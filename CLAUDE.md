@@ -19,3 +19,4 @@ Multi-tenant SaaS LMS for online 1:1 tutoring academies. Architecture (Arabic): 
 - Use cases are `final` Action classes; controllers, Filament pages and jobs call the same Action.
 - API errors are RFC 7807 (`Modules\SharedKernel\Http\ProblemDetails`); user-facing strings in `lang/{ar,en}` inside the module.
 - UTC everywhere, `CarbonImmutable`; money as minor units + currency (when Billing lands).
+- Times leave the API only through `LocalTimePresenter::present()` → `{utc, local, timezone, label}` in the viewer's zone (`ViewerTimezone`: `X-Timezone` header → profile → academy → UTC). Wall-clock → UTC only through `LocalTimeResolver` (DST gap → later by the gap; repeated hour → earlier). Timezones are IANA names, never offsets.

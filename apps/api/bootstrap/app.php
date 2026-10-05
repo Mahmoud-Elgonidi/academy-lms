@@ -7,6 +7,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Modules\SharedKernel\Http\ProblemDetails;
+use Modules\SharedKernel\Http\ResolveViewerTimezone;
 use Modules\SharedKernel\Http\SetLocale;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'tenant' => ResolveTenant::class,
             'locale' => SetLocale::class,
+            'timezone' => ResolveViewerTimezone::class,
         ]);
 
         // The tenant must be known before authentication, rate limiting and

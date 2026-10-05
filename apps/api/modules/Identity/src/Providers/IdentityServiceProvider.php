@@ -24,7 +24,7 @@ final class IdentityServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'identity');
 
         Route::prefix('api/v1')
-            ->middleware(['api', 'tenant', 'locale'])
+            ->middleware(['api', 'tenant', 'locale', 'timezone'])
             ->group(__DIR__.'/../../routes/api.php');
     }
 }

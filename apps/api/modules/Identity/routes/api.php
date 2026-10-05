@@ -9,5 +9,6 @@ Route::post('auth/login', [AuthController::class, 'login'])->name('identity.logi
 
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('me', [AuthController::class, 'me'])->name('identity.me');
+    Route::patch('me', [AuthController::class, 'updateMe'])->name('identity.me.update');
     Route::post('auth/logout', [AuthController::class, 'logout'])->name('identity.logout');
 });

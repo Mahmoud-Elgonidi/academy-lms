@@ -15,6 +15,9 @@ use Illuminate\Support\ServiceProvider;
 use Modules\SharedKernel\Tenancy\PgTenantSession;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantResolver;
+use Modules\SharedKernel\Time\LocalTimePresenter;
+use Modules\SharedKernel\Time\LocalTimeResolver;
+use Modules\SharedKernel\Time\ViewerTimezone;
 
 final class SharedKernelServiceProvider extends ServiceProvider
 {
@@ -23,6 +26,9 @@ final class SharedKernelServiceProvider extends ServiceProvider
         // Scoped: reset between requests under Octane and between queued jobs.
         $this->app->scoped(PgTenantSession::class);
         $this->app->scoped(TenantContext::class);
+        $this->app->scoped(ViewerTimezone::class);
+        $this->app->scoped(LocalTimePresenter::class);
+        $this->app->singleton(LocalTimeResolver::class);
     }
 
     public function boot(): void

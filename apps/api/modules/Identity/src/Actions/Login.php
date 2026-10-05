@@ -2,6 +2,7 @@
 
 namespace Modules\Identity\Actions;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Modules\Identity\Models\User;
@@ -12,7 +13,7 @@ use Modules\Identity\Models\User;
  */
 final class Login
 {
-    /** @return array{user: User, token: string, expires_at: ?\DateTimeInterface} */
+    /** @return array{user: User, token: string, expires_at: ?CarbonImmutable} */
     public function handle(string $login, string $password, string $deviceName): array
     {
         $user = User::query()->where($this->field($login), $login)->first();
