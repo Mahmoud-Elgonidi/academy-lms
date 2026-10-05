@@ -1,0 +1,41 @@
+<?php
+
+namespace Modules\Identity\Actions;
+
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use Modules\Identity\Models\User;
+
+/**
+ * Checks credentials in the current academy and issues a Sanctum token.
+ * The login field may be an email, an E.164 phone number, or a username.
+ */
+final class Login
+{
+    /** @return array{user: User, token: string, expires_at: ?\DateTimeInterface} */
+    public function handle(string $login, string $password, string $deviceName): array
+    {
+        $user = User::query()->where($this->field($login), $login)->first();
+
+        // Same message whether the user is missing, disabled or the password is wrong.
+        if ($user === null || ! $user->isActive() || $user->password === null || ! Hash::check($password, $user->password)) {
+            throw ValidationException::withMessages(['login' => __('identity::auth.failed')]);
+        }
+
+        $minutes = config('sanctum.expiration');
+        $expiresAt = $minutes ? now()->addMinutes((int) $minutes) : null;
+
+        $token = $user->createToken($deviceName, ['*'], $expiresAt);
+
+        return ['user' => $user->load('roleRecords'), 'token' => $token->plainTextToken, 'expires_at' => $expiresAt];
+    }
+
+    private function field(string $login): string
+    {
+        return match (true) {
+            str_contains($login, '@') => 'email',
+            (bool) preg_match('/^\+\d+$/', $login) => 'phone_e164',
+            default => 'username',
+        };
+    }
+}

@@ -1,0 +1,37 @@
+# Local services for development: Postgres (with the three LMS roles), Redis, Mailpit.
+#
+#   docker compose up -d
+#
+# Creates the databases lms and lms_test with the roles from
+# apps/api/database/setup/roles.sql and the dev passwords in apps/api/.env.example.
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./apps/api/database/setup:/lms-setup:ro
+      - ./infra/docker/postgres/init-lms.sh:/docker-entrypoint-initdb.d/10-init-lms.sh:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  postgres-data:
