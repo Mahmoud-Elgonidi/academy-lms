@@ -1,0 +1,544 @@
+# 03 — المعمارية التقنية
+
+[← الفهرس](README.md)
+
+---
+
+## 1. الـ Stack
+
+| الطبقة | الاختيار | ليه |
+|---|---|---|
+| Backend | **Laravel** (أحدث إصدار مستقر وقت البداية، 12 أو أحدث)، PHP 8.4+، **Octane على FrankenPHP** | خبرة الفريق، والـ ecosystem متكامل (Queues، Horizon، Reverb، Pennant، Sanctum)، وOctane بيدّي أداء عالي |
+| لوحات الإدارة | **Filament 4**: لوحة للأكاديمية ولوحة Console للمنصة | CRUD ولوحات بسرعة جدًا، وكل module بيسجل شاشاته كـ plugin |
+| قاعدة البيانات | **PostgreSQL 17/18** (managed)، بالإضافات `btree_gist`، و`ltree`، و`pg_trgm`، و`citext` | RLS، و exclusion constraints على الفترات الزمنية، و`tstzmultirange`، وتقسيم الجداول. وPG 18 فيه `uuidv7()` جاهز |
+| Cache، Queues، Locks | **Redis**: نسخة للـ cache (LRU) ونسخة للـ queues (من غير eviction) | لو الـ cache اتملى مايمسحش jobs |
+| Jobs | **Horizon**، والـ queues مترتبة بالأولوية | مراقبة الـ jobs والتحكم في الأولويات |
+| Realtime | **Laravel Reverb** (WebSockets، بروتوكول Pusher) | إشعارات لحظية، ولوحة العمليات، وحالة الحصة |
+| التخزين | **S3 / Cloudflare R2** + CDN، مع signed URLs | الواجبات الصوتية، والتسجيلات، والموارد |
+| الفيديو | **LiveKit Cloud** في الأول، وبعدين على سيرفراتنا | التفاصيل في القسم 6 |
+| الموبايل | **Flutter**: تطبيق واحد بيتغير حسب الدور (dio، flutter_bloc، go_router، livekit_client) | نفس أدوات الفريق في CBOT Fleet |
+| الويب | **Next.js** (App Router) + React + Tailwind + LiveKit React | بوابة المدرس والطالب وولي الأمر، والفصل، والمواقع العامة (SEO) |
+| عقد الـ API | **OpenAPI** بيتولّد من Laravel (Scramble)، ومنه clients بـ Dart وTypeScript | مفيش اختلاف بين الـ API والتطبيقات |
+| الأخطاء والمراقبة | **Sentry**، وLaravel Pulse، و logs منظمة. وOpenTelemetry من المرحلة S2 | — |
+| الحماية | **Cloudflare**: DNS، وWAF، وDDoS، وCDN، وبعدين Cloudflare for SaaS للدومينات الخاصة | — |
+| الأسرار | KMS أو Secrets Manager | تشفير مفاتيح بوابات كل أكاديمية |
+
+---
+
+## 2. الشكل العام (Topology)
+
+```mermaid
+flowchart LR
+    subgraph Clients
+        FA["Flutter app (student, guardian, teacher)"]
+        BR["Browser (portal, classroom)"]
+        FI["Filament (academy staff, console)"]
+    end
+    CF["Cloudflare: DNS, WAF, CDN"]
+    subgraph Platform["Platform cell (EU region first)"]
+        NX["Next.js containers + BFF"]
+        API["Laravel Octane: API, Filament, webhooks"]
+        HZ["Horizon workers (priority queues)"]
+        SCH["Scheduler (1 instance)"]
+        RV["Reverb WebSockets"]
+        PG[("PostgreSQL primary + replica, RLS, PITR")]
+        RC[("Redis cache")]
+        RQ[("Redis queue")]
+        S3[("S3 / R2 tenant-prefixed")]
+        KMS["KMS / Secrets"]
+    end
+    subgraph External
+        LK["LiveKit Cloud"]
+        GW["Gateways: Stripe, Moyasar, Paymob, Tap, PayPal"]
+        MSG["WhatsApp, SMS, Email, FCM / APNs"]
+        ZT["ZATCA (via e-invoicing provider)"]
+        SN["Sentry"]
+    end
+    FA --> CF
+    BR --> CF
+    FI --> CF
+    CF --> NX
+    CF --> API
+    NX --> API
+    API --> PG
+    API --> RC
+    API --> RQ
+    RQ --> HZ
+    SCH --> RQ
+    HZ --> PG
+    API --> RV
+    HZ --> RV
+    API --> S3
+    API --> KMS
+    API --> LK
+    LK -- "webhooks, egress" --> API
+    LK --> S3
+    HZ --> GW
+    GW -- "webhooks" --> API
+    HZ --> MSG
+    HZ --> ZT
+    API --> SN
+```
+
+---
+
+## 3. تعدد المستأجرين (Multi-tenancy)
+
+### الاختيار: Schema مشتركة + `academy_id` + Global Scope + **RLS**
+
+| الطبقة | الآلية |
+|---|---|
+| التطبيق | Trait اسمه `BelongsToTenant`: بيضيف global scope وبيملا `academy_id` تلقائيًا |
+| قاعدة البيانات | **RLS بيقفل افتراضيًا**: لو المستأجر مش متحدد، مفيش أي صف بيرجع |
+| العلاقات | **foreign keys مركّبة** في العلاقات الأساسية: `(academy_id, teacher_id) → users(academy_id, id)`. الـ RLS لوحده مش بيمنع إنك تدخل ID تابع لأكاديمية تانية، لأن فحص الـ foreign keys مابيمرش على الـ RLS |
+| المعرفات | UUIDv7: مرتبة زمنيًا، وبتسهّل نقل أكاديمية لـ Cell تانية |
+
+```sql
+ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sessions FORCE ROW LEVEL SECURITY;
+CREATE POLICY tenant_isolation ON sessions
+  USING      (academy_id = nullif(current_setting('app.tenant_id', true), '')::uuid)
+  WITH CHECK (academy_id = nullif(current_setting('app.tenant_id', true), '')::uuid);
+ALTER TABLE sessions ALTER COLUMN academy_id
+  SET DEFAULT nullif(current_setting('app.tenant_id', true), '')::uuid;
+```
+
+### قواعد التشغيل
+- **أدوار قاعدة البيانات**:
+  - التطبيق بيتصل بـ role مش هو المالك.
+  - الـ migrations بتشتغل بالـ owner.
+  - connection منفصلة اسمها `pgsql_platform` بـ role عنده `BYPASSRLS`، ومسموحة **بس** في Platform والـ sweepers والـ Reporting. **Pest arch tests** بتفرض ده.
+- **تحديد المستأجر لكل request**:
+  - middleware بينفذ `SET app.tenant_id = …` في أول الـ request، و terminate hook بيمسحه.
+  - ده آمن مع PHP-FPM ومع Octane على FrankenPHP أو RoadRunner، لأن كل worker بيخدم request واحد في المرة.
+  - **ماتستخدمش Swoole coroutines.**
+- **PgBouncer**: الـ transaction pooling مابينقلش الـ session settings. الحلول:
+  - Octane يتصل بقاعدة البيانات مباشرة (عدد الاتصالات = عدد الـ workers + Horizon، وده رقم معقول).
+  - أو session pooling.
+  - أو `SET LOCAL` جوه transactions صريحة.
+  - **لازم نقرر قبل التوسع، مش بعده.**
+- **إزاي بنعرف المستأجر**:
+  - الـ API لمستخدم مسجل دخوله: **الـ token هو مصدر الحقيقة**، لأن المستخدم تابع لأكاديمية واحدة. لو الـ host أو الـ header مختلف، يرجع 403.
+  - من غير تسجيل دخول: من الـ host (subdomain أو دومين خاص).
+  - `TenantContext` scoped binding، وبيتمسح مع كل request.
+- **الـ Queues**: `tenant_id` بيتحط في **Laravel Context**، وده بيتنقل تلقائيًا مع الـ job، وبيرجع بـ `Context::hydrated()`. job middleware بيظبط `app.tenant_id` وبيمسحه في `finally`.
+- **الـ Scheduler**:
+  - المهام الحساسة للوقت (التذكيرات، والمواعيد النهائية، وقفل الحصص) = query واحد على كل الأكاديميات من `pgsql_platform`، وبيبعت jobs لكل أكاديمية.
+  - المهام اللي بتعتمد على الوقت المحلي (زي التقرير الشهري) = dispatcher كل 15 دقيقة بيشوف الساعة كام عند كل أكاديمية.
+- **باقي الطبقات**: مفاتيح الـ cache، ومسارات S3 (`tenants/{id}/…`)، وقنوات الـ broadcast (`private-academy.{id}.user.{id}`)، والـ rate limits، والـ logs، كلها فيها المستأجر (الـ Context بيضيف `tenant_id` للـ logs تلقائيًا).
+
+### الهوية: المستخدم تابع لأكاديمية واحدة
+- `UNIQUE(academy_id, lower(email))`. الأكاديمية هي المسؤولة عن البيانات، والمنصة بتعالجها لحسابها.
+- **مدرس شغال في أكاديميتين = حسابين** (صاحبين شغل مختلفين).
+- **ولي أمر عنده أولاد في أكاديميتين**: بيتنقل بين الحسابين في التطبيق (أكتر من token متخزن على الجهاز).
+- **اكتشاف الحسابات بعد التحقق** في التطبيق العام: الإيميل أو الموبايل، ثم OTP، ثم قائمة الحسابات. **مابنكشفش أي عضوية قبل الـ OTP.**
+- **Super Admins** في جدول منفصل `platform_admins` بـ guard خاص و 2FA، ومابيشوفوش بيانات الأكاديميات إلا بـ **الدخول بحساب مستخدم مع تسجيله**.
+- **الأدوار ثابتة في الـ MVP**: `owner, admin, supervisor, scheduler, accountant, sales, teacher, student, guardian`.
+  - مابنستخدمش "teams" بتاعة spatie/permission، لأن `setPermissionsTeamId()` حالة عامة ممكن تتسرب من request للتاني تحت Octane.
+
+### Filament
+- **من غير الـ tenancy المدمجة في Filament.** الـ `TenantContext` بيتحدد من الدومين، وFilament مابيعرفش حاجة عن المستأجرين.
+- لوحة الأكاديمية على `{slug}.<platform-domain>/admin`.
+- لوحة Console للمنصة على دومين لوحدها.
+- كل module بيسجل شاشاته كـ **Filament plugin**.
+
+---
+
+## 4. نموذج البيانات
+
+### قواعد عامة
+- كل جدول تابع لأكاديمية فيه `academy_id uuid NOT NULL` + RLS.
+- المعرفات UUIDv7.
+- الفلوس `*_minor bigint` + `currency char(3)`.
+- الوقت `timestamptz` بتوقيت UTC.
+- النصوص اللي ليها لغتين: `name_ar` و`name_en`.
+- عمود بحث عربي مُطبَّع:
+  - أ/إ/آ ← ا، و ى ← ي، و ة ← ه، والتشكيل بيتشال.
+  - عليه index بـ `pg_trgm`.
+- **الجداول الكبيرة متقسمة بالشهر**: `attendance_segments`، و`notifications`، و`audit_logs`، و`kpi_events`، وصناديق الـ webhooks.
+
+### الجداول حسب الـ Module
+
+| Module | الجداول الأساسية |
+|---|---|
+| Platform | `academies`، `academy_domains`، `academy_branding`، `saas_plans`، `saas_subscriptions`، `usage_counters`، `platform_admins` |
+| Identity | `users`، `roles/permissions`، `devices`، `otp_challenges`، `social_identities`، `consents`، `impersonations` |
+| Catalog | `subjects`، `levels`، `categories` |
+| People | `teacher_profiles`، `teacher_subjects`، `teacher_subject_categories`، `teacher_languages`، `student_profiles`، `guardian_student`، `supervisor_assignments` |
+| Curriculum | `programs`، `curriculum_versions`، `curriculum_nodes`، `node_resources`، `assessment_definitions`، `version_node_mappings` |
+| Enrollment | `enrollments`، `enrollment_teacher_assignments`، `enrollment_status_history` |
+| Scheduling | `teacher_shift_rules`، `teacher_time_off`، `availability_overrides`، `closures`، `recurring_slots`، `booking_holds`، `sessions`، `session_participants`، `attendance_segments`، `session_events`، `policy_sets`، `policy_set_versions`، `scheduling_conflicts`، `schedule_shift_notices` |
+| Classroom | `rooms`، `recordings`، `recording_access_logs`، `provider_webhook_inbox`، `tech_issue_reports` |
+| Credits | `credit_accounts`، `credit_lots`، `credit_entries`، `credit_reservations` |
+| Billing | `billing_accounts`، `billing_account_students`، `price_regions`، `plans`، `plan_prices`، `subscriptions`، `invoices`، `invoice_lines`، `invoice_sequences`، `payments`، `payment_methods`، `manual_payment_proofs`، `refunds`، `credit_notes`، `discount_rules`، `coupons`، `gateway_accounts`، `gateway_webhook_inbox`، `tax_profiles`، `tax_rates`، `einvoice_units`، `einvoice_documents` |
+| Learning | `report_templates`، `report_template_versions`، `session_reports`، `report_items_covered`، `homework_assignments`، `homework_submissions`، `homework_reviews`، `enrollment_progress`، `enrollment_positions`، `assessment_attempts`، `certificates`، `report_cards` |
+| Evaluation | `kpi_events`، `ratings`، `qa_rubrics`، `qa_audits`، `kpi_snapshots`، `scoring_configs` |
+| Payroll | `rate_cards`، `rate_card_lines`، `teacher_earnings`، `payroll_periods`، `payroll_statements`، `payouts` |
+| CRM | `leads`، `lead_activities`، `trial_assessments`، `retention_tasks`، `referrals` |
+| Communication | `notification_templates`، `notification_preferences`، `notifications`، `notification_deliveries`، `conversations`، `messages`، `announcements` |
+| Support | `tickets`، `ticket_messages` |
+| Reporting | `fact_sessions_daily`، `fact_revenue_daily`، `fact_subscriptions_monthly`، `fact_teacher_utilization_weekly`، `fact_funnel_daily` |
+| Infra | `audit_logs` (ممنوع عليه UPDATE وDELETE)، `media` |
+
+### أهم الأعمدة في الجداول الأساسية
+
+```text
+teacher_shift_rules(teacher_id, weekday, local_start, duration_min, tz, effective daterange, kind work|break)
+recurring_slots(enrollment_id, teacher_id, weekday, local_start, duration_min, anchor, anchor_tz,
+                minute_of_week int4range, effective daterange, status)
+sessions(id, academy_id, type, enrollment_id?, lead_id?, teacher_id, original_teacher_id, slot_id?,
+         occurrence_key UNIQUE, starts_at, ends_at, blocked_until, status, review_reason,
+         funding_status, makeup_for_session_id, reschedule_count, is_detached,
+         anchor_tz, anchor_local_date, anchor_local_time, policy_version_id, decision jsonb, version)
+session_participants(session_id, user_id, role, block_period tstzrange, is_active, first_join_at, attended_min)
+attendance_segments(session_id, user_id, period tstzrange, source webhook|reconcile, quality jsonb)
+teacher_profiles(user_id, gender, dialect, employment_type, max_weekly_min, max_daily_sessions,
+                 accepts_new, accepts_trials, age_groups[], tier, rate_card_id, status)
+guardian_student(guardian_id, student_id, relationship, is_primary, can_manage, receives_reports)
+session_reports(session_id UNIQUE, template_version_id, payload jsonb, engagement, overall, status,
+                due_at, submitted_at)
+report_items_covered(report_id, node_id, outcome, score, range_from, range_to, mistakes)
+enrollment_progress(enrollment_id, node_id, status, mastery, sessions_count, mastered_at, next_review_at)
+kpi_events(subject_type, subject_id, session_id, metric, value, severity, fault, occurred_at)
+```
+
+### مخطط العلاقات (ERD) للجداول الأساسية
+
+```mermaid
+erDiagram
+    ACADEMIES ||--o{ USERS : has
+    USERS ||--o| TEACHER_PROFILES : "teacher"
+    USERS ||--o| STUDENT_PROFILES : "student"
+    USERS ||--o{ GUARDIAN_STUDENT : "guardian of"
+    STUDENT_PROFILES ||--o{ GUARDIAN_STUDENT : "has guardians"
+    TEACHER_PROFILES ||--o{ TEACHER_SHIFT_RULES : works
+    TEACHER_PROFILES ||--o{ TEACHER_SUBJECTS : teaches
+    SUBJECTS ||--o{ TEACHER_SUBJECTS : "taught by"
+    STUDENT_PROFILES ||--o{ ENROLLMENTS : enrolls
+    SUBJECTS ||--o{ ENROLLMENTS : in
+    CURRICULUM_VERSIONS ||--o{ ENROLLMENTS : "pinned by"
+    CURRICULUM_VERSIONS ||--o{ CURRICULUM_NODES : contains
+    ENROLLMENTS ||--o{ RECURRING_SLOTS : "scheduled by"
+    RECURRING_SLOTS ||--o{ SESSIONS : materializes
+    ENROLLMENTS ||--o{ SESSIONS : has
+    SESSIONS ||--o{ SESSION_PARTICIPANTS : has
+    SESSIONS ||--o{ ATTENDANCE_SEGMENTS : records
+    SESSIONS ||--o| SESSION_REPORTS : "reported by"
+    SESSION_REPORTS ||--o{ REPORT_ITEMS_COVERED : covers
+    CURRICULUM_NODES ||--o{ REPORT_ITEMS_COVERED : "covered in"
+    ENROLLMENTS ||--o{ ENROLLMENT_PROGRESS : tracks
+    ENROLLMENTS ||--|| CREDIT_ACCOUNTS : funds
+    CREDIT_ACCOUNTS ||--o{ CREDIT_LOTS : holds
+    CREDIT_ACCOUNTS ||--o{ CREDIT_ENTRIES : ledger
+    SESSIONS ||--o| CREDIT_RESERVATIONS : reserves
+    BILLING_ACCOUNTS ||--o{ BILLING_ACCOUNT_STUDENTS : covers
+    BILLING_ACCOUNTS ||--o{ SUBSCRIPTIONS : pays
+    PLANS ||--o{ SUBSCRIPTIONS : "priced by"
+    ENROLLMENTS ||--o| SUBSCRIPTIONS : "billed by"
+    BILLING_ACCOUNTS ||--o{ INVOICES : receives
+    INVOICES ||--o{ PAYMENTS : "paid by"
+```
+
+---
+
+## 5. المدفوعات والضرائب وZATCA
+
+### الأكاديمية هي التاجر الرسمي (Merchant of Record)
+المنصة **مابتمسكش فلوس الأكاديميات خالص**. لو مسكتها، هتبقى ميسّر مدفوعات (payment facilitator) وهتدخل في ترخيص SAMA وتحويل الأموال ومسؤوليات ضريبية.
+
+| الحالة | الحل |
+|---|---|
+| **Stripe** | **Connect Standard** بـ direct charges. الأكاديمية صاحبة حساب Stripe، ومفيش أسرار نخزنها، وممكن ناخد رسوم منصة (application fee). ⚠️ Stripe غالبًا مش متاح لشركات مسجلة في مصر أو السعودية، فلازم نتأكد من قائمة الدول وقتها |
+| **باقي البوابات** (Moyasar، Paymob، Tap، PayPal، HyperPay) | مفاتيح الأكاديمية نفسها، متشفرة بـ envelope encryption عن طريق KMS. **لكل حساب بوابة مسار webhook خاص**: `/webhooks/{gateway}/{gateway_account_public_id}`، عشان نعرف المستأجر والسر قبل ما نتحقق من التوقيع |
+| **اشتراك الأكاديمية في المنصة** (SaaS) | كيان المنصة هو التاجر هنا. Stripe Billing لو كيان المنصة في دولة Stripe بيدعمها، وإلا فواتير يدوية أو مزوّد MoR |
+
+### محرك فوترة خاص بينا فوق tokenization البوابات
+مابنستخدمش الاشتراكات الجاهزة في البوابات، لأن نظام البلوك بيعتمد على الرصيد، والبوابات كتير، ولازم يبقى فيه مصدر حقيقة واحد. **كل فاتورة ليها لينك دفع (hosted pay link)**. ده الحل اللي بيشتغل في كل الحالات: الأسواق اللي بتدفع يدوي، والدفع التلقائي اللي بيفشل في التحقق الإضافي (SCA/3DS).
+
+```php
+interface PaymentGateway
+{
+    public function capabilities(): GatewayCapabilities; // currencies, methods (mada, Apple Pay, KNET…), tokenize, MIT, refunds
+    public function createCheckout(Invoice $invoice, ReturnUrls $urls, bool $saveMethod): CheckoutSession; // hosted + 3DS
+    public function chargeSaved(Invoice $invoice, PaymentMethodToken $token, string $idempotencyKey): ChargeResult; // MIT
+    public function refund(Payment $payment, Money $amount, string $idempotencyKey): RefundResult;
+    public function parseWebhook(Request $request): VerifiedGatewayEvent; // signature verified + normalized
+}
+```
+
+| البوابة | المرحلة | الاستخدام | ملاحظات |
+|---|---|---|---|
+| **يدوي** (تحويل بنكي، InstaPay، فودافون كاش، كاش) | MVP | في كل مكان | رفع الإثبات، ثم موافقة، ثم تسجيل الدفعة |
+| **Stripe Connect Standard** | MVP | أكاديميات مسجلة في الإمارات أو أوروبا أو بريطانيا أو أمريكا | كروت محفوظة للدفع التلقائي |
+| **Moyasar** | MVP | السعودية | مدى، والكروت، وApple Pay، وSTC Pay، وtokenization |
+| **Paymob** | MVP لو أول أكاديمية مصرية | الأكاديميات المسجلة في مصر | كروت بالجنيه ومحافظ |
+| **Tap** | P2 | الخليج كله | KNET وBENEFIT |
+| **PayPal** | P2 | بديل عالمي | — |
+| **HyperPay** | عند الطلب | مؤسسات سعودية | — |
+
+لازم نتأكد من دعم الكروت المحفوظة والدفع التلقائي لكل طريقة دفع وقت التعاقد، وخصوصًا مدى وApple Pay.
+
+### قواعد الفلوس
+- **المبالغ**: `amount_minor` + عملة ISO، بمكتبة `brick/money`.
+  - **الدينار الكويتي والبحريني والعُماني والأردني بـ 3 خانات عشرية.**
+  - مفيش تحويل عملة تلقائي. الأسعار من قوائم المناطق، والتحليلات بتحوّل بجدول `fx_rates`.
+- **ترقيم الفواتير**: متسلسل من غير فجوات لكل أكاديمية، من صف في `invoice_sequences` عليه lock (مش Postgres sequence لأنها ممكن تسيب فجوات).
+  - الفاتورة بعد ما تصدر مابتتعدلش، والتصحيح بـ **credit note**.
+- **الـ Webhooks**: inbox فيه `UNIQUE(gateway_account_id, event_id)`، وjob بيعالجها ومابيتأثرش بالتكرار.
+- **الضريبة**: `tax_profiles` لكل أكاديمية: التسجيلات حسب الدولة، والسعر شامل الضريبة أو لأ.
+  - أسعار المستهلك في الخليج بتتعرض شاملة الضريبة.
+  - هل الضريبة بتتطبق على التدريس عبر الحدود؟ ده إعداد عند الأكاديمية حسب مستشارها الضريبي، مش حاجة ثابتة في الكود.
+
+### ZATCA (للأكاديميات السعودية المسجلة في ضريبة القيمة المضافة)
+- **MVP: المرحلة الأولى**: فاتورة مبسطة فيها العربي، والرقم الضريبي، و**QR بصيغة TLV**.
+- **P2: المرحلة التانية**: عن طريق adapter اسمه `EInvoicingProvider`.
+  - تسجيل وحدة الفوترة (EGS) لكل أكاديمية من Filament: CSR، ثم OTP، ثم فحوصات الامتثال، ثم شهادة الإنتاج (CSID).
+  - **توقيع الفواتير لازم يمشي بالترتيب لكل وحدة** (عداد الفواتير + سلسلة الـ hash)، على queue بيشتغل على فاتورة واحدة في المرة.
+  - **الفواتير المبسطة (B2C)**: بتتبلغ خلال 24 ساعة. **الفواتير الضريبية (B2B)**: لازم تتعتمد (clearance) قبل ما تتبعت.
+  - الاسترداد بـ credit note بس.
+  - XML والـ hash والـ QR بيتحفظوا طول مدة الحفظ القانونية.
+  - **قرار مبكر**: مكتبة بيتم صيانتها، ولا مزوّد وسيط معتمد؟ لفريق صغير، المزوّد الوسيط أحسن في الأول.
+  - لازم نعرف الأكاديميات اللي هتجرب تابعة لأنهي موجة إلزام.
+- إيصالات مصلحة الضرائب المصرية الإلكترونية: adapter بعدين.
+
+### متاجر التطبيقات
+- **Apple 3.1.3(d)**: الخدمات الحية **بين شخصين (1:1)** زي التدريس مسموح تتباع برّه الـ in-app purchase.
+- الخدمات **لعدد صغير أو كبير** (one-to-few / one-to-many) لازم تتباع بـ in-app purchase. يعني **الحصص الجماعية والمحتوى المسجل لازم يتباعوا من الويب**.
+- سياسة Google Play مختلفة، ولازم نتأكد منها.
+- الحل البديل: لينكات دفع في الأماكن اللي مسموح فيها بده.
+
+---
+
+## 6. الفصل المباشر (Live Classroom)
+
+### مقارنة مزوّدي الفيديو
+
+| | LiveKit | Zoom Video SDK | Agora | 100ms | Jitsi / BBB |
+|---|---|---|---|---|---|
+| Flutter SDK | رسمي (`livekit_client`) | رسمي | رسمي وناضج | جيد | Jitsi عنده SDK، وBBB WebView بس |
+| Web SDK | JS + React رسمي | موجود | موجود | موجود | ويب أصلًا |
+| التسجيل | Egress على S3 بتاعنا (فيديو مجمّع، أو كل مسار لوحده، أو صوت) | تسجيل سحابي | تسجيل سحابي | موجود | Jibri / BBB (تقيل) |
+| تشغيله عندنا وموقع البيانات | **مفتوح المصدر، ونقدر نشغّله في أي منطقة (السعودية، أوروبا)** | لأ | محدود | لأ | آه، بس تشغيله متعب |
+| Webhooks | دخول وخروج المشاركين، والغرفة، والتسجيل | موجود | موجود | موجود | محدود |
+| سلامة الأطفال | صلاحيات في الـ token: مشرف مخفي، والتحكم في مين يبث، وحجم الغرفة | بعضها | بعضها | بعضها | محدود |
+| الارتباط بالمزوّد | منخفض | عالي | عالي | متوسط (لازم نقيّم استمرارية الشركة) | منخفض |
+
+**التوصية**:
+- نبدأ بـ **LiveKit Cloud**، وننقل لـ **LiveKit على سيرفراتنا** (فرانكفورت، الرياض، فيرجينيا) لما الحجم يبرر أو أكاديمية تطلب البيانات في بلدها.
+- كل ده ورا adapter اسمه `VideoProvider`.
+- ومعاه مزوّد **ExternalLink** (لينك Zoom أو Meet والحضور يدوي) كبديل في الـ MVP.
+
+### الغرفة
+- Simulcast، وadaptive stream، وصوت بس لو الشبكة ضعيفة (الإنترنت المنزلي في مصر).
+- فحص الأجهزة والشبكة قبل الدخول.
+- المشرف يدخل من غير ما يظهر للجودة، وولي الأمر يدخل متابع.
+- عارض محتوى متزامن (صفحة المصحف أو PDF عن طريق data channel) في P2، والسبورة بعده.
+
+### مصدر الحقيقة في الحضور
+- الـ Webhooks بتتخزن في `attendance_segments`، وبنطابقها مع **الـ room participant API** عند المواعيد النهائية وعند قفل الحصة.
+- **الوقت المدرَّس** = تقاطع فترات المدرس مع فترات الطالب. ده expression واحد بـ `tstzmultirange` في Postgres.
+- **كل مشكلة ليها مسؤول**: `fault ∈ {teacher, student, platform, provider, unknown}`. بنحدده من أحداث جودة الاتصال، وتشخيص الجهاز، وحوادث المزوّد.
+
+### التسجيلات والتكلفة
+- الافتراضي:
+  - فيديو مجمّع بجودة منخفضة للحصص اللي فيها أطفال، وصوت بس للكبار.
+  - **الاحتفاظ 30 يوم**، وبيتحفظ أكتر لو فيه شكوى (legal hold).
+  - المدرس مايقدرش ينزّل التسجيل، وكل مشاهدة بتتسجل.
+- **الحجم**:
+  - فيديو حوالي 500kbps: حوالي 170MB لحصة 45 دقيقة. صوت 32kbps: حوالي 11MB.
+  - عند 800 ألف حصة في الشهر: حوالي 135TB فيديو أو 9TB صوت.
+- **دقائق المشاركين** عند 100 ألف طالب: 8 حصص × 45 دقيقة × 2 مشاركين = **حوالي 72 مليون دقيقة في الشهر**. دي أكبر تكلفة متغيرة، وعشانها لازم نخطط ننقل LiveKit لسيرفراتنا.
+
+---
+
+## 7. الـ API والـ Realtime
+
+### قواعد الـ API
+- REST على `/api/v1`.
+- الأخطاء بصيغة **RFC 7807 Problem Details** (رسائل بالعربي والإنجليزي حسب `Accept-Language`).
+- Cursor pagination.
+- **`Idempotency-Key` إجباري** في الدفع والحجز والإلغاء.
+- `If-Match` أو `version` عند التعديل.
+- الوقت UTC بصيغة ISO-8601 وفي آخره `Z`. القواعد المتكررة `{weekday, local_time, tz}`.
+- كل رد فيه وقت الطرف التاني جاهز للعرض ("18:00 الرياض").
+
+### OpenAPI
+- Scramble بيولّد `openapi.json`، والملف ده **بيتعمل له commit في الريبو**.
+- **`oasdiff` في الـ CI** بيمنع أي تغيير بيكسر التوافق.
+- منه بيتولّد `api-client-dart` (dart-dio) و`api-client-ts`.
+
+### تسجيل الدخول
+- **الموبايل**: Sanctum tokens ليها مدة صلاحية، ومتخزنة في secure storage (زي CBOT Fleet). وفيه أكتر من token متخزن للتنقل بين الحسابات.
+- **الويب (Next.js)**: **BFF**. الـ token في httpOnly cookie على دومين الأكاديمية، والمتصفح مابيشوفش الـ bearer token. Next.js بيمرر `/api/*` للـ Laravel.
+
+### Realtime (Reverb)
+- القنوات:
+  - `private-academy.{id}.user.{id}`: إشعارات المستخدم.
+  - `private-academy.{id}.session.{id}`: حالة الحصة.
+  - `private-academy.{id}.ops`: لوحة العمليات.
+- مسموح بس للأعضاء في نفس الأكاديمية (`routes/channels.php` بيتحقق من `academy_id`).
+
+---
+
+## 8. التطبيقات
+
+### Flutter (تطبيق واحد بيتغير حسب الدور)
+- **ثلاث واجهات** على go_router:
+  - **الطالب**: الجدول، والدخول للحصة، والـ roadmap، والواجبات (تسجيل صوتي)، والتقارير.
+  - **ولي الأمر**: يتنقل بين أولاده، وفواتيره، ولينكات الدفع.
+  - **المدرس**: الجدول، والدخول، والتقرير، وتصحيح الواجبات، والأرباح.
+- **إجبار التحديث** + remote config، وpush (FCM/APNs)، وdeep links للحصة.
+- العربي والإنجليزي بـ RTL كامل، بنفس أسلوب `core/l10n` في CBOT Fleet.
+- **White-label (P3)**: flavors + `--dart-define-from-file tenants/<slug>.json`.
+  - ⚠️ **Apple 4.2.6**: كل تطبيق white-label لازم يتنشر من **حساب مطوّر الأكاديمية نفسها**.
+  - البديل المسموح: التطبيق العام اللي فيه اختيار الأكاديمية.
+
+### Next.js
+- **البوابة**: المدرس هو أكتر حد بيستخدم الويب، بس الطالب وولي الأمر كمان.
+- **الفصل**: `app/(classroom)/[locale]/session/[id]` بـ LiveKit React.
+- **المواقع العامة لكل أكاديمية (P2)**: ISR بـ tag لكل أكاديمية، وSEO، ونموذج lead.
+- `middleware.ts` بيحدد المستأجر واللغة من الـ host.
+
+### Filament
+- **لوحة الأكاديمية**: كل التشغيل (الشفتات، والبحث عن مدرس، ولوحة العمليات، والفواتير، والمرتبات، والـ CRM، والجودة).
+- **Console**: المنصة.
+- كل module بيسجل `Resources` و`Pages` و`Widgets` بتوعه عن طريق plugin.
+
+---
+
+## 9. البنية التحتية والبيئات وCI/CD
+
+### البيئات
+
+| البيئة | الوصف |
+|---|---|
+| `local` | Docker / Sail، ومعاها Postgres وRedis وMinIO وMailpit |
+| `ci` | Postgres مؤقت فيه RLS والـ migrations |
+| `staging` | زي الإنتاج، وفيها sandbox للبوابات ومشروع LiveKit منفصل. **بيانات وهمية بس، ومانسخش بيانات أطفال من الإنتاج أبدًا** |
+| `production` | فيها **أكاديمية تجريبية** ببيانات وهمية للمبيعات |
+| Mobile flavors | `dev`، `staging`، `prod` |
+
+### المنطقة
+- نبدأ بـ **منطقة أوروبية واحدة (فرانكفورت)**: قريبة من مصر والخليج، ومناسبة لـ GDPR. وPDPL السعودي بيسمح بالنقل بضمانات.
+- **Cell سعودي** لما عميل يطلب إن البيانات تفضل جوه المملكة.
+
+### CI/CD (GitHub Actions، والـ workflow بيشتغل حسب الفولدر اللي اتغير)
+- **API**:
+  - Pint، وLarastan، وPest (unit، وfeature، و**arch**، و**عزل المستأجرين**، و**DST**).
+  - `oasdiff` على الـ OpenAPI.
+- **Mobile**: `flutter analyze`، و`flutter test`، والـ build. النشر بـ Fastlane أو Codemagic.
+- **Web**: lint، وtypecheck، والاختبارات، والـ build.
+- **النشر**:
+  - الصور بتتبني وتتخزن في الـ registry.
+  - الـ merge على `main` بيعمل deploy على staging.
+  - الإنتاج بـ tag + موافقة يدوية.
+- **الـ Migrations**: بأسلوب expand/contract، عشان مايبقاش فيه توقف.
+
+---
+
+## 10. خطة التوسع
+
+| المرحلة | الطلاب | الحصص في الشهر | أقصى عدد غرف في نفس الوقت | اللي بيتغير |
+|---|---|---|---|---|
+| **S1** | لحد 1,000 | حوالي 8 آلاف | 30–50 | API ×2 (Octane)، Horizon ×2، Scheduler ×1، Reverb ×1. Postgres managed (2 vCPU + PITR). Redis ×2. LiveKit Cloud |
+| **S2** | حوالي 10,000 | حوالي 80 ألف | 300–600 | autoscale للـ API من 3 لـ 6. **queues منفصلة**: `critical`، `realtime`، `notifications`، `webhooks`، `einvoice` (فاتورة واحدة في المرة)، `reports`، `low`. Postgres 4–8 vCPU + **read replica** لجداول Filament والتقارير. تقسيم الجداول الكبيرة بالشهر. Reverb ×2 بـ Redis. التسجيلات ورا CDN. نتفاوض على سعر LiveKit. OpenTelemetry |
+| **S3** | حوالي 100,000 | حوالي 800 ألف | 3–6 آلاف (ذروة الخليج 13–19 UTC، وذروة أمريكا 22–03 UTC، والويك إند) | **Cells**: نسخ مستقلة في أوروبا والسعودية (وأمريكا لو احتجنا)، والأكاديمية متثبّتة على Cell عن طريق دليل عام. **LiveKit على سيرفراتنا** + egress في نفس المنطقة. التحليلات في ClickHouse أو BigQuery عن طريق CDC. الأكاديميات الكبيرة في Cell خاص بيها. Session pooling |
+
+**ليه Postgres كفاية لحد S3**: حوالي 10 مليون حصة في السنة مع تقسيم الجداول ده حجم عادي جدًا. مافيش داعي نقسّم قاعدة البيانات (sharding) قبل الـ Cells.
+
+**امتى نفصل module لـ service؟**
+- لما يبقى ليه نمط حمل مختلف خالص، زي استقبال webhooks الفيديو أو الإشعارات.
+- أو لما يحتاج فريق مستقل.
+- قبل كده الـ monolith أسرع وأرخص.
+
+---
+
+## 11. الأمن والخصوصية والامتثال
+
+### عزل المستأجرين
+- [ ] RLS بيقفل افتراضيًا + global scope + foreign keys مركّبة.
+- [ ] `BYPASSRLS` على connection المنصة بس، وarch tests بتفرض ده.
+- [ ] **اختبار تلقائي**: أكاديميتين، وكل endpoint، والمتوقع 403 أو 404.
+- [ ] المستأجر موجود في مفاتيح الـ cache، ومسارات S3، والقنوات، والـ logs.
+
+### الهوية والوصول
+- [ ] 2FA إجباري للـ Super Admin والـ Owner والـ Admin.
+- [ ] rate limit على الـ OTP، وقائمة الأجهزة، وتسجيل الخروج عن بعد، وصلاحية للـ tokens.
+- [ ] الدخول بحساب مستخدم: بسبب، ولوقت محدد، ومتسجل، وبيظهر في نشاط المستخدم.
+
+### المدفوعات (PCI)
+- [ ] checkout مستضاف عند البوابة، أو redirect، أو SDK البوابة بس: **PCI SAQ A**. (لو JS من صفحتنا بيبعت بيانات الكارت، غالبًا هيبقى SAQ A-EP).
+- [ ] مفيش بيانات كروت في الـ logs.
+- [ ] أسرار البوابات متشفرة بـ KMS.
+- [ ] التحقق من توقيع الـ webhooks.
+- [ ] idempotency في كل عمليات الفلوس.
+- [ ] مفيش محفظة نقدية.
+
+### الأطفال وسلامتهم
+- [ ] **موافقة ولي الأمر موثّقة** قبل ما نجمع بيانات الطفل.
+  - COPPA: تعديلات FTC في 2025 بتطلب سياسة احتفاظ مكتوبة وبرنامج أمن معلومات.
+  - GDPR Art. 8: السن من 13 لـ 16 حسب الدولة.
+  - UK Children's Code.
+- [ ] **المدرس مابيشوفش موبايل أو إيميل الطالب أو ولي الأمر.**
+- [ ] المحادثة بين المدرس والطفل على المنصة بس، وولي الأمر فيها.
+- [ ] زرار "الإبلاغ عن مخاوف".
+- [ ] مستندات فحص المدرسين (الفيش الجنائي).
+- [ ] خيار جنس المدرس، والكاميرا اختيارية للطالب.
+
+### التسجيلات
+- [ ] موافقة عند التسجيل (من ولي الأمر) وفي عقد المدرس.
+- [ ] تشفير وهي متخزنة، وsigned URLs بعمر قصير، وكل مشاهدة بتتسجل، ومفيش تنزيل للمدرس.
+- [ ] الاحتفاظ 30 يوم افتراضيًا، وأكتر لو فيه شكوى، وخيار صوت بس.
+- [ ] DPIA (تقييم أثر على حماية البيانات) يشمل القُصّر.
+
+### PDPL السعودي
+- [ ] إشعار خصوصية بالعربي، وأساس قانوني لمعالجة البيانات، وإجراءات لطلبات أصحاب البيانات.
+- [ ] **الإبلاغ عن أي تسريب لسدايا (SDAIA) خلال 72 ساعة.**
+- [ ] ضمانات لنقل البيانات برّه المملكة، ونشوف هل التسجيل ومسؤول حماية البيانات (DPO) إلزامي.
+- [ ] اتفاقية معالجة بيانات (DPA): الأكاديمية مسؤولة عن البيانات، والمنصة بتعالجها لحسابها.
+
+### GDPR
+- [ ] DPA حسب المادة 28، وقائمة منشورة بالمزودين الفرعيين.
+- [ ] **SCCs + تقييم أثر النقل**، لأن مدرسين في مصر بيوصلوا لبيانات أوروبية.
+- [ ] موافقة الكوكيز في المواقع العامة، وحذف وتصدير البيانات لكل أكاديمية.
+
+### قانون حماية البيانات المصري (151 لسنة 2020)
+- [ ] نشوف التراخيص والتصاريح المطلوبة للمعالجة في مصر ولنقل البيانات برّه.
+
+### أمن التطبيق
+- [ ] OWASP ASVS L2، وCSP، وrate limits، وCloudflare WAF وحماية DDoS.
+- [ ] `composer audit` و`npm audit` وDependabot، وsecret scanning.
+- [ ] فحص فيروسات للملفات المرفوعة (الواجبات الصوتية، وإثباتات الدفع).
+- [ ] اختبار اختراق قبل الإطلاق.
+
+---
+
+## 12. المراقبة والتشغيل
+
+| البند | الهدف |
+|---|---|
+| توافر الـ API | 99.9% |
+| زمن الاستجابة | p95 أقل من 300ms |
+| نجاح الدخول للحصة | أكتر من 99% |
+| التذكيرات | توصل قبل الحصة بـ 10 دقايق |
+| أقصى بيانات ممكن تضيع (RPO) | 5 دقايق (PITR) |
+| أقصى وقت للرجوع (RTO) | 4 ساعات، ومعاها تجربة استرجاع كل 3 شهور |
+| نافذة الصيانة | حوالي 05:00–10:00 UTC (أقل وقت فيه حصص) |
+
+- إخفاء البيانات الشخصية في الـ logs وفي Sentry.
+- Runbooks لـ: البوابة مش شغالة، وLiveKit مش شغال (التحويل لـ ExternalLink)، وتأخر الـ queue، وتحديث tzdata.
+
+---
+
+## 13. استراتيجية الاختبار
+
+| النوع | التغطية |
+|---|---|
+| Unit | `LocalTimeResolver` (القاهرة، لندن، نيويورك، سيدني، الدار البيضاء)، و`WeekBitset`، ومحرك السياسات (كل قاعدة في الجدول)، والـ ledger، وحساب الـ KPIs |
+| Feature | كل Action: الحجز، والإلغاء، والتعويض، والقفل، والتجديد، والـ webhooks (بـ fixtures من كل بوابة) |
+| **Arch** | حدود الـ modules (الكتابة عن طريق Contracts بس)، ومين مسموح له يستخدم `pgsql_platform`، ومفيش اعتماديات دائرية |
+| **عزل المستأجرين** | أكاديميتين، وكل endpoint، والمتوقع 403 أو 404. وقراءة مباشرة من غير `app.tenant_id` المتوقع ترجّع صفر صفوف |
+| **DST** | سيناريوهات 2027 الحقيقية (14 مارس، 28 مارس، 30 أبريل، 28 أكتوبر، 31 أكتوبر، 7 نوفمبر) على مواعيد ثابتة على توقيت المدرس وعلى توقيت الطالب |
+| Concurrency | اتنين بيحجزوا في نفس الوقت، والمتوقع: واحد ينجح والتاني ياخد 409 |
+| Contract | `oasdiff`، واختبارات الـ adapters على sandbox كل بوابة |
+| E2E | Playwright للويب، وintegration_test للموبايل في التدفقات الأساسية |

@@ -1,0 +1,432 @@
+# 04 — الأنماط المعمارية والـ Design Patterns وهيكل الكود
+
+[← الفهرس](README.md)
+
+---
+
+## 1. ليه Modular Monolith؟
+
+| | Modular Monolith (اختيارنا) | Microservices |
+|---|---|---|
+| القيود اللي محتاجة transaction واحدة (الدفع ← الرصيد ← الحجز) | transaction واحدة في قاعدة البيانات | Sagas، وتعويضات، و eventual consistency |
+| فريق من 4 لـ 6 أشخاص | مناسب | تكلفة تشغيل عالية جدًا |
+| النشر والمراقبة | خدمة واحدة | خدمات كتير، وtracing موزّع |
+| فصله بعدين | ممكن، لأن الحدود واضحة | — |
+
+**الشكل**: Monolith واحد في Laravel، متقسم لـ **17 module** حسب الـ Bounded Contexts (DDD-lite). لكل module:
+- **واجهة عامة** (`Contracts/`) هي الطريقة الوحيدة اللي الـ modules التانية تكلمه بيها.
+- **events عامة** بيبعتها.
+- **جداول** هو المسؤول عنها.
+
+---
+
+## 2. الـ Modules والاعتماديات
+
+| # | Module | المسؤولية | أهم الـ Events |
+|---|---|---|---|
+| M1 | **Platform** | الأكاديميات، والدومينات، والـ branding، وباقات SaaS، والحدود، والاستخدام، والـ Cells | `AcademyCreated`، `AcademySuspended`، `AcademyPlanChanged`، `DomainVerified` |
+| M2 | **Identity** | تسجيل الدخول، والأدوار، والأجهزة، والـ OTP، والموافقات، والدخول بحساب مستخدم | `UserCreated`، `UserInvited`، `RoleAssigned`، `ConsentGranted`، `ConsentRevoked` |
+| M3 | **Catalog** | المواد، والمستويات، والتصنيفات | — |
+| M4 | **People** | ملفات المدرسين والطلاب، وعلاقات أولياء الأمور | `TeacherOnboarded`، `TeacherSubjectsChanged`، `TeacherTierChanged`، `StudentCreated`، `GuardianLinked`، `UserTimezoneChanged` |
+| M5 | **Curriculum** | البرامج، والإصدارات، وعُقد المنهج، والموارد، وتعريفات الاختبارات | `CurriculumVersionPublished` |
+| M6 | **Enrollment** | الاتفاق التعليمي، وتغيير المدرس | `EnrollmentCreated`، `EnrollmentActivated`، `EnrollmentPaused`، `EnrollmentResumed`، `EnrollmentEnded`، `TeacherReassigned` |
+| M7 | **Scheduling** | **قلب النظام**: الشفتات، والإجازات، والتوافر، والمطابقة، والحجز، ودورة حياة الحصة، والسياسات، وتغيير التوقيت | `SessionScheduled`، `SessionRescheduled`، `SessionTeacherSubstituted`، `SessionCancelled`، `SessionStarted`، `SessionFinalized`، `SessionFlaggedForReview`، `TeacherLate`، `DstShiftUpcoming`، `SchedulingConflictDetected` |
+| M8 | **Classroom** | غرف الفيديو، والتسجيلات، والـ webhooks، وبلاغات المشاكل التقنية | `ParticipantJoined`، `ParticipantLeft`، `RecordingReady`، `TechnicalIssueReported` |
+| M9 | **Credits** | الـ ledger والدفعات والحجوزات | `CreditsGranted`، `CreditsReserved`، `CreditsConsumed`، `CreditsReleased`، `CreditsExpired`، `CreditBalanceLow` |
+| M10 | **Billing** | الباقات والأسعار، والاشتراكات، والفواتير، والمدفوعات، والبوابات، والضرايب، وZATCA | `InvoiceIssued`، `PaymentSucceeded`، `PaymentFailed`، `InvoicePaid`، `SubscriptionRenewed`، `SubscriptionPastDue`، `SubscriptionPaused`، `RefundIssued`، `EInvoiceReported` |
+| M11 | **Learning** | التقارير، والواجبات، والتقدم، والاختبارات، والشهادات، والتقارير الشهرية | `SessionReportSubmitted`، `SessionReportOverdue`، `HomeworkAssigned`، `HomeworkSubmitted`، `HomeworkReviewed`، `NodeMastered`، `LevelCompleted`، `CertificateIssued` |
+| M12 | **Evaluation** | أحداث الأداء، والتقييمات، ومراجعات الجودة، والدرجات، والفئات | `RatingSubmitted`، `QaAuditCompleted`، `TeacherScoreComputed`، `StudentAtRiskDetected` |
+| M13 | **Payroll** | جداول الأسعار، والأرباح، وفترات المرتبات، والكشوف | `EarningAccrued`، `PayrollPeriodClosed`، `StatementPublished` |
+| M14 | **CRM** | الـ leads، والتجارب، وتقييمها، والاستبقاء، والإحالات | `LeadCreated`، `TrialBooked`، `TrialCompleted`، `TrialAssessed`، `LeadConverted`، `LeadLost` |
+| M15 | **Communication** | القوالب، والقنوات، والتفضيلات، والإشعارات، والمحادثات | `NotificationFailed`، `MessageFlagged` |
+| M16 | **Support** | التذاكر والشكاوى | `TicketOpened`، `ComplaintValidated` |
+| M17 | **Reporting** | جداول الحقائق والمؤشرات (للقراءة بس) | — |
+| Infra | **Audit**، **Files**، **SharedKernel** | سجل المراجعة، والملفات، والأنواع المشتركة (Money، Time، Tenancy) | — |
+
+### مخطط الاعتماديات (الاستدعاءات المتزامنة عن طريق Contracts)
+
+```mermaid
+flowchart TD
+    CRM --> People & Catalog & Scheduling & Enrollment & Billing
+    Payroll --> People & Scheduling & Evaluation
+    Evaluation --> People & Scheduling & Learning
+    Support --> People & Scheduling
+    Learning --> Scheduling & Enrollment & Curriculum & Communication
+    Billing --> People & Catalog & Enrollment & Credits & Communication
+    Classroom --> Scheduling
+    Scheduling --> People & Catalog & Enrollment & Credits & Communication
+    Enrollment --> People & Catalog & Curriculum
+    Curriculum --> Catalog
+    People --> Identity & Catalog
+    Communication --> Identity
+    Identity --> Platform
+    Catalog --> Platform
+    Credits --> SharedKernel
+    Platform --> SharedKernel
+```
+
+### القواعد
+1. **الكتابة بين الـ modules** عن طريق `Contracts/` بس (interfaces + DTOs + events عامة). ممنوع تستخدم Model بتاع module تاني عشان تكتب.
+2. **القراءة** (جداول Filament والـ Query objects) مسموح فيها `JOIN` بين جداول الـ modules، لأن ده monolith وقاعدة بيانات واحدة، والقراءة مابتكسرش أي قيود.
+3. **الرسم لازم يفضل من غير دوائر**، و**Pest arch tests** بتفرض ده.
+4. **القيود الحساسة** (الدفع ← إضافة الرصيد، الحجز ← حجز الرصيد) بتتنفذ في **transaction واحدة بين الـ modules**. الـ Events للحاجات الجانبية بس، و**مفيش Sagas**.
+5. **الاشتراك في events module تاني مسموح** طالما مابيعملش دايرة في الكود:
+   - Billing بيسمع `CreditBalanceLow` (فاتورة التجديد).
+   - Scheduling بيسمع `SubscriptionPastDue` و`SubscriptionPaused` (بيوقف الحصص)، و`ParticipantJoined` و`ParticipantLeft` (الحضور).
+   - Payroll وEvaluation وLearning بيسمعوا `SessionFinalized`.
+   - Evaluation بيسمع `SessionReportSubmitted` و`RatingSubmitted` و`ComplaintValidated`.
+   - CRM بيسمع `TrialCompleted`.
+
+---
+
+## 3. الهيكل الداخلي للـ Module
+
+بنستخدم PSR-4 عادي (`"Modules\\": "apps/api/modules/"`)، ولكل module ServiceProvider متسجل في `bootstrap/providers.php`. مابنستخدمش package خارجي لإدارة الـ modules.
+
+```text
+modules/Scheduling/
+  src/
+    Contracts/              ← الواجهة العامة الوحيدة
+      SchedulingApi.php       interface: reserveFor(), sessionsFor(), isTeacherFree()...
+      DTOs/                   SessionData, SlotData (spatie/laravel-data)
+      Events/                 SessionFinalized, SessionCancelled... (events عامة)
+    Domain/
+      Models/                 Session, SessionParticipant, RecurringSlot, ShiftRule, TimeOff, Closure, BookingHold
+      States/Session/         Scheduled, InProgress, Completed, Cancelled, StudentAbsent, TeacherAbsent,
+                              NeedsReview, Transitions/
+      Rules/                  PolicyEngine, RuleSet, Rule, Conditions/, Decision   (قواعد عمل، مش Laravel Policies)
+      Availability/           AvailabilityCalculator, Matching/{Filters/*, Scorers/*, PatternAssembler}
+      Enums/  ValueObjects/
+    Actions/                CreateEnrollmentSchedule, MaterializeHorizon, RescheduleSession, CancelSession,
+                            BookMakeup, SubstituteTeacher, FinalizeSession, ResolveReview, PlanDstTransitions
+    Queries/                TeacherCalendarQuery, LiveBoardQuery, FindTeachersQuery
+    Listeners/
+    Jobs/                   FinalizeDueSessionsSweeper, JoinNudgesSweeper, MaterializeNightly
+    Http/V1/                Controllers/, Requests/, Resources/
+    Authorization/          Laravel Policies (مين يقدر يعمل إيه)
+    Filament/               SchedulingPlugin.php, Resources/, Pages/FindTeacher.php, Widgets/LiveBoard.php
+    Infrastructure/         AvailabilityCache.php
+    Providers/              SchedulingServiceProvider.php
+  database/                 migrations/, factories/, seeders/
+  routes/                   api.php, channels.php
+  lang/                     ar/, en/
+  tests/                    Unit/, Feature/
+```
+
+| الفولدر | فيه إيه | ممنوع فيه |
+|---|---|---|
+| `Contracts/` | interfaces وDTOs وevents عامة | منطق عمل |
+| `Domain/` | الـ Models، والحالات، والقواعد، والـ Value Objects، والحسابات البحتة | HTTP، والـ queues، والـ SDKs الخارجية |
+| `Actions/` | حالة استخدام واحدة لكل class، فيها الـ transaction، وبتبعت الـ events | منطق عرض |
+| `Queries/` | قراءات معقدة مُحسّنة (Query Objects) | كتابة |
+| `Http/` | Controllers رفيعة (validate ← action ← resource) | منطق عمل |
+| `Filament/` | شاشات الإدارة، وبتنادي نفس الـ Actions | منطق عمل مكرر |
+| `Infrastructure/` | Adapters للأنظمة الخارجية، والـ cache، والـ SDKs | — |
+
+**مهم**: الـ Controller وصفحة Filament والـ Job والـ CLI **كلهم بينادوا نفس الـ Action**. المنطق في مكان واحد.
+
+---
+
+## 4. كتالوج الـ Design Patterns
+
+### 4.1 Action / Use Case
+- **المشكلة**: منطق العمل بيتفرق بين الـ Controllers والـ Filament والـ Jobs.
+- **الحل**: class لكل حالة استخدام، بـ method واحدة اسمها `handle()`، والـ transaction والـ events جواها.
+- **الاستخدام**: كل الأوامر، زي `CancelSession` و`CreateEnrollmentSchedule` و`FinalizeSession` و`IssueInvoice`.
+
+```php
+final class CancelSession
+{
+    public function __construct(
+        private PolicyEngine $policies,
+        private CreditsApi $credits,          // Contract من module Credits
+    ) {}
+
+    public function handle(Session $session, CancelRequest $req): Decision
+    {
+        return DB::transaction(function () use ($session, $req) {
+            $decision = $this->policies->evaluate(PolicyInput::forCancel($session, $req));
+            $session->status->transitionTo(Cancelled::class, $req, $decision);
+            $this->credits->apply($decision->creditAction, $session->id, idempotencyKey: "cancel:{$session->id}");
+            SessionCancelled::dispatch($session->id, $decision);   // بيتبعت بعد الـ commit
+            return $decision;
+        });
+    }
+}
+```
+
+### 4.2 DTO / Data Objects (spatie/laravel-data)
+- **المشكلة**: arrays من غير نوع بتتنقل بين الطبقات.
+- **الحل**: كائنات بيانات typed، بتتعمل لها validation، ومنها بيتولّد TypeScript وOpenAPI.
+- **الاستخدام**: مدخلات الـ Actions، والـ Contracts، وردود الـ API.
+
+### 4.3 State Machine (spatie/laravel-model-states)
+- **المشكلة**: حالات كتير وانتقالات مسموحة ومش مسموحة، و`if` متفرقة في كل حتة.
+- **الحل**: class لكل حالة، وكل انتقال class ليه شروطه وتأثيراته.
+- **الاستخدام**:
+  - **الحصة** (القسم 5 في [02](02-domain-rules.md#5-دورة-حياة-الحصة)).
+  - الاشتراك (`active | past_due | paused | cancelled`).
+  - الفاتورة (`draft | issued | paid | void`).
+  - الواجب، وطلب الإجازة، وإصدار المنهج، والـ lead.
+
+```php
+abstract class SessionState extends State
+{
+    abstract public function creditEffect(): CreditEffect;   // Reserved | Consumed | Released | Policy
+
+    public static function config(): StateConfig
+    {
+        return parent::config()
+            ->default(Scheduled::class)
+            ->allowTransition(Scheduled::class, InProgress::class)
+            ->allowTransition(Scheduled::class, Cancelled::class, ToCancelled::class)
+            ->allowTransition(InProgress::class, Completed::class, ToCompleted::class)
+            ->allowTransition([InProgress::class, Scheduled::class], NeedsReview::class);
+    }
+}
+```
+
+### 4.4 Strategy
+- **المشكلة**: نفس العملية ليها كذا طريقة، وكل أكاديمية تختار.
+- **الاستخدام**:
+  - `RenewalStrategy`: بالبلوك أو شهري.
+  - `MatchScorer`: عوامل ترتيب المدرسين وأوزانها.
+  - `PayrollRateStrategy`: بالدقيقة، أو بالحصة، أو ثابت + متغير.
+  - `ProrationStrategy`.
+  - `KpiNormalizer`.
+
+```php
+interface RenewalStrategy
+{
+    public function shouldRenew(Subscription $s, CreditAccount $a): bool;
+    public function nextBlock(Subscription $s): BlockTerms;   // minutes, validity, price
+}
+// BlockRenewal (الافتراضي) و PeriodRenewal. والاختيار من plans.renewal_mode
+```
+
+### 4.5 Specification (قواعد السياسات)
+- **المشكلة**: شروط الإلغاء والتعويض بتتغير من أكاديمية للتانية.
+- **الحل**: كل شرط class صغيرة `isSatisfiedBy(PolicyInput)` بتتركب مع غيرها. القاعدة = شروط + نتيجة. **أول قاعدة تنطبق هي اللي بتتنفذ**.
+- **الاستخدام**: `PolicyEngine` في Scheduling.
+- **ليه مش rules engine عام**: القواعد عددها محدود، والمفردات معروفة، وعايزين نختبر كل قاعدة.
+
+```php
+final class Rule
+{
+    /** @param Specification[] $conditions */
+    public function __construct(public array $conditions, public Outcome $outcome) {}
+
+    public function matches(PolicyInput $in): bool
+    {
+        return collect($this->conditions)->every(fn (Specification $c) => $c->isSatisfiedBy($in));
+    }
+}
+// أمثلة على الشروط: ActorIs(student), NoticeAtLeast(hours: 12), QuotaRemaining(), SessionTypeIs(makeup), FaultIs(platform)
+```
+
+### 4.6 Pipeline
+- **المشكلة**: فلاتر المطابقة كتير، بتتغير، وبعضها اختياري.
+- **الحل**: Laravel Pipeline، وكل فلتر class مستقلة.
+
+```php
+$candidates = app(Pipeline::class)
+    ->send(TeacherQuery::forAcademy())
+    ->through([
+        ActiveAndAcceptingNew::class,
+        TeachesSubjectAtLevel::class,
+        MatchesCategories::class,
+        GenderPreference::class,
+        SpeaksLanguage::class,
+        HasWeeklyCapacity::class,
+    ])
+    ->thenReturn()
+    ->get();
+```
+
+### 4.7 Adapter + Manager (Factory)
+- **المشكلة**: مزودين خارجيين كتير وممكن يتغيروا: بوابات الدفع، والفيديو، والفاتورة الإلكترونية، وقنوات الإرسال.
+- **الحل**: interface واحدة (Port)، وadapter لكل مزوّد، و**Manager** بيختار الـ adapter حسب إعدادات الأكاديمية.
+- **الاستخدام**:
+  - `PaymentGateway`: Stripe، وMoyasar، وPaymob، وTap، وPayPal، والدفع اليدوي.
+  - `VideoProvider`: LiveKit، وExternalLink.
+  - `EInvoicingProvider`: ZATCA.
+  - `MessagingChannel`: WhatsApp، وSMS، والإيميل، وFCM (عن طريق Laravel Notification Channels).
+
+```php
+final class GatewayManager
+{
+    public function for(GatewayAccount $account): PaymentGateway
+    {
+        return match ($account->gateway) {
+            Gateway::Stripe  => new StripeConnectGateway($account->stripe_account_id),
+            Gateway::Moyasar => new MoyasarGateway($this->secrets->decrypt($account->credentials)),
+            Gateway::Paymob  => new PaymobGateway($this->secrets->decrypt($account->credentials)),
+            Gateway::Manual  => new ManualGateway(),
+        };
+    }
+}
+```
+
+### 4.8 Domain Events + Listeners (بعد الـ commit، والتكرار مابيأثرش)
+- **المشكلة**: لما الحصة تتقفل، 4 modules لازم يتفاعلوا، ومن غير ما Scheduling يعرفهم.
+- **الحل**: event واحد `SessionFinalized`، وبيتبعت **بعد الـ commit** (`ShouldDispatchAfterCommit`). كل listener queued، و**مابيتأثرش بالتكرار** (مفتاح `idempotency_key` مبني من الحصة والـ event).
+- **الاستخدام**: Credits (الخصم)، وPayroll (الأرباح)، وEvaluation (الـ KPI)، وLearning (التقرير مطلوب).
+
+### 4.9 Inbox (و Outbox بعدين)
+- **المشكلة**: البوابات والـ LiveKit بيبعتوا نفس الـ webhook أكتر من مرة، أو بترتيب مختلف.
+- **الحل**: كل webhook بيتخزن الأول في جدول inbox فيه `UNIQUE(source, event_id)`، والرد بيرجع 200 على طول، وjob بيعالجه. ماينفعش يتعالج مرتين.
+- **Outbox**: لما نفتح webhooks خارجة للأكاديميات (P3)، نضيف جدول outbox بيتكتب في نفس الـ transaction.
+
+### 4.10 Ledger (Append-only)
+- **المشكلة**: عمود `balance` بيتعدل = مفيش تاريخ، ونزاعات مش هتتحل، وأخطاء لما عمليتين يحصلوا في نفس الوقت.
+- **الحل**: قيود بيتضاف عليها بس (`credit_entries`، و`teacher_earnings`، و`audit_logs`). الرصيد المعروض **نسخة محسوبة** (`credit_accounts`) بتتطابق كل ليلة، وأي تصحيح = **قيد عكسي**.
+- **الاستخدام**: الرصيد، وأرباح المدرسين، وسجل المراجعة.
+
+```php
+interface CreditsApi
+{
+    public function reserve(SessionId $s, AccountId $a, int $minutes, string $idempotencyKey): Reservation;
+    public function consume(SessionId $s, string $idempotencyKey): void;
+    public function release(SessionId $s, ReleaseMode $mode, string $idempotencyKey): void; // refund | makeup_lot
+    public function grant(AccountId $a, LotSource $src, int $minutes, ?CarbonImmutable $expiresAt, string $idempotencyKey): Lot;
+}
+```
+
+### 4.11 Projector / Read Model (CQRS-lite)
+- **المشكلة**: حساب التقدم والمؤشرات والتقارير في كل request مكلف ومعقد.
+- **الحل**: listeners بتحدّث جداول قراءة جاهزة.
+- **الاستخدام**:
+  - `ProgressProjector`: `enrollment_progress` و`enrollment_positions`.
+  - `KpiProjector`: `kpi_snapshots`.
+  - Reporting: جداول `fact_*`.
+- **مش CQRS كامل**: نفس قاعدة البيانات، ومفيش event store.
+
+### 4.12 Query Object
+- **المشكلة**: الشاشات محتاجة قراءات معقدة (التقويم، ولوحة العمليات، والبحث عن مدرس) ومش لازم تعدّي على الـ Models.
+- **الحل**: class لكل قراءة، بتستخدم Query Builder أو SQL مُحسّن، وبترجّع DTOs.
+- **الاستخدام**: `TeacherCalendarQuery`، و`LiveBoardQuery`، و`FindTeachersQuery`.
+
+### 4.13 Value Objects
+- **المشكلة**: الفلوس والأوقات بتتمثل بأنواع بدائية، فبتحصل أخطاء (عملات بتتجمع مع بعض، وتوقيت بيتنسي).
+- **الحل**: أنواع غير قابلة للتعديل وبتتحقق من نفسها:
+  - `Money` (brick/money).
+  - `WeeklySlot(weekday, localTime, duration, tz)`.
+  - `LocalDateTimeInZone`.
+  - `IntervalSet`.
+  - `WeekBitset`.
+  - `PhoneE164`.
+  - `Percent`.
+
+### 4.14 Tenant Context (Scoped Service + Middleware)
+- **المشكلة**: كل query وكل job لازم يعرف هو تبع أنهي أكاديمية.
+- **الحل**:
+  - `TenantContext` بيتحدد مرة واحدة: من الـ token أو الـ host في الـ HTTP middleware، ومن Laravel Context في الـ job middleware.
+  - بيظبط `app.tenant_id` في Postgres.
+  - الـ global scope والـ RLS بيقروا منه.
+
+### 4.15 Policies (الصلاحيات)
+- Laravel Policies لكل Model. مثلًا: المدرس يلغي حصته بس، وولي الأمر يشوف أولاده بس.
+- Filament وAPI بيستخدموا نفس الـ Policies.
+
+---
+
+## 5. أنماط بنتجنبها عن قصد
+
+| النمط | ليه بنتجنبه |
+|---|---|
+| Repository فوق كل Eloquent model | طبقة مالهاش فايدة في Laravel. بنستخدم Query Objects للقراءات المعقدة بس |
+| Microservices بدري | تكلفة تشغيل عالية، وتعقيد في الـ transactions، والفريق صغير |
+| Sagas / Process Managers | قاعدة بيانات واحدة، والقيود المهمة في transaction واحدة |
+| CQRS كامل + Event Sourcing | تعقيد كبير. الـ ledger والـ projectors بيدّوا 90% من الفايدة |
+| Rules Engine عام (DSL) | القواعد محدودة والمفردات معروفة. نبدأ بـ Specifications |
+| طبقات DDD التقليدية الأربعة بالكامل في كل module | مكتوبة بزيادة. الهيكل في القسم 3 أخف ومكفي |
+| Multi-database tenancy | تكلفة migrations وتشغيل. الـ Cells بعدين بتحل مشكلة العملاء الكبار |
+
+---
+
+## 6. هيكل المجلدات
+
+### Monorepo
+
+```text
+lms/
+  apps/
+    api/                      Laravel: REST API + Filament panels + workers
+    mobile/                   Flutter: تطبيق واحد بيتغير حسب الدور (+ flavors)
+    web/                      Next.js: البوابة + الفصل (+ المواقع العامة في P2)
+  packages/
+    openapi/                  openapi.json (بيتعمل له commit، و oasdiff في الـ CI)
+    api-client-dart/          بيتولّد تلقائيًا (dart-dio)
+    api-client-ts/            بيتولّد تلقائيًا
+    design-tokens/            JSON → Flutter ThemeExtension + Tailwind
+  infra/                      terraform/, docker/, runbooks/
+  docs/                       الوثيقة دي + ADRs/
+  .github/workflows/          api.yml, mobile.yml, web.yml, contracts.yml (كل واحد حسب الفولدر)
+```
+
+الأدوات: pnpm + Turborepo لـ JS، وDart pub workspaces أو Melos لـ Flutter.
+
+### Laravel
+
+```text
+apps/api/
+  app/Providers/              AppServiceProvider, HorizonServiceProvider
+  app/Filament/               AcademyPanelProvider, ConsolePanelProvider (اللوحات بس)
+  modules/
+    SharedKernel/src/
+      Money/  Ids/  Events/DomainEvent.php
+      Time/{Timezone, WeeklySlot, IntervalSet, WeekBitset, LocalTimeResolver}
+      Tenancy/{TenantContext, BelongsToTenant, ResolveTenant, SetPgTenant, TenantJobMiddleware}
+      Http/{ProblemDetails, IdempotencyMiddleware}
+    Platform/  Identity/  Catalog/  People/  Curriculum/  Enrollment/
+    Scheduling/  Classroom/  Credits/
+    Billing/        (Infrastructure/Gateways/{Stripe, Moyasar, Paymob, Tap, PayPal, Manual},
+                     Infrastructure/EInvoicing/Zatca)
+    Learning/  Evaluation/  Payroll/  Crm/
+    Communication/  (Channels/{Mail, Fcm, WhatsApp, Sms, InApp})
+    Support/  Reporting/  Audit/  Files/
+  routes/{api.php, webhooks.php}      (بيضموا routes الـ modules)
+  tests/{Arch/ModuleBoundariesTest.php, TenantIsolation/, Dst/}
+```
+
+### Flutter (حسب الميزة، بنفس أدوات CBOT Fleet: dio، وflutter_bloc، وgo_router)
+
+```text
+apps/mobile/lib/
+  app/        bootstrap.dart, router/ (shells: student, guardian, teacher), di/, theme/, flavors/
+  core/       network/ (dio + interceptors: auth, locale, idempotency, retry)
+              auth/ (multi-account store)  realtime/ (Reverb/Pusher)  push/  deeplinks/
+              time/ (display helpers)  l10n/ (ar/en, RTL)  remote_config/
+  features/   auth/  account_switcher/  dashboard/  schedule/  classroom/ (livekit_client)
+              reports/  homework/ (audio)  roadmap/  billing/ (pay links)  notifications/  chat/  profile/
+              كل ميزة: data/  domain/  presentation/{bloc, pages, widgets}
+  shared/widgets/
+tenants/<slug>.json            (إعدادات white-label، P3)
+```
+
+### Next.js (App Router)
+
+```text
+apps/web/src/
+  middleware.ts                       host → tenant + locale، والـ token من httpOnly cookie
+  app/(portal)/[locale]/...           المدرس (أكتر حد بيستخدم الويب)، والطالب، وولي الأمر
+  app/(classroom)/[locale]/session/[id]   LiveKit React
+  app/(public)/[locale]/...           موقع الأكاديمية العام، ISR بـ tag لكل أكاديمية (P2)
+  app/api/                            BFF رفيع (login، refresh)
+  features/  lib/api (generated)  lib/auth  components/ui
+```
+
+---
+
+## 7. قواعد الكود
+
+| المجال | القاعدة |
+|---|---|
+| الأسماء | الـ Actions بأفعال (`CancelSession`)، والـ Events بالماضي (`SessionCancelled`)، والـ Queries بـ `…Query` |
+| Events | الـ events العامة في `Contracts/Events` بس، ومعاها نسخة (`v1`) لو بقت تطلع برّه النظام |
+| Idempotency | كل عملية فلوس أو رصيد أو حجز بتاخد `idempotency_key`، وعليه `UNIQUE` في قاعدة البيانات |
+| الوقت | `CarbonImmutable` في كل مكان، وممنوع `now()` في الـ Domain (بنحقن `Clock`) |
+| الفلوس | `Money` بس، وممنوع float |
+| الترجمة | كل النصوص في `lang/{ar,en}` جوه الـ module، ورسائل الأخطاء بتترجم حسب `Accept-Language` |
+| الاختبارات | كل Action ليه feature test، وكل قاعدة سياسة ليها unit test، وكل module ليه arch test |
+| الـ Migrations | expand/contract، ومفيش حذف أعمدة في نفس الإصدار اللي وقف استخدامها |
