@@ -30,7 +30,7 @@
 | M4 | **People** | ملفات المدرسين والطلاب، وعلاقات أولياء الأمور | `TeacherOnboarded`، `TeacherSubjectsChanged`، `TeacherTierChanged`، `StudentCreated`، `GuardianLinked`، `UserTimezoneChanged` |
 | M5 | **Curriculum** | البرامج، والإصدارات، وعُقد المنهج، والموارد، وتعريفات الاختبارات | `CurriculumVersionPublished` |
 | M6 | **Enrollment** | الاتفاق التعليمي، وتغيير المدرس | `EnrollmentCreated`، `EnrollmentActivated`، `EnrollmentPaused`، `EnrollmentResumed`، `EnrollmentEnded`، `TeacherReassigned` |
-| M7 | **Scheduling** | **قلب النظام**: الشفتات، والإجازات، والتوافر، والمطابقة، والحجز، ودورة حياة الحصة، والسياسات، وتغيير التوقيت | `SessionScheduled`، `SessionRescheduled`، `SessionTeacherSubstituted`، `SessionCancelled`، `SessionStarted`، `SessionFinalized`، `SessionFlaggedForReview`، `TeacherLate`، `DstShiftUpcoming`، `SchedulingConflictDetected` |
+| M7 | **Scheduling** | **قلب النظام**: الشفتات ومقترحاتها، والإجازات، والتوافر، والمطابقة، والحجز، ودورة حياة الحصة، والسياسات، وتغيير التوقيت | `SessionScheduled`، `SessionRescheduled`، `SessionTeacherSubstituted`، `SessionCancelled`، `SessionStarted`، `SessionFinalized`، `SessionFlaggedForReview`، `TeacherLate`، `DstShiftUpcoming`، `SchedulingConflictDetected`، `ShiftProposalSubmitted`، `ShiftProposalChangesRequested`، `ShiftProposalCountered`، `ShiftProposalApproved`، `ShiftProposalRejected`، `ShiftRulesChanged` |
 | M8 | **Classroom** | غرف الفيديو، والتسجيلات، والـ webhooks، وبلاغات المشاكل التقنية | `ParticipantJoined`، `ParticipantLeft`، `RecordingReady`، `TechnicalIssueReported` |
 | M9 | **Credits** | الـ ledger والدفعات والحجوزات | `CreditsGranted`، `CreditsReserved`، `CreditsConsumed`، `CreditsReleased`، `CreditsExpired`، `CreditBalanceLow` |
 | M10 | **Billing** | الباقات والأسعار، والاشتراكات، والفواتير، والمدفوعات، والبوابات، والضرايب، وZATCA | `InvoiceIssued`، `PaymentSucceeded`، `PaymentFailed`، `InvoicePaid`، `SubscriptionRenewed`، `SubscriptionPastDue`، `SubscriptionPaused`، `RefundIssued`، `EInvoiceReported` |
@@ -94,11 +94,13 @@ modules/Scheduling/
       Models/                 Session, SessionParticipant, RecurringSlot, ShiftRule, TimeOff, Closure, BookingHold
       States/Session/         Scheduled, InProgress, Completed, Cancelled, StudentAbsent, TeacherAbsent,
                               NeedsReview, Transitions/
+      States/ShiftProposal/   Draft, Submitted, ChangesRequested, Countered, Approved, Rejected, Withdrawn, Superseded
       Rules/                  PolicyEngine, RuleSet, Rule, Conditions/, Decision   (قواعد عمل، مش Laravel Policies)
       Availability/           AvailabilityCalculator, Matching/{Filters/*, Scorers/*, PatternAssembler}
       Enums/  ValueObjects/
     Actions/                CreateEnrollmentSchedule, MaterializeHorizon, RescheduleSession, CancelSession,
-                            BookMakeup, SubstituteTeacher, FinalizeSession, ResolveReview, PlanDstTransitions
+                            BookMakeup, SubstituteTeacher, FinalizeSession, ResolveReview, PlanDstTransitions,
+                            SubmitShiftProposal, ReviewShiftProposal, CounterShiftProposal, ApproveShiftProposal
     Queries/                TeacherCalendarQuery, LiveBoardQuery, FindTeachersQuery
     Listeners/
     Jobs/                   FinalizeDueSessionsSweeper, JoinNudgesSweeper, MaterializeNightly
@@ -167,6 +169,7 @@ final class CancelSession
   - **الحصة** (القسم 5 في [02](02-domain-rules.md#5-دورة-حياة-الحصة)).
   - الاشتراك (`active | past_due | paused | cancelled`).
   - الفاتورة (`draft | issued | paid | void`).
+  - **مقترح الشفتات** (`draft | submitted | changes_requested | countered | approved | rejected | withdrawn | superseded`).
   - الواجب، وطلب الإجازة، وإصدار المنهج، والـ lead.
 
 ```php

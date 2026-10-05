@@ -167,7 +167,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 | People | `teacher_profiles`، `teacher_subjects`، `teacher_subject_categories`، `teacher_languages`، `student_profiles`، `guardian_student`، `supervisor_assignments` |
 | Curriculum | `programs`، `curriculum_versions`، `curriculum_nodes`، `node_resources`، `assessment_definitions`، `version_node_mappings` |
 | Enrollment | `enrollments`، `enrollment_teacher_assignments`، `enrollment_status_history` |
-| Scheduling | `teacher_shift_rules`، `teacher_time_off`، `availability_overrides`، `closures`، `recurring_slots`، `booking_holds`، `sessions`، `session_participants`، `attendance_segments`، `session_events`، `policy_sets`، `policy_set_versions`، `scheduling_conflicts`، `schedule_shift_notices` |
+| Scheduling | `teacher_shift_schedules`، `teacher_shift_rules`، `shift_proposals`، `shift_proposal_rules`، `shift_proposal_comments`، `teacher_time_off`، `availability_overrides`، `closures`، `recurring_slots`، `booking_holds`، `sessions`، `session_participants`، `attendance_segments`، `session_events`، `policy_sets`، `policy_set_versions`، `scheduling_conflicts`، `schedule_shift_notices` |
 | Classroom | `rooms`، `recordings`، `recording_access_logs`، `provider_webhook_inbox`، `tech_issue_reports` |
 | Credits | `credit_accounts`، `credit_lots`، `credit_entries`، `credit_reservations` |
 | Billing | `billing_accounts`، `billing_account_students`، `price_regions`، `plans`، `plan_prices`، `subscriptions`، `invoices`، `invoice_lines`، `invoice_sequences`، `payments`، `payment_methods`، `manual_payment_proofs`، `refunds`، `credit_notes`، `discount_rules`، `coupons`، `gateway_accounts`، `gateway_webhook_inbox`، `tax_profiles`، `tax_rates`، `einvoice_units`، `einvoice_documents` |
@@ -183,7 +183,15 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 ### أهم الأعمدة في الجداول الأساسية
 
 ```text
-teacher_shift_rules(teacher_id, weekday, local_start, duration_min, tz, effective daterange, kind work|break)
+teacher_shift_schedules(id, teacher_id, version, effective daterange, status active|superseded,
+                        approved_by, source_proposal_id)   -- نسخة واحدة سارية لكل مدرس (EXCLUDE)
+teacher_shift_rules(schedule_id, teacher_id, weekday, local_start, duration_min, tz, kind work|break)
+shift_proposals(id, teacher_id, base_schedule_id, author_role teacher|admin,
+                status draft|submitted|changes_requested|countered|approved|rejected|withdrawn|superseded,
+                effective_from, note, min_weekly_min, max_weekly_min, submitted_at,
+                decided_by, decided_at, decision_note, override_reason, impact jsonb, version)
+shift_proposal_rules(proposal_id, revision, weekday, local_start, duration_min, tz, kind)  -- revision لكل عرض مضاد
+shift_proposal_comments(proposal_id, author_id, body, created_at)
 recurring_slots(enrollment_id, teacher_id, weekday, local_start, duration_min, anchor, anchor_tz,
                 minute_of_week int4range, effective daterange, status)
 sessions(id, academy_id, type, enrollment_id?, lead_id?, teacher_id, original_teacher_id, slot_id?,
@@ -211,7 +219,10 @@ erDiagram
     USERS ||--o| STUDENT_PROFILES : "student"
     USERS ||--o{ GUARDIAN_STUDENT : "guardian of"
     STUDENT_PROFILES ||--o{ GUARDIAN_STUDENT : "has guardians"
-    TEACHER_PROFILES ||--o{ TEACHER_SHIFT_RULES : works
+    TEACHER_PROFILES ||--o{ SHIFT_PROPOSALS : proposes
+    SHIFT_PROPOSALS ||--o| TEACHER_SHIFT_SCHEDULES : "approved into"
+    TEACHER_PROFILES ||--o{ TEACHER_SHIFT_SCHEDULES : "works by"
+    TEACHER_SHIFT_SCHEDULES ||--o{ TEACHER_SHIFT_RULES : contains
     TEACHER_PROFILES ||--o{ TEACHER_SUBJECTS : teaches
     SUBJECTS ||--o{ TEACHER_SUBJECTS : "taught by"
     STUDENT_PROFILES ||--o{ ENROLLMENTS : enrolls
@@ -386,7 +397,7 @@ interface PaymentGateway
 - **ثلاث واجهات** على go_router:
   - **الطالب**: الجدول، والدخول للحصة، والـ roadmap، والواجبات (تسجيل صوتي)، والتقارير.
   - **ولي الأمر**: يتنقل بين أولاده، وفواتيره، ولينكات الدفع.
-  - **المدرس**: الجدول، والدخول، والتقرير، وتصحيح الواجبات، والأرباح.
+  - **المدرس**: الجدول، و**اقتراح شفتاته ومتابعة حالتها**، والدخول، والتقرير، وتصحيح الواجبات، والأرباح.
 - **إجبار التحديث** + remote config، وpush (FCM/APNs)، وdeep links للحصة.
 - العربي والإنجليزي بـ RTL كامل، بنفس أسلوب `core/l10n` في CBOT Fleet.
 - **White-label (P3)**: flavors + `--dart-define-from-file tenants/<slug>.json`.
