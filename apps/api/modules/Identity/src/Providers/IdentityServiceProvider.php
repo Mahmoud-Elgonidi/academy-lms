@@ -5,20 +5,28 @@ namespace Modules\Identity\Providers;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
+use Modules\Identity\Authorization\AbilityMatrix;
 use Modules\Identity\Contracts\IdentityApi;
+use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Identity\IdentityService;
 use Modules\Identity\Models\PersonalAccessToken;
+use Modules\Identity\Preferences\PreferenceStore;
 
 final class IdentityServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
         $this->app->singleton(IdentityApi::class, IdentityService::class);
+
+        // One registry per process: modules declare their preferences in boot().
+        $this->app->singleton(PreferenceStore::class);
+        $this->app->alias(PreferenceStore::class, UserPreferences::class);
     }
 
     public function boot(): void
     {
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+        AbilityMatrix::register();
 
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'identity');

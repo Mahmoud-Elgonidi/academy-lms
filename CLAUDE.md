@@ -19,4 +19,7 @@ Multi-tenant SaaS LMS for online 1:1 tutoring academies. Architecture (Arabic): 
 - Use cases are `final` Action classes; controllers, Filament pages and jobs call the same Action.
 - API errors are RFC 7807 (`Modules\SharedKernel\Http\ProblemDetails`); user-facing strings in `lang/{ar,en}` inside the module.
 - UTC everywhere, `CarbonImmutable`; money as minor units + currency (when Billing lands).
+- Back office: Filament 5 panel `academy` in `app/Providers/Filament`; each module adds screens through its own `Filament/*Plugin`. Check permissions with `Gate::allows(Ability::X->value)` (`Modules\SharedKernel\Authorization\Ability`); only Identity maps roles to abilities. Per-user screen choices: declare with `UserPreferences::define()` in the module's provider; they show up on "My settings".
+- Custom screens use Filament's colour variables (`--primary-600`, `--danger-50`, ...) so they follow the academy's branding; never hard-code the brand colour.
+- `sessions` is Scheduling's table of lessons; Laravel's web sessions live in `http_sessions`.
 - Times leave the API only through `LocalTimePresenter::present()` → `{utc, local, timezone, label}` in the viewer's zone (`ViewerTimezone`: `X-Timezone` header → profile → academy → UTC). Wall-clock → UTC only through `LocalTimeResolver` (DST gap → later by the gap; repeated hour → earlier). Timezones are IANA names, never offsets.

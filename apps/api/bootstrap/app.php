@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Modules\SharedKernel\Http\ProblemDetails;
 use Modules\SharedKernel\Http\ResolveViewerTimezone;
 use Modules\SharedKernel\Http\SetLocale;
+use Modules\SharedKernel\Tenancy\Exceptions\TenantNotResolved;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -29,4 +31,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(fn (Throwable $e, Request $request) => ProblemDetails::render($e, $request));
+
+        // The back office on a host that is no academy: a plain 404, not a server error.
+        $exceptions->map(TenantNotResolved::class, fn (TenantNotResolved $e) => request()->is('api/*')
+            ? $e
+            : new NotFoundHttpException($e->getMessage(), $e));
     })->create();

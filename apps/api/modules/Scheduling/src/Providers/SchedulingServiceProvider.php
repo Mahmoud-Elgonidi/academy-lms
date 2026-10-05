@@ -1,0 +1,43 @@
+<?php
+
+namespace Modules\Scheduling\Providers;
+
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\ServiceProvider;
+use Modules\Identity\Contracts\Preferences\PreferenceDefinition;
+use Modules\Identity\Contracts\Preferences\UserPreferences;
+use Modules\Scheduling\Console\SweepSessionsCommand;
+use Modules\Scheduling\Domain\AttendancePolicy;
+use Modules\Scheduling\Filament\Pages\LiveBoard;
+
+final class SchedulingServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        // Per-academy policy sets replace this when the policy engine lands.
+        $this->app->singleton(AttendancePolicy::class, fn () => AttendancePolicy::defaults());
+    }
+
+    public function boot(): void
+    {
+        $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
+        $this->loadTranslationsFrom(__DIR__.'/../../lang', 'scheduling');
+        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'scheduling');
+
+        $this->app->make(UserPreferences::class)->define(new PreferenceDefinition(
+            key: LiveBoard::LAYOUT_PREFERENCE,
+            label: 'scheduling::board.layout.label',
+            options: array_combine(LiveBoard::LAYOUTS, array_map(fn (string $l) => "scheduling::board.layout.{$l}", LiveBoard::LAYOUTS)),
+            default: 'table',
+            hint: 'scheduling::board.layout.hint',
+        ));
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([SweepSessionsCommand::class]);
+        }
+
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->command('scheduling:sweep')->everyMinute()->withoutOverlapping()->onOneServer();
+        });
+    }
+}

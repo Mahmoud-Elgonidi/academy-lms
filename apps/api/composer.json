@@ -11,6 +11,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "filament/filament": "^5.9",
         "laravel/framework": "^13.17",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0"
@@ -35,7 +36,12 @@
             "Modules\\Platform\\": "modules/Platform/src/",
             "Modules\\Identity\\": "modules/Identity/src/",
             "Modules\\Identity\\Database\\Factories\\": "modules/Identity/database/factories/",
-            "Modules\\Platform\\Database\\Factories\\": "modules/Platform/database/factories/"
+            "Modules\\Platform\\Database\\Factories\\": "modules/Platform/database/factories/",
+            "Modules\\Catalog\\": "modules/Catalog/src/",
+            "Modules\\People\\": "modules/People/src/",
+            "Modules\\Scheduling\\": "modules/Scheduling/src/",
+            "Modules\\Scheduling\\Database\\Factories\\": "modules/Scheduling/database/factories/",
+            "Modules\\Scheduling\\Database\\Seeders\\": "modules/Scheduling/database/seeders/"
         }
     },
     "autoload-dev": {
@@ -62,7 +68,8 @@
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan filament:upgrade"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
@@ -83,6 +90,10 @@
         ],
         "lint": [
             "@php vendor/bin/pint --test"
+        ],
+        "demo": [
+            "@php artisan migrate:fresh --database=pgsql_owner --force",
+            "@php artisan db:seed --force"
         ]
     },
     "extra": {

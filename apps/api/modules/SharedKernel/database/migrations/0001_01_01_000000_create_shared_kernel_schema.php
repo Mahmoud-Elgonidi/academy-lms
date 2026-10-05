@@ -22,7 +22,9 @@ return new class extends Migration
         SQL);
 
         // Platform-level tables used before any tenant is known: no academy_id, no RLS.
-        Schema::create('sessions', function ($table) {
+        // Laravel's web sessions live in http_sessions: `sessions` is the
+        // Scheduling module's table of lessons (docs/architecture/03, section 4).
+        Schema::create('http_sessions', function ($table) {
             $table->string('id')->primary();
             $table->uuid('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
@@ -34,7 +36,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('sessions');
+        Schema::dropIfExists('http_sessions');
         DB::statement('drop function if exists app_current_tenant()');
     }
 };

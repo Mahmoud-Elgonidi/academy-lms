@@ -2,6 +2,9 @@
 
 namespace Modules\Identity\Models;
 
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,8 +27,9 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?string $timezone
  * @property UserStatus $status
  * @property bool $is_managed_minor
+ * @property array<string, string> $preferences
  */
-final class User extends Authenticatable
+final class User extends Authenticatable implements FilamentUser, HasLocalePreference
 {
     use BelongsToTenant;
     use HasApiTokens;
@@ -46,6 +50,7 @@ final class User extends Authenticatable
     protected $attributes = [
         'status' => 'active',
         'is_managed_minor' => false,
+        'preferences' => '{}',
     ];
 
     protected function casts(): array
@@ -54,6 +59,7 @@ final class User extends Authenticatable
             'password' => 'hashed',
             'status' => UserStatus::class,
             'is_managed_minor' => 'boolean',
+            'preferences' => 'array',
         ];
     }
 
@@ -88,6 +94,18 @@ final class User extends Authenticatable
     public function isActive(): bool
     {
         return $this->status === UserStatus::Active;
+    }
+
+    /** The academy back office is for active staff; teachers, students and guardians use the apps. */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->isActive() && array_filter($this->roles(), fn (Role $role) => $role->isStaff()) !== [];
+    }
+
+    public function preferredLocale(): ?string
+    {
+        // A user built in memory may not carry the column yet; that means "no preference".
+        return $this->attributes['locale'] ?? null;
     }
 
     protected static function newFactory(): UserFactory

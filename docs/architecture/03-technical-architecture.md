@@ -9,7 +9,7 @@
 | الطبقة | الاختيار | ليه |
 |---|---|---|
 | Backend | **Laravel** (أحدث إصدار مستقر وقت البداية، 12 أو أحدث)، PHP 8.4+، **Octane على FrankenPHP** | خبرة الفريق، والـ ecosystem متكامل (Queues، Horizon، Reverb، Pennant، Sanctum)، وOctane بيدّي أداء عالي |
-| لوحات الإدارة | **Filament 4**: لوحة للأكاديمية ولوحة Console للمنصة | CRUD ولوحات بسرعة جدًا، وكل module بيسجل شاشاته كـ plugin |
+| لوحات الإدارة | **Filament 5** (Livewire 4): لوحة للأكاديمية ولوحة Console للمنصة | CRUD ولوحات بسرعة جدًا، وكل module بيسجل شاشاته كـ plugin |
 | قاعدة البيانات | **PostgreSQL 17/18** (managed)، بالإضافات `btree_gist`، و`ltree`، و`pg_trgm`، و`citext` | RLS، و exclusion constraints على الفترات الزمنية، و`tstzmultirange`، وتقسيم الجداول. وPG 18 فيه `uuidv7()` جاهز |
 | Cache، Queues، Locks | **Redis**: نسخة للـ cache (LRU) ونسخة للـ queues (من غير eviction) | لو الـ cache اتملى مايمسحش jobs |
 | Jobs | **Horizon**، والـ queues مترتبة بالأولوية | مراقبة الـ jobs والتحكم في الأولويات |
@@ -141,6 +141,11 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 - لوحة الأكاديمية على `{slug}.<platform-domain>/admin`.
 - لوحة Console للمنصة على دومين لوحدها.
 - كل module بيسجل شاشاته كـ **Filament plugin**.
+- **ترتيب الـ middleware**: `ResolveTenant` أول واحد، قبل ما الـ session تحمّل المستخدم، وكل الـ middleware **persistent** عشان تشتغل تاني في كل طلب Livewire. لون الأكاديمية بيتسجل بعد ما الأكاديمية تتعرف (`ApplyAcademyColours`)، لأن Filament بيسجل الألوان قبل كده.
+- الألوان بتتحول لدرجات (50–950) واللون نفسه بيفضل في درجة 600 اللي الأزرار بتستخدمها (`BrandPalette`)، والشاشات المخصصة بتستخدم متغيرات CSS بتاعة Filament (`--primary-600` وغيرها)، فبتتبع هوية الأكاديمية لوحدها.
+- صور المستخدمين بتترسم من الحروف الأولى على السيرفر، مش من خدمة خارجية (Filament افتراضيًا بيبعت اسم كل مستخدم لـ ui-avatars).
+- الصلاحيات: كل module بيسأل عن **قدرة** (`SharedKernel\Authorization\Ability`) بـ `Gate::allows()`، وIdentity بس هو اللي بيربط الأدوار بالقدرات.
+- اختيارات كل مستخدم (زي شكل لوحة العمليات) بتتعرّف من الـ module صاحب الشاشة (`UserPreferences::define()`)، وبتظهر لوحدها في **إعداداتي**.
 
 ---
 
@@ -161,7 +166,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 
 | Module | الجداول الأساسية |
 |---|---|
-| Platform | `academies`، `academy_domains`، `academy_branding`، `saas_plans`، `saas_subscriptions`، `usage_counters`، `platform_admins` |
+| Platform | `academies`، `academy_domains`، `academy_branding`، `branding_templates`، `saas_plans`، `saas_subscriptions`، `usage_counters`، `platform_admins` |
 | Identity | `users`، `roles/permissions`، `devices`، `otp_challenges`، `social_identities`، `consents`، `impersonations` |
 | Catalog | `subjects`، `levels`، `categories` |
 | People | `teacher_profiles`، `teacher_subjects`، `teacher_subject_categories`، `teacher_languages`، `student_profiles`، `guardian_student`، `supervisor_assignments` |
@@ -183,6 +188,10 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 ### أهم الأعمدة في الجداول الأساسية
 
 ```text
+academy_branding(academy_id UNIQUE, template_ref "builtin:{key}"|"saved:{id}"|null, tokens jsonb, logo_path, favicon_path)
+branding_templates(academy_id, name UNIQUE per academy, tokens jsonb)
+  -- tokens = {primary, attention, danger, info, neutral, heading_font, body_font, radius}
+-- جلسات الويب في http_sessions، لأن sessions هو جدول الحصص
 teacher_shift_schedules(id, teacher_id, version, effective daterange, status active|superseded,
                         approved_by, source_proposal_id)   -- نسخة واحدة سارية لكل مدرس (EXCLUDE)
 teacher_shift_rules(schedule_id, teacher_id, weekday, local_start, duration_min, tz, kind work|break)

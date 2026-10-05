@@ -1,16 +1,35 @@
 # Academy LMS API
 
-Laravel 13 modular monolith: the REST API (and, later, the Filament back office and queue workers) for the Academy LMS.
+Laravel 13 modular monolith: the REST API, the Filament back office and (later) the queue workers for the Academy LMS.
 The architecture is in [`docs/architecture`](../../docs/architecture/README.md).
 
-## What's here so far (P0, increment 1)
+## What's here so far
 
 | Module | What it does |
 |---|---|
-| `modules/SharedKernel` | Tenancy (`TenantContext`, `BelongsToTenant`, fail-closed RLS helpers, tenant carried into queued jobs), local time (`ViewerTimezone`, `LocalTimePresenter`, `LocalTimeResolver` for summer-time edges), RFC 7807 errors, `ar`/`en` locale |
-| `modules/Platform` | Academies and their domains; resolves the academy from host, slug or id |
-| `modules/Identity` | Users (per academy), fixed roles, Sanctum tokens that carry their academy, login / me / logout |
-| `app/` | Composition only: `ResolveTenant` middleware, `academy:create` command |
+| `modules/SharedKernel` | Tenancy (`TenantContext`, `BelongsToTenant`, fail-closed RLS helpers, tenant carried into queued jobs), local time (`ViewerTimezone`, `LocalTimePresenter`, `LocalTimeResolver` for summer-time edges), back-office abilities, RFC 7807 errors, `ar`/`en` locale |
+| `modules/Platform` | Academies and their domains; resolves the academy from host, slug or id. **Branding**: name, logo, colours, fonts and corners; five built-in templates, custom looks saved as the academy's own templates; `GET /api/v1/branding` |
+| `modules/Identity` | Users (per academy), fixed roles mapped to abilities, Sanctum tokens that carry their academy, login / me / logout, per-user preferences, **My settings** page |
+| `modules/Catalog` | Subjects (levels and categories come later) |
+| `modules/People` | Guardian ↔ student links |
+| `modules/Scheduling` | Sessions, participants (double-booking refused by an exclusion constraint), the session log, attendance deadlines (`scheduling:sweep`, every minute) and the **live board** with its actions |
+| `app/` | Composition only: `ResolveTenant`, the academy panel provider, `academy:create` |
+
+## The back office
+
+```sh
+# .env: PLATFORM_DOMAIN=localhost (browsers send *.localhost to 127.0.0.1)
+php artisan filament:assets && php artisan storage:link
+composer demo             # fresh database + academy "demo" with an evening of sessions around now
+php artisan serve
+php artisan schedule:work # optional: runs the attendance sweeper every minute
+```
+
+Open http://demo.localhost:8000/admin and sign in as `owner@demo.test` / `password` (or `scheduler@demo.test`).
+
+- **Live operations** (home): sessions now and in the next hour. Two layouts, saved per user: *Table* and *Problems first*. Switch on the board or in *My settings*.
+- **Settings › Identity and colours** (owner and admin): templates, colours, fonts, logo, live preview; save as your own template.
+- The demo times are relative to when you seeded; run `composer demo` again to get a fresh evening.
 
 ## Running it locally
 
@@ -55,3 +74,4 @@ Feature tests use real Postgres with RLS on, not SQLite: the app connects as `lm
 3. **References between tenant tables** use `$table->tenantForeign('user_id', 'users')`, never a plain foreign key: foreign-key checks bypass RLS.
 4. **The academy is resolved before auth.** From the bearer token (source of truth), else the host (`{slug}.PLATFORM_DOMAIN` or a verified custom domain), else the `X-Academy` header. A token sent to another academy gets 403.
 5. **Modules talk through `Contracts/`.** `tests/Arch` fails the build otherwise.
+6. **The back office resolves the academy the same way.** `ResolveTenant` runs first in the panel's middleware, before the session loads the user, and again on every Livewire request.

@@ -106,7 +106,7 @@ modules/Scheduling/
     Jobs/                   FinalizeDueSessionsSweeper, JoinNudgesSweeper, MaterializeNightly
     Http/V1/                Controllers/, Requests/, Resources/
     Authorization/          Laravel Policies (مين يقدر يعمل إيه)
-    Filament/               SchedulingPlugin.php, Resources/, Pages/FindTeacher.php, Widgets/LiveBoard.php
+    Filament/               SchedulingPlugin.php, Resources/, Pages/FindTeacher.php, Pages/LiveBoard.php
     Infrastructure/         AvailabilityCache.php
     Providers/              SchedulingServiceProvider.php
   database/                 migrations/, factories/, seeders/

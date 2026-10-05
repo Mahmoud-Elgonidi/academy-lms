@@ -3,6 +3,7 @@
 namespace Modules\Platform\Directory;
 
 use Modules\Platform\Contracts\TenantDirectory;
+use Modules\Platform\Enums\AcademyStatus;
 use Modules\Platform\Models\Academy;
 use Modules\Platform\Models\AcademyDomain;
 use Modules\SharedKernel\Tenancy\TenantRef;
@@ -45,6 +46,16 @@ final class EloquentTenantDirectory implements TenantDirectory
             ->first()
             ?->academy
             ?->toTenantRef();
+    }
+
+    public function active(): array
+    {
+        return Academy::query()
+            ->where('status', AcademyStatus::Active->value)
+            ->orderBy('created_at')
+            ->get()
+            ->map(fn (Academy $academy) => $academy->toTenantRef())
+            ->all();
     }
 
     private static function isUuid(string $value): bool
