@@ -21,6 +21,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  *  1. A bearer token is the source of truth: users belong to one academy.
  *  2. Otherwise the host ({slug}.{platform domain} or a verified custom domain),
  *     or the X-Academy header (slug) that the shared mobile app sends.
+ *  3. In local development only, PLATFORM_DEV_ACADEMY (so plain localhost works).
  *
  * A token for academy A sent to academy B's host or header is refused (403).
  */
@@ -37,7 +38,7 @@ final class ResolveTenant
     public function handle(Request $request, Closure $next): Response
     {
         $fromToken = $this->fromToken($request);
-        $fromRequest = $this->fromHost($request) ?? $this->fromHeader($request);
+        $fromRequest = $this->fromHost($request) ?? $this->fromHeader($request) ?? $this->devAcademy();
 
         if ($fromToken !== null && $fromRequest !== null && $fromToken->id !== $fromRequest->id) {
             throw new AccessDeniedHttpException('This token belongs to a different academy.');
@@ -80,6 +81,13 @@ final class ResolveTenant
     private function fromHost(Request $request): ?TenantRef
     {
         return $this->directory->byHost($request->getHost());
+    }
+
+    private function devAcademy(): ?TenantRef
+    {
+        $slug = config('platform.dev_academy');
+
+        return app()->environment('local') && is_string($slug) && $slug !== '' ? $this->directory->bySlug($slug) : null;
     }
 
     private function fromHeader(Request $request): ?TenantRef

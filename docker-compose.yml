@@ -1,11 +1,36 @@
-# Local services for development: Postgres (with the three LMS roles), Redis, Mailpit.
+# Local development: the API and back office, Postgres (with the three LMS
+# roles), Redis and Mailpit.
 #
-#   docker compose up -d
+#   docker compose up            then open http://demo.localhost:8000/admin
+#                                (owner@demo.test / password)
+#   docker compose up -d postgres redis mailpit   services only, run PHP yourself
 #
 # Creates the databases lms and lms_test with the roles from
 # apps/api/database/setup/roles.sql and the dev passwords in apps/api/.env.example.
 
 services:
+  api:
+    build: ./apps/api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./apps/api:/app
+      - ./infra/docker/api/start.sh:/start.sh:ro
+    environment:
+      APP_ENV: local
+      APP_URL: http://localhost:8000
+      DB_HOST: postgres
+      REDIS_HOST: redis
+      MAIL_HOST: mailpit
+      MAIL_PORT: "1025"
+      PLATFORM_DOMAIN: localhost
+      PLATFORM_DEV_ACADEMY: demo
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
   postgres:
     image: postgres:17
     environment:

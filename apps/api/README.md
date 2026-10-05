@@ -17,6 +17,15 @@ The architecture is in [`docs/architecture`](../../docs/architecture/README.md).
 
 ## The back office
 
+The quickest way, from the repository root (Docker only, nothing else to install):
+
+```sh
+docker compose up        # then http://localhost:8000/admin, owner@demo.test / password
+docker compose exec api composer demo     # a fresh evening of demo sessions
+```
+
+Or with PHP 8.3 and Composer on your machine (services from `docker compose up -d postgres redis mailpit`):
+
 ```sh
 # .env: PLATFORM_DOMAIN=localhost (browsers send *.localhost to 127.0.0.1)
 php artisan filament:assets && php artisan storage:link
@@ -26,6 +35,7 @@ php artisan schedule:work # optional: runs the attendance sweeper every minute
 ```
 
 Open http://demo.localhost:8000/admin and sign in as `owner@demo.test` / `password` (or `scheduler@demo.test`).
+With `PLATFORM_DEV_ACADEMY=demo` in `.env`, plain http://localhost:8000/admin works too (local environment only; some browsers do not resolve `*.localhost`).
 
 - **Live operations** (home): sessions now and in the next hour. Two layouts, saved per user: *Table* and *Problems first*. Switch on the board or in *My settings*.
 - **Settings › Identity and colours** (owner and admin): templates, colours, fonts, logo, live preview; save as your own template.

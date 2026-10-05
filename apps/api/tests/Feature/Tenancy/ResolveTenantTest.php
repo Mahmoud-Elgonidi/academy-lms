@@ -88,3 +88,13 @@ it('clears the tenant when the request ends', function () {
     expect(app(TenantContext::class)->check())->toBeFalse()
         ->and(DB::table('users')->count())->toBe(0);
 });
+
+it('uses the development academy on plain localhost, in local development only', function () {
+    $this->createAcademy(['slug' => 'demo']);
+    config(['platform.dev_academy' => 'demo']);
+
+    $this->get('http://localhost/admin/login')->assertNotFound();
+
+    app()->detectEnvironment(fn () => 'local');
+    $this->get('http://localhost/admin/login')->assertOk();
+});
