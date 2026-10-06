@@ -1,0 +1,36 @@
+<?php
+
+return [
+    'audience' => [
+        'family' => 'The student and their guardians',
+        'teacher' => 'The teacher',
+        'supervisors' => 'Supervisors and schedulers',
+        'reviewers' => 'Whoever reviews shifts',
+    ],
+    'reminder_day' => ['title' => ':subject lesson tomorrow', 'body' => ':student\'s lesson with :teacher on :when.'],
+    'reminder_hour' => ['title' => ':subject lesson in an hour', 'body' => ':student\'s lesson with :teacher at :when. Join from the app a couple of minutes early.'],
+    'reminder_hour_teacher' => ['title' => 'Lesson with :student in an hour', 'body' => ':subject, :when.'],
+    'join_now' => ['title' => 'The lesson has started!', 'body' => ':teacher is waiting for :student in the :subject lesson. Open the app and join now.'],
+    'teacher_join_now' => ['title' => 'Lesson with :student has started', 'body' => 'It started at :when and you have not joined yet. Join now.'],
+    'teacher_late' => ['title' => ':teacher has not joined :student\'s lesson', 'body' => 'It started at :when. Follow it on the live board.'],
+    'session_cancelled' => ['title' => ':subject lesson cancelled', 'body' => ':student\'s lesson on :when is cancelled. :outcome'],
+    'session_cancelled_teacher' => ['title' => 'Lesson with :student cancelled', 'body' => 'The :subject lesson on :when is cancelled.'],
+    'session_moved' => ['title' => ':subject lesson moved', 'body' => ':student\'s lesson moved from :from to :when.'],
+    'session_moved_teacher' => ['title' => 'Lesson with :student moved', 'body' => 'The :subject lesson moved from :from to :when.'],
+    'proposal_submitted' => ['title' => ':teacher sent a shift proposal', 'body' => 'Review it on the "Shift proposals" page.'],
+    'proposal_answered' => ['title' => 'An answer on your shift proposal', 'body' => ':outcome'],
+    'outcomes' => [
+        'makeup' => 'A makeup lesson is owed to you.',
+        'refund' => 'The credit is back in your account.',
+        'forfeit' => 'The lesson counts, under the cancellation policy.',
+        'consumed' => 'The lesson counts, under the cancellation policy.',
+        'unpaid' => 'The invoice is unpaid. Pay it and the times come back.',
+        'none' => '',
+    ],
+    'answers' => [
+        'approved' => 'Approved. The new schedule starts on the date you chose.',
+        'rejected' => 'Rejected. See the note from the admins in the app.',
+        'changes_requested' => 'The admins asked for changes. See their note and send it again.',
+        'countered' => 'The admins sent an adjusted schedule. Accept it or change it.',
+    ],
+];

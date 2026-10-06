@@ -6,7 +6,7 @@
  * no cycles, and only platform code may use the BYPASSRLS connection.
  */
 
-const MODULES_ABOVE_KERNEL = ['Modules\Platform', 'Modules\Identity', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'App'];
+const MODULES_ABOVE_KERNEL = ['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'App'];
 
 arch('the shared kernel depends on no module')
     ->expect('Modules\SharedKernel')
@@ -63,8 +63,28 @@ arch('identity reaches platform only through its contracts, and knows nothing ab
     ->expect('Modules\Identity')
     ->not->toUse([
         'Modules\Platform\Models', 'Modules\Platform\Actions', 'Modules\Platform\Directory', 'Modules\Platform\Branding',
-        'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'App',
+        'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'App',
     ]);
+
+arch('communication knows only identity\'s and platform\'s contracts: modules call it, it calls none of them')
+    ->expect('Modules\Communication')
+    ->not->toUse([
+        'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\Identity\Authorization', 'Modules\Identity\Preferences',
+        'Modules\Platform\Models', 'Modules\Platform\Actions', 'Modules\Platform\Directory', 'Modules\Platform\Branding',
+        'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing',
+        'Modules\Scheduling', 'Modules\Learning', 'App',
+    ]);
+
+arch('modules send messages only through communication\'s contracts')
+    ->expect(['Modules\Learning', 'Modules\Billing', 'Modules\Scheduling'])
+    ->not->toUse([
+        'Modules\Communication\Models', 'Modules\Communication\Actions', 'Modules\Communication\Channels',
+        'Modules\Communication\Templates', 'Modules\Communication\Jobs', 'Modules\Communication\Domain',
+    ]);
+
+arch('quiet hours and channel choices are pure')
+    ->expect('Modules\Communication\Domain')
+    ->toOnlyUse(['Carbon\CarbonImmutable', 'Modules\Communication\Domain', 'InvalidArgumentException']);
 
 arch('catalog depends only on the shared kernel')
     ->expect('Modules\Catalog')
@@ -102,6 +122,7 @@ arch('the app layer uses modules only through contracts, plugins and the shared 
         'Modules\Credits\Models', 'Modules\Credits\Actions',
         'Modules\Enrollment\Models', 'Modules\Enrollment\Actions',
         'Modules\Billing\Models', 'Modules\Billing\Actions',
+        'Modules\Communication\Models', 'Modules\Communication\Actions',
         'Modules\Curriculum\Models', 'Modules\Curriculum\Actions',
         'Modules\Learning\Models', 'Modules\Learning\Actions', 'Modules\Learning\Domain',
     ]);
@@ -109,9 +130,9 @@ arch('the app layer uses modules only through contracts, plugins and the shared 
 arch('actions and models are final')
     ->expect([
         'Modules\Platform\Actions', 'Modules\Identity\Actions', 'Modules\Catalog\Actions', 'Modules\People\Actions', 'Modules\Scheduling\Actions',
-        'Modules\Credits\Actions', 'Modules\Enrollment\Actions', 'Modules\Billing\Actions', 'Modules\Curriculum\Actions', 'Modules\Learning\Actions',
+        'Modules\Credits\Actions', 'Modules\Enrollment\Actions', 'Modules\Billing\Actions', 'Modules\Curriculum\Actions', 'Modules\Learning\Actions', 'Modules\Communication\Actions',
         'Modules\Platform\Models', 'Modules\Identity\Models', 'Modules\Catalog\Models', 'Modules\People\Models', 'Modules\Scheduling\Domain\Models',
-        'Modules\Credits\Models', 'Modules\Enrollment\Models', 'Modules\Billing\Models', 'Modules\Curriculum\Models', 'Modules\Learning\Models',
+        'Modules\Credits\Models', 'Modules\Enrollment\Models', 'Modules\Billing\Models', 'Modules\Curriculum\Models', 'Modules\Learning\Models', 'Modules\Communication\Models',
     ])
     ->toBeFinal();
 

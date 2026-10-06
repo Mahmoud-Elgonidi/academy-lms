@@ -2,7 +2,7 @@
 
 namespace Modules\Scheduling\Contracts\Events;
 
-/** Credits (refund or makeup credit) and Communication listen to this. */
+/** A session was cancelled; Scheduling tells the family and the teacher through Communication. */
 final readonly class SessionCancelled
 {
     public function __construct(

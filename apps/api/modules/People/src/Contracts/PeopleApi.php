@@ -11,6 +11,9 @@ interface PeopleApi
 
     public function saveTeacherProfile(TeacherProfileData $profile): void;
 
+    /** @return list<string> ids of the student's guardians; with $reportsOnly, those who asked for reports */
+    public function guardiansOf(string $studentId, bool $reportsOnly = false): array;
+
     /** @return list<string> ids of the students this guardian is linked to */
     public function studentsOf(string $guardianId): array;
 }

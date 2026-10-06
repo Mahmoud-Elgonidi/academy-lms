@@ -40,6 +40,8 @@
             "Modules\\Platform\\Database\\Factories\\": "modules/Platform/database/factories/",
             "Modules\\Catalog\\": "modules/Catalog/src/",
             "Modules\\People\\": "modules/People/src/",
+            "Modules\\Communication\\": "modules/Communication/src/",
+            "Modules\\Communication\\Database\\Seeders\\": "modules/Communication/database/seeders/",
             "Modules\\Curriculum\\": "modules/Curriculum/src/",
             "Modules\\Curriculum\\Database\\Seeders\\": "modules/Curriculum/database/seeders/",
             "Modules\\Credits\\": "modules/Credits/src/",

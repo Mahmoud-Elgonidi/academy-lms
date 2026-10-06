@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Modules\Billing\Database\Seeders\DemoBillingSeeder;
+use Modules\Communication\Database\Seeders\DemoCommunicationSeeder;
 use Modules\Curriculum\Database\Seeders\DemoCurriculumSeeder;
 use Modules\Identity\Contracts\DTOs\NewUser;
 use Modules\Identity\Contracts\IdentityApi;
@@ -20,8 +21,8 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * Local demo data: academy "demo" (demo.<platform domain>, or header X-Academy: demo)
  * with one user per main role, an evening of sessions around now for the
  * live board, teacher shifts and proposals, plans and prices, and enrolled
- * students with invoices in every state, curricula, and lesson reports with
- * homework. Every password is "password". `composer demo` rebuilds it.
+ * students with invoices in every state, curricula, lesson reports with
+ * homework, and the notifications all of that sent. Every password is "password". `composer demo` rebuilds it.
  */
 class DatabaseSeeder extends Seeder
 {
@@ -57,7 +58,7 @@ class DatabaseSeeder extends Seeder
                 $identity->createUser(new NewUser(name: $name, roles: $roles, email: $email, password: 'password', locale: 'ar', timezone: 'Africa/Cairo'));
             }
 
-            $this->call([DemoLiveBoardSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class]);
+            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class]);
         });
 
         $this->command?->info('Seeded academy "demo". Sign in as owner@demo.test / password.');

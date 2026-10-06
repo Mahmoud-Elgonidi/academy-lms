@@ -2,7 +2,7 @@
 
 namespace Modules\Learning\Contracts\Events;
 
-/** Homework set for a student; Communication tells the student and the guardians. */
+/** Homework set for a student; Learning tells the student and the guardians through Communication. */
 final readonly class HomeworkAssigned
 {
     public function __construct(

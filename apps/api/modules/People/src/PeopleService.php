@@ -25,6 +25,13 @@ final class PeopleService implements PeopleApi
         $this->saveTeacherProfile->handle($profile);
     }
 
+    public function guardiansOf(string $studentId, bool $reportsOnly = false): array
+    {
+        return GuardianStudent::query()->where('student_id', $studentId)
+            ->when($reportsOnly, fn ($q) => $q->where('receives_reports', true))
+            ->pluck('guardian_id')->all();
+    }
+
     public function studentsOf(string $guardianId): array
     {
         return GuardianStudent::query()->where('guardian_id', $guardianId)->pluck('student_id')->all();

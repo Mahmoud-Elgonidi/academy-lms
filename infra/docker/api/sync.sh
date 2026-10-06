@@ -41,3 +41,4 @@ else
 fi
 php artisan filament:assets >/dev/null
 [ -e public/storage ] || php artisan storage:link >/dev/null
+php artisan queue:restart >/dev/null   # the worker picks up the new code

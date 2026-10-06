@@ -6,15 +6,26 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Modules\Communication\Contracts\NotificationLinks;
+use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Credits\Contracts\Events\CreditsGranted;
 use Modules\Identity\Contracts\Preferences\PreferenceDefinition;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Scheduling\Console\MaterializeSessionsCommand;
 use Modules\Scheduling\Console\SweepSessionsCommand;
+use Modules\Scheduling\Contracts\Events\SessionCancelled;
+use Modules\Scheduling\Contracts\Events\SessionRescheduled;
+use Modules\Scheduling\Contracts\Events\ShiftProposalApproved;
+use Modules\Scheduling\Contracts\Events\ShiftProposalChangesRequested;
+use Modules\Scheduling\Contracts\Events\ShiftProposalCountered;
+use Modules\Scheduling\Contracts\Events\ShiftProposalRejected;
+use Modules\Scheduling\Contracts\Events\ShiftProposalSubmitted;
 use Modules\Scheduling\Domain\AttendancePolicy;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Filament\Pages\LiveBoard;
+use Modules\Scheduling\Filament\Pages\ReviewShiftProposal;
 use Modules\Scheduling\Listeners\FundSessionsFromNewCredit;
+use Modules\Scheduling\Listeners\SendSchedulingNotifications;
 
 final class SchedulingServiceProvider extends ServiceProvider
 {
@@ -43,6 +54,19 @@ final class SchedulingServiceProvider extends ServiceProvider
         ));
 
         Event::listen(CreditsGranted::class, FundSessionsFromNewCredit::class);
+
+        SendSchedulingNotifications::templates($this->app->make(NotificationsApi::class));
+        $links = $this->app->make(NotificationLinks::class);
+        $links->register('shift_proposal', fn (array $a, string $panel) => $panel === 'academy' ? ReviewShiftProposal::getUrl(['proposal' => $a['id']], panel: 'academy') : null);
+        foreach (['session', 'live_board'] as $screen) {
+            $links->register($screen, fn (array $a, string $panel) => $panel === 'academy' ? LiveBoard::getUrl(panel: 'academy') : null);
+        }
+        Event::listen(SessionCancelled::class, [SendSchedulingNotifications::class, 'cancelled']);
+        Event::listen(SessionRescheduled::class, [SendSchedulingNotifications::class, 'rescheduled']);
+        Event::listen(ShiftProposalSubmitted::class, [SendSchedulingNotifications::class, 'proposalSubmitted']);
+        foreach ([ShiftProposalApproved::class, ShiftProposalRejected::class, ShiftProposalChangesRequested::class, ShiftProposalCountered::class] as $answer) {
+            Event::listen($answer, [SendSchedulingNotifications::class, 'proposalAnswered']);
+        }
 
         if ($this->app->runningInConsole()) {
             $this->commands([SweepSessionsCommand::class, MaterializeSessionsCommand::class]);

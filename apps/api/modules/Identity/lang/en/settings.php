@@ -5,7 +5,7 @@ return [
     'sections' => [
         'account' => 'Account',
         'region' => 'Language and time',
-        'screens' => 'Screens',
+        'screens' => 'Screens and notifications',
         'password' => 'Password',
     ],
     'region_hint' => 'You see every time in this timezone; each student and teacher sees their own.',

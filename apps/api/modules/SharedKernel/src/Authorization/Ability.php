@@ -22,4 +22,6 @@ enum Ability: string
     case ManageCurriculum = 'curriculum.manage';
     case WriteReports = 'reports.write';
     case ReviewReports = 'reports.review';
+    case ViewMessageLog = 'messages.view-log';
+    case ManageTemplates = 'messages.manage-templates';
 }

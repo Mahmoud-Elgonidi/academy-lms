@@ -2,7 +2,7 @@
 
 namespace Modules\Billing\Contracts\Events;
 
-/** Communication sends the payer the invoice and its pay link (when it lands). */
+/** Billing tells the payer through Communication; the pay link comes with online payments. */
 final readonly class InvoiceIssued
 {
     public function __construct(public string $academyId, public string $invoiceId, public string $billingAccountId, public ?string $subscriptionId) {}

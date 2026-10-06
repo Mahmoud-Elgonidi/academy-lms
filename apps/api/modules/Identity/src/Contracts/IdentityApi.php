@@ -3,6 +3,7 @@
 namespace Modules\Identity\Contracts;
 
 use Modules\Identity\Contracts\DTOs\NewUser;
+use Modules\SharedKernel\Authorization\Ability;
 
 /** What other modules and the app layer may ask of Identity. */
 interface IdentityApi
@@ -15,4 +16,7 @@ interface IdentityApi
      * unknown, expired, or does not match.
      */
     public function academyIdForToken(string $plainTextToken): ?string;
+
+    /** @return list<string> active users of the current academy who hold the ability (who to tell about a proposal, say) */
+    public function usersWithAbility(Ability $ability): array;
 }

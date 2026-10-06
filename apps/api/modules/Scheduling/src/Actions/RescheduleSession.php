@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Scheduling\Actions\Policy\PolicyDecider;
 use Modules\Scheduling\Actions\Policy\RecordPolicyDecision;
+use Modules\Scheduling\Contracts\Events\SessionRescheduled;
 use Modules\Scheduling\Domain\Availability\IntervalSet;
 use Modules\Scheduling\Domain\Enums\ParticipantRole;
 use Modules\Scheduling\Domain\Enums\SessionEventKind;
@@ -74,6 +75,7 @@ final class RescheduleSession
                 }
 
                 SessionEvent::record($session, SessionEventKind::Rescheduled, ['from' => $old->toIso8601String(), 'to' => $newStart->toIso8601String(), 'by' => $askedBy], $actorId);
+                DB::afterCommit(fn () => event(new SessionRescheduled($session->academy_id, $session->id, $old->utc()->toIso8601ZuluString(), $actorId)));
             });
         } catch (QueryException $e) {
             if (str_contains($e->getMessage(), 'session_participants_no_double_booking')) {

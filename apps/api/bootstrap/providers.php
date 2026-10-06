@@ -5,6 +5,7 @@ use App\Providers\Filament\AcademyPanelProvider;
 use App\Providers\Filament\TeacherPanelProvider;
 use Modules\Billing\Providers\BillingServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
+use Modules\Communication\Providers\CommunicationServiceProvider;
 use Modules\Credits\Providers\CreditsServiceProvider;
 use Modules\Curriculum\Providers\CurriculumServiceProvider;
 use Modules\Enrollment\Providers\EnrollmentServiceProvider;
@@ -20,6 +21,7 @@ return [
     SharedKernelServiceProvider::class,
     PlatformServiceProvider::class,
     IdentityServiceProvider::class,
+    CommunicationServiceProvider::class,
     CatalogServiceProvider::class,
     PeopleServiceProvider::class,
     CurriculumServiceProvider::class,

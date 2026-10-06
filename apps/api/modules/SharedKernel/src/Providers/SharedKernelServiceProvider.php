@@ -47,7 +47,7 @@ final class SharedKernelServiceProvider extends ServiceProvider
     /**
      * TenantContext::set() puts tenant_id in Laravel's Context, which Laravel
      * serializes into every job payload. When a worker hydrates that context,
-     * set the tenant again; once the job is done, clear it.
+     * set the tenant again; once the job is done, clear it (on a worker).
      */
     private function restoreTenantInQueuedJobs(): void
     {
@@ -63,7 +63,13 @@ final class SharedKernelServiceProvider extends ServiceProvider
             }
         });
 
-        $clear = fn () => $this->app->make(TenantContext::class)->clear();
+        // A sync job runs inside the request (or command) that dispatched it,
+        // which still needs its academy afterwards: only workers clear it.
+        $clear = function (JobProcessed|JobFailed|JobExceptionOccurred $event): void {
+            if ($event->connectionName !== 'sync') {
+                $this->app->make(TenantContext::class)->clear();
+            }
+        };
         Event::listen(JobProcessed::class, $clear);
         Event::listen(JobFailed::class, $clear);
         Event::listen(JobExceptionOccurred::class, $clear);

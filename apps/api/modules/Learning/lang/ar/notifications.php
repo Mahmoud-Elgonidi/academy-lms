@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'audience' => [
+        'family' => 'الطالب وأولياء أمره',
+        'teacher' => 'المدرس',
+    ],
+    'report_submitted' => [
+        'title' => 'تقرير حصة :student',
+        'body' => ':teacher كتب تقرير حصة :when. التقييم :overall من 5. :note',
+    ],
+    'homework_assigned' => [
+        'title' => 'واجب جديد لـ :student',
+        'body' => ':title. آخر ميعاد للتسليم :due.',
+    ],
+    'homework_reviewed' => [
+        'title' => 'اتصحح واجب :student',
+        'body' => ':title: الدرجة :grade من 5. :feedback',
+    ],
+    'node_mastered' => [
+        'title' => 'مبروك! :student اتقن درس جديد',
+        'body' => 'اتقن ":lesson" وبقى خلّص :percent% من :program.',
+    ],
+    'homework_submitted' => [
+        'title' => ':student سلّم الواجب',
+        'body' => '":title" مستني تصحيحك.',
+    ],
+    'report_overdue' => [
+        'title' => 'تقرير حصة :student متأخر',
+        'body' => 'الحصة كانت :when. اكتب التقرير دلوقتي عشان الأسرة تعرف وصلوا لفين.',
+    ],
+    'no_grade' => 'من غير درجة',
+];

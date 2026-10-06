@@ -2,7 +2,7 @@
 
 namespace Modules\Scheduling\Contracts\Events;
 
-/** Communication tells the other side (WhatsApp and push) when it lands. */
+/** An answer to a teacher's proposal; Scheduling tells the teacher through Communication. */
 final readonly class ShiftProposalChangesRequested
 {
     public function __construct(

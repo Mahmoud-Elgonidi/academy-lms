@@ -58,7 +58,7 @@ flowchart TD
     Enrollment --> People & Catalog & Curriculum
     Curriculum --> Catalog
     People --> Identity & Catalog
-    Communication --> Identity
+    Communication --> Identity & Platform
     Identity --> Platform
     Catalog --> Platform
     Credits --> SharedKernel
@@ -77,6 +77,7 @@ flowchart TD
    - Billing بيسمع `CreditBalanceLow` (فاتورة التجديد).
    - Scheduling بيسمع `SubscriptionPastDue` و`SubscriptionPaused` (بيوقف الحصص)، و`ParticipantJoined` و`ParticipantLeft` (الحضور)، و`CreditsGranted` (بيأكّد الحصص المستنية بالترتيب).
    - Payroll وEvaluation وLearning بيسمعوا `SessionFinalized`.
+   - **الإشعارات** عكس اتجاه السماع: الـ module اللي حصل عنده الحدث (Learning، Billing، Scheduling) بيسمع الـ events بتاعته ويبعت رسالة عن طريق `NotificationsApi` بقالب معرّف في الـ provider بتاعه، والصيغة في ملفات الـ lang بتاعته. Communication مابيعرفش حد غير Identity وPlatform (الاسم والشعار في الإيميل)، فبيفضل تحت في الرسم. وفين الإشعار بيفتح في اللوحات، كل module بيسجّله في `NotificationLinks`.
      - **المنفّذ دلوقتي**: Learning بيفتح التقرير لما يسمع `SessionFinalized`، وبيعيد حساب التقدم لما يسمع `CurriculumAttached` من Enrollment. ولأن Scheduling مايعرفش Learning، قسم "المنهج والتقدم" في حساب الطالب بيدخل الصفحة عن طريق **render hook** باسم ثابت (`scheduling::enrollment.account`) بيسجّله Learning.
    - Evaluation بيسمع `SessionReportSubmitted` و`RatingSubmitted` و`ComplaintValidated`.
    - CRM بيسمع `TrialCompleted`.
