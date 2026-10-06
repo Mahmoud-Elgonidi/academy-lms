@@ -1,7 +1,7 @@
 #!/bin/sh
 # Starts the API, the back office and the teacher area for local
 # development: everything sync.sh does (packages, app key, migrations,
-# demo data), then the scheduler (attendance, reminders and held messages
+# demo data), then Reverb and the live board relay, the scheduler (attendance, reminders and held messages
 # every minute, reports and homework every five, credit expiry hourly,
 # sessions from weekly times nightly), the queue worker and the web server.
 #
@@ -41,6 +41,12 @@ fingerprint() {
 ) &
 
 php artisan schedule:work >/tmp/schedule.log 2>&1 &
+
+# Live screens: Reverb holds the browsers' connections, and scheduling:live
+# passes changes from the database to it (one signal per change, nothing while
+# idle). Both stop by themselves after an update and start again here.
+( while true; do php artisan reverb:start --host=0.0.0.0 --port=8080 >>/tmp/reverb.log 2>&1; sleep 1; done ) &
+( while true; do php artisan scheduling:live >>/tmp/live.log 2>&1; sleep 1; done ) &
 
 # Notifications go out from the queue. sync.sh restarts the worker after an
 # update (queue:restart), and this loop starts it again on the new code.

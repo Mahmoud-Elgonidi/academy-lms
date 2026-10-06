@@ -20,7 +20,7 @@
                         <div class="lf-card-main">
                             <span class="lf-ring" data-severity="{{ $item['severity'] }}">
                                 @if ($item['minutesLeft'] !== null)
-                                    <strong class="lms-heading">{{ $item['minutesLeft'] }}</strong><small>{{ __('scheduling::board.minutes') }}</small>
+                                    <strong class="lms-heading" {{ $tick($item['leftNumTick']) }}>{{ $item['minutesLeft'] }}</strong><small>{{ __('scheduling::board.minutes') }}</small>
                                 @else
                                     <x-filament::icon :icon="$item['issue'] === 'weak_connection' ? 'heroicon-o-wifi' : 'heroicon-o-flag'" class="lb-icon" />
                                 @endif
@@ -53,8 +53,8 @@
                         <strong class="lb-num">{{ $item['time'] }}</strong>
                         <span class="lf-who">{{ $item['teacher'] }} {{ __('scheduling::shifts.arrow') }} {{ $item['student'] }} <small>· {{ $item['subject'] }}</small></span>
                         @if ($item['typeLabel'])<span class="lb-tag" data-type="{{ $item['type'] }}">{{ $item['typeLabel'] }}</span>@endif
-                        <span class="lb-bar"><span style="width: {{ $item['progress'] }}%"></span></span>
-                        <small class="lf-progress">{{ $item['progressText'] }}</small>
+                        <span class="lb-bar"><span style="width: {{ $item['progress'] }}%" {{ $tick($item['barTick']) }}></span></span>
+                        <small class="lf-progress" {{ $tick($item['progressTick']) }}>{{ $item['progressText'] }}</small>
                     </button>
                 @endforeach
             </section>

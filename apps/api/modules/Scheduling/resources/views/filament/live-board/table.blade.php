@@ -26,7 +26,7 @@
                     <div class="lb-alert-top">
                         <strong>{{ $item['problem'] }}</strong>
                         @if ($item['minutesLeft'] !== null)
-                            <span class="lb-alert-left">{{ __('scheduling::board.left_short', ['min' => $item['minutesLeft']]) }}</span>
+                            <span class="lb-alert-left" {{ $tick($item['leftTick']) }}>{{ __('scheduling::board.left_short', ['min' => $item['minutesLeft']]) }}</span>
                         @endif
                     </div>
                     <p>{{ $item['context'] }}</p>
@@ -44,7 +44,7 @@
 <section class="lb-card">
     <div class="lb-card-head">
         <h2 class="lb-h2 lms-heading">{{ __('scheduling::board.now_and_next') }}</h2>
-        <span class="lb-muted">{{ __('scheduling::board.window', ['from' => $board['windowFrom'], 'to' => $board['windowTo'], 'city' => $board['city']]) }}</span>
+        <span class="lb-muted" data-tick="window" data-tpl="{{ __('scheduling::board.window', ['from' => ':from', 'to' => ':to', 'city' => $board['city']]) }}">{{ __('scheduling::board.window', ['from' => $board['windowFrom'], 'to' => $board['windowTo'], 'city' => $board['city']]) }}</span>
         <div class="lb-chips" role="group" aria-label="{{ __('scheduling::board.filter') }}">
             @foreach ($filters as $key => $count)
                 <button type="button" wire:click="setFilter('{{ $key }}')" aria-pressed="{{ $this->filter === $key ? 'true' : 'false' }}">
@@ -70,7 +70,7 @@
             <div class="lb-tr" role="row" data-issue="{{ $item['issue'] ?? '' }}" wire:key="row-{{ $item['id'] }}">
                 <span role="cell">
                     <strong class="lb-num">{{ $item['time'] }}</strong>
-                    <small @class(['lb-late' => in_array($item['status']['key'], ['late', 'waiting'])])>{{ $item['timing'] }}</small>
+                    <small @class(['lb-late' => in_array($item['status']['key'], ['late', 'waiting'])]) {{ $tick($item['timingTick']) }}>{{ $item['timing'] }}</small>
                 </span>
                 <span role="cell">
                     <strong>{{ $item['teacher'] }}</strong>
@@ -87,8 +87,8 @@
                     @endif
                 </span>
                 <span role="cell" class="lb-progress-cell">
-                    <span class="lb-bar"><span style="width: {{ $item['progress'] }}%"></span></span>
-                    <small>{{ $item['result'] ?? $item['progressText'] }}</small>
+                    <span class="lb-bar"><span style="width: {{ $item['progress'] }}%" {{ $tick($item['barTick']) }}></span></span>
+                    <small {{ $tick($item['result'] ? [] : $item['progressTick']) }}>{{ $item['result'] ?? $item['progressText'] }}</small>
                 </span>
                 <span role="cell"><span class="lb-pill" data-status="{{ $item['status']['key'] }}">{{ $item['status']['label'] }}</span></span>
                 <span role="cell" class="lb-row-actions">

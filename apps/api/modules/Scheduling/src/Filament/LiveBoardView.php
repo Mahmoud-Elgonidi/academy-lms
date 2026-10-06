@@ -74,7 +74,50 @@ final class LiveBoardView
                 ['who' => __('scheduling::board.clocks.teacher'), 'time' => $this->hm($s->startsAt, $s->teacher->timezone), 'city' => self::city($s->teacher->timezone)],
             ])),
             'actions' => $this->actions($item),
+            // The browser counts the minutes on between updates (page.blade.php): no request for that.
+            'timingTick' => $this->timingTick($item),
+            'leftTick' => $item->deadline ? self::tick('until', $item->deadline, __('scheduling::board.left_short', ['min' => ':min'])) : [],
+            'leftNumTick' => $item->deadline ? self::tick('until', $item->deadline, ':min') : [],
+            'progressTick' => $item->group === BoardGroup::Upcoming ? $this->timingTick($item) : $this->doneTick($item, 'text'),
+            'barTick' => $this->doneTick($item, 'bar'),
         ];
+    }
+
+    /** @return array<string, string|int> */
+    private function timingTick(BoardItem $item): array
+    {
+        $s = $item->session;
+        if ($item->group === BoardGroup::Done || $s->status === SessionStatus::NeedsReview) {
+            return [];
+        }
+
+        return $s->startsAt->greaterThan($this->now)
+            ? self::tick('until', $s->startsAt, __('scheduling::board.timing.starts_in', ['min' => ':min']))
+            : self::tick('since', $s->startsAt, __('scheduling::board.timing.started_ago', ['min' => ':min']));
+    }
+
+    /**
+     * Minutes taught so far keep growing while both are in.
+     *
+     * @return array<string, string|int>
+     */
+    private function doneTick(BoardItem $item, string $what): array
+    {
+        $s = $item->session;
+        if ($item->group === BoardGroup::Done || ! $s->status->isOpen() || $s->teacher->joinedAt === null || $s->student?->joinedAt === null) {
+            return [];
+        }
+        $from = $s->teacher->joinedAt->max($s->student->joinedAt)->max($s->startsAt)->getTimestamp();
+
+        return $what === 'bar'
+            ? ['data-tick' => 'bar', 'data-from' => $from, 'data-to' => $s->endsAt->getTimestamp(), 'data-total' => $s->durationMin()]
+            : ['data-tick' => 'done', 'data-from' => $from, 'data-to' => $s->endsAt->getTimestamp(), 'data-tpl' => __('scheduling::board.progress', ['done' => ':done', 'total' => $s->durationMin()])];
+    }
+
+    /** @return array<string, string|int> */
+    private static function tick(string $mode, CarbonImmutable $at, string $template): array
+    {
+        return ['data-tick' => $mode, 'data-at' => $at->getTimestamp(), 'data-tpl' => $template];
     }
 
     public function hm(CarbonImmutable $instant, ?string $tz = null): string

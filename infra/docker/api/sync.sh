@@ -41,4 +41,5 @@ else
 fi
 php artisan filament:assets >/dev/null
 [ -e public/storage ] || php artisan storage:link >/dev/null
-php artisan queue:restart >/dev/null   # the worker picks up the new code
+php artisan queue:restart >/dev/null   # the worker and the live board relay pick up the new code
+php artisan reverb:restart >/dev/null 2>&1 || true

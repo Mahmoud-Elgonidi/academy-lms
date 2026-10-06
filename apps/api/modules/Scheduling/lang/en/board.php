@@ -4,6 +4,10 @@ return [
     'nav' => 'Live operations',
     'title' => "Today's operations",
     'subtitle' => 'Refreshes every 30 seconds · last update :time',
+    'live' => [
+        'on' => 'Live: updates the moment something changes',
+        'connecting' => 'Connecting…',
+    ],
     'in_zone' => 'in',
     'zone_label' => 'Display timezone',
     'zone_mine' => 'mine',

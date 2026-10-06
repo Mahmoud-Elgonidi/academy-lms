@@ -4,6 +4,10 @@
     .lb-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; }
     .lb-title { margin: 0; font-size: 1.75rem; font-weight: 600; line-height: 1.25; }
     .lb-sub, .lb-muted { margin: 0; color: var(--gray-500); font-size: .875rem; }
+    .lb-live { display: inline-flex; align-items: center; gap: .45rem; }
+    .lb-live::before { content: ''; flex: none; width: .5rem; height: .5rem; border-radius: 999px; background: var(--gray-400); }
+    .lb-live[data-state="on"]::before { background: var(--success-500); box-shadow: 0 0 0 3px color-mix(in oklab, var(--success-500) 25%, transparent); }
+    .lb-live[data-state="connecting"]::before { background: var(--warning-500); }
     .lb-head-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
     .lb-icon { width: 1.1rem; height: 1.1rem; }
     .lb-num { font-variant-numeric: tabular-nums; }

@@ -96,6 +96,16 @@ final class LiveBoardQuery
         })->values()->all();
     }
 
+    /** When the first open lesson after $after starts: the next one to come into view. */
+    public function nextStartAfter(CarbonImmutable $after): ?CarbonImmutable
+    {
+        $at = DB::table('sessions')->where('starts_at', '>', $after)
+            ->whereIn('status', [SessionStatus::Scheduled->value, SessionStatus::InProgress->value])
+            ->min('starts_at');
+
+        return $at === null ? null : self::time($at);
+    }
+
     /**
      * Counts for the day [from, to) by status, for the board's headline numbers.
      *

@@ -34,9 +34,11 @@ use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Filament\LiveBoardView;
 use Modules\Scheduling\Filament\PolicyPreview;
 use Modules\Scheduling\Listeners\SendSchedulingNotifications;
+use Modules\Scheduling\Live\BoardChanged;
 use Modules\Scheduling\Queries\LiveBoardQuery;
 use Modules\Scheduling\Queries\SessionPeople;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Realtime\BrowserEcho;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerTimezone;
@@ -71,6 +73,9 @@ final class LiveBoard extends Page
 
     public bool $showDone = false;
 
+    /** Updates arrive by signal (Reverb) rather than every 30 seconds. */
+    public bool $live = false;
+
     public static function getRoutePath(Panel $panel): string
     {
         return '/';
@@ -100,6 +105,7 @@ final class LiveBoard extends Page
     {
         $this->boardLayout = app(UserPreferences::class)->get((string) auth()->id(), self::LAYOUT_PREFERENCE);
         $this->viewTz = app(ViewerTimezone::class)->effective();
+        $this->live = BrowserEcho::enableOnThisPage(request());
     }
 
     /** The on-screen switch; saved for this user, same as on "My settings". */
@@ -143,8 +149,9 @@ final class LiveBoard extends Page
         $now = CarbonImmutable::now();
         $tenant = app(TenantContext::class)->require();
         $query = app(LiveBoardQuery::class);
-        $groups = (new BoardClassifier(app(AttendancePolicy::class)))
-            ->classify($query->around($now, BoardClassifier::UPCOMING_WINDOW_MIN, $tenant->defaultTimezone), $now);
+        $classifier = new BoardClassifier(app(AttendancePolicy::class));
+        $sessions = $query->around($now, BoardClassifier::UPCOMING_WINDOW_MIN, $tenant->defaultTimezone);
+        $groups = $classifier->classify($sessions, $now);
 
         $view = new LiveBoardView($now, $this->viewTz);
         $items = array_map(fn (array $group) => array_map(fn (BoardItem $i) => $view->item($i), $group), $groups);
@@ -152,12 +159,20 @@ final class LiveBoard extends Page
         $dayStart = $now->setTimezone($this->viewTz)->startOfDay();
         $counts = $query->countsBetween($dayStart->utc(), $dayStart->addDay()->utc());
         $nextDeadline = collect($groups['attention'])->map(fn (BoardItem $i) => $i->deadline)->filter()->sort()->first();
+        // When the clock alone changes the board (a start, a teacher late, midnight for the day's numbers).
+        $nextChange = collect([
+            $classifier->nextChange($sessions, $now, $query->nextStartAfter($now->addMinutes(BoardClassifier::UPCOMING_WINDOW_MIN))),
+            $dayStart->addDay()->utc(),
+        ])->filter()->min();
 
         $selected = collect($items)->flatten(1)->firstWhere('id', $this->selected)
             ?? ($items['attention'][0] ?? $items['fine'][0] ?? $items['upcoming'][0] ?? null);
 
         return [
             'now' => $view->hm($now),
+            'serverNow' => $now->getTimestampMs(),
+            'nextChangeAt' => $nextChange?->getTimestampMs(),
+            'channel' => BoardChanged::channel($tenant->id),
             'today' => $now->setTimezone($this->viewTz)->locale(app()->getLocale())->translatedFormat('l j F'),
             'city' => LiveBoardView::city($this->viewTz),
             'windowFrom' => $view->hm($now->subHour()),

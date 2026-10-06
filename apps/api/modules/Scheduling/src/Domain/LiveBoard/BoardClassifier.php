@@ -43,6 +43,40 @@ final class BoardClassifier
         return $groups;
     }
 
+    /**
+     * The next moment the board looks different by the clock alone: a lesson
+     * enters the hour ahead or starts, a teacher becomes late, a student is
+     * due a nudge, a weak connection calms down. Everything else changes in
+     * the database, which signals it; so an open board needs no timer but
+     * this one.
+     *
+     * @param  list<BoardSession>  $sessions
+     */
+    public function nextChange(array $sessions, CarbonImmutable $now, ?CarbonImmutable $nextStartBeyondWindow = null): ?CarbonImmutable
+    {
+        $moments = $nextStartBeyondWindow ? [$nextStartBeyondWindow->subMinutes(self::UPCOMING_WINDOW_MIN)] : [];
+
+        foreach ($sessions as $s) {
+            if ($s->status->isFinal() || $s->status === SessionStatus::NeedsReview) {
+                continue;
+            }
+            $moments[] = $s->startsAt;
+            if ($s->teacher->joinedAt === null) {
+                $moments[] = $s->startsAt->addMinutes($this->policy->teacherLateAfterMin);
+            }
+            if ($s->student !== null && $s->student->joinedAt === null) {
+                $moments[] = $s->startsAt->addMinutes($this->policy->studentNudgeAfterMin);
+            }
+            foreach ($s->eventsOf(SessionEventKind::ConnectionDrop) as $drop) {
+                $moments[] = $drop->at->addMinutes($this->policy->weakConnectionWindowMin);
+            }
+        }
+
+        $future = array_filter($moments, fn (CarbonImmutable $m) => $m->greaterThan($now));
+
+        return $future === [] ? null : array_reduce($future, fn (?CarbonImmutable $min, CarbonImmutable $m) => $min === null || $m->lessThan($min) ? $m : $min);
+    }
+
     /** @param  list<BoardSession>  $all */
     private function place(BoardSession $s, array $all, CarbonImmutable $now): ?BoardItem
     {

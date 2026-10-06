@@ -3,7 +3,10 @@
 namespace Modules\Scheduling\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
@@ -13,6 +16,7 @@ use Modules\Identity\Contracts\Preferences\PreferenceDefinition;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Scheduling\AttendanceService;
 use Modules\Scheduling\Console\MaterializeSessionsCommand;
+use Modules\Scheduling\Console\RelayBoardChangesCommand;
 use Modules\Scheduling\Console\SweepSessionsCommand;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\Events\SessionCancelled;
@@ -28,6 +32,9 @@ use Modules\Scheduling\Filament\Pages\LiveBoard;
 use Modules\Scheduling\Filament\Pages\ReviewShiftProposal;
 use Modules\Scheduling\Listeners\FundSessionsFromNewCredit;
 use Modules\Scheduling\Listeners\SendSchedulingNotifications;
+use Modules\Scheduling\Live\BoardChanged;
+use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Tenancy\TenantContext;
 
 final class SchedulingServiceProvider extends ServiceProvider
 {
@@ -58,6 +65,10 @@ final class SchedulingServiceProvider extends ServiceProvider
 
         Event::listen(CreditsGranted::class, FundSessionsFromNewCredit::class);
 
+        // The live board's signals: only for someone of that academy who may see the board.
+        Broadcast::channel(BoardChanged::CHANNEL, fn (Authenticatable $user, string $academyId) => $academyId === $this->app->make(TenantContext::class)->id()
+            && Gate::forUser($user)->allows(Ability::ViewLiveBoard->value));
+
         SendSchedulingNotifications::templates($this->app->make(NotificationsApi::class));
         $links = $this->app->make(NotificationLinks::class);
         $links->register('shift_proposal', fn (array $a, string $panel) => $panel === 'academy' ? ReviewShiftProposal::getUrl(['proposal' => $a['id']], panel: 'academy') : null);
@@ -72,7 +83,7 @@ final class SchedulingServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningInConsole()) {
-            $this->commands([SweepSessionsCommand::class, MaterializeSessionsCommand::class]);
+            $this->commands([SweepSessionsCommand::class, MaterializeSessionsCommand::class, RelayBoardChangesCommand::class]);
         }
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {

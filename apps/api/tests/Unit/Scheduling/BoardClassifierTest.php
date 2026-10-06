@@ -130,3 +130,22 @@ it('keeps sessions that need review in front of a manager', function () {
     expect($groups['attention'][0]->issue)->toBe(BoardIssue::NeedsReview)
         ->and($groups['attention'][0]->deadline)->toBeNull();
 });
+
+it('knows the next moment the clock alone changes the board, and nothing sooner', function () {
+    $now = CarbonImmutable::parse(BOARD_NOW, 'UTC');
+    $classifier = new BoardClassifier(AttendancePolicy::defaults());
+    $late = boardSession('late', '19:00', 45, ['studentIn' => '18:59']);                 // already flagged at 19:02
+    $soon = boardSession('soon', '19:20', 45);                                             // starts at 19:20
+    $waiting = boardSession('waiting', '19:01', 45, ['teacherIn' => '19:00']);             // the student's nudge is due at 19:04
+    $done = boardSession('done', '19:30', 30, ['status' => SessionStatus::Cancelled]);     // nothing will happen to it
+
+    expect($classifier->nextChange([$late, $soon, $waiting, $done], $now)->format('H:i'))->toBe('19:04')
+        ->and($classifier->nextChange([$late, $soon, $done], $now)->format('H:i'))->toBe('19:20')
+        ->and($classifier->nextChange([$late], $now, utcAt('20:30'))->format('H:i'))->toBe('19:30')   // the next lesson comes into the hour ahead
+        ->and($classifier->nextChange([$late, $done], $now))->toBeNull();
+
+    $drops = boardSession('weak', '18:30', 60, ['teacherIn' => '18:29', 'studentIn' => '18:30', 'events' => [
+        new BoardEvent(SessionEventKind::ConnectionDrop, utcAt('18:55'), [], null),
+    ]]);
+    expect($classifier->nextChange([$drops], $now)->format('H:i'))->toBe('19:10');      // the drop leaves the 15-minute window
+});
