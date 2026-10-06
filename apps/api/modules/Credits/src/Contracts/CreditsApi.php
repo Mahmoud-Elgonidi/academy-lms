@@ -36,6 +36,9 @@ interface CreditsApi
      */
     public function release(string $sessionId, ReleaseMode $mode, string $idempotencyKey, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): void;
 
+    /** Lots not yet lapsed expire $days later (a holiday gives its days back); returns how many moved. */
+    public function extend(string $accountId, int $days, string $idempotencyKey, ?string $actorId = null, ?string $reason = null): int;
+
     public function isReserved(string $sessionId): bool;
 
     public function balance(string $accountId): CreditBalance;

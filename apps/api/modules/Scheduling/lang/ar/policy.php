@@ -84,6 +84,7 @@ return [
         'student' => 'الطالب أو ولي الأمر',
         'teacher' => 'المدرس',
         'academy' => 'الأكاديمية',
+        'family' => 'الأسرة',
         'system' => 'النظام',
     ],
     'reasons' => [
@@ -95,6 +96,9 @@ return [
         'emergency' => 'ظرف طارئ',
         'closure' => 'إجازة أو عطلة الأكاديمية',
         'unpaid' => 'مش مدفوعة',
+        'teacher_leave' => 'إجازة المدرس',
+        'holiday' => 'إجازة الأكاديمية',
+        'substitute_refused' => 'رفض المدرس البديل',
         'other' => 'سبب تاني',
     ],
     'preview' => [

@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Scheduling\Contracts\DTOs\NewSession;
+use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Domain\Models\RecurringSlot;
 use Modules\Scheduling\Domain\Models\SchedulingSettings;
 use Modules\Scheduling\Domain\Models\Session;
@@ -15,8 +16,9 @@ use Modules\SharedKernel\Time\LocalTimeResolver;
  * Turns weekly times into sessions up to the horizon (docs/architecture/01,
  * "توليد الحصص تلقائيًا"). Each date once: the occurrence key (slot + local
  * date) makes a second run a no-op. A date the teacher or the student is
- * already booked on is skipped and reported, never double-booked. Times are
- * resolved on the teacher's clock, so DST moves the student's side only.
+ * already booked on is skipped and reported, never double-booked; a date on
+ * an academy holiday is left out. Times are resolved on the teacher's clock,
+ * so DST moves the student's side only.
  */
 final class MaterializeSessions
 {
@@ -42,6 +44,8 @@ final class MaterializeSessions
             ->when($enrollmentIds !== null, fn ($q) => $q->whereIn('recurring_slots.enrollment_id', $enrollmentIds))
             ->get();
 
+        $holidays = AcademyHoliday::query()->where('ends_at', '>', $now)->where('starts_at', '<', $now->addWeeks($horizon + 1))->get();
+
         $created = [];
         $skipped = [];
         foreach ($slots as $slot) {
@@ -61,7 +65,7 @@ final class MaterializeSessions
                     continue;
                 }
                 $startsAt = $this->resolver->resolve($date, $slot->weeklyTime()->clock(), $slot->anchor_tz)->utc;
-                if ($startsAt->lessThanOrEqualTo($now)) {
+                if ($startsAt->lessThanOrEqualTo($now) || $holidays->contains(fn (AcademyHoliday $h) => $h->contains($startsAt))) {
                     continue;
                 }
 

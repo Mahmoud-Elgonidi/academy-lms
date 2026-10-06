@@ -30,7 +30,7 @@
 | M4 | **People** | ملفات المدرسين والطلاب، وعلاقات أولياء الأمور | `TeacherOnboarded`، `TeacherSubjectsChanged`، `TeacherTierChanged`، `StudentCreated`، `GuardianLinked`، `UserTimezoneChanged` |
 | M5 | **Curriculum** | البرامج، والإصدارات، وعُقد المنهج، والموارد، وتعريفات الاختبارات | `CurriculumVersionPublished` |
 | M6 | **Enrollment** | الاتفاق التعليمي، وتغيير المدرس | `EnrollmentCreated`، `EnrollmentActivated`، `EnrollmentPaused`، `EnrollmentResumed`، `EnrollmentEnded`، `TeacherReassigned` |
-| M7 | **Scheduling** | **قلب النظام**: الشفتات ومقترحاتها، والإجازات، والتوافر، والمطابقة، والحجز، ودورة حياة الحصة، والسياسات، وتغيير التوقيت | `SessionScheduled`، `SessionRescheduled`، `SessionTeacherSubstituted`، `SessionCancelled`، `SessionStarted`، `SessionFinalized`، `SessionFlaggedForReview`، `TeacherLate`، `DstShiftUpcoming`، `SchedulingConflictDetected`، `ShiftProposalSubmitted`، `ShiftProposalChangesRequested`، `ShiftProposalCountered`، `ShiftProposalApproved`، `ShiftProposalRejected`، `ShiftRulesChanged` |
+| M7 | **Scheduling** | **قلب النظام**: الشفتات ومقترحاتها، والإجازات، والتوافر، والمطابقة، والحجز، ودورة حياة الحصة، والسياسات، وتغيير التوقيت | `SessionScheduled`، `SessionRescheduled`، `SessionTeacherSubstituted`، `SessionCancelled`، `SessionStarted`، `SessionFinalized`، `SessionFlaggedForReview`، `TeacherLate`، `DstShiftUpcoming`، `SchedulingConflictDetected`، `ShiftProposalSubmitted`، `ShiftProposalChangesRequested`، `ShiftProposalCountered`، `ShiftProposalApproved`، `ShiftProposalRejected`، `ShiftRulesChanged`، `TimeOffRequested`، `TimeOffDecided`، `HolidayDeclared` |
 | M8 | **Classroom** | غرف الفيديو، والتسجيلات، والـ webhooks، وبلاغات المشاكل التقنية | `ParticipantJoined`، `ParticipantLeft`، `RecordingReady`، `TechnicalIssueReported` |
 | M9 | **Credits** | الـ ledger والدفعات والحجوزات | `CreditsGranted`، `CreditsReserved`، `CreditsConsumed`، `CreditsReleased`، `CreditsExpired`، `CreditBalanceLow` |
 | M10 | **Billing** | الباقات والأسعار، والاشتراكات، والفواتير، والمدفوعات، والبوابات، والضرايب، وZATCA | `InvoiceIssued`، `PaymentSucceeded`، `PaymentFailed`، `InvoicePaid`، `SubscriptionRenewed`، `SubscriptionPastDue`، `SubscriptionPaused`، `RefundIssued`، `EInvoiceReported` |
@@ -106,7 +106,9 @@ modules/Scheduling/
       Enums/  ValueObjects/
     Actions/                CreateEnrollmentSchedule, MaterializeHorizon, RescheduleSession, CancelSession,
                             BookMakeup, SubstituteTeacher, FinalizeSession, ResolveReview, PlanDstTransitions,
-                            SubmitShiftProposal, ReviewShiftProposal, CounterShiftProposal, ApproveShiftProposal
+                            SubmitShiftProposal, ReviewShiftProposal, CounterShiftProposal, ApproveShiftProposal,
+                            TimeOff/{RequestTimeOff, DecideTimeOff, WithdrawTimeOff, AssignSubstitutes, CancelUncoveredLessons},
+                            Holidays/{DeclareHoliday, RemoveHoliday}, RefuseSubstitute
     Queries/                TeacherCalendarQuery, LiveBoardQuery, FindTeachersQuery
     Listeners/
     Jobs/                   FinalizeDueSessionsSweeper, JoinNudgesSweeper, MaterializeNightly

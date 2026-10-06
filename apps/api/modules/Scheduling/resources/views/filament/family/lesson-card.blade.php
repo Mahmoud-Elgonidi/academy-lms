@@ -7,7 +7,8 @@
     </div>
     <div class="fl-what">
         <strong>{{ $lesson['subject'] }} @if ($lesson['type']) <span class="fl-tag">{{ $lesson['type'] }}</span> @endif</strong>
-        <small>{{ __($l.'with', ['name' => $lesson['with']]) }}</small>
+        <small>{{ __($l.'with', ['name' => $lesson['with']]) }}@if ($lesson['substitute'] ?? null) <span class="fl-tag" data-kind="substitute">{{ $lesson['substitute'] }}</span>@endif</small>
+        @if ($lesson['why'] ?? null)<small class="fl-muted">{{ $lesson['why'] }}</small>@endif
     </div>
     <div class="fl-side">
         @if ($lesson['joinUrl'])
@@ -20,6 +21,11 @@
                 <small class="fl-muted">{{ __($l.'opens_at', ['time' => $lesson['opensAt']]) }}</small>
             @endif
         @endif
+        @isset($refuse)
+            @if ($lesson['refusable'] ?? false)
+                {{ ($refuse)(['session' => $lesson['id']]) }}
+            @endif
+        @endisset
         @isset($cancel)
             @if ($lesson['cancellable'])
                 {{ ($cancel)(['session' => $lesson['id']]) }}

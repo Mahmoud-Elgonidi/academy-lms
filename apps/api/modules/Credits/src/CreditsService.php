@@ -4,6 +4,7 @@ namespace Modules\Credits;
 
 use Carbon\CarbonImmutable;
 use Modules\Credits\Actions\ConsumeCredits;
+use Modules\Credits\Actions\ExtendCredits;
 use Modules\Credits\Actions\GrantCredits;
 use Modules\Credits\Actions\OpenCreditAccount;
 use Modules\Credits\Actions\ReleaseCredits;
@@ -24,6 +25,7 @@ final class CreditsService implements CreditsApi
         private readonly ReserveCredits $reserve,
         private readonly ConsumeCredits $consume,
         private readonly ReleaseCredits $release,
+        private readonly ExtendCredits $extend,
     ) {}
 
     public function openAccount(string $studentId, string $scopeType, ?string $scopeId, ?int $lowBalanceMin = null): string
@@ -54,6 +56,11 @@ final class CreditsService implements CreditsApi
     public function release(string $sessionId, ReleaseMode $mode, string $idempotencyKey, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): void
     {
         $this->release->handle($sessionId, $mode, $idempotencyKey, $actorId, $reason, $makeupDays);
+    }
+
+    public function extend(string $accountId, int $days, string $idempotencyKey, ?string $actorId = null, ?string $reason = null): int
+    {
+        return $this->extend->handle($accountId, $days, $idempotencyKey, $actorId, $reason);
     }
 
     public function isReserved(string $sessionId): bool

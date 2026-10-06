@@ -12,7 +12,8 @@ use Modules\SharedKernel\Time\LocalTimeResolver;
 /**
  * Free time per teacher over a horizon: the approved schedule in force each
  * day, unfolded day by day on the teacher's clock (so summer time is right),
- * minus booked sessions and other coordinators' unexpired holds.
+ * less approved time off and the academy's holidays (no shift then), minus
+ * booked sessions and other coordinators' unexpired holds.
  *
  * Computed on demand; the Redis week bitsets of docs/architecture/02,
  * section 2 replace this when teacher counts call for it.
@@ -55,6 +56,18 @@ final class AvailabilityQuery
             ->get()
             ->groupBy('teacher_id');
 
+        $off = DB::table('teacher_time_off')
+            ->whereIn('teacher_id', $teacherIds)
+            ->where('status', 'approved')
+            ->where('starts_at', '<', $to)->where('ends_at', '>', $from)
+            ->selectRaw('teacher_id, extract(epoch from starts_at)::bigint as s, extract(epoch from ends_at)::bigint as e')
+            ->get()
+            ->groupBy('teacher_id');
+        $closed = DB::table('academy_holidays')
+            ->where('starts_at', '<', $to)->where('ends_at', '>', $from)
+            ->selectRaw('extract(epoch from starts_at)::bigint as s, extract(epoch from ends_at)::bigint as e')
+            ->get()->map(fn ($h) => [(int) $h->s, (int) $h->e])->all();
+
         $result = [];
         foreach ($schedules->groupBy('teacher_id') as $teacherId => $versions) {
             $timezone = $versions->first()->timezone;
@@ -73,7 +86,9 @@ final class AvailabilityQuery
                 }
             }
 
-            $shifts = (new IntervalSet($shiftIntervals))->minus(new IntervalSet([[PHP_INT_MIN, $from->getTimestamp()], [$to->getTimestamp(), PHP_INT_MAX]]));
+            $shifts = (new IntervalSet($shiftIntervals))
+                ->minus(new IntervalSet([[PHP_INT_MIN, $from->getTimestamp()], [$to->getTimestamp(), PHP_INT_MAX]]))
+                ->minus(new IntervalSet(array_merge($closed, $off->get($teacherId, collect())->map(fn ($o) => [(int) $o->s, (int) $o->e])->all())));
             $taken = new IntervalSet(array_merge(
                 $busy->get($teacherId, collect())->map(fn ($b) => [(int) $b->s, (int) $b->e])->all(),
                 $holds->get($teacherId, collect())->map(fn ($h) => [(int) $h->s, (int) $h->e])->all(),

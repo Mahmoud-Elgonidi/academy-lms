@@ -16,11 +16,15 @@ use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\LearnerStage;
 use Modules\Scheduling\Actions\CancelSession;
 use Modules\Scheduling\Actions\Policy\PolicyDecider;
+use Modules\Scheduling\Actions\RefuseSubstitute;
 use Modules\Scheduling\Domain\Enums\ParticipantRole;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Enums\SessionType;
+use Modules\Scheduling\Domain\Models\AcademyHoliday;
+use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Policy\PolicyEvent;
+use Modules\Scheduling\Filament\TimeOffView;
 use Modules\Scheduling\Queries\LessonList;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerTimezone;
@@ -95,6 +99,39 @@ final class FamilyLessons extends Page
                 app(CancelSession::class)->handle($this->ownLesson($arguments), 'student', $data['reason'], $data['note'] ?? null, (string) auth()->id());
                 unset($this->lessons);
                 Notification::make()->success()->title(__($l.'done'))->send();
+            });
+    }
+
+    /** Coming academy holidays (the next six weeks), said above the lessons. */
+    #[Computed]
+    public function holidays(): array
+    {
+        $now = CarbonImmutable::now();
+
+        return AcademyHoliday::query()->where('ends_at', '>', $now)->where('starts_at', '<', $now->addWeeks(6))->orderBy('starts_at')->get()
+            ->map(fn (AcademyHoliday $h) => ['name' => $h->name, 'period' => TimeOffView::holiday($h)])->all();
+    }
+
+    /**
+     * Turning down the substitute for a teacher on leave (docs/architecture/01,
+     * section 8): the lesson is cancelled as the academy's doing, and its
+     * minutes come back as makeup credit to book with their own teacher.
+     */
+    public function refuseAction(): Action
+    {
+        $l = 'scheduling::timeoff.family.';
+
+        return Action::make('refuse')
+            ->label(__($l.'refuse'))->link()->color('warning')->size('sm')
+            ->visible(fn () => app(FamilyView::class)->stage((string) auth()->id()) !== LearnerStage::Kids)
+            ->modalHeading(__($l.'refuse_heading'))
+            ->modalDescription(fn () => __($l.'refuse_text', ['days' => PolicyVersion::settingsInForce()->get('makeup_validity_days')]))
+            ->modalSubmitActionLabel(__($l.'refuse_confirm'))
+            ->requiresConfirmation()
+            ->action(function (array $arguments) use ($l) {
+                app(RefuseSubstitute::class)->handle($this->ownLesson($arguments), null, (string) auth()->id());
+                unset($this->lessons);
+                Notification::make()->success()->title(__($l.'refused'))->send();
             });
     }
 

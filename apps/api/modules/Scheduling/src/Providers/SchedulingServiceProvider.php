@@ -18,17 +18,26 @@ use Modules\Scheduling\AttendanceService;
 use Modules\Scheduling\Console\MaterializeSessionsCommand;
 use Modules\Scheduling\Console\SweepSessionsCommand;
 use Modules\Scheduling\Contracts\AttendanceApi;
+use Modules\Scheduling\Contracts\Events\HolidayDeclared;
 use Modules\Scheduling\Contracts\Events\SessionCancelled;
 use Modules\Scheduling\Contracts\Events\SessionRescheduled;
+use Modules\Scheduling\Contracts\Events\SessionTeacherSubstituted;
 use Modules\Scheduling\Contracts\Events\ShiftProposalApproved;
 use Modules\Scheduling\Contracts\Events\ShiftProposalChangesRequested;
 use Modules\Scheduling\Contracts\Events\ShiftProposalCountered;
 use Modules\Scheduling\Contracts\Events\ShiftProposalRejected;
 use Modules\Scheduling\Contracts\Events\ShiftProposalSubmitted;
+use Modules\Scheduling\Contracts\Events\TimeOffDecided;
+use Modules\Scheduling\Contracts\Events\TimeOffRequested;
 use Modules\Scheduling\Domain\AttendancePolicy;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
+use Modules\Scheduling\Filament\Family\FamilyLessons;
+use Modules\Scheduling\Filament\Pages\Holidays;
 use Modules\Scheduling\Filament\Pages\LiveBoard;
 use Modules\Scheduling\Filament\Pages\ReviewShiftProposal;
+use Modules\Scheduling\Filament\Pages\TimeOffReview;
+use Modules\Scheduling\Filament\Teacher\MyTimeOff;
+use Modules\Scheduling\Filament\Teacher\MyWeek;
 use Modules\Scheduling\Listeners\FundSessionsFromNewCredit;
 use Modules\Scheduling\Listeners\SendSchedulingNotifications;
 use Modules\Scheduling\Live\BoardChanged;
@@ -77,12 +86,31 @@ final class SchedulingServiceProvider extends ServiceProvider
         SendSchedulingNotifications::templates($this->app->make(NotificationsApi::class));
         $links = $this->app->make(NotificationLinks::class);
         $links->register('shift_proposal', fn (array $a, string $panel) => $panel === 'academy' ? ReviewShiftProposal::getUrl(['proposal' => $a['id']], panel: 'academy') : null);
-        foreach (['session', 'live_board'] as $screen) {
-            $links->register($screen, fn (array $a, string $panel) => $panel === 'academy' ? LiveBoard::getUrl(panel: 'academy') : null);
-        }
+        $links->register('live_board', fn (array $a, string $panel) => $panel === 'academy' ? LiveBoard::getUrl(panel: 'academy') : null);
+        $links->register('session', fn (array $a, string $panel) => match ($panel) {
+            'academy' => LiveBoard::getUrl(panel: 'academy'),
+            'teach' => MyWeek::getUrl(panel: 'teach'),
+            'family' => FamilyLessons::getUrl(panel: 'family'),
+            default => null,
+        });
+        $links->register('time_off', fn (array $a, string $panel) => match ($panel) {
+            'academy' => TimeOffReview::getUrl(['timeOff' => $a['id']], panel: 'academy'),
+            'teach' => MyTimeOff::getUrl(panel: 'teach'),
+            default => null,
+        });
+        $links->register('holiday', fn (array $a, string $panel) => match ($panel) {
+            'academy' => Holidays::getUrl(panel: 'academy'),
+            'teach' => MyWeek::getUrl(panel: 'teach'),
+            'family' => FamilyLessons::getUrl(panel: 'family'),
+            default => null,
+        });
         Event::listen(SessionCancelled::class, [SendSchedulingNotifications::class, 'cancelled']);
         Event::listen(SessionRescheduled::class, [SendSchedulingNotifications::class, 'rescheduled']);
         Event::listen(ShiftProposalSubmitted::class, [SendSchedulingNotifications::class, 'proposalSubmitted']);
+        Event::listen(TimeOffRequested::class, [SendSchedulingNotifications::class, 'timeOffRequested']);
+        Event::listen(TimeOffDecided::class, [SendSchedulingNotifications::class, 'timeOffDecided']);
+        Event::listen(SessionTeacherSubstituted::class, [SendSchedulingNotifications::class, 'substituted']);
+        Event::listen(HolidayDeclared::class, [SendSchedulingNotifications::class, 'holidayDeclared']);
         foreach ([ShiftProposalApproved::class, ShiftProposalRejected::class, ShiftProposalChangesRequested::class, ShiftProposalCountered::class] as $answer) {
             Event::listen($answer, [SendSchedulingNotifications::class, 'proposalAnswered']);
         }

@@ -27,8 +27,9 @@ final class CancelSession
     public const REASONS = [
         'student' => ['illness', 'travel', 'school', 'family', 'technical', 'other'],
         'teacher' => ['illness', 'emergency', 'technical', 'other'],
-        'academy' => ['closure', 'emergency', 'unpaid', 'other'],
-        'system' => ['unpaid'],
+        'academy' => ['closure', 'emergency', 'unpaid', 'teacher_leave', 'other'],
+        'family' => ['substitute_refused'],             // turned down the substitute for their teacher on leave
+        'system' => ['unpaid', 'holiday', 'teacher_leave'],
     ];
 
     public function __construct(
@@ -78,6 +79,14 @@ final class CancelSession
 
     public static function event(string $askedBy, string $reason): PolicyEvent
     {
+        // An academy holiday is rule 15; a teacher on leave, whoever cancels, is the academy not giving the lesson (rule 21: makeup).
+        if ($reason === 'holiday') {
+            return PolicyEvent::Closure;
+        }
+        if (in_array($reason, ['teacher_leave', 'substitute_refused'], true)) {
+            return PolicyEvent::AcademyCancel;
+        }
+
         return match ($askedBy) {
             'student' => PolicyEvent::StudentCancel,
             'teacher' => PolicyEvent::TeacherCancel,

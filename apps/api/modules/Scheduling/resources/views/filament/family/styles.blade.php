@@ -14,6 +14,7 @@
     .fl-status[data-status="teacher_absent"], .fl-status[data-status="student_absent"] { background: var(--warning-50); color: var(--warning-700); }
     .fl-status[data-status="cancelled"] { background: var(--gray-100); color: var(--gray-500); }
     .fl-tag { font-size: .7rem; padding: .05rem .5rem; border-radius: 999px; background: var(--primary-50); color: var(--primary-700); font-weight: 600; margin-inline-start: .25rem; }
+    .fl-tag[data-kind="substitute"] { background: var(--warning-50); color: var(--warning-800); }
     .fl-warn { color: var(--danger-600); font-size: .8rem; }
     .fl-h2 { font-size: 1rem; font-weight: 700; margin: 1.25rem 0 .6rem; }
     .fl-empty { padding: 1.5rem; text-align: center; color: var(--gray-500); border: 1px dashed var(--gray-300); border-radius: var(--radius-xl, .75rem); }

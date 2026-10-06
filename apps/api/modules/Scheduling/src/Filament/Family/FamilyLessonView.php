@@ -43,6 +43,11 @@ final class FamilyLessonView
             'opensAt' => $open && ! $joinable && $r->starts_at->greaterThan($this->now)
                 ? $r->starts_at->subMinutes((int) config('classroom.opens_before_min', 10))->setTimezone($this->tz)->format('H:i') : null,
             'cancellable' => $this->counterpart === 'teacher' && $r->status === 'scheduled' && $r->starts_at->greaterThan($this->now),
+            // A substitute has the lesson: the family sees whose place they take, the substitute whom they cover.
+            'substitute' => ($r->original_teacher ?? null) ? __($this->counterpart === 'teacher' ? 'scheduling::timeoff.family.substitute' : 'scheduling::timeoff.teacher.covering', ['name' => $r->original_teacher]) : null,
+            'refusable' => $this->counterpart === 'teacher' && ($r->original_teacher ?? null) !== null && $r->status === 'scheduled' && $r->starts_at->greaterThan($this->now),
+            'why' => $r->status === 'cancelled' && in_array($r->cancel_reason ?? null, ['holiday', 'teacher_leave', 'substitute_refused'], true)
+                ? __('scheduling::timeoff.family.why.'.$r->cancel_reason) : null,
         ];
     }
 

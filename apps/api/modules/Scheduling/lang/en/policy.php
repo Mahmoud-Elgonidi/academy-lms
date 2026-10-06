@@ -84,6 +84,7 @@ return [
         'student' => 'Student or guardian',
         'teacher' => 'Teacher',
         'academy' => 'Academy',
+        'family' => 'The family',
         'system' => 'System',
     ],
     'reasons' => [
@@ -95,6 +96,9 @@ return [
         'emergency' => 'Emergency',
         'closure' => 'Academy holiday or closure',
         'unpaid' => 'Unpaid',
+        'teacher_leave' => 'Teacher on leave',
+        'holiday' => 'Academy holiday',
+        'substitute_refused' => 'Declined the substitute',
         'other' => 'Other',
     ],
     'preview' => [

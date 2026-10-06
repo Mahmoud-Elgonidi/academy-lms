@@ -25,4 +25,7 @@ enum Ability: string
     case ViewMessageLog = 'messages.view-log';
     case ManageTemplates = 'messages.manage-templates';
     case ManageClassroom = 'classroom.manage';
+    case ManageTimeOff = 'time-off.manage';
+    case RequestOwnTimeOff = 'time-off.request-own';
+    case ManageHolidays = 'holidays.manage';
 }

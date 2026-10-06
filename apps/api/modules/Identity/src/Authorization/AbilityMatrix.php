@@ -14,10 +14,10 @@ final class AbilityMatrix
     public static function rolesFor(Ability $ability): array
     {
         return match ($ability) {
-            Ability::ManageBranding, Ability::ManagePolicies, Ability::ManageTemplates, Ability::ManageClassroom => [Role::Owner, Role::Admin],
-            Ability::ViewLiveBoard, Ability::ManageSessions, Ability::ReviewShifts => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler],
+            Ability::ManageBranding, Ability::ManagePolicies, Ability::ManageTemplates, Ability::ManageClassroom, Ability::ManageHolidays => [Role::Owner, Role::Admin],
+            Ability::ViewLiveBoard, Ability::ManageSessions, Ability::ReviewShifts, Ability::ManageTimeOff => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler],
             Ability::FindTeachers => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler, Role::Sales],
-            Ability::ProposeOwnShifts, Ability::WriteReports => [Role::Teacher],
+            Ability::ProposeOwnShifts, Ability::WriteReports, Ability::RequestOwnTimeOff => [Role::Teacher],
             Ability::ManageCurriculum, Ability::ReviewReports, Ability::ViewMessageLog => [Role::Owner, Role::Admin, Role::Supervisor],
             Ability::ViewEnrollments => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler, Role::Accountant],
             Ability::ViewBilling, Ability::RecordPayments => [Role::Owner, Role::Admin, Role::Accountant],
