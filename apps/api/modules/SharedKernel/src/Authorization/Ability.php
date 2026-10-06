@@ -19,4 +19,7 @@ enum Ability: string
     case RecordPayments = 'billing.record-payments';
     case ManageBilling = 'billing.manage';
     case ManagePolicies = 'policies.manage';
+    case ManageCurriculum = 'curriculum.manage';
+    case WriteReports = 'reports.write';
+    case ReviewReports = 'reports.review';
 }

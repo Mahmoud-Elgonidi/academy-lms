@@ -2,11 +2,14 @@
 
 use App\Providers\AppServiceProvider;
 use App\Providers\Filament\AcademyPanelProvider;
+use App\Providers\Filament\TeacherPanelProvider;
 use Modules\Billing\Providers\BillingServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
 use Modules\Credits\Providers\CreditsServiceProvider;
+use Modules\Curriculum\Providers\CurriculumServiceProvider;
 use Modules\Enrollment\Providers\EnrollmentServiceProvider;
 use Modules\Identity\Providers\IdentityServiceProvider;
+use Modules\Learning\Providers\LearningServiceProvider;
 use Modules\People\Providers\PeopleServiceProvider;
 use Modules\Platform\Providers\PlatformServiceProvider;
 use Modules\Scheduling\Providers\SchedulingServiceProvider;
@@ -19,10 +22,13 @@ return [
     IdentityServiceProvider::class,
     CatalogServiceProvider::class,
     PeopleServiceProvider::class,
+    CurriculumServiceProvider::class,
     CreditsServiceProvider::class,
     EnrollmentServiceProvider::class,
     BillingServiceProvider::class,
     SchedulingServiceProvider::class,
+    LearningServiceProvider::class,
     AppServiceProvider::class,
     AcademyPanelProvider::class,
+    TeacherPanelProvider::class,
 ];

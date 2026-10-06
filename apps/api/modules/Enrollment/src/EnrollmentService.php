@@ -4,6 +4,7 @@ namespace Modules\Enrollment;
 
 use Carbon\CarbonImmutable;
 use Modules\Enrollment\Actions\ActivateEnrollment;
+use Modules\Enrollment\Actions\AttachCurriculum;
 use Modules\Enrollment\Actions\CreateEnrollment;
 use Modules\Enrollment\Actions\ReassignEnrollmentTeacher;
 use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
@@ -17,6 +18,7 @@ final class EnrollmentService implements EnrollmentApi
         private readonly CreateEnrollment $create,
         private readonly ActivateEnrollment $activate,
         private readonly ReassignEnrollmentTeacher $reassign,
+        private readonly AttachCurriculum $curriculum,
     ) {}
 
     public function create(NewEnrollment $new): string
@@ -39,9 +41,19 @@ final class EnrollmentService implements EnrollmentApi
         $this->reassign->handle($enrollmentId, $teacherId, $from, $actorId);
     }
 
+    public function attachCurriculum(string $enrollmentId, ?string $programId, ?string $actorId = null): void
+    {
+        $this->curriculum->handle(Enrollment::query()->findOrFail($enrollmentId), $programId, $actorId);
+    }
+
     public function find(string $enrollmentId): ?EnrollmentData
     {
         return Enrollment::query()->find($enrollmentId)?->toData();
+    }
+
+    public function forStudent(string $studentId): array
+    {
+        return Enrollment::query()->where('student_id', $studentId)->orderByDesc('created_at')->get()->map(fn (Enrollment $e) => $e->toData())->all();
     }
 
     public function forCreditAccount(string $creditAccountId): array

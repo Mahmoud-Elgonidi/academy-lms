@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Curriculum and progress',
+    'no_program' => 'This student follows no program yet. Choose one so the teacher gets today\'s plan and the family sees the progress.',
+    'no_programs' => 'No published program for this subject. Create one on the Curricula page.',
+    'choose' => 'Choose a program',
+    'change' => 'Change program',
+    'program' => 'Program',
+    'attached' => 'The student now follows this program; progress was worked out from the reports.',
+    'percent' => 'Done',
+    'here' => 'Where they are',
+    'finished' => 'Finished the whole program',
+    'eta' => 'Expected finish',
+    'eta_value' => '{0} finished|{1} about a week|[2,*] about :n weeks',
+    'eta_unknown' => 'Worked out after the first reports',
+    'pace' => 'at :per lessons a week',
+    'lessons' => ':mastered of :total lessons',
+    'states' => ['done' => 'Mastered', 'here' => 'You are here', 'review' => 'Needs review', 'todo' => 'To come'],
+    'reports' => 'Latest reports',
+    'homework' => 'Homework',
+    'none' => 'Nothing yet.',
+    'late' => 'handed in late',
+    'overall' => 'rated :n/5',
+    'absent' => 'Absent',
+    'due' => 'due :date',
+    'grade' => 'grade :n/5',
+];

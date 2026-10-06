@@ -6,6 +6,7 @@ use Modules\People\Actions\LinkGuardian;
 use Modules\People\Actions\SaveTeacherProfile;
 use Modules\People\Contracts\DTOs\TeacherProfileData;
 use Modules\People\Contracts\PeopleApi;
+use Modules\People\Models\GuardianStudent;
 
 final class PeopleService implements PeopleApi
 {
@@ -22,5 +23,10 @@ final class PeopleService implements PeopleApi
     public function saveTeacherProfile(TeacherProfileData $profile): void
     {
         $this->saveTeacherProfile->handle($profile);
+    }
+
+    public function studentsOf(string $guardianId): array
+    {
+        return GuardianStudent::query()->where('guardian_id', $guardianId)->pluck('student_id')->all();
     }
 }

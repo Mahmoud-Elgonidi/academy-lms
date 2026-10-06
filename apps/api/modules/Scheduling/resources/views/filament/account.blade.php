@@ -96,6 +96,9 @@
             </div>
         </div>
 
+        {{-- Other modules add sections here (Learning: curriculum and progress). --}}
+        {{ \Filament\Support\Facades\FilamentView::renderHook('scheduling::enrollment.account', data: ['enrollmentId' => $this->record->id]) }}
+
         <div class="ac-cols">
             <div class="ac" style="gap: 1.1rem">
                 <section class="ac-box">

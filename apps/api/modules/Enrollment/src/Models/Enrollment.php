@@ -19,6 +19,8 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property EnrollmentStatus $status
  * @property CarbonImmutable $start_date
  * @property ?string $credit_account_id
+ * @property ?string $program_id
+ * @property ?string $curriculum_version_id the published version the student follows
  * @property ?string $created_by
  * @property ?CarbonImmutable $ended_at
  */
@@ -27,7 +29,7 @@ final class Enrollment extends Model
     use BelongsToTenant;
     use HasUuids;
 
-    protected $fillable = ['student_id', 'subject_id', 'teacher_id', 'status', 'start_date', 'credit_account_id', 'created_by'];
+    protected $fillable = ['student_id', 'subject_id', 'teacher_id', 'status', 'start_date', 'credit_account_id', 'program_id', 'curriculum_version_id', 'created_by'];
 
     protected $attributes = ['status' => 'pending_payment'];
 
@@ -67,6 +69,6 @@ final class Enrollment extends Model
 
     public function toData(): EnrollmentData
     {
-        return new EnrollmentData($this->id, $this->student_id, $this->subject_id, $this->teacher_id, $this->status, $this->start_date, $this->credit_account_id);
+        return new EnrollmentData($this->id, $this->student_id, $this->subject_id, $this->teacher_id, $this->status, $this->start_date, $this->credit_account_id, $this->program_id, $this->curriculum_version_id);
     }
 }

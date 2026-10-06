@@ -17,7 +17,8 @@ final class AbilityMatrix
             Ability::ManageBranding, Ability::ManagePolicies => [Role::Owner, Role::Admin],
             Ability::ViewLiveBoard, Ability::ManageSessions, Ability::ReviewShifts => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler],
             Ability::FindTeachers => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler, Role::Sales],
-            Ability::ProposeOwnShifts => [Role::Teacher],
+            Ability::ProposeOwnShifts, Ability::WriteReports => [Role::Teacher],
+            Ability::ManageCurriculum, Ability::ReviewReports => [Role::Owner, Role::Admin, Role::Supervisor],
             Ability::ViewEnrollments => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler, Role::Accountant],
             Ability::ViewBilling, Ability::RecordPayments => [Role::Owner, Role::Admin, Role::Accountant],
             // Prices, tax, regions and voiding invoices: the owner and the accountant (Admin is "◐" for billing).

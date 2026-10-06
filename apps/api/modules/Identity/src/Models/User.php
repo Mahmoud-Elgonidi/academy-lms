@@ -96,10 +96,19 @@ final class User extends Authenticatable implements FilamentUser, HasLocalePrefe
         return $this->status === UserStatus::Active;
     }
 
-    /** The academy back office is for active staff; teachers, students and guardians use the apps. */
+    /**
+     * The academy back office is for active staff; the teacher area (/teach)
+     * for active teachers. Students and guardians use the apps.
+     */
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->isActive() && array_filter($this->roles(), fn (Role $role) => $role->isStaff()) !== [];
+        if (! $this->isActive()) {
+            return false;
+        }
+
+        return $panel->getId() === 'teach'
+            ? $this->hasRole(Role::Teacher)
+            : array_filter($this->roles(), fn (Role $role) => $role->isStaff()) !== [];
     }
 
     public function preferredLocale(): ?string

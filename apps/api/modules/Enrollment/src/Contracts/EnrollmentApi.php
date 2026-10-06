@@ -20,7 +20,13 @@ interface EnrollmentApi
     /** The teacher from $from on; the current assignment ends the day before. */
     public function reassignTeacher(string $enrollmentId, string $teacherId, CarbonImmutable $from, ?string $actorId = null): void;
 
+    /** The program the student follows, pinned to its published version. Null clears it. */
+    public function attachCurriculum(string $enrollmentId, ?string $programId, ?string $actorId = null): void;
+
     public function find(string $enrollmentId): ?EnrollmentData;
+
+    /** @return list<EnrollmentData> the student's enrollments, newest first */
+    public function forStudent(string $studentId): array;
 
     /** @return list<EnrollmentData> enrollments funded by this credit account */
     public function forCreditAccount(string $creditAccountId): array;

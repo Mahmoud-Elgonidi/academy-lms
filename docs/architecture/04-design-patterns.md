@@ -51,7 +51,7 @@ flowchart TD
     Payroll --> People & Scheduling & Evaluation
     Evaluation --> People & Scheduling & Learning
     Support --> People & Scheduling
-    Learning --> Scheduling & Enrollment & Curriculum & Communication
+    Learning --> Scheduling & Enrollment & Curriculum & People & Communication
     Billing --> People & Catalog & Enrollment & Credits & Communication
     Classroom --> Scheduling
     Scheduling --> People & Catalog & Enrollment & Credits & Billing & Communication
@@ -77,6 +77,7 @@ flowchart TD
    - Billing بيسمع `CreditBalanceLow` (فاتورة التجديد).
    - Scheduling بيسمع `SubscriptionPastDue` و`SubscriptionPaused` (بيوقف الحصص)، و`ParticipantJoined` و`ParticipantLeft` (الحضور)، و`CreditsGranted` (بيأكّد الحصص المستنية بالترتيب).
    - Payroll وEvaluation وLearning بيسمعوا `SessionFinalized`.
+     - **المنفّذ دلوقتي**: Learning بيفتح التقرير لما يسمع `SessionFinalized`، وبيعيد حساب التقدم لما يسمع `CurriculumAttached` من Enrollment. ولأن Scheduling مايعرفش Learning، قسم "المنهج والتقدم" في حساب الطالب بيدخل الصفحة عن طريق **render hook** باسم ثابت (`scheduling::enrollment.account`) بيسجّله Learning.
    - Evaluation بيسمع `SessionReportSubmitted` و`RatingSubmitted` و`ComplaintValidated`.
    - CRM بيسمع `TrialCompleted`.
 

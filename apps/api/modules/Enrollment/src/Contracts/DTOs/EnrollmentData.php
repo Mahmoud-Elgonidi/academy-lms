@@ -15,5 +15,7 @@ final readonly class EnrollmentData
         public EnrollmentStatus $status,
         public CarbonImmutable $startDate,
         public ?string $creditAccountId,
+        public ?string $programId = null,
+        public ?string $curriculumVersionId = null,
     ) {}
 }
