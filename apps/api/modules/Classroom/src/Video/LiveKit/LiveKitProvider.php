@@ -70,7 +70,7 @@ final class LiveKitProvider implements VideoProvider
             'iss' => $this->config['key'],
             'sub' => $identity,
             'name' => $name,
-            'nbf' => time() - 10,
+            'nbf' => CarbonImmutable::now()->getTimestamp() - 10,
             'exp' => $expires->getTimestamp(),
             'video' => $video,
             'metadata' => (string) json_encode($metadata),

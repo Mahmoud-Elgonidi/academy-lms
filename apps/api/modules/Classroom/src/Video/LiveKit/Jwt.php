@@ -2,6 +2,7 @@
 
 namespace Modules\Classroom\Video\LiveKit;
 
+use Carbon\CarbonImmutable;
 use RuntimeException;
 
 /** The small part of JWT (HS256) LiveKit needs: access tokens out, webhook signatures in. */
@@ -31,7 +32,7 @@ final class Jwt
         if (! is_array($claims)) {
             throw new RuntimeException('Malformed claims.');
         }
-        $now = time();
+        $now = CarbonImmutable::now()->getTimestamp();   // the app's clock, as for the times the token was issued with
         if ((isset($claims['exp']) && $now > $claims['exp'] + $leewaySeconds) || (isset($claims['nbf']) && $now < $claims['nbf'] - $leewaySeconds)) {
             throw new RuntimeException('Token not valid now.');
         }
