@@ -26,6 +26,19 @@ abstract class TestCase extends BaseTestCase
     /** @var list<string> */
     protected array $exceptTables = ['migrations'];
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Truncation opens no transaction to close, so nothing would close this test's connections
+        // (app, owner, platform) until PHP collects them: a long run could use up Postgres' slots.
+        $this->beforeApplicationDestroyed(function () {
+            foreach ($this->app['db']->getConnections() as $connection) {
+                $connection->disconnect();
+            }
+        });
+    }
+
     protected function migrateFreshUsing(): array
     {
         return ['--database' => 'pgsql_owner', '--drop-views' => true, '--seed' => false];
