@@ -29,10 +29,13 @@ docker compose up
 
 ```sh
 git pull
-docker compose up
 ```
 
-مش محتاج حاجة تانية. الـ container لوحده بيثبّت المكتبات الجديدة لو `composer.lock` اتغير، وبيشغّل الـ migrations الجديدة، وبيبني البيانات التجريبية من جديد لو شكلها اتغير. محتاج `docker compose up --build` بس لو الـ `Dockerfile` نفسه اتغير.
+لو `docker compose up` شغال: مش محتاج تعمل حاجة. الـ container بيلاحظ التحديث خلال ثواني، وبيثبّت المكتبات الجديدة (لو `composer.json` أو `composer.lock` اتغيروا)، وبيشغّل الـ migrations الجديدة، وبيبني البيانات التجريبية من جديد لو نسختها اتغيرت (`apps/api/database/demo-version`). هتلاقي في الـ log سطر `Up to date.`.
+
+لو مش شغال: `docker compose up` وهو بيعمل نفس الخطوات وهو بيبدأ. محتاج `docker compose up --build` بس لو الـ `Dockerfile` نفسه اتغير.
+
+> **أول مرة بعد التحديث ده بس**: لو كان شغال من قبل، اقفله (Ctrl+C) وشغّل `docker compose up` تاني، عشان الـ container يتعمل من جديد بالطريقة الجديدة. بعد كده أي `git pull` بيتطبّق لوحده.
 
 ## الوثيقة المعمارية
 

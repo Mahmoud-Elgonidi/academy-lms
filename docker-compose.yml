@@ -13,9 +13,12 @@ services:
     build: ./apps/api
     ports:
       - "8000:8000"
+    # The scripts are mounted as a folder (not one file) so a git pull reaches
+    # a running container; start.sh then applies new packages and migrations.
+    command: ["sh", "/docker/start.sh"]
     volumes:
       - ./apps/api:/app
-      - ./infra/docker/api/start.sh:/start.sh:ro
+      - ./infra/docker/api:/docker:ro
     environment:
       APP_ENV: local
       APP_URL: http://localhost:8000

@@ -15,4 +15,4 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /app
 EXPOSE 8000
 
-CMD ["sh", "/start.sh"]
+CMD ["sh", "/docker/start.sh"]

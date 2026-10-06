@@ -29,7 +29,7 @@ docker compose up        # then http://localhost:8000/admin, owner@demo.test / p
 docker compose exec api composer demo     # a fresh evening of demo sessions
 ```
 
-After a `git pull`, `docker compose up` again is enough: the container installs packages when `composer.lock` changed, runs new migrations, and rebuilds the demo data when its version (`DEMO_VERSION` in `infra/docker/api/start.sh`) changed. Use `--build` only when the `Dockerfile` changes.
+After a `git pull` there is nothing to do: a running container notices within seconds and runs `infra/docker/api/sync.sh` again (packages when `composer.json` or `composer.lock` changed, new migrations, and the demo data rebuilt when `database/demo-version` changed); the log says `Up to date.` When it is not running, `docker compose up` does the same on start. Use `--build` only when the `Dockerfile` changes.
 
 Or with PHP 8.3 and Composer on your machine (services from `docker compose up -d postgres redis mailpit`):
 
