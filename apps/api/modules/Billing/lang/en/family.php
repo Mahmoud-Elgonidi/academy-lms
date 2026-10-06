@@ -1,0 +1,18 @@
+<?php
+
+return [
+    'nav' => 'Balance & invoices',
+    'title' => 'Balance & invoices',
+    'balance_for' => ':name\'s balance',
+    'sessions_left' => '{0} No lessons left|{1} One lesson left|[2,*] :n lessons left',
+    'minutes_left' => ':n minutes left',
+    'renew_soon' => 'The renewal invoice will reach you soon.',
+    'owed' => 'To pay',
+    'invoices' => 'Invoices',
+    'issued' => 'Issued :date',
+    'due' => 'Due :date',
+    'paid_on' => 'Paid :date',
+    'left' => ':amount left',
+    'no_invoices' => 'No invoices in your name.',
+    'how_to_pay' => 'To pay, contact the academy; it records the payment and you get a confirmation.',
+];

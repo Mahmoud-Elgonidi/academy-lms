@@ -26,7 +26,8 @@ final class SubmitHomework
 
     public const MAX_KB = 25 * 1024;
 
-    public const AUDIO = ['audio/mpeg', 'audio/mp4', 'audio/aac', 'audio/ogg', 'audio/webm', 'audio/wav', 'audio/x-wav', 'audio/x-m4a', 'video/webm'];
+    /** Recordings: browsers record voice into webm (Chrome) or mp4 (Safari) containers, which read as video/*. */
+    public const AUDIO = ['audio/mpeg', 'audio/mp4', 'audio/aac', 'audio/ogg', 'audio/webm', 'audio/wav', 'audio/x-wav', 'audio/x-m4a', 'video/webm', 'video/mp4'];
 
     public const FILES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic'];
 

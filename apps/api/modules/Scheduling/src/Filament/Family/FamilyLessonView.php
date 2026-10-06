@@ -1,0 +1,61 @@
+<?php
+
+namespace Modules\Scheduling\Filament\Family;
+
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Route;
+
+/**
+ * One lesson as a person in it reads it: on their clock, in their words,
+ * with the way in once the classroom opens. A family sees the teacher's
+ * name; a teacher, the student's.
+ */
+final class FamilyLessonView
+{
+    public function __construct(
+        private readonly CarbonImmutable $now,
+        private readonly string $tz,
+        private readonly string $counterpart = 'teacher',
+    ) {}
+
+    /** @return array<string, mixed> */
+    public function lesson(object $r): array
+    {
+        $l = 'scheduling::family.';
+        $start = $r->starts_at->setTimezone($this->tz);
+        $open = in_array($r->status, ['scheduled', 'in_progress'], true);
+        $joinable = $open
+            && $this->now->greaterThanOrEqualTo($r->starts_at->subMinutes((int) config('classroom.opens_before_min', 10)))
+            && $this->now->lessThanOrEqualTo($r->ends_at->addMinutes((int) config('classroom.closes_after_min', 10)));
+
+        return [
+            'id' => $r->id,
+            'day' => $this->day($start),
+            'time' => $start->format('H:i').' – '.$r->ends_at->setTimezone($this->tz)->format('H:i'),
+            'minutes' => (int) round($r->starts_at->diffInMinutes($r->ends_at)),
+            'subject' => app()->getLocale() === 'ar' ? $r->subject_ar : $r->subject_en,
+            'with' => $r->{$this->counterpart},
+            'status' => $r->status,
+            'statusLabel' => __($l.'statuses.'.$r->status),
+            'type' => $r->type === 'regular' ? null : __($l.'types.'.$r->type),
+            'unfunded' => $open && $r->funding_status === 'unfunded',
+            'joinUrl' => $joinable && Route::has('classroom.page') ? route('classroom.page', ['session' => $r->id]) : null,
+            'opensAt' => $open && ! $joinable && $r->starts_at->greaterThan($this->now)
+                ? $r->starts_at->subMinutes((int) config('classroom.opens_before_min', 10))->setTimezone($this->tz)->format('H:i') : null,
+            'cancellable' => $this->counterpart === 'teacher' && $r->status === 'scheduled' && $r->starts_at->greaterThan($this->now),
+        ];
+    }
+
+    private function day(CarbonImmutable $start): string
+    {
+        $today = $this->now->setTimezone($this->tz)->startOfDay();
+        $l = 'scheduling::family.';
+
+        return match (true) {
+            $start->isSameDay($today) => __($l.'today'),
+            $start->isSameDay($today->addDay()) => __($l.'tomorrow'),
+            $start->isSameDay($today->subDay()) => __($l.'yesterday'),
+            default => $start->locale(app()->getLocale())->translatedFormat('l j F'),
+        };
+    }
+}

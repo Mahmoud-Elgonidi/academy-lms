@@ -1,0 +1,72 @@
+<?php
+
+namespace App\Providers\Filament;
+
+use App\Filament\Family\FamilyHome;
+use App\Http\Middleware\ResolveTenant;
+use App\Http\Middleware\SetPanelLocale;
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\AuthenticateSession;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Modules\Billing\Filament\Family\BillingFamilyPlugin;
+use Modules\Identity\Filament\IdentityPlugin;
+use Modules\Learning\Filament\Family\LearningFamilyPlugin;
+use Modules\People\Filament\Family\PeopleFamilyPlugin;
+use Modules\Platform\Filament\PlatformPlugin;
+use Modules\Scheduling\Filament\Family\SchedulingFamilyPlugin;
+use Modules\SharedKernel\Realtime\EnableBrowserEcho;
+
+/**
+ * The family area at {slug}.{platform domain}/my: students and guardians on
+ * the web, in the academy's look. A guardian follows each child (the
+ * switcher at the top of every page); the screens come from the modules.
+ */
+final class FamilyPanelProvider extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            ->id('family')
+            ->path('my')
+            ->login()
+            ->spa()
+            ->topNavigation()
+            ->maxContentWidth('6xl')
+            ->pages([FamilyHome::class])
+            // Live screens: one socket per page (Reverb, EnableBrowserEcho below), and the helper they share.
+            ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::live'))
+            ->middleware([
+                ResolveTenant::class,
+                EncryptCookies::class,
+                AddQueuedCookiesToResponse::class,
+                StartSession::class,
+                AuthenticateSession::class,
+                ShareErrorsFromSession::class,
+                VerifyCsrfToken::class,
+                SubstituteBindings::class,
+                DisableBladeIconComponents::class,
+                DispatchServingFilamentEvent::class,
+                SetPanelLocale::class,
+                EnableBrowserEcho::class,
+            ], isPersistent: true)
+            ->authMiddleware([Authenticate::class], isPersistent: true)
+            ->plugins([
+                PeopleFamilyPlugin::make(),
+                SchedulingFamilyPlugin::make(),
+                LearningFamilyPlugin::make(),
+                BillingFamilyPlugin::make(),
+                PlatformPlugin::make(),
+                IdentityPlugin::make(),
+            ]);
+    }
+}

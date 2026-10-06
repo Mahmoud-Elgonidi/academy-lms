@@ -99,7 +99,7 @@ final class User extends Authenticatable implements FilamentUser, HasLocalePrefe
 
     /**
      * The academy back office is for active staff; the teacher area (/teach)
-     * for active teachers. Students and guardians use the apps.
+     * for active teachers; the family area (/my) for students and guardians.
      */
     public function canAccessPanel(Panel $panel): bool
     {
@@ -107,9 +107,11 @@ final class User extends Authenticatable implements FilamentUser, HasLocalePrefe
             return false;
         }
 
-        return $panel->getId() === 'teach'
-            ? $this->hasRole(Role::Teacher)
-            : array_filter($this->roles(), fn (Role $role) => $role->isStaff()) !== [];
+        return match ($panel->getId()) {
+            'teach' => $this->hasRole(Role::Teacher),
+            'family' => $this->hasRole(Role::Student, Role::Guardian),
+            default => array_filter($this->roles(), fn (Role $role) => $role->isStaff()) !== [],
+        };
     }
 
     /** Their own private channel (PersonalChannel); the panels' pop-up notifications listen on it too. */

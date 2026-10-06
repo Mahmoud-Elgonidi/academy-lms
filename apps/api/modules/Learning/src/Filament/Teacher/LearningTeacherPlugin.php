@@ -20,7 +20,7 @@ final class LearningTeacherPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([MyReports::class, WriteReport::class, HomeworkToMark::class]);
+        $panel->pages([MyStudents::class, StudentProgress::class, MyReports::class, WriteReport::class, HomeworkToMark::class]);
     }
 
     public function boot(Panel $panel): void {}

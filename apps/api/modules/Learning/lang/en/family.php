@@ -1,0 +1,47 @@
+<?php
+
+return [
+    'progress' => [
+        'nav' => 'Progress',
+        'title' => 'Progress on the programme',
+        'with' => 'with :teacher',
+        'lessons' => 'Lessons',
+        'no_program' => 'This subject is not on a programme yet. The academy will set one.',
+        'none' => 'No subjects yet.',
+    ],
+    'reports' => [
+        'nav' => 'Reports',
+        'title' => 'Lesson reports',
+        'by' => 'by :teacher',
+        'none' => 'No reports yet. One arrives after every lesson.',
+    ],
+    'homework' => [
+        'nav' => 'Homework',
+        'title' => 'Homework',
+        'from' => 'from :teacher',
+        'due' => 'Due :date',
+        'was_due' => 'Was due :date',
+        'answer' => 'Write the answer here…',
+        'record' => 'Record your voice',
+        'record_again' => 'Record again',
+        'stop' => 'Stop recording',
+        'uploading' => 'Uploading…',
+        'mic_failed' => 'The microphone is not available. Let the browser use it, or upload an audio file.',
+        'or_file' => 'Upload a file or a photo',
+        'or_audio_file' => 'Upload an audio file',
+        'remove' => 'Remove',
+        'hand_in' => 'Hand in',
+        'sent' => 'Handed in. The teacher will mark it and let you know.',
+        'none_open' => 'No homework to do right now. 👏',
+        'handed_in' => 'Handed in',
+    ],
+    'home' => [
+        'here' => 'You are at: :lesson',
+        'homework' => 'Homework',
+        'homework_open' => '{1} one to do|[2,*] :n to do',
+        'homework_none' => 'Nothing to do',
+        'next_due' => 'Next due :date',
+        'last_report' => 'Last report',
+        'no_report' => 'None yet',
+    ],
+];

@@ -21,12 +21,14 @@ use Modules\Classroom\Filament\Teacher\ClassroomTeacherPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Learning\Filament\Teacher\LearningTeacherPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
+use Modules\Scheduling\Filament\Teacher\SchedulingTeacherPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
 
 /**
- * The teacher area at {slug}.{platform domain}/teach: reports and homework,
- * in the academy's look. An interim web home for teachers until the mobile
- * app covers the same API; tenancy works exactly as in the back office.
+ * The teacher area at {slug}.{platform domain}/teach: today's lessons and the
+ * week, their students and reports, homework to mark, and their hours, in
+ * the academy's look. The same Actions as the teacher API for the mobile
+ * app; tenancy works exactly as in the back office.
  */
 final class TeacherPanelProvider extends PanelProvider
 {
@@ -58,6 +60,7 @@ final class TeacherPanelProvider extends PanelProvider
             ->authMiddleware([Authenticate::class], isPersistent: true)
             ->plugins([
                 ClassroomTeacherPlugin::make(),
+                SchedulingTeacherPlugin::make(),
                 LearningTeacherPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),

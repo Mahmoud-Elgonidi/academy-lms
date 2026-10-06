@@ -1,6 +1,18 @@
 <?php
 
 return [
+    'students' => [
+        'nav' => 'My students',
+        'title' => 'My students',
+        'here' => 'At: :lesson',
+        'no_program' => 'Not on a programme yet.',
+        'paused' => 'Paused',
+        'last_report' => 'Last report :when',
+        'no_report' => 'No reports yet',
+        'to_mark' => '{1} One homework to mark|[2,*] :n homework to mark',
+        'none' => 'No students enrolled with you yet.',
+        'reports' => 'Reports',
+    ],
     'nav_reports' => 'My reports',
     'nav_homework' => 'Homework',
     'lessons_count' => '{1} one lesson|[2,*] :n lessons',

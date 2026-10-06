@@ -38,6 +38,7 @@ final class HomeworkSubmission extends Model
 
     public function isAudio(): bool
     {
-        return str_starts_with((string) $this->mime, 'audio/');
+        // A recording made in the browser comes in a webm or mp4 container (SubmitHomework::AUDIO).
+        return str_starts_with((string) $this->mime, 'audio/') || in_array($this->mime, ['video/webm', 'video/mp4'], true);
     }
 }
