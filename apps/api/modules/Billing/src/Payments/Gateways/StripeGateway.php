@@ -1,0 +1,140 @@
+<?php
+
+namespace Modules\Billing\Payments\Gateways;
+
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Modules\Billing\Payments\CheckoutRequest;
+use Modules\Billing\Payments\CheckoutSession;
+use Modules\Billing\Payments\CheckoutState;
+use Modules\Billing\Payments\GatewayEvent;
+use Modules\Billing\Payments\GatewayException;
+use Modules\Billing\Payments\PaymentGateway;
+use Modules\SharedKernel\Money\Money;
+
+/**
+ * Stripe Checkout (hosted page): cards, Apple Pay and Google Pay, in most
+ * currencies. On the academy's own secret key, or (Stripe Connect, later)
+ * the platform's key acting for the academy's connected account. Webhooks
+ * are signed with the endpoint's secret (Stripe-Signature).
+ */
+final class StripeGateway implements PaymentGateway
+{
+    /** Three-decimal currencies: Stripe charges them in steps of 10 of the minor unit. */
+    private const STEP_OF_TEN = ['BHD', 'JOD', 'KWD', 'OMR', 'TND'];
+
+    private const TOLERANCE_SECONDS = 300;
+
+    /** @param  array<string, string>  $credentials  secret_key, webhook_secret, account_id (Connect) */
+    public function __construct(private readonly array $credentials) {}
+
+    public function refuses(Money $amount): ?string
+    {
+        return in_array($amount->currency, self::STEP_OF_TEN, true) && $amount->minor % 10 !== 0
+            ? __('billing::payments.errors.stripe_step', ['currency' => $amount->currency])
+            : null;
+    }
+
+    public function createCheckout(CheckoutRequest $request): CheckoutSession
+    {
+        $session = $this->send(fn (PendingRequest $http) => $http->withHeaders(['Idempotency-Key' => 'checkout-'.$request->checkoutId])
+            ->post('/v1/checkout/sessions', [
+                'mode' => 'payment',
+                'client_reference_id' => $request->checkoutId,
+                'success_url' => $request->returnUrl,
+                'cancel_url' => $request->cancelUrl,
+                'expires_at' => $request->expiresAt->getTimestamp(),
+                'locale' => 'auto',
+                'customer_email' => $request->payerEmail,
+                'line_items' => [[
+                    'quantity' => 1,
+                    'price_data' => [
+                        'currency' => strtolower($request->amount->currency),
+                        'unit_amount' => $request->amount->minor,
+                        'product_data' => ['name' => $request->description],
+                    ],
+                ]],
+                'metadata' => ['checkout_id' => $request->checkoutId, 'invoice' => $request->invoiceNumber],
+                'payment_intent_data' => ['metadata' => ['checkout_id' => $request->checkoutId, 'invoice' => $request->invoiceNumber]],
+            ]));
+
+        return new CheckoutSession((string) $session['id'], (string) $session['url']);
+    }
+
+    public function fetch(string $providerRef): CheckoutState
+    {
+        $session = $this->send(fn (PendingRequest $http) => $http->get('/v1/checkout/sessions/'.rawurlencode($providerRef)));
+        $amount = isset($session['amount_total'], $session['currency']) ? Money::of((int) $session['amount_total'], (string) $session['currency']) : null;
+
+        return match (true) {
+            ($session['status'] ?? null) === 'complete' && in_array($session['payment_status'] ?? null, ['paid', 'no_payment_required'], true) => new CheckoutState(CheckoutState::PAID, $amount, $session['payment_intent'] ?? $providerRef),
+            ($session['status'] ?? null) === 'expired' => new CheckoutState(CheckoutState::EXPIRED, $amount),
+            default => new CheckoutState(CheckoutState::OPEN, $amount),   // still open, or paid by a method that confirms later
+        };
+    }
+
+    public function parseWebhook(Request $request): ?GatewayEvent
+    {
+        $secret = (string) ($this->credentials['webhook_secret'] ?? '');
+        $payload = $request->getContent();
+        $parts = [];
+        foreach (explode(',', (string) $request->header('Stripe-Signature')) as $part) {
+            [$key, $value] = array_pad(explode('=', trim($part), 2), 2, '');
+            $parts[$key][] = $value;
+        }
+        $timestamp = (int) ($parts['t'][0] ?? 0);
+        $expected = hash_hmac('sha256', $timestamp.'.'.$payload, $secret);
+        $signed = $secret !== '' && collect($parts['v1'] ?? [])->contains(fn (string $signature) => hash_equals($expected, $signature));
+        if (! $signed || abs(time() - $timestamp) > self::TOLERANCE_SECONDS) {
+            return null;
+        }
+
+        $event = json_decode($payload, true);
+        if (! is_array($event) || ! isset($event['id'], $event['type'])) {
+            return null;
+        }
+        $object = $event['data']['object'] ?? [];
+
+        return new GatewayEvent((string) $event['id'], (string) $event['type'],
+            str_starts_with((string) $event['type'], 'checkout.session.') ? ($object['id'] ?? null) : null, $event);
+    }
+
+    public function check(): ?string
+    {
+        try {
+            $this->send(fn (PendingRequest $http) => $http->get('/v1/balance'));
+
+            return null;
+        } catch (GatewayException $e) {
+            return $e->getMessage();
+        }
+    }
+
+    /**
+     * @param  callable(PendingRequest): Response  $call
+     * @return array<string, mixed>
+     */
+    private function send(callable $call): array
+    {
+        $http = Http::baseUrl((string) config('billing.payments.stripe.base'))
+            ->withToken((string) ($this->credentials['secret_key'] ?? config('billing.payments.stripe.platform_secret')))
+            ->asForm()->acceptJson()->timeout((int) config('billing.payments.timeout'));
+        if (! empty($this->credentials['account_id'])) {
+            $http = $http->withHeaders(['Stripe-Account' => $this->credentials['account_id']]);
+        }
+
+        try {
+            $response = $call($http);
+        } catch (ConnectionException $e) {
+            throw new GatewayException('Stripe could not be reached: '.$e->getMessage(), previous: $e);
+        }
+        if ($response->failed()) {
+            throw new GatewayException('Stripe: '.($response->json('error.message') ?? 'HTTP '.$response->status()));
+        }
+
+        return (array) $response->json();
+    }
+}

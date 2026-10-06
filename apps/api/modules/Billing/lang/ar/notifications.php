@@ -4,7 +4,7 @@ return [
     'audience' => ['payer' => 'اللي بيدفع (ولي الأمر أو الطالب)'],
     'invoice_issued' => [
         'title' => 'فاتورة جديدة :number',
-        'body' => 'فاتورة :student بمبلغ :total، آخر ميعاد للدفع :due.',
+        'body' => 'فاتورة :student بمبلغ :total، آخر ميعاد للدفع :due. الفاتورة وطرق الدفع: :link',
     ],
     'invoice_paid' => [
         'title' => 'وصلنا الدفع، شكرًا',

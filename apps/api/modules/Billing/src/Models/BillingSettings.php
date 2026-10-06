@@ -13,6 +13,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?string $tax_number
  * @property string $invoice_prefix
  * @property int $due_days
+ * @property ?string $manual_payment_note how to pay by hand (bank transfer, InstaPay…), shown with the invoice
  */
 final class BillingSettings extends Model
 {
@@ -26,7 +27,7 @@ final class BillingSettings extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['tax_rate_bp', 'prices_include_tax', 'tax_number', 'invoice_prefix', 'due_days'];
+    protected $fillable = ['tax_rate_bp', 'prices_include_tax', 'tax_number', 'invoice_prefix', 'due_days', 'manual_payment_note'];
 
     protected $attributes = ['tax_rate_bp' => 0, 'prices_include_tax' => true, 'invoice_prefix' => 'INV-', 'due_days' => 3];
 

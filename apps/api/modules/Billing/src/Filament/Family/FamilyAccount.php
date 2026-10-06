@@ -53,6 +53,8 @@ final class FamilyAccount
             'for' => trim(($i->getAttribute('student_name') ?? '').' · '.(app()->getLocale() === 'ar' ? $i->getAttribute('subject_ar') : $i->getAttribute('subject_en')), ' ·'),
             'total' => $i->total()->format(),
             'outstanding' => $i->status === 'issued' ? $i->outstanding()->format() : null,
+            'payable' => $i->status === 'issued' && $i->outstanding()->minor > 0,
+            'currency' => $i->currency,
             'status' => InvoiceResource::statusKey($i),
             'statusLabel' => __('billing::billing.statuses.'.InvoiceResource::statusKey($i)),
             'issued' => $i->issued_at ? CarbonImmutable::parse($i->issued_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F Y') : null,

@@ -19,7 +19,7 @@ final class SendBillingNotifications
     public static function templates(NotificationsApi $notifications): void
     {
         foreach ([
-            ['invoice_issued', ['email', 'whatsapp', 'push'], ['number' => 'NR-000002', 'student' => 'زياد', 'total' => '560 ر.س.', 'due' => 'الأربعاء 14 أكتوبر']],
+            ['invoice_issued', ['email', 'whatsapp', 'push'], ['number' => 'NR-000002', 'student' => 'زياد', 'total' => '560 ر.س.', 'due' => 'الأربعاء 14 أكتوبر', 'link' => 'https://noor.example.com/pay/invoice/…']],
             ['invoice_paid', ['email', 'push'], ['number' => 'NR-000002', 'total' => '560 ر.س.']],
         ] as [$name, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(

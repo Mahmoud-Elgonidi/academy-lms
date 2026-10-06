@@ -132,6 +132,25 @@
             </section>
         @endif
 
+        @if ($d['checkouts'] !== [])
+            <section class="iv-pay iv-online">
+                <h3>{{ __('billing::payments.invoice.section') }}</h3>
+                <table>
+                    <tbody>
+                        @foreach ($d['checkouts'] as $c)
+                            <tr>
+                                <td>{{ $c['gateway'] }} @if ($c['ref']) <span class="iv-muted" dir="ltr">· {{ $c['ref'] }}</span> @endif
+                                    @if ($c['failure']) <div class="iv-muted">{{ $c['failure'] }}</div> @endif</td>
+                                <td class="iv-muted">{{ $c['when'] }}</td>
+                                <td>{{ __('billing::payments.statuses.'.$c['status']) }}</td>
+                                <td class="num">{{ $c['amount'] }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </section>
+        @endif
+
         @if ($inv->status === 'void')
             <div class="iv-note">{{ __('billing::invoices.doc.voided', ['reason' => $inv->void_reason]) }}</div>
         @elseif ($inv->status === 'issued' && $inv->subscription_id)

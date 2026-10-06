@@ -4,7 +4,7 @@ return [
     'audience' => ['payer' => 'Whoever pays (guardian or student)'],
     'invoice_issued' => [
         'title' => 'New invoice :number',
-        'body' => 'Invoice for :student of :total, due by :due.',
+        'body' => 'Invoice for :student of :total, due by :due. The invoice and ways to pay: :link',
     ],
     'invoice_paid' => [
         'title' => 'Payment received, thank you',

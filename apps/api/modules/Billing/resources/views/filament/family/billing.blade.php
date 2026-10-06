@@ -1,6 +1,18 @@
-@php $l = 'billing::family.'; $a = $this->account; @endphp
+@php $l = 'billing::family.'; $a = $this->account; $online = app(\Modules\Billing\Payments\OnlinePayments::class); @endphp
 <x-filament-panels::page>
     @include('billing::filament.family.styles')
+    <div data-live-channel="{{ $a['channel'] }}" hidden></div>
+
+    @if ($a['result'])
+        @php $tone = match ($a['result']->status) { 'paid' => 'good', 'open', 'refund_due' => 'wait', default => 'bad' }; @endphp
+        <div class="bf-result" data-tone="{{ $tone }}" role="status" wire:key="result-{{ $a['result']->id }}-{{ $a['result']->status }}">
+            <b aria-hidden="true">{{ ['good' => '✓', 'wait' => '…', 'bad' => '!'][$tone] }}</b>
+            <div>
+                <strong>{{ __('billing::payments.page.result.'.$a['result']->status) }}</strong>
+                <small>{{ __('billing::payments.page.result_hint.'.$a['result']->status) }}</small>
+            </div>
+        </div>
+    @endif
 
     @if ($a['balances'] !== [])
         <h2 class="bf-h2">{{ __($l.'balance_for', ['name' => $a['learner']]) }}</h2>
@@ -29,12 +41,28 @@
                 @if ($inv['outstanding'] && $inv['status'] === 'partly_paid')
                     <small style="justify-self: end">{{ __($l.'left', ['amount' => $inv['outstanding']]) }}</small>
                 @endif
+                @if ($inv['payable'] && $online->offers($inv['currency']))
+                    <div class="bf-pay">{{ ($this->payAction)(['invoice' => $inv['id']]) }}</div>
+                @endif
             </div>
         @empty
             <div class="bf-empty">{{ __($l.'no_invoices') }}</div>
         @endforelse
     </div>
-    @if ($a['owed'])
+    @if ($a['owed'] && ($note = $online->manualNote()))
+        <p class="bf-note" style="white-space: pre-line"><strong>{{ __('billing::payments.page.manual') }}:</strong> {{ $note }}</p>
+    @elseif ($a['owed'])
         <p class="bf-note">{{ __($l.'how_to_pay') }}</p>
     @endif
 </x-filament-panels::page>
+
+@script
+<script>
+    // Back from a gateway the payment may still be confirming: the page updates by itself when it goes through
+    // (the payer's own live channel; LmsLive, shared/live.blade.php), every two minutes only without a connection.
+    const el = $wire.$el.querySelector('[data-live-channel]');
+    if (el && window.LmsLive) {
+        window.LmsLive.watch({ el, channel: el.dataset.liveChannel, event: '.payments.changed', refresh: () => $wire.$refresh(), every: 120000 });
+    }
+</script>
+@endscript

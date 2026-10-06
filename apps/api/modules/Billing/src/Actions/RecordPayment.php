@@ -16,7 +16,9 @@ use Modules\SharedKernel\Money\Money;
 
 /**
  * Money received for an invoice: a bank transfer, InstaPay, a wallet, cash
- * (docs/architecture/03, "يدوي"). When the invoice is paid in full, in the
+ * (docs/architecture/03, "يدوي"), or online from a checkout the gateway
+ * confirmed (SettleCheckout; one payment per checkout, which the database
+ * holds to). When the invoice is paid in full, in the
  * same transaction (docs/architecture/04, rule 4): the block's minutes are
  * granted, the subscription moves to that block, and the enrollment starts.
  * Scheduling then funds the waiting sessions, oldest first.
@@ -28,13 +30,13 @@ final class RecordPayment
         private readonly EnrollmentApi $enrollments,
     ) {}
 
-    public function handle(string $invoiceId, string $method, Money $amount, ?string $reference, CarbonImmutable $receivedAt, ?string $note, ?string $actorId): Invoice
+    public function handle(string $invoiceId, string $method, Money $amount, ?string $reference, CarbonImmutable $receivedAt, ?string $note, ?string $actorId, ?string $checkoutId = null): Invoice
     {
-        if (! in_array($method, Payment::METHODS, true)) {
+        if ($checkoutId === null ? ! in_array($method, Payment::METHODS, true) : $method !== Payment::ONLINE) {
             throw ValidationException::withMessages(['method' => __('billing::billing.errors.method')]);
         }
 
-        return DB::transaction(function () use ($invoiceId, $method, $amount, $reference, $receivedAt, $note, $actorId) {
+        return DB::transaction(function () use ($invoiceId, $method, $amount, $reference, $receivedAt, $note, $actorId, $checkoutId) {
             $invoice = Invoice::lock($invoiceId);
             if ($invoice->status !== 'issued') {
                 throw ValidationException::withMessages(['invoice' => __('billing::billing.errors.not_payable')]);
@@ -54,6 +56,7 @@ final class RecordPayment
                 'received_at' => $receivedAt->utc(),
                 'recorded_by' => $actorId,
                 'note' => $note,
+                'checkout_id' => $checkoutId,
             ]);
 
             $invoice->paid_minor += $amount->minor;

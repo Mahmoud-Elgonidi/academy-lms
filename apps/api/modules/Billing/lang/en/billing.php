@@ -19,6 +19,7 @@ return [
         'cash' => 'Cash',
         'card_terminal' => 'Card (terminal)',
         'other' => 'Other',
+        'online' => 'Online',
     ],
     'subscription_statuses' => [
         'active' => 'Active',

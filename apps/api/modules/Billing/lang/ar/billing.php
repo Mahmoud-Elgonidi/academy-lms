@@ -19,6 +19,7 @@ return [
         'cash' => 'كاش',
         'card_terminal' => 'كارت (ماكينة)',
         'other' => 'أخرى',
+        'online' => 'دفع إلكتروني',
     ],
     'subscription_statuses' => [
         'active' => 'نشط',

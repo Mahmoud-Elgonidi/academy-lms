@@ -21,17 +21,22 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property CarbonImmutable $received_at
  * @property ?string $recorded_by
  * @property ?string $note
+ * @property ?string $checkout_id the online checkout it came from
  */
 final class Payment extends Model
 {
     use BelongsToTenant;
     use HasUuids;
 
+    /** Recorded by hand from the back office. */
     public const METHODS = ['bank_transfer', 'instapay', 'wallet', 'cash', 'card_terminal', 'other'];
+
+    /** Paid on a gateway's page (PaymentCheckout); never typed in. */
+    public const ONLINE = 'online';
 
     public const UPDATED_AT = null;
 
-    protected $fillable = ['invoice_id', 'method', 'amount_minor', 'currency', 'reference', 'received_at', 'recorded_by', 'note'];
+    protected $fillable = ['invoice_id', 'method', 'amount_minor', 'currency', 'reference', 'received_at', 'recorded_by', 'note', 'checkout_id'];
 
     protected function casts(): array
     {

@@ -17,5 +17,16 @@
     .bf-h2 { font-size: 1rem; font-weight: 700; margin: 1.25rem 0 .6rem; }
     .bf-note { color: var(--gray-600); font-size: .9rem; margin: .5rem 0 0; }
     .bf-empty { padding: 1.25rem; text-align: center; color: var(--gray-500); border: 1px dashed var(--gray-300); border-radius: var(--radius-xl, .75rem); }
+    .bf-pay { grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: .35rem; }
+    .bf-result { display: flex; gap: .75rem; align-items: flex-start; border-radius: var(--radius-xl, .75rem); padding: .85rem 1rem; margin-bottom: .5rem; background: var(--warning-50); color: var(--warning-800); }
+    .bf-result b { font-size: 1.4rem; line-height: 1; }
+    .bf-result strong { display: block; }
+    .bf-result small { display: block; font-size: .85rem; opacity: .9; }
+    .bf-result[data-tone="good"] { background: var(--success-50); color: var(--success-800); }
+    .bf-result[data-tone="bad"] { background: var(--danger-50); color: var(--danger-800); }
+    @media (prefers-reduced-motion: no-preference) {
+        .bf-result { animation: lms-rise .45s var(--lms-ease) backwards; }
+        .bf-result[data-tone="good"] b { display: inline-block; animation: lms-pop .6s var(--lms-spring) .2s backwards; }
+    }
     .dark .bf-card, .dark .bf-inv { background: var(--gray-900); border-color: var(--gray-800); }
 </style>
