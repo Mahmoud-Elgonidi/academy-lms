@@ -12,4 +12,11 @@ interface TenantDirectory extends TenantResolver
     public function byHost(string $host): ?TenantRef;
 
     public function bySlug(string $slug): ?TenantRef;
+
+    /**
+     * Where the academy lives on the web, for links that leave the app (a
+     * message's "join" link): {slug}.{platform domain} with APP_URL's scheme
+     * and port, or APP_URL itself for the local development academy.
+     */
+    public function baseUrl(TenantRef $tenant): string;
 }

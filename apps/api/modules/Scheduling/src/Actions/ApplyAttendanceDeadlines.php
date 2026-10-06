@@ -15,6 +15,7 @@ use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionEvent;
 use Modules\Scheduling\Domain\Policy\PolicyEvent;
+use Modules\Scheduling\Queries\TaughtMinutes;
 
 /**
  * The per-minute sweeper for the current academy: what the live board's
@@ -32,6 +33,7 @@ final class ApplyAttendanceDeadlines
         private readonly SettleSessionCredits $settle,
         private readonly PolicyDecider $decider,
         private readonly RecordPolicyDecision $record,
+        private readonly TaughtMinutes $taught,
     ) {}
 
     /** @return int how many sessions changed */
@@ -68,8 +70,11 @@ final class ApplyAttendanceDeadlines
             }
 
             if ($teacherIn && $studentIn && $now->greaterThanOrEqualTo($session->ends_at->addMinutes($policy->finalizeAfterEndMin))) {
-                $from = $teacher->first_join_at->max($student->first_join_at)->max($session->starts_at);
-                $taught = max(0, $from->diffInMinutes($session->ends_at, false));
+                // From the classroom's stretches when there are any (both in at once, inside the lesson);
+                // otherwise from the first joins, as before Classroom.
+                $taught = $this->taught->hasSegments($session->id)
+                    ? $this->taught->of($session->id, $session->starts_at, $session->ends_at, $now)
+                    : (int) max(0, $teacher->first_join_at->max($student->first_join_at)->max($session->starts_at)->diffInMinutes($session->ends_at, false));
                 $taught >= $policy->completionShare * $session->durationMinutes()
                     ? $this->complete($session, (int) $taught, $now)
                     : $this->flagForReview->handle($session, 'short_delivery', null, null);

@@ -7,6 +7,7 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Modules\Communication\Channels\ChannelManager;
 use Modules\Communication\Contracts\DTOs\Message;
+use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Domain\ChannelChoice;
 use Modules\Communication\Jobs\SendDelivery;
 use Modules\Communication\Models\CommunicationSettings;
@@ -22,6 +23,7 @@ use Modules\Communication\Templates\TemplateRegistry;
  * and the person wants. WhatsApp and push wait out the person's quiet hours
  * unless the message is urgent; email and the inbox never wait. Deliveries
  * are queued after the commit. A dedupe key sends at most once per person.
+ * A template with :link gets each person's own link (NotificationLinks).
  */
 final class SendMessage
 {
@@ -31,6 +33,7 @@ final class SendMessage
         private readonly Recipients $recipients,
         private readonly NotificationPreferences $preferences,
         private readonly ChannelManager $channels,
+        private readonly NotificationLinks $links,
     ) {}
 
     public function handle(Message $message): int
@@ -49,7 +52,11 @@ final class SendMessage
                 if ($message->dedupeKey !== null && Notification::query()->where('user_id', $person->id)->where('dedupe_key', $message->dedupeKey)->exists()) {
                     continue;
                 }
-                $text = $this->renderer->render($template, $person->locale, $message->data, $person->timezone);
+                $data = $message->data;
+                if (in_array('link', $template->placeholders(), true) && ! array_key_exists('link', $data)) {
+                    $data['link'] = $this->links->personal($message->action, $person->id) ?? '';
+                }
+                $text = $this->renderer->render($template, $person->locale, $data, $person->timezone);
 
                 try {
                     $notification = DB::transaction(fn () => Notification::query()->create([

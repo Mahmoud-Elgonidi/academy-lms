@@ -24,6 +24,18 @@ final class EloquentTenantDirectory implements TenantDirectory
         return Academy::query()->where('slug', $slug)->first()?->toTenantRef();
     }
 
+    public function baseUrl(TenantRef $tenant): string
+    {
+        $app = parse_url((string) config('app.url')) ?: [];
+        if (config('platform.dev_academy') === $tenant->slug) {
+            return rtrim((string) config('app.url'), '/');
+        }
+
+        $port = isset($app['port']) ? ':'.$app['port'] : '';
+
+        return ($app['scheme'] ?? 'https').'://'.$tenant->slug.'.'.config('platform.domain').$port;
+    }
+
     public function byHost(string $host): ?TenantRef
     {
         $host = strtolower(preg_replace('/:\d+$/', '', trim($host)) ?? '');

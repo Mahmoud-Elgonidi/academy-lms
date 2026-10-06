@@ -24,4 +24,5 @@ enum Ability: string
     case ReviewReports = 'reports.review';
     case ViewMessageLog = 'messages.view-log';
     case ManageTemplates = 'messages.manage-templates';
+    case ManageClassroom = 'classroom.manage';
 }

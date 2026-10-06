@@ -53,7 +53,7 @@ flowchart TD
     Support --> People & Scheduling
     Learning --> Scheduling & Enrollment & Curriculum & People & Communication
     Billing --> People & Catalog & Enrollment & Credits & Communication
-    Classroom --> Scheduling
+    Classroom --> Scheduling & Learning & People & Communication & Platform
     Scheduling --> People & Catalog & Enrollment & Credits & Billing & Communication
     Enrollment --> People & Catalog & Curriculum
     Curriculum --> Catalog
@@ -76,6 +76,7 @@ flowchart TD
 5. **الاشتراك في events module تاني مسموح** طالما مابيعملش دايرة في الكود:
    - Billing بيسمع `CreditBalanceLow` (فاتورة التجديد).
    - Scheduling بيسمع `SubscriptionPastDue` و`SubscriptionPaused` (بيوقف الحصص)، و`ParticipantJoined` و`ParticipantLeft` (الحضور)، و`CreditsGranted` (بيأكّد الحصص المستنية بالترتيب).
+     - **المنفّذ دلوقتي (الحضور)**: Classroom بينادي `AttendanceApi` بتاع Scheduling مباشرة بدل الـ events، لأن الحضور لازم يتسجل قبل ما مهمة المواعيد النهائية تحكم على الحصة. Classroom فوق Scheduling في الرسم، ومفيش module بيعتمد عليه. والعمليات اللحظية بتفتح صفحة الفصل باسم الـ route (`classroom.page`) بس، من غير ما تعرف الـ module.
    - Payroll وEvaluation وLearning بيسمعوا `SessionFinalized`.
    - **الإشعارات** عكس اتجاه السماع: الـ module اللي حصل عنده الحدث (Learning، Billing، Scheduling) بيسمع الـ events بتاعته ويبعت رسالة عن طريق `NotificationsApi` بقالب معرّف في الـ provider بتاعه، والصيغة في ملفات الـ lang بتاعته. Communication مابيعرفش حد غير Identity وPlatform (الاسم والشعار في الإيميل)، فبيفضل تحت في الرسم. وفين الإشعار بيفتح في اللوحات، كل module بيسجّله في `NotificationLinks`.
      - **المنفّذ دلوقتي**: Learning بيفتح التقرير لما يسمع `SessionFinalized`، وبيعيد حساب التقدم لما يسمع `CurriculumAttached` من Enrollment. ولأن Scheduling مايعرفش Learning، قسم "المنهج والتقدم" في حساب الطالب بيدخل الصفحة عن طريق **render hook** باسم ثابت (`scheduling::enrollment.account`) بيسجّله Learning.

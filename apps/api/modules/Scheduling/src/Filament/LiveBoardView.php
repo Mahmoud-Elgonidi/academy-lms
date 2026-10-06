@@ -247,12 +247,14 @@ final class LiveBoardView
             $item->issue === BoardIssue::StudentNotJoined => [
                 $a('contact', ['target' => 'guardian'], 'call_guardian', 'call_guardian'),
                 $a('markStudentAbsent', [], 'mark_student_absent', 'mark_student_absent', true),
-                $a('soon', ['what' => 'resend_link'], 'resend_link', 'soon_messages', soon: true),
+                $a('resendLink', [], 'resend_link', 'resend_link'),
+                $a('observe', [], 'observe', 'observe'),
             ],
             $item->issue === BoardIssue::WeakConnection => [
                 $a('contact', ['target' => 'teacher'], 'call_teacher', 'call_teacher_tech'),
                 $a('flagTechnical', [], 'flag_technical', 'flag_technical'),
                 $a('extend', [], 'extend', 'extend'),
+                $a('observe', [], 'observe', 'observe'),
             ],
             $item->issue === BoardIssue::Unfunded => [
                 $a('allowUnfunded', [], 'allow_unfunded', 'allow_unfunded'),
@@ -266,7 +268,7 @@ final class LiveBoardView
                 $a('contact', ['target' => 'teacher'], 'call_teacher', 'call_teacher_any'),
                 $a('extend', [], 'extend', 'extend'),
                 $a('flagTechnical', [], 'flag_technical', 'flag_technical'),
-                $a('soon', ['what' => 'observe'], 'observe', 'soon_classroom', soon: true),
+                $a('observe', [], 'observe', 'observe'),
             ],
             $item->group === BoardGroup::Upcoming => array_values(array_filter([
                 $a('contact', ['target' => 'teacher'], 'call_teacher', 'call_teacher_any'),

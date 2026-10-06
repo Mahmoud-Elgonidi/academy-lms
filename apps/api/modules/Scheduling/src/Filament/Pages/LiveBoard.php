@@ -14,7 +14,10 @@ use Filament\Panel;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Livewire\Attributes\Computed;
+use Modules\Communication\Contracts\DTOs\Message;
+use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Scheduling\Actions\AllowUnfundedSession;
 use Modules\Scheduling\Actions\CancelSession;
@@ -30,7 +33,9 @@ use Modules\Scheduling\Domain\LiveBoard\BoardItem;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Filament\LiveBoardView;
 use Modules\Scheduling\Filament\PolicyPreview;
+use Modules\Scheduling\Listeners\SendSchedulingNotifications;
 use Modules\Scheduling\Queries\LiveBoardQuery;
+use Modules\Scheduling\Queries\SessionPeople;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Timezones;
@@ -306,7 +311,30 @@ final class LiveBoard extends Page
             });
     }
 
-    /** Placeholder for actions whose module is not built yet (messages, billing, classroom, substitutes). */
+    /** Opens the lesson's classroom in a new tab, as a hidden observer (the Classroom module's page). */
+    public function observeAction(): Action
+    {
+        return Action::make('observe')
+            ->authorize(fn () => Gate::allows(Ability::ViewLiveBoard->value) && Route::has('classroom.page'))
+            ->button()->size('sm')->color('gray')
+            ->url(fn (array $arguments) => route('classroom.page', ['session' => $arguments['session'] ?? '']), shouldOpenInNewTab: true);
+    }
+
+    /** "Join now" again to the student and the guardians, with their own links, even in quiet hours. */
+    public function resendLinkAction(): Action
+    {
+        return $this->sessionAction('resendLink')
+            ->action(function (array $arguments) {
+                $s = app(SessionPeople::class)->of($this->session($arguments)->id);
+                if ($s !== null) {
+                    app(NotificationsApi::class)->send(new Message('scheduling.join_now', $s['family'], SendSchedulingNotifications::lessonData($s),
+                        ['screen' => 'session', 'id' => $s['session_id']], 'join-now-again:'.$s['session_id'].':'.now()->format('YmdHi'), urgent: true));
+                }
+                $this->done(__('scheduling::board.done.link_sent'));
+            });
+    }
+
+    /** Placeholder for actions whose module is not built yet (billing, substitutes). */
     public function soonAction(): Action
     {
         return Action::make('soon')

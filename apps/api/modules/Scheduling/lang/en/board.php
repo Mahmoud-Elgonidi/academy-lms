@@ -227,6 +227,8 @@ return [
         'dispute' => 'Within 48 hours; credit is held until the decision',
         'soon_messages' => 'Arrives with WhatsApp messages and notifications',
         'soon_billing' => 'Arrives with invoices and payments',
+        'observe' => 'Opens the lesson in a new tab; nobody sees or hears you.',
+        'resend_link' => 'Sends :student and their guardians the join link again, even in quiet hours.',
         'soon_classroom' => 'Arrives with the live classroom',
         'soon_substitute' => 'Arrives with teacher search',
     ],
@@ -267,6 +269,7 @@ return [
         ],
     ],
     'done' => [
+        'link_sent' => 'Link sent again.',
         'contact' => 'Contact logged.',
         'cancelled' => 'Session cancelled.',
         'student_absent' => 'Student marked absent.',

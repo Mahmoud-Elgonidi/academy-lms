@@ -1,5 +1,5 @@
 # Local development: the API and back office, Postgres (with the three LMS
-# roles), Redis and Mailpit.
+# roles), Redis, Mailpit, and LiveKit for the live classroom.
 #
 #   docker compose up            then open http://demo.localhost:8000/admin
 #                                (owner@demo.test / password)
@@ -29,6 +29,10 @@ services:
       MAIL_PORT: "1025"
       PLATFORM_DOMAIN: localhost
       PLATFORM_DEV_ACADEMY: demo
+      LIVEKIT_URL: ws://localhost:7880          # the browser connects here
+      LIVEKIT_API_URL: http://livekit:7880      # the API calls the room service here
+      LIVEKIT_API_KEY: devkey
+      LIVEKIT_API_SECRET: local-dev-secret-not-for-production-0001   # same as infra/docker/livekit/livekit.yaml
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,6 +54,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  # The live classroom's video server (development keys; webhooks go to the api).
+  livekit:
+    image: livekit/livekit-server:v1.13.7
+    command: ["--config", "/etc/livekit.yaml"]
+    volumes:
+      - ./infra/docker/livekit/livekit.yaml:/etc/livekit.yaml:ro
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
 
   redis:
     image: redis:7

@@ -36,12 +36,14 @@ final class SendSchedulingNotifications
     {
         $lesson = ['student' => 'زياد', 'teacher' => 'أ. خالد', 'subject' => 'النحو', 'when' => 'الأحد 11 أكتوبر · 18:00'];
         $a = 'scheduling::notifications.audience.';
+        // Each person's own signed link to the class page, filled in by Communication (Classroom registers it).
+        $link = ['link' => 'https://demo.lms.test/class/…'];
         foreach ([
             ['reminder_day', 'lessons', $a.'family', ['push', 'email'], $lesson],
-            ['reminder_hour', 'lessons', $a.'family', ['push', 'whatsapp'], $lesson],
-            ['reminder_hour_teacher', 'staff', $a.'teacher', ['push'], $lesson],
-            ['join_now', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson],
-            ['teacher_join_now', 'staff', $a.'teacher', ['whatsapp', 'push'], $lesson],
+            ['reminder_hour', 'lessons', $a.'family', ['push', 'whatsapp'], $lesson + $link],
+            ['reminder_hour_teacher', 'staff', $a.'teacher', ['push'], $lesson + $link],
+            ['join_now', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson + $link],
+            ['teacher_join_now', 'staff', $a.'teacher', ['whatsapp', 'push'], $lesson + $link],
             ['teacher_late', 'staff', $a.'supervisors', ['push'], $lesson],
             ['session_cancelled', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson + ['outcome' => 'وليكم حصة تعويض.']],
             ['session_cancelled_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson],

@@ -359,6 +359,33 @@ interface PaymentGateway
 - **الوقت المدرَّس** = تقاطع فترات المدرس مع فترات الطالب. ده expression واحد بـ `tstzmultirange` في Postgres.
 - **كل مشكلة ليها مسؤول**: `fault ∈ {teacher, student, platform, provider, unknown}`. بنحدده من أحداث جودة الاتصال، وتشخيص الجهاز، وحوادث المزوّد.
 
+### المنفّذ دلوقتي
+- **module اسمه `Classroom`**، بيعتمد على Contracts بس:
+  - Scheduling (`AttendanceApi`: الحصة، والحضور).
+  - Learning (`planFor`: خطة اليوم).
+  - People (أولياء الأمور).
+  - Communication (`NotificationLinks`: لينك كل شخص).
+  - Platform (الشعار، ولينك الأكاديمية).
+- **`VideoProvider`** وتحته `LiveKitProvider` و`ExternalLinkProvider`، وبيختارهم `ProviderManager` حسب إعداد الأكاديمية (`classroom_settings`).
+- **LiveKit**:
+  - الـ access token بنعمله بنفسنا (JWT HS256 بالـ video grants)، من غير SDK.
+  - الغرفة بنعملها بـ Twirp `RoomService/CreateRoom` (best effort، لأن LiveKit بيعملها لوحده عند أول دخول).
+  - قايمة اللي جوه بـ `ListParticipants`.
+  - اسم الغرفة `{academy}_{lesson}`، فالـ webhook بيعرف الأكاديمية من غير tenant في الطلب.
+- **الـ Webhooks** (`POST /webhooks/livekit`):
+  - التوقيع: JWT فيه `sha256` لجسم الطلب.
+  - بتتخزن في `provider_webhook_inbox` بـ unique على `event_id`، فالتكرار مابيعملش حاجة.
+  - الدخول بيفتح فترة في `attendance_segments`، والخروج بيقفلها. قفل الغرفة بيقفل كل الفترات المفتوحة.
+- **`classroom:reconcile`** كل دقيقة: بيقارن الفترات المفتوحة باللي في الغرفة فعلًا، ويصلّح اللي webhook ضاع منه (`source = reconcile`).
+- **الكراسي**:
+  - المدرس والطالب بيبثوا.
+  - ولي الأمر بيقعد مكان ابنه.
+  - المشرف `observer:{id}` بـ `hidden` ومن غير بث. مابيتحسبش في الحضور.
+- **قاعدة البيانات**:
+  - `attendance_segments` فيها فترة مفتوحة واحدة بس لكل شخص في الحصة (partial unique index).
+  - الوقت المدرَّس = `range_agg(المدرس) * range_agg(الطالب) * tstzrange(الحصة)`، ولو مفيش فترات بنرجع لتقريب أول دخول.
+- **التشغيل على الجهاز**: `docker compose` فيه LiveKit (`livekit/livekit-server:v1.13.7`، بورتات 7880 و7881 و7882/udp)، والـ webhooks رايحة للـ API. اتجرّب بحصة حقيقية بين متصفحين ومشرف مخفي، والحضور اتسجل من الـ webhooks.
+
 ### التسجيلات والتكلفة
 - الافتراضي:
   - فيديو مجمّع بجودة منخفضة للحصص اللي فيها أطفال، وصوت بس للكبار.

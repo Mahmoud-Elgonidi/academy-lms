@@ -5,6 +5,7 @@ use App\Providers\Filament\AcademyPanelProvider;
 use App\Providers\Filament\TeacherPanelProvider;
 use Modules\Billing\Providers\BillingServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
+use Modules\Classroom\Providers\ClassroomServiceProvider;
 use Modules\Communication\Providers\CommunicationServiceProvider;
 use Modules\Credits\Providers\CreditsServiceProvider;
 use Modules\Curriculum\Providers\CurriculumServiceProvider;
@@ -30,6 +31,7 @@ return [
     BillingServiceProvider::class,
     SchedulingServiceProvider::class,
     LearningServiceProvider::class,
+    ClassroomServiceProvider::class,
     AppServiceProvider::class,
     AcademyPanelProvider::class,
     TeacherPanelProvider::class,

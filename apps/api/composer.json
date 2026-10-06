@@ -41,6 +41,7 @@
             "Modules\\Catalog\\": "modules/Catalog/src/",
             "Modules\\People\\": "modules/People/src/",
             "Modules\\Communication\\": "modules/Communication/src/",
+            "Modules\\Classroom\\Database\\Seeders\\": "modules/Classroom/database/seeders/",
             "Modules\\Communication\\Database\\Seeders\\": "modules/Communication/database/seeders/",
             "Modules\\Curriculum\\": "modules/Curriculum/src/",
             "Modules\\Curriculum\\Database\\Seeders\\": "modules/Curriculum/database/seeders/",
@@ -50,6 +51,7 @@
             "Modules\\Billing\\Database\\Seeders\\": "modules/Billing/database/seeders/",
             "Modules\\Scheduling\\": "modules/Scheduling/src/",
             "Modules\\Learning\\": "modules/Learning/src/",
+            "Modules\\Classroom\\": "modules/Classroom/src/",
             "Modules\\Learning\\Database\\Seeders\\": "modules/Learning/database/seeders/",
             "Modules\\Scheduling\\Database\\Factories\\": "modules/Scheduling/database/factories/",
             "Modules\\Scheduling\\Database\\Seeders\\": "modules/Scheduling/database/seeders/"

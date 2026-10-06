@@ -17,4 +17,16 @@ interface NotificationLinks
 
     /** @param  array<string, string>  $action */
     public function resolve(array $action, string $panel): ?string;
+
+    /**
+     * A link for one person that works outside the panels (WhatsApp, email):
+     * a template using :link gets it filled from the message's action, per
+     * recipient (a signed "join" link, say).
+     *
+     * @param  Closure(array<string, string>, string): ?string  $resolver  (action, recipient user id)
+     */
+    public function registerPersonal(string $screen, Closure $resolver): void;
+
+    /** @param  array<string, string>  $action */
+    public function personal(array $action, string $userId): ?string;
 }

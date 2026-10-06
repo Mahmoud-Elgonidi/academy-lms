@@ -16,11 +16,13 @@ use Modules\Learning\Contracts\Events\HomeworkSubmitted;
 use Modules\Learning\Contracts\Events\NodeMastered;
 use Modules\Learning\Contracts\Events\SessionReportOverdue;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
+use Modules\Learning\Contracts\LearningApi;
 use Modules\Learning\Filament\LearningPlugin;
 use Modules\Learning\Filament\Pages\ReportsOversight;
 use Modules\Learning\Filament\Teacher\HomeworkToMark;
 use Modules\Learning\Filament\Teacher\WriteReport;
 use Modules\Learning\Http\Web\SubmissionFileController;
+use Modules\Learning\LearningService;
 use Modules\Learning\Listeners\OpenReportWhenSessionCloses;
 use Modules\Learning\Listeners\RebuildProgressOnProgramChange;
 use Modules\Learning\Listeners\SendLearningNotifications;
@@ -29,6 +31,11 @@ use Modules\Scheduling\Contracts\Events\SessionFinalized;
 /** Reports, homework and progress on the roadmap (docs/architecture/01, "التقارير والواجبات"; 02, section 6). */
 final class LearningServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->app->singleton(LearningApi::class, LearningService::class);
+    }
+
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');

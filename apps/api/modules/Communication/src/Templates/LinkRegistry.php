@@ -10,6 +10,9 @@ final class LinkRegistry implements NotificationLinks
     /** @var array<string, Closure> */
     private array $resolvers = [];
 
+    /** @var array<string, Closure> */
+    private array $personal = [];
+
     public function register(string $screen, Closure $resolver): void
     {
         $this->resolvers[$screen] = $resolver;
@@ -20,5 +23,17 @@ final class LinkRegistry implements NotificationLinks
         $resolver = $this->resolvers[$action['screen'] ?? ''] ?? null;
 
         return $resolver === null ? null : $resolver($action, $panel);
+    }
+
+    public function registerPersonal(string $screen, Closure $resolver): void
+    {
+        $this->personal[$screen] = $resolver;
+    }
+
+    public function personal(array $action, string $userId): ?string
+    {
+        $resolver = $this->personal[$action['screen'] ?? ''] ?? null;
+
+        return $resolver === null ? null : $resolver($action, $userId);
     }
 }
