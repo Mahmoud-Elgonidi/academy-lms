@@ -5,6 +5,7 @@
     $tz = $this->data['timezone'] ?? 'UTC';
     $picked = $this->pickedCandidates();
     $pickedResult = collect($results)->first(fn ($r) => $r['teacher']->id === $this->pickedTeacher);
+    $trial = $this->isTrial();
 @endphp
 
 <x-filament-panels::page>
@@ -45,6 +46,7 @@
         .ft-chip strong { font-size: .95rem; font-variant-numeric: tabular-nums; }
         .ft-chip small { font-size: .68rem; color: var(--gray-500); }
         .ft-chip em { font-style: normal; font-size: .65rem; font-weight: 700; color: var(--warning-700); }
+        .ft-chip em.ft-first { color: var(--primary-700); }
         .ft-chip:hover { border-color: var(--primary-400); }
         .ft-chip[aria-pressed="true"] { background: var(--primary-600); border-color: var(--primary-600); color: white; }
         .ft-chip[aria-pressed="true"] small, .ft-chip[aria-pressed="true"] em { color: white; }
@@ -95,8 +97,11 @@
                             {{ __('scheduling::find.held_for') }} <span class="ft-timer" x-text="Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0')"></span>
                         </span>
                         <div class="ft-actions">
-                            <x-filament::button wire:click="confirm('trial')" color="gray" size="sm">{{ __('scheduling::find.confirm_trial') }}</x-filament::button>
-                            <x-filament::button wire:click="confirm('series')" size="sm">{{ __('scheduling::find.confirm_series', ['count' => $this->heldCount()]) }}</x-filament::button>
+                            @if ($trial)
+                                <x-filament::button wire:click="confirm('trial')" size="sm" icon="heroicon-m-sparkles">{{ __('scheduling::find.confirm_trial') }}</x-filament::button>
+                            @else
+                                <x-filament::button wire:click="confirm('series')" size="sm">{{ __('scheduling::find.confirm_series', ['count' => $this->heldCount()]) }}</x-filament::button>
+                            @endif
                             <x-filament::button wire:click="release" color="gray" size="sm" outlined>{{ __('scheduling::find.release') }}</x-filament::button>
                         </div>
                     @else
@@ -109,9 +114,9 @@
 
             @if (! $this->searched)
                 <div class="ft-card ft-empty">
-                    <x-filament::icon icon="heroicon-o-calendar-days" style="width: 2rem; height: 2rem; margin: 0 auto .5rem" />
-                    <strong>{{ __('scheduling::find.start.title') }}</strong>
-                    <p class="ft-muted">{{ __('scheduling::find.start.hint') }}</p>
+                    <x-filament::icon :icon="$trial ? 'heroicon-o-sparkles' : 'heroicon-o-calendar-days'" style="width: 2rem; height: 2rem; margin: 0 auto .5rem" />
+                    <strong>{{ __('scheduling::find.'.($trial ? 'start_trial' : 'start').'.title') }}</strong>
+                    <p class="ft-muted">{{ __('scheduling::find.'.($trial ? 'start_trial' : 'start').'.hint') }}</p>
                 </div>
             @elseif ($results === [])
                 <div class="ft-card ft-empty">
@@ -140,11 +145,15 @@
                             </div>
                             <div class="ft-stats">
                                 <div><small>{{ __('scheduling::find.fit') }}</small><strong>{{ $result['score'] }}%</strong></div>
-                                <div><small>{{ __('scheduling::find.load') }}</small><strong>{{ (int) round($result['utilisation'] * 100) }}%</strong></div>
+                                @if ($trial)
+                                    <div><small>{{ __('scheduling::find.conversion') }}</small><strong>{{ $result['conversion'] === null ? '—' : (int) round($result['conversion'] * 100).'%' }}</strong></div>
+                                @else
+                                    <div><small>{{ __('scheduling::find.load') }}</small><strong>{{ (int) round($result['utilisation'] * 100) }}%</strong></div>
+                                @endif
                             </div>
                         </div>
 
-                        @if ($result['pattern'])
+                        @if ($result['pattern'] && ! $trial)
                             <div class="ft-pattern">
                                 <span>{{ __('scheduling::find.pattern') }}</span>
                                 <strong>{{ collect($this->inWeekOrder($result['pattern']))->map(fn ($c) => $this->dayName($c->studentWeekday).' '.$c->studentTime)->implode(' + ') }}</strong>
@@ -165,9 +174,11 @@
                                                 title="{{ $chip->full() ? __('scheduling::find.all_weeks', ['n' => $chip->weeks]) : __('scheduling::find.conflicts_on', ['dates' => implode('، ', $chip->conflictDates)]) }}">
                                                 <strong>{{ $chip->studentTime }}</strong>
                                                 <small>{{ $chip->teacherTime }} {{ $this->city($t->timezone ?? 'UTC') }}</small>
-                                                @unless ($chip->full())
+                                                @if ($trial)
+                                                    <em class="ft-first">{{ __('scheduling::find.first_free', ['date' => $this->firstFree($chip, $t->timezone ?? 'UTC')]) }}</em>
+                                                @elseif (! $chip->full())
                                                     <em>{{ $chip->coverage }}/{{ $chip->weeks }}</em>
-                                                @endunless
+                                                @endif
                                             </button>
                                         @endforeach
                                     </div>

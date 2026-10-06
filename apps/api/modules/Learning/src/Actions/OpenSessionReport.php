@@ -10,7 +10,8 @@ use Modules\Learning\Queries\SessionFacts;
 /**
  * A finished lesson asks for a report; a student absence asks for a short
  * note (docs/architecture/02, section 5, "حالة التقرير"). Other outcomes ask
- * for nothing. Due report_due_hours after the lesson ends, or after now when
+ * for nothing, and so does a trial lesson: its teacher assesses it in the
+ * CRM instead. Due report_due_hours after the lesson ends, or after now when
  * the lesson was closed late (a review decided days later). Idempotent.
  */
 final class OpenSessionReport
@@ -25,7 +26,7 @@ final class OpenSessionReport
             default => null,
         };
         $session = $kind === null ? null : $this->sessions->find($sessionId);
-        if ($session === null || $session->student_id === null) {
+        if ($session === null || $session->student_id === null || $session->type === 'trial') {
             return null;
         }
 

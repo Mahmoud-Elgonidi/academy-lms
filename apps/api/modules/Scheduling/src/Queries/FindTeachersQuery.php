@@ -5,6 +5,7 @@ namespace Modules\Scheduling\Queries;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Scheduling\Contracts\DTOs\TeacherSearch;
+use Modules\Scheduling\Contracts\TrialConversionRates;
 use Modules\Scheduling\Domain\Availability\Candidate;
 use Modules\Scheduling\Domain\Availability\Matcher;
 
@@ -13,18 +14,24 @@ use Modules\Scheduling\Domain\Availability\Matcher;
  * then free time and matching per teacher, then a weighted score.
  *
  * Score (of the weights in the docs, the ones we can measure today):
- * availability 35, load balance 15, soft preferences 10, scaled to 100.
- * Teacher tier, continuity and trial conversion join when Evaluation lands.
+ * availability 35, load balance 15, soft preferences 10, and for a trial
+ * how often the teacher's trials became subscriptions 10 (from the CRM;
+ * a teacher with no trials yet counts at the 40% target), scaled to 100.
+ * Teacher tier and continuity join when Evaluation lands.
  */
 final class FindTeachersQuery
 {
+    /** A teacher with no trials yet counts at the target rate (docs/architecture/02, KPIs). */
+    public const TRIAL_TARGET = 0.4;
+
     public function __construct(
         private readonly AvailabilityQuery $availability,
         private readonly Matcher $matcher,
+        private readonly TrialConversionRates $conversion,
     ) {}
 
     /**
-     * @return list<array{teacher: object, score: int, utilisation: float, candidates: list<Candidate>,
+     * @return list<array{teacher: object, score: int, conversion: ?float, utilisation: float, candidates: list<Candidate>,
      *     chips: array<int, list<Candidate>>, pattern: ?list<Candidate>}>
      */
     public function run(TeacherSearch $search): array
@@ -49,6 +56,7 @@ final class FindTeachersQuery
             return [];
         }
 
+        $rates = $search->forTrial ? $this->conversion->forTeachers($teachers->keys()->all()) : [];
         $from = CarbonImmutable::parse($pref->startDate->toDateString(), $pref->timezone)->utc();
         $free = $this->availability->forTeachers($teachers->keys()->all(), $from, $from->addWeeks($pref->weeks), $search->searcherId);
 
@@ -71,9 +79,15 @@ final class FindTeachersQuery
                 default => 1.0,
             };
 
+            $weighted = 0.35 * $coverage + 0.15 * (1 - $availability->utilisation()) + 0.10 * $soft;
+            $score = $search->forTrial
+                ? ($weighted + 0.10 * ($rates[$teacherId] ?? self::TRIAL_TARGET)) / 0.70
+                : $weighted / 0.60;
+
             $results[] = [
                 'teacher' => $teacher,
-                'score' => (int) round(100 * (0.35 * $coverage + 0.15 * (1 - $availability->utilisation()) + 0.10 * $soft) / 0.60),
+                'score' => (int) round(100 * $score),
+                'conversion' => $search->forTrial ? ($rates[$teacherId] ?? null) : null,
                 'utilisation' => $availability->utilisation(),
                 'candidates' => $candidates,
                 'chips' => $this->matcher->chips($candidates),

@@ -18,6 +18,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Classroom\Filament\Teacher\ClassroomTeacherPlugin;
+use Modules\Crm\Filament\Teacher\CrmTeacherPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Learning\Filament\Teacher\LearningTeacherPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
@@ -68,6 +69,7 @@ final class TeacherPanelProvider extends PanelProvider
             ->plugins([
                 ClassroomTeacherPlugin::make(),
                 SchedulingTeacherPlugin::make(),
+                CrmTeacherPlugin::make(),
                 LearningTeacherPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),

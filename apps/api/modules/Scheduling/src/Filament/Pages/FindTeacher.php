@@ -41,8 +41,11 @@ use Modules\SharedKernel\Time\Timezones;
  * "Find a teacher" (docs/architecture/02, section 2): the student's times on
  * a week grid in the student's timezone, teachers ranked by fit, weekly
  * times as chips on the student's clock with the teacher's clock under them,
- * a 10-minute hold, then a free trial or the enrolment (plan, payer,
- * invoice, weekly times and their sessions).
+ * a 10-minute hold, then the enrolment (plan, payer, invoice, weekly times
+ * and their sessions). In trial mode: one free lesson in the next two weeks
+ * with a teacher who takes trials, ranked by how often their trials became
+ * subscriptions; sales may book it. Other screens (the CRM's lead page) open
+ * it filled in (?mode, student, subject, tz, days, from, to, return).
  *
  * @property-read Schema $form
  */
@@ -73,6 +76,9 @@ final class FindTeacher extends Page
 
     public ?int $holdExpiresAt = null;
 
+    /** Where to go after booking (a path in this panel), when another screen sent us here. */
+    public ?string $back = null;
+
     public static function canAccess(): bool
     {
         return Gate::allows(Ability::FindTeachers->value);
@@ -90,26 +96,51 @@ final class FindTeacher extends Page
 
     public function mount(): void
     {
+        $query = request()->query();
+        $back = (string) ($query['return'] ?? '');
+        $this->back = str_starts_with($back, '/') && ! str_starts_with($back, '//') ? $back : null;
         $this->form->fill([
-            'student_id' => request()->query('student'),
-            'timezone' => app(TenantContext::class)->require()->defaultTimezone,
-            'subject_id' => request()->query('subject'),
+            'mode' => ($query['mode'] ?? null) === 'trial' ? 'trial' : 'series',
+            'student_id' => $query['student'] ?? null,
+            'timezone' => in_array($query['tz'] ?? null, Timezones::all(), true) ? $query['tz'] : app(TenantContext::class)->require()->defaultTimezone,
+            'subject_id' => $query['subject'] ?? null,
             'gender' => 'any',
             'language' => null,
-            'per_week' => 2,
+            'per_week' => min(5, max(1, (int) ($query['per_week'] ?? 2))),
             'duration' => 30,
             'start_date' => CarbonImmutable::now()->addDay()->toDateString(),
             'weeks' => 8,
             'min_coverage' => 8,
         ]);
-        if ($this->data['student_id']) {
+        if ($this->data['student_id'] && ! isset($query['tz'])) {
             $this->studentChosen($this->data['student_id']);
         }
+
+        // Preferred times sent along: those hours on those days, and the search runs.
+        $days = array_values(array_filter(array_map('intval', explode(',', (string) ($query['days'] ?? ''))), fn (int $d) => $d >= 1 && $d <= 7));
+        [$from, $to] = [(int) ($query['from'] ?? 0), (int) ($query['to'] ?? 0)];
+        if ($days !== [] && $from >= 0 && $to > $from && $to <= 24) {
+            foreach ($days as $day) {
+                $this->cells[$day] = array_values(array_filter(range($from, $to - 1), fn (int $h) => $h >= 6 && $h <= 23));
+            }
+            $this->searched = filled($this->data['subject_id']) && array_filter($this->cells) !== [];
+        }
+    }
+
+    public function isTrial(): bool
+    {
+        return ($this->data['mode'] ?? 'series') === 'trial';
     }
 
     public function form(Schema $schema): Schema
     {
+        $series = fn (Get $get) => $get('mode') !== 'trial';
+
         return $schema->statePath('data')->components([
+            ToggleButtons::make('mode')->hiddenLabel()->inline()->required()->live()
+                ->options(['series' => __('scheduling::find.modes.series'), 'trial' => __('scheduling::find.modes.trial')])
+                ->icons(['series' => Heroicon::OutlinedCalendarDays, 'trial' => Heroicon::OutlinedSparkles])
+                ->afterStateUpdated(fn () => $this->resetResults()),
             Grid::make(2)->schema([
                 Select::make('student_id')->label(__('scheduling::find.fields.student'))
                     ->options(fn () => self::students())->searchable()->live()
@@ -127,14 +158,15 @@ final class FindTeacher extends Page
                 ->inline()->required(),
             Grid::make(3)->schema([
                 Select::make('per_week')->label(__('scheduling::find.fields.per_week'))
-                    ->options(array_combine(range(1, 5), array_map(fn ($n) => trans_choice('scheduling::find.per_week', $n, ['n' => $n]), range(1, 5))))->required()->native(false),
+                    ->options(array_combine(range(1, 5), array_map(fn ($n) => trans_choice('scheduling::find.per_week', $n, ['n' => $n]), range(1, 5))))->required()->native(false)
+                    ->visible($series),
                 ToggleButtons::make('duration')->label(__('scheduling::find.fields.duration'))
                     ->options([30 => '30', 45 => '45', 60 => '60'])->inline()->required(),
                 DatePicker::make('start_date')->label(__('scheduling::find.fields.start_date'))->required()->native(false),
             ]),
             ToggleButtons::make('min_coverage')->label(__('scheduling::find.fields.min_coverage'))
                 ->options([8 => __('scheduling::find.coverage.all', ['n' => 8]), 7 => __('scheduling::find.coverage.allow_one', ['n' => 8])])
-                ->inline()->required(),
+                ->inline()->required()->visible($series),
         ]);
     }
 
@@ -174,6 +206,8 @@ final class FindTeacher extends Page
 
         if (in_array($key, $this->picked, true)) {
             $this->picked = array_values(array_diff($this->picked, [$key]));
+        } elseif ($this->isTrial()) {
+            $this->picked = [$key];
         } elseif (count($this->picked) < (int) $this->data['per_week']) {
             $this->picked[] = $key;
         } else {
@@ -232,7 +266,8 @@ final class FindTeacher extends Page
 
             return;
         }
-        if (! Gate::allows(Ability::ManageSessions->value)) {
+        // A trial is sales' to book too; a weekly series is the scheduler's (docs/architecture/01, permissions).
+        if (! Gate::allows(($kind === 'series' ? Ability::ManageSessions : Ability::BookTrials)->value)) {
             Notification::make()->danger()->title(__('scheduling::find.errors.cannot_book'))->send();
 
             return;
@@ -249,7 +284,11 @@ final class FindTeacher extends Page
 
         Notification::make()->success()
             ->title(__('scheduling::find.booked.trial', ['date' => $this->studentDate($trial->starts_at)]))
+            ->body(__('scheduling::find.booked.trial_told'))
             ->send();
+        if ($this->back !== null) {
+            $this->redirect($this->back, navigate: true);
+        }
     }
 
     /** The enrolment step: plan, payer and price region, then one action does the rest. */
@@ -329,14 +368,16 @@ final class FindTeacher extends Page
             return [];
         }
 
+        // A trial is one lesson: any free time in the next two weeks will do.
+        $trial = $this->isTrial();
         $preference = new StudentPreference(
             timezone: $this->data['timezone'],
             windows: StudentPreference::windowsFromHours($this->cells),
-            perWeek: (int) $this->data['per_week'],
+            perWeek: $trial ? 1 : (int) $this->data['per_week'],
             durationMin: (int) $this->data['duration'],
             startDate: CarbonImmutable::parse($this->data['start_date']),
-            weeks: (int) $this->data['weeks'],
-            minCoverage: (int) $this->data['min_coverage'],
+            weeks: $trial ? 2 : (int) $this->data['weeks'],
+            minCoverage: $trial ? 1 : (int) $this->data['min_coverage'],
         );
 
         return app(FindTeachersQuery::class)->run(new TeacherSearch(
@@ -344,6 +385,7 @@ final class FindTeacher extends Page
             preference: $preference,
             gender: $this->data['gender'],
             language: $this->data['language'] ?: null,
+            forTrial: $trial,
             searcherId: (string) auth()->id(),
         ));
     }
@@ -374,6 +416,19 @@ final class FindTeacher extends Page
         uksort($items, fn (int $a, int $b) => $order[$a] <=> $order[$b]);
 
         return $items;
+    }
+
+    /** The first free day of a weekly time, on the student's clock (a trial takes that one). */
+    public function firstFree(Candidate $candidate, string $teacherTz): ?string
+    {
+        foreach ($candidate->occurrences as $ts) {
+            $at = CarbonImmutable::createFromTimestamp($ts, 'UTC');
+            if (! in_array($at->setTimezone($teacherTz)->toDateString(), $candidate->conflictDates, true) && $at->isFuture()) {
+                return $at->setTimezone($this->data['timezone'])->locale(app()->getLocale())->translatedFormat('j M');
+            }
+        }
+
+        return null;
     }
 
     public function dayName(int $weekday): string

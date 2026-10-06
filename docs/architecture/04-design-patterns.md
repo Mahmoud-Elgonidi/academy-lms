@@ -30,14 +30,14 @@
 | M4 | **People** | ملفات المدرسين والطلاب، وعلاقات أولياء الأمور | `TeacherOnboarded`، `TeacherSubjectsChanged`، `TeacherTierChanged`، `StudentCreated`، `GuardianLinked`، `UserTimezoneChanged` |
 | M5 | **Curriculum** | البرامج، والإصدارات، وعُقد المنهج، والموارد، وتعريفات الاختبارات | `CurriculumVersionPublished` |
 | M6 | **Enrollment** | الاتفاق التعليمي، وتغيير المدرس | `EnrollmentCreated`، `EnrollmentActivated`، `EnrollmentPaused`، `EnrollmentResumed`، `EnrollmentEnded`، `TeacherReassigned` |
-| M7 | **Scheduling** | **قلب النظام**: الشفتات ومقترحاتها، والإجازات، والتوافر، والمطابقة، والحجز، ودورة حياة الحصة، والسياسات، وتغيير التوقيت | `SessionScheduled`، `SessionRescheduled`، `SessionTeacherSubstituted`، `SessionCancelled`، `SessionStarted`، `SessionFinalized`، `SessionFlaggedForReview`، `TeacherLate`، `DstShiftUpcoming`، `DstShiftDecided`، `SlotTimesShifted`، `TeacherLessonsShifted`، `SchedulingConflictDetected`، `ShiftProposalSubmitted`، `ShiftProposalChangesRequested`، `ShiftProposalCountered`، `ShiftProposalApproved`، `ShiftProposalRejected`، `ShiftRulesChanged`، `TimeOffRequested`، `TimeOffDecided`، `HolidayDeclared` |
+| M7 | **Scheduling** | **قلب النظام**: الشفتات ومقترحاتها، والإجازات، والتوافر، والمطابقة، والحجز، ودورة حياة الحصة، والسياسات، وتغيير التوقيت | `SessionScheduled`، `SessionRescheduled`، `SessionTeacherSubstituted`، `SessionCancelled`، `SessionStarted`، `SessionFinalized`، `SessionFlaggedForReview`، `TeacherLate`، `DstShiftUpcoming`، `DstShiftDecided`، `SlotTimesShifted`، `TeacherLessonsShifted`، `SchedulingConflictDetected`، `ShiftProposalSubmitted`، `ShiftProposalChangesRequested`، `ShiftProposalCountered`، `ShiftProposalApproved`، `ShiftProposalRejected`، `ShiftRulesChanged`، `TimeOffRequested`، `TimeOffDecided`، `HolidayDeclared`، `TrialLessonBooked` |
 | M8 | **Classroom** | غرف الفيديو، والتسجيلات، والـ webhooks، وبلاغات المشاكل التقنية | `ParticipantJoined`، `ParticipantLeft`، `RecordingReady`، `TechnicalIssueReported` |
 | M9 | **Credits** | الـ ledger والدفعات والحجوزات | `CreditsGranted`، `CreditsReserved`، `CreditsConsumed`، `CreditsReleased`، `CreditsExpired`، `CreditBalanceLow` |
 | M10 | **Billing** | الباقات والأسعار، والاشتراكات، والفواتير، والمدفوعات، والبوابات، والضرايب، وZATCA | `InvoiceIssued`، `PaymentSucceeded`، `PaymentFailed`، `InvoicePaid`، `SubscriptionRenewed`، `SubscriptionPastDue`، `SubscriptionPaused`، `RefundIssued`، `EInvoiceReported` |
 | M11 | **Learning** | التقارير، والواجبات، والتقدم، والاختبارات، والشهادات، والتقارير الشهرية | `SessionReportSubmitted`، `SessionReportOverdue`، `HomeworkAssigned`، `HomeworkSubmitted`، `HomeworkReviewed`، `NodeMastered`، `LevelCompleted`، `CertificateIssued` |
 | M12 | **Evaluation** | أحداث الأداء، والتقييمات، ومراجعات الجودة، والدرجات، والفئات | `RatingSubmitted`، `QaAuditCompleted`، `TeacherScoreComputed`، `StudentAtRiskDetected` |
 | M13 | **Payroll** | جداول الأسعار، والأرباح، وفترات المرتبات، والكشوف | `EarningAccrued`، `PayrollPeriodClosed`، `StatementPublished` |
-| M14 | **CRM** | الـ leads، والتجارب، وتقييمها، والاستبقاء، والإحالات | `LeadCreated`، `TrialBooked`، `TrialCompleted`، `TrialAssessed`، `LeadConverted`، `LeadLost` |
+| M14 | **CRM** | الـ leads، والتجارب، وتقييمها، والاستبقاء، والإحالات | `LeadCreated`، `LeadAssigned`، `TrialCompleted`، `TrialMissed`، `TrialAssessed`، `LeadConverted`، `LeadLost` |
 | M15 | **Communication** | القوالب، والقنوات، والتفضيلات، والإشعارات، والمحادثات | `NotificationFailed`، `MessageFlagged` |
 | M16 | **Support** | التذاكر والشكاوى | `TicketOpened`، `ComplaintValidated` |
 | M17 | **Reporting** | جداول الحقائق والمؤشرات (للقراءة بس) | — |
@@ -81,7 +81,9 @@ flowchart TD
    - **الإشعارات** عكس اتجاه السماع: الـ module اللي حصل عنده الحدث (Learning، Billing، Scheduling) بيسمع الـ events بتاعته ويبعت رسالة عن طريق `NotificationsApi` بقالب معرّف في الـ provider بتاعه، والصيغة في ملفات الـ lang بتاعته. Communication مابيعرفش حد غير Identity وPlatform (الاسم والشعار في الإيميل)، فبيفضل تحت في الرسم. وفين الإشعار بيفتح في اللوحات، كل module بيسجّله في `NotificationLinks`.
      - **المنفّذ دلوقتي**: Learning بيفتح التقرير لما يسمع `SessionFinalized`، وبيعيد حساب التقدم لما يسمع `CurriculumAttached` من Enrollment. ولأن Scheduling مايعرفش Learning، قسم "المنهج والتقدم" في حساب الطالب بيدخل الصفحة عن طريق **render hook** باسم ثابت (`scheduling::enrollment.account`) بيسجّله Learning.
    - Evaluation بيسمع `SessionReportSubmitted` و`RatingSubmitted` و`ComplaintValidated`.
-   - CRM بيسمع `TrialCompleted`.
+   - CRM بيسمع `TrialLessonBooked` و`SessionRescheduled` و`SessionCancelled` و`SessionFinalized` من Scheduling، و`EnrollmentCreated` من Enrollment. وبيطلّع `TrialCompleted` (المدرس يقيّم) و`TrialAssessed` (المبيعات تكمّل).
+     - **المنفّذ دلوقتي**: محدش بيعتمد على CRM. ترتيب "ابحث عن مدرس" محتاج نسبة تحويل التجارب، فـ Scheduling بيعرّف عقد `TrialConversionRates` عنده، والـ CRM بيسجّل التنفيذ بتاعه (dependency inversion). من غير CRM محدش بيتقدم على حد.
+     - صفحة العميل بتفتح "ابحث عن مدرس" باسم الـ route وparameters في الـ URL، وده بيفضل داخل حدود الـ module.
 
 ---
 

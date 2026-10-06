@@ -16,6 +16,8 @@ return [
     'teacher_late' => ['title' => ':teacher has not joined :student\'s lesson', 'body' => 'It started at :when. Follow it on the live board.'],
     'session_cancelled' => ['title' => ':subject lesson cancelled', 'body' => ':student\'s lesson on :when is cancelled. :outcome'],
     'session_cancelled_teacher' => ['title' => 'Lesson with :student cancelled', 'body' => 'The :subject lesson on :when is cancelled.'],
+    'trial_booked' => ['title' => ':student\'s trial lesson is booked', 'body' => 'The :subject trial lesson with :teacher is on :when. No account or app needed: join here a few minutes before: :link'],
+    'trial_booked_teacher' => ['title' => 'A new trial lesson', 'body' => ':student · :subject · :when. After the lesson you will be asked to assess their level.'],
     'session_moved' => ['title' => ':subject lesson moved', 'body' => ':student\'s lesson moved from :from to :when.'],
     'session_moved_teacher' => ['title' => 'Lesson with :student moved', 'body' => 'The :subject lesson moved from :from to :when.'],
     'proposal_submitted' => ['title' => ':teacher sent a shift proposal', 'body' => 'Review it on the "Shift proposals" page.'],

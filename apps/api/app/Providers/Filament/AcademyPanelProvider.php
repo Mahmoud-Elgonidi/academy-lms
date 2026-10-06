@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\OpenFirstAllowedScreen;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SetPanelLocale;
 use Filament\Http\Middleware\Authenticate;
@@ -20,6 +21,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Billing\Filament\BillingPlugin;
 use Modules\Classroom\Filament\ClassroomPlugin;
 use Modules\Communication\Filament\CommunicationPlugin;
+use Modules\Crm\Filament\CrmPlugin;
 use Modules\Curriculum\Filament\CurriculumPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Learning\Filament\LearningPlugin;
@@ -70,9 +72,10 @@ final class AcademyPanelProvider extends PanelProvider
                 SetPanelLocale::class,
                 EnableBrowserEcho::class,
             ], isPersistent: true)
-            ->authMiddleware([Authenticate::class], isPersistent: true)
+            ->authMiddleware([Authenticate::class, OpenFirstAllowedScreen::class], isPersistent: true)
             ->plugins([
                 SchedulingPlugin::make(),
+                CrmPlugin::make(),
                 BillingPlugin::make(),
                 CurriculumPlugin::make(),
                 LearningPlugin::make(),

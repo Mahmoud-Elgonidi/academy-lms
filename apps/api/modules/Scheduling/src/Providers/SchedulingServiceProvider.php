@@ -34,6 +34,8 @@ use Modules\Scheduling\Contracts\Events\SlotTimesShifted;
 use Modules\Scheduling\Contracts\Events\TeacherLessonsShifted;
 use Modules\Scheduling\Contracts\Events\TimeOffDecided;
 use Modules\Scheduling\Contracts\Events\TimeOffRequested;
+use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
+use Modules\Scheduling\Contracts\TrialConversionRates;
 use Modules\Scheduling\Domain\AttendancePolicy;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Filament\Family\FamilyLessons;
@@ -58,6 +60,14 @@ final class SchedulingServiceProvider extends ServiceProvider
         // The current academy's numbers, read each time (one process serves many academies).
         $this->app->bind(AttendancePolicy::class, fn () => PolicyVersion::settingsInForce()->attendance());
         $this->app->singleton(AttendanceApi::class, AttendanceService::class);
+        // Trial conversion is the CRM's to know; without it no teacher gets ahead in a trial search.
+        $this->app->bindIf(TrialConversionRates::class, fn () => new class implements TrialConversionRates
+        {
+            public function forTeachers(array $teacherIds): array
+            {
+                return [];
+            }
+        });
     }
 
     public function boot(): void
@@ -120,6 +130,7 @@ final class SchedulingServiceProvider extends ServiceProvider
         Event::listen(DstShiftDecided::class, [SendSchedulingNotifications::class, 'dstDecided']);
         Event::listen(SlotTimesShifted::class, [SendSchedulingNotifications::class, 'slotShifted']);
         Event::listen(TeacherLessonsShifted::class, [SendSchedulingNotifications::class, 'teacherShifted']);
+        Event::listen(TrialLessonBooked::class, [SendSchedulingNotifications::class, 'trialBooked']);
         foreach ([ShiftProposalApproved::class, ShiftProposalRejected::class, ShiftProposalChangesRequested::class, ShiftProposalCountered::class] as $answer) {
             Event::listen($answer, [SendSchedulingNotifications::class, 'proposalAnswered']);
         }

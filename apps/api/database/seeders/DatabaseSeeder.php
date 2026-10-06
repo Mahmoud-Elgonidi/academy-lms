@@ -7,6 +7,7 @@ use Modules\Billing\Database\Seeders\DemoBillingSeeder;
 use Modules\Billing\Database\Seeders\DemoPaymentsSeeder;
 use Modules\Classroom\Database\Seeders\DemoClassroomSeeder;
 use Modules\Communication\Database\Seeders\DemoCommunicationSeeder;
+use Modules\Crm\Database\Seeders\DemoCrmSeeder;
 use Modules\Curriculum\Database\Seeders\DemoCurriculumSeeder;
 use Modules\Identity\Contracts\DTOs\NewUser;
 use Modules\Identity\Contracts\IdentityApi;
@@ -54,6 +55,7 @@ class DatabaseSeeder extends Seeder
                 ['هالة منصور', 'owner@demo.test', [Role::Owner, Role::Admin]],
                 ['منسّق الجداول', 'scheduler@demo.test', [Role::Scheduler]],
                 ['محاسب الأكاديمية', 'accountant@demo.test', [Role::Accountant]],
+                ['ريم عادل', 'sales@demo.test', [Role::Sales]],
                 ['أ. أحمد', 'teacher@demo.test', [Role::Teacher]],
                 ['ولي أمر', 'guardian@demo.test', [Role::Guardian]],
                 ['طالب', 'student@demo.test', [Role::Student]],
@@ -63,7 +65,7 @@ class DatabaseSeeder extends Seeder
                 $identity->createUser(new NewUser(name: $name, roles: $roles, email: $email, password: 'password', locale: 'ar', timezone: 'Africa/Cairo'));
             }
 
-            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class]);
+            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class]);
         });
 
         $this->command?->info('Seeded academy "demo". Sign in as owner@demo.test / password.');

@@ -6,7 +6,7 @@
  * no cycles, and only platform code may use the BYPASSRLS connection.
  */
 
-const MODULES_ABOVE_KERNEL = ['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'App'];
+const MODULES_ABOVE_KERNEL = ['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'App'];
 
 arch('the shared kernel depends on no module')
     ->expect('Modules\SharedKernel')
@@ -25,7 +25,7 @@ arch('enrollment reaches people, catalog and curriculum through contracts, and k
     ->not->toUse([
         'Modules\Platform', 'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\People\Models', 'Modules\People\Actions',
         'Modules\Catalog\Models', 'Modules\Catalog\Actions', 'Modules\Curriculum\Models', 'Modules\Curriculum\Actions',
-        'Modules\Credits', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'App',
+        'Modules\Credits', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Crm', 'App',
     ]);
 
 arch('curriculum knows only catalog\'s contracts and the shared kernel')
@@ -43,7 +43,7 @@ arch('learning reaches other modules only through their contracts, and nothing d
         'Modules\Curriculum\Models', 'Modules\Curriculum\Actions',
         'Modules\Enrollment\Models', 'Modules\Enrollment\Actions',
         'Modules\Scheduling\Domain', 'Modules\Scheduling\Actions', 'Modules\Scheduling\Queries',
-        'Modules\Credits', 'Modules\Billing', 'App',
+        'Modules\Credits', 'Modules\Billing', 'Modules\Crm', 'App',
     ]);
 
 arch('progress, mastery and today\'s plan are pure: dates, curriculum DTOs and domain types only')
@@ -56,14 +56,14 @@ arch('billing reaches enrollment and credits only through their contracts, and k
         'Modules\Credits\Models', 'Modules\Credits\Actions', 'Modules\Credits\Domain',
         'Modules\Enrollment\Models', 'Modules\Enrollment\Actions',
         'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\People\Models', 'Modules\People\Actions',
-        'Modules\Platform\Models', 'Modules\Platform\Actions', 'Modules\Scheduling', 'Modules\Curriculum', 'Modules\Learning', 'App',
+        'Modules\Platform\Models', 'Modules\Platform\Actions', 'Modules\Scheduling', 'Modules\Curriculum', 'Modules\Learning', 'Modules\Crm', 'App',
     ]);
 
 arch('identity reaches platform only through its contracts, and knows nothing above it')
     ->expect('Modules\Identity')
     ->not->toUse([
         'Modules\Platform\Models', 'Modules\Platform\Actions', 'Modules\Platform\Directory', 'Modules\Platform\Branding',
-        'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'App',
+        'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Crm', 'App',
     ]);
 
 arch('communication knows only identity\'s and platform\'s contracts: modules call it, it calls none of them')
@@ -72,11 +72,11 @@ arch('communication knows only identity\'s and platform\'s contracts: modules ca
         'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\Identity\Authorization', 'Modules\Identity\Preferences',
         'Modules\Platform\Models', 'Modules\Platform\Actions', 'Modules\Platform\Directory', 'Modules\Platform\Branding',
         'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing',
-        'Modules\Scheduling', 'Modules\Learning', 'App',
+        'Modules\Scheduling', 'Modules\Learning', 'Modules\Crm', 'App',
     ]);
 
 arch('modules send messages only through communication\'s contracts')
-    ->expect(['Modules\Learning', 'Modules\Billing', 'Modules\Scheduling'])
+    ->expect(['Modules\Learning', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Crm'])
     ->not->toUse([
         'Modules\Communication\Models', 'Modules\Communication\Actions', 'Modules\Communication\Channels',
         'Modules\Communication\Templates', 'Modules\Communication\Jobs', 'Modules\Communication\Domain',
@@ -95,7 +95,7 @@ arch('people reaches identity and catalog only through their contracts')
     ->not->toUse([
         'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\Identity\Preferences',
         'Modules\Catalog\Models', 'Modules\Catalog\Actions',
-        'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'App',
+        'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Crm', 'App',
     ]);
 
 arch('scheduling reaches other modules only through their contracts')
@@ -108,8 +108,25 @@ arch('scheduling reaches other modules only through their contracts')
         'Modules\Credits\Models', 'Modules\Credits\Actions', 'Modules\Credits\Domain',
         'Modules\Enrollment\Models', 'Modules\Enrollment\Actions',
         'Modules\Billing\Models', 'Modules\Billing\Actions', 'Modules\Billing\Domain',
-        'Modules\Curriculum', 'Modules\Learning', 'App',
+        'Modules\Curriculum', 'Modules\Learning', 'Modules\Crm', 'App',
     ]);
+
+// The demo seeder books trials and enrolments the way the screens do, through Scheduling's actions.
+arch('crm sits on top: it reaches every module only through its contracts, and nothing depends on it')
+    ->expect('Modules\Crm')
+    ->not->toUse([
+        'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\Identity\Preferences', 'Modules\Identity\Authorization',
+        'Modules\Platform\Models', 'Modules\Platform\Actions', 'Modules\Platform\Directory', 'Modules\Platform\Branding',
+        'Modules\Catalog\Models', 'Modules\Catalog\Actions',
+        'Modules\People\Models', 'Modules\People\Actions',
+        'Modules\Credits', 'Modules\Curriculum', 'Modules\Learning', 'Modules\Classroom',
+        'Modules\Enrollment\Models', 'Modules\Enrollment\Actions',
+        'Modules\Billing\Models', 'Modules\Billing\Actions', 'Modules\Billing\Domain',
+        'Modules\Scheduling\Domain', 'Modules\Scheduling\Actions', 'Modules\Scheduling\Queries', 'Modules\Scheduling\Filament',
+        'Modules\Communication\Models', 'Modules\Communication\Actions', 'Modules\Communication\Channels', 'Modules\Communication\Templates',
+        'App',
+    ])
+    ->ignoring('Modules\Crm\Database');
 
 arch('the classroom reaches lessons, plans, people, messages and branding only through their contracts, and nothing depends on it')
     ->expect('Modules\Classroom')
@@ -122,7 +139,7 @@ arch('the classroom reaches lessons, plans, people, messages and branding only t
         'Modules\Communication\Models', 'Modules\Communication\Actions', 'Modules\Communication\Channels', 'Modules\Communication\Templates',
         'Modules\Catalog', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'App',
     ])
-    ->and(['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning'])
+    ->and(['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Crm'])
     ->not->toUse('Modules\Classroom');
 
 arch('the video adapters only talk to the provider: no queries, no attendance, no tenancy')
@@ -144,14 +161,15 @@ arch('the app layer uses modules only through contracts, plugins and the shared 
         'Modules\Curriculum\Models', 'Modules\Curriculum\Actions',
         'Modules\Learning\Models', 'Modules\Learning\Actions', 'Modules\Learning\Domain',
         'Modules\Classroom\Models', 'Modules\Classroom\Actions', 'Modules\Classroom\Video',
+        'Modules\Crm\Models', 'Modules\Crm\Actions',
     ]);
 
 arch('actions and models are final')
     ->expect([
         'Modules\Platform\Actions', 'Modules\Identity\Actions', 'Modules\Catalog\Actions', 'Modules\People\Actions', 'Modules\Scheduling\Actions',
-        'Modules\Credits\Actions', 'Modules\Enrollment\Actions', 'Modules\Billing\Actions', 'Modules\Curriculum\Actions', 'Modules\Learning\Actions', 'Modules\Communication\Actions', 'Modules\Classroom\Actions',
+        'Modules\Credits\Actions', 'Modules\Enrollment\Actions', 'Modules\Billing\Actions', 'Modules\Curriculum\Actions', 'Modules\Learning\Actions', 'Modules\Communication\Actions', 'Modules\Classroom\Actions', 'Modules\Crm\Actions',
         'Modules\Platform\Models', 'Modules\Identity\Models', 'Modules\Catalog\Models', 'Modules\People\Models', 'Modules\Scheduling\Domain\Models',
-        'Modules\Credits\Models', 'Modules\Enrollment\Models', 'Modules\Billing\Models', 'Modules\Curriculum\Models', 'Modules\Learning\Models', 'Modules\Communication\Models', 'Modules\Classroom\Models',
+        'Modules\Credits\Models', 'Modules\Enrollment\Models', 'Modules\Billing\Models', 'Modules\Curriculum\Models', 'Modules\Learning\Models', 'Modules\Communication\Models', 'Modules\Classroom\Models', 'Modules\Crm\Models',
     ])
     ->toBeFinal();
 

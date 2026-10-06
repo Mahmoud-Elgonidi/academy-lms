@@ -197,7 +197,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 | Learning | `report_templates`، `report_template_versions`، `session_reports`، `report_items_covered`، `homework_assignments`، `homework_submissions`، `homework_reviews`، `enrollment_progress`، `enrollment_positions`، `assessment_attempts`، `certificates`، `report_cards` |
 | Evaluation | `kpi_events`، `ratings`، `qa_rubrics`، `qa_audits`، `kpi_snapshots`، `scoring_configs` |
 | Payroll | `rate_cards`، `rate_card_lines`، `teacher_earnings`، `payroll_periods`، `payroll_statements`، `payouts` |
-| CRM | `leads`، `lead_activities`، `trial_assessments`، `retention_tasks`، `referrals` |
+| CRM | `leads`، `lead_activities`، `lead_trials` (ومعاها تقييم المدرس)، `retention_tasks`، `referrals` |
 | Communication | `notification_templates`، `notification_preferences`، `notifications`، `notification_deliveries`، `conversations`، `messages`، `announcements` |
 | Support | `tickets`، `ticket_messages` |
 | Reporting | `fact_sessions_daily`، `fact_revenue_daily`، `fact_subscriptions_monthly`، `fact_teacher_utilization_weekly`، `fact_funnel_daily` |
@@ -221,6 +221,13 @@ shift_proposal_rules(proposal_id, revision, weekday, local_start, duration_min, 
 shift_proposal_comments(proposal_id, author_id, body, created_at)
 recurring_slots(enrollment_id, teacher_id, weekday, local_start, duration_min, anchor, anchor_tz,
                 minute_of_week int4multirange, effective daterange, status)  -- EXCLUDE: نفس المدرس، دقايق متداخلة في الأسبوع، وفترة متداخلة
+leads(contact_name, phone_e164, email, country, timezone, locale, for_child, learner_name, learner_birth_year, subject_id,
+      preferred_days jsonb, preferred_from, preferred_to, source, utm_*, notes, owner_id,
+      stage new|contacted|trial_booked|attended|assessed|won|lost, stage_changed_at, lost_reason, last_contact_at,
+      learner_id?, contact_id?, enrollment_id?)          -- الرقم بصيغة E.164، وحساب الطالب بيتعمل وقت ما يتحتاج
+lead_activities(lead_id, kind, body, data jsonb, actor_id, created_at)
+lead_trials(lead_id, session_id UNIQUE, teacher_id, starts_at, status booked|attended|missed|cancelled,
+            level, recommended_plan_id, recommended_per_week, assessment, assessed_by, assessed_at)
 schedule_shift_notices(slot_id, enrollment_id UNIQUE+changes_at, teacher_id, student_id, anchor_tz, other_tz, cause_tz,
                        changes_at, reverts_at, before_weekday/time, after_weekday/time, delta_min, lessons,
                        decision pending|keep_teacher|keep_student, decided_by, notified_early_at, notified_late_at)

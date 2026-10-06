@@ -16,6 +16,8 @@ return [
     'teacher_late' => ['title' => ':teacher ما دخلش حصة :student', 'body' => 'الحصة بدأت :when. تابعها من لوحة العمليات.'],
     'session_cancelled' => ['title' => 'اتلغت حصة :subject', 'body' => 'حصة :student يوم :when اتلغت. :outcome'],
     'session_cancelled_teacher' => ['title' => 'اتلغت حصة :student', 'body' => 'حصة :subject يوم :when اتلغت.'],
+    'trial_booked' => ['title' => 'اتحجزت الحصة التجريبية لـ :student', 'body' => 'حصة :subject التجريبية مع :teacher يوم :when. مش محتاجين حساب ولا تطبيق: ادخلوا من هنا قبل الميعاد بدقايق: :link'],
+    'trial_booked_teacher' => ['title' => 'حصة تجريبية جديدة', 'body' => ':student · :subject · :when. بعد الحصة هيتطلب منك تقييم مستواه.'],
     'session_moved' => ['title' => 'حصة :subject اتنقلت', 'body' => 'حصة :student اتنقلت من :from لـ :when.'],
     'session_moved_teacher' => ['title' => 'حصة :student اتنقلت', 'body' => 'حصة :subject اتنقلت من :from لـ :when.'],
     'proposal_submitted' => ['title' => ':teacher بعت مقترح شفتات', 'body' => 'راجعه من صفحة "مقترحات الشفتات".'],

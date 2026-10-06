@@ -5,13 +5,15 @@ namespace Modules\Scheduling\Actions;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Scheduling\Contracts\DTOs\NewSession;
+use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
 use Modules\Scheduling\Domain\Models\BookingHold;
 use Modules\Scheduling\Domain\Models\Session;
 
 /**
  * Books the free trial from a hold: the first held time, then the hold is
- * released. A weekly series is an enrolment (EnrollStudent): plan, invoice,
- * weekly times and sessions together.
+ * released, and everyone hears of it (TrialLessonBooked). A weekly series
+ * is an enrolment (EnrollStudent): plan, invoice, weekly times and sessions
+ * together.
  */
 final class ConfirmBooking
 {
@@ -38,6 +40,9 @@ final class ConfirmBooking
             ), $coordinatorId);
 
             BookingHold::query()->where('batch_id', $batchId)->delete();
+            DB::afterCommit(fn () => event(new TrialLessonBooked(
+                $session->academy_id, $session->id, $studentId, $session->teacher_id, $subjectId, $session->starts_at->utc()->toIso8601ZuluString(), $coordinatorId,
+            )));
 
             return $session;
         });

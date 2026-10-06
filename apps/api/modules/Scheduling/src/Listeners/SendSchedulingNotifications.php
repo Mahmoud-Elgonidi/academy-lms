@@ -27,6 +27,7 @@ use Modules\Scheduling\Contracts\Events\SlotTimesShifted;
 use Modules\Scheduling\Contracts\Events\TeacherLessonsShifted;
 use Modules\Scheduling\Contracts\Events\TimeOffDecided;
 use Modules\Scheduling\Contracts\Events\TimeOffRequested;
+use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
 use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\ShiftNotice;
@@ -64,6 +65,8 @@ final class SendSchedulingNotifications
             ['teacher_late', 'staff', $a.'supervisors', ['push'], $lesson],
             ['session_cancelled', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson + ['outcome' => 'وليكم حصة تعويض.']],
             ['session_cancelled_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson],
+            ['trial_booked', 'lessons', $a.'family', ['whatsapp', 'email', 'push'], $lesson + $link],
+            ['trial_booked_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson],
             ['session_moved', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson + ['from' => 'السبت 10 أكتوبر · 18:00']],
             ['session_moved_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson + ['from' => 'السبت 10 أكتوبر · 18:00']],
             ['proposal_submitted', 'staff', $a.'reviewers', ['push', 'email'], ['teacher' => 'أ. سارة']],
@@ -122,6 +125,20 @@ final class SendSchedulingNotifications
 
         $this->notifications->send(new Message('scheduling.session_moved', $this->without($s['family'], $event->actorId), $data, $action, $key));
         $this->notifications->send(new Message('scheduling.session_moved_teacher', $this->without([$s['teacher_id']], $event->actorId), $data, $action, $key));
+    }
+
+    /** A free trial: the family gets the time and each person their own link to the class; the teacher hears of it. */
+    public function trialBooked(TrialLessonBooked $event): void
+    {
+        $s = $this->sessions->of($event->sessionId);
+        if ($s === null) {
+            return;
+        }
+        $action = ['screen' => 'session', 'id' => $s['session_id']];
+        $key = "trial:{$s['session_id']}";
+
+        $this->notifications->send(new Message('scheduling.trial_booked', $s['family'], self::lessonData($s), $action, $key));
+        $this->notifications->send(new Message('scheduling.trial_booked_teacher', $this->without([$s['teacher_id']], $event->actorId), self::lessonData($s), $action, $key));
     }
 
     public function proposalSubmitted(ShiftProposalSubmitted $event): void

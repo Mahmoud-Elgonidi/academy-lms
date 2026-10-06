@@ -28,4 +28,7 @@ enum Ability: string
     case ManageTimeOff = 'time-off.manage';
     case RequestOwnTimeOff = 'time-off.request-own';
     case ManageHolidays = 'holidays.manage';
+    case ManageLeads = 'leads.manage';
+    case BookTrials = 'trials.book';
+    case AssessTrials = 'trials.assess';
 }

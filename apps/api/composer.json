@@ -53,6 +53,8 @@
             "Modules\\Scheduling\\": "modules/Scheduling/src/",
             "Modules\\Learning\\": "modules/Learning/src/",
             "Modules\\Classroom\\": "modules/Classroom/src/",
+            "Modules\\Crm\\": "modules/Crm/src/",
+            "Modules\\Crm\\Database\\Seeders\\": "modules/Crm/database/seeders/",
             "Modules\\Learning\\Database\\Seeders\\": "modules/Learning/database/seeders/",
             "Modules\\Scheduling\\Database\\Factories\\": "modules/Scheduling/database/factories/",
             "Modules\\Scheduling\\Database\\Seeders\\": "modules/Scheduling/database/seeders/"

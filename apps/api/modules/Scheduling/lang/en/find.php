@@ -14,6 +14,7 @@ return [
         'start_date' => 'Starting',
         'min_coverage' => 'Minimum availability',
     ],
+    'modes' => ['series' => 'Weekly lessons', 'trial' => 'Trial lesson'],
     'minutes' => 'min',
     'per_week' => '{1} one session|[2,*] :n sessions',
     'genders' => [
@@ -35,6 +36,10 @@ return [
         'clear' => 'Clear all',
     ],
     'search' => 'Search',
+    'start_trial' => [
+        'title' => 'Choose the subject and the times that suit the trial',
+        'hint' => 'The nearest free times in the next two weeks, with teachers who give trials, ranked by fit and by how many of their trial students went on to subscribe.',
+    ],
     'start' => [
         'title' => 'Pick the subject and the student\'s times',
         'hint' => 'Teachers are ranked by fit; times show on the student\'s clock with the teacher\'s underneath.',
@@ -47,6 +52,8 @@ return [
     'found_hint' => 'Ranked by fit · times in :city time, teacher\'s time underneath',
     'fit' => 'Fit',
     'load' => 'Load',
+    'conversion' => 'Subscribed after a trial',
+    'first_free' => 'first on :date',
     'pattern' => 'Suggested pattern:',
     'use_pattern' => 'Use it',
     'all_weeks' => 'Free every week (:n)',
@@ -60,6 +67,7 @@ return [
     'release' => 'Release',
     'booked' => [
         'trial' => 'Trial booked: :date.',
+        'trial_told' => 'The family gets the time and a link to join without an account, and so does the teacher.',
         'series' => 'Enrolled: :count sessions, the first on :date. Invoice :number for :total; the sessions are confirmed once it is paid.',
         'skipped' => 'Skipped :dates: the teacher or the student is already booked.',
     ],
@@ -86,7 +94,7 @@ return [
         'hold_expired' => 'The hold expired; pick the times again.',
         'kind' => 'Choose a trial or weekly sessions.',
         'student_needed' => 'Choose the student first.',
-        'cannot_book' => 'Booking is for schedulers.',
+        'cannot_book' => 'Enrolling a student on a plan is for schedulers.',
         'slot_taken' => 'That weekly time was just given to another student of this teacher. Search again.',
         'plan' => 'Choose a plan.',
         'plan_mismatch' => 'The plan must have :minutes-minute sessions, :per_week a week, like the times you chose.',
