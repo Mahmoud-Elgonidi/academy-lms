@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
 use Modules\Identity\Authorization\AbilityMatrix;
 use Modules\Identity\Contracts\IdentityApi;
+use Modules\Identity\Contracts\PersonalChannel;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Identity\IdentityService;
 use Modules\Identity\Models\PersonalAccessToken;
@@ -30,8 +31,8 @@ final class IdentityServiceProvider extends ServiceProvider
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
         AbilityMatrix::register();
 
-        // Each person's own channel (the panels' pop-up notifications listen on it).
-        Broadcast::channel('Modules.Identity.Models.User.{id}', fn (User $user, string $id) => (string) $user->getKey() === $id);
+        // Each person's own channel: only they listen (their inbox, their lessons, the panels' pop-ups).
+        Broadcast::channel(PersonalChannel::PATTERN, fn (User $user, string $id) => (string) $user->getKey() === $id);
 
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'identity');

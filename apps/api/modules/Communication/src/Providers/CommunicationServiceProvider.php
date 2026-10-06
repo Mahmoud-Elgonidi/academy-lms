@@ -14,9 +14,11 @@ use Modules\Communication\Console\SweepCommunicationCommand;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Communication\Filament\NotificationBell;
+use Modules\Communication\Live\InboxChanged;
 use Modules\Communication\NotificationPreferences;
 use Modules\Communication\Templates\LinkRegistry;
 use Modules\Communication\Templates\TemplateRegistry;
+use Modules\SharedKernel\Realtime\LiveSignals;
 
 final class CommunicationServiceProvider extends ServiceProvider
 {
@@ -39,6 +41,9 @@ final class CommunicationServiceProvider extends ServiceProvider
             ->group(__DIR__.'/../../routes/api.php');
 
         $this->app->make(NotificationPreferences::class)->define();
+
+        // The bell updates when the inbox changes (live:relay), not on a timer.
+        $this->app->make(LiveSignals::class)->on('inbox', fn (string $userId) => new InboxChanged($userId));
 
         // The bell, in every panel's top bar (staff and teachers).
         Livewire::component('communication.bell', NotificationBell::class);

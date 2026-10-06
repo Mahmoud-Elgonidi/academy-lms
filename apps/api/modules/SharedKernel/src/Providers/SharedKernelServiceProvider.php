@@ -12,6 +12,8 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Modules\SharedKernel\Realtime\Console\LiveRelayCommand;
+use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Tenancy\PgTenantSession;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantResolver;
@@ -29,12 +31,17 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->scoped(ViewerTimezone::class);
         $this->app->scoped(LocalTimePresenter::class);
         $this->app->singleton(LocalTimeResolver::class);
+        $this->app->singleton(LiveSignals::class);
     }
 
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'shared');
+        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'shared');
+        if ($this->app->runningInConsole()) {
+            $this->commands([LiveRelayCommand::class]);
+        }
 
         Event::listen(ConnectionEstablished::class, function (ConnectionEstablished $event): void {
             $this->app->make(PgTenantSession::class)->onConnectionEstablished($event);

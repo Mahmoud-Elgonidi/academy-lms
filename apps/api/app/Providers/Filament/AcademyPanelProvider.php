@@ -10,6 +10,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -24,6 +25,7 @@ use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Learning\Filament\LearningPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
 use Modules\Scheduling\Filament\SchedulingPlugin;
+use Modules\SharedKernel\Realtime\EnableBrowserEcho;
 
 /**
  * The academy back office at {slug}.{platform domain}/admin.
@@ -40,6 +42,8 @@ final class AcademyPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('academy')
+            // Live screens: one socket per page (Reverb, EnableBrowserEcho below) for the bell and any live part, and the helper they share.
+            ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::live'))
             ->path('admin')
             ->login()
             ->spa()
@@ -57,6 +61,7 @@ final class AcademyPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 SetPanelLocale::class,
+                EnableBrowserEcho::class,
             ], isPersistent: true)
             ->authMiddleware([Authenticate::class], isPersistent: true)
             ->plugins([

@@ -10,8 +10,13 @@ use Livewire\Component;
 use Modules\Communication\Actions\MarkNotificationsRead;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Models\Notification;
+use Modules\Identity\Contracts\PersonalChannel;
 
-/** The bell in both panels' top bar: unread count, the latest messages, and where each one opens. */
+/**
+ * The bell in both panels' top bar: unread count, the latest messages, and
+ * where each one opens. It refreshes when the inbox changes (a signal on the
+ * person's own channel), not on a timer.
+ */
 final class NotificationBell extends Component
 {
     public string $panel = 'academy';
@@ -57,6 +62,9 @@ final class NotificationBell extends Component
 
     public function render(): View
     {
-        return view('communication::filament.bell');
+        return view('communication::filament.bell', [
+            'channel' => PersonalChannel::name((string) auth()->id()),
+            'renderedAt' => now()->getTimestampMs(),
+        ]);
     }
 }

@@ -1,15 +1,15 @@
 <?php
 
-namespace Modules\Scheduling\Live;
+namespace Modules\SharedKernel\Realtime;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
 /**
  * The relay's heartbeat on a public channel, with no data: "alive" every
- * minute, so a board knows its signals still come (else it falls back to
- * refreshing every 30 seconds), and "resync" when the relay starts, so every
- * open board catches up on what it may have missed.
+ * minute, so a live screen knows its signals still come (else it falls back
+ * to a timer), and "resync" when the relay starts, so every open screen
+ * catches up on what it may have missed.
  */
 final class RelayPulse implements ShouldBroadcastNow
 {

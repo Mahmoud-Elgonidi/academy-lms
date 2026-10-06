@@ -1,4 +1,4 @@
-<div wire:poll.60s class="cm-bell">
+<div class="cm-bell" data-live-now="{{ $renderedAt }}" data-live-channel="{{ $channel }}">
     <style>
         .cm-list { display: flex; flex-direction: column; max-height: 26rem; overflow-y: auto; }
         .cm-item { display: flex; gap: .6rem; text-align: start; padding: .6rem .75rem; border: 0; background: none; cursor: pointer; width: 100%; border-bottom: 1px solid var(--gray-100); }
@@ -49,3 +49,18 @@
         </div>
     </x-filament::dropdown>
 </div>
+
+@script
+<script>
+    // Refreshes when a message arrives or is read on another device (LmsLive, shared/live.blade.php);
+    // every minute only while there is no live connection.
+    const el = $wire.$el;
+    const live = window.LmsLive
+        ? window.LmsLive.watch({ el, channel: el.dataset.liveChannel, event: '.inbox.changed', refresh: () => $wire.$refresh(), every: 60000 })
+        : (setInterval(() => $wire.$refresh(), 60000), null);
+    // "5 minutes ago" is only read when the list opens: bring it up to date then, if the list is more than a minute old.
+    el.addEventListener('click', (e) => {
+        if (live && e.target.closest('.fi-dropdown-trigger') && live.now() - Number(el.dataset.liveNow) > 60000) $wire.$refresh();
+    });
+</script>
+@endscript

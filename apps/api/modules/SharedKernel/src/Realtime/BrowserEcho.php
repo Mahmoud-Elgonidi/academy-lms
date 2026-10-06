@@ -10,8 +10,8 @@ use Illuminate\Http\Request;
  * Browsers connect to the host the page came from (each academy has its
  * own) unless REVERB_PUBLIC_HOST says where Reverb is.
  *
- * A live screen turns it on for its own page only (enableOnThisPage), so
- * other screens open no socket.
+ * The panels turn it on for every page (enableOnThisPage): one idle socket
+ * per page replaces the timers the bell and the live screens used.
  */
 final class BrowserEcho
 {

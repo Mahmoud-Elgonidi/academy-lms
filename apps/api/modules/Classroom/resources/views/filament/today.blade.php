@@ -1,5 +1,8 @@
-@php $l = 'classroom::classroom.'; @endphp
-<x-filament-panels::page wire:poll.30s>
+@php
+    $l = 'classroom::classroom.';
+    $today = $this->today;
+@endphp
+<x-filament-panels::page data-live-now="{{ $today['now'] }}" data-live-next="{{ $today['next'] }}" data-live-channel="{{ $today['channel'] }}">
     <style>
         .td { display: flex; flex-direction: column; gap: .6rem; }
         .td-row { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) auto; gap: .75rem; align-items: center; padding: .85rem 1rem; background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-xl); }
@@ -33,3 +36,16 @@
         @endforelse
     </div>
 </x-filament-panels::page>
+
+@script
+<script>
+    // Refreshes when one of the teacher's lessons changes, and when a classroom opens or closes (data-live-next);
+    // every 30 seconds only while there is no live connection (LmsLive, shared/live.blade.php).
+    const el = $wire.$el;
+    if (window.LmsLive) {
+        window.LmsLive.watch({ el, channel: el.dataset.liveChannel, event: '.lessons.changed', refresh: () => $wire.$refresh(), every: 30000 });
+    } else {
+        setInterval(() => $wire.$refresh(), 30000);
+    }
+</script>
+@endscript

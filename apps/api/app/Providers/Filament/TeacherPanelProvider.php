@@ -10,6 +10,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -20,6 +21,7 @@ use Modules\Classroom\Filament\Teacher\ClassroomTeacherPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Learning\Filament\Teacher\LearningTeacherPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
+use Modules\SharedKernel\Realtime\EnableBrowserEcho;
 
 /**
  * The teacher area at {slug}.{platform domain}/teach: reports and homework,
@@ -32,6 +34,8 @@ final class TeacherPanelProvider extends PanelProvider
     {
         return $panel
             ->id('teach')
+            // Live screens: one socket per page (Reverb, EnableBrowserEcho below) for the bell and any live part, and the helper they share.
+            ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::live'))
             ->path('teach')
             ->login()
             ->spa()
@@ -49,6 +53,7 @@ final class TeacherPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 SetPanelLocale::class,
+                EnableBrowserEcho::class,
             ], isPersistent: true)
             ->authMiddleware([Authenticate::class], isPersistent: true)
             ->plugins([

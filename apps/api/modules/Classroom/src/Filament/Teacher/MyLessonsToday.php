@@ -13,11 +13,16 @@ use Illuminate\Contracts\Support\Htmlable;
 use Livewire\Attributes\Computed;
 use Modules\Classroom\Actions\SaveMeetingLink;
 use Modules\Classroom\Models\MeetingLink;
+use Modules\Identity\Contracts\PersonalChannel;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\DTOs\LessonCard;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
-/** The teacher's lessons today, on their clock, with the way into each classroom once it opens. */
+/**
+ * The teacher's lessons today, on their clock, with the way into each
+ * classroom once it opens. Updates when a lesson changes or a classroom
+ * opens, not on a timer.
+ */
 final class MyLessonsToday extends Page
 {
     protected string $view = 'classroom::filament.today';
@@ -52,23 +57,50 @@ final class MyLessonsToday extends Page
     #[Computed]
     public function lessons(): array
     {
+        return $this->today['lessons'];
+    }
+
+    /**
+     * Today's lessons, and the next moment the clock alone changes the page
+     * (a classroom opens or closes, midnight). Changes to the lessons
+     * themselves arrive as a signal on the teacher's own channel.
+     *
+     * @return array{lessons: list<array<string, mixed>>, now: int, next: ?int, channel: string}
+     */
+    #[Computed]
+    public function today(): array
+    {
         $tz = app(ViewerTimezone::class)->effective();
         $day = CarbonImmutable::now($tz)->startOfDay();
         $now = CarbonImmutable::now();
         $before = config('classroom.opens_before_min');
         $after = config('classroom.closes_after_min');
+        $cards = app(AttendanceApi::class)->lessonsOf((string) auth()->id(), $day->utc(), $day->addDay()->utc());
 
-        return array_map(fn (LessonCard $l) => [
-            'id' => $l->id,
-            'time' => $l->startsAt->setTimezone($tz)->format('H:i').' – '.$l->endsAt->setTimezone($tz)->format('H:i'),
-            'student' => $l->studentName,
-            'subject' => $l->subject(),
-            'status' => $l->status,
-            'open' => $l->isOpen() && $now->greaterThanOrEqualTo($l->startsAt->subMinutes($before)) && $now->lessThanOrEqualTo($l->endsAt->addMinutes($after)),
-            'opens' => $l->startsAt->subMinutes($before)->setTimezone($tz)->format('H:i'),
-            'past' => $now->greaterThan($l->endsAt->addMinutes($after)) || ! $l->isOpen(),
-            'url' => route('classroom.page', ['session' => $l->id]),
-        ], app(AttendanceApi::class)->lessonsOf((string) auth()->id(), $day->utc(), $day->addDay()->utc()));
+        $moments = [$day->addDay()];
+        foreach ($cards as $l) {
+            if ($l->isOpen()) {
+                array_push($moments, $l->startsAt->subMinutes($before), $l->endsAt->addMinutes($after));
+            }
+        }
+        $next = collect($moments)->filter(fn (CarbonImmutable $m) => $m->greaterThan($now))->min();
+
+        return [
+            'lessons' => array_map(fn (LessonCard $l) => [
+                'id' => $l->id,
+                'time' => $l->startsAt->setTimezone($tz)->format('H:i').' – '.$l->endsAt->setTimezone($tz)->format('H:i'),
+                'student' => $l->studentName,
+                'subject' => $l->subject(),
+                'status' => $l->status,
+                'open' => $l->isOpen() && $now->greaterThanOrEqualTo($l->startsAt->subMinutes($before)) && $now->lessThanOrEqualTo($l->endsAt->addMinutes($after)),
+                'opens' => $l->startsAt->subMinutes($before)->setTimezone($tz)->format('H:i'),
+                'past' => $now->greaterThan($l->endsAt->addMinutes($after)) || ! $l->isOpen(),
+                'url' => route('classroom.page', ['session' => $l->id]),
+            ], $cards),
+            'now' => $now->getTimestampMs(),
+            'next' => $next?->getTimestampMs(),
+            'channel' => PersonalChannel::name((string) auth()->id()),
+        ];
     }
 
     protected function getHeaderActions(): array

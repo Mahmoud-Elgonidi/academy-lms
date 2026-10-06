@@ -16,7 +16,6 @@ use Modules\Identity\Contracts\Preferences\PreferenceDefinition;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Scheduling\AttendanceService;
 use Modules\Scheduling\Console\MaterializeSessionsCommand;
-use Modules\Scheduling\Console\RelayBoardChangesCommand;
 use Modules\Scheduling\Console\SweepSessionsCommand;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\Events\SessionCancelled;
@@ -33,7 +32,9 @@ use Modules\Scheduling\Filament\Pages\ReviewShiftProposal;
 use Modules\Scheduling\Listeners\FundSessionsFromNewCredit;
 use Modules\Scheduling\Listeners\SendSchedulingNotifications;
 use Modules\Scheduling\Live\BoardChanged;
+use Modules\Scheduling\Live\TeacherLessonsChanged;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 final class SchedulingServiceProvider extends ServiceProvider
@@ -65,6 +66,10 @@ final class SchedulingServiceProvider extends ServiceProvider
 
         Event::listen(CreditsGranted::class, FundSessionsFromNewCredit::class);
 
+        // Live screens (live:relay): what a change to lessons means, and who may hear it.
+        $live = $this->app->make(LiveSignals::class);
+        $live->on('board', fn (string $academyId) => new BoardChanged($academyId));
+        $live->on('lessons', fn (string $teacherId) => new TeacherLessonsChanged($teacherId));
         // The live board's signals: only for someone of that academy who may see the board.
         Broadcast::channel(BoardChanged::CHANNEL, fn (Authenticatable $user, string $academyId) => $academyId === $this->app->make(TenantContext::class)->id()
             && Gate::forUser($user)->allows(Ability::ViewLiveBoard->value));
@@ -83,7 +88,7 @@ final class SchedulingServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningInConsole()) {
-            $this->commands([SweepSessionsCommand::class, MaterializeSessionsCommand::class, RelayBoardChangesCommand::class]);
+            $this->commands([SweepSessionsCommand::class, MaterializeSessionsCommand::class]);
         }
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {

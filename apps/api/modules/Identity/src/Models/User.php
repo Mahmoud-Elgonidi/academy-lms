@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Modules\Identity\Contracts\PersonalChannel;
 use Modules\Identity\Database\Factories\UserFactory;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Enums\UserStatus;
@@ -109,6 +110,12 @@ final class User extends Authenticatable implements FilamentUser, HasLocalePrefe
         return $panel->getId() === 'teach'
             ? $this->hasRole(Role::Teacher)
             : array_filter($this->roles(), fn (Role $role) => $role->isStaff()) !== [];
+    }
+
+    /** Their own private channel (PersonalChannel); the panels' pop-up notifications listen on it too. */
+    public function receivesBroadcastNotificationsOn(): string
+    {
+        return PersonalChannel::name((string) $this->getKey());
     }
 
     public function preferredLocale(): ?string

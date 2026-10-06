@@ -105,7 +105,7 @@ final class LiveBoard extends Page
     {
         $this->boardLayout = app(UserPreferences::class)->get((string) auth()->id(), self::LAYOUT_PREFERENCE);
         $this->viewTz = app(ViewerTimezone::class)->effective();
-        $this->live = BrowserEcho::enableOnThisPage(request());
+        $this->live = BrowserEcho::config(request()) !== null;   // the panel turned Echo on for every page
     }
 
     /** The on-screen switch; saved for this user, same as on "My settings". */
