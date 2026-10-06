@@ -48,6 +48,10 @@ final class FamilyPanelProvider extends PanelProvider
             // Motion: pages slide in, cards follow, bars fill, numbers count up; none for reduced motion.
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('shared::motion.styles'))
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::motion.script'))
+            // The frame: a side menu with a greeting and a sliding pill, a see-through top bar, page changes as view transitions.
+            ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('shared::chrome.styles'))
+            ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::chrome.script'))
+            ->renderHook(PanelsRenderHook::SIDEBAR_NAV_START, fn () => view('shared::chrome.greeting'))
             ->middleware([
                 ResolveTenant::class,
                 EncryptCookies::class,
