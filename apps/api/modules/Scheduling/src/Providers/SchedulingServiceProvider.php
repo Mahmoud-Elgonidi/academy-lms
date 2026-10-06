@@ -3,6 +3,7 @@
 namespace Modules\Scheduling\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Identity\Contracts\Preferences\PreferenceDefinition;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
@@ -23,6 +24,10 @@ final class SchedulingServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'scheduling');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'scheduling');
+
+        Route::prefix('api/v1')
+            ->middleware(['api', 'tenant', 'locale', 'timezone'])
+            ->group(__DIR__.'/../../routes/api.php');
 
         $this->app->make(UserPreferences::class)->define(new PreferenceDefinition(
             key: LiveBoard::LAYOUT_PREFERENCE,

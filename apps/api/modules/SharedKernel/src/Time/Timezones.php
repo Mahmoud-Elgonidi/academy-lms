@@ -11,6 +11,12 @@ final class Timezones
     /** @var array<string, true>|null */
     private static ?array $known = null;
 
+    /** @return list<string> every IANA name PHP knows */
+    public static function all(): array
+    {
+        return DateTimeZone::listIdentifiers();
+    }
+
     public static function isValid(mixed $timezone): bool
     {
         if (! is_string($timezone) || $timezone === '') {

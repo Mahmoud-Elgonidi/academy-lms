@@ -51,7 +51,7 @@
                 @foreach ($groups['fine'] as $item)
                     <button type="button" class="lf-row" wire:click="select('{{ $item['id'] }}')" aria-pressed="{{ ($selected['id'] ?? null) === $item['id'] ? 'true' : 'false' }}" wire:key="f-{{ $item['id'] }}">
                         <strong class="lb-num">{{ $item['time'] }}</strong>
-                        <span class="lf-who">{{ $item['teacher'] }} ← {{ $item['student'] }} <small>· {{ $item['subject'] }}</small></span>
+                        <span class="lf-who">{{ $item['teacher'] }} {{ __('scheduling::shifts.arrow') }} {{ $item['student'] }} <small>· {{ $item['subject'] }}</small></span>
                         @if ($item['typeLabel'])<span class="lb-tag" data-type="{{ $item['type'] }}">{{ $item['typeLabel'] }}</span>@endif
                         <span class="lb-bar"><span style="width: {{ $item['progress'] }}%"></span></span>
                         <small class="lf-progress">{{ $item['progressText'] }}</small>
@@ -66,7 +66,7 @@
                 @foreach ($groups['upcoming'] as $item)
                     <button type="button" class="lf-row" wire:click="select('{{ $item['id'] }}')" aria-pressed="{{ ($selected['id'] ?? null) === $item['id'] ? 'true' : 'false' }}" wire:key="f-{{ $item['id'] }}">
                         <strong class="lb-num">{{ $item['time'] }}</strong>
-                        <span class="lf-who">{{ $item['teacher'] }} ← {{ $item['student'] }} <small>· {{ $item['subject'] }}</small></span>
+                        <span class="lf-who">{{ $item['teacher'] }} {{ __('scheduling::shifts.arrow') }} {{ $item['student'] }} <small>· {{ $item['subject'] }}</small></span>
                         <span class="lf-checks">
                             @foreach ($item['checks'] as $check)
                                 <span class="lb-check" data-ok="{{ $check['ok'] ? 'true' : 'false' }}">{{ $check['ok'] ? '✓' : '!' }} {{ $check['label'] }}</span>
@@ -90,7 +90,7 @@
                     @foreach ($groups['done'] as $item)
                         <button type="button" class="lf-row" wire:click="select('{{ $item['id'] }}')" wire:key="f-{{ $item['id'] }}">
                             <strong class="lb-num">{{ $item['time'] }}</strong>
-                            <span class="lf-who">{{ $item['teacher'] }} ← {{ $item['student'] }} <small>· {{ $item['subject'] }}</small></span>
+                            <span class="lf-who">{{ $item['teacher'] }} {{ __('scheduling::shifts.arrow') }} {{ $item['student'] }} <small>· {{ $item['subject'] }}</small></span>
                             <span class="lb-pill" data-status="{{ $item['status']['key'] }}">{{ $item['result'] }}</span>
                         </button>
                     @endforeach

@@ -68,3 +68,16 @@ it('saves the layout switch on the board for the signed-in user', function () {
 it('answers 404, not a server error, for the back office on a host that is no academy', function () {
     $this->get('http://nowhere.lms.test/admin/login')->assertNotFound();
 });
+
+it('opens find a teacher and the shift proposals for schedulers, not for teachers', function () {
+    $scheduler = (function () {
+        $this->actAsTenant($this->academy);
+        $user = User::factory()->withRole(Role::Scheduler)->create();
+        $this->clearTenant();
+
+        return $user;
+    })->call($this);
+
+    $this->actingAs($scheduler)->get('http://noor.lms.test/admin/find-teacher')->assertOk();
+    $this->actingAs($scheduler)->get('http://noor.lms.test/admin/shifts/proposals')->assertOk();
+});

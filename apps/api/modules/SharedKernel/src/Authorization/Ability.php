@@ -11,4 +11,7 @@ enum Ability: string
     case ManageBranding = 'academy.manage-branding';
     case ViewLiveBoard = 'live-board.view';
     case ManageSessions = 'sessions.manage';
+    case ReviewShifts = 'shifts.review';
+    case ProposeOwnShifts = 'shifts.propose-own';
+    case FindTeachers = 'teachers.find';
 }

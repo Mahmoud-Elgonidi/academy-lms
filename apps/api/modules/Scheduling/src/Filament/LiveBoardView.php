@@ -153,7 +153,7 @@ final class LiveBoardView
     private function context(BoardItem $item): string
     {
         $s = $item->session;
-        $base = $s->subject().' · '.$s->teacher->name.' ← '.($s->student?->name ?? '—');
+        $base = $s->subject().' · '.$s->teacher->name.' '.__('scheduling::shifts.arrow').' '.($s->student?->name ?? '—');
 
         return match ($item->issue) {
             BoardIssue::TeacherNotJoined => __('scheduling::board.issues.teacher_not_joined.context', ['base' => $base, 'time' => $this->hm($s->student?->joinedAt ?? $s->startsAt)]),

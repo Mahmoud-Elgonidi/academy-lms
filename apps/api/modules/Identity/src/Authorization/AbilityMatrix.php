@@ -15,7 +15,9 @@ final class AbilityMatrix
     {
         return match ($ability) {
             Ability::ManageBranding => [Role::Owner, Role::Admin],
-            Ability::ViewLiveBoard, Ability::ManageSessions => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler],
+            Ability::ViewLiveBoard, Ability::ManageSessions, Ability::ReviewShifts => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler],
+            Ability::FindTeachers => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler, Role::Sales],
+            Ability::ProposeOwnShifts => [Role::Teacher],
         };
     }
 

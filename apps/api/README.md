@@ -11,8 +11,8 @@ The architecture is in [`docs/architecture`](../../docs/architecture/README.md).
 | `modules/Platform` | Academies and their domains; resolves the academy from host, slug or id. **Branding**: name, logo, colours, fonts and corners; five built-in templates, custom looks saved as the academy's own templates; `GET /api/v1/branding` |
 | `modules/Identity` | Users (per academy), fixed roles mapped to abilities, Sanctum tokens that carry their academy, login / me / logout, per-user preferences, **My settings** page |
 | `modules/Catalog` | Subjects (levels and categories come later) |
-| `modules/People` | Guardian ↔ student links |
-| `modules/Scheduling` | Sessions, participants (double-booking refused by an exclusion constraint), the session log, attendance deadlines (`scheduling:sweep`, every minute) and the **live board** with its actions |
+| `modules/People` | Guardian ↔ student links; teacher profiles (gender, languages, dialect, accepting new students / trials, contract hours) and the subjects they teach |
+| `modules/Scheduling` | Sessions, participants (double-booking refused by an exclusion constraint), the session log, attendance deadlines (`scheduling:sweep`, every minute) and the **live board** with its actions. **Shifts**: versioned weekly schedules (one in force per teacher, exclusion constraint), teacher proposals with counter-offers, comments, notice rules and the impact on booked students; teacher API under `/api/v1/teacher/shifts`. **Find a teacher**: availability from the schedule in force each day (DST-safe) minus bookings and holds, week-by-week coverage, suggested patterns, 10-minute holds, trial or weekly booking |
 | `app/` | Composition only: `ResolveTenant`, the academy panel provider, `academy:create` |
 
 ## The back office
@@ -38,6 +38,8 @@ Open http://demo.localhost:8000/admin and sign in as `owner@demo.test` / `passwo
 With `PLATFORM_DEV_ACADEMY=demo` in `.env`, plain http://localhost:8000/admin works too (local environment only; some browsers do not resolve `*.localhost`).
 
 - **Live operations** (home): sessions now and in the next hour. Two layouts, saved per user: *Table* and *Problems first*. Switch on the board or in *My settings*.
+- **Find a teacher**: mark the student's times on the week grid (student's clock), search, pick a suggested pattern or chips, hold for 10 minutes, then book a trial or the weekly series.
+- **Shift proposals**: Sara's proposal clashes with three booked students; resolve each (agreed exception or start later), reply in the thread, approve. Ahmed's only adds time; Mona's counter-offer waits on her.
 - **Settings › Identity and colours** (owner and admin): templates, colours, fonts, logo, live preview; save as your own template.
 - The demo times are relative to when you seeded; run `composer demo` again to get a fresh evening.
 

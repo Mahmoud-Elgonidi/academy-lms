@@ -59,6 +59,10 @@ arch('actions and models are final')
     ])
     ->toBeFinal();
 
+arch('shift and matching rules are pure: dates, time zones and domain types only')
+    ->expect(['Modules\\Scheduling\\Domain\\Shifts', 'Modules\\Scheduling\\Domain\\Availability'])
+    ->toOnlyUse(['Carbon\\CarbonImmutable', 'Modules\\Scheduling\\Domain', 'Modules\\SharedKernel\\Time\\LocalTimeResolver', 'InvalidArgumentException']);
+
 arch('the live board rules are pure: dates and domain types only, no database or HTTP')
     ->expect('Modules\Scheduling\Domain\LiveBoard')
     ->toOnlyUse(['Carbon\CarbonImmutable', 'Modules\Scheduling\Domain', 'app']);
