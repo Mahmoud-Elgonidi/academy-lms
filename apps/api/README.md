@@ -27,6 +27,8 @@ docker compose up        # then http://localhost:8000/admin, owner@demo.test / p
 docker compose exec api composer demo     # a fresh evening of demo sessions
 ```
 
+After a `git pull`, `docker compose up` again is enough: the container installs packages when `composer.lock` changed, runs new migrations, and rebuilds the demo data when its version (`DEMO_VERSION` in `infra/docker/api/start.sh`) changed. Use `--build` only when the `Dockerfile` changes.
+
 Or with PHP 8.3 and Composer on your machine (services from `docker compose up -d postgres redis mailpit`):
 
 ```sh

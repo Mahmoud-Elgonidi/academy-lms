@@ -23,6 +23,15 @@ docker compose up
 
 المحاسب: `accountant@demo.test` / `password` (الفواتير والأسعار، من غير الجداول).
 
+### لما تسحب تحديث جديد
+
+```sh
+git pull
+docker compose up
+```
+
+مش محتاج حاجة تانية. الـ container لوحده بيثبّت المكتبات الجديدة لو `composer.lock` اتغير، وبيشغّل الـ migrations الجديدة، وبيبني البيانات التجريبية من جديد لو شكلها اتغير. محتاج `docker compose up --build` بس لو الـ `Dockerfile` نفسه اتغير.
+
 ## الوثيقة المعمارية
 
 ابدأ من [docs/architecture/README.md](docs/architecture/README.md):
