@@ -51,8 +51,9 @@ return [
     'resolution_hints' => [
         'exception' => 'The slot stays with this teacher outside the shift, agreed by both.',
         'delay' => 'The new schedule starts after the last affected session.',
+        'moved' => 'Opens the student\'s account to move them to a teacher free at the same times from the start date. Once moved, the conflict goes away.',
     ],
-    'move_soon' => 'Moving a student arrives with Enrollment; use Find a teacher meanwhile.',
+    'move_unenrolled' => 'These lessons are not part of an enrollment, so they cannot be moved from here.',
     'undo' => 'Undo',
     'thread' => 'Conversation',
     'no_messages' => 'No messages yet.',

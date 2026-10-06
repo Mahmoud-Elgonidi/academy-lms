@@ -46,6 +46,7 @@
         .rv-choices button { padding: .3rem .7rem; border-radius: var(--radius-md); border: 1px solid var(--gray-300); background: white; font-size: .78rem; }
         .rv-choices button[aria-pressed="true"] { background: var(--primary-600); border-color: var(--primary-600); color: white; font-weight: 600; }
         .rv-choices button[disabled] { opacity: .5; cursor: not-allowed; }
+        .rv-choices .rv-move { padding: .3rem .7rem; border-radius: var(--radius-md); border: 1px solid var(--primary-300); color: var(--primary-700); font-size: .78rem; font-weight: 600; }
         .rv-state { font-size: .72rem; font-weight: 700; }
         .rv-thread { display: flex; flex-direction: column; gap: .6rem; max-height: 26rem; overflow-y: auto; }
         .rv-msg { max-width: 88%; padding: .55rem .75rem; border-radius: var(--radius-lg); font-size: .85rem; background: var(--gray-100); align-self: flex-start; }
@@ -148,7 +149,11 @@
                                 </div>
                                 @if ($r['status']->isOpen())
                                     <div class="rv-choices">
-                                        <button type="button" disabled title="{{ __('scheduling::review.move_soon') }}">{{ __('scheduling::review.resolutions.moved') }}</button>
+                                        @if ($c['move_url'])
+                                            <a href="{{ $c['move_url'] }}" wire:navigate class="rv-move" title="{{ __('scheduling::review.resolution_hints.moved') }}">{{ __('scheduling::review.resolutions.moved') }}</a>
+                                        @else
+                                            <button type="button" disabled title="{{ __('scheduling::review.move_unenrolled') }}">{{ __('scheduling::review.resolutions.moved') }}</button>
+                                        @endif
                                         @foreach (['exception', 'delay'] as $kind)
                                             <button type="button" wire:click="resolve(@js($c['key']), '{{ $kind }}')" aria-pressed="{{ $c['resolution'] === $kind ? 'true' : 'false' }}" title="{{ __('scheduling::review.resolution_hints.'.$kind) }}">
                                                 {{ __('scheduling::review.resolutions.'.$kind) }}

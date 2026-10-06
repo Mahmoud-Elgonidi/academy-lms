@@ -39,56 +39,59 @@
         .ac .plus { color: var(--success-700); font-weight: 700; }
         .ac .minus { color: var(--gray-700); font-weight: 700; }
         .ac td a { color: var(--primary-700); font-weight: 600; }
+        .ac-row-actions { display: flex; gap: .6rem; justify-content: flex-end; }
+        .ac-pill[data-s="makeup"] { background: var(--info-50); color: var(--info-700); }
+        .ac-pill[data-s="cancelled"] { background: var(--gray-100); color: var(--gray-600); }
         .dark .ac-card, .dark .ac-box { background: var(--gray-900); border-color: var(--gray-800); }
         .dark .ac-card[data-tone="warn"] { background: color-mix(in oklab, var(--warning-500) 12%, transparent); }
     </style>
 
     <div class="ac">
         <div class="ac-sub">
-            <span>{{ $a['subject'] }} · {{ __('enrollment::enrollments.with', ['teacher' => $h['teacher']]) }}</span>
-            <span class="ac-pill" data-s="{{ $h['status'] }}">{{ __('enrollment::enrollments.statuses.'.$h['status']) }}</span>
+            <span>{{ $a['subject'] }} · {{ __('scheduling::enrollments.with', ['teacher' => $h['teacher']]) }}</span>
+            <span class="ac-pill" data-s="{{ $h['status'] }}">{{ __('scheduling::enrollments.statuses.'.$h['status']) }}</span>
             @if ($a['plan']) <span>· {{ $a['plan'] }} · {{ $a['price'] }}</span> @endif
-            @if ($h['payer'] && $h['payer_id'] !== $h['student_id']) <span>· {{ __('enrollment::enrollments.payer', ['name' => $h['payer']]) }}</span> @endif
+            @if ($h['payer'] && $h['payer_id'] !== $h['student_id']) <span>· {{ __('scheduling::enrollments.payer', ['name' => $h['payer']]) }}</span> @endif
         </div>
 
         <div class="ac-cards">
             <div class="ac-card" @if ($low) data-tone="warn" @endif>
-                <small>{{ __('enrollment::enrollments.cards.left') }}</small>
-                <strong class="lms-heading">{{ trans_choice('enrollment::enrollments.sessions', $a['sessionsLeft'], ['n' => $a['sessionsLeft']]) }}</strong>
-                <small>{{ __('enrollment::enrollments.cards.minutes', ['remaining' => $a['remainingMin'], 'reserved' => $a['reservedMin']]) }}</small>
+                <small>{{ __('scheduling::enrollments.cards.left') }}</small>
+                <strong class="lms-heading">{{ trans_choice('scheduling::enrollments.sessions', $a['sessionsLeft'], ['n' => $a['sessionsLeft']]) }}</strong>
+                <small>{{ __('scheduling::enrollments.cards.minutes', ['remaining' => $a['remainingMin'], 'reserved' => $a['reservedMin']]) }}</small>
                 @if ($a['block'] > 0)
                     <div class="ac-meter"><i style="width: {{ min(100, round(100 * $a['sessionsLeft'] / max(1, $a['block']))) }}%"></i></div>
                 @endif
             </div>
             <div class="ac-card" @if ($openInvoice && $openInvoice['status'] === 'overdue') data-tone="warn" @endif>
-                <small>{{ __('enrollment::enrollments.cards.billing') }}</small>
+                <small>{{ __('scheduling::enrollments.cards.billing') }}</small>
                 @if ($openInvoice)
                     <strong class="lms-heading">{{ $openInvoice['total'] }}</strong>
-                    <small>{{ __('enrollment::enrollments.cards.invoice_open', ['number' => $openInvoice['number']]) }} · {{ __('billing::billing.statuses.'.$openInvoice['status']) }}</small>
-                    <a href="{{ $openInvoice['url'] }}" wire:navigate>{{ __('enrollment::enrollments.cards.open_invoice') }}</a>
+                    <small>{{ __('scheduling::enrollments.cards.invoice_open', ['number' => $openInvoice['number']]) }} · {{ __('billing::billing.statuses.'.$openInvoice['status']) }}</small>
+                    <a href="{{ $openInvoice['url'] }}" wire:navigate>{{ __('scheduling::enrollments.cards.open_invoice') }}</a>
                 @elseif ($a['renewAt'] > 0)
-                    <strong class="lms-heading">{{ __('enrollment::enrollments.cards.nothing_due') }}</strong>
-                    <small>{{ trans_choice('enrollment::enrollments.cards.renews', $a['renewAt'], ['n' => $a['renewAt']]) }}</small>
+                    <strong class="lms-heading">{{ __('scheduling::enrollments.cards.nothing_due') }}</strong>
+                    <small>{{ trans_choice('scheduling::enrollments.cards.renews', $a['renewAt'], ['n' => $a['renewAt']]) }}</small>
                 @else
                     <strong class="lms-heading">—</strong>
                 @endif
             </div>
             <div class="ac-card">
-                <small>{{ __('enrollment::enrollments.cards.progress') }}</small>
-                <strong class="lms-heading">{{ trans_choice('enrollment::enrollments.sessions', $a['counts']['done'], ['n' => $a['counts']['done']]) }}</strong>
-                <small>{{ __('enrollment::enrollments.cards.upcoming', ['n' => $a['counts']['upcoming']]) }}</small>
+                <small>{{ __('scheduling::enrollments.cards.progress') }}</small>
+                <strong class="lms-heading">{{ trans_choice('scheduling::enrollments.sessions', $a['counts']['done'], ['n' => $a['counts']['done']]) }}</strong>
+                <small>{{ __('scheduling::enrollments.cards.upcoming', ['n' => $a['counts']['upcoming']]) }}</small>
             </div>
             <div class="ac-card">
-                <small>{{ __('enrollment::enrollments.cards.expiry') }}</small>
+                <small>{{ __('scheduling::enrollments.cards.expiry') }}</small>
                 @if ($a['expiry'])
                     <strong class="lms-heading">{{ ($a['fmt'])($a['expiry']->expires_at, 'j M') }}</strong>
-                    <small>{{ __('enrollment::enrollments.cards.expiring', ['minutes' => $a['expiry']->remaining_min]) }}</small>
+                    <small>{{ __('scheduling::enrollments.cards.expiring', ['minutes' => $a['expiry']->remaining_min]) }}</small>
                 @else
                     <strong class="lms-heading">—</strong>
-                    <small>{{ __('enrollment::enrollments.cards.no_expiry') }}</small>
+                    <small>{{ __('scheduling::enrollments.cards.no_expiry') }}</small>
                 @endif
                 @if ($a['makeup']['minutes'] > 0)
-                    <small>{{ __('enrollment::enrollments.cards.makeup', ['minutes' => $a['makeup']['minutes'], 'date' => ($a['fmt'])($a['makeup']['expires_at'], 'j M')]) }}</small>
+                    <small>{{ __('scheduling::enrollments.cards.makeup', ['minutes' => $a['makeup']['minutes'], 'date' => ($a['fmt'])($a['makeup']['expires_at'], 'j M')]) }}</small>
                 @endif
             </div>
         </div>
@@ -96,13 +99,13 @@
         <div class="ac-cols">
             <div class="ac" style="gap: 1.1rem">
                 <section class="ac-box">
-                    <h2>{{ __('enrollment::enrollments.weekly.title') }}</h2>
-                    <p class="ac-muted" style="margin:0">{{ __('enrollment::enrollments.weekly.hint', ['student' => $city($a['studentTz']), 'teacher' => $city($h['teacher_tz'] ?? 'UTC')]) }}</p>
+                    <h2>{{ __('scheduling::enrollments.weekly.title') }}</h2>
+                    <p class="ac-muted" style="margin:0">{{ __('scheduling::enrollments.weekly.hint', ['student' => $city($a['studentTz']), 'teacher' => $city($h['teacher_tz'] ?? 'UTC')]) }}</p>
                     <div class="ac-times">
                         @forelse ($a['weekly'] as $t)
                             <div class="ac-time">
                                 <strong>{{ __('shared::time.days.'.$t['student_day']) }} {{ $t['student_time'] }}</strong>
-                                <small>{{ __('enrollment::enrollments.weekly.teacher', ['day' => __('shared::time.days.'.$t['teacher_day']), 'time' => $t['teacher_time']]) }} · {{ $t['minutes'] }} {{ __('enrollment::enrollments.min') }}</small>
+                                <small>{{ __('scheduling::enrollments.weekly.teacher', ['day' => __('shared::time.days.'.$t['teacher_day']), 'time' => $t['teacher_time']]) }} · {{ $t['minutes'] }} {{ __('scheduling::enrollments.min') }}</small>
                             </div>
                         @empty
                             <span class="ac-muted">—</span>
@@ -111,23 +114,33 @@
                 </section>
 
                 <section class="ac-box">
-                    <h2>{{ __('enrollment::enrollments.upcoming.title') }}</h2>
-                    <p class="ac-muted" style="margin:0">{{ __('enrollment::enrollments.upcoming.hint', ['city' => $city($a['tz'])]) }}</p>
+                    <h2>{{ __('scheduling::enrollments.upcoming.title') }}</h2>
+                    <p class="ac-muted" style="margin:0">{{ __('scheduling::enrollments.upcoming.hint', ['city' => $city($a['tz'])]) }}</p>
                     <table>
                         <tbody>
                             @forelse ($a['upcoming'] as $s)
                                 <tr>
-                                    <td>{{ $s['when'] }}</td>
+                                    <td>
+                                        {{ $s['when'] }}
+                                        @if ($s['type'] === 'makeup') <span class="ac-pill" data-s="makeup">{{ __('scheduling::enrollments.types.makeup') }}</span> @endif
+                                        @if ($s['moved']) <span class="ac-muted">· {{ __('scheduling::enrollments.row.moved') }}</span> @endif
+                                    </td>
                                     <td class="num">
                                         @if ($s['status'] !== 'scheduled')
-                                            <span class="ac-pill" data-s="{{ $s['status'] }}">{{ __('enrollment::enrollments.session_statuses.'.$s['status']) }}</span>
+                                            <span class="ac-pill" data-s="{{ $s['status'] }}">{{ __('scheduling::enrollments.session_statuses.'.$s['status']) }}</span>
                                         @else
-                                            <span class="ac-pill" data-s="{{ $s['funding'] }}">{{ __('enrollment::enrollments.funding.'.$s['funding']) }}</span>
+                                            <span class="ac-pill" data-s="{{ $s['funding'] }}">{{ __('scheduling::enrollments.funding.'.$s['funding']) }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="num ac-row-actions">
+                                        @if ($s['status'] === 'scheduled' && $s['future'])
+                                            {{ ($this->rescheduleAction)(['session' => $s['id']]) }}
+                                            {{ ($this->cancelSessionAction)(['session' => $s['id']]) }}
                                         @endif
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td class="ac-muted">{{ __('enrollment::enrollments.upcoming.none') }}</td></tr>
+                                <tr><td class="ac-muted">{{ __('scheduling::enrollments.upcoming.none') }}</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -136,15 +149,15 @@
 
             <div class="ac" style="gap: 1.1rem">
                 <section class="ac-box">
-                    <h2>{{ __('enrollment::enrollments.statement.title') }}</h2>
-                    <p class="ac-muted" style="margin:0">{{ __('enrollment::enrollments.statement.hint') }}</p>
+                    <h2>{{ __('scheduling::enrollments.statement.title') }}</h2>
+                    <p class="ac-muted" style="margin:0">{{ __('scheduling::enrollments.statement.hint') }}</p>
                     <table>
                         <thead>
                             <tr>
-                                <th>{{ __('enrollment::enrollments.statement.when') }}</th>
-                                <th>{{ __('enrollment::enrollments.statement.what') }}</th>
-                                <th class="num">{{ __('enrollment::enrollments.statement.minutes') }}</th>
-                                <th class="num">{{ __('enrollment::enrollments.statement.left') }}</th>
+                                <th>{{ __('scheduling::enrollments.statement.when') }}</th>
+                                <th>{{ __('scheduling::enrollments.statement.what') }}</th>
+                                <th class="num">{{ __('scheduling::enrollments.statement.minutes') }}</th>
+                                <th class="num">{{ __('scheduling::enrollments.statement.left') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -160,14 +173,14 @@
                                     <td class="num">{{ $e['available'] + $e['reserved'] }}</td>
                                 </tr>
                             @empty
-                                <tr><td class="ac-muted" colspan="4">{{ __('enrollment::enrollments.statement.none') }}</td></tr>
+                                <tr><td class="ac-muted" colspan="4">{{ __('scheduling::enrollments.statement.none') }}</td></tr>
                             @endforelse
                         </tbody>
                     </table>
                 </section>
 
                 <section class="ac-box">
-                    <h2>{{ __('enrollment::enrollments.invoices.title') }}</h2>
+                    <h2>{{ __('scheduling::enrollments.invoices.title') }}</h2>
                     <table>
                         <tbody>
                             @forelse ($a['invoices'] as $i)

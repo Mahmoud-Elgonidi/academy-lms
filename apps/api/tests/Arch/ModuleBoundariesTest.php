@@ -94,6 +94,14 @@ arch('shift, slot and matching rules are pure: dates, time zones and domain type
     ->expect(['Modules\\Scheduling\\Domain\\Shifts', 'Modules\\Scheduling\\Domain\\Availability', 'Modules\\Scheduling\\Domain\\Slots'])
     ->toOnlyUse(['Carbon\\CarbonImmutable', 'Modules\\Scheduling\\Domain', 'Modules\\SharedKernel\\Time\\LocalTimeResolver', 'InvalidArgumentException']);
 
+arch('the cancellation policy is pure: rules, numbers and decisions only')
+    ->expect('Modules\Scheduling\Domain\Policy')
+    ->toOnlyUse(['Modules\Scheduling\Domain', 'Closure', 'LogicException', 'InvalidArgumentException']);
+
+arch('scheduling reads other modules\' tables only through read models that refuse writes')
+    ->expect('Modules\Scheduling\Queries\Models')
+    ->toHaveMethod('save');
+
 arch('credit allocation and tax rules are pure: no database, no framework')
     ->expect(['Modules\Credits\Domain', 'Modules\Billing\Domain'])
     ->toOnlyUse(['Carbon\CarbonImmutable', 'Modules\Credits\Domain', 'Modules\Billing\Domain', 'InvalidArgumentException']);

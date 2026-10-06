@@ -11,7 +11,7 @@ set -e
 cd /app
 
 # Bump when the demo data changes shape, so existing setups rebuild it.
-DEMO_VERSION=3
+DEMO_VERSION=4
 
 [ -f .env ] || cp .env.example .env
 

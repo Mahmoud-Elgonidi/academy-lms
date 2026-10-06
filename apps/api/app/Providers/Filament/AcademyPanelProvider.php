@@ -17,7 +17,6 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Billing\Filament\BillingPlugin;
-use Modules\Enrollment\Filament\EnrollmentPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
 use Modules\Scheduling\Filament\SchedulingPlugin;
@@ -58,7 +57,6 @@ final class AcademyPanelProvider extends PanelProvider
             ->authMiddleware([Authenticate::class], isPersistent: true)
             ->plugins([
                 SchedulingPlugin::make(),
-                EnrollmentPlugin::make(),
                 BillingPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),

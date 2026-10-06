@@ -209,7 +209,7 @@ it('gives the minutes of a cancelled lesson back and funds the next waiting one 
     app(RecordPayment::class)->handle($booked->invoice->id, 'cash', Money::parse('400', 'SAR'), null, CarbonImmutable::now(), null, $this->accountant->id);
     $sessions = Session::query()->where('enrollment_id', $booked->enrollmentId)->orderBy('starts_at')->get();
 
-    app(CancelSession::class)->handle($sessions[2], 'emergency', false, null, $this->scheduler->id);
+    app(CancelSession::class)->handle($sessions[2], 'academy', 'emergency', null, $this->scheduler->id);
 
     expect($sessions[8]->refresh()->funding_status)->toBe(FundingStatus::Funded)
         ->and($sessions[9]->refresh()->funding_status)->toBe(FundingStatus::Unfunded)
@@ -237,7 +237,7 @@ it('lets minutes past their date lapse, with a ledger line', function () {
     // Two lessons are cancelled with nothing waiting to take their minutes back (beyond the funded eight, nothing is left unfunded).
     Session::query()->where('enrollment_id', $booked->enrollmentId)->where('funding_status', 'unfunded')->update(['status' => 'cancelled']);
     foreach (Session::query()->where('enrollment_id', $booked->enrollmentId)->where('funding_status', 'funded')->orderBy('starts_at')->take(2)->get() as $s) {
-        app(CancelSession::class)->handle($s, 'emergency', false, null, $this->scheduler->id);
+        app(CancelSession::class)->handle($s, 'academy', 'emergency', null, $this->scheduler->id);
     }
     expect(CreditAccount::query()->findOrFail($accountId)->available_min)->toBe(60);
 

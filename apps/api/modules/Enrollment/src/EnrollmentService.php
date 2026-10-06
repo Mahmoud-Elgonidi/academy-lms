@@ -2,8 +2,10 @@
 
 namespace Modules\Enrollment;
 
+use Carbon\CarbonImmutable;
 use Modules\Enrollment\Actions\ActivateEnrollment;
 use Modules\Enrollment\Actions\CreateEnrollment;
+use Modules\Enrollment\Actions\ReassignEnrollmentTeacher;
 use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
 use Modules\Enrollment\Contracts\DTOs\NewEnrollment;
 use Modules\Enrollment\Contracts\EnrollmentApi;
@@ -14,6 +16,7 @@ final class EnrollmentService implements EnrollmentApi
     public function __construct(
         private readonly CreateEnrollment $create,
         private readonly ActivateEnrollment $activate,
+        private readonly ReassignEnrollmentTeacher $reassign,
     ) {}
 
     public function create(NewEnrollment $new): string
@@ -29,6 +32,11 @@ final class EnrollmentService implements EnrollmentApi
     public function activate(string $enrollmentId, ?string $actorId = null): void
     {
         $this->activate->handle($enrollmentId, $actorId);
+    }
+
+    public function reassignTeacher(string $enrollmentId, string $teacherId, CarbonImmutable $from, ?string $actorId = null): void
+    {
+        $this->reassign->handle($enrollmentId, $teacherId, $from, $actorId);
     }
 
     public function find(string $enrollmentId): ?EnrollmentData

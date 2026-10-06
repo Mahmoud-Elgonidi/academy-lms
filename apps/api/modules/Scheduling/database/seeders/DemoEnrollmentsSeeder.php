@@ -9,11 +9,13 @@ use Modules\Billing\Contracts\BillingApi;
 use Modules\Billing\Contracts\DTOs\PlanOption;
 use Modules\Billing\Contracts\DTOs\RegionOption;
 use Modules\Scheduling\Actions\ApplyAttendanceDeadlines;
+use Modules\Scheduling\Actions\CancelSession;
 use Modules\Scheduling\Actions\EnrollStudent;
 use Modules\Scheduling\Actions\FundSessions;
 use Modules\Scheduling\Actions\MaterializeSessions;
 use Modules\Scheduling\Actions\PlaceBookingHold;
 use Modules\Scheduling\Actions\RecordParticipantJoin;
+use Modules\Scheduling\Actions\RescheduleSession;
 use Modules\Scheduling\Contracts\DTOs\EnrollmentTerms;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\SharedKernel\Money\Money;
@@ -34,6 +36,8 @@ class DemoEnrollmentsSeeder extends Seeder
         ApplyAttendanceDeadlines $deadlines,
         MaterializeSessions $materialize,
         FundSessions $fund,
+        CancelSession $cancel,
+        RescheduleSession $reschedule,
     ): void {
         $user = fn (string $key) => DB::table('users')->where('email', "{$key}@demo.test")->value('id');
         $subject = fn (string $en) => DB::table('subjects')->where('name_en', $en)->value('id');
@@ -102,5 +106,16 @@ class DemoEnrollmentsSeeder extends Seeder
                 default => null,
             };
         }
+
+        // Policy at work: Maryam cancels a lesson in good time (credit back, next lesson funded),
+        // Adam cancels one too late (lost, teacher paid half), Layan moves her first lesson an hour later.
+        $lesson = fn (string $student, int $nth) => Session::query()->where('type', 'regular')->where('status', 'scheduled')
+            ->whereHas('participants', fn ($q) => $q->where('user_id', $user($student))->where('role', 'student'))
+            ->orderBy('starts_at')->skip($nth)->first();
+        $cancel->handle($lesson('maryam', 1), 'student', 'travel', 'مسافرة مع الأسرة', $admin);
+        $late = $lesson('adam', 0);
+        $cancel->handle($late, 'student', 'illness', null, $admin, at: $late->starts_at->subHours(3));
+        $first = $lesson('layan', 0);
+        $reschedule->handle($first, $first->starts_at->addHour(), 'student', $admin);
     }
 }

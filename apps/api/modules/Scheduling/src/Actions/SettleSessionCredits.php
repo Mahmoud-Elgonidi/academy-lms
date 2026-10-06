@@ -16,14 +16,14 @@ use Modules\Scheduling\Domain\Models\Session;
  */
 final class SettleSessionCredits
 {
-    public const EFFECTS = ['consumed', 'forfeit', 'refund', 'makeup', 'none'];
+    public const EFFECTS = ['consumed', 'forfeit', 'refund', 'makeup', 'keep', 'none'];
 
     public function __construct(
         private readonly CreditsApi $credits,
         private readonly FundSessions $fund,
     ) {}
 
-    public function handle(Session $session, string $effect, ?string $actorId = null): void
+    public function handle(Session $session, string $effect, ?string $actorId = null, ?int $makeupDays = null): void
     {
         $reserved = $this->credits->isReserved($session->id);
 
@@ -31,7 +31,7 @@ final class SettleSessionCredits
             'consumed' => $this->credits->consume($session->id, "session:{$session->id}:consume", 'session_'.$session->status->value),
             'forfeit' => $this->credits->consume($session->id, "session:{$session->id}:consume", 'forfeit'),
             'refund' => $this->credits->release($session->id, ReleaseMode::Refund, "session:{$session->id}:release", $actorId, $session->decision['reason'] ?? null),
-            'makeup' => $this->credits->release($session->id, ReleaseMode::Makeup, "session:{$session->id}:release", $actorId, $session->decision['reason'] ?? $session->status->value),
+            'makeup' => $this->credits->release($session->id, ReleaseMode::Makeup, "session:{$session->id}:release", $actorId, $session->decision['reason'] ?? $session->status->value, $makeupDays),
             default => null,
         };
 

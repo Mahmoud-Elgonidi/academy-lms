@@ -26,11 +26,12 @@ it('takes nothing when the lots cannot cover the whole session', function () {
     expect(LotAllocator::allocate([lot('a', 20, null), lot('b', 5, null)], 30, CarbonImmutable::parse('2026-10-10')))->toBeNull();
 });
 
-it('keeps makeup minutes for makeup sessions, which use them first', function () {
+it('keeps makeup minutes for makeup sessions, which use nothing else', function () {
     $lots = [lot('paid', 60, '2026-12-01'), lot('makeup', 30, '2026-11-01', 'makeup')];
     $at = CarbonImmutable::parse('2026-10-10');
 
     expect(LotAllocator::allocate($lots, 30, $at))->toBe(['paid' => 30])
         ->and(LotAllocator::allocate($lots, 30, $at, forMakeup: true))->toBe(['makeup' => 30])
-        ->and(LotAllocator::allocate([lot('makeup', 30, '2026-11-01', 'makeup')], 30, $at))->toBeNull();
+        ->and(LotAllocator::allocate([lot('makeup', 30, '2026-11-01', 'makeup')], 30, $at))->toBeNull()
+        ->and(LotAllocator::allocate([lot('paid', 60, '2026-12-01')], 30, $at, forMakeup: true))->toBeNull();
 });

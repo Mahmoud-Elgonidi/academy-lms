@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Enrollment\Queries;
+namespace Modules\Scheduling\Queries;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -74,7 +74,7 @@ final class EnrollmentAccountQuery
         return DB::table('sessions')->where('enrollment_id', $enrollmentId)
             ->where('starts_at', '>=', CarbonImmutable::now()->subHours(2))
             ->orderBy('starts_at')->limit($limit)
-            ->get(['id', 'starts_at', 'ends_at', 'status', 'funding_status'])->all();
+            ->get(['id', 'starts_at', 'ends_at', 'status', 'funding_status', 'type', 'is_detached'])->all();
     }
 
     /** @return array{done: int, upcoming: int} */

@@ -7,9 +7,7 @@ use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Panel;
@@ -31,6 +29,7 @@ use Modules\Scheduling\Domain\LiveBoard\BoardClassifier;
 use Modules\Scheduling\Domain\LiveBoard\BoardItem;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Filament\LiveBoardView;
+use Modules\Scheduling\Filament\PolicyPreview;
 use Modules\Scheduling\Queries\LiveBoardQuery;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -213,20 +212,14 @@ final class LiveBoard extends Page
     public function cancelAction(): Action
     {
         return $this->sessionAction('cancel')
-            ->label(fn (array $arguments) => __('scheduling::board.actions.'.(($arguments['makeup'] ?? false) ? 'cancel_makeup' : 'cancel')))
+            ->label(fn (array $arguments) => __('scheduling::board.actions.'.(in_array($arguments['by'] ?? 'student', ['teacher', 'academy'], true) && ($arguments['reason'] ?? '') !== 'unpaid' ? 'cancel_makeup' : 'cancel')))
             ->color('danger')
             ->modalHeading(__('scheduling::board.cancel.heading'))
-            ->fillForm(fn (array $arguments) => ['reason' => $arguments['reason'] ?? 'other', 'makeup' => (bool) ($arguments['makeup'] ?? false)])
-            ->schema([
-                Select::make('reason')->label(__('scheduling::board.cancel.reason'))
-                    ->options(collect(CancelSession::REASONS)->mapWithKeys(fn ($r) => [$r => __('scheduling::board.cancel_reasons.'.$r)])->all())
-                    ->required()->native(false),
-                Toggle::make('makeup')->label(__('scheduling::board.cancel.makeup'))->helperText(__('scheduling::board.cancel.makeup_hint')),
-                Textarea::make('note')->label(__('scheduling::board.contact.note'))->rows(2)->maxLength(500),
-            ])
+            ->fillForm(fn (array $arguments) => ['by' => $arguments['by'] ?? 'student', 'reason' => $arguments['reason'] ?? 'other', 'waive' => false])
+            ->schema(fn (array $arguments) => PolicyPreview::cancelFields($this->session($arguments)))
             ->modalSubmitActionLabel(__('scheduling::board.cancel.submit'))
             ->action(function (array $data, array $arguments) {
-                app(CancelSession::class)->handle($this->session($arguments), $data['reason'], (bool) $data['makeup'], $data['note'] ?? null, (string) auth()->id());
+                app(CancelSession::class)->handle($this->session($arguments), $data['by'], $data['reason'], $data['note'] ?? null, (string) auth()->id(), (bool) ($data['waive'] ?? false));
                 $this->done(__('scheduling::board.done.cancelled'));
             });
     }

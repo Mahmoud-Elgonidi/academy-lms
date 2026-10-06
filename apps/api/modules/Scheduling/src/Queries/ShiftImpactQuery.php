@@ -17,7 +17,7 @@ use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
 final class ShiftImpactQuery
 {
     /**
-     * @return list<array{key: string, student_id: string, student: string, student_tz: string, subject_ar: string, subject_en: string,
+     * @return list<array{key: string, student_id: string, student: string, student_tz: string, enrollment_id: ?string, subject_ar: string, subject_en: string,
      *     weekday: int, start: string, duration_min: int, count: int, first: CarbonImmutable, last: CarbonImmutable, session_ids: list<string>}>
      */
     public function conflicts(string $teacherId, WeeklyShifts $shifts, CarbonImmutable $effectiveFrom, string $fallbackTz = 'UTC'): array
@@ -32,7 +32,7 @@ final class ShiftImpactQuery
             ->where('s.status', SessionStatus::Scheduled->value)
             ->where('s.starts_at', '>=', $from)
             ->orderBy('s.starts_at')
-            ->select('s.id', 's.starts_at', 's.ends_at', 'sub.name_ar', 'sub.name_en', 'u.id as student_id', 'u.name as student', 'u.timezone as student_tz')
+            ->select('s.id', 's.starts_at', 's.ends_at', 's.enrollment_id', 'sub.name_ar', 'sub.name_en', 'u.id as student_id', 'u.name as student', 'u.timezone as student_tz')
             ->get();
 
         $groups = [];
@@ -52,6 +52,7 @@ final class ShiftImpactQuery
                 'student_id' => $row->student_id,
                 'student' => $row->student ?? '—',
                 'student_tz' => $row->student_tz ?? $fallbackTz,
+                'enrollment_id' => $row->enrollment_id,
                 'subject_ar' => $row->name_ar,
                 'subject_en' => $row->name_en,
                 'weekday' => $weekday,

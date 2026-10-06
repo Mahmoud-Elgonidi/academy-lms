@@ -23,15 +23,18 @@ interface CreditsApi
 
     /**
      * Sets minutes aside for a session from lots still valid at $usableAt;
-     * false when there are not enough. Makeup lots pay for makeup sessions only.
+     * false when there are not enough. Makeup lots pay for makeup sessions, and makeup sessions for nothing else.
      */
     public function reserve(string $sessionId, string $accountId, int $minutes, CarbonImmutable $usableAt, string $idempotencyKey, bool $forMakeup = false): bool;
 
     /** The session happened (or was forfeited): its reserved minutes are used. No-op without a reservation. */
     public function consume(string $sessionId, string $idempotencyKey, ?string $reason = null): void;
 
-    /** The session did not happen: its minutes come back, as they were or as a makeup lot. No-op without a reservation. */
-    public function release(string $sessionId, ReleaseMode $mode, string $idempotencyKey, ?string $actorId = null, ?string $reason = null): void;
+    /**
+     * The session did not happen: its minutes come back, as they were or as a
+     * makeup lot valid $makeupDays (30 by default). No-op without a reservation.
+     */
+    public function release(string $sessionId, ReleaseMode $mode, string $idempotencyKey, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): void;
 
     public function isReserved(string $sessionId): bool;
 

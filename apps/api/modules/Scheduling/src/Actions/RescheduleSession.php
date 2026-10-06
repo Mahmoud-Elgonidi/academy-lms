@@ -1,0 +1,88 @@
+<?php
+
+namespace Modules\Scheduling\Actions;
+
+use Carbon\CarbonImmutable;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Modules\Scheduling\Actions\Policy\PolicyDecider;
+use Modules\Scheduling\Actions\Policy\RecordPolicyDecision;
+use Modules\Scheduling\Domain\Availability\IntervalSet;
+use Modules\Scheduling\Domain\Enums\ParticipantRole;
+use Modules\Scheduling\Domain\Enums\SessionEventKind;
+use Modules\Scheduling\Domain\Enums\SessionStatus;
+use Modules\Scheduling\Domain\Models\Session;
+use Modules\Scheduling\Domain\Models\SessionEvent;
+use Modules\Scheduling\Domain\Models\SessionParticipant;
+use Modules\Scheduling\Domain\Policy\PolicyEvent;
+use Modules\Scheduling\Queries\AvailabilityQuery;
+
+/**
+ * Moves one session to another time with the same teacher (rule 1): the
+ * student may, with notice and within the block's quota; the academy may
+ * always. The teacher must be on shift and free; the database refuses a
+ * time either person is already booked. The credit stays reserved, and the
+ * session no longer follows its weekly time.
+ */
+final class RescheduleSession
+{
+    public function __construct(
+        private readonly PolicyDecider $decider,
+        private readonly RecordPolicyDecision $record,
+        private readonly AvailabilityQuery $availability,
+    ) {}
+
+    public function handle(Session $session, CarbonImmutable $newStart, string $askedBy, ?string $actorId, bool $waive = false, ?CarbonImmutable $at = null): Session
+    {
+        $at ??= CarbonImmutable::now();
+        if ($session->status !== SessionStatus::Scheduled || $session->starts_at->lessThanOrEqualTo($at)) {
+            throw ValidationException::withMessages(['session' => __('scheduling::policy.errors.not_movable')]);
+        }
+        $newStart = $newStart->utc();
+        $newEnd = $newStart->addMinutes($session->durationMinutes());
+        if ($newStart->lessThanOrEqualTo($at)) {
+            throw ValidationException::withMessages(['starts_at' => __('scheduling::policy.errors.in_the_past')]);
+        }
+
+        [$decision, $input, $version] = $this->decider->decide($session, $askedBy === 'student' ? PolicyEvent::StudentReschedule : PolicyEvent::AcademyReschedule, $at);
+        if (! $decision->allowed && ! $waive) {
+            throw ValidationException::withMessages(['session' => __('scheduling::policy.refusals.'.$decision->refusal, ['n' => $version->policy()->get('quota_per_block'), 'hours' => $version->policy()->get('student_notice_hours')])]);
+        }
+
+        $teacher = $this->availability->forTeachers([$session->teacher_id], $newStart->subHour(), $newEnd->addHour())[$session->teacher_id] ?? null;
+        $own = [$session->starts_at->getTimestamp(), $session->ends_at->getTimestamp()];
+        $free = new IntervalSet(array_merge($teacher?->free->intervals ?? [], [$own]));
+        if ($teacher === null || ! $teacher->shifts->contains($newStart->getTimestamp(), $newEnd->getTimestamp()) || ! $free->contains($newStart->getTimestamp(), $newEnd->getTimestamp())) {
+            throw ValidationException::withMessages(['starts_at' => __('scheduling::policy.errors.teacher_busy')]);
+        }
+
+        try {
+            DB::transaction(function () use ($session, $newStart, $newEnd, $askedBy, $actorId, $waive, $decision, $input, $version) {
+                $old = $session->starts_at;
+                $session->starts_at = $newStart;
+                $session->ends_at = $newEnd;
+                $session->reschedule_count++;
+                $session->is_detached = true;
+                $session->version++;
+                $this->record->handle($session, $decision, $input, $version, ['by' => $askedBy, 'waived' => $waive, 'moved_from' => $old->toIso8601String()], $actorId);
+                $session->save();
+
+                $period = SessionParticipant::blockPeriod($newStart, $newEnd);
+                foreach ([ParticipantRole::Teacher, ParticipantRole::Student] as $role) {
+                    $session->participants()->where('role', $role->value)->where('is_active', true)->update(['block_period' => $period]);
+                }
+
+                SessionEvent::record($session, SessionEventKind::Rescheduled, ['from' => $old->toIso8601String(), 'to' => $newStart->toIso8601String(), 'by' => $askedBy], $actorId);
+            });
+        } catch (QueryException $e) {
+            if (str_contains($e->getMessage(), 'session_participants_no_double_booking')) {
+                throw ValidationException::withMessages(['starts_at' => __('scheduling::policy.errors.someone_busy')]);
+            }
+
+            throw $e;
+        }
+
+        return $session;
+    }
+}

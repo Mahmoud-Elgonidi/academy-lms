@@ -8,7 +8,7 @@ use Carbon\CarbonImmutable;
  * Which lots pay for a session: only lots still valid when the session
  * starts, the soonest to expire first (so minutes that are about to lapse
  * get used), oldest first among equals. A session may draw on several lots.
- * Makeup minutes are kept for makeup sessions, which take them first.
+ * Makeup minutes are kept for makeup sessions, which use nothing else.
  * All or nothing: if the valid lots cannot cover it, nothing is taken.
  */
 final class LotAllocator
@@ -25,11 +25,11 @@ final class LotAllocator
             $lots,
             fn (LotBalance $lot) => $lot->remainingMin > 0
                 && ($lot->expiresAt === null || $lot->expiresAt->greaterThan($usableAt))
-                && ($forMakeup || $lot->source !== self::MAKEUP),
+                && ($lot->source === self::MAKEUP) === $forMakeup,
         ));
 
-        usort($usable, fn (LotBalance $a, LotBalance $b) => [$a->source !== self::MAKEUP, $a->expiresAt === null, $a->expiresAt?->getTimestamp(), $a->createdAt->getTimestamp(), $a->id]
-            <=> [$b->source !== self::MAKEUP, $b->expiresAt === null, $b->expiresAt?->getTimestamp(), $b->createdAt->getTimestamp(), $b->id]);
+        usort($usable, fn (LotBalance $a, LotBalance $b) => [$a->expiresAt === null, $a->expiresAt?->getTimestamp(), $a->createdAt->getTimestamp(), $a->id]
+            <=> [$b->expiresAt === null, $b->expiresAt?->getTimestamp(), $b->createdAt->getTimestamp(), $b->id]);
 
         $allocations = [];
         $left = $minutes;

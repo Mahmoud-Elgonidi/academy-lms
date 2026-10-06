@@ -137,10 +137,10 @@ it('frees both people when a session is cancelled, so the hour can be booked aga
     Event::fake([SessionCancelled::class]);
     $session = book();
 
-    app(CancelSession::class)->handle($session, 'teacher_absent', true, 'called, no answer', $this->admin->id);
+    app(CancelSession::class)->handle($session, 'teacher', 'illness', 'called, no answer', $this->admin->id);
 
     expect($session->refresh()->status)->toBe(SessionStatus::Cancelled)
-        ->and($session->decision)->toMatchArray(['reason' => 'teacher_absent', 'makeup' => true])
+        ->and($session->decision)->toMatchArray(['by' => 'teacher', 'reason' => 'illness', 'credit' => 'makeup', 'rule' => 8])
         ->and(book()->exists)->toBeTrue();
     Event::assertDispatched(SessionCancelled::class, fn ($e) => $e->makeup && $e->sessionId === $session->id);
 });

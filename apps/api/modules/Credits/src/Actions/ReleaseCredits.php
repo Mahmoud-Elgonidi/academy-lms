@@ -14,16 +14,17 @@ use Modules\Credits\Models\CreditReservation;
 
 /**
  * The session did not take place. Refund: the minutes go back to the lots
- * they came from. Makeup: they become a makeup lot, valid for
- * MAKEUP_DAYS and never refunded (docs/architecture/02, section 3).
+ * they came from. Makeup: they become a makeup lot, valid for the
+ * academy's makeup days (MAKEUP_DAYS by default) and never refunded
+ * (docs/architecture/02, section 3).
  */
 final class ReleaseCredits
 {
     public const MAKEUP_DAYS = 30;
 
-    public function handle(string $sessionId, ReleaseMode $mode, string $idempotencyKey, ?string $actorId = null, ?string $reason = null): void
+    public function handle(string $sessionId, ReleaseMode $mode, string $idempotencyKey, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): void
     {
-        DB::transaction(function () use ($sessionId, $mode, $idempotencyKey, $actorId, $reason) {
+        DB::transaction(function () use ($sessionId, $mode, $idempotencyKey, $actorId, $reason, $makeupDays) {
             $accountId = CreditReservation::query()->where('session_id', $sessionId)->value('account_id');
             if ($accountId === null) {
                 return;
@@ -50,7 +51,7 @@ final class ReleaseCredits
                     'source_id' => $sessionId,
                     'granted_min' => $reservation->minutes,
                     'remaining_min' => $reservation->minutes,
-                    'expires_at' => CarbonImmutable::now()->addDays(self::MAKEUP_DAYS),
+                    'expires_at' => CarbonImmutable::now()->addDays($makeupDays ?? self::MAKEUP_DAYS)->endOfDay(),
                 ]);
             }
 

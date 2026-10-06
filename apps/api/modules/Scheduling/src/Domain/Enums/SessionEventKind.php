@@ -13,4 +13,7 @@ enum SessionEventKind: string
     case DecisionLogged = 'decision_logged';
     case Extended = 'extended';
     case StatusChanged = 'status_changed';
+    case PolicyApplied = 'policy_applied';
+    case Rescheduled = 'rescheduled';
+    case TeacherChanged = 'teacher_changed';
 }

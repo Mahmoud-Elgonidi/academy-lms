@@ -14,7 +14,7 @@ final class AbilityMatrix
     public static function rolesFor(Ability $ability): array
     {
         return match ($ability) {
-            Ability::ManageBranding => [Role::Owner, Role::Admin],
+            Ability::ManageBranding, Ability::ManagePolicies => [Role::Owner, Role::Admin],
             Ability::ViewLiveBoard, Ability::ManageSessions, Ability::ReviewShifts => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler],
             Ability::FindTeachers => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler, Role::Sales],
             Ability::ProposeOwnShifts => [Role::Teacher],

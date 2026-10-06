@@ -4,13 +4,17 @@ namespace Modules\Scheduling\Actions;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\Scheduling\Actions\Policy\PolicyDecider;
+use Modules\Scheduling\Actions\Policy\RecordPolicyDecision;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\Scheduling\Domain\AttendancePolicy;
 use Modules\Scheduling\Domain\Enums\ParticipantRole;
 use Modules\Scheduling\Domain\Enums\SessionEventKind;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
+use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionEvent;
+use Modules\Scheduling\Domain\Policy\PolicyEvent;
 
 /**
  * The per-minute sweeper for the current academy: what the live board's
@@ -26,13 +30,15 @@ final class ApplyAttendanceDeadlines
         private readonly MarkStudentAbsent $markStudentAbsent,
         private readonly FlagForReview $flagForReview,
         private readonly SettleSessionCredits $settle,
+        private readonly PolicyDecider $decider,
+        private readonly RecordPolicyDecision $record,
     ) {}
 
     /** @return int how many sessions changed */
     public function handle(?CarbonImmutable $now = null, ?AttendancePolicy $policy = null): int
     {
         $now ??= CarbonImmutable::now();
-        $policy ??= AttendancePolicy::defaults();
+        $policy ??= PolicyVersion::settingsInForce()->attendance();
         $changed = 0;
 
         $open = Session::query()
@@ -74,29 +80,37 @@ final class ApplyAttendanceDeadlines
         return $changed;
     }
 
+    /** Rule 9: the student is owed a makeup, the teacher is not paid. */
     private function teacherAbsent(Session $session, CarbonImmutable $now): void
     {
-        $this->close($session, SessionStatus::TeacherAbsent, ['by' => 'system', 'rule' => 9, 'credit' => 'makeup', 'teacher_pay' => 'none'], $now);
+        [$decision, $input, $version] = $this->decider->decide($session, PolicyEvent::TeacherAbsent, $now);
+
+        DB::transaction(function () use ($session, $now, $decision, $input, $version) {
+            $session->transitionTo(SessionStatus::TeacherAbsent);
+            $this->record->handle($session, $decision, $input, $version, ['by' => 'system'], null);
+            $session->save();
+
+            SessionEvent::record($session, SessionEventKind::StatusChanged, ['from' => SessionStatus::Scheduled->value, 'to' => SessionStatus::TeacherAbsent->value, 'by' => 'system'], null, $now);
+            $this->settle->handle($session, $decision->credit, null, $version->policy()->get('makeup_validity_days'));
+
+            DB::afterCommit(fn () => event(new SessionFinalized($session->academy_id, $session->id, SessionStatus::TeacherAbsent->value, $session->decision)));
+        });
     }
 
     private function complete(Session $session, int $taught, CarbonImmutable $now): void
     {
-        $this->close($session, SessionStatus::Completed, ['by' => 'system', 'credit' => 'consumed', 'taught_min' => $taught], $now);
-    }
+        $decision = ['by' => 'system', 'credit' => 'consumed', 'teacher_pay_pct' => 100, 'taught_min' => $taught];
 
-    /** @param  array<string, mixed>  $decision */
-    private function close(Session $session, SessionStatus $to, array $decision, CarbonImmutable $now): void
-    {
-        DB::transaction(function () use ($session, $to, $decision, $now) {
+        DB::transaction(function () use ($session, $decision, $now) {
             $from = $session->status;
-            $session->transitionTo($to);
+            $session->transitionTo(SessionStatus::Completed);
             $session->decision = $decision;
             $session->save();
 
-            SessionEvent::record($session, SessionEventKind::StatusChanged, ['from' => $from->value, 'to' => $to->value, 'by' => 'system'], null, $now);
-            $this->settle->handle($session, $decision['credit']);
+            SessionEvent::record($session, SessionEventKind::StatusChanged, ['from' => $from->value, 'to' => SessionStatus::Completed->value, 'by' => 'system'], null, $now);
+            $this->settle->handle($session, 'consumed');
 
-            DB::afterCommit(fn () => event(new SessionFinalized($session->academy_id, $session->id, $to->value, $decision)));
+            DB::afterCommit(fn () => event(new SessionFinalized($session->academy_id, $session->id, SessionStatus::Completed->value, $decision)));
         });
     }
 }

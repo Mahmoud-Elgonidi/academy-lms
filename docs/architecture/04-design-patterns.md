@@ -72,6 +72,7 @@ flowchart TD
 4. **القيود الحساسة** (الدفع ← إضافة الرصيد، الحجز ← حجز الرصيد) بتتنفذ في **transaction واحدة بين الـ modules**. الـ Events للحاجات الجانبية بس، و**مفيش Sagas**.
    - **المنفّذ دلوقتي**: خطوة التسجيل (`EnrollStudent` في Scheduling) بتنادي Enrollment وCredits وBilling عن طريق الـ Contracts في transaction واحدة: التسجيل، وحساب الرصيد، والاشتراك، وأول فاتورة، والمواعيد الأسبوعية، والحصص. عشان كده Scheduling بيعتمد على Contracts بتوع Billing (وده كان موجود أصلًا لما Scheduling بيسمع events بتوع Billing). Billing مابيعرفش Scheduling خالص.
    - قفل الحصة بيخصم أو يرجّع الرصيد **في نفس transaction القفل** (`SettleSessionCredits` بينادي `CreditsApi`)، بدل ما Credits يسمع `SessionFinalized`. كده Credits بيفضل معتمد على SharedKernel بس.
+   - شاشات "الطلاب المسجلين" وحساب الطالب في Scheduling، مش في Enrollment، لأن الإجراءات اللي عليها (إلغاء، تأجيل، تعويض، تغيير المدرس) بتاعة Scheduling، وEnrollment مايقدرش يعتمد عليه. Scheduling بيقرا جدول `enrollments` عن طريق read model خاص بيه (`EnrolledStudent`) بيرفض الكتابة، والكتابة بتفضل عن طريق `EnrollmentApi`.
 5. **الاشتراك في events module تاني مسموح** طالما مابيعملش دايرة في الكود:
    - Billing بيسمع `CreditBalanceLow` (فاتورة التجديد).
    - Scheduling بيسمع `SubscriptionPastDue` و`SubscriptionPaused` (بيوقف الحصص)، و`ParticipantJoined` و`ParticipantLeft` (الحضور)، و`CreditsGranted` (بيأكّد الحصص المستنية بالترتيب).

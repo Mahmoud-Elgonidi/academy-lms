@@ -12,6 +12,7 @@ use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Scheduling\Console\MaterializeSessionsCommand;
 use Modules\Scheduling\Console\SweepSessionsCommand;
 use Modules\Scheduling\Domain\AttendancePolicy;
+use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Filament\Pages\LiveBoard;
 use Modules\Scheduling\Listeners\FundSessionsFromNewCredit;
 
@@ -19,8 +20,8 @@ final class SchedulingServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // Per-academy policy sets replace this when the policy engine lands.
-        $this->app->singleton(AttendancePolicy::class, fn () => AttendancePolicy::defaults());
+        // The current academy's numbers, read each time (one process serves many academies).
+        $this->app->bind(AttendancePolicy::class, fn () => PolicyVersion::settingsInForce()->attendance());
     }
 
     public function boot(): void

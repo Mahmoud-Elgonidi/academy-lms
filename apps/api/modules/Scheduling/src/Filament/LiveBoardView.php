@@ -204,6 +204,15 @@ final class LiveBoardView
                 'status' => __('scheduling::board.status_names.'.($d['to'] ?? 'scheduled')),
                 'actor' => ($d['by'] ?? null) === 'system' ? __('scheduling::board.log.system') : $actor,
             ]),
+            SessionEventKind::PolicyApplied => __('scheduling::board.log.policy', [
+                'rule' => $d['decision']['rule'] ?? '?',
+                'credit' => __('scheduling::policy.credit.'.($d['decision']['credit'] ?? 'none')),
+            ]),
+            SessionEventKind::Rescheduled => __('scheduling::board.log.rescheduled', [
+                'actor' => $actor,
+                'from' => isset($d['from']) ? $this->hm(CarbonImmutable::parse($d['from'])) : '—',
+            ]),
+            SessionEventKind::TeacherChanged => __('scheduling::board.log.teacher_changed', ['actor' => $actor]),
         };
     }
 
@@ -226,14 +235,14 @@ final class LiveBoardView
         return match (true) {
             $item->issue === BoardIssue::TeacherNotJoined => [
                 $a('contact', ['target' => 'teacher'], 'call_teacher', 'call_teacher'),
-                $a('cancel', ['reason' => 'teacher_absent', 'makeup' => true], 'cancel_makeup', 'cancel_makeup', true),
+                $a('cancel', ['by' => 'teacher', 'reason' => 'emergency'], 'cancel_makeup', 'cancel_makeup', true),
                 $a('contact', ['target' => 'guardian'], 'reassure', 'reassure'),
                 $a('soon', ['what' => 'substitute'], 'substitute', 'soon_substitute', soon: true),
             ],
             $item->issue === BoardIssue::NobodyJoined => [
                 $a('contact', ['target' => 'teacher'], 'call_teacher', 'call_teacher'),
                 $a('contact', ['target' => 'guardian'], 'call_guardian', 'call_guardian'),
-                $a('cancel', ['reason' => 'other', 'makeup' => true], 'cancel_makeup', 'cancel_makeup', true),
+                $a('cancel', ['by' => 'academy', 'reason' => 'other'], 'cancel_makeup', 'cancel_makeup', true),
             ],
             $item->issue === BoardIssue::StudentNotJoined => [
                 $a('contact', ['target' => 'guardian'], 'call_guardian', 'call_guardian'),
@@ -247,7 +256,7 @@ final class LiveBoardView
             ],
             $item->issue === BoardIssue::Unfunded => [
                 $a('allowUnfunded', [], 'allow_unfunded', 'allow_unfunded'),
-                $a('cancel', ['reason' => 'unpaid', 'makeup' => false], 'cancel', 'cancel_unpaid', true),
+                $a('cancel', ['by' => 'academy', 'reason' => 'unpaid'], 'cancel', 'cancel_unpaid', true),
                 $a('soon', ['what' => 'payment_link'], 'payment_link', 'soon_billing', soon: true),
             ],
             $item->issue === BoardIssue::NeedsReview => [
@@ -263,7 +272,7 @@ final class LiveBoardView
                 $a('contact', ['target' => 'teacher'], 'call_teacher', 'call_teacher_any'),
                 $a('contact', ['target' => 'guardian'], 'call_guardian', 'call_guardian_any'),
                 $s->funding === FundingStatus::Unfunded ? $a('soon', ['what' => 'payment_link'], 'payment_link', 'soon_billing', soon: true) : null,
-                $a('cancel', ['reason' => 'other', 'makeup' => false], 'cancel', 'cancel_any', true),
+                $a('cancel', ['by' => 'student', 'reason' => 'other'], 'cancel', 'cancel_any', true),
             ])),
             in_array($s->status, [SessionStatus::Completed, SessionStatus::StudentAbsent, SessionStatus::TeacherAbsent], true) => [
                 $a('dispute', [], 'dispute', 'dispute'),

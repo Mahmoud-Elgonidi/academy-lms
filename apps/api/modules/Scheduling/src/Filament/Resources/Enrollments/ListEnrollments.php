@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Enrollment\Filament\Resources\Enrollments;
+namespace Modules\Scheduling\Filament\Resources\Enrollments;
 
 use Filament\Resources\Pages\ListRecords;
 

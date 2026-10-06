@@ -51,9 +51,9 @@ final class CreditsService implements CreditsApi
         $this->consume->handle($sessionId, $idempotencyKey, $reason);
     }
 
-    public function release(string $sessionId, ReleaseMode $mode, string $idempotencyKey, ?string $actorId = null, ?string $reason = null): void
+    public function release(string $sessionId, ReleaseMode $mode, string $idempotencyKey, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): void
     {
-        $this->release->handle($sessionId, $mode, $idempotencyKey, $actorId, $reason);
+        $this->release->handle($sessionId, $mode, $idempotencyKey, $actorId, $reason, $makeupDays);
     }
 
     public function isReserved(string $sessionId): bool

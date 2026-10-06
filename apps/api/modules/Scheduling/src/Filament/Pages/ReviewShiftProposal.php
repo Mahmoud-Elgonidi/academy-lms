@@ -100,6 +100,8 @@ final class ReviewShiftProposal extends Page
                 'teacher_label' => __('scheduling::shifts.days.'.$c['weekday']).' '.$c['start'].' '.LiveBoardView::city($p->timezone),
                 'student_label' => $first->setTimezone($c['student_tz'])->format('H:i').' '.LiveBoardView::city($c['student_tz']),
                 'range' => $first->locale(app()->getLocale())->translatedFormat('j M').' → '.$c['last']->locale(app()->getLocale())->translatedFormat('j M'),
+                // Moving the student to another teacher happens on their account; the conflict then goes away.
+                'move_url' => $c['enrollment_id'] ? route('filament.academy.resources.enrollments.view', ['record' => $c['enrollment_id'], 'reassign' => $p->effective_from->toDateString()]) : null,
             ];
         }, $p->status->isOpen() ? app(ShiftImpactQuery::class)->conflicts($p->teacher_id, $proposed, $p->effective_from) : []);
 
