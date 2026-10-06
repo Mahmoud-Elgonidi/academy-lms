@@ -6,7 +6,7 @@
     @include('scheduling::filament.family.styles')
 
     <h2 class="fl-h2">{{ __($l.'upcoming') }}</h2>
-    <div class="fl-list">
+    <div class="fl-list lms-stagger">
         @forelse ($lessons['upcoming'] as $lesson)
             @include('scheduling::filament.family.lesson-card', ['lesson' => $lesson, 'cancel' => $this->cancelAction ?? null])
         @empty
@@ -15,7 +15,7 @@
     </div>
 
     <h2 class="fl-h2">{{ __($l.'recent') }}</h2>
-    <div class="fl-list">
+    <div class="fl-list lms-stagger">
         @forelse ($lessons['recent'] as $lesson)
             @include('scheduling::filament.family.lesson-card', ['lesson' => $lesson])
         @empty

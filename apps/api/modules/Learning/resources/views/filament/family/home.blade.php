@@ -4,9 +4,9 @@
 @endphp
 <x-filament-widgets::widget>
     @include('learning::filament.family.styles')
-    <div class="lf-stack">
+    <div class="lf-stack lms-stagger">
         @foreach ($d['courses'] as $course)
-            <a class="lf-card" href="{{ \Modules\Learning\Filament\Family\FamilyProgress::getUrl() }}" style="text-decoration: none; color: inherit" wire:key="home-course-{{ $course['id'] }}">
+            <a class="lf-card lms-lift" href="{{ \Modules\Learning\Filament\Family\FamilyProgress::getUrl() }}" style="text-decoration: none; color: inherit" wire:key="home-course-{{ $course['id'] }}">
                 <div class="lf-head">
                     <div>
                         <h3>{{ $course['subject'] }}</h3>
@@ -17,18 +17,18 @@
                     @endif
                 </div>
                 @if ($course['map'])
-                    <span class="lf-bar"><i style="width: {{ $course['map']['percent'] }}%"></i></span>
+                    <span class="lf-bar"><i class="lms-bar-fill" style="width: {{ $course['map']['percent'] }}%"></i></span>
                 @endif
             </a>
         @endforeach
 
         <div class="lf-facts">
-            <a class="lf-fact" href="{{ \Modules\Learning\Filament\Family\FamilyHomework::getUrl() }}" style="text-decoration: none; color: inherit">
+            <a class="lf-fact lms-lift" href="{{ \Modules\Learning\Filament\Family\FamilyHomework::getUrl() }}" style="text-decoration: none; color: inherit">
                 <small>{{ __($l.'homework') }}</small>
                 <strong>{{ $d['homework'] > 0 ? trans_choice($l.'homework_open', $d['homework'], ['n' => $d['homework']]) : __($l.'homework_none') }}</strong>
                 @if ($d['next_due']) <small>{{ __($l.'next_due', ['date' => $d['next_due']]) }}</small> @endif
             </a>
-            <a class="lf-fact" href="{{ \Modules\Learning\Filament\Family\FamilyReports::getUrl() }}" style="text-decoration: none; color: inherit">
+            <a class="lf-fact lms-lift" href="{{ \Modules\Learning\Filament\Family\FamilyReports::getUrl() }}" style="text-decoration: none; color: inherit">
                 <small>{{ __($l.'last_report') }}</small>
                 @if ($d['report'])
                     <strong>{{ $d['report']['date'] }} @if ($d['report']['overall']) <span class="lf-stars">{{ str_repeat('★', $d['report']['overall']) }}</span> @endif</strong>

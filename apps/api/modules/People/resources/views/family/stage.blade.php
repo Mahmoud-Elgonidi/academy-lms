@@ -38,6 +38,10 @@
         .fi-topbar-start { display: flex; min-width: 0; margin-inline-end: .5rem; }   /* the academy's name, where the menu button was */
         .fi-topbar-start .fi-logo { margin-inline-start: 0; font-size: 1.05rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     }
+    @media (prefers-reduced-motion: no-preference) {
+        .lms-tab[aria-current] svg { animation: lms-tab-hop .55s var(--lms-spring) .1s backwards; }   /* the tab just opened hops */
+    }
+    @keyframes lms-tab-hop { from { opacity: .4; transform: translateY(6px) scale(.6); } }
     .dark .lms-tabs { background: var(--gray-900); border-color: var(--gray-800); }
     .dark .lms-tab[aria-current] { background: color-mix(in oklab, var(--primary-500) 15%, transparent); color: var(--primary-300); }
 

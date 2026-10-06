@@ -23,6 +23,9 @@ final class JourneyWidget extends Widget
 
     protected int|string|array $columnSpan = 'full';
 
+    /** Drawn with the page: no placeholder that jumps, no extra request. */
+    protected static bool $isLazy = false;
+
     public static function canView(): bool
     {
         return FamilyLearning::stage() !== LearnerStage::Classic;

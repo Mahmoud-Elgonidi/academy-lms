@@ -17,6 +17,9 @@ final class NextLessonsWidget extends Widget
 
     protected int|string|array $columnSpan = 'full';
 
+    /** Drawn with the page: no placeholder that jumps, no extra request. */
+    protected static bool $isLazy = false;
+
     /** @return list<array<string, mixed>> */
     public function lessons(): array
     {

@@ -22,7 +22,7 @@
         .dark .lf-rec-btn { background: var(--gray-900); border-color: var(--gray-700); }
     </style>
 
-    <div class="lf-stack">
+    <div class="lf-stack lms-stagger">
         @forelse ($data['open'] as $hw)
             @php $late = $hw->status === 'missed' || $hw->due_at->isPast(); @endphp
             <article class="lf-card" wire:key="hw-{{ $hw->id }}">

@@ -1,7 +1,7 @@
 @php $l = 'learning::family.reports.'; $a = 'learning::reports.attributes.'; @endphp
 <x-filament-panels::page>
     @include('learning::filament.family.styles')
-    <div class="lf-stack">
+    <div class="lf-stack lms-stagger">
         @forelse ($this->reports as $report)
             <article class="lf-card" wire:key="report-{{ $report['id'] }}">
                 <div class="lf-head">

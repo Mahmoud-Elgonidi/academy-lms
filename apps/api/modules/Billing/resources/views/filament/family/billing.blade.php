@@ -9,11 +9,11 @@
 
     <h2 class="bf-h2">{{ __($l.'invoices') }}</h2>
     @if ($a['owed'])
-        <div class="bf-grid" style="margin-bottom: .6rem">
+        <div class="bf-grid lms-stagger" style="margin-bottom: .6rem">
             <div class="bf-card" data-tone="owed"><small>{{ __($l.'owed') }}</small><span class="bf-big">{{ $a['owed'] }}</span></div>
         </div>
     @endif
-    <div class="bf-list">
+    <div class="bf-list lms-stagger">
         @forelse ($a['invoices'] as $inv)
             <div class="bf-inv" wire:key="inv-{{ $inv['id'] }}">
                 <div>

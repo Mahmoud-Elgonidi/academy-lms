@@ -45,8 +45,8 @@
         .jm-course-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
         .jm-course-head h3 { margin: 0; font-size: 1.15rem; font-weight: 800; }
         .jm-course-head small { color: var(--gray-500); font-size: .85rem; }
-        .jm-ring { --p: 0; flex: none; display: grid; place-items: center; width: 3.6rem; height: 3.6rem; border-radius: 50%; background: conic-gradient(var(--primary-500) calc(var(--p) * 1%), var(--gray-200) 0); }
-        .jm-ring span { display: grid; place-items: center; width: 2.8rem; height: 2.8rem; border-radius: 50%; background: white; font-weight: 800; font-size: .85rem; font-variant-numeric: tabular-nums; }
+        .jm-ring { flex: none; display: grid; place-items: center; width: 3.6rem; height: 3.6rem; border-radius: 50%; background: conic-gradient(var(--primary-500) calc(var(--jm-p) * 1%), var(--gray-200) 0); }
+        .jm-ring > span { display: flex; align-items: center; justify-content: center; direction: ltr; width: 2.8rem; height: 2.8rem; border-radius: 50%; background: white; font-weight: 800; font-size: .85rem; font-variant-numeric: tabular-nums; }
         .jm-worlds { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .8rem; }
         .jm-wpill { display: inline-flex; align-items: center; gap: .35rem; font-size: .8rem; font-weight: 700; padding: .25rem .65rem; border-radius: 999px; border: 1px solid var(--gray-200); color: var(--gray-500); background: var(--gray-50); max-width: 100%; }
         .jm-wpill[data-state="done"] { background: var(--success-50); border-color: var(--success-200); color: var(--success-700); }
@@ -64,7 +64,7 @@
         .jm-node > span { transform: rotate(-45deg); }
         .jm-path li[data-state="done"] .jm-node { background: var(--primary-500); border-color: var(--primary-600); color: white; }
         .jm-path li[data-state="review"] .jm-node { background: var(--warning-400); border-color: var(--warning-500); color: white; }
-        .jm-path li[data-state="here"] .jm-node { background: white; border: 3px solid var(--primary-500); color: var(--primary-600); box-shadow: 0 0 0 .35rem color-mix(in oklab, var(--primary-400) 25%, transparent), 0 0 18px color-mix(in oklab, var(--primary-500) 45%, transparent); animation: jm-glow 2s ease-in-out infinite; }
+        .jm-path li[data-state="here"] .jm-node { background: white; border: 3px solid var(--primary-500); color: var(--primary-600); box-shadow: 0 0 0 .35rem color-mix(in oklab, var(--primary-400) 25%, transparent), 0 0 18px color-mix(in oklab, var(--primary-500) 45%, transparent); }
         .jm-label { font-size: .78rem; line-height: 1.3; color: var(--gray-600); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .jm-path li[data-state="here"] .jm-label { color: var(--gray-900); font-weight: 700; }
         .jm-tag { font-size: .68rem; font-weight: 800; padding: .05rem .45rem; border-radius: 999px; background: var(--primary-600); color: white; white-space: nowrap; }
@@ -83,9 +83,39 @@
         .jm-homework span { flex: none; font-size: .85rem; color: white; background: var(--primary-600); border-radius: .75rem; padding: .4rem .8rem; }
         .jm-how { color: var(--gray-500); font-size: .78rem; line-height: 1.6; }
         @keyframes jm-glow { 0%, 100% { box-shadow: 0 0 0 .3rem color-mix(in oklab, var(--primary-400) 25%, transparent), 0 0 12px color-mix(in oklab, var(--primary-500) 35%, transparent); } 50% { box-shadow: 0 0 0 .5rem color-mix(in oklab, var(--primary-400) 15%, transparent), 0 0 22px color-mix(in oklab, var(--primary-500) 55%, transparent); } }
-        @media (prefers-reduced-motion: reduce) { .jm-path li[data-state="here"] .jm-node { animation: none; } }
+
+        /* Motion: the player card slides in and the avatar spins in, the XP bar fills with a shine running
+           over it, points and stats count up, the course ring fills, stages pop in along the path with their
+           links drawing between them, badges flip in (earned ones shine), and a new rank or badge gets
+           confetti (shared motion script). */
+        @property --jm-p { syntax: '<number>'; inherits: false; initial-value: 0; }
+        @media (prefers-reduced-motion: no-preference) {
+            .jm-hud { animation: jm-in .6s var(--lms-ease) backwards; }
+            .jm-avatar { animation: jm-spin-in .8s var(--lms-spring) .15s backwards; }
+            .jm-xp i { position: relative; overflow: hidden; animation-duration: 1.3s; animation-delay: .4s; }
+            .jm-xp i::after { content: ''; position: absolute; inset-block: 0; left: 0; width: 35%; background: linear-gradient(90deg, transparent, rgb(255 255 255 / .6), transparent); animation: lms-shine 3.4s ease-in-out 1.8s infinite; }
+            .jm-stat { animation: lms-pop .5s var(--lms-spring) backwards; }
+            .jm-stat:nth-child(1) { animation-delay: .35s; } .jm-stat:nth-child(2) { animation-delay: .45s; } .jm-stat:nth-child(3) { animation-delay: .55s; }
+            .jm-ring { animation: jm-ring 1.4s var(--lms-ease) .35s backwards; }
+            .jm-wpill { animation: lms-pop .4s var(--lms-spring) .3s backwards; }
+            .jm-path li { --d: calc(.35s + var(--i) * .09s); }
+            .jm-node { animation: jm-node .5s var(--lms-spring) var(--d) backwards; }
+            .jm-path li[data-state="here"] .jm-node { animation: jm-node .55s var(--lms-spring) var(--d) backwards, jm-glow 2s ease-in-out calc(var(--d) + .6s) infinite; }
+            .jm-path li:not(:last-child)::after { transform-origin: left center; animation: lms-grow-x .35s var(--lms-ease) calc(var(--d) + .2s) backwards; }
+            [dir="rtl"] .jm-path li:not(:last-child)::after { transform-origin: right center; }
+            .jm-label, .jm-tag { animation: lms-fade .4s ease calc(var(--d) + .1s) backwards; }
+            .jm-badge { animation: jm-flip .6s var(--lms-ease) calc(.45s + var(--i) * .08s) backwards; }
+            .jm-badge[data-earned="1"] i { position: relative; overflow: hidden; transition: transform .25s var(--lms-spring); }
+            .jm-badge[data-earned="1"] i::after { content: ''; position: absolute; inset-block: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgb(255 255 255 / .75), transparent); animation: lms-shine 4s ease-in-out calc(1.5s + var(--i) * .4s) infinite; }
+            .jm-badge[data-earned="1"]:hover i { transform: scale(1.15) rotate(-8deg); }
+        }
+        @keyframes jm-in { from { opacity: 0; transform: translateY(-12px) scale(.98); } }
+        @keyframes jm-spin-in { from { opacity: 0; transform: rotate(-120deg) scale(.4); } }
+        @keyframes jm-ring { from { --jm-p: 0; } }
+        @keyframes jm-node { from { opacity: 0; transform: rotate(45deg) scale(0); } }
+        @keyframes jm-flip { from { opacity: 0; transform: perspective(500px) rotateY(85deg); } }
         .dark .jm-card { background: var(--gray-900); border-color: var(--gray-800); }
-        .dark .jm-ring span { background: var(--gray-900); }
+        .dark .jm-ring > span { background: var(--gray-900); }
         .dark .jm-badge, .dark .jm-wpill { background: var(--gray-800); border-color: var(--gray-700); }
         .dark .jm-node { background: var(--gray-800); border-color: var(--gray-700); }
         .dark .jm-path li[data-state="here"] .jm-node { background: var(--gray-900); }
@@ -93,21 +123,23 @@
         .dark .jm-path li[data-state="here"] .jm-label { color: white; }
     </style>
 
-    <section class="jm-hud">
+    @php $rankIndex = array_search($rank['key'], array_values(\Modules\Learning\Queries\JourneyQuery::RANKS), true); @endphp
+    <section class="jm-hud" data-celebrate="rank:{{ $learner?->id }}" data-celebrate-value="{{ $rankIndex }}"
+             data-celebrate-text="{{ __($j.'cheer_rank', ['rank' => __('learning::journey.ranks.'.$rank['key'])]) }}">
         <div class="jm-player">
             <div class="jm-avatar">{{ mb_substr($first, 0, 1) }}</div>
             <div>
                 <small>{{ __($j.'rank') }}</small>
                 <strong>{{ $rankIcons[$rank['key']] }} {{ __('learning::journey.ranks.'.$rank['key']) }}</strong>
             </div>
-            <div class="jm-points"><b>{{ number_format($rank['points']) }}</b><small>{{ __($j.'points_label') }}</small></div>
+            <div class="jm-points"><b data-count="{{ $rank['points'] }}" data-count-key="points:{{ $learner?->id }}">{{ number_format($rank['points']) }}</b><small>{{ __($j.'points_label') }}</small></div>
         </div>
-        <div class="jm-xp" role="progressbar" aria-valuenow="{{ $rank['progress'] }}" aria-valuemin="0" aria-valuemax="100"><i style="width: {{ max(3, $rank['progress']) }}%"></i></div>
+        <div class="jm-xp" role="progressbar" aria-valuenow="{{ $rank['progress'] }}" aria-valuemin="0" aria-valuemax="100"><i class="lms-bar-fill" style="width: {{ max(3, $rank['progress']) }}%"></i></div>
         <small class="jm-xp-note">{{ $rank['next'] === null ? __($j.'top_rank') : __($j.'to_next', ['n' => number_format($rank['next'] - $rank['points']), 'rank' => __('learning::journey.ranks.'.$rank['next_key'])]) }}</small>
         <div class="jm-stats">
-            <div class="jm-stat"><b>🔥 {{ $journey['streak'] ?? 0 }}</b><small>{{ __($j.'streak') }}</small></div>
-            <div class="jm-stat"><b>⭐ {{ $journey['stars'] ?? 0 }}</b><small>{{ __($j.'stars') }}</small></div>
-            <div class="jm-stat"><b>✅ {{ $journey['on_time'] ?? 0 }}</b><small>{{ __($j.'on_time') }}</small></div>
+            <div class="jm-stat"><b>🔥 <span data-count="{{ $journey['streak'] ?? 0 }}" data-count-delay="450">{{ $journey['streak'] ?? 0 }}</span></b><small>{{ __($j.'streak') }}</small></div>
+            <div class="jm-stat"><b>⭐ <span data-count="{{ $journey['stars'] ?? 0 }}" data-count-delay="450">{{ $journey['stars'] ?? 0 }}</span></b><small>{{ __($j.'stars') }}</small></div>
+            <div class="jm-stat"><b>✅ <span data-count="{{ $journey['on_time'] ?? 0 }}" data-count-delay="450">{{ $journey['on_time'] ?? 0 }}</span></b><small>{{ __($j.'on_time') }}</small></div>
         </div>
     </section>
 
@@ -120,7 +152,7 @@
                         <small>{{ __('learning::journey.with', ['teacher' => $course['teacher']]) }}@if ($course['map']) · {{ $course['map']['program']['name'] }}@endif</small>
                     </div>
                     @if ($course['map'])
-                        <div class="jm-ring" style="--p: {{ $course['map']['percent'] }}"><span>{{ $course['map']['percent'] }}%</span></div>
+                        <div class="jm-ring" style="--jm-p: {{ $course['map']['percent'] }}"><span><span data-count="{{ $course['map']['percent'] }}" data-count-delay="350">{{ $course['map']['percent'] }}</span>%</span></div>
                     @endif
                 </div>
                 @if ($course['level'] === null)
@@ -145,7 +177,7 @@
                             <ol class="jm-path" x-data x-init="$nextTick(() => { const n = $el.querySelector('[aria-current]'); if (n) { const r = n.getBoundingClientRect(), c = $el.getBoundingClientRect(); $el.scrollBy({ left: (r.left + r.width / 2) - (c.left + c.width / 2) }) } })">
                                 @foreach ($world['lessons'] as $k => $lesson)
                                     @php $state = $world['state'] === 'ahead' ? 'locked' : $lesson['state']; @endphp
-                                    <li data-state="{{ $state }}" @if ($state === 'here') aria-current="step" @endif>
+                                    <li data-state="{{ $state }}" style="--i: {{ $k }}" @if ($state === 'here') aria-current="step" @endif>
                                         <span class="jm-node"><span>{{ match ($state) { 'done' => '✓', 'review' => '↻', 'locked' => '🔒', default => $k + 1 } }}</span></span>
                                         <span class="jm-label">{{ $lesson['title'] }}</span>
                                         @if ($state === 'here')
@@ -169,7 +201,7 @@
     </div>
 
     <aside class="jm-side">
-        <section class="jm-card">
+        <section class="jm-card" data-celebrate="badges:{{ $learner?->id }}" data-celebrate-value="{{ $earned }}" data-celebrate-text="{{ __($j.'cheer_badge') }}">
             <div class="jm-section-head">
                 <h3>{{ __($j.'badges') }}</h3>
                 <small>{{ __($j.'badges_count', ['n' => $earned, 'of' => count($badges)]) }}</small>
@@ -177,7 +209,7 @@
             <div class="jm-badges">
                 @foreach ($badges as $badge)
                     @php [$name, $hint] = __('learning::journey.badges.'.$badge['key']); @endphp
-                    <div class="jm-badge" data-earned="{{ $badge['earned'] ? 1 : 0 }}" title="{{ $hint }}">
+                    <div class="jm-badge" data-earned="{{ $badge['earned'] ? 1 : 0 }}" style="--i: {{ $loop->index }}" title="{{ $hint }}">
                         <i aria-hidden="true">{{ $badgeIcons[$badge['key']] }}</i>
                         <strong>{{ $name }}</strong>
                         <small>{{ $hint }}</small>
@@ -185,7 +217,7 @@
                 @endforeach
             </div>
         </section>
-        <a class="jm-card jm-homework" href="{{ \Modules\Learning\Filament\Family\FamilyHomework::getUrl() }}">
+        <a class="jm-card jm-homework lms-lift" href="{{ \Modules\Learning\Filament\Family\FamilyHomework::getUrl() }}">
             {{ trans_choice($j.'homework', $homework, ['n' => $homework]) }}
             <span>{{ __($j.'homework_go') }}</span>
         </a>

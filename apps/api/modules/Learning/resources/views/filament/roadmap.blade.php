@@ -24,7 +24,7 @@
         <details class="rm-level" @if ($level['has_current'] || count($map['levels']) === 1) open @endif>
             <summary>
                 <strong>{{ $level['title'] }}</strong>
-                <span class="rm-bar"><i style="width: {{ $level['percent'] }}%"></i></span>
+                <span class="rm-bar"><i class="lms-bar-fill" style="width: {{ $level['percent'] }}%"></i></span>
                 <span class="rm-pct">{{ $level['percent'] }}%</span>
             </summary>
             <div class="rm-body">

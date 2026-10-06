@@ -23,6 +23,7 @@ return [
     // Children: an adventure map, one island per level, a star for each lesson mastered.
     'kids' => [
         'hello' => 'يلا يا :name، نكمّل الرحلة! 🚀',
+        'cheer' => 'برافو! نجومك بتزيد ⭐',
         'stars_label' => 'نجومك',
         'stars' => '{0} لسه مفيش نجوم|{1} نجمة واحدة|{2} نجمتين|[3,10] :n نجوم|[11,*] :n نجمة',
         'island' => 'الجزيرة :n من :of',
@@ -46,6 +47,8 @@ return [
     // Middle school: worlds and stages, points and a rank, a streak and badges.
     'middle' => [
         'rank' => 'رتبتك',
+        'cheer_rank' => '🎉 رتبة جديدة: :rank',
+        'cheer_badge' => '🏅 شارة جديدة!',
         'points_label' => 'نقطة',
         'to_next' => 'ناقصك :n نقطة وتبقى :rank',
         'top_rank' => 'وصلت لأعلى رتبة! 👑',

@@ -1,6 +1,6 @@
 {{-- Lessons left per course, and what is owed. $balances, $owed. --}}
 @php $l = 'billing::family.'; @endphp
-<div class="bf-grid">
+<div class="bf-grid lms-stagger">
     @foreach ($balances as $b)
         <div class="bf-card" @if ($b['sessions'] !== null && $b['sessions'] <= 1) data-low @endif>
             <small>{{ $b['subject'] }}</small>
@@ -11,7 +11,7 @@
         </div>
     @endforeach
     @if ($owed)
-        <a class="bf-card" data-tone="owed" href="{{ \Modules\Billing\Filament\Family\FamilyBilling::getUrl() }}">
+        <a class="bf-card lms-lift" data-tone="owed" href="{{ \Modules\Billing\Filament\Family\FamilyBilling::getUrl() }}">
             <small>{{ __($l.'owed') }}</small>
             <span class="bf-big">{{ $owed }}</span>
         </a>

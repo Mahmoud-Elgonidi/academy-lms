@@ -6,9 +6,9 @@
         .ts-grid .lf-card { text-decoration: none; color: inherit; }
         .ts-grid .lf-card:hover { border-color: var(--primary-400); }
     </style>
-    <div class="ts-grid">
+    <div class="ts-grid lms-stagger">
         @forelse ($this->students as $s)
-            <a class="lf-card" href="{{ $s['url'] }}" wire:key="st-{{ $s['id'] }}">
+            <a class="lf-card lms-lift" href="{{ $s['url'] }}" wire:key="st-{{ $s['id'] }}">
                 <div class="lf-head">
                     <div>
                         <h3>{{ $s['student'] }}</h3>
@@ -17,7 +17,7 @@
                     @if ($s['percent'] !== null) <span class="lf-pct" style="font-size: 1.3rem">{{ $s['percent'] }}%</span> @endif
                 </div>
                 @if ($s['percent'] !== null)
-                    <span class="lf-bar"><i style="width: {{ $s['percent'] }}%"></i></span>
+                    <span class="lf-bar"><i class="lms-bar-fill" style="width: {{ $s['percent'] }}%"></i></span>
                 @endif
                 <small class="lf-muted">{{ $s['here'] ? __($l.'here', ['lesson' => $s['here']]) : __($l.'no_program') }}</small>
                 <div style="display: flex; gap: .5rem; flex-wrap: wrap">

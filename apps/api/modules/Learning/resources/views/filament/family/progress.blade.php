@@ -4,7 +4,7 @@
         @include('learning::filament.family.journey.'.$this->journey['stage'], $this->journey + ['full' => true])
     @else
     @include('learning::filament.family.styles')
-    <div class="lf-stack">
+    <div class="lf-stack lms-stagger">
         @forelse ($this->courses as $course)
             @php $map = $course['map']; @endphp
             <section class="lf-card" wire:key="course-{{ $course['id'] }}">
@@ -20,7 +20,7 @@
                 @if ($map === null)
                     <p class="lf-muted">{{ __($l.'no_program') }}</p>
                 @else
-                    <span class="lf-bar"><i style="width: {{ $map['percent'] }}%"></i></span>
+                    <span class="lf-bar"><i class="lms-bar-fill" style="width: {{ $map['percent'] }}%"></i></span>
                     <div class="lf-facts">
                         <div class="lf-fact lf-here">
                             <small>{{ __($p.'here') }}</small>

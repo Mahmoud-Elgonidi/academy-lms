@@ -22,6 +22,7 @@ return [
 
     'kids' => [
         'hello' => 'Let\'s go on, :name! 🚀',
+        'cheer' => 'Well done! More stars ⭐',
         'stars_label' => 'Your stars',
         'stars' => '{0} No stars yet|{1} One star|[2,*] :n stars',
         'island' => 'Island :n of :of',
@@ -44,6 +45,8 @@ return [
 
     'middle' => [
         'rank' => 'Your rank',
+        'cheer_rank' => '🎉 New rank: :rank',
+        'cheer_badge' => '🏅 New badge!',
         'points_label' => 'points',
         'to_next' => ':n more points to become :rank',
         'top_rank' => 'You reached the top rank! 👑',

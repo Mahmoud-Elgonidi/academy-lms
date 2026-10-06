@@ -21,7 +21,7 @@
     </div>
     @forelse ($w['days'] as $day)
         <h2 class="fl-h2">{{ $day['label'] }}</h2>
-        <div class="fl-list">
+        <div class="fl-list lms-stagger">
             @foreach ($day['lessons'] as $lesson)
                 @include('scheduling::filament.family.lesson-card', ['lesson' => $lesson])
             @endforeach

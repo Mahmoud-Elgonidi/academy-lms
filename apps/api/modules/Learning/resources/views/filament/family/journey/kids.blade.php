@@ -67,9 +67,9 @@
         .jk-stop[data-state="done"] .jk-dot { background: var(--warning-400); color: white; box-shadow: 0 4px 0 var(--warning-600); }
         .jk-stop[data-state="review"] .jk-dot { background: var(--info-400); color: white; box-shadow: 0 4px 0 var(--info-600); }
         .jk-stop[data-state="todo"] .jk-dot { background: var(--gray-200); color: var(--gray-500); box-shadow: 0 4px 0 var(--gray-300); font-size: 1.15rem; }
-        .jk-stop[data-state="here"] .jk-dot { width: 4.3rem; height: 4.3rem; background: var(--primary-500); color: white; font-size: 1.6rem; box-shadow: 0 5px 0 var(--primary-700), 0 0 0 .45rem color-mix(in oklab, var(--primary-400) 30%, transparent); animation: jk-pulse 2.2s ease-in-out infinite; }
+        .jk-stop[data-state="here"] .jk-dot { width: 4.3rem; height: 4.3rem; background: var(--primary-500); color: white; font-size: 1.6rem; box-shadow: 0 5px 0 var(--primary-700), 0 0 0 .45rem color-mix(in oklab, var(--primary-400) 30%, transparent); }
         .jk-stop[data-state="here"] .jk-name { color: var(--primary-800); }
-        .jk-bubble { position: absolute; bottom: calc(100% - .2rem); white-space: nowrap; background: var(--gray-900); color: white; font-weight: 800; font-size: .85rem; padding: .25rem .7rem; border-radius: 999px; animation: jk-bounce 1.4s ease-in-out infinite; }
+        .jk-bubble { position: absolute; bottom: calc(100% - .2rem); white-space: nowrap; background: var(--gray-900); color: white; font-weight: 800; font-size: .85rem; padding: .25rem .7rem; border-radius: 999px; }
         .jk-bubble::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -.35rem; border: .35rem solid transparent; border-top-color: var(--gray-900); }
         .jk-goal .jk-dot { width: 4rem; height: 4rem; background: white; border: 3px dashed var(--warning-400); font-size: 1.9rem; }
         .jk-goal[data-state="done"] .jk-dot { border-style: solid; background: var(--warning-100); box-shadow: none; }
@@ -81,9 +81,34 @@
         .jk-next small { display: block; color: var(--gray-500); font-size: .85rem; }
         .jk-next strong { font-size: 1.05rem; }
         .jk-party { text-align: center; font-size: 1.15rem; font-weight: 800; }
+
+        /* Motion: the hello card hops in, the road draws itself from the top, the stops pop up one after
+           another along it (stars spin in), the child's marker drops in and keeps breathing, the treasure
+           wiggles now and then, the star count counts up, and new stars get confetti (shared motion script). */
+        @media (prefers-reduced-motion: no-preference) {
+            .jk-hello { animation: jk-hop .6s var(--lms-spring) backwards; }
+            .jk-starbox span { display: inline-block; animation: jk-twinkle 3.2s ease-in-out 1.4s infinite; }
+            .jk-side > :not(.jk-hello) { animation: lms-rise .5s var(--lms-ease) .45s backwards; }
+            .jk-island { animation: lms-rise .5s var(--lms-ease) .1s backwards; }
+            .jk-track svg { animation: jk-reveal 1.4s var(--lms-ease) .3s backwards; }
+            .jk-stop > .jk-dot, .jk-stop > .jk-name { animation: jk-pop .55s var(--lms-spring) calc(.35s + var(--k) * .15s) backwards; }
+            .jk-stop[data-state="done"] > .jk-dot { animation-name: jk-star; }
+            .jk-stop[data-state="here"] > .jk-dot { animation: jk-pop .6s var(--lms-spring) calc(.35s + var(--k) * .15s) backwards, jk-pulse 2.2s ease-in-out calc(1.1s + var(--k) * .15s) infinite; }
+            .jk-bubble { animation: jk-drop .5s var(--lms-spring) calc(.7s + var(--k) * .15s) backwards, jk-bounce 1.4s ease-in-out calc(1.2s + var(--k) * .15s) infinite; }
+            .jk-goal > .jk-dot { animation: jk-pop .6s var(--lms-spring) calc(.35s + var(--k) * .15s) backwards, jk-wiggle 4.5s ease-in-out calc(1.8s + var(--k) * .15s) infinite; }
+            .jk-left, .jk-course .jk-chips, .jk-more { animation: lms-fade .5s ease 1s backwards; }
+            .jk-go { animation: jk-nudge 2.8s ease-in-out 2.2s infinite; }
+        }
+        @keyframes jk-hop { from { opacity: 0; transform: translateY(-16px) scale(.95); } }
+        @keyframes jk-pop { from { opacity: 0; transform: scale(.3); } }
+        @keyframes jk-star { from { opacity: 0; transform: scale(.2) rotate(-150deg); } }
+        @keyframes jk-drop { from { opacity: 0; transform: translateY(-14px) scale(.6); } }
+        @keyframes jk-reveal { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
         @keyframes jk-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         @keyframes jk-pulse { 0%, 100% { box-shadow: 0 5px 0 var(--primary-700), 0 0 0 .3rem color-mix(in oklab, var(--primary-400) 35%, transparent); } 50% { box-shadow: 0 5px 0 var(--primary-700), 0 0 0 .7rem color-mix(in oklab, var(--primary-400) 15%, transparent); } }
-        @media (prefers-reduced-motion: reduce) { .jk-bubble, .jk-stop[data-state="here"] .jk-dot { animation: none; } }
+        @keyframes jk-wiggle { 0%, 82%, 100% { transform: rotate(0); } 86% { transform: rotate(-12deg) scale(1.08); } 90% { transform: rotate(10deg) scale(1.08); } 94% { transform: rotate(-6deg); } }
+        @keyframes jk-twinkle { 0%, 70%, 100% { transform: scale(1) rotate(0); } 80% { transform: scale(1.35) rotate(18deg); } 90% { transform: scale(.95) rotate(-8deg); } }
+        @keyframes jk-nudge { 0%, 75%, 100% { transform: scale(1); } 82% { transform: scale(1.08); } 90% { transform: scale(.98); } }
         .dark .jk-card { background: var(--gray-900); border-color: var(--gray-700); box-shadow: 0 5px 0 var(--gray-800); }
         .dark .jk-hello { background: linear-gradient(135deg, var(--primary-600), var(--primary-800)); }
         .dark .jk-island { background: linear-gradient(180deg, color-mix(in oklab, var(--info-900) 60%, var(--gray-900)), color-mix(in oklab, var(--success-900) 50%, var(--gray-900))); border-color: var(--gray-700); }
@@ -94,7 +119,10 @@
 
     <aside class="jk-side">
         <div class="jk-card jk-hello">
-            <div class="jk-starbox" title="{{ __($j.'stars_label') }}"><span>⭐</span><b>{{ $journey['stars'] ?? 0 }}</b></div>
+            <div class="jk-starbox" title="{{ __($j.'stars_label') }}"
+                 data-celebrate="stars:{{ $learner?->id }}" data-celebrate-value="{{ $journey['stars'] ?? 0 }}" data-celebrate-text="{{ __($j.'cheer') }}">
+                <span>⭐</span><b data-count="{{ $journey['stars'] ?? 0 }}" data-count-key="stars:{{ $learner?->id }}">{{ $journey['stars'] ?? 0 }}</b>
+            </div>
             <div>
                 <strong>{{ trans_choice($j.'stars', $journey['stars'] ?? 0, ['n' => $journey['stars'] ?? 0]) }} ⭐</strong>
                 <small>{{ __($j.'hello', ['name' => $first]) }}</small>
@@ -111,7 +139,7 @@
                 </div>
             @endif
         @endforeach
-        <a class="jk-card jk-homework" href="{{ \Modules\Learning\Filament\Family\FamilyHomework::getUrl() }}">
+        <a class="jk-card jk-homework lms-lift" href="{{ \Modules\Learning\Filament\Family\FamilyHomework::getUrl() }}">
             <strong>{{ trans_choice($j.'homework', $homework, ['n' => $homework]) }}</strong>
             @if ($homework > 0) <span class="jk-go">{{ __($j.'homework_go') }}</span> @endif
         </a>

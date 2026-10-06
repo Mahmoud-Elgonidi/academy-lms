@@ -5,7 +5,7 @@
         <x-slot name="afterHeader">
             <x-filament::link :href="\Modules\Scheduling\Filament\Family\FamilyLessons::getUrl()" size="sm">{{ __($l.'widget.all') }}</x-filament::link>
         </x-slot>
-        <div class="fl-list">
+        <div class="fl-list lms-stagger">
             @forelse ($lessons as $lesson)
                 @include('scheduling::filament.family.lesson-card', ['lesson' => $lesson])
             @empty

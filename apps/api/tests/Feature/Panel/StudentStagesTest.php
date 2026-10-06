@@ -155,7 +155,11 @@ it('shows a child the adventure map with their stars and where they are, and thr
     $this->get('http://noor.lms.test/my')->assertOk()
         ->assertSee('data-stage="kids"', false)
         ->assertSee('Baloo Bhaijaan 2 Variable', false)
-        ->assertSee('class="lms-tabs"', false);
+        ->assertSee('class="lms-tabs"', false)
+        // Motion: the shared layer, the star count that counts up, and a cheer for new stars (the widget is drawn with the page).
+        ->assertSee('window.LmsMotion', false)
+        ->assertSee('data-count="2"', false)
+        ->assertSee('data-celebrate="stars:'.$this->student->id.'"', false);
 });
 
 it('gives middle school worlds, a rank with the points to the next, and badges', function () {

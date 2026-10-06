@@ -38,6 +38,9 @@ final class TeacherPanelProvider extends PanelProvider
             ->id('teach')
             // Live screens: one socket per page (Reverb, EnableBrowserEcho below) for the bell and any live part, and the helper they share.
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::live'))
+            // Motion: pages slide in, cards follow, bars fill, numbers count up; none for reduced motion.
+            ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('shared::motion.styles'))
+            ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::motion.script'))
             ->path('teach')
             ->login()
             ->spa()
