@@ -15,5 +15,8 @@ final readonly class NewSession
         public string $anchorTimezone,
         public string $type = 'regular',
         public string $funding = 'funded',
+        public ?string $enrollmentId = null,
+        public ?string $slotId = null,
+        public ?string $occurrenceKey = null,
     ) {}
 }

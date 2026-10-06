@@ -13,6 +13,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property int $min_block_min
  * @property int $reduction_notice_days
  * @property int $proposal_reply_hours
+ * @property int $horizon_weeks how far ahead weekly times become sessions
  */
 final class SchedulingSettings extends Model
 {
@@ -24,13 +25,14 @@ final class SchedulingSettings extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['shift_mode', 'min_block_min', 'reduction_notice_days', 'proposal_reply_hours'];
+    protected $fillable = ['shift_mode', 'min_block_min', 'reduction_notice_days', 'proposal_reply_hours', 'horizon_weeks'];
 
     protected $attributes = [
         'shift_mode' => 'teacher_proposes',
         'min_block_min' => 60,
         'reduction_notice_days' => 14,
         'proposal_reply_hours' => 48,
+        'horizon_weeks' => 8,
     ];
 
     public static function current(): self

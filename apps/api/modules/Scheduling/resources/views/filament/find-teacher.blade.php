@@ -96,7 +96,7 @@
                         </span>
                         <div class="ft-actions">
                             <x-filament::button wire:click="confirm('trial')" color="gray" size="sm">{{ __('scheduling::find.confirm_trial') }}</x-filament::button>
-                            <x-filament::button wire:click="confirm('series')" size="sm">{{ __('scheduling::find.confirm_series', ['count' => (int) $this->data['weeks'] * count($picked)]) }}</x-filament::button>
+                            <x-filament::button wire:click="confirm('series')" size="sm">{{ __('scheduling::find.confirm_series', ['count' => $this->heldCount()]) }}</x-filament::button>
                             <x-filament::button wire:click="release" color="gray" size="sm" outlined>{{ __('scheduling::find.release') }}</x-filament::button>
                         </div>
                     @else

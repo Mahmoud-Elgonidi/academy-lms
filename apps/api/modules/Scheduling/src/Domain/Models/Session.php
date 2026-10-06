@@ -22,6 +22,9 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property string $teacher_id
  * @property ?string $original_teacher_id
  * @property string $subject_id
+ * @property ?string $enrollment_id
+ * @property ?string $slot_id
+ * @property ?string $occurrence_key
  * @property CarbonImmutable $starts_at
  * @property CarbonImmutable $ends_at
  * @property SessionStatus $status
@@ -40,7 +43,7 @@ final class Session extends Model
     protected $table = 'sessions';
 
     protected $fillable = [
-        'type', 'teacher_id', 'original_teacher_id', 'subject_id', 'starts_at', 'ends_at',
+        'type', 'teacher_id', 'original_teacher_id', 'subject_id', 'enrollment_id', 'slot_id', 'occurrence_key', 'starts_at', 'ends_at',
         'status', 'review_reason', 'funding_status', 'makeup_for_session_id', 'anchor_tz', 'decision',
     ];
 

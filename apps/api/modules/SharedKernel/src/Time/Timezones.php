@@ -17,6 +17,15 @@ final class Timezones
         return DateTimeZone::listIdentifiers();
     }
 
+    /** The city of an IANA zone in the current language: "Africa/Cairo" → "القاهرة". */
+    public static function city(string $timezone): string
+    {
+        $key = 'shared::cities.'.$timezone;
+        $name = __($key);
+
+        return $name === $key ? str_replace('_', ' ', substr(strrchr($timezone, '/') ?: $timezone, 1) ?: $timezone) : $name;
+    }
+
     public static function isValid(mixed $timezone): bool
     {
         if (! is_string($timezone) || $timezone === '') {

@@ -9,4 +9,12 @@ namespace Modules\SharedKernel\Tenancy;
 interface TenantResolver
 {
     public function byId(string $id): ?TenantRef;
+
+    /**
+     * Every active academy, for cross-tenant sweepers that then act as each
+     * academy in turn (TenantContext::run).
+     *
+     * @return list<TenantRef>
+     */
+    public function active(): array;
 }

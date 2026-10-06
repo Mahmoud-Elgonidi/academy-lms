@@ -1,0 +1,138 @@
+<?php
+
+namespace Modules\Enrollment\Filament\Resources\Enrollments;
+
+use BackedEnum;
+use Carbon\CarbonImmutable;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Modules\Enrollment\Contracts\EnrollmentStatus;
+use Modules\Enrollment\Models\Enrollment;
+use Modules\Enrollment\Queries\EnrollmentAccountQuery;
+use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\ViewerTimezone;
+
+/** Enrolled students: what they study, when, and how much credit is left. */
+final class EnrollmentResource extends Resource
+{
+    protected static ?string $model = Enrollment::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
+
+    protected static ?int $navigationSort = -3;
+
+    protected static ?string $slug = 'enrollments';
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows(Ability::ViewEnrollments->value);
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('enrollment::enrollments.nav');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('enrollment::enrollments.model');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('enrollment::enrollments.nav');
+    }
+
+    /** Enrollments with names, credit and plan, for the list and its search. */
+    public static function withAccount(Builder $query): Builder
+    {
+        $on = fn (string $alias, string $key) => fn ($j) => $j->on("{$alias}.academy_id", '=', 'enrollments.academy_id')->on("{$alias}.id", '=', $key);
+
+        return $query
+            ->select('enrollments.*', 'st.name as student_name', 'st.timezone as student_tz', 'te.name as teacher_name',
+                'su.name_ar as subject_ar', 'su.name_en as subject_en', 'ca.available_min', 'ca.reserved_min',
+                'pl.session_minutes', 'pl.sessions_per_block')
+            ->selectRaw("coalesce((select sum(cl.remaining_min) from credit_lots cl where cl.account_id = ca.id and cl.source = 'makeup'), 0) as makeup_min")
+            ->join('users as st', $on('st', 'enrollments.student_id'))
+            ->join('users as te', $on('te', 'enrollments.teacher_id'))
+            ->join('subjects as su', $on('su', 'enrollments.subject_id'))
+            ->leftJoin('credit_accounts as ca', $on('ca', 'enrollments.credit_account_id'))
+            ->leftJoin('subscriptions as sb', fn ($j) => $j->on('sb.academy_id', '=', 'enrollments.academy_id')->on('sb.enrollment_id', '=', 'enrollments.id')->where('sb.status', '<>', 'cancelled'))
+            ->leftJoin('plans as pl', fn ($j) => $j->on('pl.academy_id', '=', 'sb.academy_id')->on('pl.id', '=', 'sb.plan_id'));
+    }
+
+    public static function table(Table $table): Table
+    {
+        $tz = app(ViewerTimezone::class)->effective();
+        $query = app(EnrollmentAccountQuery::class);
+        $days = fn (Enrollment $e) => collect($query->weeklyTimes($e->id, $e->getAttribute('student_tz') ?? $tz))
+            ->map(fn ($t) => __('shared::time.days.'.$t['student_day']).' '.$t['student_time'])->implode(' · ');
+
+        return $table
+            ->modifyQueryUsing(fn (Builder $query) => self::withAccount($query))
+            ->defaultSort('enrollments.created_at', 'desc')
+            ->recordUrl(fn (Enrollment $record) => self::getUrl('view', ['record' => $record]))
+            ->columns([
+                TextColumn::make('student_name')->label(__('enrollment::enrollments.fields.student'))->weight('semibold')
+                    ->description(fn (Enrollment $e) => (app()->getLocale() === 'ar' ? $e->getAttribute('subject_ar') : $e->getAttribute('subject_en')).' · '.$e->getAttribute('teacher_name'))
+                    ->searchable(query: fn (Builder $query, string $search) => $query->where(fn ($w) => $w->where('st.name', 'ilike', "%{$search}%")->orWhere('te.name', 'ilike', "%{$search}%"))),
+                TextColumn::make('weekly')->label(__('enrollment::enrollments.fields.weekly'))->state($days)
+                    ->description(fn (Enrollment $e) => __('enrollment::enrollments.student_clock')),
+                TextColumn::make('balance')->label(__('enrollment::enrollments.fields.balance'))
+                    ->state(fn (Enrollment $e) => self::balanceLine($e))
+                    ->color(fn (Enrollment $e) => $e->status === EnrollmentStatus::Active && self::sessionsLeft($e) <= 2 ? 'danger' : 'gray'),
+                TextColumn::make('status')->label(__('enrollment::enrollments.fields.status'))->badge()
+                    ->formatStateUsing(fn (EnrollmentStatus $state) => __('enrollment::enrollments.statuses.'.$state->value))
+                    ->color(fn (EnrollmentStatus $state) => match ($state) {
+                        EnrollmentStatus::Active => 'success', EnrollmentStatus::PendingPayment => 'warning', default => 'gray',
+                    }),
+                TextColumn::make('next')->label(__('enrollment::enrollments.fields.next'))
+                    ->state(function (Enrollment $e) use ($tz) {
+                        $next = DB::table('sessions')->where('enrollment_id', $e->id)->where('status', 'scheduled')->where('starts_at', '>', CarbonImmutable::now())->orderBy('starts_at')->first(['starts_at', 'funding_status']);
+
+                        return $next ? CarbonImmutable::parse($next->starts_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i') : '—';
+                    }),
+            ])
+            ->filters([
+                SelectFilter::make('status')->label(__('enrollment::enrollments.fields.status'))
+                    ->options(collect(EnrollmentStatus::cases())->mapWithKeys(fn ($s) => [$s->value => __('enrollment::enrollments.statuses.'.$s->value)])->all())
+                    ->query(fn (Builder $query, array $data) => $data['value'] ? $query->where('enrollments.status', $data['value']) : $query),
+            ])
+            ->recordActions([ViewAction::make()->label(__('enrollment::enrollments.open'))])
+            ->emptyStateHeading(__('enrollment::enrollments.empty.title'))
+            ->emptyStateDescription(__('enrollment::enrollments.empty.hint'));
+    }
+
+    public static function sessionsLeft(Enrollment $e): int
+    {
+        $minutes = (int) $e->getAttribute('session_minutes');
+
+        $paid = (int) $e->getAttribute('available_min') + (int) $e->getAttribute('reserved_min') - (int) $e->getAttribute('makeup_min');
+
+        return $minutes > 0 ? intdiv(max(0, $paid), $minutes) : 0;
+    }
+
+    public static function balanceLine(Enrollment $e): string
+    {
+        if (! $e->getAttribute('session_minutes')) {
+            return '—';
+        }
+
+        return __('enrollment::enrollments.balance', ['left' => self::sessionsLeft($e), 'block' => $e->getAttribute('sessions_per_block')]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListEnrollments::route('/'),
+            'view' => ViewEnrollment::route('/{record}'),
+        ];
+    }
+}

@@ -4,20 +4,29 @@ namespace Modules\Scheduling\Filament\Pages;
 
 use BackedEnum;
 use Carbon\CarbonImmutable;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
+use Modules\Billing\Contracts\BillingApi;
+use Modules\Billing\Contracts\DTOs\PlanOption;
+use Modules\Billing\Contracts\DTOs\RegionOption;
 use Modules\Scheduling\Actions\ConfirmBooking;
+use Modules\Scheduling\Actions\EnrollStudent;
 use Modules\Scheduling\Actions\PlaceBookingHold;
+use Modules\Scheduling\Contracts\DTOs\EnrollmentTerms;
 use Modules\Scheduling\Contracts\DTOs\TeacherSearch;
 use Modules\Scheduling\Domain\Availability\Candidate;
 use Modules\Scheduling\Domain\Availability\StudentPreference;
@@ -32,7 +41,8 @@ use Modules\SharedKernel\Time\Timezones;
  * "Find a teacher" (docs/architecture/02, section 2): the student's times on
  * a week grid in the student's timezone, teachers ranked by fit, weekly
  * times as chips on the student's clock with the teacher's clock under them,
- * a 10-minute hold, then a trial or the weekly series.
+ * a 10-minute hold, then a free trial or the enrolment (plan, payer,
+ * invoice, weekly times and their sessions).
  *
  * @property-read Schema $form
  */
@@ -228,13 +238,87 @@ final class FindTeacher extends Page
             return;
         }
 
-        $sessions = app(ConfirmBooking::class)->handle($this->holdBatch, $this->data['student_id'], $this->data['subject_id'], $kind, (string) auth()->id());
-        [$this->holdBatch, $this->holdExpiresAt, $this->picked, $this->pickedTeacher] = [null, null, [], null];
-        unset($this->results);
+        if ($kind === 'series') {
+            $this->mountAction('enroll');
+
+            return;
+        }
+
+        $trial = app(ConfirmBooking::class)->trial($this->holdBatch, $this->data['student_id'], $this->data['subject_id'], (string) auth()->id());
+        $this->bookingDone();
 
         Notification::make()->success()
-            ->title(__('scheduling::find.booked.'.$kind, ['count' => count($sessions), 'date' => $sessions[0]->starts_at->setTimezone($this->data['timezone'])->locale(app()->getLocale())->translatedFormat('l j F · H:i')]))
+            ->title(__('scheduling::find.booked.trial', ['date' => $this->studentDate($trial->starts_at)]))
             ->send();
+    }
+
+    /** The enrolment step: plan, payer and price region, then one action does the rest. */
+    public function enrollAction(): Action
+    {
+        return Action::make('enroll')
+            ->modalHeading(__('scheduling::find.enroll.title'))
+            ->modalDescription(fn () => __('scheduling::find.enroll.intro', [
+                'per_week' => trans_choice('scheduling::find.per_week', count($this->picked), ['n' => count($this->picked)]),
+                'minutes' => $this->data['duration'],
+                'teacher' => collect($this->results)->first(fn (array $r) => $r['teacher']->id === $this->pickedTeacher)['teacher']->name ?? '',
+            ]))
+            ->modalSubmitActionLabel(__('scheduling::find.enroll.submit'))
+            ->modalWidth('lg')
+            ->fillForm(fn () => [
+                'price_region_id' => collect($this->regions())->first(fn (RegionOption $r) => $r->isDefault)?->id ?? ($this->regions()[0]->id ?? null),
+                'payer_id' => array_key_first($this->payers()),
+                'plan_id' => null,
+            ])
+            ->schema([
+                Select::make('price_region_id')->label(__('scheduling::find.enroll.region'))
+                    ->options(fn () => collect($this->regions())->mapWithKeys(fn (RegionOption $r) => [$r->id => $r->name.' · '.$r->currency])->all())
+                    ->required()->native(false)->live(),
+                Radio::make('plan_id')->label(__('scheduling::find.enroll.plan'))
+                    ->options(fn (Get $get) => collect($this->matchingPlans())->mapWithKeys(fn (PlanOption $p) => [$p->id => __('scheduling::find.enroll.plan_option', [
+                        'name' => $p->name,
+                        'price' => isset($p->prices[$get('price_region_id')]) ? $p->prices[$get('price_region_id')]->format() : __('scheduling::find.enroll.no_price'),
+                    ])])->all())
+                    ->disableOptionWhen(fn (string $value, Get $get) => ! isset(collect($this->matchingPlans())->firstWhere('id', $value)?->prices[$get('price_region_id')]))
+                    ->required()
+                    ->visible(fn () => $this->matchingPlans() !== []),
+                Text::make(fn () => __('scheduling::find.enroll.no_plans', [
+                    'minutes' => $this->data['duration'],
+                    'per_week' => trans_choice('scheduling::find.per_week', count($this->picked), ['n' => count($this->picked)]),
+                ]))->visible(fn () => $this->matchingPlans() === [])->color('danger'),
+                Radio::make('payer_id')->label(__('scheduling::find.enroll.payer'))
+                    ->options(fn () => $this->payers())->required(),
+            ])
+            ->action(function (array $data) {
+                $booked = app(EnrollStudent::class)->handle(
+                    $this->holdBatch,
+                    $this->data['student_id'],
+                    $this->data['subject_id'],
+                    new EnrollmentTerms($data['plan_id'], $data['payer_id'], $data['price_region_id']),
+                    (string) auth()->id(),
+                );
+                $this->bookingDone();
+
+                Notification::make()->success()->persistent()
+                    ->title(__('scheduling::find.booked.series', [
+                        'count' => $booked->sessions,
+                        'date' => $booked->firstSession ? $this->studentDate($booked->firstSession) : '—',
+                        'number' => $booked->invoice->number,
+                        'total' => $booked->invoice->total->format(),
+                    ]))
+                    ->body($booked->skippedDates !== [] ? __('scheduling::find.booked.skipped', ['dates' => implode('، ', $booked->skippedDates)]) : null)
+                    ->actions([
+                        Action::make('invoice')->label(__('scheduling::find.enroll.open_invoice'))->button()
+                            ->url(route('filament.academy.resources.invoices.view', ['record' => $booked->invoice->id])),
+                        Action::make('account')->label(__('scheduling::find.enroll.open_account'))->link()
+                            ->url(route('filament.academy.resources.enrollments.view', ['record' => $booked->enrollmentId])),
+                    ])
+                    ->send();
+            });
+    }
+
+    public function heldCount(): int
+    {
+        return $this->holdBatch ? BookingHold::query()->where('batch_id', $this->holdBatch)->count() : 0;
     }
 
     /** @return list<array<string, mixed>> */
@@ -306,6 +390,46 @@ final class FindTeacher extends Page
     public function gridDays(): array
     {
         return app()->getLocale() === 'ar' ? [6, 7, 1, 2, 3, 4, 5] : [1, 2, 3, 4, 5, 6, 7];
+    }
+
+    /** @return list<PlanOption> active plans with this session length and weekly count */
+    private function matchingPlans(): array
+    {
+        return array_values(array_filter(
+            app(BillingApi::class)->planOptions((int) $this->data['duration']),
+            fn (PlanOption $p) => $p->sessionMinutes === (int) $this->data['duration'] && $p->sessionsPerWeek === count($this->picked),
+        ));
+    }
+
+    /** @return list<RegionOption> */
+    private function regions(): array
+    {
+        return app(BillingApi::class)->regions();
+    }
+
+    /** @return array<string, string> who can pay: the student's guardians (primary first), then the student */
+    private function payers(): array
+    {
+        $studentId = $this->data['student_id'];
+        $guardians = DB::table('guardian_student as g')
+            ->join('users as u', fn ($j) => $j->on('u.academy_id', '=', 'g.academy_id')->on('u.id', '=', 'g.guardian_id'))
+            ->where('g.student_id', $studentId)->orderByDesc('g.is_primary')->orderBy('u.name')
+            ->pluck('u.name', 'u.id')
+            ->map(fn (string $name) => __('scheduling::find.enroll.payer_guardian', ['name' => $name]));
+        $student = DB::table('users')->where('id', $studentId)->value('name');
+
+        return $guardians->all() + [$studentId => __('scheduling::find.enroll.payer_student', ['name' => $student])];
+    }
+
+    private function bookingDone(): void
+    {
+        [$this->holdBatch, $this->holdExpiresAt, $this->picked, $this->pickedTeacher] = [null, null, [], null];
+        unset($this->results);
+    }
+
+    private function studentDate(CarbonImmutable $at): string
+    {
+        return $at->setTimezone($this->data['timezone'])->locale(app()->getLocale())->translatedFormat('l j F · H:i');
     }
 
     private function studentChosen(?string $studentId): void

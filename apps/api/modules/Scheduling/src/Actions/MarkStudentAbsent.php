@@ -19,6 +19,8 @@ use Modules\Scheduling\Domain\Models\SessionEvent;
  */
 final class MarkStudentAbsent
 {
+    public function __construct(private readonly SettleSessionCredits $settle) {}
+
     public function handle(Session $session, ?string $actorId, string $by = 'admin', ?CarbonImmutable $at = null): Session
     {
         $teacher = $session->participant(ParticipantRole::Teacher);
@@ -37,6 +39,7 @@ final class MarkStudentAbsent
             SessionEvent::record($session, SessionEventKind::StatusChanged, [
                 'from' => $from->value, 'to' => SessionStatus::StudentAbsent->value, 'by' => $by,
             ], $actorId, $at);
+            $this->settle->handle($session, 'consumed', $actorId);
 
             DB::afterCommit(fn () => event(new SessionFinalized($session->academy_id, $session->id, SessionStatus::StudentAbsent->value, $session->decision)));
         });

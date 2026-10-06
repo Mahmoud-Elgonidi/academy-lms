@@ -25,6 +25,7 @@ final class ApplyAttendanceDeadlines
     public function __construct(
         private readonly MarkStudentAbsent $markStudentAbsent,
         private readonly FlagForReview $flagForReview,
+        private readonly SettleSessionCredits $settle,
     ) {}
 
     /** @return int how many sessions changed */
@@ -93,6 +94,7 @@ final class ApplyAttendanceDeadlines
             $session->save();
 
             SessionEvent::record($session, SessionEventKind::StatusChanged, ['from' => $from->value, 'to' => $to->value, 'by' => 'system'], null, $now);
+            $this->settle->handle($session, $decision['credit']);
 
             DB::afterCommit(fn () => event(new SessionFinalized($session->academy_id, $session->id, $to->value, $decision)));
         });

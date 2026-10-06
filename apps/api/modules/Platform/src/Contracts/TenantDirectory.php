@@ -12,12 +12,4 @@ interface TenantDirectory extends TenantResolver
     public function byHost(string $host): ?TenantRef;
 
     public function bySlug(string $slug): ?TenantRef;
-
-    /**
-     * Every active academy, for cross-tenant sweepers that then act as each
-     * academy in turn (TenantContext::run).
-     *
-     * @return list<TenantRef>
-     */
-    public function active(): array;
 }

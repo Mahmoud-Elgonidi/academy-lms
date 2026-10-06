@@ -12,7 +12,10 @@ The architecture is in [`docs/architecture`](../../docs/architecture/README.md).
 | `modules/Identity` | Users (per academy), fixed roles mapped to abilities, Sanctum tokens that carry their academy, login / me / logout, per-user preferences, **My settings** page |
 | `modules/Catalog` | Subjects (levels and categories come later) |
 | `modules/People` | Guardian ↔ student links; teacher profiles (gender, languages, dialect, accepting new students / trials, contract hours) and the subjects they teach |
-| `modules/Scheduling` | Sessions, participants (double-booking refused by an exclusion constraint), the session log, attendance deadlines (`scheduling:sweep`, every minute) and the **live board** with its actions. **Shifts**: versioned weekly schedules (one in force per teacher, exclusion constraint), teacher proposals with counter-offers, comments, notice rules and the impact on booked students; teacher API under `/api/v1/teacher/shifts`. **Find a teacher**: availability from the schedule in force each day (DST-safe) minus bookings and holds, week-by-week coverage, suggested patterns, 10-minute holds, trial or weekly booking |
+| `modules/Credits` | The credit ledger in **minutes**: accounts, lots that expire (paid, makeup, bonus…), one reservation per session, append-only entries with idempotency keys. Reserve / consume / release (refund or a 30-day makeup lot) / expire (`credits:expire`, hourly); `CreditBalanceLow` at the renewal mark (makeup minutes aside) |
+| `modules/Enrollment` | The learning agreement (student, subject, teacher, from when): `pending_payment` → `active` on the first payment, teacher assignments and status history. **Enrolled students** list and the **student account** page (credit in sessions and minutes, weekly times, coming sessions, statement, invoices) |
+| `modules/Billing` | Price regions, block plans with a price per region, billing accounts (payer: guardian or student), subscriptions, invoices with gapless numbers and VAT (inclusive or added), manual payments. Paying an invoice grants the block's minutes in the same transaction; the renewal invoice goes out by itself on `CreditBalanceLow`. Screens: **Invoices** (due / overdue / paid, record payment, void, printable invoice) and **Plans and prices** (with regions and tax settings) |
+| `modules/Scheduling` | Sessions, participants (double-booking refused by an exclusion constraint), the session log, attendance deadlines (`scheduling:sweep`, every minute) and the **live board** with its actions. **Shifts**: versioned weekly schedules (one in force per teacher, exclusion constraint), teacher proposals with counter-offers, comments, notice rules and the impact on booked students; teacher API under `/api/v1/teacher/shifts`. **Find a teacher**: availability from the schedule in force each day (DST-safe) minus bookings and holds, week-by-week coverage, suggested patterns, 10-minute holds, then a free trial or an **enrolment** (`EnrollStudent`: enrollment + credit account + subscription + first invoice + weekly times + sessions, in one transaction). **Weekly times** (`recurring_slots`, on the teacher's clock, exclusion constraint per teacher) become sessions over a rolling horizon (`scheduling:materialize`, nightly); sessions are funded from credit oldest first, and closing a session consumes, refunds or turns its minutes into makeup credit |
 | `app/` | Composition only: `ResolveTenant`, the academy panel provider, `academy:create` |
 
 ## The back office
@@ -34,11 +37,14 @@ php artisan serve
 php artisan schedule:work # optional: runs the attendance sweeper every minute
 ```
 
-Open http://demo.localhost:8000/admin and sign in as `owner@demo.test` / `password` (or `scheduler@demo.test`).
+Open http://demo.localhost:8000/admin and sign in as `owner@demo.test` / `password` (or `scheduler@demo.test`, `accountant@demo.test`).
 With `PLATFORM_DEV_ACADEMY=demo` in `.env`, plain http://localhost:8000/admin works too (local environment only; some browsers do not resolve `*.localhost`).
 
 - **Live operations** (home): sessions now and in the next hour. Two layouts, saved per user: *Table* and *Problems first*. Switch on the board or in *My settings*.
-- **Find a teacher**: mark the student's times on the week grid (student's clock), search, pick a suggested pattern or chips, hold for 10 minutes, then book a trial or the weekly series.
+- **Find a teacher**: mark the student's times on the week grid (student's clock), search, pick a suggested pattern or chips, hold for 10 minutes, then book a trial or **enroll**: choose the plan (its price in the payer's region), who pays, and the invoice is issued with the weekly times and their sessions.
+- **Invoices**: record a transfer, InstaPay, wallet or cash payment; paid in full, the block's minutes are added and the waiting sessions confirmed in order. Overdue invoices show on the menu badge.
+- **Enrolled students** › a student account: credit left in sessions and minutes, makeup credit, the statement line by line. Ziad's shows six lessons used, a teacher no-show turned into makeup credit, and the renewal invoice that went out by itself.
+- **Settings › Plans and prices** (owner and accountant): block plans, a price per region, price regions, VAT and invoice numbering.
 - **Shift proposals**: Sara's proposal clashes with three booked students; resolve each (agreed exception or start later), reply in the thread, approve. Ahmed's only adds time; Mona's counter-offer waits on her.
 - **Settings › Identity and colours** (owner and admin): templates, colours, fonts, logo, live preview; save as your own template.
 - The demo times are relative to when you seeded; run `composer demo` again to get a fresh evening.

@@ -14,6 +14,8 @@ use Modules\Scheduling\Domain\Models\SessionEvent;
 /** A manager decides a session that needs review; the decision and its reason are recorded. */
 final class ResolveReview
 {
+    public function __construct(private readonly SettleSessionCredits $settle) {}
+
     public const OUTCOMES = ['completed', 'teacher_absent', 'student_absent', 'cancelled_makeup'];
 
     public function handle(Session $session, string $outcome, ?string $note, string $actorId): Session
@@ -42,6 +44,7 @@ final class ResolveReview
             SessionEvent::record($session, SessionEventKind::StatusChanged, array_filter([
                 'from' => SessionStatus::NeedsReview->value, 'to' => $to->value, 'resolution' => $outcome, 'note' => $note,
             ]), $actorId);
+            $this->settle->handle($session, $decision['credit'], $actorId);
 
             DB::afterCommit(fn () => $to === SessionStatus::Cancelled
                 ? event(new SessionCancelled($session->academy_id, $session->id, 'review', true, $actorId))

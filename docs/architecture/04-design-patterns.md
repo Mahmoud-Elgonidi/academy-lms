@@ -54,7 +54,7 @@ flowchart TD
     Learning --> Scheduling & Enrollment & Curriculum & Communication
     Billing --> People & Catalog & Enrollment & Credits & Communication
     Classroom --> Scheduling
-    Scheduling --> People & Catalog & Enrollment & Credits & Communication
+    Scheduling --> People & Catalog & Enrollment & Credits & Billing & Communication
     Enrollment --> People & Catalog & Curriculum
     Curriculum --> Catalog
     People --> Identity & Catalog
@@ -70,9 +70,11 @@ flowchart TD
 2. **القراءة** (جداول Filament والـ Query objects) مسموح فيها `JOIN` بين جداول الـ modules، لأن ده monolith وقاعدة بيانات واحدة، والقراءة مابتكسرش أي قيود.
 3. **الرسم لازم يفضل من غير دوائر**، و**Pest arch tests** بتفرض ده.
 4. **القيود الحساسة** (الدفع ← إضافة الرصيد، الحجز ← حجز الرصيد) بتتنفذ في **transaction واحدة بين الـ modules**. الـ Events للحاجات الجانبية بس، و**مفيش Sagas**.
+   - **المنفّذ دلوقتي**: خطوة التسجيل (`EnrollStudent` في Scheduling) بتنادي Enrollment وCredits وBilling عن طريق الـ Contracts في transaction واحدة: التسجيل، وحساب الرصيد، والاشتراك، وأول فاتورة، والمواعيد الأسبوعية، والحصص. عشان كده Scheduling بيعتمد على Contracts بتوع Billing (وده كان موجود أصلًا لما Scheduling بيسمع events بتوع Billing). Billing مابيعرفش Scheduling خالص.
+   - قفل الحصة بيخصم أو يرجّع الرصيد **في نفس transaction القفل** (`SettleSessionCredits` بينادي `CreditsApi`)، بدل ما Credits يسمع `SessionFinalized`. كده Credits بيفضل معتمد على SharedKernel بس.
 5. **الاشتراك في events module تاني مسموح** طالما مابيعملش دايرة في الكود:
    - Billing بيسمع `CreditBalanceLow` (فاتورة التجديد).
-   - Scheduling بيسمع `SubscriptionPastDue` و`SubscriptionPaused` (بيوقف الحصص)، و`ParticipantJoined` و`ParticipantLeft` (الحضور).
+   - Scheduling بيسمع `SubscriptionPastDue` و`SubscriptionPaused` (بيوقف الحصص)، و`ParticipantJoined` و`ParticipantLeft` (الحضور)، و`CreditsGranted` (بيأكّد الحصص المستنية بالترتيب).
    - Payroll وEvaluation وLearning بيسمعوا `SessionFinalized`.
    - Evaluation بيسمع `SessionReportSubmitted` و`RatingSubmitted` و`ComplaintValidated`.
    - CRM بيسمع `TrialCompleted`.

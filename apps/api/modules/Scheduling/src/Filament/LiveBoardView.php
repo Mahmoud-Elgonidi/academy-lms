@@ -12,6 +12,7 @@ use Modules\Scheduling\Domain\LiveBoard\BoardGroup;
 use Modules\Scheduling\Domain\LiveBoard\BoardIssue;
 use Modules\Scheduling\Domain\LiveBoard\BoardItem;
 use Modules\Scheduling\Domain\LiveBoard\BoardPerson;
+use Modules\SharedKernel\Time\Timezones;
 
 /**
  * Turns board items into plain arrays for the two layouts: every time is in
@@ -83,10 +84,7 @@ final class LiveBoardView
 
     public static function city(string $tz): string
     {
-        $key = 'scheduling::cities.'.$tz;
-        $name = __($key);
-
-        return $name === $key ? str_replace('_', ' ', substr(strrchr($tz, '/') ?: $tz, 1) ?: $tz) : $name;
+        return Timezones::city($tz);
     }
 
     private function timing(BoardItem $item): string

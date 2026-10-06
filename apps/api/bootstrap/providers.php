@@ -2,7 +2,10 @@
 
 use App\Providers\AppServiceProvider;
 use App\Providers\Filament\AcademyPanelProvider;
+use Modules\Billing\Providers\BillingServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
+use Modules\Credits\Providers\CreditsServiceProvider;
+use Modules\Enrollment\Providers\EnrollmentServiceProvider;
 use Modules\Identity\Providers\IdentityServiceProvider;
 use Modules\People\Providers\PeopleServiceProvider;
 use Modules\Platform\Providers\PlatformServiceProvider;
@@ -16,6 +19,9 @@ return [
     IdentityServiceProvider::class,
     CatalogServiceProvider::class,
     PeopleServiceProvider::class,
+    CreditsServiceProvider::class,
+    EnrollmentServiceProvider::class,
+    BillingServiceProvider::class,
     SchedulingServiceProvider::class,
     AppServiceProvider::class,
     AcademyPanelProvider::class,

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Modules\Billing\Database\Seeders\DemoBillingSeeder;
 use Modules\Identity\Contracts\DTOs\NewUser;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Enums\Role;
@@ -15,8 +16,9 @@ use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
  * Local demo data: academy "demo" (demo.<platform domain>, or header X-Academy: demo)
- * with one user per main role and an evening of sessions around now for the
- * live board. Every password is "password". `composer demo` rebuilds it.
+ * with one user per main role, an evening of sessions around now for the
+ * live board, teacher shifts and proposals, plans and prices, and enrolled
+ * students with invoices in every state. Every password is "password". `composer demo` rebuilds it.
  */
 class DatabaseSeeder extends Seeder
 {
@@ -42,6 +44,7 @@ class DatabaseSeeder extends Seeder
             $people = [
                 ['هالة منصور', 'owner@demo.test', [Role::Owner, Role::Admin]],
                 ['منسّق الجداول', 'scheduler@demo.test', [Role::Scheduler]],
+                ['محاسب الأكاديمية', 'accountant@demo.test', [Role::Accountant]],
                 ['أ. أحمد', 'teacher@demo.test', [Role::Teacher]],
                 ['ولي أمر', 'guardian@demo.test', [Role::Guardian]],
                 ['طالب', 'student@demo.test', [Role::Student]],
@@ -51,7 +54,7 @@ class DatabaseSeeder extends Seeder
                 $identity->createUser(new NewUser(name: $name, roles: $roles, email: $email, password: 'password', locale: 'ar', timezone: 'Africa/Cairo'));
             }
 
-            $this->call([DemoLiveBoardSeeder::class, DemoShiftsSeeder::class]);
+            $this->call([DemoLiveBoardSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class]);
         });
 
         $this->command?->info('Seeded academy "demo". Sign in as owner@demo.test / password.');

@@ -7,11 +7,9 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Modules\People\Contracts\DTOs\TeacherProfileData;
 use Modules\People\Contracts\PeopleApi;
-use Modules\Scheduling\Actions\ScheduleSession;
 use Modules\Scheduling\Actions\Shifts\CommentOnShiftProposal;
 use Modules\Scheduling\Actions\Shifts\CounterShiftProposal;
 use Modules\Scheduling\Actions\Shifts\SaveShiftProposal;
-use Modules\Scheduling\Contracts\DTOs\NewSession;
 use Modules\Scheduling\Domain\Models\ShiftSchedule;
 use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
 
@@ -24,7 +22,7 @@ use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
  */
 final class DemoShiftsSeeder extends Seeder
 {
-    public function run(PeopleApi $people, ScheduleSession $schedule, SaveShiftProposal $save, CounterShiftProposal $counter, CommentOnShiftProposal $comment): void
+    public function run(PeopleApi $people, SaveShiftProposal $save, CounterShiftProposal $counter, CommentOnShiftProposal $comment): void
     {
         $user = fn (string $key) => DB::table('users')->where('email', "{$key}@demo.test")->value('id');
         $subject = fn (string $en) => DB::table('subjects')->where('name_en', $en)->value('id');
@@ -64,26 +62,8 @@ final class DemoShiftsSeeder extends Seeder
             }
         }
 
-        // Weekly bookings for the next eight weeks, on the teacher's clock.
-        $series = [
-            ['sara', 'maryam', 'Tajweed', 2, '17:00', 45],
-            ['sara', 'adam', 'Arabic', 2, '19:00', 45],
-            ['sara', 'hamza', 'Quran memorisation', 7, '20:00', 30],
-            ['nour', 'yousef', 'Quran memorisation', 6, '18:00', 30],
-            ['mahmoud', 'omar', 'Tajweed', 1, '19:00', 45],
-            ['khaled', 'ziad', 'Arabic grammar', 3, '18:00', 45],
-            ['mona', 'salma', 'Arabic', 7, '19:00', 45],
-            ['ahmed', 'layan', 'English', 2, '20:00', 30],
-        ];
-        foreach ($series as [$teacher, $student, $subjectName, $weekday, $time, $minutes]) {
-            $teacherId = $user($teacher);
-            $tz = DB::table('users')->where('id', $teacherId)->value('timezone');
-            $day = CarbonImmutable::now($tz)->addDay()->startOfDay();
-            $day = $day->addDays(($weekday - $day->dayOfWeekIso + 7) % 7);
-            for ($i = 0; $i < 8; $i++, $day = $day->addWeek()) {
-                $schedule->handle(new NewSession($teacherId, $user($student), $subject($subjectName), CarbonImmutable::parse($day->toDateString().' '.$time, $tz), $minutes, $tz), $admin);
-            }
-        }
+        // Enrolled students, their weekly times, invoices and payments.
+        $this->call(DemoEnrollmentsSeeder::class);
 
         // Sara: university on Tuesday afternoons; moves Tuesday to the evening and adds Wednesday.
         $saraTz = 'Africa/Cairo';

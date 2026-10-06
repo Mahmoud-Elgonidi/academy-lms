@@ -87,26 +87,24 @@ it('holds the chosen times for ten minutes: taken for other coordinators, not fo
         ->toThrow(ValidationException::class);
 });
 
-it('books a free trial or the whole weekly series from a hold, then releases it', function () {
+it('books a free trial from a hold, then releases it', function () {
     $nour = collect(search())->first(fn ($r) => $r['teacher']->name === 'nour');
     $times = array_merge(...array_map(fn ($c) => $c->occurrences, $nour['pattern']));
     $batch = app(PlaceBookingHold::class)->handle($this->nour->id, $this->student->id, $times, 30, $this->coordinator->id);
 
-    $sessions = app(ConfirmBooking::class)->handle($batch, $this->student->id, $this->quran, 'series', $this->coordinator->id);
+    $trial = app(ConfirmBooking::class)->trial($batch, $this->student->id, $this->quran, $this->coordinator->id);
 
-    expect($sessions)->toHaveCount(16)
-        ->and(Session::query()->where('type', SessionType::Regular->value)->count())->toBe(16)
+    expect($trial->type)->toBe(SessionType::Trial)
+        ->and($trial->funding_status->value)->toBe('free')
+        ->and($trial->starts_at->getTimestamp())->toBe(min($times))
+        ->and(Session::query()->count())->toBe(1)
         ->and(BookingHold::query()->count())->toBe(0);
-
-    $trialBatch = app(PlaceBookingHold::class)->handle($this->mahmoud->id, null, [CarbonImmutable::parse('2026-10-10 17:00', 'Africa/Cairo')->getTimestamp()], 30, $this->coordinator->id);
-    $trial = app(ConfirmBooking::class)->handle($trialBatch, User::factory()->withRole(Role::Student)->create()->id, $this->quran, 'trial', $this->coordinator->id);
-    expect($trial[0]->type)->toBe(SessionType::Trial)->and($trial[0]->funding_status->value)->toBe('free');
 });
 
 it('refuses to book from an expired hold', function () {
     $batch = app(PlaceBookingHold::class)->handle($this->nour->id, null, [CarbonImmutable::parse('2026-10-10 17:00', 'Africa/Cairo')->getTimestamp()], 30, $this->coordinator->id);
     CarbonImmutable::setTestNow(CarbonImmutable::now()->addMinutes(11));
 
-    expect(fn () => app(ConfirmBooking::class)->handle($batch, $this->student->id, $this->quran, 'trial', $this->coordinator->id))
+    expect(fn () => app(ConfirmBooking::class)->trial($batch, $this->student->id, $this->quran, $this->coordinator->id))
         ->toThrow(ValidationException::class);
 });

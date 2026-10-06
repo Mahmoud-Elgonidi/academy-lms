@@ -14,4 +14,8 @@ enum Ability: string
     case ReviewShifts = 'shifts.review';
     case ProposeOwnShifts = 'shifts.propose-own';
     case FindTeachers = 'teachers.find';
+    case ViewEnrollments = 'enrollments.view';
+    case ViewBilling = 'billing.view';
+    case RecordPayments = 'billing.record-payments';
+    case ManageBilling = 'billing.manage';
 }

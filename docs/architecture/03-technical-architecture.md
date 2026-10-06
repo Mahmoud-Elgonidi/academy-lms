@@ -202,7 +202,7 @@ shift_proposals(id, teacher_id, base_schedule_id, author_role teacher|admin,
 shift_proposal_rules(proposal_id, revision, weekday, local_start, duration_min, tz, kind)  -- revision لكل عرض مضاد
 shift_proposal_comments(proposal_id, author_id, body, created_at)
 recurring_slots(enrollment_id, teacher_id, weekday, local_start, duration_min, anchor, anchor_tz,
-                minute_of_week int4range, effective daterange, status)
+                minute_of_week int4multirange, effective daterange, status)  -- EXCLUDE: نفس المدرس، دقايق متداخلة في الأسبوع، وفترة متداخلة
 sessions(id, academy_id, type, enrollment_id?, lead_id?, teacher_id, original_teacher_id, slot_id?,
          occurrence_key UNIQUE, starts_at, ends_at, blocked_until, status, review_reason,
          funding_status, makeup_for_session_id, reschedule_count, is_detached,
