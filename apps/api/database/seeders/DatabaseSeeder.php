@@ -15,6 +15,7 @@ use Modules\Learning\Database\Seeders\DemoLearningSeeder;
 use Modules\Platform\Contracts\DTOs\NewAcademy;
 use Modules\Platform\Contracts\PlatformApi;
 use Modules\Platform\Contracts\TenantDirectory;
+use Modules\Scheduling\Database\Seeders\DemoDstSeeder;
 use Modules\Scheduling\Database\Seeders\DemoLiveBoardSeeder;
 use Modules\Scheduling\Database\Seeders\DemoShiftsSeeder;
 use Modules\Scheduling\Database\Seeders\DemoTimeOffSeeder;
@@ -62,7 +63,7 @@ class DatabaseSeeder extends Seeder
                 $identity->createUser(new NewUser(name: $name, roles: $roles, email: $email, password: 'password', locale: 'ar', timezone: 'Africa/Cairo'));
             }
 
-            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class]);
+            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class]);
         });
 
         $this->command?->info('Seeded academy "demo". Sign in as owner@demo.test / password.');

@@ -16,8 +16,11 @@ use Modules\Identity\Contracts\Preferences\PreferenceDefinition;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Scheduling\AttendanceService;
 use Modules\Scheduling\Console\MaterializeSessionsCommand;
+use Modules\Scheduling\Console\PlanDstCommand;
 use Modules\Scheduling\Console\SweepSessionsCommand;
 use Modules\Scheduling\Contracts\AttendanceApi;
+use Modules\Scheduling\Contracts\Events\DstShiftDecided;
+use Modules\Scheduling\Contracts\Events\DstShiftUpcoming;
 use Modules\Scheduling\Contracts\Events\HolidayDeclared;
 use Modules\Scheduling\Contracts\Events\SessionCancelled;
 use Modules\Scheduling\Contracts\Events\SessionRescheduled;
@@ -27,6 +30,8 @@ use Modules\Scheduling\Contracts\Events\ShiftProposalChangesRequested;
 use Modules\Scheduling\Contracts\Events\ShiftProposalCountered;
 use Modules\Scheduling\Contracts\Events\ShiftProposalRejected;
 use Modules\Scheduling\Contracts\Events\ShiftProposalSubmitted;
+use Modules\Scheduling\Contracts\Events\SlotTimesShifted;
+use Modules\Scheduling\Contracts\Events\TeacherLessonsShifted;
 use Modules\Scheduling\Contracts\Events\TimeOffDecided;
 use Modules\Scheduling\Contracts\Events\TimeOffRequested;
 use Modules\Scheduling\Domain\AttendancePolicy;
@@ -111,17 +116,22 @@ final class SchedulingServiceProvider extends ServiceProvider
         Event::listen(TimeOffDecided::class, [SendSchedulingNotifications::class, 'timeOffDecided']);
         Event::listen(SessionTeacherSubstituted::class, [SendSchedulingNotifications::class, 'substituted']);
         Event::listen(HolidayDeclared::class, [SendSchedulingNotifications::class, 'holidayDeclared']);
+        Event::listen(DstShiftUpcoming::class, [SendSchedulingNotifications::class, 'dstUpcoming']);
+        Event::listen(DstShiftDecided::class, [SendSchedulingNotifications::class, 'dstDecided']);
+        Event::listen(SlotTimesShifted::class, [SendSchedulingNotifications::class, 'slotShifted']);
+        Event::listen(TeacherLessonsShifted::class, [SendSchedulingNotifications::class, 'teacherShifted']);
         foreach ([ShiftProposalApproved::class, ShiftProposalRejected::class, ShiftProposalChangesRequested::class, ShiftProposalCountered::class] as $answer) {
             Event::listen($answer, [SendSchedulingNotifications::class, 'proposalAnswered']);
         }
 
         if ($this->app->runningInConsole()) {
-            $this->commands([SweepSessionsCommand::class, MaterializeSessionsCommand::class]);
+            $this->commands([SweepSessionsCommand::class, MaterializeSessionsCommand::class, PlanDstCommand::class]);
         }
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('scheduling:sweep')->everyMinute()->withoutOverlapping()->onOneServer();
             $schedule->command('scheduling:materialize')->dailyAt('01:10')->withoutOverlapping()->onOneServer();
+            $schedule->command('scheduling:dst')->dailyAt('01:40')->withoutOverlapping()->onOneServer();
         });
     }
 }

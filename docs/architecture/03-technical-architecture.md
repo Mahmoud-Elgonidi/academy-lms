@@ -221,6 +221,9 @@ shift_proposal_rules(proposal_id, revision, weekday, local_start, duration_min, 
 shift_proposal_comments(proposal_id, author_id, body, created_at)
 recurring_slots(enrollment_id, teacher_id, weekday, local_start, duration_min, anchor, anchor_tz,
                 minute_of_week int4multirange, effective daterange, status)  -- EXCLUDE: نفس المدرس، دقايق متداخلة في الأسبوع، وفترة متداخلة
+schedule_shift_notices(slot_id, enrollment_id UNIQUE+changes_at, teacher_id, student_id, anchor_tz, other_tz, cause_tz,
+                       changes_at, reverts_at, before_weekday/time, after_weekday/time, delta_min, lessons,
+                       decision pending|keep_teacher|keep_student, decided_by, notified_early_at, notified_late_at)
 sessions(id, academy_id, type, enrollment_id?, lead_id?, teacher_id, original_teacher_id, slot_id?,
          occurrence_key UNIQUE, starts_at, ends_at, blocked_until, status, review_reason,
          funding_status, makeup_for_session_id, reschedule_count, is_detached,

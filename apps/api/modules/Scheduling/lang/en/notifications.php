@@ -33,6 +33,17 @@ return [
     'substitute_teacher' => ['title' => 'A lesson with :student was added for you', 'body' => 'The :subject lesson on :when.'],
     'holiday_family' => ['title' => 'Academy holiday: :name', 'body' => 'The academy is closed from :from to :to. :student\'s :count lessons on those days are cancelled; the minutes are back in the balance and its validity is extended by the days off.'],
     'holiday_teacher' => ['title' => 'Academy holiday: :name', 'body' => 'The academy is closed from :from to :to, and :count of your lessons on those days are cancelled.'],
+    'dst_family' => ['title' => ':student\'s lesson time is changing', 'body' => 'Because the clocks change in :cause, from the lesson on :when the :subject lesson with :teacher will be at :after instead of :before, :zone time.'],
+    'dst_kept_family' => ['title' => ':student\'s lesson time stays the same', 'body' => 'The academy kept your time: :time, :zone time, despite the clock change.'],
+    'lessons_shifted_family' => ['title' => 'A new time for :student\'s lessons', 'body' => 'From :from to :until, the :subject lessons will be at :time, :zone time.'],
+    'lessons_shifted_family_open' => ['title' => 'A new time for :student\'s lessons', 'body' => 'From :from, the :subject lessons will be at :time, :zone time.'],
+    'lessons_shifted_teacher' => ['title' => 'A new time for lessons with :student', 'body' => 'From :from to :until, the :subject lessons will be at :time your time. :why'],
+    'lessons_shifted_teacher_open' => ['title' => 'A new time for lessons with :student', 'body' => 'From :from, the :subject lessons will be at :time your time. :why'],
+    'teacher_lessons_shifted' => ['title' => 'Your lesson times change for a while', 'body' => 'From :from to :until, all your weekly lessons will be :shift than usual, then go back to their times. :count booked lessons moved, and the students were told.'],
+    'shift_reasons' => [
+        'dst' => 'This keeps the student\'s time the same through the clock change.',
+        'academy' => '',
+    ],
     'outcomes' => [
         'makeup' => 'A makeup lesson is owed to you.',
         'refund' => 'The credit is back in your account.',

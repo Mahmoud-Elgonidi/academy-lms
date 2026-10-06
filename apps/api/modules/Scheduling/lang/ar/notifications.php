@@ -33,6 +33,17 @@ return [
     'substitute_teacher' => ['title' => 'اتضافت لك حصة مع :student', 'body' => 'حصة :subject يوم :when.'],
     'holiday_family' => ['title' => 'إجازة الأكاديمية: :name', 'body' => 'الأكاديمية إجازة من :from لـ :to. حصص :student في الأيام دي (:count) اتلغت، والدقايق رجعت لرصيده وصلاحيته اتمدت بعدد أيام الإجازة.'],
     'holiday_teacher' => ['title' => 'إجازة الأكاديمية: :name', 'body' => 'الأكاديمية إجازة من :from لـ :to، و:count من حصصك في الأيام دي اتلغت.'],
+    'dst_family' => ['title' => 'ميعاد حصص :student هيتغير', 'body' => 'بسبب تغيير التوقيت في :cause، من حصة :when ميعاد حصة :subject مع :teacher هيبقى :after بدل :before بتوقيت :zone.'],
+    'dst_kept_family' => ['title' => 'ميعاد حصص :student مش هيتغير', 'body' => 'الأكاديمية ثبّتت ميعادكم: هيفضل :time بتوقيت :zone رغم تغيير التوقيت.'],
+    'lessons_shifted_family' => ['title' => 'ميعاد جديد لحصص :student', 'body' => 'من :from لحد :until، حصص :subject هتبقى :time بتوقيت :zone.'],
+    'lessons_shifted_family_open' => ['title' => 'ميعاد جديد لحصص :student', 'body' => 'من :from، حصص :subject هتبقى :time بتوقيت :zone.'],
+    'lessons_shifted_teacher' => ['title' => 'ميعاد جديد لحصص :student', 'body' => 'من :from لحد :until، حصص :subject هتبقى :time بتوقيتك. :why'],
+    'lessons_shifted_teacher_open' => ['title' => 'ميعاد جديد لحصص :student', 'body' => 'من :from، حصص :subject هتبقى :time بتوقيتك. :why'],
+    'teacher_lessons_shifted' => ['title' => 'مواعيد حصصك هتتغير لفترة', 'body' => 'من :from لحد :until، كل حصصك الأسبوعية هتبقى :shift عن ميعادها، وبعدها ترجع زي ما كانت. اتنقل :count حصة محجوزة، والطلاب اتبلّغوا.'],
+    'shift_reasons' => [
+        'dst' => 'ده عشان ميعاد الطالب مايتغيرش مع تغيير التوقيت الصيفي.',
+        'academy' => '',
+    ],
     'outcomes' => [
         'makeup' => 'وليكم حصة تعويض.',
         'refund' => 'والرصيد رجع لحسابكم.',

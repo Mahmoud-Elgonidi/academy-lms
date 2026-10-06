@@ -9,6 +9,9 @@
     @foreach ($this->holidays as $h)
         <div class="to-banner" style="margin-bottom: .5rem"><x-filament::icon icon="heroicon-o-sparkles" />{{ __('scheduling::timeoff.family.holiday', ['name' => $h['name'], 'period' => $h['period']]) }}</div>
     @endforeach
+    @foreach ($this->clockChanges as $change)
+        <div class="to-banner" style="margin-bottom: .5rem"><x-filament::icon icon="heroicon-o-clock" />{{ $change }}</div>
+    @endforeach
 
     <h2 class="fl-h2">{{ __($l.'upcoming') }}</h2>
     <div class="fl-list lms-stagger">

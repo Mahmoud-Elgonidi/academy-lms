@@ -16,7 +16,7 @@ use Modules\Scheduling\Domain\Slots\WeeklyTime;
 final class CreateRecurringSlots
 {
     /**
-     * @param  array<int, array{time: WeeklyTime, from: CarbonImmutable}>  $times  on the teacher's clock, each from its first local date
+     * @param  array<int, array{time: WeeklyTime, from: CarbonImmutable, until?: ?CarbonImmutable}>  $times  on the teacher's clock, each from its first local date (and up to a local date, excluded)
      * @return list<RecurringSlot>
      */
     public function handle(string $enrollmentId, string $teacherId, string $studentId, string $anchorTz, array $times, ?string $actorId): array
@@ -31,7 +31,7 @@ final class CreateRecurringSlots
                 'duration_min' => $t['time']->durationMin,
                 'anchor_tz' => $anchorTz,
                 'minute_of_week' => $t['time']->minuteOfWeek(),
-                'effective' => '['.$t['from']->toDateString().',)',
+                'effective' => '['.$t['from']->toDateString().','.(isset($t['until']) ? $t['until']->toDateString() : '').')',
                 'created_by' => $actorId,
             ]), array_values($times)));
         } catch (QueryException $e) {

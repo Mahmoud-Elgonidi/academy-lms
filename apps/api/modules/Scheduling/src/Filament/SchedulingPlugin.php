@@ -4,6 +4,7 @@ namespace Modules\Scheduling\Filament;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Modules\Scheduling\Filament\Pages\DstChanges;
 use Modules\Scheduling\Filament\Pages\FindTeacher;
 use Modules\Scheduling\Filament\Pages\Holidays;
 use Modules\Scheduling\Filament\Pages\LiveBoard;
@@ -29,7 +30,7 @@ final class SchedulingPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([LiveBoard::class, FindTeacher::class, ShiftProposals::class, ReviewShiftProposal::class, TimeOffRequests::class, TimeOffReview::class, Holidays::class, PolicySettings::class]);
+        $panel->pages([LiveBoard::class, FindTeacher::class, ShiftProposals::class, ReviewShiftProposal::class, TimeOffRequests::class, TimeOffReview::class, DstChanges::class, Holidays::class, PolicySettings::class]);
         $panel->resources([EnrollmentResource::class]);
     }
 

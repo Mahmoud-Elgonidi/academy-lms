@@ -34,9 +34,7 @@ final class TimeOffForm
 
         return array_values(array_filter([
             $pickTeacher ? Select::make('teacher_id')->label(__($l.'teacher'))->required()->searchable()->live()
-                ->options(fn () => DB::table('users as u')
-                    ->join('user_roles as r', fn ($j) => $j->on('r.academy_id', '=', 'u.academy_id')->on('r.user_id', '=', 'u.id'))
-                    ->where('r.role', 'teacher')->where('u.status', 'active')->orderBy('u.name')->pluck('u.name', 'u.id')) : null,
+                ->options(fn () => self::teachers()) : null,
             ToggleButtons::make('kind')->label(__($l.'kind'))->inline()->required()->live()->default('days')
                 ->options(__($l.'kinds')),
             DatePicker::make('first_day')->label(fn (Get $get) => __($hours($get) ? $l.'day' : $l.'first_day'))->required()->native(false)->live()
@@ -55,6 +53,14 @@ final class TimeOffForm
                 ->description(fn (Get $get) => self::impact($teacher($get), $get('kind'), $get('first_day'), $get('last_day'), $get('from'), $get('to')))
                 ->visible(fn (Get $get) => $teacher($get) !== null && filled($get('first_day'))),
         ]));
+    }
+
+    /** @return array<string, string> the academy's active teachers by name */
+    public static function teachers(): array
+    {
+        return DB::table('users as u')
+            ->join('user_roles as r', fn ($j) => $j->on('r.academy_id', '=', 'u.academy_id')->on('r.user_id', '=', 'u.id'))
+            ->where('r.role', 'teacher')->where('u.status', 'active')->orderBy('u.name')->pluck('u.name', 'u.id')->all();
     }
 
     /** @return array{0: string, 1: string, 2: ?string, 3: ?string} the Action's days and hours from the form */

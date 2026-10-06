@@ -5,11 +5,15 @@ namespace Modules\Scheduling\Listeners;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Communication\Contracts\DTOs\Day;
+use Modules\Communication\Contracts\DTOs\Localized;
 use Modules\Communication\Contracts\DTOs\Message;
 use Modules\Communication\Contracts\DTOs\TemplateDefinition;
 use Modules\Communication\Contracts\DTOs\Translatable;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Identity\Contracts\IdentityApi;
+use Modules\People\Contracts\PeopleApi;
+use Modules\Scheduling\Contracts\Events\DstShiftDecided;
+use Modules\Scheduling\Contracts\Events\DstShiftUpcoming;
 use Modules\Scheduling\Contracts\Events\HolidayDeclared;
 use Modules\Scheduling\Contracts\Events\SessionCancelled;
 use Modules\Scheduling\Contracts\Events\SessionRescheduled;
@@ -19,13 +23,17 @@ use Modules\Scheduling\Contracts\Events\ShiftProposalChangesRequested;
 use Modules\Scheduling\Contracts\Events\ShiftProposalCountered;
 use Modules\Scheduling\Contracts\Events\ShiftProposalRejected;
 use Modules\Scheduling\Contracts\Events\ShiftProposalSubmitted;
+use Modules\Scheduling\Contracts\Events\SlotTimesShifted;
+use Modules\Scheduling\Contracts\Events\TeacherLessonsShifted;
 use Modules\Scheduling\Contracts\Events\TimeOffDecided;
 use Modules\Scheduling\Contracts\Events\TimeOffRequested;
 use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Domain\Models\Session;
+use Modules\Scheduling\Domain\Models\ShiftNotice;
 use Modules\Scheduling\Domain\Models\TeacherTimeOff;
 use Modules\Scheduling\Queries\SessionPeople;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Timezones;
 
 /**
  * What the family, the teacher and the reviewers hear about lessons,
@@ -38,6 +46,7 @@ final class SendSchedulingNotifications
         private readonly NotificationsApi $notifications,
         private readonly SessionPeople $sessions,
         private readonly IdentityApi $identity,
+        private readonly PeopleApi $people,
     ) {}
 
     public static function templates(NotificationsApi $notifications): void
@@ -66,6 +75,13 @@ final class SendSchedulingNotifications
             ['substitute_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson + ['original' => 'أ. سارة']],
             ['holiday_family', 'lessons', $a.'family', ['whatsapp', 'email', 'push'], ['name' => 'عيد الأضحى', 'from' => 'الثلاثاء 26 مايو', 'to' => 'الجمعة 29 مايو', 'student' => 'زياد', 'count' => '2']],
             ['holiday_teacher', 'staff', $a.'teacher', ['push', 'email'], ['name' => 'عيد الأضحى', 'from' => 'الثلاثاء 26 مايو', 'to' => 'الجمعة 29 مايو', 'count' => '6']],
+            ['dst_family', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'النحو', 'teacher' => 'أ. خالد', 'when' => 'الجمعة 30 أكتوبر · 19:00', 'before' => 'الجمعة 18:00', 'after' => 'الجمعة 19:00', 'zone' => 'الرياض', 'cause' => 'القاهرة']],
+            ['dst_kept_family', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'time' => 'الجمعة 18:00', 'zone' => 'الرياض']],
+            ['lessons_shifted_family', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 19:00', 'zone' => 'الرياض', 'from' => 'الأحد 1 نوفمبر', 'until' => 'السبت 28 نوفمبر']],
+            ['lessons_shifted_family_open', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 19:00', 'zone' => 'الرياض', 'from' => 'الأحد 1 نوفمبر']],
+            ['lessons_shifted_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 19:00', 'from' => 'الأحد 1 نوفمبر', 'until' => 'السبت 28 نوفمبر', 'why' => '']],
+            ['lessons_shifted_teacher_open', 'staff', $a.'teacher', ['push', 'whatsapp'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 19:00', 'from' => 'الأحد 1 نوفمبر', 'why' => '']],
+            ['teacher_lessons_shifted', 'staff', $a.'teacher', ['push', 'whatsapp', 'email'], ['from' => 'الأحد 1 نوفمبر', 'until' => 'السبت 28 نوفمبر', 'shift' => 'ساعة متأخر', 'count' => '12']],
         ] as [$name, $category, $audience, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
                 key: "scheduling.{$name}", category: $category,
@@ -205,6 +221,101 @@ final class SendSchedulingNotifications
             $this->notifications->send(new Message('scheduling.holiday_teacher', $this->without([$teacherId], $event->actorId),
                 $period + ['count' => (string) $count], $action, "holiday:{$holiday->id}:{$teacherId}"));
         }
+    }
+
+    /** The family's new hour at a clock change, 14 and 2 days before. */
+    public function dstUpcoming(DstShiftUpcoming $event): void
+    {
+        $notice = ShiftNotice::query()->find($event->noticeId);
+        if ($notice === null || ! $notice->movesForFamily()) {
+            return;
+        }
+        $s = $this->sessions->of((string) Session::query()->where('enrollment_id', $notice->enrollment_id)->where('starts_at', $notice->changes_at)->value('id'));
+        $family = [$notice->student_id, ...$this->people->guardiansOf($notice->student_id)];
+        $day = fn (int $weekday, string $time) => CarbonImmutable::parse('2026-01-05 '.substr($time, 0, 5))->addDays($weekday - 1);   // a Monday, then the weekday
+
+        $this->notifications->send(new Message('scheduling.dst_family', $family, [
+            'student' => (string) DB::table('users')->where('id', $notice->student_id)->value('name'),
+            'subject' => $s['subject'] ?? '',
+            'teacher' => (string) DB::table('users')->where('id', $notice->teacher_id)->value('name'),
+            'when' => $notice->changes_at,
+            'before' => self::weekdayTime($day($notice->before_weekday, $notice->before_time)),
+            'after' => self::weekdayTime($day($notice->after_weekday, $notice->after_time)),
+            'zone' => self::city($notice->other_tz),
+            'cause' => self::city($notice->cause_tz),
+        ], ['screen' => 'session', 'id' => $s['session_id'] ?? null], "dst:{$notice->id}:{$event->stage}"));
+    }
+
+    /** The academy kept the student's hour after the family had been told it would move. */
+    public function dstDecided(DstShiftDecided $event): void
+    {
+        $notice = ShiftNotice::query()->find($event->noticeId);
+        if ($notice === null || $event->decision !== 'keep_student' || $notice->notified_early_at === null) {
+            return;
+        }
+        $day = CarbonImmutable::parse('2026-01-05 '.substr($notice->before_time, 0, 5))->addDays($notice->before_weekday - 1);
+        $this->notifications->send(new Message('scheduling.dst_kept_family', $this->without([$notice->student_id, ...$this->people->guardiansOf($notice->student_id)], $event->actorId), [
+            'student' => (string) DB::table('users')->where('id', $notice->student_id)->value('name'),
+            'time' => self::weekdayTime($day),
+            'zone' => self::city($notice->other_tz),
+        ], ['screen' => 'session', 'id' => null], "dst:{$notice->id}:kept"));
+    }
+
+    /**
+     * A weekly time moved for a period. Keeping a student's hour through a
+     * clock change: the teacher hears the new time on their clock (the
+     * family's does not move). An academy move: the family hears theirs (the
+     * teacher hears the whole move once, teacherShifted).
+     */
+    public function slotShifted(SlotTimesShifted $event): void
+    {
+        $first = Session::query()->where('slot_id', $event->slotId)->where('status', 'scheduled')->where('starts_at', '>=', $event->fromUtc)->orderBy('starts_at')->first();
+        if ($first === null) {
+            return;
+        }
+        $s = $this->sessions->of($first->id);
+        $teacherTz = (string) (DB::table('users')->where('id', $event->teacherId)->value('timezone') ?? 'UTC');
+        $studentTz = (string) (DB::table('users')->where('id', $event->studentId)->value('timezone') ?? $teacherTz);
+        $open = $event->untilUtc === null ? '_open' : '';
+        $period = ['from' => new Day(CarbonImmutable::parse($event->fromUtc)->setTimezone($teacherTz)->toDateString())]
+            + ($event->untilUtc ? ['until' => new Day(CarbonImmutable::parse($event->untilUtc)->subMinute()->setTimezone($teacherTz)->toDateString())] : []);
+        $common = ['student' => $s['student'] ?? '', 'subject' => $s['subject'] ?? ''];
+        $action = ['screen' => 'session', 'id' => $first->id];
+        $key = "shifted:{$event->slotId}";
+
+        if ($event->reason === 'dst') {
+            $this->notifications->send(new Message("scheduling.lessons_shifted_teacher{$open}", $this->without([$event->teacherId], $event->actorId), $common + $period + [
+                'time' => self::weekdayTime($first->starts_at->setTimezone($teacherTz)),
+                'why' => new Translatable('scheduling::notifications.shift_reasons.dst'),
+            ], $action, $key));
+
+            return;
+        }
+        $this->notifications->send(new Message("scheduling.lessons_shifted_family{$open}", $this->without($s['family'] ?? [], $event->actorId), $common + $period + [
+            'time' => self::weekdayTime($first->starts_at->setTimezone($studentTz)),
+            'zone' => self::city($studentTz),
+        ], $action, $key));
+    }
+
+    /** Every weekly lesson of a teacher moved for some days: they hear it once. */
+    public function teacherShifted(TeacherLessonsShifted $event): void
+    {
+        $this->notifications->send(new Message('scheduling.teacher_lessons_shifted', $this->without([$event->teacherId], $event->actorId), [
+            'from' => new Day($event->firstDay),
+            'until' => new Day($event->lastDay),
+            'shift' => new Translatable('scheduling::dst.shift.by.'.$event->minutes),
+            'count' => (string) $event->lessons,
+        ], ['screen' => 'session', 'id' => null], "shifted:{$event->teacherId}:{$event->firstDay}:{$event->minutes}"));
+    }
+
+    private static function weekdayTime(CarbonImmutable $local): Localized
+    {
+        return new Localized($local->locale('ar')->translatedFormat('l H:i'), $local->locale('en')->translatedFormat('l H:i'));
+    }
+
+    private static function city(string $timezone): Localized
+    {
+        return new Localized(Timezones::city($timezone, 'ar'), Timezones::city($timezone, 'en'));
     }
 
     /** @return array{from: Day|CarbonImmutable, to: Day|CarbonImmutable} whole days as days on the teacher's clock, hours as instants */
