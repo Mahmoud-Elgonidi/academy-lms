@@ -25,7 +25,7 @@
     <h2 class="fl-h2">{{ __($l.'recent') }}</h2>
     <div class="fl-list lms-stagger">
         @forelse ($lessons['recent'] as $lesson)
-            @include('scheduling::filament.family.lesson-card', ['lesson' => $lesson])
+            @include('scheduling::filament.family.lesson-card', ['lesson' => $lesson, 'after' => true])
         @empty
             <div class="fl-empty">{{ __($l.'none_recent') }}</div>
         @endforelse

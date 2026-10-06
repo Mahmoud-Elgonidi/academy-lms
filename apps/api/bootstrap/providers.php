@@ -12,6 +12,7 @@ use Modules\Credits\Providers\CreditsServiceProvider;
 use Modules\Crm\Providers\CrmServiceProvider;
 use Modules\Curriculum\Providers\CurriculumServiceProvider;
 use Modules\Enrollment\Providers\EnrollmentServiceProvider;
+use Modules\Evaluation\Providers\EvaluationServiceProvider;
 use Modules\Identity\Providers\IdentityServiceProvider;
 use Modules\Learning\Providers\LearningServiceProvider;
 use Modules\People\Providers\PeopleServiceProvider;
@@ -33,6 +34,7 @@ return [
     BillingServiceProvider::class,
     SchedulingServiceProvider::class,
     LearningServiceProvider::class,
+    EvaluationServiceProvider::class,
     ClassroomServiceProvider::class,
     CrmServiceProvider::class,
     AppServiceProvider::class,

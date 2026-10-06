@@ -54,6 +54,8 @@
             "Modules\\Learning\\": "modules/Learning/src/",
             "Modules\\Classroom\\": "modules/Classroom/src/",
             "Modules\\Crm\\": "modules/Crm/src/",
+            "Modules\\Evaluation\\": "modules/Evaluation/src/",
+            "Modules\\Evaluation\\Database\\Seeders\\": "modules/Evaluation/database/seeders/",
             "Modules\\Crm\\Database\\Seeders\\": "modules/Crm/database/seeders/",
             "Modules\\Learning\\Database\\Seeders\\": "modules/Learning/database/seeders/",
             "Modules\\Scheduling\\Database\\Factories\\": "modules/Scheduling/database/factories/",

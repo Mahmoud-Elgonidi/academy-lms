@@ -23,6 +23,7 @@ use Modules\Classroom\Filament\ClassroomPlugin;
 use Modules\Communication\Filament\CommunicationPlugin;
 use Modules\Crm\Filament\CrmPlugin;
 use Modules\Curriculum\Filament\CurriculumPlugin;
+use Modules\Evaluation\Filament\EvaluationPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Learning\Filament\LearningPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
@@ -79,6 +80,7 @@ final class AcademyPanelProvider extends PanelProvider
                 BillingPlugin::make(),
                 CurriculumPlugin::make(),
                 LearningPlugin::make(),
+                EvaluationPlugin::make(),
                 CommunicationPlugin::make(),
                 ClassroomPlugin::make(),
                 PlatformPlugin::make(),

@@ -19,8 +19,8 @@ final class AbilityMatrix
             Ability::FindTeachers, Ability::BookTrials => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler, Role::Sales],
             // Leads and trials (CRM): sales, and the scheduler who books for them; a teacher assesses their own trials.
             Ability::ManageLeads => [Role::Owner, Role::Admin, Role::Scheduler, Role::Sales],
-            Ability::ProposeOwnShifts, Ability::WriteReports, Ability::RequestOwnTimeOff, Ability::AssessTrials => [Role::Teacher],
-            Ability::ManageCurriculum, Ability::ReviewReports, Ability::ViewMessageLog => [Role::Owner, Role::Admin, Role::Supervisor],
+            Ability::ProposeOwnShifts, Ability::WriteReports, Ability::RequestOwnTimeOff, Ability::AssessTrials, Ability::ViewOwnPerformance => [Role::Teacher],
+            Ability::ManageCurriculum, Ability::ReviewReports, Ability::ViewMessageLog, Ability::ReviewPerformance => [Role::Owner, Role::Admin, Role::Supervisor],
             Ability::ViewEnrollments => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler, Role::Accountant],
             Ability::ViewBilling, Ability::RecordPayments => [Role::Owner, Role::Admin, Role::Accountant],
             // Prices, tax, regions and voiding invoices: the owner and the accountant (Admin is "◐" for billing).

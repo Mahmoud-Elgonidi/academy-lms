@@ -1,4 +1,4 @@
-{{-- One lesson card (family area). $lesson from FamilyLessonView. --}}
+{{-- One lesson card (family area). $lesson from FamilyLessonView. With $after, other modules add a row under it (the "scheduling::family.lesson-card" hook: the rating). --}}
 @php $l = 'scheduling::family.'; @endphp
 <article class="fl-card" data-status="{{ $lesson['status'] }}" wire:key="fl-{{ $lesson['id'] }}">
     <div class="fl-when">
@@ -32,4 +32,7 @@
             @endif
         @endisset
     </div>
+    @if ($after ?? false)
+        {{ \Filament\Support\Facades\FilamentView::renderHook('scheduling::family.lesson-card', data: ['lesson' => $lesson]) }}
+    @endif
 </article>
