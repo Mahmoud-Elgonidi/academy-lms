@@ -23,8 +23,10 @@ use Modules\SharedKernel\Money\Money;
 /**
  * Demo enrolments through the real actions: hold, enrol (invoice, weekly
  * times, sessions), then each payment state an academy sees: paid, part
- * paid, due, overdue. Ziad started 26 days ago: six lessons taught, one
- * teacher no-show (a makeup lot), and his renewal invoice went out on its own.
+ * paid, due, overdue. Ziad, Yousef and Maryam started 26 days ago (one per
+ * student look: middle school, a child, secondary school): about seven
+ * lessons each, Ziad's teacher missed one (a makeup lot) and Maryam missed
+ * one herself; renewal invoices went out on their own.
  */
 class DemoEnrollmentsSeeder extends Seeder
 {
@@ -46,7 +48,7 @@ class DemoEnrollmentsSeeder extends Seeder
         $regions = collect($billing->regions())->keyBy(fn (RegionOption $r) => $r->currency);
         $realNow = CarbonImmutable::now();
 
-        $enrol = function (string $teacher, string $student, string $subjectName, array $times, int $minutes, string $currency, CarbonImmutable $from) use ($user, $subject, $hold, $enroll, $billing, $regions, $admin) {
+        $enrol = function (string $teacher, string $student, string $subjectName, array $times, int $minutes, string $currency, CarbonImmutable $from) use ($user, $subject, $hold, $enroll, $billing, $regions, $admin, $realNow) {
             $teacherId = $user($teacher);
             $tz = DB::table('users')->where('id', $teacherId)->value('timezone');
             $occurrences = [];
@@ -57,6 +59,8 @@ class DemoEnrollmentsSeeder extends Seeder
                     $occurrences[] = CarbonImmutable::parse($day->toDateString().' '.$clock, $tz)->getTimestamp();
                 }
             }
+            // Keep clear of the live board's lessons around the real now.
+            $occurrences = array_values(array_filter($occurrences, fn (int $ts) => abs($ts - $realNow->getTimestamp()) > 3 * 3600));
             $plan = collect($billing->planOptions($minutes))->first(fn (PlanOption $p) => $p->sessionMinutes === $minutes && $p->sessionsPerWeek === count($times));
             $payer = DB::table('users')->where('email', "{$student}.guardian@demo.test")->value('id') ?? $user($student);
             $batch = $hold->handle($teacherId, $user($student), $occurrences, $minutes, $admin);
@@ -64,32 +68,38 @@ class DemoEnrollmentsSeeder extends Seeder
             return $enroll->handle($batch, $user($student), $subject($subjectName), new EnrollmentTerms($plan->id, $payer, $regions[$currency]->id), $admin);
         };
 
-        // Ziad, from 26 days ago (the shift schedules have been in force for a month).
-        CarbonImmutable::setTestNow($realNow->subDays(26));
-        $ziad = $enrol('khaled', 'ziad', 'Arabic grammar', [[7, '18:00'], [3, '18:00']], 45, 'SAR', CarbonImmutable::now()->addDay());
-        $billing->recordPayment($ziad->invoice->id, 'bank_transfer', $ziad->invoice->total, 'SA-88213', CarbonImmutable::now(), $accountant);
+        // A month of history (the shift schedules have been in force for a month): enrolled 26 days ago,
+        // paid, then each past lesson as it happened; a teacher who never came, or a student who did not.
+        $history = function (string $teacher, string $student, string $subjectName, array $times, int $minutes, string $currency, string $reference, ?int $teacherMissed = null, ?int $studentMissed = null) use ($enrol, $user, $billing, $accountant, $join, $deadlines, $materialize, $fund, $realNow) {
+            CarbonImmutable::setTestNow($realNow->subDays(26));
+            $booked = $enrol($teacher, $student, $subjectName, $times, $minutes, $currency, CarbonImmutable::now()->addDay());
+            $billing->recordPayment($booked->invoice->id, $currency === 'SAR' ? 'bank_transfer' : 'card_terminal', $booked->invoice->total, $reference, CarbonImmutable::now(), $accountant);
 
-        $past = Session::query()->where('enrollment_id', $ziad->enrollmentId)->where('ends_at', '<', $realNow->subHours(6))->orderBy('starts_at')->with('participants')->get()->take(7);
-        foreach ($past->values() as $i => $session) {
-            CarbonImmutable::setTestNow($session->starts_at->addMinute());
-            if ($i !== 2) {
-                $join->handle($session, $session->teacher_id);
+            $past = Session::query()->where('enrollment_id', $booked->enrollmentId)->where('ends_at', '<', $realNow->subHours(6))->orderBy('starts_at')->with('participants')->get()->take(7);
+            foreach ($past->values() as $i => $session) {
+                CarbonImmutable::setTestNow($session->starts_at->addMinute());
+                if ($i !== $teacherMissed) {
+                    $join->handle($session, $session->teacher_id);
+                }
+                if ($i !== $studentMissed) {
+                    $join->handle($session->refresh(), $user($student));
+                }
+                CarbonImmutable::setTestNow($i === $teacherMissed ? $session->starts_at->addMinutes(10) : $session->ends_at->addMinutes(11));
+                $deadlines->handle();
             }
-            $join->handle($session->refresh(), $user('ziad'));
-            CarbonImmutable::setTestNow($i === 2 ? $session->starts_at->addMinutes(10) : $session->ends_at->addMinutes(11));
-            $deadlines->handle();
-        }
-        CarbonImmutable::setTestNow();
-        $materialize->handle([$ziad->enrollmentId]);
-        $fund->handle($ziad->enrollmentId);
+            CarbonImmutable::setTestNow();
+            $materialize->handle([$booked->enrollmentId]);
+            $fund->handle($booked->enrollmentId);
+        };
+        $history('khaled', 'ziad', 'Arabic grammar', [[7, '18:00'], [3, '18:00']], 45, 'SAR', 'SA-88213', teacherMissed: 2);
+        $history('nour', 'yousef', 'Quran memorisation', [[6, '18:00'], [4, '19:00']], 30, 'GBP', 'TRX-40417');
+        $history('sara', 'maryam', 'Tajweed', [[2, '17:00'], [7, '19:00']], 45, 'SAR', 'SA-90542', studentMissed: 3);
 
         // Everyone else starts the day after tomorrow, once a week.
         $from = $realNow->addDays(2);
         $series = [
-            ['sara', 'maryam', 'Tajweed', 2, '17:00', 45, 'SAR', 'paid'],
             ['sara', 'adam', 'Arabic', 2, '19:00', 45, 'GBP', 'paid'],
             ['sara', 'hamza', 'Quran memorisation', 7, '20:00', 30, 'AED', 'overdue'],
-            ['nour', 'yousef', 'Quran memorisation', 6, '18:00', 30, 'GBP', 'paid'],
             ['mahmoud', 'omar', 'Tajweed', 1, '19:00', 45, 'SAR', 'due'],
             ['mona', 'salma', 'Arabic', 7, '19:00', 45, 'USD', 'partial'],
             ['ahmed', 'layan', 'English', 2, '20:00', 30, 'SAR', 'paid'],

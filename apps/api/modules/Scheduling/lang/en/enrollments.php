@@ -1,6 +1,28 @@
 <?php
 
 return [
+    'look' => [
+        'action' => 'Age & look',
+        'title' => 'The student\'s age and the look of their area',
+        'hint' => 'The student\'s web area (/my) changes its look and tone with their age, from the birth date, unless you choose one.',
+        'birth_date' => 'Birth date',
+        'stage' => 'Look',
+        'stages' => [
+            'auto' => 'By age',
+            'kids' => 'Kids',
+            'middle' => 'Middle school',
+            'teen' => 'Secondary school',
+            'classic' => 'Classic (adults)',
+        ],
+        'hints' => [
+            'auto' => 'Under 12 kids, 12 to 14 middle school, 15 to 18 secondary, older classic.',
+            'kids' => 'A journey on a map with stars, simple words and big buttons.',
+            'middle' => 'Levels, points, a lesson streak and badges.',
+            'teen' => 'A plan with goals, dates and pace; no cartoons.',
+            'classic' => 'The plain look.',
+        ],
+        'done' => 'Saved. The student\'s area now looks: :stage.',
+    ],
     'nav' => 'Enrolled students',
     'model' => 'Enrollment',
     'open' => 'Student account',

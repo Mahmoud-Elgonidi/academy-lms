@@ -21,6 +21,11 @@ final class FamilyBilling extends Page
 
     protected static ?string $slug = 'account';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return FamilyAccount::shown();
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('billing::family.nav');

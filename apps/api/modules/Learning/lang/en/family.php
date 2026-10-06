@@ -2,7 +2,7 @@
 
 return [
     'progress' => [
-        'nav' => 'Progress',
+        'nav' => ['classic' => 'Progress', 'kids' => 'My map', 'middle' => 'Worlds', 'teen' => 'Plan'],
         'title' => 'Progress on the programme',
         'with' => 'with :teacher',
         'lessons' => 'Lessons',
@@ -10,13 +10,13 @@ return [
         'none' => 'No subjects yet.',
     ],
     'reports' => [
-        'nav' => 'Reports',
+        'nav' => ['classic' => 'Reports', 'kids' => 'Reports', 'middle' => 'My reports', 'teen' => 'Reports'],
         'title' => 'Lesson reports',
         'by' => 'by :teacher',
         'none' => 'No reports yet. One arrives after every lesson.',
     ],
     'homework' => [
-        'nav' => 'Homework',
+        'nav' => ['classic' => 'Homework', 'kids' => 'My homework', 'middle' => 'My homework', 'teen' => 'Homework'],
         'title' => 'Homework',
         'from' => 'from :teacher',
         'due' => 'Due :date',

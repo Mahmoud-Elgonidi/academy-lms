@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'nav' => 'الحصص',
+    'nav' => ['classic' => 'الحصص', 'kids' => 'حصصي', 'middle' => 'حصصي', 'teen' => 'الحصص'],
     'title' => 'الحصص',
     'subtitle' => 'المواعيد بتوقيتك (:zone).',
     'upcoming' => 'الحصص الجاية',

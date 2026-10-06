@@ -9,13 +9,20 @@ use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Learning\Queries\RoadmapQuery;
 use Modules\People\Contracts\DTOs\Learner;
 use Modules\People\Contracts\FamilyView;
+use Modules\People\Contracts\LearnerStage;
 
-/** What the family pages share: the learner on screen, their courses, and dates on the viewer's clock. */
+/** What the family pages share: the learner on screen, the look of the area, their courses, and dates on the viewer's clock. */
 final class FamilyLearning
 {
     public static function learner(): ?Learner
     {
         return app(FamilyView::class)->current((string) auth()->id());
+    }
+
+    /** The viewer's look: a student's own stage, the classic one for a guardian. */
+    public static function stage(): LearnerStage
+    {
+        return app(FamilyView::class)->stage((string) auth()->id());
     }
 
     /** @return list<array{id: string, subject: ?string, teacher: ?string, map: ?array<string, mixed>}> */

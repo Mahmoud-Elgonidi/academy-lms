@@ -6,9 +6,10 @@ use Carbon\CarbonImmutable;
 use Filament\Widgets\Widget;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\SessionReport;
+use Modules\People\Contracts\LearnerStage;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
-/** Home: progress on each course, homework to do, and the teacher's last words. */
+/** Home, for guardians and adults: progress on each course, homework to do, and the teacher's last words. Students with a stage get JourneyWidget. */
 final class LearningHomeWidget extends Widget
 {
     protected string $view = 'learning::filament.family.home';
@@ -16,6 +17,11 @@ final class LearningHomeWidget extends Widget
     protected static ?int $sort = 20;
 
     protected int|string|array $columnSpan = 'full';
+
+    public static function canView(): bool
+    {
+        return FamilyLearning::stage() === LearnerStage::Classic;
+    }
 
     /** @return array<string, mixed> */
     public function data(): array

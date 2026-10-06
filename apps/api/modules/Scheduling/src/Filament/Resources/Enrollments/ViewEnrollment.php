@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
@@ -18,6 +19,8 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Modules\People\Contracts\LearnerStage;
+use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Actions\BookMakeup;
 use Modules\Scheduling\Actions\CancelSession;
 use Modules\Scheduling\Actions\ReassignTeacher;
@@ -100,6 +103,34 @@ final class ViewEnrollment extends ViewRecord
 
                     return __('scheduling::enrollments.reassign.done', ['moved' => $result['moved']])
                         .($result['retimed'] > 0 ? ' '.__('scheduling::enrollments.reassign.retimed', ['n' => $result['retimed']]) : '');
+                })),
+            // The student's age, which picks the look of their own area (/my): kids, middle school, teens.
+            Action::make('studentLook')
+                ->label(__('scheduling::enrollments.look.action'))
+                ->icon(Heroicon::OutlinedSparkles)
+                ->color('gray')
+                ->visible(fn () => Gate::allows(Ability::ManageSessions->value))
+                ->modalHeading(__('scheduling::enrollments.look.title'))
+                ->modalDescription(__('scheduling::enrollments.look.hint'))
+                ->fillForm(function () {
+                    $profile = app(PeopleApi::class)->studentProfile($this->record->student_id);
+
+                    return ['birth_date' => $profile->birthDate?->toDateString(), 'stage' => $profile->chosenStage?->value ?? 'auto'];
+                })
+                ->schema([
+                    DatePicker::make('birth_date')->label(__('scheduling::enrollments.look.birth_date'))->native(false)->maxDate(CarbonImmutable::now()->toDateString()),
+                    Radio::make('stage')->label(__('scheduling::enrollments.look.stage'))->required()
+                        ->options(collect(['auto', ...array_map(fn (LearnerStage $s) => $s->value, LearnerStage::cases())])->mapWithKeys(fn (string $s) => [$s => __('scheduling::enrollments.look.stages.'.$s)])->all())
+                        ->descriptions(collect(['auto', ...array_map(fn (LearnerStage $s) => $s->value, LearnerStage::cases())])->mapWithKeys(fn (string $s) => [$s => __('scheduling::enrollments.look.hints.'.$s)])->all()),
+                ])
+                ->action(fn (array $data, Action $action) => $this->attempt($action, function () use ($data) {
+                    app(PeopleApi::class)->saveStudentProfile(
+                        $this->record->student_id,
+                        filled($data['birth_date'] ?? null) ? CarbonImmutable::parse($data['birth_date']) : null,
+                        $data['stage'] === 'auto' ? null : LearnerStage::from($data['stage']),
+                    );
+
+                    return __('scheduling::enrollments.look.done', ['stage' => __('scheduling::enrollments.look.stages.'.app(PeopleApi::class)->studentProfile($this->record->student_id)->stage->value)]);
                 })),
         ];
     }

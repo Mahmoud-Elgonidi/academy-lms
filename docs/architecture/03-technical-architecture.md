@@ -212,6 +212,7 @@ attendance_segments(session_id, user_id, period tstzrange, source webhook|reconc
 teacher_profiles(user_id, gender, dialect, employment_type, max_weekly_min, max_daily_sessions,
                  accepts_new, accepts_trials, age_groups[], tier, rate_card_id, status)
 guardian_student(guardian_id, student_id, relationship, is_primary, can_manage, receives_reports)
+student_profiles(user_id PK, birth_date, stage kids|middle|teen|classic NULL)   -- شكل حساب الطالب: من السن، أو اللي الأكاديمية اختارته
 session_reports(session_id UNIQUE, template_version_id, payload jsonb, engagement, overall, status,
                 due_at, submitted_at)
 report_items_covered(report_id, node_id, outcome, score, range_from, range_to, mistakes)

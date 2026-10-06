@@ -5,6 +5,8 @@ namespace Modules\People\Family;
 use Illuminate\Support\Facades\DB;
 use Modules\People\Contracts\DTOs\Learner;
 use Modules\People\Contracts\FamilyView;
+use Modules\People\Contracts\LearnerStage;
+use Modules\People\Contracts\PeopleApi;
 use Modules\People\Models\GuardianStudent;
 
 /** FamilyView with the choice kept in the browser session. */
@@ -14,6 +16,9 @@ final class SessionFamilyView implements FamilyView
 
     /** @var array<string, list<Learner>> */
     private array $cache = [];
+
+    /** @var array<string, LearnerStage> */
+    private array $stages = [];
 
     public function learners(string $viewerId): array
     {
@@ -51,6 +56,13 @@ final class SessionFamilyView implements FamilyView
         if ($this->follows($viewerId, $learnerId)) {
             session([self::SESSION_KEY => $learnerId]);
         }
+    }
+
+    public function stage(string $viewerId): LearnerStage
+    {
+        $self = array_filter($this->learners($viewerId), fn (Learner $l) => $l->isSelf);
+
+        return $this->stages[$viewerId] ??= $self === [] ? LearnerStage::Classic : app(PeopleApi::class)->studentProfile($viewerId)->stage;
     }
 
     public function follows(string $viewerId, string $learnerId): bool

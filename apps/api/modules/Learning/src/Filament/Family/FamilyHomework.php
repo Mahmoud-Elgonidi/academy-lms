@@ -40,7 +40,7 @@ final class FamilyHomework extends Page
 
     public static function getNavigationLabel(): string
     {
-        return __('learning::family.homework.nav');
+        return __('learning::family.homework.nav.'.FamilyLearning::stage()->value);
     }
 
     public static function getNavigationBadge(): ?string

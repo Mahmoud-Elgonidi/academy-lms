@@ -13,6 +13,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Livewire\Attributes\Computed;
 use Modules\People\Contracts\FamilyView;
+use Modules\People\Contracts\LearnerStage;
 use Modules\Scheduling\Actions\CancelSession;
 use Modules\Scheduling\Actions\Policy\PolicyDecider;
 use Modules\Scheduling\Domain\Enums\ParticipantRole;
@@ -37,7 +38,7 @@ final class FamilyLessons extends Page
 
     public static function getNavigationLabel(): string
     {
-        return __('scheduling::family.nav');
+        return __('scheduling::family.nav.'.app(FamilyView::class)->stage((string) auth()->id())->value);
     }
 
     public function getTitle(): string|Htmlable
@@ -72,7 +73,8 @@ final class FamilyLessons extends Page
     /**
      * Cancelling a lesson, under the academy's policy: what happens to the
      * lesson is said before it is confirmed (back to the balance, or counted).
-     * Moving it to another time goes through the academy for now.
+     * Moving it to another time goes through the academy for now. A child
+     * does not cancel on their own: their guardian does.
      */
     public function cancelAction(): Action
     {
@@ -80,6 +82,7 @@ final class FamilyLessons extends Page
 
         return Action::make('cancel')
             ->label(__($l.'button'))->link()->color('danger')->size('sm')
+            ->visible(fn () => app(FamilyView::class)->stage((string) auth()->id()) !== LearnerStage::Kids)
             ->modalHeading(__($l.'heading'))
             ->modalDescription(fn (array $arguments) => $this->outcome($this->ownLesson($arguments)))
             ->schema([

@@ -21,4 +21,7 @@ interface FamilyView
     public function choose(string $viewerId, string $learnerId): void;
 
     public function follows(string $viewerId, string $learnerId): bool;
+
+    /** The look of the viewer's area: their own stage when they are a student; the classic look for a guardian. */
+    public function stage(string $viewerId): LearnerStage;
 }

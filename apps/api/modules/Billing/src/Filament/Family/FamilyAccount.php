@@ -9,6 +9,8 @@ use Modules\Billing\Models\Invoice;
 use Modules\Credits\Contracts\CreditsApi;
 use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\People\Contracts\FamilyView;
+use Modules\People\Contracts\LearnerStage;
 use Modules\SharedKernel\Money\Money;
 
 /** The family's money in plain words: lessons left on each course, and the invoices this person pays. */
@@ -57,6 +59,18 @@ final class FamilyAccount
             'due' => $i->due_at ? CarbonImmutable::parse($i->due_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F Y') : null,
             'paid' => $i->paid_at ? CarbonImmutable::parse($i->paid_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F Y') : null,
         ])->all();
+    }
+
+    /**
+     * Whether money is shown to the person signed in: guardians and adults
+     * (the classic look), and a student only when they pay for themselves.
+     */
+    public static function shown(): bool
+    {
+        $viewer = (string) auth()->id();
+
+        return app(FamilyView::class)->stage($viewer) === LearnerStage::Classic
+            || DB::table('billing_accounts')->where('payer_id', $viewer)->exists();
     }
 
     /** What this person still owes, per currency, formatted. */

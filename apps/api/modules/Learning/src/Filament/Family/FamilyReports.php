@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Modules\Learning\Models\ReportItem;
 use Modules\Learning\Models\SessionReport;
+use Modules\People\Contracts\LearnerStage;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /** What the teacher wrote after each lesson, for the family: never the internal notes. */
@@ -23,9 +24,15 @@ final class FamilyReports extends Page
 
     protected static ?string $slug = 'reports';
 
+    /** Children leave the reports to their guardian; their home tells them how they are doing. */
+    public static function shouldRegisterNavigation(): bool
+    {
+        return FamilyLearning::stage() !== LearnerStage::Kids;
+    }
+
     public static function getNavigationLabel(): string
     {
-        return __('learning::family.reports.nav');
+        return __('learning::family.reports.nav.'.FamilyLearning::stage()->value);
     }
 
     public function getTitle(): string|Htmlable

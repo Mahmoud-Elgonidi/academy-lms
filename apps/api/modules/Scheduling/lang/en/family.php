@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'nav' => 'Lessons',
+    'nav' => ['classic' => 'Lessons', 'kids' => 'My lessons', 'middle' => 'My lessons', 'teen' => 'Lessons'],
     'title' => 'Lessons',
     'subtitle' => 'Times are on your clock (:zone).',
     'upcoming' => 'Coming up',

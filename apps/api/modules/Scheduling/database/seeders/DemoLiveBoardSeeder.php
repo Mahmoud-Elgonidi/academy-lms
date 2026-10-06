@@ -67,6 +67,11 @@ final class DemoLiveBoardSeeder extends Seeder
             $people->linkGuardian($user("{$key}.guardian@demo.test", $guardianName, Role::Guardian, $tz, $guardianPhone), $students[$key], $relationship);
         }
 
+        // Ages, so each student's own area takes its look (children, middle school, secondary, adults).
+        foreach (['omar' => 11, 'yousef' => 9, 'maryam' => 16, 'hamza' => 8, 'adam' => 14, 'layan' => 17, 'salma' => 22, 'zain' => 10, 'ziad' => 13, 'rana' => 12] as $key => $age) {
+            $people->saveStudentProfile($students[$key], $now->subYears($age)->subMonths(4)->startOfDay(), null);
+        }
+
         $book = fn (string $teacher, string $student, string $subject, int $startOffset, int $minutes, string $type = 'regular', string $funding = 'funded') => $schedule->handle(new NewSession(
             teacherId: $teachers[$teacher], studentId: $students[$student], subjectId: $subjects[$subject],
             startsAt: $now->addMinutes($startOffset), durationMin: $minutes, anchorTimezone: 'Africa/Cairo', type: $type, funding: $funding,
