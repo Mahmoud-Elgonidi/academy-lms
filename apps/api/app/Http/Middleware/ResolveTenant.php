@@ -22,6 +22,8 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  *  2. Otherwise the host ({slug}.{platform domain} or a verified custom domain),
  *     or the X-Academy header (slug) that the shared mobile app sends.
  *  3. In local development only, PLATFORM_DEV_ACADEMY (so plain localhost works).
+ *  4. With nothing else to go on, PLATFORM_HOME_ACADEMY on the platform's own
+ *     host, in any environment (a server without DNS for academy subdomains).
  *
  * A token for academy A sent to academy B's host or header is refused (403).
  */
@@ -39,6 +41,8 @@ final class ResolveTenant
     {
         $fromToken = $this->fromToken($request);
         $fromRequest = $this->fromHost($request) ?? $this->fromHeader($request) ?? $this->devAcademy();
+        // Only without a token: a token for another academy still reaches its own on this host.
+        $fromRequest ??= $fromToken === null ? $this->homeAcademy($request) : null;
 
         if ($fromToken !== null && $fromRequest !== null && $fromToken->id !== $fromRequest->id) {
             throw new AccessDeniedHttpException('This token belongs to a different academy.');
@@ -88,6 +92,14 @@ final class ResolveTenant
         $slug = config('platform.dev_academy');
 
         return app()->environment('local') && is_string($slug) && $slug !== '' ? $this->directory->bySlug($slug) : null;
+    }
+
+    private function homeAcademy(Request $request): ?TenantRef
+    {
+        $slug = config('platform.home_academy');
+        $onPlatformHost = strtolower($request->getHost()) === strtolower((string) config('platform.domain'));
+
+        return $onPlatformHost && is_string($slug) && $slug !== '' ? $this->directory->bySlug($slug) : null;
     }
 
     private function fromHeader(Request $request): ?TenantRef

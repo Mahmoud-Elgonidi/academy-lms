@@ -116,3 +116,21 @@ it('uses the development academy on plain localhost, in local development only',
     app()->detectEnvironment(fn () => 'local');
     $this->get('http://localhost/admin/login')->assertOk();
 });
+
+it('serves the home academy on the platform\'s own host in any environment, when nothing names another', function () {
+    $this->createAcademy(['slug' => 'demo']);
+    $this->get('http://lms.test/admin/login')->assertNotFound();
+
+    config(['platform.home_academy' => 'demo']);
+    $this->get('http://lms.test/admin/login')->assertOk();
+    $this->get('http://lms.test/teach/login')->assertOk();
+    $this->get('http://lms.test/my/login')->assertOk();
+    $this->get('http://localhost/admin/login')->assertNotFound();
+
+    // A token alone still decides: it reaches its own academy on the platform's host.
+    $token = login('alpha')->json('token');
+    $this->flushHeaders();
+    $this->withToken($token)->getJson('http://lms.test/api/v1/me')
+        ->assertOk()
+        ->assertJsonPath('data.academy.slug', 'alpha');
+});

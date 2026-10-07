@@ -9,6 +9,11 @@ return [
     // Ignored outside APP_ENV=local.
     'dev_academy' => env('PLATFORM_DEV_ACADEMY'),
 
+    // One academy on the platform's own host ({domain}/admin, /teach, /my),
+    // for a server whose academy subdomains have no DNS yet. Any environment;
+    // only for requests that name no academy (no token, header or subdomain).
+    'home_academy' => env('PLATFORM_HOME_ACADEMY'),
+
     // The platform team's console: its own host in production (console.{domain}),
     // APP_URL/console when this is empty.
     'console_url' => env('PLATFORM_CONSOLE_URL'),

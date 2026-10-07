@@ -27,7 +27,7 @@ final class EloquentTenantDirectory implements TenantDirectory
     public function baseUrl(TenantRef $tenant): string
     {
         $app = parse_url((string) config('app.url')) ?: [];
-        if (config('platform.dev_academy') === $tenant->slug) {
+        if (config('platform.dev_academy') === $tenant->slug || config('platform.home_academy') === $tenant->slug) {
             return rtrim((string) config('app.url'), '/');
         }
 

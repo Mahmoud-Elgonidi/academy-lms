@@ -25,6 +25,14 @@ it('finds an academy by a verified custom domain only', function () {
     expect($this->directory->byHost('learn.noor.sa')?->id)->toBe($this->academy->id);
 });
 
+it('links the home academy to the platform\'s own address and the others to their subdomains', function () {
+    $other = Academy::factory()->create(['slug' => 'huda']);
+    config(['app.url' => 'https://lms.test', 'platform.home_academy' => 'noor']);
+
+    expect($this->directory->baseUrl($this->academy->toTenantRef()))->toBe('https://lms.test')
+        ->and($this->directory->baseUrl($other->toTenantRef()))->toBe('https://huda.lms.test');
+});
+
 it('looks academies up by id without choking on bad input', function () {
     expect($this->directory->byId($this->academy->id)?->slug)->toBe('noor')
         ->and($this->directory->byId('not-a-uuid'))->toBeNull();
