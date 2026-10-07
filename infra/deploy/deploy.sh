@@ -225,12 +225,23 @@ dk image ls "$repo" --format '{{.Repository}}:{{.Tag}}' | while read -r ref; do
 done
 dk logout "${IMAGE%%/*}" >/dev/null 2>&1 || true
 
+# Through the published port, from the server itself (the check above ran inside the container).
+if command -v curl >/dev/null 2>&1; then
+    curl -fsS -o /dev/null --max-time 10 "http://127.0.0.1:$HTTP_PORT/up" \
+        || fail "The app answers inside its container but not on 127.0.0.1:$HTTP_PORT."
+fi
 say "Done: $IMAGE answers on 127.0.0.1:$HTTP_PORT"
-edge="$(curl -s -o /dev/null -w '%{http_code}' -H "Host: $DOMAIN" "http://127.0.0.1/up" 2>/dev/null || true)"
-case "$edge" in
-    200|301|302|308) echo "    https://$DOMAIN reaches it (nginx answered $edge)." ;;
-    *) echo "    The server's web server does not pass $DOMAIN here yet: run setup-nginx.sh once (README.md)." ;;
-esac
+
+# Is it the app that answers for the domain, or still something else? Its own root
+# says {"app":"<APP_NAME>",...}; any other answer (a redirect, another site) is not it.
+marker="\"app\":\"$(setting APP_NAME | tr -d '"')\""
+edge="$( { curl -sk --max-time 5 --resolve "$DOMAIN:443:127.0.0.1" "https://$DOMAIN/"; \
+           curl -s --max-time 5 -H "Host: $DOMAIN" "http://127.0.0.1/"; } 2>/dev/null || true)"
+if grep -qF "$marker" <<<"$edge"; then
+    echo "    https://$DOMAIN reaches it through the server's web server."
+else
+    echo "    The server's web server does not pass $DOMAIN to it yet: run setup-nginx.sh once, with sudo (README.md)."
+fi
 echo "    Academies: https://<slug>.$DOMAIN/admin · console: https://$DOMAIN/console"
 [ "$DEMO_DATA" = 1 ] && echo "    Demo sign-in: owner@demo.test; the password is DEMO_PASSWORD in $HERE/.env"
 exit 0
