@@ -2,12 +2,25 @@
 #
 # The production image (infra/deploy): one image for the whole app; the
 # command picks the part (infra/deploy/entrypoint.sh): web (FrankenPHP serving
-# public/, with Reverb's browser connections passed on under /app/), reverb,
+# public/, with Reverb's browser connections passed on under /app/ and the
+# portal's pages to the portal), portal (apps/web, Next's own server), reverb,
 # worker, scheduler, relay, and the one-off migrate and seed-demo.
 #
 # Built from the repository root:
 #   docker build -f apps/api/Dockerfile.prod -t academy-lms .
 # The development image is ./Dockerfile (docker compose up at the root).
+
+# The portal (apps/web): Next's standalone server, built here; the final image
+# takes it and Node's binary from this stage.
+FROM node:22-bookworm-slim AS portal
+WORKDIR /web
+COPY apps/web/package.json apps/web/package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY apps/web/ ./
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build \
+    && cp -r .next/static .next/standalone/.next/static
+
 FROM dunglas/frankenphp:1-php8.3-bookworm
 
 RUN install-php-extensions pdo_pgsql pgsql intl zip bcmath pcntl redis opcache \
@@ -31,6 +44,8 @@ RUN composer install --no-dev --no-interaction --prefer-dist --no-progress --no-
     && rm -rf /root/.composer/cache
 
 COPY apps/api/ ./
+COPY --from=portal /usr/local/bin/node /usr/local/bin/node
+COPY --from=portal /web/.next/standalone /portal
 COPY infra/deploy/Caddyfile /etc/academy/Caddyfile
 COPY --chmod=755 infra/deploy/entrypoint.sh /usr/local/bin/academy
 
@@ -44,7 +59,8 @@ RUN composer dump-autoload --no-dev --optimize --no-interaction \
     && ln -sfn /app/storage/app/public public/storage \
     && rm -f bootstrap/cache/*.php .env \
     && chown -R www-data:www-data storage bootstrap/cache /data/caddy /config/caddy \
-    && (setcap -r /usr/local/bin/frankenphp || true)
+    && (setcap -r /usr/local/bin/frankenphp || true) \
+    && node --version >/dev/null
 
 USER www-data
 EXPOSE 8080

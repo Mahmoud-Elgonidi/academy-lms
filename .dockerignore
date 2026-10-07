@@ -1,10 +1,14 @@
 # The production image (apps/api/Dockerfile.prod) is built from the repository
-# root; it needs apps/api and infra/deploy only.
+# root; it needs apps/api, apps/web (the portal) and infra/deploy only.
 .git
 .github
 **/node_modules
 apps/mobile
-apps/web
+apps/web/.next
+apps/web/test-results
+apps/web/playwright-report
+apps/web/e2e
+apps/web/.env*
 docs
 packages
 apps/api/vendor

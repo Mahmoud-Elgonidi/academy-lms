@@ -45,6 +45,25 @@ services:
       resources:
         limits: { memory: "${WEB_MEMORY:-768m}", cpus: "${WEB_CPUS:-1.5}" }
 
+  # The teachers' portal (apps/web): Next's own server. The web part passes it
+  # /ar, /en, /_next and /bff, and it calls the API back through the web part,
+  # so the academy is the host's, as for every other page. It needs none of the
+  # app's settings or secrets.
+  portal:
+    image: ${IMAGE:?deploy.sh sets IMAGE in .env}
+    command: ["portal"]
+    restart: unless-stopped
+    networks: [internal]
+    environment:
+      API_INTERNAL_URL: http://web:8080
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      disable: true
+    logging: *logging
+    deploy:
+      resources:
+        limits: { memory: "${PORTAL_MEMORY:-384m}", cpus: "${PORTAL_CPUS:-0.75}" }
+
   reverb:
     <<: *app
     command: ["reverb"]

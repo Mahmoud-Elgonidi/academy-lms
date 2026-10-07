@@ -1,0 +1,135 @@
+name: web
+
+on:
+  push:
+    branches: [main]
+    paths: ['apps/web/**', 'packages/openapi/**', '.github/workflows/web.yml']
+  pull_request:
+    paths: ['apps/web/**', 'packages/openapi/**', '.github/workflows/web.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - run: npm ci
+
+      # The portal's calls are typed from packages/openapi/openapi.json: a path the API
+      # no longer has fails the typecheck, so the generated types must match the document.
+      - name: API types up to date
+        run: |
+          npm run api:types
+          git diff --exit-code -- src/lib/api/schema.ts || {
+            echo "::error::apps/web/src/lib/api/schema.ts is out of date: run 'npm run api:types' in apps/web and commit it."; exit 1; }
+
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+
+  # The teacher's portal end to end, against the real API with the demo data.
+  e2e:
+    runs-on: ubuntu-latest
+    needs: check
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, pgsql, redis, intl, mbstring, zip
+          coverage: none
+
+      - name: Composer cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: composer-${{ hashFiles('apps/api/composer.lock') }}
+          restore-keys: composer-
+
+      - name: API with the demo data
+        working-directory: apps/api
+        env:
+          PGPASSWORD: postgres
+          COMPOSER_AUTH: '{"github-oauth": {"github.com": "${{ secrets.GITHUB_TOKEN }}"}}'
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          psql -h 127.0.0.1 -U postgres -v ON_ERROR_STOP=1 \
+            -v db=lms -v owner_password=owner -v app_password=app -v platform_password=platform \
+            -f database/setup/roles.sql
+          cp .env.example .env
+          php artisan key:generate
+          # Nothing listens for broadcasts here (no Reverb).
+          sed -i 's/^BROADCAST_CONNECTION=.*/BROADCAST_CONNECTION=log/' .env
+          php artisan migrate --database=pgsql_owner --force
+          php artisan db:seed --force
+          nohup php artisan serve --host=127.0.0.1 --port=8000 > ../../api-serve.log 2>&1 &
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Portal (production build)
+        working-directory: apps/web
+        env:
+          API_INTERNAL_URL: http://127.0.0.1:8000
+          ACADEMY: demo
+        run: |
+          npm ci
+          npm run build
+          nohup npm run start > ../../web-serve.log 2>&1 &
+          npx playwright install --with-deps chromium
+          for i in $(seq 1 30); do curl -fsS -o /dev/null http://127.0.0.1:3000/ar/sign-in && break; sleep 2; done
+
+      - name: End-to-end tests
+        working-directory: apps/web
+        run: npx playwright test
+
+      - name: Logs and report when something failed
+        if: failure()
+        run: |
+          tail -n 80 api-serve.log web-serve.log apps/api/storage/logs/laravel.log 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 7

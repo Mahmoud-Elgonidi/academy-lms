@@ -1,9 +1,10 @@
 # Deploying to a server
 
-Every push to `main` that passes the API checks goes to the server on its own:
-GitHub Actions builds the production image, rehearses the deploy on its own
-machine, pushes the image to GitHub's registry, then runs `deploy.sh` on the
-server over SSH (`.github/workflows/deploy.yml`).
+Every push to `main` that passes the API or web checks goes to the server on its own:
+GitHub Actions builds the production image (the API, the panels and the teachers'
+portal in one image), rehearses the deploy on its own machine, pushes the image to
+GitHub's registry, then runs `deploy.sh` on the server over SSH
+(`.github/workflows/deploy.yml`).
 
 The LMS is built to share a server with other projects without touching them:
 
@@ -12,7 +13,7 @@ The LMS is built to share a server with other projects without touching them:
 | Files | one folder, `~/academy-lms`, owned by the deploy user (`.env` and `postgres.env` readable by it only) |
 | Containers | the Docker project `academy-lms`: its own containers, network (`academy-lms_internal`) and volumes; `deploy.sh` only ever runs `docker compose -p academy-lms` and removes only its own older images |
 | Network | one port, on `127.0.0.1` only (the first free one from 18080); Postgres, Redis and Reverb are not published at all |
-| Resources | memory and CPU limits on every container (`WEB_MEMORY`, `DB_MEMORY`, ... in `.env`), and logs that rotate (3 × 10 MB) |
+| Resources | memory and CPU limits on every container (`WEB_MEMORY`, `PORTAL_MEMORY`, `DB_MEMORY`, ... in `.env`), and logs that rotate (3 × 10 MB) |
 | Web server | one new nginx site for `progma.store` and `*.progma.store`, added once by `setup-nginx.sh`: it stops if any site already mentions the domain, and takes its file out again if `nginx -t` fails |
 | The system | nothing installed or changed: no packages, no Docker settings, no firewall |
 
@@ -64,7 +65,8 @@ and says what is missing.
    wildcard certificate through a DNS challenge (`certbot certonly --manual --preferred-challenges dns
    -d progma.store -d '*.progma.store'`, then point the site at it).
 3. Open `https://demo.progma.store/admin` (or `https://progma.store/admin` with `PLATFORM_HOME_ACADEMY=demo`). The demo accounts (`owner@demo.test`, `khaled@demo.test`, ...) use
-   this server's own password: `grep DEMO_PASSWORD ~/academy-lms/.env`. The platform console is
+   this server's own password: `grep DEMO_PASSWORD ~/academy-lms/.env`. The teachers' portal is
+   `https://demo.progma.store/ar` (or `https://progma.store/ar`); a browser opening the bare address goes there. The platform console is
    `https://progma.store/console` (`admin@platform.test`, same password); its authenticator secret is
    `DEMO_PLATFORM_2FA_SECRET` in `.env`, or print the current code:
    `cd ~/academy-lms && docker compose exec web php artisan platform:code admin@platform.test`.
@@ -76,8 +78,8 @@ WebSocket upgrade headers.
 ## Day to day (in `~/academy-lms`)
 
 ```bash
-docker compose ps                                  # the seven parts: web, reverb, worker, scheduler, relay, postgres, redis
-docker compose logs -f web                         # or worker, scheduler, ...
+docker compose ps                                  # the eight parts: web, portal, reverb, worker, scheduler, relay, postgres, redis
+docker compose logs -f web                         # or portal, worker, scheduler, ...
 docker compose exec web php artisan about
 docker compose exec -T postgres pg_dump -U postgres -Fc lms > lms-$(date +%F).dump   # a backup
 ```
@@ -97,9 +99,9 @@ docker compose exec -T postgres pg_dump -U postgres -Fc lms > lms-$(date +%F).du
 
 | File | What it is |
 |---|---|
-| `../../apps/api/Dockerfile.prod` | the one production image (FrankenPHP, PHP 8.3, no dev packages, runs as `www-data`) |
-| `entrypoint.sh` | what each container runs: `web`, `reverb`, `worker`, `scheduler`, `relay`, `migrate`, `seed-demo` |
-| `Caddyfile` | the web server inside the image: the app, and Reverb under `/app/` |
+| `../../apps/api/Dockerfile.prod` | the one production image (FrankenPHP, PHP 8.3, no dev packages, runs as `www-data`; a Node stage builds the portal, and the image carries its standalone server and Node) |
+| `entrypoint.sh` | what each container runs: `web`, `portal`, `reverb`, `worker`, `scheduler`, `relay`, `migrate`, `seed-demo` |
+| `Caddyfile` | the web server inside the image: the app, Reverb under `/app/`, and the portal (`apps/web`) under `/ar`, `/en`, `/_next` and `/bff`; it trusts the forwarded headers of nginx (private addresses), so the portal knows a page is https |
 | `php.ini` | production PHP settings (opcache, upload size) |
 | `compose.yml` | the stack, with its limits and its one port |
 | `postgres-init.sh` | the LMS roles on a new database (`apps/api/database/setup/roles.sql`) |

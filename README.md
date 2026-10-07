@@ -172,6 +172,27 @@ flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000/api/v1
 
 التفاصيل في [`apps/mobile/README.md`](apps/mobile/README.md).
 
+### جرّب بوابة المدرس على الويب
+
+محتاج Node 22. الـ API لازم يكون شغال (`docker compose up` أو `php artisan serve`):
+
+```bash
+cd apps/web
+npm ci
+ACADEMY=demo API_INTERNAL_URL=http://127.0.0.1:8000 npm run build
+ACADEMY=demo API_INTERNAL_URL=http://127.0.0.1:8000 npm run start
+```
+
+1. افتح http://localhost:3000/ar وادخل بـ `khaled@demo.test` / `password`، أو بكود على نفس الإيميل (الكود في Mailpit أو في `apps/api/storage/logs/laravel.log`).
+2. **النهارده**: حصص اليوم بتوقيتك، والحصة الجاية وزرار الدخول، واللي مستنيك (تقارير، وواجبات تصحّحها، وحصص تجريبية تقيّمها).
+3. **التقارير**: افتح تقرير زياد المتأخر، واختار اللي حصل في كل درس من خطة النهارده، والتركيز والمستوى، وادّي واجب، وابعته.
+4. **تصحيح الواجبات**: شغّل تسجيل زياد من الصفحة، وادّيله درجة وكلمة.
+5. **مواعيدي**: اقترح مواعيد جديدة (مسودة أو ابعتها)، واكتب للأكاديمية. ولو الأكاديمية عدّلت، هتشوف اللي اتضاف واللي اتشال ملوّن.
+6. **الإجازات، وأرباحي، وأدائي، والإشعارات، وطلابي** (ومنهج كل طالب).
+7. **حصة حية**: لما يكون فيه حصة الفصل بتاعها مفتوح، "ادخل الحصة" ← "ادخل الأوضة": الكاميرا والمايك في المتصفح على LiveKit.
+
+الطالب وولي الأمر بيدخلوا من نفس الصفحة، وبيلاقوا لينك لمنطقتهم الحالية (`/my`) لحد ما بوابتهم على الويب تجهز. التفاصيل في [`apps/web/README.md`](apps/web/README.md).
+
 ### جرّب لوحة المنصة والدخول بحساب مستخدم
 
 لوحة فريق المنصة منفصلة عن لوحات الأكاديميات، ولازم فيها تطبيق مصادقة:
@@ -210,9 +231,9 @@ git pull
 
 ## النشر على سيرفر
 
-أي push على `main` بيعدّي اختبارات الـ API بيتنشر لوحده (`.github/workflows/deploy.yml`):
-1. GitHub بيبني صورة الإنتاج.
-2. بيجرّب النشر كله على جهازه: الصفحات، والدخول بالـ API، والاتصال اللحظي.
+أي push على `main` بيعدّي اختبارات الـ API أو الويب بيتنشر لوحده (`.github/workflows/deploy.yml`):
+1. GitHub بيبني صورة الإنتاج (الـ API واللوحات وبوابة الويب في صورة واحدة).
+2. بيجرّب النشر كله على جهازه: الصفحات، والدخول بالـ API، والاتصال اللحظي، وبوابة المدرس بحساب مدرس.
 3. بيرفع الصورة على registry بتاع GitHub.
 4. بيشغّل `infra/deploy/deploy.sh` على السيرفر بـ SSH.
 
@@ -250,7 +271,7 @@ git pull
 | قاعدة البيانات | PostgreSQL مع Row-Level Security |
 | Queues وCache وRealtime | Redis، وHorizon، وReverb |
 | تطبيقات الموبايل | Flutter: تطبيق واحد للطالب وولي الأمر والمدرس |
-| الويب | Next.js: البوابة، والفصل المباشر، والمواقع العامة |
+| الويب | Next.js 16 (App Router) + Tailwind 4 + next-intl: بوابة المدرس والفصل المباشر (✅)، وبوابة الطالب وولي الأمر والمواقع العامة (لسه) |
 | الفيديو | LiveKit |
 
 ## التشغيل السريع
@@ -263,18 +284,17 @@ composer migrate && php artisan db:seed
 composer test
 ```
 
-## الهيكل المخطط للريبو
+## هيكل الريبو
 
 ```text
 apps/
   api/        Laravel: REST API + Filament + workers
   mobile/     Flutter (تطبيق واحد لكل الأكاديميات والأدوار)
-  web/        Next.js
+  web/        Next.js: البوابة (المدرس دلوقتي) والفصل المباشر
 packages/
-  openapi/          عقد الـ API (openapi.json)، والتطبيق بيتختبر عليه
-  api-client-ts/    بيتولّد تلقائيًا
-  design-tokens/
-infra/        terraform/, docker/, runbooks/
+  openapi/          عقد الـ API (openapi.json): التطبيق بيتختبر عليه، والويب بيتولّد منه أنواعه
+  design-tokens/    (مخطط)
+infra/        deploy/ (السيرفر)، وterraform/ وrunbooks/ (مخطط)
 docs/         الوثيقة المعمارية + ADRs
 ```
 

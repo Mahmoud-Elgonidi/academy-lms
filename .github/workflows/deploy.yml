@@ -4,21 +4,23 @@ name: deploy
 #   1. builds the production image (apps/api/Dockerfile.prod);
 #   2. rehearses the deploy on this GitHub machine: infra/deploy/deploy.sh with
 #      the demo data, then the panels, the API sign-in (roles, row-level security
-#      and data together), links on https behind a proxy, and a live WebSocket
-#      connection through the web container;
-#   3. on main, once the api checks pass (or when run by hand from the Actions
+#      and data together), links on https behind a proxy, a live WebSocket
+#      connection through the web container, and the teachers' portal with a
+#      teacher's session;
+#   3. on main, once the api or web checks pass (or when run by hand from the Actions
 #      tab), pushes the image to GitHub's registry and runs deploy.sh on the
 #      server over SSH.
 # A push to another branch that touches the image or the deploy does 1 and 2 only.
 
 on:
+  # The image holds the API and the portal: either one's checks passing on main ships it.
   workflow_run:
-    workflows: [api]
+    workflows: [api, web]
     types: [completed]
     branches: [main]
   push:
     branches-ignore: [main]
-    paths: ['apps/api/Dockerfile.prod', 'infra/deploy/**', '.dockerignore', '.github/workflows/deploy.yml']
+    paths: ['apps/api/Dockerfile.prod', 'apps/web/**', 'infra/deploy/**', '.dockerignore', '.github/workflows/deploy.yml']
   workflow_dispatch:
     inputs:
       demo_data:
@@ -126,9 +128,32 @@ jobs:
           echo "$ws websocket /app/<key>"
           [ "$ws" = 101 ]
 
+          # The portal, through the web container: its page in the academy's name, its own
+          # assets, a redirect to sign in that stays on https, and a teacher's day, which
+          # the portal reads from the API back through the web container.
+          for _ in $(seq 1 30); do
+            [ "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: demo.lms.example' "$base/ar/sign-in")" = 200 ] && break
+            sleep 1
+          done
+          check 302 demo.lms.example / -H 'Accept: text/html'
+          check 200 demo.lms.example /ar/sign-in
+          grep -q 'أكاديمية النور' /tmp/body || { echo "the portal's sign-in page does not name the academy"; exit 1; }
+          asset="$( (grep -oE '/_next/static/[^"]+\.(css|js)' /tmp/body || true) | head -n 1)"
+          [ -n "$asset" ] || { echo "no portal asset on the sign-in page"; exit 1; }
+          check 200 demo.lms.example "$asset"
+          check 307 demo.lms.example /ar/teach -H 'X-Forwarded-Proto: https'
+          location="$(curl -s -o /dev/null -w '%{redirect_url}' -H 'Host: demo.lms.example' -H 'X-Forwarded-Proto: https' "$base/ar/teach")"
+          echo "-> $location"
+          [ "$location" = "https://demo.lms.example/ar/sign-in?next=%2Far%2Fteach" ] || { echo "the portal's redirect is not on https"; exit 1; }
+          check 200 demo.lms.example /api/v1/auth/login -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' \
+            --data "{\"login\":\"khaled@demo.test\",\"password\":\"$(setting DEMO_PASSWORD)\",\"device_name\":\"rehearsal\"}"
+          teacher="$(python3 -c 'import json; print(json.load(open("/tmp/body"))["token"])')"
+          check 200 demo.lms.example /ar/teach -H "Cookie: lms_session=$teacher"
+          grep -q 'خالد' /tmp/body || { echo "the portal does not show the teacher's day"; exit 1; }
+
           # Every part of the stack is up, and only the web port is published, on 127.0.0.1.
           docker compose -p academy-lms -f "$dir/compose.yml" ps
-          [ "$(docker compose -p academy-lms -f "$dir/compose.yml" ps --status running -q | wc -l)" = 7 ]
+          [ "$(docker compose -p academy-lms -f "$dir/compose.yml" ps --status running -q | wc -l)" = 8 ]
           # Only web and postgres have a health check (the image's own, on Caddy's admin port, is off).
           checked="$(docker ps --filter label=com.docker.compose.project=academy-lms --format '{{.Names}} {{.Status}}' | grep -c 'health' || true)"
           [ "$checked" = 2 ] || { echo "expected 2 containers with a health check, found $checked"; exit 1; }

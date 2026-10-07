@@ -1,0 +1,88 @@
+@import 'tailwindcss';
+
+/*
+ * The academy's look: its colours arrive as --brand, --attention, --danger,
+ * --info and --neutral on <html> (from GET /branding), and every screen uses
+ * these tokens, never a hard-coded brand colour. Tints are mixed from them.
+ */
+@theme {
+  --color-brand: var(--brand);
+  --color-brand-strong: color-mix(in oklab, var(--brand) 82%, black);
+  --color-brand-soft: color-mix(in oklab, var(--brand) 12%, white);
+  --color-brand-line: color-mix(in oklab, var(--brand) 30%, white);
+  --color-attention: var(--attention);
+  --color-attention-soft: color-mix(in oklab, var(--attention) 14%, white);
+  --color-danger: var(--danger);
+  --color-danger-soft: color-mix(in oklab, var(--danger) 10%, white);
+  --color-info: var(--info);
+  --color-info-soft: color-mix(in oklab, var(--info) 12%, white);
+  --color-ink: color-mix(in oklab, var(--neutral) 30%, #1c1917);
+  --color-muted: var(--neutral);
+  --color-line: color-mix(in oklab, var(--neutral) 18%, white);
+  --color-paper: color-mix(in oklab, var(--neutral) 4%, white);
+  --radius-card: var(--radius-lg);
+  --radius-control: var(--radius-md);
+  --font-sans: var(--font-body), var(--font-plex-latin), var(--font-plex-arabic), system-ui, sans-serif;
+  --font-heading: var(--font-head), var(--font-plex-latin), var(--font-plex-arabic), system-ui, sans-serif;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--color-paper);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-heading);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* Motion: things come in gently, and only when the person allows motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .appear {
+    animation: appear 380ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+  .stagger > * {
+    animation: appear 380ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+  .stagger > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger > *:nth-child(n + 6) { animation-delay: 240ms; }
+  .lift {
+    transition: transform 160ms ease, box-shadow 160ms ease;
+  }
+  .lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -12px color-mix(in oklab, var(--neutral) 45%, transparent);
+  }
+}
+
+@keyframes appear {
+  from { opacity: 0; transform: translateY(6px); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* A bar that fills from the start (the reading side). */
+  .bar-fill {
+    animation: bar-fill 700ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    transform-origin: left;
+  }
+  [dir='rtl'] .bar-fill {
+    transform-origin: right;
+  }
+}
+
+@keyframes bar-fill {
+  from { transform: scaleX(0); }
+}

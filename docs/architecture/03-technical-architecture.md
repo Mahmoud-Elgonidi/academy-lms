@@ -505,7 +505,7 @@ interface PaymentGateway
 ### OpenAPI
 - Scramble بيولّد `openapi.json`، والملف ده **بيتعمل له commit في الريبو**.
 - **`oasdiff` في الـ CI** بيمنع أي تغيير بيكسر التوافق.
-- **الـ clients**: تطبيق Flutter بيكلّم الـ API بـ repositories مكتوبة باليد لكل ميزة (مش متولّدة)، وفيه **contract test** بيقرا كل نداء في كود التطبيق (`_api.get('family/lessons')`…) ويتأكد إنه موجود في `openapi.json` بنفس الـ method. ولو اتغير route أو حد كتبه غلط، الاختبار بيقع قبل ما يوصل لموبايل. الـ client بتاع Next.js هيتولّد لما الويب يبدأ (`api-client-ts`).
+- **الـ clients**: تطبيق Flutter بيكلّم الـ API بـ repositories مكتوبة باليد لكل ميزة (مش متولّدة)، وفيه **contract test** بيقرا كل نداء في كود التطبيق (`_api.get('family/lessons')`…) ويتأكد إنه موجود في `openapi.json` بنفس الـ method. ولو اتغير route أو حد كتبه غلط، الاختبار بيقع قبل ما يوصل لموبايل. والويب (Next.js) بيولّد أنواع الـ paths من نفس الملف (`openapi-typescript` ← `apps/web/src/lib/api/schema.ts`)، وأي نداء لـ path أو method مش موجود في الملف بيوقع الـ typecheck. والـ CI بتاع الويب بيتأكد إن الأنواع مطابقة للملف.
 - **المنفّذ**:
   - الملف في `packages/openapi/openapi.json`، وبيتولّد بـ `composer openapi`. والملف ثابت: نفس الكود بيطلّع نفس الملف في أي بيئة (الـ server ثابت `/api`).
   - `App\OpenApi`: الأخطاء بصيغة RFC 7807 زي ما الـ API بيبعتها فعلًا (`ProblemDetails`)، والـ headers (`X-Academy` في routes الأكاديمية، و`Accept-Language`، و`X-Timezone`، و`Idempotency-Key` في الـ routes اللي عليها `idempotent`)، والـ bearer token على الـ routes اللي عليها `auth:sanctum` بس، وtag لكل module.
@@ -527,7 +527,11 @@ interface PaymentGateway
 
 ### تسجيل الدخول
 - **الموبايل**: Sanctum tokens ليها مدة صلاحية، ومتخزنة في secure storage (زي CBOT Fleet). وفيه أكتر من token متخزن للتنقل بين الحسابات.
-- **الويب (Next.js)**: **BFF**. الـ token في httpOnly cookie على دومين الأكاديمية، والمتصفح مابيشوفش الـ bearer token. Next.js بيمرر `/api/*` للـ Laravel.
+- **الويب (Next.js)**: **BFF**. الـ token في httpOnly cookie (`lms_session`، و`Secure` ورا https، و`SameSite=Lax`) على دومين الأكاديمية، والمتصفح مابيشوفش الـ bearer token أبدًا.
+  - الدخول (بكود أو بكلمة سر) بيحصل في Server Actions بتكلّم `auth/code/verify` أو `auth/login`. حساب الإدارة مابياخدش session في البوابة، بيتحوّل لـ `/admin`.
+  - سيرفر Next بس هو اللي بيكلّم الـ API (`lib/api/server.ts`، ‏`server-only`)، ومعاه الـ token و`Accept-Language` و`X-Timezone` (توقيت المتصفح من cookie بتكتبها الصفحة)، و`X-Forwarded-Host` (الـ host اللي الصفحة اتطلبت عليه، فالأكاديمية بتتحدد زي اللوحات بالظبط).
+  - لو الـ API رفض الـ token (انتهى، أو اتخرّج من جهاز تاني)، الصفحة بتروح `/bff/session-ended` اللي بيمسح الـ cookie ويرجّع لصفحة الدخول.
+  - الملفات اللي الطالب سلّمها (تسجيل أو صورة) بتعدّي من `/bff/submissions/{id}/file` بـ token المدرس، والتسجيل بيتقدّم ويرجع (`Range`).
 
 ### Realtime (Reverb)
 - القنوات:
@@ -611,9 +615,16 @@ interface PaymentGateway
 
 ### Next.js
 - **البوابة**: المدرس هو أكتر حد بيستخدم الويب، بس الطالب وولي الأمر كمان.
-- **الفصل**: `app/(classroom)/[locale]/session/[id]` بـ LiveKit React.
+- **الفصل**: صفحة الحصة بـ LiveKit React (أو لينك المدرس البره).
 - **المواقع العامة لكل أكاديمية (P2)**: ISR بـ tag لكل أكاديمية، وSEO، ونموذج lead.
-- `middleware.ts` بيحدد المستأجر واللغة من الـ host.
+- **المنفّذ (المرحلة A، بوابة المدرس)** في `apps/web`: Next.js 16 (App Router)، وReact 19، وTailwind 4، وnext-intl (عربي افتراضي، وإنجليزي، واللغة في الـ path: `/ar/...`، `/en/...`).
+  - `proxy.ts` (اللي كان اسمه middleware): أي صفحة محتاجة الـ session cookie ما عدا الدخول. والأكاديمية مابتتحددش في Next: الـ API هو اللي بيحددها من الـ host اللي جاي في `X-Forwarded-Host`، أو من الـ token.
+  - الصفحات server components بتقرا من الـ API (`get`)، وكل كتابة Server Action بتنادي نفس الـ endpoint اللي التطبيق بيناديه (ومنه نفس الـ Action)، وبعدها الصفحة بتتحدث (`refresh()`). ورسالة الـ API (RFC 7807) وأخطاء الحقول بترجع للفورم زي ما هي.
+  - الشاشات: النهارده (والحصة الجاية، واللي مستنيك)، والأسبوع، والتقارير (خطة النهارده، والتركيز والمستوى، والواجب)، وتصحيح الواجبات (التسجيل بيشتغل في الصفحة)، والطلاب ومنهج كل واحد، والحصص التجريبية وتقييمها، ومواعيدي (المقترح، وتعديل الأكاديمية ملوّن، والمحادثة)، والإجازات، والأرباح، والأداء، والإشعارات، والحصة الحية.
+  - شكل الأكاديمية من `GET /branding`: الألوان متغيرات CSS على `<html>` وكل الدرجات متخلّطة منها، والزوايا والخطوط. والأوقات بتتعرض زي ما الـ API كتبها (`label`)، والبوابة مابتحوّلش مناطق زمنية أبدًا.
+  - على السيرفر: نفس صورة الإنتاج (stage فيها Node بيبني البوابة)، وجزء اسمه `portal`. الـ web container بيعدّي له `/ar` و`/en` و`/_next` و`/bff`، والمتصفح اللي بيفتح العنوان من غير path بيروح `/ar`. والبوابة بتكلّم الـ API من جوه الـ stack (`http://web:8080`).
+  - الاختبارات: unit (vitest)، وend-to-end بـ Playwright على الـ API الحقيقي والبيانات التجريبية (الدخول بأنواعه، وكل صفحة على عرض موبايل، وتقرير، وتصحيح، وإجازة، ومقترح مواعيد)، في `.github/workflows/web.yml`.
+  - **لسه**: بوابة الطالب وولي الأمر (دلوقتي بيلاقوا لينك لـ `/my`)، والتحديث اللحظي في البوابة (Reverb)، والمواقع العامة.
 
 ### Filament
 - **لوحة الأكاديمية**: كل التشغيل (الشفتات، والبحث عن مدرس، ولوحة العمليات، والفواتير، والمرتبات، والـ CRM، والجودة).

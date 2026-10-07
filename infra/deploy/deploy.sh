@@ -234,6 +234,21 @@ if command -v curl >/dev/null 2>&1; then
 fi
 say "Done: $IMAGE answers on 127.0.0.1:$HTTP_PORT"
 
+# The teachers' portal (the portal part, behind the web part under /ar and /en).
+if command -v curl >/dev/null 2>&1; then
+    portal=""
+    for _ in $(seq 1 20); do
+        portal="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "http://127.0.0.1:$HTTP_PORT/ar/sign-in" 2>/dev/null || true)"
+        [ "$portal" = 200 ] && break
+        sleep 2
+    done
+    if [ "$portal" = 200 ]; then
+        echo "    The teachers' portal answers under /ar and /en."
+    else
+        echo "    !! The teachers' portal does not answer (HTTP ${portal:-none}): docker compose logs portal"
+    fi
+fi
+
 # Is it the app that answers for the domain, or still something else? Its own root
 # says {"app":"<APP_NAME>",...}; any other answer (a redirect, another site) is not it.
 marker="\"app\":\"$(setting APP_NAME | tr -d '"')\""
@@ -246,9 +261,9 @@ else
 fi
 home="$(setting PLATFORM_HOME_ACADEMY)"
 if [ -n "$home" ]; then
-    echo "    Academy \"$home\": https://$DOMAIN/admin (PLATFORM_HOME_ACADEMY) · others: https://<slug>.$DOMAIN/admin · console: https://$DOMAIN/console"
+    echo "    Academy \"$home\": https://$DOMAIN/admin and the teachers' portal https://$DOMAIN/ar (PLATFORM_HOME_ACADEMY) · others: https://<slug>.$DOMAIN · console: https://$DOMAIN/console"
 else
-    echo "    Academies: https://<slug>.$DOMAIN/admin · console: https://$DOMAIN/console"
+    echo "    Academies: https://<slug>.$DOMAIN/admin, teachers' portal https://<slug>.$DOMAIN/ar · console: https://$DOMAIN/console"
 fi
 [ "$DEMO_DATA" = 1 ] && echo "    Demo sign-in: owner@demo.test; the password is DEMO_PASSWORD in $HERE/.env"
 exit 0

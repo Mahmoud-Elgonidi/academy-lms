@@ -6,6 +6,11 @@
 	admin off
 	auto_https off
 	frankenphp
+	# The server's nginx (and the portal) reach this from private addresses: their
+	# X-Forwarded-Proto and -Host pass on, so the portal knows the page is https.
+	servers {
+		trusted_proxies static private_ranges
+	}
 }
 
 :8080 {
@@ -14,6 +19,21 @@
 	# Reverb: the browsers' live connections (wss://<academy host>/app/<key>).
 	handle /app/* {
 		reverse_proxy reverb:8080
+	}
+
+	# A browser opening the bare address goes to the portal (it asks who you are);
+	# anything else at / still gets the app's own answer.
+	@browser_home {
+		path /
+		header Accept *text/html*
+	}
+	redir @browser_home /ar 302
+
+	# The portal (apps/web): its pages are under a language, its assets under
+	# /_next and its own routes under /bff. It calls the API back through here.
+	@portal path /ar /ar/* /en /en/* /_next/* /bff/*
+	handle @portal {
+		reverse_proxy portal:3000
 	}
 
 	# Everything else: the panels, the API and their assets.

@@ -440,13 +440,20 @@ tenants/<slug>.json            (إعدادات white-label، P3)
 ### Next.js (App Router)
 
 ```text
-apps/web/src/
-  middleware.ts                       host → tenant + locale، والـ token من httpOnly cookie
-  app/(portal)/[locale]/...           المدرس (أكتر حد بيستخدم الويب)، والطالب، وولي الأمر
-  app/(classroom)/[locale]/session/[id]   LiveKit React
-  app/(public)/[locale]/...           موقع الأكاديمية العام، ISR بـ tag لكل أكاديمية (P2)
-  app/api/                            BFF رفيع (login، refresh)
-  features/  lib/api (generated)  lib/auth  components/ui
+apps/web/
+  messages/{ar,en}.json               كل الكلام (عربي مصري)
+  e2e/                                Playwright على الـ API الحقيقي والبيانات التجريبية
+  src/
+    proxy.ts                          الـ session cookie مطلوبة (ما عدا الدخول)، واللغة في الـ path (next-intl)
+    app/[locale]/sign-in/             الدخول بكود أو بكلمة سر (Server Actions)، والـ token في httpOnly cookie
+    app/[locale]/teach/               بوابة المدرس: الصفحات (server components) و actions.ts (كل الكتابة)
+    app/[locale]/teach/lessons/[id]   الحصة: LiveKit React أو لينك برّه
+    app/[locale]/family/              الطالب وولي الأمر (لحد ما بوابتهم تجهز: لينك لـ /my)
+    app/bff/                          session-ended، والملفات اللي اتسلّمت (بالـ token من السيرفر)
+    lib/api/server.ts                 get/send: الـ API من السيرفر بس، والـ paths متكتبة من schema.ts (متولّد من openapi.json)
+    lib/teach/  lib/format.ts  lib/time.ts  lib/viewer.ts (الشكل والشخص)
+    components/ui.tsx  components/icons.tsx  components/teach/*
+  (P2) app/(public)/[locale]/...      موقع الأكاديمية العام، ISR بـ tag لكل أكاديمية
 ```
 
 ---
