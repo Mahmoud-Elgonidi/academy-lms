@@ -57,7 +57,7 @@ final class FamilyLessonsController
         return response()->json([
             'learner' => ['id' => $learner->id, 'name' => $learner->name],
             'data' => array_map(fn (object $r) => $this->present->lesson($r, $now, 'teacher', $mayAct), $rows),
-            /** @var list<string> */
+            /** Coming holidays and clock changes that move the learner's hour. */
             'notices' => [
                 ...array_map(fn (array $h) => $h['name'].' · '.$h['period'], $notices->holidays()),
                 ...$notices->clockChanges($learner->id, $viewer->effective()),
@@ -65,7 +65,12 @@ final class FamilyLessonsController
         ]);
     }
 
-    /** What cancelling would do. */
+    /**
+     * What cancelling would do.
+     *
+     * @throws NotFoundHttpException not a lesson of someone I follow
+     * @throws AccessDeniedHttpException started, over, or a child in the kids' look
+     */
     public function cancellation(Request $request, string $session, FamilyCancellation $cancellation): JsonResponse
     {
         $lesson = $this->ownLesson($request, $session);
@@ -82,6 +87,9 @@ final class FamilyLessonsController
      * Cancel a lesson.
      *
      * Send an Idempotency-Key: a retry answers the same without cancelling twice.
+     *
+     * @throws NotFoundHttpException not a lesson of someone I follow
+     * @throws AccessDeniedHttpException started, over, or a child in the kids' look
      */
     public function cancel(CancelLessonRequest $request, string $session, CancelSession $cancel): JsonResponse
     {
@@ -95,6 +103,9 @@ final class FamilyLessonsController
      * Turn down the substitute.
      *
      * The lesson is cancelled as the academy's doing and its minutes come back as makeup credit (makeup_days to book it).
+     *
+     * @throws NotFoundHttpException not a lesson of someone I follow
+     * @throws AccessDeniedHttpException started, over, or a child in the kids' look
      */
     public function refuseSubstitute(Request $request, string $session, RefuseSubstitute $refuse): JsonResponse
     {

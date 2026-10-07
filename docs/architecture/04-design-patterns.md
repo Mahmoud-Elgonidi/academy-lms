@@ -91,7 +91,13 @@ flowchart TD
    - CRM بيسمع `TrialLessonBooked` و`SessionRescheduled` و`SessionCancelled` و`SessionFinalized` من Scheduling، و`EnrollmentCreated` من Enrollment. وبيطلّع `TrialCompleted` (المدرس يقيّم) و`TrialAssessed` (المبيعات تكمّل).
      - **المنفّذ دلوقتي**: محدش بيعتمد على CRM. ترتيب "ابحث عن مدرس" محتاج نسبة تحويل التجارب، فـ Scheduling بيعرّف عقد `TrialConversionRates` عنده، والـ CRM بيسجّل التنفيذ بتاعه (dependency inversion). من غير CRM محدش بيتقدم على حد.
      - صفحة العميل بتفتح "ابحث عن مدرس" باسم الـ route وparameters في الـ URL، وده بيفضل داخل حدود الـ module.
-6. **سجل المراجعة ولوحة المنصة**:
+6. **الدخول بكود والـ API بتاع التطبيقات**:
+   - Identity تحت Communication، فمينفعش تبعت رسالة بنفسها. Identity بتعرّف `OtpSender` في Contracts بتاعتها (ومعاه `LogOtpSender` افتراضي)، وCommunication بتربط التنفيذ الحقيقي (واتساب، SMS، إيميل). نفس فكرة `TrialConversionRates`.
+   - الاكتشاف محتاج يدوّر على الشخص في كل الأكاديميات، ودي قراءة على `pgsql_platform`، فبتعدّي على عقد Platform `AccountDirectory`. Identity مابتلمسش الـ connection ده.
+   - الـ endpoints بتاعة التطبيقات كل واحد في الـ module صاحب البيانات (`routes/api.php` بتاعه)، وبتنادي نفس الـ Actions والـ queries اللي الشاشات بتناديها. اللي كان جوه صفحة Filament واتحتاج في الـ API اتنقل لـ query مشتركة (`FamilyNotices`، `FamilyCancellation`، `TeacherStudents`، `TeacherTrials`).
+   - `Idempotency-Key` middleware في SharedKernel (`idempotent`)، بيتحط على الـ route نفسه.
+   - توثيق الـ API (Scramble) في `app/OpenApi`، لأنه تجميع مش منطق: شكل الأخطاء، والـ headers، والـ auth.
+7. **سجل المراجعة ولوحة المنصة**:
    - السجل في SharedKernel، فأي module يقدر يكتب فيه من غير ما يعتمد على حد: `AuditTrail::record()` جوه الـ Action اللي فيها العملية الحساسة، في نفس الـ transaction. مين عمل العملية بييجي من `AuditActor` (في الـ Laravel Context): الشخص اللي داخل، أو فريق المنصة (ولو داخل بحساب حد، مين)، أو النظام.
    - **لوحة المنصة** (`console`) شاشاتها من اتنين modules: Platform (الأكاديميات، والإيقاف، والسجل) بالـ connection اللي بيعدّي الـ RLS، وIdentity (أكاديمية جديدة، والدخول بحساب مستخدم) بالـ contracts بتاعة Platform بس: `PlatformApi` و`TenantDirectory` و`ConsoleApi`. Identity بيوصل لبيانات الأكاديمية عن طريق `TenantContext::run` على الـ connection العادي، فالـ RLS بيفضل شغال.
    - Platform مابيعرفش Identity: الصفحات بتشاور على بعض باسم الـ route بس.
@@ -449,7 +455,7 @@ apps/web/src/
 |---|---|
 | الأسماء | الـ Actions بأفعال (`CancelSession`)، والـ Events بالماضي (`SessionCancelled`)، والـ Queries بـ `…Query` |
 | Events | الـ events العامة في `Contracts/Events` بس، ومعاها نسخة (`v1`) لو بقت تطلع برّه النظام |
-| Idempotency | كل عملية فلوس أو رصيد أو حجز بتاخد `idempotency_key`، وعليه `UNIQUE` في قاعدة البيانات |
+| Idempotency | كل عملية فلوس أو رصيد أو حجز بتاخد `idempotency_key`، وعليه `UNIQUE` في قاعدة البيانات. وفي الـ API، الكتابة اللي بتحرك فلوس أو حصص عليها middleware `idempotent` (`Idempotency-Key`) |
 | الوقت | `CarbonImmutable` في كل مكان، وممنوع `now()` في الـ Domain (بنحقن `Clock`) |
 | الفلوس | `Money` بس، وممنوع float |
 | الترجمة | كل النصوص في `lang/{ar,en}` جوه الـ module، ورسائل الأخطاء بتترجم حسب `Accept-Language` |

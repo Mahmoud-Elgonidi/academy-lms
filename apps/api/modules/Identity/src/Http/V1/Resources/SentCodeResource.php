@@ -25,7 +25,7 @@ final class SentCodeResource extends JsonResource
             'expires_at' => app(LocalTimePresenter::class)->present($this->resource->expiresAt),
             /** Seconds before another code can be asked for. */
             'resend_after' => $this->resource->resendAfter,
-            /** @var list<string> Channels a new code can go by (to offer "send by SMS instead"). */
+            /** Channels a new code can go by (to offer "send by SMS instead"). */
             'channels' => $this->resource->channels,
         ];
     }

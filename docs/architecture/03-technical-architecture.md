@@ -132,6 +132,10 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 - **مدرس شغال في أكاديميتين = حسابين** (صاحبين شغل مختلفين).
 - **ولي أمر عنده أولاد في أكاديميتين**: بيتنقل بين الحسابين في التطبيق (أكتر من token متخزن على الجهاز).
 - **اكتشاف الحسابات بعد التحقق** في التطبيق العام: الإيميل أو الموبايل، ثم OTP، ثم قائمة الحسابات. **مابنكشفش أي عضوية قبل الـ OTP.**
+  - **المنفّذ**: `otp_challenges` في Identity، من غير RLS زي `personal_access_tokens`، لأن تحدي الاكتشاف مالوش أكاديمية، والتحدي بيتلاقي بالـ id العشوائي بتاعه بس.
+    - بيتخزن: الكود كـ HMAC، والرقم أو الإيميل متشفر ومعاه HMAC عشان نعدّ الأكواد لكل شخص، و token الاكتشاف كـ hash. وكله بيتمسح بعد يوم (`model:prune`).
+    - `POST /auth/code` و`/auth/code/verify` جوه الأكاديمية. الاكتشاف من غير أكاديمية: `POST /accounts/code` و`/accounts/code/verify`، والقائمة جاية من `Platform\Contracts\AccountDirectory` (على `pgsql_platform`: الحسابات الشغالة في الأكاديميات الشغالة بس). بعدها `POST /accounts/sign-in` بـ `X-Academy` لكل حساب.
+    - الإرسال: Identity تحت Communication، فـ Identity بتعرّف `OtpSender`، وCommunication بتربطه (dependency inversion): واتساب بقالب authentication، وSMS عن طريق Twilio (ومعاه سطر WebOTP)، والإيميل. ومفيش حاجة من الأكواد بتدخل سجل الرسائل.
 - **Super Admins** في جدول منفصل `platform_admins` بـ guard خاص و 2FA، ومابيشوفوش بيانات الأكاديميات إلا بـ **الدخول بحساب مستخدم مع تسجيله**.
   - **المنفّذ**: guard اسمه `platform` ولوحة Filament لوحدها (`console`) من غير `ResolveTenant`، وتطبيق مصادقة إجباري. `platform_admins` عليه RLS من غير policy، فالـ connection بتاع الأكاديميات مابيشوفش منه ولا صف.
   - **الدخول بحساب مستخدم** (`impersonations` في Identity، جدول tenant): الأدمن بيطلب من اللوحة بسبب ومدة، والـ Action بيشتغل جوه `TenantContext::run` للأكاديمية دي. اللينك بيشتغل مرة واحدة ولمدة دقيقتين، على عنوان الأكاديمية بس (الـ RLS بيمنع أي أكاديمية تانية تلاقيه). كل request بعدها بيعدّي على `WatchImpersonation`: بيسجّل العمليات باسم فريق المنصة "بحساب" الشخص (`AuditActor` في الـ Context)، وبيقفل الجلسة لما وقتها يخلص أو تتقفل من اللوحة.
@@ -487,7 +491,7 @@ interface PaymentGateway
 - REST على `/api/v1`.
 - الأخطاء بصيغة **RFC 7807 Problem Details** (رسائل بالعربي والإنجليزي حسب `Accept-Language`).
 - Cursor pagination.
-- **`Idempotency-Key` إجباري** في الدفع والحجز والإلغاء.
+- **`Idempotency-Key`** في الدفع والحجز والإلغاء. **المنفّذ**: middleware اسمه `idempotent` في SharedKernel: نفس المفتاح (لنفس الأكاديمية والشخص والـ route) بيرجّع أول رد لمدة يوم بدل ما ينفّذ مرتين، ونفس المفتاح مع body مختلف بيرجع 409. على: إلغاء الحصة، ورفض البديل، وطلب الإجازة، والدفع أونلاين.
 - `If-Match` أو `version` عند التعديل.
 - الوقت UTC بصيغة ISO-8601 وفي آخره `Z`. القواعد المتكررة `{weekday, local_time, tz}`.
 - **كل وقت بيظهر بتوقيت المستخدم اللي بيشوفه:**
@@ -502,6 +506,23 @@ interface PaymentGateway
 - Scramble بيولّد `openapi.json`، والملف ده **بيتعمل له commit في الريبو**.
 - **`oasdiff` في الـ CI** بيمنع أي تغيير بيكسر التوافق.
 - منه بيتولّد `api-client-dart` (dart-dio) و`api-client-ts`.
+- **المنفّذ**:
+  - الملف في `packages/openapi/openapi.json`، وبيتولّد بـ `composer openapi`. والملف ثابت: نفس الكود بيطلّع نفس الملف في أي بيئة (الـ server ثابت `/api`).
+  - `App\OpenApi`: الأخطاء بصيغة RFC 7807 زي ما الـ API بيبعتها فعلًا (`ProblemDetails`)، والـ headers (`X-Academy` في routes الأكاديمية، و`Accept-Language`، و`X-Timezone`، و`Idempotency-Key` في الـ routes اللي عليها `idempotent`)، والـ bearer token على الـ routes اللي عليها `auth:sanctum` بس، وtag لكل module.
+  - الـ CI: الملف لازم يطابق الكود (`git diff --exit-code`)، وفي أي PR `oasdiff breaking` ضد الفرع الأساسي. التغيير اللي بيكسر عن قصد بياخد label اسمه `api-breaking`.
+  - محليًا: `/docs/api` (في البيئة المحلية بس).
+  - الـ clients لسه ماتولدتش.
+
+### الـ API المنفّذ (`/api/v1`، 54 route)
+- **الدخول والحساب** (Identity): `auth/login`، و`auth/code` و`auth/code/verify`، و`accounts/code` و`accounts/code/verify` و`accounts/sign-in`، و`me`، و`me/sessions` (الأجهزة وتخريج جهاز)، و`auth/logout`.
+- **الأسرة**:
+  - `family/learners` (People): الطالب نفسه وأولاده، ومرحلة كل واحد. كل endpoint للأسرة بياخد `learner_id`، ولو مابعتوش بياخد أول واحد (`FamilyView::learner`).
+  - `family/lessons` (القادمة أو اللي فاتت، ومعاها الإجازات وتغييرات الساعة)، و`lessons/{id}/cancellation` (هيحصل إيه لو ألغيت، بالسياسة)، و`lessons/{id}/cancel`، و`lessons/{id}/refuse-substitute`. الطفل في شكل kids مابيلغيش.
+  - `lessons/{id}/rating` (Evaluation): GET وPUT.
+  - `family/balance`، و`family/invoices` (ومعاها لينك المستند الموقّع وطرق الدفع)، و`family/invoices/{id}/checkout` (Billing). الطالب اللي مابيدفعش مابيشوفش فلوس.
+  - `learning/*`: الـ roadmap والتقارير والواجبات (كانت موجودة).
+- **المدرس**: `teacher/lessons` (من يوم لعدد أيام)، و`teacher/students`، و`teacher/time-off` (عرض، وطلب، وسحب)، و`teacher/earnings?month=` (Payroll)، و`teacher/performance` (Evaluation، التقييمات من غير أسماء)، و`teacher/trials` وتقييم الحصة التجريبية (CRM)، و`teacher/shifts`، و`teacher/reports`، و`teacher/homework`.
+- كل endpoint بيستخدم نفس الـ Actions والـ queries اللي الشاشات بتستخدمها (`FamilyNotices`، و`FamilyCancellation`، و`TeacherStudents`، و`TeacherTrials`، ...).
 
 ### تسجيل الدخول
 - **الموبايل**: Sanctum tokens ليها مدة صلاحية، ومتخزنة في secure storage (زي CBOT Fleet). وفيه أكتر من token متخزن للتنقل بين الحسابات.
@@ -634,7 +655,7 @@ interface PaymentGateway
 
 ### الهوية والوصول
 - [ ] 2FA إجباري للـ Super Admin والـ Owner والـ Admin. (فريق المنصة منفّذ: تطبيق مصادقة إجباري على `/console`. المالك والمدير لسه.)
-- [ ] rate limit على الـ OTP، وقائمة الأجهزة، وتسجيل الخروج عن بعد، وصلاحية للـ tokens.
+- [x] rate limit على الـ OTP، وقائمة الأجهزة، وتسجيل الخروج عن بعد، وصلاحية للـ tokens. (كود كل دقيقة، و5 في الساعة لكل رقم أو إيميل، و20 لكل IP، و5 محاولات للكود؛ `me/sessions`؛ الـ tokens صلاحيتها من `sanctum.expiration`.)
 - [x] الدخول بحساب مستخدم: بسبب، ولوقت محدد، ومتسجل، وبيظهر في نشاط المستخدم. (لينك مرة واحدة على عنوان الأكاديمية، وشريط فيه الوقت الباقي، وتغيير كلمة السر مقفول، و"دخول فريق المنصة على حسابك" في إعداداته.)
 - [x] سجل مراجعة مابيتعدلش ومابيتمسحش (trigger)، معزول بالـ RLS لكل أكاديمية، ومابيتسجلش فيه أسرار.
 

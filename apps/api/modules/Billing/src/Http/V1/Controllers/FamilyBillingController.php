@@ -51,6 +51,8 @@ final class FamilyBillingController
      *
      * The invoices this person pays, the latest first; document_url opens the invoice (with its tax QR) in a browser.
      * A child who does not pay for themselves sees no money.
+     *
+     * @throws AccessDeniedHttpException a child who does not pay
      */
     public function invoices(Request $request, PayLinks $links, OnlinePayments $online): JsonResponse
     {
@@ -90,7 +92,6 @@ final class FamilyBillingController
                     'pay_with' => array_map(fn (GatewayAccount $a) => [
                         'account_id' => $a->id,
                         'label' => $a->label,
-                        /** @var list<string> */
                         'methods' => array_map(fn (string $m) => __('billing::payments.methods.'.$m), GatewayManager::methods($a->gateway)),
                     ], $online->accountsFor($i)),
                 ];
@@ -103,6 +104,8 @@ final class FamilyBillingController
      *
      * Opens a checkout at the academy's gateway account (the first one when none is named) and answers its URL;
      * open it in a browser. The invoice is paid only when the gateway confirms it. Send an Idempotency-Key.
+     *
+     * @throws NotFoundHttpException not an invoice I pay
      */
     public function checkout(Request $request, string $invoice, OnlinePayments $online, StartCheckout $start): JsonResponse
     {

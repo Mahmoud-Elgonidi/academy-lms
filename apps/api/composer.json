@@ -13,6 +13,7 @@
         "php": "^8.3",
         "brick/money": "^0.15.2",
         "chillerlan/php-qrcode": "^5.0",
+        "dedoc/scramble": "^0.13",
         "filament/filament": "^5.9",
         "laravel/framework": "^13.17",
         "laravel/reverb": "^1.12",
@@ -120,6 +121,9 @@
         "demo": [
             "@php artisan migrate:fresh --database=pgsql_owner --force",
             "@php artisan db:seed --force"
+        ],
+        "openapi": [
+            "@php artisan scramble:export --path=../../packages/openapi/openapi.json"
         ]
     },
     "extra": {

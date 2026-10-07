@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\OpenApi\ApiDocumentation;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
@@ -21,5 +22,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Catch lazy loading, silently discarded attributes and missing attributes in dev and tests.
         Model::shouldBeStrict(! $this->app->isProduction());
+
+        ApiDocumentation::configure();
     }
 }

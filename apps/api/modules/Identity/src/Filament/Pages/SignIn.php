@@ -155,7 +155,8 @@ final class SignIn extends Login
     {
         if ($this->inCodeStep()) {
             return __('identity::otp.sign_in.sent', [
-                'contact' => $this->sentTo,
+                // Kept left to right inside Arabic: "+966•••••••01", not "01•••••••966+".
+                'contact' => "\u{2066}{$this->sentTo}\u{2069}",
                 'channel' => __('identity::otp.sign_in.channels.'.$this->channel),
             ]);
         }

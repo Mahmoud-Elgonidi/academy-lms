@@ -27,7 +27,6 @@ final class DiscoveredAccountResource extends JsonResource
             'user' => [
                 'id' => $a->userId,
                 'name' => $a->userName,
-                /** @var list<string> */
                 'roles' => $a->roles,
             ],
         ];

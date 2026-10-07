@@ -3,9 +3,9 @@ name: api
 on:
   push:
     branches: [main]
-    paths: ['apps/api/**', '.github/workflows/api.yml']
+    paths: ['apps/api/**', 'packages/openapi/**', '.github/workflows/api.yml']
   pull_request:
-    paths: ['apps/api/**', '.github/workflows/api.yml']
+    paths: ['apps/api/**', 'packages/openapi/**', '.github/workflows/api.yml']
   workflow_dispatch:
 
 concurrency:
@@ -71,3 +71,35 @@ jobs:
 
       - name: Tests (Pest, against Postgres with RLS)
         run: vendor/bin/pest
+
+      # The apps are built from packages/openapi/openapi.json: it must say what the code does.
+      - name: OpenAPI document is up to date
+        run: |
+          composer openapi
+          git diff --exit-code -- ../../packages/openapi/openapi.json || {
+            echo "::error::packages/openapi/openapi.json is out of date: run 'composer openapi' in apps/api and commit it."; exit 1; }
+
+  # Apps already in people's phones keep working: no breaking change to the API without saying so
+  # (label the pull request "api-breaking" when one is meant, with a new version for the apps).
+  openapi-breaking:
+    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'api-breaking')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+
+      - name: Install oasdiff
+        run: go install github.com/oasdiff/oasdiff@latest
+
+      - name: No breaking changes against the base branch
+        run: |
+          if ! git show "origin/${{ github.base_ref }}:packages/openapi/openapi.json" > /tmp/base.json 2>/dev/null; then
+            echo "The base branch has no OpenAPI document yet."; exit 0
+          fi
+          "$(go env GOPATH)/bin/oasdiff" breaking /tmp/base.json packages/openapi/openapi.json --fail-on ERR
