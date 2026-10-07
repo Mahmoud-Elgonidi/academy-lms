@@ -17,6 +17,10 @@ x-app: &app
   volumes:
     - app-storage:/app/storage/app
   security_opt: ["no-new-privileges:true"]
+  # The base image checks Caddy's admin port, which only the web part has (and
+  # it is off): the web part has its own check below, the others none.
+  healthcheck:
+    disable: true
   logging: &logging
     driver: json-file
     options: { max-size: "10m", max-file: "3" }

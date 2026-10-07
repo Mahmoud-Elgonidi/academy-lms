@@ -129,6 +129,9 @@ jobs:
           # Every part of the stack is up, and only the web port is published, on 127.0.0.1.
           docker compose -p academy-lms -f "$dir/compose.yml" ps
           [ "$(docker compose -p academy-lms -f "$dir/compose.yml" ps --status running -q | wc -l)" = 7 ]
+          # Only web and postgres have a health check (the image's own, on Caddy's admin port, is off).
+          checked="$(docker ps --filter label=com.docker.compose.project=academy-lms --format '{{.Names}} {{.Status}}' | grep -c 'health' || true)"
+          [ "$checked" = 2 ] || { echo "expected 2 containers with a health check, found $checked"; exit 1; }
           ports="$(docker ps --filter label=com.docker.compose.project=academy-lms --format '{{.Ports}}' | grep -o '[0-9.]*:[0-9]*->' | sort -u)"
           echo "published: $ports"
           [ "$ports" = "127.0.0.1:$(setting HTTP_PORT)->" ]
