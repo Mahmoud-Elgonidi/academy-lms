@@ -23,8 +23,9 @@
         .iv table { width: 100%; border-collapse: collapse; font-size: .9rem; }
         .iv th { text-align: start; font-size: .75rem; color: var(--gray-500); font-weight: 600; padding: .5rem 0; border-bottom: 1px solid var(--gray-200); }
         .iv td { padding: .75rem 0; border-bottom: 1px solid var(--gray-100); vertical-align: top; }
-        .iv .num { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .iv .num { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; padding-inline-start: 1rem; }
         .iv-line small { display: block; color: var(--gray-500); font-size: .78rem; margin-top: .15rem; }
+        .iv-sum { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: flex-start; justify-content: space-between; }
         .iv-totals { margin-inline-start: auto; min-width: min(320px, 100%); display: flex; flex-direction: column; gap: .35rem; font-size: .9rem; }
         .iv-totals div { display: flex; justify-content: space-between; gap: 1rem; }
         .iv-totals .iv-grand { font-size: 1.1rem; font-weight: 800; border-top: 1px solid var(--gray-200); padding-top: .5rem; }
@@ -43,11 +44,11 @@
     <article class="iv">
         <header class="iv-top">
             <div>
-                <h2 class="lms-heading">{{ $d['academy'] }}</h2>
+                <h2 class="lms-heading">{{ $d['seller'] ?? $d['academy'] }}</h2>
                 @if ($d['taxNumber']) <div class="iv-muted">{{ __('billing::invoices.doc.tax_number', ['number' => $d['taxNumber']]) }}</div> @endif
             </div>
             <div class="iv-no">
-                <span class="iv-muted">{{ $inv->tax_rate_bp > 0 ? __('billing::invoices.doc.tax_invoice') : __('billing::invoices.model') }}</span>
+                <span class="iv-muted">{{ $d['title'] }}@if ($d['simplified']) · {{ __('billing::invoices.doc.simplified_alt') }}@endif</span>
                 <strong>{{ $inv->number }}</strong>
                 <span class="iv-pill" data-status="{{ $d['status'] }}">{{ __('billing::billing.statuses.'.$d['status']) }}</span>
             </div>
@@ -68,7 +69,7 @@
                 </div>
             @endif
             <div>
-                <small>{{ __('billing::invoices.fields.issued_at') }}</small>
+                <small>{{ $d['simplified'] ? __('billing::invoices.doc.issued_at') : __('billing::invoices.fields.issued_at') }}</small>
                 <strong>{{ $d['issued'] }}</strong>
             </div>
             <div>
@@ -98,6 +99,8 @@
             </tbody>
         </table>
 
+        <div class="iv-sum">
+        @if ($d['qr']) @include('billing::invoice.qr', ['qr' => $d['qr']]) @endif
         <div class="iv-totals">
             @if ($inv->tax_rate_bp > 0)
                 <div><span>{{ __('billing::invoices.doc.subtotal') }}</span><span class="num">{{ $money($inv->subtotal_minor) }}</span></div>
@@ -113,6 +116,7 @@
             @if ($inv->tax_rate_bp > 0)
                 <div class="iv-muted">{{ $inv->prices_include_tax ? __('billing::invoices.doc.vat_included') : __('billing::invoices.doc.vat_added') }}</div>
             @endif
+        </div>
         </div>
 
         @if ($d['payments'] !== [])
@@ -151,7 +155,10 @@
             </section>
         @endif
 
-        @if ($inv->status === 'void')
+        @if ($inv->status === 'void' && $d['creditNote'])
+            <div class="iv-note">{{ __('billing::invoices.doc.voided_by_note', ['number' => $d['creditNote']['number'], 'reason' => $inv->void_reason]) }}</div>
+            @include('billing::invoice.credit-note', ['note' => $d['creditNote']])
+        @elseif ($inv->status === 'void')
             <div class="iv-note">{{ __('billing::invoices.doc.voided', ['reason' => $inv->void_reason]) }}</div>
         @elseif ($inv->status === 'issued' && $inv->subscription_id)
             <div class="iv-note">{{ __('billing::invoices.doc.on_payment') }}</div>

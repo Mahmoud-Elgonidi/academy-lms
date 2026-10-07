@@ -9,6 +9,8 @@ use Modules\Billing\Domain\TaxCalculator;
 use Modules\Billing\Models\BillingSettings;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\Subscription;
+use Modules\Billing\Zatca\TaxDocument;
+use Modules\SharedKernel\Money\Money;
 
 /**
  * Issues the invoice for one block of a subscription: the plan's sessions
@@ -17,7 +19,7 @@ use Modules\Billing\Models\Subscription;
  */
 final class IssueBlockInvoice
 {
-    public function __construct(private readonly NextInvoiceNumber $numbers) {}
+    public function __construct(private readonly NextInvoiceNumber $numbers, private readonly TaxDocument $tax) {}
 
     public function handle(Subscription $subscription, int $blockNo, string $subjectAr, string $subjectEn, ?string $actorId = null): Invoice
     {
@@ -37,6 +39,7 @@ final class IssueBlockInvoice
             $settings = BillingSettings::current();
             $amounts = TaxCalculator::compute($subscription->amount_minor, $settings->tax_rate_bp, $settings->prices_include_tax);
             $now = CarbonImmutable::now();
+            $stamp = $this->tax->stamp($settings);
 
             $invoice = Invoice::query()->create([
                 'number' => $this->numbers->take($settings->invoice_prefix),
@@ -52,7 +55,9 @@ final class IssueBlockInvoice
                 'issued_at' => $now,
                 'due_at' => $now->addDays($settings->due_days),
                 'created_by' => $actorId,
-            ]);
+                'zatca_qr' => TaxDocument::qr($stamp['tax_document'], $stamp['seller_name'], $stamp['seller_tax_number'], $now,
+                    Money::of($amounts['total'], $subscription->currency), Money::of($amounts['tax'], $subscription->currency)),
+            ] + $stamp);
 
             $invoice->lines()->create([
                 'kind' => 'block',

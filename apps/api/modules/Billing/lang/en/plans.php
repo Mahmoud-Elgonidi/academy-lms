@@ -51,12 +51,17 @@ return [
         'due_days' => 'Due after (days)',
         'inclusive' => 'Prices include VAT',
         'inclusive_hint' => 'Gulf consumer prices are shown with VAT included. Off: VAT is added on top.',
+        'seller_name' => 'Name registered for tax',
+        'seller_hint' => 'Shown on invoices as registered. Invoices already issued keep what they said.',
+        'zatca' => 'ZATCA invoices (Saudi Arabia)',
+        'zatca_hint' => 'Every invoice becomes a simplified tax invoice with the name, VAT number, time of issue and a QR code (phase 1). Needs a valid Saudi VAT number (15 digits, starting and ending with 3). Cancelling an invoice issues a credit note.',
     ],
     'empty' => [
         'title' => 'No plans yet',
         'hint' => 'Add your price regions first, then a plan such as "8 sessions × 30 min, twice a week".',
     ],
     'errors' => [
+        'vat_number' => 'A Saudi VAT number has 15 digits, starting and ending with 3.',
         'positive' => 'Length and number of sessions must be above zero.',
         'region_twice' => 'One price per region.',
         'negative' => 'A price cannot be negative.',

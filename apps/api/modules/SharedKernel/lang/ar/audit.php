@@ -8,6 +8,8 @@ return [
             'payment_recorded' => 'تسجيل دفعة :amount (:method) على الفاتورة :number',
             'invoice_voided' => 'إلغاء الفاتورة :number: :reason',
             'settings_saved' => 'تعديل إعدادات الضريبة والفواتير',
+            'stripe_connected' => 'ربط حساب Stripe :account (:mode)',
+            'stripe_disconnected' => 'فصل حساب Stripe :account',
         ],
         'policy' => [
             'saved' => 'إصدار :version من سياسة الإلغاء والتعويض',

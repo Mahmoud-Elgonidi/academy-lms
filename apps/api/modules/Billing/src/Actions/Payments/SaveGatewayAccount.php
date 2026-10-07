@@ -22,11 +22,14 @@ final class SaveGatewayAccount
     public function handle(?GatewayAccount $account, array $data, ?string $actorId): GatewayAccount
     {
         $gateway = $account->gateway ?? (string) ($data['gateway'] ?? '');
+        if ($gateway === 'stripe_connect' && $account !== null) {
+            $data['mode'] = $account->mode;   // a connected account's mode is Stripe's to say
+        }
         $data['currencies'] = array_values(array_unique(array_map('strtoupper', array_filter((array) ($data['currencies'] ?? [])))));
         $takes = GatewayManager::currencies($gateway);
 
         Validator::make(['gateway' => $gateway] + $data, [
-            'gateway' => ['required', Rule::in($this->gateways->gateways())],
+            'gateway' => ['required', Rule::in($account !== null ? [$account->gateway] : $this->gateways->gateways())],
             'label' => ['required', 'string', 'max:80'],
             'mode' => ['required', Rule::in(['test', 'live'])],
             'currencies' => ['array'],
@@ -47,10 +50,16 @@ final class SaveGatewayAccount
                 $errors[$field] = __('billing::payments.errors.required', ['field' => __('billing::payments.fields.'.$field)]);
             }
         }
-        $key = $credentials['secret_key'] ?? '';
         $mode = $gateway === 'demo' ? 'test' : $data['mode'];
-        if ($key !== '' && preg_match('/^(sk|rk)_(test|live)_/', $key, $m) && $m[2] !== $mode) {
-            $errors['secret_key'] = __('billing::payments.errors.key_mode.'.$mode);
+        foreach (['secret_key', 'public_key'] as $field) {
+            $key = $credentials[$field] ?? '';
+            // Stripe's sk_/rk_, Paymob's egy_sk_/egy_pk_: a test key on a live account, or the reverse, is refused.
+            if ($key !== '' && preg_match('/^(?:[a-z]{3}_)?(?:sk|rk|pk)_(test|live)_/', $key, $m) && $m[1] !== $mode) {
+                $errors[$field] = __('billing::payments.errors.key_mode.'.$mode);
+            }
+        }
+        if (($credentials['integration_ids'] ?? '') !== '' && ! preg_match('/^\s*\d+(\s*,\s*\d+)*\s*$/', $credentials['integration_ids'])) {
+            $errors['integration_ids'] = __('billing::payments.errors.integration_ids');
         }
         if ($errors !== []) {
             throw ValidationException::withMessages($errors);
@@ -67,7 +76,7 @@ final class SaveGatewayAccount
         ])->save();
         app(AuditTrail::class)->record('billing.gateway_saved', 'gateway_account', $account->id, [
             'gateway' => $gateway, 'label' => $account->label, 'mode' => $mode, 'currencies' => $data['currencies'], 'is_active' => $account->is_active,
-            'fields_changed' => array_keys(array_filter(GatewayManager::fields($gateway), fn ($r, $f) => trim((string) ($data[$f] ?? '')) !== '', ARRAY_FILTER_USE_BOTH)),
+            'fields_changed' => array_values(array_filter(array_keys(GatewayManager::fields($gateway)), fn (string $f) => trim((string) ($data[$f] ?? '')) !== '' && trim((string) ($data[$f] ?? '')) !== ($saved[$f] ?? null))),
         ]);
 
         return $account;

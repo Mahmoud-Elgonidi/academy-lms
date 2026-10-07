@@ -13,7 +13,8 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * and never shown again; the webhook comes to a path of its own.
  *
  * @property string $id
- * @property string $gateway stripe | moyasar | tap | demo
+ * @property string $gateway stripe | stripe_connect | moyasar | tap | paymob | demo
+ * @property ?string $external_id a connected Stripe account (acct_…), no secret
  * @property string $label
  * @property string $mode test | live
  * @property list<string> $currencies empty: every currency the gateway takes
@@ -26,9 +27,9 @@ final class GatewayAccount extends Model
     use BelongsToTenant;
     use HasUuids;
 
-    public const GATEWAYS = ['stripe', 'moyasar', 'tap', 'demo'];
+    public const GATEWAYS = ['stripe', 'stripe_connect', 'moyasar', 'tap', 'paymob', 'demo'];
 
-    protected $fillable = ['gateway', 'label', 'mode', 'currencies', 'credentials', 'is_active', 'sort', 'created_by'];
+    protected $fillable = ['gateway', 'label', 'mode', 'currencies', 'credentials', 'is_active', 'sort', 'created_by', 'external_id'];
 
     protected $attributes = ['mode' => 'test', 'currencies' => '[]', 'is_active' => true, 'sort' => 0];
 

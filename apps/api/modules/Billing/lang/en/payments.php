@@ -2,10 +2,10 @@
 
 return [
     'description' => 'Invoice :number · :academy',
-    'gateways' => ['stripe' => 'Stripe', 'moyasar' => 'Moyasar', 'tap' => 'Tap', 'demo' => 'Demo gateway'],
+    'gateways' => ['stripe' => 'Stripe', 'moyasar' => 'Moyasar', 'tap' => 'Tap', 'paymob' => 'Paymob', 'stripe_connect' => 'Stripe (the academy\'s account, connected)', 'demo' => 'Demo gateway'],
     'methods' => [
         'card' => 'Card', 'mada' => 'mada', 'apple_pay' => 'Apple Pay', 'google_pay' => 'Google Pay',
-        'stc_pay' => 'STC Pay', 'knet' => 'KNET', 'benefit' => 'BENEFIT',
+        'stc_pay' => 'STC Pay', 'knet' => 'KNET', 'benefit' => 'BENEFIT', 'wallet' => 'Mobile wallets',
     ],
     'modes' => ['test' => 'Test', 'live' => 'Live'],
     'statuses' => ['open' => 'Open', 'paid' => 'Paid', 'failed' => 'Failed', 'expired' => 'Expired', 'refund_due' => 'Refund due'],
@@ -17,6 +17,10 @@ return [
         'currencies' => 'Currencies',
         'secret_key' => 'Secret key',
         'webhook_secret' => 'Webhook secret',
+        'public_key' => 'Public key',
+        'api_key' => 'API key',
+        'hmac_secret' => 'HMAC secret',
+        'integration_ids' => 'Integration IDs',
         'is_active' => 'On',
     ],
     'hints' => [
@@ -27,12 +31,19 @@ return [
             'stripe' => 'From Stripe › Developers › Webhooks (starts with whsec_). The webhook address shows on the gateway\'s card once saved.',
             'moyasar' => 'The shared secret you type in Moyasar when adding the webhook.',
         ],
+        'secret_key' => ['paymob' => 'From Paymob › Settings › Account Info (starts with egy_sk_).'],
+        'public_key' => ['paymob' => 'From the same page (starts with egy_pk_).'],
+        'api_key' => ['paymob' => 'From Paymob › Settings › Account Info. Used to ask Paymob about a transaction before any payment is recorded.'],
+        'hmac_secret' => ['paymob' => 'From Paymob › Settings › Account Info. Proves a notification really comes from Paymob.'],
+        'integration_ids' => ['paymob' => 'From Paymob › Developers › Payment Integrations: the card one and the wallet one, separated by commas (e.g. 123456, 234567).'],
     ],
     'errors' => [
         'required' => 'The :field is needed.',
         'key_mode' => ['test' => 'This is a live key, and the account is in test mode.', 'live' => 'This is a test key, and the account is live.'],
         'not_here' => 'This way to pay does not take :currency invoices.',
         'gateway' => 'The payment gateway is not answering right now. Try again shortly or choose another way.',
+        'integration_ids' => 'Write the integration IDs as numbers separated by commas.',
+        'paymob_integrations' => 'No integration IDs: Paymob cannot show any way to pay.',
         'stripe_step' => 'Stripe takes :currency amounts in steps of 10 fils only.',
     ],
     'page' => [
@@ -93,6 +104,8 @@ return [
             'stripe' => 'In Stripe › Developers › Webhooks add this address, with the events checkout.session.completed, checkout.session.async_payment_succeeded, checkout.session.async_payment_failed and checkout.session.expired.',
             'moyasar' => 'In Moyasar › Settings › Webhooks add this address with the same shared secret, and the payment events (payment_paid, payment_failed).',
             'tap' => 'Tap posts to this address with every charge by itself; nothing to set up.',
+            'paymob' => 'Paymob posts to this address with every transaction by itself (signed with the HMAC); nothing to set up.',
+            'stripe_connect' => 'The academy\'s own Stripe account, connected to the platform: money goes straight to it, with no keys or webhook to set up.',
             'demo' => 'The demo gateway uses no webhooks.',
         ],
         'all_currencies' => 'All currencies',
@@ -110,5 +123,19 @@ return [
         'copy_link_hint' => 'Send it to the payer by WhatsApp or email: it opens the invoice and the ways to pay without signing in.',
         'open' => 'Open it',
         'none' => 'No online payments for this invoice.',
+    ],
+    'connect' => [
+        'action' => 'Connect a Stripe account',
+        'explain' => 'You go to Stripe, sign in with the academy\'s account (or open one), and allow the platform to open payment pages on it. Money goes straight to the academy\'s account; there are no keys to type here.',
+        'go' => 'Go to Stripe',
+        'account' => 'Connected account: :id',
+        'disconnect' => 'Disconnect',
+        'disconnect_explain' => 'The platform will no longer take payments on this Stripe account. Payments already made stay as they are.',
+        'disconnected' => 'The Stripe account was disconnected.',
+        'result' => [
+            'connected' => 'The Stripe account is connected. Test it, then it takes invoices.',
+            'denied' => 'Connecting was not finished at Stripe.',
+            'failed' => 'Stripe did not answer the connection. Try again.',
+        ],
     ],
 ];

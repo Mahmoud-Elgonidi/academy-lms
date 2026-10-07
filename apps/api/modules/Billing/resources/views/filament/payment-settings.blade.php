@@ -47,7 +47,9 @@
                             <span>{{ __($p.'methods.'.$method) }}</span>
                         @endforeach
                     </div>
-                    @if ($account->gateway !== 'demo')
+                    @if ($account->gateway === 'stripe_connect')
+                        <div class="ps-muted">{{ __($p.'connect.account', ['id' => $account->external_id]) }}</div>
+                    @elseif ($account->gateway !== 'demo')
                         <div>
                             <small class="ps-muted">{{ __($s.'webhook') }}</small>
                             <div class="ps-hook" x-data="{ copied: false }">
@@ -62,6 +64,7 @@
                     <div class="ps-actions">
                         {{ ($this->editAction)(['account' => $account->id]) }}
                         {{ ($this->testAction)(['account' => $account->id]) }}
+                        {{ ($this->disconnectAction)(['account' => $account->id]) }}
                     </div>
                 </section>
             @endforeach

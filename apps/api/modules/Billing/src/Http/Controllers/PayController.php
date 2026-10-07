@@ -16,6 +16,7 @@ use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentCheckout;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
+use Modules\Billing\Queries\InvoiceDocument;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Throwable;
@@ -50,6 +51,20 @@ final class PayController
             ], $online->accountsFor($invoice)) : [],
             'manual' => $online->manualNote(),
             'tz' => $tenants->require()->defaultTimezone,
+            'document' => app(PayLinks::class)->document($invoice, $payerId),
+        ]);
+    }
+
+    /** The invoice as a document to read and print (a Saudi tax invoice with its QR code, and the credit note that cancelled it). */
+    public function document(Request $request, Invoice $invoice, InvoiceDocument $documents, BrandingApi $branding, TenantContext $tenants, PayLinks $links): View
+    {
+        $payerId = $request->query('u');
+        $this->speak($payerId, $tenants);
+
+        return view('billing::pay.document', [
+            'd' => $documents->build($invoice, $tenants->require()->defaultTimezone),
+            'branding' => $branding->current(),
+            'back' => $invoice->status === 'issued' ? $links->invoice($invoice, $payerId) : null,
         ]);
     }
 

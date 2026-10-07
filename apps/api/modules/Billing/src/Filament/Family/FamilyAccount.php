@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Billing\Filament\Resources\Invoices\InvoiceResource;
 use Modules\Billing\Models\Invoice;
+use Modules\Billing\Payments\PayLinks;
 use Modules\Credits\Contracts\CreditsApi;
 use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
 use Modules\Enrollment\Contracts\EnrollmentApi;
@@ -60,6 +61,7 @@ final class FamilyAccount
             'issued' => $i->issued_at ? CarbonImmutable::parse($i->issued_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F Y') : null,
             'due' => $i->due_at ? CarbonImmutable::parse($i->due_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F Y') : null,
             'paid' => $i->paid_at ? CarbonImmutable::parse($i->paid_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F Y') : null,
+            'document' => app(PayLinks::class)->document($i, $payerId),
         ])->all();
     }
 

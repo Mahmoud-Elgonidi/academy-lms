@@ -33,7 +33,8 @@ final class OnlinePayments
     public function offers(string $currency): bool
     {
         return GatewayAccount::query()->where('is_active', true)->get()
-            ->contains(fn (GatewayAccount $account) => $account->takes($currency) && ($account->gateway !== 'demo' || $this->gateways->demoAllowed()));
+            ->contains(fn (GatewayAccount $account) => $account->takes($currency) && ($account->gateway !== 'demo' || $this->gateways->demoAllowed())
+                && ($account->gateway !== 'stripe_connect' || $this->gateways->connectAvailable()));
     }
 
     public function manualNote(): ?string

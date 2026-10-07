@@ -41,6 +41,7 @@
                 <dt>{{ __($p.'due') }}</dt><dd>{{ $invoice->due_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F Y') }}</dd>
             @endif
         </dl>
+        <a class="doc-link" href="{{ $document }}">{{ __('billing::invoices.doc.view') }}</a>
     </section>
 
     @if ($errors->any())

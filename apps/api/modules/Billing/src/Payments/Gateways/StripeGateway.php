@@ -17,9 +17,11 @@ use Modules\SharedKernel\Money\Money;
 
 /**
  * Stripe Checkout (hosted page): cards, Apple Pay and Google Pay, in most
- * currencies. On the academy's own secret key, or (Stripe Connect, later)
- * the platform's key acting for the academy's connected account. Webhooks
- * are signed with the endpoint's secret (Stripe-Signature).
+ * currencies. On the academy's own secret key, or (Stripe Connect Standard)
+ * the platform's key acting for the academy's connected account: a direct
+ * charge on that account (Stripe-Account), with the platform's fee if one
+ * is set. Webhooks are signed with the endpoint's secret (Stripe-Signature);
+ * for connected accounts that is the platform's Connect endpoint.
  */
 final class StripeGateway implements PaymentGateway
 {
@@ -28,7 +30,7 @@ final class StripeGateway implements PaymentGateway
 
     private const TOLERANCE_SECONDS = 300;
 
-    /** @param  array<string, string>  $credentials  secret_key, webhook_secret, account_id (Connect) */
+    /** @param  array<string, mixed>  $credentials  secret_key, webhook_secret; or (Connect) account_id, application_fee_bp, academy_id */
     public function __construct(private readonly array $credentials) {}
 
     public function refuses(Money $amount): ?string
@@ -40,6 +42,8 @@ final class StripeGateway implements PaymentGateway
 
     public function createCheckout(CheckoutRequest $request): CheckoutSession
     {
+        $metadata = array_filter(['checkout_id' => $request->checkoutId, 'invoice' => $request->invoiceNumber, 'academy' => $this->credentials['academy_id'] ?? null]);
+        $fee = ! empty($this->credentials['account_id']) ? intdiv($request->amount->minor * (int) ($this->credentials['application_fee_bp'] ?? 0), 10_000) : 0;
         $session = $this->send(fn (PendingRequest $http) => $http->withHeaders(['Idempotency-Key' => 'checkout-'.$request->checkoutId])
             ->post('/v1/checkout/sessions', [
                 'mode' => 'payment',
@@ -57,8 +61,8 @@ final class StripeGateway implements PaymentGateway
                         'product_data' => ['name' => $request->description],
                     ],
                 ]],
-                'metadata' => ['checkout_id' => $request->checkoutId, 'invoice' => $request->invoiceNumber],
-                'payment_intent_data' => ['metadata' => ['checkout_id' => $request->checkoutId, 'invoice' => $request->invoiceNumber]],
+                'metadata' => $metadata,
+                'payment_intent_data' => array_filter(['metadata' => $metadata, 'application_fee_amount' => $fee > 0 ? $fee : null]),
             ]));
 
         return new CheckoutSession((string) $session['id'], (string) $session['url']);
@@ -78,7 +82,28 @@ final class StripeGateway implements PaymentGateway
 
     public function parseWebhook(Request $request): ?GatewayEvent
     {
-        $secret = (string) ($this->credentials['webhook_secret'] ?? '');
+        $event = self::verified($request, (string) ($this->credentials['webhook_secret'] ?? ''));
+        if ($event === null) {
+            return null;
+        }
+        // A connected account's event must be about that account.
+        if (! empty($this->credentials['account_id']) && ($event['account'] ?? null) !== $this->credentials['account_id']) {
+            return null;
+        }
+        $object = $event['data']['object'] ?? [];
+
+        return new GatewayEvent((string) $event['id'], (string) $event['type'],
+            str_starts_with((string) $event['type'], 'checkout.session.') ? ($object['id'] ?? null) : null, $event);
+    }
+
+    /**
+     * A Stripe webhook delivery checked against a signing secret (Stripe-Signature,
+     * five minutes' tolerance): the event, or null when it is not genuine.
+     *
+     * @return ?array<string, mixed>
+     */
+    public static function verified(Request $request, string $secret): ?array
+    {
         $payload = $request->getContent();
         $parts = [];
         foreach (explode(',', (string) $request->header('Stripe-Signature')) as $part) {
@@ -91,15 +116,9 @@ final class StripeGateway implements PaymentGateway
         if (! $signed || abs(time() - $timestamp) > self::TOLERANCE_SECONDS) {
             return null;
         }
-
         $event = json_decode($payload, true);
-        if (! is_array($event) || ! isset($event['id'], $event['type'])) {
-            return null;
-        }
-        $object = $event['data']['object'] ?? [];
 
-        return new GatewayEvent((string) $event['id'], (string) $event['type'],
-            str_starts_with((string) $event['type'], 'checkout.session.') ? ($object['id'] ?? null) : null, $event);
+        return is_array($event) && isset($event['id'], $event['type']) ? $event : null;
     }
 
     public function check(): ?string

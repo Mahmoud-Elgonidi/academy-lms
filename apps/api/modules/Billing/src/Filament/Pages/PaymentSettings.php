@@ -18,13 +18,17 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
+use Modules\Billing\Actions\Payments\DisconnectStripeAccount;
 use Modules\Billing\Actions\Payments\SaveGatewayAccount;
 use Modules\Billing\Models\BillingSettings;
 use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Models\PaymentCheckout;
+use Modules\Billing\Payments\GatewayException;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\PayLinks;
+use Modules\Billing\Payments\StripeConnect;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Tenancy\TenantContext;
 use UnitEnum;
 
 /**
@@ -73,6 +77,12 @@ final class PaymentSettings extends Page
     public function mount(): void
     {
         $this->manualNote = BillingSettings::current()->manual_payment_note;
+
+        // Back from Stripe after connecting the academy's own account.
+        $stripe = request()->query('stripe');
+        if (in_array($stripe, ['connected', 'denied', 'failed'], true)) {
+            Notification::make()->title(__('billing::payments.connect.result.'.$stripe))->{$stripe === 'connected' ? 'success' : 'warning'}()->send();
+        }
     }
 
     /** @return list<array{account: GatewayAccount, webhook: string}> */
@@ -100,6 +110,12 @@ final class PaymentSettings extends Page
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('connectStripe')->label(__('billing::payments.connect.action'))->icon(Heroicon::OutlinedLink)->color('gray')
+                ->visible(fn () => app(GatewayManager::class)->connectAvailable())
+                ->requiresConfirmation()->modalIcon(Heroicon::OutlinedLink)
+                ->modalHeading(__('billing::payments.connect.action'))->modalDescription(__('billing::payments.connect.explain'))
+                ->modalSubmitActionLabel(__('billing::payments.connect.go'))
+                ->action(fn () => $this->redirect(app(StripeConnect::class)->authorizeUrl(app(TenantContext::class)->require()->id, (string) auth()->id()))),
             Action::make('add')->label(__('billing::payments.settings.add'))->icon(Heroicon::OutlinedPlus)
                 ->modalHeading(__('billing::payments.settings.add'))->modalWidth('lg')->modalSubmitActionLabel(__('billing::payments.settings.save'))
                 ->schema(fn () => $this->accountSchema(null))
@@ -115,12 +131,29 @@ final class PaymentSettings extends Page
     {
         return Action::make('edit')->label(__('billing::payments.settings.edit'))->icon(Heroicon::OutlinedPencilSquare)->link()->size('sm')
             ->modalHeading(fn (array $arguments) => $this->account($arguments)->label)->modalWidth('lg')->modalSubmitActionLabel(__('billing::payments.settings.save'))
-            ->fillForm(fn (array $arguments) => collect($this->account($arguments)->only(['label', 'mode', 'currencies', 'is_active']))->all())
+            ->fillForm(fn (array $arguments) => collect($this->account($arguments)->only(['label', 'mode', 'currencies', 'is_active']))->all()
+                + array_intersect_key((array) $this->account($arguments)->credentials, array_flip(GatewayManager::publicFields($this->account($arguments)->gateway))))
             ->schema(fn (array $arguments) => $this->accountSchema($this->account($arguments)))
             ->action(function (array $data, array $arguments) {
                 app(SaveGatewayAccount::class)->handle($this->account($arguments), $data, (string) auth()->id());
                 unset($this->accounts);
                 Notification::make()->success()->title(__('billing::payments.settings.saved'))->send();
+            });
+    }
+
+    public function disconnectAction(): Action
+    {
+        return Action::make('disconnect')->label(__('billing::payments.connect.disconnect'))->icon(Heroicon::OutlinedLinkSlash)->link()->size('sm')->color('danger')
+            ->requiresConfirmation()->modalHeading(__('billing::payments.connect.disconnect'))->modalDescription(__('billing::payments.connect.disconnect_explain'))
+            ->visible(fn (array $arguments) => ($a = GatewayAccount::query()->find($arguments['account'] ?? null)) !== null && $a->gateway === 'stripe_connect' && $a->is_active)
+            ->action(function (array $arguments) {
+                try {
+                    app(DisconnectStripeAccount::class)->handle($this->account($arguments));
+                    Notification::make()->success()->title(__('billing::payments.connect.disconnected'))->send();
+                } catch (GatewayException $e) {
+                    Notification::make()->danger()->title(__('billing::payments.settings.test_failed'))->body($e->getMessage())->send();
+                }
+                unset($this->accounts);
             });
     }
 
@@ -163,15 +196,16 @@ final class PaymentSettings extends Page
             TextInput::make('label')->label(__($p.'fields.label'))->required()->maxLength(80)->helperText(__($p.'hints.label')),
             Radio::make('mode')->label(__($p.'fields.mode'))->inline()->default('test')
                 ->options(['test' => __($p.'modes.test'), 'live' => __($p.'modes.live')])
-                ->visible(fn (Get $get) => $gateway($get) !== null && $gateway($get) !== 'demo'),
+                ->visible(fn (Get $get) => $gateway($get) !== null && ! in_array($gateway($get), ['demo', 'stripe_connect'], true)),
             Select::make('currencies')->label(__($p.'fields.currencies'))->multiple()->helperText(__($p.'hints.currencies'))
                 ->options(fn (Get $get) => collect(GatewayManager::currencies((string) $gateway($get)) ?? $this->knownCurrencies())->mapWithKeys(fn (string $c) => [$c => $c])->all()),
-            TextInput::make('secret_key')->label(__($p.'fields.secret_key'))->password()->revealable()->autocomplete('off')
-                ->required(fn (Get $get) => $account === null && $needs('secret_key')($get))->visible($needs('secret_key'))
-                ->helperText($account ? __($p.'hints.keep') : null),
-            TextInput::make('webhook_secret')->label(__($p.'fields.webhook_secret'))->password()->revealable()->autocomplete('off')
-                ->required(fn (Get $get) => $account === null && $needs('webhook_secret')($get))->visible($needs('webhook_secret'))
-                ->helperText(fn (Get $get) => trim(($account ? __($p.'hints.keep').' ' : '').__($p.'hints.webhook_secret.'.$gateway($get)))),
+            ...array_map(fn (string $field) => TextInput::make($field)->label(__($p.'fields.'.$field))->autocomplete('off')->visible($needs($field))
+                ->password(fn (Get $get) => ! in_array($field, GatewayManager::publicFields((string) $gateway($get)), true))
+                ->revealable(fn (Get $get) => ! in_array($field, GatewayManager::publicFields((string) $gateway($get)), true))
+                ->required(fn (Get $get) => $account === null && $needs($field)($get) && (GatewayManager::fields((string) $gateway($get))[$field] ?? false))
+                ->helperText(fn (Get $get) => trim(($account && ! in_array($field, GatewayManager::publicFields((string) $gateway($get)), true) ? __($p.'hints.keep').' ' : '')
+                    .(trans()->has($p.'hints.'.$field.'.'.$gateway($get)) ? __($p.'hints.'.$field.'.'.$gateway($get)) : '')) ?: null),
+                GatewayManager::allFields()),
             Toggle::make('is_active')->label(__($p.'fields.is_active'))->default(true),
         ];
     }

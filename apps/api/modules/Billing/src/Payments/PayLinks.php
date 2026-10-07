@@ -33,6 +33,15 @@ final class PayLinks
             array_filter(['invoice' => $invoice->id, 'u' => $payerId] + $extra), absolute: false);
     }
 
+    /** The invoice itself, to read and print, for the payer without signing in (with its QR code for a Saudi tax invoice). */
+    public function document(Invoice $invoice, ?string $payerId = null): string
+    {
+        $days = (int) config('billing.payments.link_days');
+
+        return $this->base().URL::temporarySignedRoute('billing.pay.document', CarbonImmutable::now()->addDays($days),
+            array_filter(['invoice' => $invoice->id, 'u' => $payerId]), absolute: false);
+    }
+
     /** Back from the gateway's page (paid, or not), to the host the payer left from: their session is there. */
     public function returnTo(PaymentCheckout $checkout): string
     {

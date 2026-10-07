@@ -2,10 +2,10 @@
 
 return [
     'description' => 'فاتورة :number · :academy',
-    'gateways' => ['stripe' => 'Stripe', 'moyasar' => 'Moyasar (ميسّر)', 'tap' => 'Tap', 'demo' => 'بوابة تجريبية'],
+    'gateways' => ['stripe' => 'Stripe', 'moyasar' => 'Moyasar (ميسّر)', 'tap' => 'Tap', 'paymob' => 'Paymob (باي موب)', 'stripe_connect' => 'Stripe (حساب الأكاديمية مربوط)', 'demo' => 'بوابة تجريبية'],
     'methods' => [
         'card' => 'كارت', 'mada' => 'مدى', 'apple_pay' => 'Apple Pay', 'google_pay' => 'Google Pay',
-        'stc_pay' => 'STC Pay', 'knet' => 'KNET', 'benefit' => 'BENEFIT',
+        'stc_pay' => 'STC Pay', 'knet' => 'KNET', 'benefit' => 'BENEFIT', 'wallet' => 'محافظ إلكترونية',
     ],
     'modes' => ['test' => 'تجربة', 'live' => 'حقيقي'],
     'statuses' => ['open' => 'مفتوحة', 'paid' => 'اتدفعت', 'failed' => 'ما تمّتش', 'expired' => 'انتهت', 'refund_due' => 'محتاجة استرداد'],
@@ -17,6 +17,10 @@ return [
         'currencies' => 'العملات',
         'secret_key' => 'المفتاح السري (Secret key)',
         'webhook_secret' => 'سر الـ webhook',
+        'public_key' => 'المفتاح العام (Public key)',
+        'api_key' => 'مفتاح الـ API',
+        'hmac_secret' => 'سر الـ HMAC',
+        'integration_ids' => 'أرقام الـ Integrations',
         'is_active' => 'شغالة',
     ],
     'hints' => [
@@ -27,6 +31,11 @@ return [
             'stripe' => 'من Stripe › Developers › Webhooks (بيبدأ بـ whsec_). رابط الـ webhook بيظهر في كارت البوابة بعد الحفظ.',
             'moyasar' => 'الكلمة السرية اللي هتكتبها في Moyasar وانت بتضيف الـ webhook.',
         ],
+        'secret_key' => ['paymob' => 'من Paymob › Settings › Account Info (بيبدأ بـ egy_sk_).'],
+        'public_key' => ['paymob' => 'من نفس الصفحة (بيبدأ بـ egy_pk_).'],
+        'api_key' => ['paymob' => 'من Paymob › Settings › Account Info. بنستخدمه عشان نسأل Paymob عن العملية قبل ما نسجّل أي دفعة.'],
+        'hmac_secret' => ['paymob' => 'من Paymob › Settings › Account Info. بنتأكد بيه إن الإشعار جاي من Paymob فعلًا.'],
+        'integration_ids' => ['paymob' => 'من Paymob › Developers › Payment Integrations: رقم الكارت ورقم المحافظ، بينهم فاصلة (مثلًا 123456, 234567).'],
     ],
     'errors' => [
         'required' => 'لازم :field.',
@@ -34,6 +43,8 @@ return [
         'not_here' => 'الطريقة دي مش متاحة لفاتورة بالـ :currency.',
         'gateway' => 'بوابة الدفع مش بترد دلوقتي. جرّب تاني بعد شوية أو اختار طريقة تانية.',
         'stripe_step' => 'Stripe بيقبل مبالغ الـ :currency بمضاعفات 10 فلس بس.',
+        'integration_ids' => 'اكتب أرقام الـ Integrations أرقام بس، بينهم فاصلة.',
+        'paymob_integrations' => 'مفيش أرقام Integrations: Paymob مش هيعرف يعرض طرق الدفع.',
     ],
     'page' => [
         'title' => 'فاتورة :number',
@@ -93,6 +104,8 @@ return [
             'stripe' => 'في Stripe › Developers › Webhooks ضيف الرابط ده، واختار الأحداث: checkout.session.completed وcheckout.session.async_payment_succeeded وcheckout.session.async_payment_failed وcheckout.session.expired.',
             'moyasar' => 'في Moyasar › Settings › Webhooks ضيف الرابط ده بنفس الكلمة السرية، واختار أحداث الدفع (payment_paid وpayment_failed).',
             'tap' => 'Tap بيبعت على الرابط ده لوحده مع كل عملية دفع، ومش محتاج إعداد.',
+            'paymob' => 'Paymob بيبعت على الرابط ده لوحده مع كل عملية دفع (موقّع بالـ HMAC)، ومش محتاج إعداد.',
+            'stripe_connect' => 'حساب Stripe بتاع الأكاديمية مربوط بالمنصة: الفلوس بتروح عليه هو على طول، ومش محتاج مفاتيح ولا webhook.',
             'demo' => 'البوابة التجريبية مش بتستخدم webhooks.',
         ],
         'all_currencies' => 'كل العملات',
@@ -110,5 +123,19 @@ return [
         'copy_link_hint' => 'ابعته للي بيدفع على واتساب أو إيميل: بيفتح الفاتورة وطرق الدفع من غير تسجيل دخول.',
         'open' => 'افتحه',
         'none' => 'مفيش محاولات دفع أونلاين للفاتورة دي.',
+    ],
+    'connect' => [
+        'action' => 'اربط حساب Stripe',
+        'explain' => 'هتروح على Stripe تدخل بحساب الأكاديمية (أو تعمل واحد)، وتوافق إن المنصة تعمل صفحات دفع عليه. الفلوس بتروح على حساب الأكاديمية على طول، وإنت مش محتاج تحط أي مفاتيح هنا.',
+        'go' => 'روح على Stripe',
+        'account' => 'الحساب المربوط: :id',
+        'disconnect' => 'افصل الحساب',
+        'disconnect_explain' => 'المنصة مش هتقدر تعمل مدفوعات على حساب Stripe ده تاني. المدفوعات اللي اتعملت قبل كده بتفضل زي ما هي.',
+        'disconnected' => 'حساب Stripe اتفصل.',
+        'result' => [
+            'connected' => 'حساب Stripe اتربط. اختبره وبعدين شغّله للفواتير.',
+            'denied' => 'الربط ما كملش في Stripe.',
+            'failed' => 'Stripe ما ردّش على الربط. جرّب تاني.',
+        ],
     ],
 ];

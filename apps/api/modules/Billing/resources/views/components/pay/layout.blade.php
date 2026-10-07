@@ -1,4 +1,4 @@
-@props(['branding' => null, 'title' => ''])
+@props(['branding' => null, 'title' => '', 'wide' => false])
 {{-- A page of its own for paying, outside the panels: the academy's name, logo and colour, Arabic first, phone first. --}}
 @php
     $rtl = str_starts_with(app()->getLocale(), 'ar');
@@ -27,6 +27,8 @@
         * { box-sizing: border-box; }
         body { margin: 0; min-height: 100dvh; background: var(--bg); color: var(--ink); font: 16px/1.6 'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
         main { max-width: 30rem; margin: 0 auto; padding: 1.25rem 1rem 2.5rem; display: flex; flex-direction: column; gap: .9rem; }
+        main.wide { max-width: 50rem; }
+        @media print { body { background: #fff; } main { padding: 0; } .no-print { display: none !important; } .card { border: 0; } main > * { animation: none !important; } }
         .brand { display: flex; align-items: center; gap: .7rem; padding: .25rem 0 .5rem; }
         .brand img { height: 2.4rem; width: auto; }
         .brand span.mark { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: .7rem; background: var(--brand); color: #fff; font-weight: 700; }
@@ -61,6 +63,7 @@
         .banner[data-tone="wait"] { background: var(--wait-soft); color: var(--wait); }
         .errors { color: var(--bad); font-size: .9rem; margin: 0; }
         footer { text-align: center; color: var(--muted); font-size: .78rem; }
+        .doc-link { display: inline-block; margin-top: .7rem; font-size: .88rem; font-weight: 600; color: var(--brand); }
         @media (prefers-reduced-motion: no-preference) {
             main > * { animation: rise .45s cubic-bezier(.2, .7, .2, 1) backwards; }
             main > :nth-child(2) { animation-delay: 60ms; } main > :nth-child(3) { animation-delay: 120ms; } main > :nth-child(4) { animation-delay: 180ms; } main > :nth-child(5) { animation-delay: 240ms; }
@@ -71,7 +74,7 @@
     </style>
 </head>
 <body>
-    <main>
+    <main @if ($wide) class="wide" @endif>
         <div class="brand">
             @if ($branding?->logoUrl)
                 <img src="{{ $branding->logoUrl }}" alt="">

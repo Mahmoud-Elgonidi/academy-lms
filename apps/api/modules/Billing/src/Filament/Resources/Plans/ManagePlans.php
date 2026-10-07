@@ -18,6 +18,7 @@ use Modules\Billing\Actions\SavePlan;
 use Modules\Billing\Actions\SavePriceRegions;
 use Modules\Billing\Models\BillingSettings;
 use Modules\Billing\Models\PriceRegion;
+use Modules\SharedKernel\Tenancy\TenantContext;
 
 final class ManagePlans extends ManageRecords
 {
@@ -64,7 +65,8 @@ final class ManagePlans extends ManageRecords
                 ->fillForm(function () {
                     $s = BillingSettings::current();
 
-                    return ['tax_percent' => $s->tax_rate_bp / 100, 'prices_include_tax' => $s->prices_include_tax, 'tax_number' => $s->tax_number, 'invoice_prefix' => $s->invoice_prefix, 'due_days' => $s->due_days];
+                    return ['tax_percent' => $s->tax_rate_bp / 100, 'prices_include_tax' => $s->prices_include_tax, 'tax_number' => $s->tax_number, 'invoice_prefix' => $s->invoice_prefix, 'due_days' => $s->due_days,
+                        'seller_name' => $s->seller_name ?: app(TenantContext::class)->require()->nameAr, 'zatca' => $s->zatca];
                 })
                 ->schema([
                     Grid::make(2)->schema([
@@ -74,9 +76,12 @@ final class ManagePlans extends ManageRecords
                         TextInput::make('due_days')->label(__('billing::plans.tax.due_days'))->numeric()->minValue(0)->maxValue(90)->required(),
                     ]),
                     Toggle::make('prices_include_tax')->label(__('billing::plans.tax.inclusive'))->helperText(__('billing::plans.tax.inclusive_hint')),
+                    TextInput::make('seller_name')->label(__('billing::plans.tax.seller_name'))->helperText(__('billing::plans.tax.seller_hint'))->maxLength(120),
+                    Toggle::make('zatca')->label(__('billing::plans.tax.zatca'))->helperText(__('billing::plans.tax.zatca_hint')),
                 ])
                 ->action(function (array $data) {
-                    app(SaveBillingSettings::class)->handle($data['tax_percent'], (bool) $data['prices_include_tax'], $data['tax_number'] ?? null, (string) $data['invoice_prefix'], (int) $data['due_days']);
+                    app(SaveBillingSettings::class)->handle($data['tax_percent'], (bool) $data['prices_include_tax'], $data['tax_number'] ?? null, (string) $data['invoice_prefix'], (int) $data['due_days'],
+                        $data['seller_name'] ?? null, (bool) ($data['zatca'] ?? false));
                     Notification::make()->success()->title(__('billing::plans.saved'))->send();
                 }),
             CreateAction::make()

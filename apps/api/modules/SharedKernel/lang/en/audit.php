@@ -8,6 +8,8 @@ return [
             'payment_recorded' => 'Payment of :amount (:method) recorded on invoice :number',
             'invoice_voided' => 'Invoice :number voided: :reason',
             'settings_saved' => 'Tax and invoice settings changed',
+            'stripe_connected' => 'Stripe account :account connected (:mode)',
+            'stripe_disconnected' => 'Stripe account :account disconnected',
         ],
         'policy' => [
             'saved' => 'Cancellation policy version :version',

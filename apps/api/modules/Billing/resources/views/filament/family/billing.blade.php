@@ -38,6 +38,7 @@
                     @if ($inv['paid']) · {{ __($l.'paid_on', ['date' => $inv['paid']]) }}
                     @elseif ($inv['due']) · {{ __($l.'due', ['date' => $inv['due']]) }}@endif
                 </small>
+                <a class="bf-doc" href="{{ $inv['document'] }}" target="_blank" rel="noopener">{{ __('billing::invoices.doc.view') }}</a>
                 @if ($inv['outstanding'] && $inv['status'] === 'partly_paid')
                     <small style="justify-self: end">{{ __($l.'left', ['amount' => $inv['outstanding']]) }}</small>
                 @endif

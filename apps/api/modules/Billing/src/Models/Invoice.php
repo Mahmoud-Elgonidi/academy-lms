@@ -13,7 +13,8 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
  * Once issued an invoice never changes except for what is paid on it; a
- * mistake is voided (unpaid) or corrected with a credit note (later).
+ * mistake is voided (unpaid). A Saudi tax invoice (ZATCA) is cancelled by a
+ * credit note. What it says about the seller is kept as issued.
  *
  * @property string $id
  * @property ?string $number
@@ -33,6 +34,11 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?CarbonImmutable $voided_at
  * @property ?string $void_reason
  * @property ?string $voided_by
+ * @property ?string $seller_name
+ * @property ?string $seller_tax_number
+ * @property ?string $tax_document simplified (a ZATCA simplified tax invoice) | null
+ * @property ?string $zatca_qr
+ * @property ?string $credit_note_id
  */
 final class Invoice extends Model
 {
@@ -42,7 +48,11 @@ final class Invoice extends Model
     protected $fillable = [
         'number', 'billing_account_id', 'subscription_id', 'status', 'currency', 'subtotal_minor', 'tax_minor', 'total_minor',
         'paid_minor', 'tax_rate_bp', 'prices_include_tax', 'issued_at', 'due_at', 'paid_at', 'voided_at', 'void_reason', 'voided_by', 'created_by',
+        'seller_name', 'seller_tax_number', 'tax_document', 'zatca_qr', 'credit_note_id',
     ];
+
+    /** What an issued invoice says, which never changes after. */
+    private const FROZEN = ['number', 'currency', 'subtotal_minor', 'tax_minor', 'total_minor', 'tax_rate_bp', 'prices_include_tax', 'issued_at', 'seller_name', 'seller_tax_number', 'tax_document', 'zatca_qr'];
 
     protected $attributes = ['status' => 'draft', 'paid_minor' => 0];
 
@@ -85,6 +95,12 @@ final class Invoice extends Model
         return $this->belongsTo(BillingAccount::class);
     }
 
+    /** @return BelongsTo<CreditNote, $this> */
+    public function creditNote(): BelongsTo
+    {
+        return $this->belongsTo(CreditNote::class);
+    }
+
     /** @return BelongsTo<Subscription, $this> */
     public function subscription(): BelongsTo
     {
@@ -108,8 +124,8 @@ final class Invoice extends Model
 
     public function save(array $options = []): bool
     {
-        if ($this->exists && in_array($this->getOriginal('status'), ['paid', 'void'], true) && $this->isDirty(['total_minor', 'subtotal_minor', 'tax_minor', 'number', 'currency'])) {
-            throw new LogicException('A closed invoice does not change.');
+        if ($this->exists && in_array($this->getOriginal('status'), ['issued', 'paid', 'void'], true) && $this->isDirty(self::FROZEN)) {
+            throw new LogicException('An issued invoice does not change.');
         }
 
         return parent::save($options);

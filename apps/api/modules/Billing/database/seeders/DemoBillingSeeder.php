@@ -16,7 +16,8 @@ class DemoBillingSeeder extends Seeder
 {
     public function run(SaveBillingSettings $settings, SavePriceRegions $regions, SavePlan $plans): void
     {
-        $settings->handle(15, true, '310123456700003', 'NR-', 3);
+        // A Saudi academy registered for VAT: its invoices are simplified tax invoices with the ZATCA QR code.
+        $settings->handle(15, true, '310123456700003', 'NR-', 3, 'مؤسسة النور التعليمية', true);
 
         $regions->handle([
             ['name_ar' => 'السعودية والخليج', 'name_en' => 'Saudi Arabia and the Gulf', 'currency' => 'SAR', 'is_default' => true],

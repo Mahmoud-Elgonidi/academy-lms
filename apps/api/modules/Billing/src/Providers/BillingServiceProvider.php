@@ -14,6 +14,7 @@ use Modules\Billing\Contracts\Events\InvoicePaid;
 use Modules\Billing\Filament\Family\FamilyBilling;
 use Modules\Billing\Filament\Resources\Invoices\InvoiceResource;
 use Modules\Billing\Http\Controllers\GatewayWebhookController;
+use Modules\Billing\Http\Controllers\StripeConnectController;
 use Modules\Billing\Listeners\IssueRenewalInvoice;
 use Modules\Billing\Listeners\SendBillingNotifications;
 use Modules\Billing\Live\PaymentsChanged;
@@ -43,6 +44,11 @@ final class BillingServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
         Route::post('webhooks/payments/{academy}/{account}', GatewayWebhookController::class)
             ->middleware(['api', 'throttle:120,1'])->name('billing.webhooks');
+        // Stripe Connect: one address on the platform for coming back from Stripe, and one webhook for every connected account.
+        Route::get('billing/stripe/connected', [StripeConnectController::class, 'connected'])
+            ->middleware(['web', 'throttle:20,1'])->name('billing.stripe.connected');
+        Route::post('webhooks/stripe-connect', [StripeConnectController::class, 'webhook'])
+            ->middleware(['api', 'throttle:240,1'])->name('billing.webhooks.stripe-connect');
         $this->app->make(LiveSignals::class)->on('payments', fn (string $userId) => new PaymentsChanged($userId));
         if ($this->app->runningInConsole()) {
             $this->commands([SweepBillingCommand::class]);

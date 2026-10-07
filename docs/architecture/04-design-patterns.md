@@ -272,9 +272,9 @@ $candidates = app(Pipeline::class)
 - **المشكلة**: مزودين خارجيين كتير وممكن يتغيروا: بوابات الدفع، والفيديو، والفاتورة الإلكترونية، وقنوات الإرسال.
 - **الحل**: interface واحدة (Port)، وadapter لكل مزوّد، و**Manager** بيختار الـ adapter حسب إعدادات الأكاديمية.
 - **الاستخدام**:
-  - `PaymentGateway`: Stripe، وMoyasar، وPaymob، وTap، وPayPal، والدفع اليدوي.
+  - `PaymentGateway`: Stripe (بمفاتيح الأكاديمية أو حسابها المربوط بـ Connect)، وMoyasar، وPaymob، وTap، وPayPal (لسه)، والدفع اليدوي.
   - `VideoProvider`: LiveKit، وExternalLink.
-  - `EInvoicingProvider`: ZATCA.
+  - `EInvoicingProvider`: ZATCA (المرحلة التانية، P2). المرحلة الأولى مش محتاجة adapter: `Billing\Zatca\TaxDocument` بيختم الفاتورة وقت ما تصدر.
   - `MessagingChannel`: WhatsApp، وSMS، والإيميل، وFCM (عن طريق Laravel Notification Channels).
 
 ```php
