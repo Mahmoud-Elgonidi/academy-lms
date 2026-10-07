@@ -26,6 +26,7 @@ final class AbilityMatrix
             // Prices, tax, regions and voiding invoices: the owner and the accountant (Admin is "◐" for billing).
             Ability::ManageBilling => [Role::Owner, Role::Accountant],
             Ability::ManagePayroll => [Role::Owner, Role::Accountant],
+            Ability::ImportData => [Role::Owner, Role::Admin],
         };
     }
 

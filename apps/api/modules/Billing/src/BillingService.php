@@ -29,6 +29,11 @@ final class BillingService implements BillingApi
         return new IssuedInvoice($invoice->id, (string) $invoice->number, $invoice->total());
     }
 
+    public function adopt(NewSubscription $new): string
+    {
+        return $this->subscribe->adopt($new)->id;
+    }
+
     public function recordPayment(string $invoiceId, string $method, Money $amount, ?string $reference, CarbonImmutable $receivedAt, ?string $actorId): void
     {
         $this->payments->handle($invoiceId, $method, $amount, $reference, $receivedAt, null, $actorId);
@@ -48,6 +53,7 @@ final class BillingService implements BillingApi
                 sessionsPerWeek: $plan->sessions_per_week,
                 validityDays: $plan->validity_days,
                 prices: $plan->prices->mapWithKeys(fn (PlanPrice $p) => [$p->price_region_id => $p->money()])->all(),
+                names: [$plan->name_ar, $plan->name_en],
             ))
             ->all();
     }

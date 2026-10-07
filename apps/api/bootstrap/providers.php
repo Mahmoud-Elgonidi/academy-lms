@@ -14,6 +14,7 @@ use Modules\Curriculum\Providers\CurriculumServiceProvider;
 use Modules\Enrollment\Providers\EnrollmentServiceProvider;
 use Modules\Evaluation\Providers\EvaluationServiceProvider;
 use Modules\Identity\Providers\IdentityServiceProvider;
+use Modules\Import\Providers\ImportServiceProvider;
 use Modules\Learning\Providers\LearningServiceProvider;
 use Modules\Payroll\Providers\PayrollServiceProvider;
 use Modules\People\Providers\PeopleServiceProvider;
@@ -39,6 +40,7 @@ return [
     PayrollServiceProvider::class,
     ClassroomServiceProvider::class,
     CrmServiceProvider::class,
+    ImportServiceProvider::class,
     AppServiceProvider::class,
     AcademyPanelProvider::class,
     TeacherPanelProvider::class,

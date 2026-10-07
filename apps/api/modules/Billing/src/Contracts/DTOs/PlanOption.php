@@ -7,7 +7,10 @@ use Modules\SharedKernel\Money\Money;
 /** A plan as the enrolment form offers it, with its price in each region. */
 final readonly class PlanOption
 {
-    /** @param  array<string, Money>  $prices  price region id => block price */
+    /**
+     * @param  array<string, Money>  $prices  price region id => block price
+     * @param  list<string>  $names  the plan's name in each language (to find it by a name typed in either)
+     */
     public function __construct(
         public string $id,
         public string $name,
@@ -16,5 +19,6 @@ final readonly class PlanOption
         public int $sessionsPerWeek,
         public int $validityDays,
         public array $prices,
+        public array $names = [],
     ) {}
 }

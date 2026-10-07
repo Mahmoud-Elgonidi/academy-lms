@@ -14,6 +14,7 @@ use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Credits\Contracts\Events\CreditsGranted;
 use Modules\Identity\Contracts\Preferences\PreferenceDefinition;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
+use Modules\Scheduling\Actions\BringExistingSchedule;
 use Modules\Scheduling\AttendanceService;
 use Modules\Scheduling\Console\MaterializeSessionsCommand;
 use Modules\Scheduling\Console\PlanDstCommand;
@@ -35,6 +36,7 @@ use Modules\Scheduling\Contracts\Events\TeacherLessonsShifted;
 use Modules\Scheduling\Contracts\Events\TimeOffDecided;
 use Modules\Scheduling\Contracts\Events\TimeOffRequested;
 use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
+use Modules\Scheduling\Contracts\ScheduleImport;
 use Modules\Scheduling\Contracts\TrialConversionRates;
 use Modules\Scheduling\Domain\AttendancePolicy;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
@@ -60,6 +62,7 @@ final class SchedulingServiceProvider extends ServiceProvider
         // The current academy's numbers, read each time (one process serves many academies).
         $this->app->bind(AttendancePolicy::class, fn () => PolicyVersion::settingsInForce()->attendance());
         $this->app->singleton(AttendanceApi::class, AttendanceService::class);
+        $this->app->bind(ScheduleImport::class, BringExistingSchedule::class);
         // Trial conversion is the CRM's to know; without it no teacher gets ahead in a trial search.
         $this->app->bindIf(TrialConversionRates::class, fn () => new class implements TrialConversionRates
         {

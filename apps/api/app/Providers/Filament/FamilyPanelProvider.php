@@ -20,6 +20,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Billing\Filament\Family\BillingFamilyPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
+use Modules\Identity\Filament\Pages\SignIn;
 use Modules\Learning\Filament\Family\LearningFamilyPlugin;
 use Modules\People\Filament\Family\PeopleFamilyPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
@@ -38,7 +39,7 @@ final class FamilyPanelProvider extends PanelProvider
         return $panel
             ->id('family')
             ->path('my')
-            ->login()
+            ->login(SignIn::class)
             ->spa()
             ->topNavigation()
             ->maxContentWidth('6xl')

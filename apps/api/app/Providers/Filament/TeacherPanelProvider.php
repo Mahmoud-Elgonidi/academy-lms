@@ -21,6 +21,7 @@ use Modules\Classroom\Filament\Teacher\ClassroomTeacherPlugin;
 use Modules\Crm\Filament\Teacher\CrmTeacherPlugin;
 use Modules\Evaluation\Filament\Teacher\EvaluationTeacherPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
+use Modules\Identity\Filament\Pages\SignIn;
 use Modules\Learning\Filament\Teacher\LearningTeacherPlugin;
 use Modules\Payroll\Filament\Teacher\PayrollTeacherPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
@@ -49,7 +50,7 @@ final class TeacherPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::chrome.script'))
             ->renderHook(PanelsRenderHook::SIDEBAR_NAV_START, fn () => view('shared::chrome.greeting'))
             ->path('teach')
-            ->login()
+            ->login(SignIn::class)
             ->spa()
             ->maxContentWidth('full')
             ->topNavigation()

@@ -19,6 +19,14 @@ interface BillingApi
     public function subscribe(NewSubscription $new): IssuedInvoice;
 
     /**
+     * Puts an enrollment brought over from before the platform on a plan:
+     * the block under way was paid there (its minutes left are the opening
+     * balance), so the first invoice is the next block's, when the balance
+     * reaches the renewal mark. Returns the subscription id.
+     */
+    public function adopt(NewSubscription $new): string;
+
+    /**
      * Records money received for an invoice (a transfer, cash, a wallet). Paid
      * in full, it grants the block's minutes in the same transaction.
      */

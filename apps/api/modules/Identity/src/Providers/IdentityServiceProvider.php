@@ -36,6 +36,8 @@ final class IdentityServiceProvider extends ServiceProvider
 
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'identity');
+        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'identity');
+        $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
 
         Route::prefix('api/v1')
             ->middleware(['api', 'tenant', 'locale', 'timezone'])

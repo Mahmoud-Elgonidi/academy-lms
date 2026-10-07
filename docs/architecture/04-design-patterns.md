@@ -38,6 +38,7 @@
 | M12 | **Evaluation** | أحداث الأداء، والتقييمات، ومراجعات الجودة، والدرجات، والفئات | `LessonRated`، `LessonRatingDue`، و(P2) `QaAuditCompleted`، `TeacherScoreComputed`، `StudentAtRiskDetected` |
 | M13 | **Payroll** | جداول الأسعار، والأرباح، وفترات المرتبات، والكشوف | `PayrollMonthClosed`، و(P2) `StatementPublished` |
 | M14 | **CRM** | الـ leads، والتجارب، وتقييمها، والاستبقاء، والإحالات | `LeadCreated`، `LeadAssigned`، `TrialCompleted`، `TrialMissed`، `TrialAssessed`، `LeadConverted`، `LeadLost` |
+| M14ب | **Import** | استيراد المدرسين والطلاب وأولياء الأمور والجداول من الشيتات | `PeopleImported` |
 | M15 | **Communication** | القوالب، والقنوات، والتفضيلات، والإشعارات، والمحادثات | `NotificationFailed`، `MessageFlagged` |
 | M16 | **Support** | التذاكر والشكاوى | `TicketOpened`، `ComplaintValidated` |
 | M17 | **Reporting** | جداول الحقائق والمؤشرات (للقراءة بس) | — |
@@ -48,6 +49,7 @@
 ```mermaid
 flowchart TD
     CRM --> People & Catalog & Scheduling & Enrollment & Billing
+    Import --> Identity & People & Catalog & Scheduling & Billing & Communication
     Payroll --> People & Scheduling & Evaluation
     Evaluation --> People & Scheduling & Learning
     Support --> People & Scheduling
@@ -83,6 +85,9 @@ flowchart TD
      - **المنفّذ دلوقتي**: Learning بيفتح التقرير لما يسمع `SessionFinalized`، وبيعيد حساب التقدم لما يسمع `CurriculumAttached` من Enrollment. ولأن Scheduling مايعرفش Learning، قسم "المنهج والتقدم" في حساب الطالب بيدخل الصفحة عن طريق **render hook** باسم ثابت (`scheduling::enrollment.account`) بيسجّله Learning.
    - Evaluation بيسمع `SessionReportSubmitted` و`RatingSubmitted` و`ComplaintValidated`.
    - Evaluation بيسمع `SessionFinalized` عشان يطلب تقييم الحصة من الأسرة. المؤشرات نفسها بتتقري من الجداول وقت ما تتطلب (القراءة مسموح فيها join)، ونجوم التقييم تحت الحصة بتدخل صفحة الأسرة عن طريق **render hook** باسم ثابت (`scheduling::family.lesson-card`)، زي Learning.
+   - **Import** فوق الكل زي CRM، ومحدش بيعتمد عليه. بيعمل كل حاجة عن طريق contracts الـ modules: الحسابات من `IdentityApi`، والملفات وأولياء الأمور من `PeopleApi`، والمواد من `CatalogApi`، والجدول الشغال من عقد Scheduling `ScheduleImport`، اللي بيفتح التسجيل والرصيد ويعمل `BillingApi::adopt` (اشتراك أول فاتورة فيه هي الباقة الجاية).
+     - **المعاينة** بتشغّل الاستيراد كله في transaction واحدة وبعدين `rollBack`، وكل صف في savepoint لوحده. فالمعاينة بتقول بالظبط إيه اللي هيحصل، وحتى الصفوف اللي معتمدة على صفوف قبلها (ولي الأمر اللي اتعمل في صف ومستخدم في اللي بعده). الرسايل مابتطلعش لأنها بتستنى الـ commit.
+     - لما الاستيراد يخلص بيطلّع `PeopleImported`، والـ listener بتاعه بيبعت رسالة الترحيب. اللينك الخاص بكل شخص بيتسجل بـ `registerPersonal('welcome')`، وبيشاور على صفحة Identity اللي بيتحدد فيها كلمة السر.
    - CRM بيسمع `TrialLessonBooked` و`SessionRescheduled` و`SessionCancelled` و`SessionFinalized` من Scheduling، و`EnrollmentCreated` من Enrollment. وبيطلّع `TrialCompleted` (المدرس يقيّم) و`TrialAssessed` (المبيعات تكمّل).
      - **المنفّذ دلوقتي**: محدش بيعتمد على CRM. ترتيب "ابحث عن مدرس" محتاج نسبة تحويل التجارب، فـ Scheduling بيعرّف عقد `TrialConversionRates` عنده، والـ CRM بيسجّل التنفيذ بتاعه (dependency inversion). من غير CRM محدش بيتقدم على حد.
      - صفحة العميل بتفتح "ابحث عن مدرس" باسم الـ route وparameters في الـ URL، وده بيفضل داخل حدود الـ module.
@@ -398,7 +403,7 @@ apps/api/
     Scheduling/  Classroom/  Credits/
     Billing/        (Infrastructure/Gateways/{Stripe, Moyasar, Paymob, Tap, PayPal, Manual},
                      Infrastructure/EInvoicing/Zatca)
-    Learning/  Evaluation/  Payroll/  Crm/
+    Learning/  Evaluation/  Payroll/  Crm/  Import/
     Communication/  (Channels/{Mail, Fcm, WhatsApp, Sms, InApp})
     Support/  Reporting/  Audit/  Files/
   routes/{api.php, webhooks.php}      (بيضموا routes الـ modules)

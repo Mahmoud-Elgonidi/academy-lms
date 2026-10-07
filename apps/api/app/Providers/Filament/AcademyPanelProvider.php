@@ -25,6 +25,8 @@ use Modules\Crm\Filament\CrmPlugin;
 use Modules\Curriculum\Filament\CurriculumPlugin;
 use Modules\Evaluation\Filament\EvaluationPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
+use Modules\Identity\Filament\Pages\SignIn;
+use Modules\Import\Filament\ImportPlugin;
 use Modules\Learning\Filament\LearningPlugin;
 use Modules\Payroll\Filament\PayrollPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
@@ -56,7 +58,7 @@ final class AcademyPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::chrome.script'))
             ->renderHook(PanelsRenderHook::SIDEBAR_NAV_START, fn () => view('shared::chrome.greeting'))
             ->path('admin')
-            ->login()
+            ->login(SignIn::class)
             ->spa()
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')
@@ -83,6 +85,7 @@ final class AcademyPanelProvider extends PanelProvider
                 LearningPlugin::make(),
                 EvaluationPlugin::make(),
                 PayrollPlugin::make(),
+                ImportPlugin::make(),
                 CommunicationPlugin::make(),
                 ClassroomPlugin::make(),
                 PlatformPlugin::make(),
