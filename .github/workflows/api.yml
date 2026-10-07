@@ -75,6 +75,17 @@ jobs:
       - name: Tests (Pest, against Postgres with RLS)
         run: vendor/bin/pest
 
+      # Scramble reads the models' columns from the database, as on a laptop:
+      # the export needs the app's database (lms) migrated, not only lms_test.
+      - name: Database for the OpenAPI export
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h 127.0.0.1 -U postgres -v ON_ERROR_STOP=1 \
+            -v db=lms -v owner_password=owner -v app_password=app -v platform_password=platform \
+            -f database/setup/roles.sql
+          php artisan migrate --database=pgsql_owner --force
+
       # The apps are built from packages/openapi/openapi.json: it must say what the code does.
       - name: OpenAPI document is up to date
         run: |
