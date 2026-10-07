@@ -15,6 +15,18 @@ return [
             // Business-initiated messages must use templates Meta approved; this one carries
             // the title and the body as its two parameters, in the recipient's language.
             'template' => env('WHATSAPP_META_TEMPLATE', 'academy_notification'),
+            // Sign-in codes: an "authentication" template with a copy-code button, approved per language.
+            'otp_template' => env('WHATSAPP_META_OTP_TEMPLATE', 'sign_in_code'),
+        ],
+    ],
+    // Texts carry sign-in codes only (a phone without WhatsApp, or "send by SMS instead").
+    'sms' => [
+        'driver' => env('SMS_DRIVER', 'log'),               // log | twilio | none
+        'twilio' => [
+            'sid' => env('TWILIO_ACCOUNT_SID'),
+            'token' => env('TWILIO_AUTH_TOKEN'),
+            'from' => env('TWILIO_FROM'),                   // a number or an alphanumeric sender ID
+            'messaging_service_sid' => env('TWILIO_MESSAGING_SERVICE_SID'),
         ],
     ],
     'push' => [

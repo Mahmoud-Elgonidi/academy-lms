@@ -11,14 +11,13 @@ use Modules\Identity\Actions\UpdateProfile;
 use Modules\Identity\Http\V1\Requests\LoginRequest;
 use Modules\Identity\Http\V1\Requests\UpdateProfileRequest;
 use Modules\Identity\Http\V1\Resources\UserResource;
+use Modules\Identity\Http\V1\Responses\TokenResponse;
 use Modules\Identity\Models\PersonalAccessToken;
 use Modules\Identity\Models\User;
-use Modules\SharedKernel\Time\LocalTimePresenter;
-use Modules\SharedKernel\Time\ViewerTimezone;
 
 final class AuthController
 {
-    public function login(LoginRequest $request, Login $login, ViewerTimezone $viewer, LocalTimePresenter $time): JsonResponse
+    public function login(LoginRequest $request, Login $login): JsonResponse
     {
         $request->ensureIsNotRateLimited();
 
@@ -35,14 +34,8 @@ final class AuthController
         }
 
         $request->clearRateLimiter();
-        $viewer->setUser($result['user']);
 
-        return response()->json([
-            'token' => $result['token'],
-            'token_type' => 'Bearer',
-            'expires_at' => $time->present($result['expires_at']),
-            'user' => new UserResource($result['user']),
-        ]);
+        return TokenResponse::make($result);
     }
 
     public function me(Request $request): UserResource

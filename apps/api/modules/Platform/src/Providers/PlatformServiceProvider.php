@@ -10,11 +10,13 @@ use Modules\Platform\Branding\BrandingService;
 use Modules\Platform\Commands\CreatePlatformAdmin;
 use Modules\Platform\Commands\ShowPlatformCode;
 use Modules\Platform\Console\ConsoleService;
+use Modules\Platform\Contracts\AccountDirectory;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\Platform\Contracts\ConsoleApi;
 use Modules\Platform\Contracts\PlatformApi;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Platform\Directory\EloquentTenantDirectory;
+use Modules\Platform\Directory\PlatformAccountDirectory;
 use Modules\Platform\Listeners\RecordConsoleSignIn;
 use Modules\Platform\PlatformService;
 use Modules\SharedKernel\Tenancy\TenantResolver;
@@ -29,6 +31,7 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->alias(TenantDirectory::class, TenantResolver::class);
         $this->app->singleton(PlatformApi::class, PlatformService::class);
         $this->app->singleton(ConsoleApi::class, ConsoleService::class);
+        $this->app->singleton(AccountDirectory::class, PlatformAccountDirectory::class);
 
         // Scoped: built once per request for the request's academy.
         $this->app->scoped(BrandingService::class);

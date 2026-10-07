@@ -144,6 +144,8 @@
     .fi-simple-main { position: relative; background-color: color-mix(in oklab, white 86%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 0 0 1px var(--lms-line), 0 2px 4px rgb(0 0 0 / .03), 0 30px 60px -32px rgb(0 0 0 / .3); }
     .fi-simple-main::before { content: ''; position: absolute; inset-inline: 22%; top: 0; height: 4px; border-radius: 0 0 4px 4px; background: var(--lms-pill); }
     .fi-simple-header div.fi-logo { margin-bottom: calc(1rem - .3em); font-size: 1.4rem; font-weight: 800; }
+    /* The one-time code: big, spaced digits, read left to right in every language. */
+    .lms-otp-input { text-align: center; font-size: 1.35rem; font-weight: 700; letter-spacing: .45em; font-variant-numeric: tabular-nums; }
     .dark .fi-simple-main { background-color: color-mix(in oklab, var(--gray-900) 85%, transparent); box-shadow: 0 0 0 1px rgb(255 255 255 / .08), 0 30px 60px -32px rgb(0 0 0 / .7); }
     .dark .fi-simple-layout::before { background: radial-gradient(circle, color-mix(in oklab, var(--primary-500) 22%, transparent), transparent 65%); }
     .dark .fi-simple-layout::after { background: radial-gradient(circle, color-mix(in oklab, var(--warning-500) 12%, transparent), transparent 65%); }

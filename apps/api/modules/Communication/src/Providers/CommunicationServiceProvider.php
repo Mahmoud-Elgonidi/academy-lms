@@ -17,8 +17,10 @@ use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Communication\Filament\NotificationBell;
 use Modules\Communication\Live\InboxChanged;
 use Modules\Communication\NotificationPreferences;
+use Modules\Communication\Otp\CommunicationOtpSender;
 use Modules\Communication\Templates\LinkRegistry;
 use Modules\Communication\Templates\TemplateRegistry;
+use Modules\Identity\Contracts\OtpSender;
 use Modules\SharedKernel\Realtime\LiveSignals;
 
 final class CommunicationServiceProvider extends ServiceProvider
@@ -29,6 +31,8 @@ final class CommunicationServiceProvider extends ServiceProvider
         $this->app->singleton(TemplateRegistry::class);
         $this->app->singleton(NotificationsApi::class, CommunicationService::class);
         $this->app->singleton(NotificationLinks::class, LinkRegistry::class);
+        // Identity's sign-in codes go out through the platform's channels (Identity sits below and cannot call us).
+        $this->app->singleton(OtpSender::class, CommunicationOtpSender::class);
     }
 
     public function boot(): void

@@ -2,24 +2,31 @@
 
 namespace Modules\Identity\Providers;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
 use Modules\Identity\Authorization\AbilityMatrix;
 use Modules\Identity\Contracts\IdentityApi;
+use Modules\Identity\Contracts\OtpSender;
 use Modules\Identity\Contracts\PersonalChannel;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Identity\IdentityService;
+use Modules\Identity\Models\OtpChallenge;
 use Modules\Identity\Models\PersonalAccessToken;
 use Modules\Identity\Models\User;
+use Modules\Identity\Otp\LogOtpSender;
 use Modules\Identity\Preferences\PreferenceStore;
 
 final class IdentityServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->mergeConfigFrom(__DIR__.'/../../config/identity.php', 'identity');
         $this->app->singleton(IdentityApi::class, IdentityService::class);
+        // Codes go to the log until Communication binds the real sender.
+        $this->app->singletonIf(OtpSender::class, LogOtpSender::class);
 
         // One registry per process: modules declare their preferences in boot().
         $this->app->singleton(PreferenceStore::class);
@@ -42,5 +49,12 @@ final class IdentityServiceProvider extends ServiceProvider
         Route::prefix('api/v1')
             ->middleware(['api', 'tenant', 'locale', 'timezone'])
             ->group(__DIR__.'/../../routes/api.php');
+        Route::prefix('api/v1')
+            ->middleware(['api', 'locale', 'timezone'])
+            ->group(__DIR__.'/../../routes/api_accounts.php');
+
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->command('model:prune', ['--model' => [OtpChallenge::class]])->daily()->onOneServer();
+        });
     }
 }

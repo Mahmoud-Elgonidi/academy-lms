@@ -13,6 +13,8 @@ use Modules\Identity\Models\User;
  */
 final class Login
 {
+    public function __construct(private readonly IssueAccessToken $tokens) {}
+
     /** @return array{user: User, token: string, expires_at: ?CarbonImmutable} */
     public function handle(string $login, string $password, string $deviceName): array
     {
@@ -23,12 +25,7 @@ final class Login
             throw ValidationException::withMessages(['login' => __('identity::auth.failed')]);
         }
 
-        $minutes = config('sanctum.expiration');
-        $expiresAt = $minutes ? now()->addMinutes((int) $minutes) : null;
-
-        $token = $user->createToken($deviceName, ['*'], $expiresAt);
-
-        return ['user' => $user->load('roleRecords'), 'token' => $token->plainTextToken, 'expires_at' => $expiresAt];
+        return $this->tokens->handle($user, $deviceName);
     }
 
     private function field(string $login): string
