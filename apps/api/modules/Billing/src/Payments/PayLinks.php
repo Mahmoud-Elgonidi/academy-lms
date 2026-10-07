@@ -45,7 +45,8 @@ final class PayLinks
     /** Back from the gateway's page (paid, or not), to the host the payer left from: their session is there. */
     public function returnTo(PaymentCheckout $checkout): string
     {
-        $host = app()->runningInConsole() ? $this->base() : request()->getSchemeAndHttpHost();
+        // The apps call the API on a shared host: the payer comes back to the academy's own.
+        $host = app()->runningInConsole() || request()->is('api/*') ? $this->base() : request()->getSchemeAndHttpHost();
 
         return $host.URL::temporarySignedRoute('billing.pay.return', $checkout->expires_at->addDays(2), ['checkout' => $checkout->id], absolute: false);
     }

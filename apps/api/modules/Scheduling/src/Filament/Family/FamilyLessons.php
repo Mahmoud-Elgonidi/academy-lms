@@ -15,18 +15,13 @@ use Livewire\Attributes\Computed;
 use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\LearnerStage;
 use Modules\Scheduling\Actions\CancelSession;
-use Modules\Scheduling\Actions\Dst\SendDstNotices;
-use Modules\Scheduling\Actions\Policy\PolicyDecider;
 use Modules\Scheduling\Actions\RefuseSubstitute;
 use Modules\Scheduling\Domain\Enums\ParticipantRole;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
-use Modules\Scheduling\Domain\Enums\SessionType;
-use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
-use Modules\Scheduling\Domain\Models\ShiftNotice;
-use Modules\Scheduling\Domain\Policy\PolicyEvent;
-use Modules\Scheduling\Filament\TimeOffView;
+use Modules\Scheduling\Queries\FamilyCancellation;
+use Modules\Scheduling\Queries\FamilyNotices;
 use Modules\Scheduling\Queries\LessonList;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerTimezone;
@@ -108,16 +103,12 @@ final class FamilyLessons extends Page
     #[Computed]
     public function holidays(): array
     {
-        $now = CarbonImmutable::now();
-
-        return AcademyHoliday::query()->where('ends_at', '>', $now)->where('starts_at', '<', $now->addWeeks(6))->orderBy('starts_at')->get()
-            ->map(fn (AcademyHoliday $h) => ['name' => $h->name, 'period' => TimeOffView::holiday($h)])->all();
+        return app(FamilyNotices::class)->holidays();
     }
 
     /**
-     * Clock changes that move the learner's hour within two weeks (the DST
-     * planner, as the family is told), said above the lessons on the
-     * learner's clock; not where the academy kept their hour.
+     * Clock changes that move the learner's hour within two weeks, said above
+     * the lessons on the learner's clock.
      *
      * @return list<string>
      */
@@ -125,24 +116,8 @@ final class FamilyLessons extends Page
     public function clockChanges(): array
     {
         $learner = app(FamilyView::class)->current((string) auth()->id());
-        if ($learner === null) {
-            return [];
-        }
-        $now = CarbonImmutable::now();
-        $locale = app()->getLocale();
-        $viewer = app(ViewerTimezone::class)->effective();
-        $at = fn (int $weekday, string $time) => CarbonImmutable::parse('2026-01-05 '.substr($time, 0, 5))->addDays($weekday - 1)->locale($locale)->translatedFormat('l H:i');
 
-        return ShiftNotice::query()->where('student_id', $learner->id)->where('decision', '!=', 'keep_student')
-            ->where('changes_at', '>', $now)->where('changes_at', '<=', $now->addDays(SendDstNotices::EARLY_DAYS))
-            ->orderBy('changes_at')->get()
-            ->map(fn (ShiftNotice $n) => __('scheduling::dst.family.notice', [
-                'date' => $n->changes_at->setTimezone($viewer)->locale($locale)->translatedFormat('l j F'),
-                'before' => $at($n->before_weekday, $n->before_time),
-                'after' => $at($n->after_weekday, $n->after_time),
-                'zone' => Timezones::city($n->other_tz),
-                'cause' => Timezones::city($n->cause_tz),
-            ]))->all();
+        return $learner === null ? [] : app(FamilyNotices::class)->clockChanges($learner->id, app(ViewerTimezone::class)->effective());
     }
 
     /**
@@ -183,16 +158,6 @@ final class FamilyLessons extends Page
     /** The policy's answer in the family's words: no teacher pay, no scores. */
     private function outcome(Session $session): string
     {
-        [$decision, $input, $version] = app(PolicyDecider::class)->decide($session, PolicyEvent::StudentCancel);
-        $policy = $version->policy();
-        $l = 'scheduling::family.cancel.outcomes.';
-
-        return match (true) {
-            $session->type === SessionType::Trial => __($l.'trial'),
-            $session->type === SessionType::Makeup => __($l.'makeup'),
-            $decision->credit === 'refund' => __($l.'refund', ['hours' => $policy->get('student_notice_hours')]),
-            $input->noticeHours < $policy->get('student_notice_hours') => __($l.'late', ['hours' => $policy->get('student_notice_hours')]),
-            default => __($l.'quota', ['quota' => $policy->get('quota_per_block')]),
-        };
+        return app(FamilyCancellation::class)->outcome($session);
     }
 }

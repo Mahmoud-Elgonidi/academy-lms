@@ -3,7 +3,6 @@
 namespace Modules\Crm\Filament\Teacher;
 
 use BackedEnum;
-use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -19,6 +18,7 @@ use Modules\Billing\Contracts\BillingApi;
 use Modules\Crm\Actions\AssessTrial;
 use Modules\Crm\Filament\Concerns\Attempts;
 use Modules\Crm\Models\LeadTrial;
+use Modules\Crm\Queries\TeacherTrials;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -77,43 +77,13 @@ final class MyTrials extends Page
     #[Computed]
     public function groups(): array
     {
-        $now = CarbonImmutable::now();
         $viewer = app(ViewerTimezone::class)->effective();
         $locale = app()->getLocale();
-        $plans = collect(app(BillingApi::class)->planOptions(null))->keyBy('id');
-        $rows = LeadTrial::query()
-            ->join('leads as l', fn ($j) => $j->on('l.academy_id', '=', 'lead_trials.academy_id')->on('l.id', '=', 'lead_trials.lead_id'))
-            ->leftJoin('subjects as s', fn ($j) => $j->on('s.academy_id', '=', 'l.academy_id')->on('s.id', '=', 'l.subject_id'))
-            ->where('lead_trials.teacher_id', auth()->id())
-            ->where(fn ($q) => $q->where('lead_trials.status', 'booked')
-                ->orWhere(fn ($q) => $q->where('lead_trials.status', 'attended')->where(fn ($q) => $q->whereNull('lead_trials.assessed_at')->orWhere('lead_trials.assessed_at', '>', $now->subDays(30)))))
-            ->orderBy('lead_trials.starts_at')
-            ->get(['lead_trials.*', 'l.contact_name', 'l.for_child', 'l.learner_name', 'l.learner_birth_year', 'l.notes as lead_notes', 's.name_ar as subject_ar', 's.name_en as subject_en']);
 
-        $groups = ['to_assess' => [], 'upcoming' => [], 'done' => []];
-        foreach ($rows as $t) {
-            /** @var LeadTrial $t */
-            $group = match (true) {
-                $t->status === 'booked' => 'upcoming',
-                $t->assessed_at === null => 'to_assess',
-                default => 'done',
-            };
-            $groups[$group][] = [
-                'id' => $t->id,
-                'name' => $t->getAttribute('for_child') && $t->getAttribute('learner_name') ? $t->getAttribute('learner_name') : $t->getAttribute('contact_name'),
-                'age' => $t->getAttribute('learner_birth_year') ? __('crm::trials.age', ['years' => $now->year - (int) $t->getAttribute('learner_birth_year')]) : null,
-                'subject' => $locale === 'ar' ? $t->getAttribute('subject_ar') : $t->getAttribute('subject_en'),
-                'when' => $t->starts_at->setTimezone($viewer)->locale($locale)->translatedFormat('l j F · H:i'),
-                'notes' => $t->getAttribute('lead_notes'),
-                'level' => $t->level,
-                'plan' => $t->recommended_plan_id ? ($plans[$t->recommended_plan_id]->name ?? null) : null,
-                'perWeek' => $t->recommended_per_week,
-                'assessment' => $t->assessment,
-            ];
-        }
-        $groups['done'] = array_reverse($groups['done']);
-
-        return $groups;
+        return array_map(fn (array $group) => array_map(fn (array $t) => [
+            'when' => $t['starts_at']->setTimezone($viewer)->locale($locale)->translatedFormat('l j F · H:i'),
+            'perWeek' => $t['per_week'],
+        ] + $t, $group), app(TeacherTrials::class)->of((string) auth()->id()));
     }
 
     public function assessAction(): Action

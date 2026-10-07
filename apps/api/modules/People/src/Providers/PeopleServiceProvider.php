@@ -2,6 +2,7 @@
 
 namespace Modules\People\Providers;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Modules\People\Contracts\FamilyView;
@@ -24,5 +25,9 @@ final class PeopleServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'people');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'people');
         Livewire::component('people.learner-switcher', LearnerSwitcher::class);
+
+        Route::prefix('api/v1')
+            ->middleware(['api', 'tenant', 'locale', 'timezone'])
+            ->group(__DIR__.'/../../routes/api.php');
     }
 }

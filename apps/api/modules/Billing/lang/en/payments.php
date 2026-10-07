@@ -85,6 +85,7 @@ return [
         'pay_now' => 'Pay now',
         'choose' => 'Choose how to pay',
         'go' => 'Continue to pay',
+        'unavailable' => 'This invoice cannot be paid online now. Pay the academy the usual way.',
     ],
     'settings' => [
         'nav' => 'Online payments',

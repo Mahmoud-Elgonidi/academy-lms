@@ -12,6 +12,8 @@ return [
     'conflict' => 'هذا يتعارض مع الحالة الحالية.',
     'too-many-requests' => 'طلبات كثيرة. حاول مرة أخرى بعد قليل.',
     'http-error' => 'تعذّر إتمام الطلب.',
+    'idempotency_key' => 'مفتاح Idempotency-Key طويل جدًا.',
+    'idempotency_reused' => 'مفتاح Idempotency-Key ده اتستخدم قبل كده لطلب مختلف.',
     'server-error' => 'حدث خطأ من جهتنا.',
     // The web pages of a suspended academy (the API answers academy-suspended).
     'suspended_page' => ['title' => 'الأكاديمية متوقفة مؤقتًا', 'body' => 'الموقع ده مش متاح دلوقتي. لو انت من الأكاديمية، تواصل مع الإدارة.'],

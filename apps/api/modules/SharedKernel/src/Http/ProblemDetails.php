@@ -73,7 +73,8 @@ final class ProblemDetails
             return config('app.debug') ? $e->getMessage() : null;
         }
 
-        if ($e instanceof ValidationException) {
+        // A missing record says nothing of what it was (no class names).
+        if ($e instanceof ValidationException || $e instanceof ModelNotFoundException) {
             return null;
         }
 

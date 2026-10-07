@@ -5,9 +5,9 @@ namespace Modules\People\Contracts;
 use Modules\People\Contracts\DTOs\Learner;
 
 /**
- * Whose account a student or guardian is looking at on the web. A student
- * sees their own; a guardian, each child they are linked to, one at a
- * time (the choice holds for their browser session).
+ * Whose account a student or guardian is looking at. A student sees their
+ * own; a guardian, each child they are linked to, one at a time (on the web
+ * the choice holds for their browser session; the apps name the learner).
  */
 interface FamilyView
 {
@@ -21,6 +21,12 @@ interface FamilyView
     public function choose(string $viewerId, string $learnerId): void;
 
     public function follows(string $viewerId, string $learnerId): bool;
+
+    /**
+     * For the apps, which name the learner on each request: that learner if
+     * the viewer follows them, the first one when none is named, else null.
+     */
+    public function learner(string $viewerId, ?string $learnerId): ?Learner;
 
     /** The look of the viewer's area: their own stage when they are a student; the classic look for a guardian. */
     public function stage(string $viewerId): LearnerStage;

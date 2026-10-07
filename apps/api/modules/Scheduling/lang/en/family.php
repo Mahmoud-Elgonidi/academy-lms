@@ -36,6 +36,7 @@ return [
         'reason' => 'Reason',
         'note' => 'A note for the academy (optional)',
         'confirm' => 'Yes, cancel it',
+        'not_now' => 'This lesson cannot be changed now: it has started, is over, or is for a grown-up to change.',
         'done' => 'The lesson is cancelled; the teacher and the academy know.',
         'reasons' => [
             'illness' => 'Unwell',

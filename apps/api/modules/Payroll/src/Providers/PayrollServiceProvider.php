@@ -3,6 +3,7 @@
 namespace Modules\Payroll\Providers;
 
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
@@ -27,6 +28,9 @@ final class PayrollServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'payroll');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'payroll');
+        Route::prefix('api/v1')
+            ->middleware(['api', 'tenant', 'locale', 'timezone'])
+            ->group(__DIR__.'/../../routes/api.php');
 
         SendPayrollNotifications::templates($this->app->make(NotificationsApi::class));
         $this->app->make(NotificationLinks::class)->register('payroll_month', fn (array $a, string $panel) => match ($panel) {

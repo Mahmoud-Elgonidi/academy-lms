@@ -4,8 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Modules\Learning\Http\V1\Controllers\LearnerController;
 use Modules\Learning\Http\V1\Controllers\TeacherReportsController;
 
-// The teacher (mobile app): reports to write, starting from today's plan, and homework to mark.
+// The teacher (mobile app): my students, reports to write (starting from today's plan), and homework to mark.
 Route::middleware(['auth:sanctum', 'can:reports.write'])->prefix('teacher')->group(function () {
+    Route::get('students', [TeacherReportsController::class, 'students'])->name('teacher.students');
     Route::get('reports', [TeacherReportsController::class, 'index'])->name('teacher.reports.index');
     Route::get('reports/{report}', [TeacherReportsController::class, 'show'])->name('teacher.reports.show');
     Route::put('reports/{report}', [TeacherReportsController::class, 'submit'])->name('teacher.reports.submit');

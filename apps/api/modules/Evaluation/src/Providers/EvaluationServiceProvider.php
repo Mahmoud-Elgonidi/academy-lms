@@ -4,6 +4,7 @@ namespace Modules\Evaluation\Providers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
@@ -33,6 +34,9 @@ final class EvaluationServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'evaluation');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'evaluation');
         $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
+        Route::prefix('api/v1')
+            ->middleware(['api', 'tenant', 'locale', 'timezone'])
+            ->group(__DIR__.'/../../routes/api.php');
 
         SendEvaluationNotifications::templates($this->app->make(NotificationsApi::class));
         $links = $this->app->make(NotificationLinks::class);

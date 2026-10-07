@@ -3,6 +3,7 @@
 namespace Modules\Crm\Providers;
 
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
@@ -41,6 +42,9 @@ final class CrmServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'crm');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'crm');
+        Route::prefix('api/v1')
+            ->middleware(['api', 'tenant', 'locale', 'timezone'])
+            ->group(__DIR__.'/../../routes/api.php');
 
         SendCrmNotifications::templates($this->app->make(NotificationsApi::class));
         $links = $this->app->make(NotificationLinks::class);

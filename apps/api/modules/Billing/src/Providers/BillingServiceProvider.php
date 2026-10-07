@@ -42,6 +42,9 @@ final class BillingServiceProvider extends ServiceProvider
         // Paying online: the invoice's pay page and the way back from a gateway (signed, on the academy's host),
         // and each gateway account's webhook (the academy and the account in the path, signed by the gateway).
         $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
+        Route::prefix('api/v1')
+            ->middleware(['api', 'tenant', 'locale', 'timezone'])
+            ->group(__DIR__.'/../../routes/api.php');
         Route::post('webhooks/payments/{academy}/{account}', GatewayWebhookController::class)
             ->middleware(['api', 'throttle:120,1'])->name('billing.webhooks');
         // Stripe Connect: one address on the platform for coming back from Stripe, and one webhook for every connected account.

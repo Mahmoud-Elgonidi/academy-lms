@@ -13,6 +13,8 @@ use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\ReportFormQuery;
 use Modules\Learning\Queries\RoadmapQuery;
+use Modules\Learning\Queries\TeacherStudents;
+use Modules\SharedKernel\Time\LocalTimePresenter;
 
 /** The teacher's reports and the homework to mark (mobile app). Every change goes through the same Actions as the screens. */
 final class TeacherReportsController
@@ -22,6 +24,20 @@ final class TeacherReportsController
         private readonly LearningPresenter $present,
         private readonly ReportFormQuery $form,
     ) {}
+
+    /**
+     * My students.
+     *
+     * Each running course I teach: the student, where they are on the roadmap (GET /learning/enrollments/{id}/roadmap
+     * for all of it), when I last reported, and homework waiting for my mark.
+     */
+    public function students(Request $request, TeacherStudents $students, LocalTimePresenter $time): JsonResponse
+    {
+        return response()->json(['data' => array_map(
+            fn (array $r) => ['last_report_at' => $time->present($r['last_report_at'])] + $r,
+            $students->of((string) $request->user()->getAuthIdentifier()),
+        )]);
+    }
 
     public function index(Request $request): JsonResponse
     {

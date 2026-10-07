@@ -51,6 +51,21 @@ final class SessionFamilyView implements FamilyView
         return $learners[0] ?? null;
     }
 
+    public function learner(string $viewerId, ?string $learnerId): ?Learner
+    {
+        $learners = $this->learners($viewerId);
+        if ($learnerId === null || $learnerId === '') {
+            return $learners[0] ?? null;
+        }
+        foreach ($learners as $learner) {
+            if ($learner->id === $learnerId) {
+                return $learner;
+            }
+        }
+
+        return null;
+    }
+
     public function choose(string $viewerId, string $learnerId): void
     {
         if ($this->follows($viewerId, $learnerId)) {

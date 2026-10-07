@@ -12,6 +12,8 @@ return [
     'conflict' => 'This conflicts with the current state.',
     'too-many-requests' => 'Too many requests. Try again shortly.',
     'http-error' => 'The request could not be completed.',
+    'idempotency_key' => 'This Idempotency-Key is too long.',
+    'idempotency_reused' => 'This Idempotency-Key was already used for a different request.',
     'server-error' => 'Something went wrong on our side.',
     // The web pages of a suspended academy (the API answers academy-suspended).
     'suspended_page' => ['title' => 'This academy is paused', 'body' => 'This site is not available right now. If you belong to the academy, please contact its office.'],
