@@ -16,7 +16,8 @@
         "laravel/framework": "^13.17",
         "laravel/reverb": "^1.12",
         "laravel/sanctum": "^4.0",
-        "laravel/tinker": "^3.0"
+        "laravel/tinker": "^3.0",
+        "openspout/openspout": "^4.32"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -56,6 +57,8 @@
             "Modules\\Crm\\": "modules/Crm/src/",
             "Modules\\Evaluation\\": "modules/Evaluation/src/",
             "Modules\\Evaluation\\Database\\Seeders\\": "modules/Evaluation/database/seeders/",
+            "Modules\\Payroll\\": "modules/Payroll/src/",
+            "Modules\\Payroll\\Database\\Seeders\\": "modules/Payroll/database/seeders/",
             "Modules\\Crm\\Database\\Seeders\\": "modules/Crm/database/seeders/",
             "Modules\\Learning\\Database\\Seeders\\": "modules/Learning/database/seeders/",
             "Modules\\Scheduling\\Database\\Factories\\": "modules/Scheduling/database/factories/",

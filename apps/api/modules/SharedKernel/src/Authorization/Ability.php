@@ -33,4 +33,6 @@ enum Ability: string
     case AssessTrials = 'trials.assess';
     case ReviewPerformance = 'performance.review';
     case ViewOwnPerformance = 'performance.view-own';
+    case ManagePayroll = 'payroll.manage';
+    case ViewOwnEarnings = 'payroll.view-own';
 }

@@ -26,6 +26,7 @@ use Modules\Curriculum\Filament\CurriculumPlugin;
 use Modules\Evaluation\Filament\EvaluationPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Learning\Filament\LearningPlugin;
+use Modules\Payroll\Filament\PayrollPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
 use Modules\Scheduling\Filament\SchedulingPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
@@ -81,6 +82,7 @@ final class AcademyPanelProvider extends PanelProvider
                 CurriculumPlugin::make(),
                 LearningPlugin::make(),
                 EvaluationPlugin::make(),
+                PayrollPlugin::make(),
                 CommunicationPlugin::make(),
                 ClassroomPlugin::make(),
                 PlatformPlugin::make(),

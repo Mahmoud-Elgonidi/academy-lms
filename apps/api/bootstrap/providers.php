@@ -15,6 +15,7 @@ use Modules\Enrollment\Providers\EnrollmentServiceProvider;
 use Modules\Evaluation\Providers\EvaluationServiceProvider;
 use Modules\Identity\Providers\IdentityServiceProvider;
 use Modules\Learning\Providers\LearningServiceProvider;
+use Modules\Payroll\Providers\PayrollServiceProvider;
 use Modules\People\Providers\PeopleServiceProvider;
 use Modules\Platform\Providers\PlatformServiceProvider;
 use Modules\Scheduling\Providers\SchedulingServiceProvider;
@@ -35,6 +36,7 @@ return [
     SchedulingServiceProvider::class,
     LearningServiceProvider::class,
     EvaluationServiceProvider::class,
+    PayrollServiceProvider::class,
     ClassroomServiceProvider::class,
     CrmServiceProvider::class,
     AppServiceProvider::class,

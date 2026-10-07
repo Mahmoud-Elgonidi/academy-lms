@@ -36,7 +36,7 @@
 | M10 | **Billing** | الباقات والأسعار، والاشتراكات، والفواتير، والمدفوعات، والبوابات، والضرايب، وZATCA | `InvoiceIssued`، `PaymentSucceeded`، `PaymentFailed`، `InvoicePaid`، `SubscriptionRenewed`، `SubscriptionPastDue`، `SubscriptionPaused`، `RefundIssued`، `EInvoiceReported` |
 | M11 | **Learning** | التقارير، والواجبات، والتقدم، والاختبارات، والشهادات، والتقارير الشهرية | `SessionReportSubmitted`، `SessionReportOverdue`، `HomeworkAssigned`، `HomeworkSubmitted`، `HomeworkReviewed`، `NodeMastered`، `LevelCompleted`، `CertificateIssued` |
 | M12 | **Evaluation** | أحداث الأداء، والتقييمات، ومراجعات الجودة، والدرجات، والفئات | `LessonRated`، `LessonRatingDue`، و(P2) `QaAuditCompleted`، `TeacherScoreComputed`، `StudentAtRiskDetected` |
-| M13 | **Payroll** | جداول الأسعار، والأرباح، وفترات المرتبات، والكشوف | `EarningAccrued`، `PayrollPeriodClosed`، `StatementPublished` |
+| M13 | **Payroll** | جداول الأسعار، والأرباح، وفترات المرتبات، والكشوف | `PayrollMonthClosed`، و(P2) `StatementPublished` |
 | M14 | **CRM** | الـ leads، والتجارب، وتقييمها، والاستبقاء، والإحالات | `LeadCreated`، `LeadAssigned`، `TrialCompleted`، `TrialMissed`، `TrialAssessed`، `LeadConverted`، `LeadLost` |
 | M15 | **Communication** | القوالب، والقنوات، والتفضيلات، والإشعارات، والمحادثات | `NotificationFailed`، `MessageFlagged` |
 | M16 | **Support** | التذاكر والشكاوى | `TicketOpened`، `ComplaintValidated` |
@@ -78,6 +78,7 @@ flowchart TD
    - Scheduling بيسمع `SubscriptionPastDue` و`SubscriptionPaused` (بيوقف الحصص)، و`ParticipantJoined` و`ParticipantLeft` (الحضور)، و`CreditsGranted` (بيأكّد الحصص المستنية بالترتيب).
      - **المنفّذ دلوقتي (الحضور)**: Classroom بينادي `AttendanceApi` بتاع Scheduling مباشرة بدل الـ events، لأن الحضور لازم يتسجل قبل ما مهمة المواعيد النهائية تحكم على الحصة. Classroom فوق Scheduling في الرسم، ومفيش module بيعتمد عليه. والعمليات اللحظية بتفتح صفحة الفصل باسم الـ route (`classroom.page`) بس، من غير ما تعرف الـ module.
    - Payroll وEvaluation وLearning بيسمعوا `SessionFinalized`.
+     - **المنفّذ دلوقتي (Payroll)**: بيسمع `SessionFinalized` و`SessionCancelled` و`SessionFlaggedForReview`، وبيقرا الحصة من جدولها ونسبة الأجر من قرار السياسة. مفيش module بيعتمد عليه. وبيبعت للمدرسين إجمالي الشهر لما يسمع `PayrollMonthClosed` بتاعه.
    - **الإشعارات** عكس اتجاه السماع: الـ module اللي حصل عنده الحدث (Learning، Billing، Scheduling) بيسمع الـ events بتاعته ويبعت رسالة عن طريق `NotificationsApi` بقالب معرّف في الـ provider بتاعه، والصيغة في ملفات الـ lang بتاعته. Communication مابيعرفش حد غير Identity وPlatform (الاسم والشعار في الإيميل)، فبيفضل تحت في الرسم. وفين الإشعار بيفتح في اللوحات، كل module بيسجّله في `NotificationLinks`.
      - **المنفّذ دلوقتي**: Learning بيفتح التقرير لما يسمع `SessionFinalized`، وبيعيد حساب التقدم لما يسمع `CurriculumAttached` من Enrollment. ولأن Scheduling مايعرفش Learning، قسم "المنهج والتقدم" في حساب الطالب بيدخل الصفحة عن طريق **render hook** باسم ثابت (`scheduling::enrollment.account`) بيسجّله Learning.
    - Evaluation بيسمع `SessionReportSubmitted` و`RatingSubmitted` و`ComplaintValidated`.

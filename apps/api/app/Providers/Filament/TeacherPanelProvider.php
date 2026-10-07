@@ -22,6 +22,7 @@ use Modules\Crm\Filament\Teacher\CrmTeacherPlugin;
 use Modules\Evaluation\Filament\Teacher\EvaluationTeacherPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Learning\Filament\Teacher\LearningTeacherPlugin;
+use Modules\Payroll\Filament\Teacher\PayrollTeacherPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
 use Modules\Scheduling\Filament\Teacher\SchedulingTeacherPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
@@ -73,6 +74,7 @@ final class TeacherPanelProvider extends PanelProvider
                 CrmTeacherPlugin::make(),
                 LearningTeacherPlugin::make(),
                 EvaluationTeacherPlugin::make(),
+                PayrollTeacherPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),
             ]);

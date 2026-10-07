@@ -14,6 +14,7 @@ use Modules\Identity\Contracts\DTOs\NewUser;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Enums\Role;
 use Modules\Learning\Database\Seeders\DemoLearningSeeder;
+use Modules\Payroll\Database\Seeders\DemoPayrollSeeder;
 use Modules\Platform\Contracts\DTOs\NewAcademy;
 use Modules\Platform\Contracts\PlatformApi;
 use Modules\Platform\Contracts\TenantDirectory;
@@ -29,7 +30,7 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * live board, teacher shifts and proposals, plans and prices, and enrolled
  * students with invoices in every state (payable online on the demo gateway),
  * curricula, lesson reports with homework, teacher time off with a substitute
- * and an academy holiday, and the notifications all of that sent. Every password is "password". `composer demo` rebuilds it.
+ * and an academy holiday, ratings, teachers' pay with last month closed, and the notifications all of that sent. Every password is "password". `composer demo` rebuilds it.
  */
 class DatabaseSeeder extends Seeder
 {
@@ -66,7 +67,7 @@ class DatabaseSeeder extends Seeder
                 $identity->createUser(new NewUser(name: $name, roles: $roles, email: $email, password: 'password', locale: 'ar', timezone: 'Africa/Cairo'));
             }
 
-            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class]);
+            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoPayrollSeeder::class]);
         });
 
         $this->command?->info('Seeded academy "demo". Sign in as owner@demo.test / password.');

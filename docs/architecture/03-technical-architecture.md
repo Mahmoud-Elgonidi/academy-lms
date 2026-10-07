@@ -196,7 +196,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 | Billing | `billing_accounts`، `billing_account_students`، `price_regions`، `plans`، `plan_prices`، `subscriptions`، `invoices`، `invoice_lines`، `invoice_sequences`، `payments`، `payment_methods`، `manual_payment_proofs`، `refunds`، `credit_notes`، `discount_rules`، `coupons`، `gateway_accounts`، `payment_checkouts`، `gateway_webhook_inbox`، `tax_profiles`، `tax_rates`، `einvoice_units`، `einvoice_documents` |
 | Learning | `report_templates`، `report_template_versions`، `session_reports`، `report_items_covered`، `homework_assignments`، `homework_submissions`، `homework_reviews`، `enrollment_progress`، `enrollment_positions`، `assessment_attempts`، `certificates`، `report_cards` |
 | Evaluation | `lesson_ratings`، `kpi_exclusions`، و(P2) `kpi_events`، `qa_rubrics`، `qa_audits`، `kpi_snapshots`، `scoring_configs` |
-| Payroll | `rate_cards`، `rate_card_lines`، `teacher_earnings`، `payroll_periods`، `payroll_statements`، `payouts` |
+| Payroll | `rate_cards`، `rate_card_lines`، `teacher_rate_cards`، `teacher_earnings`، `payroll_periods`، و(P2) `payroll_statements`، `payouts` |
 | CRM | `leads`، `lead_activities`، `lead_trials` (ومعاها تقييم المدرس)، `retention_tasks`، `referrals` |
 | Communication | `notification_templates`، `notification_preferences`، `notifications`، `notification_deliveries`، `conversations`، `messages`، `announcements` |
 | Support | `tickets`، `ticket_messages` |
@@ -247,6 +247,13 @@ report_items_covered(report_id, node_id, outcome, score, range_from, range_to, m
 enrollment_progress(enrollment_id, node_id, status, mastery, sessions_count, mastered_at, next_review_at)
 lesson_ratings(session_id, rater_id UNIQUE+session, student_id, teacher_id, stars 1–5, tags jsonb, comment, via app|link)
 kpi_exclusions(session_id UNIQUE, teacher_id, reason platform|provider|academy|other, note, excluded_by)
+rate_cards(name, currency, is_default)   -- جدول افتراضي واحد لكل أكاديمية
+rate_card_lines(rate_card_id, subject_id NULL, session_type NULL, unit hour|lesson, amount_minor)   -- UNIQUE NULLS NOT DISTINCT
+teacher_rate_cards(teacher_id UNIQUE, rate_card_id)
+teacher_earnings(teacher_id, period, kind lesson|reversal|bonus|deduction, session_id, reverses_id UNIQUE, lesson_on, outcome, rule,
+                 session_type, subject_id, booked_min, pay_pct, unit, rate_minor, amount_minor, currency, rate_card_id, note, created_by)
+                 -- بيتضاف عليه بس، ومفيش قيد في شهر مقفول (trigger)
+payroll_periods(month UNIQUE, closed_at, closed_by)   -- صف = شهر مقفول
 kpi_events(subject_type, subject_id, session_id, metric, value, severity, fault, occurred_at)   -- P2: مع الصور الشهرية
 ```
 

@@ -8,6 +8,7 @@ use Modules\Scheduling\Contracts\Events\SessionCancelled;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\Scheduling\Domain\Enums\SessionEventKind;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
+use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionEvent;
 
@@ -24,11 +25,12 @@ final class ResolveReview
             throw ValidationException::withMessages(['outcome' => __('scheduling::board.errors.cannot_resolve')]);
         }
 
+        // The teacher's share of the pay, as the policy has it (Payroll reads it from the decision).
         [$to, $decision] = match ($outcome) {
-            'completed' => [SessionStatus::Completed, ['credit' => 'consumed', 'teacher_pay' => 'full']],
-            'teacher_absent' => [SessionStatus::TeacherAbsent, ['credit' => 'makeup', 'teacher_pay' => 'none']],
-            'student_absent' => [SessionStatus::StudentAbsent, ['credit' => 'consumed', 'teacher_pay' => 'full']],
-            'cancelled_makeup' => [SessionStatus::Cancelled, ['credit' => 'makeup', 'teacher_pay' => 'none']],
+            'completed' => [SessionStatus::Completed, ['credit' => 'consumed', 'teacher_pay_pct' => 100]],
+            'teacher_absent' => [SessionStatus::TeacherAbsent, ['credit' => 'makeup', 'teacher_pay_pct' => 0]],
+            'student_absent' => [SessionStatus::StudentAbsent, ['credit' => 'consumed', 'teacher_pay_pct' => PolicyVersion::settingsInForce()->get('student_absent_teacher_pay_pct')]],
+            'cancelled_makeup' => [SessionStatus::Cancelled, ['credit' => 'makeup', 'teacher_pay_pct' => 0]],
         };
 
         DB::transaction(function () use ($session, $to, $decision, $outcome, $note, $actorId) {
