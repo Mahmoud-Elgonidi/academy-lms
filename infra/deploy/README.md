@@ -35,15 +35,16 @@ Repository → Settings → Secrets and variables → Actions:
 
 | Secret | Value |
 |---|---|
-| `DEPLOY_HOST` | the server's address, `145.223.99.175` |
-| `DEPLOY_USER` | the SSH user, `lukas-tech` |
 | `DEPLOY_SSH_KEY` | the private key `academy_deploy` (all of it) |
 | `DEPLOY_PASSWORD` | only if there is no key: the SSH password |
 | `DEPLOY_KNOWN_HOSTS` | the `ssh-keyscan -H` output; without it the server's key is trusted as first seen |
+| `DEPLOY_HOST`, `DEPLOY_USER` | only to deploy somewhere else: the workflow defaults to `145.223.99.175` and `lukas-tech` |
+
+The key or the password lives in GitHub's secrets only, never in a file of the repository.
 
 Optional variables: `DEPLOY_DOMAIN` (default `progma.store`), `DEPLOY_DIR` (default `academy-lms`, under the
-user's home), `DEPLOY_SSH_PORT` (default 22). Without the secrets the workflow still builds and rehearses, and
-says what is missing.
+user's home), `DEPLOY_SSH_PORT` (default 22). Without the key or password the workflow still builds and rehearses,
+and says what is missing.
 
 ## The first deploy
 

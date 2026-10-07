@@ -161,8 +161,10 @@ jobs:
       contents: read
       packages: read
     env:
-      HOST: ${{ secrets.DEPLOY_HOST }}
-      SSH_USER: ${{ secrets.DEPLOY_USER }}
+      # The server and its user (not secret: the domain already points at it); a
+      # secret or variable of the same name wins. The key or password is only ever a secret.
+      HOST: ${{ secrets.DEPLOY_HOST || vars.DEPLOY_HOST || '145.223.99.175' }}
+      SSH_USER: ${{ secrets.DEPLOY_USER || vars.DEPLOY_USER || 'lukas-tech' }}
       SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
       SSH_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
       KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
@@ -176,7 +178,7 @@ jobs:
         id: ready
         run: |
           if [ -z "$HOST" ] || [ -z "$SSH_USER" ] || { [ -z "$SSH_KEY" ] && [ -z "$SSH_PASSWORD" ]; }; then
-            echo "::warning title=Not deployed::Add the repository secrets DEPLOY_HOST, DEPLOY_USER and DEPLOY_SSH_KEY (or DEPLOY_PASSWORD), then run this workflow again (infra/deploy/README.md)."
+            echo "::warning title=Not deployed::Add the repository secret DEPLOY_SSH_KEY (or DEPLOY_PASSWORD) for $SSH_USER@$HOST, then run this workflow again (infra/deploy/README.md)."
             echo "go=false" >> "$GITHUB_OUTPUT"
           else
             echo "go=true" >> "$GITHUB_OUTPUT"

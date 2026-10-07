@@ -224,7 +224,7 @@ git pull
 - ملف nginx واحد بيتضاف مرة واحدة بعد مراجعة `nginx -t`.
 
 قبل أول نشر:
-- ضيف الـ secrets في GitHub: `DEPLOY_HOST` و`DEPLOY_USER` و`DEPLOY_SSH_KEY`.
+- ضيف secret واحد في GitHub: `DEPLOY_SSH_KEY` (أو `DEPLOY_PASSWORD`). عنوان السيرفر واسم المستخدم مكتوبين في الـ workflow.
 - خلّي الـ DNS بتاع `*.progma.store` يشاور على السيرفر.
 
 التفاصيل والخطوات في [`infra/deploy/README.md`](infra/deploy/README.md).
