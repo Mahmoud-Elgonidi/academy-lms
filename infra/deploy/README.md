@@ -22,6 +22,10 @@ The LMS is built to share a server with other projects without touching them:
    in the `docker` group, or with passwordless sudo for `docker`. `deploy.sh` stops and says so otherwise.
 2. **DNS** for the domain, pointing at the server:
    `progma.store`, `www.progma.store` and `*.progma.store` (academies are `<slug>.progma.store`).
+   Without the wildcard, one academy can live on the domain itself: `PLATFORM_HOME_ACADEMY=<slug>` in the
+   server's `.env` serves it at `https://progma.store/admin`, `/teach` and `/my` (the console stays at
+   `/console`; a subdomain, token or `X-Academy` header still decides when there is one). Then
+   `cd ~/academy-lms && docker compose up -d` to apply it.
 3. **An SSH key for GitHub** (better than a password). On your own computer:
    ```bash
    ssh-keygen -t ed25519 -f academy_deploy -N "" -C "github deploy"
@@ -59,7 +63,7 @@ and says what is missing.
    certbot covers the names given; add each new academy with `--expand -d <slug>.progma.store`, or get one
    wildcard certificate through a DNS challenge (`certbot certonly --manual --preferred-challenges dns
    -d progma.store -d '*.progma.store'`, then point the site at it).
-3. Open `https://demo.progma.store/admin`. The demo accounts (`owner@demo.test`, `khaled@demo.test`, ...) use
+3. Open `https://demo.progma.store/admin` (or `https://progma.store/admin` with `PLATFORM_HOME_ACADEMY=demo`). The demo accounts (`owner@demo.test`, `khaled@demo.test`, ...) use
    this server's own password: `grep DEMO_PASSWORD ~/academy-lms/.env`. The platform console is
    `https://progma.store/console` (`admin@platform.test`, same password); its authenticator secret is
    `DEMO_PLATFORM_2FA_SECRET` in `.env`, or print the current code:

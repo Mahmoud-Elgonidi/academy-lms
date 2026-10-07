@@ -96,8 +96,10 @@ APP_FALLBACK_LOCALE=en
 LOG_CHANNEL=stderr
 LOG_LEVEL=info
 
-# The academies: <slug>.$DOMAIN. The platform console: https://$DOMAIN/console
+# The academies: <slug>.$DOMAIN (or one on $DOMAIN itself: PLATFORM_HOME_ACADEMY=<slug>).
+# The platform console: https://$DOMAIN/console
 PLATFORM_DOMAIN=$DOMAIN
+PLATFORM_HOME_ACADEMY=
 PLATFORM_CONSOLE_DOMAIN=
 PLATFORM_CONSOLE_URL=
 
@@ -242,6 +244,11 @@ if grep -qF "$marker" <<<"$edge"; then
 else
     echo "    The server's web server does not pass $DOMAIN to it yet: run setup-nginx.sh once, with sudo (README.md)."
 fi
-echo "    Academies: https://<slug>.$DOMAIN/admin · console: https://$DOMAIN/console"
+home="$(setting PLATFORM_HOME_ACADEMY)"
+if [ -n "$home" ]; then
+    echo "    Academy \"$home\": https://$DOMAIN/admin (PLATFORM_HOME_ACADEMY) · others: https://<slug>.$DOMAIN/admin · console: https://$DOMAIN/console"
+else
+    echo "    Academies: https://<slug>.$DOMAIN/admin · console: https://$DOMAIN/console"
+fi
 [ "$DEMO_DATA" = 1 ] && echo "    Demo sign-in: owner@demo.test; the password is DEMO_PASSWORD in $HERE/.env"
 exit 0
