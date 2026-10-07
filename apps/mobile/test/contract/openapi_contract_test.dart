@@ -13,11 +13,12 @@ void main() {
     (path, ops) => MapEntry(path, (ops as Map<String, dynamic>).keys.map((m) => m.toUpperCase()).toSet()),
   );
 
-  final call = RegExp(r"_api\.(get|post|put|patch|delete)\(\s*'([^']+)'");
+  final call = RegExp(r"_api\.(get|post|put|patch|delete|download)\(\s*'([^']+)'");
   final calls = <(String, String, String)>[];
   for (final file in Directory('lib').listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.dart'))) {
     for (final m in call.allMatches(file.readAsStringSync())) {
-      calls.add((m.group(1)!.toUpperCase(), m.group(2)!, file.path));
+      // download() reads a file with GET.
+      calls.add((m.group(1) == 'download' ? 'GET' : m.group(1)!.toUpperCase(), m.group(2)!, file.path));
     }
   }
 

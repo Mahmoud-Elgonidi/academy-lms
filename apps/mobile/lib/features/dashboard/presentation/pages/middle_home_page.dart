@@ -14,6 +14,7 @@ import '../../../challenges/presentation/widgets/teasers.dart';
 import '../../data/home_loader.dart';
 import '../widgets/badge_tile.dart';
 import '../widgets/next_lesson_card.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 
 /// A middle-school student's home: rank and points toward the next one,
 /// the streak, the world and stage they are on, badges, and homework.
@@ -78,6 +79,7 @@ class _MiddleHome extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const NotificationBell(),
                   GestureDetector(onTap: () => context.push('/account'), child: InitialAvatar(name, size: 40)),
                 ],
               ),

@@ -6109,6 +6109,8 @@
         "/v1/branding": {
             "get": {
                 "operationId": "platform.branding",
+                "description": "With `app`: the oldest app version still served (an older app asks to be updated first) and where to update it.",
+                "summary": "The academy's look",
                 "tags": [
                     "Platform"
                 ],
@@ -6270,10 +6272,33 @@
                                                 "favicon_url",
                                                 "template"
                                             ]
+                                        },
+                                        "app": {
+                                            "type": "object",
+                                            "properties": {
+                                                "min_version": {
+                                                    "type": "string",
+                                                    "description": "The oldest app version still served, like \"1.0.0\"."
+                                                },
+                                                "android_url": {
+                                                    "type": "string",
+                                                    "description": "The store page on Android, or null."
+                                                },
+                                                "ios_url": {
+                                                    "type": "string",
+                                                    "description": "The App Store page, or null."
+                                                }
+                                            },
+                                            "required": [
+                                                "min_version",
+                                                "android_url",
+                                                "ios_url"
+                                            ]
                                         }
                                     },
                                     "required": [
-                                        "data"
+                                        "data",
+                                        "app"
                                     ]
                                 }
                             }

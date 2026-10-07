@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../app/theme/branding.dart';
 import '../../app/theme/stage.dart';
+import '../app_policy.dart';
 import '../prefs/app_prefs.dart';
+import '../push/push.dart';
 import 'account.dart';
 import 'account_store.dart';
 import 'session_holder.dart';
@@ -28,6 +30,8 @@ class SessionState extends Equatable {
     this.clock,
     this.me,
     this.notice,
+    this.policy,
+    this.appVersion,
   });
 
   final SessionStatus status;
@@ -44,6 +48,15 @@ class SessionState extends Equatable {
   final String? clock;
   final Me? me;
   final SessionNotice? notice;
+
+  /// The platform's word on app versions (with the academy's look).
+  final AppPolicy? policy;
+
+  /// This app's version (null in tests: never asked to update).
+  final String? appVersion;
+
+  /// This app is older than the oldest still served: it asks to be updated first.
+  bool get updateRequired => policy != null && appVersion != null && policy!.tooOld(appVersion!);
 
   /// The zone times are asked in.
   String? get timezone => clock ?? deviceTimezone;
@@ -69,6 +82,7 @@ class SessionState extends Equatable {
     String? Function()? clock,
     Me? Function()? me,
     SessionNotice? Function()? notice,
+    AppPolicy? policy,
   }) => SessionState(
     status: status ?? this.status,
     accounts: accounts ?? this.accounts,
@@ -80,6 +94,8 @@ class SessionState extends Equatable {
     clock: clock != null ? clock() : this.clock,
     me: me != null ? me() : this.me,
     notice: notice != null ? notice() : this.notice,
+    policy: policy ?? this.policy,
+    appVersion: appVersion,
   );
 
   @override
@@ -95,6 +111,7 @@ class SessionState extends Equatable {
     me?.mismatch,
     me?.timezone,
     notice,
+    policy?.minVersion,
   ];
 }
 
@@ -108,11 +125,14 @@ class SessionCubit extends Cubit<SessionState> {
     required SessionRepository repository,
     String? deviceTimezone,
     this._deviceLocale,
+    String? appVersion,
+    this._push,
   }) : _repo = repository,
-       super(SessionState(deviceTimezone: deviceTimezone)) {
+       super(SessionState(deviceTimezone: deviceTimezone, appVersion: appVersion)) {
     _holder
       ..timezone = deviceTimezone
       ..expired = expired;
+    _push?.refreshed.listen((_) => unawaited(_registerPush()));
   }
 
   final SessionHolder _holder;
@@ -120,6 +140,7 @@ class SessionCubit extends Cubit<SessionState> {
   final AppPrefs _prefs;
   final SessionRepository _repo;
   final String? _deviceLocale;
+  final PushTokens? _push;
 
   Future<void> start() async {
     final locale = await _prefs.locale() ?? (_deviceLocale == 'en' ? 'en' : 'ar');
@@ -154,7 +175,11 @@ class SessionCubit extends Cubit<SessionState> {
   Future<void> signOut([String? id]) async {
     final target = state.accounts.where((a) => a.id == (id ?? state.current?.id)).firstOrNull;
     if (target == null) return;
-    unawaited(_repo.signOut(academy: target.academySlug, token: target.token));
+    final pushToken = _push?.token;
+    unawaited(() async {
+      if (pushToken != null) await _repo.forgetDevice(academy: target.academySlug, token: target.token, pushToken: pushToken);
+      await _repo.signOut(academy: target.academySlug, token: target.token);
+    }());
     await _drop(target, SessionNotice.signedOut);
   }
 
@@ -207,7 +232,9 @@ class SessionCubit extends Cubit<SessionState> {
       _quietly(() async {
         final json = await _repo.branding(account.academySlug);
         await _prefs.setBranding(account.academySlug, json);
-        if (state.current?.id == account.id) _set(state.copyWith(branding: Branding.fromJson(json)));
+        if (state.current?.id == account.id) {
+          _set(state.copyWith(branding: Branding.fromJson(json), policy: AppPolicy.fromJson(json['app'])));
+        }
       }),
       if (account.isFamily && !account.isTeacher)
         _quietly(() async {
@@ -220,8 +247,16 @@ class SessionCubit extends Cubit<SessionState> {
           _set(state.copyWith(accounts: accounts, current: () => updated));
         }),
       _loadMe(),
+      _registerPush(),
     ]);
   }
+
+  /// This phone gets the open account's notifications (when push is up).
+  Future<void> _registerPush() => _quietly(() async {
+    final token = _push?.token;
+    if (token == null || state.current == null) return;
+    await _repo.registerDevice(platform: _push!.platform, token: token, appVersion: state.appVersion);
+  });
 
   Future<void> _loadMe() => _quietly(() async {
     final id = state.current?.id;
@@ -265,6 +300,7 @@ class SessionCubit extends Cubit<SessionState> {
         status: SessionStatus.signedIn,
         current: () => opened,
         branding: cached != null ? Branding.fromJson(cached) : Branding.fromColour(opened.academyColour),
+        policy: AppPolicy.fromJson(cached?['app']),
         clock: () => clock,
         me: () => null,
       ),

@@ -15,6 +15,7 @@ import '../../../challenges/presentation/widgets/teasers.dart';
 import '../../data/home_loader.dart';
 import '../../domain/journey.dart';
 import '../widgets/next_lesson_card.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 
 /// A child's home: their stars, the next lesson, and the journey through
 /// their course as a winding path of stops, with "you're here".
@@ -63,6 +64,7 @@ class _KidsHome extends StatelessWidget {
                 ],
               ),
             ),
+            const NotificationBell(),
             Semantics(
               label: '${home.journey.stars} ${l.stars}',
               child: Container(

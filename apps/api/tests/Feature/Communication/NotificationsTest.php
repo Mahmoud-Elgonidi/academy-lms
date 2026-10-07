@@ -169,7 +169,10 @@ it('pushes through FCM and forgets devices the app was removed from', function (
 
     expect(Delivery::query()->where('channel', 'push')->sole()->status)->toBe('sent')
         ->and(PushDevice::query()->pluck('token')->all())->toBe(['token-sara']);
-    Http::assertSent(fn ($request) => str_contains($request->url(), 'messages:send') && $request['message']['data']['screen'] === 'session');
+    Http::assertSent(fn ($request) => str_contains($request->url(), 'messages:send')
+        && $request['message']['data']['screen'] === 'session'
+        && $request['message']['data']['academy'] === $this->academy->slug
+        && $request['message']['data']['user'] === $this->sara->id);
 });
 
 it('never breaks what caused a message when the message cannot be written', function () {

@@ -549,9 +549,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get handedIn => 'اتسلّم. المدرّس هيصححه.';
 
   @override
-  String get handInOnWeb => 'الواجب ده تسجيل صوت أو ملف. التسليم بيه جاي قريب في التطبيق، وسلّمه من الموقع لحد ما يوصل.';
-
-  @override
   String get teacherFeedback => 'رأي المدرّس';
 
   @override
@@ -762,16 +759,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get writeOnWeb => 'التقارير والتصحيح من لوحة المدرّس على الموقع لحد ما يوصلوا هنا.';
-
-  @override
   String reportDueBy(String when) {
     return 'قبل $when';
-  }
-
-  @override
-  String weekSummary(int n, String h) {
-    return '$n حصة · $h ساعة';
   }
 
   @override
@@ -821,8 +810,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get monthClosed => 'الشهر اتقفل';
 
   @override
-  String lessonsHours(int n, String h) {
-    return '$n حصة · $h ساعة';
+  String lessonsHours(String lessons, String hours) {
+    return '$lessons · $hours';
   }
 
   @override
@@ -1225,4 +1214,368 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get soundsHint => 'أصوات خفيفة لما تدوس أو تستلم جايزة';
+
+  @override
+  String get reportsOpen => 'مستنية منك';
+
+  @override
+  String get reportsSent => 'اتبعتت';
+
+  @override
+  String get noReportsWaiting => 'مفيش تقارير مستنياك. برافو!';
+
+  @override
+  String get reportLesson => 'تقرير حصة';
+
+  @override
+  String get reportAbsence => 'ملاحظة غياب';
+
+  @override
+  String get todaysPlan => 'خطة النهارده';
+
+  @override
+  String get planHint => 'اختار اللي حصل في كل درس.';
+
+  @override
+  String get reasonNext => 'الدرس الجاي';
+
+  @override
+  String get reasonReview => 'مراجعة';
+
+  @override
+  String get outcomeIntroduced => 'اتشرح';
+
+  @override
+  String get outcomePracticed => 'اتدرّب عليه';
+
+  @override
+  String get outcomeMastered => 'اتقن';
+
+  @override
+  String get outcomeNeedsReview => 'محتاج مراجعة';
+
+  @override
+  String get itemScore => 'الدرجة';
+
+  @override
+  String get itemNote => 'ملاحظة على الدرس';
+
+  @override
+  String get addNote => 'ضيف ملاحظة';
+
+  @override
+  String get addLesson => 'ضيف درس';
+
+  @override
+  String get pickLesson => 'اختار درس';
+
+  @override
+  String get searchLessons => 'دوّر على درس';
+
+  @override
+  String get remove => 'شيل';
+
+  @override
+  String get notesForFamily => 'ملاحظات للطالب وولي الأمر';
+
+  @override
+  String get notesInternal => 'ملاحظات داخلية';
+
+  @override
+  String get notesInternalHint => 'للأكاديمية بس، الأسرة مابتشوفهاش.';
+
+  @override
+  String get absenceNote => 'ملاحظة الغياب';
+
+  @override
+  String get absenceHint => 'الطالب ماحضرش. اكتب اللي حصل وأي حاجة الأسرة محتاجة تعرفها.';
+
+  @override
+  String get giveHomework => 'ادّي واجب';
+
+  @override
+  String get homeworkField => 'الواجب';
+
+  @override
+  String get homeworkDetails => 'التفاصيل';
+
+  @override
+  String get acceptsLabel => 'بيتسلّم';
+
+  @override
+  String get acceptsAny => 'أي حاجة';
+
+  @override
+  String get acceptsText => 'كتابة';
+
+  @override
+  String get acceptsAudio => 'تسجيل صوت';
+
+  @override
+  String get acceptsFile => 'ملف';
+
+  @override
+  String dueIn(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'بعد $n يوم', few: 'بعد $n أيام', two: 'بعد يومين', one: 'بعد يوم');
+    return '$_temp0';
+  }
+
+  @override
+  String get homeworkLocked => 'الطالب سلّم الواجب ده، فمش هيتغير.';
+
+  @override
+  String get sendReport => 'ابعت التقرير';
+
+  @override
+  String get updateReport => 'حدّث التقرير';
+
+  @override
+  String get reportSent => 'التقرير اتبعت.';
+
+  @override
+  String get reportLocked => 'الأكاديمية راجعت التقرير ده، فمش هيتغير.';
+
+  @override
+  String get pickRatings => 'اختار التركيز والمستوى العام.';
+
+  @override
+  String get pickOutcomes => 'اختار اللي حصل في كل درس.';
+
+  @override
+  String get markTitle => 'تصحيح الواجبات';
+
+  @override
+  String get markWaiting => 'مستني التصحيح';
+
+  @override
+  String get markDone => 'اتصحّح';
+
+  @override
+  String get noHomeworkToMark => 'مفيش واجبات مستنية تصحيح.';
+
+  @override
+  String get gradeLabel => 'الدرجة';
+
+  @override
+  String get feedbackLabel => 'كلمتك للطالب';
+
+  @override
+  String get saveMark => 'سجّل التصحيح';
+
+  @override
+  String get marked => 'اتسجّل التصحيح.';
+
+  @override
+  String handedInAt(String when) {
+    return 'اتسلّم $when';
+  }
+
+  @override
+  String get fileOnWeb => 'الملف ده بيتفتح من الموقع.';
+
+  @override
+  String get showPicture => 'اعرض الصورة';
+
+  @override
+  String get playRecording => 'شغّل التسجيل';
+
+  @override
+  String get pause => 'وقّف';
+
+  @override
+  String get cannotPlay => 'مش قادرين نشغّل التسجيل ده هنا.';
+
+  @override
+  String get waitingTap => 'دوس عشان تبدأ';
+
+  @override
+  String get recordVoice => 'سجّل صوتك';
+
+  @override
+  String get recordKids => 'سجّل تسميعك';
+
+  @override
+  String recordingNow(String time) {
+    return 'بيسجّل… $time';
+  }
+
+  @override
+  String get stopRecording => 'وقّف التسجيل';
+
+  @override
+  String get recordAgain => 'سجّل تاني';
+
+  @override
+  String get attachFile => 'ضيف ملف';
+
+  @override
+  String get attachPicture => 'ضيف صورة أو PDF';
+
+  @override
+  String get micDenied => 'محتاجين إذن المايك عشان تسجّل. فعّله من إعدادات الموبايل.';
+
+  @override
+  String recordingLimit(int n) {
+    return 'التسجيل وقف عند $n دقايق.';
+  }
+
+  @override
+  String get fileTooBig => 'الملف أكبر من 25 ميجا.';
+
+  @override
+  String get answerOptional => 'اكتب حاجة كمان (اختياري)';
+
+  @override
+  String get myHours => 'مواعيدي';
+
+  @override
+  String hoursOnClock(String zone) {
+    return 'على توقيت $zone';
+  }
+
+  @override
+  String weeklyHours(String h) {
+    return '$h في الأسبوع';
+  }
+
+  @override
+  String get currentWeek => 'المواعيد المعتمدة';
+
+  @override
+  String get noHoursYet => 'لسه مفيش مواعيد معتمدة.';
+
+  @override
+  String get proposeHours => 'اقترح مواعيد جديدة';
+
+  @override
+  String get yourProposal => 'مقترحك';
+
+  @override
+  String get waitingOnAcademy => 'مستني رد الأكاديمية';
+
+  @override
+  String get waitingOnYou => 'مستني ردك';
+
+  @override
+  String startsOn(String date) {
+    return 'يبدأ $date';
+  }
+
+  @override
+  String get academyCounter => 'الأكاديمية عدّلت مقترحك. ده اللي اتغير:';
+
+  @override
+  String get timeAdded => 'اتضاف';
+
+  @override
+  String get timeRemoved => 'اتشال';
+
+  @override
+  String get acceptCounter => 'موافق على التعديل';
+
+  @override
+  String get editProposal => 'عدّل المقترح';
+
+  @override
+  String get withdrawConfirm => 'تسحب المقترح؟ المواعيد المعتمدة هتفضل زي ما هي.';
+
+  @override
+  String get proposalAccepted => 'مواعيدك اتعتمدت.';
+
+  @override
+  String get proposalSent => 'المقترح اتبعت للأكاديمية.';
+
+  @override
+  String get draftSaved => 'المسودة اتحفظت.';
+
+  @override
+  String get conversation => 'المحادثة مع الأكاديمية';
+
+  @override
+  String get writeMessage => 'اكتب رسالة…';
+
+  @override
+  String get editHours => 'عدّل مواعيدك';
+
+  @override
+  String get addTime => 'ضيف وقت';
+
+  @override
+  String get dayOff => 'مفيش';
+
+  @override
+  String get effectiveFrom => 'يبدأ من';
+
+  @override
+  String reduceNotice(String date) {
+    return 'لو هتقلل ساعات، أقرب بداية $date.';
+  }
+
+  @override
+  String get minHours => 'أقل ساعات في الأسبوع';
+
+  @override
+  String get maxHours => 'أكتر ساعات في الأسبوع';
+
+  @override
+  String get proposalNote => 'ملاحظة للأكاديمية';
+
+  @override
+  String get saveDraft => 'احفظ مسودة';
+
+  @override
+  String get sendProposal => 'ابعت للأكاديمية';
+
+  @override
+  String get endAfterStart => 'وقت النهاية لازم يكون بعد البداية.';
+
+  @override
+  String get untilMidnight => 'لحد نص الليل';
+
+  @override
+  String get inboxTitle => 'الإشعارات';
+
+  @override
+  String get markAllRead => 'علّم الكل مقروء';
+
+  @override
+  String get noNotifications => 'مفيش إشعارات.';
+
+  @override
+  String get loadMore => 'اعرض أكتر';
+
+  @override
+  String get notificationChoices => 'اختيارات الإشعارات';
+
+  @override
+  String get saved => 'اتحفظ.';
+
+  @override
+  String get openIt => 'افتح';
+
+  @override
+  String unreadCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n إشعار جديد',
+      few: '$n إشعارات جديدة',
+      two: 'إشعارين جداد',
+      one: 'إشعار جديد',
+      zero: 'مفيش جديد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get updateTitle => 'فيه نسخة جديدة من التطبيق';
+
+  @override
+  String get updateBody => 'النسخة اللي عندك قديمة ومش هتشتغل مع الأكاديمية. حدّثها عشان تكمل.';
+
+  @override
+  String get updateNow => 'حدّث التطبيق';
+
+  @override
+  String get updateFromStore => 'حدّثه من متجر التطبيقات على موبايلك.';
 }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/time/formats.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
@@ -95,7 +96,10 @@ class _Month extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(t.total, style: context.text.headlineMedium),
-                Text(l.lessonsHours(t.lessons, t.hours), style: context.text.bodyMedium?.copyWith(color: c.muted)),
+                Text(
+                  l.lessonsHours(l.lessonsCount(t.lessons), hoursAmount(context, num.tryParse(t.hours) ?? 0)),
+                  style: context.text.bodyMedium?.copyWith(color: c.muted),
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: [

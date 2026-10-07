@@ -110,3 +110,14 @@ it('serves the look to the apps before sign-in', function () {
         ->assertJsonPath('data.template.ref', 'builtin:sky')
         ->assertJsonPath('data.fonts_url', 'https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
 });
+
+it('tells the apps the oldest version still served, and where to update', function () {
+    config(['platform.app.min_version' => '1.4.0', 'platform.app.android_url' => 'https://play.google.com/store/apps/details?id=academy.app', 'platform.app.ios_url' => null]);
+    $this->clearTenant();
+
+    $this->withHeader('X-Academy', 'noor')->getJson('/api/v1/branding')
+        ->assertOk()
+        ->assertJsonPath('app.min_version', '1.4.0')
+        ->assertJsonPath('app.android_url', 'https://play.google.com/store/apps/details?id=academy.app')
+        ->assertJsonPath('app.ios_url', null);
+});

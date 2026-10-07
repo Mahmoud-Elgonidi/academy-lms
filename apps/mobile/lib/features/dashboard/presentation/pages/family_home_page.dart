@@ -15,6 +15,7 @@ import '../../data/home_loader.dart';
 import '../bloc/learner_cubit.dart';
 import '../widgets/learner_switcher.dart';
 import '../widgets/next_lesson_card.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 
 /// The guardian's (and an adult student's) home: the next lesson with its
 /// join button, what is left and what is owed, the latest report, and the
@@ -52,6 +53,7 @@ class FamilyHomePage extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const NotificationBell(),
                 ],
               ),
             ),

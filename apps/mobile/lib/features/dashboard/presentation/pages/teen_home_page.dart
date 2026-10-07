@@ -15,6 +15,7 @@ import '../../../challenges/presentation/widgets/teasers.dart';
 import '../../data/home_loader.dart';
 import '../../domain/journey.dart';
 import '../widgets/next_lesson_card.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 
 /// A high-school student's plan: the goal, how far along, the finish date
 /// at the current pace, the milestones, and what is next.
@@ -58,6 +59,7 @@ class _TeenHome extends StatelessWidget {
                 ],
               ),
             ),
+            const NotificationBell(),
             GestureDetector(onTap: () => context.push('/account'), child: InitialAvatar(name, size: 40)),
           ],
         ),

@@ -2,9 +2,12 @@ import 'package:intl/intl.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/time/local_time.dart';
+import '../../homework/domain/homework.dart';
+import '../domain/reports.dart';
+import '../domain/shifts.dart';
 import '../domain/teaching.dart';
 
-/// The teacher's side: lessons, students, pay, time off.
+/// The teacher's side: lessons, students, reports, homework to mark, hours, pay, time off.
 class TeachingRepository {
   TeachingRepository(this._api);
 
@@ -35,6 +38,59 @@ class TeachingRepository {
           : (student: (first['student'] as Map<String, dynamic>?)?['name'] as String? ?? '', dueAt: LocalTime.fromJson(first['due_at'])),
     );
   }
+
+  /// Reports still to write first, then the ones sent in the last two weeks.
+  Future<List<ReportSummary>> reports() async => [
+    for (final r in (await _api.get('teacher/reports'))['data'] as List<dynamic>) ReportSummary.fromJson(r as Map<String, dynamic>),
+  ];
+
+  Future<ReportForm> report(String id) async =>
+      ReportForm.fromJson((await _api.get('teacher/reports/$id'))['data'] as Map<String, dynamic>);
+
+  /// Sends (or corrects) a report; the API checks it as the web form does.
+  Future<void> submitReport(String id, Map<String, dynamic> payload) => _api.put('teacher/reports/$id', body: payload);
+
+  /// [status] submitted (waiting for a mark) or reviewed (marked).
+  Future<List<Homework>> homeworkToMark({String status = 'submitted'}) async => [
+    for (final h in (await _api.get('teacher/homework', query: {'status': status}))['data'] as List<dynamic>)
+      Homework.fromJson(h as Map<String, dynamic>),
+  ];
+
+  Future<void> mark(String homeworkId, {int? grade, String? feedback}) =>
+      _api.post('teacher/homework/$homeworkId/review', body: {'grade': grade, 'feedback': feedback});
+
+  Future<MyShifts> shifts() async => MyShifts.fromJson((await _api.get('teacher/shifts'))['data'] as Map<String, dynamic>);
+
+  /// Saves the proposal: a draft ([submit] false) or sent to the academy.
+  Future<ShiftProposal> saveShifts({
+    required List<ShiftBlock> blocks,
+    required String effectiveFrom,
+    String? note,
+    double? minHours,
+    double? maxHours,
+    bool submit = true,
+  }) async => ShiftProposal.fromJson(
+    (await _api.put(
+          'teacher/shifts/proposal',
+          body: {
+            'blocks': [for (final b in blocks) b.toJson()],
+            'effective_from': effectiveFrom,
+            'note': note,
+            'min_weekly_hours': minHours,
+            'max_weekly_hours': maxHours,
+            'submit': submit,
+          },
+        ))['data']
+        as Map<String, dynamic>,
+  );
+
+  Future<void> withdrawShifts() => _api.post('teacher/shifts/proposal/withdraw');
+
+  /// Takes the academy's counter-offer as it is.
+  Future<void> acceptShifts() => _api.post('teacher/shifts/proposal/accept');
+
+  Future<ShiftProposal> commentOnShifts(String body) async =>
+      ShiftProposal.fromJson((await _api.post('teacher/shifts/proposal/comments', body: {'body': body}))['data'] as Map<String, dynamic>);
 
   /// [month] "YYYY-MM" (default: this month on the academy's clock).
   Future<Earnings> earnings({String? month}) async => Earnings.fromJson(await _api.get('teacher/earnings', query: {'month': ?month}));

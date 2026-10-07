@@ -10,8 +10,25 @@
 	<string>Academy</string>
 	<key>NSCameraUsageDescription</key>
 	<string>The camera shows you to your teacher during a live lesson.</string>
+	<key>FlutterDeepLinkingEnabled</key>
+	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>academy.app.open</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>academyapp</string>
+			</array>
+		</dict>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>The microphone lets your teacher hear you during a live lesson.</string>
+	<string>The microphone lets your teacher hear you during a live lesson, and records your voice homework.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<!-- The local API and LiveKit over plain http/ws while developing; the internet stays https only. -->

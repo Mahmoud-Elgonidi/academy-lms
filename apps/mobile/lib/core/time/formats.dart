@@ -58,6 +58,12 @@ String hoursText(int minutes) {
   return h == h.roundToDouble() ? h.toStringAsFixed(0) : h.toStringAsFixed(1);
 }
 
+/// "3 ساعات", "ساعتين", "1.5 ساعة": an amount of hours, worded for its number.
+String hoursAmount(BuildContext context, num hours) {
+  if (hours == hours.roundToDouble()) return context.l10n.inHours(hours.round());
+  return context.l10n.hours(hours.toStringAsFixed(1));
+}
+
 /// "Asia/Riyadh" → "الرياض" / "Riyadh": how people name a zone.
 String zoneName(String? zone, [String locale = 'en']) {
   if (zone == null || zone.isEmpty) return '';

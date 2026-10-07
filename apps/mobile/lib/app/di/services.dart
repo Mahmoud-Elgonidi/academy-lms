@@ -9,6 +9,7 @@ import '../../features/classroom/data/classroom_repository.dart';
 import '../../features/dashboard/data/family_repository.dart';
 import '../../features/dashboard/data/home_loader.dart';
 import '../../features/homework/data/homework_repository.dart';
+import '../../features/notifications/data/notifications_repository.dart';
 import '../../features/profile/data/profile_repository.dart';
 import '../../features/roadmap/data/learning_repository.dart';
 import '../../features/schedule/data/lessons_repository.dart';
@@ -26,7 +27,8 @@ class Services {
       classroom = ClassroomRepository(api),
       profile = ProfileRepository(api),
       teaching = TeachingRepository(api),
-      challenges = ChallengesRepository(api) {
+      challenges = ChallengesRepository(api),
+      notifications = NotificationsRepository(api) {
     home = HomeLoader(lessons: lessons, billing: billing, learning: learning, homework: homework, family: family);
   }
 
@@ -41,6 +43,7 @@ class Services {
   final ProfileRepository profile;
   final TeachingRepository teaching;
   final ChallengesRepository challenges;
+  final NotificationsRepository notifications;
   late final HomeLoader home;
 
   Widget provide({required Widget child}) => MultiRepositoryProvider(
@@ -56,6 +59,7 @@ class Services {
       RepositoryProvider.value(value: profile),
       RepositoryProvider.value(value: teaching),
       RepositoryProvider.value(value: challenges),
+      RepositoryProvider.value(value: notifications),
       RepositoryProvider.value(value: home),
     ],
     child: child,

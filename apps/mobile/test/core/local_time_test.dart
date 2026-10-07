@@ -1,5 +1,7 @@
+import 'package:academy_app/core/l10n/l10n.dart';
 import 'package:academy_app/core/time/formats.dart';
 import 'package:academy_app/core/time/local_time.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -51,5 +53,31 @@ void main() {
     expect(zoneName('Pacific/Chatham', 'ar'), 'Chatham');
     expect(hoursText(90), '1.5');
     expect(hoursText(120), '2');
+  });
+
+  testWidgets('words an amount of hours for its number', (tester) async {
+    late BuildContext ar;
+    late BuildContext en;
+    Widget app(Locale locale, void Function(BuildContext) keep) => Localizations(
+      locale: locale,
+      delegates: AppLocalizations.localizationsDelegates,
+      child: Builder(
+        builder: (c) {
+          keep(c);
+          return const SizedBox();
+        },
+      ),
+    );
+    await tester.pumpWidget(Column(children: [app(const Locale('ar'), (c) => ar = c), app(const Locale('en'), (c) => en = c)]));
+    expect([1, 2, 3, 10, 11, 30, 1.5].map((h) => hoursAmount(ar, h)), [
+      'ساعة',
+      'ساعتين',
+      '3 ساعات',
+      '10 ساعات',
+      '11 ساعة',
+      '30 ساعة',
+      '1.5 ساعة',
+    ]);
+    expect([1, 3, 1.5].map((h) => hoursAmount(en, h)), ['1 hour', '3 hours', '1.5 hours']);
   });
 }

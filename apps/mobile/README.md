@@ -12,7 +12,7 @@ flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000/api/v1
 # Android emulator: http://10.0.2.2:8000/api/v1 · a phone on the same Wi-Fi: http://<your machine's IP>:8000/api/v1
 ```
 
-Sign in with a code to `salma.guardian@demo.test` (the code is in Mailpit, http://localhost:8025, or `apps/api/storage/logs/laravel.log`), or with **"Have a password?"**: academy code `demo`, then `yousef@demo.test` (kids), `ziad@demo.test` (middle), `maryam@demo.test` (teen), `nour@demo.test` (teacher), password `password`. Add more accounts from **Me** and switch between them without signing in again.
+Sign in with a code to `salma.guardian@demo.test` (the code is in Mailpit, http://localhost:8025, or `apps/api/storage/logs/laravel.log`), or with **"Have a password?"**: academy code `demo`, then `yousef@demo.test` (kids), `ziad@demo.test` (middle), `maryam@demo.test` (teen), `nour@demo.test` or `khaled@demo.test` (teachers; Khaled has reports waiting and a recorded homework to mark), password `password`. Add more accounts from **Me** and switch between them without signing in again.
 
 ## How it is built
 
@@ -20,7 +20,8 @@ Sign in with a code to `salma.guardian@demo.test` (the code is in Mailpit, http:
 |---|---|
 | `lib/app` | `bootstrap.dart` (wiring), `app.dart` (theme, language, notices), `router/` (one shell per look: `/family`, `/kids`, `/middle`, `/teen`, `/teach`; the open account decides which, a staff-only account goes to `/web-only`), `theme/` (the academy's branding from `GET /branding` turned into `ThemeData` plus `LmsColors` and `LmsShape` per stage), `di/` (the repositories) |
 | `lib/core` | `network/` (dio: `X-Academy`, Bearer, `Accept-Language`, `X-Timezone` on every call; RFC 7807 errors as `ApiProblem`; offline retries, and writes that move lessons or money carry one `Idempotency-Key` across them), `auth/` (several accounts in secure storage, the open one in `SessionCubit`), `time/` (the API's `{utc, local, timezone, label}`; shown on the wall clock the API wrote, never converted on the phone), `l10n/` (generated), `state/` (`LoadCubit`) |
-| `lib/features/<x>` | `data/` (a typed repository over the API), `domain/` (models from JSON), `presentation/` (pages, widgets, cubits): `auth`, `profile`, `dashboard` (homes for each look), `challenges` (each stage's challenges, the kids' chest and sticker album, collecting rewards, guardians' cheers), `schedule`, `classroom` (LiveKit in the app, or an outside link), `billing`, `roadmap`, `homework`, `teaching` |
+| `lib/features/<x>` | `data/` (a typed repository over the API), `domain/` (models from JSON), `presentation/` (pages, widgets, cubits): `auth`, `profile`, `dashboard` (homes for each look), `challenges` (each stage's challenges, the kids' chest and sticker album, collecting rewards, guardians' cheers), `schedule`, `classroom` (LiveKit in the app, or an outside link), `billing`, `roadmap`, `homework` (handing in words, a voice recording or a file), `teaching` (today, week, students, earnings, time off, and the focused tasks over the tabs: lesson reports, marking homework, My hours with shift proposals), `notifications` (bell, inbox, choices, and the update screen) |
+| `lib/core/push` | Firebase Cloud Messaging behind `PushTokens`; the device is registered for the open account (`POST devices`) and forgotten before signing out. A push carries its `academy` and `user`: tapped, it opens that account first (`openMessage`), and nothing for an account no longer on the phone. A tapped push or a link `academyapp://app/open/{screen}/{id}` goes through `app/router/targets.dart` (`targetOf`: the notification's `{screen, id}` to a place in the open account's look; a tab location opens with `go`, anything else is pushed over it) |
 | `lib/shared/motion` | How the app moves: `motion.dart` (`appear`/`staggered` entrances, `bob`, `wiggle`, `pulse`, `shimmerIf`, `CountUp`, `Pressable`, each look's spring), `celebration.dart` (confetti, stars or gems over the screen), `juice.dart` (sounds and haptics). Everything stands still when the phone asks for less motion |
 | `tool/sounds.py` | Writes the app's five short sounds (`assets/sounds/*.wav`: pop, coin, chest, levelup, cheer); we make them ourselves, nothing third-party |
 | `tool/strings.py` | Every word of the app in Arabic (Egyptian, as on the web) and English; it writes `lib/core/l10n/arb/*.arb`, then `flutter gen-l10n` |
@@ -31,7 +32,7 @@ The API client is written by hand per feature, not generated: a **contract test*
 
 ```bash
 flutter analyze
-flutter test            # unit, widget (sign-in, cancelling a lesson, challenges for each look) against a fake API, and the contract test
+flutter test            # unit, widget (sign-in, cancelling a lesson, challenges for each look, a teacher's report, marking and hours, the inbox, push registration, deep links, forced update) against a fake API, and the contract test
 dart format --set-exit-if-changed lib test
 python3 tool/strings.py && flutter gen-l10n   # after changing any wording
 python3 tool/sounds.py                          # after changing a sound
@@ -39,6 +40,17 @@ python3 tool/sounds.py                          # after changing a sound
 
 CI runs the same (`.github/workflows/mobile.yml`) plus a web build.
 
+## Push, links and updates
+
+- **Push** needs a Firebase project per environment; its settings come with the build, nothing is committed:
+  ```bash
+  flutter build apk --dart-define=API_BASE_URL=… --dart-define=FCM_API_KEY=… --dart-define=FCM_APP_ID=… \
+    --dart-define=FCM_SENDER_ID=… --dart-define=FCM_PROJECT_ID=…   # and FCM_VAPID_KEY=… for the web
+  ```
+  Without them the app has no push and works the same otherwise. The API sends through its FCM channel (`apps/api`, Communication). iOS also needs an APNs key uploaded to Firebase and the Push Notifications capability in Xcode; the web also needs a `web/firebase-messaging-sw.js` with the project's settings (not in the repo, so web builds have the bell and inbox but no push).
+- **Links**: `academyapp://app/open/{screen}/{id}` (Android intent filter, iOS URL type; on the web `/#/open/{screen}/{id}`), the same targets as a notification.
+- **Forced update**: `GET /branding` carries `app.min_version` (and the store links) from the API's `APP_MIN_VERSION`, `APP_ANDROID_URL`, `APP_IOS_URL`; an older app opens on the update screen only.
+
 ## Not yet in the app
 
-Recording voice homework, writing lesson reports and marking homework (teachers do it on `/teach` for now), proposing shifts, the notifications inbox and push (FCM), deep links into a lesson, forced updates, and dark mode.
+Dark mode.

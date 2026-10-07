@@ -525,10 +525,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get handedIn => 'Handed in. The teacher will mark it.';
 
   @override
-  String get handInOnWeb =>
-      'This homework takes a recording or a file. Handing those in is coming to the app soon; use the website until then.';
-
-  @override
   String get teacherFeedback => 'Teacher\'s feedback';
 
   @override
@@ -702,7 +698,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String hours(String h) {
-    return '$h h';
+    return '$h hours';
   }
 
   @override
@@ -723,16 +719,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get writeOnWeb => 'Write reports and mark homework on the teacher site until they arrive here.';
-
-  @override
   String reportDueBy(String when) {
     return 'Before $when';
-  }
-
-  @override
-  String weekSummary(int n, String h) {
-    return '$n lessons · $h h';
   }
 
   @override
@@ -782,8 +770,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get monthClosed => 'Month closed';
 
   @override
-  String lessonsHours(int n, String h) {
-    return '$n lessons · $h h';
+  String lessonsHours(String lessons, String hours) {
+    return '$lessons · $hours';
   }
 
   @override
@@ -1164,4 +1152,366 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get soundsHint => 'Little sounds on taps and rewards';
+
+  @override
+  String get reportsOpen => 'Waiting for you';
+
+  @override
+  String get reportsSent => 'Sent';
+
+  @override
+  String get noReportsWaiting => 'No reports waiting. Well done!';
+
+  @override
+  String get reportLesson => 'Lesson report';
+
+  @override
+  String get reportAbsence => 'Absence note';
+
+  @override
+  String get todaysPlan => 'Today\'s plan';
+
+  @override
+  String get planHint => 'Pick what happened with each lesson.';
+
+  @override
+  String get reasonNext => 'Next lesson';
+
+  @override
+  String get reasonReview => 'Review';
+
+  @override
+  String get outcomeIntroduced => 'Introduced';
+
+  @override
+  String get outcomePracticed => 'Practised';
+
+  @override
+  String get outcomeMastered => 'Mastered';
+
+  @override
+  String get outcomeNeedsReview => 'Needs review';
+
+  @override
+  String get itemScore => 'Score';
+
+  @override
+  String get itemNote => 'Note on this lesson';
+
+  @override
+  String get addNote => 'Add a note';
+
+  @override
+  String get addLesson => 'Add a lesson';
+
+  @override
+  String get pickLesson => 'Pick a lesson';
+
+  @override
+  String get searchLessons => 'Search lessons';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get notesForFamily => 'Notes for the student and family';
+
+  @override
+  String get notesInternal => 'Internal notes';
+
+  @override
+  String get notesInternalHint => 'For the academy only; the family never sees them.';
+
+  @override
+  String get absenceNote => 'Absence note';
+
+  @override
+  String get absenceHint => 'The student didn\'t come. Say what happened and anything the family should know.';
+
+  @override
+  String get giveHomework => 'Give homework';
+
+  @override
+  String get homeworkField => 'Homework';
+
+  @override
+  String get homeworkDetails => 'Details';
+
+  @override
+  String get acceptsLabel => 'Handed in as';
+
+  @override
+  String get acceptsAny => 'Anything';
+
+  @override
+  String get acceptsText => 'Text';
+
+  @override
+  String get acceptsAudio => 'Voice recording';
+
+  @override
+  String get acceptsFile => 'File';
+
+  @override
+  String dueIn(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'In $n days', one: 'In 1 day');
+    return '$_temp0';
+  }
+
+  @override
+  String get homeworkLocked => 'The student handed this homework in, so it stays as it is.';
+
+  @override
+  String get sendReport => 'Send the report';
+
+  @override
+  String get updateReport => 'Update the report';
+
+  @override
+  String get reportSent => 'Report sent.';
+
+  @override
+  String get reportLocked => 'The academy reviewed this report, so it stays as it is.';
+
+  @override
+  String get pickRatings => 'Pick focus and overall.';
+
+  @override
+  String get pickOutcomes => 'Pick what happened with each lesson.';
+
+  @override
+  String get markTitle => 'Marking';
+
+  @override
+  String get markWaiting => 'To mark';
+
+  @override
+  String get markDone => 'Marked';
+
+  @override
+  String get noHomeworkToMark => 'No homework to mark.';
+
+  @override
+  String get gradeLabel => 'Grade';
+
+  @override
+  String get feedbackLabel => 'Your words for the student';
+
+  @override
+  String get saveMark => 'Save the mark';
+
+  @override
+  String get marked => 'Marked.';
+
+  @override
+  String handedInAt(String when) {
+    return 'Handed in $when';
+  }
+
+  @override
+  String get fileOnWeb => 'Open this file on the website.';
+
+  @override
+  String get showPicture => 'Show the picture';
+
+  @override
+  String get playRecording => 'Play the recording';
+
+  @override
+  String get pause => 'Pause';
+
+  @override
+  String get cannotPlay => 'This recording can\'t play here.';
+
+  @override
+  String get waitingTap => 'Tap to start';
+
+  @override
+  String get recordVoice => 'Record your voice';
+
+  @override
+  String get recordKids => 'Record yourself';
+
+  @override
+  String recordingNow(String time) {
+    return 'Recording… $time';
+  }
+
+  @override
+  String get stopRecording => 'Stop';
+
+  @override
+  String get recordAgain => 'Record again';
+
+  @override
+  String get attachFile => 'Attach a file';
+
+  @override
+  String get attachPicture => 'Attach a picture or PDF';
+
+  @override
+  String get micDenied => 'We need the microphone to record. Allow it in your phone settings.';
+
+  @override
+  String recordingLimit(int n) {
+    return 'Recording stopped at $n minutes.';
+  }
+
+  @override
+  String get fileTooBig => 'The file is larger than 25 MB.';
+
+  @override
+  String get answerOptional => 'Add a few words (optional)';
+
+  @override
+  String get myHours => 'My hours';
+
+  @override
+  String hoursOnClock(String zone) {
+    return 'On $zone time';
+  }
+
+  @override
+  String weeklyHours(String h) {
+    return '$h a week';
+  }
+
+  @override
+  String get currentWeek => 'Approved hours';
+
+  @override
+  String get noHoursYet => 'No approved hours yet.';
+
+  @override
+  String get proposeHours => 'Propose new hours';
+
+  @override
+  String get yourProposal => 'Your proposal';
+
+  @override
+  String get waitingOnAcademy => 'Waiting for the academy';
+
+  @override
+  String get waitingOnYou => 'Waiting for you';
+
+  @override
+  String startsOn(String date) {
+    return 'Starts $date';
+  }
+
+  @override
+  String get academyCounter => 'The academy changed your proposal. This is what changed:';
+
+  @override
+  String get timeAdded => 'Added';
+
+  @override
+  String get timeRemoved => 'Removed';
+
+  @override
+  String get acceptCounter => 'Accept the change';
+
+  @override
+  String get editProposal => 'Edit the proposal';
+
+  @override
+  String get withdrawConfirm => 'Withdraw the proposal? Your approved hours stay as they are.';
+
+  @override
+  String get proposalAccepted => 'Your hours are approved.';
+
+  @override
+  String get proposalSent => 'Proposal sent to the academy.';
+
+  @override
+  String get draftSaved => 'Draft saved.';
+
+  @override
+  String get conversation => 'Conversation with the academy';
+
+  @override
+  String get writeMessage => 'Write a message…';
+
+  @override
+  String get editHours => 'Edit your hours';
+
+  @override
+  String get addTime => 'Add time';
+
+  @override
+  String get dayOff => 'Off';
+
+  @override
+  String get effectiveFrom => 'Starts on';
+
+  @override
+  String reduceNotice(String date) {
+    return 'If you cut hours, the earliest start is $date.';
+  }
+
+  @override
+  String get minHours => 'Fewest hours a week';
+
+  @override
+  String get maxHours => 'Most hours a week';
+
+  @override
+  String get proposalNote => 'Note for the academy';
+
+  @override
+  String get saveDraft => 'Save a draft';
+
+  @override
+  String get sendProposal => 'Send to the academy';
+
+  @override
+  String get endAfterStart => 'The end must be after the start.';
+
+  @override
+  String get untilMidnight => 'Until midnight';
+
+  @override
+  String get inboxTitle => 'Notifications';
+
+  @override
+  String get markAllRead => 'Mark all read';
+
+  @override
+  String get noNotifications => 'No notifications.';
+
+  @override
+  String get loadMore => 'Show more';
+
+  @override
+  String get notificationChoices => 'Notification choices';
+
+  @override
+  String get saved => 'Saved.';
+
+  @override
+  String get openIt => 'Open';
+
+  @override
+  String unreadCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n new notifications',
+      one: '1 new notification',
+      zero: 'Nothing new',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get updateTitle => 'A new version of the app is out';
+
+  @override
+  String get updateBody => 'Your version is too old to work with the academy. Update it to carry on.';
+
+  @override
+  String get updateNow => 'Update the app';
+
+  @override
+  String get updateFromStore => 'Update it from your phone\'s app store.';
 }

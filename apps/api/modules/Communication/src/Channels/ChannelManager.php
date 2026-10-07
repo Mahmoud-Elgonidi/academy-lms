@@ -11,6 +11,7 @@ use Modules\Communication\Channels\Sms\TwilioSmsGateway;
 use Modules\Communication\Channels\WhatsApp\LogWhatsAppGateway;
 use Modules\Communication\Channels\WhatsApp\MetaCloudWhatsAppGateway;
 use Modules\Communication\Channels\WhatsApp\WhatsAppGateway;
+use Modules\SharedKernel\Tenancy\TenantContext;
 
 /** Picks the adapter for each channel from config (docs/architecture/04, "Adapter + Manager"). */
 final class ChannelManager
@@ -22,7 +23,7 @@ final class ChannelManager
             'whatsapp' => new WhatsAppChannel($this->whatsapp()),
             'push' => new PushChannel(config('communication.push.driver') === 'fcm'
                 ? new FcmPushGateway(config('communication.push.fcm'))
-                : new LogPushGateway),
+                : new LogPushGateway, app(TenantContext::class)),
             default => throw new InvalidArgumentException("Unknown channel [{$channel}]."),
         };
     }

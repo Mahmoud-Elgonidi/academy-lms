@@ -1,0 +1,51 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/l10n/l10n.dart';
+import '../../../../shared/motion/motion.dart';
+import '../../data/notifications_repository.dart';
+
+/// The bell on a home: how many unread, a swing when there are some; opens
+/// the inbox, and counts again on the way back.
+class NotificationBell extends StatefulWidget {
+  const NotificationBell({super.key});
+
+  @override
+  State<NotificationBell> createState() => _NotificationBellState();
+}
+
+class _NotificationBellState extends State<NotificationBell> {
+  int _unread = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_count());
+  }
+
+  Future<void> _count() async {
+    try {
+      final n = await context.read<NotificationsRepository>().unread();
+      if (mounted) setState(() => _unread = n);
+    } on Exception {
+      // The bell just stays quiet.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget icon = Icon(_unread > 0 ? Icons.notifications_active_rounded : Icons.notifications_none_rounded);
+    if (_unread > 0) icon = icon.wiggle(context);
+    return IconButton(
+      tooltip: '${context.l10n.inboxTitle} · ${context.l10n.unreadCount(_unread)}',
+      onPressed: () async {
+        await context.push('/inbox');
+        if (mounted) await _count();
+      },
+      icon: Badge(isLabelVisible: _unread > 0, label: Text('$_unread'), child: icon),
+    );
+  }
+}

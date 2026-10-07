@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/auth/session_cubit.dart';
@@ -14,6 +15,7 @@ import '../../../schedule/presentation/widgets/lesson_card.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 
 class _Today {
   const _Today(this.lessons, this.todo);
@@ -69,14 +71,21 @@ class _TodayList extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       children: staggered(context, [
         const SizedBox(height: 6),
-        Text(
-          l.todayHeader(DateFormat('EEEE d MMMM', context.locale).format(today.lessons.from), zoneName(zone, context.locale)),
-          style: context.text.bodySmall,
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l.todayHeader(DateFormat('EEEE d MMMM', context.locale).format(today.lessons.from), zoneName(zone, context.locale)),
+                style: context.text.bodySmall,
+              ),
+            ),
+            const NotificationBell(),
+          ],
         ),
         const SizedBox(height: 2),
         Text(l.todayCount(today.lessons.count), style: context.text.headlineSmall),
         if (today.lessons.minutes > 0)
-          Text(l.hours(hoursText(today.lessons.minutes)), style: context.text.bodyMedium?.copyWith(color: c.muted)),
+          Text(hoursAmount(context, today.lessons.minutes / 60), style: context.text.bodyMedium?.copyWith(color: c.muted)),
         const SizedBox(height: 14),
         if (next != null) ...[
           NextLessonCard(lesson: next, onOpened: () => context.read<LoadCubit<_Today>>().load()),
@@ -90,6 +99,7 @@ class _TodayList extends StatelessWidget {
               if (todo.reports > 0)
                 Expanded(
                   child: _Waiting(
+                    onTap: () => _open(context, '/teach/reports'),
                     count: todo.reports,
                     label: l.reportsWaiting(todo.reports),
                     caption: todo.firstReport == null
@@ -101,20 +111,31 @@ class _TodayList extends StatelessWidget {
               if (todo.reports > 0 && todo.homework > 0) const SizedBox(width: 10),
               if (todo.homework > 0)
                 Expanded(
-                  child: _Waiting(count: todo.homework, label: l.homeworkToMark(todo.homework), tone: Tone.info),
+                  child: _Waiting(
+                    onTap: () => _open(context, '/teach/marking'),
+                    count: todo.homework,
+                    label: l.homeworkToMark(todo.homework),
+                    tone: Tone.info,
+                  ),
                 ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(l.writeOnWeb, style: context.text.bodySmall),
         ],
       ]),
     );
   }
 }
 
+/// Opens a task and refreshes what waits when coming back.
+Future<void> _open(BuildContext context, String location) async {
+  await context.push(location);
+  if (context.mounted) await context.read<LoadCubit<_Today>>().load();
+}
+
 class _Waiting extends StatelessWidget {
-  const _Waiting({required this.count, required this.label, required this.tone, this.caption});
+  const _Waiting({required this.count, required this.label, required this.tone, required this.onTap, this.caption});
+
+  final VoidCallback onTap;
 
   final int count;
   final String label;
@@ -125,6 +146,7 @@ class _Waiting extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, ink) = tone.colours(context);
     return LmsCard(
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

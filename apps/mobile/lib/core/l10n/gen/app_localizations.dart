@@ -962,12 +962,6 @@ abstract class AppLocalizations {
   /// **'اتسلّم. المدرّس هيصححه.'**
   String get handedIn;
 
-  /// No description provided for @handInOnWeb.
-  ///
-  /// In ar, this message translates to:
-  /// **'الواجب ده تسجيل صوت أو ملف. التسليم بيه جاي قريب في التطبيق، وسلّمه من الموقع لحد ما يوصل.'**
-  String get handInOnWeb;
-
   /// No description provided for @teacherFeedback.
   ///
   /// In ar, this message translates to:
@@ -1274,23 +1268,11 @@ abstract class AppLocalizations {
   /// **'{n, plural, =1{واجب تصحّحه} =2{واجبين تصحّحهم} few{{n} واجبات تصحّحها} other{{n} واجب تصحّحه}}'**
   String homeworkToMark(int n);
 
-  /// No description provided for @writeOnWeb.
-  ///
-  /// In ar, this message translates to:
-  /// **'التقارير والتصحيح من لوحة المدرّس على الموقع لحد ما يوصلوا هنا.'**
-  String get writeOnWeb;
-
   /// No description provided for @reportDueBy.
   ///
   /// In ar, this message translates to:
   /// **'قبل {when}'**
   String reportDueBy(String when);
-
-  /// No description provided for @weekSummary.
-  ///
-  /// In ar, this message translates to:
-  /// **'{n} حصة · {h} ساعة'**
-  String weekSummary(int n, String h);
 
   /// No description provided for @prevWeek.
   ///
@@ -1379,8 +1361,8 @@ abstract class AppLocalizations {
   /// No description provided for @lessonsHours.
   ///
   /// In ar, this message translates to:
-  /// **'{n} حصة · {h} ساعة'**
-  String lessonsHours(int n, String h);
+  /// **'{lessons} · {hours}'**
+  String lessonsHours(String lessons, String hours);
 
   /// No description provided for @lessonPay.
   ///
@@ -1975,6 +1957,678 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'أصوات خفيفة لما تدوس أو تستلم جايزة'**
   String get soundsHint;
+
+  /// No description provided for @reportsOpen.
+  ///
+  /// In ar, this message translates to:
+  /// **'مستنية منك'**
+  String get reportsOpen;
+
+  /// No description provided for @reportsSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتبعتت'**
+  String get reportsSent;
+
+  /// No description provided for @noReportsWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش تقارير مستنياك. برافو!'**
+  String get noReportsWaiting;
+
+  /// No description provided for @reportLesson.
+  ///
+  /// In ar, this message translates to:
+  /// **'تقرير حصة'**
+  String get reportLesson;
+
+  /// No description provided for @reportAbsence.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظة غياب'**
+  String get reportAbsence;
+
+  /// No description provided for @todaysPlan.
+  ///
+  /// In ar, this message translates to:
+  /// **'خطة النهارده'**
+  String get todaysPlan;
+
+  /// No description provided for @planHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار اللي حصل في كل درس.'**
+  String get planHint;
+
+  /// No description provided for @reasonNext.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدرس الجاي'**
+  String get reasonNext;
+
+  /// No description provided for @reasonReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'مراجعة'**
+  String get reasonReview;
+
+  /// No description provided for @outcomeIntroduced.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتشرح'**
+  String get outcomeIntroduced;
+
+  /// No description provided for @outcomePracticed.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتدرّب عليه'**
+  String get outcomePracticed;
+
+  /// No description provided for @outcomeMastered.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتقن'**
+  String get outcomeMastered;
+
+  /// No description provided for @outcomeNeedsReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'محتاج مراجعة'**
+  String get outcomeNeedsReview;
+
+  /// No description provided for @itemScore.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدرجة'**
+  String get itemScore;
+
+  /// No description provided for @itemNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظة على الدرس'**
+  String get itemNote;
+
+  /// No description provided for @addNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف ملاحظة'**
+  String get addNote;
+
+  /// No description provided for @addLesson.
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف درس'**
+  String get addLesson;
+
+  /// No description provided for @pickLesson.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار درس'**
+  String get pickLesson;
+
+  /// No description provided for @searchLessons.
+  ///
+  /// In ar, this message translates to:
+  /// **'دوّر على درس'**
+  String get searchLessons;
+
+  /// No description provided for @remove.
+  ///
+  /// In ar, this message translates to:
+  /// **'شيل'**
+  String get remove;
+
+  /// No description provided for @notesForFamily.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظات للطالب وولي الأمر'**
+  String get notesForFamily;
+
+  /// No description provided for @notesInternal.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظات داخلية'**
+  String get notesInternal;
+
+  /// No description provided for @notesInternalHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'للأكاديمية بس، الأسرة مابتشوفهاش.'**
+  String get notesInternalHint;
+
+  /// No description provided for @absenceNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظة الغياب'**
+  String get absenceNote;
+
+  /// No description provided for @absenceHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطالب ماحضرش. اكتب اللي حصل وأي حاجة الأسرة محتاجة تعرفها.'**
+  String get absenceHint;
+
+  /// No description provided for @giveHomework.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادّي واجب'**
+  String get giveHomework;
+
+  /// No description provided for @homeworkField.
+  ///
+  /// In ar, this message translates to:
+  /// **'الواجب'**
+  String get homeworkField;
+
+  /// No description provided for @homeworkDetails.
+  ///
+  /// In ar, this message translates to:
+  /// **'التفاصيل'**
+  String get homeworkDetails;
+
+  /// No description provided for @acceptsLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'بيتسلّم'**
+  String get acceptsLabel;
+
+  /// No description provided for @acceptsAny.
+  ///
+  /// In ar, this message translates to:
+  /// **'أي حاجة'**
+  String get acceptsAny;
+
+  /// No description provided for @acceptsText.
+  ///
+  /// In ar, this message translates to:
+  /// **'كتابة'**
+  String get acceptsText;
+
+  /// No description provided for @acceptsAudio.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيل صوت'**
+  String get acceptsAudio;
+
+  /// No description provided for @acceptsFile.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملف'**
+  String get acceptsFile;
+
+  /// No description provided for @dueIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{بعد يوم} =2{بعد يومين} few{بعد {n} أيام} other{بعد {n} يوم}}'**
+  String dueIn(int n);
+
+  /// No description provided for @homeworkLocked.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطالب سلّم الواجب ده، فمش هيتغير.'**
+  String get homeworkLocked;
+
+  /// No description provided for @sendReport.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت التقرير'**
+  String get sendReport;
+
+  /// No description provided for @updateReport.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدّث التقرير'**
+  String get updateReport;
+
+  /// No description provided for @reportSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'التقرير اتبعت.'**
+  String get reportSent;
+
+  /// No description provided for @reportLocked.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية راجعت التقرير ده، فمش هيتغير.'**
+  String get reportLocked;
+
+  /// No description provided for @pickRatings.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار التركيز والمستوى العام.'**
+  String get pickRatings;
+
+  /// No description provided for @pickOutcomes.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار اللي حصل في كل درس.'**
+  String get pickOutcomes;
+
+  /// No description provided for @markTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصحيح الواجبات'**
+  String get markTitle;
+
+  /// No description provided for @markWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'مستني التصحيح'**
+  String get markWaiting;
+
+  /// No description provided for @markDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتصحّح'**
+  String get markDone;
+
+  /// No description provided for @noHomeworkToMark.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش واجبات مستنية تصحيح.'**
+  String get noHomeworkToMark;
+
+  /// No description provided for @gradeLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدرجة'**
+  String get gradeLabel;
+
+  /// No description provided for @feedbackLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلمتك للطالب'**
+  String get feedbackLabel;
+
+  /// No description provided for @saveMark.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل التصحيح'**
+  String get saveMark;
+
+  /// No description provided for @marked.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتسجّل التصحيح.'**
+  String get marked;
+
+  /// No description provided for @handedInAt.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتسلّم {when}'**
+  String handedInAt(String when);
+
+  /// No description provided for @fileOnWeb.
+  ///
+  /// In ar, this message translates to:
+  /// **'الملف ده بيتفتح من الموقع.'**
+  String get fileOnWeb;
+
+  /// No description provided for @showPicture.
+  ///
+  /// In ar, this message translates to:
+  /// **'اعرض الصورة'**
+  String get showPicture;
+
+  /// No description provided for @playRecording.
+  ///
+  /// In ar, this message translates to:
+  /// **'شغّل التسجيل'**
+  String get playRecording;
+
+  /// No description provided for @pause.
+  ///
+  /// In ar, this message translates to:
+  /// **'وقّف'**
+  String get pause;
+
+  /// No description provided for @cannotPlay.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش قادرين نشغّل التسجيل ده هنا.'**
+  String get cannotPlay;
+
+  /// No description provided for @waitingTap.
+  ///
+  /// In ar, this message translates to:
+  /// **'دوس عشان تبدأ'**
+  String get waitingTap;
+
+  /// No description provided for @recordVoice.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل صوتك'**
+  String get recordVoice;
+
+  /// No description provided for @recordKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل تسميعك'**
+  String get recordKids;
+
+  /// No description provided for @recordingNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'بيسجّل… {time}'**
+  String recordingNow(String time);
+
+  /// No description provided for @stopRecording.
+  ///
+  /// In ar, this message translates to:
+  /// **'وقّف التسجيل'**
+  String get stopRecording;
+
+  /// No description provided for @recordAgain.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل تاني'**
+  String get recordAgain;
+
+  /// No description provided for @attachFile.
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف ملف'**
+  String get attachFile;
+
+  /// No description provided for @attachPicture.
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف صورة أو PDF'**
+  String get attachPicture;
+
+  /// No description provided for @micDenied.
+  ///
+  /// In ar, this message translates to:
+  /// **'محتاجين إذن المايك عشان تسجّل. فعّله من إعدادات الموبايل.'**
+  String get micDenied;
+
+  /// No description provided for @recordingLimit.
+  ///
+  /// In ar, this message translates to:
+  /// **'التسجيل وقف عند {n} دقايق.'**
+  String recordingLimit(int n);
+
+  /// No description provided for @fileTooBig.
+  ///
+  /// In ar, this message translates to:
+  /// **'الملف أكبر من 25 ميجا.'**
+  String get fileTooBig;
+
+  /// No description provided for @answerOptional.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب حاجة كمان (اختياري)'**
+  String get answerOptional;
+
+  /// No description provided for @myHours.
+  ///
+  /// In ar, this message translates to:
+  /// **'مواعيدي'**
+  String get myHours;
+
+  /// No description provided for @hoursOnClock.
+  ///
+  /// In ar, this message translates to:
+  /// **'على توقيت {zone}'**
+  String hoursOnClock(String zone);
+
+  /// No description provided for @weeklyHours.
+  ///
+  /// In ar, this message translates to:
+  /// **'{h} في الأسبوع'**
+  String weeklyHours(String h);
+
+  /// No description provided for @currentWeek.
+  ///
+  /// In ar, this message translates to:
+  /// **'المواعيد المعتمدة'**
+  String get currentWeek;
+
+  /// No description provided for @noHoursYet.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش مواعيد معتمدة.'**
+  String get noHoursYet;
+
+  /// No description provided for @proposeHours.
+  ///
+  /// In ar, this message translates to:
+  /// **'اقترح مواعيد جديدة'**
+  String get proposeHours;
+
+  /// No description provided for @yourProposal.
+  ///
+  /// In ar, this message translates to:
+  /// **'مقترحك'**
+  String get yourProposal;
+
+  /// No description provided for @waitingOnAcademy.
+  ///
+  /// In ar, this message translates to:
+  /// **'مستني رد الأكاديمية'**
+  String get waitingOnAcademy;
+
+  /// No description provided for @waitingOnYou.
+  ///
+  /// In ar, this message translates to:
+  /// **'مستني ردك'**
+  String get waitingOnYou;
+
+  /// No description provided for @startsOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'يبدأ {date}'**
+  String startsOn(String date);
+
+  /// No description provided for @academyCounter.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية عدّلت مقترحك. ده اللي اتغير:'**
+  String get academyCounter;
+
+  /// No description provided for @timeAdded.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتضاف'**
+  String get timeAdded;
+
+  /// No description provided for @timeRemoved.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتشال'**
+  String get timeRemoved;
+
+  /// No description provided for @acceptCounter.
+  ///
+  /// In ar, this message translates to:
+  /// **'موافق على التعديل'**
+  String get acceptCounter;
+
+  /// No description provided for @editProposal.
+  ///
+  /// In ar, this message translates to:
+  /// **'عدّل المقترح'**
+  String get editProposal;
+
+  /// No description provided for @withdrawConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسحب المقترح؟ المواعيد المعتمدة هتفضل زي ما هي.'**
+  String get withdrawConfirm;
+
+  /// No description provided for @proposalAccepted.
+  ///
+  /// In ar, this message translates to:
+  /// **'مواعيدك اتعتمدت.'**
+  String get proposalAccepted;
+
+  /// No description provided for @proposalSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'المقترح اتبعت للأكاديمية.'**
+  String get proposalSent;
+
+  /// No description provided for @draftSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'المسودة اتحفظت.'**
+  String get draftSaved;
+
+  /// No description provided for @conversation.
+  ///
+  /// In ar, this message translates to:
+  /// **'المحادثة مع الأكاديمية'**
+  String get conversation;
+
+  /// No description provided for @writeMessage.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب رسالة…'**
+  String get writeMessage;
+
+  /// No description provided for @editHours.
+  ///
+  /// In ar, this message translates to:
+  /// **'عدّل مواعيدك'**
+  String get editHours;
+
+  /// No description provided for @addTime.
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف وقت'**
+  String get addTime;
+
+  /// No description provided for @dayOff.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش'**
+  String get dayOff;
+
+  /// No description provided for @effectiveFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'يبدأ من'**
+  String get effectiveFrom;
+
+  /// No description provided for @reduceNotice.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو هتقلل ساعات، أقرب بداية {date}.'**
+  String reduceNotice(String date);
+
+  /// No description provided for @minHours.
+  ///
+  /// In ar, this message translates to:
+  /// **'أقل ساعات في الأسبوع'**
+  String get minHours;
+
+  /// No description provided for @maxHours.
+  ///
+  /// In ar, this message translates to:
+  /// **'أكتر ساعات في الأسبوع'**
+  String get maxHours;
+
+  /// No description provided for @proposalNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظة للأكاديمية'**
+  String get proposalNote;
+
+  /// No description provided for @saveDraft.
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ مسودة'**
+  String get saveDraft;
+
+  /// No description provided for @sendProposal.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت للأكاديمية'**
+  String get sendProposal;
+
+  /// No description provided for @endAfterStart.
+  ///
+  /// In ar, this message translates to:
+  /// **'وقت النهاية لازم يكون بعد البداية.'**
+  String get endAfterStart;
+
+  /// No description provided for @untilMidnight.
+  ///
+  /// In ar, this message translates to:
+  /// **'لحد نص الليل'**
+  String get untilMidnight;
+
+  /// No description provided for @inboxTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإشعارات'**
+  String get inboxTitle;
+
+  /// No description provided for @markAllRead.
+  ///
+  /// In ar, this message translates to:
+  /// **'علّم الكل مقروء'**
+  String get markAllRead;
+
+  /// No description provided for @noNotifications.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش إشعارات.'**
+  String get noNotifications;
+
+  /// No description provided for @loadMore.
+  ///
+  /// In ar, this message translates to:
+  /// **'اعرض أكتر'**
+  String get loadMore;
+
+  /// No description provided for @notificationChoices.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختيارات الإشعارات'**
+  String get notificationChoices;
+
+  /// No description provided for @saved.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتحفظ.'**
+  String get saved;
+
+  /// No description provided for @openIt.
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح'**
+  String get openIt;
+
+  /// No description provided for @unreadCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مفيش جديد} =1{إشعار جديد} =2{إشعارين جداد} few{{n} إشعارات جديدة} other{{n} إشعار جديد}}'**
+  String unreadCount(int n);
+
+  /// No description provided for @updateTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'فيه نسخة جديدة من التطبيق'**
+  String get updateTitle;
+
+  /// No description provided for @updateBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'النسخة اللي عندك قديمة ومش هتشتغل مع الأكاديمية. حدّثها عشان تكمل.'**
+  String get updateBody;
+
+  /// No description provided for @updateNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدّث التطبيق'**
+  String get updateNow;
+
+  /// No description provided for @updateFromStore.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدّثه من متجر التطبيقات على موبايلك.'**
+  String get updateFromStore;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

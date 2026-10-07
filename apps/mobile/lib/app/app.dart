@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -5,10 +7,12 @@ import 'package:go_router/go_router.dart';
 
 import '../core/auth/session_cubit.dart';
 import '../core/l10n/l10n.dart';
+import '../core/push/push.dart';
 import '../features/auth/presentation/bloc/sign_in_cubit.dart';
 import '../shared/motion/juice.dart';
 import 'di/services.dart';
 import 'router/router.dart';
+import 'router/targets.dart';
 import 'theme/app_theme.dart';
 
 /// One app for every academy: the open account picks the colours (its
@@ -27,11 +31,44 @@ class AcademyApp extends StatefulWidget {
 class _AcademyAppState extends State<AcademyApp> {
   late final GoRouter _router = buildRouter(widget.session);
   final _messenger = GlobalKey<ScaffoldMessengerState>();
+  final _subs = <StreamSubscription<Object?>>[];
+
+  @override
+  void initState() {
+    super.initState();
+    final push = Push.instance;
+    _subs
+      ..add(push.opened.listen(_open))
+      ..add(push.received.listen(_show));
+    final first = push.pending;
+    if (first != null) {
+      push.pending = null;
+      // After the session has opened the account.
+      WidgetsBinding.instance.addPostFrameCallback((_) => Future<void>.delayed(const Duration(milliseconds: 600), () => _open(first)));
+    }
+  }
 
   @override
   void dispose() {
+    for (final s in _subs) {
+      unawaited(s.cancel());
+    }
     _router.dispose();
     super.dispose();
+  }
+
+  /// A tapped push opens where it belongs, in its own account.
+  void _open(Map<String, String> data) => unawaited(openMessage(widget.session, _router, data));
+
+  /// A push while the app is open: a line at the bottom, with a way in.
+  void _show(({String title, String body, Map<String, String> data}) m) {
+    final l = lookupAppLocalizations(Locale(widget.session.state.locale));
+    _messenger.currentState?.showSnackBar(
+      SnackBar(
+        content: Text([m.title, m.body].where((t) => t.isNotEmpty).join('\n')),
+        action: SnackBarAction(label: l.openIt, onPressed: () => _open(m.data)),
+      ),
+    );
   }
 
   @override

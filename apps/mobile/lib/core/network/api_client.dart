@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
@@ -61,9 +62,29 @@ class ApiClient {
 
   Future<Map<String, dynamic>> put(String path, {Object? body}) => _send('PUT', path, body: body, retry: true);
 
+  /// A file the API streams (a homework recording), as bytes.
+  Future<Uint8List> download(String path) async {
+    for (var attempt = 1; ; attempt++) {
+      try {
+        final response = await _dio.get<List<int>>(path, options: Options(responseType: ResponseType.bytes));
+        return Uint8List.fromList(response.data ?? const []);
+      } on DioException catch (e) {
+        final problem = ApiProblem.fromDio(e);
+        if (problem.isOffline && attempt < _attempts) {
+          await Future<void>.delayed(Duration(milliseconds: 400 * attempt * attempt));
+          continue;
+        }
+        if (problem.isUnauthenticated && _context.token != null) _context.onUnauthorized();
+        throw problem;
+      }
+    }
+  }
+
   Future<Map<String, dynamic>> patch(String path, {Object? body}) => _send('PATCH', path, body: body);
 
-  Future<Map<String, dynamic>> delete(String path) => _send('DELETE', path, retry: true);
+  /// [academy] and [token] act as another account on this device, as for [post].
+  Future<Map<String, dynamic>> delete(String path, {Object? body, String? academy, String? token}) =>
+      _send('DELETE', path, body: body, academy: academy, token: token, retry: true);
 
   Future<Map<String, dynamic>> _send(
     String method,

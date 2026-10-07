@@ -26,9 +26,25 @@ class SessionRepository {
 
   final ApiClient _api;
 
-  /// Public: works before and after sign-in.
-  Future<Map<String, dynamic>> branding(String academy) async =>
-      (await _api.get('branding', academy: academy, anonymous: true))['data'] as Map<String, dynamic>;
+  /// Public: works before and after sign-in. The app policy (the oldest
+  /// version still served) rides along under `app`, so it is cached with the look.
+  Future<Map<String, dynamic>> branding(String academy) async {
+    final json = await _api.get('branding', academy: academy, anonymous: true);
+    return {...json['data'] as Map<String, dynamic>, 'app': json['app']};
+  }
+
+  /// This phone receives the open account's push notifications.
+  Future<void> registerDevice({required String platform, required String token, String? appVersion}) =>
+      _api.post('devices', body: {'platform': platform, 'token': token, 'app_version': ?appVersion});
+
+  /// The account (signing out of this phone) stops sending pushes here. Best effort.
+  Future<void> forgetDevice({required String academy, required String token, required String pushToken}) async {
+    try {
+      await _api.delete('devices', body: {'token': pushToken}, academy: academy, token: token);
+    } on Exception {
+      // The API drops dead tokens by itself on the next push.
+    }
+  }
 
   Future<Me> me() async => Me.fromJson((await _api.get('me'))['data'] as Map<String, dynamic>);
 

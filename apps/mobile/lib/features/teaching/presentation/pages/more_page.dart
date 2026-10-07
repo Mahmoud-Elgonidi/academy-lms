@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/widgets/lms.dart';
 
-/// The teacher's other screens: time off and the account.
+/// The teacher's other screens: reports, marking, hours, time off and the account.
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
 
@@ -20,6 +20,27 @@ class MorePage extends StatelessWidget {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
+                ListTile(
+                  leading: const Icon(Icons.article_outlined),
+                  title: Text(l.navReports),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.push('/teach/reports'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.rate_review_outlined),
+                  title: Text(l.markTitle),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.push('/teach/marking'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.schedule_rounded),
+                  title: Text(l.myHours),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.push('/teach/hours'),
+                ),
+                const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.beach_access_outlined),
                   title: Text(l.timeOff),

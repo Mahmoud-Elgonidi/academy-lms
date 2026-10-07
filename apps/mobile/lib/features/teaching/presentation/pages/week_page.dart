@@ -79,7 +79,10 @@ class _Days extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       children: staggered(context, [
         Text(range, style: Theme.of(context).textTheme.titleLarge),
-        Text(l.weekSummary(week.count, hoursText(week.minutes)), style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          l.lessonsHours(l.lessonsCount(week.count), hoursAmount(context, week.minutes / 60)),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
         const SizedBox(height: 10),
         if (week.lessons.isEmpty) EmptyNote(l.noLessonsWeek),
         if (week.lessons.isNotEmpty)

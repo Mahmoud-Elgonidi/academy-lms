@@ -351,7 +351,6 @@
   "handIn": "سلّم",
   "yourAnswer": "إجابتك",
   "handedIn": "اتسلّم. المدرّس هيصححه.",
-  "handInOnWeb": "الواجب ده تسجيل صوت أو ملف. التسليم بيه جاي قريب في التطبيق، وسلّمه من الموقع لحد ما يوصل.",
   "teacherFeedback": "رأي المدرّس",
   "grade": "الدرجة: {g} من 5",
   "@grade": {
@@ -524,22 +523,10 @@
       }
     }
   },
-  "writeOnWeb": "التقارير والتصحيح من لوحة المدرّس على الموقع لحد ما يوصلوا هنا.",
   "reportDueBy": "قبل {when}",
   "@reportDueBy": {
     "placeholders": {
       "when": {
-        "type": "String"
-      }
-    }
-  },
-  "weekSummary": "{n} حصة · {h} ساعة",
-  "@weekSummary": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      },
-      "h": {
         "type": "String"
       }
     }
@@ -572,13 +559,13 @@
   "soFar": "لحد النهارده",
   "monthOpen": "الشهر لسه مفتوح",
   "monthClosed": "الشهر اتقفل",
-  "lessonsHours": "{n} حصة · {h} ساعة",
+  "lessonsHours": "{lessons} · {hours}",
   "@lessonsHours": {
     "placeholders": {
-      "n": {
-        "type": "int"
+      "lessons": {
+        "type": "String"
       },
-      "h": {
+      "hours": {
         "type": "String"
       }
     }
@@ -884,5 +871,180 @@
   "seeAll": "شوف الكل",
   "allBadges": "كل الإنجازات",
   "sounds": "الأصوات",
-  "soundsHint": "أصوات خفيفة لما تدوس أو تستلم جايزة"
+  "soundsHint": "أصوات خفيفة لما تدوس أو تستلم جايزة",
+  "reportsOpen": "مستنية منك",
+  "reportsSent": "اتبعتت",
+  "noReportsWaiting": "مفيش تقارير مستنياك. برافو!",
+  "reportLesson": "تقرير حصة",
+  "reportAbsence": "ملاحظة غياب",
+  "todaysPlan": "خطة النهارده",
+  "planHint": "اختار اللي حصل في كل درس.",
+  "reasonNext": "الدرس الجاي",
+  "reasonReview": "مراجعة",
+  "outcomeIntroduced": "اتشرح",
+  "outcomePracticed": "اتدرّب عليه",
+  "outcomeMastered": "اتقن",
+  "outcomeNeedsReview": "محتاج مراجعة",
+  "itemScore": "الدرجة",
+  "itemNote": "ملاحظة على الدرس",
+  "addNote": "ضيف ملاحظة",
+  "addLesson": "ضيف درس",
+  "pickLesson": "اختار درس",
+  "searchLessons": "دوّر على درس",
+  "remove": "شيل",
+  "notesForFamily": "ملاحظات للطالب وولي الأمر",
+  "notesInternal": "ملاحظات داخلية",
+  "notesInternalHint": "للأكاديمية بس، الأسرة مابتشوفهاش.",
+  "absenceNote": "ملاحظة الغياب",
+  "absenceHint": "الطالب ماحضرش. اكتب اللي حصل وأي حاجة الأسرة محتاجة تعرفها.",
+  "giveHomework": "ادّي واجب",
+  "homeworkField": "الواجب",
+  "homeworkDetails": "التفاصيل",
+  "acceptsLabel": "بيتسلّم",
+  "acceptsAny": "أي حاجة",
+  "acceptsText": "كتابة",
+  "acceptsAudio": "تسجيل صوت",
+  "acceptsFile": "ملف",
+  "dueIn": "{n, plural, =1{بعد يوم} =2{بعد يومين} few{بعد {n} أيام} other{بعد {n} يوم}}",
+  "@dueIn": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeworkLocked": "الطالب سلّم الواجب ده، فمش هيتغير.",
+  "sendReport": "ابعت التقرير",
+  "updateReport": "حدّث التقرير",
+  "reportSent": "التقرير اتبعت.",
+  "reportLocked": "الأكاديمية راجعت التقرير ده، فمش هيتغير.",
+  "pickRatings": "اختار التركيز والمستوى العام.",
+  "pickOutcomes": "اختار اللي حصل في كل درس.",
+  "markTitle": "تصحيح الواجبات",
+  "markWaiting": "مستني التصحيح",
+  "markDone": "اتصحّح",
+  "noHomeworkToMark": "مفيش واجبات مستنية تصحيح.",
+  "gradeLabel": "الدرجة",
+  "feedbackLabel": "كلمتك للطالب",
+  "saveMark": "سجّل التصحيح",
+  "marked": "اتسجّل التصحيح.",
+  "handedInAt": "اتسلّم {when}",
+  "@handedInAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "fileOnWeb": "الملف ده بيتفتح من الموقع.",
+  "showPicture": "اعرض الصورة",
+  "playRecording": "شغّل التسجيل",
+  "pause": "وقّف",
+  "cannotPlay": "مش قادرين نشغّل التسجيل ده هنا.",
+  "waitingTap": "دوس عشان تبدأ",
+  "recordVoice": "سجّل صوتك",
+  "recordKids": "سجّل تسميعك",
+  "recordingNow": "بيسجّل… {time}",
+  "@recordingNow": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "stopRecording": "وقّف التسجيل",
+  "recordAgain": "سجّل تاني",
+  "attachFile": "ضيف ملف",
+  "attachPicture": "ضيف صورة أو PDF",
+  "micDenied": "محتاجين إذن المايك عشان تسجّل. فعّله من إعدادات الموبايل.",
+  "recordingLimit": "التسجيل وقف عند {n} دقايق.",
+  "@recordingLimit": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "fileTooBig": "الملف أكبر من 25 ميجا.",
+  "answerOptional": "اكتب حاجة كمان (اختياري)",
+  "myHours": "مواعيدي",
+  "hoursOnClock": "على توقيت {zone}",
+  "@hoursOnClock": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "weeklyHours": "{h} في الأسبوع",
+  "@weeklyHours": {
+    "placeholders": {
+      "h": {
+        "type": "String"
+      }
+    }
+  },
+  "currentWeek": "المواعيد المعتمدة",
+  "noHoursYet": "لسه مفيش مواعيد معتمدة.",
+  "proposeHours": "اقترح مواعيد جديدة",
+  "yourProposal": "مقترحك",
+  "waitingOnAcademy": "مستني رد الأكاديمية",
+  "waitingOnYou": "مستني ردك",
+  "startsOn": "يبدأ {date}",
+  "@startsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "academyCounter": "الأكاديمية عدّلت مقترحك. ده اللي اتغير:",
+  "timeAdded": "اتضاف",
+  "timeRemoved": "اتشال",
+  "acceptCounter": "موافق على التعديل",
+  "editProposal": "عدّل المقترح",
+  "withdrawConfirm": "تسحب المقترح؟ المواعيد المعتمدة هتفضل زي ما هي.",
+  "proposalAccepted": "مواعيدك اتعتمدت.",
+  "proposalSent": "المقترح اتبعت للأكاديمية.",
+  "draftSaved": "المسودة اتحفظت.",
+  "conversation": "المحادثة مع الأكاديمية",
+  "writeMessage": "اكتب رسالة…",
+  "editHours": "عدّل مواعيدك",
+  "addTime": "ضيف وقت",
+  "dayOff": "مفيش",
+  "effectiveFrom": "يبدأ من",
+  "reduceNotice": "لو هتقلل ساعات، أقرب بداية {date}.",
+  "@reduceNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "minHours": "أقل ساعات في الأسبوع",
+  "maxHours": "أكتر ساعات في الأسبوع",
+  "proposalNote": "ملاحظة للأكاديمية",
+  "saveDraft": "احفظ مسودة",
+  "sendProposal": "ابعت للأكاديمية",
+  "endAfterStart": "وقت النهاية لازم يكون بعد البداية.",
+  "untilMidnight": "لحد نص الليل",
+  "inboxTitle": "الإشعارات",
+  "markAllRead": "علّم الكل مقروء",
+  "noNotifications": "مفيش إشعارات.",
+  "loadMore": "اعرض أكتر",
+  "notificationChoices": "اختيارات الإشعارات",
+  "saved": "اتحفظ.",
+  "openIt": "افتح",
+  "unreadCount": "{n, plural, =0{مفيش جديد} =1{إشعار جديد} =2{إشعارين جداد} few{{n} إشعارات جديدة} other{{n} إشعار جديد}}",
+  "@unreadCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "updateTitle": "فيه نسخة جديدة من التطبيق",
+  "updateBody": "النسخة اللي عندك قديمة ومش هتشتغل مع الأكاديمية. حدّثها عشان تكمل.",
+  "updateNow": "حدّث التطبيق",
+  "updateFromStore": "حدّثه من متجر التطبيقات على موبايلك."
 }
