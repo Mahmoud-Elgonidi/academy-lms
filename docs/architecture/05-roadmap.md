@@ -41,7 +41,7 @@
 - توليد OpenAPI ✅ (`packages/openapi/openapi.json`، والـ CI بيتأكد إنه مطابق للكود ومابيكسرش التوافق)، ثم توليد الـ clients (Dart وTS).
 - العربي والإنجليزي وRTL، وسجل المراجعة.
 - بنية الإشعارات: Push، والإيميل، وWhatsApp.
-- أول نشر على staging.
+- أول نشر على staging. ✅ (‏`progma.store` على سيرفر مشترك، معزول في Docker project لوحده؛ أي merge على `main` بيعدّي الاختبارات بيتنشر لوحده: `infra/deploy` و`.github/workflows/deploy.yml`.)
 
 ### P1 — الـ MVP (الأسابيع 4–14)
 
