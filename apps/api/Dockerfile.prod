@@ -58,7 +58,7 @@ RUN composer dump-autoload --no-dev --optimize --no-interaction \
         storage/framework/views storage/logs bootstrap/cache \
     && ln -sfn /app/storage/app/public public/storage \
     && rm -f bootstrap/cache/*.php .env \
-    && chown -R www-data:www-data storage bootstrap/cache /data/caddy /config/caddy \
+    && chown -R www-data:www-data storage bootstrap/cache /data/caddy /config/caddy /portal/.next \
     && (setcap -r /usr/local/bin/frankenphp || true) \
     && node --version >/dev/null
 
