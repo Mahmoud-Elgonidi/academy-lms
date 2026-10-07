@@ -15,7 +15,8 @@ use Throwable;
 
 /**
  * Renders API errors as RFC 7807 problem details (application/problem+json).
- * Titles are translated (modules/SharedKernel/lang/{ar,en}/problems.php) from Accept-Language.
+ * Titles are translated (modules/SharedKernel/lang/{ar,en}/problems.php) from Accept-Language,
+ * also when the error comes before the locale middleware (no academy, no such route).
  */
 final class ProblemDetails
 {
@@ -36,9 +37,13 @@ final class ProblemDetails
             default => [500, 'server-error', []],
         };
 
+        $locale = $request->headers->has('Accept-Language')
+            ? ($request->getPreferredLanguage(SetLocale::SUPPORTED) ?? app()->getLocale())
+            : app()->getLocale();
+
         $body = [
             'type' => $type,
-            'title' => __("shared::problems.{$type}"),
+            'title' => __("shared::problems.{$type}", [], $locale),
             'status' => $status,
         ];
 
@@ -49,7 +54,7 @@ final class ProblemDetails
 
         $headers = $e instanceof HttpExceptionInterface ? $e->getHeaders() : [];
 
-        return new JsonResponse($body + $extra, $status, ['Content-Type' => 'application/problem+json'] + $headers);
+        return new JsonResponse($body + $extra, $status, ['Content-Type' => 'application/problem+json', 'Content-Language' => $locale] + $headers);
     }
 
     private static function typeForStatus(int $status): string
@@ -73,8 +78,9 @@ final class ProblemDetails
             return config('app.debug') ? $e->getMessage() : null;
         }
 
-        // A missing record says nothing of what it was (no class names).
-        if ($e instanceof ValidationException || $e instanceof ModelNotFoundException) {
+        // Anything not found says nothing of what it was: no class names, no
+        // routes, no "which academy" (the title says enough, in the reader's language).
+        if ($e instanceof ValidationException || $status === 404) {
             return null;
         }
 

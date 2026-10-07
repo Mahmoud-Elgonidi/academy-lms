@@ -15,7 +15,10 @@ use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\HomeworkSubmission;
 use Modules\Learning\Models\ReportItem;
 use Modules\Learning\Models\SessionReport;
+use Modules\Learning\Queries\JourneyQuery;
 use Modules\Learning\Queries\RoadmapQuery;
+use Modules\People\Contracts\FamilyView;
+use Modules\SharedKernel\Time\LocalTimePresenter;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -61,6 +64,62 @@ final class LearnerController
         })->filter(fn (array $s) => $s['enrollments'] !== [])->values();
 
         return response()->json(['data' => $data->all()]);
+    }
+
+    /**
+     * A learner's journey.
+     *
+     * What the student's own home shows in each stage's look: stars (lessons mastered), points and rank, the lesson
+     * streak, badges, and per course its levels (worlds) with each lesson's state, where they are, what is next and
+     * the expected finish. learner_id defaults to the student themself, or a guardian's first child.
+     */
+    public function journey(Request $request, JourneyQuery $journey, LocalTimePresenter $time, FamilyView $family): JsonResponse
+    {
+        $request->validate(['learner_id' => ['nullable', 'string', 'max:64']]);
+        $asked = $request->query('learner_id');
+        $learner = $family->learner((string) $request->user()?->getAuthIdentifier(), is_string($asked) && $asked !== '' ? $asked : null)?->id;
+        abort_if($learner === null, 404);
+
+        $j = $journey->for($learner);
+        $l = 'learning::journey.';
+
+        return response()->json(['data' => [
+            'learner_id' => $learner,
+            'stars' => $j['stars'],
+            'attended' => $j['attended'],
+            'on_time' => $j['on_time'],
+            'streak' => $j['streak'],
+            'points' => $j['points'],
+            'rank' => $j['rank'] + [
+                'label' => __($l.'ranks.'.$j['rank']['key']),
+                'next_label' => $j['rank']['next_key'] ? __($l.'ranks.'.$j['rank']['next_key']) : null,
+            ],
+            'badges' => array_map(fn (array $b) => $b + ['name' => __($l.'badges.'.$b['key'])[0], 'hint' => __($l.'badges.'.$b['key'])[1]], $j['badges']),
+            'courses' => array_map(fn (array $c) => [
+                'enrollment_id' => $c['id'],
+                'subject' => $c['subject'],
+                'teacher' => $c['teacher'],
+                'program' => $c['map']['program']['name'] ?? null,
+                'percent' => $c['map']['percent'] ?? null,
+                'finished' => (bool) ($c['map']['finished'] ?? false),
+                'lessons_per_week' => $c['map']['lessons_per_week'] ?? null,
+                'finish_on' => $time->present($c['finish_on']),
+                'stars' => $c['stars'],
+                'streak' => $c['streak'],
+                'points' => $c['points'],
+                /** Each level: done, here or ahead, with its lessons (state: done, review, here, todo). */
+                'worlds' => array_map(fn (array $w) => [
+                    'index' => $w['index'],
+                    'title' => $w['title'],
+                    'percent' => $w['percent'],
+                    'state' => $w['state'],
+                    'done' => $w['done'],
+                    'lessons' => array_map(fn (array $lesson) => ['id' => $lesson['id'] ?? null, 'title' => $lesson['title'] ?? null, 'state' => $lesson['state'] ?? null], $w['lessons']),
+                ], $c['worlds']),
+                'level' => $c['level'] === null ? null : ['index' => $c['level']['index'], 'title' => $c['level']['title'], 'count' => $c['level']['count'], 'weeks_left' => $c['level']['weeks_left']],
+                'next' => array_map(fn (array $lesson) => ['id' => $lesson['id'] ?? null, 'title' => $lesson['title'] ?? null, 'state' => $lesson['state'] ?? null], $c['next']),
+            ], $j['courses']),
+        ]]);
     }
 
     public function roadmap(Request $request, string $enrollment, RoadmapQuery $roadmap): JsonResponse

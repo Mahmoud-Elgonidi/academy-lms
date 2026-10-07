@@ -1,0 +1,765 @@
+{
+  "@@locale": "ar",
+  "appName": "الأكاديمية",
+  "retry": "جرّب تاني",
+  "offline": "مفيش نت. اتأكد من الاتصال وجرّب تاني.",
+  "problem": "حصلت مشكلة. جرّب تاني.",
+  "back": "رجوع",
+  "close": "قفل",
+  "send": "ابعت",
+  "optional": "(اختياري)",
+  "noticeSignedOut": "خرجت من الحساب.",
+  "noticeExpired": "الدخول انتهى على الحساب ده. ادخل تاني.",
+  "minutes": "{n} دقيقة",
+  "@minutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "today": "النهارده",
+  "tomorrow": "بكرة",
+  "inMinutes": "{n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}",
+  "@inMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "inHours": "{n, plural, =1{ساعة} =2{ساعتين} few{{n} ساعات} other{{n} ساعة}}",
+  "@inHours": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonsCount": "{n, plural, =0{مفيش حصص} =1{حصة واحدة} =2{حصتين} few{{n} حصص} other{{n} حصة}}",
+  "@lessonsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "welcomeTitle": "أهلًا بيك",
+  "welcomeLead": "اكتب رقم موبايلك أو إيميلك، وهنبعتلك كود. بعدها هتلاقي حساباتك في كل الأكاديميات اللي انت فيها.",
+  "byPhone": "رقم الموبايل",
+  "byEmail": "الإيميل",
+  "countryCode": "كود الدولة",
+  "phoneHint": "الكود هيوصلك على واتساب. لو ماعندكش واتساب، هتقدر تطلبه رسالة SMS.",
+  "emailHint": "الكود هيوصلك على الإيميل ده.",
+  "sendCode": "ابعتلي كود",
+  "havePassword": "عندك كلمة سر؟ ادخل بيها",
+  "codeTitle": "اكتب الكود",
+  "codeSentWhatsapp": "بعتنالك كود من 6 أرقام على واتساب، على الرقم {to}",
+  "@codeSentWhatsapp": {
+    "placeholders": {
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "codeSentSms": "بعتنالك كود من 6 أرقام في رسالة SMS، على الرقم {to}",
+  "@codeSentSms": {
+    "placeholders": {
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "codeSentEmail": "بعتنالك كود من 6 أرقام على الإيميل {to}",
+  "@codeSentEmail": {
+    "placeholders": {
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "codeLabel": "الكود",
+  "codeValid": "الكود صالح 10 دقايق.",
+  "noCode": "ماوصلكش؟",
+  "resendIn": "ابعت كود جديد بعد {time}",
+  "@resendIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "resend": "ابعت كود جديد",
+  "sendBySms": "ابعته رسالة SMS بدل واتساب",
+  "confirm": "تأكيد",
+  "otherContact": "استخدم رقم أو إيميل تاني",
+  "accountsTitle": "حساباتك في كل الأكاديميات",
+  "accountsFound": "{n, plural, =0{مالقيناش حسابات} =1{لقينا حساب واحد ليك} =2{لقينا حسابين ليك} few{لقينا {n} حسابات ليك} other{لقينا {n} حساب ليك}}",
+  "@accountsFound": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsLead": "اختار اللي عايزه على الموبايل ده. بعد كده بتتنقل بينهم من \"حسابي\" من غير ما تدخل تاني.",
+  "accountsNote": "بنعرض بس الحسابات اللي على نفس الرقم، في الأكاديميات الشغالة. مش لاقي حساب؟ يمكن الأكاديمية مسجلاك برقم تاني: كلّمها.",
+  "addAccounts": "{n, plural, =1{ادخل} =2{أضف الحسابين وادخل} few{أضف {n} حسابات وادخل} other{أضف {n} حساب وادخل}}",
+  "@addAccounts": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "noAccounts": "مالقيناش حساب بالرقم أو الإيميل ده في أي أكاديمية. اتأكد منه، أو كلّم أكاديميتك.",
+  "roleStudent": "طالب",
+  "roleGuardian": "ولي أمر",
+  "roleTeacher": "مدرّس",
+  "roleStaff": "إدارة",
+  "passwordTitle": "ادخل بكلمة السر",
+  "academyCode": "كود الأكاديمية",
+  "academyCodeHint": "بتلاقيه في رسالة الترحيب، أو اسأل الأكاديمية.",
+  "loginLabel": "الإيميل أو الموبايل أو اسم المستخدم",
+  "passwordLabel": "كلمة السر",
+  "signIn": "ادخل",
+  "useCodeInstead": "ادخل بكود بدل كلمة السر",
+  "webOnlyTitle": "الحساب ده للإدارة",
+  "webOnlyBody": "حسابات الإدارة بتشتغل من الموقع. افتح لوحة الأكاديمية من الكمبيوتر.",
+  "navHome": "الرئيسية",
+  "navLessons": "الحصص",
+  "navProgress": "التقدم",
+  "navMoney": "الفلوس",
+  "navMe": "حسابي",
+  "navJourney": "رحلتي",
+  "navMyLessons": "حصصي",
+  "navMyHomework": "واجباتي",
+  "navBadges": "إنجازاتي",
+  "navPlan": "الخطة",
+  "navHomework": "الواجبات",
+  "navReports": "التقارير",
+  "navToday": "النهارده",
+  "navWeek": "أسبوعي",
+  "navStudents": "طلابي",
+  "navEarnings": "أرباحي",
+  "navMore": "المزيد",
+  "greetingMorning": "صباح الخير يا {name}",
+  "@greetingMorning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingEvening": "مساء الخير يا {name}",
+  "@greetingEvening": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nextLesson": "الحصة الجاية",
+  "noNextLesson": "مفيش حصص جاية في الأربع أسابيع دول.",
+  "roomOpensIn": "الفصل بيفتح بعد {time}",
+  "@roomOpensIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "roomOpen": "الفصل مفتوح",
+  "lessonOn": "الحصة شغالة دلوقتي",
+  "lessonWith": "{subject} مع {teacher}",
+  "@lessonWith": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      },
+      "teacher": {
+        "type": "String"
+      }
+    }
+  },
+  "joinLesson": "ادخل الحصة",
+  "joinOpensAt": "بيفتح {time}",
+  "@joinOpensAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "allLessons": "كل الحصص",
+  "balance": "الرصيد",
+  "owed": "عليك",
+  "payNow": "ادفع دلوقتي",
+  "nothingOwed": "مفيش عليك حاجة",
+  "lastReport": "آخر تقرير",
+  "readReport": "اقراه",
+  "homeworkLine": "واجب: {title}",
+  "@homeworkLine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "unfunded": "مستنية الدفع",
+  "notices": "تنبيهات",
+  "lessonsOf": "حصص {name}",
+  "@lessonsOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onClock": "بتوقيت {zone}",
+  "@onClock": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "upcoming": "الجاية",
+  "past": "اللي فاتت",
+  "noUpcoming": "مفيش حصص جاية في الأربع أسابيع دول.",
+  "noPast": "مفيش حصص في الأربع أسابيع اللي فاتوا.",
+  "substituteFor": "مدرّس بديل: {name} في إجازة",
+  "@substituteFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "refuseSubstitute": "مش موافقين على البديل",
+  "refuseSubstituteTitle": "مش موافقين على البديل؟",
+  "refuseSubstituteBody": "الحصة هتتلغي على حساب الأكاديمية، ودقايقها هترجعلك حصة تعويض تحجزها بعدين.",
+  "refuseSubstituteYes": "أيوه، ألغيها وعوّضوني",
+  "refusedSubstitute": "اتلغت. عندك {days} يوم تحجز فيهم حصة التعويض.",
+  "@refusedSubstitute": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "cancelLesson": "إلغاء الحصة",
+  "cancelTitle": "تلغي حصة {day}؟",
+  "@cancelTitle": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "reason": "السبب",
+  "noteForAcademy": "ملاحظة للأكاديمية",
+  "keepIt": "لأ، خليها",
+  "yesCancel": "أيوه، ألغيها",
+  "cancelled": "الحصة اتلغت.",
+  "pickReason": "اختار سبب الأول.",
+  "rateLesson": "قيّم الحصة",
+  "rateTitle": "الحصة كانت إزاي؟",
+  "rateGood": "إيه اللي عجبكم؟",
+  "rateBad": "إيه اللي ماعجبكمش؟",
+  "rateComment": "كلمة للأكاديمية",
+  "rateAnonymous": "المدرّس بيشوف التقييم من غير اسمك.",
+  "sendRating": "ابعت التقييم",
+  "notNow": "مش دلوقتي",
+  "rated": "شكرًا! وصل تقييمك.",
+  "starsOf": "{n} من 5",
+  "@starsOf": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "yourRating": "تقييمك",
+  "progressOf": "تقدّم {name}",
+  "@progressOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "percentDone": "{p}% من البرنامج",
+  "@percentDone": {
+    "placeholders": {
+      "p": {
+        "type": "int"
+      }
+    }
+  },
+  "hereNow": "دلوقتي: {title}",
+  "@hereNow": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "weeksLeft": "{n, plural, =0{قرّب يخلص} =1{باقي حوالي أسبوع} =2{باقي حوالي أسبوعين} few{باقي حوالي {n} أسابيع} other{باقي حوالي {n} أسبوع}}",
+  "@weeksLeft": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeworkOpen": "{n, plural, =1{واجب مفتوح} =2{واجبين مفتوحين} few{{n} واجبات مفتوحة} other{{n} واجب مفتوح}}",
+  "@homeworkOpen": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "reports": "التقارير",
+  "noReports": "مفيش تقارير لسه.",
+  "noCourses": "مفيش اشتراكات شغالة.",
+  "noProgram": "من غير منهج",
+  "reportOf": "تقرير {day}",
+  "@reportOf": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "engagement": "التركيز",
+  "overall": "المستوى العام",
+  "homeworkTitle": "الواجبات",
+  "noHomework": "مفيش واجبات دلوقتي.",
+  "dueBy": "قبل {when}",
+  "@dueBy": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "handIn": "سلّم",
+  "yourAnswer": "إجابتك",
+  "handedIn": "اتسلّم. المدرّس هيصححه.",
+  "handInOnWeb": "الواجب ده تسجيل صوت أو ملف. التسليم بيه جاي قريب في التطبيق، وسلّمه من الموقع لحد ما يوصل.",
+  "teacherFeedback": "رأي المدرّس",
+  "grade": "الدرجة: {g} من 5",
+  "@grade": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "yourSubmission": "اللي سلّمته",
+  "kidsHomeworkStar": "كل واجب بتسلّمه بيجيبلك نجمة جديدة!",
+  "owedNow": "عليك دلوقتي",
+  "invoiceDue": "فاتورة {number} · قبل {when}",
+  "@invoiceDue": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "payAmount": "ادفع {amount}",
+  "@payAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payNote": "الدفع بيتم في صفحة بوابة الأكاديمية. لما تخلّص ارجع هنا.",
+  "lessonsLeftTitle": "الحصص الفاضلة",
+  "invoices": "الفواتير",
+  "noInvoices": "مفيش فواتير.",
+  "openInvoice": "افتح الفاتورة",
+  "invoiceNote": "افتح أي فاتورة تشوفها وتطبعها، وفيها رمز QR بتاع الفاتورة الضريبية.",
+  "cantPayOnline": "الدفع أونلاين مش متاح للفاتورة دي. كلّم الأكاديمية.",
+  "pickGateway": "تدفع بإيه؟",
+  "joining": "بندخّلك الحصة…",
+  "openedOutside": "الحصة اتفتحت في تطبيق تاني.",
+  "leave": "اخرج من الحصة",
+  "micOff": "اقفل المايك",
+  "micOn": "افتح المايك",
+  "camOff": "اقفل الكاميرا",
+  "camOn": "افتح الكاميرا",
+  "audioOnly": "الصوت بس",
+  "rejoinHint": "لو خرجت بالغلط، ادخل تاني من نفس الزرار لحد ما الحصة تخلص.",
+  "weakNetwork": "النت ضعيف. جرّب \"الصوت بس\" لو الصورة بتقطّع.",
+  "waitingOther": "مستنيين الطرف التاني يدخل…",
+  "you": "انت",
+  "minutesLeft": "فاضل {n} دقيقة",
+  "@minutesLeft": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonUntil": "الحصة لحد {time}",
+  "@lessonUntil": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "meTitle": "حسابي",
+  "openNow": "داخل فيه",
+  "switchTo": "انتقل",
+  "addAccount": "ضيف حساب تاني",
+  "clockPrompt": "موبايلك على توقيت {device}، وحسابك على {profile}. نعرض المواعيد بتوقيت {device}؟",
+  "@clockPrompt": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      },
+      "profile": {
+        "type": "String"
+      }
+    }
+  },
+  "clockYes": "أيوه، {zone}",
+  "@clockYes": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "clockKeep": "خليه {zone}",
+  "@clockKeep": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "language": "اللغة",
+  "timezone": "التوقيت",
+  "myDevices": "أجهزتي",
+  "thisDevice": "الجهاز ده",
+  "lastUsed": "آخر مرة {when}",
+  "@lastUsed": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "signOutDevice": "خرّجه",
+  "deviceSignedOut": "الجهاز خرج من الحساب.",
+  "signOut": "اخرج من الحساب ده",
+  "signOutConfirm": "تخرج من {academy} على الموبايل ده؟",
+  "@signOutConfirm": {
+    "placeholders": {
+      "academy": {
+        "type": "String"
+      }
+    }
+  },
+  "todayHeader": "{date} · بتوقيت {zone}",
+  "@todayHeader": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "todayCount": "{n, plural, =0{النهارده مفيش حصص} =1{النهارده: حصة واحدة} =2{النهارده: حصتين} few{النهارده: {n} حصص} other{النهارده: {n} حصة}}",
+  "@todayCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hours": "{h} ساعة",
+  "@hours": {
+    "placeholders": {
+      "h": {
+        "type": "String"
+      }
+    }
+  },
+  "nextIn": "الجاية بعد {time}",
+  "@nextIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsWaiting": "{n, plural, =1{تقرير مستنيك} =2{تقريرين مستنيينك} few{{n} تقارير مستنياك} other{{n} تقرير مستنيك}}",
+  "@reportsWaiting": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeworkToMark": "{n, plural, =1{واجب تصحّحه} =2{واجبين تصحّحهم} few{{n} واجبات تصحّحها} other{{n} واجب تصحّحه}}",
+  "@homeworkToMark": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "writeOnWeb": "التقارير والتصحيح من لوحة المدرّس على الموقع لحد ما يوصلوا هنا.",
+  "reportDueBy": "قبل {when}",
+  "@reportDueBy": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "weekSummary": "{n} حصة · {h} ساعة",
+  "@weekSummary": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "h": {
+        "type": "String"
+      }
+    }
+  },
+  "prevWeek": "الأسبوع اللي فات",
+  "nextWeek": "الأسبوع الجاي",
+  "noLessonsDay": "مفيش حصص",
+  "noLessonsWeek": "مفيش حصص الأسبوع ده.",
+  "studentsTitle": "طلابي",
+  "paused": "متوقف مؤقتًا",
+  "toMark": "{n} للتصحيح",
+  "@toMark": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "lastReportAt": "آخر تقرير: {when}",
+  "@lastReportAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "noStudents": "مفيش طلاب لسه.",
+  "prevMonth": "الشهر اللي فات",
+  "nextMonth": "الشهر الجاي",
+  "soFar": "لحد النهارده",
+  "monthOpen": "الشهر لسه مفتوح",
+  "monthClosed": "الشهر اتقفل",
+  "lessonsHours": "{n} حصة · {h} ساعة",
+  "@lessonsHours": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "h": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonPay": "الحصص",
+  "bonuses": "مكافآت",
+  "deductions": "خصومات",
+  "unpricedNote": "{n, plural, =1{حصة لسه مالهاش سعر} =2{حصتين لسه مالهمش سعر} few{{n} حصص لسه مالهاش سعر} other{{n} حصة لسه مالهاش سعر}}. الأكاديمية هتحدده، وهتتحسب في الشهر ده.",
+  "@unpricedNote": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "noEarnings": "مفيش حصص في الشهر ده.",
+  "adjustments": "تعديلات",
+  "corrected": "اتصحّح",
+  "timeOff": "الإجازات",
+  "requestTimeOff": "اطلب إجازة",
+  "timeOffLead": "بتوقيتك: {zone} · الأكاديمية بترد عليك",
+  "@timeOffLead": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "wholeDays": "أيام كاملة",
+  "partOfDay": "جزء من يوم",
+  "fromDay": "من",
+  "toDay": "لحد",
+  "dayLabel": "اليوم",
+  "fromTime": "من الساعة",
+  "toTime": "لحد الساعة",
+  "reasonSick": "مرض",
+  "reasonVacation": "إجازة سنوية",
+  "reasonPersonal": "ظرف شخصي",
+  "reasonFamily": "ظرف عائلي",
+  "reasonEmergency": "طارئ",
+  "reasonOther": "حاجة تانية",
+  "sendRequest": "ابعت الطلب",
+  "yourRequests": "طلباتك",
+  "withdraw": "اسحبه",
+  "requestSent": "الطلب اتبعت. هيوصلك الرد.",
+  "withdrawn": "الطلب اتسحب.",
+  "academyHolidays": "إجازات الأكاديمية",
+  "coverState": "{covered} من {total} حصص ليها بديل",
+  "@coverState": {
+    "placeholders": {
+      "covered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "fillTimeOff": "اختار الأيام والسبب الأول.",
+  "noTimeOff": "مفيش طلبات.",
+  "kidsHello": "أهلًا يا بطل",
+  "kidsJourney": "رحلتي في {program}",
+  "@kidsJourney": {
+    "placeholders": {
+      "program": {
+        "type": "String"
+      }
+    }
+  },
+  "kidsStations": "{n, plural, =0{أول محطة مستنياك!} =1{خلّصت محطة!} =2{خلّصت محطتين!} few{خلّصت {n} محطات!} other{خلّصت {n} محطة!}}",
+  "@kidsStations": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "kidsNext": "الجاية: {title}",
+  "@kidsNext": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "youAreHere": "انت هنا!",
+  "levelRank": "المستوى {index} · {rank}",
+  "@levelRank": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "pointsTo": "نقاطك لـ {rank}",
+  "@pointsTo": {
+    "placeholders": {
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "pointsLeft": "باقيلك {n} نقطة.",
+  "@pointsLeft": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "topRank": "وصلت لأعلى رتبة!",
+  "worldStage": "العالم {index} · {title}",
+  "@worldStage": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "stageOf": "المرحلة {i} من {n}",
+  "@stageOf": {
+    "placeholders": {
+      "i": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "streak": "{n} حصص ورا بعض",
+  "@streak": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "badgesCount": "{earned} من {total}",
+  "@badgesCount": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "planFor": "خطتك يا {name}",
+  "@planFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goal": "هدفك",
+  "finishOn": "هتخلّص على كده",
+  "pace": "سرعتك",
+  "perWeek": "{n} درس في الأسبوع",
+  "@perWeek": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "milestones": "المحطات",
+  "programDone": "خلّصت البرنامج!",
+  "weeksLeftLevel": "{n, plural, =0{المستوى ده قرّب يخلص} =1{باقي أسبوع في المستوى ده} =2{باقي أسبوعين في المستوى ده} few{باقي {n} أسابيع في المستوى ده} other{باقي {n} أسبوع في المستوى ده}}",
+  "@weeksLeftLevel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "stars": "نجوم",
+  "points": "نقطة"
+}

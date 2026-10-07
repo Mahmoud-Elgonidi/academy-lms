@@ -39,6 +39,24 @@ it('answers 404 for an unknown academy header', function () {
     login('nope')->assertNotFound()->assertJsonPath('type', 'academy-not-found');
 });
 
+it('says "not found" in the reader\'s language and nothing more, even before the academy is known', function () {
+    // A wrong academy code in the app's password sign-in: the words come from Accept-Language,
+    // with no English detail and no hint of which academies exist.
+    $this->withHeaders(['X-Academy' => 'nope', 'Accept-Language' => 'ar'])
+        ->postJson('/api/v1/auth/login', ['login' => 'x@example.test', 'password' => 'x', 'device_name' => 'pest'])
+        ->assertNotFound()
+        ->assertHeader('Content-Language', 'ar')
+        ->assertJsonPath('title', __('shared::problems.academy-not-found', [], 'ar'))
+        ->assertJsonMissingPath('detail');
+
+    // An unknown route says nothing of the path either.
+    $this->withHeaders(['Accept-Language' => 'ar'])->getJson('/api/v1/nowhere')
+        ->assertNotFound()
+        ->assertJsonPath('type', 'not-found')
+        ->assertJsonPath('title', __('shared::problems.not-found', [], 'ar'))
+        ->assertJsonMissingPath('detail');
+});
+
 it('resolves the academy from its subdomain', function () {
     $this->postJson('http://alpha.lms.test/api/v1/auth/login', [
         'login' => 'same@example.test', 'password' => 'password', 'device_name' => 'pest',

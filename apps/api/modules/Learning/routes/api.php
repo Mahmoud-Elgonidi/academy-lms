@@ -17,6 +17,7 @@ Route::middleware(['auth:sanctum', 'can:reports.write'])->prefix('teacher')->gro
 // Students and guardians: the roadmap, the reports and the homework of each child.
 Route::middleware('auth:sanctum')->prefix('learning')->group(function () {
     Route::get('students', [LearnerController::class, 'students'])->name('learning.students');
+    Route::get('journey', [LearnerController::class, 'journey'])->name('learning.journey');
     Route::get('enrollments/{enrollment}/roadmap', [LearnerController::class, 'roadmap'])->name('learning.roadmap');
     Route::get('enrollments/{enrollment}/reports', [LearnerController::class, 'reports'])->name('learning.reports');
     Route::get('homework', [LearnerController::class, 'homework'])->name('learning.homework');

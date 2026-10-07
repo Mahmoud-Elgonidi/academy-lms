@@ -3862,6 +3862,129 @@
                 }
             }
         },
+        "/v1/learning/journey": {
+            "get": {
+                "operationId": "learning.journey",
+                "description": "What the student's own home shows in each stage's look: stars (lessons mastered), points and rank, the lesson\nstreak, badges, and per course its levels (worlds) with each lesson's state, where they are, what is next and\nthe expected finish. learner_id defaults to the student themself, or a guardian's first child.",
+                "summary": "A learner's journey",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "learner_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 64
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "learner_id": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "stars": {
+                                                    "type": "integer"
+                                                },
+                                                "attended": {
+                                                    "type": "integer"
+                                                },
+                                                "on_time": {
+                                                    "type": "integer"
+                                                },
+                                                "streak": {},
+                                                "points": {
+                                                    "type": "integer"
+                                                },
+                                                "rank": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "badges": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "courses": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "required": [
+                                                "learner_id",
+                                                "stars",
+                                                "attended",
+                                                "on_time",
+                                                "streak",
+                                                "points",
+                                                "rank",
+                                                "badges",
+                                                "courses"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/learning/enrollments/{enrollment}/roadmap": {
             "get": {
                 "operationId": "learning.roadmap",

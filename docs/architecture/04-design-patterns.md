@@ -387,7 +387,7 @@ lms/
     web/                      Next.js: البوابة + الفصل (+ المواقع العامة في P2)
   packages/
     openapi/                  openapi.json (بيتعمل له commit، و oasdiff في الـ CI)
-    api-client-dart/          بيتولّد تلقائيًا (dart-dio)
+    (api-client-dart)         مش متولّد: Flutter بـ repositories مكتوبة باليد + contract test على openapi.json
     api-client-ts/            بيتولّد تلقائيًا
     design-tokens/            JSON → Flutter ThemeExtension + Tailwind
   infra/                      terraform/, docker/, runbooks/
@@ -424,14 +424,16 @@ apps/api/
 
 ```text
 apps/mobile/lib/
-  app/        bootstrap.dart, router/ (shells: student, guardian, teacher), di/, theme/, flavors/
-  core/       network/ (dio + interceptors: auth, locale, idempotency, retry)
-              auth/ (multi-account store)  realtime/ (Reverb/Pusher)  push/  deeplinks/
-              time/ (display helpers)  l10n/ (ar/en, RTL)  remote_config/
-  features/   auth/  account_switcher/  dashboard/  schedule/  classroom/ (livekit_client)
-              reports/  homework/ (audio)  roadmap/  billing/ (pay links)  notifications/  chat/  profile/
+  app/        bootstrap.dart, app.dart, router/ (shell لكل شكل: family, kids, middle, teen, teach), di/, theme/ (branding + stage)
+  core/       network/ (dio: academy, token, locale, timezone, idempotency, retry; ApiProblem)
+              auth/ (multi-account store + SessionCubit)  time/ (LocalTime)  l10n/ (ar/en, RTL)  state/ (LoadCubit)  prefs/
+              (لسه: realtime/, push/, deeplinks/, remote_config/)
+  features/   auth/  profile/ (الحسابات والأجهزة)  dashboard/ (رئيسية لكل شكل)  schedule/  classroom/ (livekit_client)
+              roadmap/ (التقدم والتقارير)  homework/  billing/ (pay links)  teaching/ (المدرس)
               كل ميزة: data/  domain/  presentation/{bloc, pages, widgets}
   shared/widgets/
+tool/strings.py               كل كلام التطبيق بالعربي والإنجليزي ← lib/core/l10n/arb
+test/                          unit, widget (API مزيّف), contract/ (openapi.json)
 tenants/<slug>.json            (إعدادات white-label، P3)
 ```
 

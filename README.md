@@ -149,6 +149,23 @@ docker compose up
 2. الـ API كله موصوف في `packages/openapi/openapi.json`. اقراه على http://localhost:8000/docs/api، وفيه أمثلة `curl` في `apps/api/README.md`.
 3. التطبيق المشترك بيبدأ بـ **اكتشاف الحسابات**: `POST /api/v1/accounts/code` بإيميل أو رقم بكود الدولة، وبعد الكود بيرجع حسابات الشخص في كل الأكاديميات.
 
+### جرّب تطبيق الموبايل
+
+محتاج Flutter 3.47. الـ API لازم يكون شغال (`docker compose up` أو `php artisan serve`):
+
+```bash
+cd apps/mobile
+flutter pub get
+flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000/api/v1
+# محاكي أندرويد: http://10.0.2.2:8000/api/v1 · موبايل على نفس الواي فاي: http://<IP جهازك>:8000/api/v1
+```
+
+1. اختار "الإيميل" واكتب `salma.guardian@demo.test`. الكود في Mailpit (http://localhost:8025) أو في `apps/api/storage/logs/laravel.log`. هتلاقي حسابها في أكاديمية النور، ادخل بيه: الرئيسية، والحصص (جرّب "إلغاء الحصة" وشوف نتيجة السياسة قبل ما تأكد)، والتقدم، والفلوس، وحسابي.
+2. من "حسابي" ← "ضيف حساب تاني" ← "عندك كلمة سر؟": كود الأكاديمية `demo`، وبعدين `yousef@demo.test` (شكل الأطفال)، أو `ziad@demo.test` (إعدادي)، أو `maryam@demo.test` (ثانوي)، أو `nour@demo.test` (المدرسة). كلمة السر `password`. وتتنقل بينهم من "حسابي".
+3. **حصة جوه التطبيق**: لما يكون فيه حصة الفصل بتاعها مفتوح، ادخل من نسختين (يوسف ونور مثلًا). الاتنين بيشوفوا بعض على LiveKit المحلي.
+
+التفاصيل في [`apps/mobile/README.md`](apps/mobile/README.md).
+
 ### جرّب لوحة المنصة والدخول بحساب مستخدم
 
 لوحة فريق المنصة منفصلة عن لوحات الأكاديميات، ولازم فيها تطبيق مصادقة:
@@ -224,11 +241,10 @@ composer test
 ```text
 apps/
   api/        Laravel: REST API + Filament + workers
-  mobile/     Flutter
+  mobile/     Flutter (تطبيق واحد لكل الأكاديميات والأدوار)
   web/        Next.js
 packages/
-  openapi/          عقد الـ API (openapi.json)
-  api-client-dart/  بيتولّد تلقائيًا
+  openapi/          عقد الـ API (openapi.json)، والتطبيق بيتختبر عليه
   api-client-ts/    بيتولّد تلقائيًا
   design-tokens/
 infra/        terraform/, docker/, runbooks/
