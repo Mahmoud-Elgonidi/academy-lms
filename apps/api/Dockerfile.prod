@@ -1,0 +1,52 @@
+# syntax=docker/dockerfile:1
+#
+# The production image (infra/deploy): one image for the whole app; the
+# command picks the part (infra/deploy/entrypoint.sh): web (FrankenPHP serving
+# public/, with Reverb's browser connections passed on under /app/), reverb,
+# worker, scheduler, relay, and the one-off migrate and seed-demo.
+#
+# Built from the repository root:
+#   docker build -f apps/api/Dockerfile.prod -t academy-lms .
+# The development image is ./Dockerfile (docker compose up at the root).
+FROM dunglas/frankenphp:1-php8.3-bookworm
+
+RUN install-php-extensions pdo_pgsql pgsql intl zip bcmath pcntl redis opcache \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends libcap2-bin \
+    && rm -rf /var/lib/apt/lists/* \
+    && cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+COPY infra/deploy/php.ini "$PHP_INI_DIR/conf.d/zz-academy.ini"
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+ENV APP_ENV=production \
+    LOG_CHANNEL=stderr \
+    COMPOSER_ALLOW_SUPERUSER=1
+
+WORKDIR /app
+
+# Packages first, so a code change does not download them again.
+COPY apps/api/composer.json apps/api/composer.lock ./
+RUN composer install --no-dev --no-interaction --prefer-dist --no-progress --no-scripts --no-autoloader \
+    && rm -rf /root/.composer/cache
+
+COPY apps/api/ ./
+COPY infra/deploy/Caddyfile /etc/academy/Caddyfile
+COPY --chmod=755 infra/deploy/entrypoint.sh /usr/local/bin/academy
+
+# The class map, package discovery and Filament's published assets (public/css,
+# public/js); then the folders the app writes to, owned by www-data. It runs as
+# www-data on port 8080, so FrankenPHP needs no capability to bind low ports
+# (and compose's no-new-privileges would refuse a binary that asks for one).
+RUN composer dump-autoload --no-dev --optimize --no-interaction \
+    && mkdir -p resources/views storage/app/public storage/framework/cache/data storage/framework/sessions \
+        storage/framework/views storage/logs bootstrap/cache \
+    && ln -sfn /app/storage/app/public public/storage \
+    && rm -f bootstrap/cache/*.php .env \
+    && chown -R www-data:www-data storage bootstrap/cache /data/caddy /config/caddy \
+    && (setcap -r /usr/local/bin/frankenphp || true)
+
+USER www-data
+EXPOSE 8080
+ENTRYPOINT ["academy"]
+CMD ["web"]

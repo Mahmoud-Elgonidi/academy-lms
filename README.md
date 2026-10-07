@@ -208,6 +208,27 @@ git pull
 
 > **بعد التحديث ده مرة واحدة**: لو كان شغال من قبل، اقفله (Ctrl+C) وشغّل `docker compose up` تاني. التحديث فيه حاجات لازم تبدأ مع الـ container: سيرفر الفيديو (LiveKit)، وسيرفر التحديث اللحظي (Reverb على البورت 8080). لو ماعملتش كده، لوحة العمليات هتفضل شغالة بس هتتحدث كل 30 ثانية زي الأول. بعد كده أي `git pull` بيتطبّق لوحده.
 
+## النشر على سيرفر
+
+أي push على `main` بيعدّي اختبارات الـ API بيتنشر لوحده (`.github/workflows/deploy.yml`):
+1. GitHub بيبني صورة الإنتاج.
+2. بيجرّب النشر كله على جهازه: الصفحات، والدخول بالـ API، والاتصال اللحظي.
+3. بيرفع الصورة على registry بتاع GitHub.
+4. بيشغّل `infra/deploy/deploy.sh` على السيرفر بـ SSH.
+
+المشروع معزول عن أي حاجة تانية على السيرفر:
+- فولدر لوحده.
+- Docker project لوحده (`academy-lms`)، بالـ network والـ volumes بتوعه.
+- حدود ميموري ومعالج لكل container.
+- بورت واحد بس على `127.0.0.1`.
+- ملف nginx واحد بيتضاف مرة واحدة بعد مراجعة `nginx -t`.
+
+قبل أول نشر:
+- ضيف الـ secrets في GitHub: `DEPLOY_HOST` و`DEPLOY_USER` و`DEPLOY_SSH_KEY`.
+- خلّي الـ DNS بتاع `*.progma.store` يشاور على السيرفر.
+
+التفاصيل والخطوات في [`infra/deploy/README.md`](infra/deploy/README.md).
+
 ## الوثيقة المعمارية
 
 ابدأ من [docs/architecture/README.md](docs/architecture/README.md):

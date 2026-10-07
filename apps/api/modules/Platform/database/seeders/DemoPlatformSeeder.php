@@ -12,8 +12,9 @@ use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Audit\AuditTrail;
 
 /**
- * The demo platform team: admin@platform.test / password, with a fixed
- * authenticator secret so `php artisan platform:code admin@platform.test`
+ * The demo platform team: admin@platform.test with the demo password and a
+ * fixed authenticator secret (both set per server: DEMO_PASSWORD,
+ * DEMO_PLATFORM_2FA_SECRET), so `php artisan platform:code admin@platform.test`
  * prints the code, a few past console sign-ins, and the second demo academy
  * suspended with a reason.
  */
@@ -27,11 +28,11 @@ final class DemoPlatformSeeder extends Seeder
         $admin = PlatformAdmin::query()->create([
             'name' => 'سلمى من فريق المنصة',
             'email' => 'admin@platform.test',
-            'password' => 'password',
+            'password' => (string) config('app.demo.password'),
             'locale' => 'ar',
             'timezone' => 'Africa/Cairo',
         ]);
-        $admin->saveAppAuthenticationSecret(self::SECRET);
+        $admin->saveAppAuthenticationSecret((string) (config('app.demo.platform_2fa_secret') ?: self::SECRET));
         $actor = new AuditActor('platform', $admin->id, $admin->name);
 
         $now = CarbonImmutable::now();

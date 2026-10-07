@@ -3,7 +3,10 @@ name: api
 on:
   push:
     branches: [main]
-    paths: ['apps/api/**', 'packages/openapi/**', '.github/workflows/api.yml']
+    # The deploy (.github/workflows/deploy.yml) follows these checks on main, so a
+    # change to the image or the deploy runs them too.
+    paths: ['apps/api/**', 'packages/openapi/**', '.github/workflows/api.yml',
+            'infra/deploy/**', '.dockerignore', '.github/workflows/deploy.yml']
   pull_request:
     paths: ['apps/api/**', 'packages/openapi/**', '.github/workflows/api.yml']
   workflow_dispatch:

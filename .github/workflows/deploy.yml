@@ -1,0 +1,220 @@
+name: deploy
+
+# Ships the app to the server (infra/deploy/README.md):
+#   1. builds the production image (apps/api/Dockerfile.prod);
+#   2. rehearses the deploy on this GitHub machine: infra/deploy/deploy.sh with
+#      the demo data, then the panels, the API sign-in (roles, row-level security
+#      and data together), links on https behind a proxy, and a live WebSocket
+#      connection through the web container;
+#   3. on main, once the api checks pass (or when run by hand from the Actions
+#      tab), pushes the image to GitHub's registry and runs deploy.sh on the
+#      server over SSH.
+# A push to another branch that touches the image or the deploy does 1 and 2 only.
+
+on:
+  workflow_run:
+    workflows: [api]
+    types: [completed]
+    branches: [main]
+  push:
+    branches-ignore: [main]
+    paths: ['apps/api/Dockerfile.prod', 'infra/deploy/**', '.dockerignore', '.github/workflows/deploy.yml']
+  workflow_dispatch:
+    inputs:
+      demo_data:
+        description: Load the demo academies on the server (skipped when they are there)
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-${{ github.event_name == 'push' && github.ref || 'production' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.name.outputs.image }}
+      publish: ${{ steps.name.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Image name
+        id: name
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          PUBLISH: ${{ github.event_name == 'workflow_run' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') }}
+        run: |
+          repo="ghcr.io/${GITHUB_REPOSITORY,,}"
+          echo "repo=$repo" >> "$GITHUB_OUTPUT"
+          echo "image=$repo:${SHA::12}" >> "$GITHUB_OUTPUT"
+          echo "publish=$PUBLISH" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile.prod
+          load: true
+          tags: ${{ steps.name.outputs.image }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Rehearse the deploy on this machine
+        env:
+          IMAGE: ${{ steps.name.outputs.image }}
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/academy-lms"
+          mkdir -p "$dir/nginx"
+          cp infra/deploy/compose.yml infra/deploy/deploy.sh infra/deploy/postgres-init.sh infra/deploy/setup-nginx.sh \
+             apps/api/database/setup/roles.sql "$dir/"
+          cp infra/deploy/nginx/academy-lms.conf "$dir/nginx/"
+          echo "dir=$dir" >> "$GITHUB_ENV"
+
+          DOMAIN=lms.example DEMO_DATA=1 bash "$dir/deploy.sh" "$IMAGE" </dev/null
+          # A second run is an update: nothing new to write, same port, same data.
+          DOMAIN=lms.example bash "$dir/deploy.sh" "$IMAGE" </dev/null
+
+          setting() { grep -E "^$1=" "$dir/.env" | cut -d= -f2-; }
+          base="http://127.0.0.1:$(setting HTTP_PORT)"
+          check() {
+            local want="$1" host="$2" path="$3"; shift 3
+            local got
+            got="$(curl -s -o /tmp/body -w '%{http_code}' -H "Host: $host" "$@" "$base$path" || true)"
+            echo "$got $host$path"
+            [ "$got" = "$want" ] || { head -c 3000 /tmp/body; echo; exit 1; }
+          }
+
+          check 200 lms.example /up
+          check 200 demo.lms.example /admin/login
+          check 200 demo.lms.example /teach/login
+          check 200 demo.lms.example /my/login
+          check 200 lms.example /console/login
+          check 404 lms.example /admin/login
+          check 200 demo.lms.example /api/v1/branding -H 'Accept: application/json'
+
+          # Behind the server's nginx (X-Forwarded-Proto: https), links stay on https.
+          check 200 demo.lms.example /admin/login -H 'X-Forwarded-Proto: https' -H 'X-Forwarded-Port: 443'
+          grep -q 'https://demo.lms.example/' /tmp/body || { echo "links are not on https"; exit 1; }
+          # Filament's published assets are in the image.
+          css="$( (grep -oE 'href="https://demo.lms.example/[^"]+\.css[^"]*"' /tmp/body || true) | head -n 1 | sed -E 's#href="https://demo.lms.example##; s#"$##')"
+          [ -n "$css" ] || { echo "no stylesheet on the sign-in page"; exit 1; }
+          check 200 demo.lms.example "$css"
+
+          # Signing in through the API with the server's own demo password.
+          check 200 demo.lms.example /api/v1/auth/login -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' \
+            --data "{\"login\":\"owner@demo.test\",\"password\":\"$(setting DEMO_PASSWORD)\",\"device_name\":\"rehearsal\"}"
+          grep -q 'token' /tmp/body || { echo "no token in the sign-in answer"; exit 1; }
+          check 422 demo.lms.example /api/v1/auth/login -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' \
+            --data '{"login":"owner@demo.test","password":"password","device_name":"rehearsal"}'
+
+          # Live screens: a browser's WebSocket reaches Reverb through the web container (/app/<key>).
+          ws="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 -H 'Host: demo.lms.example' \
+            -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' \
+            -H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' \
+            "$base/app/$(setting REVERB_APP_KEY)?protocol=7&client=js&version=8.4.0" || true)"
+          echo "$ws websocket /app/<key>"
+          [ "$ws" = 101 ]
+
+          # Every part of the stack is up, and only the web port is published, on 127.0.0.1.
+          docker compose -p academy-lms -f "$dir/compose.yml" ps
+          [ "$(docker compose -p academy-lms -f "$dir/compose.yml" ps --status running -q | wc -l)" = 7 ]
+          ports="$(docker ps --filter label=com.docker.compose.project=academy-lms --format '{{.Ports}}' | grep -o '[0-9.]*:[0-9]*->' | sort -u)"
+          echo "published: $ports"
+          [ "$ports" = "127.0.0.1:$(setting HTTP_PORT)->" ]
+
+      - name: What the stack said
+        if: failure()
+        run: docker compose -p academy-lms -f "$dir/compose.yml" logs --tail=120 || true
+
+      - name: Push to GitHub's registry
+        if: steps.name.outputs.publish == 'true'
+        env:
+          IMAGE: ${{ steps.name.outputs.image }}
+          REPO: ${{ steps.name.outputs.repo }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker push "$IMAGE"
+          docker tag "$IMAGE" "$REPO:latest"
+          docker push "$REPO:latest"
+
+  deploy:
+    needs: image
+    if: needs.image.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      packages: read
+    env:
+      HOST: ${{ secrets.DEPLOY_HOST }}
+      SSH_USER: ${{ secrets.DEPLOY_USER }}
+      SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      SSH_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+      KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DEPLOY_SSH_PORT || '22' }}
+      DIR: ${{ vars.DEPLOY_DIR || 'academy-lms' }}
+      DOMAIN: ${{ vars.DEPLOY_DOMAIN || 'progma.store' }}
+      IMAGE: ${{ needs.image.outputs.image }}
+      DEMO_DATA: ${{ inputs.demo_data && '1' || '0' }}
+    steps:
+      - name: Server settings
+        id: ready
+        run: |
+          if [ -z "$HOST" ] || [ -z "$SSH_USER" ] || { [ -z "$SSH_KEY" ] && [ -z "$SSH_PASSWORD" ]; }; then
+            echo "::warning title=Not deployed::Add the repository secrets DEPLOY_HOST, DEPLOY_USER and DEPLOY_SSH_KEY (or DEPLOY_PASSWORD), then run this workflow again (infra/deploy/README.md)."
+            echo "go=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.ready.outputs.go == 'true'
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Deploy over SSH
+        if: steps.ready.outputs.go == 'true'
+        env:
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          if [ -n "$KNOWN_HOSTS" ]; then
+            printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            echo "::warning::DEPLOY_KNOWN_HOSTS is not set: the server's key is trusted as first seen (infra/deploy/README.md)."
+            ssh-keyscan -p "$SSH_PORT" -H "$HOST" > ~/.ssh/known_hosts 2>/dev/null
+          fi
+
+          if [ -n "$SSH_KEY" ]; then
+            printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+            ssh_cmd=(ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -p "$SSH_PORT")
+            scp_cmd=(scp -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -P "$SSH_PORT")
+          else
+            sudo apt-get install -y -qq sshpass >/dev/null
+            export SSHPASS="$SSH_PASSWORD"
+            ssh_cmd=(sshpass -e ssh -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -p "$SSH_PORT")
+            scp_cmd=(sshpass -e scp -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -P "$SSH_PORT")
+          fi
+          target="$SSH_USER@$HOST"
+
+          "${ssh_cmd[@]}" "$target" "mkdir -p '$DIR/nginx' && chmod 700 '$DIR'"
+          "${scp_cmd[@]}" infra/deploy/compose.yml infra/deploy/deploy.sh infra/deploy/postgres-init.sh \
+            infra/deploy/setup-nginx.sh apps/api/database/setup/roles.sql "$target:$DIR/"
+          "${scp_cmd[@]}" infra/deploy/nginx/academy-lms.conf "$target:$DIR/nginx/"
+
+          # The registry login travels on stdin (user, then token), never on a command line.
+          printf '%s\n%s\n' "$GITHUB_ACTOR" "$REGISTRY_TOKEN" \
+            | "${ssh_cmd[@]}" "$target" "cd '$DIR' && DOMAIN='$DOMAIN' DEMO_DATA='$DEMO_DATA' bash deploy.sh '$IMAGE'"

@@ -1,0 +1,121 @@
+# The production stack (infra/deploy/README.md). It keeps to itself on a
+# shared server: its own project name, network and volumes; memory and CPU
+# limits; logs that rotate; and a single port, on 127.0.0.1 only, that the
+# server's web server (nginx) passes progma.store and its academies to.
+# Nothing here is reachable from outside except through that port.
+#
+# deploy.sh writes .env (this server's settings and secrets, readable by its
+# owner only) and runs this file; by hand, from this folder:
+#   docker compose ps | logs -f web | exec web php artisan ...
+name: academy-lms
+
+x-app: &app
+  image: ${IMAGE:?deploy.sh sets IMAGE in .env}
+  env_file: [.env]
+  restart: unless-stopped
+  networks: [internal]
+  volumes:
+    - app-storage:/app/storage/app
+  security_opt: ["no-new-privileges:true"]
+  logging: &logging
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+  depends_on:
+    postgres: { condition: service_healthy }
+    redis: { condition: service_started }
+
+services:
+  # The panels, the API, and Reverb's browser connections under /app/.
+  web:
+    <<: *app
+    command: ["web"]
+    ports:
+      - "127.0.0.1:${HTTP_PORT:?deploy.sh sets HTTP_PORT in .env}:8080"
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8080/up') === false ? 1 : 0);"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    deploy:
+      resources:
+        limits: { memory: "${WEB_MEMORY:-768m}", cpus: "${WEB_CPUS:-1.5}" }
+
+  reverb:
+    <<: *app
+    command: ["reverb"]
+    deploy:
+      resources:
+        limits: { memory: "${REVERB_MEMORY:-256m}", cpus: "${REVERB_CPUS:-0.5}" }
+
+  worker:
+    <<: *app
+    command: ["worker"]
+    deploy:
+      resources:
+        limits: { memory: "${WORKER_MEMORY:-384m}", cpus: "${WORKER_CPUS:-1}" }
+
+  scheduler:
+    <<: *app
+    command: ["scheduler"]
+    deploy:
+      resources:
+        limits: { memory: "${SCHEDULER_MEMORY:-256m}", cpus: "${SCHEDULER_CPUS:-0.5}" }
+
+  relay:
+    <<: *app
+    command: ["relay"]
+    deploy:
+      resources:
+        limits: { memory: "${RELAY_MEMORY:-128m}", cpus: "${RELAY_CPUS:-0.25}" }
+
+  # Postgres with the LMS roles (owner for migrations, app under row-level
+  # security, platform), made on the first start from roles.sql.
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    networks: [internal]
+    env_file: [postgres.env]
+    environment:
+      LMS_OWNER_PASSWORD: ${DB_OWNER_PASSWORD:?}
+      LMS_APP_PASSWORD: ${DB_PASSWORD:?}
+      LMS_PLATFORM_PASSWORD: ${DB_PLATFORM_PASSWORD:?}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./roles.sql:/lms-setup/roles.sql:ro
+      - ./postgres-init.sh:/docker-entrypoint-initdb.d/10-lms.sh:ro
+    healthcheck:
+      # Over TCP: while the first start sets up the roles, only the socket is open.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d lms"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    shm_size: 128mb
+    security_opt: ["no-new-privileges:true"]
+    logging: *logging
+    deploy:
+      resources:
+        limits: { memory: "${DB_MEMORY:-1g}", cpus: "${DB_CPUS:-1}" }
+
+  # Sessions, cache and the queue. Nothing is evicted: a full Redis refuses
+  # writes rather than dropping queued messages.
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks: [internal]
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "${REDIS_MAXMEMORY:-200mb}", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis-data:/data
+    security_opt: ["no-new-privileges:true"]
+    logging: *logging
+    deploy:
+      resources:
+        limits: { memory: "${REDIS_MEMORY:-256m}", cpus: "${REDIS_CPUS:-0.5}" }
+
+networks:
+  internal: {}
+
+volumes:
+  postgres-data: {}
+  redis-data: {}
+  app-storage: {}

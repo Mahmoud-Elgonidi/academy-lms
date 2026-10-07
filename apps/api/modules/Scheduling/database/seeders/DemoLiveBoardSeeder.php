@@ -38,7 +38,7 @@ final class DemoLiveBoardSeeder extends Seeder
         ];
 
         $user = fn (string $email, string $name, Role $role, string $tz, ?string $phone = null) => $identity->createUser(new NewUser(
-            name: $name, roles: [$role], email: $email, phoneE164: $phone, password: 'password', locale: 'ar', timezone: $tz,
+            name: $name, roles: [$role], email: $email, phoneE164: $phone, password: (string) config('app.demo.password'), locale: 'ar', timezone: $tz,
         ));
 
         $teachers = [

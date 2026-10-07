@@ -37,7 +37,7 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * students with invoices in every state (payable online on the demo gateway),
  * curricula, lesson reports with homework, teacher time off with a substitute
  * and an academy holiday, ratings, teachers' pay with last month closed, imports from sheets, and the notifications all of that sent;
- * a second academy (suspended) and the platform team's console with past support sign-ins. Every password is "password". `composer demo` rebuilds it.
+ * a second academy (suspended) and the platform team's console with past support sign-ins. Every password is "password" (DEMO_PASSWORD on a server). `composer demo` rebuilds it.
  */
 class DatabaseSeeder extends Seeder
 {
@@ -49,6 +49,8 @@ class DatabaseSeeder extends Seeder
             return;
         }
 
+        $password = (string) config('app.demo.password');
+
         $academy = $platform->createAcademy(new NewAcademy(
             slug: 'demo',
             nameAr: 'أكاديمية النور التجريبية',
@@ -59,7 +61,7 @@ class DatabaseSeeder extends Seeder
             country: 'SA',
         ));
 
-        $tenants->run($academy, function () use ($identity): void {
+        $tenants->run($academy, function () use ($identity, $password): void {
             $ownerId = null;
             $people = [
                 ['هالة منصور', 'owner@demo.test', [Role::Owner, Role::Admin]],
@@ -72,7 +74,7 @@ class DatabaseSeeder extends Seeder
             ];
 
             foreach ($people as [$name, $email, $roles]) {
-                $id = $identity->createUser(new NewUser(name: $name, roles: $roles, email: $email, password: 'password', locale: 'ar', timezone: 'Africa/Cairo'));
+                $id = $identity->createUser(new NewUser(name: $name, roles: $roles, email: $email, password: $password, locale: 'ar', timezone: 'Africa/Cairo'));
                 $ownerId ??= $id;
             }
             // What the demo does in the back office (prices, policy, voided invoices, ...) is in the activity log as the owner's.
@@ -92,22 +94,22 @@ class DatabaseSeeder extends Seeder
             defaultLocale: 'ar',
             country: 'EG',
         ));
-        $tenants->run($rawda, function () use ($identity): void {
-            $identity->createUser(new NewUser(name: 'محمود سامي', roles: [Role::Owner, Role::Admin], email: 'owner@rawda.test', password: 'password', locale: 'ar', timezone: 'Africa/Cairo'));
+        $tenants->run($rawda, function () use ($identity, $password): void {
+            $identity->createUser(new NewUser(name: 'محمود سامي', roles: [Role::Owner, Role::Admin], email: 'owner@rawda.test', password: $password, locale: 'ar', timezone: 'Africa/Cairo'));
             foreach (['أ. منى', 'أ. حسن'] as $i => $name) {
-                $identity->createUser(new NewUser(name: $name, roles: [Role::Teacher], email: 'teacher'.($i + 1).'@rawda.test', password: 'password'));
+                $identity->createUser(new NewUser(name: $name, roles: [Role::Teacher], email: 'teacher'.($i + 1).'@rawda.test', password: $password));
             }
             foreach (['يوسف', 'ليلى', 'آدم', 'سلمى'] as $i => $name) {
-                $identity->createUser(new NewUser(name: $name, roles: [Role::Student], email: 'student'.($i + 1).'@rawda.test', password: 'password'));
+                $identity->createUser(new NewUser(name: $name, roles: [Role::Student], email: 'student'.($i + 1).'@rawda.test', password: $password));
             }
         });
 
-        // The platform team: admin@platform.test / password at /console, with past support sign-ins in the demo academy.
+        // The platform team: admin@platform.test (the demo password) at /console, with past support sign-ins in the demo academy.
         $this->call(DemoPlatformSeeder::class);
         $admin = PlatformAdmin::query()->where('email', 'admin@platform.test')->firstOrFail();
         $tenants->run($academy, fn () => $this->callWith(DemoSupportSeeder::class, ['adminId' => $admin->id, 'adminName' => $admin->name]));
 
-        $this->command?->info('Seeded academy "demo". Sign in as owner@demo.test / password.');
-        $this->command?->info('Platform console: admin@platform.test / password at /console; the code: php artisan platform:code admin@platform.test');
+        $this->command?->info('Seeded academy "demo". Sign in as owner@demo.test with the demo password.');
+        $this->command?->info('Platform console: admin@platform.test at /console; the code: php artisan platform:code admin@platform.test');
     }
 }

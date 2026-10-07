@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    // The proxies in front of the app (on a server: its nginx, then the
+    // container's web server), as addresses or ranges separated by commas, or
+    // "*". Their X-Forwarded-* headers keep links and redirects on https.
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    // Signing in to the demo data (database/seeders): "password" on a laptop;
+    // a server reachable from the internet sets its own (infra/deploy makes them).
+    'demo' => [
+        'password' => env('DEMO_PASSWORD', 'password'),
+        'platform_2fa_secret' => env('DEMO_PLATFORM_2FA_SECRET'),
+    ],
+
 ];

@@ -1,0 +1,24 @@
+# The web server inside the production image (FrankenPHP). It listens on
+# 8080 for plain HTTP only: the server's own web server (nginx) holds the
+# certificates and passes progma.store and its academies here
+# (infra/deploy/nginx/academy-lms.conf).
+{
+	admin off
+	auto_https off
+	frankenphp
+}
+
+:8080 {
+	encode zstd gzip
+
+	# Reverb: the browsers' live connections (wss://<academy host>/app/<key>).
+	handle /app/* {
+		reverse_proxy reverb:8080
+	}
+
+	# Everything else: the panels, the API and their assets.
+	handle {
+		root * /app/public
+		php_server
+	}
+}

@@ -1,0 +1,22 @@
+# The production image (apps/api/Dockerfile.prod) is built from the repository
+# root; it needs apps/api and infra/deploy only.
+.git
+.github
+**/node_modules
+apps/mobile
+apps/web
+docs
+packages
+apps/api/vendor
+apps/api/tests
+apps/api/.env
+apps/api/.phpunit.cache
+apps/api/bootstrap/cache/*.php
+apps/api/storage/app/*
+apps/api/storage/framework/cache/*
+apps/api/storage/framework/sessions/*
+apps/api/storage/framework/views/*
+apps/api/storage/logs/*
+apps/api/public/storage
+apps/api/public/css
+apps/api/public/js
