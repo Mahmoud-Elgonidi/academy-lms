@@ -25,7 +25,7 @@ The LMS is built to share a server with other projects without touching them:
 3. **An SSH key for GitHub** (better than a password). On your own computer:
    ```bash
    ssh-keygen -t ed25519 -f academy_deploy -N "" -C "github deploy"
-   ssh-copy-id -i academy_deploy.pub lukas-tech@145.223.99.175   # or append it to ~/.ssh/authorized_keys
+   ssh-copy-id -i academy_deploy.pub lukas-demo@145.223.99.175   # or append it to ~/.ssh/authorized_keys
    ssh-keyscan -H 145.223.99.175                                   # the server's key, for DEPLOY_KNOWN_HOSTS
    ```
 
@@ -38,7 +38,7 @@ Repository → Settings → Secrets and variables → Actions:
 | `DEPLOY_SSH_KEY` | the private key `academy_deploy` (all of it) |
 | `DEPLOY_PASSWORD` | only if there is no key: the SSH password |
 | `DEPLOY_KNOWN_HOSTS` | the `ssh-keyscan -H` output; without it the server's key is trusted as first seen |
-| `DEPLOY_HOST`, `DEPLOY_USER` | only to deploy somewhere else: the workflow defaults to `145.223.99.175` and `lukas-tech` |
+| `DEPLOY_HOST`, `DEPLOY_USER` | only to deploy somewhere else: the workflow defaults to `145.223.99.175` and `lukas-demo` |
 
 The key or the password lives in GitHub's secrets only, never in a file of the repository.
 
