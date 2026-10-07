@@ -9,6 +9,7 @@ use Modules\Payroll\Contracts\Events\PayrollMonthClosed;
 use Modules\Payroll\Models\PayrollPeriod;
 use Modules\Payroll\Models\TeacherEarning;
 use Modules\Payroll\Support\PayrollMonths;
+use Modules\SharedKernel\Audit\AuditTrail;
 
 /**
  * Closes a payroll month once it is over: its lines are final (the database
@@ -39,6 +40,7 @@ final class ClosePayrollMonth
             }
 
             $period = PayrollPeriod::query()->create(['month' => $month, 'closed_at' => $now ?? CarbonImmutable::now(), 'closed_by' => $actorId]);
+            app(AuditTrail::class)->record('payroll.month_closed', 'payroll_period', $period->id, ['month' => $month->format('Y-m')]);
             DB::afterCommit(fn () => event(new PayrollMonthClosed($period->academy_id, $month->format('Y-m-d'), $actorId)));
 
             return $period;

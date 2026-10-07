@@ -11,6 +11,7 @@ use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionEvent;
+use Modules\SharedKernel\Audit\AuditTrail;
 
 /** A manager decides a session that needs review; the decision and its reason are recorded. */
 final class ResolveReview
@@ -47,6 +48,8 @@ final class ResolveReview
                 'from' => SessionStatus::NeedsReview->value, 'to' => $to->value, 'resolution' => $outcome, 'note' => $note,
             ]), $actorId);
             $this->settle->handle($session, $decision['credit'], $actorId);
+
+            app(AuditTrail::class)->record('session.review_resolved', 'session', $session->id, ['review_reason' => $reason, 'outcome' => $outcome, 'note' => $note]);
 
             DB::afterCommit(fn () => $to === SessionStatus::Cancelled
                 ? event(new SessionCancelled($session->academy_id, $session->id, 'review', true, $actorId))

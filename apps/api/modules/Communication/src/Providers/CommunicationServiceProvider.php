@@ -2,6 +2,7 @@
 
 namespace Modules\Communication\Providers;
 
+use Filament\Facades\Filament;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Console\Scheduling\Schedule;
@@ -47,7 +48,8 @@ final class CommunicationServiceProvider extends ServiceProvider
 
         // The bell, in every panel's top bar (staff and teachers).
         Livewire::component('communication.bell', NotificationBell::class);
-        FilamentView::registerRenderHook(PanelsRenderHook::USER_MENU_BEFORE, fn () => auth()->check() ? Blade::render('@livewire(\'communication.bell\')') : '');
+        // The academy's panels only: the platform console has no inbox.
+        FilamentView::registerRenderHook(PanelsRenderHook::USER_MENU_BEFORE, fn () => auth()->check() && in_array(Filament::getCurrentPanel()?->getId(), ['academy', 'teach', 'family'], true) ? Blade::render('@livewire(\'communication.bell\')') : '');
 
         if ($this->app->runningInConsole()) {
             $this->commands([SweepCommunicationCommand::class]);

@@ -7,6 +7,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Payments\GatewayManager;
+use Modules\SharedKernel\Audit\AuditTrail;
 
 /**
  * Connects one of the academy's gateway accounts, or changes it. The keys
@@ -64,6 +65,10 @@ final class SaveGatewayAccount
             'is_active' => (bool) ($data['is_active'] ?? true),
             'sort' => (int) ($data['sort'] ?? $account->sort ?? 0),
         ])->save();
+        app(AuditTrail::class)->record('billing.gateway_saved', 'gateway_account', $account->id, [
+            'gateway' => $gateway, 'label' => $account->label, 'mode' => $mode, 'currencies' => $data['currencies'], 'is_active' => $account->is_active,
+            'fields_changed' => array_keys(array_filter(GatewayManager::fields($gateway), fn ($r, $f) => trim((string) ($data[$f] ?? '')) !== '', ARRAY_FILTER_USE_BOTH)),
+        ]);
 
         return $account;
     }

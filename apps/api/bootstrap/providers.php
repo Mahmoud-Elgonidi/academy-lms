@@ -2,6 +2,7 @@
 
 use App\Providers\AppServiceProvider;
 use App\Providers\Filament\AcademyPanelProvider;
+use App\Providers\Filament\ConsolePanelProvider;
 use App\Providers\Filament\FamilyPanelProvider;
 use App\Providers\Filament\TeacherPanelProvider;
 use Modules\Billing\Providers\BillingServiceProvider;
@@ -45,4 +46,5 @@ return [
     AcademyPanelProvider::class,
     TeacherPanelProvider::class,
     FamilyPanelProvider::class,
+    ConsolePanelProvider::class,
 ];

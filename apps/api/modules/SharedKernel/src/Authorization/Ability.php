@@ -36,4 +36,5 @@ enum Ability: string
     case ManagePayroll = 'payroll.manage';
     case ViewOwnEarnings = 'payroll.view-own';
     case ImportData = 'data.import';
+    case ViewAuditLog = 'audit.view';
 }

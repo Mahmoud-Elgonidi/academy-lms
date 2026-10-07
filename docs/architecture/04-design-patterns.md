@@ -42,7 +42,7 @@
 | M15 | **Communication** | القوالب، والقنوات، والتفضيلات، والإشعارات، والمحادثات | `NotificationFailed`، `MessageFlagged` |
 | M16 | **Support** | التذاكر والشكاوى | `TicketOpened`، `ComplaintValidated` |
 | M17 | **Reporting** | جداول الحقائق والمؤشرات (للقراءة بس) | — |
-| Infra | **Audit**، **Files**، **SharedKernel** | سجل المراجعة، والملفات، والأنواع المشتركة (Money، Time، Tenancy) | — |
+| Infra | **Audit**، **Files**، **SharedKernel** | سجل المراجعة (منفّذ في `SharedKernel\Audit`: `AuditTrail` بيكتب، و`AuditActor` بيقول مين، و`AuditEntries` بيقرا)، والملفات، والأنواع المشتركة (Money، Time، Tenancy) | — |
 
 ### مخطط الاعتماديات (الاستدعاءات المتزامنة عن طريق Contracts)
 
@@ -91,6 +91,10 @@ flowchart TD
    - CRM بيسمع `TrialLessonBooked` و`SessionRescheduled` و`SessionCancelled` و`SessionFinalized` من Scheduling، و`EnrollmentCreated` من Enrollment. وبيطلّع `TrialCompleted` (المدرس يقيّم) و`TrialAssessed` (المبيعات تكمّل).
      - **المنفّذ دلوقتي**: محدش بيعتمد على CRM. ترتيب "ابحث عن مدرس" محتاج نسبة تحويل التجارب، فـ Scheduling بيعرّف عقد `TrialConversionRates` عنده، والـ CRM بيسجّل التنفيذ بتاعه (dependency inversion). من غير CRM محدش بيتقدم على حد.
      - صفحة العميل بتفتح "ابحث عن مدرس" باسم الـ route وparameters في الـ URL، وده بيفضل داخل حدود الـ module.
+6. **سجل المراجعة ولوحة المنصة**:
+   - السجل في SharedKernel، فأي module يقدر يكتب فيه من غير ما يعتمد على حد: `AuditTrail::record()` جوه الـ Action اللي فيها العملية الحساسة، في نفس الـ transaction. مين عمل العملية بييجي من `AuditActor` (في الـ Laravel Context): الشخص اللي داخل، أو فريق المنصة (ولو داخل بحساب حد، مين)، أو النظام.
+   - **لوحة المنصة** (`console`) شاشاتها من اتنين modules: Platform (الأكاديميات، والإيقاف، والسجل) بالـ connection اللي بيعدّي الـ RLS، وIdentity (أكاديمية جديدة، والدخول بحساب مستخدم) بالـ contracts بتاعة Platform بس: `PlatformApi` و`TenantDirectory` و`ConsoleApi`. Identity بيوصل لبيانات الأكاديمية عن طريق `TenantContext::run` على الـ connection العادي، فالـ RLS بيفضل شغال.
+   - Platform مابيعرفش Identity: الصفحات بتشاور على بعض باسم الـ route بس.
 
 ---
 

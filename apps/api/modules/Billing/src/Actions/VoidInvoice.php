@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Models\Invoice;
+use Modules\SharedKernel\Audit\AuditTrail;
 
 /** Cancels an issued invoice nothing has been paid on. Its number stays used. */
 final class VoidInvoice
@@ -23,6 +24,7 @@ final class VoidInvoice
             $invoice->void_reason = trim($reason);
             $invoice->voided_by = $actorId;
             $invoice->save();
+            app(AuditTrail::class)->record('billing.invoice_voided', 'invoice', $invoice->id, ['number' => $invoice->number, 'reason' => $invoice->void_reason]);
 
             return $invoice;
         });

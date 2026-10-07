@@ -13,4 +13,6 @@ return [
     'too-many-requests' => 'Too many requests. Try again shortly.',
     'http-error' => 'The request could not be completed.',
     'server-error' => 'Something went wrong on our side.',
+    // The web pages of a suspended academy (the API answers academy-suspended).
+    'suspended_page' => ['title' => 'This academy is paused', 'body' => 'This site is not available right now. If you belong to the academy, please contact its office.'],
 ];

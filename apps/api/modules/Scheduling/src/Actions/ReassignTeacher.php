@@ -16,6 +16,7 @@ use Modules\Scheduling\Domain\Models\SessionEvent;
 use Modules\Scheduling\Domain\Models\SessionParticipant;
 use Modules\Scheduling\Domain\Slots\WeeklyTime;
 use Modules\Scheduling\Queries\AvailabilityQuery;
+use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Time\LocalTimeResolver;
 
 /**
@@ -126,6 +127,7 @@ final class ReassignTeacher
                 $this->enrollments->reassignTeacher($enrollment->id, $teacherId, $from, $actorId);
                 $this->materialize->handle([$enrollment->id], actorId: $actorId);
                 $this->fund->handle($enrollment->id);
+                app(AuditTrail::class)->record('enrollment.teacher_changed', 'enrollment', $enrollment->id, ['from' => $enrollment->teacherId, 'to' => $teacherId, 'starting' => $from->toDateString(), 'lessons_moved' => $plan->count()]);
 
                 return ['moved' => $plan->count(), 'retimed' => $retimed];
             });

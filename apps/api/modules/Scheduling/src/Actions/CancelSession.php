@@ -14,6 +14,7 @@ use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionEvent;
 use Modules\Scheduling\Domain\Policy\Decision;
 use Modules\Scheduling\Domain\Policy\PolicyEvent;
+use Modules\SharedKernel\Audit\AuditTrail;
 
 /**
  * Cancels a session under the policy (docs/architecture/02, section 4):
@@ -71,6 +72,9 @@ final class CancelSession
             ], $actorId);
             $this->settle->handle($session, $decision->credit, $actorId, $version->policy()->get('makeup_validity_days'));
 
+            if ($waive) {
+                app(AuditTrail::class)->record('session.cancel_waived', 'session', $session->id, ['asked_by' => $askedBy, 'reason' => $reason, 'note' => $note, 'rule' => $decision->rule]);
+            }
             DB::afterCommit(fn () => event(new SessionCancelled($session->academy_id, $session->id, $reason, $decision->credit === 'makeup', $actorId)));
         });
 

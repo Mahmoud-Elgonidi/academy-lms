@@ -40,6 +40,8 @@
             "Modules\\Identity\\": "modules/Identity/src/",
             "Modules\\Identity\\Database\\Factories\\": "modules/Identity/database/factories/",
             "Modules\\Platform\\Database\\Factories\\": "modules/Platform/database/factories/",
+            "Modules\\Platform\\Database\\Seeders\\": "modules/Platform/database/seeders/",
+            "Modules\\Identity\\Database\\Seeders\\": "modules/Identity/database/seeders/",
             "Modules\\Catalog\\": "modules/Catalog/src/",
             "Modules\\People\\": "modules/People/src/",
             "Modules\\Communication\\": "modules/Communication/src/",

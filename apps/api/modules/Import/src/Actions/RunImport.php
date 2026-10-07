@@ -8,6 +8,7 @@ use Illuminate\Validation\ValidationException;
 use Modules\Import\Contracts\Events\PeopleImported;
 use Modules\Import\Models\ImportRow;
 use Modules\Import\Models\ImportRun;
+use Modules\SharedKernel\Audit\AuditTrail;
 
 /**
  * Imports a checked file: every row in its own savepoint, so the rows that
@@ -45,6 +46,7 @@ final class RunImport
             }
             $run->forceFill(['status' => 'done', 'counts' => $counts, 'finished_at' => CarbonImmutable::now()])->save();
 
+            app(AuditTrail::class)->record('import.done', 'import_run', $run->id, ['kind' => $run->kind, 'file' => $run->file_name, 'counts' => $counts]);
             $people = array_values(array_unique($people));
             if ($people !== []) {
                 DB::afterCommit(fn () => event(new PeopleImported($run->academy_id, $run->id, $run->kind, $people, (bool) $run->option('invite', true))));

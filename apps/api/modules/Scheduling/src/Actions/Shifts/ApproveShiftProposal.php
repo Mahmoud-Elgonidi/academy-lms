@@ -11,6 +11,7 @@ use Modules\Scheduling\Domain\Enums\ShiftProposalStatus;
 use Modules\Scheduling\Domain\Models\ShiftProposal;
 use Modules\Scheduling\Domain\Models\ShiftSchedule;
 use Modules\Scheduling\Queries\ShiftImpactQuery;
+use Modules\SharedKernel\Audit\AuditTrail;
 
 /**
  * Turns a proposal into the teacher's schedule from its start date
@@ -97,6 +98,9 @@ final class ApproveShiftProposal
                 'by' => __('scheduling::shifts.roles.'.$actorRole),
             ]).($overrideReason ? ' · '.__('scheduling::shifts.comments.override', ['reason' => $overrideReason]) : ''));
 
+            if ($overrideReason !== null) {
+                app(AuditTrail::class)->record('shift.approved_override', 'shift_proposal', $proposal->id, ['teacher_id' => $proposal->teacher_id, 'reason' => $overrideReason]);
+            }
             DB::afterCommit(function () use ($proposal, $schedule, $from, $actorId) {
                 event(new ShiftProposalApproved($proposal->academy_id, $proposal->id, $proposal->teacher_id, $actorId));
                 event(new ShiftRulesChanged($proposal->academy_id, $proposal->teacher_id, $from, $schedule->version));

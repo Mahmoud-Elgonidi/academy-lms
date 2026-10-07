@@ -12,6 +12,7 @@ use Modules\Billing\Models\Subscription;
 use Modules\Credits\Contracts\CreditsApi;
 use Modules\Credits\Contracts\LotSource;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Money\Money;
 
 /**
@@ -69,6 +70,9 @@ final class RecordPayment
             if ($invoice->status === 'paid') {
                 $this->fulfil($invoice, $actorId);
                 DB::afterCommit(fn () => event(new InvoicePaid($invoice->academy_id, $invoice->id, $invoice->subscription_id)));
+            }
+            if ($checkoutId === null) {
+                app(AuditTrail::class)->record('billing.payment_recorded', 'invoice', $invoice->id, ['number' => $invoice->number, 'amount' => $amount->format(), 'method' => $method, 'reference' => $reference]);
             }
 
             return $invoice;

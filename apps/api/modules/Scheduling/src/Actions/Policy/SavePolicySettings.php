@@ -7,6 +7,7 @@ use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Policy\PolicySettings;
+use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /** Saves the policy numbers as a new version; earlier decisions keep theirs. */
@@ -28,11 +29,16 @@ final class SavePolicySettings
                 return $current;
             }
 
-            return PolicyVersion::query()->create([
+            $version = PolicyVersion::query()->create([
                 'version' => ($current?->version ?? 0) + 1,
                 'settings' => $settings->toArray(),
                 'created_by' => $actorId,
             ]);
+            $before = (array) ($current?->settings ?? []);
+            $changed = array_keys(array_filter($settings->toArray(), fn ($value, $key) => ! array_key_exists($key, $before) || $before[$key] != $value, ARRAY_FILTER_USE_BOTH));
+            app(AuditTrail::class)->record('policy.saved', 'policy_version', $version->id, ['version' => $version->version, 'changed' => $changed]);
+
+            return $version;
         });
     }
 }

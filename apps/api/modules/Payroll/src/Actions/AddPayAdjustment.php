@@ -8,6 +8,7 @@ use Illuminate\Validation\ValidationException;
 use Modules\Payroll\Models\RateCard;
 use Modules\Payroll\Models\TeacherEarning;
 use Modules\Payroll\Support\PayrollMonths;
+use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Money\Money;
 
 /**
@@ -42,6 +43,8 @@ final class AddPayAdjustment
         return DB::transaction(function () use ($teacherId, $kind, $money, $note, $actorId, $month) {
             $this->months->lock();
 
+            app(AuditTrail::class)->record('payroll.adjusted', 'teacher', $teacherId, ['kind' => $kind, 'amount' => $money->format(), 'note' => $note]);
+
             return TeacherEarning::query()->create([
                 'teacher_id' => $teacherId,
                 'period' => $this->months->firstOpenFrom($month ?? $this->months->current()),
@@ -63,6 +66,8 @@ final class AddPayAdjustment
             if ($entry === null) {
                 throw ValidationException::withMessages(['entry' => __('payroll::payroll.errors.cannot_reverse')]);
             }
+
+            app(AuditTrail::class)->record('payroll.adjustment_reversed', 'teacher', $entry->teacher_id, ['kind' => $entry->kind, 'amount' => $entry->money()->format(), 'note' => $entry->note]);
 
             return TeacherEarning::query()->create([
                 'teacher_id' => $entry->teacher_id,

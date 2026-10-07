@@ -3,14 +3,12 @@
 namespace Modules\Import\Providers;
 
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
+use Modules\Identity\Contracts\IdentityApi;
 use Modules\Import\Contracts\Events\PeopleImported;
 use Modules\Import\Listeners\SendWelcomes;
-use Modules\Platform\Contracts\TenantDirectory;
-use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
  * Import (docs/architecture/01: "استيراد من CSV/Excel"): teachers, families
@@ -19,9 +17,6 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  */
 final class ImportServiceProvider extends ServiceProvider
 {
-    /** How long a welcome link works. */
-    public const WELCOME_DAYS = 14;
-
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
@@ -30,11 +25,7 @@ final class ImportServiceProvider extends ServiceProvider
 
         SendWelcomes::templates($this->app->make(NotificationsApi::class));
         // Each person's own link to choose their password (Identity's welcome page), on the academy's host.
-        $this->app->make(NotificationLinks::class)->registerPersonal('welcome', function (array $action, string $userId) {
-            $path = URL::temporarySignedRoute('identity.welcome', now()->addDays(self::WELCOME_DAYS), ['user' => $userId], absolute: false);
-
-            return $this->app->make(TenantDirectory::class)->baseUrl($this->app->make(TenantContext::class)->require()).$path;
-        });
+        $this->app->make(NotificationLinks::class)->registerPersonal('welcome', fn (array $action, string $userId) => $this->app->make(IdentityApi::class)->welcomeLink($userId));
 
         Event::listen(PeopleImported::class, SendWelcomes::class);
     }

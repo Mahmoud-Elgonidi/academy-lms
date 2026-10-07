@@ -9,6 +9,7 @@ use Modules\Payroll\Actions\ClosePayrollMonth;
 use Modules\Payroll\Actions\RecalculatePayrollMonth;
 use Modules\Payroll\Actions\SaveRateCard;
 use Modules\Payroll\Support\PayrollMonths;
+use Modules\SharedKernel\Audit\AuditActor;
 
 /**
  * Payroll in the demo, set up the way an academy would: a default card in
@@ -23,6 +24,20 @@ final class DemoPayrollSeeder extends Seeder
     public function run(SaveRateCard $cards, RecalculatePayrollMonth $recalculate, AddPayAdjustment $adjust, ClosePayrollMonth $close, PayrollMonths $months): void
     {
         $accountant = DB::table('users')->where('email', 'accountant@demo.test')->value('id');
+        // Payroll is the accountant's work: their name is on it in the activity log.
+        $before = AuditActor::current();
+        if ($accountant !== null) {
+            AuditActor::use(new AuditActor('user', $accountant, (string) DB::table('users')->where('id', $accountant)->value('name')));
+        }
+        try {
+            $this->seedPayroll($cards, $recalculate, $adjust, $close, $months, $accountant);
+        } finally {
+            AuditActor::use($before);
+        }
+    }
+
+    private function seedPayroll(SaveRateCard $cards, RecalculatePayrollMonth $recalculate, AddPayAdjustment $adjust, ClosePayrollMonth $close, PayrollMonths $months, ?string $accountant): void
+    {
         $teacher = fn (string $email) => DB::table('users')->where('email', $email)->value('id');
         $quran = DB::table('subjects')->where('name_en', 'Quran memorisation')->value('id');
 

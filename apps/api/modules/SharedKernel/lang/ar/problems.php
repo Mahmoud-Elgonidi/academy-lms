@@ -13,4 +13,6 @@ return [
     'too-many-requests' => 'طلبات كثيرة. حاول مرة أخرى بعد قليل.',
     'http-error' => 'تعذّر إتمام الطلب.',
     'server-error' => 'حدث خطأ من جهتنا.',
+    // The web pages of a suspended academy (the API answers academy-suspended).
+    'suspended_page' => ['title' => 'الأكاديمية متوقفة مؤقتًا', 'body' => 'الموقع ده مش متاح دلوقتي. لو انت من الأكاديمية، تواصل مع الإدارة.'],
 ];

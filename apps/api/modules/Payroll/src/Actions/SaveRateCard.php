@@ -7,6 +7,7 @@ use Illuminate\Validation\ValidationException;
 use Modules\Payroll\Domain\RateLine;
 use Modules\Payroll\Models\RateCard;
 use Modules\Payroll\Models\TeacherRateCard;
+use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Money\Money;
 
 /**
@@ -77,6 +78,8 @@ final class SaveRateCard
                     TeacherRateCard::query()->updateOrCreate(['teacher_id' => $teacherId], ['rate_card_id' => $card->id]);
                 }
             }
+
+            app(AuditTrail::class)->record('payroll.rates_saved', 'rate_card', $card->id, ['name' => $name, 'currency' => $currency, 'default' => $default, 'lines' => count($lines)]);
 
             return $card->load('lines');
         });

@@ -7,6 +7,7 @@ use Filament\Auth\Pages\EditProfile;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
@@ -14,8 +15,11 @@ use Illuminate\Support\Arr;
 use Modules\Identity\Actions\ChangePassword;
 use Modules\Identity\Actions\UpdatePreferences;
 use Modules\Identity\Actions\UpdateProfile;
+use Modules\Identity\Models\Impersonation;
 use Modules\Identity\Models\User;
 use Modules\Identity\Preferences\PreferenceStore;
+use Modules\SharedKernel\Audit\AuditActor;
+use Modules\SharedKernel\Time\ViewerTimezone;
 use SensitiveParameter;
 
 /**
@@ -26,6 +30,9 @@ use SensitiveParameter;
 final class MySettings extends EditProfile
 {
     private ?string $localeBeforeSave = null;
+
+    /** @var list<array{admin: string, when: string, minutes: int, reason: string}>|null */
+    private ?array $signIns = null;
 
     public static function getLabel(): string
     {
@@ -68,7 +75,15 @@ final class MySettings extends EditProfile
                     $this->getPasswordFormComponent(),
                     $this->getPasswordConfirmationFormComponent(),
                     $this->getCurrentPasswordFormComponent(),
-                ]),
+                ])
+                // Not while the platform team is signed in as this person (ChangePassword refuses too).
+                ->visible(fn (): bool => AuditActor::current()->onBehalfOf === null),
+
+            Section::make(__('identity::impersonation.mine.title'))
+                ->description(__('identity::impersonation.mine.hint'))
+                ->schema([View::make('identity::impersonation.mine')->viewData(['rows' => $this->platformSignIns()])])
+                ->visible(fn (): bool => $this->platformSignIns() !== [])
+                ->collapsible(),
         ]);
     }
 
@@ -112,6 +127,30 @@ final class MySettings extends EditProfile
     protected function getRedirectUrl(): ?string
     {
         return $this->localeBeforeSave !== $this->getUser()->getAttribute('locale') ? self::getUrl() : null;
+    }
+
+    /**
+     * The platform team's sign-ins to this account that were used, newest first.
+     *
+     * @return list<array{admin: string, when: string, minutes: int, reason: string}>
+     */
+    private function platformSignIns(): array
+    {
+        if ($this->signIns !== null) {
+            return $this->signIns;
+        }
+        $tz = app(ViewerTimezone::class)->effective();
+
+        return $this->signIns = Impersonation::query()
+            ->where('user_id', $this->getUser()->getAuthIdentifier())
+            ->whereNotNull('redeemed_at')
+            ->latest('redeemed_at')->limit(10)->get()
+            ->map(fn (Impersonation $i) => [
+                'admin' => $i->admin_name,
+                'when' => $i->redeemed_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M Y · H:i'),
+                'minutes' => $i->minutes,
+                'reason' => $i->reason,
+            ])->all();
     }
 
     /** @return list<ToggleButtons> */

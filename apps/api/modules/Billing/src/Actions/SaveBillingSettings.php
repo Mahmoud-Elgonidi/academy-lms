@@ -4,6 +4,7 @@ namespace Modules\Billing\Actions;
 
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Models\BillingSettings;
+use Modules\SharedKernel\Audit\AuditTrail;
 
 /** VAT, the invoice number prefix and how many days an invoice is due in. */
 final class SaveBillingSettings
@@ -23,6 +24,9 @@ final class SaveBillingSettings
             'invoice_prefix' => $invoicePrefix,
             'due_days' => $dueDays,
         ])->save();
+        if ($settings->wasChanged()) {
+            app(AuditTrail::class)->record('billing.settings_saved', null, null, ['tax_percent' => $bp / 100, 'prices_include_tax' => $pricesIncludeTax, 'invoice_prefix' => $invoicePrefix, 'due_days' => $dueDays]);
+        }
 
         return $settings;
     }

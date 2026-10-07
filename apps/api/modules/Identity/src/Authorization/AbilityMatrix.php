@@ -27,6 +27,8 @@ final class AbilityMatrix
             Ability::ManageBilling => [Role::Owner, Role::Accountant],
             Ability::ManagePayroll => [Role::Owner, Role::Accountant],
             Ability::ImportData => [Role::Owner, Role::Admin],
+            // The academy's own audit log, the platform team's sign-ins included.
+            Ability::ViewAuditLog => [Role::Owner, Role::Admin],
         };
     }
 
