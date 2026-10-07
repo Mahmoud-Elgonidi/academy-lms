@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Learning\Http\V1\Controllers\ChallengesController;
 use Modules\Learning\Http\V1\Controllers\LearnerController;
 use Modules\Learning\Http\V1\Controllers\TeacherReportsController;
 
@@ -23,4 +24,10 @@ Route::middleware('auth:sanctum')->prefix('learning')->group(function () {
     Route::get('homework', [LearnerController::class, 'homework'])->name('learning.homework');
     Route::post('homework/{homework}/submissions', [LearnerController::class, 'handIn'])->name('learning.homework.submit');
     Route::get('submissions/{submission}/file', [LearnerController::class, 'file'])->name('learning.submissions.file');
+
+    // The game layer: challenges by stage, collecting rewards, and guardians' cheers.
+    Route::get('challenges', [ChallengesController::class, 'index'])->name('learning.challenges');
+    Route::post('challenges/claim', [ChallengesController::class, 'claim'])->middleware('idempotent')->name('learning.challenges.claim');
+    Route::post('cheers', [ChallengesController::class, 'cheer'])->name('learning.cheers.send');
+    Route::post('cheers/seen', [ChallengesController::class, 'seen'])->name('learning.cheers.seen');
 });

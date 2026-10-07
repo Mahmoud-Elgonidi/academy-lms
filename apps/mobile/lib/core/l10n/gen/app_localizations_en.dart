@@ -262,6 +262,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMore => 'More';
 
   @override
+  String get navMissions => 'Missions';
+
+  @override
+  String get navQuests => 'Quests';
+
+  @override
+  String get navGoals => 'Goals';
+
+  @override
   String greetingMorning(String name) {
     return 'Good morning, $name';
   }
@@ -988,4 +997,171 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get points => 'points';
+
+  @override
+  String get missionsTitle => 'This week\'s missions';
+
+  @override
+  String get questsTitle => 'This week\'s quests';
+
+  @override
+  String get goalsTitle => 'This week\'s goals';
+
+  @override
+  String get monthGoal => 'This month\'s goal';
+
+  @override
+  String get bossFights => 'Boss fights';
+
+  @override
+  String get waitingRewards => 'Rewards waiting for you';
+
+  @override
+  String get fromLastWeek => 'From last week';
+
+  @override
+  String get fromLastMonth => 'From last month';
+
+  @override
+  String weekEnds(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n days left this week',
+      one: '1 day left this week',
+      zero: 'Last day of the week!',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get doneMark => 'Done!';
+
+  @override
+  String get collect => 'Collect';
+
+  @override
+  String missionsOf(int done, int total) {
+    return '$done of $total missions';
+  }
+
+  @override
+  String challengesDone(int done, int total) {
+    return '$done of $total done';
+  }
+
+  @override
+  String get chestReady => 'The chest is ready! Tap it';
+
+  @override
+  String get chestSurprise => 'A surprise sticker inside';
+
+  @override
+  String get chestOpened => 'You opened this week\'s chest';
+
+  @override
+  String get noChallenges => 'No challenges right now. They show up here once you have lessons this week.';
+
+  @override
+  String get album => 'Sticker album';
+
+  @override
+  String get albumLead => 'Every chest you open brings a new sticker.';
+
+  @override
+  String get newSticker => 'A new sticker for your album!';
+
+  @override
+  String get rewardKids => 'Bravo!';
+
+  @override
+  String get rewardTitle => 'Well done!';
+
+  @override
+  String rankUp(String rank) {
+    return 'New rank: $rank';
+  }
+
+  @override
+  String get awesome => 'Awesome!';
+
+  @override
+  String get yourPoints => 'Your points';
+
+  @override
+  String get yourGems => 'Your gems';
+
+  @override
+  String get pointsWord => 'Points';
+
+  @override
+  String get thisWeek => 'This week';
+
+  @override
+  String readyCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n rewards waiting', one: 'A reward is waiting');
+    return '$_temp0';
+  }
+
+  @override
+  String cheerFrom(String name) {
+    return 'A cheer from $name!';
+  }
+
+  @override
+  String get cheerThanks => 'Thanks!';
+
+  @override
+  String get cheerClap => 'Clap';
+
+  @override
+  String get cheerStar => 'Star';
+
+  @override
+  String get cheerHeart => 'Heart';
+
+  @override
+  String get cheerFire => 'Fire';
+
+  @override
+  String childChallenges(String name) {
+    return '$name\'s challenges';
+  }
+
+  @override
+  String get myChallenges => 'My challenges';
+
+  @override
+  String cheerOn(String name) {
+    return 'Cheer $name on';
+  }
+
+  @override
+  String cheerSent(String name) {
+    return 'Your cheer reached $name!';
+  }
+
+  @override
+  String cheersLeft(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n cheers left today',
+      one: '1 cheer left today',
+      zero: 'No cheers left today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get seeAll => 'See all';
+
+  @override
+  String get allBadges => 'All badges';
+
+  @override
+  String get sounds => 'Sounds';
+
+  @override
+  String get soundsHint => 'Little sounds on taps and rewards';
 }

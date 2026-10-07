@@ -13,6 +13,7 @@ import '../../../dashboard/presentation/widgets/next_lesson_card.dart';
 import '../../../schedule/presentation/widgets/lesson_card.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
+import '../../../../shared/motion/motion.dart';
 
 class _Today {
   const _Today(this.lessons, this.todo);
@@ -66,7 +67,7 @@ class _TodayList extends StatelessWidget {
     return ListView(
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
-      children: [
+      children: staggered(context, [
         const SizedBox(height: 6),
         Text(
           l.todayHeader(DateFormat('EEEE d MMMM', context.locale).format(today.lessons.from), zoneName(zone, context.locale)),
@@ -107,7 +108,7 @@ class _TodayList extends StatelessWidget {
           const SizedBox(height: 8),
           Text(l.writeOnWeb, style: context.text.bodySmall),
         ],
-      ],
+      ]),
     );
   }
 }

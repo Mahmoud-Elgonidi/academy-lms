@@ -15,6 +15,7 @@ use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Database\Seeders\DemoSupportSeeder;
 use Modules\Identity\Enums\Role;
 use Modules\Import\Database\Seeders\DemoImportSeeder;
+use Modules\Learning\Database\Seeders\DemoChallengesSeeder;
 use Modules\Learning\Database\Seeders\DemoLearningSeeder;
 use Modules\Payroll\Database\Seeders\DemoPayrollSeeder;
 use Modules\Platform\Contracts\DTOs\NewAcademy;
@@ -77,7 +78,7 @@ class DatabaseSeeder extends Seeder
             // What the demo does in the back office (prices, policy, voided invoices, ...) is in the activity log as the owner's.
             AuditActor::use(new AuditActor('user', $ownerId, 'هالة منصور'));
 
-            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class]);
+            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class, DemoChallengesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class]);
             AuditActor::forget();
         });
 

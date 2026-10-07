@@ -1,0 +1,84 @@
+<?php
+
+// Challenges in each stage's voice (Learning\Domain\Challenges\ChallengeCatalog).
+return [
+    'kids' => [
+        'attend' => ['Come to all your lessons', 'Every lesson brings you closer to the treasure!'],
+        'homework' => ['Hand in your homework', 'Hand in this week\'s homework for gems!'],
+        'on_time' => ['Be right on time', 'Join your lesson right when it starts.'],
+        'chest' => ['Treasure chest', 'Finish every mission and the chest opens!'],
+    ],
+    'middle' => [
+        'attend' => ['On fire', 'Come to every lesson this week.'],
+        'homework' => ['Homework on time', 'Hand in this week\'s homework before it is due.'],
+        'master' => ['Master a new lesson', 'When your teacher marks a lesson mastered this week.'],
+        'focus' => ['Full focus', 'Score 4 or 5 for focus in this week\'s lessons.'],
+        'boss' => ['Boss level: :world', 'Finish every lesson of world :index to open the next.'],
+    ],
+    'teen' => [
+        'attend' => ['Full attendance', 'Come to every lesson this week.'],
+        'homework' => ['Homework on time', 'Hand in this week\'s homework before it is due.'],
+        'master' => ['Master new lessons', 'Lessons you master this week bring your goal closer.'],
+        'month' => ['A month without missing', 'Come to every lesson this month.'],
+    ],
+    'classic' => [
+        'attend' => ['Full attendance this week', 'Come to every lesson this week.'],
+        'homework' => ['Homework on time', 'Hand in this week\'s homework before it is due.'],
+        'master' => ['New lessons mastered', 'Lessons you master this week.'],
+        'month' => ['A month without missing', 'Come to every lesson this month.'],
+    ],
+    'units' => [
+        'kids' => ':n gems',
+        'middle' => ':n XP',
+        'teen' => ':n points',
+        'classic' => ':n points',
+    ],
+    'states' => [
+        'active' => 'In progress',
+        'done' => 'Ready to collect',
+        'claimed' => 'Collected',
+        'missed' => 'Next time!',
+    ],
+    'stickers' => [
+        'lion' => 'Lion', 'rocket' => 'Rocket', 'sun' => 'Sun', 'whale' => 'Whale', 'cat' => 'Cat', 'tree' => 'Tree',
+        'kite' => 'Kite', 'castle' => 'Castle', 'camel' => 'Camel', 'owl' => 'Owl', 'turtle' => 'Turtle', 'balloon' => 'Balloon',
+        'moon' => 'Moon', 'fish' => 'Fish', 'bee' => 'Bee', 'rainbow' => 'Rainbow', 'plane' => 'Plane', 'crown' => 'Crown',
+        'cupcake' => 'Cupcake', 'dino' => 'Dino', 'flower' => 'Flower', 'robot' => 'Robot', 'boat' => 'Boat', 'trophy' => 'Trophy',
+    ],
+    'cheers' => [
+        'clap' => 'a round of applause',
+        'star' => 'a star',
+        'heart' => 'a heart',
+        'fire' => 'a spark of energy',
+    ],
+    'errors' => [
+        'not_ready' => 'This challenge is not finished yet.',
+        'claimed' => 'You already collected this reward.',
+        'not_yours' => 'This is not one of your learners.',
+        'too_many_cheers' => 'That is enough cheers for today. Send more tomorrow!',
+    ],
+    'web' => [
+        'title' => ['kids' => "This week's missions", 'middle' => "This week's quests", 'teen' => "This week's goals", 'classic' => "This week's goals"],
+        'of' => ":name's challenges",
+        'groups' => [
+            'last_week' => 'From last week',
+            'week' => 'This week',
+            'month' => "This month's goal",
+            'last_month' => 'From last month',
+            'world' => 'Boss fights',
+        ],
+        'days_left' => '{0} Last day of the week!|{1} 1 day left this week|[2,*] :count days left this week',
+        'collect' => 'Collect :reward',
+        'collected' => 'You collected :reward!',
+        'sticker' => 'A new sticker for your album: :name',
+        'rank_up' => 'New rank: :rank',
+        'done' => 'Done!',
+        'album' => 'Your album: :earned of :total stickers',
+        'cheer_from' => 'A cheer from :names!',
+        'thanks' => 'Thanks!',
+        'cheer_on' => 'Cheer :name on',
+        'cheers_left' => '{0} No cheers left today|{1} 1 cheer left today|[2,*] :count cheers left today',
+        'cheer_sent' => 'Your cheer reached :name!',
+        'none' => 'No challenges right now. They show up here once there are lessons this week.',
+    ],
+];

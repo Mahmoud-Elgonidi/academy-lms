@@ -8,6 +8,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
+import '../../../../shared/motion/motion.dart';
 
 /// The teacher's pay for a month (the academy's clock): the total so far,
 /// lessons and hours, bonuses and deductions, and each lesson's line.
@@ -78,7 +79,7 @@ class _Month extends StatelessWidget {
     return ListView(
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
-      children: [
+      children: staggered(context, [
         Text(e.label, style: context.text.titleLarge),
         const SizedBox(height: 10),
         for (final t in e.totals) ...[
@@ -187,7 +188,7 @@ class _Month extends StatelessWidget {
             ),
           ),
         ],
-      ],
+      ]),
     );
   }
 }

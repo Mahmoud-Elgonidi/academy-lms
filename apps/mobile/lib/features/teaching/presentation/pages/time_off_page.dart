@@ -12,6 +12,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
+import '../../../../shared/motion/motion.dart';
 
 /// Asking for time off on the teacher's own clock (whole days, or part of
 /// one day), and the requests so far; a pending one can be withdrawn.
@@ -37,7 +38,7 @@ class TimeOffPage extends StatelessWidget {
           builder: (context, list) => ListView(
             padding: pagePadding,
             physics: const AlwaysScrollableScrollPhysics(),
-            children: [
+            children: staggered(context, [
               const _RequestForm(),
               const SizedBox(height: 20),
               SectionLabel(context.l10n.yourRequests),
@@ -51,7 +52,7 @@ class TimeOffPage extends StatelessWidget {
                   const SizedBox(height: 8),
                 ],
               ],
-            ],
+            ]),
           ),
         ),
       ),

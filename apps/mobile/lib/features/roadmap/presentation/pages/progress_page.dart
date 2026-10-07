@@ -11,6 +11,7 @@ import '../../../dashboard/presentation/bloc/learner_cubit.dart';
 import '../../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../../data/learning_repository.dart';
 import '../../domain/learning.dart';
+import '../../../../shared/motion/motion.dart';
 
 /// Where each course stands for the learner: the program, how far, the
 /// lesson now, the weeks left, open homework; a course opens its reports.
@@ -36,10 +37,10 @@ class ProgressPage extends StatelessWidget {
                   return ListView(
                     padding: pagePadding,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
+                    children: staggered(context, [
                       if (courses.isEmpty) EmptyNote(l.noCourses, icon: Icons.menu_book_outlined),
                       for (final course in courses) ...[_CourseCard(course: course), const SizedBox(height: 12)],
-                    ],
+                    ]),
                   );
                 },
               ),

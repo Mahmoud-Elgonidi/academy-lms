@@ -530,6 +530,24 @@ abstract class AppLocalizations {
   /// **'المزيد'**
   String get navMore;
 
+  /// No description provided for @navMissions.
+  ///
+  /// In ar, this message translates to:
+  /// **'مهماتي'**
+  String get navMissions;
+
+  /// No description provided for @navQuests.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحدياتي'**
+  String get navQuests;
+
+  /// No description provided for @navGoals.
+  ///
+  /// In ar, this message translates to:
+  /// **'أهدافي'**
+  String get navGoals;
+
   /// No description provided for @greetingMorning.
   ///
   /// In ar, this message translates to:
@@ -1693,6 +1711,270 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'نقطة'**
   String get points;
+
+  /// No description provided for @missionsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مهمات الأسبوع'**
+  String get missionsTitle;
+
+  /// No description provided for @questsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحديات الأسبوع'**
+  String get questsTitle;
+
+  /// No description provided for @goalsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أهداف الأسبوع'**
+  String get goalsTitle;
+
+  /// No description provided for @monthGoal.
+  ///
+  /// In ar, this message translates to:
+  /// **'هدف الشهر'**
+  String get monthGoal;
+
+  /// No description provided for @bossFights.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحدي الزعيم'**
+  String get bossFights;
+
+  /// No description provided for @waitingRewards.
+  ///
+  /// In ar, this message translates to:
+  /// **'جوايز مستنياك'**
+  String get waitingRewards;
+
+  /// No description provided for @fromLastWeek.
+  ///
+  /// In ar, this message translates to:
+  /// **'من الأسبوع اللي فات'**
+  String get fromLastWeek;
+
+  /// No description provided for @fromLastMonth.
+  ///
+  /// In ar, this message translates to:
+  /// **'من الشهر اللي فات'**
+  String get fromLastMonth;
+
+  /// No description provided for @weekEnds.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{آخر يوم في الأسبوع!} =1{باقي يوم على آخر الأسبوع} =2{باقي يومين على آخر الأسبوع} few{باقي {n} أيام على آخر الأسبوع} other{باقي {n} يوم على آخر الأسبوع}}'**
+  String weekEnds(int n);
+
+  /// No description provided for @doneMark.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم!'**
+  String get doneMark;
+
+  /// No description provided for @collect.
+  ///
+  /// In ar, this message translates to:
+  /// **'استلم'**
+  String get collect;
+
+  /// No description provided for @missionsOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'{done} من {total} مهمات'**
+  String missionsOf(int done, int total);
+
+  /// No description provided for @challengesDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'{done} من {total} خلصوا'**
+  String challengesDone(int done, int total);
+
+  /// No description provided for @chestReady.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصندوق جاهز! دوس عليه'**
+  String get chestReady;
+
+  /// No description provided for @chestSurprise.
+  ///
+  /// In ar, this message translates to:
+  /// **'جواه ستيكر مفاجأة'**
+  String get chestSurprise;
+
+  /// No description provided for @chestOpened.
+  ///
+  /// In ar, this message translates to:
+  /// **'فتحت صندوق الأسبوع ده'**
+  String get chestOpened;
+
+  /// No description provided for @noChallenges.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش تحديات دلوقتي. لما يكون عندك حصص الأسبوع ده، هتظهر هنا.'**
+  String get noChallenges;
+
+  /// No description provided for @album.
+  ///
+  /// In ar, this message translates to:
+  /// **'ألبوم الستيكرز'**
+  String get album;
+
+  /// No description provided for @albumLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل صندوق بتفتحه بيجيبلك ستيكر جديد.'**
+  String get albumLead;
+
+  /// No description provided for @newSticker.
+  ///
+  /// In ar, this message translates to:
+  /// **'ستيكر جديد في ألبومك!'**
+  String get newSticker;
+
+  /// No description provided for @rewardKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'برافو عليك!'**
+  String get rewardKids;
+
+  /// No description provided for @rewardTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أحسنت!'**
+  String get rewardTitle;
+
+  /// No description provided for @rankUp.
+  ///
+  /// In ar, this message translates to:
+  /// **'رتبة جديدة: {rank}'**
+  String rankUp(String rank);
+
+  /// No description provided for @awesome.
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام!'**
+  String get awesome;
+
+  /// No description provided for @yourPoints.
+  ///
+  /// In ar, this message translates to:
+  /// **'نقطك'**
+  String get yourPoints;
+
+  /// No description provided for @yourGems.
+  ///
+  /// In ar, this message translates to:
+  /// **'جواهرك'**
+  String get yourGems;
+
+  /// No description provided for @pointsWord.
+  ///
+  /// In ar, this message translates to:
+  /// **'النقط'**
+  String get pointsWord;
+
+  /// No description provided for @thisWeek.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأسبوع ده'**
+  String get thisWeek;
+
+  /// No description provided for @readyCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{جايزة مستنياك} =2{جايزتين مستنيينك} few{{n} جوايز مستنياك} other{{n} جايزة مستنياك}}'**
+  String readyCount(int n);
+
+  /// No description provided for @cheerFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'تشجيع من {name}!'**
+  String cheerFrom(String name);
+
+  /// No description provided for @cheerThanks.
+  ///
+  /// In ar, this message translates to:
+  /// **'شكرًا!'**
+  String get cheerThanks;
+
+  /// No description provided for @cheerClap.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصفيقة'**
+  String get cheerClap;
+
+  /// No description provided for @cheerStar.
+  ///
+  /// In ar, this message translates to:
+  /// **'نجمة'**
+  String get cheerStar;
+
+  /// No description provided for @cheerHeart.
+  ///
+  /// In ar, this message translates to:
+  /// **'قلب'**
+  String get cheerHeart;
+
+  /// No description provided for @cheerFire.
+  ///
+  /// In ar, this message translates to:
+  /// **'شعلة حماس'**
+  String get cheerFire;
+
+  /// No description provided for @childChallenges.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحديات {name}'**
+  String childChallenges(String name);
+
+  /// No description provided for @myChallenges.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحدياتي'**
+  String get myChallenges;
+
+  /// No description provided for @cheerOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'شجّع {name}'**
+  String cheerOn(String name);
+
+  /// No description provided for @cheerSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'التشجيع وصل لـ {name}!'**
+  String cheerSent(String name);
+
+  /// No description provided for @cheersLeft.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{خلّصت تشجيعات النهارده} =1{فاضل تشجيع واحد النهارده} =2{فاضل تشجيعين النهارده} few{فاضل {n} تشجيعات النهارده} other{فاضل {n} تشجيع النهارده}}'**
+  String cheersLeft(int n);
+
+  /// No description provided for @seeAll.
+  ///
+  /// In ar, this message translates to:
+  /// **'شوف الكل'**
+  String get seeAll;
+
+  /// No description provided for @allBadges.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل الإنجازات'**
+  String get allBadges;
+
+  /// No description provided for @sounds.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأصوات'**
+  String get sounds;
+
+  /// No description provided for @soundsHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'أصوات خفيفة لما تدوس أو تستلم جايزة'**
+  String get soundsHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

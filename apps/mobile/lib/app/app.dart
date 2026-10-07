@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../core/auth/session_cubit.dart';
 import '../core/l10n/l10n.dart';
 import '../features/auth/presentation/bloc/sign_in_cubit.dart';
+import '../shared/motion/juice.dart';
 import 'di/services.dart';
 import 'router/router.dart';
 import 'theme/app_theme.dart';
@@ -41,8 +42,10 @@ class _AcademyAppState extends State<AcademyApp> {
         BlocProvider(create: (_) => SignInCubit(widget.services.auth, widget.session)),
       ],
       child: BlocConsumer<SessionCubit, SessionState>(
-        listenWhen: (a, b) => b.notice != null && a.notice != b.notice,
+        listenWhen: (a, b) => (b.notice != null && a.notice != b.notice) || a.sounds != b.sounds,
         listener: (context, state) {
+          Juice.sounds = state.sounds;
+          if (state.notice == null) return;
           final l = lookupAppLocalizations(Locale(state.locale));
           final text = switch (state.notice!) {
             SessionNotice.expired => l.noticeExpired,

@@ -9,6 +9,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
+import '../../../../shared/motion/motion.dart';
 
 /// The teacher's students: subject, how far along, the lesson now, homework to mark.
 class StudentsPage extends StatelessWidget {
@@ -23,10 +24,10 @@ class StudentsPage extends StatelessWidget {
         builder: (context, students) => ListView(
           padding: pagePadding,
           physics: const AlwaysScrollableScrollPhysics(),
-          children: [
+          children: staggered(context, [
             if (students.isEmpty) EmptyNote(context.l10n.noStudents, icon: Icons.groups_outlined),
             for (final s in students) ...[_StudentCard(student: s), const SizedBox(height: 10)],
-          ],
+          ]),
         ),
       ),
     ),

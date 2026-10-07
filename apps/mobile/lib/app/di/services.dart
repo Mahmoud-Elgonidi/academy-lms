@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/network/api_client.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/billing/data/billing_repository.dart';
+import '../../features/challenges/data/challenges_repository.dart';
 import '../../features/classroom/data/classroom_repository.dart';
 import '../../features/dashboard/data/family_repository.dart';
 import '../../features/dashboard/data/home_loader.dart';
@@ -24,7 +25,8 @@ class Services {
       homework = HomeworkRepository(api),
       classroom = ClassroomRepository(api),
       profile = ProfileRepository(api),
-      teaching = TeachingRepository(api) {
+      teaching = TeachingRepository(api),
+      challenges = ChallengesRepository(api) {
     home = HomeLoader(lessons: lessons, billing: billing, learning: learning, homework: homework, family: family);
   }
 
@@ -38,6 +40,7 @@ class Services {
   final ClassroomRepository classroom;
   final ProfileRepository profile;
   final TeachingRepository teaching;
+  final ChallengesRepository challenges;
   late final HomeLoader home;
 
   Widget provide({required Widget child}) => MultiRepositoryProvider(
@@ -52,6 +55,7 @@ class Services {
       RepositoryProvider.value(value: classroom),
       RepositoryProvider.value(value: profile),
       RepositoryProvider.value(value: teaching),
+      RepositoryProvider.value(value: challenges),
       RepositoryProvider.value(value: home),
     ],
     child: child,

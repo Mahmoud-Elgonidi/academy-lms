@@ -143,6 +143,9 @@
   "navStudents": "طلابي",
   "navEarnings": "أرباحي",
   "navMore": "المزيد",
+  "navMissions": "مهماتي",
+  "navQuests": "تحدياتي",
+  "navGoals": "أهدافي",
   "greetingMorning": "صباح الخير يا {name}",
   "@greetingMorning": {
     "placeholders": {
@@ -761,5 +764,125 @@
     }
   },
   "stars": "نجوم",
-  "points": "نقطة"
+  "points": "نقطة",
+  "missionsTitle": "مهمات الأسبوع",
+  "questsTitle": "تحديات الأسبوع",
+  "goalsTitle": "أهداف الأسبوع",
+  "monthGoal": "هدف الشهر",
+  "bossFights": "تحدي الزعيم",
+  "waitingRewards": "جوايز مستنياك",
+  "fromLastWeek": "من الأسبوع اللي فات",
+  "fromLastMonth": "من الشهر اللي فات",
+  "weekEnds": "{n, plural, =0{آخر يوم في الأسبوع!} =1{باقي يوم على آخر الأسبوع} =2{باقي يومين على آخر الأسبوع} few{باقي {n} أيام على آخر الأسبوع} other{باقي {n} يوم على آخر الأسبوع}}",
+  "@weekEnds": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "doneMark": "تم!",
+  "collect": "استلم",
+  "missionsOf": "{done} من {total} مهمات",
+  "@missionsOf": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "challengesDone": "{done} من {total} خلصوا",
+  "@challengesDone": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "chestReady": "الصندوق جاهز! دوس عليه",
+  "chestSurprise": "جواه ستيكر مفاجأة",
+  "chestOpened": "فتحت صندوق الأسبوع ده",
+  "noChallenges": "مفيش تحديات دلوقتي. لما يكون عندك حصص الأسبوع ده، هتظهر هنا.",
+  "album": "ألبوم الستيكرز",
+  "albumLead": "كل صندوق بتفتحه بيجيبلك ستيكر جديد.",
+  "newSticker": "ستيكر جديد في ألبومك!",
+  "rewardKids": "برافو عليك!",
+  "rewardTitle": "أحسنت!",
+  "rankUp": "رتبة جديدة: {rank}",
+  "@rankUp": {
+    "placeholders": {
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "awesome": "تمام!",
+  "yourPoints": "نقطك",
+  "yourGems": "جواهرك",
+  "pointsWord": "النقط",
+  "thisWeek": "الأسبوع ده",
+  "readyCount": "{n, plural, =1{جايزة مستنياك} =2{جايزتين مستنيينك} few{{n} جوايز مستنياك} other{{n} جايزة مستنياك}}",
+  "@readyCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "cheerFrom": "تشجيع من {name}!",
+  "@cheerFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cheerThanks": "شكرًا!",
+  "cheerClap": "تصفيقة",
+  "cheerStar": "نجمة",
+  "cheerHeart": "قلب",
+  "cheerFire": "شعلة حماس",
+  "childChallenges": "تحديات {name}",
+  "@childChallenges": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "myChallenges": "تحدياتي",
+  "cheerOn": "شجّع {name}",
+  "@cheerOn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cheerSent": "التشجيع وصل لـ {name}!",
+  "@cheerSent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cheersLeft": "{n, plural, =0{خلّصت تشجيعات النهارده} =1{فاضل تشجيع واحد النهارده} =2{فاضل تشجيعين النهارده} few{فاضل {n} تشجيعات النهارده} other{فاضل {n} تشجيع النهارده}}",
+  "@cheersLeft": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "seeAll": "شوف الكل",
+  "allBadges": "كل الإنجازات",
+  "sounds": "الأصوات",
+  "soundsHint": "أصوات خفيفة لما تدوس أو تستلم جايزة"
 }

@@ -9,6 +9,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../data/learning_repository.dart';
 import '../../domain/learning.dart';
+import '../../../../shared/motion/motion.dart';
 
 /// The reports teachers wrote for the family: one course's, or (a teen's
 /// Reports tab) every course's, latest first.
@@ -32,10 +33,10 @@ class ReportsPage extends StatelessWidget {
           builder: (context, reports) => ListView(
             padding: pagePadding,
             physics: const AlwaysScrollableScrollPhysics(),
-            children: [
+            children: staggered(context, [
               if (reports.isEmpty) EmptyNote(l.noReports, icon: Icons.article_outlined),
               for (final r in reports) ...[ReportCard(report: r), const SizedBox(height: 12)],
-            ],
+            ]),
           ),
         ),
       ),

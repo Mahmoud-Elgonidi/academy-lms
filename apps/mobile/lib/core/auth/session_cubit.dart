@@ -23,6 +23,7 @@ class SessionState extends Equatable {
     this.current,
     this.branding = Branding.fallback,
     this.locale = 'ar',
+    this.sounds = true,
     this.deviceTimezone,
     this.clock,
     this.me,
@@ -34,6 +35,9 @@ class SessionState extends Equatable {
   final Account? current;
   final Branding branding;
   final String locale;
+
+  /// Little sounds on taps and rewards.
+  final bool sounds;
   final String? deviceTimezone;
 
   /// The zone this account chose to keep instead of the phone's (null: the phone's).
@@ -61,6 +65,7 @@ class SessionState extends Equatable {
     Account? Function()? current,
     Branding? branding,
     String? locale,
+    bool? sounds,
     String? Function()? clock,
     Me? Function()? me,
     SessionNotice? Function()? notice,
@@ -70,6 +75,7 @@ class SessionState extends Equatable {
     current: current != null ? current() : this.current,
     branding: branding ?? this.branding,
     locale: locale ?? this.locale,
+    sounds: sounds ?? this.sounds,
     deviceTimezone: deviceTimezone,
     clock: clock != null ? clock() : this.clock,
     me: me != null ? me() : this.me,
@@ -77,7 +83,19 @@ class SessionState extends Equatable {
   );
 
   @override
-  List<Object?> get props => [status, accounts, current, branding, locale, deviceTimezone, clock, me?.mismatch, me?.timezone, notice];
+  List<Object?> get props => [
+    status,
+    accounts,
+    current,
+    branding,
+    locale,
+    sounds,
+    deviceTimezone,
+    clock,
+    me?.mismatch,
+    me?.timezone,
+    notice,
+  ];
 }
 
 /// The accounts on this device and the open one. Everything that depends on
@@ -105,6 +123,7 @@ class SessionCubit extends Cubit<SessionState> {
 
   Future<void> start() async {
     final locale = await _prefs.locale() ?? (_deviceLocale == 'en' ? 'en' : 'ar');
+    final sounds = await _prefs.sounds();
     final (saved, currentId) = await _store.load();
     final now = DateTime.now();
     final accounts = saved.where((a) => !a.expired(now)).toList();
@@ -112,7 +131,7 @@ class SessionCubit extends Cubit<SessionState> {
     if (accounts.length != saved.length) {
       await _store.save(accounts, current?.id);
     }
-    _set(state.copyWith(locale: locale, accounts: accounts));
+    _set(state.copyWith(locale: locale, sounds: sounds, accounts: accounts));
     await _open(current);
   }
 
@@ -154,6 +173,11 @@ class SessionCubit extends Cubit<SessionState> {
     if (state.current != null) {
       unawaited(_quietly(() => _repo.updateMe(locale: locale)));
     }
+  }
+
+  Future<void> setSounds(bool on) async {
+    await _prefs.setSounds(on);
+    _set(state.copyWith(sounds: on));
   }
 
   /// "Yes, use my phone's clock": the profile takes the phone's zone.

@@ -9,6 +9,7 @@ use Modules\Communication\Contracts\DTOs\Message;
 use Modules\Communication\Contracts\DTOs\TemplateDefinition;
 use Modules\Communication\Contracts\DTOs\Translatable;
 use Modules\Communication\Contracts\NotificationsApi;
+use Modules\Learning\Contracts\Events\CheerSent;
 use Modules\Learning\Contracts\Events\HomeworkAssigned;
 use Modules\Learning\Contracts\Events\HomeworkReviewed;
 use Modules\Learning\Contracts\Events\HomeworkSubmitted;
@@ -43,6 +44,7 @@ final class SendLearningNotifications
             ['node_mastered', 'learning', $family, [], ['student' => 'زياد', 'lesson' => 'الفعل الماضي', 'percent' => '30', 'program' => 'النحو الميسّر']],
             ['homework_submitted', 'staff', $teacher, ['push'], ['student' => 'زياد', 'title' => 'صرّف الفعل كتب']],
             ['report_overdue', 'staff', $teacher, ['push', 'whatsapp'], ['student' => 'زياد', 'when' => 'الأحد 4 أكتوبر · 18:00']],
+            ['cheer', 'learning', 'learning::notifications.audience.student', ['push'], ['from' => 'ماما', 'kind' => 'تصفيقة']],
         ] as [$name, $category, $audience, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
                 key: "learning.{$name}", category: $category,
@@ -50,6 +52,15 @@ final class SendLearningNotifications
                 audience: $audience, channels: $channels, sample: $sample,
             ));
         }
+    }
+
+    /** A guardian's cheer reaches the student only (the app shows it with a celebration too). */
+    public function cheerSent(CheerSent $event): void
+    {
+        $this->notifications->send(new Message('learning.cheer', [$event->studentId], [
+            'from' => $this->name($event->fromId),
+            'kind' => new Translatable('learning::challenges.cheers.'.$event->kind),
+        ], ['screen' => 'challenges'], "cheer:{$event->cheerId}"));
     }
 
     public function reportSubmitted(SessionReportSubmitted $event): void

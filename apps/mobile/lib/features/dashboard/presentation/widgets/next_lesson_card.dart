@@ -7,6 +7,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/time/formats.dart';
 import '../../../classroom/presentation/join.dart';
 import '../../../schedule/domain/lesson.dart';
+import '../../../../shared/motion/motion.dart';
 
 /// The next lesson in the brand's colour: when, with whom, how long until
 /// the room opens, and the join button once it does. Ticks every half
@@ -136,7 +137,7 @@ class _NextLessonCardState extends State<NextLessonCard> {
               onPressed: lesson.joinOpen ? () => joinLesson(context, lesson.id) : null,
               icon: const Icon(Icons.videocam_rounded),
               label: Text(lesson.joinOpen || opens == null ? l.joinLesson : '${l.joinLesson} · ${opens.clock(context.locale)}'),
-            ),
+            ).shimmerIf(context, lesson.joinOpen, color: c.brandSoft),
           ),
         ],
       ),

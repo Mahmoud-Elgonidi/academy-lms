@@ -8,6 +8,7 @@ use Modules\Scheduling\Actions\RecordConnectionDrop;
 use Modules\Scheduling\Actions\RecordParticipantJoin;
 use Modules\Scheduling\Actions\RecordParticipantLeave;
 use Modules\Scheduling\Contracts\AttendanceApi;
+use Modules\Scheduling\Contracts\DTOs\LearnerLesson;
 use Modules\Scheduling\Contracts\DTOs\LessonCard;
 use Modules\Scheduling\Domain\Models\Session;
 
@@ -27,6 +28,20 @@ final class AttendanceService implements AttendanceApi
     public function lessonsOf(string $teacherId, CarbonImmutable $from, CarbonImmutable $to): array
     {
         return $this->cards(fn ($q) => $q->where('s.teacher_id', $teacherId)->where('s.starts_at', '>=', $from)->where('s.starts_at', '<', $to));
+    }
+
+    public function lessonsOfStudent(string $studentId, CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        return DB::table('sessions as s')
+            ->join('session_participants as p', fn ($j) => $j->on('p.academy_id', '=', 's.academy_id')->on('p.session_id', '=', 's.id')
+                ->where('p.role', 'student')->where('p.user_id', $studentId))
+            ->where('s.starts_at', '>=', $from)->where('s.starts_at', '<', $to)
+            ->orderBy('s.starts_at')
+            ->get(['s.id', 's.status', 's.starts_at', 'p.first_join_at', 's.enrollment_id'])
+            ->map(fn (object $r) => new LearnerLesson(
+                $r->id, $r->status, CarbonImmutable::parse($r->starts_at),
+                $r->first_join_at === null ? null : CarbonImmutable::parse($r->first_join_at), $r->enrollment_id,
+            ))->all();
     }
 
     public function lessonsInClass(CarbonImmutable $at, int $beforeMin, int $afterMin): array

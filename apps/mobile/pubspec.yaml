@@ -47,6 +47,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   livekit_client: ^2.13.0
+  flutter_animate: ^4.5.2
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +72,7 @@ flutter:
 
   assets:
     - assets/fonts/OFL.txt
+    - assets/sounds/
 
   # Bundled (OFL, see assets/fonts/OFL.txt): the same faces as the web's academy and stage looks.
   fonts:

@@ -3,20 +3,26 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Small choices that are not secrets: the app's language, each academy's
-/// last known look (so the app opens in its colours), and the clock the
-/// person chose to see times on.
+/// last known look (so the app opens in its colours), the clock the person
+/// chose to see times on, and whether the app plays sounds.
 class AppPrefs {
   AppPrefs(this._prefs);
 
   static const _localeKey = 'lms.locale';
   static const _brandingKey = 'lms.branding.';
   static const _clockKey = 'lms.clock.';
+  static const _soundsKey = 'lms.sounds';
 
   final SharedPreferencesAsync _prefs;
 
   Future<String?> locale() => _prefs.getString(_localeKey);
 
   Future<void> setLocale(String locale) => _prefs.setString(_localeKey, locale);
+
+  /// Little sounds on taps and rewards (on unless turned off).
+  Future<bool> sounds() async => await _prefs.getBool(_soundsKey) ?? true;
+
+  Future<void> setSounds(bool on) => _prefs.setBool(_soundsKey, on);
 
   Future<Map<String, dynamic>?> branding(String academy) async {
     final raw = await _prefs.getString('$_brandingKey$academy');

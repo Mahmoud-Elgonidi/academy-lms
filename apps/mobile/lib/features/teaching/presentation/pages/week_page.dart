@@ -11,6 +11,7 @@ import '../../../schedule/domain/lesson.dart';
 import '../../../schedule/presentation/widgets/lesson_card.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
+import '../../../../shared/motion/motion.dart';
 
 /// Seven days of lessons from today (or another week), day by day.
 class WeekPage extends StatefulWidget {
@@ -76,7 +77,7 @@ class _Days extends StatelessWidget {
     return ListView(
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
-      children: [
+      children: staggered(context, [
         Text(range, style: Theme.of(context).textTheme.titleLarge),
         Text(l.weekSummary(week.count, hoursText(week.minutes)), style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 10),
@@ -97,7 +98,7 @@ class _Days extends StatelessWidget {
                 for (final lesson in lessons) ...[LessonCard(lesson: lesson), const SizedBox(height: 10)],
               ];
             }(),
-      ],
+      ]),
     );
   }
 }

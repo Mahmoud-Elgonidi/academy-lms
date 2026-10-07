@@ -8,8 +8,10 @@ import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/formats.dart';
+import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
+import '../../../challenges/presentation/widgets/teasers.dart';
 import '../../data/home_loader.dart';
 import '../../domain/journey.dart';
 import '../widgets/next_lesson_card.dart';
@@ -44,7 +46,7 @@ class _TeenHome extends StatelessWidget {
     return ListView(
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
-      children: [
+      children: staggered(context, [
         Row(
           children: [
             Expanded(
@@ -77,7 +79,11 @@ class _TeenHome extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Text('${course.percent ?? 0}%', style: context.text.headlineMedium?.copyWith(color: c.brand)),
+                    CountUp(
+                      course.percent ?? 0,
+                      suffix: '%',
+                      style: context.text.headlineMedium?.copyWith(color: c.brand),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -99,6 +105,8 @@ class _TeenHome extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 12),
+          const ChallengesTeaser(route: '/teen/goals'),
           const SizedBox(height: 16),
           SectionLabel(l.milestones),
           LmsCard(
@@ -124,7 +132,7 @@ class _TeenHome extends StatelessWidget {
             ),
           ),
         ],
-      ],
+      ]),
     );
   }
 }

@@ -10,6 +10,7 @@ use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Enrollment\Contracts\Events\CurriculumAttached;
 use Modules\Learning\Console\SweepLearningCommand;
+use Modules\Learning\Contracts\Events\CheerSent;
 use Modules\Learning\Contracts\Events\HomeworkAssigned;
 use Modules\Learning\Contracts\Events\HomeworkReviewed;
 use Modules\Learning\Contracts\Events\HomeworkSubmitted;
@@ -62,6 +63,7 @@ final class LearningServiceProvider extends ServiceProvider
         Event::listen(NodeMastered::class, [SendLearningNotifications::class, 'nodeMastered']);
         Event::listen(HomeworkSubmitted::class, [SendLearningNotifications::class, 'homeworkSubmitted']);
         Event::listen(SessionReportOverdue::class, [SendLearningNotifications::class, 'reportOverdue']);
+        Event::listen(CheerSent::class, [SendLearningNotifications::class, 'cheerSent']);
         Event::listen(CurriculumAttached::class, RebuildProgressOnProgramChange::class);
 
         if ($this->app->runningInConsole()) {

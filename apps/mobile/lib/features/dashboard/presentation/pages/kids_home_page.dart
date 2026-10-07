@@ -8,8 +8,10 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/state/load_cubit.dart';
+import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
+import '../../../challenges/presentation/widgets/teasers.dart';
 import '../../data/home_loader.dart';
 import '../../domain/journey.dart';
 import '../widgets/next_lesson_card.dart';
@@ -47,7 +49,7 @@ class _KidsHome extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 12, 18, 28),
       physics: const AlwaysScrollableScrollPhysics(),
-      children: [
+      children: staggered(context, [
         Row(
           children: [
             GestureDetector(onTap: () => context.push('/account'), child: InitialAvatar(name, size: 54)),
@@ -70,7 +72,7 @@ class _KidsHome extends StatelessWidget {
                   children: [
                     Icon(Icons.star_rounded, color: c.reward, size: 26),
                     const SizedBox(width: 4),
-                    Text('${home.journey.stars}', style: context.text.titleLarge),
+                    CountUp(home.journey.stars, style: context.text.titleLarge),
                   ],
                 ),
               ),
@@ -79,7 +81,9 @@ class _KidsHome extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         NextLessonCard(lesson: home.next, onOpened: () => context.read<LoadCubit<StudentHome>>().load()),
-        const SizedBox(height: 18),
+        const SizedBox(height: 14),
+        const ChallengesTeaser(route: '/kids/missions'),
+        const SizedBox(height: 14),
         if (course != null)
           LmsCard(
             padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
@@ -97,7 +101,7 @@ class _KidsHome extends StatelessWidget {
               ],
             ),
           ),
-      ],
+      ]),
     );
   }
 }
@@ -130,13 +134,21 @@ class JourneyMap extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              Positioned.fill(child: CustomPaint(painter: _PathPainter(points, c.brand, c.line, shown.where((s) => s.done).length))),
+              Positioned.fill(
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: context.calm ? 1 : 0, end: 1),
+                  duration: Duration(milliseconds: 160 * shown.length),
+                  curve: Curves.easeInOutCubic,
+                  builder: (context, drawn, _) =>
+                      CustomPaint(painter: _PathPainter(points, c.brand, c.line, shown.where((s) => s.done).length, drawn)),
+                ),
+              ),
               for (var i = 0; i < shown.length; i++)
                 Positioned(
                   left: points[i].dx - 70,
                   top: points[i].dy - 30,
                   width: 140,
-                  child: _Stop(step: shown[i], number: start + i + 1, name: name),
+                  child: _Stop(step: shown[i], number: start + i + 1, name: name).appear(context, i + 1, rise: 0.4),
                 ),
             ],
           ),
@@ -244,22 +256,28 @@ class _BounceState extends State<_Bounce> with SingleTickerProviderStateMixin {
 /// The road between stops: solid in the brand colour up to the last done
 /// stop, dashed after.
 class _PathPainter extends CustomPainter {
-  _PathPainter(this.points, this.done, this.ahead, this.doneCount);
+  _PathPainter(this.points, this.done, this.ahead, this.doneCount, this.drawn);
 
   final List<Offset> points;
   final Color done;
   final Color ahead;
   final int doneCount;
 
+  /// How much of the road is drawn yet (0..1), as it draws itself in.
+  final double drawn;
+
   @override
   void paint(Canvas canvas, Size size) {
     if (points.length < 2) return;
-    for (var i = 0; i < points.length - 1; i++) {
+    final reach = drawn * (points.length - 1);
+    for (var i = 0; i < points.length - 1 && i < reach; i++) {
       final a = points[i];
       final b = points[i + 1];
-      final path = Path()
+      final whole = Path()
         ..moveTo(a.dx, a.dy)
         ..cubicTo(a.dx, (a.dy + b.dy) / 2, b.dx, (a.dy + b.dy) / 2, b.dx, b.dy);
+      final part = math.min(1.0, reach - i);
+      final path = part >= 1 ? whole : _partOf(whole, part);
       final walked = i < doneCount;
       final paint = Paint()
         ..style = PaintingStyle.stroke
@@ -278,6 +296,14 @@ class _PathPainter extends CustomPainter {
     }
   }
 
+  static Path _partOf(Path path, double share) {
+    final out = Path();
+    for (final metric in path.computeMetrics()) {
+      out.addPath(metric.extractPath(0, metric.length * share), Offset.zero);
+    }
+    return out;
+  }
+
   @override
-  bool shouldRepaint(_PathPainter old) => old.points != points || old.doneCount != doneCount || old.done != done;
+  bool shouldRepaint(_PathPainter old) => old.points != points || old.doneCount != doneCount || old.done != done || old.drawn != drawn;
 }

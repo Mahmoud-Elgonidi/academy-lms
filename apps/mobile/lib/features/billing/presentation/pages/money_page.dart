@@ -12,6 +12,7 @@ import '../../../../shared/widgets/load_view.dart';
 import '../../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../../data/billing_repository.dart';
 import '../../domain/billing.dart';
+import '../../../../shared/motion/motion.dart';
 
 class _Money {
   const _Money(this.invoices, this.balance);
@@ -79,7 +80,7 @@ class _MoneyList extends StatelessWidget {
     return ListView(
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
-      children: [
+      children: staggered(context, [
         if (due != null) ...[
           LmsCard(
             color: c.attentionSoft,
@@ -138,7 +139,7 @@ class _MoneyList extends StatelessWidget {
           ),
         const SizedBox(height: 10),
         Text(l.invoiceNote, style: context.text.bodySmall),
-      ],
+      ]),
     );
   }
 }

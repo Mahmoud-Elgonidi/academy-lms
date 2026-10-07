@@ -11,6 +11,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../data/homework_repository.dart';
 import '../../domain/homework.dart';
+import '../../../../shared/motion/motion.dart';
 
 /// The student's homework: open ones first, each handed in from here when
 /// it takes text; marked ones show the teacher's grade and words.
@@ -29,11 +30,11 @@ class HomeworkPage extends StatelessWidget {
           builder: (context, list) => ListView(
             padding: pagePadding,
             physics: const AlwaysScrollableScrollPhysics(),
-            children: [
+            children: staggered(context, [
               if (kids) ...[Note(l.kidsHomeworkStar, tone: Tone.reward, icon: Icons.star_rounded), const SizedBox(height: 12)],
               if (list.isEmpty) EmptyNote(l.noHomework, icon: Icons.assignment_turned_in_outlined),
               for (final h in list) ...[_HomeworkCard(homework: h), const SizedBox(height: 12)],
-            ],
+            ]),
           ),
         ),
       ),

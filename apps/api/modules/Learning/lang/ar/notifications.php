@@ -3,6 +3,7 @@
 return [
     'audience' => [
         'family' => 'الطالب وأولياء أمره',
+        'student' => 'الطالب',
         'teacher' => 'المدرس',
     ],
     'report_submitted' => [
@@ -30,4 +31,8 @@ return [
         'body' => 'الحصة كانت :when. اكتب التقرير دلوقتي عشان الأسرة تعرف وصلوا لفين.',
     ],
     'no_grade' => 'من غير درجة',
+    'cheer' => [
+        'title' => ':from بيشجّعك!',
+        'body' => ':from بعتلك :kind. كمّل كده!',
+    ],
 ];

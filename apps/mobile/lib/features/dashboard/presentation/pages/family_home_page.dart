@@ -7,8 +7,10 @@ import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/formats.dart';
+import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
+import '../../../challenges/presentation/widgets/teasers.dart';
 import '../../data/home_loader.dart';
 import '../bloc/learner_cubit.dart';
 import '../widgets/learner_switcher.dart';
@@ -60,7 +62,9 @@ class FamilyHomePage extends StatelessWidget {
                   : BlocProvider(
                       key: ValueKey(learnerId),
                       create: (c) => LoadCubit<FamilyHome>(() => c.read<HomeLoader>().familyHome(learnerId))..load(),
-                      child: LoadView<FamilyHome>(builder: (context, home) => _Home(home: home)),
+                      child: LoadView<FamilyHome>(
+                        builder: (context, home) => _Home(home: home, learnerId: learnerId, name: learners.selected?.firstName ?? first),
+                      ),
                     ),
             ),
           ],
@@ -71,9 +75,11 @@ class FamilyHomePage extends StatelessWidget {
 }
 
 class _Home extends StatelessWidget {
-  const _Home({required this.home});
+  const _Home({required this.home, required this.learnerId, required this.name});
 
   final FamilyHome home;
+  final String? learnerId;
+  final String name;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +91,7 @@ class _Home extends StatelessWidget {
     return ListView(
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
-      children: [
+      children: staggered(context, [
         NextLessonCard(lesson: home.next, onOpened: () => context.read<LoadCubit<FamilyHome>>().load()),
         Align(
           alignment: AlignmentDirectional.centerEnd,
@@ -116,6 +122,8 @@ class _Home extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 16),
+        FamilyChallengesCard(learnerId: learnerId, name: name),
         if (report != null) ...[
           const SizedBox(height: 16),
           LmsCard(
@@ -181,7 +189,7 @@ class _Home extends StatelessWidget {
             ),
           ),
         ],
-      ],
+      ]),
     );
   }
 }

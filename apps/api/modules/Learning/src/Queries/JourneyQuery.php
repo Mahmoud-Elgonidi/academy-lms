@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\Learning\Models\ChallengeClaim;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\SessionReport;
 
@@ -14,11 +15,12 @@ use Modules\Learning\Models\SessionReport;
  * roadmap and where they are on it, plus what keeps them going, all from
  * what really happened (reports and homework), nothing made up: stars
  * (lessons mastered), points and a rank, the lesson streak, badges, and the
- * pace and the date they should finish at that pace.
+ * pace and the date they should finish at that pace. Points also count the
+ * challenge rewards the student collected (ChallengesQuery).
  */
 final class JourneyQuery
 {
-    /** Points: a lesson mastered, a lesson attended, homework handed in on time. */
+    /** Points: a lesson mastered, a lesson attended, homework handed in on time (plus collected challenge rewards). */
     public const POINTS = ['mastered' => 100, 'attended' => 20, 'on_time' => 30];
 
     /** Ranks by points. */
@@ -30,7 +32,7 @@ final class JourneyQuery
     ) {}
 
     /**
-     * @return array{courses: list<array<string, mixed>>, stars: int, attended: int, on_time: int, streak: int, points: int,
+     * @return array{courses: list<array<string, mixed>>, stars: int, attended: int, on_time: int, streak: int, points: int, challenge_points: int,
      *     rank: array{key: string, points: int, next: ?int, next_key: ?string, progress: int}, badges: list<array{key: string, earned: bool}>}
      */
     public function for(string $studentId, ?CarbonImmutable $now = null): array
@@ -43,7 +45,8 @@ final class JourneyQuery
 
         $sum = fn (string $key) => (int) array_sum(array_column($courses, $key));
         $streak = $courses === [] ? 0 : max(array_column($courses, 'streak'));
-        $points = $sum('points');
+        $bonus = (int) ChallengeClaim::query()->where('student_id', $studentId)->sum('points');
+        $points = $sum('points') + $bonus;
 
         return [
             'courses' => $courses,
@@ -52,7 +55,8 @@ final class JourneyQuery
             'on_time' => $sum('on_time'),
             'streak' => $streak,
             'points' => $points,
-            'rank' => $this->rank($points),
+            'challenge_points' => $bonus,
+            'rank' => self::rank($points),
             'badges' => array_map(fn (array $b) => ['key' => $b[0], 'earned' => $b[1]], [
                 ['first_star', $sum('stars') >= 1],
                 ['five_stars', $sum('stars') >= 5],
@@ -104,7 +108,7 @@ final class JourneyQuery
     }
 
     /** @return array{key: string, points: int, next: ?int, next_key: ?string, progress: int} */
-    private function rank(int $points): array
+    public static function rank(int $points): array
     {
         [$key, $from, $next, $nextKey] = ['beginner', 0, null, null];
         foreach (self::RANKS as $threshold => $name) {

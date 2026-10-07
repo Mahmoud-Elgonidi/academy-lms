@@ -11,7 +11,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../data/profile_repository.dart';
 import '../widgets/accounts_card.dart';
 
-/// "Me": the accounts on this phone, the clock and language, the devices
+/// "Me": the accounts on this phone, the clock, language and sounds, the devices
 /// signed in to this account, and signing out.
 class AccountPage extends StatelessWidget {
   const AccountPage({this.standalone = false, super.key});
@@ -109,6 +109,21 @@ class _Settings extends StatelessWidget {
                 selected: {s.locale},
                 onSelectionChanged: (v) => context.read<SessionCubit>().setLocale(v.first),
               ),
+            ],
+          ),
+          const Divider(height: 22),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(context.l10n.sounds, style: context.text.titleSmall),
+                    Text(context.l10n.soundsHint, style: context.text.bodySmall),
+                  ],
+                ),
+              ),
+              Switch.adaptive(value: s.sounds, onChanged: (on) => context.read<SessionCubit>().setSounds(on)),
             ],
           ),
           const Divider(height: 22),

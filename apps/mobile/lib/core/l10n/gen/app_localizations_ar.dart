@@ -278,6 +278,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navMore => 'المزيد';
 
   @override
+  String get navMissions => 'مهماتي';
+
+  @override
+  String get navQuests => 'تحدياتي';
+
+  @override
+  String get navGoals => 'أهدافي';
+
+  @override
   String greetingMorning(String name) {
     return 'صباح الخير يا $name';
   }
@@ -1038,4 +1047,182 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get points => 'نقطة';
+
+  @override
+  String get missionsTitle => 'مهمات الأسبوع';
+
+  @override
+  String get questsTitle => 'تحديات الأسبوع';
+
+  @override
+  String get goalsTitle => 'أهداف الأسبوع';
+
+  @override
+  String get monthGoal => 'هدف الشهر';
+
+  @override
+  String get bossFights => 'تحدي الزعيم';
+
+  @override
+  String get waitingRewards => 'جوايز مستنياك';
+
+  @override
+  String get fromLastWeek => 'من الأسبوع اللي فات';
+
+  @override
+  String get fromLastMonth => 'من الشهر اللي فات';
+
+  @override
+  String weekEnds(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'باقي $n يوم على آخر الأسبوع',
+      few: 'باقي $n أيام على آخر الأسبوع',
+      two: 'باقي يومين على آخر الأسبوع',
+      one: 'باقي يوم على آخر الأسبوع',
+      zero: 'آخر يوم في الأسبوع!',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get doneMark => 'تم!';
+
+  @override
+  String get collect => 'استلم';
+
+  @override
+  String missionsOf(int done, int total) {
+    return '$done من $total مهمات';
+  }
+
+  @override
+  String challengesDone(int done, int total) {
+    return '$done من $total خلصوا';
+  }
+
+  @override
+  String get chestReady => 'الصندوق جاهز! دوس عليه';
+
+  @override
+  String get chestSurprise => 'جواه ستيكر مفاجأة';
+
+  @override
+  String get chestOpened => 'فتحت صندوق الأسبوع ده';
+
+  @override
+  String get noChallenges => 'مفيش تحديات دلوقتي. لما يكون عندك حصص الأسبوع ده، هتظهر هنا.';
+
+  @override
+  String get album => 'ألبوم الستيكرز';
+
+  @override
+  String get albumLead => 'كل صندوق بتفتحه بيجيبلك ستيكر جديد.';
+
+  @override
+  String get newSticker => 'ستيكر جديد في ألبومك!';
+
+  @override
+  String get rewardKids => 'برافو عليك!';
+
+  @override
+  String get rewardTitle => 'أحسنت!';
+
+  @override
+  String rankUp(String rank) {
+    return 'رتبة جديدة: $rank';
+  }
+
+  @override
+  String get awesome => 'تمام!';
+
+  @override
+  String get yourPoints => 'نقطك';
+
+  @override
+  String get yourGems => 'جواهرك';
+
+  @override
+  String get pointsWord => 'النقط';
+
+  @override
+  String get thisWeek => 'الأسبوع ده';
+
+  @override
+  String readyCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n جايزة مستنياك',
+      few: '$n جوايز مستنياك',
+      two: 'جايزتين مستنيينك',
+      one: 'جايزة مستنياك',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cheerFrom(String name) {
+    return 'تشجيع من $name!';
+  }
+
+  @override
+  String get cheerThanks => 'شكرًا!';
+
+  @override
+  String get cheerClap => 'تصفيقة';
+
+  @override
+  String get cheerStar => 'نجمة';
+
+  @override
+  String get cheerHeart => 'قلب';
+
+  @override
+  String get cheerFire => 'شعلة حماس';
+
+  @override
+  String childChallenges(String name) {
+    return 'تحديات $name';
+  }
+
+  @override
+  String get myChallenges => 'تحدياتي';
+
+  @override
+  String cheerOn(String name) {
+    return 'شجّع $name';
+  }
+
+  @override
+  String cheerSent(String name) {
+    return 'التشجيع وصل لـ $name!';
+  }
+
+  @override
+  String cheersLeft(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'فاضل $n تشجيع النهارده',
+      few: 'فاضل $n تشجيعات النهارده',
+      two: 'فاضل تشجيعين النهارده',
+      one: 'فاضل تشجيع واحد النهارده',
+      zero: 'خلّصت تشجيعات النهارده',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get seeAll => 'شوف الكل';
+
+  @override
+  String get allBadges => 'كل الإنجازات';
+
+  @override
+  String get sounds => 'الأصوات';
+
+  @override
+  String get soundsHint => 'أصوات خفيفة لما تدوس أو تستلم جايزة';
 }

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/auth/session_cubit.dart';
 import '../../core/l10n/l10n.dart';
+import '../../core/state/load_cubit.dart';
 import '../../features/auth/presentation/pages/accounts_page.dart';
 import '../../features/auth/presentation/pages/code_page.dart';
 import '../../features/auth/presentation/pages/password_page.dart';
@@ -18,6 +19,11 @@ import '../../features/dashboard/presentation/pages/family_home_page.dart';
 import '../../features/dashboard/presentation/pages/kids_home_page.dart';
 import '../../features/dashboard/presentation/pages/middle_home_page.dart';
 import '../../features/dashboard/presentation/pages/badges_page.dart';
+import '../../features/challenges/data/challenges_repository.dart';
+import '../../features/challenges/domain/challenges.dart';
+import '../../features/challenges/presentation/pages/album_page.dart';
+import '../../features/challenges/presentation/pages/challenges_page.dart';
+import '../../features/challenges/presentation/widgets/cheers.dart';
 import '../../features/dashboard/presentation/pages/teen_home_page.dart';
 import '../../features/homework/presentation/pages/homework_page.dart';
 import '../../features/profile/presentation/pages/account_page.dart';
@@ -32,13 +38,15 @@ import '../../features/teaching/presentation/pages/today_page.dart';
 import '../../features/teaching/presentation/pages/week_page.dart';
 import 'areas.dart';
 import 'shell.dart';
+import 'transitions.dart';
 
 /// Every screen and who may see it. The open account decides the look: a
 /// location outside its area goes to the area's home, and signing out goes
-/// to the welcome screen.
+/// to the welcome screen. Screens come in fading and growing; tabs fade
+/// into place and keep their own stacks.
 GoRouter buildRouter(SessionCubit session) {
   GoRoute page(String path, Widget Function(GoRouterState s) build, {List<RouteBase> routes = const []}) =>
-      GoRoute(path: path, builder: (_, s) => build(s), routes: routes);
+      GoRoute(path: path, pageBuilder: (_, s) => fadeScalePage(s, build(s)), routes: routes);
 
   StatefulShellBranch branch(String path, Widget Function(GoRouterState s) build, {List<RouteBase> routes = const []}) =>
       StatefulShellBranch(routes: [page(path, build, routes: routes)]);
@@ -85,7 +93,8 @@ GoRouter buildRouter(SessionCubit session) {
       page('/reports/:enrollment', (s) => ReportsPage(enrollmentId: s.pathParameters['enrollment'], title: s.uri.queryParameters['title'])),
 
       // Guardians and adult students: the academy's own look.
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
+        navigatorContainerBuilder: _branches,
         builder: (context, state, shell) => BlocProvider(
           create: (c) => LearnerCubit(c.read(), LearnerScope.family)..load(),
           child: Builder(
@@ -102,7 +111,7 @@ GoRouter buildRouter(SessionCubit session) {
           ),
         ),
         branches: [
-          branch('/family/home', (_) => const FamilyHomePage()),
+          branch('/family/home', (_) => const FamilyHomePage(), routes: [page('challenges', (_) => const ChallengesPage())]),
           branch('/family/lessons', (_) => const LessonsPage()),
           branch('/family/progress', (_) => const ProgressPage()),
           branch('/family/money', (_) => const MoneyPage()),
@@ -110,44 +119,48 @@ GoRouter buildRouter(SessionCubit session) {
         ],
       ),
 
-      // A child in the kids' look: three big tabs.
+      // A child in the kids' look: four big tabs, the missions with their chest.
       _studentShell(
-        tabs: (l) => [
+        tabs: (l, ready) => [
           ShellTab(Icons.map_outlined, Icons.map_rounded, l.navJourney),
+          ShellTab(Icons.redeem_outlined, Icons.redeem_rounded, l.navMissions, count: ready),
           ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navMyLessons),
           ShellTab(Icons.mic_none_rounded, Icons.mic_rounded, l.navMyHomework),
         ],
         branches: [
           branch('/kids/journey', (_) => const KidsHomePage()),
+          branch('/kids/missions', (_) => const ChallengesPage(), routes: [page('album', (_) => const AlbumPage())]),
           branch('/kids/lessons', (_) => const LessonsPage()),
           branch('/kids/homework', (_) => const HomeworkPage()),
         ],
       ),
 
       _studentShell(
-        tabs: (l) => [
+        tabs: (l, ready) => [
           ShellTab(Icons.home_outlined, Icons.home_rounded, l.navHome),
+          ShellTab(Icons.sports_esports_outlined, Icons.sports_esports_rounded, l.navQuests, count: ready),
           ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navMyLessons),
           ShellTab(Icons.assignment_outlined, Icons.assignment_rounded, l.navMyHomework),
-          ShellTab(Icons.emoji_events_outlined, Icons.emoji_events_rounded, l.navBadges),
         ],
         branches: [
           branch('/middle/home', (_) => const MiddleHomePage()),
+          branch('/middle/quests', (_) => const ChallengesPage(), routes: [page('badges', (_) => const BadgesPage())]),
           branch('/middle/lessons', (_) => const LessonsPage()),
           branch('/middle/homework', (_) => const HomeworkPage()),
-          branch('/middle/badges', (_) => const BadgesPage()),
         ],
       ),
 
       _studentShell(
-        tabs: (l) => [
+        tabs: (l, ready) => [
           ShellTab(Icons.flag_outlined, Icons.flag_rounded, l.navPlan),
+          ShellTab(Icons.track_changes_outlined, Icons.track_changes_rounded, l.navGoals, count: ready),
           ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navLessons),
           ShellTab(Icons.assignment_outlined, Icons.assignment_rounded, l.navHomework),
           ShellTab(Icons.article_outlined, Icons.article_rounded, l.navReports),
         ],
         branches: [
           branch('/teen/plan', (_) => const TeenHomePage()),
+          branch('/teen/goals', (_) => const ChallengesPage()),
           branch('/teen/lessons', (_) => const LessonsPage()),
           branch('/teen/homework', (_) => const HomeworkPage()),
           branch('/teen/reports', (_) => const ReportsPage()),
@@ -155,7 +168,8 @@ GoRouter buildRouter(SessionCubit session) {
       ),
 
       // Teachers.
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
+        navigatorContainerBuilder: _branches,
         builder: (context, state, shell) => AppShell(
           shell: shell,
           tabs: [
@@ -178,13 +192,27 @@ GoRouter buildRouter(SessionCubit session) {
   );
 }
 
+Widget _branches(BuildContext context, StatefulNavigationShell shell, List<Widget> children) =>
+    AnimatedBranches(index: shell.currentIndex, children: children);
+
+/// A student's own area: their challenges load with it, so the challenges
+/// tab shows the rewards waiting, and guardians' cheers pop up on any tab.
 StatefulShellRoute _studentShell({
-  required List<ShellTab> Function(AppLocalizations l) tabs,
+  required List<ShellTab> Function(AppLocalizations l, int ready) tabs,
   required List<StatefulShellBranch> branches,
-}) => StatefulShellRoute.indexedStack(
-  builder: (context, state, shell) => BlocProvider(
-    create: (c) => LearnerCubit(c.read(), LearnerScope.self)..load(),
-    child: AppShell(shell: shell, tabs: tabs(context.l10n)),
+}) => StatefulShellRoute(
+  navigatorContainerBuilder: _branches,
+  builder: (context, state, shell) => MultiBlocProvider(
+    providers: [
+      BlocProvider(create: (c) => LearnerCubit(c.read(), LearnerScope.self)..load()),
+      BlocProvider(create: (c) => LoadCubit<ChallengeBoard>(c.read<ChallengesRepository>().board)..load()),
+    ],
+    child: CheersListener(
+      child: BlocBuilder<LoadCubit<ChallengeBoard>, LoadState<ChallengeBoard>>(
+        buildWhen: (a, b) => a.data?.ready != b.data?.ready,
+        builder: (context, board) => AppShell(shell: shell, tabs: tabs(context.l10n, board.data?.ready ?? 0)),
+      ),
+    ),
   ),
   branches: branches,
 );

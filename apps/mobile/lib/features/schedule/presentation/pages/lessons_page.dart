@@ -15,6 +15,7 @@ import '../../data/lessons_repository.dart';
 import '../../domain/lesson.dart';
 import '../widgets/lesson_card.dart';
 import '../widgets/lesson_sheets.dart';
+import '../../../../shared/motion/motion.dart';
 
 /// A learner's lessons, four weeks ahead or back, by day; on the viewer's
 /// clock. Holidays and clock changes that touch them come first.
@@ -100,7 +101,7 @@ class _LessonDays extends StatelessWidget {
     return ListView(
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
-      children: [
+      children: staggered(context, [
         for (final n in data.notices) ...[Note(n, tone: Tone.info, icon: Icons.event_note_rounded), const SizedBox(height: 10)],
         if (data.lessons.isEmpty) EmptyNote(past ? l.noPast : l.noUpcoming),
         for (final entry in days.entries) ...[
@@ -135,7 +136,7 @@ class _LessonDays extends StatelessWidget {
             const SizedBox(height: 10),
           ],
         ],
-      ],
+      ]),
     );
   }
 }

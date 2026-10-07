@@ -3,6 +3,7 @@
 namespace Modules\Scheduling\Contracts;
 
 use Carbon\CarbonImmutable;
+use Modules\Scheduling\Contracts\DTOs\LearnerLesson;
 use Modules\Scheduling\Contracts\DTOs\LessonCard;
 
 /**
@@ -16,6 +17,9 @@ interface AttendanceApi
 
     /** @return list<LessonCard> the teacher's lessons starting in [from, to), by time */
     public function lessonsOf(string $teacherId, CarbonImmutable $from, CarbonImmutable $to): array;
+
+    /** @return list<LearnerLesson> a student's lessons starting in [$from, $to), oldest first, with when they first came in */
+    public function lessonsOfStudent(string $studentId, CarbonImmutable $from, CarbonImmutable $to): array;
 
     /** @return list<string> ids of open lessons whose classroom is open at $at (from T−$beforeMin to the end + $afterMin) */
     public function lessonsInClass(CarbonImmutable $at, int $beforeMin, int $afterMin): array;

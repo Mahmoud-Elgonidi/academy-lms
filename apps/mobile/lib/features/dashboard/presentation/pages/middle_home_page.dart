@@ -7,8 +7,10 @@ import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/formats.dart';
+import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
+import '../../../challenges/presentation/widgets/teasers.dart';
 import '../../data/home_loader.dart';
 import '../widgets/badge_tile.dart';
 import '../widgets/next_lesson_card.dart';
@@ -48,7 +50,7 @@ class _MiddleHome extends StatelessWidget {
     return ListView(
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
-      children: [
+      children: staggered(context, [
         const SizedBox(height: 4),
         LmsCard(
           child: Column(
@@ -83,10 +85,13 @@ class _MiddleHome extends StatelessWidget {
               Row(
                 children: [
                   Expanded(child: Text(next == null ? l.topRank : l.pointsTo(j.rank.nextLabel ?? ''), style: context.text.titleSmall)),
-                  Text(
-                    next == null ? '${j.points}' : '${j.points} / $next',
+                  Directionality(
                     textDirection: TextDirection.ltr,
-                    style: context.text.titleSmall?.copyWith(color: c.muted),
+                    child: CountUp(
+                      j.points,
+                      suffix: next == null ? '' : ' / $next',
+                      style: context.text.titleSmall?.copyWith(color: c.muted),
+                    ),
                   ),
                 ],
               ),
@@ -104,6 +109,8 @@ class _MiddleHome extends StatelessWidget {
             ],
           ),
         ),
+        const SizedBox(height: 12),
+        const ChallengesTeaser(route: '/middle/quests'),
         const SizedBox(height: 12),
         if (world != null)
           LmsCard(
@@ -128,7 +135,7 @@ class _MiddleHome extends StatelessWidget {
         const SizedBox(height: 12),
         SectionLabel(
           l.navBadges,
-          trailing: TextButton(onPressed: () => context.go('/middle/badges'), child: Text(l.badgesCount(earned, j.badges.length))),
+          trailing: TextButton(onPressed: () => context.go('/middle/quests'), child: Text(l.badgesCount(earned, j.badges.length))),
         ),
         LmsCard(
           child: Wrap(
@@ -165,7 +172,7 @@ class _MiddleHome extends StatelessWidget {
             ),
           ),
         ],
-      ],
+      ]),
     );
   }
 }

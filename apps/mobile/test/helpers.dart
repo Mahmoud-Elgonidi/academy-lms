@@ -10,6 +10,7 @@ import 'package:academy_app/core/auth/session_repository.dart';
 import 'package:academy_app/core/config.dart';
 import 'package:academy_app/core/network/api_client.dart';
 import 'package:academy_app/core/prefs/app_prefs.dart';
+import 'package:academy_app/shared/motion/juice.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -90,6 +91,8 @@ class TestApp {
 
   static Future<TestApp> create({List<Account> accounts = const [], String? current}) async {
     SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
+    // No audio or haptics plugins in widget tests.
+    Juice.enabled = false;
     final api = FakeApi();
     final dio = Dio()..httpClientAdapter = api;
     final secrets = MemorySecrets();

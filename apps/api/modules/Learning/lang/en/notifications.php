@@ -3,6 +3,7 @@
 return [
     'audience' => [
         'family' => 'The student and their guardians',
+        'student' => 'The student',
         'teacher' => 'The teacher',
     ],
     'report_submitted' => [
@@ -30,4 +31,8 @@ return [
         'body' => 'The lesson was on :when. Write it now so the family knows where things stand.',
     ],
     'no_grade' => 'no grade',
+    'cheer' => [
+        'title' => ':from is cheering you on!',
+        'body' => ':from sent you :kind. Keep going!',
+    ],
 ];

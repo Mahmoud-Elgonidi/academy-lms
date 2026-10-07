@@ -20,7 +20,9 @@ Sign in with a code to `salma.guardian@demo.test` (the code is in Mailpit, http:
 |---|---|
 | `lib/app` | `bootstrap.dart` (wiring), `app.dart` (theme, language, notices), `router/` (one shell per look: `/family`, `/kids`, `/middle`, `/teen`, `/teach`; the open account decides which, a staff-only account goes to `/web-only`), `theme/` (the academy's branding from `GET /branding` turned into `ThemeData` plus `LmsColors` and `LmsShape` per stage), `di/` (the repositories) |
 | `lib/core` | `network/` (dio: `X-Academy`, Bearer, `Accept-Language`, `X-Timezone` on every call; RFC 7807 errors as `ApiProblem`; offline retries, and writes that move lessons or money carry one `Idempotency-Key` across them), `auth/` (several accounts in secure storage, the open one in `SessionCubit`), `time/` (the API's `{utc, local, timezone, label}`; shown on the wall clock the API wrote, never converted on the phone), `l10n/` (generated), `state/` (`LoadCubit`) |
-| `lib/features/<x>` | `data/` (a typed repository over the API), `domain/` (models from JSON), `presentation/` (pages, widgets, cubits): `auth`, `profile`, `dashboard` (homes for each look), `schedule`, `classroom` (LiveKit in the app, or an outside link), `billing`, `roadmap`, `homework`, `teaching` |
+| `lib/features/<x>` | `data/` (a typed repository over the API), `domain/` (models from JSON), `presentation/` (pages, widgets, cubits): `auth`, `profile`, `dashboard` (homes for each look), `challenges` (each stage's challenges, the kids' chest and sticker album, collecting rewards, guardians' cheers), `schedule`, `classroom` (LiveKit in the app, or an outside link), `billing`, `roadmap`, `homework`, `teaching` |
+| `lib/shared/motion` | How the app moves: `motion.dart` (`appear`/`staggered` entrances, `bob`, `wiggle`, `pulse`, `shimmerIf`, `CountUp`, `Pressable`, each look's spring), `celebration.dart` (confetti, stars or gems over the screen), `juice.dart` (sounds and haptics). Everything stands still when the phone asks for less motion |
+| `tool/sounds.py` | Writes the app's five short sounds (`assets/sounds/*.wav`: pop, coin, chest, levelup, cheer); we make them ourselves, nothing third-party |
 | `tool/strings.py` | Every word of the app in Arabic (Egyptian, as on the web) and English; it writes `lib/core/l10n/arb/*.arb`, then `flutter gen-l10n` |
 
 The API client is written by hand per feature, not generated: a **contract test** (`test/contract`) reads every `_api.get('…')` call in `lib/` and fails if `openapi.json` has no such method and path.
@@ -29,9 +31,10 @@ The API client is written by hand per feature, not generated: a **contract test*
 
 ```bash
 flutter analyze
-flutter test            # unit, widget (sign-in, cancelling a lesson against a fake API) and the contract test
+flutter test            # unit, widget (sign-in, cancelling a lesson, challenges for each look) against a fake API, and the contract test
 dart format --set-exit-if-changed lib test
 python3 tool/strings.py && flutter gen-l10n   # after changing any wording
+python3 tool/sounds.py                          # after changing a sound
 ```
 
 CI runs the same (`.github/workflows/mobile.yml`) plus a web build.
