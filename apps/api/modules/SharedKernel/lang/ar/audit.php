@@ -37,6 +37,11 @@ return [
         'identity' => [
             'password_set' => ':name حدد كلمة السر من لينك الترحيب',
             'password_changed' => 'تغيير كلمة السر',
+            'two_factor_enabled' => ':name شغّل الدخول بخطوتين',
+            'two_factor_disabled' => ':name قفل الدخول بخطوتين',
+            'recovery_code_used' => ':name دخل بكود استرجاع',
+            'recovery_codes_renewed' => ':name عمل أكواد استرجاع جديدة',
+            'two_factor_reset' => 'فريق المنصة صفّر الدخول بخطوتين لـ :name: :reason',
         ],
         'impersonation' => [
             'started' => 'دخول بحساب :user لمدة :minutes دقيقة: :reason',

@@ -70,6 +70,9 @@ and says what is missing.
    `https://progma.store/console` (`admin@platform.test`, same password); its authenticator secret is
    `DEMO_PLATFORM_2FA_SECRET` in `.env`, or print the current code:
    `cd ~/academy-lms && docker compose exec web php artisan platform:code admin@platform.test`.
+   The owner, admins and accountants set up two-step sign-in (an authenticator app) the first time they
+   open `/admin`. The app and the portal ask for its code after the password or the one-time code. If someone
+   loses the phone and the recovery codes, the console resets it: Support sign-in → the person → a reason → Reset.
 
 Another web server instead of nginx needs the same as `nginx/academy-lms.conf`: pass `progma.store` and
 `*.progma.store` to `127.0.0.1:<HTTP_PORT>` with `Host`, `X-Forwarded-For`, `X-Forwarded-Proto` and the

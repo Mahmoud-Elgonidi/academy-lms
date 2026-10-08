@@ -261,6 +261,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Sign in with a password
+         * @description The token for this device. With two-step sign-in on, a 403 problem of type "two-factor-required" instead,
+         *     carrying two_factor_token for auth/two-factor; "two-factor-setup-required" when the account must set it up in the back office first.
+         */
         post: operations["identity.login"];
         delete?: never;
         options?: never;
@@ -297,7 +302,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Sign in with the code */
+        /**
+         * Sign in with the code
+         * @description With two-step sign-in on, a 403 problem of type "two-factor-required" carrying two_factor_token for auth/two-factor.
+         */
         post: operations["identity.code.verify"];
         delete?: never;
         options?: never;
@@ -316,9 +324,31 @@ export interface paths {
         put?: never;
         /**
          * Sign in to a discovered account
-         * @description Send the account's academy as X-Academy.
+         * @description Send the account's academy as X-Academy. With two-step sign-in on, a 403 problem of type "two-factor-required"
+         *     carrying two_factor_token for auth/two-factor (in the same academy).
          */
         post: operations["identity.accounts.sign-in"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/auth/two-factor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish signing in with the second step
+         * @description After a sign-in answered "two-factor-required": its two_factor_token and the code the authenticator app shows now
+         *     (or one of the recovery codes, used up). Five tries within five minutes; then sign in again. Answers like any sign-in.
+         */
+        post: operations["identity.two-factor"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2253,6 +2283,56 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["DiscoveredSignInRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        token: string;
+                        /** @constant */
+                        token_type: "Bearer";
+                        expires_at: string;
+                        user: components["schemas"]["UserResource"];
+                    };
+                };
+            };
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "identity.two-factor": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    two_factor_token: string;
+                    code: string;
+                    device_name?: string | null;
+                };
             };
         };
         responses: {

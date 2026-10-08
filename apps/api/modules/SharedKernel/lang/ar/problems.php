@@ -4,6 +4,8 @@ return [
     'validation' => 'البيانات المرسلة غير صحيحة.',
     'unauthenticated' => 'لازم تسجّل الدخول.',
     'forbidden' => 'غير مسموح لك بالقيام بهذا.',
+    'two-factor-required' => 'اكتب الكود اللي في تطبيق المصادقة.',
+    'two-factor-setup-required' => 'شغّل الدخول بخطوتين الأول.',
     'academy-suspended' => 'هذه الأكاديمية موقوفة.',
     'academy-not-found' => 'الأكاديمية غير موجودة.',
     'not-found' => 'غير موجود.',

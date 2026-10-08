@@ -22,6 +22,7 @@ use Modules\Crm\Filament\Teacher\CrmTeacherPlugin;
 use Modules\Evaluation\Filament\Teacher\EvaluationTeacherPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Identity\Filament\Pages\SignIn;
+use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\Learning\Filament\Teacher\LearningTeacherPlugin;
 use Modules\Payroll\Filament\Teacher\PayrollTeacherPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
@@ -51,6 +52,8 @@ final class TeacherPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::SIDEBAR_NAV_START, fn () => view('shared::chrome.greeting'))
             ->path('teach')
             ->login(SignIn::class)
+            // Two-step sign-in, for whoever turned it on (anyone may, in My settings).
+            ->multiFactorAuthentication(fn () => [TwoFactor::provider()])
             ->spa()
             ->maxContentWidth('full')
             ->topNavigation()

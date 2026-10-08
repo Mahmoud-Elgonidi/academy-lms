@@ -12,9 +12,11 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\Identity\Actions\Impersonation\EndImpersonation;
 use Modules\Identity\Actions\Impersonation\StartImpersonation;
+use Modules\Identity\Actions\TwoFactor\ResetTwoFactor;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\Impersonation;
 use Modules\Identity\Models\User;
+use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\Platform\Contracts\ConsoleApi;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -112,7 +114,7 @@ final class SupportSignIn extends Page
         });
     }
 
-    /** @return ?array{id: string, name: string, contact: ?string, roles: list<string>} */
+    /** @return ?array{id: string, name: string, contact: ?string, roles: list<string>, two_factor: bool} */
     #[Computed]
     public function chosen(): ?array
     {
@@ -124,7 +126,8 @@ final class SupportSignIn extends Page
         return app(TenantContext::class)->run($tenant, function () {
             $u = User::query()->with('roleRecords')->where('status', 'active')->find($this->person);
 
-            return $u === null ? null : ['id' => $u->id, 'name' => $u->name, 'contact' => $u->email ?? $u->phone_e164 ?? $u->username, 'roles' => array_map(fn (Role $r) => $r->value, $u->roles())];
+            return $u === null ? null : ['id' => $u->id, 'name' => $u->name, 'contact' => $u->email ?? $u->phone_e164 ?? $u->username, 'roles' => array_map(fn (Role $r) => $r->value, $u->roles()),
+                'two_factor' => TwoFactor::enabledFor($u)];
         });
     }
 
@@ -196,6 +199,27 @@ final class SupportSignIn extends Page
         ];
         $this->reason = '';
         unset($this->recent);
+    }
+
+    /** Someone lost their phone and their recovery codes: they set two-step sign-in up again at their next sign-in. */
+    public function resetTwoFactor(): void
+    {
+        $tenant = $this->tenant();
+        $admin = app(ConsoleApi::class)->currentAdmin();
+        if ($tenant === null || $this->person === null || $admin === null) {
+            return;
+        }
+        $this->resetErrorBag();
+        try {
+            app(ResetTwoFactor::class)->handle($tenant, $this->person, $admin, $this->reason);
+        } catch (ValidationException $e) {
+            $this->setErrorBag($e->validator->errors());
+
+            return;
+        }
+        $this->reason = '';
+        unset($this->chosen);
+        Notification::make()->title(__('identity::two_factor.console.reset_done'))->success()->send();
     }
 
     public function end(string $id): void

@@ -34,8 +34,11 @@ class _PasswordPageState extends State<PasswordPage> {
 
   Future<void> _submit() async {
     if (_academy.text.trim().isEmpty || _login.text.trim().isEmpty || _password.text.isEmpty) return;
-    final ok = await context.read<SignInCubit>().signInWithPassword(academy: _academy.text, login: _login.text, password: _password.text);
-    if (ok && mounted) context.go('/');
+    final cubit = context.read<SignInCubit>();
+    final ok = await cubit.signInWithPassword(academy: _academy.text, login: _login.text, password: _password.text);
+    if (!ok || !mounted) return;
+    // Two-step sign-in on: the authenticator's code comes next.
+    cubit.state.twoFactor != null ? await context.push('${widget.base}/two-factor') : context.go('/');
   }
 
   @override

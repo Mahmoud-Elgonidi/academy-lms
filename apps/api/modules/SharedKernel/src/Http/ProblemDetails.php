@@ -28,6 +28,7 @@ final class ProblemDetails
 
         [$status, $type, $extra] = match (true) {
             $e instanceof ValidationException => [422, 'validation', ['errors' => $e->errors()]],
+            $e instanceof ProblemException => [$e->getStatusCode(), $e->type, $e->extra],
             $e instanceof AuthenticationException => [401, 'unauthenticated', []],
             $e instanceof AuthorizationException => [403, 'forbidden', []],
             $e instanceof TenantSuspended => [403, 'academy-suspended', []],

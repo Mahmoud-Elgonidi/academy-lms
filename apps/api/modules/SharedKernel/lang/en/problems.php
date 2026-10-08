@@ -4,6 +4,8 @@ return [
     'validation' => 'The given data was invalid.',
     'unauthenticated' => 'You need to sign in.',
     'forbidden' => 'You are not allowed to do this.',
+    'two-factor-required' => 'Enter the code from your authenticator app.',
+    'two-factor-setup-required' => 'Set up two-step sign-in first.',
     'academy-suspended' => 'This academy is suspended.',
     'academy-not-found' => 'Academy not found.',
     'not-found' => 'Not found.',

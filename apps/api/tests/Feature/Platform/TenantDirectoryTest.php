@@ -54,9 +54,10 @@ it('creates an academy with its owner from the command line', function () {
     expect($academy->base_currency)->toBe('KWD')
         ->and($academy->domains()->sole()->host)->toBe('huda.lms.test');
 
+    // The password is right; an owner sets up two-step sign-in in the back office before an app may sign in.
     $this->postJson('http://huda.lms.test/api/v1/auth/login', [
         'login' => 'owner@huda.test', 'password' => 'secret-pass', 'device_name' => 'cli-test',
-    ])->assertOk()->assertJsonPath('user.roles', ['owner', 'admin']);
+    ])->assertForbidden()->assertJsonPath('type', 'two-factor-setup-required');
 });
 
 it('refuses reserved and duplicate slugs', function (string $slug) {

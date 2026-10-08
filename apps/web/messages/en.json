@@ -48,7 +48,12 @@
     "password": "Password",
     "expired": "Your session ended. Sign in again.",
     "staff": "Your account is for the back office.",
-    "openAdmin": "Open the back office"
+    "openAdmin": "Open the back office",
+    "twoFactorTitle": "Two-step sign-in",
+    "twoFactorHint": "Open your authenticator app and type the 6-digit code. Lost your phone? Type one of your recovery codes.",
+    "twoFactorCode": "Code",
+    "twoFactorExpired": "This sign-in took too long. Sign in again.",
+    "startAgain": "Start again"
   },
   "nav": {
     "today": "Today",

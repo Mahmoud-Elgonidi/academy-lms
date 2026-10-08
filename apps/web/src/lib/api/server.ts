@@ -81,20 +81,23 @@ export async function call<M extends Method>(method: M, path: PathFor<M>, option
   });
 }
 
-/** An RFC 7807 answer from the API: its words in the reader's language, and the fields it names. */
-export type Problem = { status: number; title: string; errors: Record<string, string[]> };
+/** The API's problem (RFC 7807): its type, the words to show, field errors, and any members of its own (two_factor_token…). */
+export type Problem = { status: number; title: string; errors: Record<string, string[]>; type?: string; extra?: Record<string, unknown> };
 
 async function problemOf(response: Response): Promise<Problem> {
   const body = (await response.json().catch(() => ({}))) as {
+    type?: string;
     title?: string;
     detail?: string;
     message?: string;
     errors?: Record<string, string[]>;
-  };
+  } & Record<string, unknown>;
   return {
     status: response.status,
     title: body.detail ?? body.title ?? body.message ?? `HTTP ${response.status}`,
     errors: body.errors ?? {},
+    type: body.type,
+    extra: body,
   };
 }
 

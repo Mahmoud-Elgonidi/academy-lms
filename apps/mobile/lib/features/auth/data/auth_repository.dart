@@ -42,4 +42,15 @@ class AuthRepository {
       body: {'login': login, 'password': password, 'device_name': deviceName()},
     ),
   );
+
+  /// The second step: the code the authenticator app shows now, or a recovery code.
+  Future<Account> completeTwoFactor(TwoFactorStep step, String code) async => accountFromToken(
+    await _api.post(
+      'auth/two-factor',
+      anonymous: true,
+      academy: step.academySlug,
+      body: {'two_factor_token': step.token, 'code': code, 'device_name': deviceName()},
+    ),
+    found: step.found,
+  );
 }

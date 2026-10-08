@@ -124,6 +124,21 @@
   "passwordLabel": "كلمة السر",
   "signIn": "ادخل",
   "useCodeInstead": "ادخل بكود بدل كلمة السر",
+  "twoFactorTitle": "الدخول بخطوتين",
+  "twoFactorLead": "افتح تطبيق المصادقة واكتب الكود اللي فيه (6 أرقام). ضيّعت موبايلك؟ اكتب كود من أكواد الاسترجاع.",
+  "twoFactorAccount": "{name} في {academy}",
+  "@twoFactorAccount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "academy": {
+        "type": "String"
+      }
+    }
+  },
+  "twoFactorCode": "الكود",
+  "startAgain": "ابدأ من الأول",
   "webOnlyTitle": "الحساب ده للإدارة",
   "webOnlyBody": "حسابات الإدارة بتشتغل من الموقع. افتح لوحة الأكاديمية من الكمبيوتر.",
   "navHome": "الرئيسية",

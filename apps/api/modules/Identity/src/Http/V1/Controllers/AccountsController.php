@@ -51,7 +51,8 @@ final class AccountsController
     /**
      * Sign in to a discovered account.
      *
-     * Send the account's academy as X-Academy.
+     * Send the account's academy as X-Academy. With two-step sign-in on, a 403 problem of type "two-factor-required"
+     * carrying two_factor_token for auth/two-factor (in the same academy).
      */
     public function signIn(DiscoveredSignInRequest $request, SignInDiscoveredAccount $signIn, IssueAccessToken $tokens): JsonResponse
     {

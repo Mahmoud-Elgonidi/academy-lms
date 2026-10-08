@@ -35,7 +35,10 @@ class AccountsPage extends StatelessWidget {
                   onPressed: state.selected.isEmpty
                       ? null
                       : () async {
-                          if (await context.read<SignInCubit>().addSelected() && context.mounted) context.go('/');
+                          final cubit = context.read<SignInCubit>();
+                          if (!await cubit.addSelected() || !context.mounted) return;
+                          // An account with two-step sign-in asks for the authenticator's code first.
+                          cubit.state.twoFactor != null ? await context.push('$base/two-factor') : context.go('/');
                         },
                 ),
           children: [

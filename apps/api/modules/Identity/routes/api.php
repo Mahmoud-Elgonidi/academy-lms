@@ -13,6 +13,7 @@ Route::post('auth/login', [AuthController::class, 'login'])->name('identity.logi
 Route::post('auth/code', [CodeSignInController::class, 'send'])->name('identity.code.send');
 Route::post('auth/code/verify', [CodeSignInController::class, 'verify'])->name('identity.code.verify');
 Route::post('accounts/sign-in', [AccountsController::class, 'signIn'])->name('identity.accounts.sign-in');
+Route::post('auth/two-factor', [AuthController::class, 'twoFactor'])->middleware('throttle:10,1')->name('identity.two-factor');
 
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('me', [AuthController::class, 'me'])->name('identity.me');

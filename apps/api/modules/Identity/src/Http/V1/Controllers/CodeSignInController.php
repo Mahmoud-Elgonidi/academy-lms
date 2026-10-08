@@ -28,7 +28,11 @@ final class CodeSignInController
         ));
     }
 
-    /** Sign in with the code. */
+    /**
+     * Sign in with the code.
+     *
+     * With two-step sign-in on, a 403 problem of type "two-factor-required" carrying two_factor_token for auth/two-factor.
+     */
     public function verify(VerifyCodeRequest $request, VerifySignInCode $verify, IssueAccessToken $tokens): JsonResponse
     {
         $user = $verify->handle((string) $request->string('challenge_id'), (string) $request->string('code'));

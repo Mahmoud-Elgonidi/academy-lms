@@ -4,12 +4,45 @@ namespace Modules\Identity\Actions;
 
 use Carbon\CarbonImmutable;
 use Modules\Identity\Models\User;
+use Modules\Identity\TwoFactor\PendingSignIns;
+use Modules\Identity\TwoFactor\TwoFactor;
+use Modules\SharedKernel\Http\ProblemException;
+use Modules\SharedKernel\Time\LocalTimePresenter;
 
-/** A Sanctum token for an app on one device (password, code, or a discovered account). */
+/**
+ * A Sanctum token for an app on one device (password, code, or a discovered
+ * account). Whoever has two-step sign-in on gets, instead, a problem of type
+ * "two-factor-required" with a token for the second step (auth/two-factor);
+ * the owner, admins and accountants who have not set it up yet get
+ * "two-factor-setup-required" (they set it up in the back office first).
+ */
 final class IssueAccessToken
 {
+    public function __construct(private readonly PendingSignIns $pending) {}
+
     /** @return array{user: User, token: string, expires_at: ?CarbonImmutable} */
     public function handle(User $user, string $deviceName): array
+    {
+        if (TwoFactor::enabledFor($user)) {
+            $step = $this->pending->begin($user, $deviceName);
+            throw new ProblemException(403, 'two-factor-required', __('identity::two_factor.api.required'), [
+                'two_factor_token' => $step['token'],
+                'expires_at' => app(LocalTimePresenter::class)->present($step['expires_at']),
+            ]);
+        }
+        if (TwoFactor::requiredFor($user)) {
+            throw new ProblemException(403, 'two-factor-setup-required', __('identity::two_factor.api.setup_required'));
+        }
+
+        return $this->issue($user, $deviceName);
+    }
+
+    /**
+     * The token itself, once every step is done (CompleteTwoFactorSignIn).
+     *
+     * @return array{user: User, token: string, expires_at: ?CarbonImmutable}
+     */
+    public function issue(User $user, string $deviceName): array
     {
         $minutes = config('sanctum.expiration');
         $expiresAt = $minutes ? now()->toImmutable()->addMinutes((int) $minutes) : null;

@@ -24,6 +24,8 @@
         .ss-chosen div { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
         .ss-chosen small { color: var(--primary-700); font-size: .76rem; font-weight: 600; }
         .ss-chosen strong { font-size: .95rem; }
+        .ss-tf { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem .75rem; padding: .6rem .8rem; border-radius: .8rem; border: 1px dashed var(--gray-300); font-size: .8rem; color: var(--gray-600); }
+        .ss-tf span { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; min-width: 0; }
         .ss-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
         .ss-chips button { font-size: .82rem; font-weight: 600; padding: .4rem .85rem; border-radius: 999px; border: 1px solid var(--gray-200); background: white; color: var(--gray-700); }
         .ss-chips button[aria-pressed="true"] { background: var(--primary-600); border-color: var(--primary-600); color: white; }
@@ -132,6 +134,12 @@
                     @error('user')<span class="ss-error">{{ $message }}</span>@enderror
                     @error('academy')<span class="ss-error">{{ $message }}</span>@enderror
                     <div><x-filament::button wire:click="start" icon="heroicon-o-key" wire:key="start">{{ __($l.'start') }}</x-filament::button></div>
+                    @if ($chosen['two_factor'] ?? false)
+                        <div class="ss-tf" wire:key="two-factor">
+                            <span><x-filament::badge color="success" size="sm">{{ __('identity::two_factor.console.on') }}</x-filament::badge> {{ __('identity::two_factor.console.reset_hint') }}</span>
+                            <x-filament::button size="sm" color="danger" outlined wire:click="resetTwoFactor" icon="heroicon-o-arrow-path" wire:confirm="{{ __('identity::two_factor.console.reset') }}?">{{ __('identity::two_factor.console.reset') }}</x-filament::button>
+                        </div>
+                    @endif
                 @endif
             @endif
         </section>

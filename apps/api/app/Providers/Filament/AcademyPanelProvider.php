@@ -26,6 +26,8 @@ use Modules\Curriculum\Filament\CurriculumPlugin;
 use Modules\Evaluation\Filament\EvaluationPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Identity\Filament\Pages\SignIn;
+use Modules\Identity\Http\Middleware\RequireTwoFactor;
+use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\Import\Filament\ImportPlugin;
 use Modules\Learning\Filament\LearningPlugin;
 use Modules\Payroll\Filament\PayrollPlugin;
@@ -59,6 +61,9 @@ final class AcademyPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::SIDEBAR_NAV_START, fn () => view('shared::chrome.greeting'))
             ->path('admin')
             ->login(SignIn::class)
+            // Two-step sign-in (an authenticator app): asked of whoever has it on; the owner, admins and accountants must set it up first.
+            ->multiFactorAuthentication(fn () => [TwoFactor::provider()], isRequired: true)
+            ->multiFactorAuthenticationRequiredMiddlewareName(RequireTwoFactor::class)
             ->spa()
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')

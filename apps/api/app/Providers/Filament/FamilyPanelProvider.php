@@ -21,6 +21,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Billing\Filament\Family\BillingFamilyPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Identity\Filament\Pages\SignIn;
+use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\Learning\Filament\Family\LearningFamilyPlugin;
 use Modules\People\Filament\Family\PeopleFamilyPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
@@ -40,6 +41,8 @@ final class FamilyPanelProvider extends PanelProvider
             ->id('family')
             ->path('my')
             ->login(SignIn::class)
+            // Two-step sign-in, for whoever turned it on (anyone may, in My settings).
+            ->multiFactorAuthentication(fn () => [TwoFactor::provider()])
             ->spa()
             ->topNavigation()
             ->maxContentWidth('6xl')

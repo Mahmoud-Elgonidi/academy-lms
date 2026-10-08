@@ -205,6 +205,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get useCodeInstead => 'Sign in with a code instead';
 
   @override
+  String get twoFactorTitle => 'Two-step sign-in';
+
+  @override
+  String get twoFactorLead => 'Open your authenticator app and type the 6-digit code. Lost your phone? Type one of your recovery codes.';
+
+  @override
+  String twoFactorAccount(String name, String academy) {
+    return '$name at $academy';
+  }
+
+  @override
+  String get twoFactorCode => 'Code';
+
+  @override
+  String get startAgain => 'Start again';
+
+  @override
   String get webOnlyTitle => 'This is a staff account';
 
   @override

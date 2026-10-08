@@ -25,7 +25,7 @@
 | # | Module | المسؤولية | أهم الـ Events |
 |---|---|---|---|
 | M1 | **Platform** | الأكاديميات، والدومينات، والـ branding، وباقات SaaS، والحدود، والاستخدام، والـ Cells | `AcademyCreated`، `AcademySuspended`، `AcademyPlanChanged`، `DomainVerified` |
-| M2 | **Identity** | تسجيل الدخول، والأدوار، والأجهزة، والـ OTP، والموافقات، والدخول بحساب مستخدم | `UserCreated`، `UserInvited`، `RoleAssigned`، `ConsentGranted`، `ConsentRevoked` |
+| M2 | **Identity** | تسجيل الدخول، والدخول بخطوتين، والأدوار، والأجهزة، والـ OTP، والموافقات، والدخول بحساب مستخدم | `UserCreated`، `UserInvited`، `RoleAssigned`، `ConsentGranted`، `ConsentRevoked` |
 | M3 | **Catalog** | المواد، والمستويات، والتصنيفات | — |
 | M4 | **People** | ملفات المدرسين والطلاب، وعلاقات أولياء الأمور | `TeacherOnboarded`، `TeacherSubjectsChanged`، `TeacherTierChanged`، `StudentCreated`، `GuardianLinked`، `UserTimezoneChanged` |
 | M5 | **Curriculum** | البرامج، والإصدارات، وعُقد المنهج، والموارد، وتعريفات الاختبارات | `CurriculumVersionPublished` |

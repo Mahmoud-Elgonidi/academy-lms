@@ -139,6 +139,12 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 - **Super Admins** في جدول منفصل `platform_admins` بـ guard خاص و 2FA، ومابيشوفوش بيانات الأكاديميات إلا بـ **الدخول بحساب مستخدم مع تسجيله**.
   - **المنفّذ**: guard اسمه `platform` ولوحة Filament لوحدها (`console`) من غير `ResolveTenant`، وتطبيق مصادقة إجباري. `platform_admins` عليه RLS من غير policy، فالـ connection بتاع الأكاديميات مابيشوفش منه ولا صف.
   - **الدخول بحساب مستخدم** (`impersonations` في Identity، جدول tenant): الأدمن بيطلب من اللوحة بسبب ومدة، والـ Action بيشتغل جوه `TenantContext::run` للأكاديمية دي. اللينك بيشتغل مرة واحدة ولمدة دقيقتين، على عنوان الأكاديمية بس (الـ RLS بيمنع أي أكاديمية تانية تلاقيه). كل request بعدها بيعدّي على `WatchImpersonation`: بيسجّل العمليات باسم فريق المنصة "بحساب" الشخص (`AuditActor` في الـ Context)، وبيقفل الجلسة لما وقتها يخلص أو تتقفل من اللوحة.
+- **الدخول بخطوتين للمستخدمين** (`Identity\TwoFactor`): تطبيق مصادقة من Filament (`AppAuthentication`) على `users`:
+  - العمودين `app_authentication_secret` (متشفر) و`app_authentication_recovery_codes` (أكواد hash، متشفرة)، ومخفيين من أي JSON.
+  - `TwoFactor::REQUIRED_FOR` = المالك والمدير والمحاسب: middleware اسمه `RequireTwoFactor` في لوحة الإدارة بيحوّلهم لصفحة التشغيل. الحساب اللي فريق المنصة داخل بيه مستثنى، والـ model نفسه بيرفض أي تغيير في العمودين طول ما `AuditActor::current()->onBehalfOf` موجود.
+  - في اللوحات: نفس شاشة Filament بعد كلمة السر، وبعد الكود لمرة واحدة كمان (`SignIn`، والخطوة التانية متقفلة بـ `codePassed` متشفر لعشر دقايق).
+  - في الـ API: `IssueAccessToken` هو اللي بيقرر لكل طرق الدخول (`auth/login`، و`auth/code/verify`، و`accounts/sign-in`). الحساب اللي شغّلها بياخد 403 من نوع `two-factor-required` ومعاه `two_factor_token` و`expires_at`، والـ token ده بيتبدّل بـ token الدخول في `POST /auth/two-factor` (الكود، أو كود استرجاع). الـ token متخزن hash في الـ cache، لمدة 5 دقايق، و5 محاولات، ومرة واحدة، وعلى نفس الأكاديمية (`PendingSignIns`). والدور اللي لازم يشغّلها ولسه ماشغّلهاش بياخد `two-factor-setup-required` من غير token: بيشغّلها من لوحة الإدارة الأول.
+  - فريق المنصة بيصفّرها لشخص ضيّع موبايله وأكواده (`ResetTwoFactor`، بسبب، من "الدخول بحساب مستخدم")، وكل تغيير بيتسجل في `audit_logs` (`identity.two_factor_*`).
 - **الأدوار ثابتة في الـ MVP**: `owner, admin, supervisor, scheduler, accountant, sales, teacher, student, guardian`.
   - مابنستخدمش "teams" بتاعة spatie/permission، لأن `setPermissionsTeamId()` حالة عامة ممكن تتسرب من request للتاني تحت Octane.
 
@@ -519,8 +525,8 @@ interface PaymentGateway
   - محليًا: `/docs/api` (في البيئة المحلية بس).
   - الـ CI بتاع الموبايل (`mobile.yml`) بيشتغل كمان لما `packages/openapi` يتغير، فالـ contract test بيتأكد إن التطبيق لسه ماشي مع الـ API.
 
-### الـ API المنفّذ (`/api/v1`، 55 route)
-- **الدخول والحساب** (Identity): `auth/login`، و`auth/code` و`auth/code/verify`، و`accounts/code` و`accounts/code/verify` و`accounts/sign-in`، و`me`، و`me/sessions` (الأجهزة وتخريج جهاز)، و`auth/logout`.
+### الـ API المنفّذ (`/api/v1`، 63 route)
+- **الدخول والحساب** (Identity): `auth/login`، و`auth/code` و`auth/code/verify`، و`accounts/code` و`accounts/code/verify` و`accounts/sign-in`، و`auth/two-factor` (الخطوة التانية بعد أي واحد فيهم)، و`me`، و`me/sessions` (الأجهزة وتخريج جهاز)، و`auth/logout`.
 - **الأسرة**:
   - `family/learners` (People): الطالب نفسه وأولاده، ومرحلة كل واحد. كل endpoint للأسرة بياخد `learner_id`، ولو مابعتوش بياخد أول واحد (`FamilyView::learner`).
   - `family/lessons` (القادمة أو اللي فاتت، ومعاها الإجازات وتغييرات الساعة)، و`lessons/{id}/cancellation` (هيحصل إيه لو ألغيت، بالسياسة)، و`lessons/{id}/cancel`، و`lessons/{id}/refuse-substitute`. الطفل في شكل kids مابيلغيش.
@@ -534,7 +540,7 @@ interface PaymentGateway
 ### تسجيل الدخول
 - **الموبايل**: Sanctum tokens ليها مدة صلاحية، ومتخزنة في secure storage (زي CBOT Fleet). وفيه أكتر من token متخزن للتنقل بين الحسابات.
 - **الويب (Next.js)**: **BFF**. الـ token في httpOnly cookie (`lms_session`، و`Secure` ورا https، و`SameSite=Lax`) على دومين الأكاديمية، والمتصفح مابيشوفش الـ bearer token أبدًا.
-  - الدخول (بكود أو بكلمة سر) بيحصل في Server Actions بتكلّم `auth/code/verify` أو `auth/login`. حساب الإدارة مابياخدش session في البوابة، بيتحوّل لـ `/admin`.
+  - الدخول (بكود أو بكلمة سر) بيحصل في Server Actions بتكلّم `auth/code/verify` أو `auth/login`، ولو الحساب شغّل الدخول بخطوتين، خانة لكود التطبيق بتكلّم `auth/two-factor`. حساب الإدارة مابياخدش session في البوابة، بيتحوّل لـ `/admin` (وكمان لو لسه لازم يشغّل الدخول بخطوتين هناك).
   - سيرفر Next بس هو اللي بيكلّم الـ API (`lib/api/server.ts`، ‏`server-only`)، ومعاه الـ token و`Accept-Language` و`X-Timezone` (توقيت المتصفح من cookie بتكتبها الصفحة)، و`X-Forwarded-Host` (الـ host اللي الصفحة اتطلبت عليه، فالأكاديمية بتتحدد زي اللوحات بالظبط).
   - لو الـ API رفض الـ token (انتهى، أو اتخرّج من جهاز تاني)، الصفحة بتروح `/bff/session-ended` اللي بيمسح الـ cookie ويرجّع لصفحة الدخول.
   - الملفات اللي الطالب سلّمها (تسجيل أو صورة) بتعدّي من `/bff/submissions/{id}/file` بـ token المدرس، والتسجيل بيتقدّم ويرجع (`Range`).
@@ -735,7 +741,7 @@ interface PaymentGateway
 - [ ] المستأجر موجود في مفاتيح الـ cache، ومسارات S3، والقنوات، والـ logs.
 
 ### الهوية والوصول
-- [ ] 2FA إجباري للـ Super Admin والـ Owner والـ Admin. (فريق المنصة منفّذ: تطبيق مصادقة إجباري على `/console`. المالك والمدير لسه.)
+- [x] 2FA إجباري للـ Super Admin والـ Owner والـ Admin. (تطبيق مصادقة إجباري على `/console` لفريق المنصة، وفي لوحة الإدارة للمالك والمدير والمحاسب (`RequireTwoFactor`)، ومتاح لأي حد من "إعداداتي". بيتطلب في كل طرق الدخول، والـ API بيرد `two-factor-required` ومعاه token للخطوة التانية `POST /v1/auth/two-factor`.)
 - [x] rate limit على الـ OTP، وقائمة الأجهزة، وتسجيل الخروج عن بعد، وصلاحية للـ tokens. (كود كل دقيقة، و5 في الساعة لكل رقم أو إيميل، و20 لكل IP، و5 محاولات للكود؛ `me/sessions`؛ الـ tokens صلاحيتها من `sanctum.expiration`.)
 - [x] الدخول بحساب مستخدم: بسبب، ولوقت محدد، ومتسجل، وبيظهر في نشاط المستخدم. (لينك مرة واحدة على عنوان الأكاديمية، وشريط فيه الوقت الباقي، وتغيير كلمة السر مقفول، و"دخول فريق المنصة على حسابك" في إعداداته.)
 - [x] سجل مراجعة مابيتعدلش ومابيتمسحش (trigger)، معزول بالـ RLS لكل أكاديمية، ومابيتسجلش فيه أسرار.

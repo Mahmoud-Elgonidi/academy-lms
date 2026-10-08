@@ -2,8 +2,11 @@
 
 namespace Modules\Identity\Models;
 
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +18,10 @@ use Modules\Identity\Contracts\PersonalChannel;
 use Modules\Identity\Database\Factories\UserFactory;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Enums\UserStatus;
+use Modules\SharedKernel\Audit\AuditActor;
+use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
+use SensitiveParameter;
 
 /**
  * @property string $id
@@ -29,8 +35,10 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property UserStatus $status
  * @property bool $is_managed_minor
  * @property array<string, string> $preferences
+ * @property ?string $app_authentication_secret the authenticator app's secret, once set up (encrypted)
+ * @property ?array<string> $app_authentication_recovery_codes hashed one-time recovery codes (encrypted)
  */
-final class User extends Authenticatable implements FilamentUser, HasLocalePreference
+final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasLocalePreference
 {
     use BelongsToTenant;
     use HasApiTokens;
@@ -46,7 +54,7 @@ final class User extends Authenticatable implements FilamentUser, HasLocalePrefe
         'locale', 'timezone', 'status', 'is_managed_minor',
     ];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes'];
 
     protected $attributes = [
         'status' => 'active',
@@ -61,7 +69,41 @@ final class User extends Authenticatable implements FilamentUser, HasLocalePrefe
             'status' => UserStatus::class,
             'is_managed_minor' => 'boolean',
             'preferences' => 'array',
+            'app_authentication_secret' => 'encrypted',
+            'app_authentication_recovery_codes' => 'encrypted:array',
         ];
+    }
+
+    /**
+     * The second factor changes through Filament's own actions (set up, new
+     * recovery codes, turn off, a recovery code used at sign-in) and the
+     * platform team's reset; each change is in the activity log, and none
+     * may happen while the platform team is signed in as this person.
+     */
+    protected static function booted(): void
+    {
+        self::updating(function (User $user): void {
+            if (! $user->isDirty(['app_authentication_secret', 'app_authentication_recovery_codes'])) {
+                return;
+            }
+            if (AuditActor::current()->onBehalfOf !== null) {
+                throw new AuthorizationException(__('identity::two_factor.errors.impersonating'));
+            }
+        });
+        self::updated(function (User $user): void {
+            $secret = $user->wasChanged('app_authentication_secret');
+            $codes = $user->wasChanged('app_authentication_recovery_codes');
+            if (! $secret && ! $codes) {
+                return;
+            }
+            $action = match (true) {
+                $secret && filled($user->app_authentication_secret) => 'two_factor_enabled',
+                $secret => 'two_factor_disabled',
+                count($user->app_authentication_recovery_codes ?? []) === count((array) $user->getOriginal('app_authentication_recovery_codes')) - 1 => 'recovery_code_used',
+                default => 'recovery_codes_renewed',
+            };
+            app(AuditTrail::class)->record('identity.'.$action, 'user', $user->id, ['name' => $user->name]);
+        });
     }
 
     /** @return HasMany<UserRole, $this> */
@@ -118,6 +160,45 @@ final class User extends Authenticatable implements FilamentUser, HasLocalePrefe
     public function receivesBroadcastNotificationsOn(): string
     {
         return PersonalChannel::name((string) $this->getKey());
+    }
+
+    public function getAppAuthenticationSecret(): ?string
+    {
+        return $this->twoFactorColumn('app_authentication_secret');
+    }
+
+    public function saveAppAuthenticationSecret(#[SensitiveParameter] ?string $secret): void
+    {
+        $this->forceFill(['app_authentication_secret' => $secret])->save();
+    }
+
+    /** What the authenticator app shows under the academy's name. */
+    public function getAppAuthenticationHolderName(): string
+    {
+        return $this->email ?? $this->phone_e164 ?? $this->username ?? $this->name;
+    }
+
+    /** @return ?array<string> */
+    public function getAppAuthenticationRecoveryCodes(): ?array
+    {
+        return $this->twoFactorColumn('app_authentication_recovery_codes');
+    }
+
+    /** @param  ?array<string>  $codes */
+    public function saveAppAuthenticationRecoveryCodes(#[SensitiveParameter] ?array $codes): void
+    {
+        $this->forceFill(['app_authentication_recovery_codes' => $codes])->save();
+    }
+
+    /** A two-step column, read from the row when this model was built without it (made in memory, or a narrow select). */
+    private function twoFactorColumn(string $column): mixed
+    {
+        if (! array_key_exists($column, $this->attributes)) {
+            $this->attributes[$column] = $this->exists ? self::query()->whereKey($this->getKey())->value($column) : null;
+            $this->syncOriginalAttribute($column);
+        }
+
+        return $this->getAttribute($column);
     }
 
     public function preferredLocale(): ?string

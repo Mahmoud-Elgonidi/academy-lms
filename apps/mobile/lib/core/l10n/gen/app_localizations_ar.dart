@@ -221,6 +221,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String get useCodeInstead => 'ادخل بكود بدل كلمة السر';
 
   @override
+  String get twoFactorTitle => 'الدخول بخطوتين';
+
+  @override
+  String get twoFactorLead => 'افتح تطبيق المصادقة واكتب الكود اللي فيه (6 أرقام). ضيّعت موبايلك؟ اكتب كود من أكواد الاسترجاع.';
+
+  @override
+  String twoFactorAccount(String name, String academy) {
+    return '$name في $academy';
+  }
+
+  @override
+  String get twoFactorCode => 'الكود';
+
+  @override
+  String get startAgain => 'ابدأ من الأول';
+
+  @override
   String get webOnlyTitle => 'الحساب ده للإدارة';
 
   @override

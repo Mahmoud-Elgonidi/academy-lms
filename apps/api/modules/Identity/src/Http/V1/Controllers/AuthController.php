@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 use Modules\Identity\Actions\Login;
+use Modules\Identity\Actions\TwoFactor\CompleteTwoFactorSignIn;
 use Modules\Identity\Actions\UpdateProfile;
 use Modules\Identity\Http\V1\Requests\LoginRequest;
 use Modules\Identity\Http\V1\Requests\UpdateProfileRequest;
@@ -17,6 +18,12 @@ use Modules\Identity\Models\User;
 
 final class AuthController
 {
+    /**
+     * Sign in with a password.
+     *
+     * The token for this device. With two-step sign-in on, a 403 problem of type "two-factor-required" instead,
+     * carrying two_factor_token for auth/two-factor; "two-factor-setup-required" when the account must set it up in the back office first.
+     */
     public function login(LoginRequest $request, Login $login): JsonResponse
     {
         $request->ensureIsNotRateLimited();
@@ -36,6 +43,27 @@ final class AuthController
         $request->clearRateLimiter();
 
         return TokenResponse::make($result);
+    }
+
+    /**
+     * Finish signing in with the second step.
+     *
+     * After a sign-in answered "two-factor-required": its two_factor_token and the code the authenticator app shows now
+     * (or one of the recovery codes, used up). Five tries within five minutes; then sign in again. Answers like any sign-in.
+     */
+    public function twoFactor(Request $request, CompleteTwoFactorSignIn $complete): JsonResponse
+    {
+        $request->validate([
+            'two_factor_token' => ['required', 'string', 'max:100'],
+            'code' => ['required', 'string', 'max:40'],
+            'device_name' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        return TokenResponse::make($complete->handle(
+            (string) $request->string('two_factor_token'),
+            (string) $request->string('code'),
+            $request->filled('device_name') ? (string) $request->string('device_name') : null,
+        ));
     }
 
     public function me(Request $request): UserResource

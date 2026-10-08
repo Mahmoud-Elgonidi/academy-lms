@@ -1,17 +1,29 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/auth/account.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/network/api_problem.dart';
 import '../../data/auth_repository.dart';
 import '../../domain/sign_in_models.dart';
 
 class SignInState extends Equatable {
-  const SignInState({this.contact = '', this.sent, this.discovery, this.selected = const {}, this.busy = false, this.problem});
+  const SignInState({
+    this.contact = '',
+    this.sent,
+    this.discovery,
+    this.selected = const {},
+    this.twoFactor,
+    this.busy = false,
+    this.problem,
+  });
 
   final String contact;
   final SentCode? sent;
   final Discovery? discovery;
+
+  /// A sign-in waiting on the authenticator app's code.
+  final TwoFactorStep? twoFactor;
 
   /// Ids of the found accounts to add.
   final Set<String> selected;
@@ -23,6 +35,7 @@ class SignInState extends Equatable {
     SentCode? Function()? sent,
     Discovery? Function()? discovery,
     Set<String>? selected,
+    TwoFactorStep? Function()? twoFactor,
     bool? busy,
     ApiProblem? Function()? problem,
   }) => SignInState(
@@ -30,16 +43,19 @@ class SignInState extends Equatable {
     sent: sent != null ? sent() : this.sent,
     discovery: discovery != null ? discovery() : this.discovery,
     selected: selected ?? this.selected,
+    twoFactor: twoFactor != null ? twoFactor() : this.twoFactor,
     busy: busy ?? this.busy,
     problem: problem != null ? problem() : this.problem,
   );
 
   @override
-  List<Object?> get props => [contact, sent, discovery, selected, busy, problem];
+  List<Object?> get props => [contact, sent, discovery, selected, twoFactor, busy, problem];
 }
 
 /// The sign-in flow: contact → code → the accounts it found → signed in.
-/// Each step returns whether it worked so the page can move on.
+/// Each step returns whether it worked so the page can move on; an account
+/// with two-step sign-in stops on [SignInState.twoFactor] for the
+/// authenticator's code ([completeTwoFactor] goes on from there).
 class SignInCubit extends Cubit<SignInState> {
   SignInCubit(this._repo, this._session) : super(const SignInState());
 
@@ -80,21 +96,66 @@ class SignInCubit extends Cubit<SignInState> {
   Future<bool> addSelected() {
     final discovery = state.discovery;
     if (discovery == null || state.selected.isEmpty) return Future.value(false);
-    return _run(() async {
-      final chosen = discovery.accounts.where((a) => state.selected.contains(a.id)).toList();
-      final accounts = [for (final found in chosen) await _repo.signInFound(discovery, found)];
-      for (final account in accounts.reversed) {
-        await _session.add(account);
-      }
-      emit(const SignInState());
-    });
+    final chosen = discovery.accounts.where((a) => state.selected.contains(a.id)).toList();
+    return _run(() => _signInFound(discovery, chosen, const []));
   }
 
   Future<bool> signInWithPassword({required String academy, required String login, required String password}) => _run(() async {
-    final account = await _repo.signInWithPassword(academy: academy.trim().toLowerCase(), login: login.trim(), password: password);
-    await _session.add(account);
-    emit(const SignInState());
+    final slug = academy.trim().toLowerCase();
+    try {
+      await _keep([await _repo.signInWithPassword(academy: slug, login: login.trim(), password: password)]);
+    } on ApiProblem catch (problem) {
+      final token = problem.twoFactorToken;
+      if (token == null) rethrow;
+      emit(
+        state.copyWith(
+          twoFactor: () => TwoFactorStep(token: token, academySlug: slug),
+        ),
+      );
+    }
   });
+
+  /// The authenticator's code (or a recovery code) for the sign-in waiting
+  /// on it; then on to the accounts still chosen.
+  Future<bool> completeTwoFactor(String code) {
+    final step = state.twoFactor;
+    if (step == null) return Future.value(false);
+    return _run(() async {
+      final account = await _repo.completeTwoFactor(step, code.trim());
+      emit(state.copyWith(twoFactor: () => null));
+      final discovery = state.discovery;
+      if (step.queue.isEmpty || discovery == null) return _keep([...step.signed, account]);
+      await _signInFound(discovery, step.queue, [...step.signed, account]);
+    });
+  }
+
+  Future<void> _signInFound(Discovery discovery, List<FoundAccount> queue, List<Account> signed) async {
+    final done = [...signed];
+    for (var i = 0; i < queue.length; i++) {
+      try {
+        done.add(await _repo.signInFound(discovery, queue[i]));
+      } on ApiProblem catch (problem) {
+        final token = problem.twoFactorToken;
+        if (token == null) rethrow;
+        emit(
+          state.copyWith(
+            twoFactor: () =>
+                TwoFactorStep(token: token, academySlug: queue[i].academySlug, found: queue[i], queue: queue.sublist(i + 1), signed: done),
+          ),
+        );
+        return;
+      }
+    }
+    await _keep(done);
+  }
+
+  /// Keeps the signed accounts on this phone together, so the first one opens.
+  Future<void> _keep(List<Account> accounts) async {
+    for (final account in accounts.reversed) {
+      await _session.add(account);
+    }
+    emit(const SignInState());
+  }
 
   void clearProblem() => emit(state.copyWith(problem: () => null));
 

@@ -37,6 +37,11 @@ return [
         'identity' => [
             'password_set' => ':name chose a password from their welcome link',
             'password_changed' => 'Password changed',
+            'two_factor_enabled' => ':name turned on two-step sign-in',
+            'two_factor_disabled' => ':name turned off two-step sign-in',
+            'recovery_code_used' => ':name signed in with a recovery code',
+            'recovery_codes_renewed' => ':name made new recovery codes',
+            'two_factor_reset' => 'Two-step sign-in of :name reset by the platform team: :reason',
         ],
         'impersonation' => [
             'started' => 'Signed in as :user for :minutes minutes: :reason',

@@ -6,6 +6,7 @@ use DateTimeZone;
 use Filament\Auth\Pages\EditProfile;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
@@ -24,8 +25,8 @@ use SensitiveParameter;
 
 /**
  * "My settings": name, language, timezone, the screen choices modules declare
- * (e.g. the live board layout) and password. Saves through the same Actions
- * the API uses.
+ * (e.g. the live board layout), password, and two-step sign-in (Filament's
+ * authenticator app section). Saves through the same Actions the API uses.
  */
 final class MySettings extends EditProfile
 {
@@ -85,6 +86,12 @@ final class MySettings extends EditProfile
                 ->visible(fn (): bool => $this->platformSignIns() !== [])
                 ->collapsible(),
         ]);
+    }
+
+    /** Two-step sign-in (set up, new recovery codes, turn off), never while the platform team is signed in as this person. */
+    public function getMultiFactorAuthenticationContentComponent(): ?Component
+    {
+        return AuditActor::current()->onBehalfOf === null ? parent::getMultiFactorAuthenticationContentComponent() : null;
     }
 
     /** @param  array<string, mixed>  $data */

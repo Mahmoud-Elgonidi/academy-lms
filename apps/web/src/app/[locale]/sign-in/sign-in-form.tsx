@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useActionState, useEffect, useState } from 'react';
 import { Button, Field, Input, Notice, join } from '@/components/ui';
-import { sendCode, signInWithPassword, verifyCode, type SignInState } from './actions';
+import { sendCode, signInWithPassword, verifyCode, verifyTwoFactor, type SignInState } from './actions';
 
 const start: SignInState = { step: 'contact' };
 
@@ -52,6 +52,7 @@ function CodeForm({ next }: { next: string }) {
   const state = checked.error || checked.staff ? { ...sent, ...checked } : sent;
   const wait = useCountdown(sent.resendAfter, sent.challengeId);
 
+  if (checked.step === 'two-factor' && checked.twoFactorToken && !editing) return <TwoFactorStep token={checked.twoFactorToken} next={next} />;
   if (sent.step === 'contact' || editing) {
     return (
       <form action={(form) => { setEditing(false); send(form); }} className="space-y-4">
@@ -95,9 +96,43 @@ function ChallengeCarrier({ state }: { state: SignInState }) {
   return <input type="hidden" name="challenge" value={JSON.stringify({ challengeId: state.challengeId, contact: state.contact })} />;
 }
 
+/**
+ * The second step for an account with two-step sign-in: the six digits the
+ * authenticator app shows now, or one of the recovery codes.
+ */
+function TwoFactorStep({ token, next }: { token: string; next: string }) {
+  const t = useTranslations('signIn');
+  const [state, check, checking] = useActionState(verifyTwoFactor, { step: 'two-factor', twoFactorToken: token });
+  // A back-office account passed both steps: its place is the back office.
+  if (state.staff) return <Staff />;
+  if (state.step === 'contact') {
+    return (
+      <div className="space-y-3">
+        <Notice tone="danger">{state.error ?? t('twoFactorExpired')}</Notice>
+        <a href="" className="block text-center font-semibold text-brand-strong underline underline-offset-4">{t('startAgain')}</a>
+      </div>
+    );
+  }
+  return (
+    <form action={check} className="space-y-4">
+      <input type="hidden" name="next" value={next} />
+      <input type="hidden" name="token" value={state.twoFactorToken ?? token} />
+      <div>
+        <p className="font-heading font-semibold">{t('twoFactorTitle')}</p>
+        <p className="text-sm text-muted">{t('twoFactorHint')}</p>
+      </div>
+      <Field label={t('twoFactorCode')} error={state.error}>
+        <Input name="code" autoComplete="one-time-code" maxLength={40} required dir="ltr" autoFocus className="text-center text-xl tracking-[0.3em]" />
+      </Field>
+      <Button wide disabled={checking}>{t('enter')}</Button>
+    </form>
+  );
+}
+
 function PasswordForm({ next }: { next: string }) {
   const t = useTranslations('signIn');
   const [state, signIn, pending] = useActionState(signInWithPassword, start);
+  if (state.step === 'two-factor' && state.twoFactorToken) return <TwoFactorStep token={state.twoFactorToken} next={next} />;
   return (
     <form action={signIn} className="space-y-4">
       <input type="hidden" name="next" value={next} />

@@ -24,12 +24,16 @@ use Modules\Identity\Accounts\AccountLookup;
 use Modules\Identity\Actions\Otp\RequestSignInCode;
 use Modules\Identity\Actions\Otp\VerifySignInCode;
 use SensitiveParameter;
+use Throwable;
 
 /**
  * Sign-in for every panel with what people have: an email, a mobile number
  * (as they write it: "+20 101…", "00966…", or local "0101…" when only one
  * account here ends with it), or a username, and a password; or, instead of
- * the password, a one-time code sent by WhatsApp, text or email.
+ * the password, a one-time code sent by WhatsApp, text or email. Whoever has
+ * two-step sign-in on is then asked for the code from their authenticator
+ * app (or a recovery code), by password (Filament's own challenge) or by
+ * code alike.
  */
 final class SignIn extends Login
 {
@@ -53,6 +57,10 @@ final class SignIn extends Login
     /** @var list<string> */
     #[Locked]
     public array $channels = [];
+
+    /** After a right one-time code, whose second step this is and until when (encrypted: [user id, unix time]). */
+    #[Locked]
+    public ?string $codePassed = null;
 
     public function form(Schema $schema): Schema
     {
@@ -94,6 +102,9 @@ final class SignIn extends Login
         if ($this->mode !== 'code') {
             return parent::authenticate();
         }
+        if (filled($this->userUndertakingMultiFactorAuthentication)) {
+            return $this->afterCodeSecondStep();
+        }
 
         try {
             $this->rateLimit(5);
@@ -122,7 +133,42 @@ final class SignIn extends Login
             throw ValidationException::withMessages(['data.email' => __('filament-panels::auth/pages/login.messages.failed')]);
         }
 
+        // Two-step sign-in on: the code proved the phone or the email; the authenticator app comes next.
+        $challenge = $this->getMultiFactorChallenge();
+        if ($provider = $challenge->getFirstEnabledProvider($user)) {
+            $this->userUndertakingMultiFactorAuthentication = encrypt($user->getAuthIdentifier());
+            $this->codePassed = encrypt([$user->getAuthIdentifier(), now()->addMinutes(10)->getTimestamp()]);
+            $challenge->beforeChallenge($user, $provider);
+            $this->multiFactorChallengeForm->fill();
+
+            return null;
+        }
+
         Filament::auth()->login($user, (bool) ($data['remember'] ?? false));
+        session()->regenerate();
+
+        return app(LoginResponse::class);
+    }
+
+    /** The authenticator app's code after a right one-time code, within ten minutes of it. */
+    private function afterCodeSecondStep(): ?LoginResponse
+    {
+        $user = $this->getUserUndertakingMultiFactorAuthentication();
+        try {
+            [$passedFor, $until] = decrypt((string) $this->codePassed);
+        } catch (Throwable) {
+            $passedFor = $until = null;
+        }
+        if ($user === null || $passedFor !== $user->getAuthIdentifier() || $until < now()->getTimestamp() || ! $this->isUserAllowedToAccessPanel($user)) {
+            $this->reset('userUndertakingMultiFactorAuthentication', 'codePassed', 'challengeId', 'sentTo', 'channel', 'channels');
+            throw ValidationException::withMessages(['data.email' => __('identity::two_factor.errors.start_again')]);
+        }
+        if ($this->isMultiFactorChallengeRateLimited($user)) {
+            return null;
+        }
+        $this->multiFactorChallengeForm->validate();
+
+        Filament::auth()->login($user, (bool) ($this->data['remember'] ?? false));
         session()->regenerate();
 
         return app(LoginResponse::class);

@@ -416,6 +416,36 @@ abstract class AppLocalizations {
   /// **'ادخل بكود بدل كلمة السر'**
   String get useCodeInstead;
 
+  /// No description provided for @twoFactorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدخول بخطوتين'**
+  String get twoFactorTitle;
+
+  /// No description provided for @twoFactorLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح تطبيق المصادقة واكتب الكود اللي فيه (6 أرقام). ضيّعت موبايلك؟ اكتب كود من أكواد الاسترجاع.'**
+  String get twoFactorLead;
+
+  /// No description provided for @twoFactorAccount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} في {academy}'**
+  String twoFactorAccount(String name, String academy);
+
+  /// No description provided for @twoFactorCode.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكود'**
+  String get twoFactorCode;
+
+  /// No description provided for @startAgain.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدأ من الأول'**
+  String get startAgain;
+
   /// No description provided for @webOnlyTitle.
   ///
   /// In ar, this message translates to:

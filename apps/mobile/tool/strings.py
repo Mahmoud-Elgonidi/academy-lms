@@ -67,6 +67,11 @@ s('loginLabel', 'الإيميل أو الموبايل أو اسم المستخد
 s('passwordLabel', 'كلمة السر', 'Password')
 s('signIn', 'ادخل', 'Sign in')
 s('useCodeInstead', 'ادخل بكود بدل كلمة السر', 'Sign in with a code instead')
+s('twoFactorTitle', 'الدخول بخطوتين', 'Two-step sign-in')
+s('twoFactorLead', 'افتح تطبيق المصادقة واكتب الكود اللي فيه (6 أرقام). ضيّعت موبايلك؟ اكتب كود من أكواد الاسترجاع.', 'Open your authenticator app and type the 6-digit code. Lost your phone? Type one of your recovery codes.')
+s('twoFactorAccount', '{name} في {academy}', '{name} at {academy}', name='String', academy='String')
+s('twoFactorCode', 'الكود', 'Code')
+s('startAgain', 'ابدأ من الأول', 'Start again')
 s('webOnlyTitle', 'الحساب ده للإدارة', 'This is a staff account')
 s('webOnlyBody', 'حسابات الإدارة بتشتغل من الموقع. افتح لوحة الأكاديمية من الكمبيوتر.', "Staff accounts work on the website. Open the academy's back office on a computer.")
 

@@ -1962,6 +1962,8 @@
         "/v1/auth/login": {
             "post": {
                 "operationId": "identity.login",
+                "description": "The token for this device. With two-step sign-in on, a 403 problem of type \"two-factor-required\" instead,\ncarrying two_factor_token for auth/two-factor; \"two-factor-setup-required\" when the account must set it up in the back office first.",
+                "summary": "Sign in with a password",
                 "tags": [
                     "Identity"
                 ],
@@ -2111,6 +2113,7 @@
         "/v1/auth/code/verify": {
             "post": {
                 "operationId": "identity.code.verify",
+                "description": "With two-step sign-in on, a 403 problem of type \"two-factor-required\" carrying two_factor_token for auth/two-factor.",
                 "summary": "Sign in with the code",
                 "tags": [
                     "Identity"
@@ -2196,7 +2199,7 @@
         "/v1/accounts/sign-in": {
             "post": {
                 "operationId": "identity.accounts.sign-in",
-                "description": "Send the account's academy as X-Academy.",
+                "description": "Send the account's academy as X-Academy. With two-step sign-in on, a 403 problem of type \"two-factor-required\"\ncarrying two_factor_token for auth/two-factor (in the same academy).",
                 "summary": "Sign in to a discovered account",
                 "tags": [
                     "Identity"
@@ -2236,6 +2239,113 @@
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/DiscoveredSignInRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "token": {
+                                            "type": "string"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "const": "Bearer"
+                                        },
+                                        "expires_at": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/UserResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "token",
+                                        "token_type",
+                                        "expires_at",
+                                        "user"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/auth/two-factor": {
+            "post": {
+                "operationId": "identity.two-factor",
+                "description": "After a sign-in answered \"two-factor-required\": its two_factor_token and the code the authenticator app shows now\n(or one of the recovery codes, used up). Five tries within five minutes; then sign in again. Answers like any sign-in.",
+                "summary": "Finish signing in with the second step",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "two_factor_token": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "maxLength": 40
+                                    },
+                                    "device_name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 100
+                                    }
+                                },
+                                "required": [
+                                    "two_factor_token",
+                                    "code"
+                                ]
                             }
                         }
                     }
