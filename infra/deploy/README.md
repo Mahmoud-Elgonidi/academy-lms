@@ -10,7 +10,7 @@ The LMS is built to share a server with other projects without touching them:
 
 | What | How it stays apart |
 |---|---|
-| Files | one folder, `~/academy-lms`, owned by the deploy user (`.env` and `postgres.env` readable by it only) |
+| Files | one folder, `~/academy-lms` in the deploy user's home (`/home/lukas-demo/academy-lms` unless `DEPLOY_USER` names another), owned by that user (`.env` and `postgres.env` readable by it only). Signed in as root, use the full path: `~` is root's home there |
 | Containers | the Docker project `academy-lms`: its own containers, network (`academy-lms_internal`) and volumes; `deploy.sh` only ever runs `docker compose -p academy-lms` and removes only its own older images |
 | Network | one port, on `127.0.0.1` only (the first free one from 18080); Postgres, Redis and Reverb are not published at all |
 | Resources | memory and CPU limits on every container (`WEB_MEMORY`, `PORTAL_MEMORY`, `DB_MEMORY`, ... in `.env`), and logs that rotate (3 × 10 MB) |
@@ -65,7 +65,7 @@ and says what is missing.
    wildcard certificate through a DNS challenge (`certbot certonly --manual --preferred-challenges dns
    -d progma.store -d '*.progma.store'`, then point the site at it).
 3. Open `https://demo.progma.store/admin` (or `https://progma.store/admin` with `PLATFORM_HOME_ACADEMY=demo`). The demo accounts (`owner@demo.test`, `khaled@demo.test`, ...) use
-   this server's own password: `grep DEMO_PASSWORD ~/academy-lms/.env`. The portal (teachers at /ar/teach, students and guardians at /ar/family, live through Reverb) is
+   this server's own password: `grep DEMO_PASSWORD ~/academy-lms/.env` as the deploy user (as root: `grep DEMO_PASSWORD /home/lukas-demo/academy-lms/.env`). The portal (teachers at /ar/teach, students and guardians at /ar/family, live through Reverb) is
    `https://demo.progma.store/ar` (or `https://progma.store/ar`); a browser opening the bare address goes there. The platform console is
    `https://progma.store/console` (`admin@platform.test`, same password); its authenticator secret is
    `DEMO_PLATFORM_2FA_SECRET` in `.env`, or print the current code:
