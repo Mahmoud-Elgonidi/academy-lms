@@ -29,7 +29,7 @@ export default async function Lesson({ params }: { params: Promise<{ id: string 
           </p>
         ) : null}
       </header>
-      <Classroom id={id} />
+      <Classroom id={id} back={{ href: '/teach', label: t('backToToday') }} />
     </div>
   );
 }

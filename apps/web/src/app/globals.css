@@ -86,3 +86,76 @@ h1, h2, h3 {
 @keyframes bar-fill {
   from { transform: scaleX(0); }
 }
+
+/*
+ * A student's own look (FamilyView::stage of the person signed in), as in the
+ * app and the panel: fonts, corners and the page's neutral. Guardians and
+ * adults keep the classic look (the academy's). Colours stay the academy's.
+ */
+@theme {
+  --color-reward: #f2b53a;
+  --color-reward-soft: #fff1cc;
+}
+
+[data-stage='kids'] {
+  --font-sans: var(--font-baloo), var(--font-plex-arabic), system-ui, sans-serif;
+  --font-heading: var(--font-baloo), var(--font-plex-arabic), system-ui, sans-serif;
+  --radius-card: 1.625rem;
+  --radius-control: 1.125rem;
+  --color-paper: #f3f7fb;
+  font-family: var(--font-sans);
+  font-size: 16px;
+}
+
+[data-stage='middle'] {
+  --font-sans: var(--font-rubik), var(--font-plex-arabic), system-ui, sans-serif;
+  --font-heading: var(--font-rubik), var(--font-plex-arabic), system-ui, sans-serif;
+  --radius-card: 1.125rem;
+  --radius-control: 0.875rem;
+  --color-paper: #f4f4f6;
+  font-family: var(--font-sans);
+}
+
+[data-stage='teen'] {
+  --font-sans: var(--font-plex-latin), var(--font-plex-arabic), system-ui, sans-serif;
+  --font-heading: var(--font-plex-latin), var(--font-plex-arabic), system-ui, sans-serif;
+  --radius-card: 0.625rem;
+  --radius-control: 0.625rem;
+  --color-paper: #f8fafc;
+  --color-line: #e2e8f0;
+  font-family: var(--font-sans);
+}
+
+[data-stage] {
+  background: var(--color-paper);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The kids' "you're here" stop bobs gently. */
+  .bob {
+    animation: bob 1.6s ease-in-out infinite;
+  }
+  /* A reward that pops in when it becomes ready. */
+  .pop {
+    animation: pop 420ms cubic-bezier(0.2, 1.4, 0.4, 1) backwards;
+  }
+  /* A reward waiting to be collected nudges now and then. */
+  .nudge {
+    animation: nudge 2.6s ease-in-out 1.2s infinite backwards;
+  }
+}
+
+@keyframes bob {
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.6); }
+}
+
+@keyframes nudge {
+  0%, 70%, 100% { transform: translateY(0); }
+  78% { transform: translateY(-3px); }
+  86% { transform: translateY(0); }
+  92% { transform: translateY(-1.5px); }
+}

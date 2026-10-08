@@ -1,0 +1,18 @@
+import type { Stage } from './types';
+
+/** A student's own look: no cancelling or rating for kids, no money for students in a stage. */
+export function canAct(stage: Stage): boolean {
+  return stage !== 'kids';
+}
+
+export function seesMoney(stage: Stage): boolean {
+  return stage === 'classic';
+}
+
+/** Whether a lesson offers this person anything to do: cancel, turn down the substitute, or rate it once it took place. */
+export function lessonActionsFor(lesson: { status: string; can_cancel: boolean; can_refuse_substitute: boolean }, stage: Stage): { cancel: boolean; refuse: boolean; rate: boolean } | null {
+  if (!canAct(stage)) return null;
+  const rate = lesson.status === 'completed' || lesson.status === 'student_absent';
+  const found = { cancel: lesson.can_cancel, refuse: lesson.can_refuse_substitute, rate };
+  return found.cancel || found.refuse || found.rate ? found : null;
+}

@@ -2,14 +2,14 @@
 
 import { useTranslations } from 'next-intl';
 import { useTransition } from 'react';
-import { markRead } from '@/app/[locale]/teach/actions';
+import { markRead } from '@/lib/actions/shared';
 import { useRouter } from '@/i18n/navigation';
 import { Button, join } from '@/components/ui';
 import type { Notification } from '@/lib/teach/types';
 
 /** Messages: opening one marks it read and goes where it is about. */
 export function Inbox({ items, unread }: { items: (Notification & { href: string })[]; unread: number }) {
-  const t = useTranslations('teach');
+  const t = useTranslations('common');
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
@@ -41,7 +41,7 @@ export function Inbox({ items, unread }: { items: (Notification & { href: string
               <span className={join('mt-2 size-2 shrink-0 rounded-full', n.read ? 'bg-transparent' : n.urgent ? 'bg-danger' : 'bg-brand')} aria-hidden="true" />
               <span className="min-w-0 flex-1">
                 <span className={join('block', !n.read && 'font-semibold')}>{n.title}</span>
-                <span className="mt-0.5 block text-sm text-muted">{n.body}</span>
+                <span className="mt-0.5 block text-sm text-muted [overflow-wrap:anywhere]">{n.body}</span>
                 <span className="mt-1 block text-xs text-muted">{n.created_at.label}</span>
               </span>
             </button>

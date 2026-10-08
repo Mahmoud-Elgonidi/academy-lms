@@ -2,7 +2,7 @@
 
 import { refresh } from 'next/cache';
 import { send, type Outcome } from '@/lib/api/server';
-import type { JoinTicket, ShiftBlock } from '@/lib/teach/types';
+import type { ShiftBlock } from '@/lib/teach/types';
 
 /**
  * The teacher's writes. Each calls the same API endpoint (and so the same
@@ -92,19 +92,4 @@ export async function requestTimeOff(payload: TimeOffPayload, key: string): Prom
 
 export async function withdrawTimeOff(id: string): Promise<Result> {
   return result(await send('delete', '/v1/teacher/time-off/{timeOff}', { params: { timeOff: id } }));
-}
-
-/** Marks notifications read: these, or all of them. */
-export async function markRead(ids?: string[]): Promise<Result> {
-  return result(await send('post', '/v1/notifications/read', { body: ids ? { ids } : {} }));
-}
-
-/** A seat in the lesson's room (LiveKit's address and token, or an outside link), for this person only. */
-export async function joinLesson(id: string): Promise<{ ok: true; ticket: JoinTicket } | { ok: false; message?: string }> {
-  const joined = await send<{ data: JoinTicket }>('post', '/v1/lessons/{session}/join', { params: { session: id } });
-  if (!joined.ok) {
-    const first = Object.values(joined.problem.errors)[0]?.[0];
-    return { ok: false, message: first ?? (joined.problem.title || undefined) };
-  }
-  return { ok: true, ticket: joined.data.data };
 }

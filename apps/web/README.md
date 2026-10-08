@@ -1,6 +1,11 @@
 # Academy LMS portal
 
-The academies' web portal (Next.js 16, App Router). Phase A is the **teacher's portal**: today, the week, lesson reports, marking homework (recordings play in the page), students and their roadmap, trial lessons, my hours (shift proposals with the academy), time off, earnings, performance, notifications, and the live lesson in the browser (LiveKit, or the teacher's outside link). Students and guardians see a page pointing to their area at `/my` until phase B. Staff keep the back office at `/admin`.
+The academies' web portal (Next.js 16, App Router), in two parts:
+
+- **The teacher's portal** (phase A, `/teach`): today, the week, lesson reports, marking homework (recordings play in the page), students and their roadmap, trial lessons, my hours (shift proposals with the academy), time off, earnings, performance, notifications, and the live lesson in the browser (LiveKit, or the teacher's outside link).
+- **The family's portal** (phase B, `/family`), for students and guardians, in the look of the person signed in, as in the app and the `/my` panel: a student's own stage (kids: their journey map, missions and big tabs; middle school: points, levels and quests; teens: their plan and goals) or the classic look for adults and every guardian. The home, lessons (cancelling after seeing what the policy will do, turning down a substitute, rating a lesson that took place; kids do none of these), progress (each course's roadmap and the teacher's reports), homework (handed in as words, a voice recording made in the browser, or a picture or PDF), money (what is owed, paid on the academy's own gateway page; invoices with their tax document; lessons left; the classic look only), challenges (the student collects rewards; a guardian follows and cheers), notifications. A guardian with several children picks whose pages they see.
+
+Staff keep the back office at `/admin`.
 
 It talks only to the API (`/api/v1`, [`packages/openapi/openapi.json`](../../packages/openapi/openapi.json)), as the Flutter app does, and calls the same Actions through it.
 
@@ -15,7 +20,13 @@ ACADEMY=demo API_INTERNAL_URL=http://127.0.0.1:8000 npm run build
 ACADEMY=demo API_INTERNAL_URL=http://127.0.0.1:8000 npm run start   # http://localhost:3000
 ```
 
-`npm run dev` works the same way. Sign in at http://localhost:3000/ar with `khaled@demo.test` / `password` (Khaled has a report waiting, a recorded homework to mark and a lesson now and then), or with a code: it goes to Mailpit (http://localhost:8025) or `apps/api/storage/logs/laravel.log`.
+`npm run dev` works the same way. Sign in at http://localhost:3000/ar with `password` as:
+
+- `khaled@demo.test`, a teacher (a report waiting, a recorded homework to mark, a lesson now and then);
+- `ziad.guardian@demo.test`, a guardian (an overdue invoice, lessons to cancel or rate), or `yousef.guardian@demo.test`;
+- `yousef@demo.test` (kids), `ziad@demo.test` (middle school), `maryam@demo.test` (teen), students in their own looks.
+
+Or sign in with a code: it goes to Mailpit (http://localhost:8025) or `apps/api/storage/logs/laravel.log`.
 
 | Setting | What it is |
 |---|---|
@@ -28,13 +39,16 @@ ACADEMY=demo API_INTERNAL_URL=http://127.0.0.1:8000 npm run start   # http://loc
 |---|---|
 | `src/proxy.ts` | Next's proxy (it was middleware): a page needs the session cookie, except signing in; then next-intl keeps `/ar` or `/en` in the path |
 | `src/lib/api/server.ts` | The API from the server only (`server-only`): `get` for pages (401 → sign in again, 403/404 → not found, anything else → the error page), `send` for Server Actions (the API's RFC 7807 words and field errors back to the form). Each call carries the token from the httpOnly cookie, `Accept-Language`, `X-Timezone` (the browser's zone, from a cookie the page writes), and the page's host as `X-Forwarded-Host`. Paths are typed from the OpenAPI document (`schema.ts`): a path or method the API no longer has fails `npm run typecheck` |
-| `src/lib/teach/types.ts` | What the teacher endpoints answer, as the pages read it |
-| `src/app/[locale]/sign-in` | Signing in by code (to an email or number) or password, as Server Actions; the token goes into an httpOnly, `SameSite=Lax` cookie (`Secure` behind https) and never reaches the page's scripts. Staff accounts are sent to `/admin` |
-| `src/app/[locale]/teach` | The teacher's pages (server components) and `actions.ts` (every write: a report, a mark, a trial assessment, a shift proposal and its messages, time off, notifications read, a seat in a lesson). After a write the page refreshes from the API |
-| `src/app/bff` | The portal's own routes: `session-ended` (forgets a refused token, then sign in again) and `submissions/{id}/file` (a handed-in file or recording, streamed through with the teacher's token; seeking passes `Range` on) |
-| `src/components` | `ui.tsx` (the small kit), `icons.tsx` (our own line icons), `teach/*` (shell and navigation, lesson card, report editor, marking, week view and shift editor, time off, inbox, classroom) |
+| `src/lib/teach/types.ts`, `src/lib/family/types.ts` | What the teacher and family endpoints answer, as the pages read it |
+| `src/lib/family` | `context.ts`: the learners, the look of the person signed in (`viewer_stage`) and whose pages they are (the `lms_learner` cookie, else the first); `rules.ts`: what a look allows (money only in the classic look; no cancelling or rating for kids); `nav-items.ts`: each look's places and phone tabs (`nav.{stage}` in messages); `targets.ts`: where a notification opens |
+| `src/app/[locale]/sign-in` | Signing in by code (to an email or number) or password, as Server Actions; the token goes into an httpOnly, `SameSite=Lax` cookie (`Secure` behind https) and never reaches the page's scripts. Teachers go to `/teach`, students and guardians to `/family`, staff to `/admin` |
+| `src/app/[locale]/teach` | The teacher's pages (server components) and `actions.ts` (every write: a report, a mark, a trial assessment, a shift proposal and its messages, time off). After a write the page refreshes from the API |
+| `src/app/[locale]/family` | The family's pages, wrapped in the look (`layout.tsx`: a `data-stage` frame with the stage's fonts and corners, the academy's colours either way), and `actions.ts` (choosing the learner, cancelling with an idempotency key, turning down a substitute, rating, handing in as multipart, collecting a reward, cheering, paying) |
+| `src/lib/actions/shared.ts` | Writes both portals make: a seat in a lesson, notifications read |
+| `src/app/bff` | The portal's own routes: `session-ended` (forgets a refused token, then sign in again) and `submissions/{id}/file` (a handed-in file or recording, streamed through with the person's token; the API checks it is theirs to see; seeking passes `Range` on) |
+| `src/components` | `ui.tsx` (the small kit), `icons.tsx` (our own line icons), `inbox.tsx`, `handed.tsx` (what was handed in), `roadmap-view.tsx`, `teach/*` (shell and navigation, lesson card, report editor, marking, week view and shift editor, time off, classroom), `family/*` (shell, navigation and learner switch, the four homes, lesson card and its dialogs, hand-in with the browser's recorder, paying, the challenges board) |
 | `messages/{ar,en}.json` | Every word; Arabic is Egyptian, as on the panels and in the app |
-| `src/app/globals.css` | Tailwind 4 tokens from the academy's branding (`GET /branding`): its colours as CSS variables on `<html>`, tints mixed from them, its corners and fonts. Motion (`.appear`, `.stagger`, `.lift`, `.bar-fill`) only when the person allows motion |
+| `src/app/globals.css` | Tailwind 4 tokens from the academy's branding (`GET /branding`): its colours as CSS variables on `<html>`, tints mixed from them, its corners and fonts; each stage's look (`[data-stage]`: Baloo Bhaijaan 2 for kids, Rubik for middle school, Plex for teens, from `src/fonts`, OFL). Motion (`.appear`, `.stagger`, `.lift`, `.bar-fill`, `.bob`, `.pop`, `.nudge`) only when the person allows motion |
 
 Times are shown as the API writes them (`LocalTime.label`, or the wall clock in `local`); calendar days (a week, a month) are written in UTC so a day stays the same day. The portal never converts zones.
 
@@ -43,12 +57,12 @@ Times are shown as the API writes them (`LocalTime.label`, or the wall clock in 
 ```bash
 npm run lint
 npm run typecheck
-npm test                 # unit (vitest): days and zones, safe redirects, notification targets, form problems
+npm test                 # unit (vitest): days and zones, safe redirects, notification targets, form problems, each look's places and what it allows
 npm run api:types        # after the API changes (composer openapi), then commit src/lib/api/schema.ts
 npx playwright test      # end to end against the running portal and API with fresh demo data (playwright.config.ts)
 ```
 
-The end-to-end tests sign in (password, code, staff, a refused token), then as Khaled: every page at phone width with no sideways scroll, the week back and forth, a report refused without ratings and then sent with homework, a recording that plays through the portal and a mark, someone else's file refused, time off asked for and withdrawn, a draft of new hours with a message to the academy then withdrawn, and the switch to English. They change the demo data, so CI runs them on a fresh demo (`.github/workflows/web.yml`).
+The end-to-end tests sign in (password, code, staff, a refused token), then as Khaled: every page at phone width with no sideways scroll, the week back and forth, a report refused without ratings and then sent with homework, a recording that plays through the portal and a mark, someone else's file refused, time off asked for and withdrawn, a draft of new hours with a message to the academy then withdrawn, and the switch to English. Then the family: as Ziad's guardian every page at phone width, the classic tabs, what cancelling would do (and keeping the lesson), a rating, paying on the gateway's page, a cheer; as Yousef (kids) the journey and missions, no money, cancelling or rating, and collecting a reward; as Ziad (middle school) his quests and homework handed in in words. They change the demo data, so CI runs them on a fresh demo (`.github/workflows/web.yml`).
 
 ## On the server
 

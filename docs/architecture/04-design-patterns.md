@@ -448,11 +448,13 @@ apps/web/
     app/[locale]/sign-in/             الدخول بكود أو بكلمة سر (Server Actions)، والـ token في httpOnly cookie
     app/[locale]/teach/               بوابة المدرس: الصفحات (server components) و actions.ts (كل الكتابة)
     app/[locale]/teach/lessons/[id]   الحصة: LiveKit React أو لينك برّه
-    app/[locale]/family/              الطالب وولي الأمر (لحد ما بوابتهم تجهز: لينك لـ /my)
+    app/[locale]/family/              الطالب وولي الأمر بشكل مرحلة اللي داخل (data-stage)، و actions.ts (كل الكتابة)
     app/bff/                          session-ended، والملفات اللي اتسلّمت (بالـ token من السيرفر)
     lib/api/server.ts                 get/send: الـ API من السيرفر بس، والـ paths متكتبة من schema.ts (متولّد من openapi.json)
+    lib/family/                       context (الطالب المختار والشكل)، rules (اللي كل شكل يسمح بيه)، nav-items، targets
+    lib/actions/shared.ts             كتابة البوابتين: الدخول للحصة، وقراية الإشعارات
     lib/teach/  lib/format.ts  lib/time.ts  lib/viewer.ts (الشكل والشخص)
-    components/ui.tsx  components/icons.tsx  components/teach/*
+    components/ui.tsx  components/icons.tsx  components/inbox.tsx  components/teach/*  components/family/*
   (P2) app/(public)/[locale]/...      موقع الأكاديمية العام، ISR بـ tag لكل أكاديمية
 ```
 

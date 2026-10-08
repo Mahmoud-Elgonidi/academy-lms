@@ -1,0 +1,68 @@
+import { expect, test } from '@playwright/test';
+import { fitsTheScreen } from './helpers';
+
+// Ziad's guardian, in the classic look: lessons, money and cheering on.
+test.use({ storageState: 'e2e/.auth/guardian.json' });
+
+test('every family page opens, fits a phone, and reads right to left', async ({ page }) => {
+  for (const path of ['/ar/family', '/ar/family/lessons', '/ar/family/lessons?when=past', '/ar/family/progress', '/ar/family/homework', '/ar/family/money', '/ar/family/challenges', '/ar/family/notifications', '/ar/family/more']) {
+    const response = await page.goto(path);
+    expect(response?.status(), path).toBe(200);
+    await expect(page.locator('h1').first(), path).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+    await fitsTheScreen(page);
+  }
+  // The classic tab bar has the money, not the challenges.
+  const tabs = page.getByRole('navigation', { name: 'القايمة' }).last();
+  await expect(tabs.getByRole('link', { name: 'الفلوس' })).toBeVisible();
+  await tabs.getByRole('link', { name: 'الحصص' }).click();
+  await expect(page).toHaveURL(/\/ar\/family\/lessons$/);
+});
+
+test('a guardian sees what cancelling would do, and may keep the lesson', async ({ page }) => {
+  await page.goto('/ar/family/lessons');
+  const cancel = page.getByRole('button', { name: 'إلغاء الحصة' });
+  test.skip((await cancel.count()) === 0, 'no lesson to cancel in this data');
+  await cancel.first().click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText('حسب سياسة الأكاديمية:')).toBeVisible();
+  // Confirming without a reason asks for one.
+  await dialog.getByRole('button', { name: 'أيوه، ألغيها' }).click();
+  await expect(dialog.getByText('اختار سبب الأول.')).toBeVisible();
+  await dialog.getByRole('button', { name: 'لأ، خليها' }).click();
+  await expect(dialog).toBeHidden();
+});
+
+test('a guardian rates a lesson that took place', async ({ page }) => {
+  await page.goto('/ar/family/lessons?when=past');
+  const rate = page.getByRole('button', { name: 'قيّم الحصة' });
+  test.skip((await rate.count()) === 0, 'no lesson to rate in this data');
+  await rate.first().click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('radio', { name: '4 من 5' }).click();
+  await expect(dialog.getByText('إيه اللي عجبكم؟')).toBeVisible();
+  await dialog.getByRole('button', { name: 'ابعت التقييم' }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByText('شكرًا! وصل تقييمك.')).toBeVisible();
+});
+
+test('what is owed is paid on the academy\'s payment page', async ({ page }) => {
+  await page.goto('/ar/family/money');
+  await expect(page.getByText('الفواتير', { exact: true })).toBeVisible();
+  const pay = page.getByRole('button', { name: /^ادفع / });
+  test.skip((await pay.count()) === 0, 'nothing owed in this data');
+  await pay.first().click();
+  // The academy's own gateway page (the demo gateway here); the invoice is paid only when it says so.
+  await page.waitForURL(/\/pay\//);
+});
+
+test('a guardian cheers their child on', async ({ page }) => {
+  await page.goto('/ar/family/challenges');
+  await expect(page.getByRole('heading', { name: /^شجّع / })).toBeVisible();
+  test.skip(await page.getByText('خلّصت تشجيعات النهارده').isVisible(), 'no cheers left today');
+  await page.getByRole('button', { name: 'نجمة' }).click();
+  await expect(page.getByText(/^التشجيع وصل لـ /)).toBeVisible();
+  // Only the student collects rewards.
+  await expect(page.getByRole('button', { name: /^استلم / })).toHaveCount(0);
+});

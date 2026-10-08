@@ -5,7 +5,7 @@ import { ControlBar, GridLayout, LiveKitRoom, ParticipantTile, RoomAudioRenderer
 import { Track } from 'livekit-client';
 import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
-import { joinLesson } from '@/app/[locale]/teach/actions';
+import { joinLesson } from '@/lib/actions/shared';
 import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
 import { Button, Card, Notice, buttonLook } from '@/components/ui';
@@ -19,7 +19,7 @@ type Stage = { kind: 'ready' } | { kind: 'in'; ticket: JoinTicket } | { kind: 'l
  * here with camera and microphone; an outside link opens in a new tab.
  * Attendance comes from the room itself (webhooks), not from this page.
  */
-export function Classroom({ id }: { id: string }) {
+export function Classroom({ id, back }: { id: string; back: { href: string; label: string } }) {
   const t = useTranslations('teach');
   const common = useTranslations('common');
   const [stage, setStage] = useState<Stage>({ kind: 'ready' });
@@ -79,8 +79,8 @@ export function Classroom({ id }: { id: string }) {
           <Button onClick={enter} disabled={pending}>
             {t('enterRoom')}
           </Button>
-          <Link href="/teach" className={buttonLook('quiet')}>
-            {t('backToToday')}
+          <Link href={back.href} className={buttonLook('quiet')}>
+            {back.label}
           </Link>
         </div>
       </Card>

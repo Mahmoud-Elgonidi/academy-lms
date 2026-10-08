@@ -1,4 +1,11 @@
+Fonts bundled in the portal: IBM Plex Sans Arabic (WOFF2), Baloo Bhaijaan 2 and Rubik (TrueType from Google Fonts), for the students' stage looks.
+
+Copyright 2019 The Baloo 2 Project Authors (https://github.com/EkType/Baloo2)
+
 Copyright 2019 IBM Corp. All rights reserved. IBMPlexSansArabic-ExtraLight.ttf: Copyright 2019 IBM Corp. All rights reserved. IBMPlexSansArabic-Light.ttf: Copyright 2019 IBM Corp. All rights reserved. IBMPlexSansArabic-Regular.ttf: Copyright 2019 IBM Corp. All rights reserved. IBMPlexSansArabic-Medium.ttf: Copyright 2019 IBM Corp. All rights reserved. IBMPlexSansArabic-SemiBold.ttf: Copyright 2019 IBM Corp. All rights reserved. IBMPlexSansArabic-Bold.ttf: Copyright 2019 IBM Corp. All rights reserved.
+
+Copyright 2015 The Rubik Project Authors (https://github.com/googlefonts/rubik) Rubik-Italic[wght].ttf: Copyright 2015 The Rubik Project Authors (https://github.com/googlefonts/rubik)
+
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

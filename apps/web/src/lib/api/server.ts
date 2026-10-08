@@ -26,6 +26,8 @@ type Options = {
   params?: Record<string, string>;
   query?: Query;
   body?: unknown;
+  /** A multipart body instead (a file handed in); fetch sets its boundary. */
+  form?: FormData;
   /** A token just issued, before the cookie holds it. */
   token?: string;
   /** Writes that move lessons or money: the same key for a retry of the same submit. */
@@ -73,7 +75,7 @@ export async function call<M extends Method>(method: M, path: PathFor<M>, option
   return fetch(urlOf(path, options.params, options.query), {
     method: method.toUpperCase(),
     headers: sent,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body: options.form ?? (options.body === undefined ? undefined : JSON.stringify(options.body)),
     cache: 'no-store',
     redirect: 'manual',
   });

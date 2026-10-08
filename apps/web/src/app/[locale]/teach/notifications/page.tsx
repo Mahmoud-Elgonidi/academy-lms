@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Inbox } from '@/components/teach/inbox';
+import { Inbox } from '@/components/inbox';
 import { Empty, Heading } from '@/components/ui';
 import { get } from '@/lib/api/server';
 import type { Notification } from '@/lib/teach/types';
