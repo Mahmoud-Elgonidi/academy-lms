@@ -600,6 +600,54 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pickGateway => 'تدفع بإيه؟';
 
   @override
+  String get paidByTransfer => 'دفعت بالتحويل';
+
+  @override
+  String get proofTitle => 'ابعت إثبات الدفع';
+
+  @override
+  String get proofHint => 'ادفع الأول، وبعدين ابعت الإيصال هنا. الأكاديمية هتتأكد إن الفلوس وصلت وتأكّد الدفعة.';
+
+  @override
+  String get proofHowTo => 'إزاي تدفع بالتحويل';
+
+  @override
+  String get proofMethod => 'دفعت إزاي';
+
+  @override
+  String get proofAmount => 'المبلغ اللي دفعته';
+
+  @override
+  String get proofPaidOn => 'يوم الدفع';
+
+  @override
+  String get proofReference => 'رقم التحويل (اختياري)';
+
+  @override
+  String get proofNote => 'ملاحظة (اختياري)';
+
+  @override
+  String get proofReceipt => 'الإيصال';
+
+  @override
+  String get proofPickReceipt => 'اختار صورة أو PDF';
+
+  @override
+  String get proofReceiptHint => 'صورة أو سكرين شوت أو PDF البنك، لحد 10 ميجا.';
+
+  @override
+  String get proofSend => 'ابعت الإثبات';
+
+  @override
+  String get proofSent => 'الإثبات اتبعت. هنقولك أول ما الأكاديمية تأكّده.';
+
+  @override
+  String get proofNeedsReceipt => 'اختار الإيصال الأول.';
+
+  @override
+  String get proofFileTooBig => 'الملف أكبر من 10 ميجا.';
+
+  @override
   String get joining => 'بندخّلك الحصة…';
 
   @override

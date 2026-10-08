@@ -36,7 +36,7 @@ final class Payment extends Model
 
     public const UPDATED_AT = null;
 
-    protected $fillable = ['invoice_id', 'method', 'amount_minor', 'currency', 'reference', 'received_at', 'recorded_by', 'note', 'checkout_id'];
+    protected $fillable = ['id', 'invoice_id', 'method', 'amount_minor', 'currency', 'reference', 'received_at', 'recorded_by', 'note', 'checkout_id'];
 
     protected function casts(): array
     {

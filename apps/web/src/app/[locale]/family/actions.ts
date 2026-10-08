@@ -112,4 +112,20 @@ export async function payInvoice(id: string, accountId: string | null, key: stri
   return { ok: true, url: opened.data.url };
 }
 
+/**
+ * Sends proof of paying an invoice by hand: how, how much, the payer's own
+ * day, the transfer's number and the receipt. It waits for the academy;
+ * one key per submit, so a retry sends it once.
+ */
+export async function sendProof(id: string, form: FormData, key: string): Promise<Result> {
+  const sent = new FormData();
+  for (const name of ['method', 'amount', 'paid_on', 'reference', 'note']) {
+    const value = String(form.get(name) ?? '').trim();
+    if (value) sent.set(name, value);
+  }
+  const file = form.get('file');
+  if (file instanceof File && file.size > 0) sent.set('file', file, file.name || 'receipt');
+  return result(await send('post', '/v1/family/invoices/{invoice}/proofs', { params: { invoice: id }, form: sent, idempotencyKey: key }));
+}
+
 export type { Rating };

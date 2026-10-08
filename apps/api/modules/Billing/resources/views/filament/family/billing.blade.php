@@ -1,4 +1,4 @@
-@php $l = 'billing::family.'; $a = $this->account; $online = app(\Modules\Billing\Payments\OnlinePayments::class); @endphp
+@php $l = 'billing::family.'; $a = $this->account; $online = app(\Modules\Billing\Payments\OnlinePayments::class); $takesProofs = $online->takesProofs(); @endphp
 <x-filament-panels::page>
     @include('billing::filament.family.styles')
     <div data-live-channel="{{ $a['channel'] }}" hidden></div>
@@ -42,8 +42,14 @@
                 @if ($inv['outstanding'] && $inv['status'] === 'partly_paid')
                     <small style="justify-self: end">{{ __($l.'left', ['amount' => $inv['outstanding']]) }}</small>
                 @endif
-                @if ($inv['payable'] && $online->offers($inv['currency']))
-                    <div class="bf-pay">{{ ($this->payAction)(['invoice' => $inv['id']]) }}</div>
+                @if ($inv['proof'] && ($inv['payable'] || $inv['proof']['status'] !== 'rejected'))
+                    <div class="bf-proof" data-s="{{ $inv['proof']['status'] }}">{{ $inv['proof']['text'] }}</div>
+                @endif
+                @if ($inv['payable'] && ($online->offers($inv['currency']) || ($inv['canSendProof'] && $takesProofs)))
+                    <div class="bf-pay">
+                        @if ($inv['canSendProof'] && $takesProofs) {{ ($this->sendProofAction)(['invoice' => $inv['id']]) }} @endif
+                        @if ($online->offers($inv['currency'])) {{ ($this->payAction)(['invoice' => $inv['id']]) }} @endif
+                    </div>
                 @endif
             </div>
         @empty

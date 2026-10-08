@@ -11,9 +11,12 @@ use Modules\Billing\Console\SweepBillingCommand;
 use Modules\Billing\Contracts\BillingApi;
 use Modules\Billing\Contracts\Events\InvoiceIssued;
 use Modules\Billing\Contracts\Events\InvoicePaid;
+use Modules\Billing\Contracts\Events\PaymentProofDecided;
+use Modules\Billing\Contracts\Events\PaymentProofSubmitted;
 use Modules\Billing\Filament\Family\FamilyBilling;
 use Modules\Billing\Filament\Resources\Invoices\InvoiceResource;
 use Modules\Billing\Http\Controllers\GatewayWebhookController;
+use Modules\Billing\Http\Controllers\ProofFileController;
 use Modules\Billing\Http\Controllers\StripeConnectController;
 use Modules\Billing\Listeners\IssueRenewalInvoice;
 use Modules\Billing\Listeners\SendBillingNotifications;
@@ -52,6 +55,8 @@ final class BillingServiceProvider extends ServiceProvider
             ->middleware(['web', 'throttle:20,1'])->name('billing.stripe.connected');
         Route::post('webhooks/stripe-connect', [StripeConnectController::class, 'webhook'])
             ->middleware(['api', 'throttle:240,1'])->name('billing.webhooks.stripe-connect');
+        // A proof's receipt, for the staff who review it and the payer who sent it (signed in on the panels).
+        Route::middleware(['web', 'tenant'])->get('billing/proofs/{proof}/file', ProofFileController::class)->name('billing.proofs.file');
         $this->app->make(LiveSignals::class)->on('payments', fn (string $userId) => new PaymentsChanged($userId));
         if ($this->app->runningInConsole()) {
             $this->commands([SweepBillingCommand::class]);
@@ -77,5 +82,7 @@ final class BillingServiceProvider extends ServiceProvider
         });
         Event::listen(InvoiceIssued::class, [SendBillingNotifications::class, 'issued']);
         Event::listen(InvoicePaid::class, [SendBillingNotifications::class, 'paid']);
+        Event::listen(PaymentProofSubmitted::class, [SendBillingNotifications::class, 'proofSubmitted']);
+        Event::listen(PaymentProofDecided::class, [SendBillingNotifications::class, 'proofDecided']);
     }
 }

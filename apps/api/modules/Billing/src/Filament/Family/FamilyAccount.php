@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Billing\Filament\Resources\Invoices\InvoiceResource;
 use Modules\Billing\Models\Invoice;
+use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Credits\Contracts\CreditsApi;
 use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
@@ -48,6 +49,8 @@ final class FamilyAccount
             ->orderByDesc('invoices.issued_at')->limit($limit)
             ->get(['invoices.*', 'st.name as student_name', 'sj.name_ar as subject_ar', 'sj.name_en as subject_en']);
 
+        $proofs = PaymentProof::latestFor($rows->pluck('id')->all());
+
         return $rows->map(fn (Invoice $i) => [
             'id' => $i->id,
             'number' => $i->number,
@@ -62,7 +65,19 @@ final class FamilyAccount
             'due' => $i->due_at ? CarbonImmutable::parse($i->due_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F Y') : null,
             'paid' => $i->paid_at ? CarbonImmutable::parse($i->paid_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F Y') : null,
             'document' => app(PayLinks::class)->document($i, $payerId),
+            'proof' => isset($proofs[$i->id]) ? self::proofLine($proofs[$i->id], $tz) : null,
+            'canSendProof' => $i->status === 'issued' && $i->outstanding()->minor > 0 && ($proofs[$i->id]->status ?? null) !== 'pending',
         ])->all();
+    }
+
+    /** @return array{status: string, text: string} the latest proof on an invoice, in a sentence */
+    public static function proofLine(PaymentProof $proof, string $tz): array
+    {
+        return ['status' => $proof->status, 'text' => __('billing::proofs.state.'.$proof->status, [
+            'amount' => $proof->money()->format(),
+            'date' => $proof->created_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F'),
+            'reason' => $proof->decision_note,
+        ])];
     }
 
     /**

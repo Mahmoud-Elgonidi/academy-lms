@@ -386,6 +386,12 @@ interface PaymentGateway
   - `GET /pay/invoice/{invoice}` موقّع ومؤقت لمدة 60 يوم، وفيه `u` (اللي بيدفع)، وبيتحط مكان `:link` في رسالة الفاتورة (`NotificationLinks::registerPersonal('invoice')`).
   - رجوع العميل بيكون على نفس الـ host اللي بدأ منه، عشان جلسته تفضل شغالة.
   - الـ trigger على `payment_checkouts` بيبعت `payments:{payer}` لصفحة اللي بيدفع، فبتتحدّث لوحدها.
+- **`manual_payment_proofs`** (الدفع اليدوي بإثبات):
+  - الفاتورة، واللي بعته (`payer_id`، لازم يكون اللي بيدفع الفاتورة)، و`channel` (`family` من حسابه في اللوحة أو التطبيق أو البوابة، أو `link` من لينك الدفع)، والطريقة (`bank_transfer`، `instapay`، `wallet`، `other`)، والمبلغ، و`paid_on` (يوم تقويمي)، ورقم التحويل، والملاحظة، والإيصال (`file_path` على الـ disk الخاص تحت `academies/{academy}/payment-proofs/{invoice}`).
+  - `status`: `pending` ← `approved` (ومعاها `payment_id`) أو `rejected` (ومعاها `decision_note`). constraint بيربط الحالة بالقرار، و**unique index جزئي على الإثبات المستني** لكل فاتورة، ومفيش delete لـ `lms_app`.
+  - الإيصال بيتعرض من `billing/proofs/{proof}/file` لصاحبه ولمن عنده `billing.view` بس، و`no-store`.
+  - **trigger** بيرفع `payments:{payer}` لما إثبات يتبعت أو يتحسم، وtrigger على `invoices` بيرفعه لما المدفوع أو الحالة يتغيروا (حتى الدفع اللي بيتسجل من الإدارة)، فصفحات اللي بيدفع بتتحدث لوحدها.
+  - في الـ API: `POST /v1/family/invoices/{invoice}/proofs` (multipart، `Idempotency-Key`؛ الـ middleware بياخد بصمة الحقول ومحتوى الملفات)، وكل فاتورة في `GET /v1/family/invoices` معاها `proof` و`can_send_proof`، وفوقهم `manual` (كلام الأكاديمية، وهل بتاخد إثباتات، والطرق).
 - **الضريبة**: `tax_profiles` لكل أكاديمية: التسجيلات حسب الدولة، والسعر شامل الضريبة أو لأ.
   - أسعار المستهلك في الخليج بتتعرض شاملة الضريبة.
   - هل الضريبة بتتطبق على التدريس عبر الحدود؟ ده إعداد عند الأكاديمية حسب مستشارها الضريبي، مش حاجة ثابتة في الكود.

@@ -62,6 +62,28 @@
         .banner[data-tone="bad"] { background: var(--bad-soft); color: var(--bad); }
         .banner[data-tone="wait"] { background: var(--wait-soft); color: var(--wait); }
         .errors { color: var(--bad); font-size: .9rem; margin: 0; }
+        .proof { margin: .7rem 0 0; padding: .6rem .8rem; border-radius: .75rem; font-size: .9rem; background: var(--wait-soft); color: var(--wait); overflow-wrap: anywhere; }
+        .proof[data-s="approved"] { background: var(--good-soft); color: var(--good); }
+        .proof[data-s="rejected"] { background: var(--bad-soft); color: var(--bad); }
+        details.proof-form > summary { list-style: none; }
+        details.proof-form > summary::-webkit-details-marker { display: none; }
+        details.proof-form[open] > summary { display: none; }
+        .proof-form form { display: flex; flex-direction: column; gap: .75rem; margin-top: .9rem; }
+        .proof-form h3 { margin: 0; font-size: .98rem; }
+        .field { display: flex; flex-direction: column; gap: .3rem; min-width: 0; }
+        .field > span { font-size: .85rem; font-weight: 600; }
+        .field small { color: var(--muted); font-size: .78rem; }
+        .field small.bad { color: var(--bad); }
+        .field input, .field textarea { width: 100%; font: inherit; font-size: 1rem; padding: .6rem .75rem; border: 1px solid var(--line); border-radius: .7rem; background: #fff; color: var(--ink); }
+        .field input:focus-visible, .field textarea:focus-visible, .chips input:focus-visible + span { outline: 2px solid var(--brand); outline-offset: 1px; }
+        .field input[type="file"] { padding: .5rem; background: var(--bg); }
+        .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .75rem; }
+        .chips { display: flex; flex-wrap: wrap; gap: .4rem; border: 0; margin: 0; padding: 0; }
+        .chips legend { font-size: .85rem; font-weight: 600; margin-bottom: .3rem; padding: 0; }
+        .chips label { position: relative; }
+        .chips input { position: absolute; opacity: 0; inset: 0; }
+        .chips span { display: inline-block; padding: .4rem .8rem; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: .88rem; cursor: pointer; }
+        .chips input:checked + span { background: var(--brand-soft); border-color: var(--brand); color: var(--ink); font-weight: 700; }
         footer { text-align: center; color: var(--muted); font-size: .78rem; }
         .doc-link { display: inline-block; margin-top: .7rem; font-size: .88rem; font-weight: 600; color: var(--brand); }
         @media (prefers-reduced-motion: no-preference) {

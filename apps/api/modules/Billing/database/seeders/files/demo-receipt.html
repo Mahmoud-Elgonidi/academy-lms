@@ -1,0 +1,33 @@
+<!doctype html>
+<!-- The demo transfer receipt (our own, for the demo only): open in Chromium at 360×640 and save a 2× screenshot as demo-receipt.jpg. -->
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+@font-face { font-family: Plex; font-weight: 400; src: url('../../../../../public/fonts/stages/ibm-plex-sans-arabic/ibm-plex-sans-arabic-arabic-400-normal.woff2'); unicode-range: U+0600-06FF, U+FE70-FEFC; }
+@font-face { font-family: Plex; font-weight: 400; src: url('../../../../../public/fonts/stages/ibm-plex-sans-arabic/ibm-plex-sans-arabic-latin-400-normal.woff2'); unicode-range: U+0000-00FF; }
+@font-face { font-family: Plex; font-weight: 700; src: url('../../../../../public/fonts/stages/ibm-plex-sans-arabic/ibm-plex-sans-arabic-arabic-700-normal.woff2'); unicode-range: U+0600-06FF, U+FE70-FEFC; }
+@font-face { font-family: Plex; font-weight: 700; src: url('../../../../../public/fonts/stages/ibm-plex-sans-arabic/ibm-plex-sans-arabic-latin-700-normal.woff2'); unicode-range: U+0000-00FF; }
+* { box-sizing: border-box; } body { margin: 0; width: 360px; height: 640px; background: #eef1f4; font-family: Plex, sans-serif; color: #1f2933; }
+.bar { height: 56px; background: #26364a; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 17px; }
+.card { margin: 22px 18px; background: #fff; border-radius: 18px; padding: 26px 20px 20px; box-shadow: 0 6px 20px rgba(0,0,0,.08); text-align: center; }
+.ok { width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 50%; background: #e3f5ea; display: grid; place-items: center; }
+.ok svg { width: 34px; height: 34px; }
+h1 { margin: 0; font-size: 19px; } .amt { margin: 10px 0 2px; font-size: 32px; font-weight: 700; direction: ltr; } .muted { color: #6b7785; font-size: 13px; }
+dl { margin: 18px 0 0; text-align: start; border-top: 1px dashed #d5dbe1; padding-top: 12px; font-size: 13.5px; }
+dl div { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; } dt { color: #6b7785; } dd { margin: 0; font-weight: 700; } .ltr { direction: ltr; unicode-bidi: isolate; }
+.foot { text-align: center; color: #8a95a1; font-size: 12px; margin-top: 4px; }
+</style></head><body>
+<div class="bar">إيصال تحويل</div>
+<div class="card">
+  <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#1f8a4c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+  <h1>تم التحويل بنجاح</h1>
+  <div class="amt">300.00 SAR</div>
+  <div class="muted">تحويل بنكي داخلي</div>
+  <dl>
+    <div><dt>إلى</dt><dd>أكاديمية النور</dd></div>
+    <div><dt>رقم الحساب</dt><dd class="ltr">SA44 •••• •••• 1234</dd></div>
+    <div><dt>من</dt><dd>ناصر علي</dd></div>
+    <div><dt>رقم العملية</dt><dd class="ltr">TRF-58213</dd></div>
+    <div><dt>الغرض</dt><dd>رسوم دراسية · عمر ناصر</dd></div>
+  </dl>
+</div>
+<div class="foot">صورة توضيحية للعرض التجريبي</div>
+</body></html>

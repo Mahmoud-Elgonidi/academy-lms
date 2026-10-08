@@ -2,6 +2,8 @@
 
 namespace Modules\Billing\Http\Controllers;
 
+use Carbon\CarbonImmutable;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,10 +12,12 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Modules\Billing\Actions\Payments\SettleCheckout;
 use Modules\Billing\Actions\Payments\StartCheckout;
+use Modules\Billing\Actions\Proofs\SubmitPaymentProof;
 use Modules\Billing\Filament\Family\FamilyBilling;
 use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentCheckout;
+use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Queries\InvoiceDocument;
@@ -24,7 +28,8 @@ use Throwable;
 /**
  * An invoice and its ways to pay, for the payer, in the academy's look and
  * without signing in (the signed link in the invoice message): the online
- * gateways that take its currency, or how to pay by hand. Back from a
+ * gateways that take its currency, or how to pay by hand and sending the
+ * receipt for the academy to confirm. Back from a
  * gateway, the checkout is settled by asking the gateway, then the payer
  * sees where it stands.
  */
@@ -52,7 +57,30 @@ final class PayController
             'manual' => $online->manualNote(),
             'tz' => $tenants->require()->defaultTimezone,
             'document' => app(PayLinks::class)->document($invoice, $payerId),
+            'proof' => PaymentProof::latestFor([$invoice->id])[$invoice->id] ?? null,
+            'proofUrl' => $invoice->status === 'issued' && $invoice->outstanding()->minor > 0 && $online->takesProofs()
+                ? URL::temporarySignedRoute('billing.pay.proof', now()->addHours(6), array_filter(['invoice' => $invoice->id, 'u' => $payerId]), absolute: false)
+                : null,
+            'today' => CarbonImmutable::now($tenants->require()->defaultTimezone)->toDateString(),
         ]);
+    }
+
+    /** The payer sends proof of paying by hand from their link; it waits for the academy. */
+    public function proof(Request $request, Invoice $invoice, SubmitPaymentProof $submit, PayLinks $links, TenantContext $tenants): RedirectResponse
+    {
+        $payerId = $request->query('u') ?: DB::table('billing_accounts')->where('id', $invoice->billing_account_id)->value('payer_id');
+        $this->speak($payerId, $tenants);
+        $back = $links->invoice($invoice, $request->query('u'));
+        try {
+            $submit->handle($invoice, (string) $payerId, 'link', $request->input('method'), $request->input('amount'), $request->input('paid_on'),
+                $request->input('reference'), $request->input('note'), $request->file('file'));
+        } catch (AuthorizationException) {
+            abort(404);
+        } catch (ValidationException $e) {
+            return redirect()->to($back)->withErrors($e->errors())->withInput($request->except('file'));
+        }
+
+        return redirect()->to($back)->with('proof_sent', true);
     }
 
     /** The invoice as a document to read and print (a Saudi tax invoice with its QR code, and the credit note that cancelled it). */

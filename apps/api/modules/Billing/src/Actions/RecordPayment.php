@@ -31,13 +31,14 @@ final class RecordPayment
         private readonly EnrollmentApi $enrollments,
     ) {}
 
-    public function handle(string $invoiceId, string $method, Money $amount, ?string $reference, CarbonImmutable $receivedAt, ?string $note, ?string $actorId, ?string $checkoutId = null): Invoice
+    /** @param  ?string  $paymentId  the new payment's id, when the caller keeps it (an approved proof points to its payment) */
+    public function handle(string $invoiceId, string $method, Money $amount, ?string $reference, CarbonImmutable $receivedAt, ?string $note, ?string $actorId, ?string $checkoutId = null, ?string $paymentId = null): Invoice
     {
         if ($checkoutId === null ? ! in_array($method, Payment::METHODS, true) : $method !== Payment::ONLINE) {
             throw ValidationException::withMessages(['method' => __('billing::billing.errors.method')]);
         }
 
-        return DB::transaction(function () use ($invoiceId, $method, $amount, $reference, $receivedAt, $note, $actorId, $checkoutId) {
+        return DB::transaction(function () use ($invoiceId, $method, $amount, $reference, $receivedAt, $note, $actorId, $checkoutId, $paymentId) {
             $invoice = Invoice::lock($invoiceId);
             if ($invoice->status !== 'issued') {
                 throw ValidationException::withMessages(['invoice' => __('billing::billing.errors.not_payable')]);
@@ -49,7 +50,7 @@ final class RecordPayment
                 throw ValidationException::withMessages(['amount' => __('billing::billing.errors.amount', ['max' => $invoice->outstanding()->format()])]);
             }
 
-            $invoice->payments()->create([
+            $invoice->payments()->create(array_filter(['id' => $paymentId]) + [
                 'method' => $method,
                 'amount_minor' => $amount->minor,
                 'currency' => $amount->currency,

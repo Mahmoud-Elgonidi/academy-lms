@@ -57,6 +57,22 @@ void main() {
     expect(keys.single, isNotNull);
   });
 
+  test('a form with a file is sent again whole after a dropped connection', () async {
+    api.on('POST', 'family/invoices/i1/proofs', {'data': <String, Object>{}});
+    final flaky = Flaky(api, failures: 1);
+    dio.httpClientAdapter = flaky;
+    final form = FormData.fromMap({
+      'amount': '400',
+      'file': MultipartFile.fromBytes([1, 2, 3], filename: 'receipt.jpg'),
+    });
+    await client.post('family/invoices/i1/proofs', idempotent: true, body: form);
+    expect(flaky.seen, hasLength(2));
+    final again = flaky.seen.last.data as FormData;
+    expect(again, isNot(same(form)));
+    expect(again.fields.single.value, '400');
+    expect(again.files.single.value.filename, 'receipt.jpg');
+  });
+
   test('a plain write is not retried, and each call gets a new key', () async {
     final flaky = Flaky(api);
     dio.httpClientAdapter = flaky;

@@ -1052,6 +1052,102 @@ abstract class AppLocalizations {
   /// **'تدفع بإيه؟'**
   String get pickGateway;
 
+  /// No description provided for @paidByTransfer.
+  ///
+  /// In ar, this message translates to:
+  /// **'دفعت بالتحويل'**
+  String get paidByTransfer;
+
+  /// No description provided for @proofTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت إثبات الدفع'**
+  String get proofTitle;
+
+  /// No description provided for @proofHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادفع الأول، وبعدين ابعت الإيصال هنا. الأكاديمية هتتأكد إن الفلوس وصلت وتأكّد الدفعة.'**
+  String get proofHint;
+
+  /// No description provided for @proofHowTo.
+  ///
+  /// In ar, this message translates to:
+  /// **'إزاي تدفع بالتحويل'**
+  String get proofHowTo;
+
+  /// No description provided for @proofMethod.
+  ///
+  /// In ar, this message translates to:
+  /// **'دفعت إزاي'**
+  String get proofMethod;
+
+  /// No description provided for @proofAmount.
+  ///
+  /// In ar, this message translates to:
+  /// **'المبلغ اللي دفعته'**
+  String get proofAmount;
+
+  /// No description provided for @proofPaidOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'يوم الدفع'**
+  String get proofPaidOn;
+
+  /// No description provided for @proofReference.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم التحويل (اختياري)'**
+  String get proofReference;
+
+  /// No description provided for @proofNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظة (اختياري)'**
+  String get proofNote;
+
+  /// No description provided for @proofReceipt.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإيصال'**
+  String get proofReceipt;
+
+  /// No description provided for @proofPickReceipt.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار صورة أو PDF'**
+  String get proofPickReceipt;
+
+  /// No description provided for @proofReceiptHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'صورة أو سكرين شوت أو PDF البنك، لحد 10 ميجا.'**
+  String get proofReceiptHint;
+
+  /// No description provided for @proofSend.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت الإثبات'**
+  String get proofSend;
+
+  /// No description provided for @proofSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإثبات اتبعت. هنقولك أول ما الأكاديمية تأكّده.'**
+  String get proofSent;
+
+  /// No description provided for @proofNeedsReceipt.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار الإيصال الأول.'**
+  String get proofNeedsReceipt;
+
+  /// No description provided for @proofFileTooBig.
+  ///
+  /// In ar, this message translates to:
+  /// **'الملف أكبر من 10 ميجا.'**
+  String get proofFileTooBig;
+
   /// No description provided for @joining.
   ///
   /// In ar, this message translates to:

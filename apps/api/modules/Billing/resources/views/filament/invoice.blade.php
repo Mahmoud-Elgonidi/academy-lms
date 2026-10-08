@@ -3,6 +3,10 @@
     $inv = $d['invoice'];
     $money = fn (int $minor) => \Modules\SharedKernel\Money\Money::of($minor, $inv->currency)->format();
     $rate = rtrim(rtrim(number_format($inv->tax_rate_bp / 100, 2), '0'), '.');
+    $proofs = $this->proofs();
+    $waiting = collect($proofs)->firstWhere('status', 'pending');
+    $decided = array_values(array_filter($proofs, fn ($p) => $p['status'] !== 'pending'));
+    $pr = 'billing::proofs.review.';
 @endphp
 
 <x-filament-panels::page>
@@ -32,14 +36,78 @@
         .iv-totals .iv-left { color: var(--danger-700); font-weight: 700; }
         .iv-pay h3 { margin: 0 0 .5rem; font-size: .95rem; font-weight: 700; }
         .iv-note { font-size: .8125rem; padding: .6rem .8rem; border-radius: var(--radius-lg); background: var(--primary-50); color: var(--primary-800); }
+        .pv { max-width: 860px; width: 100%; margin-inline: auto; display: flex; flex-direction: column; gap: .75rem; }
+        .pv-wait { display: grid; grid-template-columns: minmax(0, 180px) minmax(0, 1fr); gap: 1.25rem; padding: 1.25rem; border-radius: var(--radius-xl); background: white; border: 1px solid var(--info-200, var(--primary-200)); box-shadow: 0 0 0 4px var(--info-50, var(--primary-50)); }
+        .pv-shot { display: flex; align-items: center; justify-content: center; aspect-ratio: 3 / 4; border-radius: var(--radius-lg); overflow: hidden; background: var(--gray-100); border: 1px solid var(--gray-200); }
+        .pv-shot img { width: 100%; height: 100%; object-fit: cover; }
+        .pv-pdf { font-weight: 800; font-size: 1.25rem; color: var(--danger-600); letter-spacing: .05em; }
+        .pv-body { display: flex; flex-direction: column; gap: .35rem; min-width: 0; font-size: .875rem; }
+        .pv-tag { align-self: flex-start; padding: .15rem .6rem; border-radius: 999px; font-size: .72rem; font-weight: 700; background: var(--info-50, var(--primary-50)); color: var(--info-700, var(--primary-700)); }
+        .pv-amount { font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.2; }
+        .pv-body a { color: var(--primary-700); font-weight: 600; }
+        .pv-quote { padding: .5rem .7rem; border-radius: var(--radius-lg); background: var(--gray-50); overflow-wrap: anywhere; }
+        .pv-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .5rem; }
+        .pv-past { padding: .75rem 1rem; border-radius: var(--radius-xl); background: white; border: 1px solid var(--gray-200); font-size: .82rem; }
+        .pv-past h3 { margin: 0 0 .35rem; font-size: .85rem; font-weight: 700; }
+        .pv-past li { display: flex; flex-wrap: wrap; gap: .25rem .75rem; padding: .4rem 0; border-top: 1px solid var(--gray-100); }
+        .pv-past li:first-child { border-top: 0; }
+        .pv-past [data-s="approved"] { color: var(--success-700); font-weight: 700; }
+        .pv-past [data-s="rejected"] { color: var(--danger-700); font-weight: 700; }
+        @media (max-width: 560px) { .pv-wait { grid-template-columns: 1fr; } .pv-shot { aspect-ratio: 4 / 3; } }
+        .dark .pv-wait, .dark .pv-past { background: var(--gray-900); border-color: var(--gray-800); }
+        .dark .pv-quote { background: var(--gray-800); }
         .dark .iv { background: var(--gray-900); border-color: var(--gray-800); }
         .dark .iv-parties { background: var(--gray-800); }
         @media print {
-            .fi-sidebar, .fi-topbar, .fi-header, .fi-page-header-main-ctn > .fi-header, nav { display: none !important; }
+            .fi-sidebar, .fi-topbar, .fi-header, .fi-page-header-main-ctn > .fi-header, nav, .pv { display: none !important; }
             .fi-main { padding: 0 !important; }
             .iv { border: 0; padding: 0; max-width: none; }
         }
     </style>
+
+    @if ($proofs !== [])
+        <section class="pv" aria-label="{{ __($pr.'section') }}">
+            @if ($waiting)
+                <div class="pv-wait" wire:key="proof-{{ $waiting['id'] }}">
+                    <a class="pv-shot" href="{{ $waiting['file'] }}" target="_blank" rel="noopener" title="{{ __($pr.'open_file') }}">
+                        @if ($waiting['image'])
+                            <img src="{{ $waiting['file'] }}" alt="{{ __($pr.'open_file') }}" loading="lazy">
+                        @else
+                            <span class="pv-pdf">PDF</span>
+                        @endif
+                    </a>
+                    <div class="pv-body">
+                        <span class="pv-tag">{{ __($pr.'waiting') }}</span>
+                        <div><span class="pv-amount">{{ $waiting['amount'] }}</span> · {{ $waiting['method'] }}</div>
+                        <div class="iv-muted">{{ __($pr.'sent_by', ['name' => $waiting['sentBy'], 'when' => $waiting['sentAt']]) }}@if ($waiting['viaLink']) · {{ __($pr.'via_link') }}@endif</div>
+                        <div>{{ __($pr.'paid_on', ['date' => $waiting['paidOn']]) }}</div>
+                        @if ($waiting['reference']) <div>{{ __($pr.'reference', ['ref' => '']) }}<span dir="ltr">{{ $waiting['reference'] }}</span></div> @endif
+                        @if ($waiting['note']) <div class="pv-quote" dir="auto">{{ $waiting['note'] }}</div> @endif
+                        <a href="{{ $waiting['file'] }}" target="_blank" rel="noopener">{{ __($pr.'open_file') }} ({{ $waiting['fileName'] }})</a>
+                        <div class="pv-actions">
+                            {{ $this->approveProofAction }}
+                            {{ $this->rejectProofAction }}
+                        </div>
+                    </div>
+                </div>
+            @endif
+            @if ($decided !== [])
+                <div class="pv-past">
+                    <h3>{{ __($pr.'section') }}</h3>
+                    <ul>
+                        @foreach ($decided as $p)
+                            <li wire:key="proof-{{ $p['id'] }}">
+                                <span>{{ $p['amount'] }} · {{ $p['method'] }}</span>
+                                <span data-s="{{ $p['status'] }}">{{ __($pr.'decided', ['status' => __('billing::proofs.statuses.'.$p['status']), 'name' => $p['decidedBy'], 'when' => $p['decidedAt']]) }}</span>
+                                @if ($p['reason']) <span class="iv-muted">{{ __($pr.'reason', ['reason' => $p['reason']]) }}</span> @endif
+                                <a href="{{ $p['file'] }}" target="_blank" rel="noopener">{{ __($pr.'open_file') }}</a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+        </section>
+    @endif
 
     <article class="iv">
         <header class="iv-top">

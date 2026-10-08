@@ -576,6 +576,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickGateway => 'Pay with?';
 
   @override
+  String get paidByTransfer => 'I paid by transfer';
+
+  @override
+  String get proofTitle => 'Send proof of payment';
+
+  @override
+  String get proofHint => 'Pay first, then send the receipt here. The academy checks the money arrived and confirms it.';
+
+  @override
+  String get proofHowTo => 'How to pay by hand';
+
+  @override
+  String get proofMethod => 'How you paid';
+
+  @override
+  String get proofAmount => 'Amount you paid';
+
+  @override
+  String get proofPaidOn => 'Day you paid';
+
+  @override
+  String get proofReference => 'Transfer number (optional)';
+
+  @override
+  String get proofNote => 'Note (optional)';
+
+  @override
+  String get proofReceipt => 'Receipt';
+
+  @override
+  String get proofPickReceipt => 'Choose a photo or PDF';
+
+  @override
+  String get proofReceiptHint => 'A photo, a screenshot or the bank\'s PDF, up to 10 MB.';
+
+  @override
+  String get proofSend => 'Send proof';
+
+  @override
+  String get proofSent => 'Proof sent. You\'ll hear once the academy confirms it.';
+
+  @override
+  String get proofNeedsReceipt => 'Choose the receipt first.';
+
+  @override
+  String get proofFileTooBig => 'The file is larger than 10 MB.';
+
+  @override
   String get joining => 'Joining…';
 
   @override

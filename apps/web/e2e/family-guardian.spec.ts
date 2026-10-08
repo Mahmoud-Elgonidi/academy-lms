@@ -57,6 +57,29 @@ test('what is owed is paid on the academy\'s payment page', async ({ page }) => 
   await page.waitForURL(/\/pay\//);
 });
 
+test('a guardian who paid by transfer sends the receipt, and the invoice says it waits for the academy', async ({ page }) => {
+  await page.goto('/ar/family/money');
+  const paidByHand = page.getByRole('button', { name: 'دفعت بالتحويل' });
+  test.skip((await paidByHand.count()) === 0, 'no invoice takes a proof in this data');
+  await paidByHand.first().click();
+  const form = page.locator('form').filter({ hasText: 'ابعت إثبات الدفع' });
+  await expect(form.getByText('مصرف الراجحي', { exact: false })).toBeVisible();
+
+  // No receipt yet: nothing is sent.
+  await form.getByRole('button', { name: 'ابعت الإثبات' }).click();
+  await expect(form.getByText('اختار الإيصال الأول.')).toBeVisible();
+
+  await form.getByText('تحويل بنكي', { exact: true }).click();
+  await form.getByLabel('رقم التحويل').fill('TRF-E2E-1');
+  // A tiny picture of our own as the receipt (1×1 PNG).
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+  await form.locator('input[type="file"]').setInputFiles({ name: 'receipt.png', mimeType: 'image/png', buffer: png });
+  await form.getByRole('button', { name: 'ابعت الإثبات' }).click();
+
+  await expect(page.getByText('الإثبات اتبعت. هنقولك أول ما الأكاديمية تأكّده.')).toBeVisible();
+  await expect(page.getByText(/ومستني الأكاديمية/).first()).toBeVisible();
+});
+
 test('a guardian cheers their child on', async ({ page }) => {
   await page.goto('/ar/family/challenges');
   await expect(page.getByRole('heading', { name: /^شجّع / })).toBeVisible();

@@ -18,7 +18,10 @@
     .bf-h2 { font-size: 1rem; font-weight: 700; margin: 1.25rem 0 .6rem; }
     .bf-note { color: var(--gray-600); font-size: .9rem; margin: .5rem 0 0; }
     .bf-empty { padding: 1.25rem; text-align: center; color: var(--gray-500); border: 1px dashed var(--gray-300); border-radius: var(--radius-xl, .75rem); }
-    .bf-pay { grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: .35rem; }
+    .bf-pay { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .5rem; justify-content: flex-end; margin-top: .35rem; }
+    .bf-proof { grid-column: 1 / -1; font-size: .82rem; padding: .45rem .7rem; border-radius: var(--radius-lg, .5rem); background: var(--info-50, var(--primary-50)); color: var(--info-800, var(--primary-800)); overflow-wrap: anywhere; }
+    .bf-proof[data-s="approved"] { background: var(--success-50); color: var(--success-800); }
+    .bf-proof[data-s="rejected"] { background: var(--danger-50); color: var(--danger-800); }
     .bf-result { display: flex; gap: .75rem; align-items: flex-start; border-radius: var(--radius-xl, .75rem); padding: .85rem 1rem; margin-bottom: .5rem; background: var(--warning-50); color: var(--warning-800); }
     .bf-result b { font-size: 1.4rem; line-height: 1; }
     .bf-result strong { display: block; }
@@ -30,4 +33,5 @@
         .bf-result[data-tone="good"] b { display: inline-block; animation: lms-pop .6s var(--lms-spring) .2s backwards; }
     }
     .dark .bf-card, .dark .bf-inv { background: var(--gray-900); border-color: var(--gray-800); }
+    .dark .bf-proof { background: var(--gray-800); color: var(--gray-100); }
 </style>

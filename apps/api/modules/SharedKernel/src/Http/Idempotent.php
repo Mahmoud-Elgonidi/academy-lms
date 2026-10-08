@@ -5,6 +5,7 @@ namespace Modules\SharedKernel\Http;
 use Closure;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
  * Idempotency-Key for the apps' writes (a cancel, a payment, a request): the
  * same key replays the first answer for a day instead of doing it twice, so
  * a retry on a bad network is safe. Keys are per academy, person and route;
- * the same key with a different body is a conflict. Without the header the
+ * the same key with a different body (or other files) is a conflict. Without the header the
  * request runs as usual.
  */
 final class Idempotent
@@ -36,7 +37,7 @@ final class Idempotent
         }
 
         $scope = 'idempotency:'.hash('sha256', implode('|', [$this->tenants->id(), $request->user()?->getAuthIdentifier(), $request->method(), $request->path(), $key]));
-        $fingerprint = hash('sha256', $request->getContent());
+        $fingerprint = $this->fingerprint($request);
         $store = $this->store();
 
         return $store->lock($scope.':lock', 30)->block(10, function () use ($store, $scope, $fingerprint, $request, $next): Response {
@@ -62,6 +63,20 @@ final class Idempotent
 
             return $response;
         });
+    }
+
+    /** What the request carries; a multipart upload has no raw body in PHP, so its fields and its files' contents stand for it. */
+    private function fingerprint(Request $request): string
+    {
+        $body = $request->getContent();
+        if ($body === '' && $request->allFiles() !== []) {
+            $fields = $request->except(array_keys($request->allFiles()));
+            ksort($fields);
+            $files = array_map(fn ($file) => hash_file('sha256', $file->getRealPath()), Arr::flatten($request->allFiles()));
+            $body = json_encode([$fields, $files]);
+        }
+
+        return hash('sha256', (string) $body);
     }
 
     private function store(): Repository

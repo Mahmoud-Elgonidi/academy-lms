@@ -7,6 +7,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Billing\Models\Invoice;
+use Modules\Billing\Models\PaymentProof;
 
 final class ListInvoices extends ListRecords
 {
@@ -15,9 +16,14 @@ final class ListInvoices extends ListRecords
     public function getTabs(): array
     {
         $now = CarbonImmutable::now();
-        $count = fn (callable $scope) => $scope(Invoice::query())->count();
+        $count = fn (callable $scope, ?Builder $from = null) => $scope($from ?? Invoice::query())->count();
+
+        $proofs = $count(fn ($q) => $q->where('status', 'pending'), PaymentProof::query());
 
         return [
+            'proofs' => Tab::make(__('billing::proofs.review.tab'))
+                ->badge($proofs ?: null)->badgeColor('info')
+                ->modifyQueryUsing(fn (Builder $query) => InvoiceResource::withProofWaiting($query)),
             'due' => Tab::make(__('billing::invoices.tabs.due'))
                 ->badge($count(fn ($q) => $q->where('status', 'issued')) ?: null)
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('invoices.status', 'issued')),
@@ -30,8 +36,9 @@ final class ListInvoices extends ListRecords
         ];
     }
 
+    /** Proofs waiting come first: the money may already be in the account. */
     public function getDefaultActiveTab(): string|int|null
     {
-        return 'due';
+        return PaymentProof::query()->where('status', 'pending')->exists() ? 'proofs' : 'due';
     }
 }

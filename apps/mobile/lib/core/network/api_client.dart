@@ -103,9 +103,11 @@ class ApiClient {
     );
     for (var attempt = 1; ; attempt++) {
       try {
-        final response = await _dio.request<Object?>(path, data: body, queryParameters: query, options: options);
-        final data = response.data;
-        return data is Map<String, dynamic> ? data : <String, dynamic>{};
+        // A form with files is spent once sent: a retry sends a copy.
+        final data = body is FormData && attempt > 1 ? body.clone() : body;
+        final response = await _dio.request<Object?>(path, data: data, queryParameters: query, options: options);
+        final json = response.data;
+        return json is Map<String, dynamic> ? json : <String, dynamic>{};
       } on DioException catch (e) {
         final problem = ApiProblem.fromDio(e);
         if (problem.isOffline && retry && attempt < _attempts) {

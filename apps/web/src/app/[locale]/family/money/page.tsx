@@ -1,19 +1,27 @@
 import { getTranslations } from 'next-intl/server';
 import { PayInvoice } from '@/components/family/pay-invoice';
+import { SendProof } from '@/components/family/send-proof';
 import { Icon } from '@/components/icons';
-import { Badge, Empty, Heading, SectionTitle, join, type Tone } from '@/components/ui';
+import { Badge, Empty, Heading, Notice, SectionTitle, join, type Tone } from '@/components/ui';
 import { redirect } from '@/i18n/navigation';
 import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
 import { seesMoney } from '@/lib/family/rules';
-import type { Balance, Invoices } from '@/lib/family/types';
+import type { Balance, Invoice, Invoices } from '@/lib/family/types';
 
 const tone: Record<string, Tone> = { paid: 'brand', overdue: 'danger', partly_paid: 'attention', issued: 'info', void: 'muted', draft: 'muted' };
+const proofTone: Record<string, Tone> = { pending: 'info', approved: 'brand', rejected: 'danger' };
+
+/** Where the latest proof of paying by hand stands, in the API's words. */
+function ProofLine({ proof }: { proof: NonNullable<Invoice['proof']> }) {
+  return <Notice tone={proofTone[proof.status] ?? 'info'}>{proof.text}</Notice>;
+}
 
 /**
  * Money, for whoever pays (the classic look only; a student's own look never
- * shows it): what is owed now with a way to pay it online, the lessons left
- * for the chosen child, and every invoice with its printable tax document.
+ * shows it): what is owed now with a way to pay it online or by hand with the
+ * receipt, the lessons left for the chosen child, and every invoice with its
+ * printable tax document.
  */
 export default async function Money({ params }: { params: Promise<{ locale: string }> }) {
   const [{ locale }, t, fam] = await Promise.all([params, getTranslations('family'), family()]);
@@ -48,8 +56,10 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
                       <Badge tone={tone[i.status] ?? 'muted'}>{i.status_label}</Badge>
                     </div>
                   </div>
-                  <div className="mt-4 border-t border-line pt-4">
-                    <PayInvoice invoice={i} />
+                  <div className="mt-4 space-y-3 border-t border-line pt-4">
+                    {i.proof ? <ProofLine proof={i.proof} /> : null}
+                    {i.pay_with.length > 0 || !i.can_send_proof ? <PayInvoice invoice={i} /> : null}
+                    {i.can_send_proof ? <SendProof invoice={i} manual={invoices.manual} primary={i.pay_with.length === 0} /> : null}
                   </div>
                 </article>
               </li>
@@ -97,6 +107,9 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
                     </div>
                     <p className="shrink-0 font-semibold tabular-nums">{i.total}</p>
                   </div>
+                  {i.proof && (i.proof.status !== 'rejected' || i.outstanding_minor > 0) ? (
+                    <p className={join('mt-1 text-sm', i.proof.status === 'rejected' ? 'text-danger' : 'text-muted')}>{i.proof.text}</p>
+                  ) : null}
                   <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                     <Badge tone={tone[i.status] ?? 'muted'}>{i.status_label}</Badge>
                     {i.document_url ? (

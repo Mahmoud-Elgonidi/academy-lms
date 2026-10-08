@@ -4,6 +4,7 @@ namespace Modules\Billing\Filament\Resources\Invoices;
 
 use BackedEnum;
 use Carbon\CarbonImmutable;
+use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Modules\Billing\Filament\InvoiceActions;
 use Modules\Billing\Models\Invoice;
+use Modules\Billing\Models\PaymentProof;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -49,8 +51,13 @@ final class InvoiceResource extends Resource
         return __('billing::invoices.nav');
     }
 
+    /** Proofs of payment waiting come first (someone has to look); otherwise the invoices past due. */
     public static function getNavigationBadge(): ?string
     {
+        $proofs = PaymentProof::query()->where('status', 'pending')->count();
+        if ($proofs > 0) {
+            return (string) $proofs;
+        }
         $late = Invoice::query()->where('status', 'issued')->where('due_at', '<', CarbonImmutable::now())->count();
 
         return $late > 0 ? (string) $late : null;
@@ -58,12 +65,19 @@ final class InvoiceResource extends Resource
 
     public static function getNavigationBadgeColor(): ?string
     {
-        return 'danger';
+        return PaymentProof::query()->where('status', 'pending')->exists() ? 'warning' : 'danger';
     }
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return __('billing::invoices.badge');
+        return PaymentProof::query()->where('status', 'pending')->exists() ? __('billing::proofs.review.badge') : __('billing::invoices.badge');
+    }
+
+    /** Invoices with a proof of payment waiting for review. */
+    public static function withProofWaiting(Builder $query): Builder
+    {
+        return $query->whereExists(fn ($q) => $q->selectRaw('1')->from('manual_payment_proofs as mpp')
+            ->whereColumn('mpp.academy_id', 'invoices.academy_id')->whereColumn('mpp.invoice_id', 'invoices.id')->where('mpp.status', 'pending'));
     }
 
     /** Invoices with the payer's and the student's names, for the list and its search. */
@@ -73,6 +87,7 @@ final class InvoiceResource extends Resource
 
         return $query
             ->select('invoices.*', 'payer.name as payer_name', 'student.name as student_name', 'subject.name_ar as subject_ar', 'subject.name_en as subject_en')
+            ->selectRaw("exists (select 1 from manual_payment_proofs mpp where mpp.academy_id = invoices.academy_id and mpp.invoice_id = invoices.id and mpp.status = 'pending') as proof_waiting")
             ->join('billing_accounts as ba', $on('ba', 'invoices.billing_account_id'))
             ->join('users as payer', $on('payer', 'ba.payer_id'))
             ->leftJoin('subscriptions as sub', $on('sub', 'invoices.subscription_id'))
@@ -100,10 +115,11 @@ final class InvoiceResource extends Resource
                     ->description(fn (Invoice $r) => $r->status === 'issued' && $r->paid_minor > 0 ? __('billing::invoices.left', ['amount' => $r->outstanding()->format()]) : null)
                     ->sortable(query: fn (Builder $query, string $direction) => $query->orderBy('invoices.total_minor', $direction)),
                 TextColumn::make('status')->label(__('billing::invoices.fields.status'))->badge()
-                    ->state(fn (Invoice $r) => self::statusKey($r))
-                    ->formatStateUsing(fn (string $state) => __('billing::billing.statuses.'.$state))
+                    ->state(fn (Invoice $r) => $r->getAttribute('proof_waiting') ? 'proof' : self::statusKey($r))
+                    ->formatStateUsing(fn (string $state) => $state === 'proof' ? __('billing::proofs.review.waiting') : __('billing::billing.statuses.'.$state))
+                    ->icon(fn (string $state) => $state === 'proof' ? Heroicon::OutlinedDocumentMagnifyingGlass : null)
                     ->color(fn (string $state) => match ($state) {
-                        'paid' => 'success', 'overdue' => 'danger', 'issued', 'partly_paid' => 'warning', default => 'gray',
+                        'paid' => 'success', 'overdue' => 'danger', 'issued', 'partly_paid' => 'warning', 'proof' => 'info', default => 'gray',
                     }),
                 TextColumn::make('issued_at')->label(__('billing::invoices.fields.issued_at'))
                     ->state(fn (Invoice $r) => $r->issued_at?->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M Y'))
@@ -112,7 +128,13 @@ final class InvoiceResource extends Resource
                     ->state(fn (Invoice $r) => self::dueLine($r))
                     ->color(fn (Invoice $r) => $r->isOverdue() ? 'danger' : 'gray'),
             ])
-            ->recordActions([InvoiceActions::recordPayment(), ViewAction::make()->label(__('billing::invoices.open'))])
+            ->recordActions([
+                Action::make('reviewProof')->label(__('billing::proofs.review.review'))->icon(Heroicon::OutlinedDocumentMagnifyingGlass)->color('info')
+                    ->visible(fn (Invoice $record) => (bool) $record->getAttribute('proof_waiting') && Gate::allows(Ability::RecordPayments->value))
+                    ->url(fn (Invoice $record) => self::getUrl('view', ['record' => $record])),
+                InvoiceActions::recordPayment()->hidden(fn (Invoice $record) => (bool) $record->getAttribute('proof_waiting')),
+                ViewAction::make()->label(__('billing::invoices.open')),
+            ])
             ->emptyStateHeading(__('billing::invoices.empty.title'))
             ->emptyStateDescription(__('billing::invoices.empty.hint'));
     }

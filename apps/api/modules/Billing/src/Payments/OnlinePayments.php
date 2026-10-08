@@ -41,4 +41,10 @@ final class OnlinePayments
     {
         return BillingSettings::current()->manual_payment_note;
     }
+
+    /** Whether payers can send proof of paying by hand: the academy says how to pay by hand. */
+    public function takesProofs(): bool
+    {
+        return filled($this->manualNote());
+    }
 }

@@ -10,6 +10,7 @@ return [
             'settings_saved' => 'تعديل إعدادات الضريبة والفواتير',
             'stripe_connected' => 'ربط حساب Stripe :account (:mode)',
             'stripe_disconnected' => 'فصل حساب Stripe :account',
+            'proof_rejected' => 'رفض إثبات دفع :amount على الفاتورة :number: :reason',
         ],
         'policy' => [
             'saved' => 'إصدار :version من سياسة الإلغاء والتعويض',

@@ -66,6 +66,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/family/invoices/{invoice}/proofs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send proof of paying an invoice by hand
+         * @description multipart/form-data with the receipt (a photo, a screenshot or a PDF, up to 10 MB). paid_on is the payer's own day (Y-m-d).
+         *     Nothing is paid yet: the academy checks the money arrived, then approves it (or turns it down with a reason).
+         *     One proof waits per invoice. Send an Idempotency-Key.
+         */
+        post: operations["family.invoices.proofs"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/lessons/{session}/join": {
         parameters: {
             query?: never;
@@ -1293,6 +1315,13 @@ export interface operations {
                     "application/json": {
                         /** @description What this person still owes, per currency. */
                         owed: string | null;
+                        /** @description Paying by hand: how (the academy's words: an account number, InstaPay…), and whether a proof can be sent (POST /family/invoices/{id}/proofs). */
+                        manual: {
+                            note: string | null;
+                            takes_proofs: boolean;
+                            /** @description The ways a proof can say it was paid. */
+                            methods: unknown[];
+                        };
                         data: {
                             id: string;
                             number: string | null;
@@ -1303,6 +1332,8 @@ export interface operations {
                             total: string;
                             outstanding_minor: number;
                             outstanding: string | null;
+                            /** @description What is left as a number to type in a form ("400.00"), in the currency's own decimals. */
+                            outstanding_decimal: string;
                             /** @description issued, partly_paid, overdue, paid */
                             status: string;
                             status_label: string;
@@ -1327,6 +1358,29 @@ export interface operations {
                             document_url: string;
                             /** @description Where it can be paid now: POST /family/invoices/{id}/checkout with one of these. */
                             pay_with: unknown[];
+                            /** @description The latest proof of paying by hand on it, if any: pending, approved or rejected (with the academy's reason). */
+                            proof: {
+                                id: string;
+                                /** @description pending, approved, rejected */
+                                status: string;
+                                status_label: string;
+                                method: string;
+                                amount: string;
+                                /** @description The day the payer said they paid, as they wrote it (Y-m-d). */
+                                paid_on: string;
+                                sent_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description Where it stands, in a sentence for the payer. */
+                                text: string;
+                                /** @description Why the academy turned it down. */
+                                reason: string | null;
+                            } | null;
+                            /** @description Whether a proof can be sent now (the academy takes them, something is owed, none is waiting). */
+                            can_send_proof: string;
                         }[];
                     };
                 };
@@ -1387,6 +1441,88 @@ export interface operations {
                             timezone: null;
                             label: string;
                         } | null;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.invoices.proofs": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                invoice: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** @enum {string} */
+                    method: "bank_transfer" | "instapay" | "wallet" | "other";
+                    amount: number;
+                    /** Format: date */
+                    paid_on: string;
+                    reference?: string | null;
+                    note?: string | null;
+                    /**
+                     * Format: binary
+                     * @description Maximum file size: 10240 kilobytes.
+                     */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description pending, approved, rejected */
+                            status: string;
+                            status_label: string;
+                            method: string;
+                            amount: string;
+                            /** @description The day the payer said they paid, as they wrote it (Y-m-d). */
+                            paid_on: string;
+                            sent_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Where it stands, in a sentence for the payer. */
+                            text: string;
+                            /** @description Why the academy turned it down. */
+                            reason: string | null;
+                        };
                     };
                 };
             };

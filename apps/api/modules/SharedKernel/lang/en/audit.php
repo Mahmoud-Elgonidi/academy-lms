@@ -10,6 +10,7 @@ return [
             'settings_saved' => 'Tax and invoice settings changed',
             'stripe_connected' => 'Stripe account :account connected (:mode)',
             'stripe_disconnected' => 'Stripe account :account disconnected',
+            'proof_rejected' => 'Proof of :amount on invoice :number turned down: :reason',
         ],
         'policy' => [
             'saved' => 'Cancellation policy version :version',

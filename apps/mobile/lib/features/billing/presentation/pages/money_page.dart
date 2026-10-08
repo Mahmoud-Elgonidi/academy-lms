@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -22,9 +25,10 @@ class _Money {
   final List<Balance> balance;
 }
 
-/// What is owed and paying it on the academy's own gateway page, the
-/// lessons left, and every invoice (each opens its printable document with
-/// the tax QR). Coming back to the app reloads it.
+/// What is owed and paying it on the academy's own gateway page, or by hand
+/// with the receipt for the academy to confirm; the lessons left, and every
+/// invoice (each opens its printable document with the tax QR). Coming back
+/// to the app reloads it.
 class MoneyPage extends StatefulWidget {
   const MoneyPage({super.key});
 
@@ -95,13 +99,21 @@ class _MoneyList extends StatelessWidget {
                   l.invoiceDue(due.number, due.dueAt?.day(context.locale) ?? ''),
                   style: context.text.bodySmall?.copyWith(color: c.attentionInk),
                 ),
+                if (due.proof case final proof?) ...[const SizedBox(height: 10), _ProofLine(proof: proof)],
                 const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: _PayButton(invoice: due),
-                ),
-                const SizedBox(height: 6),
-                Text(l.payNote, style: context.text.bodySmall),
+                if (due.payWith.isNotEmpty || !due.canSendProof)
+                  SizedBox(
+                    width: double.infinity,
+                    child: _PayButton(invoice: due),
+                  ),
+                if (due.canSendProof) ...[
+                  if (due.payWith.isNotEmpty) const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: _ProofButton(invoice: due, manual: money.invoices.manual, primary: due.payWith.isEmpty),
+                  ),
+                ],
+                if (due.payWith.isNotEmpty) ...[const SizedBox(height: 6), Text(l.payNote, style: context.text.bodySmall)],
               ],
             ),
           ),
@@ -174,6 +186,10 @@ class _InvoiceRow extends StatelessWidget {
                     '${invoice.number}${invoice.issuedAt == null ? '' : ' · ${invoice.issuedAt!.day(context.locale)}'}',
                     style: context.text.bodySmall,
                   ),
+                  if (invoice.proof case final proof? when proof.status != 'rejected' || invoice.payable) ...[
+                    const SizedBox(height: 6),
+                    _ProofLine(proof: proof),
+                  ],
                 ],
               ),
             ),
@@ -251,4 +267,274 @@ class _PayButtonState extends State<_PayButton> {
     icon: const Icon(Icons.lock_outline_rounded),
     label: Text(context.l10n.payAmount(widget.invoice.outstanding)),
   );
+}
+
+/// Where the latest proof stands, in the API's words.
+class _ProofLine extends StatelessWidget {
+  const _ProofLine({required this.proof});
+
+  final ProofState proof;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final (bg, ink, icon) = switch (proof.status) {
+      'approved' => (c.brandSoft, c.brandDeep, Icons.check_circle_outline_rounded),
+      'rejected' => (c.dangerSoft, c.dangerInk, Icons.error_outline_rounded),
+      _ => (c.infoSoft, c.infoInk, Icons.hourglass_top_rounded),
+    };
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(context.shape.field)),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: ink),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(proof.text, style: context.text.bodySmall?.copyWith(color: ink)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProofButton extends StatelessWidget {
+  const _ProofButton({required this.invoice, required this.manual, required this.primary});
+
+  final Invoice invoice;
+  final ManualPayment manual;
+  final bool primary;
+
+  Future<void> _open(BuildContext context) async {
+    final repo = context.read<BillingRepository>();
+    final cubit = context.read<LoadCubit<_Money>>();
+    final sent = await showModalBottomSheet<bool>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (c) => _ProofSheet(invoice: invoice, manual: manual, repo: repo),
+    );
+    if (sent == true && context.mounted) {
+      showSnack(context, context.l10n.proofSent);
+      unawaited(cubit.load());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final label = Text(context.l10n.paidByTransfer);
+    const icon = Icon(Icons.receipt_long_outlined);
+    return primary
+        ? FilledButton.icon(onPressed: () => _open(context), icon: icon, label: label)
+        : OutlinedButton.icon(onPressed: () => _open(context), icon: icon, label: label);
+  }
+}
+
+/// The receipt and what it says: how, how much, the day, the transfer's
+/// number. The day is the payer's own, as picked on the phone.
+class _ProofSheet extends StatefulWidget {
+  const _ProofSheet({required this.invoice, required this.manual, required this.repo});
+
+  final Invoice invoice;
+  final ManualPayment manual;
+  final BillingRepository repo;
+
+  @override
+  State<_ProofSheet> createState() => _ProofSheetState();
+}
+
+class _ProofSheetState extends State<_ProofSheet> {
+  static const _mimes = {
+    'pdf': 'application/pdf',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+    'webp': 'image/webp',
+    'heic': 'image/heic',
+  };
+  static const _maxBytes = 10 * 1024 * 1024;
+
+  late final _amount = TextEditingController(text: widget.invoice.outstandingDecimal);
+  final _reference = TextEditingController();
+  final _note = TextEditingController();
+  late String _method = widget.manual.methods.firstOrNull?.value ?? 'bank_transfer';
+  DateTime _paidOn = DateUtils.dateOnly(DateTime.now());
+  Receipt? _receipt;
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _amount.dispose();
+    _reference.dispose();
+    _note.dispose();
+    super.dispose();
+  }
+
+  String get _day =>
+      '${_paidOn.year.toString().padLeft(4, '0')}-${_paidOn.month.toString().padLeft(2, '0')}-${_paidOn.day.toString().padLeft(2, '0')}';
+
+  Future<void> _pickDay() async {
+    final today = DateUtils.dateOnly(DateTime.now());
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _paidOn,
+      firstDate: today.subtract(const Duration(days: 60)),
+      lastDate: today,
+    );
+    if (picked != null && mounted) setState(() => _paidOn = picked);
+  }
+
+  Future<void> _pick() async {
+    final l = context.l10n;
+    final picked = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: _mimes.keys.toList());
+    if (picked == null || !mounted) return;
+    final bytes = await picked.xFile.readAsBytes();
+    if (!mounted) return;
+    if (bytes.length > _maxBytes) {
+      setState(() => _error = l.proofFileTooBig);
+      return;
+    }
+    final ext = (picked.extension ?? '').toLowerCase();
+    setState(() {
+      _receipt = Receipt(bytes: bytes, name: picked.name, mime: _mimes[ext] ?? 'application/octet-stream');
+      _error = null;
+    });
+  }
+
+  Future<void> _send() async {
+    final l = context.l10n;
+    final receipt = _receipt;
+    if (receipt == null) {
+      setState(() => _error = l.proofNeedsReceipt);
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await widget.repo.sendProof(
+        widget.invoice.id,
+        method: _method,
+        amount: _amount.text.trim(),
+        paidOn: _day,
+        receipt: receipt,
+        reference: _reference.text.trim().isEmpty ? null : _reference.text.trim(),
+        note: _note.text.trim().isEmpty ? null : _note.text.trim(),
+      );
+      if (mounted) Navigator.pop(context, true);
+    } on ApiProblem catch (p) {
+      if (mounted) setState(() => _error = context.problemText(p));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final note = widget.manual.note;
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(l.proofTitle, style: context.text.titleLarge),
+              const SizedBox(height: 4),
+              Text(l.proofHint, style: context.text.bodySmall),
+              if (note != null && note.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                LmsCard(
+                  color: c.brandSoft,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l.proofHowTo, style: context.text.labelLarge),
+                      const SizedBox(height: 4),
+                      SelectableText(note, style: context.text.bodyMedium),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+              Text(l.proofMethod, style: context.text.labelLarge),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final m in widget.manual.methods)
+                    ChoiceChip(label: Text(m.label), selected: _method == m.value, onSelected: (_) => setState(() => _method = m.value)),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _amount,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(labelText: l.proofAmount),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: InkWell(
+                      onTap: _pickDay,
+                      child: InputDecorator(
+                        decoration: InputDecoration(labelText: l.proofPaidOn, suffixIcon: const Icon(Icons.event_outlined)),
+                        child: Text(MaterialLocalizations.of(context).formatMediumDate(_paidOn)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _reference,
+                decoration: InputDecoration(labelText: l.proofReference),
+              ),
+              const SizedBox(height: 12),
+              Text(l.proofReceipt, style: context.text.labelLarge),
+              const SizedBox(height: 6),
+              OutlinedButton.icon(
+                onPressed: _busy ? null : _pick,
+                icon: Icon(_receipt == null ? Icons.add_photo_alternate_outlined : Icons.check_circle_outline_rounded),
+                label: Text(_receipt?.name ?? l.proofPickReceipt, overflow: TextOverflow.ellipsis),
+              ),
+              const SizedBox(height: 4),
+              Text(l.proofReceiptHint, style: context.text.bodySmall),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _note,
+                maxLines: 2,
+                decoration: InputDecoration(labelText: l.proofNote),
+              ),
+              if (_error case final error?) ...[
+                const SizedBox(height: 12),
+                Text(error, style: context.text.bodyMedium?.copyWith(color: c.danger)),
+              ],
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: _busy ? null : _send,
+                icon: _busy
+                    ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.send_rounded),
+                label: Text(l.proofSend),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

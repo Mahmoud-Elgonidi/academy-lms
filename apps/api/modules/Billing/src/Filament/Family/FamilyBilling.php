@@ -3,10 +3,17 @@
 namespace Modules\Billing\Filament\Family;
 
 use BackedEnum;
+use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
@@ -14,9 +21,11 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\Billing\Actions\Payments\StartCheckout;
+use Modules\Billing\Actions\Proofs\SubmitPaymentProof;
 use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentCheckout;
+use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Identity\Contracts\PersonalChannel;
@@ -27,7 +36,8 @@ use Modules\SharedKernel\Time\ViewerTimezone;
  * Lessons left on each course of the learner on screen, and the invoices the
  * person signed in pays, each payable online on the academy's gateways
  * ("pay now": the gateway's page, then back here, which says how it went
- * and updates by itself once the gateway confirms).
+ * and updates by itself once the gateway confirms), or paid by hand and
+ * shown with the receipt ("I paid by transfer"), for the academy to confirm.
  */
 final class FamilyBilling extends Page
 {
@@ -103,6 +113,49 @@ final class FamilyBilling extends Page
                     return;
                 }
                 $this->redirect((string) $checkout->url);
+            });
+    }
+
+    public function sendProofAction(): Action
+    {
+        $l = 'billing::proofs.send.';
+
+        return Action::make('sendProof')
+            ->label(__($l.'action'))->icon(Heroicon::OutlinedDocumentArrowUp)->button()->size('sm')->outlined()
+            ->modalHeading(__($l.'title'))->modalDescription(__($l.'hint'))->modalWidth('lg')
+            ->modalSubmitActionLabel(__($l.'submit'))
+            ->modalContent(fn () => view('billing::filament.family.how-to-pay', ['note' => app(OnlinePayments::class)->manualNote()]))
+            ->fillForm(fn (array $arguments) => [
+                'method' => 'bank_transfer',
+                'amount' => $this->ownInvoice($arguments['invoice'] ?? '')->outstanding()->decimal(),
+                'paid_on' => CarbonImmutable::now(app(ViewerTimezone::class)->effective())->toDateString(),
+            ])
+            ->schema(fn (array $arguments) => [
+                ToggleButtons::make('method')->label(__($l.'method'))->inline()->required()
+                    ->options(collect(PaymentProof::METHODS)->mapWithKeys(fn ($m) => [$m => __('billing::billing.methods.'.$m)])->all()),
+                Grid::make(2)->schema([
+                    TextInput::make('amount')->label(__($l.'amount'))->numeric()->minValue(0)->required()
+                        ->suffix($this->ownInvoice($arguments['invoice'] ?? '')->currency),
+                    DatePicker::make('paid_on')->label(__($l.'paid_on'))->native(false)->required()
+                        ->maxDate(CarbonImmutable::now(app(ViewerTimezone::class)->effective())->toDateString()),
+                ]),
+                TextInput::make('reference')->label(__($l.'reference'))->placeholder(__($l.'reference_hint'))->maxLength(120),
+                FileUpload::make('file')->label(__($l.'file'))->helperText(__($l.'file_hint'))->required()
+                    ->storeFiles(false)->acceptedFileTypes(PaymentProof::MIMES)->maxSize(PaymentProof::MAX_KB),
+                Textarea::make('note')->label(__($l.'note'))->placeholder(__($l.'note_hint'))->rows(2)->maxLength(500),
+            ])
+            ->action(function (array $data, array $arguments) use ($l) {
+                $file = is_array($data['file'] ?? null) ? collect($data['file'])->first() : ($data['file'] ?? null);
+                try {
+                    app(SubmitPaymentProof::class)->handle($this->ownInvoice($arguments['invoice'] ?? ''), (string) auth()->id(), 'family',
+                        $data['method'] ?? null, $data['amount'] ?? null, $data['paid_on'] ?? null, $data['reference'] ?? null, $data['note'] ?? null, $file);
+                } catch (ValidationException $e) {
+                    Notification::make()->danger()->title(collect($e->errors())->flatten()->first())->send();
+
+                    return;
+                }
+                Notification::make()->success()->title(__($l.'sent'))->send();
+                unset($this->account);
             });
     }
 

@@ -49,9 +49,16 @@ export type Invoice = {
   paid_at: LocalTime | null;
   document_url: string | null;
   pay_with: { account_id: string; label: string; methods: string[] }[];
+  /** What is left as a number to type ("400.00"). */
+  outstanding_decimal: string;
+  /** The latest proof of paying by hand: pending, approved, or rejected with the academy's reason. */
+  proof: { id: string; status: 'pending' | 'approved' | 'rejected'; text: string; reason: string | null } | null;
+  can_send_proof: boolean;
 };
 
-export type Invoices = { owed: string | null; data: Invoice[] };
+export type ManualPayment = { note: string | null; takes_proofs: boolean; methods: { value: string; label: string }[] };
+
+export type Invoices = { owed: string | null; manual: ManualPayment; data: Invoice[] };
 
 type Rank = { key: string; points: number; next: number | null; next_key: string | null; progress: number; label: string; next_label: string | null };
 

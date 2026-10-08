@@ -162,6 +162,31 @@
                                             ],
                                             "description": "What this person still owes, per currency."
                                         },
+                                        "manual": {
+                                            "type": "object",
+                                            "description": "Paying by hand: how (the academy's words: an account number, InstaPay\u2026), and whether a proof can be sent (POST /family/invoices/{id}/proofs).",
+                                            "properties": {
+                                                "note": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "takes_proofs": {
+                                                    "type": "boolean"
+                                                },
+                                                "methods": {
+                                                    "type": "array",
+                                                    "description": "The ways a proof can say it was paid.",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "required": [
+                                                "note",
+                                                "takes_proofs",
+                                                "methods"
+                                            ]
+                                        },
                                         "data": {
                                             "type": "array",
                                             "items": {
@@ -200,6 +225,10 @@
                                                             "string",
                                                             "null"
                                                         ]
+                                                    },
+                                                    "outstanding_decimal": {
+                                                        "type": "string",
+                                                        "description": "What is left as a number to type in a form (\"400.00\"), in the currency's own decimals."
                                                     },
                                                     "status": {
                                                         "type": "string",
@@ -293,6 +322,87 @@
                                                         "type": "array",
                                                         "description": "Where it can be paid now: POST /family/invoices/{id}/checkout with one of these.",
                                                         "items": {}
+                                                    },
+                                                    "proof": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "The latest proof of paying by hand on it, if any: pending, approved or rejected (with the academy's reason).",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "description": "pending, approved, rejected"
+                                                            },
+                                                            "status_label": {
+                                                                "type": "string"
+                                                            },
+                                                            "method": {
+                                                                "type": "string"
+                                                            },
+                                                            "amount": {
+                                                                "type": "string"
+                                                            },
+                                                            "paid_on": {
+                                                                "type": "string",
+                                                                "description": "The day the payer said they paid, as they wrote it (Y-m-d)."
+                                                            },
+                                                            "sent_at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            },
+                                                            "text": {
+                                                                "type": "string",
+                                                                "description": "Where it stands, in a sentence for the payer."
+                                                            },
+                                                            "reason": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "Why the academy turned it down."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "status",
+                                                            "status_label",
+                                                            "method",
+                                                            "amount",
+                                                            "paid_on",
+                                                            "sent_at",
+                                                            "text",
+                                                            "reason"
+                                                        ]
+                                                    },
+                                                    "can_send_proof": {
+                                                        "type": "string",
+                                                        "description": "Whether a proof can be sent now (the academy takes them, something is owed, none is waiting)."
                                                     }
                                                 },
                                                 "required": [
@@ -304,19 +414,23 @@
                                                     "total",
                                                     "outstanding_minor",
                                                     "outstanding",
+                                                    "outstanding_decimal",
                                                     "status",
                                                     "status_label",
                                                     "issued_at",
                                                     "due_at",
                                                     "paid_at",
                                                     "document_url",
-                                                    "pay_with"
+                                                    "pay_with",
+                                                    "proof",
+                                                    "can_send_proof"
                                                 ]
                                             }
                                         }
                                     },
                                     "required": [
                                         "owed",
+                                        "manual",
                                         "data"
                                     ]
                                 }
@@ -452,6 +566,212 @@
                                         "checkout_id",
                                         "url",
                                         "expires_at"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/family/invoices/{invoice}/proofs": {
+            "post": {
+                "operationId": "family.invoices.proofs",
+                "description": "multipart/form-data with the receipt (a photo, a screenshot or a PDF, up to 10 MB). paid_on is the payer's own day (Y-m-d).\nNothing is paid yet: the academy checks the money arrived, then approves it (or turns it down with a reason).\nOne proof waits per invoice. Send an Idempotency-Key.",
+                "summary": "Send proof of paying an invoice by hand",
+                "tags": [
+                    "Billing"
+                ],
+                "parameters": [
+                    {
+                        "name": "invoice",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "bank_transfer",
+                                            "instapay",
+                                            "wallet",
+                                            "other"
+                                        ]
+                                    },
+                                    "amount": {
+                                        "type": "number"
+                                    },
+                                    "paid_on": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "reference": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 120
+                                    },
+                                    "note": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 500
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "contentMediaType": "application/octet-stream",
+                                        "description": "Maximum file size: 10240 kilobytes."
+                                    }
+                                },
+                                "required": [
+                                    "method",
+                                    "amount",
+                                    "paid_on",
+                                    "file"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "description": "pending, approved, rejected"
+                                                },
+                                                "status_label": {
+                                                    "type": "string"
+                                                },
+                                                "method": {
+                                                    "type": "string"
+                                                },
+                                                "amount": {
+                                                    "type": "string"
+                                                },
+                                                "paid_on": {
+                                                    "type": "string",
+                                                    "description": "The day the payer said they paid, as they wrote it (Y-m-d)."
+                                                },
+                                                "sent_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "text": {
+                                                    "type": "string",
+                                                    "description": "Where it stands, in a sentence for the payer."
+                                                },
+                                                "reason": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Why the academy turned it down."
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "status",
+                                                "status_label",
+                                                "method",
+                                                "amount",
+                                                "paid_on",
+                                                "sent_at",
+                                                "text",
+                                                "reason"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
                                     ]
                                 }
                             }
