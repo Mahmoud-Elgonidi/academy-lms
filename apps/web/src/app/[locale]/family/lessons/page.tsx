@@ -1,10 +1,12 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { FamilyLessonCard } from '@/components/family/lesson-card';
+import { RefreshAt } from '@/components/live-refresh';
 import { LessonActions } from '@/components/family/lesson-actions';
 import { Empty, Heading, join } from '@/components/ui';
 import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
+import { momentsOf } from '@/lib/live';
 import { lessonActionsFor } from '@/lib/family/rules';
 import { dayLabel, zoneName } from '@/lib/format';
 import type { FamilyLessons } from '@/lib/family/types';
@@ -31,6 +33,7 @@ export default async function Lessons({ searchParams }: { searchParams: Promise<
 
   return (
     <div>
+      {past ? null : <RefreshAt moments={momentsOf(lessons.data)} />}
       <Heading title={learner.is_self ? t('lessonsOf', { name: learner.name.split(' ')[0] ?? learner.name }) : t('lessonsOf', { name: learner.name })} hint={common('onClock', { zone: zoneName(person.display_timezone, locale) })} />
       {lessons.notices.length > 0 ? (
         <ul className="mb-4 space-y-2">

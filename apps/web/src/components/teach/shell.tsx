@@ -2,15 +2,18 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { signOut } from '@/app/[locale]/sign-in/actions';
 import { Icon } from '@/components/icons';
+import { LiveRefresh } from '@/components/live-refresh';
+import { liveOf } from '@/lib/live-server';
 import type { Branding, Me } from '@/lib/viewer';
 import { LanguageSwitch, SideNav, TabBar } from './nav';
 
-/** The teacher's frame: the academy and the person, the menu, and the page. */
+/** The teacher's frame: the academy and the person, the menu (with the unread count), and the page, kept live. */
 export async function Shell({ person, look, locale, children }: { person: Me; look: Branding; locale: string; children: ReactNode }) {
-  const t = await getTranslations('common');
+  const [t, live] = await Promise.all([getTranslations('common'), liveOf()]);
   const academy = locale === 'ar' ? look.name.ar : look.name.en;
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[16rem_1fr]">
+      <LiveRefresh realtime={live.realtime} />
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:start-3 focus:top-3 focus:z-50 focus:rounded-control focus:bg-white focus:px-3 focus:py-2">
         {t('skip')}
       </a>
@@ -20,7 +23,7 @@ export async function Shell({ person, look, locale, children }: { person: Me; lo
           <p className="font-heading text-[15px] font-bold leading-tight">{academy}</p>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-2">
-          <SideNav />
+          <SideNav unread={live.unread} />
         </div>
         <div className="space-y-1 border-t border-line p-3">
           <p className="truncate px-3 pb-1 text-sm font-semibold">{person.name}</p>
@@ -43,7 +46,7 @@ export async function Shell({ person, look, locale, children }: { person: Me; lo
           {children}
         </main>
       </div>
-      <TabBar />
+      <TabBar unread={live.unread} />
     </div>
   );
 }

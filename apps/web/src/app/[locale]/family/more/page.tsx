@@ -5,13 +5,15 @@ import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
 import { LanguageSwitch } from '@/components/teach/nav';
 import { Heading } from '@/components/ui';
+import { Unread } from '@/components/unread';
+import { liveOf } from '@/lib/live-server';
 import { family } from '@/lib/family/context';
 import { seesMoney } from '@/lib/family/rules';
 import { me } from '@/lib/viewer';
 
 /** On a phone: the places that are not tabs, the language, and signing out. */
 export default async function More() {
-  const [fam, person, common] = await Promise.all([family(), me(), getTranslations('common')]);
+  const [fam, person, common, { unread }] = await Promise.all([family(), me(), getTranslations('common'), liveOf()]);
   const nav = await getTranslations(`nav.${fam.stage}`);
   const { all, tabs } = itemsOf(fam.stage, seesMoney(fam.stage));
   const rest = all.filter((item) => !tabs.some((tab) => tab.href === item.href));
@@ -25,6 +27,7 @@ export default async function More() {
             <Link href={item.href} className={`${row} hover:bg-paper`}>
               <Icon name={item.icon} className="text-muted" />
               <span className="flex-1">{nav(item.key)}</span>
+              {item.key === 'notifications' ? <Unread n={unread} label={common('newMessages', { n: unread })} className="ms-0" /> : null}
               <Icon name="chevron" size={18} className="text-muted rtl:-scale-x-100" />
             </Link>
           </li>

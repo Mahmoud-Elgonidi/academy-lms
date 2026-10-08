@@ -6,15 +6,19 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Modules\Identity\Contracts\PersonalChannel;
 
-/** "One of your lessons changed" (its time, status or teacher), on the teacher's own channel; no data. */
-final class TeacherLessonsChanged implements ShouldBroadcastNow
+/**
+ * "One of your lessons changed" (its time, status or teacher, or a student
+ * booked in or out), on the person's own channel: the teacher's, the
+ * student's and their guardians'. No data.
+ */
+final class LessonsChanged implements ShouldBroadcastNow
 {
-    public function __construct(public readonly string $teacherId) {}
+    public function __construct(public readonly string $userId) {}
 
     /** @return list<PrivateChannel> */
     public function broadcastOn(): array
     {
-        return [new PrivateChannel(PersonalChannel::name($this->teacherId))];
+        return [new PrivateChannel(PersonalChannel::name($this->userId))];
     }
 
     public function broadcastAs(): string

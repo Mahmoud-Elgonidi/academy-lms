@@ -4,6 +4,8 @@ import { Link } from '@/i18n/navigation';
 import { Icon, type IconName } from '@/components/icons';
 import { LanguageSwitch } from '@/components/teach/nav';
 import { Heading } from '@/components/ui';
+import { Unread } from '@/components/unread';
+import { liveOf } from '@/lib/live-server';
 import { me } from '@/lib/viewer';
 
 const ITEMS: { href: string; key: string; icon: IconName }[] = [
@@ -18,7 +20,7 @@ const ITEMS: { href: string; key: string; icon: IconName }[] = [
 
 /** On a phone: the teacher's other screens, the language, and signing out. */
 export default async function More() {
-  const [nav, common, person] = await Promise.all([getTranslations('nav'), getTranslations('common'), me()]);
+  const [nav, common, person, { unread }] = await Promise.all([getTranslations('nav'), getTranslations('common'), me(), liveOf()]);
   const row = 'flex min-h-13 items-center gap-3 px-4 py-3';
   return (
     <div>
@@ -29,6 +31,7 @@ export default async function More() {
             <Link href={item.href} className={`${row} hover:bg-paper`}>
               <Icon name={item.icon} className="text-muted" />
               <span className="flex-1">{nav(item.key)}</span>
+              {item.key === 'notifications' ? <Unread n={unread} label={common('newMessages', { n: unread })} className="ms-0" /> : null}
               <Icon name="chevron" size={18} className="text-muted rtl:-scale-x-100" />
             </Link>
           </li>

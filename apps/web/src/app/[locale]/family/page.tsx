@@ -1,8 +1,11 @@
 import { getTranslations } from 'next-intl/server';
+import type { ReactNode } from 'react';
 import { ClassicHome, KidsHome, MiddleHome, TeenHome } from '@/components/family/homes';
+import { RefreshAt } from '@/components/live-refresh';
 import { Empty } from '@/components/ui';
 import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
+import { momentsOf } from '@/lib/live';
 import { seesMoney } from '@/lib/family/rules';
 import type { Balance, FamilyLessons, Homework, Invoices, Journey } from '@/lib/family/types';
 import { me } from '@/lib/viewer';
@@ -20,15 +23,18 @@ export default async function FamilyHome() {
     get<{ data: Homework[] }>('/v1/learning/homework', { query: { student_id: learner.id } }),
   ]);
 
-  if (fam.stage === 'kids') return <KidsHome learner={learner} journey={journey.data} lessons={lessons.data} homework={homework.data} />;
-  if (fam.stage === 'middle') return <MiddleHome learner={learner} journey={journey.data} lessons={lessons.data} homework={homework.data} />;
-  if (fam.stage === 'teen') return <TeenHome learner={learner} journey={journey.data} lessons={lessons.data} homework={homework.data} />;
+  // The next lesson's room opens and closes by the clock alone.
+  const clock = <RefreshAt moments={momentsOf(lessons.data)} />;
+  if (fam.stage === 'kids') return withClock(clock, <KidsHome learner={learner} journey={journey.data} lessons={lessons.data} homework={homework.data} />);
+  if (fam.stage === 'middle') return withClock(clock, <MiddleHome learner={learner} journey={journey.data} lessons={lessons.data} homework={homework.data} />);
+  if (fam.stage === 'teen') return withClock(clock, <TeenHome learner={learner} journey={journey.data} lessons={lessons.data} homework={homework.data} />);
 
   const [balance, invoices] = await Promise.all([
     get<Balance>('/v1/family/balance', { query: who }),
     seesMoney(fam.stage) ? get<Invoices>('/v1/family/invoices') : Promise.resolve(null),
   ]);
-  return (
+  return withClock(
+    clock,
     <ClassicHome
       name={person.name}
       learner={learner}
@@ -38,6 +44,15 @@ export default async function FamilyHome() {
       invoices={invoices}
       homework={homework.data}
       courses={journey.data.courses}
-    />
+    />,
+  );
+}
+
+function withClock(clock: ReactNode, home: ReactNode) {
+  return (
+    <>
+      {clock}
+      {home}
+    </>
   );
 }

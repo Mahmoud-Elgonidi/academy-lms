@@ -2350,6 +2350,202 @@
                 }
             }
         },
+        "/v1/realtime": {
+            "get": {
+                "operationId": "identity.realtime",
+                "description": "enabled is false when the academy's server does not broadcast; refresh some other way then.",
+                "summary": "Where to listen",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "enabled": {
+                                                    "type": "boolean"
+                                                },
+                                                "key": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "The app key for the socket (wss://{host}:{port}/app/{key})."
+                                                },
+                                                "host": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "null: the same host as the page (or the API) you came from."
+                                                },
+                                                "port": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "tls": {
+                                                    "type": "boolean"
+                                                },
+                                                "channel": {
+                                                    "type": "string",
+                                                    "description": "My own private channel: subscribe to \"private-\" and this."
+                                                }
+                                            },
+                                            "required": [
+                                                "enabled",
+                                                "key",
+                                                "host",
+                                                "port",
+                                                "tls",
+                                                "channel"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/realtime/auth": {
+            "post": {
+                "operationId": "identity.realtime.auth",
+                "description": "Signs a socket's subscription to a private channel I may hear (my own); the socket sends the answer as its auth.",
+                "summary": "Permission to listen",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "socket_id": {
+                                        "type": "string",
+                                        "pattern": "^\\d+\\.\\d+$",
+                                        "maxLength": 64
+                                    },
+                                    "channel_name": {
+                                        "type": "string",
+                                        "maxLength": 200
+                                    }
+                                },
+                                "required": [
+                                    "socket_id",
+                                    "channel_name"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "auth": {
+                                            "type": "string",
+                                            "description": "The signature for the subscription."
+                                        }
+                                    },
+                                    "required": [
+                                        "auth"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AccessDeniedHttpException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/accounts/code": {
             "post": {
                 "operationId": "identity.accounts.code",

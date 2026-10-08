@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { Icon, type IconName } from '@/components/icons';
 import { join } from '@/components/ui';
+import { Unread } from '@/components/unread';
 
 type Item = { href: string; key: string; icon: IconName };
 
@@ -33,8 +34,9 @@ function useActive() {
 }
 
 /** The side menu on wide screens. */
-export function SideNav() {
+export function SideNav({ unread }: { unread: number }) {
   const t = useTranslations('nav');
+  const common = useTranslations('common');
   const active = useActive();
   const group = (title: string, items: Item[]) => (
     <div>
@@ -52,6 +54,7 @@ export function SideNav() {
             >
               <Icon name={item.icon} className={active(item.href) ? 'text-brand' : 'text-muted'} />
               {t(item.key)}
+              {item.key === 'notifications' ? <Unread n={unread} label={common('newMessages', { n: unread })} /> : null}
             </Link>
           </li>
         ))}
@@ -67,8 +70,9 @@ export function SideNav() {
 }
 
 /** The tab bar at the bottom of a phone's screen. */
-export function TabBar() {
+export function TabBar({ unread }: { unread: number }) {
   const t = useTranslations('nav');
+  const common = useTranslations('common');
   const active = useActive();
   const inMore = ![...TABS.slice(0, 4)].some((tab) => active(tab.href));
   return (
@@ -81,10 +85,11 @@ export function TabBar() {
               <Link
                 href={tab.href}
                 aria-current={on ? 'page' : undefined}
-                className={join('flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px]', on ? 'font-semibold text-brand-strong' : 'text-muted')}
+                className={join('relative flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px]', on ? 'font-semibold text-brand-strong' : 'text-muted')}
               >
                 <Icon name={tab.icon} size={22} className={on ? 'text-brand' : undefined} />
                 {t(tab.key)}
+                {tab.key === 'menu' ? <Unread n={unread} label={common('newMessages', { n: unread })} dot /> : null}
               </Link>
             </li>
           );

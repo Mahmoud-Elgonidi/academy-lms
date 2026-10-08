@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Identity\Http\V1\Controllers\AccountsController;
 use Modules\Identity\Http\V1\Controllers\AuthController;
 use Modules\Identity\Http\V1\Controllers\CodeSignInController;
+use Modules\Identity\Http\V1\Controllers\RealtimeController;
 use Modules\Identity\Http\V1\Controllers\SessionsController;
 
 // Mounted at /api/v1 with the api, tenant and locale middleware (IdentityServiceProvider).
@@ -19,4 +20,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('me/sessions', [SessionsController::class, 'index'])->name('identity.sessions');
     Route::delete('me/sessions/{session}', [SessionsController::class, 'destroy'])->whereNumber('session')->name('identity.sessions.end');
     Route::post('auth/logout', [AuthController::class, 'logout'])->name('identity.logout');
+    Route::get('realtime', [RealtimeController::class, 'show'])->name('identity.realtime');
+    Route::post('realtime/auth', [RealtimeController::class, 'auth'])->name('identity.realtime.auth');
 });

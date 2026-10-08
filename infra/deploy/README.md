@@ -65,7 +65,7 @@ and says what is missing.
    wildcard certificate through a DNS challenge (`certbot certonly --manual --preferred-challenges dns
    -d progma.store -d '*.progma.store'`, then point the site at it).
 3. Open `https://demo.progma.store/admin` (or `https://progma.store/admin` with `PLATFORM_HOME_ACADEMY=demo`). The demo accounts (`owner@demo.test`, `khaled@demo.test`, ...) use
-   this server's own password: `grep DEMO_PASSWORD ~/academy-lms/.env`. The teachers' portal is
+   this server's own password: `grep DEMO_PASSWORD ~/academy-lms/.env`. The portal (teachers at /ar/teach, students and guardians at /ar/family, live through Reverb) is
    `https://demo.progma.store/ar` (or `https://progma.store/ar`); a browser opening the bare address goes there. The platform console is
    `https://progma.store/console` (`admin@platform.test`, same password); its authenticator secret is
    `DEMO_PLATFORM_2FA_SECRET` in `.env`, or print the current code:

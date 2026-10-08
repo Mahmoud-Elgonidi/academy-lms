@@ -50,7 +50,7 @@ use Modules\Scheduling\Filament\Teacher\MyWeek;
 use Modules\Scheduling\Listeners\FundSessionsFromNewCredit;
 use Modules\Scheduling\Listeners\SendSchedulingNotifications;
 use Modules\Scheduling\Live\BoardChanged;
-use Modules\Scheduling\Live\TeacherLessonsChanged;
+use Modules\Scheduling\Live\LessonsChanged;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -96,7 +96,7 @@ final class SchedulingServiceProvider extends ServiceProvider
         // Live screens (live:relay): what a change to lessons means, and who may hear it.
         $live = $this->app->make(LiveSignals::class);
         $live->on('board', fn (string $academyId) => new BoardChanged($academyId));
-        $live->on('lessons', fn (string $teacherId) => new TeacherLessonsChanged($teacherId));
+        $live->on('lessons', fn (string $userId) => new LessonsChanged($userId));
         // The live board's signals: only for someone of that academy who may see the board.
         Broadcast::channel(BoardChanged::CHANNEL, fn (Authenticatable $user, string $academyId) => $academyId === $this->app->make(TenantContext::class)->id()
             && Gate::forUser($user)->allows(Ability::ViewLiveBoard->value));

@@ -5,7 +5,7 @@ name: deploy
 #   2. rehearses the deploy on this GitHub machine: infra/deploy/deploy.sh with
 #      the demo data, then the panels, the API sign-in (roles, row-level security
 #      and data together), links on https behind a proxy, a live WebSocket
-#      connection through the web container, and the teachers' portal with a
+#      connection through the web container, and the portal with a
 #      teacher's session;
 #   3. on main, once the api or web checks pass (or when run by hand from the Actions
 #      tab), pushes the image to GitHub's registry and runs deploy.sh on the

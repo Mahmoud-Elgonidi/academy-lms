@@ -234,7 +234,7 @@ if command -v curl >/dev/null 2>&1; then
 fi
 say "Done: $IMAGE answers on 127.0.0.1:$HTTP_PORT"
 
-# The teachers' portal (the portal part, behind the web part under /ar and /en).
+# The portal for teachers, students and guardians (the portal part, behind the web part under /ar and /en).
 if command -v curl >/dev/null 2>&1; then
     portal=""
     for _ in $(seq 1 20); do
@@ -243,9 +243,9 @@ if command -v curl >/dev/null 2>&1; then
         sleep 2
     done
     if [ "$portal" = 200 ]; then
-        echo "    The teachers' portal answers under /ar and /en."
+        echo "    The portal (teachers, students, guardians) answers under /ar and /en."
     else
-        echo "    !! The teachers' portal does not answer (HTTP ${portal:-none}): docker compose logs portal"
+        echo "    !! The portal does not answer (HTTP ${portal:-none}): docker compose logs portal"
     fi
 fi
 
@@ -261,9 +261,9 @@ else
 fi
 home="$(setting PLATFORM_HOME_ACADEMY)"
 if [ -n "$home" ]; then
-    echo "    Academy \"$home\": https://$DOMAIN/admin and the teachers' portal https://$DOMAIN/ar (PLATFORM_HOME_ACADEMY) · others: https://<slug>.$DOMAIN · console: https://$DOMAIN/console"
+    echo "    Academy \"$home\": https://$DOMAIN/admin and the portal https://$DOMAIN/ar (PLATFORM_HOME_ACADEMY) · others: https://<slug>.$DOMAIN · console: https://$DOMAIN/console"
 else
-    echo "    Academies: https://<slug>.$DOMAIN/admin, teachers' portal https://<slug>.$DOMAIN/ar · console: https://$DOMAIN/console"
+    echo "    Academies: https://<slug>.$DOMAIN/admin, portal https://<slug>.$DOMAIN/ar · console: https://$DOMAIN/console"
 fi
 [ "$DEMO_DATA" = 1 ] && echo "    Demo sign-in: owner@demo.test; the password is DEMO_PASSWORD in $HERE/.env"
 exit 0

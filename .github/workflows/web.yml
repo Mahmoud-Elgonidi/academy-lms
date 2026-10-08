@@ -92,11 +92,13 @@ jobs:
             -f database/setup/roles.sql
           cp .env.example .env
           php artisan key:generate
-          # Nothing listens for broadcasts here (no Reverb).
-          sed -i 's/^BROADCAST_CONNECTION=.*/BROADCAST_CONNECTION=log/' .env
           php artisan migrate --database=pgsql_owner --force
           php artisan db:seed --force
           nohup php artisan serve --host=127.0.0.1 --port=8000 > ../../api-serve.log 2>&1 &
+          # Live pages: Reverb (the browsers' sockets, .env.example's local keys) and the relay
+          # that turns the database's signals into broadcasts.
+          nohup php artisan reverb:start --host=127.0.0.1 --port=8080 > ../../reverb.log 2>&1 &
+          nohup php artisan live:relay > ../../relay.log 2>&1 &
 
       - uses: actions/setup-node@v4
         with:
@@ -118,12 +120,14 @@ jobs:
 
       - name: End-to-end tests
         working-directory: apps/web
+        env:
+          E2E_LIVE: '1'
         run: npx playwright test
 
       - name: Logs and report when something failed
         if: failure()
         run: |
-          tail -n 80 api-serve.log web-serve.log apps/api/storage/logs/laravel.log 2>/dev/null || true
+          tail -n 80 api-serve.log web-serve.log reverb.log relay.log apps/api/storage/logs/laravel.log 2>/dev/null || true
 
       - uses: actions/upload-artifact@v4
         if: failure()

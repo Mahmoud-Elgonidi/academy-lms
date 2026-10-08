@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
 import { join } from '@/components/ui';
+import { Unread } from '@/components/unread';
 import { itemsOf } from '@/lib/family/nav-items';
 import type { Stage } from '@/lib/family/types';
 
@@ -12,8 +13,9 @@ function useActive() {
   return (href: string) => (href === '/family' ? path === '/family' : path === href || path.startsWith(`${href}/`));
 }
 
-export function SideNav({ stage, money }: { stage: Stage; money: boolean }) {
+export function SideNav({ stage, money, unread }: { stage: Stage; money: boolean; unread: number }) {
   const t = useTranslations(`nav.${stage}`);
+  const common = useTranslations('common');
   const active = useActive();
   return (
     <nav aria-label={t('menu')}>
@@ -30,6 +32,7 @@ export function SideNav({ stage, money }: { stage: Stage; money: boolean }) {
             >
               <Icon name={item.icon} className={active(item.href) ? 'text-brand' : 'text-muted'} />
               {t(item.key)}
+              {item.key === 'notifications' ? <Unread n={unread} label={common('newMessages', { n: unread })} /> : null}
             </Link>
           </li>
         ))}
@@ -39,8 +42,9 @@ export function SideNav({ stage, money }: { stage: Stage; money: boolean }) {
 }
 
 /** The phone's tab bar; the kids' one is bigger, with room for small fingers. */
-export function TabBar({ stage, money }: { stage: Stage; money: boolean }) {
+export function TabBar({ stage, money, unread }: { stage: Stage; money: boolean; unread: number }) {
   const t = useTranslations(`nav.${stage}`);
+  const common = useTranslations('common');
   const active = useActive();
   const { tabs } = itemsOf(stage, money);
   const inMore = !tabs.slice(0, -1).some((tab) => active(tab.href));
@@ -56,7 +60,7 @@ export function TabBar({ stage, money }: { stage: Stage; money: boolean }) {
                 href={tab.href}
                 aria-current={on ? 'page' : undefined}
                 className={join(
-                  'flex flex-col items-center justify-center gap-0.5',
+                  'relative flex flex-col items-center justify-center gap-0.5',
                   kids ? 'min-h-16 text-xs' : 'min-h-14 text-[11px]',
                   on ? 'font-semibold text-brand-strong' : 'text-muted',
                 )}
@@ -65,6 +69,7 @@ export function TabBar({ stage, money }: { stage: Stage; money: boolean }) {
                   <Icon name={tab.icon} size={kids ? 24 : 22} className={on ? 'text-brand' : undefined} />
                 </span>
                 {t(tab.key)}
+                {tab.key === 'more' ? <Unread n={unread} label={common('newMessages', { n: unread })} dot className={kids ? 'top-2.5 end-[calc(50%-1.1rem)]' : undefined} /> : null}
               </Link>
             </li>
           );

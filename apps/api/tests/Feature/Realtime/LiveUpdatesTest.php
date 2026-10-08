@@ -85,13 +85,15 @@ function useReverb(): void
     }
 }
 
-it('raises each committed change once, for the academy\'s board and the teacher\'s lessons, and nothing for a refused one', function () {
+it('raises each committed change once, for the academy\'s board and the lessons of its teacher and student, and nothing for a refused one', function () {
     $listener = liveListen();
     $board = "board:{$this->academy->id}";
     $lessons = "lessons:{$this->teacher->id}";
+    $booked = [$board, $lessons, "lessons:{$this->student->id}"];
+    sort($booked);
 
     $session = liveBook();                                                   // the lesson, its two people and its log: one transaction
-    expect(liveRaised($listener))->toBe([$board, $lessons]);
+    expect(liveRaised($listener))->toBe($booked);
 
     app(LogContactAttempt::class)->handle($session, 'teacher', 'running_late', null, $this->admin->id);
     expect(liveRaised($listener))->toBe([$board]);                           // only the log: the teacher's day is the same

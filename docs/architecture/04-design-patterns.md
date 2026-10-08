@@ -453,6 +453,7 @@ apps/web/
     lib/api/server.ts                 get/send: الـ API من السيرفر بس، والـ paths متكتبة من schema.ts (متولّد من openapi.json)
     lib/family/                       context (الطالب المختار والشكل)، rules (اللي كل شكل يسمح بيه)، nav-items، targets
     lib/actions/shared.ts             كتابة البوابتين: الدخول للحصة، وقراية الإشعارات
+    lib/live.ts  components/live-refresh.tsx  app/bff/realtime/   الصفحات الحية: socket واحد على قناة الشخص، وrefresh مع كل إشارة
     lib/teach/  lib/format.ts  lib/time.ts  lib/viewer.ts (الشكل والشخص)
     components/ui.tsx  components/icons.tsx  components/inbox.tsx  components/teach/*  components/family/*
   (P2) app/(public)/[locale]/...      موقع الأكاديمية العام، ISR بـ tag لكل أكاديمية

@@ -27,7 +27,9 @@ use Modules\Learning\LearningService;
 use Modules\Learning\Listeners\OpenReportWhenSessionCloses;
 use Modules\Learning\Listeners\RebuildProgressOnProgramChange;
 use Modules\Learning\Listeners\SendLearningNotifications;
+use Modules\Learning\Live\HomeworkChanged;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
+use Modules\SharedKernel\Realtime\LiveSignals;
 
 /** Reports, homework and progress on the roadmap (docs/architecture/01, "التقارير والواجبات"; 02, section 6). */
 final class LearningServiceProvider extends ServiceProvider
@@ -65,6 +67,9 @@ final class LearningServiceProvider extends ServiceProvider
         Event::listen(SessionReportOverdue::class, [SendLearningNotifications::class, 'reportOverdue']);
         Event::listen(CheerSent::class, [SendLearningNotifications::class, 'cheerSent']);
         Event::listen(CurriculumAttached::class, RebuildProgressOnProgramChange::class);
+
+        // Homework pages refresh when homework changes (the homework triggers raise "homework:{person}").
+        $this->app->make(LiveSignals::class)->on('homework', fn (string $userId) => new HomeworkChanged($userId));
 
         if ($this->app->runningInConsole()) {
             $this->commands([SweepLearningCommand::class]);

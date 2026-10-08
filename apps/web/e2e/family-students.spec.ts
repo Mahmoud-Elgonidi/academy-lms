@@ -69,4 +69,31 @@ test.describe('a middle-school student (Ziad)', () => {
     // What was handed in shows on the homework, now waiting for the teacher.
     await expect(page.getByText('حليت التمرين كله وراجعته مرتين.').first()).toBeVisible();
   });
+
+  test('sees the teacher\'s mark arrive without reloading', async ({ page, browser }) => {
+    test.skip(!process.env.E2E_LIVE, 'needs Reverb and the live relay (E2E_LIVE=1)');
+    const title = 'حل تمرين ص 20';
+    await page.goto('/ar/family/homework');
+    const card = page.getByRole('article').filter({ hasText: title });
+    test.skip((await card.count()) === 0 || (await card.getByText('رأي المدرّس').count()) > 0, 'nothing waiting for a mark in this data');
+    // The page's socket is on Ziad's own channel before the teacher marks.
+    await page.waitForFunction(() => performance.getEntriesByType('resource').some((r) => r.name.includes('/bff/realtime/auth')));
+    let reloaded = false;
+    page.on('load', () => (reloaded = true));
+
+    // The teacher marks it in their own browser.
+    const teacher = await browser.newContext({ storageState: 'e2e/.auth/teacher.json' });
+    const marking = await teacher.newPage();
+    await marking.goto('/ar/teach/marking');
+    const handed = marking.getByRole('article').filter({ hasText: title }).first();
+    await handed.getByRole('radio', { name: '5' }).click();
+    await handed.getByLabel('كلمتك للطالب').fill('ممتاز يا زياد، كمّل كده.');
+    await handed.getByRole('button', { name: 'سجّل التصحيح' }).click();
+    await expect(marking.getByRole('article').filter({ hasText: title })).toHaveCount(0);
+    await teacher.close();
+
+    await expect(card.getByText('رأي المدرّس')).toBeVisible({ timeout: 10_000 });
+    await expect(card.getByText('ممتاز يا زياد، كمّل كده.')).toBeVisible();
+    expect(reloaded).toBe(false);
+  });
 });

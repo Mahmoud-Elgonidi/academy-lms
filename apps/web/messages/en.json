@@ -28,7 +28,8 @@
     "hoursAmount": "{h} hours",
     "handedInAt": "Handed in {when}",
     "downloadFile": "Download the file",
-    "markAllRead": "Mark all read"
+    "markAllRead": "Mark all read",
+    "newMessages": "{n, plural, =1 {1 new message} other {# new messages}}"
   },
   "signIn": {
     "title": "Welcome",
