@@ -13,6 +13,7 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\RenderHook;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Filament\View\PanelsRenderHook;
@@ -27,6 +28,7 @@ use Modules\Identity\Actions\Otp\VerifySignInCode;
 use Modules\Identity\Contracts\SignInGate;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
+use Modules\Identity\Social\Provider;
 use SensitiveParameter;
 use Throwable;
 
@@ -65,6 +67,12 @@ final class SignIn extends Login
     /** After a right one-time code, whose second step this is and until when (encrypted: [user id, unix time]). */
     #[Locked]
     public ?string $codePassed = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->finishSocialSignIn();
+    }
 
     public function form(Schema $schema): Schema
     {
@@ -213,6 +221,9 @@ final class SignIn extends Login
                 ->alignment(Alignment::Center)
                 ->key('sign-in-ways')
                 ->visible(fn (): bool => blank($this->userUndertakingMultiFactorAuthentication)),
+            View::make('identity::social.buttons')
+                ->viewData(['providers' => Provider::forWeb(), 'panel' => Filament::getCurrentOrDefaultPanel()->getId()])
+                ->visible(fn (): bool => Provider::forWeb() !== [] && blank($this->userUndertakingMultiFactorAuthentication) && ! $this->inCodeStep()),
             RenderHook::make(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER),
         ]);
     }
@@ -297,6 +308,58 @@ final class SignIn extends Login
                 $this->data['email'] = $this->contact;
                 $this->data['code'] = null;
             });
+    }
+
+    /**
+     * Back from Google or Apple (SocialSignInController::finish): the same
+     * door checks as a password, then the authenticator app's code for
+     * whoever has it on (within ten minutes, as after a one-time code), else
+     * straight in. A refusal on the way back is shown here.
+     */
+    private function finishSocialSignIn(): void
+    {
+        if (is_string($error = session()->pull('identity.social.error'))) {
+            Notification::make()->title($error)->danger()->persistent()->send();
+        }
+        $passed = session()->pull('identity.social.passed');
+        try {
+            [$userId, $panel, $until] = is_string($passed) ? decrypt($passed) : [null, null, 0];
+        } catch (Throwable) {
+            return;
+        }
+        $user = $userId !== null && $panel === Filament::getCurrentOrDefaultPanel()->getId() && $until >= now()->getTimestamp()
+            ? User::query()->find($userId) : null;
+        if ($user === null) {
+            return;
+        }
+
+        try {
+            $allowed = $this->isUserAllowedToAccessPanel($user);
+        } catch (ValidationException $held) {
+            Notification::make()->title((string) collect($held->errors())->flatten()->first())->danger()->persistent()->send();
+
+            return;
+        }
+        if (! $allowed) {
+            Notification::make()->title(__('filament-panels::auth/pages/login.messages.failed'))->danger()->persistent()->send();
+
+            return;
+        }
+
+        $challenge = $this->getMultiFactorChallenge();
+        if ($provider = $challenge->getFirstEnabledProvider($user)) {
+            $this->mode = 'code';
+            $this->userUndertakingMultiFactorAuthentication = encrypt($user->getAuthIdentifier());
+            $this->codePassed = encrypt([$user->getAuthIdentifier(), now()->addMinutes(10)->getTimestamp()]);
+            $challenge->beforeChallenge($user, $provider);
+            $this->multiFactorChallengeForm->fill();
+
+            return;
+        }
+
+        Filament::auth()->login($user);
+        session()->regenerate();
+        $this->redirectIntended(Filament::getUrl());
     }
 
     /**

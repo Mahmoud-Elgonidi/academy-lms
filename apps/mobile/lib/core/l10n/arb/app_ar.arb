@@ -53,6 +53,57 @@
   "emailHint": "الكود هيوصلك على الإيميل ده.",
   "sendCode": "ابعتلي كود",
   "havePassword": "عندك كلمة سر؟ ادخل بيها",
+  "signInOr": "أو",
+  "signInWithGoogle": "ادخل بحساب جوجل",
+  "signInWithApple": "ادخل بحساب أبل",
+  "socialFailed": "الدخول بحساب {provider} ماكملش. جرّب تاني.",
+  "@socialFailed": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "providerGoogle": "جوجل",
+  "providerApple": "أبل",
+  "signInMethodsTitle": "الدخول بجوجل وأبل",
+  "signInMethodsHint": "اربط حسابك بجوجل أو أبل، وادخل بيهم من غير كود ولا كلمة سر.",
+  "signInMethodLinkedAs": "مربوط: {email}",
+  "@signInMethodLinkedAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "signInMethodLinked": "مربوط",
+  "signInMethodNotLinked": "مش مربوط",
+  "signInMethodLink": "اربط",
+  "signInMethodUnlink": "افصل",
+  "signInMethodUnlinkConfirm": "تفصل حساب {provider}؟ مش هتقدر تدخل بيه لحد ما تربطه تاني.",
+  "@signInMethodUnlinkConfirm": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "signInMethodLinkedDone": "حساب {provider} اتربط.",
+  "@signInMethodLinkedDone": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "signInMethodUnlinkedDone": "حساب {provider} اتفصل.",
+  "@signInMethodUnlinkedDone": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
   "codeTitle": "اكتب الكود",
   "codeSentWhatsapp": "بعتنالك كود من 6 أرقام على واتساب، على الرقم {to}",
   "@codeSentWhatsapp": {

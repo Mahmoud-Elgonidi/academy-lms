@@ -8,8 +8,9 @@ import type { JoinTicket } from '@/lib/teach/types';
 /**
  * Writes every portal makes the same way, teachers and families alike: a
  * seat in a lesson (JoinLesson decides whose lesson it is and whether it is
- * open yet), notifications marked read, tickets to the academy, and lesson
- * recordings (consent, watching, starting and stopping one).
+ * open yet), notifications marked read, tickets to the academy, lesson
+ * recordings (consent, watching, starting and stopping one), and unlinking
+ * Google or Apple from one's account.
  */
 export async function joinLesson(id: string): Promise<{ ok: true; ticket: JoinTicket; recording: LessonRecording } | { ok: false; message?: string }> {
   const joined = await send<{ data: JoinTicket; recording?: LessonRecording }>('post', '/v1/lessons/{session}/join', { params: { session: id } });
@@ -51,6 +52,14 @@ export async function recordLesson(id: string, on: boolean): Promise<{ ok: true;
   const done = await send<{ data: { running: boolean } }>('post', on ? '/v1/lessons/{session}/recording' : '/v1/lessons/{session}/recording/stop', { params: { session: id } });
   if (!done.ok) return problemOf(done.problem);
   return { ok: true, running: done.data.data.running };
+}
+
+/** Takes Google or Apple off this account (not when it is the only way in). */
+export async function unlinkSocial(provider: string): Promise<Done> {
+  const done = await send('delete', '/v1/me/social/{provider}', { params: { provider } });
+  if (!done.ok) return problemOf(done.problem);
+  refresh();
+  return { ok: true };
 }
 
 /** Marks notifications read: these, or all of them. */

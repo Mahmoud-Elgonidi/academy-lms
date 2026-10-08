@@ -16,6 +16,7 @@ use Modules\Identity\Contracts\SignInGate;
 use Modules\Identity\IdentityService;
 use Modules\Identity\Models\OtpChallenge;
 use Modules\Identity\Models\PersonalAccessToken;
+use Modules\Identity\Models\SocialSignIn;
 use Modules\Identity\Models\User;
 use Modules\Identity\Otp\LogOtpSender;
 use Modules\Identity\Preferences\PreferenceStore;
@@ -63,7 +64,7 @@ final class IdentityServiceProvider extends ServiceProvider
             ->group(__DIR__.'/../../routes/api_accounts.php');
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
-            $schedule->command('model:prune', ['--model' => [OtpChallenge::class]])->daily()->onOneServer();
+            $schedule->command('model:prune', ['--model' => [OtpChallenge::class, SocialSignIn::class]])->daily()->onOneServer();
         });
     }
 }

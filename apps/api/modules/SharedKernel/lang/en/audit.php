@@ -47,6 +47,8 @@ return [
             'recovery_code_used' => ':name signed in with a recovery code',
             'recovery_codes_renewed' => ':name made new recovery codes',
             'two_factor_reset' => 'Two-step sign-in of :name reset by the platform team: :reason',
+            'social_linked' => ':name linked a :provider account (:via)',
+            'social_unlinked' => ':name unlinked a :provider account',
         ],
         'people' => [
             'consent_granted' => ':guardian agreed to :student\'s account (:via)',
@@ -88,7 +90,8 @@ return [
         'kind' => ['bonus' => 'Bonus', 'deduction' => 'Deduction'],
         'outcome' => ['completed' => 'taught', 'teacher_absent' => 'teacher absent', 'student_absent' => 'student absent', 'cancelled_makeup' => 'cancelled with a makeup'],
         'mode' => ['test' => 'test', 'live' => 'live'],
-        'via' => ['self' => 'themself', 'guardian' => 'as guardian', 'family' => 'from their account', 'link' => 'from the link they got', 'staff' => 'recorded by the office'],
+        'via' => ['self' => 'themself', 'guardian' => 'as guardian', 'family' => 'from their account', 'link' => 'from the link they got', 'staff' => 'recorded by the office', 'email' => 'first sign-in with the same email', 'settings' => 'from their settings'],
+        'provider' => ['google' => 'Google', 'apple' => 'Apple'],
         'how' => ['exit' => 'they left', 'expired' => 'time ran out', 'ended' => 'ended from the console'],
         'recording' => ['off' => 'no recording', 'manual' => 'the teacher starts it', 'auto' => 'every lesson by itself'],
         'media' => ['by_age' => 'by age', 'video' => 'video', 'audio' => 'sound only'],

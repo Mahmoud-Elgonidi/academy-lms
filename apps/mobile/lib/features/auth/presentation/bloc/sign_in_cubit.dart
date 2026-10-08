@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/auth/account.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/network/api_problem.dart';
+import '../../../../core/social/social_sign_in.dart';
 import '../../data/auth_repository.dart';
 import '../../domain/sign_in_models.dart';
 
@@ -74,6 +75,25 @@ class SignInCubit extends Cubit<SignInState> {
     if (sent == null) return Future.value(false);
     return _run(() async {
       final discovery = await _repo.verify(sent.challengeId, code.trim());
+      emit(
+        state.copyWith(
+          discovery: () => discovery,
+          selected: {
+            for (final a in discovery.accounts)
+              if (a.hasAppArea) a.id,
+          },
+        ),
+      );
+    });
+  }
+
+  /// The phone's Google or Apple sign-in instead of a code: the same list of accounts to add.
+  /// False (and nothing said) when the person cancelled.
+  Future<bool> withProvider(SocialSignIn social, String provider) async {
+    final credential = await social.signIn(provider);
+    if (credential == null) return false;
+    return _run(() async {
+      final discovery = await _repo.discoverWith(credential);
       emit(
         state.copyWith(
           discovery: () => discovery,

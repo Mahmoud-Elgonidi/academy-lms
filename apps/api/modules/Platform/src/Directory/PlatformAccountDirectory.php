@@ -2,6 +2,8 @@
 
 namespace Modules\Platform\Directory;
 
+use Closure;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Modules\Platform\Contracts\AccountDirectory;
@@ -12,21 +14,31 @@ final class PlatformAccountDirectory implements AccountDirectory
 {
     public function withEmail(string $email): array
     {
-        return $this->find('email', $email);
+        return $this->find(fn (Builder $q) => $q->where('u.email', $email));
     }
 
     public function withPhone(string $phoneE164): array
     {
-        return $this->find('phone_e164', $phoneE164);
+        return $this->find(fn (Builder $q) => $q->where('u.phone_e164', $phoneE164));
     }
 
-    /** @return list<DiscoveredAccount> */
-    private function find(string $column, string $value): array
+    public function withSocialIdentity(string $provider, string $subject): array
+    {
+        return $this->find(fn (Builder $q) => $q->whereExists(fn (Builder $s) => $s->from('social_identities as si')
+            ->whereColumn('si.user_id', 'u.id')->whereColumn('si.academy_id', 'u.academy_id')
+            ->where('si.provider', $provider)->where('si.subject', $subject)));
+    }
+
+    /**
+     * @param  Closure(Builder): mixed  $match
+     * @return list<DiscoveredAccount>
+     */
+    private function find(Closure $match): array
     {
         $rows = DB::connection('pgsql_platform')->table('users as u')
             ->join('academies as a', 'a.id', '=', 'u.academy_id')
             ->leftJoin('academy_branding as b', 'b.academy_id', '=', 'a.id')
-            ->where("u.{$column}", $value)
+            ->where($match)
             ->where('u.status', 'active')
             ->where('a.status', AcademyStatus::Active->value)
             ->orderBy('a.name_en')->orderBy('u.name')

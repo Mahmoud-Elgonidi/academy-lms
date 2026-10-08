@@ -200,7 +200,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 | Module | الجداول الأساسية |
 |---|---|
 | Platform | `academies`، `academy_domains`، `academy_branding`، `branding_templates`، `saas_plans`، `saas_subscriptions`، `usage_counters`، `platform_admins` |
-| Identity | `users`، `roles/permissions`، `devices`، `otp_challenges`، `social_identities`، `impersonations` |
+| Identity | `users`، `roles/permissions`، `devices`، `otp_challenges`، `social_identities` (ربط حساب بجوجل أو أبل، بالـ `sub`)، `social_sign_ins` (تذاكر واكتشاف لدقايق، من غير RLS زي `otp_challenges`)، `impersonations` |
 | Catalog | `subjects`، `levels`، `categories` |
 | People | `teacher_profiles`، `teacher_subjects`، `teacher_subject_categories`، `teacher_languages`، `student_profiles`، `guardian_student`، `guardian_consents` (بتتضاف بس، والسحب مرة واحدة)، `people_settings` (سن الموافقة)، `supervisor_assignments` |
 | Curriculum | `programs`، `curriculum_versions`، `curriculum_nodes`، `node_resources`، `assessment_definitions`، `version_node_mappings` |
@@ -567,6 +567,13 @@ interface PaymentGateway
   - سيرفر Next بس هو اللي بيكلّم الـ API (`lib/api/server.ts`، ‏`server-only`)، ومعاه الـ token و`Accept-Language` و`X-Timezone` (توقيت المتصفح من cookie بتكتبها الصفحة)، و`X-Forwarded-Host` (الـ host اللي الصفحة اتطلبت عليه، فالأكاديمية بتتحدد زي اللوحات بالظبط).
   - لو الـ API رفض الـ token (انتهى، أو اتخرّج من جهاز تاني)، الصفحة بتروح `/bff/session-ended` اللي بيمسح الـ cookie ويرجّع لصفحة الدخول.
   - الملفات اللي الطالب سلّمها (تسجيل أو صورة) بتعدّي من `/bff/submissions/{id}/file` بـ token المدرس، والتسجيل بيتقدّم ويرجع (`Range`).
+
+- **جوجل وأبل** ([02 — القسم 14](02-domain-rules.md#14-الدخول-بجوجل-وأبل)):
+  - حسابات المنصة نفسها عند جوجل وأبل (`GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` وApple Services ID للويب، و`GOOGLE_APP_CLIENT_IDS`/`APPLE_APP_IDS` للتطبيقات)، و**عنوان رجوع واحد** على المنصة (`SOCIAL_REDIRECT_BASE` + `/auth/social/{provider}/callback`) متسجل عندهم لكل الأكاديميات.
+  - التحقق من الـ ID token من غير SDK (`IdTokens`: JWKS وRS256 بـ OpenSSL). كود جوجل بيتبدّل بـ PKCE، وأبل بيرد بـ `form_post` فالـ callback من غير session ولا CSRF.
+  - اللوحات: `GET /auth/social/{provider}/start?panel=…` على عنوان الأكاديمية، والـ callback على المنصة، و`/auth/social/finish?ticket=…` على الأكاديمية، وصفحة الدخول بتكمّل (والخطوة التانية لو شغالة). روابط الأزرار full page load (`spa-mode=false`)، لأن الـ SPA navigation مايقدرش يتبع redirect لموقع تاني.
+  - البوابة: `/bff/social/{provider}/start` بيحط السر في httpOnly cookie ويطلب العنوان من `POST /v1/auth/social/{provider}/start` (أو `me/social/{provider}/start` للربط)، والرجوع على `/bff/social/finish` بيبدّل التذكرة بالسر (`POST /v1/auth/social/ticket` أو `me/social/ticket`). لو الخطوة التانية مطلوبة، الـ token بتاعها بيستنى في httpOnly cookie لدقايق وصفحة الدخول بتسأل الكود.
+  - التطبيقات: `POST /v1/auth/social` (جوه أكاديمية)، و`POST /v1/accounts/social` (الاكتشاف)، و`GET`/`POST`/`DELETE /v1/me/social`، و`GET /v1/auth/social` (المتاح للويب وللتطبيقات). إعدادات التطبيق من `--dart-define` (`GOOGLE_SERVER_CLIENT_ID`، `GOOGLE_IOS_CLIENT_ID`).
 
 ### Realtime (Reverb)
 - القنوات:

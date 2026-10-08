@@ -3,9 +3,12 @@
 namespace Modules\Identity\Filament\Pages;
 
 use DateTimeZone;
+use Filament\Actions\Action;
 use Filament\Auth\Pages\EditProfile;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\View;
@@ -13,19 +16,24 @@ use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 use Modules\Identity\Actions\ChangePassword;
+use Modules\Identity\Actions\Social\UnlinkSocialIdentity;
 use Modules\Identity\Actions\UpdatePreferences;
 use Modules\Identity\Actions\UpdateProfile;
 use Modules\Identity\Models\Impersonation;
 use Modules\Identity\Models\User;
 use Modules\Identity\Preferences\PreferenceStore;
+use Modules\Identity\Queries\SocialAccounts;
+use Modules\Identity\Social\Provider;
 use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use SensitiveParameter;
 
 /**
  * "My settings": name, language, timezone, the screen choices modules declare
- * (e.g. the live board layout), password, and two-step sign-in (Filament's
+ * (e.g. the live board layout), password, Google and Apple sign-in (link
+ * through the provider, unlink here), and two-step sign-in (Filament's
  * authenticator app section). Saves through the same Actions the API uses.
  */
 final class MySettings extends EditProfile
@@ -34,6 +42,18 @@ final class MySettings extends EditProfile
 
     /** @var list<array{admin: string, when: string, minutes: int, reason: string}>|null */
     private ?array $signIns = null;
+
+    /** Back from linking Google or Apple (SocialSignInController::finish). */
+    public function mount(): void
+    {
+        parent::mount();
+        if (is_string($done = session()->pull('identity.social.done'))) {
+            Notification::make()->title($done)->success()->send();
+        }
+        if (is_string($error = session()->pull('identity.social.error'))) {
+            Notification::make()->title($error)->danger()->persistent()->send();
+        }
+    }
 
     public static function getLabel(): string
     {
@@ -80,12 +100,66 @@ final class MySettings extends EditProfile
                 // Not while the platform team is signed in as this person (ChangePassword refuses too).
                 ->visible(fn (): bool => AuditActor::current()->onBehalfOf === null),
 
+            Section::make(__('identity::social.settings.title'))
+                ->description(__('identity::social.settings.description'))
+                ->schema([View::make('identity::social.linked')->viewData(fn (): array => ['rows' => $this->socialRows(), 'panel' => Filament::getCurrentOrDefaultPanel()->getId()])])
+                // Not while the platform team is signed in as this person (linking refuses too).
+                ->visible(fn (): bool => Provider::forWeb() !== [] && AuditActor::current()->onBehalfOf === null),
+
             Section::make(__('identity::impersonation.mine.title'))
                 ->description(__('identity::impersonation.mine.hint'))
                 ->schema([View::make('identity::impersonation.mine')->viewData(['rows' => $this->platformSignIns()])])
                 ->visible(fn (): bool => $this->platformSignIns() !== [])
                 ->collapsible(),
         ]);
+    }
+
+    /** Unlink Google or Apple, after a word on what it means. */
+    public function unlinkSocialAction(): Action
+    {
+        $provider = fn (array $arguments): Provider => Provider::tryFrom((string) ($arguments['provider'] ?? '')) ?? Provider::Google;
+
+        return Action::make('unlinkSocial')
+            ->label(__('identity::social.settings.unlink'))
+            ->color('danger')
+            ->outlined()
+            ->size('sm')
+            ->requiresConfirmation()
+            ->modalSubmitActionLabel(__('identity::social.settings.unlink'))
+            ->modalHeading(fn (array $arguments): string => __('identity::social.settings.unlink').' · '.$provider($arguments)->label())
+            ->modalDescription(fn (array $arguments): string => __('identity::social.settings.unlink_confirm', ['provider' => $provider($arguments)->label()]))
+            ->action(function (array $arguments) use ($provider): void {
+                /** @var User $user */
+                $user = $this->getUser();
+                try {
+                    app(UnlinkSocialIdentity::class)->handle($user, $provider($arguments));
+                } catch (ValidationException $e) {
+                    Notification::make()->title((string) collect($e->errors())->flatten()->first())->danger()->send();
+
+                    return;
+                }
+                Notification::make()->title(__('identity::social.settings.unlinked_done', ['provider' => $provider($arguments)->label()]))->success()->send();
+            });
+    }
+
+    /**
+     * Each provider on for the web, and whether this account is linked to it.
+     *
+     * @return list<array{provider: string, label: string, email: ?string, last_used: ?string}>
+     */
+    private function socialRows(): array
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $tz = app(ViewerTimezone::class)->effective();
+
+        return array_map(fn (array $row) => [
+            'provider' => $row['provider']->value,
+            'label' => $row['provider']->label(),
+            'linked' => $row['linked'],
+            'email' => $row['email'],
+            'last_used' => $row['last_used_at']?->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M Y'),
+        ], app(SocialAccounts::class)->of($user));
     }
 
     /** Two-step sign-in (set up, new recovery codes, turn off), never while the platform team is signed in as this person. */

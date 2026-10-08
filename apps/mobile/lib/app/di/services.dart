@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/network/api_client.dart';
 import '../../core/realtime/live.dart';
+import '../../core/social/social_sign_in.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/billing/data/billing_repository.dart';
 import '../../features/challenges/data/challenges_repository.dart';
@@ -22,8 +23,9 @@ import '../../features/teaching/data/teaching_repository.dart';
 
 /// The repositories every screen reads from, over one API client.
 class Services {
-  Services(this.api)
-    : auth = AuthRepository(api),
+  Services(this.api, {SocialSignIn? social})
+    : social = social ?? NativeSocialSignIn(),
+      auth = AuthRepository(api),
       family = FamilyRepository(api),
       lessons = LessonsRepository(api),
       billing = BillingRepository(api),
@@ -42,6 +44,9 @@ class Services {
   }
 
   final ApiClient api;
+
+  /// The phone's Google and Apple sign-in.
+  final SocialSignIn social;
   final AuthRepository auth;
   final FamilyRepository family;
   final LessonsRepository lessons;
@@ -65,6 +70,7 @@ class Services {
     providers: [
       RepositoryProvider.value(value: this),
       RepositoryProvider.value(value: auth),
+      RepositoryProvider<SocialSignIn>.value(value: social),
       RepositoryProvider.value(value: family),
       RepositoryProvider.value(value: lessons),
       RepositoryProvider.value(value: billing),

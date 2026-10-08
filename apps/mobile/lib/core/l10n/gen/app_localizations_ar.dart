@@ -104,6 +104,64 @@ class AppLocalizationsAr extends AppLocalizations {
   String get havePassword => 'عندك كلمة سر؟ ادخل بيها';
 
   @override
+  String get signInOr => 'أو';
+
+  @override
+  String get signInWithGoogle => 'ادخل بحساب جوجل';
+
+  @override
+  String get signInWithApple => 'ادخل بحساب أبل';
+
+  @override
+  String socialFailed(String provider) {
+    return 'الدخول بحساب $provider ماكملش. جرّب تاني.';
+  }
+
+  @override
+  String get providerGoogle => 'جوجل';
+
+  @override
+  String get providerApple => 'أبل';
+
+  @override
+  String get signInMethodsTitle => 'الدخول بجوجل وأبل';
+
+  @override
+  String get signInMethodsHint => 'اربط حسابك بجوجل أو أبل، وادخل بيهم من غير كود ولا كلمة سر.';
+
+  @override
+  String signInMethodLinkedAs(String email) {
+    return 'مربوط: $email';
+  }
+
+  @override
+  String get signInMethodLinked => 'مربوط';
+
+  @override
+  String get signInMethodNotLinked => 'مش مربوط';
+
+  @override
+  String get signInMethodLink => 'اربط';
+
+  @override
+  String get signInMethodUnlink => 'افصل';
+
+  @override
+  String signInMethodUnlinkConfirm(String provider) {
+    return 'تفصل حساب $provider؟ مش هتقدر تدخل بيه لحد ما تربطه تاني.';
+  }
+
+  @override
+  String signInMethodLinkedDone(String provider) {
+    return 'حساب $provider اتربط.';
+  }
+
+  @override
+  String signInMethodUnlinkedDone(String provider) {
+    return 'حساب $provider اتفصل.';
+  }
+
+  @override
   String get codeTitle => 'اكتب الكود';
 
   @override

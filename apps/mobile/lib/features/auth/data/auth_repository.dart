@@ -1,11 +1,12 @@
 import '../../../core/auth/account.dart';
 import '../../../core/device.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/social/social_sign_in.dart';
 import '../domain/sign_in_models.dart';
 
-/// Signing in: a code to a phone or email that finds the person's accounts
-/// in every academy (nothing is said about accounts before the code), or a
-/// password in one academy.
+/// Signing in: a code to a phone or email, or the phone's Google or Apple
+/// sign-in, that finds the person's accounts in every academy (nothing is
+/// said about accounts before that), or a password in one academy.
 class AuthRepository {
   AuthRepository(this._api);
 
@@ -21,6 +22,15 @@ class AuthRepository {
       'accounts/code/verify',
       anonymous: true,
       body: {'challenge_id': challengeId, 'code': code, 'device_name': deviceName()},
+    ),
+  );
+
+  /// The accounts linked to this Google or Apple account, or carrying the email it verified, in every academy.
+  Future<Discovery> discoverWith(SocialCredential credential) async => Discovery.fromJson(
+    await _api.post(
+      'accounts/social',
+      anonymous: true,
+      body: {'provider': credential.provider, 'id_token': credential.idToken, 'nonce': ?credential.nonce},
     ),
   );
 

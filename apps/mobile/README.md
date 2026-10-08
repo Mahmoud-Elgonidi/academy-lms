@@ -53,6 +53,12 @@ With the API's Reverb and relay running (`php artisan reverb:start`, `php artisa
     --dart-define=FCM_SENDER_ID=… --dart-define=FCM_PROJECT_ID=…   # and FCM_VAPID_KEY=… for the web
   ```
   Without them the app has no push and works the same otherwise. The API sends through its FCM channel (`apps/api`, Communication). iOS also needs an APNs key uploaded to Firebase and the Push Notifications capability in Xcode; the web also needs a `web/firebase-messaging-sw.js` with the project's settings (not in the repo, so web builds have the bell and inbox but no push).
+- **Google and Apple sign-in** show on the welcome screen and under **Me → Account** when the API has them on for the apps (`GET auth/social`) and the phone can do it. Google needs the platform's OAuth clients with the build (nothing is committed):
+  ```bash
+  flutter build apk --dart-define=GOOGLE_SERVER_CLIENT_ID=….apps.googleusercontent.com   # the web client, as the API's GOOGLE_CLIENT_ID
+  flutter build ipa --dart-define=GOOGLE_SERVER_CLIENT_ID=… --dart-define=GOOGLE_IOS_CLIENT_ID=…
+  ```
+  Android also needs the app's signing SHA-1 on an Android client in the same Google project; iOS needs the iOS client's reversed id as a URL scheme in `Info.plist`, and the Sign in with Apple capability in Xcode (the API's `APPLE_APP_IDS` lists the bundle id). Apple is only offered on iPhone, iPad and Mac, and neither on the web build. The phone only asks the person: the API checks the ID token and signs in only an account the academy made.
 - **Links**: `academyapp://app/open/{screen}/{id}` (Android intent filter, iOS URL type; on the web `/#/open/{screen}/{id}`), the same targets as a notification.
 - **Forced update**: `GET /branding` carries `app.min_version` (and the store links) from the API's `APP_MIN_VERSION`, `APP_ANDROID_URL`, `APP_IOS_URL`; an older app opens on the update screen only.
 

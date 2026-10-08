@@ -94,7 +94,9 @@ docker compose exec -T postgres pg_dump -U postgres -Fc lms > lms-$(date +%F).du
 - **Not on yet**: live lessons through LiveKit (lessons use an outside link: `CLASSROOM_PROVIDER=external`)
   and recording them (LiveKit Egress, with `LIVEKIT_EGRESS_URL`, `RECORDINGS_DISK` and `RECORDINGS_RECORDER_ROOT`),
   email, WhatsApp, texts and push (messages go to the log), real payment gateways (each academy adds its own
-  keys), and academies' own domains.
+  keys), signing in with Google and Apple (the platform's clients: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
+  `GOOGLE_APP_CLIENT_IDS`, `APPLE_SERVICES_ID`, `APPLE_APP_IDS`; each provider sends people back to
+  `https://$DOMAIN/auth/social/{google|apple}/callback`), and academies' own domains.
 - **Removing it all**: `docker compose down -v` here (the data goes too), delete this folder, and
   `sudo rm /etc/nginx/sites-enabled/academy-lms.conf /etc/nginx/sites-available/academy-lms.conf && sudo
   systemctl reload nginx`.

@@ -97,6 +97,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String get havePassword => 'Have a password? Sign in with it';
 
   @override
+  String get signInOr => 'or';
+
+  @override
+  String get signInWithGoogle => 'Sign in with Google';
+
+  @override
+  String get signInWithApple => 'Sign in with Apple';
+
+  @override
+  String socialFailed(String provider) {
+    return 'Signing in with $provider did not finish. Try again.';
+  }
+
+  @override
+  String get providerGoogle => 'Google';
+
+  @override
+  String get providerApple => 'Apple';
+
+  @override
+  String get signInMethodsTitle => 'Sign in with Google and Apple';
+
+  @override
+  String get signInMethodsHint => 'Link your account to Google or Apple and sign in with them, without a code or a password.';
+
+  @override
+  String signInMethodLinkedAs(String email) {
+    return 'Linked: $email';
+  }
+
+  @override
+  String get signInMethodLinked => 'Linked';
+
+  @override
+  String get signInMethodNotLinked => 'Not linked';
+
+  @override
+  String get signInMethodLink => 'Link';
+
+  @override
+  String get signInMethodUnlink => 'Unlink';
+
+  @override
+  String signInMethodUnlinkConfirm(String provider) {
+    return 'Unlink your $provider account? You will not be able to sign in with it until you link it again.';
+  }
+
+  @override
+  String signInMethodLinkedDone(String provider) {
+    return 'Your $provider account is linked.';
+  }
+
+  @override
+  String signInMethodUnlinkedDone(String provider) {
+    return 'Your $provider account is unlinked.';
+  }
+
+  @override
   String get codeTitle => 'Enter the code';
 
   @override

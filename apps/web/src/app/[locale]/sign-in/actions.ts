@@ -1,11 +1,12 @@
 'use server';
 
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { send, type Problem } from '@/lib/api/server';
 import { deviceName, forgetSession, keepSession } from '@/lib/auth';
 import { homeOf, safeNext } from '@/lib/session';
+import { TWO_FACTOR_COOKIE } from '@/lib/social';
 import { formProblem } from '@/lib/problems';
 import { twoFactorTurn } from '@/lib/two-factor';
 import type { LocalTime } from '@/lib/time';
@@ -38,6 +39,8 @@ function said(problem: Problem): string | undefined {
 
 async function finish(signed: Signed, next: FormDataEntryValue | null): Promise<SignInState> {
   const locale = await getLocale();
+  // A sign-in that came back from Google or Apple waited on this page with its token: done with it.
+  (await cookies()).delete(TWO_FACTOR_COOKIE);
   const home = homeOf(signed.user.roles);
   if (home === 'staff') {
     // The back office has its own sign-in; this token is not needed.

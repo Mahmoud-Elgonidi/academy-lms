@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/social/social_sign_in.dart';
+import '../../../../shared/widgets/lms.dart';
 import '../bloc/sign_in_cubit.dart';
 import '../widgets/sign_in_frame.dart';
 
@@ -62,6 +65,65 @@ class _WelcomePageState extends State<WelcomePage> {
     }
   }
 
+  /// Google or Apple instead of a code: the same list of accounts comes next.
+  Future<void> _withProvider(String provider) async {
+    final cubit = context.read<SignInCubit>();
+    final l = context.l10n;
+    final label = provider == 'apple' ? l.providerApple : l.providerGoogle;
+    try {
+      if (await cubit.withProvider(context.read<SocialSignIn>(), provider) && mounted) {
+        await context.push('${widget.base}/accounts');
+      }
+    } catch (_) {
+      // The phone's own sign-in failed (not a refusal from the academy: that shows under the field).
+      if (mounted) showSnack(context, l.socialFailed(label));
+    }
+  }
+
+  List<Widget> _socialButtons(BuildContext context, SignInState state) {
+    final social = context.read<SocialSignIn>();
+    final l = context.l10n;
+    final providers = [
+      for (final p in const ['apple', 'google'])
+        if (social.available(p)) p,
+    ];
+    if (providers.isEmpty) return const [];
+    return [
+      const SizedBox(height: 4),
+      Row(
+        children: [
+          const Expanded(child: Divider()),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(l.signInOr, style: context.text.bodySmall?.copyWith(color: context.colors.muted)),
+          ),
+          const Expanded(child: Divider()),
+        ],
+      ),
+      const SizedBox(height: 8),
+      for (final p in providers)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: p == 'apple'
+              // Apple's own button, as its guidelines ask.
+              ? SignInWithAppleButton(
+                  key: const Key('social-apple'),
+                  text: l.signInWithApple,
+                  height: 48,
+                  onPressed: () => state.busy ? null : _withProvider('apple'),
+                )
+              : SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    key: const Key('social-google'),
+                    onPressed: state.busy ? null : () => _withProvider('google'),
+                    child: Text(l.signInWithGoogle),
+                  ),
+                ),
+        ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -85,6 +147,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 },
                 child: Text(l.havePassword),
               ),
+              ..._socialButtons(context, state),
             ],
           ),
           children: [

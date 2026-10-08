@@ -1,33 +1,66 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useActionState, useEffect, useState } from 'react';
 import { Button, Field, Input, Notice, join } from '@/components/ui';
+import { startHref, type SocialProvider } from '@/lib/social';
 import { sendCode, signInWithPassword, verifyCode, verifyTwoFactor, type SignInState } from './actions';
 
 const start: SignInState = { step: 'contact' };
 
-export function SignInForm({ next }: { next: string }) {
+/**
+ * The ways in: a one-time code or a password, then Google or Apple below
+ * (where the platform has them). Coming back from Google or Apple to an
+ * account with two-step sign-in, only the authenticator's step shows.
+ */
+export function SignInForm({ next, providers = [], twoFactorToken, staff = false }: { next: string; providers?: SocialProvider[]; twoFactorToken?: string; staff?: boolean }) {
   const t = useTranslations('signIn');
+  const locale = useLocale();
   const [mode, setMode] = useState<'code' | 'password'>('code');
 
-  return (
-    <div className="rounded-card border border-line bg-white p-5 shadow-sm">
-      <div role="tablist" className="mb-5 grid grid-cols-2 gap-1 rounded-control bg-paper p-1">
-        {(['code', 'password'] as const).map((m) => (
-          <button
-            key={m}
-            role="tab"
-            type="button"
-            aria-selected={mode === m}
-            onClick={() => setMode(m)}
-            className={join('min-h-10 rounded-control text-sm font-semibold transition-colors', mode === m ? 'bg-white text-brand-strong shadow-sm' : 'text-muted hover:text-ink')}
-          >
-            {m === 'code' ? t('byCode') : t('byPassword')}
-          </button>
-        ))}
+  if (twoFactorToken) {
+    return (
+      <div className="rounded-card border border-line bg-white p-5 shadow-sm">
+        <TwoFactorStep token={twoFactorToken} next={next} />
       </div>
-      {mode === 'code' ? <CodeForm next={next} /> : <PasswordForm next={next} />}
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-card border border-line bg-white p-5 shadow-sm">
+        {staff ? <Staff /> : null}
+        <div role="tablist" className="mb-5 grid grid-cols-2 gap-1 rounded-control bg-paper p-1">
+          {(['code', 'password'] as const).map((m) => (
+            <button
+              key={m}
+              role="tab"
+              type="button"
+              aria-selected={mode === m}
+              onClick={() => setMode(m)}
+              className={join('min-h-10 rounded-control text-sm font-semibold transition-colors', mode === m ? 'bg-white text-brand-strong shadow-sm' : 'text-muted hover:text-ink')}
+            >
+              {m === 'code' ? t('byCode') : t('byPassword')}
+            </button>
+          ))}
+        </div>
+        {mode === 'code' ? <CodeForm next={next} /> : <PasswordForm next={next} />}
+      </div>
+      {providers.length > 0 ? (
+        <div className="space-y-3">
+          <p className="flex items-center gap-3 text-sm text-muted before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line">{t('or')}</p>
+          {providers.map((p) => (
+            <a
+              key={p.provider}
+              href={startHref(p.provider, locale, { back: next || undefined })}
+              data-provider={p.provider}
+              className="flex min-h-11 w-full items-center justify-center rounded-control border border-line bg-white px-4 font-semibold text-ink shadow-sm transition-colors hover:bg-paper"
+            >
+              {t('withProvider', { provider: p.label })}
+            </a>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

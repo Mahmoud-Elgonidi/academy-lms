@@ -154,6 +154,15 @@ LIVEKIT_EGRESS_URL=
 RECORDINGS_DISK=local
 RECORDINGS_RECORDER_ROOT=
 
+# Signing in with Google and Apple: off until the platform's own clients are
+# registered with each (their callback is https://$DOMAIN/auth/social/{google|apple}/callback).
+SOCIAL_REDIRECT_BASE=https://$DOMAIN
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_APP_CLIENT_IDS=
+APPLE_SERVICES_ID=
+APPLE_APP_IDS=
+
 # The demo data's sign-in on this server (when it is loaded): every demo
 # account's password, and the console's authenticator secret.
 DEMO_PASSWORD=$(secret | cut -c1-16)

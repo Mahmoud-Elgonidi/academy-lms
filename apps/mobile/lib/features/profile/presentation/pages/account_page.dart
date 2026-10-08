@@ -7,6 +7,7 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
+import '../../../../core/social/social_sign_in.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/formats.dart';
 import '../../../../shared/widgets/lms.dart';
@@ -14,8 +15,8 @@ import '../../../consent/presentation/privacy_page.dart';
 import '../../data/profile_repository.dart';
 import '../widgets/accounts_card.dart';
 
-/// "Me": the accounts on this phone, the clock, language and sounds, the devices
-/// signed in to this account, and signing out.
+/// "Me": the accounts on this phone, the clock, language and sounds, Google
+/// and Apple sign-in, the devices signed in to this account, and signing out.
 class AccountPage extends StatelessWidget {
   const AccountPage({this.standalone = false, super.key});
 
@@ -40,6 +41,7 @@ class AccountPage extends StatelessWidget {
             const _Help(),
             const _ClockPrompt(),
             const _Settings(),
+            const _SignInMethods(),
             const SizedBox(height: 18),
             const _Devices(),
             const SizedBox(height: 18),
@@ -308,4 +310,132 @@ class _SignOut extends StatelessWidget {
       },
     );
   }
+}
+
+/// Google and Apple on this account: linked as which email, or link it with the phone's own sign-in; unlink (the API
+/// refuses when it is the only way in). Only what this phone can offer, or what is linked already; not a child in the
+/// kids' look (their guardian signs in for them).
+class _SignInMethods extends StatelessWidget {
+  const _SignInMethods();
+
+  @override
+  Widget build(BuildContext context) {
+    if (Area.of(context.watch<SessionCubit>().state) == Area.kids) return const SizedBox.shrink();
+    return BlocProvider(
+      create: (c) => LoadCubit<List<SignInMethod>>(c.read<ProfileRepository>().signInMethods)..load(),
+      child: const _SignInMethodsCard(),
+    );
+  }
+}
+
+class _SignInMethodsCard extends StatefulWidget {
+  const _SignInMethodsCard();
+
+  @override
+  State<_SignInMethodsCard> createState() => _SignInMethodsCardState();
+}
+
+class _SignInMethodsCardState extends State<_SignInMethodsCard> {
+  String? _busy;
+
+  String _label(String provider) => provider == 'apple' ? context.l10n.providerApple : context.l10n.providerGoogle;
+
+  Future<void> _run(String provider, Future<String?> Function() step) async {
+    setState(() => _busy = provider);
+    try {
+      final done = await step();
+      if (!mounted) return;
+      if (done != null) showSnack(context, done);
+      await context.read<LoadCubit<List<SignInMethod>>>().load();
+    } on ApiProblem catch (p) {
+      if (mounted) showSnack(context, context.problemText(p));
+    } catch (_) {
+      if (mounted) showSnack(context, context.l10n.socialFailed(_label(provider)));
+    } finally {
+      if (mounted) setState(() => _busy = null);
+    }
+  }
+
+  Future<void> _link(String provider) => _run(provider, () async {
+    final credential = await context.read<SocialSignIn>().signIn(provider);
+    if (credential == null || !mounted) return null;
+    await context.read<ProfileRepository>().link(credential);
+    return mounted ? context.l10n.signInMethodLinkedDone(_label(provider)) : null;
+  });
+
+  Future<void> _unlink(String provider) async {
+    final l = context.l10n;
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        content: Text(l.signInMethodUnlinkConfirm(_label(provider))),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(l.back)),
+          FilledButton(onPressed: () => Navigator.pop(d, true), child: Text(l.signInMethodUnlink)),
+        ],
+      ),
+    );
+    if (sure != true || !mounted) return;
+    await _run(provider, () async {
+      await context.read<ProfileRepository>().unlink(provider);
+      return mounted ? l.signInMethodUnlinkedDone(_label(provider)) : null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => BlocBuilder<LoadCubit<List<SignInMethod>>, LoadState<List<SignInMethod>>>(
+    builder: (context, state) {
+      final social = context.read<SocialSignIn>();
+      final methods = [
+        for (final m in state.data ?? const <SignInMethod>[])
+          if (m.linked || social.available(m.provider)) m,
+      ];
+      if (methods.isEmpty) return const SizedBox.shrink();
+      final l = context.l10n;
+      return Padding(
+        padding: const EdgeInsets.only(top: 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SectionLabel(l.signInMethodsTitle),
+            LmsCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l.signInMethodsHint, style: context.text.bodySmall?.copyWith(color: context.colors.muted)),
+                  for (final m in methods) ...[
+                    const Divider(height: 22),
+                    Row(
+                      key: Key('sign-in-method-${m.provider}'),
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(_label(m.provider), style: context.text.titleSmall),
+                              Text(
+                                m.linked
+                                    ? (m.email == null ? l.signInMethodLinked : l.signInMethodLinkedAs(m.email!))
+                                    : l.signInMethodNotLinked,
+                                style: context.text.bodySmall?.copyWith(color: context.colors.muted),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        if (m.linked)
+                          OutlinedButton(onPressed: _busy != null ? null : () => _unlink(m.provider), child: Text(l.signInMethodUnlink))
+                        else
+                          FilledButton.tonal(onPressed: _busy != null ? null : () => _link(m.provider), child: Text(l.signInMethodLink)),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }

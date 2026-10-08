@@ -1,13 +1,27 @@
+import { cookies } from 'next/headers';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Notice } from '@/components/ui';
+import { TWO_FACTOR_COOKIE, outcomeOf } from '@/lib/social';
+import { webProviders } from '@/lib/social-server';
 import { branding } from '@/lib/viewer';
 import { SignInForm } from './sign-in-form';
 
-type Props = { searchParams: Promise<{ next?: string; expired?: string }> };
+type Props = { searchParams: Promise<{ next?: string; expired?: string; social?: string; provider?: string; step?: string; staff?: string }> };
 
 export default async function SignInPage({ searchParams }: Props) {
-  const [{ next, expired }, t, locale, look] = await Promise.all([searchParams, getTranslations('signIn'), getLocale(), branding()]);
+  const [{ next, expired, social, provider, step, staff }, t, locale, look, providers, jar] = await Promise.all([
+    searchParams,
+    getTranslations('signIn'),
+    getLocale(),
+    branding(),
+    webProviders(),
+    cookies(),
+  ]);
   const academy = locale === 'ar' ? look.name.ar : look.name.en;
+  const outcome = outcomeOf(social);
+  const providerLabel = providers.find((p) => p.provider === provider)?.label ?? provider ?? '';
+  // Back from Google or Apple to an account with two-step sign-in: its authenticator's step.
+  const twoFactorToken = step === 'two-factor' ? jar.get(TWO_FACTOR_COOKIE)?.value : undefined;
 
   return (
     <main className="grid min-h-dvh place-items-center bg-[radial-gradient(ellipse_at_top,var(--color-brand-soft),transparent_60%)] px-4 py-10">
@@ -27,7 +41,12 @@ export default async function SignInPage({ searchParams }: Props) {
             <Notice tone="attention">{t('expired')}</Notice>
           </div>
         ) : null}
-        <SignInForm next={next ?? ''} />
+        {outcome ? (
+          <div className="mb-4">
+            <Notice tone={outcome === 'denied' ? 'attention' : 'danger'}>{t(`social.${outcome}`, { provider: providerLabel })}</Notice>
+          </div>
+        ) : null}
+        <SignInForm next={next ?? ''} providers={providers} twoFactorToken={twoFactorToken} staff={staff === '1'} />
       </div>
     </main>
   );

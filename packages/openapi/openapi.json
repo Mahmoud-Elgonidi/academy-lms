@@ -3635,6 +3635,342 @@
                 "security": []
             }
         },
+        "/v1/auth/social": {
+            "get": {
+                "operationId": "identity.social.providers",
+                "description": "Google and Apple, where the platform has them: in a browser (web) and in the apps (app).",
+                "summary": "Ways to sign in besides the academy's own",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "providers": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "provider": {
+                                                        "type": "string"
+                                                    },
+                                                    "label": {
+                                                        "type": "string"
+                                                    },
+                                                    "web": {
+                                                        "type": "boolean",
+                                                        "description": "Through the browser (POST auth/social/{provider}/start)."
+                                                    },
+                                                    "app": {
+                                                        "type": "boolean",
+                                                        "description": "With the phone's own sign-in (POST auth/social)."
+                                                    }
+                                                },
+                                                "required": [
+                                                    "provider",
+                                                    "label",
+                                                    "web",
+                                                    "app"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "providers"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            },
+            "post": {
+                "operationId": "identity.social.token",
+                "description": "Send the academy as X-Academy. With two-step sign-in on, a 403 problem of type \"two-factor-required\" carrying\ntwo_factor_token for auth/two-factor. No account here with that Google or Apple account or its email: 404\n\"social-account-not-found\".",
+                "summary": "Sign in with the phone's Google or Apple sign-in",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SocialTokenRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "token": {
+                                            "type": "string"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "const": "Bearer"
+                                        },
+                                        "expires_at": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/UserResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "token",
+                                        "token_type",
+                                        "expires_at",
+                                        "user"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/auth/social/ticket": {
+            "post": {
+                "operationId": "identity.social.ticket",
+                "description": "With two-step sign-in on, a 403 problem of type \"two-factor-required\" carrying two_factor_token for auth/two-factor.",
+                "summary": "Sign in with the ticket the portal got back",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SocialTicketRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "token": {
+                                            "type": "string"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "const": "Bearer"
+                                        },
+                                        "expires_at": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/UserResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "token",
+                                        "token_type",
+                                        "expires_at",
+                                        "user"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/auth/social/{provider}/start": {
+            "post": {
+                "operationId": "identity.social.api-start",
+                "description": "Send the browser to url; it comes back to the portal's /bff/social/finish with a ticket (or an error).",
+                "summary": "Start signing in with Google or Apple in the portal",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SocialStartRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "url": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "url"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                },
+                "security": []
+            }
+        },
         "/v1/me": {
             "get": {
                 "operationId": "identity.me",
@@ -3981,6 +4317,695 @@
                 }
             }
         },
+        "/v1/me/social": {
+            "get": {
+                "operationId": "identity.social.mine",
+                "summary": "My Google and Apple sign-ins",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "provider": {
+                                                        "type": "string"
+                                                    },
+                                                    "label": {
+                                                        "type": "string"
+                                                    },
+                                                    "linked": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "email": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "description": "The Google or Apple email it is linked as (Apple's may be a relay address)."
+                                                    },
+                                                    "linked_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "last_used_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "provider",
+                                                    "label",
+                                                    "linked",
+                                                    "email",
+                                                    "linked_at",
+                                                    "last_used_at"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "identity.social.link",
+                "summary": "Link the phone's Google or Apple account",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SocialTokenRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "provider": {
+                                                        "type": "string"
+                                                    },
+                                                    "label": {
+                                                        "type": "string"
+                                                    },
+                                                    "linked": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "email": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "description": "The Google or Apple email it is linked as (Apple's may be a relay address)."
+                                                    },
+                                                    "linked_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "last_used_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "provider",
+                                                    "label",
+                                                    "linked",
+                                                    "email",
+                                                    "linked_at",
+                                                    "last_used_at"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/v1/me/social/ticket": {
+            "post": {
+                "operationId": "identity.social.link-ticket",
+                "summary": "Link with the ticket the portal got back",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SocialTicketRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "provider": {
+                                                        "type": "string"
+                                                    },
+                                                    "label": {
+                                                        "type": "string"
+                                                    },
+                                                    "linked": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "email": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "description": "The Google or Apple email it is linked as (Apple's may be a relay address)."
+                                                    },
+                                                    "linked_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "last_used_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "provider",
+                                                    "label",
+                                                    "linked",
+                                                    "email",
+                                                    "linked_at",
+                                                    "last_used_at"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "$ref": "#/components/responses/ProblemException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/v1/me/social/{provider}/start": {
+            "post": {
+                "operationId": "identity.social.link-start",
+                "description": "Send the browser to url; it comes back to the portal's /bff/social/finish with a ticket for POST me/social/ticket.",
+                "summary": "Link Google or Apple from the portal",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SocialStartRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "url": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "url"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/v1/me/social/{provider}": {
+            "delete": {
+                "operationId": "identity.social.unlink",
+                "summary": "Unlink Google or Apple",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "provider": {
+                                                        "type": "string"
+                                                    },
+                                                    "label": {
+                                                        "type": "string"
+                                                    },
+                                                    "linked": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "email": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "description": "The Google or Apple email it is linked as (Apple's may be a relay address)."
+                                                    },
+                                                    "linked_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "last_used_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "provider",
+                                                    "label",
+                                                    "linked",
+                                                    "email",
+                                                    "linked_at",
+                                                    "last_used_at"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/auth/logout": {
             "post": {
                 "operationId": "identity.logout",
@@ -4311,6 +5336,105 @@
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/VerifyCodeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "discovery_token": {
+                                            "type": "string",
+                                            "description": "Trade it for a sign-in to each account (POST /accounts/sign-in) until expires_at."
+                                        },
+                                        "expires_at": {
+                                            "type": [
+                                                "object",
+                                                "null"
+                                            ],
+                                            "properties": {
+                                                "utc": {
+                                                    "type": "string"
+                                                },
+                                                "local": {
+                                                    "type": "string"
+                                                },
+                                                "timezone": {
+                                                    "type": "null"
+                                                },
+                                                "label": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "utc",
+                                                "local",
+                                                "timezone",
+                                                "label"
+                                            ]
+                                        },
+                                        "accounts": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/DiscoveredAccountResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "discovery_token",
+                                        "expires_at",
+                                        "accounts"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/accounts/social": {
+            "post": {
+                "operationId": "identity.accounts.social",
+                "description": "No academy is needed: the accounts linked to that Google or Apple account, or carrying the email it verified,\nin every academy, and a discovery token for POST /accounts/sign-in, as after a code.",
+                "summary": "Find my accounts with Google or Apple",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SocialTokenRequest"
                             }
                         }
                     }
@@ -13956,6 +15080,96 @@
                 ],
                 "title": "SentCodeResource"
             },
+            "SocialStartRequest": {
+                "type": "object",
+                "properties": {
+                    "bind": {
+                        "type": "string",
+                        "description": "SHA-256 (hex) of a secret only the browser that starts holds; the ticket coming back needs the secret itself.",
+                        "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "locale": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The portal's language, for the way back.",
+                        "enum": [
+                            "ar",
+                            "en",
+                            null
+                        ]
+                    }
+                },
+                "required": [
+                    "bind"
+                ],
+                "title": "SocialStartRequest"
+            },
+            "SocialTicketRequest": {
+                "type": "object",
+                "properties": {
+                    "ticket": {
+                        "type": "string",
+                        "description": "What came back on the portal's address from the provider's callback.",
+                        "maxLength": 100
+                    },
+                    "bind": {
+                        "type": "string",
+                        "description": "The secret whose hash started it.",
+                        "maxLength": 100
+                    },
+                    "device_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "ticket",
+                    "bind"
+                ],
+                "title": "SocialTicketRequest"
+            },
+            "SocialTokenRequest": {
+                "type": "object",
+                "properties": {
+                    "provider": {
+                        "type": "string",
+                        "enum": [
+                            "google",
+                            "apple"
+                        ]
+                    },
+                    "id_token": {
+                        "type": "string",
+                        "description": "The ID token the phone's Google or Apple sign-in gave the app.",
+                        "maxLength": 8000
+                    },
+                    "nonce": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The nonce the app started the sign-in with, if any (Apple's: the raw one, before hashing).",
+                        "maxLength": 200
+                    },
+                    "device_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "provider",
+                    "id_token"
+                ],
+                "title": "SocialTokenRequest"
+            },
             "TimeOffRequest": {
                 "type": "object",
                 "properties": {
@@ -14180,6 +15394,26 @@
                     }
                 }
             },
+            "ProblemException": {
+                "description": "An error",
+                "content": {
+                    "application/problem+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ProblemDetails"
+                        }
+                    }
+                }
+            },
+            "ModelNotFoundException": {
+                "description": "Not found",
+                "content": {
+                    "application/problem+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ProblemDetails"
+                        }
+                    }
+                }
+            },
             "AccessDeniedHttpException": {
                 "description": "Access denied",
                 "content": {
@@ -14192,16 +15426,6 @@
             },
             "AuthorizationException": {
                 "description": "Not allowed",
-                "content": {
-                    "application/problem+json": {
-                        "schema": {
-                            "$ref": "#/components/schemas/ProblemDetails"
-                        }
-                    }
-                }
-            },
-            "ModelNotFoundException": {
-                "description": "Not found",
                 "content": {
                     "application/problem+json": {
                         "schema": {

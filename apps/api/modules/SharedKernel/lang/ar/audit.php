@@ -47,6 +47,8 @@ return [
             'recovery_code_used' => ':name دخل بكود استرجاع',
             'recovery_codes_renewed' => ':name عمل أكواد استرجاع جديدة',
             'two_factor_reset' => 'فريق المنصة صفّر الدخول بخطوتين لـ :name: :reason',
+            'social_linked' => ':name ربط حساب :provider (:via)',
+            'social_unlinked' => ':name فصل حساب :provider',
         ],
         'people' => [
             'consent_granted' => ':guardian وافق على حساب :student (:via)',
@@ -88,7 +90,8 @@ return [
         'kind' => ['bonus' => 'مكافأة', 'deduction' => 'خصم'],
         'outcome' => ['completed' => 'اتعملت', 'teacher_absent' => 'غياب المدرس', 'student_absent' => 'غياب الطالب', 'cancelled_makeup' => 'اتلغت بتعويض'],
         'mode' => ['test' => 'تجريبي', 'live' => 'حقيقي'],
-        'via' => ['self' => 'بنفسه', 'guardian' => 'ولي الأمر', 'family' => 'من حسابه', 'link' => 'من اللينك اللي وصله', 'staff' => 'سجلتها الإدارة'],
+        'via' => ['self' => 'بنفسه', 'guardian' => 'ولي الأمر', 'family' => 'من حسابه', 'link' => 'من اللينك اللي وصله', 'staff' => 'سجلتها الإدارة', 'email' => 'أول دخول بنفس الإيميل', 'settings' => 'من إعداداته'],
+        'provider' => ['google' => 'جوجل', 'apple' => 'أبل'],
         'how' => ['exit' => 'خرج بنفسه', 'expired' => 'الوقت خلص', 'ended' => 'اتقفل من لوحة المنصة'],
         'recording' => ['off' => 'مفيش تسجيل', 'manual' => 'المدرس يبدأه', 'auto' => 'كل حصة لوحدها'],
         'media' => ['by_age' => 'حسب السن', 'video' => 'فيديو', 'audio' => 'صوت بس'],

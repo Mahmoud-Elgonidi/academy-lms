@@ -242,6 +242,102 @@ abstract class AppLocalizations {
   /// **'عندك كلمة سر؟ ادخل بيها'**
   String get havePassword;
 
+  /// No description provided for @signInOr.
+  ///
+  /// In ar, this message translates to:
+  /// **'أو'**
+  String get signInOr;
+
+  /// No description provided for @signInWithGoogle.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادخل بحساب جوجل'**
+  String get signInWithGoogle;
+
+  /// No description provided for @signInWithApple.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادخل بحساب أبل'**
+  String get signInWithApple;
+
+  /// No description provided for @socialFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدخول بحساب {provider} ماكملش. جرّب تاني.'**
+  String socialFailed(String provider);
+
+  /// No description provided for @providerGoogle.
+  ///
+  /// In ar, this message translates to:
+  /// **'جوجل'**
+  String get providerGoogle;
+
+  /// No description provided for @providerApple.
+  ///
+  /// In ar, this message translates to:
+  /// **'أبل'**
+  String get providerApple;
+
+  /// No description provided for @signInMethodsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدخول بجوجل وأبل'**
+  String get signInMethodsTitle;
+
+  /// No description provided for @signInMethodsHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اربط حسابك بجوجل أو أبل، وادخل بيهم من غير كود ولا كلمة سر.'**
+  String get signInMethodsHint;
+
+  /// No description provided for @signInMethodLinkedAs.
+  ///
+  /// In ar, this message translates to:
+  /// **'مربوط: {email}'**
+  String signInMethodLinkedAs(String email);
+
+  /// No description provided for @signInMethodLinked.
+  ///
+  /// In ar, this message translates to:
+  /// **'مربوط'**
+  String get signInMethodLinked;
+
+  /// No description provided for @signInMethodNotLinked.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش مربوط'**
+  String get signInMethodNotLinked;
+
+  /// No description provided for @signInMethodLink.
+  ///
+  /// In ar, this message translates to:
+  /// **'اربط'**
+  String get signInMethodLink;
+
+  /// No description provided for @signInMethodUnlink.
+  ///
+  /// In ar, this message translates to:
+  /// **'افصل'**
+  String get signInMethodUnlink;
+
+  /// No description provided for @signInMethodUnlinkConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'تفصل حساب {provider}؟ مش هتقدر تدخل بيه لحد ما تربطه تاني.'**
+  String signInMethodUnlinkConfirm(String provider);
+
+  /// No description provided for @signInMethodLinkedDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'حساب {provider} اتربط.'**
+  String signInMethodLinkedDone(String provider);
+
+  /// No description provided for @signInMethodUnlinkedDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'حساب {provider} اتفصل.'**
+  String signInMethodUnlinkedDone(String provider);
+
   /// No description provided for @codeTitle.
   ///
   /// In ar, this message translates to:

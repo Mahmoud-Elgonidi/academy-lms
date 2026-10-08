@@ -9,7 +9,8 @@ export type NavItem = { href: string; key: string; icon: IconName };
  * teens their plan and goals; guardians and adults the classic set, and a
  * guardian their children's privacy (their consent to each child's account).
  * Lesson recordings are everyone's but a child's in the kids' look.
- * Everyone but a child in the kids' look can write to the academy (help).
+ * Everyone but a child in the kids' look can write to the academy (help)
+ * and link Google or Apple to their account.
  */
 export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: NavItem[]; tabs: NavItem[] } {
   const lessons: NavItem = { href: '/family/lessons', key: 'lessons', icon: 'calendar' };
@@ -25,12 +26,14 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: 
   const recordings: NavItem[] = stage === 'kids' ? [] : [{ href: '/family/recordings', key: 'recordings', icon: 'video' }];
   // Writing to the academy: everyone but a child in the kids' look (their guardian writes).
   const help: NavItem[] = stage === 'kids' ? [] : [{ href: '/family/help', key: 'help', icon: 'help' }];
+  // My account (signing in with Google or Apple): everyone but a child in the kids' look.
+  const account: NavItem[] = stage === 'kids' ? [] : [{ href: '/family/account', key: 'account', icon: 'lock' }];
 
   if (stage === 'classic') {
     return {
-      all: [home, lessons, progress, homework, ...pay, challenges, inbox, ...recordings, ...privacy, ...help],
+      all: [home, lessons, progress, homework, ...pay, challenges, inbox, ...recordings, ...privacy, ...help, ...account],
       tabs: [home, lessons, progress, ...(money ? pay : [homework]), more],
     };
   }
-  return { all: [home, challenges, lessons, homework, progress, inbox, ...recordings, ...help], tabs: [home, challenges, lessons, homework, more] };
+  return { all: [home, challenges, lessons, homework, progress, inbox, ...recordings, ...help, ...account], tabs: [home, challenges, lessons, homework, more] };
 }

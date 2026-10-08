@@ -54,7 +54,17 @@
     "twoFactorHint": "Open your authenticator app and type the 6-digit code. Lost your phone? Type one of your recovery codes.",
     "twoFactorCode": "Code",
     "twoFactorExpired": "This sign-in took too long. Sign in again.",
-    "startAgain": "Start again"
+    "startAgain": "Start again",
+    "or": "or",
+    "withProvider": "Sign in with {provider}",
+    "social": {
+      "denied": "Signing in with {provider} was cancelled.",
+      "failed": "Signing in with {provider} did not finish. Try again.",
+      "expired": "This step took too long. Start signing in again.",
+      "no_account": "There is no account at this academy with this {provider} email. Sign in the way the academy sent you, then link {provider} in My account, or contact the academy.",
+      "held": "This account is waiting for a guardian's consent before its first sign-in.",
+      "off": "Signing in with {provider} is not available here."
+    }
   },
   "nav": {
     "today": "Today",
@@ -83,7 +93,8 @@
       "more": "More",
       "privacy": "Children's privacy",
       "help": "Help",
-      "recordings": "Lesson recordings"
+      "recordings": "Lesson recordings",
+      "account": "My account"
     },
     "kids": {
       "menu": "Menu",
@@ -108,7 +119,8 @@
       "notifications": "Notifications",
       "more": "More",
       "help": "Ask for help",
-      "recordings": "My lesson recordings"
+      "recordings": "My lesson recordings",
+      "account": "My account"
     },
     "teen": {
       "menu": "Menu",
@@ -121,10 +133,12 @@
       "notifications": "Notifications",
       "more": "More",
       "help": "Help",
-      "recordings": "My lesson recordings"
+      "recordings": "My lesson recordings",
+      "account": "My account"
     },
     "help": "Support",
-    "recordings": "My lesson recordings"
+    "recordings": "My lesson recordings",
+    "account": "My account"
   },
   "family": {
     "switchLearner": "Choose whose",
@@ -634,5 +648,25 @@
     "stop": "Stop recording",
     "missing": "It cannot be recorded until they agree to recording: {names}.",
     "separator": ", "
+  },
+  "account": {
+    "title": "My account",
+    "socialTitle": "Sign in with Google and Apple",
+    "socialHint": "Link your account to Google or Apple and sign in with them, without a password. Two-step sign-in stays as it is.",
+    "linked": "Linked",
+    "notLinked": "Not linked",
+    "lastUsed": "Last used {date}",
+    "link": "Link {provider}",
+    "unlink": "Unlink",
+    "unlinkConfirm": "Unlink your {provider} account? You will not be able to sign in with it until you link it again.",
+    "none": "Signing in with Google and Apple is not available at this academy.",
+    "outcome": {
+      "linked": "Your account is linked. You can sign in with it from now on.",
+      "taken": "That account is linked to another account at this academy, or you already linked another one of the same kind.",
+      "expired": "This step took too long. Try again.",
+      "denied": "Linking was cancelled.",
+      "failed": "Linking did not finish. Try again.",
+      "off": "Linking is not available right now."
+    }
   }
 }

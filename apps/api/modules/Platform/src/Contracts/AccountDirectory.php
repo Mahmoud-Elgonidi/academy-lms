@@ -16,4 +16,11 @@ interface AccountDirectory
 
     /** @return list<DiscoveredAccount> */
     public function withPhone(string $phoneE164): array;
+
+    /**
+     * The accounts linked to this Google or Apple account.
+     *
+     * @return list<DiscoveredAccount>
+     */
+    public function withSocialIdentity(string $provider, string $subject): array;
 }

@@ -1,3 +1,5 @@
+import 'package:academy_app/core/social/social_sign_in.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -109,7 +111,13 @@ class FakePush implements PushTokens {
 class TestApp {
   TestApp._(this.api, this.secrets, this.holder, this.client, this.session, this.services);
 
-  static Future<TestApp> create({List<Account> accounts = const [], String? current, String? appVersion, PushTokens? push}) async {
+  static Future<TestApp> create({
+    List<Account> accounts = const [],
+    String? current,
+    String? appVersion,
+    PushTokens? push,
+    SocialSignIn? social,
+  }) async {
     SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
     // No audio or haptics plugins in widget tests.
     Juice.enabled = false;
@@ -134,7 +142,7 @@ class TestApp {
       appVersion: appVersion,
       push: push,
     );
-    return TestApp._(api, secrets, holder, client, session, Services(client));
+    return TestApp._(api, secrets, holder, client, session, Services(client, social: social));
   }
 
   final FakeApi api;
