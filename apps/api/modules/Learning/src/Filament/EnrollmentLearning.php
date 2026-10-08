@@ -20,6 +20,7 @@ use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\RoadmapQuery;
+use Modules\Learning\Templates\TemplateAnswers;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -57,6 +58,7 @@ final class EnrollmentLearning extends Component implements HasActions, HasSchem
                 'late' => $r->late,
                 'overall' => $r->overall,
                 'note' => $r->kind === 'absence' ? $r->absence_note : $r->notes_for_student,
+                'answers' => TemplateAnswers::ofReport($r, true),
             ])->all();
     }
 

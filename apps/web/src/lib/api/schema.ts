@@ -564,7 +564,17 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * A report to write or correct
+         * @description The report with today's plan, the lessons to choose from, the homework set from it, the roadmap, and the
+         *     subject's own questions (`template`, null when it has none); send their answers as `answers` by key.
+         */
         get: operations["teacher.reports.show"];
+        /**
+         * Hand in or correct a report
+         * @description Answers to the subject's questions go in `answers`, by the field's key (stars 1-5, a number, a choice's key,
+         *     true or false, a text).
+         */
         put: operations["teacher.reports.submit"];
         post?: never;
         delete?: never;
@@ -3180,6 +3190,19 @@ export interface operations {
                             notes_for_student: string | null;
                             absence_note: string | null;
                             items: string[];
+                            /** @description The academy's own questions for this subject, answered (only those the family reads, for the family). */
+                            answers: {
+                                key: string;
+                                label: string;
+                                type: string;
+                                value: unknown;
+                                text: string;
+                                family: boolean;
+                                /** @description false: only the academy reads it */
+                                unit: string | null;
+                                /** @enum {integer|null} */
+                                max: 5 | null;
+                            }[];
                         }[];
                     };
                 };
@@ -3301,6 +3324,19 @@ export interface operations {
                             notes_for_student: string | null;
                             absence_note: string | null;
                             items: unknown[][] | unknown[];
+                            /** @description The academy's own questions for this subject, answered (only those the family reads, for the family). */
+                            answers: {
+                                key: string;
+                                label: string;
+                                type: string;
+                                value: unknown;
+                                text: string;
+                                family: boolean;
+                                /** @description false: only the academy reads it */
+                                unit: string | null;
+                                /** @enum {integer|null} */
+                                max: 5 | null;
+                            }[];
                         };
                     };
                 };
@@ -3764,6 +3800,19 @@ export interface operations {
                                 outcome_label: string;
                                 score: number | null;
                                 note: string | null;
+                            }[];
+                            /** @description The academy's own questions for this subject, answered (only those the family reads, for the family). */
+                            answers: {
+                                key: string;
+                                label: string;
+                                type: string;
+                                value: unknown;
+                                text: string;
+                                family: boolean;
+                                /** @description false: only the academy reads it */
+                                unit: string | null;
+                                /** @enum {integer|null} */
+                                max: 5 | null;
                             }[];
                         }[];
                     };

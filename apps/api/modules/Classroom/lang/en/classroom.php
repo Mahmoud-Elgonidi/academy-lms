@@ -34,6 +34,13 @@ return [
         'review' => 'Review',
         'none' => 'This student follows no program.',
     ],
+    'homework' => [
+        'title' => 'Last homework',
+        'none' => 'No homework yet.',
+        'due' => 'Due :date',
+        'statuses' => ['assigned' => 'Not handed in yet', 'submitted' => 'Handed in, waiting for your mark', 'reviewed' => 'Marked :grade/5', 'missed' => 'Missed'],
+        'reviewed' => 'Marked',
+    ],
     'external' => [
         'title' => 'This lesson is on an outside link',
         'go' => 'Open the lesson',

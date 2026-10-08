@@ -48,6 +48,13 @@ test('a lesson report is written and sent', async ({ page }) => {
   await page.getByRole('radiogroup', { name: 'التركيز والتفاعل' }).getByRole('radio', { name: '4 من 5' }).click();
   await page.getByRole('radiogroup', { name: 'المستوى العام' }).getByRole('radio', { name: '5 من 5' }).click();
   await page.getByLabel('ملاحظات للطالب وولي الأمر').fill('شغل حلو النهارده، كمّل على كده.');
+  // The subject's own questions (Arabic grammar in the demo): stars for parsing, a number of new words.
+  if ((await page.getByRole('heading', { name: 'أسئلة الأكاديمية' }).count()) > 0) {
+    await page.getByRole('button', { name: 'ابعت التقرير' }).click();
+    await expect(page.getByText('جاوب على "الإعراب".')).toBeVisible();
+    await page.getByRole('radiogroup', { name: 'الإعراب' }).getByRole('radio', { name: '4 من 5' }).click();
+    await page.getByLabel('الكلمات الجديدة').fill('6');
+  }
   await page.getByLabel('ادّي واجب').check();
   await page.getByLabel('الواجب', { exact: true }).fill('حل تمرين ص 20');
   await page.getByRole('button', { name: 'ابعت التقرير' }).click();

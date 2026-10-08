@@ -16,6 +16,11 @@
     .lf-stars { color: var(--warning-500); letter-spacing: .1em; }
     .lf-items { display: flex; flex-direction: column; gap: .35rem; margin: 0; padding: 0; list-style: none; }
     .lf-items li { display: flex; justify-content: space-between; gap: .75rem; font-size: .88rem; border-bottom: 1px dashed var(--gray-200); padding-bottom: .3rem; }
+    .lf-answers { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .45rem; margin: 0; padding: 0; list-style: none; }
+    .lf-answers li { display: flex; flex-direction: column; gap: .1rem; padding: .45rem .65rem; border-radius: var(--radius-lg, .75rem); background: var(--primary-50); font-size: .88rem; }
+    .lf-answers small { color: var(--gray-600); font-size: .75rem; }
+    .dark .lf-answers li { background: color-mix(in oklab, var(--primary-500) 14%, transparent); }
+    .dark .lf-answers small { color: var(--gray-400); }
     .lf-pill { font-size: .75rem; padding: .1rem .55rem; border-radius: 999px; background: var(--gray-100); color: var(--gray-700); white-space: nowrap; }
     .lf-pill[data-tone="good"] { background: var(--success-50); color: var(--success-700); }
     .lf-pill[data-tone="warn"] { background: var(--warning-50); color: var(--warning-700); }

@@ -75,6 +75,9 @@
         aside .line small { color: var(--muted); font-size: 12px; }
         aside .line p { margin: 4px 0 0; font-size: 13px; color: #d4d4d8; white-space: pre-line; }
         .tag { align-self: flex-start; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: var(--line); }
+        aside h2 + h2, aside .line + h2, aside small + h2 { margin-top: 6px; }
+        .homework.submitted .tag { background: color-mix(in oklab, var(--brand) 35%, var(--line)); }
+        .homework.missed .tag { background: #7f1d1d; color: #fee2e2; }
         [hidden] { display: none !important; }
         @media (max-width: 640px) { header .brand { display: none; } .tiles { grid-template-columns: minmax(0, 1fr); } }
     </style>
@@ -142,6 +145,19 @@
                 @empty
                     <small style="color:var(--muted)">{{ __($l.'plan.none') }}</small>
                 @endforelse
+
+                <h2>{{ __($l.'homework.title') }}</h2>
+                @if ($homework)
+                    <div class="line homework {{ $homework->status }}">
+                        <span class="tag">{{ __($l.'homework.statuses.'.$homework->status, ['grade' => $homework->grade ?? '–']) }}</span>
+                        <strong>{{ $homework->title }}</strong>
+                        <small>{{ __($l.'homework.due', ['date' => $homework->dueAt->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F')]) }}</small>
+                        @if ($homework->instructions) <p>{{ \Illuminate\Support\Str::limit($homework->instructions, 220) }}</p> @endif
+                        @if ($homework->feedback) <p>“{{ \Illuminate\Support\Str::limit($homework->feedback, 160) }}”</p> @endif
+                    </div>
+                @else
+                    <small style="color:var(--muted)">{{ __($l.'homework.none') }}</small>
+                @endif
             </aside>
         @endif
     </main>

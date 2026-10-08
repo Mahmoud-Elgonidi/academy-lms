@@ -27,6 +27,8 @@ export type ReportPayload = {
   absence_note?: string | null;
   items?: { node_id: string; outcome: string; score: number | null; note: string | null }[];
   homework?: { title: string; instructions: string | null; accepts: string; due_days: number } | null;
+  /** Answers to the subject's questions, by key. */
+  answers?: Record<string, number | string | boolean>;
 };
 
 /** Sends (or corrects) a lesson report or absence note. */

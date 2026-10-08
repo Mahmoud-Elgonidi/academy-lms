@@ -1375,6 +1375,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notesInternalHint => 'For the academy only; the family never sees them.';
 
   @override
+  String get questionsTitle => 'The academy\'s questions';
+
+  @override
+  String get questionsHint => 'Questions your academy asks in every report of this subject.';
+
+  @override
+  String answerRequired(String question) {
+    return 'Answer \"$question\".';
+  }
+
+  @override
+  String get answerYes => 'Yes';
+
+  @override
+  String get answerNo => 'No';
+
+  @override
+  String get academyOnly => 'Academy only';
+
+  @override
   String get absenceNote => 'Absence note';
 
   @override

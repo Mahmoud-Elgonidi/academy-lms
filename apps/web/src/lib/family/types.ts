@@ -1,4 +1,5 @@
 import type { LocalTime } from '../time';
+import type { ReportAnswer } from '../report-answers';
 import type { Homework, Lesson as TeacherLesson, Roadmap } from '../teach/types';
 
 /**
@@ -173,6 +174,8 @@ export type FamilyReport = {
   absence_note: string | null;
   teacher: { id: string; name: string } | null;
   items: { node_id: string; title: string | null; outcome: string; outcome_label: string; score: number | null; note: string | null }[];
+  /** Answers to the academy's own questions (only those the family reads). */
+  answers: ReportAnswer[];
 };
 
 export type { Homework, Roadmap };

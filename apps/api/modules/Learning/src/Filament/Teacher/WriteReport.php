@@ -2,6 +2,7 @@
 
 namespace Modules\Learning\Filament\Teacher;
 
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -21,16 +22,19 @@ use Modules\Learning\Actions\SubmitSessionReport;
 use Modules\Learning\Domain\MasteryRule;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\LearningSettings;
+use Modules\Learning\Models\ReportTemplate;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\ReportFormQuery;
 use Modules\Learning\Queries\RoadmapQuery;
+use Modules\Learning\Templates\TemplateField;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
  * The report form, filled in with today's plan (docs/architecture/02,
  * section 6, step 2): what was covered with an outcome and a score per
- * lesson, two ratings, notes, and optional homework. Same Action as the API.
+ * lesson, two ratings, notes, the subject's own questions (its report
+ * template), and optional homework. Same Action as the API.
  *
  * @property-read Schema $form
  */
@@ -45,6 +49,10 @@ final class WriteReport extends Page
     public SessionReport $sessionReport;
 
     public ?array $data = [];
+
+    private ?ReportTemplate $template = null;
+
+    private bool $templateRead = false;
 
     public static function canAccess(): bool
     {
@@ -64,6 +72,7 @@ final class WriteReport extends Page
             'notes_for_student' => $this->sessionReport->notes_for_student,
             'notes_internal' => $this->sessionReport->notes_internal,
             'absence_note' => $this->sessionReport->absence_note,
+            'answers' => $this->sessionReport->answers ?? [],
             'homework' => [
                 'title' => $homework?->title,
                 'instructions' => $homework?->instructions,
@@ -145,6 +154,7 @@ final class WriteReport extends Page
                     ->rows(3)->required()->maxLength(1000),
                 Textarea::make('notes_internal')->label(__('learning::teacher.write.notes_internal'))->rows(2)->maxLength(3000),
             ]),
+            $this->questions(),
             Section::make(__('learning::teacher.write.homework'))->collapsible()->collapsed(fn () => blank($this->data['homework']['title'] ?? null))
                 ->schema([
                     TextInput::make('homework.title')->label(__('learning::teacher.write.homework_title'))->maxLength(200),
@@ -157,6 +167,48 @@ final class WriteReport extends Page
                     ]),
                 ]),
         ])));
+    }
+
+    /** The subject's own questions (the version this report was handed in with, else the one now). */
+    private function questions(): ?Section
+    {
+        $template = $this->template();
+        if ($template === null || $template->fields === []) {
+            return null;
+        }
+        $subject = (string) DB::table('sessions as s')->join('subjects as j', fn ($j) => $j->on('j.academy_id', '=', 's.academy_id')->on('j.id', '=', 's.subject_id'))
+            ->where('s.id', $this->sessionReport->session_id)->value(app()->getLocale() === 'ar' ? 'j.name_ar' : 'j.name_en');
+
+        return Section::make(__('learning::templates.form.section'))
+            ->description(__('learning::templates.form.hint', ['subject' => $subject]))
+            ->schema(array_map(fn (TemplateField $f) => $this->question($f), $template->fieldList()))
+            ->columns(2);
+    }
+
+    private function question(TemplateField $f): Field
+    {
+        $name = 'answers.'.$f->key;
+        $field = match ($f->type) {
+            'rating' => ToggleButtons::make($name)->options(array_combine(range(1, 5), array_map('strval', range(1, 5))))->inline(),
+            'number' => TextInput::make($name)->numeric()->minValue($f->min)->maxValue($f->max)->suffix($f->unit())->step('any'),
+            'choice' => ToggleButtons::make($name)->options($f->choices())->inline(),
+            'yes_no' => ToggleButtons::make($name)->boolean(__('learning::templates.answer.yes'), __('learning::templates.answer.no'))->inline(),
+            default => TextInput::make($name)->maxLength(500)->columnSpanFull(),
+        };
+
+        return $field->label($f->label())->required($f->required)
+            ->hint($f->family ? null : __('learning::templates.internal'))->hintIcon($f->family ? null : 'heroicon-m-lock-closed')
+            ->hintIconTooltip($f->family ? null : __('learning::templates.form.internal_hint'));
+    }
+
+    private function template(): ?ReportTemplate
+    {
+        if (! $this->templateRead) {
+            $this->template = ReportTemplate::forReport($this->sessionReport);
+            $this->templateRead = true;
+        }
+
+        return $this->template;
     }
 
     public function submit(): void

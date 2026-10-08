@@ -15,14 +15,18 @@ use Modules\Learning\Contracts\Events\SessionReportSubmitted;
 use Modules\Learning\Domain\MasteryRule;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\LearningSettings;
+use Modules\Learning\Models\ReportTemplate;
 use Modules\Learning\Models\SessionReport;
+use Modules\Learning\Templates\TemplateAnswers;
 
 /**
  * The teacher hands in the report (docs/architecture/01, "التقارير والواجبات";
  * 02, section 6): for a lesson, what was covered and how it went, scores and
  * notes, and optionally homework; for an absence, a short note. It can be
  * corrected until a supervisor has reviewed it. The progress projector runs
- * in the same transaction, so the roadmap is never behind the report.
+ * in the same transaction, so the roadmap is never behind the report. A
+ * lesson report also answers its subject's template (the version it was
+ * first handed in with, else the one now) and keeps which version that was.
  */
 final class SubmitSessionReport
 {
@@ -35,7 +39,7 @@ final class SubmitSessionReport
 
     /**
      * @param  array{engagement?: ?int, overall?: ?int, notes_for_student?: ?string, notes_internal?: ?string, absence_note?: ?string,
-     *     items?: list<array{node_id: string, outcome: string, score?: ?int, note?: ?string}>,
+     *     items?: list<array{node_id: string, outcome: string, score?: ?int, note?: ?string}>, answers?: array<string, mixed>,
      *     homework?: ?array{title?: ?string, instructions?: ?string, accepts?: ?string, due_days?: ?int}}  $data
      */
     public function handle(SessionReport $report, string $actorId, array $data): SessionReport
@@ -45,8 +49,10 @@ final class SubmitSessionReport
         }
         $tree = $this->treeFor($report);
         $data = $this->validate($report, $tree, $data);
+        $template = ReportTemplate::forReport($report);
+        $answers = $template === null ? [] : TemplateAnswers::check($template, is_array($data['answers'] ?? null) ? $data['answers'] : []);
 
-        DB::transaction(function () use ($report, $actorId, $data) {
+        DB::transaction(function () use ($report, $actorId, $data, $template, $answers) {
             $now = CarbonImmutable::now();
             $first = $report->submitted_at === null;
             $lesson = $report->kind === 'lesson';
@@ -59,6 +65,8 @@ final class SubmitSessionReport
                 'notes_for_student' => $lesson ? (($data['notes_for_student'] ?? null) ?: null) : null,
                 'notes_internal' => ($data['notes_internal'] ?? null) ?: null,
                 'absence_note' => $lesson ? null : $data['absence_note'],
+                'template_id' => $template?->id,
+                'answers' => $answers,
             ])->save();
 
             $report->items()->delete();

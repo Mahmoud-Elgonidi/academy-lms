@@ -29,7 +29,8 @@
     "handedInAt": "Handed in {when}",
     "downloadFile": "Download the file",
     "markAllRead": "Mark all read",
-    "newMessages": "{n, plural, =1 {1 new message} other {# new messages}}"
+    "newMessages": "{n, plural, =1 {1 new message} other {# new messages}}",
+    "academyOnly": "Academy only"
   },
   "signIn": {
     "title": "Welcome",
@@ -513,7 +514,12 @@
     "backToToday": "Back to today",
     "connecting": "Connecting…",
     "withStudent": "With {name}",
-    "minutesShort": "min"
+    "minutesShort": "min",
+    "questionsTitle": "The academy's questions",
+    "questionsHint": "Questions your academy asks in every report of this subject.",
+    "answerRequired": "Answer \"{question}\".",
+    "yes": "Yes",
+    "no": "No"
   },
   "errors": {
     "title": "Something went wrong",

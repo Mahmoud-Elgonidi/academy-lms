@@ -1436,6 +1436,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notesInternalHint => 'للأكاديمية بس، الأسرة مابتشوفهاش.';
 
   @override
+  String get questionsTitle => 'أسئلة الأكاديمية';
+
+  @override
+  String get questionsHint => 'أسئلة الأكاديمية بتسألها في كل تقرير للمادة دي.';
+
+  @override
+  String answerRequired(String question) {
+    return 'جاوب على \"$question\".';
+  }
+
+  @override
+  String get answerYes => 'أيوه';
+
+  @override
+  String get answerNo => 'لأ';
+
+  @override
+  String get academyOnly => 'للأكاديمية بس';
+
+  @override
   String get absenceNote => 'ملاحظة الغياب';
 
   @override

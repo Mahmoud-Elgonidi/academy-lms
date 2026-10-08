@@ -63,7 +63,7 @@ export function Empty({ children }: { children: ReactNode }) {
   return <p className="rounded-card border border-dashed border-line bg-white/60 p-8 text-center text-muted">{children}</p>;
 }
 
-export function Field({ label, hint, error, children }: { label: string; hint?: string; error?: string; children: ReactNode }) {
+export function Field({ label, hint, error, children }: { label: ReactNode; hint?: string; error?: string; children: ReactNode }) {
   return (
     <label className="block">
       <span className="mb-1.5 block text-sm font-semibold">{label}</span>

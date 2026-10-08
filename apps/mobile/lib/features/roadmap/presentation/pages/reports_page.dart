@@ -11,6 +11,7 @@ import '../../data/learning_repository.dart';
 import '../../domain/learning.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../core/realtime/live.dart';
+import '../widgets/report_answers_view.dart';
 
 /// The reports teachers wrote for the family: one course's, or (a teen's
 /// Reports tab) every course's, latest first.
@@ -92,6 +93,7 @@ class ReportCard extends StatelessWidget {
                 ),
               ),
           ],
+          if (report.answers.isNotEmpty) ...[const SizedBox(height: 8), ReportAnswersView(answers: report.answers)],
           if ((report.notesForStudent ?? '').isNotEmpty) ...[
             const SizedBox(height: 8),
             Container(

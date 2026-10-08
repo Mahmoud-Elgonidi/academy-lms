@@ -1,4 +1,5 @@
-{{-- One report, read-only: $report, $items (ReportFormQuery::items), $homework, $internal (show internal notes). --}}
+{{-- One report, read-only: $report, $items (ReportFormQuery::items), $homework, $internal (show internal notes and academy-only answers). --}}
+@php $answers = \Modules\Learning\Templates\TemplateAnswers::ofReport($report, $internal); @endphp
 <div class="rd" style="display:flex; flex-direction:column; gap:.9rem; font-size:.875rem">
     <style>
         .rd h4 { margin: 0 0 .3rem; font-size: .8rem; color: var(--gray-500); font-weight: 600; }
@@ -11,8 +12,13 @@
         .rd-scores { display: flex; gap: 1.5rem; }
         .rd-scores strong { font-size: 1.1rem; }
         .rd p { margin: 0; white-space: pre-line; }
+        .rd-answers { display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: .4rem; }
+        .rd-answer { display: flex; flex-direction: column; gap: .1rem; padding: .45rem .6rem; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); }
+        .rd-answer small { color: var(--gray-500); }
+        .rd-answer[data-internal] { border-style: dashed; }
+        .rd-stars { color: var(--warning-500); letter-spacing: .05em; }
         .rd-internal { padding: .5rem .7rem; border-radius: var(--radius-lg); background: var(--gray-50); border: 1px dashed var(--gray-300); }
-        .dark .rd-item { border-color: var(--gray-700); }
+        .dark .rd-item, .dark .rd-answer { border-color: var(--gray-700); }
         .dark .rd-internal { background: var(--gray-800); }
     </style>
 
@@ -37,6 +43,23 @@
             <div><h4>{{ __('learning::reports.detail.engagement') }}</h4><strong>{{ $report->engagement }}/5</strong></div>
             <div><h4>{{ __('learning::reports.detail.overall') }}</h4><strong>{{ $report->overall }}/5</strong></div>
         </div>
+        @if ($answers !== [])
+            <div>
+                <h4>{{ __('learning::templates.form.section') }}</h4>
+                <div class="rd-answers">
+                    @foreach ($answers as $a)
+                        <div class="rd-answer" @unless ($a['family']) data-internal @endunless>
+                            <small>{{ $a['label'] }}@unless ($a['family']) · {{ __('learning::templates.internal') }}@endunless</small>
+                            @if ($a['type'] === 'rating')
+                                <strong><span class="rd-stars" aria-hidden="true">{{ str_repeat('★', $a['value']) }}{{ str_repeat('☆', 5 - $a['value']) }}</span> {{ $a['text'] }}</strong>
+                            @else
+                                <strong>{{ $a['text'] }}</strong>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
         @if ($report->notes_for_student)
             <div><h4>{{ __('learning::reports.detail.for_family') }}</h4><p>{{ $report->notes_for_student }}</p></div>
         @endif

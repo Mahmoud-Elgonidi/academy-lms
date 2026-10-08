@@ -8,6 +8,7 @@ use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
 use Modules\Learning\Filament\Pages\ReportsOversight;
+use Modules\Learning\Filament\Pages\ReportTemplates;
 
 /**
  * Learning in the academy back office: report follow-up, and the curriculum
@@ -30,7 +31,7 @@ final class LearningPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([ReportsOversight::class]);
+        $panel->pages([ReportsOversight::class, ReportTemplates::class]);
     }
 
     public function boot(Panel $panel): void {}

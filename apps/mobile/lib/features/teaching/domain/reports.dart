@@ -1,5 +1,6 @@
 import '../../../core/time/local_time.dart';
 import '../../homework/domain/homework.dart';
+import '../../roadmap/domain/report_answers.dart';
 
 /// A lesson report or absence note in the teacher's list.
 class ReportSummary {
@@ -110,6 +111,8 @@ class ReportForm {
     this.absenceNote,
     this.reviewNote,
     this.homework,
+    this.template,
+    this.answers = const [],
   });
 
   factory ReportForm.fromJson(Map<String, dynamic> json) => ReportForm(
@@ -126,6 +129,8 @@ class ReportForm {
         (id: (o as Map<String, dynamic>)['id'] as String, label: o['label'] as String? ?? ''),
     ],
     homework: json['homework'] == null ? null : Homework.fromJson(json['homework'] as Map<String, dynamic>),
+    template: ReportTemplate.fromJson(json['template']),
+    answers: ReportAnswer.listOf(json['answers']),
   );
 
   final ReportSummary summary;
@@ -140,6 +145,10 @@ class ReportForm {
   final List<ReportItem> items;
   final List<({String id, String label})> lessonOptions;
   final Homework? homework;
+
+  /// The subject's own questions; null when it has none.
+  final ReportTemplate? template;
+  final List<ReportAnswer> answers;
 
   /// Reviewed by the academy: it no longer changes.
   bool get locked => summary.status == 'reviewed';

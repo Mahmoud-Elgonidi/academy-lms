@@ -5,10 +5,12 @@ namespace Modules\Learning;
 use Carbon\CarbonImmutable;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\Learning\Contracts\DTOs\HomeworkLine;
 use Modules\Learning\Contracts\DTOs\PlanLine;
 use Modules\Learning\Contracts\LearningApi;
 use Modules\Learning\Domain\PlannedItem;
 use Modules\Learning\Domain\TodaysPlan;
+use Modules\Learning\Models\Homework;
 use Modules\Learning\Queries\ProgressQuery;
 
 final class LearningService implements LearningApi
@@ -34,5 +36,15 @@ final class LearningService implements LearningApi
             $i->reason,
             $tree->nodes[$i->nodeId]->objectives,
         ), TodaysPlan::for($tree, $this->progress->states($enrollmentId), $lessonStart));
+    }
+
+    public function lastHomework(string $studentId, ?string $enrollmentId, CarbonImmutable $lessonStart): ?HomeworkLine
+    {
+        $h = Homework::query()->withCount('submissions')->where('student_id', $studentId)
+            ->when($enrollmentId !== null, fn ($q) => $q->where('enrollment_id', $enrollmentId))
+            ->where('created_at', '<', $lessonStart)
+            ->orderByDesc('created_at')->first();
+
+        return $h === null ? null : new HomeworkLine($h->id, $h->title, $h->instructions, $h->status, $h->due_at, $h->grade, $h->feedback, (int) $h->submissions_count);
     }
 }

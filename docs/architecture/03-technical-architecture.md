@@ -209,7 +209,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 | Classroom | `rooms`، `recordings`، `recording_access_logs`، `provider_webhook_inbox`، `tech_issue_reports` |
 | Credits | `credit_accounts`، `credit_lots`، `credit_entries`، `credit_reservations` |
 | Billing | `billing_accounts`، `billing_account_students`، `price_regions`، `plans`، `plan_prices`، `subscriptions`، `invoices`، `invoice_lines`، `invoice_sequences`، `payments`، `payment_methods`، `manual_payment_proofs`، `refunds`، `credit_notes`، `coupons`، `coupon_redemptions`، `gateway_accounts`، `payment_checkouts`، `gateway_webhook_inbox`، `tax_profiles`، `tax_rates`، `einvoice_units`، `einvoice_documents` |
-| Learning | `report_templates`، `report_template_versions`، `session_reports`، `report_items_covered`، `homework_assignments`، `homework_submissions`، `homework_reviews`، `enrollment_progress`، `enrollment_positions`، `assessment_attempts`، `certificates`، `report_cards`، `challenge_claims`، `cheers` |
+| Learning | `report_templates` (صف لكل إصدار)، `session_reports`، `report_items_covered`، `homework_assignments`، `homework_submissions`، `homework_reviews`، `enrollment_progress`، `enrollment_positions`، `assessment_attempts`، `certificates`، `report_cards`، `challenge_claims`، `cheers` |
 | Evaluation | `lesson_ratings`، `kpi_exclusions`، و(P2) `kpi_events`، `qa_rubrics`، `qa_audits`، `kpi_snapshots`، `scoring_configs` |
 | Payroll | `rate_cards`، `rate_card_lines`، `teacher_rate_cards`، `teacher_earnings`، `payroll_periods`، و(P2) `payroll_statements`، `payouts` |
 | CRM | `leads`، `lead_activities`، `lead_trials` (ومعاها تقييم المدرس)، `retention_tasks`، `referrals` |
@@ -257,8 +257,9 @@ teacher_profiles(user_id, gender, dialect, employment_type, max_weekly_min, max_
                  accepts_new, accepts_trials, age_groups[], tier, rate_card_id, status)
 guardian_student(guardian_id, student_id, relationship, is_primary, can_manage, receives_reports)
 student_profiles(user_id PK, birth_date, stage kids|middle|teen|classic NULL)   -- شكل حساب الطالب: من السن، أو اللي الأكاديمية اختارته
-session_reports(session_id UNIQUE, template_version_id, payload jsonb, engagement, overall, status,
+session_reports(session_id UNIQUE, template_id → report_templates, answers jsonb, engagement, overall, status,
                 due_at, submitted_at)
+report_templates(subject_id, version UNIQUE+subject, fields jsonb ≤ 12, created_by)   -- إصدار مابيتعدلش (update/delete مسحوبين)
 report_items_covered(report_id, node_id, outcome, score, range_from, range_to, mistakes)
 enrollment_progress(enrollment_id, node_id, status, mastery, sessions_count, mastered_at, next_review_at)
 lesson_ratings(session_id, rater_id UNIQUE+session, student_id, teacher_id, stars 1–5, tags jsonb, comment, via app|link)
@@ -539,7 +540,7 @@ interface PaymentGateway
   - `learning/*`: الـ roadmap والتقارير والواجبات (كانت موجودة)، و`learning/journey`: رئيسية الطالب في شكل مرحلته (النجوم، والنقاط والرتبة، والأيام ورا بعض، والإنجازات، ومستويات كل كورس وحالة كل درس، والجاي، والميعاد المتوقع للإنهاء). الطالب نفسه أو أول ابن لولي الأمر (`FamilyView::learner`).
 - **الدعم** (Support، للأسرة والمدرس): `support/new` (الأنواع المسموحة لللي بيسأل، والحصص)، و`support/tickets` (تذاكري، وكتابة تذكرة multipart مع صورة أو PDF و`Idempotency-Key`)، و`support/tickets/{id}` (المحادثة من غير ملاحظات الإدارة ولا قراراتها)، و`.../messages` (الرد)، و`.../reopen`، و`.../close`، و`.../messages/{message}/file`. الأسرة بتبعت `learner_id`.
 - **الأخطاء**: الـ route بتاع ميزة مش في الباقة بيرد 403 `feature-not-in-plan` (ومعاه `feature`)، وحد مقفول بيرد 403 `plan-limit-reached` (ومعاه `limit` و`max`). وعنوان الخطأ بلغة `Accept-Language` حتى لو الخطأ حصل قبل ما الأكاديمية تتعرف (كود أكاديمية غلط، route مش موجود). و404 مابيقولش أي تفاصيل (لا اسم class، ولا route، ولا أنهي أكاديمية).
-- **المدرس**: `teacher/lessons` (من يوم لعدد أيام)، و`teacher/students`، و`teacher/time-off` (عرض، وطلب، وسحب)، و`teacher/earnings?month=` (Payroll)، و`teacher/performance` (Evaluation، التقييمات من غير أسماء)، و`teacher/trials` وتقييم الحصة التجريبية (CRM)، و`teacher/shifts`، و`teacher/reports`، و`teacher/homework`.
+- **المدرس**: `teacher/lessons` (من يوم لعدد أيام)، و`teacher/students`، و`teacher/time-off` (عرض، وطلب، وسحب)، و`teacher/earnings?month=` (Payroll)، و`teacher/performance` (Evaluation، التقييمات من غير أسماء)، و`teacher/trials` وتقييم الحصة التجريبية (CRM)، و`teacher/shifts`، و`teacher/reports`، و`teacher/homework`. وتقرير المدرس (`teacher/reports/{id}`) بيرجّع أسئلة المادة في `template` (النوع، والاختيارات، والحدود، والوحدة، ولازم ولا لأ، والأسرة بتشوف ولا لأ)، والإجابات بتتبعت في `answers` بالمفتاح. وكل تقرير (للمدرس وللأسرة) فيه `answers`: السؤال وإجابته مكتوبة (`text`)، وللأسرة من غير اللي للأكاديمية بس.
 - كل endpoint بيستخدم نفس الـ Actions والـ queries اللي الشاشات بتستخدمها (`FamilyNotices`، و`FamilyCancellation`، و`TeacherStudents`، و`TeacherTrials`، ...).
 
 ### تسجيل الدخول

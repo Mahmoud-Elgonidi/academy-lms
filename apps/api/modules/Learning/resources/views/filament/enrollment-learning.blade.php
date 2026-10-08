@@ -18,6 +18,10 @@
         .lr-row { display: flex; gap: .6rem; align-items: baseline; padding: .4rem 0; border-top: 1px solid var(--gray-100); font-size: .8125rem; }
         .lr-row > span:first-child { color: var(--gray-500); min-width: 5.5rem; white-space: nowrap; }
         .lr-row p { margin: 0; color: var(--gray-700); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .lr-row { flex-wrap: wrap; }
+        .lr-row p.lr-answers { flex-basis: 100%; white-space: normal; display: flex; flex-wrap: wrap; gap: .2rem .9rem; color: var(--gray-500); padding-inline-start: 6.1rem; }
+        .lr-row p.lr-answers strong { color: var(--gray-800); font-weight: 600; }
+        .dark .lr-row p.lr-answers strong { color: var(--gray-200); }
         .lr-pill { white-space: nowrap; padding: .05rem .5rem; border-radius: 999px; font-size: .7rem; font-weight: 700; background: var(--gray-100); color: var(--gray-700); }
         .lr-pill[data-s="overdue"], .lr-pill[data-s="missed"] { background: var(--danger-50); color: var(--danger-700); }
         .lr-pill[data-s="due"], .lr-pill[data-s="assigned"] { background: var(--warning-50); color: var(--warning-800); }
@@ -74,6 +78,9 @@
                     <span>{{ $r['when'] }}</span>
                     <span class="lr-pill" data-s="{{ $r['status'] }}">{{ $r['kind'] === 'absence' ? __('learning::progress.absent') : __('learning::reports.statuses.'.$r['status']) }}</span>
                     <p>@if ($r['overall']) {{ __('learning::progress.overall', ['n' => $r['overall']]) }} · @endif{{ $r['note'] }}</p>
+                    @if ($r['answers'] !== [])
+                        <p class="lr-answers">@foreach ($r['answers'] as $a)<span>{{ $a['label'] }}: <strong>{{ $a['text'] }}</strong></span>@endforeach</p>
+                    @endif
                     @if ($r['late']) <span class="lr-late">{{ __('learning::progress.late') }}</span> @endif
                 </div>
             @empty

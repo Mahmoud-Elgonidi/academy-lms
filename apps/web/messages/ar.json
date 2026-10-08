@@ -29,7 +29,8 @@
     "handedInAt": "اتسلّم {when}",
     "downloadFile": "نزّل الملف",
     "markAllRead": "علّم الكل مقروء",
-    "newMessages": "{n, plural, =1 {رسالة جديدة} =2 {رسالتين جداد} few {# رسايل جديدة} other {# رسالة جديدة}}"
+    "newMessages": "{n, plural, =1 {رسالة جديدة} =2 {رسالتين جداد} few {# رسايل جديدة} other {# رسالة جديدة}}",
+    "academyOnly": "للأكاديمية بس"
   },
   "signIn": {
     "title": "أهلًا بيك",
@@ -513,7 +514,12 @@
     "backToToday": "ارجع للنهارده",
     "connecting": "بيوصل…",
     "withStudent": "مع {name}",
-    "minutesShort": "دقيقة"
+    "minutesShort": "دقيقة",
+    "questionsTitle": "أسئلة الأكاديمية",
+    "questionsHint": "أسئلة الأكاديمية بتسألها في كل تقرير للمادة دي.",
+    "answerRequired": "جاوب على \"{question}\".",
+    "yes": "أيوه",
+    "no": "لأ"
   },
   "errors": {
     "title": "حصلت مشكلة",

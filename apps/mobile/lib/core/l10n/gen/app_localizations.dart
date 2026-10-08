@@ -2342,6 +2342,42 @@ abstract class AppLocalizations {
   /// **'للأكاديمية بس، الأسرة مابتشوفهاش.'**
   String get notesInternalHint;
 
+  /// No description provided for @questionsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أسئلة الأكاديمية'**
+  String get questionsTitle;
+
+  /// No description provided for @questionsHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'أسئلة الأكاديمية بتسألها في كل تقرير للمادة دي.'**
+  String get questionsHint;
+
+  /// No description provided for @answerRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاوب على \"{question}\".'**
+  String answerRequired(String question);
+
+  /// No description provided for @answerYes.
+  ///
+  /// In ar, this message translates to:
+  /// **'أيوه'**
+  String get answerYes;
+
+  /// No description provided for @answerNo.
+  ///
+  /// In ar, this message translates to:
+  /// **'لأ'**
+  String get answerNo;
+
+  /// No description provided for @academyOnly.
+  ///
+  /// In ar, this message translates to:
+  /// **'للأكاديمية بس'**
+  String get academyOnly;
+
   /// No description provided for @absenceNote.
   ///
   /// In ar, this message translates to:

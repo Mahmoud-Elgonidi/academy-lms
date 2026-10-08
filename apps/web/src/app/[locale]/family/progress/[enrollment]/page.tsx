@@ -4,6 +4,7 @@ import { Icon } from '@/components/icons';
 import { RoadmapView } from '@/components/roadmap-view';
 import { Badge, Card, Empty, SectionTitle } from '@/components/ui';
 import { get } from '@/lib/api/server';
+import { ReportAnswers } from '@/components/report-answers';
 import type { FamilyReport, Roadmap } from '@/lib/family/types';
 
 /** One course: its roadmap, and the teacher's reports after each lesson (newest first, without internal notes). */
@@ -56,6 +57,7 @@ export default async function Course({ params }: { params: Promise<{ enrollment:
                     <p className="mt-3 text-sm text-muted">
                       {t('engagement')}: {r.engagement ?? '—'} · {t('overall')}: {r.overall ?? '—'}
                     </p>
+                    <ReportAnswers answers={r.answers ?? []} />
                     {r.notes_for_student ? (
                       <div className="mt-3 rounded-control bg-paper p-3">
                         <p className="text-xs font-semibold text-muted">{t('teacherSaid')}</p>

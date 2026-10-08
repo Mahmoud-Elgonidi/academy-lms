@@ -10,6 +10,7 @@ use Modules\Learning\Actions\SubmitSessionReport;
 use Modules\Learning\Authorization\LearningAccess;
 use Modules\Learning\Http\V1\Resources\LearningPresenter;
 use Modules\Learning\Models\Homework;
+use Modules\Learning\Models\ReportTemplate;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\ReportFormQuery;
 use Modules\Learning\Queries\RoadmapQuery;
@@ -50,21 +51,34 @@ final class TeacherReportsController
         return response()->json(['data' => $reports->map(fn (SessionReport $r) => $this->present->report($r, true))->all()]);
     }
 
+    /**
+     * A report to write or correct.
+     *
+     * The report with today's plan, the lessons to choose from, the homework set from it, the roadmap, and the
+     * subject's own questions (`template`, null when it has none); send their answers as `answers` by key.
+     */
     public function show(Request $request, string $report, RoadmapQuery $roadmap): JsonResponse
     {
         $report = $this->mine($request, $report);
 
         return response()->json(['data' => $this->present->report($report, true, $this->form->items($report)) + [
+            'template' => $this->present->template(ReportTemplate::forReport($report)),
             'lesson_options' => collect($this->form->lessonOptions($report))->map(fn ($label, $id) => ['id' => $id, 'label' => $label])->values()->all(),
             'homework' => ($h = $report->homework()->with('submissions')->first()) ? $this->present->homework($h) : null,
             'roadmap' => $report->enrollment_id ? $roadmap->for($report->enrollment_id) : null,
         ]]);
     }
 
+    /**
+     * Hand in or correct a report.
+     *
+     * Answers to the subject's questions go in `answers`, by the field's key (stars 1-5, a number, a choice's key,
+     * true or false, a text).
+     */
     public function submit(Request $request, string $report, SubmitSessionReport $submit): JsonResponse
     {
         $report = $submit->handle($this->mine($request, $report), $request->user()->getAuthIdentifier(), $request->only([
-            'engagement', 'overall', 'notes_for_student', 'notes_internal', 'absence_note', 'items', 'homework',
+            'engagement', 'overall', 'notes_for_student', 'notes_internal', 'absence_note', 'items', 'homework', 'answers',
         ]));
 
         return response()->json(['data' => $this->present->report($report, true, $this->form->items($report))]);

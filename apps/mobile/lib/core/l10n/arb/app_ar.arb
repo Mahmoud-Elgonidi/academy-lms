@@ -1028,6 +1028,19 @@
   "notesForFamily": "ملاحظات للطالب وولي الأمر",
   "notesInternal": "ملاحظات داخلية",
   "notesInternalHint": "للأكاديمية بس، الأسرة مابتشوفهاش.",
+  "questionsTitle": "أسئلة الأكاديمية",
+  "questionsHint": "أسئلة الأكاديمية بتسألها في كل تقرير للمادة دي.",
+  "answerRequired": "جاوب على \"{question}\".",
+  "@answerRequired": {
+    "placeholders": {
+      "question": {
+        "type": "String"
+      }
+    }
+  },
+  "answerYes": "أيوه",
+  "answerNo": "لأ",
+  "academyOnly": "للأكاديمية بس",
   "absenceNote": "ملاحظة الغياب",
   "absenceHint": "الطالب ماحضرش. اكتب اللي حصل وأي حاجة الأسرة محتاجة تعرفها.",
   "giveHomework": "ادّي واجب",

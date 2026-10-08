@@ -47,6 +47,8 @@ final class ClassroomPageController
             'seat' => $seat,
             'when' => $lesson->startsAt->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F · H:i'),
             'plan' => $seat->role === 'student' ? [] : $learning->planFor($lesson->enrollmentId, $lesson->startsAt),
+            'homework' => $seat->role === 'student' || $lesson->studentId === null ? null : $learning->lastHomework($lesson->studentId, $lesson->enrollmentId, $lesson->startsAt),
+            'tz' => $tz,
             'ticketUrl' => route('classroom.ticket', ['session' => $session]),
             'goUrl' => route('classroom.go', ['session' => $session]),
         ]);

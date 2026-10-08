@@ -1,12 +1,14 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, type ReactNode } from 'react';
 import { submitReport, type ReportPayload } from '@/app/[locale]/teach/actions';
 import { useRouter } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
 import { Badge, Button, Card, Field, Input, Notice, Select, Textarea, join } from '@/components/ui';
+import { ReportAnswers } from '@/components/report-answers';
 import { formProblem } from '@/lib/problems';
+import { answersOf, answersPayload, missingAnswers, type Answers, type Question } from '@/lib/report-answers';
 import { ACCEPTS, OUTCOMES, type Accepts, type Outcome, type ReportForm, type ReportItem } from '@/lib/teach/types';
 
 type Item = ReportItem & { noteOpen: boolean };
@@ -14,7 +16,8 @@ type Item = ReportItem & { noteOpen: boolean };
 /**
  * A report as the teacher writes it: what happened with each lesson of
  * today's plan (and any added), focus and overall, words for the family and
- * for the academy, and homework. An absence asks only for a note. The API
+ * for the academy, the subject's own questions, and homework. An absence
+ * asks only for a note. The API
  * checks it again (SubmitSessionReport) and its words come back here.
  */
 export function ReportEditor({ form }: { form: ReportForm }) {
@@ -39,6 +42,7 @@ export function ReportEditor({ form }: { form: ReportForm }) {
   const [instructions, setInstructions] = useState(hw?.instructions ?? '');
   const [accepts, setAccepts] = useState<Accepts>(hw?.accepts ?? 'any');
   const [dueDays, setDueDays] = useState(3);
+  const [answers, setAnswers] = useState<Answers>(answersOf(form.answers));
   const [problem, setProblem] = useState<{ message?: string; errors: Record<string, string[]> }>({ errors: {} });
 
   const error = (key: string) => problem.errors[key]?.[0];
@@ -64,6 +68,11 @@ export function ReportEditor({ form }: { form: ReportForm }) {
       setProblem({ message: t('planHint'), errors: {} });
       return;
     }
+    const missing = absence ? [] : missingAnswers(form.template, answers);
+    if (missing.length > 0) {
+      setProblem({ message: t('answerRequired', { question: missing[0]!.label }), errors: {} });
+      return;
+    }
     const payload: ReportPayload = absence
       ? { absence_note: absenceNote.trim(), notes_internal: internal.trim() || null }
       : {
@@ -72,6 +81,7 @@ export function ReportEditor({ form }: { form: ReportForm }) {
           notes_for_student: forFamily.trim() || null,
           notes_internal: internal.trim() || null,
           items: items.map((i) => ({ node_id: i.node_id, outcome: i.outcome!, score: i.score, note: i.note?.trim() || null })),
+          answers: answersPayload(form.template, answers),
         };
     if (!homeworkLocked) {
       payload.homework = giving && title.trim() ? { title: title.trim(), instructions: instructions.trim() || null, accepts, due_days: dueDays } : null;
@@ -83,7 +93,10 @@ export function ReportEditor({ form }: { form: ReportForm }) {
       } else {
         const errors = done.errors ?? {};
         setProblem({
-          message: formProblem({ message: done.message ?? common('problem'), errors }, ['engagement', 'overall', 'notes_for_student', 'notes_internal', 'absence_note', 'items', 'homework.title', 'homework.instructions']),
+          message: formProblem({ message: done.message ?? common('problem'), errors }, [
+            'engagement', 'overall', 'notes_for_student', 'notes_internal', 'absence_note', 'items', 'homework.title', 'homework.instructions',
+            ...(form.template?.fields ?? []).map((q) => `answers.${q.key}`),
+          ]),
           errors,
         });
       }
@@ -202,6 +215,24 @@ export function ReportEditor({ form }: { form: ReportForm }) {
               <Textarea value={forFamily} onChange={(e) => setForFamily(e.target.value)} rows={3} maxLength={3000} />
             </Field>
           </Card>
+
+          {form.template && form.template.fields.length > 0 ? (
+            <Card className="space-y-4">
+              <div>
+                <h2 className="font-semibold">{t('questionsTitle')}</h2>
+                <p className="text-sm text-muted">{t('questionsHint')}</p>
+              </div>
+              {form.template.fields.map((q) => (
+                <QuestionField
+                  key={q.key}
+                  question={q}
+                  value={answers[q.key] ?? null}
+                  onChange={(value) => setAnswers((all) => ({ ...all, [q.key]: value }))}
+                  error={error(`answers.${q.key}`)}
+                />
+              ))}
+            </Card>
+          ) : null}
         </>
       )}
 
@@ -268,6 +299,66 @@ export function ReportEditor({ form }: { form: ReportForm }) {
   );
 }
 
+/** One of the academy's questions, by the kind of answer it takes. */
+function QuestionField({ question: q, value, onChange, error }: { question: Question; value: Answers[string]; onChange: (v: Answers[string]) => void; error?: string }) {
+  const t = useTranslations('teach');
+  const common = useTranslations('common');
+  const label = (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      {q.label}
+      {!q.required ? <span className="font-normal text-muted">{common('optional')}</span> : null}
+      {!q.family ? (
+        <Badge>
+          <Icon name="lock" size={12} /> {common('academyOnly')}
+        </Badge>
+      ) : null}
+    </span>
+  );
+  if (q.type === 'rating') {
+    return <Scale label={label} name={q.label} value={typeof value === 'number' ? value : value ? Number(value) : null} onChange={onChange} optional={!q.required} error={error} />;
+  }
+  if (q.type === 'choice' || q.type === 'yes_no') {
+    const options = q.type === 'choice' ? q.options.map((o) => ({ value: o.key, label: o.label })) : [{ value: 'yes', label: t('yes') }, { value: 'no', label: t('no') }];
+    const current = q.type === 'yes_no' ? (value === true ? 'yes' : value === false ? 'no' : null) : typeof value === 'string' ? value : null;
+    return (
+      <div>
+        <p className="text-sm font-semibold">{label}</p>
+        <Choice
+          label={q.label}
+          value={current}
+          options={options}
+          onChange={(v) => onChange(q.type === 'yes_no' ? v === 'yes' : current === v && !q.required ? null : v)}
+          error={error}
+        />
+      </div>
+    );
+  }
+  if (q.type === 'number') {
+    return (
+      <Field label={label} error={error}>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            inputMode="decimal"
+            step="any"
+            min={q.min ?? undefined}
+            max={q.max ?? undefined}
+            value={value === null || typeof value === 'boolean' ? '' : String(value)}
+            onChange={(e) => onChange(e.target.value)}
+            className="max-w-40"
+          />
+          {q.unit ? <span className="text-sm text-muted">{q.unit}</span> : null}
+        </div>
+      </Field>
+    );
+  }
+  return (
+    <Field label={label} error={error}>
+      <Input value={typeof value === 'string' ? value : ''} onChange={(e) => onChange(e.target.value)} maxLength={500} />
+    </Field>
+  );
+}
+
 function objectivesOf(item: ReportItem): string[] {
   if (Array.isArray(item.objectives)) return item.objectives;
   return item.objectives ? [item.objectives] : [];
@@ -300,13 +391,13 @@ function Choice({ label, value, options, onChange, error }: { label: string; val
 }
 
 /** 1 to 5; an optional one can be cleared by choosing it again. */
-function Scale({ label, value, onChange, optional, error }: { label: string; value: number | null; onChange: (v: number | null) => void; optional?: boolean; error?: string }) {
+function Scale({ label, name, value, onChange, optional, error }: { label: ReactNode; name?: string; value: number | null; onChange: (v: number | null) => void; optional?: boolean; error?: string }) {
   const t = useTranslations('teach');
   return (
     <div>
       <div className="flex flex-wrap items-center gap-3">
         <span className="text-sm font-semibold">{label}</span>
-        <div role="radiogroup" aria-label={label} className="flex gap-1">
+        <div role="radiogroup" aria-label={name ?? (typeof label === 'string' ? label : undefined)} className="flex gap-1">
           {[1, 2, 3, 4, 5].map((n) => (
             <button
               key={n}
@@ -353,6 +444,7 @@ function ReadOnly({ form }: { form: ReportForm }) {
             {t('engagement')}: {form.engagement ?? '—'} · {t('overall')}: {form.overall ?? '—'}
           </p>
           {form.notes_for_student ? <p className="whitespace-pre-line">{form.notes_for_student}</p> : null}
+          <ReportAnswers answers={form.answers} />
         </>
       )}
     </Card>

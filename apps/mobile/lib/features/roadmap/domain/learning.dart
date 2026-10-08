@@ -1,4 +1,5 @@
 import '../../../core/time/local_time.dart';
+import 'report_answers.dart';
 
 List<Map<String, dynamic>> _list(Object? raw) => [for (final x in raw as List<dynamic>? ?? const []) x as Map<String, dynamic>];
 
@@ -64,6 +65,7 @@ class Report {
     this.notesForStudent,
     this.absenceNote,
     this.dueAt,
+    this.answers = const [],
   });
 
   factory Report.fromJson(Map<String, dynamic> json) => Report(
@@ -86,6 +88,7 @@ class Report {
           score: (i['score'] as num?)?.toInt(),
         ),
     ],
+    answers: ReportAnswer.listOf(json['answers']),
   );
 
   final String id;
@@ -99,6 +102,9 @@ class Report {
   final String? notesForStudent;
   final String? absenceNote;
   final List<({String title, String outcome, String label, int? score})> items;
+
+  /// Answers to the academy's own questions (only those the family reads).
+  final List<ReportAnswer> answers;
 
   bool get open => status == 'due' || status == 'overdue';
 }

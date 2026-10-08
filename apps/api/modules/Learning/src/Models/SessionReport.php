@@ -33,6 +33,8 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?string $reviewed_by
  * @property ?CarbonImmutable $reviewed_at
  * @property ?string $review_note
+ * @property ?string $template_id the report template version its answers follow
+ * @property array<string, mixed> $answers that template's answers, by field key
  */
 final class SessionReport extends Model
 {
@@ -43,10 +45,10 @@ final class SessionReport extends Model
 
     protected $fillable = [
         'session_id', 'enrollment_id', 'teacher_id', 'student_id', 'kind', 'status', 'session_starts_at', 'due_at', 'submitted_at', 'late',
-        'engagement', 'overall', 'notes_for_student', 'notes_internal', 'absence_note', 'reviewed_by', 'reviewed_at', 'review_note',
+        'engagement', 'overall', 'notes_for_student', 'notes_internal', 'absence_note', 'reviewed_by', 'reviewed_at', 'review_note', 'template_id', 'answers',
     ];
 
-    protected $attributes = ['kind' => 'lesson', 'status' => 'due', 'late' => false];
+    protected $attributes = ['kind' => 'lesson', 'status' => 'due', 'late' => false, 'answers' => '{}'];
 
     protected function casts(): array
     {
@@ -58,6 +60,7 @@ final class SessionReport extends Model
             'late' => 'boolean',
             'engagement' => 'integer',
             'overall' => 'integer',
+            'answers' => 'array',
         ];
     }
 

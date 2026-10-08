@@ -3667,6 +3667,58 @@
                                                         },
                                                         "minItems": 0,
                                                         "maxItems": 0
+                                                    },
+                                                    "answers": {
+                                                        "type": "array",
+                                                        "description": "The academy's own questions for this subject, answered (only those the family reads, for the family).",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "key": {
+                                                                    "type": "string"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                },
+                                                                "type": {
+                                                                    "type": "string"
+                                                                },
+                                                                "value": {},
+                                                                "text": {
+                                                                    "type": "string"
+                                                                },
+                                                                "family": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "unit": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ],
+                                                                    "description": "false: only the academy reads it"
+                                                                },
+                                                                "max": {
+                                                                    "type": [
+                                                                        "integer",
+                                                                        "null"
+                                                                    ],
+                                                                    "enum": [
+                                                                        5,
+                                                                        null
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "key",
+                                                                "label",
+                                                                "type",
+                                                                "value",
+                                                                "text",
+                                                                "family",
+                                                                "unit",
+                                                                "max"
+                                                            ]
+                                                        }
                                                     }
                                                 },
                                                 "required": [
@@ -3686,7 +3738,8 @@
                                                     "overall",
                                                     "notes_for_student",
                                                     "absence_note",
-                                                    "items"
+                                                    "items",
+                                                    "answers"
                                                 ]
                                             }
                                         }
@@ -3710,6 +3763,8 @@
         "/v1/teacher/reports/{report}": {
             "get": {
                 "operationId": "teacher.reports.show",
+                "description": "The report with today's plan, the lessons to choose from, the homework set from it, the roadmap, and the\nsubject's own questions (`template`, null when it has none); send their answers as `answers` by key.",
+                "summary": "A report to write or correct",
                 "tags": [
                     "Learning"
                 ],
@@ -3780,6 +3835,8 @@
             },
             "put": {
                 "operationId": "teacher.reports.submit",
+                "description": "Answers to the subject's questions go in `answers`, by the field's key (stars 1-5, a number, a choice's key,\ntrue or false, a text).",
+                "summary": "Hand in or correct a report",
                 "tags": [
                     "Learning"
                 ],
@@ -4000,6 +4057,58 @@
                                                             "type": "array"
                                                         }
                                                     ]
+                                                },
+                                                "answers": {
+                                                    "type": "array",
+                                                    "description": "The academy's own questions for this subject, answered (only those the family reads, for the family).",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "key": {
+                                                                "type": "string"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "type": {
+                                                                "type": "string"
+                                                            },
+                                                            "value": {},
+                                                            "text": {
+                                                                "type": "string"
+                                                            },
+                                                            "family": {
+                                                                "type": "boolean"
+                                                            },
+                                                            "unit": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "false: only the academy reads it"
+                                                            },
+                                                            "max": {
+                                                                "type": [
+                                                                    "integer",
+                                                                    "null"
+                                                                ],
+                                                                "enum": [
+                                                                    5,
+                                                                    null
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "key",
+                                                            "label",
+                                                            "type",
+                                                            "value",
+                                                            "text",
+                                                            "family",
+                                                            "unit",
+                                                            "max"
+                                                        ]
+                                                    }
                                                 }
                                             },
                                             "required": [
@@ -4019,7 +4128,8 @@
                                                 "overall",
                                                 "notes_for_student",
                                                 "absence_note",
-                                                "items"
+                                                "items",
+                                                "answers"
                                             ]
                                         }
                                     },
@@ -5490,6 +5600,58 @@
                                                                 "note"
                                                             ]
                                                         }
+                                                    },
+                                                    "answers": {
+                                                        "type": "array",
+                                                        "description": "The academy's own questions for this subject, answered (only those the family reads, for the family).",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "key": {
+                                                                    "type": "string"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                },
+                                                                "type": {
+                                                                    "type": "string"
+                                                                },
+                                                                "value": {},
+                                                                "text": {
+                                                                    "type": "string"
+                                                                },
+                                                                "family": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "unit": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ],
+                                                                    "description": "false: only the academy reads it"
+                                                                },
+                                                                "max": {
+                                                                    "type": [
+                                                                        "integer",
+                                                                        "null"
+                                                                    ],
+                                                                    "enum": [
+                                                                        5,
+                                                                        null
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "key",
+                                                                "label",
+                                                                "type",
+                                                                "value",
+                                                                "text",
+                                                                "family",
+                                                                "unit",
+                                                                "max"
+                                                            ]
+                                                        }
                                                     }
                                                 },
                                                 "required": [
@@ -5509,7 +5671,8 @@
                                                     "overall",
                                                     "notes_for_student",
                                                     "absence_note",
-                                                    "items"
+                                                    "items",
+                                                    "answers"
                                                 ]
                                             }
                                         }

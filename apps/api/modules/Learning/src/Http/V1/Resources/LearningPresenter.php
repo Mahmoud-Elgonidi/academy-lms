@@ -5,7 +5,10 @@ namespace Modules\Learning\Http\V1\Resources;
 use Illuminate\Support\Facades\DB;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\HomeworkSubmission;
+use Modules\Learning\Models\ReportTemplate;
 use Modules\Learning\Models\SessionReport;
+use Modules\Learning\Templates\TemplateAnswers;
+use Modules\Learning\Templates\TemplateField;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 
 /** Reports and homework as the apps read them; times always through LocalTimePresenter. */
@@ -13,6 +16,9 @@ final class LearningPresenter
 {
     /** @var array<string, string> */
     private array $names = [];
+
+    /** @var array<string, ?ReportTemplate> */
+    private array $templates = [];
 
     public function __construct(private readonly LocalTimePresenter $time) {}
 
@@ -37,12 +43,42 @@ final class LearningPresenter
             'notes_for_student' => $r->notes_for_student,
             'absence_note' => $r->absence_note,
             'items' => $items ?? [],
+            // The academy's own questions for this subject, answered (only those the family reads, for the family).
+            'answers' => TemplateAnswers::present($this->templateOf($r), $r->answers ?? [], $internal),
         ];
         if ($internal) {
             $out += ['notes_internal' => $r->notes_internal, 'review_note' => $r->review_note, 'reviewed_at' => $this->time->present($r->reviewed_at)];
         }
 
         return $out;
+    }
+
+    /**
+     * The questions a report form asks after the usual ones; null when the subject has none.
+     *
+     * @return ?array<string, mixed>
+     */
+    public function template(?ReportTemplate $t): ?array
+    {
+        if ($t === null || $t->fields === []) {
+            return null;
+        }
+
+        return [
+            'id' => $t->id,
+            'version' => $t->version,
+            'fields' => array_map(fn (TemplateField $f) => [
+                'key' => $f->key,
+                'label' => $f->label(),
+                'type' => $f->type,              // rating (1-5), number, choice, yes_no, text
+                'required' => $f->required,
+                'family' => $f->family,          // false: the answer stays with the academy
+                'options' => array_map(fn (string $k, string $label) => ['key' => $k, 'label' => $label], array_keys($f->choices()), $f->choices()),
+                'min' => $f->min,
+                'max' => $f->type === 'rating' ? 5 : $f->max,
+                'unit' => $f->unit(),
+            ], $t->fieldList()),
+        ];
     }
 
     /** @return array<string, mixed> */
@@ -73,6 +109,11 @@ final class LearningPresenter
                 'submitted_at' => $this->time->present($s->submitted_at),
             ])->values()->all(),
         ];
+    }
+
+    private function templateOf(SessionReport $r): ?ReportTemplate
+    {
+        return $r->template_id === null ? null : ($this->templates[$r->template_id] ??= ReportTemplate::query()->find($r->template_id));
     }
 
     private function name(string $userId): string

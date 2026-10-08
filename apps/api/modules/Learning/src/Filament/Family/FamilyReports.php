@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Modules\Learning\Models\ReportItem;
 use Modules\Learning\Models\SessionReport;
+use Modules\Learning\Templates\TemplateAnswers;
 use Modules\People\Contracts\LearnerStage;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -63,6 +64,7 @@ final class FamilyReports extends Page
             'overall' => $r->overall,
             'engagement' => $r->engagement,
             'note' => $r->kind === 'absence' ? $r->absence_note : $r->notes_for_student,
+            'answers' => TemplateAnswers::ofReport($r, false),
             'items' => $r->items->map(fn (ReportItem $i) => [
                 'title' => $titles[$i->node_id] ?? '—',
                 'outcome' => __('learning::reports.outcomes.'.$i->outcome),

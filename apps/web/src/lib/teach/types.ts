@@ -1,4 +1,5 @@
 import type { LocalTime } from '../time';
+import type { ReportAnswer, ReportTemplate } from '../report-answers';
 
 /**
  * What the teacher endpoints answer (the API's presenters), as the pages read
@@ -129,6 +130,9 @@ export type ReportForm = ReportSummary & {
   lesson_options: { id: string; label: string }[];
   homework: Homework | null;
   roadmap: Roadmap | null;
+  /** The subject's own questions; null when it has none. */
+  template: ReportTemplate | null;
+  answers: ReportAnswer[];
 };
 
 export type Student = {

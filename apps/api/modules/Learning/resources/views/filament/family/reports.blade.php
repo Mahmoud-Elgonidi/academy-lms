@@ -25,6 +25,19 @@
                         @endforeach
                     </ul>
                 @endif
+                @if ($report['answers'] !== [])
+                    <ul class="lf-answers">
+                        @foreach ($report['answers'] as $answer)
+                            <li><small>{{ $answer['label'] }}</small>
+                                @if ($answer['type'] === 'rating')
+                                    <span class="lf-stars" aria-label="{{ $answer['text'] }}">{{ str_repeat('★', $answer['value']) }}{{ str_repeat('☆', 5 - $answer['value']) }}</span>
+                                @else
+                                    <strong>{{ $answer['text'] }}</strong>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
                 @if (! $report['absence'] && $report['engagement'])
                     <small class="lf-muted">{{ __($a.'engagement') }}: {{ $report['engagement'] }}/5</small>
                 @endif

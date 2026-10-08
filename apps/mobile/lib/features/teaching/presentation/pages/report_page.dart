@@ -13,12 +13,14 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../../../shared/widgets/star_picker.dart';
 import '../../../homework/presentation/widgets/submission_view.dart';
+import '../../../roadmap/domain/report_answers.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/reports.dart';
 
 /// Writing a report from the phone: today's plan (what happened with each
 /// lesson, a score, a note), focus and overall, words for the family and
-/// for the academy, and homework. An absence asks only for the note.
+/// for the academy, the subject's own questions, and homework. An absence
+/// asks only for the note.
 /// Pops with true once sent.
 class TeacherReportPage extends StatelessWidget {
   const TeacherReportPage({required this.reportId, super.key});
@@ -59,6 +61,11 @@ class _EditorState extends State<_Editor> {
   late final _hwDetails = TextEditingController(text: f.homework?.instructions);
   late String _accepts = f.homework?.accepts ?? 'any';
   int _dueDays = 3;
+  late final Map<String, Object?> _answers = {for (final a in f.answers) a.key: a.value};
+  late final Map<String, TextEditingController> _typed = {
+    for (final q in f.template?.questions ?? const <ReportQuestion>[])
+      if (q.type == 'number' || q.type == 'text') q.key: TextEditingController(text: _answers[q.key]?.toString()),
+  };
   final _notes = <String>{};
   final _sendKey = GlobalKey();
   bool _busy = false;
@@ -72,7 +79,7 @@ class _EditorState extends State<_Editor> {
 
   @override
   void dispose() {
-    for (final c in [_forFamily, _internal, _absence, _hwTitle, _hwDetails]) {
+    for (final c in [_forFamily, _internal, _absence, _hwTitle, _hwDetails, ..._typed.values]) {
       c.dispose();
     }
     super.dispose();
@@ -115,6 +122,13 @@ class _EditorState extends State<_Editor> {
       setState(() => _error = l.pickOutcomes);
       return;
     }
+    final template = f.template;
+    final answers = {..._answers, for (final e in _typed.entries) e.key: e.value.text};
+    final missing = _absent || template == null ? const <ReportQuestion>[] : template.missing(answers);
+    if (missing.isNotEmpty) {
+      setState(() => _error = l.answerRequired(missing.first.label));
+      return;
+    }
     setState(() {
       _busy = true;
       _error = null;
@@ -134,6 +148,7 @@ class _EditorState extends State<_Editor> {
             'notes_internal': _internal.text.trim(),
             'items': [for (final i in _items) i.toJson()],
             'homework': ?homework,
+            if (template != null) 'answers': template.payload(answers),
           };
     try {
       await context.read<TeachingRepository>().submitReport(f.summary.id, payload);
@@ -240,6 +255,7 @@ class _EditorState extends State<_Editor> {
             maxLength: 3000,
             decoration: InputDecoration(labelText: l.notesForFamily, errorText: _err('notes_for_student')),
           ),
+          if (f.template case final t? when t.questions.isNotEmpty) ...[const SizedBox(height: 6), _questionsCard(t, locked)],
         ],
         const SizedBox(height: 6),
         TextField(
@@ -350,6 +366,81 @@ class _EditorState extends State<_Editor> {
                 onChanged: (v) => item.note = v,
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  /// The subject's own questions, each by the kind of answer it takes.
+  Widget _questionsCard(ReportTemplate t, bool locked) {
+    final l = context.l10n;
+    final c = context.colors;
+    Widget title(ReportQuestion q) => Wrap(
+      spacing: 6,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(q.label, style: context.text.titleSmall),
+        if (!q.required) Text(l.optional, style: context.text.bodySmall),
+        if (!q.family) Pill(l.academyOnly, tone: Tone.neutral),
+      ],
+    );
+    Widget chips(ReportQuestion q, List<(Object, String)> options) => Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        for (final (value, label) in options)
+          ChoiceChip(
+            label: Text(label),
+            selected: _answers[q.key] == value,
+            onSelected: locked
+                ? null
+                : (on) {
+                    Juice.tap();
+                    setState(() => _answers[q.key] = on || q.required ? value : null);
+                  },
+          ),
+      ],
+    );
+    return LmsCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l.questionsTitle, style: context.text.titleMedium),
+          Text(l.questionsHint, style: context.text.bodySmall),
+          for (final q in t.questions) ...[
+            const SizedBox(height: 14),
+            if (q.type == 'number' || q.type == 'text')
+              TextField(
+                controller: _typed[q.key],
+                enabled: !locked,
+                keyboardType: q.type == 'number' ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
+                maxLength: q.type == 'text' ? 500 : null,
+                decoration: InputDecoration(
+                  labelText: q.required ? q.label : '${q.label} ${l.optional}',
+                  suffixText: q.unit,
+                  helperText: q.family ? null : l.academyOnly,
+                  errorText: _err('answers.${q.key}'),
+                ),
+              )
+            else ...[
+              title(q),
+              const SizedBox(height: 6),
+              switch (q.type) {
+                'rating' => IgnorePointer(
+                  ignoring: locked,
+                  child: StarPicker(
+                    value: (_answers[q.key] as num?)?.toInt(),
+                    label: q.label,
+                    clearable: !q.required,
+                    onChanged: (v) => setState(() => _answers[q.key] = v),
+                  ),
+                ),
+                'yes_no' => chips(q, [(true, l.answerYes), (false, l.answerNo)]),
+                _ => chips(q, [for (final o in q.options) (o.key, o.label)]),
+              },
+              if (_err('answers.${q.key}') case final e?) Text(e, style: TextStyle(color: c.dangerInk)),
+            ],
+          ],
         ],
       ),
     );

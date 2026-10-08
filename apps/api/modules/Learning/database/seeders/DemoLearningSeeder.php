@@ -12,9 +12,11 @@ use Modules\Learning\Actions\MarkMissedHomework;
 use Modules\Learning\Actions\MarkOverdueReports;
 use Modules\Learning\Actions\ReviewHomework;
 use Modules\Learning\Actions\ReviewSessionReport;
+use Modules\Learning\Actions\SaveReportTemplate;
 use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Actions\SubmitSessionReport;
 use Modules\Learning\Models\Homework;
+use Modules\Learning\Models\ReportTemplate;
 use Modules\Learning\Models\SessionReport;
 
 /**
@@ -25,7 +27,10 @@ use Modules\Learning\Models\SessionReport;
  * the first; the last is overdue and waits in the teacher area with today's
  * plan filled in. Yousef finished his first island, Maryam her first level,
  * each with a lesson back for review. Homework in every state, including
- * voice recordings.
+ * voice recordings. The academy's own questions for three subjects (Quran
+ * memorisation in two versions: a revision question and a follow-up only
+ * the academy reads came in the middle of Yousef's month), answered in
+ * every report; English has none.
  */
 final class DemoLearningSeeder extends Seeder
 {
@@ -34,6 +39,7 @@ final class DemoLearningSeeder extends Seeder
         CurriculumApi $curriculum,
         SubmitSessionReport $submit,
         ReviewSessionReport $review,
+        SaveReportTemplate $templates,
         SubmitHomework $handIn,
         ReviewHomework $mark,
         MarkOverdueReports $overdue,
@@ -89,6 +95,46 @@ final class DemoLearningSeeder extends Seeder
             ],
         ];
 
+        // The academy's own questions, by subject (Arabic and English words).
+        $q = fn (string $ar, string $en, string $type, array $more = []) => ['label_ar' => $ar, 'label_en' => $en, 'type' => $type] + $more;
+        $choices = fn (array $pairs) => ['options' => array_map(fn ($p) => ['ar' => $p[0], 'en' => $p[1]], $pairs)];
+        $memorisation = [
+            $q('الآيات اللي اتحفظت', 'Verses memorised', 'number', ['required' => true, 'min' => 0, 'max' => 300, 'unit_ar' => 'آية', 'unit_ar_few' => 'آيات', 'unit_en' => 'verses']),
+            $q('التجويد', 'Tajweed', 'choice', $choices([['ممتاز', 'Excellent'], ['كويس', 'Good'], ['محتاج شغل', 'Needs work']])),
+        ];
+        $questions = [
+            'Quran memorisation' => $memorisation,
+            'Tajweed' => [
+                $q('الأحكام اللي اتطبقت صح', 'Rules applied correctly', 'rating', ['required' => true]),
+                $q('القراءة من المصحف', 'Reading from the Mushaf', 'choice', $choices([['من غير أخطاء', 'No mistakes'], ['أخطاء قليلة', 'A few mistakes'], ['محتاجة تدريب', 'Needs practice']])),
+                $q('صفحات القراءة', 'Pages read', 'number', ['min' => 0, 'max' => 40, 'unit_ar' => 'صفحة', 'unit_ar_few' => 'صفحات', 'unit_en' => 'pages']),
+            ],
+            'Arabic grammar' => [
+                $q('الإعراب', 'Parsing', 'rating', ['required' => true]),
+                $q('الكلمات الجديدة', 'New words', 'number', ['min' => 0, 'max' => 50, 'unit_ar' => 'كلمة', 'unit_ar_few' => 'كلمات', 'unit_en' => 'words']),
+                $q('ملاحظة للمشرف', 'Note for the supervisor', 'text', ['family' => false]),
+            ],
+        ];
+        $subject = fn (string $name) => (string) DB::table('subjects')->where('name_en', $name)->value('id');
+        $first = SessionReport::query()->min('session_starts_at');
+        CarbonImmutable::setTestNow(($first ? CarbonImmutable::parse($first) : $realNow)->subDays(2));
+        foreach ($questions as $name => $fields) {
+            if ($subject($name) !== '') {
+                $templates->handle($subject($name), $fields, $owner);
+            }
+        }
+
+        // Answers by report, in the order of the scripts (keys as the templates gave them).
+        $answers = [
+            'ziad' => [['f1' => 4, 'f2' => 8], ['f1' => 4, 'f2' => 6], ['f1' => 5, 'f2' => 10],
+                ['f1' => 3, 'f2' => 5, 'f3' => 'الواجب اتأخر يومين؛ اتكلمت مع ولي الأمر.'], ['f1' => 4, 'f2' => 7]],
+            'yousef' => [['f1' => 7, 'f2' => 'o2'], ['f1' => 11, 'f2' => 'o1'], ['f1' => 9, 'f2' => 'o2'],
+                ['f1' => 8, 'f2' => 'o1', 'f3' => true, 'f4' => false], ['f1' => 12, 'f2' => 'o1', 'f3' => true, 'f4' => false],
+                ['f1' => 6, 'f2' => 'o3', 'f3' => false, 'f4' => true], ['f1' => 10, 'f2' => 'o1', 'f3' => true, 'f4' => false]],
+            'maryam' => [['f1' => 3, 'f2' => 'o3', 'f3' => 2], ['f1' => 4, 'f2' => 'o2', 'f3' => 3], ['f1' => 5, 'f2' => 'o1', 'f3' => 4],
+                ['f1' => 4, 'f2' => 'o2', 'f3' => 3], ['f1' => 5, 'f2' => 'o1', 'f3' => 5], ['f1' => 4, 'f2' => 'o2', 'f3' => 4]],
+        ];
+
         $reportsFor = [];
         foreach ($scripts as $key => $script) {
             $student = DB::table('users')->where('email', "{$key}@demo.test")->value('id');
@@ -106,8 +152,17 @@ final class DemoLearningSeeder extends Seeder
                 if ($report === null) {
                     break;
                 }
+                if ($key === 'yousef' && $i === 3 && $subject('Quran memorisation') !== '') {
+                    // Halfway through the month the academy asks two more questions about memorisation.
+                    CarbonImmutable::setTestNow($report->session_starts_at->subHours(3));
+                    $templates->handle($subject('Quran memorisation'), [...ReportTemplate::currentFor($subject('Quran memorisation'))->fields,
+                        $q('راجع المحفوظ', 'Revised what he knows', 'yes_no', ['required' => true]),
+                        $q('محتاج متابعة من المشرف', 'Needs a supervisor\'s follow-up', 'yes_no', ['family' => false]),
+                    ], $owner);
+                }
                 CarbonImmutable::setTestNow($report->session_starts_at->addMinutes(45)->addHours($after));
                 $submit->handle($report, $report->teacher_id, [
+                    'answers' => $answers[$key][$i] ?? [],
                     'engagement' => $engagement, 'overall' => $overall, 'notes_for_student' => $note,
                     'notes_internal' => $key === 'ziad' && $i === 3 ? 'ولي الأمر قال إن عنده امتحانات في المدرسة الأسبوع ده.' : null,
                     'items' => array_map(fn ($it) => ['node_id' => $lesson[$it[0]], 'outcome' => $it[1], 'score' => $it[2]], $items),
