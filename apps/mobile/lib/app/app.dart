@@ -33,9 +33,18 @@ class _AcademyAppState extends State<AcademyApp> {
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   final _subs = <StreamSubscription<Object?>>[];
 
+  /// The live socket follows the open account, and only while the app is in front.
+  late final AppLifecycleListener _life = AppLifecycleListener(
+    onResume: () => unawaited(widget.services.live.foreground(true)),
+    onPause: () => unawaited(widget.services.live.foreground(false)),
+  );
+
   @override
   void initState() {
     super.initState();
+    _life;
+    _subs.add(widget.session.stream.listen(_follow));
+    _follow(widget.session.state);
     final push = Push.instance;
     _subs
       ..add(push.opened.listen(_open))
@@ -48,8 +57,14 @@ class _AcademyAppState extends State<AcademyApp> {
     }
   }
 
+  void _follow(SessionState state) =>
+      unawaited(widget.services.live.follow(state.status == SessionStatus.signedIn ? state.current?.id : null));
+
   @override
   void dispose() {
+    _life.dispose();
+    // No socket or timer outlives the app (or a test).
+    unawaited(widget.services.live.follow(null));
     for (final s in _subs) {
       unawaited(s.cancel());
     }

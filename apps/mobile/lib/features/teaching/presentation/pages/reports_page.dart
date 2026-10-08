@@ -11,6 +11,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/reports.dart';
+import '../../../../core/realtime/live.dart';
 
 /// The teacher's reports: the ones still to write first (overdue on top),
 /// then those sent in the last two weeks, which can still be corrected.
@@ -19,7 +20,8 @@ class TeacherReportsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (c) => LoadCubit<List<ReportSummary>>(c.read<TeachingRepository>().reports)..load(),
+    create: (c) =>
+        LoadCubit<List<ReportSummary>>(c.read<TeachingRepository>().reports, refreshOn: c.read<Live>().on({Live.lessons}))..load(),
     child: Scaffold(
       appBar: AppBar(title: Text(context.l10n.navReports)),
       body: LoadView<List<ReportSummary>>(

@@ -14,6 +14,7 @@ import '../../../../shared/widgets/star_picker.dart';
 import '../../../homework/domain/homework.dart';
 import '../../../homework/presentation/widgets/submission_view.dart';
 import '../../data/teaching_repository.dart';
+import '../../../../core/realtime/live.dart';
 
 /// Homework handed in, to mark: read the words, play the recording, see the
 /// picture; give a grade and a word. The marked ones stay one tap away.
@@ -52,7 +53,10 @@ class _MarkingPageState extends State<MarkingPage> {
           Expanded(
             child: BlocProvider(
               key: ValueKey(_status),
-              create: (c) => LoadCubit<List<Homework>>(() => c.read<TeachingRepository>().homeworkToMark(status: _status))..load(),
+              create: (c) => LoadCubit<List<Homework>>(
+                () => c.read<TeachingRepository>().homeworkToMark(status: _status),
+                refreshOn: c.read<Live>().on({Live.homework}),
+              )..load(),
               child: LoadView<List<Homework>>(
                 builder: (context, list) => ListView(
                   padding: pagePadding,

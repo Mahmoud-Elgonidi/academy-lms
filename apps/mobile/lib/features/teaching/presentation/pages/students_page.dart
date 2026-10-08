@@ -10,6 +10,7 @@ import '../../../../shared/widgets/load_view.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../core/realtime/live.dart';
 
 /// The teacher's students: subject, how far along, the lesson now, homework to mark.
 class StudentsPage extends StatelessWidget {
@@ -17,7 +18,8 @@ class StudentsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (c) => LoadCubit<List<TeacherStudent>>(c.read<TeachingRepository>().students)..load(),
+    create: (c) =>
+        LoadCubit<List<TeacherStudent>>(c.read<TeachingRepository>().students, refreshOn: c.read<Live>().on({Live.lessons}))..load(),
     child: Scaffold(
       appBar: AppBar(title: Text(context.l10n.studentsTitle)),
       body: LoadView<List<TeacherStudent>>(

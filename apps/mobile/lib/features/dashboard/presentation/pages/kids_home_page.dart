@@ -16,6 +16,7 @@ import '../../data/home_loader.dart';
 import '../../domain/journey.dart';
 import '../widgets/next_lesson_card.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
+import '../../../../core/realtime/live.dart';
 
 /// A child's home: their stars, the next lesson, and the journey through
 /// their course as a winding path of stops, with "you're here".
@@ -24,7 +25,11 @@ class KidsHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (c) => LoadCubit<StudentHome>(c.read<HomeLoader>().studentHome)..load(),
+    create: (c) => LoadCubit<StudentHome>(
+      c.read<HomeLoader>().studentHome,
+      refreshOn: c.read<Live>().on({Live.lessons, Live.homework}),
+      refreshAt: (d) => d.lessons.clockMoments,
+    )..load(),
     child: Scaffold(
       body: SafeArea(
         child: LoadView<StudentHome>(builder: (context, home) => _KidsHome(home: home)),

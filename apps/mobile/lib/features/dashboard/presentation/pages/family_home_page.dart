@@ -16,6 +16,7 @@ import '../bloc/learner_cubit.dart';
 import '../widgets/learner_switcher.dart';
 import '../widgets/next_lesson_card.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
+import '../../../../core/realtime/live.dart';
 
 /// The guardian's (and an adult student's) home: the next lesson with its
 /// join button, what is left and what is owed, the latest report, and the
@@ -63,7 +64,11 @@ class FamilyHomePage extends StatelessWidget {
                   ? const Center(child: CircularProgressIndicator.adaptive())
                   : BlocProvider(
                       key: ValueKey(learnerId),
-                      create: (c) => LoadCubit<FamilyHome>(() => c.read<HomeLoader>().familyHome(learnerId))..load(),
+                      create: (c) => LoadCubit<FamilyHome>(
+                        () => c.read<HomeLoader>().familyHome(learnerId),
+                        refreshOn: c.read<Live>().on({Live.lessons, Live.homework, Live.payments, Live.inbox}),
+                        refreshAt: (d) => d.lessons.clockMoments,
+                      )..load(),
                       child: LoadView<FamilyHome>(
                         builder: (context, home) => _Home(home: home, learnerId: learnerId, name: learners.selected?.firstName ?? first),
                       ),

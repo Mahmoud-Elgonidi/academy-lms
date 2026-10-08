@@ -16,6 +16,7 @@ import '../../data/home_loader.dart';
 import '../../domain/journey.dart';
 import '../widgets/next_lesson_card.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
+import '../../../../core/realtime/live.dart';
 
 /// A high-school student's plan: the goal, how far along, the finish date
 /// at the current pace, the milestones, and what is next.
@@ -24,7 +25,11 @@ class TeenHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (c) => LoadCubit<StudentHome>(c.read<HomeLoader>().studentHome)..load(),
+    create: (c) => LoadCubit<StudentHome>(
+      c.read<HomeLoader>().studentHome,
+      refreshOn: c.read<Live>().on({Live.lessons, Live.homework}),
+      refreshAt: (d) => d.lessons.clockMoments,
+    )..load(),
     child: Scaffold(
       body: SafeArea(
         child: LoadView<StudentHome>(builder: (context, home) => _TeenHome(home: home)),

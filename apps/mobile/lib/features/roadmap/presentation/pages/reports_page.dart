@@ -10,6 +10,7 @@ import '../../../../shared/widgets/load_view.dart';
 import '../../data/learning_repository.dart';
 import '../../domain/learning.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../core/realtime/live.dart';
 
 /// The reports teachers wrote for the family: one course's, or (a teen's
 /// Reports tab) every course's, latest first.
@@ -25,7 +26,10 @@ class ReportsPage extends StatelessWidget {
     return BlocProvider(
       create: (c) {
         final repo = c.read<LearningRepository>();
-        return LoadCubit<List<Report>>(() => enrollmentId == null ? repo.allReports() : repo.reports(enrollmentId!))..load();
+        return LoadCubit<List<Report>>(
+          () => enrollmentId == null ? repo.allReports() : repo.reports(enrollmentId!),
+          refreshOn: c.read<Live>().on({Live.lessons, Live.inbox}),
+        )..load();
       },
       child: Scaffold(
         appBar: AppBar(title: Text(title == null ? l.reports : '${l.reports} · $title')),

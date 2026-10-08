@@ -16,6 +16,7 @@ import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
+import '../../../../core/realtime/live.dart';
 
 class _Today {
   const _Today(this.lessons, this.todo);
@@ -34,16 +35,20 @@ class TodayPage extends StatelessWidget {
   Widget build(BuildContext context) => BlocProvider(
     create: (c) {
       final repo = c.read<TeachingRepository>();
-      return LoadCubit<_Today>(() async {
-        final lessons = repo.lessons(days: 1);
-        TeacherTodo? todo;
-        try {
-          todo = await repo.todo();
-        } on Exception {
-          todo = null;
-        }
-        return _Today(await lessons, todo);
-      })..load();
+      return LoadCubit<_Today>(
+        () async {
+          final lessons = repo.lessons(days: 1);
+          TeacherTodo? todo;
+          try {
+            todo = await repo.todo();
+          } on Exception {
+            todo = null;
+          }
+          return _Today(await lessons, todo);
+        },
+        refreshOn: c.read<Live>().on({Live.lessons, Live.homework}),
+        refreshAt: (d) => d.lessons.lessons.expand((l) => l.clockMoments),
+      )..load();
     },
     child: Scaffold(
       body: SafeArea(

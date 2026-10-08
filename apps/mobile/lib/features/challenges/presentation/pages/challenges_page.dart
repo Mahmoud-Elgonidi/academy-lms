@@ -19,6 +19,7 @@ import '../widgets/art.dart';
 import '../widgets/cheers.dart';
 import '../widgets/chest_card.dart';
 import '../widgets/tiles.dart';
+import '../../../../core/realtime/live.dart';
 
 /// A learner's challenges in their stage's way: the kids' missions and
 /// treasure chest, middle school's quests and bosses, the older students'
@@ -34,7 +35,10 @@ class ChallengesPage extends StatelessWidget {
     final id = context.learnerId();
     return BlocProvider(
       key: ValueKey(id),
-      create: (c) => LoadCubit<ChallengeBoard>(() => c.read<ChallengesRepository>().board(learnerId: id))..load(),
+      create: (c) => LoadCubit<ChallengeBoard>(
+        () => c.read<ChallengesRepository>().board(learnerId: id),
+        refreshOn: c.read<Live>().on({Live.lessons, Live.homework}),
+      )..load(),
       child: const CheersListener(child: _Screen(pushed: true)),
     );
   }
@@ -265,7 +269,10 @@ class _Badges extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (c) => LoadCubit<Journey>(() => c.read<FamilyRepository>().journey(learnerId: learnerId))..load(),
+    create: (c) => LoadCubit<Journey>(
+      () => c.read<FamilyRepository>().journey(learnerId: learnerId),
+      refreshOn: c.read<Live>().on({Live.lessons, Live.homework}),
+    )..load(),
     child: BlocBuilder<LoadCubit<Journey>, LoadState<Journey>>(
       builder: (context, state) {
         final badges = state.data?.badges ?? const <Achievement>[];

@@ -15,6 +15,7 @@ import '../../data/home_loader.dart';
 import '../widgets/badge_tile.dart';
 import '../widgets/next_lesson_card.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
+import '../../../../core/realtime/live.dart';
 
 /// A middle-school student's home: rank and points toward the next one,
 /// the streak, the world and stage they are on, badges, and homework.
@@ -23,7 +24,11 @@ class MiddleHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (c) => LoadCubit<StudentHome>(c.read<HomeLoader>().studentHome)..load(),
+    create: (c) => LoadCubit<StudentHome>(
+      c.read<HomeLoader>().studentHome,
+      refreshOn: c.read<Live>().on({Live.lessons, Live.homework}),
+      refreshAt: (d) => d.lessons.clockMoments,
+    )..load(),
     child: Scaffold(
       body: SafeArea(
         child: LoadView<StudentHome>(builder: (context, home) => _MiddleHome(home: home)),

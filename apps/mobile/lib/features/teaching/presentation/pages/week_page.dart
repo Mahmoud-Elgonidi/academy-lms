@@ -12,6 +12,7 @@ import '../../../schedule/presentation/widgets/lesson_card.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../core/realtime/live.dart';
 
 /// Seven days of lessons from today (or another week), day by day.
 class WeekPage extends StatefulWidget {
@@ -53,7 +54,7 @@ class _WeekPageState extends State<WeekPage> {
           final week = await c.read<TeachingRepository>().lessons(from: from);
           if (_today == null && mounted) setState(() => _today = week.from);
           return week;
-        })..load(),
+        }, refreshOn: c.read<Live>().on({Live.lessons}))..load(),
         child: LoadView<TeacherLessons>(builder: (context, week) => _Days(week: week)),
       ),
     );

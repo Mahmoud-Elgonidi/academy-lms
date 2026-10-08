@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,7 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
+import '../../../../core/realtime/live.dart';
 import '../../../../core/time/formats.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
@@ -30,11 +33,20 @@ class _InboxPageState extends State<InboxPage> {
   bool _loading = true;
   bool _more = false;
   ApiProblem? _problem;
+  StreamSubscription<void>? _live;
 
   @override
   void initState() {
     super.initState();
     _load(first: true);
+    // A message arrived (or was read on another device): the first page again.
+    _live = context.read<Live>().on({Live.inbox}).listen((_) => _load(first: true));
+  }
+
+  @override
+  void dispose() {
+    unawaited(_live?.cancel());
+    super.dispose();
   }
 
   Future<void> _load({bool first = false}) async {

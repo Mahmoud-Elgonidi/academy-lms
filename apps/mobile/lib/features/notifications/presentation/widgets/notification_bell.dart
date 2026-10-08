@@ -5,11 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/realtime/live.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../data/notifications_repository.dart';
 
 /// The bell on a home: how many unread, a swing when there are some; opens
-/// the inbox, and counts again on the way back.
+/// the inbox, and counts again on the way back, or when a message arrives
+/// or is read on another device (the live signal).
 class NotificationBell extends StatefulWidget {
   const NotificationBell({super.key});
 
@@ -19,11 +21,19 @@ class NotificationBell extends StatefulWidget {
 
 class _NotificationBellState extends State<NotificationBell> {
   int _unread = 0;
+  StreamSubscription<void>? _live;
 
   @override
   void initState() {
     super.initState();
     unawaited(_count());
+    _live = context.read<Live>().on({Live.inbox}).listen((_) => unawaited(_count()));
+  }
+
+  @override
+  void dispose() {
+    unawaited(_live?.cancel());
+    super.dispose();
   }
 
   Future<void> _count() async {

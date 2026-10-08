@@ -13,6 +13,7 @@ import '../../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../../data/billing_repository.dart';
 import '../../domain/billing.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../core/realtime/live.dart';
 
 class _Money {
   const _Money(this.invoices, this.balance);
@@ -59,7 +60,7 @@ class _MoneyPageState extends State<MoneyPage> {
           return _cubit = LoadCubit<_Money>(() async {
             final results = await Future.wait<Object>([repo.invoices(), repo.balance(learnerId: learnerId)]);
             return _Money(results[0] as Invoices, results[1] as List<Balance>);
-          })..load();
+          }, refreshOn: c.read<Live>().on({Live.payments, Live.lessons}))..load();
         },
         child: LoadView<_Money>(builder: (context, m) => _MoneyList(money: m)),
       ),

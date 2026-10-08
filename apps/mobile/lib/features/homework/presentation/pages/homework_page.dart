@@ -17,6 +17,7 @@ import '../../domain/homework.dart';
 import '../../../../shared/motion/celebration.dart';
 import '../../../../shared/motion/juice.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../core/realtime/live.dart';
 
 /// The student's homework: open ones first, each handed in from here in
 /// words, a voice recording made in the app, or a picture or PDF; marked
@@ -29,7 +30,8 @@ class HomeworkPage extends StatelessWidget {
     final l = context.l10n;
     final kids = context.shape.stage == Stage.kids;
     return BlocProvider(
-      create: (c) => LoadCubit<List<Homework>>(() => c.read<HomeworkRepository>().list())..load(),
+      create: (c) =>
+          LoadCubit<List<Homework>>(() => c.read<HomeworkRepository>().list(), refreshOn: c.read<Live>().on({Live.homework}))..load(),
       child: Scaffold(
         appBar: AppBar(title: Text(kids ? l.navMyHomework : l.homeworkTitle)),
         body: LoadView<List<Homework>>(

@@ -12,6 +12,7 @@ import '../../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../../data/learning_repository.dart';
 import '../../domain/learning.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../core/realtime/live.dart';
 
 /// Where each course stands for the learner: the program, how far, the
 /// lesson now, the weeks left, open homework; a course opens its reports.
@@ -30,7 +31,10 @@ class ProgressPage extends StatelessWidget {
           const LearnerSwitcher(),
           Expanded(
             child: BlocProvider(
-              create: (c) => LoadCubit<List<StudentCourses>>(c.read<LearningRepository>().students)..load(),
+              create: (c) => LoadCubit<List<StudentCourses>>(
+                c.read<LearningRepository>().students,
+                refreshOn: c.read<Live>().on({Live.lessons, Live.inbox}),
+              )..load(),
               child: LoadView<List<StudentCourses>>(
                 builder: (context, students) {
                   final courses = students.where((s) => learner == null || s.id == learner.id).expand((s) => s.courses).toList();

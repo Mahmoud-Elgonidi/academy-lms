@@ -13,6 +13,7 @@ import 'art.dart';
 import 'cheers.dart';
 import 'chest.dart';
 import 'reward.dart';
+import '../../../../core/realtime/live.dart';
 
 /// On a student's home: how the week's challenges are going, and the
 /// rewards waiting (from the board their area loaded). Opens [route].
@@ -95,7 +96,10 @@ class FamilyChallengesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider(
     key: ValueKey(learnerId),
-    create: (c) => LoadCubit<ChallengeBoard>(() => c.read<ChallengesRepository>().board(learnerId: learnerId))..load(),
+    create: (c) => LoadCubit<ChallengeBoard>(
+      () => c.read<ChallengesRepository>().board(learnerId: learnerId),
+      refreshOn: c.read<Live>().on({Live.lessons, Live.homework}),
+    )..load(),
     child: CheersListener(child: _FamilyCard(name: name)),
   );
 }

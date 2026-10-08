@@ -10,6 +10,7 @@ import '../../../../shared/widgets/load_view.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../core/realtime/live.dart';
 
 /// The teacher's pay for a month (the academy's clock): the total so far,
 /// lessons and hours, bonuses and deductions, and each lesson's line.
@@ -60,7 +61,7 @@ class _EarningsPageState extends State<EarningsPage> {
           final e = await c.read<TeachingRepository>().earnings(month: _month);
           if (_current == null && mounted) setState(() => _current = e.month);
           return e;
-        })..load(),
+        }, refreshOn: c.read<Live>().on({Live.lessons}))..load(),
         child: LoadView<Earnings>(builder: (context, e) => _Month(earnings: e)),
       ),
     );

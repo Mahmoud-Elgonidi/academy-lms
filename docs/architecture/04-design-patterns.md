@@ -427,7 +427,7 @@ apps/mobile/lib/
   app/        bootstrap.dart, app.dart, router/ (shell لكل شكل: family, kids, middle, teen, teach), di/, theme/ (branding + stage)
   core/       network/ (dio: academy, token, locale, timezone, idempotency, retry; ApiProblem)
               auth/ (multi-account store + SessionCubit)  time/ (LocalTime)  l10n/ (ar/en, RTL)  state/ (LoadCubit)  prefs/
-              (لسه: realtime/, push/, deeplinks/, remote_config/)
+              realtime/ (socket Pusher بتاعنا + Live: إشارات الحساب المفتوح)  push/  (لسه: remote_config/)
   features/   auth/  profile/ (الحسابات والأجهزة)  dashboard/ (رئيسية لكل شكل)  schedule/  classroom/ (livekit_client)
               roadmap/ (التقدم والتقارير)  homework/  billing/ (pay links)  teaching/ (المدرس)
               كل ميزة: data/  domain/  presentation/{bloc, pages, widgets}

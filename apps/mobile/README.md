@@ -22,6 +22,7 @@ Sign in with a code to `salma.guardian@demo.test` (the code is in Mailpit, http:
 | `lib/core` | `network/` (dio: `X-Academy`, Bearer, `Accept-Language`, `X-Timezone` on every call; RFC 7807 errors as `ApiProblem`; offline retries, and writes that move lessons or money carry one `Idempotency-Key` across them), `auth/` (several accounts in secure storage, the open one in `SessionCubit`), `time/` (the API's `{utc, local, timezone, label}`; shown on the wall clock the API wrote, never converted on the phone), `l10n/` (generated), `state/` (`LoadCubit`) |
 | `lib/features/<x>` | `data/` (a typed repository over the API), `domain/` (models from JSON), `presentation/` (pages, widgets, cubits): `auth`, `profile`, `dashboard` (homes for each look), `challenges` (each stage's challenges, the kids' chest and sticker album, collecting rewards, guardians' cheers), `schedule`, `classroom` (LiveKit in the app, or an outside link), `billing`, `roadmap`, `homework` (handing in words, a voice recording or a file), `teaching` (today, week, students, earnings, time off, and the focused tasks over the tabs: lesson reports, marking homework, My hours with shift proposals), `notifications` (bell, inbox, choices, and the update screen) |
 | `lib/core/push` | Firebase Cloud Messaging behind `PushTokens`; the device is registered for the open account (`POST devices`) and forgotten before signing out. A push carries its `academy` and `user`: tapped, it opens that account first (`openMessage`), and nothing for an account no longer on the phone. A tapped push or a link `academyapp://app/open/{screen}/{id}` goes through `app/router/targets.dart` (`targetOf`: the notification's `{screen, id}` to a place in the open account's look; a tab location opens with `go`, anything else is pushed over it) |
+| `lib/core/realtime` | Live screens, as the portal and the panels have: `pusher_socket.dart` (the little of the Pusher protocol Reverb speaks, over `web_socket_channel`: connect, subscribe with the API's signature, ping/pong, come back after the network drops) and `live.dart` (`Live`: one socket on the open account's own channel (`GET realtime`, signed by `POST realtime/auth`, `features/live`), only while the app is in front; a screen reloads on the signals it shows, and every screen catches up when the app comes back or the socket does; without a socket, a reload a minute). A screen's `LoadCubit` takes `refreshOn: context.read<Live>().on({Live.lessons, ...})`, and `refreshAt` for what the clock alone changes (a lesson's room opening and closing) |
 | `lib/shared/motion` | How the app moves: `motion.dart` (`appear`/`staggered` entrances, `bob`, `wiggle`, `pulse`, `shimmerIf`, `CountUp`, `Pressable`, each look's spring), `celebration.dart` (confetti, stars or gems over the screen), `juice.dart` (sounds and haptics). Everything stands still when the phone asks for less motion |
 | `tool/sounds.py` | Writes the app's five short sounds (`assets/sounds/*.wav`: pop, coin, chest, levelup, cheer); we make them ourselves, nothing third-party |
 | `tool/strings.py` | Every word of the app in Arabic (Egyptian, as on the web) and English; it writes `lib/core/l10n/arb/*.arb`, then `flutter gen-l10n` |
@@ -32,13 +33,17 @@ The API client is written by hand per feature, not generated: a **contract test*
 
 ```bash
 flutter analyze
-flutter test            # unit, widget (sign-in, cancelling a lesson, challenges for each look, a teacher's report, marking and hours, the inbox, push registration, deep links, forced update) against a fake API, and the contract test
+flutter test            # unit, widget (sign-in, cancelling a lesson, challenges for each look, a teacher's report, marking and hours, the inbox, push registration, deep links, forced update) against a fake API, the live socket and reloads against a fake WebSocket, and the contract test
 dart format --set-exit-if-changed lib test
 python3 tool/strings.py && flutter gen-l10n   # after changing any wording
 python3 tool/sounds.py                          # after changing a sound
 ```
 
 CI runs the same (`.github/workflows/mobile.yml`) plus a web build.
+
+## Live screens
+
+With the API's Reverb and relay running (`php artisan reverb:start`, `php artisan live:relay`), an open screen changes by itself when a lesson, homework, a message or a payment changes elsewhere (the web portal, another phone, the back office). Without them the app works the same and catches up each minute, and whenever it comes back to the front.
 
 ## Push, links and updates
 

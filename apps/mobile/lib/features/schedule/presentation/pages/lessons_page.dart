@@ -16,6 +16,7 @@ import '../../domain/lesson.dart';
 import '../widgets/lesson_card.dart';
 import '../widgets/lesson_sheets.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../core/realtime/live.dart';
 
 /// A learner's lessons, four weeks ahead or back, by day; on the viewer's
 /// clock. Holidays and clock changes that touch them come first.
@@ -70,8 +71,11 @@ class _LessonsPageState extends State<LessonsPage> {
                 ? const Center(child: CircularProgressIndicator.adaptive())
                 : BlocProvider(
                     key: ValueKey('$learnerId:$_past'),
-                    create: (c) =>
-                        LoadCubit<LessonList>(() => c.read<LessonsRepository>().family(learnerId: learnerId, past: _past))..load(),
+                    create: (c) => LoadCubit<LessonList>(
+                      () => c.read<LessonsRepository>().family(learnerId: learnerId, past: _past),
+                      refreshOn: c.read<Live>().on({Live.lessons}),
+                      refreshAt: (d) => d.clockMoments,
+                    )..load(),
                     child: LoadView<LessonList>(
                       builder: (context, data) => _LessonDays(data: data, past: _past),
                     ),

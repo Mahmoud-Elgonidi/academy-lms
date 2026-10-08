@@ -8,6 +8,7 @@ import '../../../../shared/widgets/load_view.dart';
 import '../../data/family_repository.dart';
 import '../../domain/journey.dart';
 import '../widgets/badge_tile.dart';
+import '../../../../core/realtime/live.dart';
 
 /// Every badge, earned or still to win, with how to get it.
 class BadgesPage extends StatelessWidget {
@@ -15,7 +16,8 @@ class BadgesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (c) => LoadCubit<Journey>(() => c.read<FamilyRepository>().journey())..load(),
+    create: (c) =>
+        LoadCubit<Journey>(() => c.read<FamilyRepository>().journey(), refreshOn: c.read<Live>().on({Live.lessons, Live.homework}))..load(),
     child: Scaffold(
       appBar: AppBar(title: Text(context.l10n.navBadges)),
       body: LoadView<Journey>(

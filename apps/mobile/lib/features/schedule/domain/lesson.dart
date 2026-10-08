@@ -83,12 +83,21 @@ class Lesson extends Equatable {
 
   @override
   List<Object?> get props => [id, status, joinOpen, canCancel, unfunded];
+
+  /// The room opens 10 minutes before and closes 10 minutes after (Classroom).
+  static const roomCloses = Duration(minutes: 10);
+
+  /// The moments the clock alone changes what this lesson shows: the room opening, the start, the room closing.
+  Iterable<DateTime> get clockMoments => [?joinOpensAt?.utc, startsAt.utc, endsAt.utc.add(roomCloses)];
 }
 
 /// A page of lessons: whose, and any notice about the coming weeks
 /// (a holiday, a clock change).
 class LessonList extends Equatable {
   const LessonList({required this.lessons, this.learnerName, this.notices = const []});
+
+  /// When the clock alone changes these lessons (see [Lesson.clockMoments]).
+  Iterable<DateTime> get clockMoments => lessons.expand((l) => l.clockMoments);
 
   factory LessonList.fromJson(Map<String, dynamic> json) => LessonList(
     learnerName: (json['learner'] as Map<String, dynamic>?)?['name'] as String?,
