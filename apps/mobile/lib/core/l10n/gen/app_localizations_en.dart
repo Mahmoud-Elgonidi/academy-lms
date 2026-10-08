@@ -636,6 +636,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openInvoice => 'Open the invoice';
 
   @override
+  String get extraAction => 'Extra lessons';
+
+  @override
+  String extraHint(String price, int minutes) {
+    return 'An extra lesson is $price ($minutes min).';
+  }
+
+  @override
+  String extraTitle(String subject) {
+    return 'Extra lessons in $subject';
+  }
+
+  @override
+  String get extraBody =>
+      'Choose how many; you get an invoice to pay like any other. Once it is paid, the academy books the lessons with you.';
+
+  @override
+  String extraEach(int n, String price) {
+    return '$n × $price';
+  }
+
+  @override
+  String get extraSubmit => 'Make the invoice';
+
+  @override
+  String extraDone(String number, String total) {
+    return 'Invoice $number is ready ($total).';
+  }
+
+  @override
+  String extraWaiting(String number) {
+    return 'Invoice $number for extra lessons is waiting to be paid.';
+  }
+
+  @override
   String get invoiceNote => 'Open any invoice to see and print it, with its tax invoice QR code.';
 
   @override

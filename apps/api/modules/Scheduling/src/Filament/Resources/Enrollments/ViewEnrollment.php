@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
@@ -19,8 +20,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Modules\Billing\Contracts\BillingApi;
+use Modules\Billing\Contracts\DTOs\CourseBilling;
 use Modules\People\Contracts\LearnerStage;
 use Modules\People\Contracts\PeopleApi;
+use Modules\Scheduling\Actions\BookExtraLesson;
 use Modules\Scheduling\Actions\BookMakeup;
 use Modules\Scheduling\Actions\CancelSession;
 use Modules\Scheduling\Actions\ReassignTeacher;
@@ -41,7 +45,8 @@ use Modules\SharedKernel\Time\ViewerTimezone;
  * The student account for one enrollment: credit left in sessions and
  * minutes, what is booked, the ledger line by line, and the invoices. From
  * here a coordinator cancels or moves a lesson (under the policy), books a
- * makeup, or moves the student to another teacher.
+ * makeup or an extra lesson, or moves the student to another teacher; and
+ * whoever records payments puts a coupon on the course or sells extra lessons.
  *
  * @property EnrolledStudent $record
  */
@@ -50,6 +55,9 @@ final class ViewEnrollment extends ViewRecord
     protected static string $resource = EnrollmentResource::class;
 
     protected string $view = 'scheduling::filament.account';
+
+    /** The course's money side: extra lessons' price, its coupon, invoices waiting (kept for this request). */
+    private ?CourseBilling $billing = null;
 
     public function mount(int|string $record): void
     {
@@ -82,6 +90,81 @@ final class ViewEnrollment extends ViewRecord
                     $session = app(BookMakeup::class)->handle($this->record->id, CarbonImmutable::parse($data['starts_at']), (string) auth()->id(), $owed);
 
                     return __('scheduling::enrollments.makeup.done', ['date' => ($this->account()['fmt'])($session->starts_at)]);
+                })),
+            Action::make('bookExtra')
+                ->label(__('scheduling::enrollments.extra.action'))
+                ->icon(Heroicon::OutlinedPlusCircle)
+                ->color('gray')
+                ->visible(fn () => Gate::allows(Ability::ManageSessions->value) && $this->freeMinutes() >= (int) ($this->account()['header']['session_minutes'] ?? PHP_INT_MAX))
+                ->modalHeading(__('scheduling::enrollments.extra.title'))
+                ->modalDescription(fn () => __('scheduling::enrollments.extra.hint', ['minutes' => $this->freeMinutes(), 'length' => (int) $this->account()['header']['session_minutes']]))
+                ->schema(fn () => $this->timePicker())
+                ->modalSubmitActionLabel(__('scheduling::enrollments.extra.submit'))
+                ->action(fn (array $data, Action $action) => $this->attempt($action, function () use ($data) {
+                    $session = app(BookExtraLesson::class)->handle($this->record->id, CarbonImmutable::parse($data['starts_at']), (string) auth()->id());
+
+                    return __('scheduling::enrollments.extra.done', ['date' => ($this->account()['fmt'])($session->starts_at)]);
+                })),
+            Action::make('sellExtra')
+                ->label(__('billing::discounts.course.extra_action'))
+                ->icon(Heroicon::OutlinedShoppingCart)
+                ->color('gray')
+                ->visible(fn () => Gate::allows(Ability::RecordPayments->value) && $this->billing()?->active === true)
+                ->modalHeading(__('billing::discounts.course.extra_title'))
+                ->modalDescription(fn () => $this->billing()->waitingExtraNumber !== null
+                    ? __('billing::discounts.course.extra_waiting', ['number' => $this->billing()->waitingExtraNumber])
+                    : __('billing::discounts.course.extra_hint', ['price' => $this->billing()->lessonPrice->format(), 'minutes' => $this->billing()->sessionMinutes]))
+                ->modalWidth('md')
+                ->schema(fn () => $this->billing()->waitingExtraNumber !== null ? [] : [
+                    ToggleButtons::make('lessons')->label(__('billing::discounts.course.lessons'))->inline()->required()->default(1)
+                        ->options(array_combine(range(1, 10), range(1, 10))),
+                ])
+                ->modalSubmitActionLabel(__('billing::discounts.course.extra_submit'))
+                ->modalSubmitAction(fn ($action) => $this->billing()->waitingExtraNumber !== null ? false : $action)
+                ->extraModalFooterActions(fn () => $this->billing()->waitingExtraInvoiceId === null ? [] : [
+                    Action::make('openExtraInvoice')->label(__('billing::discounts.course.open_invoice'))
+                        ->url(route('filament.academy.resources.invoices.view', ['record' => $this->billing()->waitingExtraInvoiceId])),
+                ])
+                ->action(fn (array $data, Action $action) => $this->attempt($action, function () use ($data) {
+                    $invoice = app(BillingApi::class)->sellExtraLessons($this->record->id, (int) $data['lessons'], (string) auth()->id());
+                    $this->billing = null;
+
+                    return __('billing::discounts.course.extra_done', ['number' => $invoice->number, 'total' => $invoice->total->format()]);
+                })),
+            Action::make('coupon')
+                ->label(fn () => $this->billing()?->couponCode !== null ? $this->billing()->couponCode : __('billing::discounts.course.coupon_action'))
+                ->icon(Heroicon::OutlinedTicket)
+                ->color(fn () => $this->billing()?->couponCode !== null ? 'success' : 'gray')
+                ->visible(fn () => Gate::allows(Ability::RecordPayments->value) && $this->billing() !== null)   // a course waiting for its first payment takes one too
+                ->modalHeading(__('billing::discounts.course.coupon_title'))
+                ->modalDescription(fn () => $this->billing()->couponCode === null
+                    ? __('billing::discounts.course.coupon_hint')
+                    : __('billing::discounts.course.coupon_now', ['code' => $this->billing()->couponCode, 'value' => $this->billing()->couponValue]).' '
+                        .($this->billing()->couponTurnsLeft === null ? __('billing::discounts.course.every_invoice') : trans_choice('billing::discounts.course.turns_left', $this->billing()->couponTurnsLeft, ['count' => $this->billing()->couponTurnsLeft])))
+                ->modalWidth('md')
+                ->schema(fn () => $this->billing()->couponCode !== null ? [] : [
+                    TextInput::make('code')->label(__('billing::discounts.course.code'))->required()->maxLength(32)
+                        ->extraInputAttributes(['dir' => 'ltr', 'style' => 'text-transform: uppercase']),
+                    Toggle::make('reissue')->label(__('billing::discounts.course.reissue', ['number' => $this->billing()->waitingBlockNumber]))
+                        ->helperText(__('billing::discounts.course.reissue_hint'))->default(true)
+                        ->visible($this->billing()->waitingBlockNumber !== null),
+                ])
+                ->modalSubmitActionLabel(fn () => $this->billing()->couponCode !== null ? __('billing::discounts.course.remove') : __('billing::discounts.course.apply'))
+                ->action(fn (array $data, Action $action) => $this->attempt($action, function () use ($data) {
+                    $api = app(BillingApi::class);
+                    if ($this->billing()->couponCode !== null) {
+                        $api->removeCoupon($this->record->id, (string) auth()->id());
+                        $this->billing = null;
+
+                        return __('billing::discounts.course.removed');
+                    }
+                    $number = $api->applyCoupon($this->record->id, (string) $data['code'], (bool) ($data['reissue'] ?? false), (string) auth()->id());
+                    $this->billing = null;
+                    $code = $this->billing()?->couponCode;
+
+                    return $number === null
+                        ? __('billing::discounts.course.applied', ['code' => $code])
+                        : __('billing::discounts.course.applied_reissued', ['code' => $code, 'number' => $number]);
                 })),
             Action::make('reassign')
                 ->label(__('scheduling::enrollments.reassign.action'))
@@ -314,6 +397,17 @@ final class ViewEnrollment extends ViewRecord
             ->get(['u.id', 'u.name', 'u.timezone'])
             ->mapWithKeys(fn ($t) => [$t->id => $t->name.' · '.Timezones::city($t->timezone ?? 'UTC')])
             ->all();
+    }
+
+    private function billing(): ?CourseBilling
+    {
+        return $this->billing ??= app(BillingApi::class)->courseBilling($this->record->id);
+    }
+
+    /** Paid minutes free beyond the booked lessons, not counting makeup credit. */
+    private function freeMinutes(): int
+    {
+        return max(0, $this->account()['availableMin'] - (int) $this->account()['makeup']['minutes']);
     }
 
     private function studentTz(): string

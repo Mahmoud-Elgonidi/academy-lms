@@ -3,9 +3,11 @@
 namespace Modules\Billing\Contracts;
 
 use Carbon\CarbonImmutable;
+use Modules\Billing\Contracts\DTOs\CourseBilling;
 use Modules\Billing\Contracts\DTOs\IssuedInvoice;
 use Modules\Billing\Contracts\DTOs\NewSubscription;
 use Modules\Billing\Contracts\DTOs\PlanOption;
+use Modules\Billing\Contracts\DTOs\PriceQuote;
 use Modules\Billing\Contracts\DTOs\RegionOption;
 use Modules\SharedKernel\Money\Money;
 
@@ -37,4 +39,26 @@ interface BillingApi
 
     /** @return list<RegionOption> */
     public function regions(): array;
+
+    /**
+     * What a first block would come to for this student and payer: the
+     * plan's regional price, the family discount, the coupon (or why it
+     * cannot be used). Null when the plan has no price in the region.
+     */
+    public function quote(string $planId, string $priceRegionId, string $payerId, string $studentId, ?string $couponCode = null): ?PriceQuote;
+
+    /** A course's money side: extra lessons' price, its coupon, invoices waiting. Null without a subscription. */
+    public function courseBilling(string $enrollmentId): ?CourseBilling;
+
+    /**
+     * Puts a coupon on a course; its next block invoices come out with it.
+     * With $reissue, the block invoice waiting to be paid is voided and
+     * issued again with it. Returns the new invoice's number, if one.
+     */
+    public function applyCoupon(string $enrollmentId, string $code, bool $reissue, ?string $actorId): ?string;
+
+    public function removeCoupon(string $enrollmentId, ?string $actorId): void;
+
+    /** Issues an invoice for N extra lessons on a course; paying it adds their minutes. */
+    public function sellExtraLessons(string $enrollmentId, int $lessons, ?string $actorId): IssuedInvoice;
 }

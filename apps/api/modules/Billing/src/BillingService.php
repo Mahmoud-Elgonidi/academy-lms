@@ -3,16 +3,24 @@
 namespace Modules\Billing;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Validation\ValidationException;
+use Modules\Billing\Actions\BuyExtraLessons;
+use Modules\Billing\Actions\Discounts\ApplyCoupon;
+use Modules\Billing\Actions\Discounts\RemoveCoupon;
 use Modules\Billing\Actions\RecordPayment;
 use Modules\Billing\Actions\SubscribeEnrollment;
 use Modules\Billing\Contracts\BillingApi;
+use Modules\Billing\Contracts\DTOs\CourseBilling;
 use Modules\Billing\Contracts\DTOs\IssuedInvoice;
 use Modules\Billing\Contracts\DTOs\NewSubscription;
 use Modules\Billing\Contracts\DTOs\PlanOption;
+use Modules\Billing\Contracts\DTOs\PriceQuote;
 use Modules\Billing\Contracts\DTOs\RegionOption;
 use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PlanPrice;
 use Modules\Billing\Models\PriceRegion;
+use Modules\Billing\Queries\CourseBillingQuery;
+use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\SharedKernel\Money\Money;
 
 final class BillingService implements BillingApi
@@ -20,6 +28,8 @@ final class BillingService implements BillingApi
     public function __construct(
         private readonly SubscribeEnrollment $subscribe,
         private readonly RecordPayment $payments,
+        private readonly CourseBillingQuery $courses,
+        private readonly EnrollmentApi $enrollments,
     ) {}
 
     public function subscribe(NewSubscription $new): IssuedInvoice
@@ -63,5 +73,38 @@ final class BillingService implements BillingApi
         return PriceRegion::query()->orderByDesc('is_default')->orderBy('sort')->get()
             ->map(fn (PriceRegion $r) => new RegionOption($r->id, $r->name(), $r->currency, $r->is_default))
             ->all();
+    }
+
+    public function quote(string $planId, string $priceRegionId, string $payerId, string $studentId, ?string $couponCode = null): ?PriceQuote
+    {
+        return $this->courses->quote($planId, $priceRegionId, $payerId, $studentId, $couponCode);
+    }
+
+    public function courseBilling(string $enrollmentId): ?CourseBilling
+    {
+        return $this->courses->forEnrollment($enrollmentId, $this->enrollments->find($enrollmentId)?->status->value === 'active');
+    }
+
+    public function applyCoupon(string $enrollmentId, string $code, bool $reissue, ?string $actorId): ?string
+    {
+        return app(ApplyCoupon::class)->handle($this->subscriptionId($enrollmentId), $code, $actorId, $reissue)['reissued']?->number;
+    }
+
+    public function removeCoupon(string $enrollmentId, ?string $actorId): void
+    {
+        app(RemoveCoupon::class)->handle($this->subscriptionId($enrollmentId), $actorId);
+    }
+
+    public function sellExtraLessons(string $enrollmentId, int $lessons, ?string $actorId): IssuedInvoice
+    {
+        $invoice = app(BuyExtraLessons::class)->handle($this->subscriptionId($enrollmentId), $lessons, $actorId);
+
+        return new IssuedInvoice($invoice->id, (string) $invoice->number, $invoice->total());
+    }
+
+    private function subscriptionId(string $enrollmentId): string
+    {
+        return $this->courses->subscriptionOf($enrollmentId)?->id
+            ?? throw ValidationException::withMessages(['enrollment' => __('billing::discounts.errors.no_subscription')]);
     }
 }

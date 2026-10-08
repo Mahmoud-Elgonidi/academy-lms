@@ -5,6 +5,7 @@ namespace Modules\Billing\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
@@ -48,5 +49,22 @@ final class Subscription extends Model
     public function price(): Money
     {
         return Money::of($this->amount_minor, $this->currency);
+    }
+
+    /** @return array{0: string, 1: string} the course's subject as invoice lines name it, in Arabic and English */
+    public function subjectNames(): array
+    {
+        $subject = DB::table('enrollments as e')->join('subjects as s', fn ($j) => $j->on('s.academy_id', '=', 'e.academy_id')->on('s.id', '=', 'e.subject_id'))
+            ->where('e.id', $this->enrollment_id)->first(['s.name_ar', 's.name_en']);
+
+        return [(string) ($subject->name_ar ?? ''), (string) ($subject->name_en ?? '')];
+    }
+
+    /** What one lesson of its block costs at the agreed price, rounded half up. */
+    public function lessonPrice(): Money
+    {
+        $sessions = max(1, (int) $this->plan->sessions_per_block);
+
+        return Money::of(intdiv(2 * $this->amount_minor + $sessions, 2 * $sessions), $this->currency);
     }
 }

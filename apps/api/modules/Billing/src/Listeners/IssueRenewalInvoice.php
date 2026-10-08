@@ -2,7 +2,6 @@
 
 namespace Modules\Billing\Listeners;
 
-use Illuminate\Support\Facades\DB;
 use Modules\Billing\Actions\IssueBlockInvoice;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\Subscription;
@@ -24,13 +23,12 @@ final class IssueRenewalInvoice
             return;
         }
 
-        if (Invoice::query()->where('subscription_id', $subscription->id)->where('status', 'issued')->exists()) {
+        // An invoice for extra lessons waiting to be paid does not hold the next block back.
+        if (Invoice::query()->where('subscription_id', $subscription->id)->where('status', 'issued')->whereHas('lines', fn ($q) => $q->where('kind', 'block'))->exists()) {
             return;
         }
 
-        $subject = DB::table('enrollments as e')->join('subjects as s', fn ($j) => $j->on('s.academy_id', '=', 'e.academy_id')->on('s.id', '=', 'e.subject_id'))
-            ->where('e.id', $subscription->enrollment_id)->first(['s.name_ar', 's.name_en']);
-
-        $this->issue->handle($subscription, $subscription->block_no + 1, $subject->name_ar ?? '', $subject->name_en ?? '');
+        [$ar, $en] = $subscription->subjectNames();
+        $this->issue->handle($subscription, $subscription->block_no + 1, $ar, $en);
     }
 }

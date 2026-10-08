@@ -90,11 +90,238 @@
                                         },
                                         "data": {
                                             "type": "array",
-                                            "items": {}
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "enrollment_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "subject": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "minutes": {
+                                                        "type": "integer"
+                                                    },
+                                                    "session_minutes": {
+                                                        "type": [
+                                                            "integer",
+                                                            "null"
+                                                        ],
+                                                        "description": "A lesson's length, when the plan has one."
+                                                    },
+                                                    "sessions": {
+                                                        "type": [
+                                                            "integer",
+                                                            "null"
+                                                        ],
+                                                        "description": "The minutes left as whole lessons."
+                                                    },
+                                                    "extra": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "Extra lessons this person can buy on the course (they pay for it, it is on): POST /family/enrollments/{id}/extra-lessons.",
+                                                        "properties": {
+                                                            "price": {
+                                                                "type": "string"
+                                                            },
+                                                            "price_minor": {
+                                                                "type": "integer"
+                                                            },
+                                                            "currency": {
+                                                                "type": "string"
+                                                            },
+                                                            "minutes": {
+                                                                "type": "integer"
+                                                            },
+                                                            "max": {
+                                                                "type": "integer"
+                                                            },
+                                                            "waiting_invoice": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "description": "The invoice for extra lessons waiting to be paid; another cannot be made until it is.",
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "number": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "id",
+                                                                    "number"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "price",
+                                                            "price_minor",
+                                                            "currency",
+                                                            "minutes",
+                                                            "max",
+                                                            "waiting_invoice"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "enrollment_id",
+                                                    "subject",
+                                                    "minutes",
+                                                    "session_minutes",
+                                                    "sessions",
+                                                    "extra"
+                                                ]
+                                            }
                                         }
                                     },
                                     "required": [
                                         "learner",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/family/enrollments/{enrollment}/extra-lessons": {
+            "post": {
+                "operationId": "family.extra-lessons",
+                "description": "An invoice for N extra lessons on a course of the learner, at a lesson's price (less the family discount),\nfor whoever pays for the course. Paying it adds the lessons' minutes to the course; the academy books them.\nOne such invoice waits at a time per course. Send an Idempotency-Key.",
+                "summary": "Buy extra lessons",
+                "tags": [
+                    "Billing"
+                ],
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "lessons": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 10
+                                    },
+                                    "learner_id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 64
+                                    }
+                                },
+                                "required": [
+                                    "lessons"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "number": {
+                                                    "type": "string"
+                                                },
+                                                "currency": {
+                                                    "type": "string"
+                                                },
+                                                "total_minor": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "description": "paid at once when it came to nothing"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "number",
+                                                "currency",
+                                                "total_minor",
+                                                "total",
+                                                "status"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
                                         "data"
                                     ]
                                 }
@@ -318,6 +545,38 @@
                                                     "document_url": {
                                                         "type": "string"
                                                     },
+                                                    "lines": {
+                                                        "type": "array",
+                                                        "description": "What it is for and what came off it, as on the invoice.",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "kind": {
+                                                                    "type": "string",
+                                                                    "description": "block, extra (extra lessons) or discount (the family discount or a coupon: a negative amount)"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string"
+                                                                },
+                                                                "quantity": {
+                                                                    "type": "string"
+                                                                },
+                                                                "amount_minor": {
+                                                                    "type": "string"
+                                                                },
+                                                                "amount": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "kind",
+                                                                "description",
+                                                                "quantity",
+                                                                "amount_minor",
+                                                                "amount"
+                                                            ]
+                                                        }
+                                                    },
                                                     "pay_with": {
                                                         "type": "array",
                                                         "description": "Where it can be paid now: POST /family/invoices/{id}/checkout with one of these.",
@@ -421,6 +680,7 @@
                                                     "due_at",
                                                     "paid_at",
                                                     "document_url",
+                                                    "lines",
                                                     "pay_with",
                                                     "proof",
                                                     "can_send_proof"

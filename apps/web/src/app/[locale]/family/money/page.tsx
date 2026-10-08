@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { ExtraLessons } from '@/components/family/extra-lessons';
 import { PayInvoice } from '@/components/family/pay-invoice';
 import { SendProof } from '@/components/family/send-proof';
 import { Icon } from '@/components/icons';
@@ -12,6 +13,22 @@ import type { Balance, Invoice, Invoices } from '@/lib/family/types';
 const tone: Record<string, Tone> = { paid: 'brand', overdue: 'danger', partly_paid: 'attention', issued: 'info', void: 'muted', draft: 'muted' };
 const proofTone: Record<string, Tone> = { pending: 'info', approved: 'brand', rejected: 'danger' };
 
+/** What came off an invoice (the family discount, a coupon), each on its own line. */
+function Discounts({ invoice }: { invoice: Invoice }) {
+  const off = invoice.lines.filter((l) => l.kind === 'discount');
+  if (off.length === 0) return null;
+  return (
+    <ul className="mt-1 space-y-0.5 text-sm text-brand-strong">
+      {off.map((l, n) => (
+        <li key={n} className="flex justify-between gap-3">
+          <span>{l.description}</span>
+          <span className="shrink-0 tabular-nums">{l.amount}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /** Where the latest proof of paying by hand stands, in the API's words. */
 function ProofLine({ proof }: { proof: NonNullable<Invoice['proof']> }) {
   return <Notice tone={proofTone[proof.status] ?? 'info'}>{proof.text}</Notice>;
@@ -20,8 +37,9 @@ function ProofLine({ proof }: { proof: NonNullable<Invoice['proof']> }) {
 /**
  * Money, for whoever pays (the classic look only; a student's own look never
  * shows it): what is owed now with a way to pay it online or by hand with the
- * receipt, the lessons left for the chosen child, and every invoice with its
- * printable tax document.
+ * receipt, the lessons left for the chosen child (and extra lessons to buy on
+ * a course this person pays for), and every invoice with what came off it and
+ * its printable tax document.
  */
 export default async function Money({ params }: { params: Promise<{ locale: string }> }) {
   const [{ locale }, t, fam] = await Promise.all([params, getTranslations('family'), family()]);
@@ -50,6 +68,7 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
                     <div className="min-w-0">
                       <p className="text-sm text-muted">{i.due_at ? t('invoiceDue', { number: i.number, when: i.due_at.label }) : i.number}</p>
                       <p className="font-semibold">{i.for}</p>
+                      <Discounts invoice={i} />
                     </div>
                     <div className="text-end">
                       <p className="font-heading text-2xl font-bold tabular-nums">{i.outstanding}</p>
@@ -76,10 +95,11 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
           ) : (
             <ul className="grid gap-3 sm:grid-cols-2">
               {balance.data.map((b) => (
-                <li key={b.subject} className="rounded-card border border-line bg-white p-4">
+                <li key={b.enrollment_id} className="rounded-card border border-line bg-white p-4">
                   <p className="text-sm text-muted">{b.subject}</p>
-                  <p className="mt-1 font-heading text-2xl font-bold">{t('lessonsLeft', { n: b.sessions })}</p>
+                  <p className="mt-1 font-heading text-2xl font-bold">{t('lessonsLeft', { n: b.sessions ?? 0 })}</p>
                   <p className="text-sm tabular-nums text-muted">{t('minutesLeft', { n: b.minutes })}</p>
+                  {b.extra ? <ExtraLessons enrollment={b.enrollment_id} learnerId={learner.id} subject={b.subject ?? ''} offer={b.extra} /> : null}
                 </li>
               ))}
             </ul>
@@ -104,6 +124,7 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
                         {i.for}
                         {i.issued_at ? ` · ${i.issued_at.label}` : ''}
                       </p>
+                      <Discounts invoice={i} />
                     </div>
                     <p className="shrink-0 font-semibold tabular-nums">{i.total}</p>
                   </div>

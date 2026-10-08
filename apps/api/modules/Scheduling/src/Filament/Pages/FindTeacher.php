@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -19,9 +20,11 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Modules\Billing\Contracts\BillingApi;
 use Modules\Billing\Contracts\DTOs\PlanOption;
+use Modules\Billing\Contracts\DTOs\PriceQuote;
 use Modules\Billing\Contracts\DTOs\RegionOption;
 use Modules\Scheduling\Actions\ConfirmBooking;
 use Modules\Scheduling\Actions\EnrollStudent;
@@ -318,23 +321,37 @@ final class FindTeacher extends Page
                         'price' => isset($p->prices[$get('price_region_id')]) ? $p->prices[$get('price_region_id')]->format() : __('scheduling::find.enroll.no_price'),
                     ])])->all())
                     ->disableOptionWhen(fn (string $value, Get $get) => ! isset(collect($this->matchingPlans())->firstWhere('id', $value)?->prices[$get('price_region_id')]))
-                    ->required()
+                    ->required()->live()
                     ->visible(fn () => $this->matchingPlans() !== []),
                 Text::make(fn () => __('scheduling::find.enroll.no_plans', [
                     'minutes' => $this->data['duration'],
                     'per_week' => trans_choice('scheduling::find.per_week', count($this->picked), ['n' => count($this->picked)]),
                 ]))->visible(fn () => $this->matchingPlans() === [])->color('danger'),
                 Radio::make('payer_id')->label(__('scheduling::find.enroll.payer'))
-                    ->options(fn () => $this->payers())->required(),
+                    ->options(fn () => $this->payers())->required()->live(),
+                TextInput::make('coupon')->label(__('scheduling::find.enroll.coupon'))->maxLength(32)->live(onBlur: true)
+                    ->extraInputAttributes(['dir' => 'ltr', 'style' => 'text-transform: uppercase'])
+                    ->visible(fn () => $this->matchingPlans() !== []),
+                Text::make(fn (Get $get) => $this->quote($get)?->couponError ?? '')->color('danger')
+                    ->visible(fn (Get $get) => filled($this->quote($get)?->couponError)),
+                Text::make(fn (Get $get) => $this->quote($get)?->couponNote ?? '')->color('warning')
+                    ->visible(fn (Get $get) => filled($this->quote($get)?->couponNote)),
+                Text::make(fn (Get $get) => $this->priceLine($this->quote($get)))
+                    ->visible(fn (Get $get) => $this->quote($get) !== null),
             ])
-            ->action(function (array $data) {
-                $booked = app(EnrollStudent::class)->handle(
-                    $this->holdBatch,
-                    $this->data['student_id'],
-                    $this->data['subject_id'],
-                    new EnrollmentTerms($data['plan_id'], $data['payer_id'], $data['price_region_id']),
-                    (string) auth()->id(),
-                );
+            ->action(function (array $data, Action $action) {
+                try {
+                    $booked = app(EnrollStudent::class)->handle(
+                        $this->holdBatch,
+                        $this->data['student_id'],
+                        $this->data['subject_id'],
+                        new EnrollmentTerms($data['plan_id'], $data['payer_id'], $data['price_region_id'], filled($data['coupon'] ?? null) ? $data['coupon'] : null),
+                        (string) auth()->id(),
+                    );
+                } catch (ValidationException $e) {
+                    Notification::make()->danger()->title(implode(' ', $e->validator->errors()->all()))->send();
+                    $action->halt();
+                }
                 $this->bookingDone();
 
                 Notification::make()->success()->persistent()
@@ -358,6 +375,38 @@ final class FindTeacher extends Page
     public function heldCount(): int
     {
         return $this->holdBatch ? BookingHold::query()->where('batch_id', $this->holdBatch)->count() : 0;
+    }
+
+    /** @var array<string, ?PriceQuote> quotes worked out in this request */
+    private array $quotes = [];
+
+    /** What the chosen plan comes to for this student and payer, with the family discount and the coupon typed. */
+    private function quote(Get $get): ?PriceQuote
+    {
+        if (blank($get('plan_id')) || blank($get('payer_id')) || blank($get('price_region_id'))) {
+            return null;
+        }
+
+        $key = implode('|', [$get('plan_id'), $get('price_region_id'), $get('payer_id'), $this->data['student_id'], $get('coupon')]);
+
+        return $this->quotes[$key] ??= app(BillingApi::class)->quote($get('plan_id'), $get('price_region_id'), $get('payer_id'), $this->data['student_id'], $get('coupon'));
+    }
+
+    /** "400 ر.س. − خصم الإخوات (10%) 40 ر.س. = 360 ر.س." */
+    private function priceLine(?PriceQuote $quote): string
+    {
+        if ($quote === null) {
+            return '';
+        }
+        if ($quote->discounts === []) {
+            return __('scheduling::find.enroll.price', ['total' => $quote->total->format()]);
+        }
+
+        return __('scheduling::find.enroll.price_after', [
+            'price' => $quote->price->format(),
+            'discounts' => implode(' · ', array_map(fn (array $d) => $d['label'].' −'.$d['amount']->format(), $quote->discounts)),
+            'total' => $quote->total->format(),
+        ]);
     }
 
     /** @return list<array<string, mixed>> */

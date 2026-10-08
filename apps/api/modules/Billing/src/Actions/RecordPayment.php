@@ -80,7 +80,26 @@ final class RecordPayment
         });
     }
 
-    /** What a paid invoice delivers: each block's minutes, valid from today. */
+    /**
+     * An invoice that came to nothing (a full scholarship): paid as it is
+     * issued, with no payment, and what it buys is granted at once.
+     */
+    public function nothingDue(Invoice $invoice, ?string $actorId): void
+    {
+        DB::transaction(function () use ($invoice, $actorId) {
+            $invoice = Invoice::lock($invoice->id);
+            if ($invoice->status !== 'issued' || $invoice->total_minor !== 0) {
+                return;
+            }
+            $invoice->status = 'paid';
+            $invoice->paid_at = CarbonImmutable::now();
+            $invoice->save();
+            $this->fulfil($invoice, $actorId);
+            DB::afterCommit(fn () => event(new InvoicePaid($invoice->academy_id, $invoice->id, $invoice->subscription_id)));
+        });
+    }
+
+    /** What a paid invoice delivers: each block's minutes, and extra lessons' minutes, valid from today. */
     private function fulfil(Invoice $invoice, ?string $actorId): void
     {
         $subscription = $invoice->subscription_id ? Subscription::query()->whereKey($invoice->subscription_id)->lockForUpdate()->first() : null;
@@ -88,7 +107,7 @@ final class RecordPayment
             return;
         }
 
-        foreach ($invoice->lines()->where('kind', 'block')->get() as $line) {
+        foreach ($invoice->lines()->whereIn('kind', ['block', 'extra'])->get() as $line) {
             $this->credits->grant(
                 $subscription->credit_account_id,
                 LotSource::Purchase,
@@ -99,7 +118,9 @@ final class RecordPayment
                 $actorId,
                 'invoice '.$invoice->number,
             );
-            $subscription->block_no = max($subscription->block_no, (int) $line->meta['block_no']);
+            if ($line->kind === 'block') {
+                $subscription->block_no = max($subscription->block_no, (int) $line->meta['block_no']);
+            }
         }
 
         $subscription->status = 'active';

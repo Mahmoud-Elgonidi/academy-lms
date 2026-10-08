@@ -3,6 +3,9 @@
 return [
     'lines' => [
         'block' => ':subject — :plan (block :block)',
+        'extra' => ':subject — extra lessons (:minutes min each)',
+        'sibling' => 'Sibling discount (:rate)',
+        'coupon' => 'Coupon :code (:value)',
     ],
     'statuses' => [
         'draft' => 'Draft',

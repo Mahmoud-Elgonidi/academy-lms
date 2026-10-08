@@ -130,6 +130,21 @@ export async function sendProof(id: string, form: FormData, key: string): Promis
 
 export type { Rating };
 
+/**
+ * Makes the invoice for extra lessons on a course this person pays for; it
+ * is then paid like any other. One key per press, so a retry makes one.
+ */
+export async function buyExtraLessons(enrollment: string, learnerId: string, lessons: number, key: string): Promise<Result & { number?: string; total?: string }> {
+  const made = await send<{ number: string; total: string }>('post', '/v1/family/enrollments/{enrollment}/extra-lessons', {
+    params: { enrollment },
+    body: { lessons, learner_id: learnerId },
+    idempotencyKey: key,
+  });
+  if (!made.ok) return result(made);
+  refresh();
+  return { ok: true, number: made.data.number, total: made.data.total };
+}
+
 /** A guardian agrees to a child's account, to the wording (version) they read. */
 export async function grantConsent(student: string, version: number, agree: boolean): Promise<Result> {
   return result(await send('post', '/v1/family/consents/{student}', { params: { student }, body: { agree, version } }));

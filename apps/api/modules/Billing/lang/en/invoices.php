@@ -57,6 +57,7 @@ return [
         'qty' => 'Qty',
         'amount' => 'Amount',
         'block_terms' => ':sessions sessions × :minutes min · valid :days days from payment',
+        'extra_terms' => ':unit a lesson · valid :days days from payment',
         'subtotal' => 'Before VAT',
         'vat' => 'VAT :rate%',
         'total' => 'Total',

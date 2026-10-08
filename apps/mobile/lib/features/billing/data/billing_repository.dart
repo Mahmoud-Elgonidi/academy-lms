@@ -29,6 +29,17 @@ class BillingRepository {
 
   Future<Invoices> invoices() async => Invoices.fromJson(await _api.get('family/invoices'));
 
+  /// Makes the invoice for extra lessons on a course this person pays for; it is paid like any other.
+  Future<({String number, String total})> buyExtraLessons(String enrollmentId, int lessons, {String? learnerId}) async {
+    final json = await _api.post(
+      'family/enrollments/$enrollmentId/extra-lessons',
+      idempotent: true,
+      body: {'lessons': lessons, 'learner_id': ?learnerId},
+    );
+    final data = json['data'] as Map<String, dynamic>;
+    return (number: data['number'] as String? ?? '', total: data['total'] as String? ?? '');
+  }
+
   /// The gateway page to pay on.
   Future<Uri> checkout(String invoiceId, {String? accountId}) async {
     final json = await _api.post('family/invoices/$invoiceId/checkout', idempotent: true, body: {'account_id': ?accountId});

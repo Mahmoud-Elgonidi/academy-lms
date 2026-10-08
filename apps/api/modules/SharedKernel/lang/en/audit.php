@@ -10,6 +10,11 @@ return [
             'settings_saved' => 'Tax and invoice settings changed',
             'stripe_connected' => 'Stripe account :account connected (:mode)',
             'stripe_disconnected' => 'Stripe account :account disconnected',
+            'coupon_saved' => 'Saved coupon :code (:value)',
+            'coupon_applied' => 'Put coupon :code (:value) on a subscription',
+            'coupon_removed' => 'Took coupon :code off a subscription',
+            'sibling_discount_saved' => 'Sibling discount: second child :second%, third and after :more%',
+            'extra_lessons' => 'Invoice :number for :lessons extra lessons (:total)',
             'proof_rejected' => 'Proof of :amount on invoice :number turned down: :reason',
         ],
         'policy' => [

@@ -9,5 +9,6 @@ final readonly class EnrollmentTerms
         public string $planId,
         public string $payerId,
         public string $priceRegionId,
+        public ?string $couponCode = null,
     ) {}
 }

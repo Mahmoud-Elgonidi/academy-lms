@@ -19,6 +19,7 @@
         .doc th { text-align: start; font-size: .75rem; color: var(--muted); font-weight: 600; padding: .45rem 0; border-bottom: 1px solid var(--line); }
         .doc td { padding: .65rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
         .doc .num { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; padding-inline-start: 1rem; }
+        .doc tr.off td { color: #15803d; }
         .doc-sum { display: flex; flex-wrap: wrap; gap: 1.2rem; justify-content: space-between; align-items: flex-start; }
         .doc-totals { margin-inline-start: auto; min-width: min(18rem, 100%); display: flex; flex-direction: column; gap: .3rem; font-size: .92rem; }
         .doc-totals div { display: flex; justify-content: space-between; gap: 1rem; }
@@ -57,8 +58,8 @@
         <table>
             <thead><tr><th>{{ __($l.'item') }}</th><th class="num">{{ __($l.'qty') }}</th><th class="num">{{ __($l.'amount') }}</th></tr></thead>
             <tbody>
-                @foreach ($inv->lines as $line)
-                    <tr><td>{{ $line->description() }}</td><td class="num">{{ $line->quantity }}</td><td class="num">{{ $money($line->amount_minor) }}</td></tr>
+                @foreach ($inv->lines->sortBy(fn ($l) => $l->kind === 'discount' ? 1 : 0) as $line)
+                    <tr @class(['off' => $line->kind === 'discount'])><td>{{ $line->description() }}</td><td class="num">{{ $line->quantity }}</td><td class="num">{{ $money($line->amount_minor) }}</td></tr>
                 @endforeach
             </tbody>
         </table>

@@ -32,7 +32,7 @@ return [
     'payer' => 'paid by :name',
     'balance' => ':left of :block left',
     'sessions' => '{0} no sessions|{1} one session|[2,*] :n sessions',
-    'types' => ['makeup' => 'makeup', 'trial' => 'trial', 'regular' => 'regular'],
+    'types' => ['makeup' => 'makeup', 'trial' => 'trial', 'regular' => 'regular', 'extra' => 'extra'],
     'row' => [
         'cancel' => 'Cancel',
         'reschedule' => 'Move',
@@ -55,6 +55,13 @@ return [
         'hint' => ':minutes min of makeup credit valid until :date, with the same teacher at a free time.',
         'submit' => 'Book the makeup',
         'done' => 'Makeup booked: :date.',
+    ],
+    'extra' => [
+        'action' => 'Book an extra lesson',
+        'title' => 'Extra lesson',
+        'hint' => 'The course has :minutes paid minutes free beyond its booked lessons. An extra lesson with the same teacher at a free time takes :length of them.',
+        'submit' => 'Book the extra lesson',
+        'done' => 'Extra lesson booked: :date.',
     ],
     'reassign' => [
         'action' => 'Change teacher',

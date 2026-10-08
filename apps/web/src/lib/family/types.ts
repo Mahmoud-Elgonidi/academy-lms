@@ -33,7 +33,16 @@ export type Rating = {
   choices: { good: { value: string; label: string }[]; bad: { value: string; label: string }[] };
 };
 
-export type Balance = { learner: { id: string; name: string }; data: { subject: string; minutes: number; session_minutes: number; sessions: number }[] };
+/** Extra lessons the person can buy on a course they pay for; one invoice for them waits at a time. */
+export type ExtraOffer = { price: string; price_minor: number; currency: string; minutes: number; max: number; waiting_invoice: { id: string; number: string } | null };
+
+export type Balance = {
+  learner: { id: string; name: string };
+  data: { enrollment_id: string; subject: string | null; minutes: number; session_minutes: number | null; sessions: number | null; extra: ExtraOffer | null }[];
+};
+
+/** A line of an invoice: what it is for, and what came off it (a discount is negative). */
+export type InvoiceLine = { kind: 'block' | 'extra' | 'discount' | string; description: string; quantity: number; amount_minor: number; amount: string };
 
 export type Invoice = {
   id: string;
@@ -54,6 +63,7 @@ export type Invoice = {
   /** The latest proof of paying by hand: pending, approved, or rejected with the academy's reason. */
   proof: { id: string; status: 'pending' | 'approved' | 'rejected'; text: string; reason: string | null } | null;
   can_send_proof: boolean;
+  lines: InvoiceLine[];
 };
 
 export type ManualPayment = { note: string | null; takes_proofs: boolean; methods: { value: string; label: string }[] };

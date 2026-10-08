@@ -452,6 +452,58 @@
   "invoices": "الفواتير",
   "noInvoices": "مفيش فواتير.",
   "openInvoice": "افتح الفاتورة",
+  "extraAction": "حصص زيادة",
+  "extraHint": "الحصة الزيادة بـ {price} ({minutes} دقيقة).",
+  "@extraHint": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "extraTitle": "حصص زيادة في {subject}",
+  "@extraTitle": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "extraBody": "اختار العدد، وهتطلعلك فاتورة تدفعها زي أي فاتورة. بعد ما تدفع، الأكاديمية بتحجز الحصص معاك.",
+  "extraEach": "{n} × {price}",
+  "@extraEach": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "extraSubmit": "اعمل الفاتورة",
+  "extraDone": "الفاتورة {number} جاهزة ({total}).",
+  "@extraDone": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "extraWaiting": "فاتورة الحصص الزيادة {number} مستنية الدفع.",
+  "@extraWaiting": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
   "invoiceNote": "افتح أي فاتورة تشوفها وتطبعها، وفيها رمز QR بتاع الفاتورة الضريبية.",
   "cantPayOnline": "الدفع أونلاين مش متاح للفاتورة دي. كلّم الأكاديمية.",
   "pickGateway": "تدفع بإيه؟",

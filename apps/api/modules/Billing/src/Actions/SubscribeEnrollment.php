@@ -4,6 +4,7 @@ namespace Modules\Billing\Actions;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Billing\Actions\Discounts\ApplyCoupon;
 use Modules\Billing\Contracts\DTOs\NewSubscription;
 use Modules\Billing\Models\BillingAccount;
 use Modules\Billing\Models\Invoice;
@@ -15,19 +16,25 @@ use Modules\Credits\Contracts\CreditsApi;
 
 /**
  * Puts an enrollment on a plan at the payer's regional price, sets the
- * credit account's renewal mark (N sessions left) and issues block 1.
+ * credit account's renewal mark (N sessions left) and issues block 1,
+ * with a coupon on it when one was given (a code that cannot be used
+ * stops the whole enrolment and says why).
  */
 final class SubscribeEnrollment
 {
     public function __construct(
         private readonly IssueBlockInvoice $issue,
         private readonly CreditsApi $credits,
+        private readonly ApplyCoupon $coupons,
     ) {}
 
     public function handle(NewSubscription $new): Invoice
     {
         return DB::transaction(function () use ($new) {
             [$subscription] = $this->open($new, blocksPaid: 0);
+            if (filled($new->couponCode)) {
+                $this->coupons->handle($subscription->id, (string) $new->couponCode, $new->actorId);
+            }
 
             return $this->issue->handle($subscription, 1, $new->subjectNameAr, $new->subjectNameEn, $new->actorId);
         });

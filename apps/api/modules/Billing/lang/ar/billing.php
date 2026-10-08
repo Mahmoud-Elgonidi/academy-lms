@@ -3,6 +3,9 @@
 return [
     'lines' => [
         'block' => ':subject — :plan (البلوك :block)',
+        'extra' => ':subject — حصص زيادة (:minutes دقيقة للحصة)',
+        'sibling' => 'خصم الإخوات (:rate)',
+        'coupon' => 'كوبون :code (:value)',
     ],
     'statuses' => [
         'draft' => 'مسودة',

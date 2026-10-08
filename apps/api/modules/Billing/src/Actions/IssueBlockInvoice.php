@@ -2,24 +2,20 @@
 
 namespace Modules\Billing\Actions;
 
-use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
-use Modules\Billing\Contracts\Events\InvoiceIssued;
-use Modules\Billing\Domain\TaxCalculator;
-use Modules\Billing\Models\BillingSettings;
+use Modules\Billing\Discounts\InvoiceDiscounts;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\Subscription;
-use Modules\Billing\Zatca\TaxDocument;
-use Modules\SharedKernel\Money\Money;
 
 /**
  * Issues the invoice for one block of a subscription: the plan's sessions
- * at the agreed price, VAT per the academy's settings, the next number.
- * One invoice per block: asking again returns the one already issued.
+ * at the agreed price, less the family discount or the subscription's
+ * coupon, VAT per the academy's settings, the next number. One invoice per
+ * block: asking again returns the one already issued.
  */
 final class IssueBlockInvoice
 {
-    public function __construct(private readonly NextInvoiceNumber $numbers, private readonly TaxDocument $tax) {}
+    public function __construct(private readonly WriteInvoice $write, private readonly InvoiceDiscounts $discounts) {}
 
     public function handle(Subscription $subscription, int $blockNo, string $subjectAr, string $subjectEn, ?string $actorId = null): Invoice
     {
@@ -36,30 +32,7 @@ final class IssueBlockInvoice
             }
 
             $plan = $subscription->plan;
-            $settings = BillingSettings::current();
-            $amounts = TaxCalculator::compute($subscription->amount_minor, $settings->tax_rate_bp, $settings->prices_include_tax);
-            $now = CarbonImmutable::now();
-            $stamp = $this->tax->stamp($settings);
-
-            $invoice = Invoice::query()->create([
-                'number' => $this->numbers->take($settings->invoice_prefix),
-                'billing_account_id' => $subscription->billing_account_id,
-                'subscription_id' => $subscription->id,
-                'status' => 'issued',
-                'currency' => $subscription->currency,
-                'subtotal_minor' => $amounts['subtotal'],
-                'tax_minor' => $amounts['tax'],
-                'total_minor' => $amounts['total'],
-                'tax_rate_bp' => $settings->tax_rate_bp,
-                'prices_include_tax' => $settings->prices_include_tax,
-                'issued_at' => $now,
-                'due_at' => $now->addDays($settings->due_days),
-                'created_by' => $actorId,
-                'zatca_qr' => TaxDocument::qr($stamp['tax_document'], $stamp['seller_name'], $stamp['seller_tax_number'], $now,
-                    Money::of($amounts['total'], $subscription->currency), Money::of($amounts['tax'], $subscription->currency)),
-            ] + $stamp);
-
-            $invoice->lines()->create([
+            $block = [
                 'kind' => 'block',
                 'description_ar' => __('billing::billing.lines.block', ['subject' => $subjectAr, 'plan' => $plan->name_ar, 'block' => $blockNo], 'ar'),
                 'description_en' => __('billing::billing.lines.block', ['subject' => $subjectEn, 'plan' => $plan->name_en, 'block' => $blockNo], 'en'),
@@ -73,11 +46,9 @@ final class IssueBlockInvoice
                     'session_minutes' => $plan->session_minutes,
                     'validity_days' => $plan->validity_days,
                 ],
-            ]);
+            ];
 
-            DB::afterCommit(fn () => event(new InvoiceIssued($invoice->academy_id, $invoice->id, $invoice->billing_account_id, $subscription->id)));
-
-            return $invoice;
+            return $this->write->handle($subscription, [$block, ...$this->discounts->lines($subscription, $subscription->amount_minor, withCoupon: true)], $actorId);
         });
     }
 }

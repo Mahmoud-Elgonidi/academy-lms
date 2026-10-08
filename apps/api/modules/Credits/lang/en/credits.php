@@ -14,6 +14,7 @@ return [
         'release' => 'Back from a session',
         'consume' => 'Session used',
         'expire' => 'Expired',
+        'extend' => 'Validity extended',
     ],
     'release_modes' => [
         'refund' => 'back to the balance',

@@ -11,6 +11,11 @@ return [
             'stripe_connected' => 'ربط حساب Stripe :account (:mode)',
             'stripe_disconnected' => 'فصل حساب Stripe :account',
             'proof_rejected' => 'رفض إثبات دفع :amount على الفاتورة :number: :reason',
+            'coupon_saved' => 'حفظ الكوبون :code (:value)',
+            'coupon_applied' => 'تطبيق الكوبون :code (:value) على اشتراك',
+            'coupon_removed' => 'شيل الكوبون :code من اشتراك',
+            'sibling_discount_saved' => 'خصم الإخوات: التاني :second%، والتالت وبعده :more%',
+            'extra_lessons' => 'فاتورة :number بـ :lessons حصص زيادة (:total)',
         ],
         'policy' => [
             'saved' => 'إصدار :version من سياسة الإلغاء والتعويض',

@@ -290,7 +290,17 @@
     "unread": "{n} new",
     "backToLessons": "Back to lessons",
     "withTeacher": "With {name}",
-    "noProgram": "No curriculum"
+    "noProgram": "No curriculum",
+    "extraAction": "Extra lessons",
+    "extraHint": "An extra lesson is {price} ({minutes} min).",
+    "extraTitle": "Extra lessons in {subject}",
+    "extraBody": "Choose how many; you get an invoice to pay like any other. Once it is paid, the academy books the lessons with you.",
+    "extraCount": "How many lessons?",
+    "extraEach": "{n} × {price}",
+    "extraSubmit": "Make the invoice",
+    "extraDone": "Invoice {number} is ready ({total}). You can pay it above.",
+    "extraWaiting": "Invoice {number} for extra lessons is waiting to be paid.",
+    "discounts": "Discounts"
   },
   "teach": {
     "todayHeader": "{date} · {zone} time",

@@ -29,6 +29,8 @@
         .iv td { padding: .75rem 0; border-bottom: 1px solid var(--gray-100); vertical-align: top; }
         .iv .num { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; padding-inline-start: 1rem; }
         .iv-line small { display: block; color: var(--gray-500); font-size: .78rem; margin-top: .15rem; }
+        .iv-off td { color: var(--success-700); }
+        .dark .iv-off td { color: var(--success-400); }
         .iv-sum { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: flex-start; justify-content: space-between; }
         .iv-totals { margin-inline-start: auto; min-width: min(320px, 100%); display: flex; flex-direction: column; gap: .35rem; font-size: .9rem; }
         .iv-totals div { display: flex; justify-content: space-between; gap: 1rem; }
@@ -152,12 +154,14 @@
                 <tr><th>{{ __('billing::invoices.doc.item') }}</th><th class="num">{{ __('billing::invoices.doc.qty') }}</th><th class="num">{{ __('billing::invoices.doc.amount') }}</th></tr>
             </thead>
             <tbody>
-                @foreach ($inv->lines as $line)
-                    <tr>
+                @foreach ($inv->lines->sortBy(fn ($l) => $l->kind === 'discount' ? 1 : 0) as $line)
+                    <tr @class(['iv-off' => $line->kind === 'discount'])>
                         <td class="iv-line">
                             {{ $line->description() }}
                             @if ($line->kind === 'block')
                                 <small>{{ __('billing::invoices.doc.block_terms', ['sessions' => $line->meta['sessions'] ?? '?', 'minutes' => $line->meta['session_minutes'] ?? '?', 'days' => $line->meta['validity_days'] ?? '?']) }}</small>
+                            @elseif ($line->kind === 'extra')
+                                <small>{{ __('billing::invoices.doc.extra_terms', ['unit' => $money($line->unit_minor), 'days' => $line->meta['validity_days'] ?? '?']) }}</small>
                             @endif
                         </td>
                         <td class="num">{{ $line->quantity }}</td>

@@ -1,18 +1,58 @@
 import '../../../core/time/local_time.dart';
 
-/// What is left of a learner's balance for one subject.
+/// What is left of a learner's balance for one subject, and extra lessons
+/// the person can buy on it when they pay for it.
 class Balance {
-  const Balance({required this.subject, required this.sessions, required this.minutes});
+  const Balance({required this.subject, required this.sessions, required this.minutes, this.enrollmentId = '', this.extra});
 
   factory Balance.fromJson(Map<String, dynamic> json) => Balance(
+    enrollmentId: json['enrollment_id'] as String? ?? '',
     subject: json['subject'] as String? ?? '',
     sessions: (json['sessions'] as num?)?.toInt() ?? 0,
     minutes: (json['minutes'] as num?)?.toInt() ?? 0,
+    extra: json['extra'] == null ? null : ExtraOffer.fromJson(json['extra'] as Map<String, dynamic>),
   );
 
+  final String enrollmentId;
   final String subject;
   final int sessions;
   final int minutes;
+  final ExtraOffer? extra;
+}
+
+/// Extra lessons on a course: a lesson's price and length, at most how many,
+/// and the invoice for them waiting to be paid (one at a time).
+class ExtraOffer {
+  const ExtraOffer({required this.price, required this.minutes, required this.max, this.waitingNumber});
+
+  factory ExtraOffer.fromJson(Map<String, dynamic> json) => ExtraOffer(
+    price: json['price'] as String? ?? '',
+    minutes: (json['minutes'] as num?)?.toInt() ?? 0,
+    max: (json['max'] as num?)?.toInt() ?? 1,
+    waitingNumber: (json['waiting_invoice'] as Map<String, dynamic>?)?['number'] as String?,
+  );
+
+  final String price;
+  final int minutes;
+  final int max;
+  final String? waitingNumber;
+}
+
+/// A line of an invoice; a discount (the family discount, a coupon) is negative.
+class InvoiceLine {
+  const InvoiceLine({required this.kind, required this.description, required this.amount});
+
+  factory InvoiceLine.fromJson(Map<String, dynamic> json) => InvoiceLine(
+    kind: json['kind'] as String? ?? '',
+    description: json['description'] as String? ?? '',
+    amount: json['amount'] as String? ?? '',
+  );
+
+  final String kind;
+  final String description;
+  final String amount;
+
+  bool get isDiscount => kind == 'discount';
 }
 
 /// The latest proof of paying an invoice by hand: waiting for the academy,
@@ -69,6 +109,7 @@ class Invoice {
     this.outstandingDecimal = '',
     this.proof,
     this.canSendProof = false,
+    this.lines = const [],
   });
 
   factory Invoice.fromJson(Map<String, dynamic> json) => Invoice(
@@ -86,6 +127,7 @@ class Invoice {
     outstandingDecimal: json['outstanding_decimal'] as String? ?? '',
     proof: json['proof'] == null ? null : ProofState.fromJson(json['proof'] as Map<String, dynamic>),
     canSendProof: json['can_send_proof'] as bool? ?? false,
+    lines: [for (final l in json['lines'] as List<dynamic>? ?? const []) InvoiceLine.fromJson(l as Map<String, dynamic>)],
     payWith: [
       for (final g in json['pay_with'] as List<dynamic>? ?? const [])
         (id: (g as Map<String, dynamic>)['account_id'] as String, label: g['label'] as String? ?? ''),
@@ -111,6 +153,9 @@ class Invoice {
   final String outstandingDecimal;
   final ProofState? proof;
   final bool canSendProof;
+
+  /// What it is for and what came off it.
+  final List<InvoiceLine> lines;
 
   bool get payable => outstandingMinor > 0 && status != 'void';
 }

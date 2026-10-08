@@ -127,10 +127,31 @@ class _MoneyList extends StatelessWidget {
                 for (final b in money.balance)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(child: Text(b.subject, style: context.text.titleSmall)),
-                        Pill(l.lessonsCount(b.sessions), tone: b.sessions <= 1 ? Tone.attention : Tone.brand),
+                        Row(
+                          children: [
+                            Expanded(child: Text(b.subject, style: context.text.titleSmall)),
+                            Pill(l.lessonsCount(b.sessions), tone: b.sessions <= 1 ? Tone.attention : Tone.brand),
+                          ],
+                        ),
+                        if (b.extra case final extra?)
+                          extra.waitingNumber != null
+                              ? Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(l.extraWaiting(extra.waitingNumber!), style: context.text.bodySmall),
+                                )
+                              : Align(
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: TextButton.icon(
+                                    key: Key('extra-${b.enrollmentId}'),
+                                    style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
+                                    onPressed: () => _buyExtra(context, b, extra),
+                                    icon: const Icon(Icons.add_circle_outline, size: 18),
+                                    label: Text('${l.extraAction} · ${l.extraHint(extra.price, extra.minutes)}'),
+                                  ),
+                                ),
                       ],
                     ),
                   ),
@@ -153,6 +174,89 @@ class _MoneyList extends StatelessWidget {
         const SizedBox(height: 10),
         Text(l.invoiceNote, style: context.text.bodySmall),
       ]),
+    );
+  }
+}
+
+/// Extra lessons on a course: how many, then the invoice, which waits with the others to be paid.
+Future<void> _buyExtra(BuildContext context, Balance course, ExtraOffer offer) async {
+  final made = await showModalBottomSheet<({String number, String total})>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (_) => RepositoryProvider.value(
+      value: context.read<BillingRepository>(),
+      child: _ExtraSheet(course: course, offer: offer, learnerId: context.learnerId()),
+    ),
+  );
+  if (made == null || !context.mounted) return;
+  showSnack(context, context.l10n.extraDone(made.number, made.total));
+  await context.read<LoadCubit<_Money>>().load();
+}
+
+class _ExtraSheet extends StatefulWidget {
+  const _ExtraSheet({required this.course, required this.offer, required this.learnerId});
+
+  final Balance course;
+  final ExtraOffer offer;
+  final String? learnerId;
+
+  @override
+  State<_ExtraSheet> createState() => _ExtraSheetState();
+}
+
+class _ExtraSheetState extends State<_ExtraSheet> {
+  int _count = 1;
+  bool _busy = false;
+  String? _error;
+
+  Future<void> _make() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final made = await context.read<BillingRepository>().buyExtraLessons(widget.course.enrollmentId, _count, learnerId: widget.learnerId);
+      if (mounted) Navigator.pop(context, made);
+    } on ApiProblem catch (p) {
+      if (mounted) setState(() => _error = context.problemText(p));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l.extraTitle(widget.course.subject), style: context.text.titleLarge),
+          const SizedBox(height: 6),
+          Text(l.extraBody, style: context.text.bodyMedium?.copyWith(color: context.colors.muted)),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (var n = 1; n <= widget.offer.max; n++)
+                ChoiceChip(
+                  key: Key('extra-count-$n'),
+                  label: Text('$n'),
+                  selected: _count == n,
+                  onSelected: _busy ? null : (_) => setState(() => _count = n),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(l.extraEach(_count, widget.offer.price), style: context.text.bodySmall),
+          if (_error != null) ...[const SizedBox(height: 10), Note(_error!, tone: Tone.danger)],
+          const SizedBox(height: 14),
+          FilledButton(key: const Key('extra-submit'), onPressed: _busy ? null : _make, child: Text(l.extraSubmit)),
+        ],
+      ),
     );
   }
 }
@@ -186,6 +290,8 @@ class _InvoiceRow extends StatelessWidget {
                     '${invoice.number}${invoice.issuedAt == null ? '' : ' · ${invoice.issuedAt!.day(context.locale)}'}',
                     style: context.text.bodySmall,
                   ),
+                  for (final off in invoice.lines.where((x) => x.isDiscount))
+                    Text('${off.description}  ${off.amount}', style: context.text.bodySmall?.copyWith(color: context.colors.brand)),
                   if (invoice.proof case final proof? when proof.status != 'rejected' || invoice.payable) ...[
                     const SizedBox(height: 6),
                     _ProofLine(proof: proof),

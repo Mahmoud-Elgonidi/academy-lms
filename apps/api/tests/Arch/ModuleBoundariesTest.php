@@ -249,7 +249,7 @@ arch('scheduling reads other modules\' tables only through read models that refu
     ->expect('Modules\Scheduling\Queries\Models')
     ->toHaveMethod('save');
 
-arch('credit allocation and tax rules are pure: no database, no framework')
+arch('credit allocation, tax and discount rules are pure: no database, no framework')
     ->expect(['Modules\Credits\Domain', 'Modules\Billing\Domain'])
     ->toOnlyUse(['Carbon\CarbonImmutable', 'Modules\Credits\Domain', 'Modules\Billing\Domain', 'InvalidArgumentException']);
 

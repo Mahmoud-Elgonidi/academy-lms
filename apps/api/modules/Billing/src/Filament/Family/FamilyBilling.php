@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
+use Modules\Billing\Actions\BuyExtraLessons;
 use Modules\Billing\Actions\Payments\StartCheckout;
 use Modules\Billing\Actions\Proofs\SubmitPaymentProof;
 use Modules\Billing\Models\GatewayAccount;
@@ -28,6 +29,7 @@ use Modules\Billing\Models\PaymentCheckout;
 use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\OnlinePayments;
+use Modules\Billing\Queries\CourseBillingQuery;
 use Modules\Identity\Contracts\PersonalChannel;
 use Modules\People\Contracts\FamilyView;
 use Modules\SharedKernel\Time\ViewerTimezone;
@@ -77,7 +79,7 @@ final class FamilyBilling extends Page
 
         return [
             'learner' => $learner?->name,
-            'balances' => $learner ? FamilyAccount::balances($learner->id) : [],
+            'balances' => $learner ? FamilyAccount::balances($learner->id, $viewer) : [],
             'invoices' => FamilyAccount::invoices($viewer, app(ViewerTimezone::class)->effective()),
             'owed' => FamilyAccount::owed($viewer),
             'channel' => PersonalChannel::name($viewer),
@@ -155,6 +157,42 @@ final class FamilyBilling extends Page
                     return;
                 }
                 Notification::make()->success()->title(__($l.'sent'))->send();
+                unset($this->account);
+            });
+    }
+
+    /**
+     * Extra lessons on one of the learner's courses, for whoever pays for it:
+     * how many, at a lesson's price; it makes the invoice, which is then paid
+     * like any other, and the academy books the lessons.
+     */
+    public function extraLessonsAction(): Action
+    {
+        $l = 'billing::discounts.family.';
+        $offer = fn (array $arguments) => collect($this->account['balances'])->firstWhere('enrollment_id', $arguments['enrollment'] ?? null);
+
+        return Action::make('extraLessons')
+            ->label(__($l.'extra'))->icon(Heroicon::OutlinedPlusCircle)->link()->size('sm')
+            ->modalHeading(fn (array $arguments) => __($l.'extra_title', ['subject' => $offer($arguments)['subject'] ?? '']))
+            ->modalDescription(fn (array $arguments) => __($l.'extra_body', ['price' => $offer($arguments)['extra']['price'] ?? '']))
+            ->modalWidth('md')
+            ->schema(fn (array $arguments) => [
+                ToggleButtons::make('lessons')->label(__('billing::discounts.course.lessons'))->inline()->required()->default(1)
+                    ->options(array_combine(range(1, (int) ($offer($arguments)['extra']['max'] ?? 1)), range(1, (int) ($offer($arguments)['extra']['max'] ?? 1)))),
+            ])
+            ->modalSubmitActionLabel(__($l.'extra_submit'))
+            ->action(function (array $data, array $arguments) use ($offer, $l) {
+                $course = $offer($arguments);
+                abort_if($course === null || $course['extra'] === null, 404);   // not a course of the learner on screen that this person pays for
+                try {
+                    $subscription = app(CourseBillingQuery::class)->subscriptionOf($course['enrollment_id']);
+                    $invoice = app(BuyExtraLessons::class)->handle((string) $subscription?->id, (int) ($data['lessons'] ?? 1), (string) auth()->id(), 'family');
+                } catch (ValidationException $e) {
+                    Notification::make()->danger()->title(collect($e->errors())->flatten()->first())->send();
+
+                    return;
+                }
+                Notification::make()->success()->title(__($l.'extra_done', ['number' => $invoice->number, 'total' => $invoice->total()->format()]))->send();
                 unset($this->account);
             });
     }

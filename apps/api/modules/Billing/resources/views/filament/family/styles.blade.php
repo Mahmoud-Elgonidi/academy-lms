@@ -2,6 +2,9 @@
     .bf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .75rem; }
     .bf-card { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-xl, .75rem); padding: .9rem 1rem; display: flex; flex-direction: column; gap: .25rem; text-decoration: none; color: inherit; }
     .bf-card small { color: var(--gray-500); font-size: .8rem; }
+    .bf-off { display: block; color: var(--success-700); font-size: .78rem; }
+    .dark .bf-off { color: var(--success-400); }
+    .bf-extra { margin-top: .35rem; padding-top: .45rem; border-top: 1px dashed var(--gray-200); display: flex; flex-wrap: wrap; align-items: center; gap: .2rem .6rem; }
     .bf-big { font-size: 1.6rem; font-weight: 800; line-height: 1.1; color: var(--primary-700); font-variant-numeric: tabular-nums; }
     .bf-card[data-tone="owed"] { border-color: var(--warning-300); background: var(--warning-50); }
     .bf-card[data-tone="owed"] .bf-big { color: var(--warning-800); }
@@ -33,5 +36,6 @@
         .bf-result[data-tone="good"] b { display: inline-block; animation: lms-pop .6s var(--lms-spring) .2s backwards; }
     }
     .dark .bf-card, .dark .bf-inv { background: var(--gray-900); border-color: var(--gray-800); }
+    .dark .bf-extra { border-color: var(--gray-700); }
     .dark .bf-proof { background: var(--gray-800); color: var(--gray-100); }
 </style>

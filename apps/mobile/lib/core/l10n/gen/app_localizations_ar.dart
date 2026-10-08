@@ -660,6 +660,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String get openInvoice => 'افتح الفاتورة';
 
   @override
+  String get extraAction => 'حصص زيادة';
+
+  @override
+  String extraHint(String price, int minutes) {
+    return 'الحصة الزيادة بـ $price ($minutes دقيقة).';
+  }
+
+  @override
+  String extraTitle(String subject) {
+    return 'حصص زيادة في $subject';
+  }
+
+  @override
+  String get extraBody => 'اختار العدد، وهتطلعلك فاتورة تدفعها زي أي فاتورة. بعد ما تدفع، الأكاديمية بتحجز الحصص معاك.';
+
+  @override
+  String extraEach(int n, String price) {
+    return '$n × $price';
+  }
+
+  @override
+  String get extraSubmit => 'اعمل الفاتورة';
+
+  @override
+  String extraDone(String number, String total) {
+    return 'الفاتورة $number جاهزة ($total).';
+  }
+
+  @override
+  String extraWaiting(String number) {
+    return 'فاتورة الحصص الزيادة $number مستنية الدفع.';
+  }
+
+  @override
   String get invoiceNote => 'افتح أي فاتورة تشوفها وتطبعها، وفيها رمز QR بتاع الفاتورة الضريبية.';
 
   @override

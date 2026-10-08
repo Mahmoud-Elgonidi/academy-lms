@@ -208,7 +208,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 | Scheduling | `teacher_shift_schedules`، `teacher_shift_rules`، `shift_proposals`، `shift_proposal_rules`، `shift_proposal_comments`، `teacher_time_off`، `availability_overrides`، `academy_holidays`، `recurring_slots`، `booking_holds`، `sessions`، `session_participants`، `attendance_segments`، `session_events`، `policy_sets`، `policy_set_versions`، `scheduling_conflicts`، `schedule_shift_notices` |
 | Classroom | `rooms`، `recordings`، `recording_access_logs`، `provider_webhook_inbox`، `tech_issue_reports` |
 | Credits | `credit_accounts`، `credit_lots`، `credit_entries`، `credit_reservations` |
-| Billing | `billing_accounts`، `billing_account_students`، `price_regions`، `plans`، `plan_prices`، `subscriptions`، `invoices`، `invoice_lines`، `invoice_sequences`، `payments`، `payment_methods`، `manual_payment_proofs`، `refunds`، `credit_notes`، `discount_rules`، `coupons`، `gateway_accounts`، `payment_checkouts`، `gateway_webhook_inbox`، `tax_profiles`، `tax_rates`، `einvoice_units`، `einvoice_documents` |
+| Billing | `billing_accounts`، `billing_account_students`، `price_regions`، `plans`، `plan_prices`، `subscriptions`، `invoices`، `invoice_lines`، `invoice_sequences`، `payments`، `payment_methods`، `manual_payment_proofs`، `refunds`، `credit_notes`، `coupons`، `coupon_redemptions`، `gateway_accounts`، `payment_checkouts`، `gateway_webhook_inbox`، `tax_profiles`، `tax_rates`، `einvoice_units`، `einvoice_documents` |
 | Learning | `report_templates`، `report_template_versions`، `session_reports`، `report_items_covered`، `homework_assignments`، `homework_submissions`، `homework_reviews`، `enrollment_progress`، `enrollment_positions`، `assessment_attempts`، `certificates`، `report_cards`، `challenge_claims`، `cheers` |
 | Evaluation | `lesson_ratings`، `kpi_exclusions`، و(P2) `kpi_events`، `qa_rubrics`، `qa_audits`، `kpi_snapshots`، `scoring_configs` |
 | Payroll | `rate_cards`، `rate_card_lines`، `teacher_rate_cards`، `teacher_earnings`، `payroll_periods`، و(P2) `payroll_statements`، `payouts` |
@@ -528,13 +528,13 @@ interface PaymentGateway
   - محليًا: `/docs/api` (في البيئة المحلية بس).
   - الـ CI بتاع الموبايل (`mobile.yml`) بيشتغل كمان لما `packages/openapi` يتغير، فالـ contract test بيتأكد إن التطبيق لسه ماشي مع الـ API.
 
-### الـ API المنفّذ (`/api/v1`، 74 route)
+### الـ API المنفّذ (`/api/v1`، 75 route)
 - **الدخول والحساب** (Identity): `auth/login`، و`auth/code` و`auth/code/verify`، و`accounts/code` و`accounts/code/verify` و`accounts/sign-in`، و`auth/two-factor` (الخطوة التانية بعد أي واحد فيهم)، و`me` (ومعاه `plan_features`: الميزات اللي في باقة الأكاديمية)، و`me/sessions` (الأجهزة وتخريج جهاز)، و`auth/logout`.
 - **الأسرة**:
   - `family/learners` (People): الطالب نفسه وأولاده، ومرحلة كل واحد. كل endpoint للأسرة بياخد `learner_id`، ولو مابعتوش بياخد أول واحد (`FamilyView::learner`).
   - `family/lessons` (القادمة أو اللي فاتت، ومعاها الإجازات وتغييرات الساعة)، و`lessons/{id}/cancellation` (هيحصل إيه لو ألغيت، بالسياسة)، و`lessons/{id}/cancel`، و`lessons/{id}/refuse-substitute`. الطفل في شكل kids مابيلغيش.
   - `lessons/{id}/rating` (Evaluation): GET وPUT.
-  - `family/balance`، و`family/invoices` (ومعاها لينك المستند الموقّع وطرق الدفع)، و`family/invoices/{id}/checkout` (Billing). الطالب اللي مابيدفعش مابيشوفش فلوس.
+  - `family/balance` (ولكل كورس اللي بيدفع له: الحصص الزيادة وسعرها والفاتورة المستنية)، و`family/enrollments/{id}/extra-lessons` (فاتورة حصص زيادة، `Idempotency-Key`)، و`family/invoices` (ومعاها لينك المستند الموقّع وطرق الدفع وسطور الفاتورة بالخصومات)، و`family/invoices/{id}/checkout` (Billing). الطالب اللي مابيدفعش مابيشوفش فلوس.
   - `family/consents` (People): أولاد ولي الأمر اللي محتاجين موافقة، والنص اللي هيوافق عليه، و`family/consents/{student}` (موافق: `agree` و`version`) و`family/consents/{student}/withdraw`. لولي الأمر بس.
   - `learning/*`: الـ roadmap والتقارير والواجبات (كانت موجودة)، و`learning/journey`: رئيسية الطالب في شكل مرحلته (النجوم، والنقاط والرتبة، والأيام ورا بعض، والإنجازات، ومستويات كل كورس وحالة كل درس، والجاي، والميعاد المتوقع للإنهاء). الطالب نفسه أو أول ابن لولي الأمر (`FamilyView::learner`).
 - **الدعم** (Support، للأسرة والمدرس): `support/new` (الأنواع المسموحة لللي بيسأل، والحصص)، و`support/tickets` (تذاكري، وكتابة تذكرة multipart مع صورة أو PDF و`Idempotency-Key`)، و`support/tickets/{id}` (المحادثة من غير ملاحظات الإدارة ولا قراراتها)، و`.../messages` (الرد)، و`.../reopen`، و`.../close`، و`.../messages/{message}/file`. الأسرة بتبعت `learner_id`.

@@ -14,6 +14,7 @@ return [
         'release' => 'رجوع من حصة',
         'consume' => 'خصم حصة',
         'expire' => 'انتهاء صلاحية',
+        'extend' => 'تمديد الصلاحية',
     ],
     'release_modes' => [
         'refund' => 'رجع للرصيد',

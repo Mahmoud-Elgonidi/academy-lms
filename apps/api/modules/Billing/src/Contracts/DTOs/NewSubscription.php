@@ -14,5 +14,6 @@ final readonly class NewSubscription
         public string $subjectNameAr,
         public string $subjectNameEn,
         public ?string $actorId = null,
+        public ?string $couponCode = null,     // a coupon to put on it before its first invoice
     ) {}
 }

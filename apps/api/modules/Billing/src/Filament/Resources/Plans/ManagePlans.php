@@ -13,6 +13,7 @@ use Filament\Resources\Pages\ManageRecords;
 use Filament\Schemas\Components\Grid;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
+use Modules\Billing\Actions\Discounts\SaveSiblingDiscount;
 use Modules\Billing\Actions\SaveBillingSettings;
 use Modules\Billing\Actions\SavePlan;
 use Modules\Billing\Actions\SavePriceRegions;
@@ -83,6 +84,24 @@ final class ManagePlans extends ManageRecords
                     app(SaveBillingSettings::class)->handle($data['tax_percent'], (bool) $data['prices_include_tax'], $data['tax_number'] ?? null, (string) $data['invoice_prefix'], (int) $data['due_days'],
                         $data['seller_name'] ?? null, (bool) ($data['zatca'] ?? false));
                     Notification::make()->success()->title(__('billing::plans.saved'))->send();
+                }),
+            Action::make('sibling')
+                ->label(__('billing::discounts.sibling.action'))
+                ->icon(Heroicon::OutlinedUsers)
+                ->color('gray')
+                ->modalHeading(__('billing::discounts.sibling.title'))
+                ->modalDescription(__('billing::discounts.sibling.hint'))
+                ->modalWidth('md')
+                ->fillForm(fn () => ['second' => BillingSettings::current()->sibling_second_bp / 100, 'more' => BillingSettings::current()->sibling_more_bp / 100])
+                ->schema([
+                    Grid::make(2)->schema([
+                        TextInput::make('second')->label(__('billing::discounts.sibling.second'))->numeric()->minValue(0)->maxValue(100)->suffix('%')->required(),
+                        TextInput::make('more')->label(__('billing::discounts.sibling.more'))->numeric()->minValue(0)->maxValue(100)->suffix('%')->required(),
+                    ]),
+                ])
+                ->action(function (array $data) {
+                    app(SaveSiblingDiscount::class)->handle($data['second'], $data['more']);
+                    Notification::make()->success()->title(__('billing::discounts.sibling.saved'))->send();
                 }),
             CreateAction::make()
                 ->label(__('billing::plans.create'))

@@ -1136,6 +1136,54 @@ abstract class AppLocalizations {
   /// **'افتح الفاتورة'**
   String get openInvoice;
 
+  /// No description provided for @extraAction.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصص زيادة'**
+  String get extraAction;
+
+  /// No description provided for @extraHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحصة الزيادة بـ {price} ({minutes} دقيقة).'**
+  String extraHint(String price, int minutes);
+
+  /// No description provided for @extraTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصص زيادة في {subject}'**
+  String extraTitle(String subject);
+
+  /// No description provided for @extraBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار العدد، وهتطلعلك فاتورة تدفعها زي أي فاتورة. بعد ما تدفع، الأكاديمية بتحجز الحصص معاك.'**
+  String get extraBody;
+
+  /// No description provided for @extraEach.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n} × {price}'**
+  String extraEach(int n, String price);
+
+  /// No description provided for @extraSubmit.
+  ///
+  /// In ar, this message translates to:
+  /// **'اعمل الفاتورة'**
+  String get extraSubmit;
+
+  /// No description provided for @extraDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفاتورة {number} جاهزة ({total}).'**
+  String extraDone(String number, String total);
+
+  /// No description provided for @extraWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'فاتورة الحصص الزيادة {number} مستنية الدفع.'**
+  String extraWaiting(String number);
+
   /// No description provided for @invoiceNote.
   ///
   /// In ar, this message translates to:

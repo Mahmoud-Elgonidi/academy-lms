@@ -17,7 +17,7 @@
     @if ($a['balances'] !== [])
         <h2 class="bf-h2">{{ __($l.'balance_for', ['name' => $a['learner']]) }}</h2>
     @endif
-    @include('billing::filament.family.balance-cards', ['balances' => $a['balances'], 'owed' => null])
+    @include('billing::filament.family.balance-cards', ['balances' => $a['balances'], 'owed' => null, 'extras' => true])
 
     <h2 class="bf-h2">{{ __($l.'invoices') }}</h2>
     @if ($a['owed'])
@@ -31,6 +31,9 @@
                 <div>
                     <strong>{{ $inv['total'] }}</strong>
                     <small>· {{ $inv['number'] }}@if ($inv['for']) · {{ $inv['for'] }}@endif</small>
+                    @foreach ($inv['discounts'] ?? [] as $off)
+                        <small class="bf-off">{{ $off['label'] }} {{ $off['amount'] }}</small>
+                    @endforeach
                 </div>
                 <span class="bf-status" data-s="{{ $inv['status'] }}">{{ $inv['statusLabel'] }}</span>
                 <small>

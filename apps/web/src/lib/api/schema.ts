@@ -24,6 +24,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/family/enrollments/{enrollment}/extra-lessons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Buy extra lessons
+         * @description An invoice for N extra lessons on a course of the learner, at a lesson's price (less the family discount),
+         *     for whoever pays for the course. Paying it adds the lessons' minutes to the course; the academy books them.
+         *     One such invoice waits at a time per course. Send an Idempotency-Key.
+         */
+        post: operations["family.extra-lessons"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/family/invoices": {
         parameters: {
             query?: never;
@@ -1516,7 +1538,89 @@ export interface operations {
                             id: string;
                             name: string;
                         };
-                        data: unknown[];
+                        data: {
+                            enrollment_id: string;
+                            subject: string | null;
+                            minutes: number;
+                            /** @description A lesson's length, when the plan has one. */
+                            session_minutes: number | null;
+                            /** @description The minutes left as whole lessons. */
+                            sessions: number | null;
+                            /** @description Extra lessons this person can buy on the course (they pay for it, it is on): POST /family/enrollments/{id}/extra-lessons. */
+                            extra: {
+                                price: string;
+                                price_minor: number;
+                                currency: string;
+                                minutes: number;
+                                max: number;
+                                /** @description The invoice for extra lessons waiting to be paid; another cannot be made until it is. */
+                                waiting_invoice: {
+                                    id: string;
+                                    number: string;
+                                } | null;
+                            } | null;
+                        }[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.extra-lessons": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                enrollment: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    lessons: number;
+                    learner_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            number: string;
+                            currency: string;
+                            total_minor: number;
+                            total: string;
+                            /** @description paid at once when it came to nothing */
+                            status: string;
+                        };
                     };
                 };
             };
@@ -1598,6 +1702,15 @@ export interface operations {
                                 label: string;
                             } | null;
                             document_url: string;
+                            /** @description What it is for and what came off it, as on the invoice. */
+                            lines: {
+                                /** @description block, extra (extra lessons) or discount (the family discount or a coupon: a negative amount) */
+                                kind: string;
+                                description: string;
+                                quantity: string;
+                                amount_minor: string;
+                                amount: string;
+                            }[];
                             /** @description Where it can be paid now: POST /family/invoices/{id}/checkout with one of these. */
                             pay_with: unknown[];
                             /** @description The latest proof of paying by hand on it, if any: pending, approved or rejected (with the academy's reason). */

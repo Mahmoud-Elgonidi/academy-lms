@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Modules\Billing\Actions\BuyExtraLessons;
 use Modules\Billing\Actions\Payments\StartCheckout;
 use Modules\Billing\Actions\Proofs\SubmitPaymentProof;
 use Modules\Billing\Filament\Family\FamilyAccount;
@@ -18,6 +19,7 @@ use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
+use Modules\Billing\Queries\CourseBillingQuery;
 use Modules\People\Contracts\FamilyView;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Time\LocalTimePresenter;
@@ -45,10 +47,69 @@ final class FamilyBillingController
         $request->validate(['learner_id' => ['nullable', 'string', 'max:64']]);
         $learner = $family->learner((string) $request->user()?->getAuthIdentifier(), $request->query('learner_id')) ?? throw new NotFoundHttpException;
 
+        $courses = [];
+        foreach (FamilyAccount::balances($learner->id, (string) $request->user()?->getAuthIdentifier()) as $b) {
+            $extra = $b['extra'];
+            $courses[] = [
+                'enrollment_id' => (string) $b['enrollment_id'],
+                'subject' => $b['subject'] === null ? null : (string) $b['subject'],
+                'minutes' => (int) $b['minutes'],
+                /** A lesson's length, when the plan has one. */
+                'session_minutes' => $b['session_minutes'] === null ? null : (int) $b['session_minutes'],
+                /** The minutes left as whole lessons. */
+                'sessions' => $b['sessions'] === null ? null : (int) $b['sessions'],
+                /** Extra lessons this person can buy on the course (they pay for it, it is on): POST /family/enrollments/{id}/extra-lessons. */
+                'extra' => $extra === null ? null : [
+                    'price' => (string) $extra['price'],
+                    'price_minor' => (int) $extra['price_minor'],
+                    'currency' => (string) $extra['currency'],
+                    'minutes' => (int) $extra['minutes'],
+                    'max' => (int) $extra['max'],
+                    /** The invoice for extra lessons waiting to be paid; another cannot be made until it is. */
+                    'waiting_invoice' => $extra['waiting'] === null ? null : ['id' => (string) $extra['waiting']['id'], 'number' => (string) $extra['waiting']['number']],
+                ],
+            ];
+        }
+
         return response()->json([
             'learner' => ['id' => $learner->id, 'name' => $learner->name],
-            'data' => FamilyAccount::balances($learner->id),
+            'data' => $courses,
         ]);
+    }
+
+    /**
+     * Buy extra lessons.
+     *
+     * An invoice for N extra lessons on a course of the learner, at a lesson's price (less the family discount),
+     * for whoever pays for the course. Paying it adds the lessons' minutes to the course; the academy books them.
+     * One such invoice waits at a time per course. Send an Idempotency-Key.
+     *
+     * @throws NotFoundHttpException not a course of my learner that I pay for
+     */
+    public function extraLessons(Request $request, string $enrollment, FamilyView $family, BuyExtraLessons $buy, CourseBillingQuery $courses): JsonResponse
+    {
+        $data = $request->validate([
+            'lessons' => ['required', 'integer', 'min:1', 'max:'.BuyExtraLessons::MAX],
+            'learner_id' => ['nullable', 'string', 'max:64'],
+        ]);
+        $me = (string) $request->user()?->getAuthIdentifier();
+        $learner = $family->learner($me, $data['learner_id'] ?? null) ?? throw new NotFoundHttpException;
+        $course = collect(FamilyAccount::balances($learner->id, $me))->firstWhere('enrollment_id', $enrollment);
+        if ($course === null || $course['extra'] === null) {
+            throw new NotFoundHttpException;
+        }
+
+        $invoice = $buy->handle((string) $courses->subscriptionOf($enrollment)?->id, (int) $data['lessons'], $me, 'family');
+
+        return response()->json(['data' => [
+            'id' => $invoice->id,
+            'number' => (string) $invoice->number,
+            'currency' => $invoice->currency,
+            'total_minor' => $invoice->total_minor,
+            'total' => $invoice->total()->format(),
+            /** paid at once when it came to nothing */
+            'status' => $invoice->status,
+        ]], 201);
     }
 
     /**
@@ -66,7 +127,7 @@ final class FamilyBillingController
             throw new AccessDeniedHttpException;
         }
         $rows = collect(FamilyAccount::invoices($me, 'UTC', 50));
-        $invoices = Invoice::query()->whereIn('id', $rows->pluck('id'))->orderByDesc('issued_at')->get();
+        $invoices = Invoice::query()->with('lines')->whereIn('id', $rows->pluck('id'))->orderByDesc('issued_at')->get();
         $for = $rows->pluck('for', 'id');
         $proofs = PaymentProof::latestFor($invoices->pluck('id')->all());
         $takesProofs = $online->takesProofs();
@@ -84,6 +145,17 @@ final class FamilyBillingController
             'data' => $invoices->map(function (Invoice $i) use ($me, $links, $online, $for, $proofs, $takesProofs) {
                 $outstanding = $i->status === 'issued' ? $i->outstanding() : Money::of(0, $i->currency);
                 $status = InvoiceResource::statusKey($i);
+                $lines = [];
+                foreach ($i->lines->sortBy(fn ($l) => $l->kind === 'discount' ? 1 : 0) as $line) {
+                    $lines[] = [
+                        /** block, extra (extra lessons) or discount (the family discount or a coupon: a negative amount) */
+                        'kind' => $line->kind,
+                        'description' => $line->description(),
+                        'quantity' => $line->quantity,
+                        'amount_minor' => $line->amount_minor,
+                        'amount' => Money::of($line->amount_minor, $i->currency)->format(),
+                    ];
+                }
 
                 return [
                     'id' => $i->id,
@@ -104,6 +176,8 @@ final class FamilyBillingController
                     'due_at' => $this->time->present($i->due_at),
                     'paid_at' => $this->time->present($i->paid_at),
                     'document_url' => $links->document($i, $me),
+                    /** What it is for and what came off it, as on the invoice. */
+                    'lines' => $lines,
                     /** Where it can be paid now: POST /family/invoices/{id}/checkout with one of these. */
                     'pay_with' => array_map(fn (GatewayAccount $a) => [
                         'account_id' => $a->id,

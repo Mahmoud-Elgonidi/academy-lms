@@ -290,7 +290,17 @@
     "unread": "{n} جديد",
     "backToLessons": "ارجع للحصص",
     "withTeacher": "مع {name}",
-    "noProgram": "من غير منهج"
+    "noProgram": "من غير منهج",
+    "extraAction": "حصص زيادة",
+    "extraHint": "الحصة الزيادة بـ {price} ({minutes} دقيقة).",
+    "extraTitle": "حصص زيادة في {subject}",
+    "extraBody": "اختار العدد، وهتطلعلك فاتورة تدفعها زي أي فاتورة. بعد ما تدفع، الأكاديمية بتحجز الحصص معاك.",
+    "extraCount": "كام حصة؟",
+    "extraEach": "{n} × {price}",
+    "extraSubmit": "اعمل الفاتورة",
+    "extraDone": "الفاتورة {number} جاهزة ({total}). تقدر تدفعها من فوق.",
+    "extraWaiting": "فاتورة الحصص الزيادة {number} مستنية الدفع.",
+    "discounts": "الخصومات"
   },
   "teach": {
     "todayHeader": "{date} · بتوقيت {zone}",

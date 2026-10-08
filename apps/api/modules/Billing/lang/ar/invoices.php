@@ -57,6 +57,7 @@ return [
         'qty' => 'الكمية',
         'amount' => 'المبلغ',
         'block_terms' => ':sessions حصص × :minutes دقيقة · صالحة :days يوم من الدفع',
+        'extra_terms' => 'الحصة بـ :unit · صالحة :days يوم من الدفع',
         'subtotal' => 'قبل الضريبة',
         'vat' => 'ضريبة القيمة المضافة :rate%',
         'total' => 'الإجمالي',

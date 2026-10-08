@@ -46,7 +46,7 @@ export default async function FamilyHome() {
       learner={learner}
       lessons={lessons.data}
       notices={lessons.notices}
-      balanceLessons={balance.data.reduce((n, b) => n + b.sessions, 0)}
+      balanceLessons={balance.data.reduce((n, b) => n + (b.sessions ?? 0), 0)}
       invoices={invoices}
       homework={homework.data}
       courses={journey.data.courses}

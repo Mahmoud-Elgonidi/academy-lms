@@ -75,6 +75,7 @@ final class EnrollStudent
                 subjectNameAr: $subject->name_ar ?? '',
                 subjectNameEn: $subject->name_en ?? '',
                 actorId: $coordinatorId,
+                couponCode: $terms->couponCode,
             ));
 
             $this->slots->handle($enrollmentId, $first->teacher_id, $studentId, $teacherTz, $times, $coordinatorId);
