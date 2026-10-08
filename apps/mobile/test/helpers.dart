@@ -213,6 +213,7 @@ void familyRoutes(FakeApi api) {
   api
     ..on('GET', 'branding', branding())
     ..on('GET', 'me', me())
+    ..on('GET', 'family/consents', {'age': 18, 'children': <Object>[]})
     ..on('GET', 'family/learners', {
       'data': [
         {'id': 'c1', 'name': 'سلمى رامي', 'is_self': false, 'stage': 'classic'},

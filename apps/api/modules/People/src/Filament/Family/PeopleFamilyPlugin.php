@@ -8,6 +8,7 @@ use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
 use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\LearnerStage;
+use Modules\People\Queries\FamilyConsents;
 
 /**
  * People in the family area: whose account the page shows, switching
@@ -28,12 +29,25 @@ final class PeopleFamilyPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
+        $panel->pages([FamilyPrivacy::class]);
         $panel->renderHook(PanelsRenderHook::PAGE_START, fn () => auth()->check() ? Blade::render('@livewire(\'people.learner-switcher\')') : '');
+        // A guardian with a child waiting for their consent sees it on every page but the one where they give it.
+        $panel->renderHook(PanelsRenderHook::PAGE_START, fn (array $scopes = []) => in_array(FamilyPrivacy::class, $scopes, true) ? '' : self::waitingBanner());
         $panel->renderHook(PanelsRenderHook::BODY_START, fn () => ($stage = self::stage()) ? view('people::family.stage', ['stage' => $stage->value]) : '');
         $panel->renderHook(PanelsRenderHook::BODY_END, fn () => self::stage() ? view('people::family.tabs') : '');
     }
 
     public function boot(Panel $panel): void {}
+
+    private static function waitingBanner(): string
+    {
+        if (! auth()->check() || self::stage() !== null) {
+            return '';
+        }
+        $names = app(FamilyConsents::class)->waiting((string) auth()->id());
+
+        return $names === [] ? '' : view('people::family.consent-banner', ['names' => $names, 'url' => FamilyPrivacy::getUrl(panel: 'family')])->render();
+    }
 
     /** The signed-in student's stage, or null for the classic look (guardians, adults, the login page). */
     private static function stage(): ?LearnerStage

@@ -50,7 +50,7 @@ final class DemoLiveBoardSeeder extends Seeder
             'mona' => $user('mona@demo.test', 'أ. منى إبراهيم', Role::Teacher, 'Asia/Amman', '+962790000006'),
         ];
 
-        $students = [];
+        $students = $guardians = [];
         foreach ([
             'omar' => ['عمر ناصر', 'Asia/Qatar', 'ناصر علي', '+97455000001', 'father'],
             'yousef' => ['يوسف خالد', 'Europe/London', 'خالد عمر', '+447700900002', 'father'],
@@ -64,12 +64,16 @@ final class DemoLiveBoardSeeder extends Seeder
             'rana' => ['رنا محمود', 'Asia/Riyadh', 'محمود سعد', '+966500000010', 'father'],
         ] as $key => [$name, $tz, $guardianName, $guardianPhone, $relationship]) {
             $students[$key] = $user("{$key}@demo.test", $name, Role::Student, $tz);
-            $people->linkGuardian($user("{$key}.guardian@demo.test", $guardianName, Role::Guardian, $tz, $guardianPhone), $students[$key], $relationship);
+            $guardians[$key] = [$user("{$key}.guardian@demo.test", $guardianName, Role::Guardian, $tz, $guardianPhone), $relationship];
         }
 
-        // Ages, so each student's own area takes its look (children, middle school, secondary, adults).
+        // Ages, so each student's own area takes its look (children, middle school, secondary, adults);
+        // known before the guardians are linked, so only the children's guardians are asked for their consent.
         foreach (['omar' => 11, 'yousef' => 9, 'maryam' => 16, 'hamza' => 8, 'adam' => 14, 'layan' => 17, 'salma' => 22, 'zain' => 10, 'ziad' => 13, 'rana' => 12] as $key => $age) {
             $people->saveStudentProfile($students[$key], $now->subYears($age)->subMonths(4)->startOfDay(), null);
+        }
+        foreach ($guardians as $key => [$guardianId, $relationship]) {
+            $people->linkGuardian($guardianId, $students[$key], $relationship);
         }
 
         $book = fn (string $teacher, string $student, string $subject, int $startOffset, int $minutes, string $type = 'regular', string $funding = 'funded') => $schedule->handle(new NewSession(

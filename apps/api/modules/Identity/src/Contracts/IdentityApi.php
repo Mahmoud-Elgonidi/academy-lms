@@ -25,4 +25,10 @@ interface IdentityApi
      * password (an account made for them: an import, a new academy's owner).
      */
     public function welcomeLink(string $userId): string;
+
+    /**
+     * Signs a person out everywhere: every app's token and every web session
+     * (a child whose guardian took their consent back).
+     */
+    public function endSessions(string $userId): void;
 }

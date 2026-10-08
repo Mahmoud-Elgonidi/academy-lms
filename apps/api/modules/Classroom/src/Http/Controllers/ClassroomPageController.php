@@ -33,7 +33,8 @@ final class ClassroomPageController
         $lesson = $this->lessons->lesson($session);
         $seat = $viewer !== null && $lesson !== null ? $this->access->seatFor($viewer, $lesson) : null;
         if ($seat === null) {
-            abort(response()->view('classroom::refused', ['brand' => $branding->current()], 403));
+            $consent = $viewer !== null && $lesson !== null && $this->access->waitsForConsent($viewer, $lesson);
+            abort(response()->view('classroom::refused', ['brand' => $branding->current(), 'consent' => $consent], 403));
         }
 
         $user = DB::table('users')->where('id', $viewer)->first(['locale', 'timezone']);

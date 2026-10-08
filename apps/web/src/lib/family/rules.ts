@@ -16,3 +16,8 @@ export function lessonActionsFor(lesson: { status: string; can_cancel: boolean; 
   const found = { cancel: lesson.can_cancel, refuse: lesson.can_refuse_substitute, rate };
   return found.cancel || found.refuse || found.rate ? found : null;
 }
+
+/** A guardian follows at least one child (not only themself): their children's privacy is theirs to answer. */
+export function isGuardian(learners: readonly { is_self: boolean }[]): boolean {
+  return learners.some((l) => !l.is_self);
+}

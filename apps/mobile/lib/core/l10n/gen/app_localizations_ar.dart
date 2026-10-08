@@ -244,6 +244,58 @@ class AppLocalizationsAr extends AppLocalizations {
   String get webOnlyBody => 'حسابات الإدارة بتشتغل من الموقع. افتح لوحة الأكاديمية من الكمبيوتر.';
 
   @override
+  String get privacyTitle => 'خصوصية الأولاد';
+
+  @override
+  String privacyLead(int age) {
+    return 'الأولاد اللي تحت $age سنة محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.';
+  }
+
+  @override
+  String get privacyNone => 'مفيش ولاد محتاجين موافقة.';
+
+  @override
+  String get consentWaiting => 'مستني موافقتك';
+
+  @override
+  String get consentGranted => 'موافق عليه';
+
+  @override
+  String get consentAgree => 'موافق';
+
+  @override
+  String consentAgreed(String name) {
+    return 'تمام، $name يقدر يدخل دلوقتي.';
+  }
+
+  @override
+  String get consentWithdraw => 'اسحب الموافقة';
+
+  @override
+  String consentWithdrawConfirm(String name) {
+    return '$name هيخرج من حسابه على كل الأجهزة، ومش هيقدر يدخل لحد ما توافق تاني. متأكد؟';
+  }
+
+  @override
+  String consentWithdrawn(String name) {
+    return 'سحبت موافقتك، و$name خرج من حسابه.';
+  }
+
+  @override
+  String consentNudge(int n, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$names مستنيين موافقتك عشان يدخلوا حساباتهم.',
+      one: '$names مستني موافقتك عشان يدخل حسابه.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get consentNudgeAction => 'اقرا ووافق';
+
+  @override
   String get navHome => 'الرئيسية';
 
   @override

@@ -79,7 +79,8 @@
       "money": "Payments",
       "challenges": "Challenges",
       "notifications": "Notifications",
-      "more": "More"
+      "more": "More",
+      "privacy": "Children's privacy"
     },
     "kids": {
       "menu": "Menu",
@@ -521,5 +522,19 @@
     "outcome_mastered": "Mastered",
     "outcome_needs_review": "Needs review",
     "roadmap": "Roadmap"
+  },
+  "privacy": {
+    "title": "Children's privacy",
+    "lead": "Children under {age} need your consent to sign in and join on their own.",
+    "none": "No child needs your consent.",
+    "waiting": "Waiting for your consent",
+    "granted": "Agreed",
+    "agree": "I agree",
+    "withdraw": "Withdraw consent",
+    "withdrawConfirm": "{student} will be signed out on every device and cannot sign in until you agree again. Are you sure?",
+    "banner": "{names} is waiting for your consent to sign in.",
+    "bannerMany": "{names} are waiting for your consent to sign in.",
+    "bannerAction": "Read and agree",
+    "nameSeparator": ", "
   }
 }

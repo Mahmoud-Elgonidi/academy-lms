@@ -11,5 +11,5 @@
         @media (prefers-color-scheme: dark) { body { background: #18181b; color: #f4f4f5; } .card { background: #27272a; } p { color: #a1a1aa; } }
     </style>
 </head>
-<body><div class="card"><h1>{{ __('classroom::classroom.refused.title') }}</h1><p>{{ __('classroom::classroom.refused.body') }}</p></div></body>
+<body><div class="card"><h1>{{ __('classroom::classroom.refused.title') }}</h1><p>{{ ($consent ?? false) ? __('classroom::classroom.refused.consent') : __('classroom::classroom.refused.body') }}</p></div></body>
 </html>

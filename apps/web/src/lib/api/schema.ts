@@ -824,6 +824,69 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/family/consents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My children's consent
+         * @description Each child of the guardian signed in who needs a guardian's consent (under the academy's consent age), or has one:
+         *     waiting or granted, who agreed and when, and the wording to agree to (send its version back when agreeing).
+         *     A student signed in, or a guardian with no such child, gets an empty list.
+         */
+        get: operations["family.consents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/consents/{student}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Agree to a child's account
+         * @description The child may sign in and join with their own link from now on. version is the wording's version from the list
+         *     (a newer wording since then answers 422: read it again).
+         */
+        post: operations["family.consents.grant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/consents/{student}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Take back your consent to a child's account
+         * @description The child is signed out on every device and waits again.
+         */
+        post: operations["family.consents.withdraw"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/branding": {
         parameters: {
             query?: never;
@@ -4005,6 +4068,169 @@ export interface operations {
                     "application/json": {
                         data: unknown[];
                         viewer_stage: string;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "family.consents": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        age: number;
+                        children: {
+                            student: {
+                                id: string;
+                                name: string;
+                            };
+                            /**
+                             * @description waiting | granted
+                             * @enum {string}
+                             */
+                            state: "waiting" | "granted";
+                            granted_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Who agreed, in words ("You agreed on 5 October 2026"); null while waiting. */
+                            by: string | null;
+                            /** @description Any of the child's guardians can take it back. */
+                            can_withdraw: boolean;
+                            /** @description What the guardian agrees to, in their language; send version back when agreeing. */
+                            text: {
+                                version: number;
+                                title: string;
+                                intro: string;
+                                /** @description Each part: a heading and its words. */
+                                sections: {
+                                    title: string;
+                                    body: string;
+                                }[];
+                                agree: string;
+                            };
+                        }[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "family.consents.grant": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                student: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {unknown} */
+                    agree?: "yes" | "on" | "1" | 1 | "true" | true;
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        /** @constant */
+                        state: "granted";
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.consents.withdraw": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                student: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        state: "waiting";
                     };
                 };
             };

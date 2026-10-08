@@ -15,6 +15,7 @@ import '../../features/notifications/data/notifications_repository.dart';
 import '../../features/profile/data/profile_repository.dart';
 import '../../features/roadmap/data/learning_repository.dart';
 import '../../features/schedule/data/lessons_repository.dart';
+import '../../features/consent/data/consent_repository.dart';
 import '../../features/teaching/data/teaching_repository.dart';
 
 /// The repositories every screen reads from, over one API client.
@@ -31,6 +32,7 @@ class Services {
       teaching = TeachingRepository(api),
       challenges = ChallengesRepository(api),
       notifications = NotificationsRepository(api),
+      consent = ConsentRepository(api),
       live = Live(source: LiveRepository(api), apiBaseUrl: api.dio.options.baseUrl) {
     home = HomeLoader(lessons: lessons, billing: billing, learning: learning, homework: homework, family: family);
   }
@@ -47,6 +49,7 @@ class Services {
   final TeachingRepository teaching;
   final ChallengesRepository challenges;
   final NotificationsRepository notifications;
+  final ConsentRepository consent;
 
   /// The person's own signals while the app is open (screens reload on them).
   final Live live;
@@ -59,6 +62,7 @@ class Services {
       RepositoryProvider.value(value: family),
       RepositoryProvider.value(value: lessons),
       RepositoryProvider.value(value: billing),
+      RepositoryProvider.value(value: consent),
       RepositoryProvider.value(value: learning),
       RepositoryProvider.value(value: homework),
       RepositoryProvider.value(value: classroom),

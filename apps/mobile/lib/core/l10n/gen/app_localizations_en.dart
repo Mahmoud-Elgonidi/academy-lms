@@ -228,6 +228,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get webOnlyBody => 'Staff accounts work on the website. Open the academy\'s back office on a computer.';
 
   @override
+  String get privacyTitle => 'Children\'s privacy';
+
+  @override
+  String privacyLead(int age) {
+    return 'Children under $age need your consent to sign in and join on their own.';
+  }
+
+  @override
+  String get privacyNone => 'No child needs your consent.';
+
+  @override
+  String get consentWaiting => 'Waiting for your consent';
+
+  @override
+  String get consentGranted => 'Agreed';
+
+  @override
+  String get consentAgree => 'I agree';
+
+  @override
+  String consentAgreed(String name) {
+    return 'Done: $name can sign in now.';
+  }
+
+  @override
+  String get consentWithdraw => 'Withdraw consent';
+
+  @override
+  String consentWithdrawConfirm(String name) {
+    return '$name will be signed out on every device and cannot sign in until you agree again. Are you sure?';
+  }
+
+  @override
+  String consentWithdrawn(String name) {
+    return 'You withdrew your consent, and $name was signed out.';
+  }
+
+  @override
+  String consentNudge(int n, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$names are waiting for your consent to sign in.',
+      one: '$names is waiting for your consent to sign in.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get consentNudgeAction => 'Read and agree';
+
+  @override
   String get navHome => 'Home';
 
   @override

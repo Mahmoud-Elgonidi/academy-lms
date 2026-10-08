@@ -129,3 +129,13 @@ export async function sendProof(id: string, form: FormData, key: string): Promis
 }
 
 export type { Rating };
+
+/** A guardian agrees to a child's account, to the wording (version) they read. */
+export async function grantConsent(student: string, version: number, agree: boolean): Promise<Result> {
+  return result(await send('post', '/v1/family/consents/{student}', { params: { student }, body: { agree, version } }));
+}
+
+/** A guardian takes their consent back: the child is signed out everywhere. */
+export async function withdrawConsent(student: string): Promise<Result> {
+  return result(await send('post', '/v1/family/consents/{student}/withdraw', { params: { student } }));
+}

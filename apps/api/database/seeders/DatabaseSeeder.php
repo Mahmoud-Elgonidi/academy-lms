@@ -18,6 +18,7 @@ use Modules\Import\Database\Seeders\DemoImportSeeder;
 use Modules\Learning\Database\Seeders\DemoChallengesSeeder;
 use Modules\Learning\Database\Seeders\DemoLearningSeeder;
 use Modules\Payroll\Database\Seeders\DemoPayrollSeeder;
+use Modules\People\Database\Seeders\DemoConsentsSeeder;
 use Modules\Platform\Contracts\DTOs\NewAcademy;
 use Modules\Platform\Contracts\PlatformApi;
 use Modules\Platform\Contracts\TenantDirectory;
@@ -33,7 +34,7 @@ use Modules\SharedKernel\Tenancy\TenantContext;
 /**
  * Local demo data: academy "demo" (demo.<platform domain>, or header X-Academy: demo)
  * with one user per main role, an evening of sessions around now for the
- * live board, teacher shifts and proposals, plans and prices, and enrolled
+ * live board, guardians' consent to their children's accounts (one still waiting), teacher shifts and proposals, plans and prices, and enrolled
  * students with invoices in every state (payable online on the demo gateway),
  * curricula, lesson reports with homework, teacher time off with a substitute
  * and an academy holiday, ratings, teachers' pay with last month closed, imports from sheets, and the notifications all of that sent;
@@ -80,7 +81,7 @@ class DatabaseSeeder extends Seeder
             // What the demo does in the back office (prices, policy, voided invoices, ...) is in the activity log as the owner's.
             AuditActor::use(new AuditActor('user', $ownerId, 'هالة منصور'));
 
-            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class, DemoChallengesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class]);
+            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class, DemoChallengesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class]);
             AuditActor::forget();
         });
 

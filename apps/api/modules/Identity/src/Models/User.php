@@ -15,6 +15,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Identity\Contracts\PersonalChannel;
+use Modules\Identity\Contracts\SignInGate;
 use Modules\Identity\Database\Factories\UserFactory;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Enums\UserStatus;
@@ -151,7 +152,8 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
 
         return match ($panel->getId()) {
             'teach' => $this->hasRole(Role::Teacher),
-            'family' => $this->hasRole(Role::Student, Role::Guardian),
+            // A child whose guardian has not agreed yet (or took it back) stays out, even with a session from before.
+            'family' => $this->hasRole(Role::Student, Role::Guardian) && app(SignInGate::class)->refusal((string) $this->getKey()) === null,
             default => array_filter($this->roles(), fn (Role $role) => $role->isStaff()) !== [],
         };
     }

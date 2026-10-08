@@ -46,6 +46,7 @@
             "Modules\\Identity\\Database\\Seeders\\": "modules/Identity/database/seeders/",
             "Modules\\Catalog\\": "modules/Catalog/src/",
             "Modules\\People\\": "modules/People/src/",
+            "Modules\\People\\Database\\Seeders\\": "modules/People/database/seeders/",
             "Modules\\Communication\\": "modules/Communication/src/",
             "Modules\\Classroom\\Database\\Seeders\\": "modules/Classroom/database/seeders/",
             "Modules\\Communication\\Database\\Seeders\\": "modules/Communication/database/seeders/",

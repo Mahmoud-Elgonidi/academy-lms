@@ -41,6 +41,7 @@ return [
     'refused' => [
         'title' => 'You cannot enter this lesson',
         'body' => 'This link has expired or is not yours. Open the lesson from the app, or ask the academy for a new link.',
+        'consent' => 'Your account is waiting for your parent\'s consent. Once they agree you can join from here; for now, your parent can bring you in from their account.',
     ],
     'errors' => [
         'not_yours' => 'This lesson is not yours.',

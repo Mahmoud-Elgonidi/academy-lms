@@ -2,6 +2,7 @@
 
 namespace Modules\Identity;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Modules\Identity\Actions\CreateUser;
 use Modules\Identity\Authorization\AbilityMatrix;
@@ -53,5 +54,14 @@ final class IdentityService implements IdentityApi
         $path = URL::temporarySignedRoute('identity.welcome', now()->addDays(WelcomeController::LINK_DAYS), ['user' => $userId], absolute: false);
 
         return $this->directory->baseUrl($this->tenants->require()).$path;
+    }
+
+    public function endSessions(string $userId): void
+    {
+        PersonalAccessToken::query()->where('tokenable_type', (new User)->getMorphClass())->where('tokenable_id', $userId)->delete();
+        // Sessions kept elsewhere (Redis) end at their next request: the family panel asks the sign-in gate each time.
+        if (config('session.driver') === 'database') {
+            DB::table((string) config('session.table'))->where('user_id', $userId)->delete();
+        }
     }
 }

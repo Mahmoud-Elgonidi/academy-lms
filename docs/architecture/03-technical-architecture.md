@@ -145,6 +145,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
   - في اللوحات: نفس شاشة Filament بعد كلمة السر، وبعد الكود لمرة واحدة كمان (`SignIn`، والخطوة التانية متقفلة بـ `codePassed` متشفر لعشر دقايق).
   - في الـ API: `IssueAccessToken` هو اللي بيقرر لكل طرق الدخول (`auth/login`، و`auth/code/verify`، و`accounts/sign-in`). الحساب اللي شغّلها بياخد 403 من نوع `two-factor-required` ومعاه `two_factor_token` و`expires_at`، والـ token ده بيتبدّل بـ token الدخول في `POST /auth/two-factor` (الكود، أو كود استرجاع). الـ token متخزن hash في الـ cache، لمدة 5 دقايق، و5 محاولات، ومرة واحدة، وعلى نفس الأكاديمية (`PendingSignIns`). والدور اللي لازم يشغّلها ولسه ماشغّلهاش بياخد `two-factor-setup-required` من غير token: بيشغّلها من لوحة الإدارة الأول.
   - فريق المنصة بيصفّرها لشخص ضيّع موبايله وأكواده (`ResetTwoFactor`، بسبب، من "الدخول بحساب مستخدم")، وكل تغيير بيتسجل في `audit_logs` (`identity.two_factor_*`).
+- **بوابة الدخول** (`Identity\Contracts\SignInGate`): أي حد عايز يمنع دخول، بيقول السبب من غير ما Identity يعرف هو مين. People بيربطها بموافقة ولي الأمر (`ConsentSignInGate`). والبوابة بتتسأل في `IssueAccessToken::handle()` (403 من نوع `guardian-consent-required`)، و`canAccessPanel('family')`، وصفحة الدخول. فريق المنصة داخل بحساب حد بيعدّي. وتفاصيل الموافقة في [02 — القسم 10](02-domain-rules.md#10-موافقة-ولي-الأمر-على-حساب-الطفل).
 - **الأدوار ثابتة في الـ MVP**: `owner, admin, supervisor, scheduler, accountant, sales, teacher, student, guardian`.
   - مابنستخدمش "teams" بتاعة spatie/permission، لأن `setPermissionsTeamId()` حالة عامة ممكن تتسرب من request للتاني تحت Octane.
 
@@ -197,9 +198,9 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 | Module | الجداول الأساسية |
 |---|---|
 | Platform | `academies`، `academy_domains`، `academy_branding`، `branding_templates`، `saas_plans`، `saas_subscriptions`، `usage_counters`، `platform_admins` |
-| Identity | `users`، `roles/permissions`، `devices`، `otp_challenges`، `social_identities`، `consents`، `impersonations` |
+| Identity | `users`، `roles/permissions`، `devices`، `otp_challenges`، `social_identities`، `impersonations` |
 | Catalog | `subjects`، `levels`، `categories` |
-| People | `teacher_profiles`، `teacher_subjects`، `teacher_subject_categories`، `teacher_languages`، `student_profiles`، `guardian_student`، `supervisor_assignments` |
+| People | `teacher_profiles`، `teacher_subjects`، `teacher_subject_categories`، `teacher_languages`، `student_profiles`، `guardian_student`، `guardian_consents` (بتتضاف بس، والسحب مرة واحدة)، `people_settings` (سن الموافقة)، `supervisor_assignments` |
 | Curriculum | `programs`، `curriculum_versions`، `curriculum_nodes`، `node_resources`، `assessment_definitions`، `version_node_mappings` |
 | Enrollment | `enrollments`، `enrollment_teacher_assignments`، `enrollment_status_history` |
 | Scheduling | `teacher_shift_schedules`، `teacher_shift_rules`، `shift_proposals`، `shift_proposal_rules`، `shift_proposal_comments`، `teacher_time_off`، `availability_overrides`، `academy_holidays`، `recurring_slots`، `booking_holds`، `sessions`، `session_participants`، `attendance_segments`، `session_events`، `policy_sets`، `policy_set_versions`، `scheduling_conflicts`، `schedule_shift_notices` |
@@ -532,6 +533,7 @@ interface PaymentGateway
   - `family/lessons` (القادمة أو اللي فاتت، ومعاها الإجازات وتغييرات الساعة)، و`lessons/{id}/cancellation` (هيحصل إيه لو ألغيت، بالسياسة)، و`lessons/{id}/cancel`، و`lessons/{id}/refuse-substitute`. الطفل في شكل kids مابيلغيش.
   - `lessons/{id}/rating` (Evaluation): GET وPUT.
   - `family/balance`، و`family/invoices` (ومعاها لينك المستند الموقّع وطرق الدفع)، و`family/invoices/{id}/checkout` (Billing). الطالب اللي مابيدفعش مابيشوفش فلوس.
+  - `family/consents` (People): أولاد ولي الأمر اللي محتاجين موافقة، والنص اللي هيوافق عليه، و`family/consents/{student}` (موافق: `agree` و`version`) و`family/consents/{student}/withdraw`. لولي الأمر بس.
   - `learning/*`: الـ roadmap والتقارير والواجبات (كانت موجودة)، و`learning/journey`: رئيسية الطالب في شكل مرحلته (النجوم، والنقاط والرتبة، والأيام ورا بعض، والإنجازات، ومستويات كل كورس وحالة كل درس، والجاي، والميعاد المتوقع للإنهاء). الطالب نفسه أو أول ابن لولي الأمر (`FamilyView::learner`).
 - **الأخطاء**: عنوان الخطأ بلغة `Accept-Language` حتى لو الخطأ حصل قبل ما الأكاديمية تتعرف (كود أكاديمية غلط، route مش موجود). و404 مابيقولش أي تفاصيل (لا اسم class، ولا route، ولا أنهي أكاديمية).
 - **المدرس**: `teacher/lessons` (من يوم لعدد أيام)، و`teacher/students`، و`teacher/time-off` (عرض، وطلب، وسحب)، و`teacher/earnings?month=` (Payroll)، و`teacher/performance` (Evaluation، التقييمات من غير أسماء)، و`teacher/trials` وتقييم الحصة التجريبية (CRM)، و`teacher/shifts`، و`teacher/reports`، و`teacher/homework`.
@@ -755,7 +757,7 @@ interface PaymentGateway
 - [ ] مفيش محفظة نقدية.
 
 ### الأطفال وسلامتهم
-- [ ] **موافقة ولي الأمر موثّقة** قبل ما نجمع بيانات الطفل.
+- [x] **موافقة ولي الأمر موثّقة** قبل ما نجمع بيانات الطفل. (`guardian_consents`: مين وافق، وعلى أنهي إصدار من النص، وإمتى، ومنين. الطفل اللي تحت سن الموافقة مابيدخلش لحد ما ولي أمره يوافق، والسحب بيخرّجه من كل الأجهزة. [02 — القسم 10](02-domain-rules.md#10-موافقة-ولي-الأمر-على-حساب-الطفل).)
   - COPPA: تعديلات FTC في 2025 بتطلب سياسة احتفاظ مكتوبة وبرنامج أمن معلومات.
   - GDPR Art. 8: السن من 13 لـ 16 حسب الدولة.
   - UK Children's Code.

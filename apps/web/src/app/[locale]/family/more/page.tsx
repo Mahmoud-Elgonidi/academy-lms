@@ -8,14 +8,14 @@ import { Heading } from '@/components/ui';
 import { Unread } from '@/components/unread';
 import { liveOf } from '@/lib/live-server';
 import { family } from '@/lib/family/context';
-import { seesMoney } from '@/lib/family/rules';
+import { isGuardian, seesMoney } from '@/lib/family/rules';
 import { me } from '@/lib/viewer';
 
 /** On a phone: the places that are not tabs, the language, and signing out. */
 export default async function More() {
   const [fam, person, common, { unread }] = await Promise.all([family(), me(), getTranslations('common'), liveOf()]);
   const nav = await getTranslations(`nav.${fam.stage}`);
-  const { all, tabs } = itemsOf(fam.stage, seesMoney(fam.stage));
+  const { all, tabs } = itemsOf(fam.stage, seesMoney(fam.stage), isGuardian(fam.learners));
   const rest = all.filter((item) => !tabs.some((tab) => tab.href === item.href));
   const row = 'flex min-h-13 items-center gap-3 px-4 py-3';
   return (

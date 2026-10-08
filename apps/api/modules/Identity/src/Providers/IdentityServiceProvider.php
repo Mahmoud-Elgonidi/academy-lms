@@ -12,12 +12,14 @@ use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Contracts\OtpSender;
 use Modules\Identity\Contracts\PersonalChannel;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
+use Modules\Identity\Contracts\SignInGate;
 use Modules\Identity\IdentityService;
 use Modules\Identity\Models\OtpChallenge;
 use Modules\Identity\Models\PersonalAccessToken;
 use Modules\Identity\Models\User;
 use Modules\Identity\Otp\LogOtpSender;
 use Modules\Identity\Preferences\PreferenceStore;
+use Modules\Identity\SignIn\OpenSignInGate;
 
 final class IdentityServiceProvider extends ServiceProvider
 {
@@ -27,6 +29,8 @@ final class IdentityServiceProvider extends ServiceProvider
         $this->app->singleton(IdentityApi::class, IdentityService::class);
         // Codes go to the log until Communication binds the real sender.
         $this->app->singletonIf(OtpSender::class, LogOtpSender::class);
+        // Per request: a module above may bind its own (People: a child waits for a guardian's consent).
+        $this->app->scopedIf(SignInGate::class, OpenSignInGate::class);
 
         // One registry per process: modules declare their preferences in boot().
         $this->app->singleton(PreferenceStore::class);

@@ -458,6 +458,78 @@ abstract class AppLocalizations {
   /// **'حسابات الإدارة بتشتغل من الموقع. افتح لوحة الأكاديمية من الكمبيوتر.'**
   String get webOnlyBody;
 
+  /// No description provided for @privacyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'خصوصية الأولاد'**
+  String get privacyTitle;
+
+  /// No description provided for @privacyLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأولاد اللي تحت {age} سنة محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.'**
+  String privacyLead(int age);
+
+  /// No description provided for @privacyNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش ولاد محتاجين موافقة.'**
+  String get privacyNone;
+
+  /// No description provided for @consentWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'مستني موافقتك'**
+  String get consentWaiting;
+
+  /// No description provided for @consentGranted.
+  ///
+  /// In ar, this message translates to:
+  /// **'موافق عليه'**
+  String get consentGranted;
+
+  /// No description provided for @consentAgree.
+  ///
+  /// In ar, this message translates to:
+  /// **'موافق'**
+  String get consentAgree;
+
+  /// No description provided for @consentAgreed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام، {name} يقدر يدخل دلوقتي.'**
+  String consentAgreed(String name);
+
+  /// No description provided for @consentWithdraw.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسحب الموافقة'**
+  String get consentWithdraw;
+
+  /// No description provided for @consentWithdrawConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} هيخرج من حسابه على كل الأجهزة، ومش هيقدر يدخل لحد ما توافق تاني. متأكد؟'**
+  String consentWithdrawConfirm(String name);
+
+  /// No description provided for @consentWithdrawn.
+  ///
+  /// In ar, this message translates to:
+  /// **'سحبت موافقتك، و{name} خرج من حسابه.'**
+  String consentWithdrawn(String name);
+
+  /// No description provided for @consentNudge.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{{names} مستني موافقتك عشان يدخل حسابه.} other{{names} مستنيين موافقتك عشان يدخلوا حساباتهم.}}'**
+  String consentNudge(int n, String names);
+
+  /// No description provided for @consentNudgeAction.
+  ///
+  /// In ar, this message translates to:
+  /// **'اقرا ووافق'**
+  String get consentNudgeAction;
+
   /// No description provided for @navHome.
   ///
   /// In ar, this message translates to:

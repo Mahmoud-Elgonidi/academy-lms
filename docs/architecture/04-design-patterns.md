@@ -25,9 +25,9 @@
 | # | Module | المسؤولية | أهم الـ Events |
 |---|---|---|---|
 | M1 | **Platform** | الأكاديميات، والدومينات، والـ branding، وباقات SaaS، والحدود، والاستخدام، والـ Cells | `AcademyCreated`، `AcademySuspended`، `AcademyPlanChanged`، `DomainVerified` |
-| M2 | **Identity** | تسجيل الدخول، والدخول بخطوتين، والأدوار، والأجهزة، والـ OTP، والموافقات، والدخول بحساب مستخدم | `UserCreated`، `UserInvited`، `RoleAssigned`، `ConsentGranted`، `ConsentRevoked` |
+| M2 | **Identity** | تسجيل الدخول، والدخول بخطوتين، والأدوار، والأجهزة، والـ OTP، والدخول بحساب مستخدم، وبوابة الدخول (`SignInGate`) | `UserCreated`، `UserInvited`، `RoleAssigned` |
 | M3 | **Catalog** | المواد، والمستويات، والتصنيفات | — |
-| M4 | **People** | ملفات المدرسين والطلاب، وعلاقات أولياء الأمور | `TeacherOnboarded`، `TeacherSubjectsChanged`، `TeacherTierChanged`، `StudentCreated`، `GuardianLinked`، `UserTimezoneChanged` |
+| M4 | **People** | ملفات المدرسين والطلاب، وعلاقات أولياء الأمور، وموافقة ولي الأمر على حساب الطفل | `TeacherOnboarded`، `TeacherSubjectsChanged`، `TeacherTierChanged`، `StudentCreated`، `GuardianLinked`، `UserTimezoneChanged`، `ConsentRequested`، `ConsentGranted`، `ConsentWithdrawn` |
 | M5 | **Curriculum** | البرامج، والإصدارات، وعُقد المنهج، والموارد، وتعريفات الاختبارات | `CurriculumVersionPublished` |
 | M6 | **Enrollment** | الاتفاق التعليمي، وتغيير المدرس | `EnrollmentCreated`، `EnrollmentActivated`، `EnrollmentPaused`، `EnrollmentResumed`، `EnrollmentEnded`، `TeacherReassigned` |
 | M7 | **Scheduling** | **قلب النظام**: الشفتات ومقترحاتها، والإجازات، والتوافر، والمطابقة، والحجز، ودورة حياة الحصة، والسياسات، وتغيير التوقيت | `SessionScheduled`، `SessionRescheduled`، `SessionTeacherSubstituted`، `SessionCancelled`، `SessionStarted`، `SessionFinalized`، `SessionFlaggedForReview`، `TeacherLate`، `DstShiftUpcoming`، `DstShiftDecided`، `SlotTimesShifted`، `TeacherLessonsShifted`، `SchedulingConflictDetected`، `ShiftProposalSubmitted`، `ShiftProposalChangesRequested`، `ShiftProposalCountered`، `ShiftProposalApproved`، `ShiftProposalRejected`، `ShiftRulesChanged`، `TimeOffRequested`، `TimeOffDecided`، `HolidayDeclared`، `TrialLessonBooked` |
@@ -59,7 +59,7 @@ flowchart TD
     Scheduling --> People & Catalog & Enrollment & Credits & Billing & Communication
     Enrollment --> People & Catalog & Curriculum
     Curriculum --> Catalog
-    People --> Identity & Catalog
+    People --> Identity & Catalog & Communication
     Communication --> Identity & Platform
     Identity --> Platform
     Catalog --> Platform
@@ -93,6 +93,7 @@ flowchart TD
      - صفحة العميل بتفتح "ابحث عن مدرس" باسم الـ route وparameters في الـ URL، وده بيفضل داخل حدود الـ module.
 6. **الدخول بكود والـ API بتاع التطبيقات**:
    - Identity تحت Communication، فمينفعش تبعت رسالة بنفسها. Identity بتعرّف `OtpSender` في Contracts بتاعتها (ومعاه `LogOtpSender` افتراضي)، وCommunication بتربط التنفيذ الحقيقي (واتساب، SMS، إيميل). نفس فكرة `TrialConversionRates`.
+   - **موافقة ولي الأمر** بنفس الفكرة: Identity بتعرّف `SignInGate` (ومعاه `OpenSignInGate` اللي مابيمنعش حد)، وPeople بيربط `ConsentSignInGate`. Identity بتسأل البوابة في كل طرق الدخول من غير ما تعرف حاجة عن الأولاد والأعمار. وClassroom بيسأل People (`PeopleApi::consentState`) قبل ما يدّي الطفل مكانه في الحصة. وPeople بقى فوق Communication عشان يبعت طلب الموافقة بنفسه (`NotificationsApi`)، وCommunication مابيعرفش People.
    - الاكتشاف محتاج يدوّر على الشخص في كل الأكاديميات، ودي قراءة على `pgsql_platform`، فبتعدّي على عقد Platform `AccountDirectory`. Identity مابتلمسش الـ connection ده.
    - الـ endpoints بتاعة التطبيقات كل واحد في الـ module صاحب البيانات (`routes/api.php` بتاعه)، وبتنادي نفس الـ Actions والـ queries اللي الشاشات بتناديها. اللي كان جوه صفحة Filament واتحتاج في الـ API اتنقل لـ query مشتركة (`FamilyNotices`، `FamilyCancellation`، `TeacherStudents`، `TeacherTrials`).
    - `Idempotency-Key` middleware في SharedKernel (`idempotent`)، بيتحط على الـ route نفسه.

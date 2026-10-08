@@ -166,3 +166,14 @@ export type FamilyReport = {
 };
 
 export type { Homework, Roadmap };
+
+/** A guardian's consent to a child's account (GET /v1/family/consents). */
+export type ChildConsent = {
+  student: { id: string; name: string };
+  state: 'waiting' | 'granted';
+  granted_at: LocalTime | null;
+  by: string | null;
+  can_withdraw: boolean;
+  text: { version: number; title: string; intro: string; sections: { title: string; body: string }[]; agree: string };
+};
+export type Consents = { age: number; children: ChildConsent[] };

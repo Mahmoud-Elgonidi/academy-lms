@@ -43,6 +43,12 @@ return [
             'recovery_codes_renewed' => ':name عمل أكواد استرجاع جديدة',
             'two_factor_reset' => 'فريق المنصة صفّر الدخول بخطوتين لـ :name: :reason',
         ],
+        'people' => [
+            'consent_granted' => ':guardian وافق على حساب :student (:via)',
+            'consent_recorded' => 'تسجيل موافقة ولي أمر :student من الإدارة: :note',
+            'consent_withdrawn' => ':guardian سحب موافقته على حساب :student',
+            'consent_age_saved' => 'سن موافقة ولي الأمر بقى أقل من :age سنة',
+        ],
         'impersonation' => [
             'started' => 'دخول بحساب :user لمدة :minutes دقيقة: :reason',
             'ended' => 'انتهى الدخول بحساب :user: :how',
@@ -61,6 +67,7 @@ return [
         'kind' => ['bonus' => 'مكافأة', 'deduction' => 'خصم'],
         'outcome' => ['completed' => 'اتعملت', 'teacher_absent' => 'غياب المدرس', 'student_absent' => 'غياب الطالب', 'cancelled_makeup' => 'اتلغت بتعويض'],
         'mode' => ['test' => 'تجريبي', 'live' => 'حقيقي'],
+        'via' => ['family' => 'من حسابه', 'link' => 'من اللينك اللي وصله', 'staff' => 'سجلتها الإدارة'],
         'how' => ['exit' => 'خرج بنفسه', 'expired' => 'الوقت خلص', 'ended' => 'اتقفل من لوحة المنصة'],
     ],
     'groups' => [
@@ -69,6 +76,7 @@ return [
         'payroll' => 'المرتبات',
         'import' => 'الاستيراد',
         'identity' => 'الحسابات',
+        'people' => 'الطلاب وأولياء الأمور',
         'impersonation' => 'دخول فريق المنصة',
         'platform' => 'المنصة',
     ],

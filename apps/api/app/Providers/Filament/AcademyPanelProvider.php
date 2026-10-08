@@ -31,6 +31,7 @@ use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\Import\Filament\ImportPlugin;
 use Modules\Learning\Filament\LearningPlugin;
 use Modules\Payroll\Filament\PayrollPlugin;
+use Modules\People\Filament\PeoplePlugin;
 use Modules\Platform\Filament\PlatformPlugin;
 use Modules\Scheduling\Filament\SchedulingPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
@@ -84,6 +85,7 @@ final class AcademyPanelProvider extends PanelProvider
             ->authMiddleware([Authenticate::class, OpenFirstAllowedScreen::class], isPersistent: true)
             ->plugins([
                 SchedulingPlugin::make(),
+                PeoplePlugin::make(),
                 CrmPlugin::make(),
                 BillingPlugin::make(),
                 CurriculumPlugin::make(),

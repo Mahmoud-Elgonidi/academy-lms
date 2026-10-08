@@ -16,6 +16,7 @@ use Filament\Schemas\Components\RenderHook;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Validation\ValidationException;
@@ -23,6 +24,9 @@ use Livewire\Attributes\Locked;
 use Modules\Identity\Accounts\AccountLookup;
 use Modules\Identity\Actions\Otp\RequestSignInCode;
 use Modules\Identity\Actions\Otp\VerifySignInCode;
+use Modules\Identity\Contracts\SignInGate;
+use Modules\Identity\Enums\Role;
+use Modules\Identity\Models\User;
 use SensitiveParameter;
 use Throwable;
 
@@ -127,8 +131,14 @@ final class SignIn extends Login
             throw ValidationException::withMessages(['data.code' => $e->errors()['code'] ?? [__('identity::otp.expired')]]);
         }
 
-        // The code was right, but not for this door (a parent at /admin): start again.
-        if (! $this->isUserAllowedToAccessPanel($user)) {
+        // The code was right, but not for this door (a parent at /admin), or not yet (a child waiting for a guardian): start again.
+        try {
+            $allowed = $this->isUserAllowedToAccessPanel($user);
+        } catch (ValidationException $held) {
+            $this->reset('challengeId', 'sentTo', 'channel', 'channels');
+            throw $held;
+        }
+        if (! $allowed) {
             $this->reset('challengeId', 'sentTo', 'channel', 'channels');
             throw ValidationException::withMessages(['data.email' => __('filament-panels::auth/pages/login.messages.failed')]);
         }
@@ -148,6 +158,25 @@ final class SignIn extends Login
         session()->regenerate();
 
         return app(LoginResponse::class);
+    }
+
+    /**
+     * Asked once the password or the code is right. Someone the sign-in gate
+     * holds back (a child whose guardian has not agreed yet) hears why,
+     * instead of "these credentials do not match".
+     */
+    protected function isUserAllowedToAccessPanel(Authenticatable $user): bool
+    {
+        if (parent::isUserAllowedToAccessPanel($user)) {
+            return true;
+        }
+        if ($user instanceof User && $user->isActive() && $user->hasRole(Role::Student, Role::Guardian) && Filament::getCurrentOrDefaultPanel()->getId() === 'family'
+            && ($refusal = app(SignInGate::class)->refusal($user->id))) {
+            $this->userUndertakingMultiFactorAuthentication = null;
+            throw ValidationException::withMessages(['data.email' => $refusal->message]);
+        }
+
+        return false;
     }
 
     /** The authenticator app's code after a right one-time code, within ten minutes of it. */

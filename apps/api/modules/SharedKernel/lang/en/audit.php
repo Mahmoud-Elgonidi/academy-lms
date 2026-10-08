@@ -43,6 +43,12 @@ return [
             'recovery_codes_renewed' => ':name made new recovery codes',
             'two_factor_reset' => 'Two-step sign-in of :name reset by the platform team: :reason',
         ],
+        'people' => [
+            'consent_granted' => ':guardian agreed to :student\'s account (:via)',
+            'consent_recorded' => 'A guardian\'s consent for :student recorded by the office: :note',
+            'consent_withdrawn' => ':guardian withdrew their consent to :student\'s account',
+            'consent_age_saved' => 'Guardians now consent for students under :age',
+        ],
         'impersonation' => [
             'started' => 'Signed in as :user for :minutes minutes: :reason',
             'ended' => 'Sign-in as :user ended: :how',
@@ -61,6 +67,7 @@ return [
         'kind' => ['bonus' => 'Bonus', 'deduction' => 'Deduction'],
         'outcome' => ['completed' => 'taught', 'teacher_absent' => 'teacher absent', 'student_absent' => 'student absent', 'cancelled_makeup' => 'cancelled with a makeup'],
         'mode' => ['test' => 'test', 'live' => 'live'],
+        'via' => ['family' => 'from their account', 'link' => 'from the link they got', 'staff' => 'recorded by the office'],
         'how' => ['exit' => 'they left', 'expired' => 'time ran out', 'ended' => 'ended from the console'],
     ],
     'groups' => [
@@ -69,6 +76,7 @@ return [
         'payroll' => 'Payroll',
         'import' => 'Imports',
         'identity' => 'Accounts',
+        'people' => 'Students and guardians',
         'impersonation' => 'Platform sign-ins',
         'platform' => 'Platform',
     ],

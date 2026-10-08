@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/auth/session_cubit.dart';
@@ -8,6 +9,7 @@ import '../../../../core/network/api_problem.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/formats.dart';
 import '../../../../shared/widgets/lms.dart';
+import '../../../consent/presentation/privacy_page.dart';
 import '../../data/profile_repository.dart';
 import '../widgets/accounts_card.dart';
 
@@ -29,20 +31,48 @@ class AccountPage extends StatelessWidget {
         listener: (context, _) => context.read<LoadCubit<List<DeviceSession>>>().load(),
         child: ListView(
           padding: pagePadding,
-          children: const [
-            AccountsCard(),
-            SizedBox(height: 14),
-            _ClockPrompt(),
-            _Settings(),
-            SizedBox(height: 18),
-            _Devices(),
-            SizedBox(height: 18),
-            _SignOut(),
+          children: [
+            const AccountsCard(),
+            const SizedBox(height: 14),
+            if (!standalone) const _Privacy(),
+            const _ClockPrompt(),
+            const _Settings(),
+            const SizedBox(height: 18),
+            const _Devices(),
+            const SizedBox(height: 18),
+            const _SignOut(),
           ],
         ),
       ),
     ),
   );
+}
+
+/// A guardian's way to their children's privacy (their consent to each child's account).
+class _Privacy extends StatelessWidget {
+  const _Privacy();
+
+  @override
+  Widget build(BuildContext context) {
+    final account = context.watch<SessionCubit>().state.current;
+    if (account == null || !account.isGuardian) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const ConsentNudge(),
+        LmsCard(
+          padding: EdgeInsets.zero,
+          child: ListTile(
+            leading: const Icon(Icons.verified_user_outlined),
+            title: Text(context.l10n.privacyTitle, style: context.text.titleSmall),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.go('/family/me/privacy'),
+          ),
+        ),
+        const SizedBox(height: 14),
+      ],
+    );
+  }
 }
 
 class _ClockPrompt extends StatelessWidget {

@@ -5,6 +5,7 @@ return [
     'unauthenticated' => 'لازم تسجّل الدخول.',
     'forbidden' => 'غير مسموح لك بالقيام بهذا.',
     'two-factor-required' => 'اكتب الكود اللي في تطبيق المصادقة.',
+    'guardian-consent-required' => 'الحساب ده مستني موافقة ولي الأمر.',
     'two-factor-setup-required' => 'شغّل الدخول بخطوتين الأول.',
     'academy-suspended' => 'هذه الأكاديمية موقوفة.',
     'academy-not-found' => 'الأكاديمية غير موجودة.',

@@ -6,6 +6,8 @@ use Carbon\CarbonImmutable;
 use Modules\People\Actions\LinkGuardian;
 use Modules\People\Actions\SaveStudentProfile;
 use Modules\People\Actions\SaveTeacherProfile;
+use Modules\People\Consent\ConsentRules;
+use Modules\People\Contracts\DTOs\ConsentState;
 use Modules\People\Contracts\DTOs\StudentProfileData;
 use Modules\People\Contracts\DTOs\TeacherProfileData;
 use Modules\People\Contracts\LearnerStage;
@@ -19,6 +21,7 @@ final class PeopleService implements PeopleApi
         private readonly LinkGuardian $linkGuardian,
         private readonly SaveTeacherProfile $saveTeacherProfile,
         private readonly SaveStudentProfile $saveStudentProfile,
+        private readonly ConsentRules $consents,
     ) {}
 
     public function saveStudentProfile(string $studentId, ?CarbonImmutable $birthDate, ?LearnerStage $stage): void
@@ -55,5 +58,10 @@ final class PeopleService implements PeopleApi
     public function studentsOf(string $guardianId): array
     {
         return GuardianStudent::query()->where('guardian_id', $guardianId)->pluck('student_id')->all();
+    }
+
+    public function consentState(string $studentId): ConsentState
+    {
+        return $this->consents->state($studentId);
     }
 }

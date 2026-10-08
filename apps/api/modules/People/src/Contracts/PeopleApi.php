@@ -3,6 +3,7 @@
 namespace Modules\People\Contracts;
 
 use Carbon\CarbonImmutable;
+use Modules\People\Contracts\DTOs\ConsentState;
 use Modules\People\Contracts\DTOs\StudentProfileData;
 use Modules\People\Contracts\DTOs\TeacherProfileData;
 
@@ -23,4 +24,7 @@ interface PeopleApi
     public function saveStudentProfile(string $studentId, ?CarbonImmutable $birthDate, ?LearnerStage $stage): void;
 
     public function studentProfile(string $studentId, ?CarbonImmutable $today = null): StudentProfileData;
+
+    /** Whether a student's account needs a guardian's consent, and whether one stands (the child's own links and sign-in wait for it). */
+    public function consentState(string $studentId): ConsentState;
 }

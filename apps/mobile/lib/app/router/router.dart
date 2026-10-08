@@ -11,6 +11,7 @@ import '../../features/auth/presentation/pages/accounts_page.dart';
 import '../../features/auth/presentation/pages/code_page.dart';
 import '../../features/auth/presentation/pages/password_page.dart';
 import '../../features/auth/presentation/pages/two_factor_page.dart';
+import '../../features/consent/presentation/privacy_page.dart';
 import '../../features/auth/presentation/pages/welcome_page.dart';
 import '../../features/auth/presentation/pages/web_only_page.dart';
 import '../../features/billing/presentation/pages/money_page.dart';
@@ -153,7 +154,7 @@ GoRouter buildRouter(SessionCubit session) {
           branch('/family/lessons', (_) => const LessonsPage()),
           branch('/family/progress', (_) => const ProgressPage()),
           branch('/family/money', (_) => const MoneyPage()),
-          branch('/family/me', (_) => const AccountPage()),
+          branch('/family/me', (_) => const AccountPage(), routes: [page('privacy', (_) => const PrivacyPage())]),
         ],
       ),
 

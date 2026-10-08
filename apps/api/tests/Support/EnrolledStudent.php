@@ -17,7 +17,7 @@ use Modules\Scheduling\Contracts\DTOs\EnrollmentTerms;
 use Modules\Scheduling\Domain\Models\ShiftSchedule;
 
 /**
- * Monday 5 October 2026, 10:00 in Cairo: a Quran student in London enrolled
+ * Monday 5 October 2026, 10:00 in Cairo: an adult Quran student in London enrolled
  * twice a week (Tuesdays and Saturdays, 18:00 Cairo) with a Cairo teacher on
  * an unpaid 8 × 30 min plan; a second teacher (Riyadh) teaches the same
  * subject on the same days.
@@ -34,6 +34,8 @@ trait EnrolledStudent
         $this->other = User::factory()->withRole(Role::Teacher)->create(['timezone' => 'Asia/Riyadh']);
         $this->student = User::factory()->withRole(Role::Student)->create(['timezone' => 'Europe/London']);
         $guardian = User::factory()->withRole(Role::Guardian)->create();
+        // An adult learner, whose guardian pays: no guardian's consent to wait for (GuardianConsentTest covers children).
+        app(PeopleApi::class)->saveStudentProfile($this->student->id, CarbonImmutable::parse('2004-05-01'), null);
         app(PeopleApi::class)->linkGuardian($guardian->id, $this->student->id);
 
         foreach ([[$this->teacher, 'Africa/Cairo', '17:00', 'female'], [$this->other, 'Asia/Riyadh', '18:00', 'male']] as [$t, $tz, $start, $gender]) {

@@ -141,6 +141,56 @@
   "startAgain": "ابدأ من الأول",
   "webOnlyTitle": "الحساب ده للإدارة",
   "webOnlyBody": "حسابات الإدارة بتشتغل من الموقع. افتح لوحة الأكاديمية من الكمبيوتر.",
+  "privacyTitle": "خصوصية الأولاد",
+  "privacyLead": "الأولاد اللي تحت {age} سنة محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.",
+  "@privacyLead": {
+    "placeholders": {
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "privacyNone": "مفيش ولاد محتاجين موافقة.",
+  "consentWaiting": "مستني موافقتك",
+  "consentGranted": "موافق عليه",
+  "consentAgree": "موافق",
+  "consentAgreed": "تمام، {name} يقدر يدخل دلوقتي.",
+  "@consentAgreed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "consentWithdraw": "اسحب الموافقة",
+  "consentWithdrawConfirm": "{name} هيخرج من حسابه على كل الأجهزة، ومش هيقدر يدخل لحد ما توافق تاني. متأكد؟",
+  "@consentWithdrawConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "consentWithdrawn": "سحبت موافقتك، و{name} خرج من حسابه.",
+  "@consentWithdrawn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "consentNudge": "{n, plural, =1{{names} مستني موافقتك عشان يدخل حسابه.} other{{names} مستنيين موافقتك عشان يدخلوا حساباتهم.}}",
+  "@consentNudge": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "consentNudgeAction": "اقرا ووافق",
   "navHome": "الرئيسية",
   "navLessons": "الحصص",
   "navProgress": "التقدم",

@@ -29,6 +29,8 @@ final class AbilityMatrix
             Ability::ImportData => [Role::Owner, Role::Admin],
             // The academy's own audit log, the platform team's sign-ins included.
             Ability::ViewAuditLog => [Role::Owner, Role::Admin],
+            // Guardians' consent for children's accounts: who follows the families day to day.
+            Ability::ManageConsents => [Role::Owner, Role::Admin, Role::Supervisor],
         };
     }
 

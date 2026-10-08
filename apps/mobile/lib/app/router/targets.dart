@@ -24,6 +24,7 @@ String targetOf(String? screen, String? id, Area area) {
   return switch ((area, screen)) {
     (_, 'session' || 'holiday' || 'lesson_rating') => '$base/lessons',
     (Area.family, 'invoice') => '/family/money',
+    (Area.family, 'guardian_consent') => '/family/me/privacy',
     (Area.family, 'report' || 'roadmap') => '/family/progress',
     (Area.family, 'challenges') => '/family/home/challenges',
     (Area.kids, 'challenges') => '/kids/missions',

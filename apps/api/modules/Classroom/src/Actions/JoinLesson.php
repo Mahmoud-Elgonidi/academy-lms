@@ -33,7 +33,8 @@ final class JoinLesson
         $lesson = $this->lessons->lesson($sessionId);
         $seat = $lesson === null ? null : $this->access->seatFor($userId, $lesson);
         if ($lesson === null || $seat === null) {
-            throw ValidationException::withMessages(['lesson' => __('classroom::classroom.errors.not_yours')]);
+            $consent = $lesson !== null && $this->access->waitsForConsent($userId, $lesson);
+            throw ValidationException::withMessages(['lesson' => __($consent ? 'classroom::classroom.refused.consent' : 'classroom::classroom.errors.not_yours')]);
         }
         if (! $lesson->isOpen() || $now->greaterThan($lesson->endsAt->addMinutes(config('classroom.closes_after_min')))) {
             throw ValidationException::withMessages(['lesson' => __('classroom::classroom.errors.closed')]);

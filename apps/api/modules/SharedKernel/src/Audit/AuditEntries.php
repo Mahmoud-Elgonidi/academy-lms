@@ -18,6 +18,7 @@ final class AuditEntries
         'payroll' => ['payroll.'],
         'import' => ['import.'],
         'identity' => ['identity.'],
+        'people' => ['people.'],
         'impersonation' => ['impersonation.'],
         'platform' => ['academy.', 'platform.'],
     ];

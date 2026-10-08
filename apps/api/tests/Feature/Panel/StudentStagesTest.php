@@ -18,6 +18,7 @@ use Modules\Learning\Filament\Family\JourneyWidget;
 use Modules\Learning\Filament\Family\LearningHomeWidget;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\JourneyQuery;
+use Modules\People\Actions\Consent\GrantConsent;
 use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\LearnerStage;
 use Modules\People\Contracts\PeopleApi;
@@ -50,6 +51,10 @@ afterEach(fn () => CarbonImmutable::setTestNow());
 function aged(User $student, ?int $years, ?LearnerStage $chosen = null): void
 {
     app(PeopleApi::class)->saveStudentProfile($student->id, $years === null ? null : CarbonImmutable::parse('2026-06-01')->subYears($years), $chosen);
+    // A child's guardian has agreed to their account (GuardianConsentTest covers waiting for it).
+    if (app(PeopleApi::class)->consentState($student->id)->waiting()) {
+        app(GrantConsent::class)->handle($student->id, (string) DB::table('guardian_student')->where('student_id', $student->id)->value('guardian_id'), 'family');
+    }
     app()->forgetInstance(FamilyView::class);   // its answers are kept for the request
 }
 

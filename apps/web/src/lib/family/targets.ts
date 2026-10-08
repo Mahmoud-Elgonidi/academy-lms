@@ -18,6 +18,8 @@ export function familyTargetOf(screen: string | null | undefined, money: boolean
       return '/family/challenges';
     case 'homework':
       return '/family/homework';
+    case 'guardian_consent':
+      return '/family/privacy';
     default:
       return '/family';
   }

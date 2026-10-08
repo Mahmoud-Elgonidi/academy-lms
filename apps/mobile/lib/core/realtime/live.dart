@@ -49,6 +49,7 @@ class Live {
   static const homework = 'homework.changed';
   static const inbox = 'inbox.changed';
   static const payments = 'payments.changed';
+  static const consents = 'consents.changed';
 
   /// Everything may have changed: after the app comes back, the socket comes back, or the relay restarts.
   static const resync = 'resync';

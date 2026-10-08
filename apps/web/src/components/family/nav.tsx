@@ -13,14 +13,14 @@ function useActive() {
   return (href: string) => (href === '/family' ? path === '/family' : path === href || path.startsWith(`${href}/`));
 }
 
-export function SideNav({ stage, money, unread }: { stage: Stage; money: boolean; unread: number }) {
+export function SideNav({ stage, money, guardian = false, unread }: { stage: Stage; money: boolean; guardian?: boolean; unread: number }) {
   const t = useTranslations(`nav.${stage}`);
   const common = useTranslations('common');
   const active = useActive();
   return (
     <nav aria-label={t('menu')}>
       <ul className="space-y-0.5">
-        {itemsOf(stage, money).all.map((item) => (
+        {itemsOf(stage, money, guardian).all.map((item) => (
           <li key={item.href}>
             <Link
               href={item.href}

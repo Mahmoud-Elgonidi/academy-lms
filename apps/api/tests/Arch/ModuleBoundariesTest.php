@@ -76,7 +76,7 @@ arch('communication knows only identity\'s and platform\'s contracts: modules ca
     ]);
 
 arch('modules send messages only through communication\'s contracts')
-    ->expect(['Modules\Learning', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import'])
+    ->expect(['Modules\People', 'Modules\Learning', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import'])
     ->not->toUse([
         'Modules\Communication\Models', 'Modules\Communication\Actions', 'Modules\Communication\Channels',
         'Modules\Communication\Templates', 'Modules\Communication\Jobs', 'Modules\Communication\Domain',

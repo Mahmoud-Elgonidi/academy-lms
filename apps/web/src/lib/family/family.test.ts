@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { itemsOf } from './nav-items';
-import { lessonActionsFor, seesMoney } from './rules';
+import { isGuardian, lessonActionsFor, seesMoney } from './rules';
 import { familyTargetOf } from './targets';
 import { STAGES } from './types';
 
@@ -66,5 +66,16 @@ describe('where a notification opens', () => {
     expect(familyTargetOf('invoice', false)).toBe('/family');
     expect(familyTargetOf('write_report', true)).toBe('/family');
     expect(familyTargetOf(null, true)).toBe('/family');
+    expect(familyTargetOf('guardian_consent', true)).toBe('/family/privacy');
+  });
+});
+
+describe("a guardian's children's privacy", () => {
+  it('is a place of the classic look for guardians only, never a tab', () => {
+    expect(itemsOf('classic', true, true).all.map((i) => i.key)).toContain('privacy');
+    expect(itemsOf('classic', true, true).tabs.map((i) => i.key)).not.toContain('privacy');
+    expect(itemsOf('classic', true).all.map((i) => i.key)).not.toContain('privacy');
+    expect(isGuardian([{ is_self: true }])).toBe(false);
+    expect(isGuardian([{ is_self: false }])).toBe(true);
   });
 });

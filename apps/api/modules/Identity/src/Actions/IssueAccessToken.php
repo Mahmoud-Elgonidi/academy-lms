@@ -3,6 +3,7 @@
 namespace Modules\Identity\Actions;
 
 use Carbon\CarbonImmutable;
+use Modules\Identity\Contracts\SignInGate;
 use Modules\Identity\Models\User;
 use Modules\Identity\TwoFactor\PendingSignIns;
 use Modules\Identity\TwoFactor\TwoFactor;
@@ -15,14 +16,22 @@ use Modules\SharedKernel\Time\LocalTimePresenter;
  * "two-factor-required" with a token for the second step (auth/two-factor);
  * the owner, admins and accountants who have not set it up yet get
  * "two-factor-setup-required" (they set it up in the back office first).
+ * Someone the sign-in gate holds back (a child waiting for a guardian's
+ * consent) gets its problem before any of that.
  */
 final class IssueAccessToken
 {
-    public function __construct(private readonly PendingSignIns $pending) {}
+    public function __construct(
+        private readonly PendingSignIns $pending,
+        private readonly SignInGate $gate,
+    ) {}
 
     /** @return array{user: User, token: string, expires_at: ?CarbonImmutable} */
     public function handle(User $user, string $deviceName): array
     {
+        if ($refusal = $this->gate->refusal($user->id)) {
+            throw new ProblemException(403, $refusal->type, $refusal->message);
+        }
         if (TwoFactor::enabledFor($user)) {
             $step = $this->pending->begin($user, $deviceName);
             throw new ProblemException(403, 'two-factor-required', __('identity::two_factor.api.required'), [

@@ -11,6 +11,7 @@ import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../../challenges/presentation/widgets/teasers.dart';
+import '../../../consent/presentation/privacy_page.dart';
 import '../../data/home_loader.dart';
 import '../bloc/learner_cubit.dart';
 import '../widgets/learner_switcher.dart';
@@ -99,6 +100,8 @@ class _Home extends StatelessWidget {
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
       children: staggered(context, [
+        // A guardian's child waiting for their consent to sign in.
+        if (context.read<SessionCubit>().state.current?.isGuardian ?? false) const ConsentNudge(),
         NextLessonCard(lesson: home.next, onOpened: () => context.read<LoadCubit<FamilyHome>>().load()),
         Align(
           alignment: AlignmentDirectional.centerEnd,
