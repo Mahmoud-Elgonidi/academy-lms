@@ -28,6 +28,23 @@
         .cb-lesson { padding-block: .45rem; padding-inline-start: 2.6rem; border-top: 1px dashed var(--gray-100); }
         .cb-level > .cb-lesson { padding-inline-start: 1.6rem; }
         .cb-add { display: flex; gap: 1rem; padding: .45rem 1rem .6rem; padding-inline-start: 2.6rem; }
+        .cb-mats { display: inline-flex; align-items: center; gap: .25rem; border: 1px solid var(--gray-200); background: none; border-radius: 999px; padding: .1rem .55rem; font-size: .72rem; color: var(--gray-500); cursor: pointer; white-space: nowrap; }
+        .cb-mats svg { width: .8rem; height: .8rem; }
+        .cb-mats[data-has] { color: var(--primary-700); border-color: var(--primary-200); background: var(--primary-50); }
+        .cb-mats[aria-expanded="true"] { border-color: var(--primary-500); }
+        .cb-materials { margin-inline-start: 2.6rem; margin-inline-end: 1rem; margin-bottom: .5rem; padding: .5rem; border-radius: var(--radius-lg); background: var(--gray-50); display: flex; flex-direction: column; gap: .35rem; }
+        .cb-mat { display: flex; align-items: center; gap: .6rem; padding: .35rem .5rem; border-radius: var(--radius-md, .5rem); background: white; border: 1px solid var(--gray-200); }
+        .cb-mat small { color: var(--gray-500); font-size: .72rem; overflow-wrap: anywhere; }
+        .cb-mat-type { font-size: .68rem; font-weight: 700; padding: .05rem .45rem; border-radius: 999px; background: var(--gray-100); color: var(--gray-700); white-space: nowrap; }
+        .cb-mat-type[data-t="pdf"] { background: var(--danger-50); color: var(--danger-700); }
+        .cb-mat-type[data-t="audio"], .cb-mat-type[data-t="video"] { background: var(--primary-50); color: var(--primary-700); }
+        .cb-mat-type[data-t="link"] { background: var(--info-50); color: var(--info-700); }
+        .cb-mat a.cb-move { text-decoration: none; }
+        .cb-mat-empty { color: var(--gray-500); font-size: .8rem; padding: .25rem .5rem; }
+        .cb-mat-add { display: flex; gap: 1rem; padding: .15rem .5rem; }
+        .dark .cb-materials { background: var(--gray-800); }
+        .dark .cb-mat { background: var(--gray-900); border-color: var(--gray-700); }
+        .dark .cb-mats { border-color: var(--gray-700); }
         .cb-empty { padding: 2rem; text-align: center; color: var(--gray-500); border: 1px dashed var(--gray-300); border-radius: var(--radius-xl); }
         .dark .cb-level { background: var(--gray-900); border-color: var(--gray-800); }
         .dark .cb-level > .cb-head { background: var(--gray-800); }

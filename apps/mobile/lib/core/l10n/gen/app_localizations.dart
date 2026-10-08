@@ -2378,6 +2378,18 @@ abstract class AppLocalizations {
   /// **'للأكاديمية بس'**
   String get academyOnly;
 
+  /// No description provided for @lessonMaterials.
+  ///
+  /// In ar, this message translates to:
+  /// **'مواد الدرس'**
+  String get lessonMaterials;
+
+  /// No description provided for @teachersOnly.
+  ///
+  /// In ar, this message translates to:
+  /// **'للمدرس بس'**
+  String get teachersOnly;
+
   /// No description provided for @absenceNote.
   ///
   /// In ar, this message translates to:

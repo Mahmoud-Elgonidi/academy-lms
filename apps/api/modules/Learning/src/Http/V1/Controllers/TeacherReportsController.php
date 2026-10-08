@@ -65,7 +65,7 @@ final class TeacherReportsController
             'template' => $this->present->template(ReportTemplate::forReport($report)),
             'lesson_options' => collect($this->form->lessonOptions($report))->map(fn ($label, $id) => ['id' => $id, 'label' => $label])->values()->all(),
             'homework' => ($h = $report->homework()->with('submissions')->first()) ? $this->present->homework($h) : null,
-            'roadmap' => $report->enrollment_id ? $roadmap->for($report->enrollment_id) : null,
+            'roadmap' => $report->enrollment_id ? $roadmap->for($report->enrollment_id, RoadmapQuery::MATERIALS_TEACHERS) : null,
         ]]);
     }
 

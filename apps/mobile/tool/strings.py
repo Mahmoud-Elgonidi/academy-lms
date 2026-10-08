@@ -420,6 +420,8 @@ s('answerRequired', 'جاوب على "{question}".', 'Answer "{question}".', que
 s('answerYes', 'أيوه', 'Yes')
 s('answerNo', 'لأ', 'No')
 s('academyOnly', 'للأكاديمية بس', 'Academy only')
+s('lessonMaterials', 'مواد الدرس', 'Lesson materials')
+s('teachersOnly', 'للمدرس بس', 'Teachers only')
 s('absenceNote', 'ملاحظة الغياب', 'Absence note')
 s('absenceHint', 'الطالب ماحضرش. اكتب اللي حصل وأي حاجة الأسرة محتاجة تعرفها.', "The student didn't come. Say what happened and anything the family should know.")
 s('giveHomework', 'ادّي واجب', 'Give homework')

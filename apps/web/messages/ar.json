@@ -542,7 +542,14 @@
     "outcome_practiced": "اتدرّب عليه",
     "outcome_mastered": "اتقن",
     "outcome_needs_review": "محتاج مراجعة",
-    "roadmap": "المنهج"
+    "roadmap": "المنهج",
+    "materials": "مواد الدرس",
+    "teachersOnly": "للمدرس بس",
+    "material_pdf": "PDF",
+    "material_audio": "تسجيل",
+    "material_video": "فيديو",
+    "material_image": "صورة",
+    "material_link": "لينك"
   },
   "privacy": {
     "title": "خصوصية الأولاد",

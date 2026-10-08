@@ -542,7 +542,14 @@
     "outcome_practiced": "Practised",
     "outcome_mastered": "Mastered",
     "outcome_needs_review": "Needs review",
-    "roadmap": "Roadmap"
+    "roadmap": "Roadmap",
+    "materials": "Lesson materials",
+    "teachersOnly": "Teachers only",
+    "material_pdf": "PDF",
+    "material_audio": "Recording",
+    "material_video": "Video",
+    "material_image": "Picture",
+    "material_link": "Link"
   },
   "privacy": {
     "title": "Children's privacy",

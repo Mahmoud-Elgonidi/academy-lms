@@ -6,25 +6,36 @@ use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\Contracts\DTOs\CurriculumNode;
 use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\Learning\Contracts\DTOs\MaterialLine;
 use Modules\Learning\Domain\NodeProgress;
 use Modules\Learning\Domain\ProgressCalculator;
+use Modules\Learning\Materials\MaterialLinks;
 
 /**
  * The roadmap screen (docs/architecture/02, section 6, step 5), the same for
  * the student, the guardian, the teacher and the back office: levels, units
  * and lessons marked done ✓, here ●, due for review ↻ or to come ○, with the
- * % per level, the pace and the expected finish.
+ * % per level, the pace and the expected finish, and each lesson's materials
+ * when asked for (the family's, or the teachers' too).
  */
 final class RoadmapQuery
 {
+    /** The lessons' materials: none (a summary), the family's, or the teachers' too (teachers and staff). */
+    public const MATERIALS_NONE = null;
+
+    public const MATERIALS_FAMILY = 'family';
+
+    public const MATERIALS_TEACHERS = 'teachers';
+
     public function __construct(
         private readonly EnrollmentApi $enrollments,
         private readonly CurriculumApi $curriculum,
         private readonly ProgressQuery $progress,
+        private readonly MaterialLinks $materials,
     ) {}
 
     /** @return array<string, mixed>|null null when the enrollment follows no program */
-    public function for(string $enrollmentId): ?array
+    public function for(string $enrollmentId, ?string $materials = self::MATERIALS_NONE): ?array
     {
         $enrollment = $this->enrollments->find($enrollmentId);
         if ($enrollment?->curriculumVersionId === null) {
@@ -36,15 +47,16 @@ final class RoadmapQuery
         $position = $this->progress->position($enrollmentId);
         $calculated = ProgressCalculator::position($tree, $states, [], $this->progress->lessonsPerWeek($enrollmentId));
         $current = $position?->current_node_id ?? $calculated->currentNodeId;
-        $lesson = fn (CurriculumNode $n) => $this->lesson($n, $states[$n->id] ?? null, $current);
+        $files = $materials === self::MATERIALS_NONE ? [] : $this->materials->forLessons(array_map(fn ($n) => $n->id, $tree->lessons()), $materials === self::MATERIALS_TEACHERS);
+        $lesson = fn (CurriculumNode $n) => $this->lesson($n, $states[$n->id] ?? null, $current, $files[$n->id] ?? []);
 
         $levels = [];
         foreach ($tree->childrenOf(null) as $top) {
             $units = [];
-            $direct = [];
+            $direct = $top->kind === 'lesson' ? [$top] : [];
             foreach ($tree->childrenOf($top->id) as $child) {
                 if ($child->kind === 'lesson') {
-                    $direct[] = $lesson($child);
+                    $direct[] = $child;
                 } else {
                     $units[] = ['id' => $child->id, 'title' => $child->title(), 'percent' => ProgressCalculator::percentUnder($tree, $states, $child->id),
                         'lessons' => array_map($lesson, $tree->lessons($child->id))];
@@ -56,7 +68,7 @@ final class RoadmapQuery
                 'title' => $top->title(),
                 'percent' => ProgressCalculator::percentUnder($tree, $states, $top->id),
                 'has_current' => $current !== null && ($current === $top->id || in_array($top->id, array_map(fn ($a) => $a->id, $tree->ancestorsOf($current)), true)),
-                'lessons' => $top->kind === 'lesson' ? [$lesson($top)] : $direct,
+                'lessons' => array_map($lesson, $direct),
                 'units' => $units,
             ];
         }
@@ -79,8 +91,11 @@ final class RoadmapQuery
         ];
     }
 
-    /** @return array<string, mixed> */
-    private function lesson(CurriculumNode $n, ?NodeProgress $p, ?string $current): array
+    /**
+     * @param  list<MaterialLine>  $materials
+     * @return array<string, mixed>
+     */
+    private function lesson(CurriculumNode $n, ?NodeProgress $p, ?string $current, array $materials): array
     {
         $state = match (true) {
             $p?->status === 'needs_review' => 'review',
@@ -98,6 +113,8 @@ final class RoadmapQuery
             'last_score' => $p?->lastScore,
             'est_sessions' => $n->estSessions,
             'weight' => $n->weight,
+            // Files and links on the lesson (a file's url is signed for twelve hours); empty when not asked for.
+            'materials' => array_map(fn (MaterialLine $m) => $m->toArray(), $materials),
         ];
     }
 

@@ -34,6 +34,12 @@ return [
         'review' => 'Review',
         'none' => 'This student follows no program.',
     ],
+    'materials' => [
+        'title' => 'Lesson materials',
+        'hint' => 'They open in a new tab; the lesson stays here.',
+        'teachers_only' => 'Teachers only',
+        'types' => ['pdf' => 'PDF', 'audio' => 'Recording', 'video' => 'Video', 'image' => 'Picture', 'link' => 'Link'],
+    ],
     'homework' => [
         'title' => 'Last homework',
         'none' => 'No homework yet.',

@@ -11,6 +11,7 @@ import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../core/realtime/live.dart';
+import '../../../roadmap/presentation/widgets/material_chips.dart';
 
 /// The teacher's students: subject, how far along, the lesson now, homework to mark.
 class StudentsPage extends StatelessWidget {
@@ -80,6 +81,7 @@ class _StudentCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(l.lastReportAt(s.lastReportAt!.day(context.locale)), style: context.text.bodySmall),
           ],
+          if (s.materials.isNotEmpty) ...[const SizedBox(height: 10), MaterialChips(items: s.materials)],
         ],
       ),
     );

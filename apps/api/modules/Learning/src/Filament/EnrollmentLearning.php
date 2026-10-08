@@ -41,7 +41,7 @@ final class EnrollmentLearning extends Component implements HasActions, HasSchem
     #[Computed]
     public function roadmap(): ?array
     {
-        return app(RoadmapQuery::class)->for($this->enrollmentId);
+        return app(RoadmapQuery::class)->for($this->enrollmentId, RoadmapQuery::MATERIALS_TEACHERS);
     }
 
     /** @return list<array<string, mixed>> */

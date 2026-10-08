@@ -23,6 +23,7 @@ use Modules\Learning\Filament\LearningPlugin;
 use Modules\Learning\Filament\Pages\ReportsOversight;
 use Modules\Learning\Filament\Teacher\HomeworkToMark;
 use Modules\Learning\Filament\Teacher\WriteReport;
+use Modules\Learning\Http\Web\MaterialController;
 use Modules\Learning\Http\Web\SubmissionFileController;
 use Modules\Learning\LearningService;
 use Modules\Learning\Listeners\OpenReportWhenSessionCloses;
@@ -55,6 +56,8 @@ final class LearningServiceProvider extends ServiceProvider
             ->group(__DIR__.'/../../routes/api.php');
         // Files handed in, for the panels (session sign-in); the apps use the API route.
         Route::middleware(['web', 'tenant'])->get('learning/files/{submission}', SubmissionFileController::class)->name('learning.files');
+        // A lesson's file behind a signed address (MaterialLinks), for whoever was shown the lesson: no sign-in needed.
+        Route::middleware(['web', 'tenant', 'signed:relative'])->get('materials/{resource}', MaterialController::class)->name('learning.material');
 
         LearningPlugin::registerAccountSection();
 

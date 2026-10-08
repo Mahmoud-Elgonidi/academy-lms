@@ -1,4 +1,5 @@
 import '../../../core/time/local_time.dart';
+import 'materials.dart';
 import 'report_answers.dart';
 
 List<Map<String, dynamic>> _list(Object? raw) => [for (final x in raw as List<dynamic>? ?? const []) x as Map<String, dynamic>];
@@ -14,6 +15,7 @@ class Course {
     this.percent,
     this.current,
     this.etaWeeks,
+    this.materials = const [],
   });
 
   factory Course.fromJson(Map<String, dynamic> json) => Course(
@@ -25,6 +27,7 @@ class Course {
     current: (json['current'] as Map<String, dynamic>?)?['title'] as String?,
     etaWeeks: (json['eta_weeks'] as num?)?.round(),
     homeworkOpen: (json['homework_open'] as num?)?.toInt() ?? 0,
+    materials: LessonMaterial.listOf(json['current_materials']),
   );
 
   final String enrollmentId;
@@ -35,6 +38,9 @@ class Course {
   final String? current;
   final int? etaWeeks;
   final int homeworkOpen;
+
+  /// The lesson now's files and links (those meant for everyone).
+  final List<LessonMaterial> materials;
 }
 
 class StudentCourses {

@@ -1456,6 +1456,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get academyOnly => 'للأكاديمية بس';
 
   @override
+  String get lessonMaterials => 'مواد الدرس';
+
+  @override
+  String get teachersOnly => 'للمدرس بس';
+
+  @override
   String get absenceNote => 'ملاحظة الغياب';
 
   @override

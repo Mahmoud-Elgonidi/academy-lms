@@ -46,7 +46,8 @@ final class ClassroomPageController
             'lesson' => $lesson,
             'seat' => $seat,
             'when' => $lesson->startsAt->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F · H:i'),
-            'plan' => $seat->role === 'student' ? [] : $learning->planFor($lesson->enrollmentId, $lesson->startsAt),
+            // The teacher and staff see today's plan with every material; the student, the materials meant for everyone.
+            'plan' => $learning->planFor($lesson->enrollmentId, $lesson->startsAt, $seat->role !== 'student'),
             'homework' => $seat->role === 'student' || $lesson->studentId === null ? null : $learning->lastHomework($lesson->studentId, $lesson->enrollmentId, $lesson->startsAt),
             'tz' => $tz,
             'ticketUrl' => route('classroom.ticket', ['session' => $session]),

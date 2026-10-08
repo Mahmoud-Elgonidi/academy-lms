@@ -4781,6 +4781,8 @@
         "/v1/learning/students": {
             "get": {
                 "operationId": "learning.students",
+                "description": "Each running course: the program, how far, the lesson now and its materials (files and links meant for\neveryone; a file's url is signed for twelve hours), the weeks left and open homework.",
+                "summary": "The learners and their courses",
                 "tags": [
                     "Learning"
                 ],
@@ -4984,6 +4986,8 @@
         "/v1/learning/enrollments/{enrollment}/roadmap": {
             "get": {
                 "operationId": "learning.roadmap",
+                "description": "Levels, units and lessons with where the student is, and each lesson's materials (files and links; a file's\nurl is signed for twelve hours and opens without signing in).",
+                "summary": "A course's roadmap",
                 "tags": [
                     "Learning"
                 ],
@@ -5162,120 +5166,8 @@
                                                                 "type": "string"
                                                             },
                                                             "lessons": {
-                                                                "anyOf": [
-                                                                    {
-                                                                        "type": "array",
-                                                                        "prefixItems": [
-                                                                            {
-                                                                                "type": "object",
-                                                                                "properties": {
-                                                                                    "id": {
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "title": {
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "state": {
-                                                                                        "type": "string",
-                                                                                        "enum": [
-                                                                                            "review",
-                                                                                            "done",
-                                                                                            "here",
-                                                                                            "todo"
-                                                                                        ]
-                                                                                    },
-                                                                                    "times_seen": {
-                                                                                        "type": "integer"
-                                                                                    },
-                                                                                    "last_outcome": {
-                                                                                        "type": [
-                                                                                            "string",
-                                                                                            "null"
-                                                                                        ]
-                                                                                    },
-                                                                                    "last_score": {
-                                                                                        "type": [
-                                                                                            "integer",
-                                                                                            "null"
-                                                                                        ]
-                                                                                    },
-                                                                                    "est_sessions": {
-                                                                                        "type": "integer"
-                                                                                    },
-                                                                                    "weight": {
-                                                                                        "type": "integer"
-                                                                                    }
-                                                                                },
-                                                                                "required": [
-                                                                                    "id",
-                                                                                    "title",
-                                                                                    "state",
-                                                                                    "times_seen",
-                                                                                    "last_outcome",
-                                                                                    "last_score",
-                                                                                    "est_sessions",
-                                                                                    "weight"
-                                                                                ]
-                                                                            }
-                                                                        ],
-                                                                        "minItems": 1,
-                                                                        "maxItems": 1
-                                                                    },
-                                                                    {
-                                                                        "type": "array",
-                                                                        "items": {
-                                                                            "type": "object",
-                                                                            "properties": {
-                                                                                "id": {
-                                                                                    "type": "string"
-                                                                                },
-                                                                                "title": {
-                                                                                    "type": "string"
-                                                                                },
-                                                                                "state": {
-                                                                                    "type": "string",
-                                                                                    "enum": [
-                                                                                        "review",
-                                                                                        "done",
-                                                                                        "here",
-                                                                                        "todo"
-                                                                                    ]
-                                                                                },
-                                                                                "times_seen": {
-                                                                                    "type": "integer"
-                                                                                },
-                                                                                "last_outcome": {
-                                                                                    "type": [
-                                                                                        "string",
-                                                                                        "null"
-                                                                                    ]
-                                                                                },
-                                                                                "last_score": {
-                                                                                    "type": [
-                                                                                        "integer",
-                                                                                        "null"
-                                                                                    ]
-                                                                                },
-                                                                                "est_sessions": {
-                                                                                    "type": "integer"
-                                                                                },
-                                                                                "weight": {
-                                                                                    "type": "integer"
-                                                                                }
-                                                                            },
-                                                                            "required": [
-                                                                                "id",
-                                                                                "title",
-                                                                                "state",
-                                                                                "times_seen",
-                                                                                "last_outcome",
-                                                                                "last_score",
-                                                                                "est_sessions",
-                                                                                "weight"
-                                                                            ]
-                                                                        }
-                                                                    }
-                                                                ]
+                                                                "type": "array",
+                                                                "items": {}
                                                             },
                                                             "units": {
                                                                 "type": "array",

@@ -10,7 +10,9 @@ use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Authorization\LearningAccess;
+use Modules\Learning\Contracts\DTOs\MaterialLine;
 use Modules\Learning\Http\V1\Resources\LearningPresenter;
+use Modules\Learning\Materials\MaterialLinks;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\HomeworkSubmission;
 use Modules\Learning\Models\ReportItem;
@@ -34,20 +36,27 @@ final class LearnerController
         private readonly LearningPresenter $present,
     ) {}
 
-    public function students(Request $request, RoadmapQuery $roadmap): JsonResponse
+    /**
+     * The learners and their courses.
+     *
+     * Each running course: the program, how far, the lesson now and its materials (files and links meant for
+     * everyone; a file's url is signed for twelve hours), the weeks left and open homework.
+     */
+    public function students(Request $request, RoadmapQuery $roadmap, MaterialLinks $materials): JsonResponse
     {
         $ids = $this->access->learnersOf($request->user());
         $users = DB::table('users')->whereIn('id', $ids)->orderBy('name')->get(['id', 'name']);
         $subjects = DB::table('subjects')->pluck(app()->getLocale() === 'ar' ? 'name_ar' : 'name_en', 'id');
 
-        $data = $users->map(function (object $u) use ($roadmap, $subjects) {
+        $data = $users->map(function (object $u) use ($roadmap, $subjects, $materials) {
             $enrollments = array_values(array_filter($this->enrollments->forStudent($u->id), fn (EnrollmentData $e) => $e->status->value !== 'ended'));
 
             return [
                 'id' => $u->id,
                 'name' => $u->name,
-                'enrollments' => array_map(function (EnrollmentData $e) use ($roadmap, $subjects) {
+                'enrollments' => array_map(function (EnrollmentData $e) use ($roadmap, $subjects, $materials) {
                     $map = $roadmap->for($e->id);
+                    $here = $map['current']['id'] ?? null;
 
                     return [
                         'id' => $e->id,
@@ -56,6 +65,7 @@ final class LearnerController
                         'program' => $map['program']['name'] ?? null,
                         'percent' => $map['percent'] ?? null,
                         'current' => $map['current'] ?? null,
+                        'current_materials' => $here === null ? [] : array_map(fn (MaterialLine $m) => $m->toArray(), $materials->forLessons([$here], false)[$here] ?? []),
                         'eta_weeks' => $map['eta_weeks'] ?? null,
                         'homework_open' => Homework::query()->where('enrollment_id', $e->id)->whereIn('status', ['assigned', 'missed'])->count(),
                     ];
@@ -122,11 +132,18 @@ final class LearnerController
         ]]);
     }
 
+    /**
+     * A course's roadmap.
+     *
+     * Levels, units and lessons with where the student is, and each lesson's materials (files and links; a file's
+     * url is signed for twelve hours and opens without signing in).
+     */
     public function roadmap(Request $request, string $enrollment, RoadmapQuery $roadmap): JsonResponse
     {
-        $this->enrollment($request, $enrollment);
+        $materials = $this->access->seesTeacherMaterials($request->user(), $this->enrollment($request, $enrollment))
+            ? RoadmapQuery::MATERIALS_TEACHERS : RoadmapQuery::MATERIALS_FAMILY;
 
-        return response()->json(['data' => $roadmap->for($enrollment)]);
+        return response()->json(['data' => $roadmap->for($enrollment, $materials)]);
     }
 
     public function reports(Request $request, string $enrollment): JsonResponse

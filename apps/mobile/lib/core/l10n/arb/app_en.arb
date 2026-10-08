@@ -381,6 +381,8 @@
   "answerYes": "Yes",
   "answerNo": "No",
   "academyOnly": "Academy only",
+  "lessonMaterials": "Lesson materials",
+  "teachersOnly": "Teachers only",
   "absenceNote": "Absence note",
   "absenceHint": "The student didn't come. Say what happened and anything the family should know.",
   "giveHomework": "Give homework",

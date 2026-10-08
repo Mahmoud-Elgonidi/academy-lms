@@ -13,6 +13,7 @@ import '../../data/learning_repository.dart';
 import '../../domain/learning.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../core/realtime/live.dart';
+import '../widgets/material_chips.dart';
 
 /// Where each course stands for the learner: the program, how far, the
 /// lesson now, the weeks left, open homework; a course opens its reports.
@@ -95,6 +96,7 @@ class _CourseCard extends StatelessWidget {
               if (course.homeworkOpen > 0) Pill(l.homeworkOpen(course.homeworkOpen), tone: Tone.attention),
             ],
           ),
+          if (course.materials.isNotEmpty) ...[const SizedBox(height: 10), MaterialChips(items: course.materials)],
           const SizedBox(height: 6),
           Align(
             alignment: AlignmentDirectional.centerEnd,

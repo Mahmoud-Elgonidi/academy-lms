@@ -36,7 +36,7 @@ final class FamilyLearning
             'id' => $e->id,
             'subject' => $subjects[$e->subjectId] ?? null,
             'teacher' => $teachers[$e->teacherId] ?? null,
-            'map' => app(RoadmapQuery::class)->for($e->id),
+            'map' => app(RoadmapQuery::class)->for($e->id, RoadmapQuery::MATERIALS_FAMILY),
         ], $enrollments);
     }
 

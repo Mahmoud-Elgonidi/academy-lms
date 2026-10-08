@@ -1,13 +1,15 @@
 import { getTranslations } from 'next-intl/server';
+import { Icon, type IconName } from '@/components/icons';
 import { Badge, Card, Progress, Stat, join, type Tone } from '@/components/ui';
-import type { Roadmap, RoadmapLesson } from '@/lib/teach/types';
+import type { Material, Roadmap, RoadmapLesson } from '@/lib/teach/types';
 
 const stateTone: Record<string, Tone> = { done: 'brand', here: 'attention', review: 'info', todo: 'muted' };
 
 /**
  * A course's roadmap (RoadmapQuery): how far along, where the student is, the
  * finish at this pace, then each level and unit with every lesson done, here,
- * or still to come. Teachers and families see the same.
+ * or still to come, and the lesson's materials. Teachers and families see the
+ * same, except the materials for teachers only.
  */
 export async function RoadmapView({ map }: { map: Roadmap }) {
   const t = await getTranslations('roadmap');
@@ -65,6 +67,32 @@ async function Lessons({ lessons }: { lessons: RoadmapLesson[] }) {
           ) : (
             <Badge>{t(`state_${lesson.state in stateTone ? lesson.state : 'todo'}`)}</Badge>
           )}
+          {lesson.materials && lesson.materials.length > 0 ? <Materials items={lesson.materials} /> : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const materialIcon: Record<Material['type'], IconName> = { pdf: 'file', audio: 'music', video: 'video', image: 'image', link: 'link' };
+
+/** A lesson's files and links, opened in a new tab: a file through its signed address, a link where the academy points. */
+async function Materials({ items }: { items: Material[] }) {
+  const t = await getTranslations('roadmap');
+  return (
+    <ul className="flex w-full flex-wrap gap-2 ps-5" aria-label={t('materials')}>
+      {items.map((m) => (
+        <li key={m.id} className="min-w-0 max-w-full">
+          <a
+            href={m.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex max-w-full items-center gap-1.5 rounded-control bg-brand-soft px-2.5 py-1 text-sm text-brand-strong hover:bg-brand-line"
+          >
+            <Icon name={materialIcon[m.type]} size={16} className="shrink-0" />
+            <span className="truncate">{m.title}</span>
+            <span className="shrink-0 text-xs text-muted">{m.teachers_only ? t('teachersOnly') : t(`material_${m.type}`)}</span>
+          </a>
         </li>
       ))}
     </ul>

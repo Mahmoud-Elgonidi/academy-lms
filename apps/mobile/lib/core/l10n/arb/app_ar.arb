@@ -1041,6 +1041,8 @@
   "answerYes": "أيوه",
   "answerNo": "لأ",
   "academyOnly": "للأكاديمية بس",
+  "lessonMaterials": "مواد الدرس",
+  "teachersOnly": "للمدرس بس",
   "absenceNote": "ملاحظة الغياب",
   "absenceHint": "الطالب ماحضرش. اكتب اللي حصل وأي حاجة الأسرة محتاجة تعرفها.",
   "giveHomework": "ادّي واجب",

@@ -622,6 +622,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * The learners and their courses
+         * @description Each running course: the program, how far, the lesson now and its materials (files and links meant for
+         *     everyone; a file's url is signed for twelve hours), the weeks left and open homework.
+         */
         get: operations["learning.students"];
         put?: never;
         post?: never;
@@ -660,6 +665,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * A course's roadmap
+         * @description Levels, units and lessons with where the student is, and each lesson's materials (files and links; a file's
+         *     url is signed for twelve hours and opens without signing in).
+         */
         get: operations["learning.roadmap"];
         put?: never;
         post?: never;
@@ -3685,29 +3695,7 @@ export interface operations {
                                 title: string;
                                 percent: number;
                                 has_current: string;
-                                lessons: [
-                                    {
-                                        id: string;
-                                        title: string;
-                                        /** @enum {string} */
-                                        state: "review" | "done" | "here" | "todo";
-                                        times_seen: number;
-                                        last_outcome: string | null;
-                                        last_score: number | null;
-                                        est_sessions: number;
-                                        weight: number;
-                                    }
-                                ] | {
-                                    id: string;
-                                    title: string;
-                                    /** @enum {string} */
-                                    state: "review" | "done" | "here" | "todo";
-                                    times_seen: number;
-                                    last_outcome: string | null;
-                                    last_score: number | null;
-                                    est_sessions: number;
-                                    weight: number;
-                                }[];
+                                lessons: unknown[];
                                 units: {
                                     id: string;
                                     title: string;

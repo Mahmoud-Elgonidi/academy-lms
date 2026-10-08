@@ -32,6 +32,12 @@ final class LearningAccess
         return Gate::forUser($user)->any([Ability::ReviewReports->value, Ability::ViewEnrollments->value]);
     }
 
+    /** Who sees a course's materials for teachers too: its teachers and the staff, never a family. */
+    public function seesTeacherMaterials(Authenticatable $user, EnrollmentData $enrollment): bool
+    {
+        return $this->isStaff($user) || $enrollment->teacherId === $user->getAuthIdentifier();
+    }
+
     public function canSeeEnrollment(Authenticatable $user, EnrollmentData $enrollment): bool
     {
         return $enrollment->teacherId === $user->getAuthIdentifier()

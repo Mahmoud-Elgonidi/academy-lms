@@ -116,6 +116,19 @@ export type RoadmapLesson = {
   times_seen: number;
   last_outcome: Outcome | null;
   last_score: number | null;
+  /** The lesson's files and links; a file's url is signed for twelve hours and opens without signing in. */
+  materials?: Material[];
+};
+
+export type Material = {
+  id: string;
+  /** pdf, audio, video, image or link. */
+  type: 'pdf' | 'audio' | 'video' | 'image' | 'link';
+  title: string;
+  url: string;
+  /** Teachers only (a guide, the answers): never in a family's roadmap. */
+  teachers_only: boolean;
+  size: number | null;
 };
 
 /** GET teacher/reports/{id}: the report with today's plan, lessons that can be added, and the homework given with it. */

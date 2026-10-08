@@ -4,15 +4,17 @@ namespace Modules\Learning\Queries;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\Learning\Contracts\DTOs\MaterialLine;
+use Modules\Learning\Materials\MaterialLinks;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\SessionReport;
 
-/** A teacher's students: each running course with where the student is on the roadmap, the last report, and homework to mark. */
+/** A teacher's students: each running course with where the student is on the roadmap (and that lesson's materials), the last report, and homework to mark. */
 final class TeacherStudents
 {
-    public function __construct(private readonly RoadmapQuery $roadmap) {}
+    public function __construct(private readonly RoadmapQuery $roadmap, private readonly MaterialLinks $materials) {}
 
-    /** @return list<array{enrollment_id: string, student_id: string, student: string, subject: string, paused: bool, percent: ?int, here: ?string, last_report_at: ?CarbonImmutable, to_mark: int}> */
+    /** @return list<array{enrollment_id: string, student_id: string, student: string, subject: string, paused: bool, percent: ?int, here: ?string, materials: list<array<string, mixed>>, last_report_at: ?CarbonImmutable, to_mark: int}> */
     public function of(string $teacherId): array
     {
         $rows = DB::table('enrollments as e')
@@ -38,6 +40,8 @@ final class TeacherStudents
                 'paused' => $r->status !== 'active',
                 'percent' => $map['percent'] ?? null,
                 'here' => $map ? ($map['finished'] ? __('learning::progress.finished') : ($map['current']['title'] ?? null)) : null,
+                // The lesson now's files and links, the teachers' too (a file's url is signed for twelve hours).
+                'materials' => ($id = $map['current']['id'] ?? null) === null ? [] : array_map(fn (MaterialLine $m) => $m->toArray(), $this->materials->forLessons([$id], true)[$id] ?? []),
                 'last_report_at' => isset($lastReport[$r->id]) ? CarbonImmutable::parse($lastReport[$r->id])->utc() : null,
                 'to_mark' => (int) ($toMark[$r->id] ?? 0),
             ];

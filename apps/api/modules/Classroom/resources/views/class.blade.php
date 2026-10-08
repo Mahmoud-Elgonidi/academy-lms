@@ -78,6 +78,12 @@
         aside h2 + h2, aside .line + h2, aside small + h2 { margin-top: 6px; }
         .homework.submitted .tag { background: color-mix(in oklab, var(--brand) 35%, var(--line)); }
         .homework.missed .tag { background: #7f1d1d; color: #fee2e2; }
+        .materials { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+        .materials a { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; background: color-mix(in oklab, var(--brand) 14%, transparent); color: #fff; text-decoration: none; font-size: 13px; }
+        .materials a:hover, .materials a:focus-visible { background: color-mix(in oklab, var(--brand) 28%, transparent); }
+        .materials svg { flex: none; width: 16px; height: 16px; }
+        .materials span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .materials em { font-style: normal; font-size: 11px; color: var(--muted); white-space: nowrap; }
         [hidden] { display: none !important; }
         @media (max-width: 640px) { header .brand { display: none; } .tiles { grid-template-columns: minmax(0, 1fr); } }
     </style>
@@ -94,7 +100,17 @@
         <span class="chip">{{ __($l.'roles.'.$seat->role) }}</span>
     </header>
 
-    <main class="{{ $seat->role !== 'student' ? 'with-plan' : '' }}">
+    @php
+        $materials = collect($plan)->flatMap(fn ($line) => $line->materials)->unique('id')->values();
+        $icons = [
+            'pdf' => 'M14 3H7.5A1.5 1.5 0 0 0 6 4.5v15A1.5 1.5 0 0 0 7.5 21h9a1.5 1.5 0 0 0 1.5-1.5V7l-4-4ZM14 3v4h4M9 13h6M9 17h4',
+            'audio' => 'M9 18V6l10-2v12M9 18a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm10-2a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z',
+            'video' => 'M4.5 6h9A1.5 1.5 0 0 1 15 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 3 16.5v-9A1.5 1.5 0 0 1 4.5 6ZM15 10.5l6-3.5v10l-6-3.5',
+            'image' => 'M4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11A1.5 1.5 0 0 1 4.5 5ZM3 16l5-5 4 4 3-3 6 6M15.5 9.5h.01',
+            'link' => 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',
+        ];
+    @endphp
+    <main class="{{ $seat->role !== 'student' || $materials->isNotEmpty() ? 'with-plan' : '' }}">
         <div class="stage">
             <section class="prejoin" id="prejoin">
                 <h1>{{ __($l.'check.title') }}</h1>
@@ -141,6 +157,7 @@
                         <strong>{{ $line->title }}</strong>
                         <small>{{ $line->path }}</small>
                         @if ($line->objectives) <p>{{ $line->objectives }}</p> @endif
+                        @include('classroom::materials', ['items' => $line->materials])
                     </div>
                 @empty
                     <small style="color:var(--muted)">{{ __($l.'plan.none') }}</small>
@@ -158,6 +175,12 @@
                 @else
                     <small style="color:var(--muted)">{{ __($l.'homework.none') }}</small>
                 @endif
+            </aside>
+        @elseif ($materials->isNotEmpty())
+            <aside>
+                <h2>{{ __($l.'materials.title') }}</h2>
+                <small style="color:var(--muted)">{{ __($l.'materials.hint') }}</small>
+                @include('classroom::materials', ['items' => $materials->all()])
             </aside>
         @endif
     </main>

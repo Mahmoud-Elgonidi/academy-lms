@@ -569,6 +569,8 @@ node_resources · assessment_definitions(node_id, type, rubric, pass_score) · v
   - **الإصدار بتاع التقرير**: تقرير الحصة بيسأل الإصدار اللي اتسلّم بيه (`session_reports.template_id`)، ولو لسه ماتسلّمش بيسأل إصدار المادة دلوقتي (من `sessions.subject_id`). ملاحظة الغياب مالهاش أسئلة.
   - **الإجابات** في `session_reports.answers` بالمفتاح، والتحقق بـ `TemplateAnswers` جوه `SubmitSessionReport`: النجوم 1–5، والرقم في حدوده (لحد رقمين بعد العلامة)، والاختيار من المفاتيح، وأيوه/لأ، والكلام لحد 500 حرف. أي مفتاح مش في الإصدار بيتشال.
   - **العرض**: `TemplateAnswers::present` بيكتب الإجابة بلغة اللي بيقرا ("4/5"، "6 آيات"، "12 آية"، اسم الاختيار)، والأسرة مابتشوفش الأسئلة اللي `family=false`.
+- **مواد الدرس**: `node_resources` (ملف على الـ disk الخاص تحت مجلد الأكاديمية، أو لينك http/https) على درس بس، لحد 12، بترتيب، و`audience` ‏`all` أو `teachers`. بتتغير بـ `AddNodeResource` (النوع من محتوى الملف مش اسمه، والحجم حسب النوع)، و`UpdateNodeResource`، و`MoveNodeResource`، و`RemoveNodeResource` (الملف بيتمسح بعد الـ commit)، ومسح درس في مسودة بيمسح ملفاته. مساحتها بتتحسب في باقة الأكاديمية.
+  - **مين يشوف إيه**: Curriculum بيدّي المواد من غير لينكات (`CurriculumApi::resources`)، واللي بيعرضها بعد ما يتأكد إن الشخص يشوف الدرس هو اللي بيعمل اللينك (`Learning\Materials\MaterialLinks`): الملف بلينك موقّع على دومين الأكاديمية (`learning.material`) صالح 12 ساعة. المدرس والإدارة بياخدوا اللي للمدرسين كمان، والأسرة لأ (الـ roadmap بيسأل `MATERIALS_TEACHERS` أو `MATERIALS_FAMILY`). الإدارة بتفتح الملف من شاشة المناهج بتسجيل دخولها (`curriculum.resource`).
 - **آخر واجب للفصل**: `LearningApi::lastHomework` (آخر واجب اتعمل للطالب في نفس الكورس قبل بداية الحصة) بيظهر جنب خطة اليوم في صفحة الفصل للمدرس والمشرف.
 
 ---

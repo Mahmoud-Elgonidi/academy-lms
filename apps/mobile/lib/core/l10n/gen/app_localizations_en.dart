@@ -1395,6 +1395,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get academyOnly => 'Academy only';
 
   @override
+  String get lessonMaterials => 'Lesson materials';
+
+  @override
+  String get teachersOnly => 'Teachers only';
+
+  @override
   String get absenceNote => 'Absence note';
 
   @override

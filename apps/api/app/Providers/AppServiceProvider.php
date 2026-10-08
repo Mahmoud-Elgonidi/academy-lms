@@ -26,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
 
         ApiDocumentation::configure();
 
+        // Uploads through Livewire (the panels' file fields) may be as big as the server takes (50 MB, infra/deploy/php.ini);
+        // each field still sets its own types and size (a lesson's video 50 MB, a PDF 20 MB). Set after Livewire merged its defaults.
+        config(['livewire.temporary_file_upload.rules' => ['required', 'file', 'max:51200']]);
+
         // Behind a server's web server: trust the proxies it names, so links stay on https.
         $proxies = config('app.trusted_proxies');
         if (is_string($proxies) && $proxies !== '') {

@@ -1,5 +1,6 @@
 import '../../../core/time/local_time.dart';
 import '../../schedule/domain/lesson.dart';
+import '../../roadmap/domain/materials.dart';
 
 List<Map<String, dynamic>> _list(Object? raw) => [for (final x in raw as List<dynamic>? ?? const []) x as Map<String, dynamic>];
 
@@ -34,6 +35,7 @@ class TeacherStudent {
     this.percent,
     this.here,
     this.lastReportAt,
+    this.materials = const [],
   });
 
   factory TeacherStudent.fromJson(Map<String, dynamic> json) => TeacherStudent(
@@ -45,6 +47,7 @@ class TeacherStudent {
     here: json['here'] as String?,
     toMark: (json['to_mark'] as num?)?.toInt() ?? 0,
     lastReportAt: LocalTime.fromJson(json['last_report_at']),
+    materials: LessonMaterial.listOf(json['materials']),
   );
 
   final String enrollmentId;
@@ -55,6 +58,9 @@ class TeacherStudent {
   final String? here;
   final int toMark;
   final LocalTime? lastReportAt;
+
+  /// The lesson now's files and links, the teachers' too.
+  final List<LessonMaterial> materials;
 }
 
 /// A month of a teacher's pay (`GET teacher/earnings`), already formatted.

@@ -5,7 +5,9 @@ namespace Modules\Curriculum;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
 use Modules\Curriculum\Contracts\DTOs\ProgramOption;
+use Modules\Curriculum\Contracts\DTOs\ResourceFile;
 use Modules\Curriculum\Models\Node;
+use Modules\Curriculum\Models\NodeResource;
 use Modules\Curriculum\Models\Program;
 
 final class CurriculumService implements CurriculumApi
@@ -28,6 +30,27 @@ final class CurriculumService implements CurriculumApi
     public function tree(string $versionId): CurriculumTree
     {
         return new CurriculumTree($versionId, Node::query()->where('version_id', $versionId)->get()->map(fn (Node $n) => $n->toData())->all());
+    }
+
+    public function resources(array $nodeIds, bool $withTeachersOnly): array
+    {
+        if ($nodeIds === []) {
+            return [];
+        }
+
+        return NodeResource::query()->whereIn('node_id', array_values(array_unique($nodeIds)))
+            ->when(! $withTeachersOnly, fn ($q) => $q->where('audience', 'all'))
+            ->orderBy('ordinal')->get()
+            ->groupBy('node_id')
+            ->map(fn ($list) => $list->map(fn (NodeResource $r) => $r->toData())->values()->all())
+            ->all();
+    }
+
+    public function resourceFile(string $resourceId): ?ResourceFile
+    {
+        $r = NodeResource::query()->where('kind', 'file')->find($resourceId);
+
+        return $r === null ? null : new ResourceFile($r->id, NodeResource::DISK, (string) $r->file_path, (string) $r->file_name, (string) $r->mime, (int) $r->size, $r->audience);
     }
 
     private function option(Program $program): ProgramOption

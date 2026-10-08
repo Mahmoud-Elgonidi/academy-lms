@@ -53,7 +53,7 @@ final class StudentProgress extends Page
         return [
             'student' => $row?->name,
             'subject' => app()->getLocale() === 'ar' ? $row?->name_ar : $row?->name_en,
-            'map' => app(RoadmapQuery::class)->for($this->enrollment),
+            'map' => app(RoadmapQuery::class)->for($this->enrollment, RoadmapQuery::MATERIALS_TEACHERS),
             'reports' => SessionReport::query()->where('enrollment_id', $this->enrollment)->whereIn('status', ['submitted', 'reviewed', 'due', 'overdue'])
                 ->orderByDesc('session_starts_at')->limit(10)->get()
                 ->map(fn (SessionReport $r) => [

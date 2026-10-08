@@ -104,7 +104,7 @@ final class WriteReport extends Page
     /** @return array<string, mixed>|null */
     public function roadmap(): ?array
     {
-        return $this->sessionReport->enrollment_id ? app(RoadmapQuery::class)->for($this->sessionReport->enrollment_id) : null;
+        return $this->sessionReport->enrollment_id ? app(RoadmapQuery::class)->for($this->sessionReport->enrollment_id, RoadmapQuery::MATERIALS_TEACHERS) : null;
     }
 
     /** @return array<string, string> lesson title => objectives, for the lessons planned or covered */
