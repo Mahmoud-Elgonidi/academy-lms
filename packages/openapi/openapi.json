@@ -9644,6 +9644,2574 @@
                     }
                 }
             }
+        },
+        "/v1/support/new": {
+            "get": {
+                "operationId": "support.new",
+                "description": "The kinds this person may choose (a teacher: technical, pay, anything else; a family: also a complaint, and\nmoney only in the classic look; nothing for a child in the kids' look), and the lessons it may be about\n(the learner's or the teacher's, newest first). A family names the learner with `learner_id` (else the first).",
+                "summary": "What a new ticket can be about",
+                "tags": [
+                    "Support"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "learner": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The learner it would be about; null for a teacher.",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "kinds": {
+                                                    "type": "array",
+                                                    "description": "complaint | billing | technical | other, with each one's words; empty: this person cannot open tickets here.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "key": {
+                                                                "type": "string"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "key",
+                                                            "label"
+                                                        ]
+                                                    }
+                                                },
+                                                "lessons": {
+                                                    "type": "array",
+                                                    "description": "Lessons from the last two months and the next week.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "subject": {
+                                                                "type": "string"
+                                                            },
+                                                            "with": {
+                                                                "type": "string",
+                                                                "description": "The other person in the lesson: the teacher for a family, the student for a teacher."
+                                                            },
+                                                            "starts_at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "description": "scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "subject",
+                                                            "with",
+                                                            "starts_at",
+                                                            "status"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "learner",
+                                                "kinds",
+                                                "lessons"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/support/tickets": {
+            "get": {
+                "operationId": "support.tickets",
+                "description": "The tickets this person wrote, the active ones first (open: the academy's turn; waiting: theirs), then the\nlatest. A family may narrow them to one learner with `learner_id`.",
+                "summary": "My tickets",
+                "tags": [
+                    "Support"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "reference": {
+                                                        "type": "string",
+                                                        "description": "\"#1024\": what to quote when calling the academy."
+                                                    },
+                                                    "subject": {
+                                                        "type": "string"
+                                                    },
+                                                    "kind": {
+                                                        "type": "object",
+                                                        "description": "complaint | billing | technical | other",
+                                                        "properties": {
+                                                            "key": {
+                                                                "type": "string"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "key",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "status": {
+                                                        "type": "object",
+                                                        "description": "open (the academy's turn) | waiting (yours) | resolved | closed",
+                                                        "properties": {
+                                                            "key": {
+                                                                "type": "string"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "key",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "learner": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "The learner it is about (a family's ticket).",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name"
+                                                        ]
+                                                    },
+                                                    "created_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "last_message_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "your_turn": {
+                                                        "type": "boolean",
+                                                        "description": "The academy answered last and waits for you."
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "reference",
+                                                    "subject",
+                                                    "kind",
+                                                    "status",
+                                                    "learner",
+                                                    "created_at",
+                                                    "last_message_at",
+                                                    "your_turn"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "support.tickets.store",
+                "description": "A family names the learner (`learner_id`); `kind` is one of what \"new\" offered; `session_id` optionally a lesson\nfrom there; `file` optionally a picture or PDF (10 MB). Answers `201` with the ticket. Send an `Idempotency-Key`.",
+                "summary": "Write to the academy",
+                "tags": [
+                    "Support"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "learner_id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "A family: the learner it is about (one of theirs)."
+                                    },
+                                    "kind": {
+                                        "type": "string",
+                                        "enum": [
+                                            "complaint",
+                                            "billing",
+                                            "technical",
+                                            "other"
+                                        ]
+                                    },
+                                    "subject": {
+                                        "type": "string",
+                                        "maxLength": 150
+                                    },
+                                    "body": {
+                                        "type": "string",
+                                        "maxLength": 5000
+                                    },
+                                    "session_id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "One of the lessons \"new\" offered."
+                                    },
+                                    "file": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "binary",
+                                        "contentMediaType": "application/octet-stream",
+                                        "description": "A picture or PDF."
+                                    }
+                                },
+                                "required": [
+                                    "kind",
+                                    "subject",
+                                    "body"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "reference": {
+                                                    "type": "string",
+                                                    "description": "\"#1024\": what to quote when calling the academy."
+                                                },
+                                                "subject": {
+                                                    "type": "string"
+                                                },
+                                                "kind": {
+                                                    "type": "object",
+                                                    "description": "complaint | billing | technical | other",
+                                                    "properties": {
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "status": {
+                                                    "type": "object",
+                                                    "description": "open (the academy's turn) | waiting (yours) | resolved | closed",
+                                                    "properties": {
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "learner": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The learner it is about (a family's ticket).",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "last_message_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "your_turn": {
+                                                    "type": "boolean",
+                                                    "description": "The academy answered last and waits for you."
+                                                },
+                                                "lesson": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The lesson it is about.",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "subject": {
+                                                            "type": "string"
+                                                        },
+                                                        "with": {
+                                                            "type": "string",
+                                                            "description": "The other person in the lesson: the teacher for a family, the student for a teacher."
+                                                        },
+                                                        "starts_at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "null"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "description": "scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "subject",
+                                                        "with",
+                                                        "starts_at",
+                                                        "status"
+                                                    ]
+                                                },
+                                                "can_reply": {
+                                                    "type": "string",
+                                                    "description": "Whether a message can still be sent (not closed; a resolved one only within its week)."
+                                                },
+                                                "can_reopen": {
+                                                    "type": "boolean"
+                                                },
+                                                "can_close": {
+                                                    "type": "boolean"
+                                                },
+                                                "reopen_until": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "Until when a resolved ticket can be reopened.",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "messages": {
+                                                    "type": "array",
+                                                    "description": "Oldest first.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "side": {
+                                                                "type": "string",
+                                                                "description": "requester (you) | staff (the academy) | system"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string",
+                                                                "description": "message | event (resolved, reopened, closed)"
+                                                            },
+                                                            "author": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "Who wrote it or did it; null for the system, or when the academy wrote your words down for you."
+                                                            },
+                                                            "body": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "event": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "For an event, what happened in words (\"Resolved by Mona\")."
+                                                            },
+                                                            "file": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "description": "A picture or PDF; download it from its `url` with the same token.",
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "mime": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "size": {
+                                                                        "type": "integer"
+                                                                    },
+                                                                    "url": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "name",
+                                                                    "mime",
+                                                                    "size",
+                                                                    "url"
+                                                                ]
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "side",
+                                                            "kind",
+                                                            "author",
+                                                            "body",
+                                                            "event",
+                                                            "file",
+                                                            "at"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "reference",
+                                                "subject",
+                                                "kind",
+                                                "status",
+                                                "learner",
+                                                "created_at",
+                                                "last_message_at",
+                                                "your_turn",
+                                                "lesson",
+                                                "can_reply",
+                                                "can_reopen",
+                                                "can_close",
+                                                "reopen_until",
+                                                "messages"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/support/tickets/{ticket}": {
+            "get": {
+                "operationId": "support.tickets.show",
+                "description": "The ticket with its lines as the requester sees them: the messages both ways and when it was resolved,\nreopened or closed.",
+                "summary": "One of my tickets",
+                "tags": [
+                    "Support"
+                ],
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "reference": {
+                                                    "type": "string",
+                                                    "description": "\"#1024\": what to quote when calling the academy."
+                                                },
+                                                "subject": {
+                                                    "type": "string"
+                                                },
+                                                "kind": {
+                                                    "type": "object",
+                                                    "description": "complaint | billing | technical | other",
+                                                    "properties": {
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "status": {
+                                                    "type": "object",
+                                                    "description": "open (the academy's turn) | waiting (yours) | resolved | closed",
+                                                    "properties": {
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "learner": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The learner it is about (a family's ticket).",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "last_message_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "your_turn": {
+                                                    "type": "boolean",
+                                                    "description": "The academy answered last and waits for you."
+                                                },
+                                                "lesson": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The lesson it is about.",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "subject": {
+                                                            "type": "string"
+                                                        },
+                                                        "with": {
+                                                            "type": "string",
+                                                            "description": "The other person in the lesson: the teacher for a family, the student for a teacher."
+                                                        },
+                                                        "starts_at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "null"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "description": "scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "subject",
+                                                        "with",
+                                                        "starts_at",
+                                                        "status"
+                                                    ]
+                                                },
+                                                "can_reply": {
+                                                    "type": "string",
+                                                    "description": "Whether a message can still be sent (not closed; a resolved one only within its week)."
+                                                },
+                                                "can_reopen": {
+                                                    "type": "boolean"
+                                                },
+                                                "can_close": {
+                                                    "type": "boolean"
+                                                },
+                                                "reopen_until": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "Until when a resolved ticket can be reopened.",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "messages": {
+                                                    "type": "array",
+                                                    "description": "Oldest first.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "side": {
+                                                                "type": "string",
+                                                                "description": "requester (you) | staff (the academy) | system"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string",
+                                                                "description": "message | event (resolved, reopened, closed)"
+                                                            },
+                                                            "author": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "Who wrote it or did it; null for the system, or when the academy wrote your words down for you."
+                                                            },
+                                                            "body": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "event": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "For an event, what happened in words (\"Resolved by Mona\")."
+                                                            },
+                                                            "file": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "description": "A picture or PDF; download it from its `url` with the same token.",
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "mime": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "size": {
+                                                                        "type": "integer"
+                                                                    },
+                                                                    "url": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "name",
+                                                                    "mime",
+                                                                    "size",
+                                                                    "url"
+                                                                ]
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "side",
+                                                            "kind",
+                                                            "author",
+                                                            "body",
+                                                            "event",
+                                                            "file",
+                                                            "at"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "reference",
+                                                "subject",
+                                                "kind",
+                                                "status",
+                                                "learner",
+                                                "created_at",
+                                                "last_message_at",
+                                                "your_turn",
+                                                "lesson",
+                                                "can_reply",
+                                                "can_reopen",
+                                                "can_close",
+                                                "reopen_until",
+                                                "messages"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/support/tickets/{ticket}/messages": {
+            "post": {
+                "operationId": "support.tickets.reply",
+                "description": "`body` and/or `file` (a picture or PDF, 10 MB). It is the academy's turn again; a resolved ticket reopens\nwithin its week. A closed one takes no more messages (open a new one). Send an `Idempotency-Key`.",
+                "summary": "Answer the academy",
+                "tags": [
+                    "Support"
+                ],
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "body": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 5000
+                                    },
+                                    "file": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "binary",
+                                        "contentMediaType": "application/octet-stream",
+                                        "description": "A picture or PDF; a message has words, a file or both."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "reference": {
+                                                    "type": "string",
+                                                    "description": "\"#1024\": what to quote when calling the academy."
+                                                },
+                                                "subject": {
+                                                    "type": "string"
+                                                },
+                                                "kind": {
+                                                    "type": "object",
+                                                    "description": "complaint | billing | technical | other",
+                                                    "properties": {
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "status": {
+                                                    "type": "object",
+                                                    "description": "open (the academy's turn) | waiting (yours) | resolved | closed",
+                                                    "properties": {
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "learner": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The learner it is about (a family's ticket).",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "last_message_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "your_turn": {
+                                                    "type": "boolean",
+                                                    "description": "The academy answered last and waits for you."
+                                                },
+                                                "lesson": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The lesson it is about.",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "subject": {
+                                                            "type": "string"
+                                                        },
+                                                        "with": {
+                                                            "type": "string",
+                                                            "description": "The other person in the lesson: the teacher for a family, the student for a teacher."
+                                                        },
+                                                        "starts_at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "null"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "description": "scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "subject",
+                                                        "with",
+                                                        "starts_at",
+                                                        "status"
+                                                    ]
+                                                },
+                                                "can_reply": {
+                                                    "type": "string",
+                                                    "description": "Whether a message can still be sent (not closed; a resolved one only within its week)."
+                                                },
+                                                "can_reopen": {
+                                                    "type": "boolean"
+                                                },
+                                                "can_close": {
+                                                    "type": "boolean"
+                                                },
+                                                "reopen_until": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "Until when a resolved ticket can be reopened.",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "messages": {
+                                                    "type": "array",
+                                                    "description": "Oldest first.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "side": {
+                                                                "type": "string",
+                                                                "description": "requester (you) | staff (the academy) | system"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string",
+                                                                "description": "message | event (resolved, reopened, closed)"
+                                                            },
+                                                            "author": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "Who wrote it or did it; null for the system, or when the academy wrote your words down for you."
+                                                            },
+                                                            "body": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "event": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "For an event, what happened in words (\"Resolved by Mona\")."
+                                                            },
+                                                            "file": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "description": "A picture or PDF; download it from its `url` with the same token.",
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "mime": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "size": {
+                                                                        "type": "integer"
+                                                                    },
+                                                                    "url": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "name",
+                                                                    "mime",
+                                                                    "size",
+                                                                    "url"
+                                                                ]
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "side",
+                                                            "kind",
+                                                            "author",
+                                                            "body",
+                                                            "event",
+                                                            "file",
+                                                            "at"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "reference",
+                                                "subject",
+                                                "kind",
+                                                "status",
+                                                "learner",
+                                                "created_at",
+                                                "last_message_at",
+                                                "your_turn",
+                                                "lesson",
+                                                "can_reply",
+                                                "can_reopen",
+                                                "can_close",
+                                                "reopen_until",
+                                                "messages"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/support/tickets/{ticket}/reopen": {
+            "post": {
+                "operationId": "support.tickets.reopen",
+                "description": "\"It is not solved\": within a week of the academy resolving it.",
+                "summary": "Reopen a resolved ticket",
+                "tags": [
+                    "Support"
+                ],
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "reference": {
+                                                    "type": "string",
+                                                    "description": "\"#1024\": what to quote when calling the academy."
+                                                },
+                                                "subject": {
+                                                    "type": "string"
+                                                },
+                                                "kind": {
+                                                    "type": "object",
+                                                    "description": "complaint | billing | technical | other",
+                                                    "properties": {
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "status": {
+                                                    "type": "object",
+                                                    "description": "open (the academy's turn) | waiting (yours) | resolved | closed",
+                                                    "properties": {
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "learner": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The learner it is about (a family's ticket).",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "last_message_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "your_turn": {
+                                                    "type": "boolean",
+                                                    "description": "The academy answered last and waits for you."
+                                                },
+                                                "lesson": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The lesson it is about.",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "subject": {
+                                                            "type": "string"
+                                                        },
+                                                        "with": {
+                                                            "type": "string",
+                                                            "description": "The other person in the lesson: the teacher for a family, the student for a teacher."
+                                                        },
+                                                        "starts_at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "null"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "description": "scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "subject",
+                                                        "with",
+                                                        "starts_at",
+                                                        "status"
+                                                    ]
+                                                },
+                                                "can_reply": {
+                                                    "type": "string",
+                                                    "description": "Whether a message can still be sent (not closed; a resolved one only within its week)."
+                                                },
+                                                "can_reopen": {
+                                                    "type": "boolean"
+                                                },
+                                                "can_close": {
+                                                    "type": "boolean"
+                                                },
+                                                "reopen_until": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "Until when a resolved ticket can be reopened.",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "messages": {
+                                                    "type": "array",
+                                                    "description": "Oldest first.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "side": {
+                                                                "type": "string",
+                                                                "description": "requester (you) | staff (the academy) | system"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string",
+                                                                "description": "message | event (resolved, reopened, closed)"
+                                                            },
+                                                            "author": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "Who wrote it or did it; null for the system, or when the academy wrote your words down for you."
+                                                            },
+                                                            "body": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "event": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "For an event, what happened in words (\"Resolved by Mona\")."
+                                                            },
+                                                            "file": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "description": "A picture or PDF; download it from its `url` with the same token.",
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "mime": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "size": {
+                                                                        "type": "integer"
+                                                                    },
+                                                                    "url": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "name",
+                                                                    "mime",
+                                                                    "size",
+                                                                    "url"
+                                                                ]
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "side",
+                                                            "kind",
+                                                            "author",
+                                                            "body",
+                                                            "event",
+                                                            "file",
+                                                            "at"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "reference",
+                                                "subject",
+                                                "kind",
+                                                "status",
+                                                "learner",
+                                                "created_at",
+                                                "last_message_at",
+                                                "your_turn",
+                                                "lesson",
+                                                "can_reply",
+                                                "can_reopen",
+                                                "can_close",
+                                                "reopen_until",
+                                                "messages"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/support/tickets/{ticket}/close": {
+            "post": {
+                "operationId": "support.tickets.close",
+                "description": "Solved, or no longer needed. It takes no more messages.",
+                "summary": "Close my ticket",
+                "tags": [
+                    "Support"
+                ],
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "reference": {
+                                                    "type": "string",
+                                                    "description": "\"#1024\": what to quote when calling the academy."
+                                                },
+                                                "subject": {
+                                                    "type": "string"
+                                                },
+                                                "kind": {
+                                                    "type": "object",
+                                                    "description": "complaint | billing | technical | other",
+                                                    "properties": {
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "status": {
+                                                    "type": "object",
+                                                    "description": "open (the academy's turn) | waiting (yours) | resolved | closed",
+                                                    "properties": {
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "learner": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The learner it is about (a family's ticket).",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "last_message_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "your_turn": {
+                                                    "type": "boolean",
+                                                    "description": "The academy answered last and waits for you."
+                                                },
+                                                "lesson": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The lesson it is about.",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "subject": {
+                                                            "type": "string"
+                                                        },
+                                                        "with": {
+                                                            "type": "string",
+                                                            "description": "The other person in the lesson: the teacher for a family, the student for a teacher."
+                                                        },
+                                                        "starts_at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "null"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "description": "scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "subject",
+                                                        "with",
+                                                        "starts_at",
+                                                        "status"
+                                                    ]
+                                                },
+                                                "can_reply": {
+                                                    "type": "string",
+                                                    "description": "Whether a message can still be sent (not closed; a resolved one only within its week)."
+                                                },
+                                                "can_reopen": {
+                                                    "type": "boolean"
+                                                },
+                                                "can_close": {
+                                                    "type": "boolean"
+                                                },
+                                                "reopen_until": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "Until when a resolved ticket can be reopened.",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "messages": {
+                                                    "type": "array",
+                                                    "description": "Oldest first.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "side": {
+                                                                "type": "string",
+                                                                "description": "requester (you) | staff (the academy) | system"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string",
+                                                                "description": "message | event (resolved, reopened, closed)"
+                                                            },
+                                                            "author": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "Who wrote it or did it; null for the system, or when the academy wrote your words down for you."
+                                                            },
+                                                            "body": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "event": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "For an event, what happened in words (\"Resolved by Mona\")."
+                                                            },
+                                                            "file": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "description": "A picture or PDF; download it from its `url` with the same token.",
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "mime": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "size": {
+                                                                        "type": "integer"
+                                                                    },
+                                                                    "url": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "name",
+                                                                    "mime",
+                                                                    "size",
+                                                                    "url"
+                                                                ]
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "side",
+                                                            "kind",
+                                                            "author",
+                                                            "body",
+                                                            "event",
+                                                            "file",
+                                                            "at"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "reference",
+                                                "subject",
+                                                "kind",
+                                                "status",
+                                                "learner",
+                                                "created_at",
+                                                "last_message_at",
+                                                "your_turn",
+                                                "lesson",
+                                                "can_reply",
+                                                "can_reopen",
+                                                "can_close",
+                                                "reopen_until",
+                                                "messages"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/support/tickets/{ticket}/messages/{message}/file": {
+            "get": {
+                "operationId": "support.tickets.file",
+                "summary": "The picture or PDF on one of the messages of my ticket",
+                "tags": [
+                    "Support"
+                ],
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "message",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "headers": {
+                            "Transfer-Encoding": {
+                                "required": true,
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "chunked"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
         }
     },
     "components": {

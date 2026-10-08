@@ -31,6 +31,7 @@ use Modules\Scheduling\Database\Seeders\DemoShiftsSeeder;
 use Modules\Scheduling\Database\Seeders\DemoTimeOffSeeder;
 use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\Support\Database\Seeders\DemoTicketsSeeder;
 
 /**
  * Local demo data: academy "demo" (demo.<platform domain>, or header X-Academy: demo)
@@ -83,7 +84,7 @@ class DatabaseSeeder extends Seeder
             // What the demo does in the back office (prices, policy, voided invoices, ...) is in the activity log as the owner's.
             AuditActor::use(new AuditActor('user', $ownerId, 'هالة منصور'));
 
-            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class, DemoChallengesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class]);
+            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoCurriculumSeeder::class, DemoLearningSeeder::class, DemoChallengesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoTicketsSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class]);
             AuditActor::forget();
         });
 

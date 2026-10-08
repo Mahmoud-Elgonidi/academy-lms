@@ -35,6 +35,7 @@ use Modules\People\Filament\PeoplePlugin;
 use Modules\Platform\Filament\PlatformPlugin;
 use Modules\Scheduling\Filament\SchedulingPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
+use Modules\Support\Filament\SupportPlugin;
 
 /**
  * The academy back office at {slug}.{platform domain}/admin.
@@ -93,6 +94,7 @@ final class AcademyPanelProvider extends PanelProvider
                 EvaluationPlugin::make(),
                 PayrollPlugin::make(),
                 ImportPlugin::make(),
+                SupportPlugin::make(),
                 CommunicationPlugin::make(),
                 ClassroomPlugin::make(),
                 PlatformPlugin::make(),

@@ -40,6 +40,7 @@ final class KpiView
         return match ($kpi->format) {
             'percent' => self::number($value * 100).'%',
             'minutes' => __('evaluation::kpis.minutes', ['count' => self::number($value)]),
+            'per100' => __('evaluation::kpis.per100', ['count' => self::number($value)]),
             default => number_format($value, 2),
         };
     }

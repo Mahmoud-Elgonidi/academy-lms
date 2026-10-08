@@ -19,6 +19,7 @@ return [
     'target_min' => 'الهدف :value أو أكتر',
     'target_max' => 'الهدف :value أو أقل',
     'minutes' => ':count دقيقة',
+    'per100' => ':count',
     'names' => [
         'punctuality' => 'الالتزام بالمواعيد',
         'avg_late' => 'متوسط التأخير',
@@ -27,6 +28,7 @@ return [
         'taught' => 'الوقت اللي اتدرّس',
         'early_leave' => 'الخروج بدري',
         'rating' => 'تقييم الأسر',
+        'complaints' => 'الشكاوى المؤكدة لكل 100 حصة',
         'reports' => 'التقارير في ميعادها',
         'homework' => 'تصحيح الواجبات في 48 ساعة',
         'trial_conversion' => 'اشتركوا بعد التجربة',
@@ -39,6 +41,7 @@ return [
         'taught' => '{1} من حصة واحدة|[2,*] من :count حصة',
         'early_leave' => '{1} من حصة واحدة|[2,*] من :count حصة',
         'rating' => '{1} من تقييم واحد|[2,*] من :count تقييم',
+        'complaints' => '{1} من حصة واحدة|[2,*] من :count حصة',
         'reports' => '{1} من تقرير واحد|[2,*] من :count تقرير',
         'homework' => '{1} من واجب واحد|[2,*] من :count واجب',
         'trial_conversion' => 'آخر 6 شهور',

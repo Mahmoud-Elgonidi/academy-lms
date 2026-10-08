@@ -1631,4 +1631,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateFromStore => 'Update it from your phone\'s app store.';
+
+  @override
+  String get helpTitle => 'Help';
+
+  @override
+  String get supportTitle => 'Support';
+
+  @override
+  String get helpLead =>
+      'Write to the academy about a lesson, a payment, a technical problem or anything else. The answers come here and in a message.';
+
+  @override
+  String get supportLead =>
+      'Write to the academy about a technical problem, your pay or anything else. The answers come here and in a message.';
+
+  @override
+  String get ticketNew => 'New ticket';
+
+  @override
+  String get ticketNewTitle => 'Write to the academy';
+
+  @override
+  String get ticketKind => 'What is it about?';
+
+  @override
+  String get ticketHintComplaint => 'About a teacher or a lesson. The academy looks into it and tells you what it did.';
+
+  @override
+  String get ticketHintBilling => 'An invoice, a payment, a refund or your package.';
+
+  @override
+  String get ticketHintPay => 'Your pay or your statement.';
+
+  @override
+  String get ticketHintTechnical => 'The class, the app or signing in not working.';
+
+  @override
+  String get ticketHintOther => 'A question or a request.';
+
+  @override
+  String get ticketLesson => 'Which lesson? (if any)';
+
+  @override
+  String get ticketNoLesson => 'No particular lesson';
+
+  @override
+  String get ticketSubject => 'Subject';
+
+  @override
+  String get ticketSubjectHint => 'In a few words';
+
+  @override
+  String get ticketBody => 'Tell us what happened';
+
+  @override
+  String get ticketAttach => 'Attach a picture or PDF';
+
+  @override
+  String get ticketTooBig => 'The file is bigger than 10 MB.';
+
+  @override
+  String get ticketSent => 'Sent. The academy answers here.';
+
+  @override
+  String get ticketsEmpty => 'No tickets yet. If anything is wrong, write to us.';
+
+  @override
+  String get ticketsMine => 'My tickets';
+
+  @override
+  String ticketAbout(String name) {
+    return 'About $name';
+  }
+
+  @override
+  String get ticketYourTurn => 'The academy answered';
+
+  @override
+  String get ticketYou => 'You';
+
+  @override
+  String get ticketAcademy => 'The academy';
+
+  @override
+  String get ticketReplyHint => 'Write to the academy…';
+
+  @override
+  String get ticketReopen => 'It is not solved';
+
+  @override
+  String ticketReopenHint(String date) {
+    return 'Not solved? You can reopen it until $date.';
+  }
+
+  @override
+  String get ticketClose => 'Close the ticket';
+
+  @override
+  String get ticketCloseHint => 'Close it when it is solved or you no longer need it. It takes no more messages.';
+
+  @override
+  String get ticketClosed => 'This ticket is closed. Open a new one if you need anything.';
 }

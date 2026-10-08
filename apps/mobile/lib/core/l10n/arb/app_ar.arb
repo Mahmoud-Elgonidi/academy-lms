@@ -1127,5 +1127,51 @@
   "updateTitle": "فيه نسخة جديدة من التطبيق",
   "updateBody": "النسخة اللي عندك قديمة ومش هتشتغل مع الأكاديمية. حدّثها عشان تكمل.",
   "updateNow": "حدّث التطبيق",
-  "updateFromStore": "حدّثه من متجر التطبيقات على موبايلك."
+  "updateFromStore": "حدّثه من متجر التطبيقات على موبايلك.",
+  "helpTitle": "المساعدة",
+  "supportTitle": "الدعم",
+  "helpLead": "اكتب للأكاديمية عن حصة، أو دفع، أو مشكلة تقنية، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.",
+  "supportLead": "اكتب للأكاديمية عن مشكلة تقنية، أو مرتبك، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.",
+  "ticketNew": "تذكرة جديدة",
+  "ticketNewTitle": "اكتب للأكاديمية",
+  "ticketKind": "عن إيه؟",
+  "ticketHintComplaint": "على مدرس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.",
+  "ticketHintBilling": "فاتورة، أو دفعة، أو فلوس راجعة، أو باقتك.",
+  "ticketHintPay": "مرتبك أو كشف حسابك.",
+  "ticketHintTechnical": "الفصل، أو التطبيق، أو الدخول مش شغال.",
+  "ticketHintOther": "سؤال أو طلب.",
+  "ticketLesson": "أنهي حصة؟ (لو فيه)",
+  "ticketNoLesson": "مش حصة معينة",
+  "ticketSubject": "العنوان",
+  "ticketSubjectHint": "في كلمتين",
+  "ticketBody": "احكيلنا حصل إيه",
+  "ticketAttach": "ارفق صورة أو PDF",
+  "ticketTooBig": "الملف أكبر من 10 ميجا.",
+  "ticketSent": "اتبعتت. الأكاديمية هترد هنا.",
+  "ticketsEmpty": "مفيش تذاكر لسه. لو فيه أي حاجة مش مظبوطة، اكتبلنا.",
+  "ticketsMine": "تذاكري",
+  "ticketAbout": "عن {name}",
+  "@ticketAbout": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketYourTurn": "الأكاديمية ردت",
+  "ticketYou": "انت",
+  "ticketAcademy": "الأكاديمية",
+  "ticketReplyHint": "اكتب للأكاديمية…",
+  "ticketReopen": "لسه ماتحلّتش",
+  "ticketReopenHint": "لسه ماتحلّتش؟ تقدر تفتحها تاني لحد {date}.",
+  "@ticketReopenHint": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketClose": "اقفل التذكرة",
+  "ticketCloseHint": "اقفلها لما تتحل أو لو مابقيتش محتاجها. مش هتاخد رسايل تاني.",
+  "ticketClosed": "التذكرة دي اتقفلت. افتح تذكرة جديدة لو محتاج حاجة."
 }

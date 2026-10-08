@@ -1123,6 +1123,153 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/support/new": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What a new ticket can be about
+         * @description The kinds this person may choose (a teacher: technical, pay, anything else; a family: also a complaint, and
+         *     money only in the classic look; nothing for a child in the kids' look), and the lessons it may be about
+         *     (the learner's or the teacher's, newest first). A family names the learner with `learner_id` (else the first).
+         */
+        get: operations["support.new"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/support/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My tickets
+         * @description The tickets this person wrote, the active ones first (open: the academy's turn; waiting: theirs), then the
+         *     latest. A family may narrow them to one learner with `learner_id`.
+         */
+        get: operations["support.tickets"];
+        put?: never;
+        /**
+         * Write to the academy
+         * @description A family names the learner (`learner_id`); `kind` is one of what "new" offered; `session_id` optionally a lesson
+         *     from there; `file` optionally a picture or PDF (10 MB). Answers `201` with the ticket. Send an `Idempotency-Key`.
+         */
+        post: operations["support.tickets.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/support/tickets/{ticket}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One of my tickets
+         * @description The ticket with its lines as the requester sees them: the messages both ways and when it was resolved,
+         *     reopened or closed.
+         */
+        get: operations["support.tickets.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/support/tickets/{ticket}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Answer the academy
+         * @description `body` and/or `file` (a picture or PDF, 10 MB). It is the academy's turn again; a resolved ticket reopens
+         *     within its week. A closed one takes no more messages (open a new one). Send an `Idempotency-Key`.
+         */
+        post: operations["support.tickets.reply"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/support/tickets/{ticket}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reopen a resolved ticket
+         * @description "It is not solved": within a week of the academy resolving it.
+         */
+        post: operations["support.tickets.reopen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/support/tickets/{ticket}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Close my ticket
+         * @description Solved, or no longer needed. It takes no more messages.
+         */
+        post: operations["support.tickets.close"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/support/tickets/{ticket}/messages/{message}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The picture or PDF on one of the messages of my ticket */
+        get: operations["support.tickets.file"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5168,6 +5315,852 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AccessDeniedHttpException"];
+        };
+    };
+    "support.new": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The learner it would be about; null for a teacher. */
+                            learner: {
+                                id: string;
+                                name: string;
+                            } | null;
+                            /** @description complaint | billing | technical | other, with each one's words; empty: this person cannot open tickets here. */
+                            kinds: {
+                                key: string;
+                                label: string;
+                            }[];
+                            /** @description Lessons from the last two months and the next week. */
+                            lessons: {
+                                id: string;
+                                subject: string;
+                                /** @description The other person in the lesson: the teacher for a family, the student for a teacher. */
+                                with: string;
+                                starts_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
+                                status: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "support.tickets": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description "#1024": what to quote when calling the academy. */
+                            reference: string;
+                            subject: string;
+                            /** @description complaint | billing | technical | other */
+                            kind: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description open (the academy's turn) | waiting (yours) | resolved | closed */
+                            status: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description The learner it is about (a family's ticket). */
+                            learner: {
+                                id: string | null;
+                                name: string;
+                            } | null;
+                            created_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            last_message_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description The academy answered last and waits for you. */
+                            your_turn: boolean;
+                        }[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "support.tickets.store": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** @description A family: the learner it is about (one of theirs). */
+                    learner_id?: string | null;
+                    /** @enum {string} */
+                    kind: "complaint" | "billing" | "technical" | "other";
+                    subject: string;
+                    body: string;
+                    /** @description One of the lessons "new" offered. */
+                    session_id?: string | null;
+                    /**
+                     * Format: binary
+                     * @description A picture or PDF.
+                     */
+                    file?: string | null;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description "#1024": what to quote when calling the academy. */
+                            reference: string;
+                            subject: string;
+                            /** @description complaint | billing | technical | other */
+                            kind: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description open (the academy's turn) | waiting (yours) | resolved | closed */
+                            status: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description The learner it is about (a family's ticket). */
+                            learner: {
+                                id: string | null;
+                                name: string;
+                            } | null;
+                            created_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            last_message_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description The academy answered last and waits for you. */
+                            your_turn: boolean;
+                            /** @description The lesson it is about. */
+                            lesson: {
+                                id: string;
+                                subject: string;
+                                /** @description The other person in the lesson: the teacher for a family, the student for a teacher. */
+                                with: string;
+                                starts_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
+                                status: string;
+                            } | null;
+                            /** @description Whether a message can still be sent (not closed; a resolved one only within its week). */
+                            can_reply: string;
+                            can_reopen: boolean;
+                            can_close: boolean;
+                            /** @description Until when a resolved ticket can be reopened. */
+                            reopen_until: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Oldest first. */
+                            messages: {
+                                id: string;
+                                /** @description requester (you) | staff (the academy) | system */
+                                side: string;
+                                /** @description message | event (resolved, reopened, closed) */
+                                kind: string;
+                                /** @description Who wrote it or did it; null for the system, or when the academy wrote your words down for you. */
+                                author: string | null;
+                                body: string | null;
+                                /** @description For an event, what happened in words ("Resolved by Mona"). */
+                                event: string | null;
+                                /** @description A picture or PDF; download it from its `url` with the same token. */
+                                file: {
+                                    name: string;
+                                    mime: string;
+                                    size: number;
+                                    url: string;
+                                } | null;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "support.tickets.show": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                ticket: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description "#1024": what to quote when calling the academy. */
+                            reference: string;
+                            subject: string;
+                            /** @description complaint | billing | technical | other */
+                            kind: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description open (the academy's turn) | waiting (yours) | resolved | closed */
+                            status: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description The learner it is about (a family's ticket). */
+                            learner: {
+                                id: string | null;
+                                name: string;
+                            } | null;
+                            created_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            last_message_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description The academy answered last and waits for you. */
+                            your_turn: boolean;
+                            /** @description The lesson it is about. */
+                            lesson: {
+                                id: string;
+                                subject: string;
+                                /** @description The other person in the lesson: the teacher for a family, the student for a teacher. */
+                                with: string;
+                                starts_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
+                                status: string;
+                            } | null;
+                            /** @description Whether a message can still be sent (not closed; a resolved one only within its week). */
+                            can_reply: string;
+                            can_reopen: boolean;
+                            can_close: boolean;
+                            /** @description Until when a resolved ticket can be reopened. */
+                            reopen_until: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Oldest first. */
+                            messages: {
+                                id: string;
+                                /** @description requester (you) | staff (the academy) | system */
+                                side: string;
+                                /** @description message | event (resolved, reopened, closed) */
+                                kind: string;
+                                /** @description Who wrote it or did it; null for the system, or when the academy wrote your words down for you. */
+                                author: string | null;
+                                body: string | null;
+                                /** @description For an event, what happened in words ("Resolved by Mona"). */
+                                event: string | null;
+                                /** @description A picture or PDF; download it from its `url` with the same token. */
+                                file: {
+                                    name: string;
+                                    mime: string;
+                                    size: number;
+                                    url: string;
+                                } | null;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "support.tickets.reply": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                ticket: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    body?: string | null;
+                    /**
+                     * Format: binary
+                     * @description A picture or PDF; a message has words, a file or both.
+                     */
+                    file?: string | null;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description "#1024": what to quote when calling the academy. */
+                            reference: string;
+                            subject: string;
+                            /** @description complaint | billing | technical | other */
+                            kind: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description open (the academy's turn) | waiting (yours) | resolved | closed */
+                            status: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description The learner it is about (a family's ticket). */
+                            learner: {
+                                id: string | null;
+                                name: string;
+                            } | null;
+                            created_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            last_message_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description The academy answered last and waits for you. */
+                            your_turn: boolean;
+                            /** @description The lesson it is about. */
+                            lesson: {
+                                id: string;
+                                subject: string;
+                                /** @description The other person in the lesson: the teacher for a family, the student for a teacher. */
+                                with: string;
+                                starts_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
+                                status: string;
+                            } | null;
+                            /** @description Whether a message can still be sent (not closed; a resolved one only within its week). */
+                            can_reply: string;
+                            can_reopen: boolean;
+                            can_close: boolean;
+                            /** @description Until when a resolved ticket can be reopened. */
+                            reopen_until: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Oldest first. */
+                            messages: {
+                                id: string;
+                                /** @description requester (you) | staff (the academy) | system */
+                                side: string;
+                                /** @description message | event (resolved, reopened, closed) */
+                                kind: string;
+                                /** @description Who wrote it or did it; null for the system, or when the academy wrote your words down for you. */
+                                author: string | null;
+                                body: string | null;
+                                /** @description For an event, what happened in words ("Resolved by Mona"). */
+                                event: string | null;
+                                /** @description A picture or PDF; download it from its `url` with the same token. */
+                                file: {
+                                    name: string;
+                                    mime: string;
+                                    size: number;
+                                    url: string;
+                                } | null;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "support.tickets.reopen": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                ticket: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description "#1024": what to quote when calling the academy. */
+                            reference: string;
+                            subject: string;
+                            /** @description complaint | billing | technical | other */
+                            kind: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description open (the academy's turn) | waiting (yours) | resolved | closed */
+                            status: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description The learner it is about (a family's ticket). */
+                            learner: {
+                                id: string | null;
+                                name: string;
+                            } | null;
+                            created_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            last_message_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description The academy answered last and waits for you. */
+                            your_turn: boolean;
+                            /** @description The lesson it is about. */
+                            lesson: {
+                                id: string;
+                                subject: string;
+                                /** @description The other person in the lesson: the teacher for a family, the student for a teacher. */
+                                with: string;
+                                starts_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
+                                status: string;
+                            } | null;
+                            /** @description Whether a message can still be sent (not closed; a resolved one only within its week). */
+                            can_reply: string;
+                            can_reopen: boolean;
+                            can_close: boolean;
+                            /** @description Until when a resolved ticket can be reopened. */
+                            reopen_until: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Oldest first. */
+                            messages: {
+                                id: string;
+                                /** @description requester (you) | staff (the academy) | system */
+                                side: string;
+                                /** @description message | event (resolved, reopened, closed) */
+                                kind: string;
+                                /** @description Who wrote it or did it; null for the system, or when the academy wrote your words down for you. */
+                                author: string | null;
+                                body: string | null;
+                                /** @description For an event, what happened in words ("Resolved by Mona"). */
+                                event: string | null;
+                                /** @description A picture or PDF; download it from its `url` with the same token. */
+                                file: {
+                                    name: string;
+                                    mime: string;
+                                    size: number;
+                                    url: string;
+                                } | null;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "support.tickets.close": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                ticket: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description "#1024": what to quote when calling the academy. */
+                            reference: string;
+                            subject: string;
+                            /** @description complaint | billing | technical | other */
+                            kind: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description open (the academy's turn) | waiting (yours) | resolved | closed */
+                            status: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description The learner it is about (a family's ticket). */
+                            learner: {
+                                id: string | null;
+                                name: string;
+                            } | null;
+                            created_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            last_message_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description The academy answered last and waits for you. */
+                            your_turn: boolean;
+                            /** @description The lesson it is about. */
+                            lesson: {
+                                id: string;
+                                subject: string;
+                                /** @description The other person in the lesson: the teacher for a family, the student for a teacher. */
+                                with: string;
+                                starts_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
+                                status: string;
+                            } | null;
+                            /** @description Whether a message can still be sent (not closed; a resolved one only within its week). */
+                            can_reply: string;
+                            can_reopen: boolean;
+                            can_close: boolean;
+                            /** @description Until when a resolved ticket can be reopened. */
+                            reopen_until: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Oldest first. */
+                            messages: {
+                                id: string;
+                                /** @description requester (you) | staff (the academy) | system */
+                                side: string;
+                                /** @description message | event (resolved, reopened, closed) */
+                                kind: string;
+                                /** @description Who wrote it or did it; null for the system, or when the academy wrote your words down for you. */
+                                author: string | null;
+                                body: string | null;
+                                /** @description For an event, what happened in words ("Resolved by Mona"). */
+                                event: string | null;
+                                /** @description A picture or PDF; download it from its `url` with the same token. */
+                                file: {
+                                    name: string;
+                                    mime: string;
+                                    size: number;
+                                    url: string;
+                                } | null;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "support.tickets.file": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                ticket: string;
+                message: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    "Transfer-Encoding": "chunked";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
         };
     };
 }

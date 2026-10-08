@@ -44,6 +44,9 @@ enum Ability: string
     case ViewAuditLog = 'audit.view';
     case ManageConsents = 'consents.manage';
     case ViewPlan = 'academy.view-plan';
+    case HandleTickets = 'tickets.handle';
+    case DecideComplaints = 'complaints.decide';
+    case ManageSupport = 'support.manage';
 
     /** The plan area this ability belongs to, if a plan may leave it out. */
     public function feature(): ?Feature

@@ -2,6 +2,7 @@
 
 namespace Modules\Evaluation\Providers;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +12,7 @@ use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Evaluation\Contracts\Events\LessonRated;
 use Modules\Evaluation\Contracts\Events\LessonRatingDue;
+use Modules\Evaluation\Contracts\TeacherComplaints;
 use Modules\Evaluation\Filament\Family\RateLessonChip;
 use Modules\Evaluation\Filament\Pages\TeacherPerformance;
 use Modules\Evaluation\Filament\Teacher\MyPerformance;
@@ -28,6 +30,18 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  */
 final class EvaluationServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        // Confirmed complaints are Support's to know; without it no teacher has any.
+        $this->app->bindIf(TeacherComplaints::class, fn () => new class implements TeacherComplaints
+        {
+            public function forTeachers(array $teacherIds, CarbonImmutable $from, CarbonImmutable $to): array
+            {
+                return [];
+            }
+        });
+    }
+
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');

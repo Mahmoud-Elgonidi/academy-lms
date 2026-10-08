@@ -74,6 +74,12 @@ describe("a guardian's children's privacy", () => {
   it('is a place of the classic look for guardians only, never a tab', () => {
     expect(itemsOf('classic', true, true).all.map((i) => i.key)).toContain('privacy');
     expect(itemsOf('classic', true, true).tabs.map((i) => i.key)).not.toContain('privacy');
+  });
+
+  it('lets everyone but a child in the kids\' look write to the academy', () => {
+    for (const stage of STAGES) {
+      expect(itemsOf(stage, seesMoney(stage)).all.some((i) => i.href === '/family/help')).toBe(stage !== 'kids');
+    }
     expect(itemsOf('classic', true).all.map((i) => i.key)).not.toContain('privacy');
     expect(isGuardian([{ is_self: true }])).toBe(false);
     expect(isGuardian([{ is_self: false }])).toBe(true);

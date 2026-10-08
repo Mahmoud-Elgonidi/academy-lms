@@ -146,6 +146,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
   - في اللوحات: نفس شاشة Filament بعد كلمة السر، وبعد الكود لمرة واحدة كمان (`SignIn`، والخطوة التانية متقفلة بـ `codePassed` متشفر لعشر دقايق).
   - في الـ API: `IssueAccessToken` هو اللي بيقرر لكل طرق الدخول (`auth/login`، و`auth/code/verify`، و`accounts/sign-in`). الحساب اللي شغّلها بياخد 403 من نوع `two-factor-required` ومعاه `two_factor_token` و`expires_at`، والـ token ده بيتبدّل بـ token الدخول في `POST /auth/two-factor` (الكود، أو كود استرجاع). الـ token متخزن hash في الـ cache، لمدة 5 دقايق، و5 محاولات، ومرة واحدة، وعلى نفس الأكاديمية (`PendingSignIns`). والدور اللي لازم يشغّلها ولسه ماشغّلهاش بياخد `two-factor-setup-required` من غير token: بيشغّلها من لوحة الإدارة الأول.
   - فريق المنصة بيصفّرها لشخص ضيّع موبايله وأكواده (`ResetTwoFactor`، بسبب، من "الدخول بحساب مستخدم")، وكل تغيير بيتسجل في `audit_logs` (`identity.two_factor_*`).
+- **الدعم والشكاوى** (`modules/Support`، فوق الكل زي CRM): التذاكر ومحادثتها ومواعيد الرد، والشكوى المؤكدة بتوصل لمؤشرات Evaluation عن طريق عقد Evaluation ‏`TeacherComplaints` اللي Support بيربطه. الطابور بيتحدث لحظيًا على قناة الأكاديمية (`academy.{id}.support`، لللي معاه `tickets.handle`)، وصاحب التذكرة على قناته (`tickets.changed`). التفاصيل في [02 — القسم 12](02-domain-rules.md#12-الدعم-والشكاوى).
 - **بوابة الدخول** (`Identity\Contracts\SignInGate`): أي حد عايز يمنع دخول، بيقول السبب من غير ما Identity يعرف هو مين. People بيربطها بموافقة ولي الأمر (`ConsentSignInGate`). والبوابة بتتسأل في `IssueAccessToken::handle()` (403 من نوع `guardian-consent-required`)، و`canAccessPanel('family')`، وصفحة الدخول. فريق المنصة داخل بحساب حد بيعدّي. وتفاصيل الموافقة في [02 — القسم 10](02-domain-rules.md#10-موافقة-ولي-الأمر-على-حساب-الطفل).
 - **الأدوار ثابتة في الـ MVP**: `owner, admin, supervisor, scheduler, accountant, sales, teacher, student, guardian`.
   - مابنستخدمش "teams" بتاعة spatie/permission، لأن `setPermissionsTeamId()` حالة عامة ممكن تتسرب من request للتاني تحت Octane.
@@ -214,7 +215,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 | CRM | `leads`، `lead_activities`، `lead_trials` (ومعاها تقييم المدرس)، `retention_tasks`، `referrals` |
 | Import | `import_runs` (الملف، وقراءة أعمدته، والخيارات، والأرقام)، `import_rows` (كل صف، وحكم المعاينة، ونتيجة الاستيراد) |
 | Communication | `notification_templates`، `notification_preferences`، `notifications`، `notification_deliveries`، `conversations`، `messages`، `announcements` |
-| Support | `tickets`، `ticket_messages` |
+| Support | `tickets` (الرقم، والنوع، والأولوية، والدور على مين، ومواعيد الرد، وقرار الشكوى)، و`ticket_messages` (مابتتعدلش ولا بتتمسح)، و`support_settings` (مواعيد الرد بالأولوية) |
 | Reporting | `fact_sessions_daily`، `fact_revenue_daily`، `fact_subscriptions_monthly`، `fact_teacher_utilization_weekly`، `fact_funnel_daily` |
 | Infra | `audit_logs` (ممنوع عليه UPDATE وDELETE، بـ trigger؛ الصفوف من غير أكاديمية للمنصة بس)، `media` |
 
@@ -527,7 +528,7 @@ interface PaymentGateway
   - محليًا: `/docs/api` (في البيئة المحلية بس).
   - الـ CI بتاع الموبايل (`mobile.yml`) بيشتغل كمان لما `packages/openapi` يتغير، فالـ contract test بيتأكد إن التطبيق لسه ماشي مع الـ API.
 
-### الـ API المنفّذ (`/api/v1`، 63 route)
+### الـ API المنفّذ (`/api/v1`، 74 route)
 - **الدخول والحساب** (Identity): `auth/login`، و`auth/code` و`auth/code/verify`، و`accounts/code` و`accounts/code/verify` و`accounts/sign-in`، و`auth/two-factor` (الخطوة التانية بعد أي واحد فيهم)، و`me` (ومعاه `plan_features`: الميزات اللي في باقة الأكاديمية)، و`me/sessions` (الأجهزة وتخريج جهاز)، و`auth/logout`.
 - **الأسرة**:
   - `family/learners` (People): الطالب نفسه وأولاده، ومرحلة كل واحد. كل endpoint للأسرة بياخد `learner_id`، ولو مابعتوش بياخد أول واحد (`FamilyView::learner`).
@@ -536,6 +537,7 @@ interface PaymentGateway
   - `family/balance`، و`family/invoices` (ومعاها لينك المستند الموقّع وطرق الدفع)، و`family/invoices/{id}/checkout` (Billing). الطالب اللي مابيدفعش مابيشوفش فلوس.
   - `family/consents` (People): أولاد ولي الأمر اللي محتاجين موافقة، والنص اللي هيوافق عليه، و`family/consents/{student}` (موافق: `agree` و`version`) و`family/consents/{student}/withdraw`. لولي الأمر بس.
   - `learning/*`: الـ roadmap والتقارير والواجبات (كانت موجودة)، و`learning/journey`: رئيسية الطالب في شكل مرحلته (النجوم، والنقاط والرتبة، والأيام ورا بعض، والإنجازات، ومستويات كل كورس وحالة كل درس، والجاي، والميعاد المتوقع للإنهاء). الطالب نفسه أو أول ابن لولي الأمر (`FamilyView::learner`).
+- **الدعم** (Support، للأسرة والمدرس): `support/new` (الأنواع المسموحة لللي بيسأل، والحصص)، و`support/tickets` (تذاكري، وكتابة تذكرة multipart مع صورة أو PDF و`Idempotency-Key`)، و`support/tickets/{id}` (المحادثة من غير ملاحظات الإدارة ولا قراراتها)، و`.../messages` (الرد)، و`.../reopen`، و`.../close`، و`.../messages/{message}/file`. الأسرة بتبعت `learner_id`.
 - **الأخطاء**: الـ route بتاع ميزة مش في الباقة بيرد 403 `feature-not-in-plan` (ومعاه `feature`)، وحد مقفول بيرد 403 `plan-limit-reached` (ومعاه `limit` و`max`). وعنوان الخطأ بلغة `Accept-Language` حتى لو الخطأ حصل قبل ما الأكاديمية تتعرف (كود أكاديمية غلط، route مش موجود). و404 مابيقولش أي تفاصيل (لا اسم class، ولا route، ولا أنهي أكاديمية).
 - **المدرس**: `teacher/lessons` (من يوم لعدد أيام)، و`teacher/students`، و`teacher/time-off` (عرض، وطلب، وسحب)، و`teacher/earnings?month=` (Payroll)، و`teacher/performance` (Evaluation، التقييمات من غير أسماء)، و`teacher/trials` وتقييم الحصة التجريبية (CRM)، و`teacher/shifts`، و`teacher/reports`، و`teacher/homework`.
 - كل endpoint بيستخدم نفس الـ Actions والـ queries اللي الشاشات بتستخدمها (`FamilyNotices`، و`FamilyCancellation`، و`TeacherStudents`، و`TeacherTrials`، ...).

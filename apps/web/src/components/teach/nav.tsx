@@ -24,6 +24,7 @@ export const ME: Item[] = [
   { href: '/teach/earnings', key: 'earnings', icon: 'wallet' },
   { href: '/teach/performance', key: 'performance', icon: 'chart' },
   { href: '/teach/notifications', key: 'notifications', icon: 'bell' },
+  { href: '/teach/help', key: 'help', icon: 'help' },
 ];
 
 /** The phone's tab bar: the day's work, and the rest under "more". */

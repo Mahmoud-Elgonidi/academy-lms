@@ -40,7 +40,7 @@
 | M14 | **CRM** | الـ leads، والتجارب، وتقييمها، والاستبقاء، والإحالات | `LeadCreated`، `LeadAssigned`، `TrialCompleted`، `TrialMissed`، `TrialAssessed`، `LeadConverted`، `LeadLost` |
 | M14ب | **Import** | استيراد المدرسين والطلاب وأولياء الأمور والجداول من الشيتات | `PeopleImported` |
 | M15 | **Communication** | القوالب، والقنوات، والتفضيلات، والإشعارات، والمحادثات | `NotificationFailed`، `MessageFlagged` |
-| M16 | **Support** | التذاكر والشكاوى | `TicketOpened`، `ComplaintValidated` |
+| M16 | **Support** | التذاكر والشكاوى ومواعيد الرد ✅ | `TicketOpened`، `TicketReplied`، `TicketAssigned`، `TicketResolved`، `TicketOverdue`، `ComplaintValidated` |
 | M17 | **Reporting** | جداول الحقائق والمؤشرات (للقراءة بس) | — |
 | Infra | **Audit**، **Files**، **SharedKernel** | سجل المراجعة (منفّذ في `SharedKernel\Audit`: `AuditTrail` بيكتب، و`AuditActor` بيقول مين، و`AuditEntries` بيقرا)، والملفات، والأنواع المشتركة (Money، Time، Tenancy) | — |
 
@@ -52,7 +52,7 @@ flowchart TD
     Import --> Identity & People & Catalog & Scheduling & Billing & Communication
     Payroll --> People & Scheduling & Evaluation
     Evaluation --> People & Scheduling & Learning
-    Support --> People & Scheduling
+    Support --> People & Scheduling & Evaluation & Communication & Identity
     Learning --> Scheduling & Enrollment & Curriculum & People & Communication
     Billing --> People & Catalog & Enrollment & Credits & Communication
     Classroom --> Scheduling & Learning & People & Communication & Platform
@@ -83,7 +83,8 @@ flowchart TD
      - **المنفّذ دلوقتي (Payroll)**: بيسمع `SessionFinalized` و`SessionCancelled` و`SessionFlaggedForReview`، وبيقرا الحصة من جدولها ونسبة الأجر من قرار السياسة. مفيش module بيعتمد عليه. وبيبعت للمدرسين إجمالي الشهر لما يسمع `PayrollMonthClosed` بتاعه.
    - **الإشعارات** عكس اتجاه السماع: الـ module اللي حصل عنده الحدث (Learning، Billing، Scheduling) بيسمع الـ events بتاعته ويبعت رسالة عن طريق `NotificationsApi` بقالب معرّف في الـ provider بتاعه، والصيغة في ملفات الـ lang بتاعته. Communication مابيعرفش حد غير Identity وPlatform (الاسم والشعار في الإيميل)، فبيفضل تحت في الرسم. وفين الإشعار بيفتح في اللوحات، كل module بيسجّله في `NotificationLinks`.
      - **المنفّذ دلوقتي**: Learning بيفتح التقرير لما يسمع `SessionFinalized`، وبيعيد حساب التقدم لما يسمع `CurriculumAttached` من Enrollment. ولأن Scheduling مايعرفش Learning، قسم "المنهج والتقدم" في حساب الطالب بيدخل الصفحة عن طريق **render hook** باسم ثابت (`scheduling::enrollment.account`) بيسجّله Learning.
-   - Evaluation بيسمع `SessionReportSubmitted` و`RatingSubmitted` و`ComplaintValidated`.
+   - Evaluation بيسمع `SessionReportSubmitted` و`RatingSubmitted`.
+     - **المنفّذ دلوقتي (الشكاوى)**: Support فوق Evaluation زي CRM، ومحدش بيعتمد عليه. Evaluation بيعرّف عقد `TeacherComplaints` عنده (من غيره محدش عنده شكاوى)، وSupport بيربط `ConfirmedComplaints`، فمؤشر "الشكاوى المؤكدة لكل 100 حصة" بيتقري وقت ما يتطلب زي باقي المؤشرات. و`ComplaintValidated` بيفضل event داخلي لـ Support (إشعار المدرس).
    - Evaluation بيسمع `SessionFinalized` عشان يطلب تقييم الحصة من الأسرة. المؤشرات نفسها بتتقري من الجداول وقت ما تتطلب (القراءة مسموح فيها join)، ونجوم التقييم تحت الحصة بتدخل صفحة الأسرة عن طريق **render hook** باسم ثابت (`scheduling::family.lesson-card`)، زي Learning.
    - **Import** فوق الكل زي CRM، ومحدش بيعتمد عليه. بيعمل كل حاجة عن طريق contracts الـ modules: الحسابات من `IdentityApi`، والملفات وأولياء الأمور من `PeopleApi`، والمواد من `CatalogApi`، والجدول الشغال من عقد Scheduling `ScheduleImport`، اللي بيفتح التسجيل والرصيد ويعمل `BillingApi::adopt` (اشتراك أول فاتورة فيه هي الباقة الجاية).
      - **المعاينة** بتشغّل الاستيراد كله في transaction واحدة وبعدين `rollBack`، وكل صف في savepoint لوحده. فالمعاينة بتقول بالظبط إيه اللي هيحصل، وحتى الصفوف اللي معتمدة على صفوف قبلها (ولي الأمر اللي اتعمل في صف ومستخدم في اللي بعده). الرسايل مابتطلعش لأنها بتستنى الـ commit.

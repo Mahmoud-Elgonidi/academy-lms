@@ -28,6 +28,7 @@ use Modules\Payroll\Filament\Teacher\PayrollTeacherPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
 use Modules\Scheduling\Filament\Teacher\SchedulingTeacherPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
+use Modules\Support\Filament\Teacher\SupportTeacherPlugin;
 
 /**
  * The teacher area at {slug}.{platform domain}/teach: today's lessons and the
@@ -79,6 +80,7 @@ final class TeacherPanelProvider extends PanelProvider
                 LearningTeacherPlugin::make(),
                 EvaluationTeacherPlugin::make(),
                 PayrollTeacherPlugin::make(),
+                SupportTeacherPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),
             ]);

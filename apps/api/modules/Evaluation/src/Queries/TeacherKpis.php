@@ -4,6 +4,7 @@ namespace Modules\Evaluation\Queries;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\Evaluation\Contracts\TeacherComplaints;
 use Modules\Evaluation\Domain\Kpi;
 use Modules\Scheduling\Contracts\TrialConversionRates;
 
@@ -24,6 +25,7 @@ use Modules\Scheduling\Contracts\TrialConversionRates;
  *  reports      lesson reports in on time ÷ reports due
  *  homework     hand-ins marked within 48 hours ÷ hand-ins due a mark
  *  trial_conversion  from Scheduling's contract (the CRM's numbers)
+ *  complaints   complaints the academy confirmed (Support, through TeacherComplaints) per 100 lessons taught
  */
 final class TeacherKpis
 {
@@ -33,7 +35,7 @@ final class TeacherKpis
 
     public const HOMEWORK_HOURS = 48;
 
-    public function __construct(private readonly TrialConversionRates $conversion) {}
+    public function __construct(private readonly TrialConversionRates $conversion, private readonly TeacherComplaints $complaints) {}
 
     /**
      * @param  list<string>  $teacherIds
@@ -93,6 +95,7 @@ final class TeacherKpis
             ->selectRaw('teacher_id, count(*) as n, sum(stars) as total')->get()->keyBy('teacher_id');
 
         $conversion = $this->conversion->forTeachers($teacherIds);
+        $complaints = $this->complaints->forTeachers($teacherIds, $from, $now);
 
         $out = [];
         foreach ($teacherIds as $id) {
@@ -112,6 +115,7 @@ final class TeacherKpis
                 'reports' => [$ratio($r->on_time ?? 0, $r->due ?? 0), (int) ($r->due ?? 0)],
                 'homework' => [$ratio($h->on_time ?? 0, $h->due ?? 0), (int) ($h->due ?? 0)],
                 'trial_conversion' => [$conversion[$id] ?? null, isset($conversion[$id]) ? 1 : 0],
+                'complaints' => [($l->taught_lessons ?? 0) > 0 ? ($complaints[$id] ?? 0) * 100 / (float) $l->taught_lessons : null, (int) ($l->taught_lessons ?? 0)],
             ];
             foreach (Kpi::all() as $kpi) {
                 [$value, $n] = $values[$kpi->key];

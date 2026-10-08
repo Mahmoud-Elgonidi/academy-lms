@@ -2827,6 +2827,198 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'حدّثه من متجر التطبيقات على موبايلك.'**
   String get updateFromStore;
+
+  /// No description provided for @helpTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'المساعدة'**
+  String get helpTitle;
+
+  /// No description provided for @supportTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدعم'**
+  String get supportTitle;
+
+  /// No description provided for @helpLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب للأكاديمية عن حصة، أو دفع، أو مشكلة تقنية، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.'**
+  String get helpLead;
+
+  /// No description provided for @supportLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب للأكاديمية عن مشكلة تقنية، أو مرتبك، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.'**
+  String get supportLead;
+
+  /// No description provided for @ticketNew.
+  ///
+  /// In ar, this message translates to:
+  /// **'تذكرة جديدة'**
+  String get ticketNew;
+
+  /// No description provided for @ticketNewTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب للأكاديمية'**
+  String get ticketNewTitle;
+
+  /// No description provided for @ticketKind.
+  ///
+  /// In ar, this message translates to:
+  /// **'عن إيه؟'**
+  String get ticketKind;
+
+  /// No description provided for @ticketHintComplaint.
+  ///
+  /// In ar, this message translates to:
+  /// **'على مدرس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.'**
+  String get ticketHintComplaint;
+
+  /// No description provided for @ticketHintBilling.
+  ///
+  /// In ar, this message translates to:
+  /// **'فاتورة، أو دفعة، أو فلوس راجعة، أو باقتك.'**
+  String get ticketHintBilling;
+
+  /// No description provided for @ticketHintPay.
+  ///
+  /// In ar, this message translates to:
+  /// **'مرتبك أو كشف حسابك.'**
+  String get ticketHintPay;
+
+  /// No description provided for @ticketHintTechnical.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفصل، أو التطبيق، أو الدخول مش شغال.'**
+  String get ticketHintTechnical;
+
+  /// No description provided for @ticketHintOther.
+  ///
+  /// In ar, this message translates to:
+  /// **'سؤال أو طلب.'**
+  String get ticketHintOther;
+
+  /// No description provided for @ticketLesson.
+  ///
+  /// In ar, this message translates to:
+  /// **'أنهي حصة؟ (لو فيه)'**
+  String get ticketLesson;
+
+  /// No description provided for @ticketNoLesson.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش حصة معينة'**
+  String get ticketNoLesson;
+
+  /// No description provided for @ticketSubject.
+  ///
+  /// In ar, this message translates to:
+  /// **'العنوان'**
+  String get ticketSubject;
+
+  /// No description provided for @ticketSubjectHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'في كلمتين'**
+  String get ticketSubjectHint;
+
+  /// No description provided for @ticketBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'احكيلنا حصل إيه'**
+  String get ticketBody;
+
+  /// No description provided for @ticketAttach.
+  ///
+  /// In ar, this message translates to:
+  /// **'ارفق صورة أو PDF'**
+  String get ticketAttach;
+
+  /// No description provided for @ticketTooBig.
+  ///
+  /// In ar, this message translates to:
+  /// **'الملف أكبر من 10 ميجا.'**
+  String get ticketTooBig;
+
+  /// No description provided for @ticketSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتبعتت. الأكاديمية هترد هنا.'**
+  String get ticketSent;
+
+  /// No description provided for @ticketsEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش تذاكر لسه. لو فيه أي حاجة مش مظبوطة، اكتبلنا.'**
+  String get ticketsEmpty;
+
+  /// No description provided for @ticketsMine.
+  ///
+  /// In ar, this message translates to:
+  /// **'تذاكري'**
+  String get ticketsMine;
+
+  /// No description provided for @ticketAbout.
+  ///
+  /// In ar, this message translates to:
+  /// **'عن {name}'**
+  String ticketAbout(String name);
+
+  /// No description provided for @ticketYourTurn.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية ردت'**
+  String get ticketYourTurn;
+
+  /// No description provided for @ticketYou.
+  ///
+  /// In ar, this message translates to:
+  /// **'انت'**
+  String get ticketYou;
+
+  /// No description provided for @ticketAcademy.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية'**
+  String get ticketAcademy;
+
+  /// No description provided for @ticketReplyHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب للأكاديمية…'**
+  String get ticketReplyHint;
+
+  /// No description provided for @ticketReopen.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه ماتحلّتش'**
+  String get ticketReopen;
+
+  /// No description provided for @ticketReopenHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه ماتحلّتش؟ تقدر تفتحها تاني لحد {date}.'**
+  String ticketReopenHint(String date);
+
+  /// No description provided for @ticketClose.
+  ///
+  /// In ar, this message translates to:
+  /// **'اقفل التذكرة'**
+  String get ticketClose;
+
+  /// No description provided for @ticketCloseHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اقفلها لما تتحل أو لو مابقيتش محتاجها. مش هتاخد رسايل تاني.'**
+  String get ticketCloseHint;
+
+  /// No description provided for @ticketClosed.
+  ///
+  /// In ar, this message translates to:
+  /// **'التذكرة دي اتقفلت. افتح تذكرة جديدة لو محتاج حاجة.'**
+  String get ticketClosed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -27,6 +27,7 @@ use Modules\People\Filament\Family\PeopleFamilyPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
 use Modules\Scheduling\Filament\Family\SchedulingFamilyPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
+use Modules\Support\Filament\Family\SupportFamilyPlugin;
 
 /**
  * The family area at {slug}.{platform domain}/my: students and guardians on
@@ -76,6 +77,7 @@ final class FamilyPanelProvider extends PanelProvider
                 SchedulingFamilyPlugin::make(),
                 LearningFamilyPlugin::make(),
                 BillingFamilyPlugin::make(),
+                SupportFamilyPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),
             ]);

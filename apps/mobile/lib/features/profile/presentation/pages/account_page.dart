@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/router/areas.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -35,6 +36,7 @@ class AccountPage extends StatelessWidget {
             const AccountsCard(),
             const SizedBox(height: 14),
             if (!standalone) const _Privacy(),
+            const _Help(),
             const _ClockPrompt(),
             const _Settings(),
             const SizedBox(height: 18),
@@ -71,6 +73,35 @@ class _Privacy extends StatelessWidget {
         ),
         const SizedBox(height: 14),
       ],
+    );
+  }
+}
+
+/// Writing to the academy: a family's "Help" from Me, a student's from their account; not a child in the kids' look
+/// (their guardian writes), and a teacher's is in More.
+class _Help extends StatelessWidget {
+  const _Help();
+
+  @override
+  Widget build(BuildContext context) {
+    final target = switch (Area.of(context.watch<SessionCubit>().state)) {
+      Area.family => '/family/me/help',
+      Area.middle || Area.teen => '/account/help',
+      _ => null,
+    };
+    if (target == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: LmsCard(
+        padding: EdgeInsets.zero,
+        child: ListTile(
+          key: const Key('open-help'),
+          leading: const Icon(Icons.support_agent_outlined),
+          title: Text(context.l10n.helpTitle, style: context.text.titleSmall),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: () => context.go(target),
+        ),
+      ),
     );
   }
 }

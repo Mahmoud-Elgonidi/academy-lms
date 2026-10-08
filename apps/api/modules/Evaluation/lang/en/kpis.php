@@ -19,6 +19,7 @@ return [
     'target_min' => 'target :value or more',
     'target_max' => 'target :value or less',
     'minutes' => ':count min',
+    'per100' => ':count',
     'names' => [
         'punctuality' => 'Punctuality',
         'avg_late' => 'Average lateness',
@@ -27,6 +28,7 @@ return [
         'taught' => 'Time taught',
         'early_leave' => 'Leaving early',
         'rating' => 'Family rating',
+        'complaints' => 'Confirmed complaints per 100 lessons',
         'reports' => 'Reports on time',
         'homework' => 'Homework marked within 48h',
         'trial_conversion' => 'Subscribed after a trial',
@@ -39,6 +41,7 @@ return [
         'taught' => '{1} of one lesson|[2,*] of :count lessons',
         'early_leave' => '{1} of one lesson|[2,*] of :count lessons',
         'rating' => '{1} from one rating|[2,*] from :count ratings',
+        'complaints' => '{1} over one lesson taught|[2,*] over :count lessons taught',
         'reports' => '{1} of one report|[2,*] of :count reports',
         'homework' => '{1} of one hand-in|[2,*] of :count hand-ins',
         'trial_conversion' => 'last 6 months',

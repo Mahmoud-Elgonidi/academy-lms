@@ -35,6 +35,8 @@ import '../../features/profile/presentation/pages/account_page.dart';
 import '../../features/roadmap/presentation/pages/progress_page.dart';
 import '../../features/roadmap/presentation/pages/reports_page.dart';
 import '../../features/schedule/presentation/pages/lessons_page.dart';
+import '../../features/support/presentation/help_page.dart';
+import '../../features/support/presentation/ticket_page.dart';
 import '../../features/teaching/presentation/pages/earnings_page.dart';
 import '../../features/teaching/presentation/pages/marking_page.dart';
 import '../../features/teaching/presentation/pages/more_page.dart';
@@ -61,6 +63,13 @@ GoRouter buildRouter(SessionCubit session) {
 
   StatefulShellBranch branch(String path, Widget Function(GoRouterState s) build, {List<RouteBase> routes = const []}) =>
       StatefulShellBranch(routes: [page(path, build, routes: routes)]);
+
+  // Writing to the academy, and each ticket, under the look's own place: Me, More, or a student's account.
+  GoRoute help(HelpScope scope) => page(
+    'help',
+    (_) => HelpPage(scope: scope),
+    routes: [page(':id', (s) => TicketPage(ticketId: s.pathParameters['id']!))],
+  );
 
   List<RouteBase> signIn(String base) => [
     page(
@@ -105,7 +114,7 @@ GoRouter buildRouter(SessionCubit session) {
       ...signIn('/welcome'),
       ...signIn('/add'),
       page('/web-only', (_) => const WebOnlyPage()),
-      page('/account', (_) => const AccountPage(standalone: true)),
+      page('/account', (_) => const AccountPage(standalone: true), routes: [help(HelpScope.self)]),
       page('/update', (_) => const UpdatePage()),
       page('/inbox', (_) => const InboxPage(), routes: [page('choices', (_) => const ChoicesPage())]),
       page('/open/:screen', (_) => const _Splash(), routes: [page(':id', (_) => const _Splash())]),
@@ -154,7 +163,7 @@ GoRouter buildRouter(SessionCubit session) {
           branch('/family/lessons', (_) => const LessonsPage()),
           branch('/family/progress', (_) => const ProgressPage()),
           branch('/family/money', (_) => const MoneyPage()),
-          branch('/family/me', (_) => const AccountPage(), routes: [page('privacy', (_) => const PrivacyPage())]),
+          branch('/family/me', (_) => const AccountPage(), routes: [page('privacy', (_) => const PrivacyPage()), help(HelpScope.family)]),
         ],
       ),
 
@@ -224,7 +233,7 @@ GoRouter buildRouter(SessionCubit session) {
           branch('/teach/week', (_) => const WeekPage()),
           branch('/teach/students', (_) => const StudentsPage()),
           branch('/teach/earnings', (_) => const EarningsPage()),
-          branch('/teach/more', (_) => const MorePage(), routes: [page('time-off', (_) => const TimeOffPage())]),
+          branch('/teach/more', (_) => const MorePage(), routes: [page('time-off', (_) => const TimeOffPage()), help(HelpScope.teacher)]),
         ],
       ),
     ],

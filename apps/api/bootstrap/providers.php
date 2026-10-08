@@ -22,6 +22,7 @@ use Modules\People\Providers\PeopleServiceProvider;
 use Modules\Platform\Providers\PlatformServiceProvider;
 use Modules\Scheduling\Providers\SchedulingServiceProvider;
 use Modules\SharedKernel\Providers\SharedKernelServiceProvider;
+use Modules\Support\Providers\SupportServiceProvider;
 
 // Module providers, in dependency order (see docs/architecture/04-design-patterns.md).
 return [
@@ -42,6 +43,7 @@ return [
     ClassroomServiceProvider::class,
     CrmServiceProvider::class,
     ImportServiceProvider::class,
+    SupportServiceProvider::class,
     AppServiceProvider::class,
     AcademyPanelProvider::class,
     TeacherPanelProvider::class,

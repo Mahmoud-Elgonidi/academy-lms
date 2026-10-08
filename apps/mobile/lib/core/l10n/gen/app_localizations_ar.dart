@@ -1695,4 +1695,104 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get updateFromStore => 'حدّثه من متجر التطبيقات على موبايلك.';
+
+  @override
+  String get helpTitle => 'المساعدة';
+
+  @override
+  String get supportTitle => 'الدعم';
+
+  @override
+  String get helpLead => 'اكتب للأكاديمية عن حصة، أو دفع، أو مشكلة تقنية، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.';
+
+  @override
+  String get supportLead => 'اكتب للأكاديمية عن مشكلة تقنية، أو مرتبك، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.';
+
+  @override
+  String get ticketNew => 'تذكرة جديدة';
+
+  @override
+  String get ticketNewTitle => 'اكتب للأكاديمية';
+
+  @override
+  String get ticketKind => 'عن إيه؟';
+
+  @override
+  String get ticketHintComplaint => 'على مدرس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.';
+
+  @override
+  String get ticketHintBilling => 'فاتورة، أو دفعة، أو فلوس راجعة، أو باقتك.';
+
+  @override
+  String get ticketHintPay => 'مرتبك أو كشف حسابك.';
+
+  @override
+  String get ticketHintTechnical => 'الفصل، أو التطبيق، أو الدخول مش شغال.';
+
+  @override
+  String get ticketHintOther => 'سؤال أو طلب.';
+
+  @override
+  String get ticketLesson => 'أنهي حصة؟ (لو فيه)';
+
+  @override
+  String get ticketNoLesson => 'مش حصة معينة';
+
+  @override
+  String get ticketSubject => 'العنوان';
+
+  @override
+  String get ticketSubjectHint => 'في كلمتين';
+
+  @override
+  String get ticketBody => 'احكيلنا حصل إيه';
+
+  @override
+  String get ticketAttach => 'ارفق صورة أو PDF';
+
+  @override
+  String get ticketTooBig => 'الملف أكبر من 10 ميجا.';
+
+  @override
+  String get ticketSent => 'اتبعتت. الأكاديمية هترد هنا.';
+
+  @override
+  String get ticketsEmpty => 'مفيش تذاكر لسه. لو فيه أي حاجة مش مظبوطة، اكتبلنا.';
+
+  @override
+  String get ticketsMine => 'تذاكري';
+
+  @override
+  String ticketAbout(String name) {
+    return 'عن $name';
+  }
+
+  @override
+  String get ticketYourTurn => 'الأكاديمية ردت';
+
+  @override
+  String get ticketYou => 'انت';
+
+  @override
+  String get ticketAcademy => 'الأكاديمية';
+
+  @override
+  String get ticketReplyHint => 'اكتب للأكاديمية…';
+
+  @override
+  String get ticketReopen => 'لسه ماتحلّتش';
+
+  @override
+  String ticketReopenHint(String date) {
+    return 'لسه ماتحلّتش؟ تقدر تفتحها تاني لحد $date.';
+  }
+
+  @override
+  String get ticketClose => 'اقفل التذكرة';
+
+  @override
+  String get ticketCloseHint => 'اقفلها لما تتحل أو لو مابقيتش محتاجها. مش هتاخد رسايل تاني.';
+
+  @override
+  String get ticketClosed => 'التذكرة دي اتقفلت. افتح تذكرة جديدة لو محتاج حاجة.';
 }

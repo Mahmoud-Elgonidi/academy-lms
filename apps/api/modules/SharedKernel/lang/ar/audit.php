@@ -49,6 +49,11 @@ return [
             'consent_withdrawn' => ':guardian سحب موافقته على حساب :student',
             'consent_age_saved' => 'سن موافقة ولي الأمر بقى أقل من :age سنة',
         ],
+        'support' => [
+            'complaint_validated' => 'تأكيد الشكوى :ticket على :teacher: :note',
+            'complaint_dismissed' => 'رفض الشكوى :ticket: :note',
+            'targets_saved' => 'تغيير مواعيد الرد على التذاكر',
+        ],
         'impersonation' => [
             'started' => 'دخول بحساب :user لمدة :minutes دقيقة: :reason',
             'ended' => 'انتهى الدخول بحساب :user: :how',
@@ -79,6 +84,7 @@ return [
         'import' => 'الاستيراد',
         'identity' => 'الحسابات',
         'people' => 'الطلاب وأولياء الأمور',
+        'support' => 'الدعم والشكاوى',
         'impersonation' => 'دخول فريق المنصة',
         'platform' => 'المنصة',
     ],

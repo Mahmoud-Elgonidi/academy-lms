@@ -49,6 +49,11 @@ return [
             'consent_withdrawn' => ':guardian withdrew their consent to :student\'s account',
             'consent_age_saved' => 'Guardians now consent for students under :age',
         ],
+        'support' => [
+            'complaint_validated' => 'Complaint :ticket about :teacher confirmed: :note',
+            'complaint_dismissed' => 'Complaint :ticket dismissed: :note',
+            'targets_saved' => 'Support answer targets changed',
+        ],
         'impersonation' => [
             'started' => 'Signed in as :user for :minutes minutes: :reason',
             'ended' => 'Sign-in as :user ended: :how',
@@ -79,6 +84,7 @@ return [
         'import' => 'Imports',
         'identity' => 'Accounts',
         'people' => 'Students and guardians',
+        'support' => 'Support and complaints',
         'impersonation' => 'Platform sign-ins',
         'platform' => 'Platform',
     ],

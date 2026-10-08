@@ -80,7 +80,8 @@
       "challenges": "Challenges",
       "notifications": "Notifications",
       "more": "More",
-      "privacy": "Children's privacy"
+      "privacy": "Children's privacy",
+      "help": "Help"
     },
     "kids": {
       "menu": "Menu",
@@ -91,7 +92,8 @@
       "money": "Payments",
       "challenges": "Missions",
       "notifications": "Messages",
-      "more": "More"
+      "more": "More",
+      "help": "Help"
     },
     "middle": {
       "menu": "Menu",
@@ -102,7 +104,8 @@
       "money": "Payments",
       "challenges": "Quests",
       "notifications": "Notifications",
-      "more": "More"
+      "more": "More",
+      "help": "Ask for help"
     },
     "teen": {
       "menu": "Menu",
@@ -113,8 +116,10 @@
       "money": "Payments",
       "challenges": "Goals",
       "notifications": "Notifications",
-      "more": "More"
-    }
+      "more": "More",
+      "help": "Help"
+    },
+    "help": "Support"
   },
   "family": {
     "switchLearner": "Choose whose",
@@ -536,5 +541,46 @@
     "bannerMany": "{names} are waiting for your consent to sign in.",
     "bannerAction": "Read and agree",
     "nameSeparator": ", "
+  },
+  "support": {
+    "title": "Help",
+    "lead": "Write to the academy about a lesson, a payment, a technical problem or anything else. The answers come here and in a message.",
+    "teacherTitle": "Support",
+    "teacherLead": "Write to the academy about a technical problem, your pay or anything else. The answers come here and in a message.",
+    "new": "New ticket",
+    "newHeading": "Write to the academy",
+    "kind": "What is it about?",
+    "hints": {
+      "complaint": "About a teacher or a lesson. The academy looks into it and tells you what it did.",
+      "billing": "An invoice, a payment, a refund or your package.",
+      "technical": "The class, the app or signing in not working.",
+      "other": "A question or a request.",
+      "pay": "Your pay or your statement."
+    },
+    "lesson": "Which lesson? (if any)",
+    "noLesson": "No particular lesson",
+    "subject": "Subject",
+    "subjectHint": "In a few words",
+    "body": "Tell us what happened",
+    "file": "A picture or PDF (if any)",
+    "tooBig": "The file is bigger than 10 MB.",
+    "send": "Send",
+    "list": "My tickets",
+    "empty": "No tickets yet. If anything is wrong, write to us.",
+    "about": "About {name}",
+    "yourTurn": "The academy answered",
+    "noneKids": "Ask your parent to write to the academy.",
+    "back": "My tickets",
+    "conversation": "The conversation",
+    "you": "You",
+    "academy": "The academy",
+    "reply": "Your answer",
+    "replyPlaceholder": "Write to the academy…",
+    "attach": "Attach a picture or PDF",
+    "reopen": "It is not solved",
+    "reopenHint": "Not solved? You can reopen it until {date}.",
+    "close": "Close the ticket",
+    "closeHint": "Close it when it is solved or you no longer need it. It takes no more messages.",
+    "closedNote": "This ticket is closed. Open a new one if you need anything."
   }
 }

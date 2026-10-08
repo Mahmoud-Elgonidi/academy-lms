@@ -34,6 +34,11 @@ final class AbilityMatrix
             Ability::ManageConsents => [Role::Owner, Role::Admin, Role::Supervisor],
             // The academy's SaaS plan and how much of it is used.
             Ability::ViewPlan => [Role::Owner, Role::Admin],
+            // Support tickets: everyone at the academy may answer one (each kind is told to whoever it concerns);
+            // confirming a complaint against a teacher is for who oversees the teachers; the answer targets for the owner and admins.
+            Ability::HandleTickets => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler, Role::Accountant, Role::Sales],
+            Ability::DecideComplaints => [Role::Owner, Role::Admin, Role::Supervisor],
+            Ability::ManageSupport => [Role::Owner, Role::Admin],
         };
     }
 

@@ -14,7 +14,7 @@ final readonly class Kpi
         public ?float $target,
         public bool $higherIsBetter,
         public int $minSample,
-        public string $format,      // percent | minutes | stars
+        public string $format,      // percent | minutes | stars | per100
         public string $group,       // commitment | quality | professionalism | business
     ) {}
 
@@ -39,6 +39,7 @@ final readonly class Kpi
             new self('taught', 0.95, true, 5, 'percent', 'commitment'),
             new self('early_leave', 0.02, false, 5, 'percent', 'commitment'),
             new self('rating', 4.6, true, 1, 'stars', 'quality'),
+            new self('complaints', 0.5, false, 5, 'per100', 'quality'),
             new self('reports', 0.95, true, 5, 'percent', 'professionalism'),
             new self('homework', 0.90, true, 3, 'percent', 'professionalism'),
             new self('trial_conversion', 0.40, true, 1, 'percent', 'business'),
