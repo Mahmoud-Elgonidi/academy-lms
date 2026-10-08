@@ -1,6 +1,8 @@
 <?php
 
 return [
+    // Why a lesson's recordings are kept (the classroom's recordings page).
+    'recording_hold' => 'شكوى مفتوحة رقم :number',
     'kinds' => [
         'complaint' => 'شكوى',
         'billing' => 'الدفع والفواتير',

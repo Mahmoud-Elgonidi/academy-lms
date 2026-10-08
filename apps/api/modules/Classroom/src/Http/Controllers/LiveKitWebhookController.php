@@ -12,9 +12,9 @@ use Modules\SharedKernel\Tenancy\TenantResolver;
 use RuntimeException;
 
 /**
- * LiveKit posts room and participant events here. The signature is checked
- * first; the academy comes from the room name ("{academy}_{session}"), and
- * the event is handled as that academy.
+ * LiveKit posts room, participant and recording (egress) events here. The
+ * signature is checked first; the academy comes from the room name
+ * ("{academy}_{session}"), and the event is handled as that academy.
  */
 final class LiveKitWebhookController
 {
@@ -27,7 +27,7 @@ final class LiveKitWebhookController
             return response('', 401);
         }
 
-        $parsed = Room::parseName((string) ($event['room']['name'] ?? ''));
+        $parsed = Room::parseName((string) ($event['room']['name'] ?? $event['egressInfo']['roomName'] ?? $event['egressInfo']['room_name'] ?? ''));
         $tenant = $parsed === null ? null : $tenants->byId($parsed[0]);
         if ($tenant === null) {
             return response('', 204);   // not one of ours: nothing to do, and no reason to retry

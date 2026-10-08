@@ -1,6 +1,8 @@
 <?php
 
 return [
+    // Why a lesson's recordings are kept (the classroom's recordings page).
+    'recording_hold' => 'Open complaint #:number',
     'kinds' => [
         'complaint' => 'Complaint',
         'billing' => 'Payments and invoices',

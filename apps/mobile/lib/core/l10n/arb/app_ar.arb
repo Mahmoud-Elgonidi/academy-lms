@@ -1043,6 +1043,50 @@
   "academyOnly": "للأكاديمية بس",
   "lessonMaterials": "مواد الدرس",
   "teachersOnly": "للمدرس بس",
+  "recordingsTitle": "تسجيلات الحصص",
+  "recordingsMine": "تسجيلات حصصي",
+  "recordingsOff": "الأكاديمية مش بتسجل الحصص دلوقتي.",
+  "recordingsOf": "تسجيلات حصص {name}",
+  "@recordingsOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "recordingsTeacherList": "تسجيلات حصصك",
+  "recordingsEmpty": "مفيش تسجيلات لسه.",
+  "recordingsNotShared": "الأكاديمية مش بتعرض التسجيلات هنا.",
+  "recordingWatch": "شوف",
+  "recordingAgreed": "موافق",
+  "recordingNotAgreed": "مش موافق",
+  "recordingAgree": "موافق",
+  "recordingAgreedDone": "شكرًا. الحصص ممكن تتسجل من دلوقتي.",
+  "recordingWithdraw": "اسحب الموافقة",
+  "recordingWithdrawConfirm": "متأكد؟ أي تسجيل شغال هيقف، ومش هيتسجل حاجة تاني.",
+  "recordingWithdrawn": "الموافقة اتسحبت، ومش هيتسجل حاجة تاني.",
+  "recordingUntil": "متاح لحد {date}",
+  "@recordingUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recordingVideo": "فيديو",
+  "recordingAudio": "صوت",
+  "recordingLogged": "فتحك للتسجيل بيتسجل باسمك.",
+  "recordingOn": "بيسجل",
+  "recordStart": "سجّل الحصة",
+  "recordStop": "وقّف التسجيل",
+  "recordingMissing": "مينفعش نسجل لحد ما يوافقوا على التسجيل: {names}.",
+  "@recordingMissing": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
   "absenceNote": "ملاحظة الغياب",
   "absenceHint": "الطالب ماحضرش. اكتب اللي حصل وأي حاجة الأسرة محتاجة تعرفها.",
   "giveHomework": "ادّي واجب",

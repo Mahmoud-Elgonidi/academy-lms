@@ -2,17 +2,55 @@
 
 import { refresh } from 'next/cache';
 import { send } from '@/lib/api/server';
+import type { LessonRecording } from '@/lib/recordings';
 import type { JoinTicket } from '@/lib/teach/types';
 
 /**
  * Writes every portal makes the same way, teachers and families alike: a
  * seat in a lesson (JoinLesson decides whose lesson it is and whether it is
- * open yet), notifications marked read, and tickets to the academy.
+ * open yet), notifications marked read, tickets to the academy, and lesson
+ * recordings (consent, watching, starting and stopping one).
  */
-export async function joinLesson(id: string): Promise<{ ok: true; ticket: JoinTicket } | { ok: false; message?: string }> {
-  const joined = await send<{ data: JoinTicket }>('post', '/v1/lessons/{session}/join', { params: { session: id } });
+export async function joinLesson(id: string): Promise<{ ok: true; ticket: JoinTicket; recording: LessonRecording } | { ok: false; message?: string }> {
+  const joined = await send<{ data: JoinTicket; recording?: LessonRecording }>('post', '/v1/lessons/{session}/join', { params: { session: id } });
   if (!joined.ok) return { ok: false, message: Object.values(joined.problem.errors)[0]?.[0] ?? (joined.problem.title || undefined) };
-  return { ok: true, ticket: joined.data.data };
+  return { ok: true, ticket: joined.data.data, recording: joined.data.recording ?? { mode: 'off', controls: false, running: false, missing: [] } };
+}
+
+type Done = { ok: true } | { ok: false; message?: string };
+
+function problemOf(problem: { title?: string; errors: Record<string, string[]> }): { ok: false; message?: string } {
+  return { ok: false, message: Object.values(problem.errors)[0]?.[0] ?? (problem.title || undefined) };
+}
+
+/** Agrees to lessons being recorded, for oneself or one's child, to the wording's version shown. */
+export async function agreeToRecording(person: string, version: number, agree: boolean): Promise<Done> {
+  const done = await send('post', '/v1/recordings/consents/{person}', { params: { person }, body: { agree, version } });
+  if (!done.ok) return problemOf(done.problem);
+  refresh();
+  return { ok: true };
+}
+
+/** Takes that consent back: a recording running stops, and nothing more is recorded. */
+export async function withdrawRecordingConsent(person: string): Promise<Done> {
+  const done = await send('post', '/v1/recordings/consents/{person}/withdraw', { params: { person } });
+  if (!done.ok) return problemOf(done.problem);
+  refresh();
+  return { ok: true };
+}
+
+/** An address to play one recording (the opening is logged by the API). */
+export async function watchRecording(id: string): Promise<{ ok: true; url: string; media: string } | { ok: false; message?: string }> {
+  const done = await send<{ url: string; media: string }>('post', '/v1/recordings/{recording}/watch', { params: { recording: id } });
+  if (!done.ok) return problemOf(done.problem);
+  return { ok: true, url: done.data.url, media: done.data.media };
+}
+
+/** Starts or stops recording a lesson (its teacher, or a supervisor in it). */
+export async function recordLesson(id: string, on: boolean): Promise<{ ok: true; running: boolean } | { ok: false; message?: string }> {
+  const done = await send<{ data: { running: boolean } }>('post', on ? '/v1/lessons/{session}/recording' : '/v1/lessons/{session}/recording/stop', { params: { session: id } });
+  if (!done.ok) return problemOf(done.problem);
+  return { ok: true, running: done.data.data.running };
 }
 
 /** Marks notifications read: these, or all of them. */

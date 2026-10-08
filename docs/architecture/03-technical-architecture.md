@@ -206,7 +206,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 | Curriculum | `programs`، `curriculum_versions`، `curriculum_nodes`، `node_resources`، `assessment_definitions`، `version_node_mappings` |
 | Enrollment | `enrollments`، `enrollment_teacher_assignments`، `enrollment_status_history` |
 | Scheduling | `teacher_shift_schedules`، `teacher_shift_rules`، `shift_proposals`، `shift_proposal_rules`، `shift_proposal_comments`، `teacher_time_off`، `availability_overrides`، `academy_holidays`، `recurring_slots`، `booking_holds`، `sessions`، `session_participants`، `attendance_segments`، `session_events`، `policy_sets`، `policy_set_versions`، `scheduling_conflicts`، `schedule_shift_notices` |
-| Classroom | `rooms`، `recordings`، `recording_access_logs`، `provider_webhook_inbox`، `tech_issue_reports` |
+| Classroom | `rooms`، `classroom_settings`، `recording_consents` (بتتضاف بس، والسحب مرة واحدة)، `recordings` (السطر بيفضل بعد مسح الملف)، `recording_access_logs` (بتتضاف بس)، `provider_webhook_inbox`، `tech_issue_reports` |
 | Credits | `credit_accounts`، `credit_lots`، `credit_entries`، `credit_reservations` |
 | Billing | `billing_accounts`، `billing_account_students`، `price_regions`، `plans`، `plan_prices`، `subscriptions`، `invoices`، `invoice_lines`، `invoice_sequences`، `payments`، `payment_methods`، `manual_payment_proofs`، `refunds`، `credit_notes`، `coupons`، `coupon_redemptions`، `gateway_accounts`، `payment_checkouts`، `gateway_webhook_inbox`، `tax_profiles`، `tax_rates`، `einvoice_units`، `einvoice_documents` |
 | Learning | `report_templates` (صف لكل إصدار)، `session_reports`، `report_items_covered`، `homework_assignments`، `homework_submissions`، `homework_reviews`، `enrollment_progress`، `enrollment_positions`، `assessment_attempts`، `certificates`، `report_cards`، `challenge_claims`، `cheers` |
@@ -491,6 +491,21 @@ interface PaymentGateway
   - الوقت المدرَّس = `range_agg(المدرس) * range_agg(الطالب) * tstzrange(الحصة)`، ولو مفيش فترات بنرجع لتقريب أول دخول.
 - **التشغيل على الجهاز**: `docker compose` فيه LiveKit (`livekit/livekit-server:v1.13.7`، بورتات 7880 و7881 و7882/udp)، والـ webhooks رايحة للـ API. اتجرّب بحصة حقيقية بين متصفحين ومشرف مخفي، والحضور اتسجل من الـ webhooks.
 
+### تسجيل الحصة (المنفّذ)
+- **`Recorder`** (عقد جوه Classroom، و`LiveKitProvider` بينفذه، و`ProviderManager::recorder()` بيرجّعه. اللينك الخارجي مالوش recorder):
+  - `startRecording`: بـ Twirp `Egress/StartRoomCompositeEgress` (grant ‏`roomRecord`)، layout ‏`speaker`، ملف واحد: MP4 ‏640×360 ‏15fps ‏500kbps، أو OGG ‏Opus ‏32kbps للصوت بس.
+  - `stopRecording`: ‏`StopEgress`، والتسجيل اللي خلص خلاص (`not_found` / `failed_precondition`) مش غلطة.
+  - `announceRecording`: ‏`RoomService/UpdateRoomMetadata` بـ `{"recording":true}`، فالمتصفح والتطبيق بيعرضوا "بيسجل" حتى قبل ما الـ egress يشتغل. وبيعرضوها كمان من `room.isRecording`.
+- **الإعدادات**: ‏`LIVEKIT_EGRESS_URL` (لو الـ egress على عنوان غير الـ API)، و`RECORDINGS_DISK` (‏`local` أو disk ‏S3: الـ egress بيكتب بمفاتيحه في نفس الـ bucket)، و`RECORDINGS_RECORDER_ROOT` (لو disk محلي: المسار اللي الـ egress شايفه من نفس الـ volume). المسار `academies/{academy}/recordings/{lesson}/{id}.mp4|ogg`.
+- **الحالات**: `starting → recording → ending → ready | failed`، و`ready → deleted`.
+  - التسجيل الشغال واحد بس لكل حصة (partial unique index)، و`egress_id` ‏unique لكل أكاديمية.
+  - الـ webhooks (`egress_started` / `egress_updated` / `egress_ended`) بتدخل نفس الـ inbox، والأكاديمية من `egressInfo.roomName`. ‏`HandleEgressEvent` مابيرجّعش الحالة لورا (حدث متأخر بعد الإيقاف مابيرجّعهاش "بيسجل").
+  - `classroom:recordings` كل 5 دقايق (`SweepRecordings`): بيوقف تسجيل الحصة اللي خلصت أو اتلغت، وبيحسم اللي الـ egress سكت عنه ساعة (الملف موجود = جاهز)، وبيمسح الملفات اللي أيامها خلصت.
+- **التشغيل**: `POST recordings/{id}/watch` (أو زرار في الشاشة) بيسجل الفتحة في `recording_access_logs` وبيرجّع لينك موقّع نسبي على عنوان الأكاديمية (`classroom.recording.media`)، صالح مدة التسجيل + 30 دقيقة. الملف بيتبعت inline بـ Range (‏`BinaryFileResponse`)، أو redirect لـ `temporaryUrl` على S3.
+- **الـ API**: `recordings/consents` (و`/{person}` و`/{person}/withdraw`)، و`family/recordings` (بـ `learner_id`)، و`teacher/recordings`، و`recordings/{id}/watch`، و`lessons/{id}/recording` (و`/stop`). وتذكرة الدخول (`lessons/{id}/join`) بترجع `recording` جنبها: الوضع، ومين يتحكم، وشغال ولا لأ، ومين لسه ماوافقش.
+- **لحظي**: trigger على `recording_consents` بيبعت `consents` لعيلة الطالب و`lessons` للمدرس، وtrigger على `recordings` بيبعت `lessons` للمدرس وللعيلة لما الحالة أو الحفظ يتغير.
+- **باقة المنصة**: الملفات الجاهزة بتتحسب في مساحة التخزين (`UsageMeters`، ‏`StorageMb`).
+
 ### التسجيلات والتكلفة
 - الافتراضي:
   - فيديو مجمّع بجودة منخفضة للحصص اللي فيها أطفال، وصوت بس للكبار.
@@ -774,9 +789,10 @@ interface PaymentGateway
 - [ ] خيار جنس المدرس، والكاميرا اختيارية للطالب.
 
 ### التسجيلات
-- [ ] موافقة عند التسجيل (من ولي الأمر) وفي عقد المدرس.
-- [ ] تشفير وهي متخزنة، وsigned URLs بعمر قصير، وكل مشاهدة بتتسجل، ومفيش تنزيل للمدرس.
-- [ ] الاحتفاظ 30 يوم افتراضيًا، وأكتر لو فيه شكوى، وخيار صوت بس.
+- [x] موافقة عند التسجيل (من ولي الأمر) وفي عقد المدرس. (`recording_consents`: المدرس والطالب الكبير بنفسهم، والطفل عن طريق ولي أمره، والعقد الورقي تسجله الإدارة بملاحظة. ومفيش تسجيل يبدأ من غير موافقة كل اللي في الحصة. [02 — القسم 13](02-domain-rules.md#13-تسجيل-الحصص).)
+- [ ] تشفير وهي متخزنة (على الـ bucket نفسه في الإنتاج).
+- [x] signed URLs بعمر قصير، وكل مشاهدة بتتسجل، ومفيش زرار تنزيل. (لينك لكل فتحة صالح مدة التسجيل + نص ساعة، و`recording_access_logs` مابيتعدلش.)
+- [x] الاحتفاظ 30 يوم افتراضيًا، وأكتر لو فيه شكوى، وخيار صوت بس. (من 7 لـ 365 يوم، والحفظ اليدوي بسبب، والشكوى المفتوحة بتحفظ تسجيلات حصتها، والوسيط حسب السن.)
 - [ ] DPIA (تقييم أثر على حماية البيانات) يشمل القُصّر.
 
 ### PDPL السعودي

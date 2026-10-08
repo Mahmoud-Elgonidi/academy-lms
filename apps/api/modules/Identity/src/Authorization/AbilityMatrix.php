@@ -32,6 +32,9 @@ final class AbilityMatrix
             Ability::ViewAuditLog => [Role::Owner, Role::Admin],
             // Guardians' consent for children's accounts: who follows the families day to day.
             Ability::ManageConsents => [Role::Owner, Role::Admin, Role::Supervisor],
+            // Lesson recordings: who reviews lessons watches them (every opening is logged); keeping one past its days or removing it early is the owner's and admins'.
+            Ability::ViewRecordings => [Role::Owner, Role::Admin, Role::Supervisor],
+            Ability::ManageRecordings => [Role::Owner, Role::Admin],
             // The academy's SaaS plan and how much of it is used.
             Ability::ViewPlan => [Role::Owner, Role::Admin],
             // Support tickets: everyone at the academy may answer one (each kind is told to whoever it concerns);

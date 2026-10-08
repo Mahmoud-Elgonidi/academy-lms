@@ -8,7 +8,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Classroom\Actions\JoinLesson;
+use Modules\Classroom\Actions\Recordings\StartRecording;
+use Modules\Classroom\Actions\Recordings\StopRecording;
 use Modules\Classroom\Authorization\ClassroomAccess;
+use Modules\Classroom\Authorization\RecordingAccess;
+use Modules\Classroom\Models\Recording;
+use Modules\Classroom\Recordings\RecordingState;
 use Modules\Learning\Contracts\LearningApi;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\Scheduling\Contracts\AttendanceApi;
@@ -27,7 +32,7 @@ final class ClassroomPageController
         private readonly ClassroomAccess $access,
     ) {}
 
-    public function show(Request $request, string $session, LearningApi $learning, BrandingApi $branding, TenantContext $tenant): View
+    public function show(Request $request, string $session, LearningApi $learning, BrandingApi $branding, TenantContext $tenant, RecordingState $recording): View
     {
         $viewer = $this->viewer($request, $session);
         $lesson = $this->lessons->lesson($session);
@@ -52,6 +57,10 @@ final class ClassroomPageController
             'tz' => $tz,
             'ticketUrl' => route('classroom.ticket', ['session' => $session]),
             'goUrl' => route('classroom.go', ['session' => $session]),
+            'recording' => $recording->for($viewer, $lesson) + [
+                'startUrl' => route('classroom.recording.start', ['session' => $session]),
+                'stopUrl' => route('classroom.recording.stop', ['session' => $session]),
+            ],
         ]);
     }
 
@@ -72,6 +81,28 @@ final class ClassroomPageController
         }
 
         return redirect()->away($ticket->url);
+    }
+
+    /** The teacher (or a supervisor) starts recording the lesson, when the academy records lessons and everyone agreed. */
+    public function startRecording(Request $request, string $session, StartRecording $start): JsonResponse
+    {
+        $viewer = $this->viewer($request, $session) ?? abort(403);
+        $recording = $start->handle($session, $viewer);
+
+        return response()->json(['data' => ['status' => $recording->status, 'running' => $recording->isRunning()]]);
+    }
+
+    /** And stops it. */
+    public function stopRecording(Request $request, string $session, StopRecording $stop, RecordingAccess $access): JsonResponse
+    {
+        $viewer = $this->viewer($request, $session) ?? abort(403);
+        $lesson = $this->lessons->lesson($session) ?? abort(404);
+        abort_unless($access->controls($viewer, $lesson), 403);
+        if ($running = Recording::query()->running()->where('session_id', $session)->first()) {
+            $stop->handle($running, $viewer);
+        }
+
+        return response()->json(['data' => ['status' => 'stopped', 'running' => false]]);
     }
 
     private function viewer(Request $request, string $session): ?string

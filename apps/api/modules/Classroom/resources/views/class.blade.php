@@ -11,6 +11,9 @@
         'joining' => __($l.'check.joining'),
         'quality' => trans($l.'room.quality'),
         'providerError' => __($l.'errors.provider'),
+        'recording' => $recording + [
+            'labels' => ['start' => __('classroom::recordings.room.start'), 'stop' => __('classroom::recordings.room.stop')],
+        ],
     ];
 @endphp
 <!doctype html>
@@ -84,6 +87,12 @@
         .materials svg { flex: none; width: 16px; height: 16px; }
         .materials span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .materials em { font-style: normal; font-size: 11px; color: var(--muted); white-space: nowrap; }
+        .rec { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--danger); color: #fff; white-space: nowrap; }
+        .rec::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+        @media (prefers-reduced-motion: no-preference) { .rec::before { animation: rec-pulse 1.6s ease-in-out infinite; } @keyframes rec-pulse { 50% { opacity: .35; } } }
+        button.record[aria-pressed="true"] { background: var(--danger); color: #fff; }
+        .rec-note { text-align: center; font-size: 13px; color: var(--muted); margin: 0; }
+        .may-record { font-size: 13px; color: var(--muted); border-inline-start: 3px solid var(--danger); padding-inline-start: 10px; }
         [hidden] { display: none !important; }
         @media (max-width: 640px) { header .brand { display: none; } .tiles { grid-template-columns: minmax(0, 1fr); } }
     </style>
@@ -96,6 +105,7 @@
             <strong>{{ __($l.'with', ['subject' => $lesson->subject(), 'teacher' => $lesson->teacherName, 'student' => $lesson->studentName]) }}</strong>
             <small>{{ $when }}</small>
         </span>
+        <span class="rec" id="rec" role="status" @if (! $recording['running']) hidden @endif>{{ __('classroom::recordings.room.on') }}</span>
         <span class="quality" id="quality"></span>
         <span class="chip">{{ __($l.'roles.'.$seat->role) }}</span>
     </header>
@@ -122,6 +132,9 @@
                     <p class="err" id="device-error" hidden>{{ __($l.'check.camera_off') }}</p>
                     <div><small style="color:var(--muted)">{{ __($l.'check.mic') }}</small><div class="meter"><i id="meter"></i></div></div>
                 @endif
+                @if ($recording['mode'] !== 'off' && $recording['missing'] === [] && $recording['controls'] === false)
+                    <p class="may-record">{{ __('classroom::recordings.room.may_record') }}</p>
+                @endif
                 <p class="err" id="join-error" hidden></p>
                 <div class="row">
                     <button class="primary" id="join" data-label="{{ __($l.'check.join') }}">{{ __($l.'check.join') }}</button>
@@ -139,8 +152,17 @@
                     <button id="screen" class="toggle" aria-pressed="false">{{ __($l.'room.screen') }}</button>
                 @endif
                 <button id="audio-only" class="toggle" aria-pressed="false">{{ __($l.'room.audio_only') }}</button>
+                @if ($recording['controls'])
+                    <button id="record" class="record" aria-pressed="{{ $recording['running'] ? 'true' : 'false' }}" @disabled($recording['missing'] !== [] && ! $recording['running'])>
+                        {{ $recording['running'] ? __('classroom::recordings.room.stop') : __('classroom::recordings.room.start') }}
+                    </button>
+                @endif
                 <button class="danger" id="leave">{{ __($l.'room.leave') }}</button>
             </div>
+            @if ($recording['controls'] && $recording['missing'] !== [])
+                <p class="rec-note" id="rec-missing">{{ __('classroom::recordings.errors.consent_missing', ['names' => implode('، ', $recording['missing'])]) }}</p>
+            @endif
+            <p class="err rec-note" id="rec-error" hidden></p>
 
             <section class="notice" id="left" hidden>
                 <h1>{{ __($l.'room.left') }}</h1>
@@ -284,7 +306,9 @@
                 .on(LK.RoomEvent.ConnectionQualityChanged, (q, p) => { if (p === room.localParticipant) { $('quality').dataset.q = q; $('quality').textContent = cfg.quality[q] ?? ''; } })
                 .on(LK.RoomEvent.Reconnecting, () => { $('reconnecting').hidden = false; })
                 .on(LK.RoomEvent.Reconnected, () => { $('reconnecting').hidden = true; })
-                .on(LK.RoomEvent.Disconnected, () => { document.querySelectorAll('.tile').forEach(t => t.remove()); setState('left'); });
+                .on(LK.RoomEvent.Disconnected, () => { document.querySelectorAll('.tile').forEach(t => t.remove()); setState('left'); })
+                .on(LK.RoomEvent.RecordingStatusChanged, () => showRecording())
+                .on(LK.RoomEvent.RoomMetadataChanged, () => { recording = !!roomMeta().recording; showRecording(); });
             try {
                 await room.connect(ticket.url, ticket.token);
             } catch (e) { return fail(cfg.providerError); }
@@ -298,7 +322,30 @@
             }
             if (!withVideo) await setAudioOnly(true);
             syncButtons();
+            if ('recording' in roomMeta()) recording = !!roomMeta().recording;
+            showRecording();
         }
+        // Everyone sees when the lesson is being recorded: LiveKit says so itself, and the room's metadata too.
+        const rec = cfg.recording;
+        let recording = rec.running;
+        function roomMeta() { try { return JSON.parse(room?.metadata || '{}') || {}; } catch (e) { return {}; } }
+        function showRecording() {
+            const on = recording || !!room?.isRecording;
+            $('rec').hidden = !on;
+            const btn = $('record');
+            if (btn) { btn.setAttribute('aria-pressed', on ? 'true' : 'false'); btn.textContent = on ? rec.labels.stop : rec.labels.start; if (on) btn.disabled = false; }
+        }
+        $('record') && ($('record').onclick = async () => {
+            const btn = $('record'), stop = btn.getAttribute('aria-pressed') === 'true';
+            btn.disabled = true; $('rec-error').hidden = true;
+            try {
+                const res = await fetch(stop ? rec.stopUrl : rec.startUrl, { method: 'POST', headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content } });
+                const body = await res.json().catch(() => ({}));
+                if (!res.ok) { $('rec-error').textContent = body.message || cfg.providerError; $('rec-error').hidden = false; }
+                else { recording = !!body.data?.running; }
+            } catch (e) { $('rec-error').textContent = cfg.providerError; $('rec-error').hidden = false; }
+            btn.disabled = false; showRecording();
+        });
         function fail(message) {
             setState('prejoin'); $('join').disabled = false; $('join').textContent = $('join').dataset.label;
             $('join-error').textContent = message; $('join-error').hidden = false; startPreview();

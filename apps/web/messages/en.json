@@ -82,7 +82,8 @@
       "notifications": "Notifications",
       "more": "More",
       "privacy": "Children's privacy",
-      "help": "Help"
+      "help": "Help",
+      "recordings": "Lesson recordings"
     },
     "kids": {
       "menu": "Menu",
@@ -106,7 +107,8 @@
       "challenges": "Quests",
       "notifications": "Notifications",
       "more": "More",
-      "help": "Ask for help"
+      "help": "Ask for help",
+      "recordings": "My lesson recordings"
     },
     "teen": {
       "menu": "Menu",
@@ -118,9 +120,11 @@
       "challenges": "Goals",
       "notifications": "Notifications",
       "more": "More",
-      "help": "Help"
+      "help": "Help",
+      "recordings": "My lesson recordings"
     },
-    "help": "Support"
+    "help": "Support",
+    "recordings": "My lesson recordings"
   },
   "family": {
     "switchLearner": "Choose whose",
@@ -605,5 +609,30 @@
     "close": "Close the ticket",
     "closeHint": "Close it when it is solved or you no longer need it. It takes no more messages.",
     "closedNote": "This ticket is closed. Open a new one if you need anything."
+  },
+  "recordings": {
+    "title": "Lesson recordings",
+    "teacherTitle": "My lesson recordings",
+    "off": "The academy does not record lessons now.",
+    "agreed": "Agreed",
+    "none": "Not agreed",
+    "agree": "Agree",
+    "withdraw": "Withdraw consent",
+    "withdrawConfirm": "Are you sure? Any recording running stops, and nothing more is recorded.",
+    "list": "{name}'s lesson recordings",
+    "teacherList": "Your lessons' recordings",
+    "empty": "No recordings yet.",
+    "notShared": "The academy does not show recordings here.",
+    "watch": "Watch",
+    "close": "Close",
+    "logged": "Your opening of this recording is logged under your name.",
+    "until": "available until {date}",
+    "video": "Video",
+    "audio": "Sound",
+    "on": "Recording",
+    "start": "Record the lesson",
+    "stop": "Stop recording",
+    "missing": "It cannot be recorded until they agree to recording: {names}.",
+    "separator": ", "
   }
 }

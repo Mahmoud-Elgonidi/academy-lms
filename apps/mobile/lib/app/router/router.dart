@@ -12,6 +12,7 @@ import '../../features/auth/presentation/pages/code_page.dart';
 import '../../features/auth/presentation/pages/password_page.dart';
 import '../../features/auth/presentation/pages/two_factor_page.dart';
 import '../../features/consent/presentation/privacy_page.dart';
+import '../../features/recordings/presentation/recordings_page.dart';
 import '../../features/auth/presentation/pages/welcome_page.dart';
 import '../../features/auth/presentation/pages/web_only_page.dart';
 import '../../features/billing/presentation/pages/money_page.dart';
@@ -163,7 +164,15 @@ GoRouter buildRouter(SessionCubit session) {
           branch('/family/lessons', (_) => const LessonsPage()),
           branch('/family/progress', (_) => const ProgressPage()),
           branch('/family/money', (_) => const MoneyPage()),
-          branch('/family/me', (_) => const AccountPage(), routes: [page('privacy', (_) => const PrivacyPage()), help(HelpScope.family)]),
+          branch(
+            '/family/me',
+            (_) => const AccountPage(),
+            routes: [
+              page('privacy', (_) => const PrivacyPage()),
+              page('recordings', (_) => const RecordingsPage(teacher: false)),
+              help(HelpScope.family),
+            ],
+          ),
         ],
       ),
 
@@ -233,7 +242,15 @@ GoRouter buildRouter(SessionCubit session) {
           branch('/teach/week', (_) => const WeekPage()),
           branch('/teach/students', (_) => const StudentsPage()),
           branch('/teach/earnings', (_) => const EarningsPage()),
-          branch('/teach/more', (_) => const MorePage(), routes: [page('time-off', (_) => const TimeOffPage()), help(HelpScope.teacher)]),
+          branch(
+            '/teach/more',
+            (_) => const MorePage(),
+            routes: [
+              page('time-off', (_) => const TimeOffPage()),
+              page('recordings', (_) => const RecordingsPage(teacher: true)),
+              help(HelpScope.teacher),
+            ],
+          ),
         ],
       ),
     ],

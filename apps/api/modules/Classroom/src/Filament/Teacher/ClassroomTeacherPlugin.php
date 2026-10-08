@@ -20,7 +20,7 @@ final class ClassroomTeacherPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([MyLessonsToday::class]);
+        $panel->pages([MyLessonsToday::class, MyRecordings::class]);
     }
 
     public function boot(Panel $panel): void {}

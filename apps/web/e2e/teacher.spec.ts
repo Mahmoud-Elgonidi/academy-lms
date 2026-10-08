@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { fitsTheScreen } from './helpers';
 
 test('every teacher page opens, fits a phone, and reads right to left', async ({ page }) => {
-  for (const path of ['/ar/teach', '/ar/teach/week', '/ar/teach/reports', '/ar/teach/marking', '/ar/teach/students', '/ar/teach/trials', '/ar/teach/hours', '/ar/teach/time-off', '/ar/teach/earnings', '/ar/teach/performance', '/ar/teach/notifications', '/ar/teach/more']) {
+  for (const path of ['/ar/teach', '/ar/teach/week', '/ar/teach/reports', '/ar/teach/marking', '/ar/teach/students', '/ar/teach/trials', '/ar/teach/hours', '/ar/teach/time-off', '/ar/teach/earnings', '/ar/teach/performance', '/ar/teach/recordings', '/ar/teach/notifications', '/ar/teach/more']) {
     const response = await page.goto(path);
     expect(response?.status(), path).toBe(200);
     await expect(page.locator('h1').first(), path).toBeVisible();

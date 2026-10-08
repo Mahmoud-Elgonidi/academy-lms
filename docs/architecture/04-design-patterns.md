@@ -52,7 +52,7 @@ flowchart TD
     Import --> Identity & People & Catalog & Scheduling & Billing & Communication
     Payroll --> People & Scheduling & Evaluation
     Evaluation --> People & Scheduling & Learning
-    Support --> People & Scheduling & Evaluation & Communication & Identity
+    Support --> People & Scheduling & Evaluation & Communication & Identity & Classroom
     Learning --> Scheduling & Enrollment & Curriculum & People & Communication
     Billing --> People & Catalog & Enrollment & Credits & Communication
     Classroom --> Scheduling & Learning & People & Communication & Platform
@@ -78,13 +78,14 @@ flowchart TD
 5. **الاشتراك في events module تاني مسموح** طالما مابيعملش دايرة في الكود:
    - Billing بيسمع `CreditBalanceLow` (فاتورة التجديد).
    - Scheduling بيسمع `SubscriptionPastDue` و`SubscriptionPaused` (بيوقف الحصص)، و`ParticipantJoined` و`ParticipantLeft` (الحضور)، و`CreditsGranted` (بيأكّد الحصص المستنية بالترتيب).
-     - **المنفّذ دلوقتي (الحضور)**: Classroom بينادي `AttendanceApi` بتاع Scheduling مباشرة بدل الـ events، لأن الحضور لازم يتسجل قبل ما مهمة المواعيد النهائية تحكم على الحصة. Classroom فوق Scheduling في الرسم، ومفيش module بيعتمد عليه. والعمليات اللحظية بتفتح صفحة الفصل باسم الـ route (`classroom.page`) بس، من غير ما تعرف الـ module.
+     - **المنفّذ دلوقتي (الحضور)**: Classroom بينادي `AttendanceApi` بتاع Scheduling مباشرة بدل الـ events، لأن الحضور لازم يتسجل قبل ما مهمة المواعيد النهائية تحكم على الحصة. Classroom فوق Scheduling في الرسم، ومفيش module بيعتمد عليه غير Support (عن طريق عقد `RecordingHolds` بس، تحت). والعمليات اللحظية بتفتح صفحة الفصل باسم الـ route (`classroom.page`) بس، من غير ما تعرف الـ module.
    - Payroll وEvaluation وLearning بيسمعوا `SessionFinalized`.
      - **المنفّذ دلوقتي (Payroll)**: بيسمع `SessionFinalized` و`SessionCancelled` و`SessionFlaggedForReview`، وبيقرا الحصة من جدولها ونسبة الأجر من قرار السياسة. مفيش module بيعتمد عليه. وبيبعت للمدرسين إجمالي الشهر لما يسمع `PayrollMonthClosed` بتاعه.
    - **الإشعارات** عكس اتجاه السماع: الـ module اللي حصل عنده الحدث (Learning، Billing، Scheduling) بيسمع الـ events بتاعته ويبعت رسالة عن طريق `NotificationsApi` بقالب معرّف في الـ provider بتاعه، والصيغة في ملفات الـ lang بتاعته. Communication مابيعرفش حد غير Identity وPlatform (الاسم والشعار في الإيميل)، فبيفضل تحت في الرسم. وفين الإشعار بيفتح في اللوحات، كل module بيسجّله في `NotificationLinks`.
      - **المنفّذ دلوقتي**: Learning بيفتح التقرير لما يسمع `SessionFinalized`، وبيعيد حساب التقدم لما يسمع `CurriculumAttached` من Enrollment. ولأن Scheduling مايعرفش Learning، قسم "المنهج والتقدم" في حساب الطالب بيدخل الصفحة عن طريق **render hook** باسم ثابت (`scheduling::enrollment.account`) بيسجّله Learning.
    - Evaluation بيسمع `SessionReportSubmitted` و`RatingSubmitted`.
      - **المنفّذ دلوقتي (الشكاوى)**: Support فوق Evaluation زي CRM، ومحدش بيعتمد عليه. Evaluation بيعرّف عقد `TeacherComplaints` عنده (من غيره محدش عنده شكاوى)، وSupport بيربط `ConfirmedComplaints`، فمؤشر "الشكاوى المؤكدة لكل 100 حصة" بيتقري وقت ما يتطلب زي باقي المؤشرات. و`ComplaintValidated` بيفضل event داخلي لـ Support (إشعار المدرس).
+     - **المنفّذ دلوقتي (تسجيلات الحصة اللي عليها شكوى)**: بنفس الطريقة، Classroom بيعرّف عقد `RecordingHolds` عنده (من غيره محدش بيحفظ تسجيل)، وSupport بيربط `ComplaintRecordingHolds`، فالتسجيل مابيتمسحش طول ما فيه شكوى مفتوحة على حصته. Support بيستخدم `Classroom\Contracts` بس، والـ arch test بيمنعه من باقي Classroom. و`RecordingReady` بيطلع بعد الـ commit لما الملف يبقى جاهز.
    - Evaluation بيسمع `SessionFinalized` عشان يطلب تقييم الحصة من الأسرة. المؤشرات نفسها بتتقري من الجداول وقت ما تتطلب (القراءة مسموح فيها join)، ونجوم التقييم تحت الحصة بتدخل صفحة الأسرة عن طريق **render hook** باسم ثابت (`scheduling::family.lesson-card`)، زي Learning.
    - **Import** فوق الكل زي CRM، ومحدش بيعتمد عليه. بيعمل كل حاجة عن طريق contracts الـ modules: الحسابات من `IdentityApi`، والملفات وأولياء الأمور من `PeopleApi`، والمواد من `CatalogApi`، والجدول الشغال من عقد Scheduling `ScheduleImport`، اللي بيفتح التسجيل والرصيد ويعمل `BillingApi::adopt` (اشتراك أول فاتورة فيه هي الباقة الجاية).
      - **المعاينة** بتشغّل الاستيراد كله في transaction واحدة وبعدين `rollBack`، وكل صف في savepoint لوحده. فالمعاينة بتقول بالظبط إيه اللي هيحصل، وحتى الصفوف اللي معتمدة على صفوف قبلها (ولي الأمر اللي اتعمل في صف ومستخدم في اللي بعده). الرسايل مابتطلعش لأنها بتستنى الـ commit.
@@ -283,6 +284,7 @@ $candidates = app(Pipeline::class)
 - **الاستخدام**:
   - `PaymentGateway`: Stripe (بمفاتيح الأكاديمية أو حسابها المربوط بـ Connect)، وMoyasar، وPaymob، وTap، وPayPal (لسه)، والدفع اليدوي.
   - `VideoProvider`: LiveKit، وExternalLink.
+  - `Recorder`: LiveKit Egress (الغرفة كلها في ملف واحد على disk الأكاديمية أو S3). اللينك الخارجي مالوش recorder، فالتسجيل بيترفض بسبب واضح. `ProviderManager::recorder()` بيرجّعه.
   - `EInvoicingProvider`: ZATCA (المرحلة التانية، P2). المرحلة الأولى مش محتاجة adapter: `Billing\Zatca\TaxDocument` بيختم الفاتورة وقت ما تصدر.
   - `MessagingChannel`: WhatsApp، وSMS، والإيميل، وFCM (عن طريق Laravel Notification Channels).
 

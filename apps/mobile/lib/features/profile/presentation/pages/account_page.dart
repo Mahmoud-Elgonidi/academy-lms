@@ -36,6 +36,7 @@ class AccountPage extends StatelessWidget {
             const AccountsCard(),
             const SizedBox(height: 14),
             if (!standalone) const _Privacy(),
+            if (!standalone) const _Recordings(),
             const _Help(),
             const _ClockPrompt(),
             const _Settings(),
@@ -73,6 +74,29 @@ class _Privacy extends StatelessWidget {
         ),
         const SizedBox(height: 14),
       ],
+    );
+  }
+}
+
+/// Lesson recordings for a family (guardians and adult students): consent and the recordings to watch.
+class _Recordings extends StatelessWidget {
+  const _Recordings();
+
+  @override
+  Widget build(BuildContext context) {
+    if (Area.of(context.watch<SessionCubit>().state) != Area.family) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: LmsCard(
+        padding: EdgeInsets.zero,
+        child: ListTile(
+          key: const Key('open-recordings'),
+          leading: const Icon(Icons.video_library_outlined),
+          title: Text(context.l10n.recordingsTitle, style: context.text.titleSmall),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: () => context.go('/family/me/recordings'),
+        ),
+      ),
     );
   }
 }

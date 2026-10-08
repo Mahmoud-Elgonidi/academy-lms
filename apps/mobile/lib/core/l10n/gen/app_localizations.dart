@@ -2390,6 +2390,144 @@ abstract class AppLocalizations {
   /// **'للمدرس بس'**
   String get teachersOnly;
 
+  /// No description provided for @recordingsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيلات الحصص'**
+  String get recordingsTitle;
+
+  /// No description provided for @recordingsMine.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيلات حصصي'**
+  String get recordingsMine;
+
+  /// No description provided for @recordingsOff.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية مش بتسجل الحصص دلوقتي.'**
+  String get recordingsOff;
+
+  /// No description provided for @recordingsOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيلات حصص {name}'**
+  String recordingsOf(String name);
+
+  /// No description provided for @recordingsTeacherList.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيلات حصصك'**
+  String get recordingsTeacherList;
+
+  /// No description provided for @recordingsEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش تسجيلات لسه.'**
+  String get recordingsEmpty;
+
+  /// No description provided for @recordingsNotShared.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية مش بتعرض التسجيلات هنا.'**
+  String get recordingsNotShared;
+
+  /// No description provided for @recordingWatch.
+  ///
+  /// In ar, this message translates to:
+  /// **'شوف'**
+  String get recordingWatch;
+
+  /// No description provided for @recordingAgreed.
+  ///
+  /// In ar, this message translates to:
+  /// **'موافق'**
+  String get recordingAgreed;
+
+  /// No description provided for @recordingNotAgreed.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش موافق'**
+  String get recordingNotAgreed;
+
+  /// No description provided for @recordingAgree.
+  ///
+  /// In ar, this message translates to:
+  /// **'موافق'**
+  String get recordingAgree;
+
+  /// No description provided for @recordingAgreedDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'شكرًا. الحصص ممكن تتسجل من دلوقتي.'**
+  String get recordingAgreedDone;
+
+  /// No description provided for @recordingWithdraw.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسحب الموافقة'**
+  String get recordingWithdraw;
+
+  /// No description provided for @recordingWithdrawConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'متأكد؟ أي تسجيل شغال هيقف، ومش هيتسجل حاجة تاني.'**
+  String get recordingWithdrawConfirm;
+
+  /// No description provided for @recordingWithdrawn.
+  ///
+  /// In ar, this message translates to:
+  /// **'الموافقة اتسحبت، ومش هيتسجل حاجة تاني.'**
+  String get recordingWithdrawn;
+
+  /// No description provided for @recordingUntil.
+  ///
+  /// In ar, this message translates to:
+  /// **'متاح لحد {date}'**
+  String recordingUntil(String date);
+
+  /// No description provided for @recordingVideo.
+  ///
+  /// In ar, this message translates to:
+  /// **'فيديو'**
+  String get recordingVideo;
+
+  /// No description provided for @recordingAudio.
+  ///
+  /// In ar, this message translates to:
+  /// **'صوت'**
+  String get recordingAudio;
+
+  /// No description provided for @recordingLogged.
+  ///
+  /// In ar, this message translates to:
+  /// **'فتحك للتسجيل بيتسجل باسمك.'**
+  String get recordingLogged;
+
+  /// No description provided for @recordingOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'بيسجل'**
+  String get recordingOn;
+
+  /// No description provided for @recordStart.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل الحصة'**
+  String get recordStart;
+
+  /// No description provided for @recordStop.
+  ///
+  /// In ar, this message translates to:
+  /// **'وقّف التسجيل'**
+  String get recordStop;
+
+  /// No description provided for @recordingMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'مينفعش نسجل لحد ما يوافقوا على التسجيل: {names}.'**
+  String recordingMissing(String names);
+
   /// No description provided for @absenceNote.
   ///
   /// In ar, this message translates to:

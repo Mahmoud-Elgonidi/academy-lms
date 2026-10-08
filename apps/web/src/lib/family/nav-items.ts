@@ -8,6 +8,7 @@ export type NavItem = { href: string; key: string; icon: IconName };
  * app's tabs: kids have their journey and missions, middle school its quests,
  * teens their plan and goals; guardians and adults the classic set, and a
  * guardian their children's privacy (their consent to each child's account).
+ * Lesson recordings are everyone's but a child's in the kids' look.
  * Everyone but a child in the kids' look can write to the academy (help).
  */
 export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: NavItem[]; tabs: NavItem[] } {
@@ -20,14 +21,16 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: 
   const home: NavItem = { href: '/family', key: 'home', icon: stage === 'kids' ? 'map' : stage === 'teen' ? 'flag' : 'home' };
   const pay: NavItem[] = money ? [{ href: '/family/money', key: 'money', icon: 'coins' }] : [];
   const privacy: NavItem[] = guardian ? [{ href: '/family/privacy', key: 'privacy', icon: 'shield' }] : [];
+  // Lesson recordings (consent, and the ones to watch): everyone but a child in the kids' look (their guardian decides).
+  const recordings: NavItem[] = stage === 'kids' ? [] : [{ href: '/family/recordings', key: 'recordings', icon: 'video' }];
   // Writing to the academy: everyone but a child in the kids' look (their guardian writes).
   const help: NavItem[] = stage === 'kids' ? [] : [{ href: '/family/help', key: 'help', icon: 'help' }];
 
   if (stage === 'classic') {
     return {
-      all: [home, lessons, progress, homework, ...pay, challenges, inbox, ...privacy, ...help],
+      all: [home, lessons, progress, homework, ...pay, challenges, inbox, ...recordings, ...privacy, ...help],
       tabs: [home, lessons, progress, ...(money ? pay : [homework]), more],
     };
   }
-  return { all: [home, challenges, lessons, homework, progress, inbox, ...help], tabs: [home, challenges, lessons, homework, more] };
+  return { all: [home, challenges, lessons, homework, progress, inbox, ...recordings, ...help], tabs: [home, challenges, lessons, homework, more] };
 }

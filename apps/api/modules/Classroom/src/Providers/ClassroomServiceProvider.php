@@ -3,12 +3,17 @@
 namespace Modules\Classroom\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Modules\Classroom\Console\ReconcileClassroomsCommand;
+use Modules\Classroom\Console\RecordingsCommand;
+use Modules\Classroom\Contracts\RecordingHolds;
 use Modules\Classroom\Http\Controllers\LiveKitWebhookController;
+use Modules\Classroom\Http\Controllers\RecordingMediaController;
 use Modules\Classroom\Queries\VideoMinutes;
+use Modules\Classroom\Recordings\NoRecordingHolds;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Scheduling\Contracts\AttendanceApi;
@@ -23,6 +28,8 @@ final class ClassroomServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../../config/classroom.php', 'classroom');
+        // Support binds its own (open complaints keep a lesson's recordings); without it nothing holds them.
+        $this->app->bindIf(RecordingHolds::class, NoRecordingHolds::class);
     }
 
     public function boot(): void
@@ -32,11 +39,15 @@ final class ClassroomServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'classroom');
         // The plan's video minutes count the lessons held on our own video this month.
         $this->app->make(UsageMeters::class)->add(Limit::VideoMinutes, fn (UsagePeriod $month) => $this->app->make(VideoMinutes::class)->in($month));
+        // And the plan's storage, the recordings kept.
+        $this->app->make(UsageMeters::class)->add(Limit::StorageMb, fn () => (int) DB::table('recordings')->where('status', 'ready')->sum('size'));
 
         $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
         Route::prefix('api/v1')->middleware(['api', 'tenant', 'locale', 'timezone'])->group(__DIR__.'/../../routes/api.php');
         // Signed by LiveKit, not by a user; the academy comes from the room name.
         Route::post('webhooks/livekit', LiveKitWebhookController::class)->middleware('api')->name('classroom.webhooks.livekit');
+        // A recording plays through the address WatchRecording signed for whoever opened it (and logged).
+        Route::middleware(['web', 'tenant', 'signed:relative'])->get('recordings/{recording}/media', RecordingMediaController::class)->whereUuid('recording')->name('classroom.recording.media');
 
         // "Join now" and reminders carry each person's own signed link to the class page.
         $this->app->make(NotificationLinks::class)->registerPersonal('session', function (array $action, string $userId) {
@@ -50,10 +61,11 @@ final class ClassroomServiceProvider extends ServiceProvider
         });
 
         if ($this->app->runningInConsole()) {
-            $this->commands([ReconcileClassroomsCommand::class]);
+            $this->commands([ReconcileClassroomsCommand::class, RecordingsCommand::class]);
         }
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('classroom:reconcile')->everyMinute()->withoutOverlapping()->onOneServer();
+            $schedule->command('classroom:recordings')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
         });
     }
 }

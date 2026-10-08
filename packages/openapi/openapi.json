@@ -1049,6 +1049,8 @@
         "/v1/lessons/{session}/join": {
             "post": {
                 "operationId": "lessons.join",
+                "description": "A ticket into the lesson's room, with what the screen shows about recording: the academy's mode (off on an\noutside link), whether this person may start and stop it, whether it runs now, and who has not agreed yet.",
+                "summary": "Join a lesson",
                 "tags": [
                     "Classroom"
                 ],
@@ -1186,11 +1188,995 @@
                                                     ]
                                                 }
                                             ]
+                                        },
+                                        "recording": {
+                                            "type": "object",
+                                            "properties": {
+                                                "mode": {
+                                                    "type": "string",
+                                                    "description": "off | manual | auto"
+                                                },
+                                                "controls": {
+                                                    "type": "boolean"
+                                                },
+                                                "running": {
+                                                    "type": "boolean"
+                                                },
+                                                "missing": {
+                                                    "type": "array",
+                                                    "description": "Who has not agreed to recording yet (names).",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "required": [
+                                                "mode",
+                                                "controls",
+                                                "running",
+                                                "missing"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "recording"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/recordings/consents": {
+            "get": {
+                "operationId": "recordings.consents",
+                "description": "The people whose consent the person signed in sees: themself (a teacher, or a student) and the children they\nlook after. For each, whether it stands and who gave it; whether they may change it (a teacher or an adult\nstudent for themself, a guardian for a child), else who decides; and the words to agree to (send its version\nback when agreeing).",
+                "summary": "Consent to lesson recordings",
+                "tags": [
+                    "Classroom"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "recording": {
+                                            "type": "string",
+                                            "description": "Whether the academy records lessons now (off | manual | auto); consent is kept either way."
+                                        },
+                                        "people": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "person": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name"
+                                                        ]
+                                                    },
+                                                    "self": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "state": {
+                                                        "type": "string",
+                                                        "description": "agreed | none"
+                                                    },
+                                                    "granted_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "by": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "description": "Who agreed, in words (\"You agreed on 5 October 2026\"); null when nobody has."
+                                                    },
+                                                    "can_change": {
+                                                        "type": "boolean",
+                                                        "description": "Whether the person signed in may agree or take it back."
+                                                    },
+                                                    "decides": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "description": "Who decides, in words, when the person signed in cannot.\nWho decides, when the viewer cannot: a child's guardian, or an adult student themself."
+                                                    },
+                                                    "text": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "version": {
+                                                                "type": "integer"
+                                                            },
+                                                            "title": {
+                                                                "type": "string"
+                                                            },
+                                                            "intro": {
+                                                                "type": "string"
+                                                            },
+                                                            "sections": {
+                                                                "type": "array",
+                                                                "description": "Each part: a heading and its words.",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "title": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "body": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "title",
+                                                                        "body"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "agree": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "version",
+                                                            "title",
+                                                            "intro",
+                                                            "sections",
+                                                            "agree"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "person",
+                                                    "self",
+                                                    "state",
+                                                    "granted_at",
+                                                    "by",
+                                                    "can_change",
+                                                    "decides",
+                                                    "text"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "recording",
+                                        "people"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/recordings/consents/{person}": {
+            "post": {
+                "operationId": "recordings.consents.agree",
+                "description": "For yourself (a teacher, an adult student) or your child. version is the wording's version from the list (a\nnewer wording since then answers 422: read it again).",
+                "summary": "Agree to lessons being recorded",
+                "tags": [
+                    "Classroom"
+                ],
+                "parameters": [
+                    {
+                        "name": "person",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "agree": {
+                                        "enum": [
+                                            "yes",
+                                            "on",
+                                            "1",
+                                            1,
+                                            "true",
+                                            true
+                                        ]
+                                    },
+                                    "version": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": [
+                                    "version"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "state": {
+                                            "type": "string",
+                                            "const": "agreed"
+                                        }
+                                    },
+                                    "required": [
+                                        "state"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/recordings/consents/{person}/withdraw": {
+            "post": {
+                "operationId": "recordings.consents.withdraw",
+                "description": "Any recording running in their lessons stops, and nothing more is recorded; what was recorded keeps its days.",
+                "summary": "Take back consent to lessons being recorded",
+                "tags": [
+                    "Classroom"
+                ],
+                "parameters": [
+                    {
+                        "name": "person",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "state": {
+                                            "type": "string",
+                                            "const": "none"
+                                        }
+                                    },
+                                    "required": [
+                                        "state"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/family/recordings": {
+            "get": {
+                "operationId": "family.recordings",
+                "description": "The ready recordings of the learner's lessons, newest first, when the academy shares them with families\n(shared false: none are listed). Open one with recordings/{id}/watch.",
+                "summary": "A learner's lesson recordings",
+                "tags": [
+                    "Classroom"
+                ],
+                "parameters": [
+                    {
+                        "name": "learner_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 64
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "shared": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "The lesson's start.",
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "teacher": {
+                                                        "type": "string"
+                                                    },
+                                                    "student": {
+                                                        "type": "string"
+                                                    },
+                                                    "media": {
+                                                        "type": "string",
+                                                        "description": "video | audio"
+                                                    },
+                                                    "duration_sec": {
+                                                        "type": "string"
+                                                    },
+                                                    "expires_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "When it goes (its days are up); null when held.",
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "at",
+                                                    "teacher",
+                                                    "student",
+                                                    "media",
+                                                    "duration_sec",
+                                                    "expires_at"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "shared",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/teacher/recordings": {
+            "get": {
+                "operationId": "teacher.recordings",
+                "description": "The ready recordings of the teacher's own lessons, newest first, when the academy shares them with teachers\n(shared false: none are listed). Teachers watch them; they never download them.",
+                "summary": "My lessons' recordings",
+                "tags": [
+                    "Classroom"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "shared": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "The lesson's start.",
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "teacher": {
+                                                        "type": "string"
+                                                    },
+                                                    "student": {
+                                                        "type": "string"
+                                                    },
+                                                    "media": {
+                                                        "type": "string",
+                                                        "description": "video | audio"
+                                                    },
+                                                    "duration_sec": {
+                                                        "type": "string"
+                                                    },
+                                                    "expires_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "When it goes (its days are up); null when held.",
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "null"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "at",
+                                                    "teacher",
+                                                    "student",
+                                                    "media",
+                                                    "duration_sec",
+                                                    "expires_at"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "shared",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/recordings/{recording}/watch": {
+            "post": {
+                "operationId": "recordings.watch",
+                "description": "Whoever may (the office, the lesson's teacher, its student and guardians when the academy allows) gets an\naddress that plays it in a page or a player, signed until expires_at; the opening is logged.",
+                "summary": "Watch a recording",
+                "tags": [
+                    "Classroom"
+                ],
+                "parameters": [
+                    {
+                        "name": "recording",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "url": {
+                                            "type": "string"
+                                        },
+                                        "media": {
+                                            "type": "string",
+                                            "description": "video | audio"
+                                        },
+                                        "expires_at": {
+                                            "type": [
+                                                "object",
+                                                "null"
+                                            ],
+                                            "properties": {
+                                                "utc": {
+                                                    "type": "string"
+                                                },
+                                                "local": {
+                                                    "type": "string"
+                                                },
+                                                "timezone": {
+                                                    "type": "null"
+                                                },
+                                                "label": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "utc",
+                                                "local",
+                                                "timezone",
+                                                "label"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "url",
+                                        "media",
+                                        "expires_at"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/lessons/{session}/recording": {
+            "post": {
+                "operationId": "lessons.recording.start",
+                "description": "Its teacher (or a supervisor in it), while the classroom is open on the academy's own video, when the academy\nrecords lessons and everyone the lesson records agreed (else 422, naming who has not). Already running: the\nsame one.",
+                "summary": "Start recording a lesson",
+                "tags": [
+                    "Classroom"
+                ],
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "running": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "status",
+                                                "running"
+                                            ]
                                         }
                                     },
                                     "required": [
                                         "data"
                                     ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/lessons/{session}/recording/stop": {
+            "post": {
+                "operationId": "lessons.recording.stop",
+                "summary": "Stop recording a lesson",
+                "tags": [
+                    "Classroom"
+                ],
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "const": "stopped"
+                                                },
+                                                "running": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "status",
+                                                "running"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "An error",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
                                 }
                             }
                         }

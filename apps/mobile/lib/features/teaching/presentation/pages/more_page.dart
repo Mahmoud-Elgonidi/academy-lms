@@ -49,6 +49,14 @@ class MorePage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('open-recordings'),
+                  leading: const Icon(Icons.video_library_outlined),
+                  title: Text(l.recordingsMine),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.go('/teach/more/recordings'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('open-support'),
                   leading: const Icon(Icons.support_agent_outlined),
                   title: Text(l.supportTitle),

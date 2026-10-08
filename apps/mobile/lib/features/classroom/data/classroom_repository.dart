@@ -6,6 +6,8 @@ class ClassroomRepository {
 
   final ApiClient _api;
 
-  Future<JoinTicket> join(String lessonId) async =>
-      JoinTicket.fromJson((await _api.post('lessons/$lessonId/join'))['data'] as Map<String, dynamic>);
+  Future<JoinTicket> join(String lessonId) async {
+    final json = await _api.post('lessons/$lessonId/join');
+    return JoinTicket.fromJson(json['data'] as Map<String, dynamic>, recording: json['recording']);
+  }
 }

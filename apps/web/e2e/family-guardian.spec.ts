@@ -5,7 +5,7 @@ import { fitsTheScreen } from './helpers';
 test.use({ storageState: 'e2e/.auth/guardian.json' });
 
 test('every family page opens, fits a phone, and reads right to left', async ({ page }) => {
-  for (const path of ['/ar/family', '/ar/family/lessons', '/ar/family/lessons?when=past', '/ar/family/progress', '/ar/family/homework', '/ar/family/money', '/ar/family/challenges', '/ar/family/notifications', '/ar/family/more']) {
+  for (const path of ['/ar/family', '/ar/family/lessons', '/ar/family/lessons?when=past', '/ar/family/progress', '/ar/family/homework', '/ar/family/money', '/ar/family/challenges', '/ar/family/recordings', '/ar/family/notifications', '/ar/family/more']) {
     const response = await page.goto(path);
     expect(response?.status(), path).toBe(200);
     await expect(page.locator('h1').first(), path).toBeVisible();
@@ -88,4 +88,24 @@ test('a guardian cheers their child on', async ({ page }) => {
   await expect(page.getByText(/^التشجيع وصل لـ /)).toBeVisible();
   // Only the student collects rewards.
   await expect(page.getByRole('button', { name: /^استلم / })).toHaveCount(0);
+});
+
+test('a guardian agrees to their child\'s lessons being recorded, and takes it back', async ({ page }) => {
+  await page.goto('/ar/family/recordings');
+  const agree = page.getByRole('button', { name: 'موافق', exact: true });
+  const withdraw = page.getByRole('button', { name: 'اسحب الموافقة' });
+  await expect(agree.or(withdraw)).toBeVisible();
+  if (await withdraw.isVisible()) {
+    page.once('dialog', (d) => d.accept());
+    await withdraw.click();
+  }
+
+  await page.getByRole('checkbox').check();
+  await agree.click();
+  await expect(withdraw).toBeVisible();
+  await expect(page.getByText('مش موافق')).toHaveCount(0);
+
+  page.once('dialog', (d) => d.accept());
+  await withdraw.click();
+  await expect(agree).toBeVisible();
 });

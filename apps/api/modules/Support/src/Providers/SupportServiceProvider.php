@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Modules\Classroom\Contracts\RecordingHolds;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Evaluation\Contracts\TeacherComplaints;
@@ -30,6 +31,7 @@ use Modules\Support\Http\Controllers\TicketFileController;
 use Modules\Support\Listeners\SendSupportNotifications;
 use Modules\Support\Live\MyTicketsChanged;
 use Modules\Support\Live\TicketsChanged;
+use Modules\Support\Queries\ComplaintRecordingHolds;
 use Modules\Support\Queries\ConfirmedComplaints;
 use Modules\Support\SupportRules;
 
@@ -46,6 +48,8 @@ final class SupportServiceProvider extends ServiceProvider
     {
         $this->app->scoped(SupportRules::class);
         $this->app->bind(TeacherComplaints::class, ConfirmedComplaints::class);
+        // And the classroom keeps a lesson's recordings while a complaint about it is open.
+        $this->app->bind(RecordingHolds::class, ComplaintRecordingHolds::class);
     }
 
     public function boot(): void

@@ -4,6 +4,7 @@ namespace Modules\Classroom\Actions;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
+use Modules\Classroom\Actions\Recordings\RecordWhenBothIn;
 use Modules\Classroom\Models\Room;
 use Modules\Classroom\Video\ProviderManager;
 use Modules\Scheduling\Contracts\AttendanceApi;
@@ -20,6 +21,7 @@ final class ReconcileRooms
     public function __construct(
         private readonly AttendanceApi $attendance,
         private readonly ProviderManager $providers,
+        private readonly RecordWhenBothIn $autoRecord,
     ) {}
 
     public function handle(?CarbonImmutable $now = null): int
@@ -46,6 +48,9 @@ final class ReconcileRooms
             foreach (array_diff($people, $open) as $userId) {
                 $this->attendance->participantJoined($room->session_id, $userId, $now, 'reconcile');
                 $fixed++;
+            }
+            if (array_diff($people, $open) !== []) {
+                $this->autoRecord->handle($room);    // the join the webhook lost may be the one that starts it
             }
             foreach (array_diff($open, $people) as $userId) {
                 $this->attendance->participantLeft($room->session_id, $userId, $now, 'reconcile');

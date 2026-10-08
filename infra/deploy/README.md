@@ -91,7 +91,8 @@ docker compose exec -T postgres pg_dump -U postgres -Fc lms > lms-$(date +%F).du
   `docker compose up -d` (migrations already applied stay).
 - **A new setting** the app needs on servers: add it to the `.env` that `deploy.sh` writes on the first
   deploy, and add it by hand to servers that already have a `.env` (it is never overwritten).
-- **Not on yet**: live lessons through LiveKit (lessons use an outside link: `CLASSROOM_PROVIDER=external`),
+- **Not on yet**: live lessons through LiveKit (lessons use an outside link: `CLASSROOM_PROVIDER=external`)
+  and recording them (LiveKit Egress, with `LIVEKIT_EGRESS_URL`, `RECORDINGS_DISK` and `RECORDINGS_RECORDER_ROOT`),
   email, WhatsApp, texts and push (messages go to the log), real payment gateways (each academy adds its own
   keys), and academies' own domains.
 - **Removing it all**: `docker compose down -v` here (the data goes too), delete this folder, and

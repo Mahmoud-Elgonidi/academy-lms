@@ -1401,6 +1401,81 @@ class AppLocalizationsEn extends AppLocalizations {
   String get teachersOnly => 'Teachers only';
 
   @override
+  String get recordingsTitle => 'Lesson recordings';
+
+  @override
+  String get recordingsMine => 'My lesson recordings';
+
+  @override
+  String get recordingsOff => 'The academy does not record lessons now.';
+
+  @override
+  String recordingsOf(String name) {
+    return '$name\'s lesson recordings';
+  }
+
+  @override
+  String get recordingsTeacherList => 'Your lessons\' recordings';
+
+  @override
+  String get recordingsEmpty => 'No recordings yet.';
+
+  @override
+  String get recordingsNotShared => 'The academy does not show recordings here.';
+
+  @override
+  String get recordingWatch => 'Watch';
+
+  @override
+  String get recordingAgreed => 'Agreed';
+
+  @override
+  String get recordingNotAgreed => 'Not agreed';
+
+  @override
+  String get recordingAgree => 'Agree';
+
+  @override
+  String get recordingAgreedDone => 'Thank you. Lessons may be recorded from now on.';
+
+  @override
+  String get recordingWithdraw => 'Withdraw consent';
+
+  @override
+  String get recordingWithdrawConfirm => 'Are you sure? Any recording running stops, and nothing more is recorded.';
+
+  @override
+  String get recordingWithdrawn => 'Consent withdrawn; nothing more will be recorded.';
+
+  @override
+  String recordingUntil(String date) {
+    return 'available until $date';
+  }
+
+  @override
+  String get recordingVideo => 'Video';
+
+  @override
+  String get recordingAudio => 'Sound';
+
+  @override
+  String get recordingLogged => 'Opening a recording is logged under your name.';
+
+  @override
+  String get recordingOn => 'Recording';
+
+  @override
+  String get recordStart => 'Record the lesson';
+
+  @override
+  String get recordStop => 'Stop recording';
+
+  @override
+  String recordingMissing(String names) {
+    return 'It cannot be recorded until they agree to recording: $names.';
+  }
+
+  @override
   String get absenceNote => 'Absence note';
 
   @override

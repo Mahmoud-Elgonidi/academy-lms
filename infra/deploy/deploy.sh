@@ -147,6 +147,12 @@ MAIL_FROM_NAME="Academy LMS"
 
 # Lessons by an outside link until LiveKit is set up for this server.
 CLASSROOM_PROVIDER=external
+# Recording lessons (when an academy turns it on) needs LiveKit Egress too: it
+# writes into the same S3 bucket (RECORDINGS_DISK=s3), or into a volume the app
+# also reads (RECORDINGS_RECORDER_ROOT: the app's recordings folder as Egress sees it).
+LIVEKIT_EGRESS_URL=
+RECORDINGS_DISK=local
+RECORDINGS_RECORDER_ROOT=
 
 # The demo data's sign-in on this server (when it is loaded): every demo
 # account's password, and the console's authenticator secret.

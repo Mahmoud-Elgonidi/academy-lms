@@ -173,7 +173,7 @@ arch('crm sits on top: it reaches every module only through its contracts, and n
     ])
     ->ignoring('Modules\Crm\Database');
 
-arch('the classroom reaches lessons, plans, people, messages and branding only through their contracts, and nothing depends on it')
+arch('the classroom reaches lessons, plans, people, messages and branding only through their contracts, and nothing below it depends on it')
     ->expect('Modules\Classroom')
     ->not->toUse([
         'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\Identity\Preferences', 'Modules\Identity\Authorization',
@@ -187,7 +187,7 @@ arch('the classroom reaches lessons, plans, people, messages and branding only t
     ->and(['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import'])
     ->not->toUse('Modules\Classroom');
 
-arch('support sits on top: it reaches lessons, people, messages and the KPIs only through their contracts, and nothing depends on it')
+arch('support sits on top: it reaches lessons, people, messages, the KPIs and recordings only through their contracts, and nothing depends on it')
     ->expect('Modules\Support')
     ->not->toUse([
         'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\Identity\Preferences', 'Modules\Identity\Authorization',
@@ -196,7 +196,8 @@ arch('support sits on top: it reaches lessons, people, messages and the KPIs onl
         'Modules\Scheduling\Domain', 'Modules\Scheduling\Actions', 'Modules\Scheduling\Queries', 'Modules\Scheduling\Filament',
         'Modules\Evaluation\Models', 'Modules\Evaluation\Actions', 'Modules\Evaluation\Domain', 'Modules\Evaluation\Queries', 'Modules\Evaluation\Filament',
         'Modules\Communication\Models', 'Modules\Communication\Actions', 'Modules\Communication\Channels', 'Modules\Communication\Templates',
-        'Modules\Catalog', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Payroll', 'Modules\Import', 'App',
+        'Modules\Classroom\Models', 'Modules\Classroom\Actions', 'Modules\Classroom\Video', 'Modules\Classroom\Recordings', 'Modules\Classroom\Filament',
+        'Modules\Catalog', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Learning', 'Modules\Crm', 'Modules\Payroll', 'Modules\Import', 'App',
     ])
     ->ignoring('Modules\Support\Database')
     ->and(['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import'])

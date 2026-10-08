@@ -19,6 +19,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Billing\Filament\Family\BillingFamilyPlugin;
+use Modules\Classroom\Filament\Family\ClassroomFamilyPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Identity\Filament\Pages\SignIn;
 use Modules\Identity\TwoFactor\TwoFactor;
@@ -77,6 +78,7 @@ final class FamilyPanelProvider extends PanelProvider
                 SchedulingFamilyPlugin::make(),
                 LearningFamilyPlugin::make(),
                 BillingFamilyPlugin::make(),
+                ClassroomFamilyPlugin::make(),
                 SupportFamilyPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),

@@ -6,6 +6,8 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Modules\Classroom\Actions\Recordings\HandleEgressEvent;
+use Modules\Classroom\Actions\Recordings\RecordWhenBothIn;
 use Modules\Classroom\Models\Room;
 use Modules\Classroom\Models\WebhookInboxItem;
 use Modules\Scheduling\Contracts\AttendanceApi;
@@ -13,14 +15,20 @@ use Throwable;
 
 /**
  * A checked LiveKit event, for the academy its room belongs to: kept once in
- * the inbox, then turned into attendance (who came and went, when). A
- * supervisor's comings and goings are not attendance.
+ * the inbox, then turned into attendance (who came and went, when), or into
+ * a recording's progress (egress events). A supervisor's comings and goings
+ * are not attendance. When the academy records every lesson, the teacher and
+ * the student both being in starts it.
  */
 final class HandleLiveKitWebhook
 {
-    public const EVENTS = ['participant_joined', 'participant_left', 'room_started', 'room_finished'];
+    public const EVENTS = ['participant_joined', 'participant_left', 'room_started', 'room_finished', 'egress_started', 'egress_updated', 'egress_ended'];
 
-    public function __construct(private readonly AttendanceApi $attendance) {}
+    public function __construct(
+        private readonly AttendanceApi $attendance,
+        private readonly HandleEgressEvent $egress,
+        private readonly RecordWhenBothIn $autoRecord,
+    ) {}
 
     /** @param  array<string, mixed>  $event */
     public function handle(array $event, Room $room): void
@@ -44,6 +52,12 @@ final class HandleLiveKitWebhook
         }
 
         try {
+            if (str_starts_with($name, 'egress_')) {
+                $this->egress->handle((array) ($event['egressInfo'] ?? $event['egress_info'] ?? []), $at);
+                $item->update(['processed_at' => CarbonImmutable::now()]);
+
+                return;
+            }
             DB::transaction(function () use ($name, $event, $room, $at) {
                 $identity = (string) ($event['participant']['identity'] ?? '');
                 $person = $identity !== '' && ! str_starts_with($identity, 'observer:') ? $identity : null;
@@ -59,6 +73,9 @@ final class HandleLiveKitWebhook
                 }
             });
             $item->update(['processed_at' => CarbonImmutable::now()]);
+            if ($name === 'participant_joined') {
+                $this->autoRecord->handle($room->refresh());
+            }
         } catch (Throwable $e) {
             $item->update(['error' => Str::limit($e->getMessage(), 490)]);
             report($e);

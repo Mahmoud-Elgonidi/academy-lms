@@ -52,6 +52,15 @@ describe('the places of each look', () => {
   });
 });
 
+describe('lesson recordings', () => {
+  it('are in every look but the kids\', where the guardian decides', () => {
+    expect(itemsOf('kids', false).all.some((i) => i.key === 'recordings')).toBe(false);
+    for (const stage of ['middle', 'teen', 'classic'] as const) {
+      expect(itemsOf(stage, seesMoney(stage)).all.find((i) => i.key === 'recordings')?.href).toBe('/family/recordings');
+    }
+  });
+});
+
 describe('where a notification opens', () => {
   it('follows the screen the API names, as the app does', () => {
     expect(familyTargetOf('session', true)).toBe('/family/lessons');

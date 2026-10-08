@@ -1462,6 +1462,81 @@ class AppLocalizationsAr extends AppLocalizations {
   String get teachersOnly => 'للمدرس بس';
 
   @override
+  String get recordingsTitle => 'تسجيلات الحصص';
+
+  @override
+  String get recordingsMine => 'تسجيلات حصصي';
+
+  @override
+  String get recordingsOff => 'الأكاديمية مش بتسجل الحصص دلوقتي.';
+
+  @override
+  String recordingsOf(String name) {
+    return 'تسجيلات حصص $name';
+  }
+
+  @override
+  String get recordingsTeacherList => 'تسجيلات حصصك';
+
+  @override
+  String get recordingsEmpty => 'مفيش تسجيلات لسه.';
+
+  @override
+  String get recordingsNotShared => 'الأكاديمية مش بتعرض التسجيلات هنا.';
+
+  @override
+  String get recordingWatch => 'شوف';
+
+  @override
+  String get recordingAgreed => 'موافق';
+
+  @override
+  String get recordingNotAgreed => 'مش موافق';
+
+  @override
+  String get recordingAgree => 'موافق';
+
+  @override
+  String get recordingAgreedDone => 'شكرًا. الحصص ممكن تتسجل من دلوقتي.';
+
+  @override
+  String get recordingWithdraw => 'اسحب الموافقة';
+
+  @override
+  String get recordingWithdrawConfirm => 'متأكد؟ أي تسجيل شغال هيقف، ومش هيتسجل حاجة تاني.';
+
+  @override
+  String get recordingWithdrawn => 'الموافقة اتسحبت، ومش هيتسجل حاجة تاني.';
+
+  @override
+  String recordingUntil(String date) {
+    return 'متاح لحد $date';
+  }
+
+  @override
+  String get recordingVideo => 'فيديو';
+
+  @override
+  String get recordingAudio => 'صوت';
+
+  @override
+  String get recordingLogged => 'فتحك للتسجيل بيتسجل باسمك.';
+
+  @override
+  String get recordingOn => 'بيسجل';
+
+  @override
+  String get recordStart => 'سجّل الحصة';
+
+  @override
+  String get recordStop => 'وقّف التسجيل';
+
+  @override
+  String recordingMissing(String names) {
+    return 'مينفعش نسجل لحد ما يوافقوا على التسجيل: $names.';
+  }
+
+  @override
   String get absenceNote => 'ملاحظة الغياب';
 
   @override

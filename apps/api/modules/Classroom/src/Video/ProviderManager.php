@@ -16,4 +16,12 @@ final class ProviderManager
             default => throw new InvalidArgumentException("Unknown video provider [{$provider}]."),
         };
     }
+
+    /** The provider's recorder, when it can record (an outside link cannot). */
+    public function recorder(string $provider): ?Recorder
+    {
+        $video = $this->get($provider);
+
+        return $video instanceof Recorder ? $video : null;
+    }
 }

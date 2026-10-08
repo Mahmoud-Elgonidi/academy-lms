@@ -9,12 +9,16 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
 import '../../../../shared/widgets/lms.dart';
+import '../../../recordings/data/recordings_repository.dart';
+import '../../../recordings/domain/recordings.dart';
 import '../../data/classroom_repository.dart';
 import '../../domain/join_ticket.dart';
 
 /// The live lesson in the app, on the academy's LiveKit room: the other
 /// person large, me small, and four big buttons (mic, camera, audio only,
 /// leave). Attendance is the server's (LiveKit tells it who is in the room).
+/// Everyone sees when the lesson is being recorded; its teacher starts and
+/// stops it here, once everyone it records agreed.
 class ClassroomPage extends StatefulWidget {
   const ClassroomPage({required this.lessonId, this.ticket, super.key});
 
@@ -34,6 +38,11 @@ class _ClassroomPageState extends State<ClassroomPage> {
   String? _problem;
   bool _connecting = true;
   bool _audioOnly = false;
+  RecordingState _recording = const RecordingState();
+
+  /// What the lesson's own start or stop said last; the room's word wins when it speaks.
+  bool? _running;
+  bool _recordBusy = false;
 
   @override
   void initState() {
@@ -60,6 +69,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
       final ticket = widget.ticket is JoinTicket
           ? widget.ticket! as JoinTicket
           : await context.read<ClassroomRepository>().join(widget.lessonId);
+      _recording = ticket.recording;
       await _room.connect(ticket.url, ticket.token!);
       _clock.start();
       if (ticket.canPublish) {
@@ -110,6 +120,33 @@ class _ClassroomPageState extends State<ClassroomPage> {
     }
   }
 
+  /// LiveKit says when the room is recorded, and so does the room's metadata (the server sets it).
+  bool get _recordingOn {
+    if (_room.isRecording) return true;
+    final meta = _room.metadata;
+    if (meta != null && meta.contains('"recording":true')) return true;
+    if (meta != null && meta.contains('"recording":false')) return _running ?? false;
+    return _running ?? _recording.running;
+  }
+
+  Future<void> _toggleRecording() async {
+    final repo = context.read<RecordingsRepository>();
+    final on = _recordingOn;
+    setState(() => _recordBusy = true);
+    try {
+      if (on) {
+        await repo.stop(widget.lessonId);
+        _running = false;
+      } else {
+        _running = await repo.start(widget.lessonId);
+      }
+    } on ApiProblem catch (p) {
+      if (mounted) showSnack(context, context.problemText(p));
+    } finally {
+      if (mounted) setState(() => _recordBusy = false);
+    }
+  }
+
   Future<void> _leave() async {
     await _room.disconnect();
     if (mounted) context.canPop() ? context.pop() : context.go('/');
@@ -144,6 +181,21 @@ class _ClassroomPageState extends State<ClassroomPage> {
                         style: const TextStyle(color: ink, fontSize: 16, fontWeight: FontWeight.w700),
                       ),
                     ),
+                    if (_recordingOn) ...[
+                      Semantics(
+                        liveRegion: true,
+                        child: Container(
+                          key: const Key('recording-on'),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(color: const Color(0xFFDC2626), borderRadius: BorderRadius.circular(999)),
+                          child: Text(
+                            l.recordingOn,
+                            style: const TextStyle(color: ink, fontWeight: FontWeight.w700, fontSize: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(999)),
@@ -252,6 +304,18 @@ class _ClassroomPageState extends State<ClassroomPage> {
                           pressed: _audioOnly,
                           onPressed: me == null ? null : _toggleAudioOnly,
                         ),
+                        if (_recording.controls) ...[
+                          const SizedBox(width: 14),
+                          _RoundButton(
+                            key: const Key('record'),
+                            tooltip: _recordingOn ? l.recordStop : l.recordStart,
+                            icon: _recordingOn ? Icons.stop_circle_outlined : Icons.fiber_manual_record_rounded,
+                            pressed: _recordingOn,
+                            onPressed: me == null || _recordBusy || (!_recordingOn && _recording.missing.isNotEmpty)
+                                ? null
+                                : _toggleRecording,
+                          ),
+                        ],
                         const SizedBox(width: 14),
                         Tooltip(
                           message: l.leave,
@@ -271,6 +335,14 @@ class _ClassroomPageState extends State<ClassroomPage> {
                         ),
                       ],
                     ),
+                    if (_recording.controls && !_recordingOn && _recording.missing.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        l.recordingMissing(_recording.missing.join('، ')),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Color(0xFFFCA5A5), fontSize: 12),
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     Text(
                       l.rejoinHint,
@@ -289,7 +361,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
 }
 
 class _RoundButton extends StatelessWidget {
-  const _RoundButton({required this.tooltip, required this.icon, required this.pressed, required this.onPressed});
+  const _RoundButton({required this.tooltip, required this.icon, required this.pressed, required this.onPressed, super.key});
 
   final String tooltip;
   final IconData icon;
