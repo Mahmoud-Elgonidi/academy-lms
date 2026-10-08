@@ -9805,7 +9805,7 @@
                 "properties": {
                     "type": {
                         "type": "string",
-                        "description": "What went wrong, as a key: validation, unauthenticated, forbidden, not-found, conflict, too-many-requests, academy-suspended, \u2026",
+                        "description": "What went wrong, as a key: validation, unauthenticated, forbidden, not-found, conflict, too-many-requests, academy-suspended, plan-limit-reached (with limit and max), feature-not-in-plan (with feature), \u2026",
                         "examples": [
                             "validation"
                         ]
@@ -10100,6 +10100,13 @@
                         "type": "array",
                         "items": {}
                     },
+                    "plan_features": {
+                        "type": "array",
+                        "description": "The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll): the apps show only these.",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
                     "academy": {
                         "type": [
                             "object",
@@ -10142,6 +10149,7 @@
                     "display_timezone",
                     "timezone_mismatch",
                     "roles",
+                    "plan_features",
                     "academy"
                 ],
                 "title": "UserResource"

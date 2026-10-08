@@ -29,6 +29,8 @@ use Modules\Platform\Branding\TemplateCatalog;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\Platform\Models\AcademyBranding;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use UnitEnum;
 
@@ -127,7 +129,8 @@ final class BrandingSettings extends Page
                     ]),
 
                 Section::make(__('platform::branding.sections.colours'))
-                    ->description(__('platform::branding.colours_hint'))
+                    ->description(fn () => $this->customAllowed() ? __('platform::branding.colours_hint') : __('platform::branding.custom_not_in_plan'))
+                    ->disabled(fn () => ! $this->customAllowed())
                     ->schema([
                         Grid::make(2)->schema(array_map(
                             fn (string $token) => ColorPicker::make($token)
@@ -147,6 +150,7 @@ final class BrandingSettings extends Page
                     ]),
 
                 Section::make(__('platform::branding.sections.type'))
+                    ->disabled(fn () => ! $this->customAllowed())
                     ->schema([
                         Grid::make(2)->schema([
                             Select::make('heading_font')->label(__('platform::branding.fields.heading_font'))
@@ -190,6 +194,7 @@ final class BrandingSettings extends Page
     {
         return [
             Action::make('saveAsTemplate')
+                ->visible(fn () => $this->customAllowed())
                 ->label(__('platform::branding.actions.save_as_template'))
                 ->icon(Heroicon::OutlinedBookmark)
                 ->color('gray')
@@ -208,7 +213,7 @@ final class BrandingSettings extends Page
                 ->label(fn () => __('platform::branding.actions.update_template', ['name' => $this->baseTemplate()['name'] ?? '']))
                 ->icon(Heroicon::OutlinedArrowPath)
                 ->color('gray')
-                ->visible(fn () => $this->isSavedBase() && $this->isModified())
+                ->visible(fn () => $this->customAllowed() && $this->isSavedBase() && $this->isModified())
                 ->requiresConfirmation()
                 ->modalDescription(__('platform::branding.update_template_hint'))
                 ->action(function (): void {
@@ -249,6 +254,12 @@ final class BrandingSettings extends Page
             });
     }
 
+    /** A look of the academy's own (edited colours and fonts, templates it saves) is an area of its plan. */
+    public function customAllowed(): bool
+    {
+        return app(AcademyPlan::class)->has(Feature::CustomBranding);
+    }
+
     /** @return list<array{ref: string, name: string, swatches: list<string>, fonts: string, builtIn: bool, active: bool, base: bool}> */
     public function templates(): array
     {
@@ -262,7 +273,7 @@ final class BrandingSettings extends Page
             'builtIn' => $t['builtIn'],
             'active' => $applied->templateRef === $t['ref'],
             'base' => $this->baseRef === $t['ref'],
-        ], app(TemplateCatalog::class)->all());
+        ], array_values(array_filter(app(TemplateCatalog::class)->all(), fn (array $t) => $t['builtIn'] || $this->customAllowed())));
     }
 
     /** The tokens on screen, or the last valid ones while a field is mid-edit. */

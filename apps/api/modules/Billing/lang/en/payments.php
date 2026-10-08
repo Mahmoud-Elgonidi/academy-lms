@@ -92,6 +92,7 @@ return [
         'title' => 'Online payments',
         'subtitle' => 'The academy is the merchant: money goes straight to your own gateway accounts. Every invoice gets a pay link in its message.',
         'empty' => 'No gateways yet. Add one so families can pay online.',
+        'not_in_plan' => "Online payments are not in the academy's plan. The gateway accounts are kept but not offered to payers; paying by hand and its proofs work as usual. Ask the platform team to add it.",
         'add' => 'Add a gateway',
         'edit' => 'Edit',
         'delete' => 'Turn off',

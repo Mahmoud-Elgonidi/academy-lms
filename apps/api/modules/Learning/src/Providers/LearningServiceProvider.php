@@ -3,6 +3,7 @@
 namespace Modules\Learning\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -29,6 +30,8 @@ use Modules\Learning\Listeners\RebuildProgressOnProgramChange;
 use Modules\Learning\Listeners\SendLearningNotifications;
 use Modules\Learning\Live\HomeworkChanged;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
+use Modules\SharedKernel\Plans\Limit;
+use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Realtime\LiveSignals;
 
 /** Reports, homework and progress on the roadmap (docs/architecture/01, "التقارير والواجبات"; 02, section 6). */
@@ -43,6 +46,8 @@ final class LearningServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'learning');
+        // The plan's storage counts the handed-in homework (recordings and files) kept for the academy.
+        $this->app->make(UsageMeters::class)->add(Limit::StorageMb, fn () => (int) DB::table('homework_submissions')->sum('size'));
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'learning');
 
         Route::prefix('api/v1')

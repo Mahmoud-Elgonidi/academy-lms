@@ -63,7 +63,7 @@ final class ProblemResponses extends HttpExceptionToResponseExtension
         }
 
         $body = (new OpenApiTypes\ObjectType)
-            ->addProperty('type', (new OpenApiTypes\StringType)->setDescription('What went wrong, as a key: validation, unauthenticated, forbidden, not-found, conflict, too-many-requests, academy-suspended, …')->example('validation'))
+            ->addProperty('type', (new OpenApiTypes\StringType)->setDescription('What went wrong, as a key: validation, unauthenticated, forbidden, not-found, conflict, too-many-requests, academy-suspended, plan-limit-reached (with limit and max), feature-not-in-plan (with feature), …')->example('validation'))
             ->addProperty('title', (new OpenApiTypes\StringType)->setDescription('The same, in the reader\'s language.'))
             ->addProperty('status', (new OpenApiTypes\IntegerType)->example(422))
             ->addProperty('detail', (new OpenApiTypes\StringType)->setDescription('More about this case, when there is more to say.'))

@@ -7,6 +7,7 @@ use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
@@ -75,11 +76,14 @@ final class Academies extends Page
             $query->where(fn ($q) => $q->where('name_ar', 'ilike', $like)->orWhere('name_en', 'ilike', $like)->orWhere('slug', 'ilike', $like));
         }
         $academies = $query->get();
-        $usage = app(AcademyUsage::class)->forAcademies($academies->pluck('id')->all());
+        $ids = $academies->pluck('id')->all();
+        $usage = app(AcademyUsage::class)->forAcademies($ids);
+        $plans = $this->plans($ids);
         $tz = app(ViewerTimezone::class)->effective();
 
-        return $academies->map(function (Academy $academy) use ($usage, $tz) {
+        return $academies->map(function (Academy $academy) use ($usage, $plans, $tz) {
             $u = $usage[$academy->id];
+            $plan = $plans[$academy->id] ?? null;
 
             return [
                 'id' => $academy->id,
@@ -93,8 +97,36 @@ final class Academies extends Page
                 'received' => ConsoleView::money($u['received']),
                 'last' => ConsoleView::ago($u['last_lesson']),
                 'url' => AcademyOverview::getUrl(['academy' => $academy->id]),
+                'plan' => $plan['name'] ?? null,
+                'plan_state' => $plan['state'] ?? 'ok',
             ];
         })->all();
+    }
+
+    /**
+     * Each academy's plan and how close its fullest limit was at the last count.
+     *
+     * @param  list<string>  $ids
+     * @return array<string, array{name: string, state: string}>
+     */
+    private function plans(array $ids): array
+    {
+        $db = DB::connection('pgsql_platform');
+        $names = $db->table('saas_subscriptions as s')->join('saas_plans as p', 'p.id', '=', 's.plan_id')
+            ->whereNull('s.ended_at')->whereIn('s.academy_id', $ids)->get(['s.academy_id', 'p.name_ar', 'p.name_en']);
+        $fullest = $db->table('usage_counters as u')->whereIn('u.academy_id', $ids)->where('u.max', '>', 0)
+            ->whereRaw('u.period = (select max(period) from usage_counters l where l.academy_id = u.academy_id)')
+            ->groupBy('u.academy_id')->selectRaw('u.academy_id, max(u.value::float / u.max) as ratio')->pluck('ratio', 'academy_id');
+        $out = [];
+        foreach ($names as $row) {
+            $ratio = (float) ($fullest[$row->academy_id] ?? 0);
+            $out[$row->academy_id] = [
+                'name' => app()->getLocale() === 'ar' ? $row->name_ar : $row->name_en,
+                'state' => $ratio >= 1 ? 'full' : ($ratio >= 0.8 ? 'near' : 'ok'),
+            ];
+        }
+
+        return $out;
     }
 
     /** @return array{active: int, suspended: int, students: int, lessons: int, hours: string} across every academy, whatever the filter */

@@ -13,6 +13,7 @@ return [
     'templates_hint' => 'Start from a ready-made template or one of yours, then change anything below. Nobody sees a change until you press "Save and apply".',
     'identity_hint' => 'The name and logo appear in the back office, the apps and emails.',
     'colours_hint' => 'Each colour has one fixed job on every screen.',
+    'custom_not_in_plan' => "Your own colours, fonts and saved templates are not in the academy's plan. Pick any ready template above, or ask the platform team to add them.",
     'fields' => [
         'name_ar' => 'Academy name (Arabic)',
         'name_en' => 'Academy name (English)',

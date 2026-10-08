@@ -5,6 +5,7 @@ import { Link, usePathname } from '@/i18n/navigation';
 import { Icon, type IconName } from '@/components/icons';
 import { join } from '@/components/ui';
 import { Unread } from '@/components/unread';
+import { inPlan } from '@/lib/teach/areas';
 
 type Item = { href: string; key: string; icon: IconName };
 
@@ -33,8 +34,8 @@ function useActive() {
   return (href: string) => (href === '/teach' ? path === '/teach' : path === href || path.startsWith(`${href}/`));
 }
 
-/** The side menu on wide screens. */
-export function SideNav({ unread }: { unread: number }) {
+/** The side menu on wide screens: the pages the academy's plan includes. */
+export function SideNav({ unread, features }: { unread: number; features: readonly string[] }) {
   const t = useTranslations('nav');
   const common = useTranslations('common');
   const active = useActive();
@@ -42,7 +43,7 @@ export function SideNav({ unread }: { unread: number }) {
     <div>
       <p className="mb-1 px-3 text-xs font-semibold text-muted">{title}</p>
       <ul className="space-y-0.5">
-        {items.map((item) => (
+        {items.filter((item) => inPlan(item.href, features)).map((item) => (
           <li key={item.href}>
             <Link
               href={item.href}

@@ -5,6 +5,8 @@ namespace Modules\Billing\Actions\Payments;
 use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Payments\StripeConnect;
 use Modules\SharedKernel\Audit\AuditTrail;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * The academy's own Stripe account, connected to the platform (Stripe
@@ -14,10 +16,15 @@ use Modules\SharedKernel\Audit\AuditTrail;
  */
 final class ConnectStripeAccount
 {
-    public function __construct(private readonly StripeConnect $connect) {}
+    public function __construct(
+        private readonly StripeConnect $connect,
+        private readonly AcademyPlan $plan,
+    ) {}
 
     public function handle(string $code, ?string $actorId): GatewayAccount
     {
+        // Taking payments online is an area of the academy's plan.
+        $this->plan->requireFeature(Feature::OnlinePayments);
         ['account' => $accountId, 'live' => $live] = $this->connect->exchange($code);
 
         $account = GatewayAccount::query()->where('gateway', 'stripe_connect')->where('external_id', $accountId)->first()

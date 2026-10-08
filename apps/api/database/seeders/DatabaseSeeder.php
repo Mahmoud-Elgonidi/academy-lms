@@ -22,6 +22,7 @@ use Modules\People\Database\Seeders\DemoConsentsSeeder;
 use Modules\Platform\Contracts\DTOs\NewAcademy;
 use Modules\Platform\Contracts\PlatformApi;
 use Modules\Platform\Contracts\TenantDirectory;
+use Modules\Platform\Database\Seeders\DemoPlansSeeder;
 use Modules\Platform\Database\Seeders\DemoPlatformSeeder;
 use Modules\Platform\Models\PlatformAdmin;
 use Modules\Scheduling\Database\Seeders\DemoDstSeeder;
@@ -38,7 +39,7 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * students with invoices in every state (payable online on the demo gateway),
  * curricula, lesson reports with homework, teacher time off with a substitute
  * and an academy holiday, ratings, teachers' pay with last month closed, imports from sheets, and the notifications all of that sent;
- * a second academy (suspended) and the platform team's console with past support sign-ins. Every password is "password" (DEMO_PASSWORD on a server). `composer demo` rebuilds it.
+ * a second academy (suspended) and the platform team's console with past support sign-ins, the academies on their SaaS plans (the demo on Pro, nine of its ten teachers' places taken). Every password is "password" (DEMO_PASSWORD on a server). `composer demo` rebuilds it.
  */
 class DatabaseSeeder extends Seeder
 {
@@ -60,6 +61,7 @@ class DatabaseSeeder extends Seeder
             defaultTimezone: 'Asia/Riyadh',
             defaultLocale: 'ar',
             country: 'SA',
+            plan: 'pro',
         ));
 
         $tenants->run($academy, function () use ($identity, $password): void {
@@ -109,6 +111,7 @@ class DatabaseSeeder extends Seeder
         $this->call(DemoPlatformSeeder::class);
         $admin = PlatformAdmin::query()->where('email', 'admin@platform.test')->firstOrFail();
         $tenants->run($academy, fn () => $this->callWith(DemoSupportSeeder::class, ['adminId' => $admin->id, 'adminName' => $admin->name]));
+        $this->callWith(DemoPlansSeeder::class, ['adminId' => $admin->id, 'adminName' => $admin->name]);
 
         $this->command?->info('Seeded academy "demo". Sign in as owner@demo.test with the demo password.');
         $this->command?->info('Platform console: admin@platform.test at /console; the code: php artisan platform:code admin@platform.test');

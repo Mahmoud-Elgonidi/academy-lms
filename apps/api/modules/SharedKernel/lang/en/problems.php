@@ -7,6 +7,8 @@ return [
     'two-factor-required' => 'Enter the code from your authenticator app.',
     'guardian-consent-required' => 'This account is waiting for a guardian\'s consent.',
     'two-factor-setup-required' => 'Set up two-step sign-in first.',
+    'plan-limit-reached' => "The academy's plan does not allow more.",
+    'feature-not-in-plan' => "This is not in the academy's plan.",
     'academy-suspended' => 'This academy is suspended.',
     'academy-not-found' => 'Academy not found.',
     'not-found' => 'Not found.',

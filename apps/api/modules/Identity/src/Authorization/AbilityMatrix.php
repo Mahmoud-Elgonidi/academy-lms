@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Gate;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Plans\AcademyPlan;
 
 /** Which fixed roles hold which ability (docs/architecture/01-features.md, permission matrix). */
 final class AbilityMatrix
@@ -31,13 +32,17 @@ final class AbilityMatrix
             Ability::ViewAuditLog => [Role::Owner, Role::Admin],
             // Guardians' consent for children's accounts: who follows the families day to day.
             Ability::ManageConsents => [Role::Owner, Role::Admin, Role::Supervisor],
+            // The academy's SaaS plan and how much of it is used.
+            Ability::ViewPlan => [Role::Owner, Role::Admin],
         };
     }
 
     public static function register(): void
     {
         foreach (Ability::cases() as $ability) {
-            Gate::define($ability->value, fn (User $user): bool => $user->isActive() && $user->hasRole(...self::rolesFor($ability)));
+            // An ability of an area the academy's plan leaves out is nobody's.
+            Gate::define($ability->value, fn (User $user): bool => $user->isActive() && $user->hasRole(...self::rolesFor($ability))
+                && ($ability->feature() === null || app(AcademyPlan::class)->has($ability->feature())));
         }
     }
 }

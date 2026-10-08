@@ -57,9 +57,11 @@ return [
             'created' => 'Academy created, owner :owner',
             'suspended' => 'Academy suspended: :reason',
             'reactivated' => 'Academy back on',
+            'plan_changed' => 'The academy moved to the :plan plan: :reason',
         ],
         'platform' => [
             'signed_in' => 'Signed in to the console',
+            'plan_saved' => 'The :plan plan edited',
         ],
     ],
     'values' => [

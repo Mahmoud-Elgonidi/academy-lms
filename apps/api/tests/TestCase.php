@@ -26,9 +26,18 @@ abstract class TestCase extends BaseTestCase
     /** @var list<string> */
     protected array $exceptTables = ['migrations'];
 
+    private static bool $platformPlansCleared = false;
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        // A fresh migration starts the platform with its plans, which would put every new
+        // academy on the default one; tests choose their academy's plan themselves.
+        if (! self::$platformPlansCleared) {
+            $this->app['db']->connection('pgsql_owner')->statement('truncate table saas_plans cascade');
+            self::$platformPlansCleared = true;
+        }
 
         // Truncation opens no transaction to close, so nothing would close this test's connections
         // (app, owner, platform) until PHP collects them: a long run could use up Postgres' slots.

@@ -25,6 +25,7 @@ use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Models\PaymentCheckout;
 use Modules\Billing\Payments\GatewayException;
 use Modules\Billing\Payments\GatewayManager;
+use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Payments\StripeConnect;
 use Modules\SharedKernel\Authorization\Ability;
@@ -107,16 +108,23 @@ final class PaymentSettings extends Page
             ->get(['payment_checkouts.*', 'i.number', 'g.label', 'u.name as payer'])->all();
     }
 
+    /** Paying online is an area of the academy's plan; paying by hand is in every plan. */
+    public function inPlan(): bool
+    {
+        return app(OnlinePayments::class)->inPlan();
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             Action::make('connectStripe')->label(__('billing::payments.connect.action'))->icon(Heroicon::OutlinedLink)->color('gray')
-                ->visible(fn () => app(GatewayManager::class)->connectAvailable())
+                ->visible(fn () => app(GatewayManager::class)->connectAvailable() && $this->inPlan())
                 ->requiresConfirmation()->modalIcon(Heroicon::OutlinedLink)
                 ->modalHeading(__('billing::payments.connect.action'))->modalDescription(__('billing::payments.connect.explain'))
                 ->modalSubmitActionLabel(__('billing::payments.connect.go'))
                 ->action(fn () => $this->redirect(app(StripeConnect::class)->authorizeUrl(app(TenantContext::class)->require()->id, (string) auth()->id()))),
             Action::make('add')->label(__('billing::payments.settings.add'))->icon(Heroicon::OutlinedPlus)
+                ->visible(fn () => $this->inPlan())
                 ->modalHeading(__('billing::payments.settings.add'))->modalWidth('lg')->modalSubmitActionLabel(__('billing::payments.settings.save'))
                 ->schema(fn () => $this->accountSchema(null))
                 ->action(function (array $data) {

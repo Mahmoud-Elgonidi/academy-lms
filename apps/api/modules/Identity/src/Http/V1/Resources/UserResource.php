@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -31,6 +33,8 @@ final class UserResource extends JsonResource
             // The device's clock differs from the profile's: the app offers to update the profile.
             'timezone_mismatch' => $viewer->mismatch(),
             'roles' => array_map(fn (Role $r) => $r->value, $this->roles()),
+            // The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll): the apps show only these.
+            'plan_features' => $academy === null ? [] : $this->planFeatures(),
             'academy' => $academy === null ? null : [
                 'id' => $academy->id,
                 'slug' => $academy->slug,
@@ -39,5 +43,19 @@ final class UserResource extends JsonResource
                 'default_timezone' => $academy->defaultTimezone,
             ],
         ];
+    }
+
+    /** @return list<string> */
+    private function planFeatures(): array
+    {
+        $plan = app(AcademyPlan::class);
+        $features = [];
+        foreach (Feature::cases() as $feature) {
+            if ($plan->has($feature)) {
+                $features[] = $feature->value;
+            }
+        }
+
+        return $features;
     }
 }

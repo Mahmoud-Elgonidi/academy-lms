@@ -10,7 +10,9 @@ use Filament\View\PanelsRenderHook;
 use Illuminate\Support\HtmlString;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\Platform\Contracts\DTOs\Branding;
+use Modules\Platform\Filament\Pages\AcademyPlanPage;
 use Modules\Platform\Filament\Pages\BrandingSettings;
+use Modules\Platform\Plans\PlanWarning;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
@@ -32,7 +34,7 @@ final class PlatformPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel
-            ->pages([BrandingSettings::class])
+            ->pages([BrandingSettings::class, AcademyPlanPage::class])
             ->brandName(fn (): string => self::branding()?->name() ?? config('app.name'))
             ->brandLogo(fn () => self::branding()?->logoUrl)
             ->brandLogoHeight('2.25rem')
@@ -46,6 +48,15 @@ final class PlatformPlugin implements Plugin
             // academy's palette is registered again once the academy is known.
             ->middleware([ApplyAcademyColours::class], isPersistent: true)
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => self::headStyles());
+
+        // The back office tells its owner and admins when a limit of the plan is close to full, except on the plan page itself.
+        if ($panel->getId() === 'academy') {
+            $panel->renderHook(PanelsRenderHook::PAGE_START, function (array $scopes = []): string {
+                $warning = in_array(AcademyPlanPage::class, $scopes, true) ? null : app(PlanWarning::class)->forViewer();
+
+                return $warning === null ? '' : view('platform::plans.banner', $warning + ['url' => AcademyPlanPage::getUrl(panel: 'academy')])->render();
+            });
+        }
     }
 
     public function boot(Panel $panel): void {}

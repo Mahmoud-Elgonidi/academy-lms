@@ -2,12 +2,16 @@
 
 namespace Modules\Platform\Providers;
 
+use Filament\Notifications\Notification;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Modules\Platform\Branding\BrandingService;
 use Modules\Platform\Commands\CreatePlatformAdmin;
+use Modules\Platform\Commands\MeasureUsageCommand;
 use Modules\Platform\Commands\ShowPlatformCode;
 use Modules\Platform\Console\ConsoleService;
 use Modules\Platform\Contracts\AccountDirectory;
@@ -18,7 +22,15 @@ use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Platform\Directory\EloquentTenantDirectory;
 use Modules\Platform\Directory\PlatformAccountDirectory;
 use Modules\Platform\Listeners\RecordConsoleSignIn;
+use Modules\Platform\Models\AcademyBranding;
+use Modules\Platform\Plans\PlanUsage;
+use Modules\Platform\Plans\PlatformAcademyPlan;
 use Modules\Platform\PlatformService;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\FeatureNotInPlan;
+use Modules\SharedKernel\Plans\Limit;
+use Modules\SharedKernel\Plans\PlanLimitReached;
+use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Tenancy\TenantResolver;
 
 final class PlatformServiceProvider extends ServiceProvider
@@ -36,6 +48,11 @@ final class PlatformServiceProvider extends ServiceProvider
         // Scoped: built once per request for the request's academy.
         $this->app->scoped(BrandingService::class);
         $this->app->alias(BrandingService::class, BrandingApi::class);
+
+        // The academies' SaaS plans, for every module through SharedKernel's AcademyPlan.
+        $this->app->scoped(PlatformAcademyPlan::class);
+        $this->app->alias(PlatformAcademyPlan::class, AcademyPlan::class);
+        $this->app->scoped(PlanUsage::class);
     }
 
     public function boot(): void
@@ -45,8 +62,27 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'platform');
         Event::listen(Login::class, RecordConsoleSignIn::class);
         if ($this->app->runningInConsole()) {
-            $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class]);
+            $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class]);
         }
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->command('platform:usage')->dailyAt('02:10')->withoutOverlapping()->onOneServer();
+        });
+
+        // The plan's storage counts the academy's logo and icon too.
+        $this->app->make(UsageMeters::class)->add(Limit::StorageMb, function (): int {
+            $branding = AcademyBranding::query()->first();
+            $disk = Storage::disk('public');
+
+            return array_sum(array_map(fn (?string $path) => $path !== null && $disk->exists($path) ? $disk->size($path) : 0, [$branding?->logo_path, $branding?->favicon_path]));
+        });
+
+        // On any panel screen, something the plan stops says why instead of failing the page.
+        \Livewire\on('exception', function ($component, $e, $stopPropagation): void {
+            if ($e instanceof PlanLimitReached || $e instanceof FeatureNotInPlan) {
+                Notification::make()->danger()->title(__('platform::plans.stopped'))->body($e->getMessage())->persistent()->send();
+                $stopPropagation();
+            }
+        });
 
         Route::prefix('api/v1')
             ->middleware(['api', 'tenant', 'locale'])

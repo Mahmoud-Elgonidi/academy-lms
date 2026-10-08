@@ -6,13 +6,24 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Modules\Identity\Contracts\DTOs\NewUser;
+use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
+use Modules\Identity\Queries\ActiveTeachers;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
-/** Creates a user, with roles, in the current academy. */
+/**
+ * Creates a user, with roles, in the current academy. A new teacher needs
+ * room in the academy's plan (its teacher limit).
+ */
 final class CreateUser
 {
-    public function __construct(private readonly TenantContext $tenants) {}
+    public function __construct(
+        private readonly TenantContext $tenants,
+        private readonly AcademyPlan $plan,
+        private readonly ActiveTeachers $teachers,
+    ) {}
 
     public function handle(NewUser $data): User
     {
@@ -37,7 +48,13 @@ final class CreateUser
             }
         })->validate();
 
-        return DB::transaction(function () use ($data): User {
+        return DB::transaction(function () use ($data, $academyId): User {
+            if (in_array(Role::Teacher, $data->roles, true) && $this->plan->limit(Limit::Teachers) !== null) {
+                // One new teacher at a time per academy, so two at once cannot both take the last place.
+                DB::select('select pg_advisory_xact_lock(hashtext(?))', ['plan:teachers:'.$academyId]);
+                $this->plan->ensureRoom(Limit::Teachers, $this->teachers->count() + 1);
+            }
+
             $user = User::query()->create([
                 'name' => $data->name,
                 'email' => $data->email,

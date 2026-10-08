@@ -5,6 +5,7 @@
 @endphp
 <x-filament-panels::page>
     @include('platform::console.styles')
+    @include('platform::plans.styles')
     <div class="pc-stack">
         @unless ($active)
             <div class="pc-note">{{ __($l.'suspended_note') }}</div>
@@ -20,6 +21,10 @@
                 <span class="pc-lines">@forelse ($u['money'] as $m)<strong>{{ $m }}</strong>@empty<strong>—</strong>@endforelse</span>
             </div>
         </div>
+
+        @if ($plan = $this->plan)
+            @include('platform::plans.summary', ['plan' => $plan, 'console' => true])
+        @endif
 
         <div class="pc-two">
             <section class="pc-base pc-box">

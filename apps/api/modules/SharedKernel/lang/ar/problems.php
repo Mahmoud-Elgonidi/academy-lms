@@ -7,6 +7,8 @@ return [
     'two-factor-required' => 'اكتب الكود اللي في تطبيق المصادقة.',
     'guardian-consent-required' => 'الحساب ده مستني موافقة ولي الأمر.',
     'two-factor-setup-required' => 'شغّل الدخول بخطوتين الأول.',
+    'plan-limit-reached' => 'باقة الأكاديمية مابتسمحش بأكتر من كده.',
+    'feature-not-in-plan' => 'الميزة دي مش في باقة الأكاديمية.',
     'academy-suspended' => 'هذه الأكاديمية موقوفة.',
     'academy-not-found' => 'الأكاديمية غير موجودة.',
     'not-found' => 'غير موجود.',

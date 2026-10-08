@@ -1,6 +1,7 @@
 @php $l = 'platform::console.academies.'; $tiles = $this->tiles; $academies = $this->academies; @endphp
 <x-filament-panels::page>
     @include('platform::console.styles')
+    @include('platform::plans.styles')
     <div class="pc-stack">
         <div class="pc-tiles lms-stagger">
             <div class="pc-base pc-tile" data-main>
@@ -40,6 +41,12 @@
                             <span class="pc-status" data-state="{{ $a['active'] ? 'active' : 'suspended' }}">{{ __('platform::console.status.'.($a['active'] ? 'active' : 'suspended')) }}</span>
                         </header>
                         <span class="pc-people">{{ __($l.'people', ['teachers' => $a['usage']['teachers'], 'students' => $a['usage']['students'], 'guardians' => $a['usage']['guardians']]) }}</span>
+                        @if ($a['plan'])
+                            <span class="pp-tags pp-tags-start">
+                                <span class="pp-tag" data-tone="brand">{{ $a['plan'] }}</span>
+                                @if ($a['plan_state'] !== 'ok')<span class="pp-tag" data-tone="{{ $a['plan_state'] === 'full' ? 'danger' : 'warn' }}">{{ __('platform::plans.summary.state.'.$a['plan_state']) }}</span>@endif
+                            </span>
+                        @endif
                         <div class="pc-figures">
                             <div><small>{{ __('platform::console.overview.tiles.lessons') }}</small><strong>{{ $a['usage']['lessons'] }}</strong></div>
                             <div><small>{{ __('platform::console.overview.tiles.hours') }}</small><strong>{{ $a['hours'] }}</strong></div>

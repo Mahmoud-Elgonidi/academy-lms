@@ -2,9 +2,14 @@
 
 namespace Modules\SharedKernel\Authorization;
 
+use Modules\SharedKernel\Plans\Feature;
+
 /**
  * Back-office abilities. Modules check them with Gate::allows(Ability::X->value)
  * and never look at roles; Identity maps roles to abilities (AbilityMatrix).
+ * An ability of an area the academy's plan may leave out (feature()) is
+ * granted only when the plan includes it, so the area's screens and routes
+ * close together.
  */
 enum Ability: string
 {
@@ -38,4 +43,16 @@ enum Ability: string
     case ImportData = 'data.import';
     case ViewAuditLog = 'audit.view';
     case ManageConsents = 'consents.manage';
+    case ViewPlan = 'academy.view-plan';
+
+    /** The plan area this ability belongs to, if a plan may leave it out. */
+    public function feature(): ?Feature
+    {
+        return match ($this) {
+            self::ManageLeads, self::BookTrials, self::AssessTrials => Feature::Crm,
+            self::ManagePayroll, self::ViewOwnEarnings => Feature::Payroll,
+            self::ImportData => Feature::Import,
+            default => null,
+        };
+    }
 }

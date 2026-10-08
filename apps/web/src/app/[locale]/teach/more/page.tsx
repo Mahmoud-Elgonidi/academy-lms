@@ -6,6 +6,7 @@ import { LanguageSwitch } from '@/components/teach/nav';
 import { Heading } from '@/components/ui';
 import { Unread } from '@/components/unread';
 import { liveOf } from '@/lib/live-server';
+import { inPlan } from '@/lib/teach/areas';
 import { me } from '@/lib/viewer';
 
 const ITEMS: { href: string; key: string; icon: IconName }[] = [
@@ -26,7 +27,7 @@ export default async function More() {
     <div>
       <Heading title={nav('menu')} hint={person.name} />
       <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-white">
-        {ITEMS.map((item) => (
+        {ITEMS.filter((item) => inPlan(item.href, person.plan_features ?? [])).map((item) => (
           <li key={item.href}>
             <Link href={item.href} className={`${row} hover:bg-paper`}>
               <Icon name={item.icon} className="text-muted" />

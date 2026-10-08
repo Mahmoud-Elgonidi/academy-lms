@@ -6,16 +6,23 @@ use Illuminate\Validation\ValidationException;
 use Modules\Platform\Branding\BrandTokens;
 use Modules\Platform\Branding\BuiltInTemplates;
 use Modules\Platform\Models\BrandingTemplate;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /** Saves the given look as a named template of the current academy and applies it. */
 final class SaveBrandTemplate
 {
     public const MAX_TEMPLATES = 20;
 
-    public function __construct(private readonly SaveBranding $saveBranding) {}
+    public function __construct(
+        private readonly SaveBranding $saveBranding,
+        private readonly AcademyPlan $plan,
+    ) {}
 
     public function handle(string $name, BrandTokens $tokens, ?string $actorId = null): BrandingTemplate
     {
+        // Templates of its own are an area of the academy's plan.
+        $this->plan->requireFeature(Feature::CustomBranding);
         $name = trim($name);
         $this->validateName($name);
 

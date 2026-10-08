@@ -23,7 +23,7 @@ export async function Shell({ person, look, locale, children }: { person: Me; lo
           <p className="font-heading text-[15px] font-bold leading-tight">{academy}</p>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-2">
-          <SideNav unread={live.unread} />
+          <SideNav unread={live.unread} features={person.plan_features ?? []} />
         </div>
         <div className="space-y-1 border-t border-line p-3">
           <p className="truncate px-3 pb-1 text-sm font-semibold">{person.name}</p>

@@ -139,6 +139,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 - **Super Admins** في جدول منفصل `platform_admins` بـ guard خاص و 2FA، ومابيشوفوش بيانات الأكاديميات إلا بـ **الدخول بحساب مستخدم مع تسجيله**.
   - **المنفّذ**: guard اسمه `platform` ولوحة Filament لوحدها (`console`) من غير `ResolveTenant`، وتطبيق مصادقة إجباري. `platform_admins` عليه RLS من غير policy، فالـ connection بتاع الأكاديميات مابيشوفش منه ولا صف.
   - **الدخول بحساب مستخدم** (`impersonations` في Identity، جدول tenant): الأدمن بيطلب من اللوحة بسبب ومدة، والـ Action بيشتغل جوه `TenantContext::run` للأكاديمية دي. اللينك بيشتغل مرة واحدة ولمدة دقيقتين، على عنوان الأكاديمية بس (الـ RLS بيمنع أي أكاديمية تانية تلاقيه). كل request بعدها بيعدّي على `WatchImpersonation`: بيسجّل العمليات باسم فريق المنصة "بحساب" الشخص (`AuditActor` في الـ Context)، وبيقفل الجلسة لما وقتها يخلص أو تتقفل من اللوحة.
+- **باقات المنصة** (`saas_plans`، و`saas_subscriptions`، و`usage_counters` في Platform): الـ modules بتسأل عقد SharedKernel `AcademyPlan` (`has(Feature)`، و`limit(Limit)`، و`ensureRoom()`، و`requireFeature()`)، وPlatform هو اللي بيربطه (`PlatformAcademyPlan`، بيقرا الباقة مرة واحدة في الـ request على `pgsql_platform`). كل module بيعدّ اللي يخصه في `UsageMeters`. الجداول دي بيكتب فيها Platform بس: الأكاديمية بتقرا اشتراكها وعدّاتها (RLS)، ومابتشوفش الباقات خالص. التفاصيل في [02 — القسم 11](02-domain-rules.md#11-باقات-المنصة-saas-وحدودها).
 - **الدخول بخطوتين للمستخدمين** (`Identity\TwoFactor`): تطبيق مصادقة من Filament (`AppAuthentication`) على `users`:
   - العمودين `app_authentication_secret` (متشفر) و`app_authentication_recovery_codes` (أكواد hash، متشفرة)، ومخفيين من أي JSON.
   - `TwoFactor::REQUIRED_FOR` = المالك والمدير والمحاسب: middleware اسمه `RequireTwoFactor` في لوحة الإدارة بيحوّلهم لصفحة التشغيل. الحساب اللي فريق المنصة داخل بيه مستثنى، والـ model نفسه بيرفض أي تغيير في العمودين طول ما `AuditActor::current()->onBehalfOf` موجود.
@@ -527,7 +528,7 @@ interface PaymentGateway
   - الـ CI بتاع الموبايل (`mobile.yml`) بيشتغل كمان لما `packages/openapi` يتغير، فالـ contract test بيتأكد إن التطبيق لسه ماشي مع الـ API.
 
 ### الـ API المنفّذ (`/api/v1`، 63 route)
-- **الدخول والحساب** (Identity): `auth/login`، و`auth/code` و`auth/code/verify`، و`accounts/code` و`accounts/code/verify` و`accounts/sign-in`، و`auth/two-factor` (الخطوة التانية بعد أي واحد فيهم)، و`me`، و`me/sessions` (الأجهزة وتخريج جهاز)، و`auth/logout`.
+- **الدخول والحساب** (Identity): `auth/login`، و`auth/code` و`auth/code/verify`، و`accounts/code` و`accounts/code/verify` و`accounts/sign-in`، و`auth/two-factor` (الخطوة التانية بعد أي واحد فيهم)، و`me` (ومعاه `plan_features`: الميزات اللي في باقة الأكاديمية)، و`me/sessions` (الأجهزة وتخريج جهاز)، و`auth/logout`.
 - **الأسرة**:
   - `family/learners` (People): الطالب نفسه وأولاده، ومرحلة كل واحد. كل endpoint للأسرة بياخد `learner_id`، ولو مابعتوش بياخد أول واحد (`FamilyView::learner`).
   - `family/lessons` (القادمة أو اللي فاتت، ومعاها الإجازات وتغييرات الساعة)، و`lessons/{id}/cancellation` (هيحصل إيه لو ألغيت، بالسياسة)، و`lessons/{id}/cancel`، و`lessons/{id}/refuse-substitute`. الطفل في شكل kids مابيلغيش.
@@ -535,7 +536,7 @@ interface PaymentGateway
   - `family/balance`، و`family/invoices` (ومعاها لينك المستند الموقّع وطرق الدفع)، و`family/invoices/{id}/checkout` (Billing). الطالب اللي مابيدفعش مابيشوفش فلوس.
   - `family/consents` (People): أولاد ولي الأمر اللي محتاجين موافقة، والنص اللي هيوافق عليه، و`family/consents/{student}` (موافق: `agree` و`version`) و`family/consents/{student}/withdraw`. لولي الأمر بس.
   - `learning/*`: الـ roadmap والتقارير والواجبات (كانت موجودة)، و`learning/journey`: رئيسية الطالب في شكل مرحلته (النجوم، والنقاط والرتبة، والأيام ورا بعض، والإنجازات، ومستويات كل كورس وحالة كل درس، والجاي، والميعاد المتوقع للإنهاء). الطالب نفسه أو أول ابن لولي الأمر (`FamilyView::learner`).
-- **الأخطاء**: عنوان الخطأ بلغة `Accept-Language` حتى لو الخطأ حصل قبل ما الأكاديمية تتعرف (كود أكاديمية غلط، route مش موجود). و404 مابيقولش أي تفاصيل (لا اسم class، ولا route، ولا أنهي أكاديمية).
+- **الأخطاء**: الـ route بتاع ميزة مش في الباقة بيرد 403 `feature-not-in-plan` (ومعاه `feature`)، وحد مقفول بيرد 403 `plan-limit-reached` (ومعاه `limit` و`max`). وعنوان الخطأ بلغة `Accept-Language` حتى لو الخطأ حصل قبل ما الأكاديمية تتعرف (كود أكاديمية غلط، route مش موجود). و404 مابيقولش أي تفاصيل (لا اسم class، ولا route، ولا أنهي أكاديمية).
 - **المدرس**: `teacher/lessons` (من يوم لعدد أيام)، و`teacher/students`، و`teacher/time-off` (عرض، وطلب، وسحب)، و`teacher/earnings?month=` (Payroll)، و`teacher/performance` (Evaluation، التقييمات من غير أسماء)، و`teacher/trials` وتقييم الحصة التجريبية (CRM)، و`teacher/shifts`، و`teacher/reports`، و`teacher/homework`.
 - كل endpoint بيستخدم نفس الـ Actions والـ queries اللي الشاشات بتستخدمها (`FamilyNotices`، و`FamilyCancellation`، و`TeacherStudents`، و`TeacherTrials`، ...).
 

@@ -57,9 +57,11 @@ return [
             'created' => 'إنشاء الأكاديمية، والمالك :owner',
             'suspended' => 'إيقاف الأكاديمية: :reason',
             'reactivated' => 'تشغيل الأكاديمية تاني',
+            'plan_changed' => 'باقة الأكاديمية بقت :plan: :reason',
         ],
         'platform' => [
             'signed_in' => 'دخول على لوحة المنصة',
+            'plan_saved' => 'تعديل الباقة :plan',
         ],
     ],
     'values' => [

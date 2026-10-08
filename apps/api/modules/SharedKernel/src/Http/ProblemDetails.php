@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Modules\SharedKernel\Plans\FeatureNotInPlan;
+use Modules\SharedKernel\Plans\PlanLimitReached;
 use Modules\SharedKernel\Tenancy\Exceptions\TenantNotResolved;
 use Modules\SharedKernel\Tenancy\Exceptions\TenantSuspended;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -27,6 +29,8 @@ final class ProblemDetails
         }
 
         [$status, $type, $extra] = match (true) {
+            $e instanceof PlanLimitReached => [403, 'plan-limit-reached', ['limit' => $e->limit->value, 'max' => $e->max]],
+            $e instanceof FeatureNotInPlan => [403, 'feature-not-in-plan', ['feature' => $e->feature->value]],
             $e instanceof ValidationException => [422, 'validation', ['errors' => $e->errors()]],
             $e instanceof ProblemException => [$e->getStatusCode(), $e->type, $e->extra],
             $e instanceof AuthenticationException => [401, 'unauthenticated', []],
@@ -81,6 +85,9 @@ final class ProblemDetails
 
         // Anything not found says nothing of what it was: no class names, no
         // routes, no "which academy" (the title says enough, in the reader's language).
+        if ($e instanceof PlanLimitReached) {
+            return $e->getMessage();
+        }
         if ($e instanceof ValidationException || $status === 404) {
             return null;
         }

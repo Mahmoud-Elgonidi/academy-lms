@@ -58,6 +58,8 @@ export type Me = {
   locale: string | null;
   timezone?: string | null;
   display_timezone: string;
+  /** The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll). */
+  plan_features?: string[];
   academy: { id: string; slug: string; name_ar: string; name_en: string; default_timezone: string } | null;
 };
 

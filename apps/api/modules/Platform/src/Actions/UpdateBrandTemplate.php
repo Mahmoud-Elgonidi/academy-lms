@@ -7,6 +7,8 @@ use Modules\Platform\Branding\BrandingService;
 use Modules\Platform\Branding\BrandTokens;
 use Modules\Platform\Models\AcademyBranding;
 use Modules\Platform\Models\BrandingTemplate;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * Overwrites a saved template with new tokens (and optionally a new name).
@@ -14,10 +16,15 @@ use Modules\Platform\Models\BrandingTemplate;
  */
 final class UpdateBrandTemplate
 {
-    public function __construct(private readonly BrandingService $branding) {}
+    public function __construct(
+        private readonly BrandingService $branding,
+        private readonly AcademyPlan $plan,
+    ) {}
 
     public function handle(string $templateId, BrandTokens $tokens, ?string $name = null, ?string $actorId = null): BrandingTemplate
     {
+        // Templates of its own are an area of the academy's plan.
+        $this->plan->requireFeature(Feature::CustomBranding);
         $template = BrandingTemplate::query()->findOrFail($templateId);
 
         if ($name !== null) {

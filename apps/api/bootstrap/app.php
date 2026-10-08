@@ -10,6 +10,7 @@ use Modules\SharedKernel\Http\Idempotent;
 use Modules\SharedKernel\Http\ProblemDetails;
 use Modules\SharedKernel\Http\ResolveViewerTimezone;
 use Modules\SharedKernel\Http\SetLocale;
+use Modules\SharedKernel\Plans\RequirePlanFeature;
 use Modules\SharedKernel\Tenancy\Exceptions\TenantNotResolved;
 use Modules\SharedKernel\Tenancy\Exceptions\TenantSuspended;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'locale' => SetLocale::class,
             'timezone' => ResolveViewerTimezone::class,
             'idempotent' => Idempotent::class,
+            'plan.feature' => RequirePlanFeature::class,
         ]);
 
         // The tenant must be known before authentication, rate limiting and

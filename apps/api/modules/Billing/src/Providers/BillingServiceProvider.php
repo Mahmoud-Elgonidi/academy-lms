@@ -3,6 +3,7 @@
 namespace Modules\Billing\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -26,6 +27,8 @@ use Modules\Billing\Payments\PayLinks;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Credits\Contracts\Events\CreditBalanceLow;
+use Modules\SharedKernel\Plans\Limit;
+use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Realtime\LiveSignals;
 
 final class BillingServiceProvider extends ServiceProvider
@@ -40,6 +43,8 @@ final class BillingServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'billing');
+        // The plan's storage counts the payment receipts sent by hand kept for the academy.
+        $this->app->make(UsageMeters::class)->add(Limit::StorageMb, fn () => (int) DB::table('manual_payment_proofs')->sum('size'));
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'billing');
 
         // Paying online: the invoice's pay page and the way back from a gateway (signed, on the academy's host),

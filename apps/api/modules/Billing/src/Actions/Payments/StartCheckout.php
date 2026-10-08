@@ -13,6 +13,8 @@ use Modules\Billing\Payments\GatewayException;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Platform\Contracts\BrandingApi;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * Opens a gateway's page to pay what is left on an invoice. Pressing "pay"
@@ -25,11 +27,13 @@ final class StartCheckout
         private readonly GatewayManager $gateways,
         private readonly PayLinks $links,
         private readonly BrandingApi $branding,
+        private readonly AcademyPlan $plan,
     ) {}
 
     /** @param  string  $channel  family (signed in) | link (the invoice's pay link) */
     public function handle(Invoice $invoice, GatewayAccount $account, ?string $payerId, string $channel): PaymentCheckout
     {
+        $this->plan->requireFeature(Feature::OnlinePayments);
         $amount = $invoice->outstanding();
         if ($invoice->status !== 'issued' || $amount->minor <= 0) {
             throw ValidationException::withMessages(['invoice' => __('billing::billing.errors.not_payable')]);

@@ -25,10 +25,14 @@
         .ps-status[data-s="paid"] { color: var(--success-700); } .ps-status[data-s="failed"], .ps-status[data-s="refund_due"] { color: var(--danger-700); }
         .ps-status[data-s="open"] { color: var(--warning-700); } .ps-status[data-s="expired"] { color: var(--gray-500); }
         .ps-scroll { overflow-x: auto; background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-xl, .75rem); }
+        .ps-plan { margin-bottom: 1rem; padding: .75rem .95rem; border-radius: var(--radius-xl, .75rem); font-size: .88rem; background: var(--warning-50); color: var(--warning-800); border: 1px solid var(--warning-200); }
         .dark .ps-card, .dark .ps-scroll { background: var(--gray-900); border-color: var(--gray-800); }
         .dark .ps-hook { background: var(--gray-800); border-color: var(--gray-700); }
     </style>
 
+    @unless ($this->inPlan())
+        <div class="ps-plan">{{ __($s.'not_in_plan') }}</div>
+    @endunless
     @if ($this->accounts === [])
         <div class="ps-empty">{{ __($s.'empty') }}</div>
     @else

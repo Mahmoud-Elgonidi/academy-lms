@@ -8,6 +8,8 @@ use Illuminate\Validation\ValidationException;
 use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\SharedKernel\Audit\AuditTrail;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * Connects one of the academy's gateway accounts, or changes it. The keys
@@ -16,11 +18,16 @@ use Modules\SharedKernel\Audit\AuditTrail;
  */
 final class SaveGatewayAccount
 {
-    public function __construct(private readonly GatewayManager $gateways) {}
+    public function __construct(
+        private readonly GatewayManager $gateways,
+        private readonly AcademyPlan $plan,
+    ) {}
 
     /** @param  array<string, mixed>  $data  gateway, label, mode, currencies, is_active, and the gateway's keys */
     public function handle(?GatewayAccount $account, array $data, ?string $actorId): GatewayAccount
     {
+        // Taking payments online is an area of the academy's plan.
+        $this->plan->requireFeature(Feature::OnlinePayments);
         $gateway = $account->gateway ?? (string) ($data['gateway'] ?? '');
         if ($gateway === 'stripe_connect' && $account !== null) {
             $data['mode'] = $account->mode;   // a connected account's mode is Stripe's to say

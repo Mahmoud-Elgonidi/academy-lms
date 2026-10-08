@@ -3,13 +3,19 @@
 namespace Modules\Platform\Filament\Console\Pages;
 
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Route;
 use Livewire\Attributes\Computed;
+use Modules\Platform\Actions\Plans\ChangeAcademyPlan;
 use Modules\Platform\Actions\SetAcademyStatus;
 use Modules\Platform\Console\AcademyPeople;
 use Modules\Platform\Console\AcademyUsage;
@@ -19,7 +25,15 @@ use Modules\Platform\Enums\AcademyStatus;
 use Modules\Platform\Enums\DomainKind;
 use Modules\Platform\Filament\Console\ConsoleView;
 use Modules\Platform\Models\Academy;
+use Modules\Platform\Models\SaasPlan;
+use Modules\Platform\Models\SaasSubscription;
+use Modules\Platform\Plans\MeasureUsage;
+use Modules\Platform\Plans\PlanFormat;
+use Modules\Platform\Plans\PlanSummary;
+use Modules\Platform\Plans\PlanTerms;
 use Modules\SharedKernel\Audit\AuditEntries;
+use Modules\SharedKernel\Plans\Limit;
+use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -83,6 +97,7 @@ final class AcademyOverview extends Page
             $actions[] = Action::make('open')->label(__('platform::console.overview.open_site'))->icon(Heroicon::OutlinedArrowTopRightOnSquare)->color('gray')
                 ->url(app(TenantDirectory::class)->baseUrl($record->toTenantRef()).'/admin', shouldOpenInNewTab: true);
         }
+        $actions[] = $this->planAction();
         $actions[] = $active
             ? Action::make('suspend')->label(__('platform::console.overview.suspend.label'))->icon(Heroicon::OutlinedPauseCircle)->color('danger')
                 ->modalHeading(__('platform::console.overview.suspend.heading', ['name' => $name]))
@@ -109,6 +124,88 @@ final class AcademyOverview extends Page
                 });
 
         return $actions;
+    }
+
+    /** The plan: who decides it, with its own limits and areas for this academy and the reason. */
+    private function planAction(): Action
+    {
+        $l = 'platform::plans.change.';
+        $current = SaasSubscription::currentFor($this->academy);
+        $own = fn (Limit $limit) => TextInput::make('limits.'.$limit->value)->label(__('shared::plans.limits.'.$limit->value))
+            ->numeric()->integer()->minValue(0)->placeholder(__($l.'follow_plan'))->suffix($limit === Limit::StorageMb ? __('platform::plans.catalog.form.mb') : null);
+
+        return Action::make('plan')->label(__($l.'label'))->icon(Heroicon::OutlinedRectangleStack)->color('gray')
+            ->modalHeading(__($l.'heading', ['name' => ConsoleView::name($this->record)]))
+            ->modalDescription(__($l.'body'))
+            ->modalSubmitActionLabel(__($l.'confirm'))
+            ->fillForm(fn () => [
+                'plan' => $current?->plan_id ?? SaasPlan::default()?->id,
+                'limits' => $current?->limits ?? [],
+                'features_on' => $current?->features_on ?? [],
+                'features_off' => $current?->features_off ?? [],
+            ])
+            ->schema([
+                Select::make('plan')->label(__($l.'plan'))->required()->native(false)
+                    ->options(fn () => SaasPlan::query()->where(fn ($q) => $q->whereNull('archived_at')->orWhere('id', $current?->plan_id))->orderBy('sort')->get()
+                        ->mapWithKeys(fn (SaasPlan $p) => [$p->id => $p->name().(PlanFormat::price($p) ? ' · '.PlanFormat::price($p) : '')])->all()),
+                Section::make(__($l.'own_limits'))->description(__($l.'own_limits_hint'))->compact()->collapsible()->collapsed(fn () => ($current?->limits ?? []) === [])->schema([
+                    Grid::make(2)->schema([
+                        $own(Limit::Teachers),
+                        $own(Limit::ActiveStudents),
+                        $own(Limit::VideoMinutes),
+                        $own(Limit::StorageMb),
+                    ]),
+                ]),
+                Section::make(__($l.'own_features'))->compact()->collapsible()->collapsed(fn () => ($current?->features_on ?? []) === [] && ($current?->features_off ?? []) === [])->schema([
+                    Grid::make(2)->schema([
+                        CheckboxList::make('features_on')->label(__($l.'features_on'))->options(PlanFormat::features()),
+                        CheckboxList::make('features_off')->label(__($l.'features_off'))->options(PlanFormat::features()),
+                    ]),
+                ]),
+                Textarea::make('reason')->label(__('platform::plans.attributes.reason'))->helperText(__($l.'reason_hint'))
+                    ->required()->minLength(ChangeAcademyPlan::REASON_MIN)->maxLength(300)->rows(2),
+            ])
+            ->action(function (array $data) use ($l) {
+                $limits = [];
+                foreach (($data['limits'] ?? []) as $key => $value) {
+                    if ($value !== null && $value !== '') {
+                        $limits[$key] = (int) $value;
+                    }
+                }
+                app(ChangeAcademyPlan::class)->handle($this->academy, (string) $data['plan'], (string) $data['reason'], $limits, array_values($data['features_on'] ?? []), array_values($data['features_off'] ?? []));
+                Notification::make()->success()->title(__($l.'done'))->send();
+                unset($this->plan);
+            });
+    }
+
+    /** Counts this academy's use now, instead of waiting for the night's count. */
+    public function countNow(): void
+    {
+        app(TenantContext::class)->run($this->record->toTenantRef(), fn () => app(MeasureUsage::class)->current());
+        unset($this->plan);
+    }
+
+    /** @return ?array<string, mixed> */
+    #[Computed]
+    public function plan(): ?array
+    {
+        $subscription = SaasSubscription::currentFor($this->academy);
+        if ($subscription === null) {
+            return null;
+        }
+        $terms = PlanTerms::of($subscription);
+        $counted = PlanSummary::counted($this->academy, $this->record->default_timezone, $terms);
+        $tz = app(ViewerTimezone::class)->effective();
+
+        return PlanSummary::of($terms, $counted['lines'], $counted['measured'], $subscription) + [
+            'price' => PlanFormat::price($subscription->plan),
+            'since' => ConsoleView::date($subscription->started_at, $tz),
+            'measured_text' => $counted['measured'] ? ConsoleView::ago($counted['measured']->toIso8601String()) : null,
+            'history' => array_map(fn (array $h) => $h + [
+                'from_text' => ConsoleView::date($h['from'], $tz),
+                'to_text' => $h['to'] ? ConsoleView::date($h['to'], $tz) : null,
+            ], PlanSummary::history($this->academy)),
+        ];
     }
 
     /** @return array<string, mixed> */

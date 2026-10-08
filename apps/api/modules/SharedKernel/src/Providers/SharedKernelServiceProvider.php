@@ -12,6 +12,9 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\OpenPlan;
+use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Realtime\Console\LiveRelayCommand;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Tenancy\PgTenantSession;
@@ -32,6 +35,9 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->scoped(LocalTimePresenter::class);
         $this->app->singleton(LocalTimeResolver::class);
         $this->app->singleton(LiveSignals::class);
+        // The academy's plan: everything until Platform binds the plans; the meters, from each module that counts.
+        $this->app->scopedIf(AcademyPlan::class, OpenPlan::class);
+        $this->app->singleton(UsageMeters::class);
     }
 
     public function boot(): void

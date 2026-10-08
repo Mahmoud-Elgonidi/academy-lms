@@ -9,6 +9,9 @@ use Modules\Platform\Contracts\DTOs\NewAcademy;
 use Modules\Platform\Enums\AcademyStatus;
 use Modules\Platform\Enums\DomainKind;
 use Modules\Platform\Models\Academy;
+use Modules\Platform\Models\SaasPlan;
+use Modules\Platform\Models\SaasSubscription;
+use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Tenancy\TenantRef;
 
 final class CreateAcademy
@@ -22,6 +25,7 @@ final class CreateAcademy
             'default_locale' => $data->defaultLocale,
             'country' => $data->country,
             'custom_domain' => $data->customDomain,
+            'plan' => $data->plan,
         ], [
             'slug' => [
                 'required', 'regex:/^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])$/',
@@ -33,6 +37,7 @@ final class CreateAcademy
             'default_locale' => ['required', Rule::in(['ar', 'en'])],
             'country' => ['nullable', 'regex:/^[A-Z]{2}$/'],
             'custom_domain' => ['nullable', 'regex:/^(?=.{4,253}$)([a-z0-9-]+\.)+[a-z]{2,}$/', Rule::unique('pgsql_platform.academy_domains', 'host')],
+            'plan' => ['nullable', Rule::exists('pgsql_platform.saas_plans', 'code')->whereNull('archived_at')],
         ])->validate();
 
         return DB::connection('pgsql_platform')->transaction(function () use ($data): TenantRef {
@@ -58,6 +63,16 @@ final class CreateAcademy
                 $academy->domains()->create([
                     'host' => $data->customDomain,
                     'kind' => DomainKind::Custom,
+                ]);
+            }
+
+            // It starts on the plan chosen, or the one new academies start on.
+            $plan = $data->plan !== null ? SaasPlan::query()->where('code', $data->plan)->first() : SaasPlan::default();
+            if ($plan !== null) {
+                $actor = AuditActor::current();
+                SaasSubscription::query()->create([
+                    'academy_id' => $academy->id, 'plan_id' => $plan->id, 'reason' => 'New academy',
+                    'changed_by' => $actor->type === 'platform' ? $actor->id : null, 'started_at' => now(),
                 ]);
             }
 

@@ -1170,7 +1170,7 @@ export interface components {
         /** ProblemDetails */
         ProblemDetails: {
             /**
-             * @description What went wrong, as a key: validation, unauthenticated, forbidden, not-found, conflict, too-many-requests, academy-suspended, …
+             * @description What went wrong, as a key: validation, unauthenticated, forbidden, not-found, conflict, too-many-requests, academy-suspended, plan-limit-reached (with limit and max), feature-not-in-plan (with feature), …
              * @example validation
              */
             type: string;
@@ -1261,6 +1261,8 @@ export interface components {
             /** @description The device's clock differs from the profile's: the app offers to update the profile. */
             timezone_mismatch: string;
             roles: unknown[];
+            /** @description The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll): the apps show only these. */
+            plan_features: string[];
             academy: {
                 id: string;
                 slug: string;

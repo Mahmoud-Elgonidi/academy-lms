@@ -13,5 +13,7 @@ final readonly class NewAcademy
         public string $defaultLocale = 'ar',
         public ?string $country = null,
         public ?string $customDomain = null,
+        /** The SaaS plan's code; the default plan when null. */
+        public ?string $plan = null,
     ) {}
 }
