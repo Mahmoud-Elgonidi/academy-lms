@@ -48,7 +48,6 @@ final class RoadmapQuery
         $calculated = ProgressCalculator::position($tree, $states, [], $this->progress->lessonsPerWeek($enrollmentId));
         $current = $position?->current_node_id ?? $calculated->currentNodeId;
         $files = $materials === self::MATERIALS_NONE ? [] : $this->materials->forLessons(array_map(fn ($n) => $n->id, $tree->lessons()), $materials === self::MATERIALS_TEACHERS);
-        $lesson = fn (CurriculumNode $n) => $this->lesson($n, $states[$n->id] ?? null, $current, $files[$n->id] ?? []);
 
         $levels = [];
         foreach ($tree->childrenOf(null) as $top) {
@@ -59,7 +58,7 @@ final class RoadmapQuery
                     $direct[] = $child;
                 } else {
                     $units[] = ['id' => $child->id, 'title' => $child->title(), 'percent' => ProgressCalculator::percentUnder($tree, $states, $child->id),
-                        'lessons' => array_map($lesson, $tree->lessons($child->id))];
+                        'lessons' => $this->lessons($tree->lessons($child->id), $states, $current, $files)];
                 }
             }
             $levels[] = [
@@ -68,7 +67,7 @@ final class RoadmapQuery
                 'title' => $top->title(),
                 'percent' => ProgressCalculator::percentUnder($tree, $states, $top->id),
                 'has_current' => $current !== null && ($current === $top->id || in_array($top->id, array_map(fn ($a) => $a->id, $tree->ancestorsOf($current)), true)),
-                'lessons' => array_map($lesson, $direct),
+                'lessons' => $this->lessons($direct, $states, $current, $files),
                 'units' => $units,
             ];
         }
@@ -92,9 +91,23 @@ final class RoadmapQuery
     }
 
     /**
-     * @param  list<MaterialLine>  $materials
-     * @return array<string, mixed>
+     * The lines of a level's or a unit's lessons.
+     *
+     * @param  list<CurriculumNode>  $nodes
+     * @param  array<string, NodeProgress>  $states
+     * @param  array<string, list<MaterialLine>>  $files
      */
+    private function lessons(array $nodes, array $states, ?string $current, array $files): array
+    {
+        $lines = [];
+        foreach ($nodes as $n) {
+            $lines[] = $this->lesson($n, $states[$n->id] ?? null, $current, $files[$n->id] ?? []);
+        }
+
+        return $lines;
+    }
+
+    /** @param  list<MaterialLine>  $materials */
     private function lesson(CurriculumNode $n, ?NodeProgress $p, ?string $current, array $materials): array
     {
         $state = match (true) {

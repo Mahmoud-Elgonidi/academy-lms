@@ -3695,12 +3695,36 @@ export interface operations {
                                 title: string;
                                 percent: number;
                                 has_current: string;
-                                lessons: unknown[];
+                                lessons: {
+                                    id: string;
+                                    title: string;
+                                    /** @enum {string} */
+                                    state: "review" | "done" | "here" | "todo";
+                                    times_seen: number;
+                                    last_outcome: string | null;
+                                    last_score: number | null;
+                                    est_sessions: number;
+                                    weight: number;
+                                    /** @description Files and links on the lesson (a file's url is signed for twelve hours); empty when not asked for. */
+                                    materials: unknown[];
+                                }[];
                                 units: {
                                     id: string;
                                     title: string;
                                     percent: number;
-                                    lessons: unknown[];
+                                    lessons: {
+                                        id: string;
+                                        title: string;
+                                        /** @enum {string} */
+                                        state: "review" | "done" | "here" | "todo";
+                                        times_seen: number;
+                                        last_outcome: string | null;
+                                        last_score: number | null;
+                                        est_sessions: number;
+                                        weight: number;
+                                        /** @description Files and links on the lesson (a file's url is signed for twelve hours); empty when not asked for. */
+                                        materials: unknown[];
+                                    }[];
                                 }[];
                             }[];
                         } | null;

@@ -5167,7 +5167,63 @@
                                                             },
                                                             "lessons": {
                                                                 "type": "array",
-                                                                "items": {}
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "title": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "state": {
+                                                                            "type": "string",
+                                                                            "enum": [
+                                                                                "review",
+                                                                                "done",
+                                                                                "here",
+                                                                                "todo"
+                                                                            ]
+                                                                        },
+                                                                        "times_seen": {
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "last_outcome": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "last_score": {
+                                                                            "type": [
+                                                                                "integer",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "est_sessions": {
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "weight": {
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "materials": {
+                                                                            "type": "array",
+                                                                            "description": "Files and links on the lesson (a file's url is signed for twelve hours); empty when not asked for.",
+                                                                            "items": {}
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "id",
+                                                                        "title",
+                                                                        "state",
+                                                                        "times_seen",
+                                                                        "last_outcome",
+                                                                        "last_score",
+                                                                        "est_sessions",
+                                                                        "weight",
+                                                                        "materials"
+                                                                    ]
+                                                                }
                                                             },
                                                             "units": {
                                                                 "type": "array",
@@ -5185,7 +5241,63 @@
                                                                         },
                                                                         "lessons": {
                                                                             "type": "array",
-                                                                            "items": {}
+                                                                            "items": {
+                                                                                "type": "object",
+                                                                                "properties": {
+                                                                                    "id": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "title": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "state": {
+                                                                                        "type": "string",
+                                                                                        "enum": [
+                                                                                            "review",
+                                                                                            "done",
+                                                                                            "here",
+                                                                                            "todo"
+                                                                                        ]
+                                                                                    },
+                                                                                    "times_seen": {
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "last_outcome": {
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "last_score": {
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "est_sessions": {
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "weight": {
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "materials": {
+                                                                                        "type": "array",
+                                                                                        "description": "Files and links on the lesson (a file's url is signed for twelve hours); empty when not asked for.",
+                                                                                        "items": {}
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "id",
+                                                                                    "title",
+                                                                                    "state",
+                                                                                    "times_seen",
+                                                                                    "last_outcome",
+                                                                                    "last_score",
+                                                                                    "est_sessions",
+                                                                                    "weight",
+                                                                                    "materials"
+                                                                                ]
+                                                                            }
                                                                         }
                                                                     },
                                                                     "required": [
