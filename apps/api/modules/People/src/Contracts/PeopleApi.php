@@ -4,6 +4,7 @@ namespace Modules\People\Contracts;
 
 use Carbon\CarbonImmutable;
 use Modules\People\Contracts\DTOs\ConsentState;
+use Modules\People\Contracts\DTOs\StudentDetails;
 use Modules\People\Contracts\DTOs\StudentProfileData;
 use Modules\People\Contracts\DTOs\TeacherProfileData;
 
@@ -24,6 +25,21 @@ interface PeopleApi
     public function saveStudentProfile(string $studentId, ?CarbonImmutable $birthDate, ?LearnerStage $stage): void;
 
     public function studentProfile(string $studentId, ?CarbonImmutable $today = null): StudentProfileData;
+
+    /** A student's gender, country, school grade, and who should teach them ("Find a teacher" starts from it). */
+    public function studentDetails(string $studentId): StudentDetails;
+
+    /** Saves those; a detail left null keeps what the student has. */
+    public function saveStudentDetails(string $studentId, StudentDetails $details): void;
+
+    /**
+     * Sends each person the academy made an account for (after commit) their
+     * own link to choose a password; who already has one, and a child under a
+     * parent, get none.
+     *
+     * @param  list<string>  $userIds
+     */
+    public function sendWelcome(array $userIds): void;
 
     /** Whether a student's account needs a guardian's consent, and whether one stands (the child's own links and sign-in wait for it). */
     public function consentState(string $studentId): ConsentState;

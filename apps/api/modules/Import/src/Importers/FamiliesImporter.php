@@ -14,6 +14,7 @@ use Modules\Import\Support\ImportContext;
 use Modules\Import\Support\Places;
 use Modules\Import\Support\RowOutcome;
 use Modules\Import\Support\Text;
+use Modules\People\Contracts\DTOs\StudentDetails;
 use Modules\People\Contracts\PeopleApi;
 use Modules\SharedKernel\Contact\Phone;
 
@@ -43,6 +44,7 @@ final class FamiliesImporter implements Importer
             new Field('student_name', true, ['الطالب', 'اسم الطالب', 'الطالبة', 'اسم الطالبة', 'student', 'student name', 'name', 'الاسم']),
             new Field('student_email', false, ['إيميل الطالب', 'ايميل الطالب', 'student email']),
             new Field('student_phone', false, ['موبايل الطالب', 'رقم الطالب', 'جوال الطالب', 'student phone', 'student mobile']),
+            new Field('gender', false, ['نوع الطالب', 'النوع', 'الجنس', 'ولد ولا بنت', 'gender', 'sex']),
             new Field('birth_date', false, ['تاريخ الميلاد', 'سنة الميلاد', 'الميلاد', 'birth date', 'birthday', 'date of birth', 'birth year', 'dob']),
             new Field('timezone', false, ['التوقيت', 'المنطقة الزمنية', 'البلد', 'الدولة', 'المدينة', 'time zone', 'country', 'city']),
             new Field('guardian_name', false, ['ولي الأمر', 'اسم ولي الأمر', 'الأب', 'الأم', 'guardian', 'parent', 'guardian name', 'parent name']),
@@ -65,6 +67,7 @@ final class FamiliesImporter implements Importer
             : (filter_var($row[$field], FILTER_VALIDATE_EMAIL) ? $row[$field] : throw ValidationException::withMessages([$field => __($e.'email', ['value' => $row[$field]])]));
         [$studentEmail, $studentPhone, $guardianEmail, $guardianPhone] = [$email('student_email'), $phone('student_phone'), $email('guardian_email'), $phone('guardian_phone')];
         $timezone = $row['timezone'] === '' ? $context->timezone : (Places::timezone($row['timezone']) ?? throw ValidationException::withMessages(['timezone' => __($e.'timezone', ['value' => $row['timezone']])]));
+        $gender = $row['gender'] === '' ? null : (Cells::gender($row['gender']) ?? throw ValidationException::withMessages(['gender' => __($e.'gender', ['value' => $row['gender']])]));
         $birth = $row['birth_date'] === '' ? null : (Cells::date($row['birth_date']) ?? throw ValidationException::withMessages(['birth_date' => __($e.'date', ['value' => $row['birth_date']])]));
         $locale = match (Text::key($row['language'])) {
             '' => $context->locale,
@@ -136,6 +139,9 @@ final class FamiliesImporter implements Importer
         }
         if ($birth !== null) {
             $this->people->saveStudentProfile($studentId, $birth, null);
+        }
+        if ($gender !== null) {
+            $this->people->saveStudentDetails($studentId, new StudentDetails(gender: $gender));
         }
 
         return new RowOutcome('created', [$own ? __('import::rows.notes.student_own') : __('import::rows.notes.student_child'), ...$notes], ['student' => $studentId, 'guardian' => $guardianId], $new);

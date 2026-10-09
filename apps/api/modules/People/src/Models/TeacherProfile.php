@@ -15,6 +15,8 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property bool $accepts_new
  * @property bool $accepts_trials
  * @property ?int $max_weekly_min
+ * @property list<string> $age_groups
+ * @property ?int $max_daily_lessons
  * @property string $status
  */
 final class TeacherProfile extends Model
@@ -27,7 +29,7 @@ final class TeacherProfile extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['user_id', 'gender', 'languages', 'dialect', 'accepts_new', 'accepts_trials', 'max_weekly_min', 'status'];
+    protected $fillable = ['user_id', 'gender', 'languages', 'dialect', 'accepts_new', 'accepts_trials', 'max_weekly_min', 'max_daily_lessons', 'age_groups', 'status'];
 
     protected function casts(): array
     {
@@ -36,6 +38,8 @@ final class TeacherProfile extends Model
             'accepts_new' => 'boolean',
             'accepts_trials' => 'boolean',
             'max_weekly_min' => 'integer',
+            'max_daily_lessons' => 'integer',
+            'age_groups' => 'array',
         ];
     }
 

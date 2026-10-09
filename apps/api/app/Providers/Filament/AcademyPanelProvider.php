@@ -19,6 +19,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Billing\Filament\BillingPlugin;
+use Modules\Catalog\Filament\CatalogPlugin;
 use Modules\Classroom\Filament\ClassroomPlugin;
 use Modules\Communication\Filament\CommunicationPlugin;
 use Modules\Crm\Filament\CrmPlugin;
@@ -87,6 +88,7 @@ final class AcademyPanelProvider extends PanelProvider
             ->plugins([
                 SchedulingPlugin::make(),
                 PeoplePlugin::make(),
+                CatalogPlugin::make(),
                 CrmPlugin::make(),
                 BillingPlugin::make(),
                 CurriculumPlugin::make(),

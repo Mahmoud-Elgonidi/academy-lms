@@ -10,6 +10,10 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property string $user_id
  * @property ?CarbonImmutable $birth_date
  * @property ?string $stage
+ * @property ?string $gender
+ * @property ?string $country
+ * @property ?string $school_grade
+ * @property ?string $teacher_gender
  */
 final class StudentProfile extends Model
 {
@@ -21,7 +25,7 @@ final class StudentProfile extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['user_id', 'birth_date', 'stage'];
+    protected $fillable = ['user_id', 'birth_date', 'stage', 'gender', 'country', 'school_grade', 'teacher_gender'];
 
     protected function casts(): array
     {

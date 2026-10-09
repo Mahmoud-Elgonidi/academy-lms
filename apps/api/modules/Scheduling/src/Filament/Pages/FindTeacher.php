@@ -15,6 +15,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -26,6 +27,9 @@ use Modules\Billing\Contracts\BillingApi;
 use Modules\Billing\Contracts\DTOs\PlanOption;
 use Modules\Billing\Contracts\DTOs\PriceQuote;
 use Modules\Billing\Contracts\DTOs\RegionOption;
+use Modules\Catalog\Contracts\CatalogApi;
+use Modules\People\Contracts\AgeGroup;
+use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Actions\ConfirmBooking;
 use Modules\Scheduling\Actions\EnrollStudent;
 use Modules\Scheduling\Actions\PlaceBookingHold;
@@ -109,6 +113,9 @@ final class FindTeacher extends Page
             'subject_id' => $query['subject'] ?? null,
             'gender' => 'any',
             'language' => null,
+            'level_id' => null,
+            'category_id' => null,
+            'age_group' => null,
             'per_week' => min(5, max(1, (int) ($query['per_week'] ?? 2))),
             'duration' => 30,
             'start_date' => CarbonImmutable::now()->addDay()->toDateString(),
@@ -151,10 +158,24 @@ final class FindTeacher extends Page
                 Select::make('timezone')->label(__('scheduling::find.fields.timezone'))
                     ->options(fn () => array_combine(Timezones::all(), Timezones::all()))->searchable()->required()->live(),
                 Select::make('subject_id')->label(__('scheduling::find.fields.subject'))
-                    ->options(fn () => DB::table('subjects')->orderBy('name_ar')->pluck(app()->getLocale() === 'ar' ? 'name_ar' : 'name_en', 'id'))->required()->native(false),
+                    ->options(fn () => DB::table('subjects')->orderBy('name_ar')->pluck(app()->getLocale() === 'ar' ? 'name_ar' : 'name_en', 'id'))->required()->native(false)
+                    ->live()->afterStateUpdated(function (Set $set) {
+                        $set('level_id', null);
+                        $set('category_id', null);
+                    }),
                 Select::make('language')->label(__('scheduling::find.fields.language'))
                     ->options(['ar' => __('scheduling::find.languages.ar'), 'en' => __('scheduling::find.languages.en')])
                     ->placeholder(__('scheduling::find.languages.any'))->native(false),
+            ]),
+            Grid::make(2)->schema([
+                Select::make('level_id')->label(__('scheduling::find.fields.level'))->placeholder(__('scheduling::find.any_level'))->native(false)
+                    ->options(fn (Get $get) => $get('subject_id') ? app(CatalogApi::class)->levels($get('subject_id')) : [])
+                    ->visible(fn (Get $get) => $get('subject_id') && app(CatalogApi::class)->levels($get('subject_id')) !== []),
+                Select::make('category_id')->label(__('scheduling::find.fields.category'))->placeholder(__('scheduling::find.any_category'))->native(false)
+                    ->options(fn (Get $get) => $get('subject_id') ? app(CatalogApi::class)->categories($get('subject_id')) : [])
+                    ->visible(fn (Get $get) => $get('subject_id') && app(CatalogApi::class)->categories($get('subject_id')) !== []),
+                Select::make('age_group')->label(__('scheduling::find.fields.age_group'))->placeholder(__('scheduling::find.any_age'))->native(false)
+                    ->options(fn () => AgeGroup::options()),
             ]),
             ToggleButtons::make('gender')->label(__('scheduling::find.fields.gender'))
                 ->options(collect(TeacherSearch::GENDERS)->mapWithKeys(fn ($g) => [$g => __('scheduling::find.genders.'.$g)])->all())
@@ -452,6 +473,9 @@ final class FindTeacher extends Page
             language: $this->data['language'] ?: null,
             forTrial: $trial,
             searcherId: (string) auth()->id(),
+            levelId: ($this->data['level_id'] ?? null) ?: null,
+            categoryId: ($this->data['category_id'] ?? null) ?: null,
+            ageGroup: ($this->data['age_group'] ?? null) ?: null,
         ));
     }
 
@@ -558,6 +582,12 @@ final class FindTeacher extends Page
         $tz = $studentId ? DB::table('users')->where('id', $studentId)->value('timezone') : null;
         if ($tz) {
             $this->data['timezone'] = $tz;
+        }
+        if ($studentId) {
+            // Who should teach them, and their age, from their profile.
+            $people = app(PeopleApi::class);
+            $this->data['gender'] = $people->studentDetails($studentId)->teacherGender ?? 'any';
+            $this->data['age_group'] = AgeGroup::forAge($people->studentProfile($studentId)->age)?->value;
         }
         $this->resetResults();
     }

@@ -5,8 +5,11 @@ namespace Modules\Identity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Modules\Identity\Actions\CreateUser;
+use Modules\Identity\Actions\SetUserActive;
+use Modules\Identity\Actions\UpdateUserDetails;
 use Modules\Identity\Authorization\AbilityMatrix;
 use Modules\Identity\Contracts\DTOs\NewUser;
+use Modules\Identity\Contracts\DTOs\UserDetails;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Http\Controllers\WelcomeController;
@@ -27,6 +30,16 @@ final class IdentityService implements IdentityApi
     public function createUser(NewUser $user): string
     {
         return $this->createUser->handle($user)->id;
+    }
+
+    public function updateUser(string $userId, UserDetails $details): void
+    {
+        app(UpdateUserDetails::class)->handle($userId, $details);
+    }
+
+    public function setActive(string $userId, bool $active): void
+    {
+        app(SetUserActive::class)->handle($userId, $active);
     }
 
     public function academyIdForToken(string $plainTextToken): ?string

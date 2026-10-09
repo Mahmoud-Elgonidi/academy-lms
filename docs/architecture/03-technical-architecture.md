@@ -201,7 +201,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 |---|---|
 | Platform | `academies`، `academy_domains`، `academy_branding`، `branding_templates`، `saas_plans`، `saas_subscriptions`، `usage_counters`، `platform_admins` |
 | Identity | `users`، `roles/permissions`، `devices`، `otp_challenges`، `social_identities` (ربط حساب بجوجل أو أبل، بالـ `sub`)، `social_sign_ins` (تذاكر واكتشاف لدقايق، من غير RLS زي `otp_challenges`)، `impersonations` |
-| Catalog | `subjects`، `levels`، `categories` |
+| Catalog | `subjects`، `subject_levels`، `subject_categories` |
 | People | `teacher_profiles`، `teacher_subjects`، `teacher_subject_categories`، `teacher_languages`، `student_profiles`، `guardian_student`، `guardian_consents` (بتتضاف بس، والسحب مرة واحدة)، `people_settings` (سن الموافقة)، `supervisor_assignments` |
 | Curriculum | `programs`، `curriculum_versions`، `curriculum_nodes`، `node_resources`، `assessment_definitions`، `version_node_mappings` |
 | Enrollment | `enrollments`، `enrollment_teacher_assignments`، `enrollment_status_history` |
@@ -253,10 +253,15 @@ sessions(id, academy_id, type, enrollment_id?, lead_id?, teacher_id, original_te
          anchor_tz, anchor_local_date, anchor_local_time, policy_version_id, decision jsonb, version)
 session_participants(session_id, user_id, role, block_period tstzrange, is_active, first_join_at, attended_min)
 attendance_segments(session_id, user_id, period tstzrange, source webhook|reconcile, quality jsonb)
-teacher_profiles(user_id, gender, dialect, employment_type, max_weekly_min, max_daily_sessions,
-                 accepts_new, accepts_trials, age_groups[], tier, rate_card_id, status)
+subject_levels(subject_id, ordinal UNIQUE+subject DEFERRABLE, name_ar, name_en)   -- مستويات المادة بالترتيب
+subject_categories(subject_id, ordinal, name_ar, name_en)                          -- مساراتها أو مناهجها
+teacher_profiles(user_id, gender, languages jsonb, dialect, employment_type, max_weekly_min, max_daily_lessons,
+                 accepts_new, accepts_trials, age_groups jsonb (kids|middle|teen|adults; فاضي = أي سن), tier, rate_card_id, status)
+teacher_subjects(teacher_id, subject_id, level_from_id?, level_to_id?)   -- مستويات نفس المادة (FK مركّب على subject_id)، والمستخدم مايتمسحش
+teacher_subject_categories(teacher_id, subject_id, category_id)          -- فاضي = كل تصنيفات المادة
 guardian_student(guardian_id, student_id, relationship, is_primary, can_manage, receives_reports)
-student_profiles(user_id PK, birth_date, stage kids|middle|teen|classic NULL)   -- شكل حساب الطالب: من السن، أو اللي الأكاديمية اختارته
+student_profiles(user_id PK, birth_date, stage kids|middle|teen|classic NULL,   -- شكل حساب الطالب: من السن، أو اللي الأكاديمية اختارته
+                 gender, country ISO-2, school_grade kg1|kg2|g1…g12|university, teacher_gender female_only|male_only|prefer_female|prefer_male NULL)
 session_reports(session_id UNIQUE, template_id → report_templates, answers jsonb, engagement, overall, status,
                 due_at, submitted_at)
 report_templates(subject_id, version UNIQUE+subject, fields jsonb ≤ 12, created_by)   -- إصدار مابيتعدلش (update/delete مسحوبين)

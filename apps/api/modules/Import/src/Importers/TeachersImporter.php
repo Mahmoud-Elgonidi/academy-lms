@@ -50,6 +50,8 @@ final class TeachersImporter implements Importer
             new Field('languages', false, ['لغة الشرح', 'اللغات', 'اللغة', 'language']),
             new Field('trials', false, ['تجريبي', 'حصص تجريبية', 'بيدي تجريبي', 'accepts trials', 'trial lessons']),
             new Field('max_hours', false, ['أقصى ساعات', 'الساعات في الأسبوع', 'ساعات الأسبوع', 'max hours', 'hours per week', 'weekly hours']),
+            new Field('ages', false, ['الأعمار', 'الفئة العمرية', 'الفئات العمرية', 'بيدرس لمين', 'ages', 'age groups']),
+            new Field('max_daily', false, ['أقصى حصص في اليوم', 'حصص اليوم', 'الحصص في اليوم', 'max lessons a day', 'lessons per day', 'daily lessons']),
         ];
     }
 
@@ -75,6 +77,8 @@ final class TeachersImporter implements Importer
         $trials = Cells::yesNo($row['trials'], true) ?? throw ValidationException::withMessages(['trials' => __($e.'yes_no', ['value' => $row['trials']])]);
         $maxHours = $row['max_hours'] === '' ? null : (Cells::integer($row['max_hours']) ?? throw ValidationException::withMessages(['max_hours' => __($e.'number', ['value' => $row['max_hours']])]));
         $languages = $this->languages($row['languages']);
+        $ages = $row['ages'] === '' ? null : $this->ages($row['ages']);
+        $maxDaily = $row['max_daily'] === '' ? null : (Cells::integer($row['max_daily']) ?? throw ValidationException::withMessages(['max_daily' => __($e.'number', ['value' => $row['max_daily']])]));
 
         $notes = [];
         $subjects = [];
@@ -97,12 +101,30 @@ final class TeachersImporter implements Importer
         $id = $existing?->id ?? $this->identity->createUser(new NewUser(
             name: $row['name'], roles: [Role::Teacher], email: $email, phoneE164: $phone, locale: $context->locale, timezone: $timezone,
         ));
-        $this->people->saveTeacherProfile(new TeacherProfileData($id, $gender, $languages, array_values(array_unique($subjects)), null, true, $trials, $maxHours === null ? null : $maxHours * 60));
+        $this->people->saveTeacherProfile(new TeacherProfileData($id, $gender, $languages, array_values(array_unique($subjects)), null, true, $trials,
+            $maxHours === null ? null : $maxHours * 60, $ages, $maxDaily));
 
         $names = implode('، ', Text::list($row['subjects']));
         array_unshift($notes, __($existing ? 'import::rows.notes.teacher_updated' : 'import::rows.notes.new_teacher', ['subjects' => $names]));
 
         return new RowOutcome($existing ? 'updated' : 'created', $notes, ['teacher' => $id], $existing ? [] : [$id]);
+    }
+
+    /** @return list<string> the ages they teach (People's AgeGroup values) */
+    private function ages(string $text): array
+    {
+        $groups = [];
+        foreach (Text::list(str_replace([' و ', ' and '], ',', $text)) as $a) {
+            $groups[] = match (Text::key($a)) {
+                'اطفال', 'طفل', 'ابتدائي', 'kids', 'children', 'child' => 'kids',
+                'اعدادي', 'متوسط', 'middle', 'middleschool' => 'middle',
+                'ثانوي', 'teen', 'teens', 'secondary' => 'teen',
+                'كبار', 'بالغين', 'adults', 'adult' => 'adults',
+                default => throw ValidationException::withMessages(['ages' => __('import::rows.errors.age_group', ['value' => $a])]),
+            };
+        }
+
+        return array_values(array_unique($groups));
     }
 
     /** @return list<string> ISO codes; Arabic when empty */

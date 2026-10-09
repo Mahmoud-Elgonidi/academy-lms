@@ -240,11 +240,11 @@ it('welcomes new teachers and parents with their own link to choose a password, 
     $sara = User::query()->where('email', 'sara.m@example.com')->sole();
     $parent = User::query()->where('phone_e164', '+447700900123')->sole();
     $omar = User::query()->where('phone_e164', '+201099999999')->sole();
-    $welcome = Notification::query()->where('user_id', $sara->id)->where('template_key', 'import.welcome_teacher')->sole();
+    $welcome = Notification::query()->where('user_id', $sara->id)->where('template_key', 'people.welcome_teacher')->sole();
 
     expect($welcome->body)->toContain('/welcome/'.$sara->id)->toContain('signature=')
-        ->and(Notification::query()->where('user_id', $parent->id)->where('template_key', 'import.welcome_family')->count())->toBe(1)
-        ->and(Notification::query()->where('template_key', 'like', 'import.welcome%')->count())->toBe(2)   // not the child, not Omar
+        ->and(Notification::query()->where('user_id', $parent->id)->where('template_key', 'people.welcome_family')->count())->toBe(1)
+        ->and(Notification::query()->where('template_key', 'like', 'people.welcome%')->count())->toBe(2)   // not the child, not Omar
         ->and($omar->password)->toBeNull();
 
     preg_match('#(/welcome/[^\s]+)#', $welcome->body, $m);

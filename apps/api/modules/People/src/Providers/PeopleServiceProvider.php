@@ -9,7 +9,9 @@ use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
+use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Contracts\SignInGate;
+use Modules\People\Actions\SendWelcome;
 use Modules\People\Consent\ConsentSignInGate;
 use Modules\People\Contracts\Events\ConsentRequested;
 use Modules\People\Contracts\Events\ConsentWithdrawn;
@@ -48,7 +50,10 @@ final class PeopleServiceProvider extends ServiceProvider
             ->group(__DIR__.'/../../routes/api.php');
 
         SendConsentNotifications::templates($this->app->make(NotificationsApi::class));
+        SendWelcome::templates($this->app->make(NotificationsApi::class));
         $links = $this->app->make(NotificationLinks::class);
+        // Each person's own link to choose their password (Identity's welcome page), on the academy's host.
+        $links->registerPersonal('welcome', fn (array $action, string $userId) => $this->app->make(IdentityApi::class)->welcomeLink($userId));
         // The request carries each guardian's own link to read and agree, without signing in.
         $links->registerPersonal('guardian_consent', function (array $action, string $userId) {
             $path = URL::temporarySignedRoute('people.consent', now()->addDays(ConsentLinkController::LINK_DAYS), ['student' => $action['id'] ?? '', 'g' => $userId], absolute: false);

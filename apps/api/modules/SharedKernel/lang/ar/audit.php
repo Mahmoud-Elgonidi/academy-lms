@@ -40,6 +40,9 @@ return [
             'done' => 'استيراد :file',
         ],
         'identity' => [
+            'contact_changed' => 'تغيير إيميل أو رقم :name (طرق الدخول)',
+            'account_disabled' => 'قفل حساب :name',
+            'account_enabled' => 'فتح حساب :name تاني',
             'password_set' => ':name حدد كلمة السر من لينك الترحيب',
             'password_changed' => 'تغيير كلمة السر',
             'two_factor_enabled' => ':name شغّل الدخول بخطوتين',

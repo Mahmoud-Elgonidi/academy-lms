@@ -2,6 +2,7 @@
 
 namespace Modules\Import\Support;
 
+use Modules\SharedKernel\Contact\Phone;
 use Modules\SharedKernel\Time\Timezones;
 
 /**
@@ -74,11 +75,6 @@ final class Places
     /** The calling code most numbers in a sheet for this academy will lack: from its time zone. */
     public static function callingCode(string $timezone): string
     {
-        return match ($timezone) {
-            'Africa/Cairo' => '20', 'Asia/Riyadh' => '966', 'Asia/Dubai' => '971', 'Asia/Kuwait' => '965', 'Asia/Qatar' => '974',
-            'Asia/Bahrain' => '973', 'Asia/Muscat' => '968', 'Asia/Amman' => '962', 'Europe/London' => '44', 'Asia/Kuala_Lumpur' => '60',
-            'Europe/Istanbul' => '90', 'Africa/Casablanca' => '212', 'Asia/Baghdad' => '964', 'America/New_York', 'America/Toronto' => '1',
-            default => '20',
-        };
+        return Phone::callingCodeFor($timezone) ?? '20';
     }
 }

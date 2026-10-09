@@ -4,10 +4,13 @@ namespace Modules\People;
 
 use Carbon\CarbonImmutable;
 use Modules\People\Actions\LinkGuardian;
+use Modules\People\Actions\SaveStudentDetails;
 use Modules\People\Actions\SaveStudentProfile;
 use Modules\People\Actions\SaveTeacherProfile;
+use Modules\People\Actions\SendWelcome;
 use Modules\People\Consent\ConsentRules;
 use Modules\People\Contracts\DTOs\ConsentState;
+use Modules\People\Contracts\DTOs\StudentDetails;
 use Modules\People\Contracts\DTOs\StudentProfileData;
 use Modules\People\Contracts\DTOs\TeacherProfileData;
 use Modules\People\Contracts\LearnerStage;
@@ -38,6 +41,21 @@ final class PeopleService implements PeopleApi
         return new StudentProfileData($studentId, $profile?->birth_date, $chosen, $chosen ?? LearnerStage::forAge($age), $age);
     }
 
+    public function studentDetails(string $studentId): StudentDetails
+    {
+        $profile = StudentProfile::query()->find($studentId);
+
+        return new StudentDetails($profile?->gender, $profile?->country, $profile?->school_grade, $profile?->teacher_gender);
+    }
+
+    public function saveStudentDetails(string $studentId, StudentDetails $details): void
+    {
+        $now = $this->studentDetails($studentId);
+        app(SaveStudentDetails::class)->handle($studentId, new StudentDetails(
+            $details->gender ?? $now->gender, $details->country ?? $now->country, $details->schoolGrade ?? $now->schoolGrade, $details->teacherGender ?? $now->teacherGender,
+        ));
+    }
+
     public function linkGuardian(string $guardianId, string $studentId, string $relationship = 'parent', bool $isPrimary = true): void
     {
         $this->linkGuardian->handle($guardianId, $studentId, $relationship, $isPrimary);
@@ -58,6 +76,11 @@ final class PeopleService implements PeopleApi
     public function studentsOf(string $guardianId): array
     {
         return GuardianStudent::query()->where('guardian_id', $guardianId)->pluck('student_id')->all();
+    }
+
+    public function sendWelcome(array $userIds): void
+    {
+        app(SendWelcome::class)->handle($userIds);
     }
 
     public function consentState(string $studentId): ConsentState

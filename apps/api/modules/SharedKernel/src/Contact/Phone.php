@@ -34,6 +34,17 @@ final class Phone
         return self::isE164('+'.$number) ? '+'.$number : null;
     }
 
+    /** The calling code a number typed without one most likely lacks, from where its person lives; null when the zone says nothing. */
+    public static function callingCodeFor(?string $timezone): ?string
+    {
+        return match ($timezone) {
+            'Africa/Cairo' => '20', 'Asia/Riyadh' => '966', 'Asia/Dubai' => '971', 'Asia/Kuwait' => '965', 'Asia/Qatar' => '974',
+            'Asia/Bahrain' => '973', 'Asia/Muscat' => '968', 'Asia/Amman' => '962', 'Europe/London' => '44', 'Asia/Kuala_Lumpur' => '60',
+            'Europe/Istanbul' => '90', 'Africa/Casablanca' => '212', 'Asia/Baghdad' => '964', 'America/New_York', 'America/Toronto' => '1',
+            default => null,
+        };
+    }
+
     public static function isE164(string $phone): bool
     {
         return (bool) preg_match('/^\+[1-9]\d{6,14}$/', $phone);

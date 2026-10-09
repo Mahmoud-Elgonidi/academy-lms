@@ -49,6 +49,9 @@ enum Ability: string
     case HandleTickets = 'tickets.handle';
     case DecideComplaints = 'complaints.decide';
     case ManageSupport = 'support.manage';
+    case ManageCatalog = 'catalog.manage';
+    case ManageTeachers = 'teachers.manage';
+    case ManageStudents = 'students.manage';
 
     /** The plan area this ability belongs to, if a plan may leave it out. */
     public function feature(): ?Feature

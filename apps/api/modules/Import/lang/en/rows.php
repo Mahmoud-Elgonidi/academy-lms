@@ -2,6 +2,7 @@
 
 return [
     'errors' => [
+        'age_group' => '":value": write kids, middle, teen or adults.',
         'name' => 'The name is empty.',
         'phone' => 'The number ":value" is unclear.',
         'email' => 'The email ":value" is not valid.',

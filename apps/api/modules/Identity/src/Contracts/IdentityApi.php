@@ -3,6 +3,7 @@
 namespace Modules\Identity\Contracts;
 
 use Modules\Identity\Contracts\DTOs\NewUser;
+use Modules\Identity\Contracts\DTOs\UserDetails;
 use Modules\SharedKernel\Authorization\Ability;
 
 /** What other modules and the app layer may ask of Identity. */
@@ -10,6 +11,12 @@ interface IdentityApi
 {
     /** Creates a user in the current academy and returns its id. */
     public function createUser(NewUser $user): string;
+
+    /** Staff change a person's name, ways in (audited), language or time zone. */
+    public function updateUser(string $userId, UserDetails $details): void;
+
+    /** Turns a person's account off (signed out everywhere) or on again; never the owner's or one's own. Audited. */
+    public function setActive(string $userId, bool $active): void;
 
     /**
      * The academy a bearer token was issued for, or null if the token is

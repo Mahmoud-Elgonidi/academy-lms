@@ -1,0 +1,42 @@
+<?php
+
+return [
+    'nav_group' => 'Teaching',
+    'nav' => 'Subjects',
+    'model' => 'subject',
+    'subtitle' => 'Each subject with its levels in order and its categories (tracks such as memorising and tajweed, or curricula such as British and Saudi). A teacher takes a range of levels and the categories they teach, and "Find a teacher" searches by them.',
+    'create' => 'New subject',
+    'edit' => 'Edit',
+    'saved' => 'Subject saved',
+    'empty' => 'No subjects yet',
+    'empty_hint' => 'Add your first subject, or import your teachers from a sheet and their subjects are added for you.',
+    'no_levels' => 'No levels',
+    'level_separator' => ' → ',
+    'columns' => [
+        'name' => 'Subject',
+        'levels' => 'Levels',
+        'categories' => 'Categories',
+        'teachers' => 'Teachers',
+    ],
+    'fields' => [
+        'name_ar' => 'Name in Arabic',
+        'name_en' => 'Name in English',
+        'name_en_hint' => 'Left empty, it is the Arabic name.',
+        'levels' => 'Levels',
+        'levels_hint' => 'From the easiest to the hardest; drag to reorder. A level a teacher teaches cannot be removed.',
+        'add_level' => 'Add a level',
+        'categories' => 'Categories',
+        'categories_hint' => "The subject's tracks or curricula, such as memorising, tajweed, foundations, conversation, British curriculum.",
+        'add_category' => 'Add a category',
+    ],
+    'errors' => [
+        'name' => 'Give the subject a name (up to 120 characters).',
+        'taken' => 'There is already a subject called ":name".',
+        'item_name' => 'Each level or category needs an Arabic name (up to 80 characters).',
+        'item_twice' => 'A name is in the list twice.',
+        'levels_max' => 'A subject has at most :max levels.',
+        'categories_max' => 'A subject has at most :max categories.',
+        'levels_in_use' => 'Teachers teach the level ":name", so it cannot be removed. Rename it, or take it off those teachers first.',
+        'categories_in_use' => 'Teachers are on the category ":name", so it cannot be removed. Rename it, or take it off those teachers first.',
+    ],
+];

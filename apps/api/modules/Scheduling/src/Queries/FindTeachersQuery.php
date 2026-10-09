@@ -10,8 +10,10 @@ use Modules\Scheduling\Domain\Availability\Candidate;
 use Modules\Scheduling\Domain\Availability\Matcher;
 
 /**
- * "Find a teacher" (docs/architecture/02, section 2): hard filters in SQL,
- * then free time and matching per teacher, then a weighted score.
+ * "Find a teacher" (docs/architecture/02, section 2): hard filters in SQL
+ * (subject and its level and category, age, gender, language, taking new
+ * students or trials), then free time (daily caps included) and matching
+ * per teacher, then a weighted score.
  *
  * Score (of the weights in the docs, the ones we can measure today):
  * availability 35, load balance 15, soft preferences 10, and for a trial
@@ -48,6 +50,20 @@ final class FindTeachersQuery
             ->when($search->gender === 'female_only', fn ($q) => $q->where('tp.gender', 'female'))
             ->when($search->gender === 'male_only', fn ($q) => $q->where('tp.gender', 'male'))
             ->when($search->language, fn ($q, $lang) => $q->whereRaw('tp.languages @> ?::jsonb', [json_encode([$lang])]))
+            // The age they teach (none given: any age).
+            ->when($search->ageGroup, fn ($q, $group) => $q->whereRaw("(tp.age_groups = '[]'::jsonb or tp.age_groups @> ?::jsonb)", [json_encode([$group])]))
+            // The level within their range of the subject's levels (an open end: from the first, or to the last).
+            ->when($search->levelId, function ($q, $levelId) {
+                $ordinal = (int) DB::table('subject_levels')->where('id', $levelId)->value('ordinal');
+                $q->leftJoin('subject_levels as lf', fn ($j) => $j->on('lf.academy_id', '=', 'ts.academy_id')->on('lf.id', '=', 'ts.level_from_id'))
+                    ->leftJoin('subject_levels as lt', fn ($j) => $j->on('lt.academy_id', '=', 'ts.academy_id')->on('lt.id', '=', 'ts.level_to_id'))
+                    ->where(fn ($w) => $w->whereNull('lf.ordinal')->orWhere('lf.ordinal', '<=', $ordinal))
+                    ->where(fn ($w) => $w->whereNull('lt.ordinal')->orWhere('lt.ordinal', '>=', $ordinal));
+            })
+            // The category among the ones they teach the subject in (none chosen: all of them).
+            ->when($search->categoryId, fn ($q, $categoryId) => $q->where(fn ($w) => $w
+                ->whereNotExists(fn ($c) => $c->from('teacher_subject_categories as c')->whereColumn('c.teacher_id', 'ts.teacher_id')->whereColumn('c.subject_id', 'ts.subject_id'))
+                ->orWhereExists(fn ($c) => $c->from('teacher_subject_categories as c')->whereColumn('c.teacher_id', 'ts.teacher_id')->whereColumn('c.subject_id', 'ts.subject_id')->where('c.category_id', $categoryId))))
             ->select('u.id', 'u.name', 'u.timezone', 'tp.gender', 'tp.languages', 'tp.dialect')
             ->get()
             ->keyBy('id');

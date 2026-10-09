@@ -40,6 +40,9 @@ return [
             'done' => ':file imported',
         ],
         'identity' => [
+            'contact_changed' => "Changed :name's email or number (ways to sign in)",
+            'account_disabled' => "Turned off :name's account",
+            'account_enabled' => "Turned :name's account back on",
             'password_set' => ':name chose a password from their welcome link',
             'password_changed' => 'Password changed',
             'two_factor_enabled' => ':name turned on two-step sign-in',

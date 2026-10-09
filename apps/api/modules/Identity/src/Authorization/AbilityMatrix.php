@@ -42,6 +42,12 @@ final class AbilityMatrix
             Ability::HandleTickets => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler, Role::Accountant, Role::Sales],
             Ability::DecideComplaints => [Role::Owner, Role::Admin, Role::Supervisor],
             Ability::ManageSupport => [Role::Owner, Role::Admin],
+            // Subjects with their levels and categories: the academy's setup.
+            Ability::ManageCatalog => [Role::Owner, Role::Admin],
+            // Adding and editing teachers, their subjects and profile: who runs the teachers and the timetable.
+            Ability::ManageTeachers => [Role::Owner, Role::Admin, Role::Scheduler],
+            // Students and guardians: who enrols them and who follows the families.
+            Ability::ManageStudents => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler],
         };
     }
 

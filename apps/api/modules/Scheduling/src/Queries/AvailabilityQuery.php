@@ -13,7 +13,9 @@ use Modules\SharedKernel\Time\LocalTimeResolver;
  * Free time per teacher over a horizon: the approved schedule in force each
  * day, unfolded day by day on the teacher's clock (so summer time is right),
  * less approved time off and the academy's holidays (no shift then), minus
- * booked sessions and other coordinators' unexpired holds.
+ * booked sessions and other coordinators' unexpired holds, and minus whole
+ * days (on the teacher's clock) that already hold as many lessons as the
+ * teacher's daily cap (teacher_profiles.max_daily_lessons).
  *
  * Computed on demand; the Redis week bitsets of docs/architecture/02,
  * section 2 replace this when teacher counts call for it.
@@ -68,6 +70,8 @@ final class AvailabilityQuery
             ->selectRaw('extract(epoch from starts_at)::bigint as s, extract(epoch from ends_at)::bigint as e')
             ->get()->map(fn ($h) => [(int) $h->s, (int) $h->e])->all();
 
+        $caps = DB::table('teacher_profiles')->whereIn('user_id', $teacherIds)->whereNotNull('max_daily_lessons')->pluck('max_daily_lessons', 'user_id');
+
         $result = [];
         foreach ($schedules->groupBy('teacher_id') as $teacherId => $versions) {
             $timezone = $versions->first()->timezone;
@@ -89,15 +93,44 @@ final class AvailabilityQuery
             $shifts = (new IntervalSet($shiftIntervals))
                 ->minus(new IntervalSet([[PHP_INT_MIN, $from->getTimestamp()], [$to->getTimestamp(), PHP_INT_MAX]]))
                 ->minus(new IntervalSet(array_merge($closed, $off->get($teacherId, collect())->map(fn ($o) => [(int) $o->s, (int) $o->e])->all())));
-            $taken = new IntervalSet(array_merge(
+            $lessons = array_merge(
                 $busy->get($teacherId, collect())->map(fn ($b) => [(int) $b->s, (int) $b->e])->all(),
                 $holds->get($teacherId, collect())->map(fn ($h) => [(int) $h->s, (int) $h->e])->all(),
-            ));
+            );
+            $taken = new IntervalSet(array_merge($lessons, $this->fullDays($lessons, $timezone, isset($caps[$teacherId]) ? (int) $caps[$teacherId] : null)));
 
             $result[$teacherId] = new TeacherAvailability($teacherId, $timezone, $shifts, $shifts->minus($taken));
         }
 
         return $result;
+    }
+
+    /**
+     * The teacher's days (midnight to midnight on their clock) that already
+     * hold their daily cap of lessons, booked or held.
+     *
+     * @param  list<array{0: int, 1: int}>  $lessons
+     * @return list<array{0: int, 1: int}>
+     */
+    private function fullDays(array $lessons, string $timezone, ?int $cap): array
+    {
+        if ($cap === null) {
+            return [];
+        }
+        $perDay = [];
+        foreach ($lessons as [$start]) {
+            $date = CarbonImmutable::createFromTimestamp($start, $timezone)->toDateString();
+            $perDay[$date] = ($perDay[$date] ?? 0) + 1;
+        }
+        $full = [];
+        foreach ($perDay as $date => $count) {
+            if ($count >= $cap) {
+                $next = CarbonImmutable::parse($date)->addDay()->toDateString();
+                $full[] = [$this->resolver->resolve($date, '00:00', $timezone)->utc->getTimestamp(), $this->resolver->resolve($next, '00:00', $timezone)->utc->getTimestamp()];
+            }
+        }
+
+        return $full;
     }
 
     /** Is the date inside a Postgres daterange literal such as "[2026-10-06,2026-10-24)" or "[2026-10-06,)"? */
