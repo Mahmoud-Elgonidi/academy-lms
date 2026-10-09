@@ -18,9 +18,11 @@ use Modules\Communication\Filament\NotificationBell;
 use Modules\Communication\Live\InboxChanged;
 use Modules\Communication\NotificationPreferences;
 use Modules\Communication\Otp\CommunicationOtpSender;
+use Modules\Communication\Privacy\MessagesData;
 use Modules\Communication\Templates\LinkRegistry;
 use Modules\Communication\Templates\TemplateRegistry;
 use Modules\Identity\Contracts\OtpSender;
+use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\LiveSignals;
 
 final class CommunicationServiceProvider extends ServiceProvider
@@ -37,6 +39,8 @@ final class CommunicationServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // The messages a person received and their push devices, for their copy and erasure (Privacy).
+        $this->app->make(PersonalData::class)->add(MessagesData::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'communication');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'communication');

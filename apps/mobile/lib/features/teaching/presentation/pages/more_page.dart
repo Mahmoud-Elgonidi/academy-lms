@@ -65,6 +65,14 @@ class MorePage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('open-my-data'),
+                  leading: const Icon(Icons.fingerprint_rounded),
+                  title: Text(l.myDataTitle),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.go('/teach/more/my-data'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: const Icon(Icons.person_outline_rounded),
                   title: Text(l.meTitle),
                   trailing: const Icon(Icons.chevron_right_rounded),

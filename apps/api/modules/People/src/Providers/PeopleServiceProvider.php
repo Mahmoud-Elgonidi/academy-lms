@@ -23,7 +23,9 @@ use Modules\People\Http\Controllers\ConsentLinkController;
 use Modules\People\Listeners\SendConsentNotifications;
 use Modules\People\Live\ConsentsChanged;
 use Modules\People\PeopleService;
+use Modules\People\Privacy\ProfileData;
 use Modules\Platform\Contracts\TenantDirectory;
+use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
@@ -39,6 +41,8 @@ final class PeopleServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // A person's profile and guardian links, for their copy and erasure (Privacy).
+        $this->app->make(PersonalData::class)->add(ProfileData::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'people');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'people');

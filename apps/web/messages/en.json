@@ -94,7 +94,8 @@
       "privacy": "Children's privacy",
       "help": "Help",
       "recordings": "Lesson recordings",
-      "account": "My account"
+      "account": "My account",
+      "myData": "My data"
     },
     "kids": {
       "menu": "Menu",
@@ -138,7 +139,8 @@
     },
     "help": "Support",
     "recordings": "My lesson recordings",
-    "account": "My account"
+    "account": "My account",
+    "myData": "My data"
   },
   "family": {
     "switchLearner": "Choose whose",
@@ -684,5 +686,45 @@
     "sent": "Your dispute reached the academy; the lesson is under review.",
     "state": "Dispute: {status}",
     "answer": "The academy's answer: {answer}"
+  },
+  "myData": {
+    "title": "My data",
+    "lead": "Everything the academy keeps about you and your children: download a copy, or ask for an account to be erased.",
+    "leadTeacher": "Everything the academy keeps about you: download a copy, or ask for your account to be erased.",
+    "young": "Your guardian asks about your data from their account.",
+    "copy": {
+      "title": "A copy of the data",
+      "body": "One ZIP file: the data in a readable file, with the files handed in. Ready in a few minutes and kept {days} days.",
+      "action": "Get a copy",
+      "preparing": "Being prepared: you will hear when it is ready.",
+      "download": "Download",
+      "until": "Until {when}"
+    },
+    "erase": {
+      "title": "Delete the account",
+      "body": "The academy answers within {days} days; once it approves, the account is erased a day later.",
+      "action": "Delete this account",
+      "confirm": "Ask to erase {name}'s account?",
+      "copyFirst": "You can download a copy first.",
+      "reason": "Why (if you like)",
+      "waiting": "Asked: the academy answers by {when}.",
+      "approved": "Approved: the account is erased {when}.",
+      "refused": "The academy refused: {answer}",
+      "cancel": "Take it back"
+    },
+    "whatGoes": "What goes and what stays",
+    "whatStays": "What stays, without the name",
+    "history": "Requests",
+    "none": "No requests yet.",
+    "about": "About {name}",
+    "learner": "Your child",
+    "pages": "The academy's pages",
+    "links": {
+      "privacy": "Privacy notice",
+      "terms": "Terms of use",
+      "deletion": "Delete your account"
+    },
+    "back": "Back",
+    "failed": "The request did not go through. Try again."
   }
 }

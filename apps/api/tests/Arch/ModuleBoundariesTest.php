@@ -6,7 +6,7 @@
  * no cycles, and only platform code may use the BYPASSRLS connection.
  */
 
-const MODULES_ABOVE_KERNEL = ['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'App'];
+const MODULES_ABOVE_KERNEL = ['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Privacy', 'App'];
 
 arch('the shared kernel depends on no module')
     ->expect('Modules\SharedKernel')
@@ -202,6 +202,24 @@ arch('support sits on top: it reaches lessons, people, messages, the KPIs and re
     ->ignoring('Modules\Support\Database')
     ->and(['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import'])
     ->not->toUse('Modules\Support');
+
+arch('privacy sits on top: every module tells it what it holds through the shared kernel, and nothing depends on it')
+    ->expect('Modules\Privacy')
+    ->not->toUse([
+        'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\Identity\Preferences', 'Modules\Identity\Authorization', 'Modules\Identity\Privacy',
+        'Modules\Platform\Models', 'Modules\Platform\Actions', 'Modules\Platform\Directory', 'Modules\Platform\Branding',
+        'Modules\People\Models', 'Modules\People\Actions', 'Modules\People\Filament', 'Modules\People\Privacy',
+        'Modules\Communication\Models', 'Modules\Communication\Actions', 'Modules\Communication\Channels', 'Modules\Communication\Templates',
+        'Modules\Catalog', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning',
+        'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'App',
+    ])
+    ->ignoring('Modules\Privacy\Database')
+    ->and(['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support'])
+    ->not->toUse('Modules\Privacy');
+
+arch('each module says what it holds about a person through the shared kernel\'s PersonalDataSource')
+    ->expect(['Modules\Identity\Privacy', 'Modules\People\Privacy', 'Modules\Communication\Privacy', 'Modules\Learning\Privacy', 'Modules\Scheduling\Privacy', 'Modules\Enrollment\Privacy', 'Modules\Billing\Privacy', 'Modules\Evaluation\Privacy', 'Modules\Classroom\Privacy', 'Modules\Support\Privacy', 'Modules\Crm\Privacy', 'Modules\Payroll\Privacy', 'Modules\Import\Privacy'])
+    ->toImplement('Modules\SharedKernel\Privacy\PersonalDataSource');
 
 arch('the video adapters only talk to the provider: no queries, no attendance, no tenancy')
     ->expect('Modules\Classroom\Video')

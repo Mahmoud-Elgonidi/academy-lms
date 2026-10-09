@@ -176,6 +176,12 @@ DEMO_PASSWORD=$(secret | cut -c1-16)
 DEMO_PLATFORM_2FA_SECRET=$(head -c 20 /dev/urandom | base32 | tr -d '=\n')
 BILLING_DEMO_GATEWAY=$demo_gateway
 
+# The platform's own privacy notice, terms and account-deletion page (/privacy, /terms,
+# /account-deletion on the platform's address; the app stores link to them): the name it goes
+# by there and the address people write to about their data. Each academy sets its own.
+PLATFORM_LEGAL_NAME=
+PRIVACY_CONTACT_EMAIL=
+
 # Health (RUNBOOKS.md): GET /health answers an uptime monitor that sends this
 # token; the console's "System health" page and the alerts go to the platform
 # team (and to HEALTH_ALERT_TO, comma-separated) once mail is set up.
@@ -206,7 +212,7 @@ add_if_missing HEALTH_TOKEN "$(secret)"
 add_if_missing HEALTH_ALERT_TO ""
 add_if_missing BACKUPS_EXPECTED true
 for k in MAIL_HOST MAIL_USERNAME MAIL_PASSWORD OFFSITE_S3_ENDPOINT OFFSITE_S3_REGION OFFSITE_S3_BUCKET \
-    OFFSITE_S3_ACCESS_KEY OFFSITE_S3_SECRET_KEY OFFSITE_AGE_RECIPIENT; do
+    OFFSITE_S3_ACCESS_KEY OFFSITE_S3_SECRET_KEY OFFSITE_AGE_RECIPIENT PLATFORM_LEGAL_NAME PRIVACY_CONTACT_EMAIL; do
     add_if_missing "$k" ""
 done
 add_if_missing MAIL_PORT 587

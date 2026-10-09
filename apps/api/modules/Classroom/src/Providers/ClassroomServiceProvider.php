@@ -12,6 +12,7 @@ use Modules\Classroom\Console\RecordingsCommand;
 use Modules\Classroom\Contracts\RecordingHolds;
 use Modules\Classroom\Http\Controllers\LiveKitWebhookController;
 use Modules\Classroom\Http\Controllers\RecordingMediaController;
+use Modules\Classroom\Privacy\RecordingsData;
 use Modules\Classroom\Queries\VideoMinutes;
 use Modules\Classroom\Recordings\NoRecordingHolds;
 use Modules\Communication\Contracts\NotificationLinks;
@@ -20,6 +21,7 @@ use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Plans\UsagePeriod;
+use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /** The live classroom (docs/architecture/01-features.md, section 9; 03, section 6). */
@@ -34,6 +36,8 @@ final class ClassroomServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Recording consents and openings, for a person's copy (Privacy).
+        $this->app->make(PersonalData::class)->add(RecordingsData::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'classroom');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'classroom');

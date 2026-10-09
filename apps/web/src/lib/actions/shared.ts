@@ -10,7 +10,8 @@ import type { JoinTicket } from '@/lib/teach/types';
  * seat in a lesson (JoinLesson decides whose lesson it is and whether it is
  * open yet), notifications marked read, tickets to the academy, lesson
  * recordings (consent, watching, starting and stopping one), unlinking
- * Google or Apple from one's account, and disputing a lesson's outcome.
+ * Google or Apple from one's account, disputing a lesson's outcome, and
+ * one's own data (a copy, erasure, taking an erasure back).
  */
 export async function joinLesson(id: string): Promise<{ ok: true; ticket: JoinTicket; recording: LessonRecording } | { ok: false; message?: string }> {
   const joined = await send<{ data: JoinTicket; recording?: LessonRecording }>('post', '/v1/lessons/{session}/join', { params: { session: id } });
@@ -127,6 +128,30 @@ export async function closeTicket(ticket: string): Promise<TicketResult> {
 export async function disputeLesson(side: 'family' | 'teacher', id: string, reason: string, note: string, key: string): Promise<Done> {
   const options = { params: { session: id }, body: { reason, note: note.trim() }, idempotencyKey: key };
   const done = side === 'family' ? await send('post', '/v1/lessons/{session}/dispute', options) : await send('post', '/v1/teacher/lessons/{session}/dispute', options);
+  if (!done.ok) return problemOf(done.problem);
+  refresh();
+  return { ok: true };
+}
+
+/** Asks for a copy of one's data, or a followed learner's (`subject`): prepared in a few minutes; one a day. */
+export async function askDataCopy(subject: string, key: string): Promise<Done> {
+  const done = await send('post', '/v1/me/data-requests', { body: { kind: 'export', subject_id: subject }, idempotencyKey: key });
+  if (!done.ok) return problemOf(done.problem);
+  refresh();
+  return { ok: true };
+}
+
+/** Asks the academy to erase an account (one's own, or a followed learner's): it answers within 30 days. */
+export async function askErasure(subject: string, reason: string, key: string): Promise<Done> {
+  const done = await send('post', '/v1/me/data-requests', { body: { kind: 'erasure', subject_id: subject, reason: reason.trim() || null }, idempotencyKey: key });
+  if (!done.ok) return problemOf(done.problem);
+  refresh();
+  return { ok: true };
+}
+
+/** Takes an erasure back while the academy has not answered, or in the day after it approved. */
+export async function cancelDataRequest(id: string): Promise<Done> {
+  const done = await send('post', '/v1/me/data-requests/{id}/cancel', { params: { id } });
   if (!done.ok) return problemOf(done.problem);
   refresh();
   return { ok: true };

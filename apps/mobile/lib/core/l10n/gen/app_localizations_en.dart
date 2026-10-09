@@ -338,6 +338,112 @@ class AppLocalizationsEn extends AppLocalizations {
   String get consentNudgeAction => 'Read and agree';
 
   @override
+  String get myDataTitle => 'My data';
+
+  @override
+  String get myDataLead => 'Everything the academy keeps about you and your children: download a copy, or ask for an account to be erased.';
+
+  @override
+  String get myDataLeadTeacher => 'Everything the academy keeps about you: download a copy, or ask for your account to be erased.';
+
+  @override
+  String get myDataYoung => 'Your guardian asks about your data from their account.';
+
+  @override
+  String get myDataCopyTitle => 'A copy of the data';
+
+  @override
+  String myDataCopyBody(int days) {
+    return 'One ZIP file: the data in a readable file, with the files handed in. Ready in a few minutes and kept $days days.';
+  }
+
+  @override
+  String get myDataCopyAction => 'Get a copy';
+
+  @override
+  String get myDataCopyPreparing => 'Being prepared: you will hear when it is ready.';
+
+  @override
+  String get myDataCopyDownload => 'Download';
+
+  @override
+  String myDataCopyUntil(String when) {
+    return 'Your copy is ready until $when';
+  }
+
+  @override
+  String get myDataEraseTitle => 'Delete the account';
+
+  @override
+  String myDataEraseBody(int days) {
+    return 'The academy answers within $days days; once it approves, the account is erased a day later.';
+  }
+
+  @override
+  String get myDataEraseAction => 'Delete this account';
+
+  @override
+  String myDataEraseConfirm(String name) {
+    return 'Ask to erase $name\'s account?';
+  }
+
+  @override
+  String get myDataEraseCopyFirst => 'You can download a copy first.';
+
+  @override
+  String get myDataEraseReason => 'Why (if you like)';
+
+  @override
+  String myDataEraseWaiting(String when) {
+    return 'Asked: the academy answers by $when.';
+  }
+
+  @override
+  String myDataEraseApproved(String when) {
+    return 'Approved: the account is erased $when.';
+  }
+
+  @override
+  String myDataEraseRefused(String answer) {
+    return 'The academy refused: $answer';
+  }
+
+  @override
+  String get myDataEraseCancel => 'Take it back';
+
+  @override
+  String get myDataEraseAsked => 'Sent to the academy.';
+
+  @override
+  String get myDataEraseCancelled => 'Taken back: the account stays.';
+
+  @override
+  String get myDataWhatGoes => 'What goes and what stays';
+
+  @override
+  String get myDataWhatStays => 'What stays, without the name';
+
+  @override
+  String get myDataHistory => 'Requests';
+
+  @override
+  String get myDataNone => 'No requests yet.';
+
+  @override
+  String myDataAbout(String name) {
+    return 'About $name';
+  }
+
+  @override
+  String get myDataPrivacy => 'Privacy notice';
+
+  @override
+  String get myDataTerms => 'Terms of use';
+
+  @override
+  String get myDataDeletion => 'Delete your account';
+
+  @override
   String get navHome => 'Home';
 
   @override

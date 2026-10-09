@@ -242,6 +242,92 @@
     }
   },
   "consentNudgeAction": "اقرا ووافق",
+  "myDataTitle": "بياناتي",
+  "myDataLead": "كل اللي الأكاديمية محتفظة بيه عنك وعن ولادك: نزّل نسخة، أو اطلب مسح حساب.",
+  "myDataLeadTeacher": "كل اللي الأكاديمية محتفظة بيه عنك: نزّل نسخة، أو اطلب مسح حسابك.",
+  "myDataYoung": "ولي أمرك هو اللي بيطلب بخصوص بياناتك من حسابه.",
+  "myDataCopyTitle": "نسخة من البيانات",
+  "myDataCopyBody": "ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل {days} أيام.",
+  "@myDataCopyBody": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "myDataCopyAction": "جهّز نسخة",
+  "myDataCopyPreparing": "بتتجهز: هنقولك أول ما تخلص.",
+  "myDataCopyDownload": "نزّل",
+  "myDataCopyUntil": "النسخة جاهزة لحد {when}",
+  "@myDataCopyUntil": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "myDataEraseTitle": "مسح الحساب",
+  "myDataEraseBody": "الأكاديمية بترد في خلال {days} يوم، ولما توافق الحساب بيتمسح بعدها بيوم.",
+  "@myDataEraseBody": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "myDataEraseAction": "امسح الحساب ده",
+  "myDataEraseConfirm": "تطلب مسح حساب {name}؟",
+  "@myDataEraseConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "myDataEraseCopyFirst": "تقدر تنزّل نسخة الأول.",
+  "myDataEraseReason": "ليه؟ (لو حابب)",
+  "myDataEraseWaiting": "اتطلب: الأكاديمية هترد قبل {when}.",
+  "@myDataEraseWaiting": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "myDataEraseApproved": "اتوافق: الحساب هيتمسح {when}.",
+  "@myDataEraseApproved": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "myDataEraseRefused": "الأكاديمية رفضت: {answer}",
+  "@myDataEraseRefused": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "myDataEraseCancel": "ارجع في طلبك",
+  "myDataEraseAsked": "الطلب وصل للأكاديمية.",
+  "myDataEraseCancelled": "رجعت في الطلب: الحساب هيفضل.",
+  "myDataWhatGoes": "إيه اللي بيتمسح وإيه اللي بيفضل",
+  "myDataWhatStays": "إيه اللي بيفضل، من غير اسم",
+  "myDataHistory": "الطلبات",
+  "myDataNone": "مفيش طلبات لسه.",
+  "myDataAbout": "عن {name}",
+  "@myDataAbout": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "myDataPrivacy": "سياسة الخصوصية",
+  "myDataTerms": "شروط الاستخدام",
+  "myDataDeletion": "مسح الحساب",
   "navHome": "الرئيسية",
   "navLessons": "الحصص",
   "navProgress": "التقدم",

@@ -74,6 +74,16 @@ return [
             'complaint_dismissed' => 'رفض الشكوى :ticket: :note',
             'targets_saved' => 'تغيير مواعيد الرد على التذاكر',
         ],
+        'privacy' => [
+            'export_requested' => 'طلب نسخة من بيانات شخص (:side)',
+            'erasure_requested' => 'طلب مسح حساب (:side)',
+            'erasure_cancelled' => 'إلغاء طلب مسح حساب',
+            'erasure_refused' => 'رفض مسح حساب: :answer',
+            'erasure_approved' => 'الموافقة على مسح حساب (بيتمسح بعد يوم)',
+            'erasure_held_back' => 'طلب مسح اتوافق عليه رجع للإدارة: ظهرت حاجة جديدة',
+            'account_erased' => 'مسح حساب',
+            'settings_saved' => 'تغيير بيانات صفحة الخصوصية',
+        ],
         'impersonation' => [
             'started' => 'دخول بحساب :user لمدة :minutes دقيقة: :reason',
             'ended' => 'انتهى الدخول بحساب :user: :how',
@@ -99,7 +109,7 @@ return [
         'how' => ['exit' => 'خرج بنفسه', 'expired' => 'الوقت خلص', 'ended' => 'اتقفل من لوحة المنصة'],
         'recording' => ['off' => 'مفيش تسجيل', 'manual' => 'المدرس يبدأه', 'auto' => 'كل حصة لوحدها'],
         'media' => ['by_age' => 'حسب السن', 'video' => 'فيديو', 'audio' => 'صوت بس'],
-        'side' => ['family' => 'الأسرة', 'teacher' => 'المدرس'],
+        'side' => ['family' => 'الأسرة', 'teacher' => 'المدرس', 'staff' => 'الإدارة سجلته'],
     ],
     'groups' => [
         'billing' => 'الفلوس',
@@ -110,6 +120,7 @@ return [
         'people' => 'الطلاب وأولياء الأمور',
         'classroom' => 'تسجيل الحصص',
         'support' => 'الدعم والشكاوى',
+        'privacy' => 'البيانات الشخصية',
         'impersonation' => 'دخول فريق المنصة',
         'platform' => 'المنصة',
     ],

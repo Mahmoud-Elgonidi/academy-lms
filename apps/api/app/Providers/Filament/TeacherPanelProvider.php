@@ -26,6 +26,7 @@ use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\Learning\Filament\Teacher\LearningTeacherPlugin;
 use Modules\Payroll\Filament\Teacher\PayrollTeacherPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
+use Modules\Privacy\Filament\Teacher\PrivacyTeacherPlugin;
 use Modules\Scheduling\Filament\Teacher\SchedulingTeacherPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
 use Modules\Support\Filament\Teacher\SupportTeacherPlugin;
@@ -81,6 +82,7 @@ final class TeacherPanelProvider extends PanelProvider
                 EvaluationTeacherPlugin::make(),
                 PayrollTeacherPlugin::make(),
                 SupportTeacherPlugin::make(),
+                PrivacyTeacherPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),
             ]);

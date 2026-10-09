@@ -28,12 +28,14 @@ use Modules\Billing\Live\PaymentsChanged;
 use Modules\Billing\Live\RevenueChanged;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Payments\PayLinks;
+use Modules\Billing\Privacy\BillingData;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Credits\Contracts\Events\CreditBalanceLow;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
+use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
@@ -47,6 +49,8 @@ final class BillingServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // A payer's invoices, payments and receipts, for their copy, and money due that holds an erasure back (Privacy).
+        $this->app->make(PersonalData::class)->add(BillingData::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'billing');
         // The plan's storage counts the payment receipts sent by hand kept for the academy.

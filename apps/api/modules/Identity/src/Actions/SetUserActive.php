@@ -24,6 +24,9 @@ final class SetUserActive
     public function handle(string $userId, bool $active): User
     {
         $user = User::query()->findOrFail($userId);
+        if ($user->status === UserStatus::Erased) {
+            throw ValidationException::withMessages(['status' => __('identity::users.erased')]);
+        }
         if (! $active && ($user->hasRole(Role::Owner) || $user->id === auth()->id())) {
             throw ValidationException::withMessages(['status' => __('identity::users.cannot_disable')]);
         }

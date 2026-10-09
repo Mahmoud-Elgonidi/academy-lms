@@ -74,6 +74,16 @@ return [
             'complaint_dismissed' => 'Complaint :ticket dismissed: :note',
             'targets_saved' => 'Support answer targets changed',
         ],
+        'privacy' => [
+            'export_requested' => 'A copy of someone\'s data asked for (:side)',
+            'erasure_requested' => 'Erasure of an account asked for (:side)',
+            'erasure_cancelled' => 'An erasure request taken back',
+            'erasure_refused' => 'An erasure refused: :answer',
+            'erasure_approved' => 'An erasure approved (the account goes a day later)',
+            'erasure_held_back' => 'An approved erasure sent back to the office: something came up',
+            'account_erased' => 'An account erased',
+            'settings_saved' => 'The privacy notice\'s details changed',
+        ],
         'impersonation' => [
             'started' => 'Signed in as :user for :minutes minutes: :reason',
             'ended' => 'Sign-in as :user ended: :how',
@@ -99,7 +109,7 @@ return [
         'how' => ['exit' => 'they left', 'expired' => 'time ran out', 'ended' => 'ended from the console'],
         'recording' => ['off' => 'no recording', 'manual' => 'the teacher starts it', 'auto' => 'every lesson by itself'],
         'media' => ['by_age' => 'by age', 'video' => 'video', 'audio' => 'sound only'],
-        'side' => ['family' => 'the family', 'teacher' => 'the teacher'],
+        'side' => ['family' => 'the family', 'teacher' => 'the teacher', 'staff' => 'written down by the office'],
     ],
     'groups' => [
         'billing' => 'Money',
@@ -110,6 +120,7 @@ return [
         'people' => 'Students and guardians',
         'classroom' => 'Lesson recordings',
         'support' => 'Support and complaints',
+        'privacy' => 'Personal data',
         'impersonation' => 'Platform sign-ins',
         'platform' => 'Platform',
     ],

@@ -354,6 +354,112 @@ class AppLocalizationsAr extends AppLocalizations {
   String get consentNudgeAction => 'اقرا ووافق';
 
   @override
+  String get myDataTitle => 'بياناتي';
+
+  @override
+  String get myDataLead => 'كل اللي الأكاديمية محتفظة بيه عنك وعن ولادك: نزّل نسخة، أو اطلب مسح حساب.';
+
+  @override
+  String get myDataLeadTeacher => 'كل اللي الأكاديمية محتفظة بيه عنك: نزّل نسخة، أو اطلب مسح حسابك.';
+
+  @override
+  String get myDataYoung => 'ولي أمرك هو اللي بيطلب بخصوص بياناتك من حسابه.';
+
+  @override
+  String get myDataCopyTitle => 'نسخة من البيانات';
+
+  @override
+  String myDataCopyBody(int days) {
+    return 'ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل $days أيام.';
+  }
+
+  @override
+  String get myDataCopyAction => 'جهّز نسخة';
+
+  @override
+  String get myDataCopyPreparing => 'بتتجهز: هنقولك أول ما تخلص.';
+
+  @override
+  String get myDataCopyDownload => 'نزّل';
+
+  @override
+  String myDataCopyUntil(String when) {
+    return 'النسخة جاهزة لحد $when';
+  }
+
+  @override
+  String get myDataEraseTitle => 'مسح الحساب';
+
+  @override
+  String myDataEraseBody(int days) {
+    return 'الأكاديمية بترد في خلال $days يوم، ولما توافق الحساب بيتمسح بعدها بيوم.';
+  }
+
+  @override
+  String get myDataEraseAction => 'امسح الحساب ده';
+
+  @override
+  String myDataEraseConfirm(String name) {
+    return 'تطلب مسح حساب $name؟';
+  }
+
+  @override
+  String get myDataEraseCopyFirst => 'تقدر تنزّل نسخة الأول.';
+
+  @override
+  String get myDataEraseReason => 'ليه؟ (لو حابب)';
+
+  @override
+  String myDataEraseWaiting(String when) {
+    return 'اتطلب: الأكاديمية هترد قبل $when.';
+  }
+
+  @override
+  String myDataEraseApproved(String when) {
+    return 'اتوافق: الحساب هيتمسح $when.';
+  }
+
+  @override
+  String myDataEraseRefused(String answer) {
+    return 'الأكاديمية رفضت: $answer';
+  }
+
+  @override
+  String get myDataEraseCancel => 'ارجع في طلبك';
+
+  @override
+  String get myDataEraseAsked => 'الطلب وصل للأكاديمية.';
+
+  @override
+  String get myDataEraseCancelled => 'رجعت في الطلب: الحساب هيفضل.';
+
+  @override
+  String get myDataWhatGoes => 'إيه اللي بيتمسح وإيه اللي بيفضل';
+
+  @override
+  String get myDataWhatStays => 'إيه اللي بيفضل، من غير اسم';
+
+  @override
+  String get myDataHistory => 'الطلبات';
+
+  @override
+  String get myDataNone => 'مفيش طلبات لسه.';
+
+  @override
+  String myDataAbout(String name) {
+    return 'عن $name';
+  }
+
+  @override
+  String get myDataPrivacy => 'سياسة الخصوصية';
+
+  @override
+  String get myDataTerms => 'شروط الاستخدام';
+
+  @override
+  String get myDataDeletion => 'مسح الحساب';
+
+  @override
   String get navHome => 'الرئيسية';
 
   @override

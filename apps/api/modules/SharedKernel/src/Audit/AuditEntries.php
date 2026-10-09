@@ -20,6 +20,7 @@ final class AuditEntries
         'identity' => ['identity.'],
         'people' => ['people.'],
         'support' => ['support.'],
+        'privacy' => ['privacy.'],
         'impersonation' => ['impersonation.'],
         'platform' => ['academy.', 'platform.'],
     ];

@@ -20,6 +20,7 @@ use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\OpenPlan;
 use Modules\SharedKernel\Plans\UsageMeters;
+use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\Console\LiveRelayCommand;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Tenancy\PgTenantSession;
@@ -43,6 +44,8 @@ final class SharedKernelServiceProvider extends ServiceProvider
         // The academy's plan: everything until Platform binds the plans; the meters, from each module that counts.
         $this->app->scopedIf(AcademyPlan::class, OpenPlan::class);
         $this->app->singleton(UsageMeters::class);
+        // What each module holds about a person, for the Privacy module's copies and erasures.
+        $this->app->singleton(PersonalData::class);
     }
 
     public function boot(): void

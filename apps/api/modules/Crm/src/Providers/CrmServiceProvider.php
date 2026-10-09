@@ -16,6 +16,7 @@ use Modules\Crm\Filament\Teacher\MyTrials;
 use Modules\Crm\Listeners\FollowLeads;
 use Modules\Crm\Listeners\SendCrmNotifications;
 use Modules\Crm\Models\LeadTrial;
+use Modules\Crm\Privacy\LeadsData;
 use Modules\Crm\Queries\TrialConversion;
 use Modules\Enrollment\Contracts\Events\EnrollmentCreated;
 use Modules\Scheduling\Contracts\Events\SessionCancelled;
@@ -23,6 +24,7 @@ use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\Scheduling\Contracts\Events\SessionRescheduled;
 use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
 use Modules\Scheduling\Contracts\TrialConversionRates;
+use Modules\SharedKernel\Privacy\PersonalData;
 
 /**
  * The CRM (docs/architecture/01, section 14; 04, M14): leads, their trial
@@ -39,6 +41,8 @@ final class CrmServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // The enquiry a person came through, for their copy and erasure (Privacy).
+        $this->app->make(PersonalData::class)->add(LeadsData::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'crm');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'crm');

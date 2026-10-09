@@ -101,6 +101,11 @@ docker compose exec web php artisan platform:mail-test   # does the server's mai
   (`MAIL_*` in `.env`, then "Send a test email" on that page; `RUNBOOKS.md`, "Email"; `HEALTH_ALERT_TO` adds
   addresses); an uptime monitor can watch `/health` with `HEALTH_TOKEN` from `.env`.
 
+- **Privacy pages**: `/privacy`, `/terms` and `/account-deletion` on the platform's address are the
+  platform's (the links for the App Store and Google Play): set `PLATFORM_LEGAL_NAME` and
+  `PRIVACY_CONTACT_EMAIL` in `.env`. Each academy's own (on its address) take its details from the back
+  office ("Data requests" → "Privacy page"). The text needs a lawyer's review before launch.
+
 - **Going back**: run the deploy workflow for an older commit, or put its image in `IMAGE=` in `.env` and
   `docker compose up -d` (migrations already applied stay).
 - **A new setting** the app needs on servers: add it to the `.env` that `deploy.sh` writes on the first

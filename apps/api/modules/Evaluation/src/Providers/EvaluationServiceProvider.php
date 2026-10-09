@@ -19,8 +19,10 @@ use Modules\Evaluation\Filament\Teacher\MyPerformance;
 use Modules\Evaluation\Http\Controllers\RateLessonController;
 use Modules\Evaluation\Listeners\AskForRatings;
 use Modules\Evaluation\Listeners\SendEvaluationNotifications;
+use Modules\Evaluation\Privacy\RatingsData;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
+use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
@@ -44,6 +46,8 @@ final class EvaluationServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // The lessons a person rated, for their copy and erasure (Privacy).
+        $this->app->make(PersonalData::class)->add(RatingsData::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'evaluation');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'evaluation');

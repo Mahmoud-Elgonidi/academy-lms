@@ -19,6 +19,7 @@ const ITEMS: { href: string; key: string; icon: IconName }[] = [
   { href: '/teach/notifications', key: 'notifications', icon: 'bell' },
   { href: '/teach/help', key: 'help', icon: 'help' },
   { href: '/teach/account', key: 'account', icon: 'lock' },
+  { href: '/teach/my-data', key: 'myData', icon: 'file' },
 ];
 
 /** On a phone: the teacher's other screens, the language, and signing out. */

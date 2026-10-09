@@ -51,6 +51,7 @@ class Live {
   static const payments = 'payments.changed';
   static const consents = 'consents.changed';
   static const tickets = 'tickets.changed';
+  static const privacy = 'privacy.changed';
 
   /// Everything may have changed: after the app comes back, the socket comes back, or the relay restarts.
   static const resync = 'resync';

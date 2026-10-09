@@ -52,6 +52,7 @@ enum Ability: string
     case ManageCatalog = 'catalog.manage';
     case ManageTeachers = 'teachers.manage';
     case ManageStudents = 'students.manage';
+    case HandleDataRequests = 'privacy.handle';
 
     /** The plan area this ability belongs to, if a plan may leave it out. */
     public function feature(): ?Feature

@@ -626,6 +626,186 @@ abstract class AppLocalizations {
   /// **'اقرا ووافق'**
   String get consentNudgeAction;
 
+  /// No description provided for @myDataTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'بياناتي'**
+  String get myDataTitle;
+
+  /// No description provided for @myDataLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل اللي الأكاديمية محتفظة بيه عنك وعن ولادك: نزّل نسخة، أو اطلب مسح حساب.'**
+  String get myDataLead;
+
+  /// No description provided for @myDataLeadTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل اللي الأكاديمية محتفظة بيه عنك: نزّل نسخة، أو اطلب مسح حسابك.'**
+  String get myDataLeadTeacher;
+
+  /// No description provided for @myDataYoung.
+  ///
+  /// In ar, this message translates to:
+  /// **'ولي أمرك هو اللي بيطلب بخصوص بياناتك من حسابه.'**
+  String get myDataYoung;
+
+  /// No description provided for @myDataCopyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'نسخة من البيانات'**
+  String get myDataCopyTitle;
+
+  /// No description provided for @myDataCopyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل {days} أيام.'**
+  String myDataCopyBody(int days);
+
+  /// No description provided for @myDataCopyAction.
+  ///
+  /// In ar, this message translates to:
+  /// **'جهّز نسخة'**
+  String get myDataCopyAction;
+
+  /// No description provided for @myDataCopyPreparing.
+  ///
+  /// In ar, this message translates to:
+  /// **'بتتجهز: هنقولك أول ما تخلص.'**
+  String get myDataCopyPreparing;
+
+  /// No description provided for @myDataCopyDownload.
+  ///
+  /// In ar, this message translates to:
+  /// **'نزّل'**
+  String get myDataCopyDownload;
+
+  /// No description provided for @myDataCopyUntil.
+  ///
+  /// In ar, this message translates to:
+  /// **'النسخة جاهزة لحد {when}'**
+  String myDataCopyUntil(String when);
+
+  /// No description provided for @myDataEraseTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسح الحساب'**
+  String get myDataEraseTitle;
+
+  /// No description provided for @myDataEraseBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية بترد في خلال {days} يوم، ولما توافق الحساب بيتمسح بعدها بيوم.'**
+  String myDataEraseBody(int days);
+
+  /// No description provided for @myDataEraseAction.
+  ///
+  /// In ar, this message translates to:
+  /// **'امسح الحساب ده'**
+  String get myDataEraseAction;
+
+  /// No description provided for @myDataEraseConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'تطلب مسح حساب {name}؟'**
+  String myDataEraseConfirm(String name);
+
+  /// No description provided for @myDataEraseCopyFirst.
+  ///
+  /// In ar, this message translates to:
+  /// **'تقدر تنزّل نسخة الأول.'**
+  String get myDataEraseCopyFirst;
+
+  /// No description provided for @myDataEraseReason.
+  ///
+  /// In ar, this message translates to:
+  /// **'ليه؟ (لو حابب)'**
+  String get myDataEraseReason;
+
+  /// No description provided for @myDataEraseWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتطلب: الأكاديمية هترد قبل {when}.'**
+  String myDataEraseWaiting(String when);
+
+  /// No description provided for @myDataEraseApproved.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتوافق: الحساب هيتمسح {when}.'**
+  String myDataEraseApproved(String when);
+
+  /// No description provided for @myDataEraseRefused.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية رفضت: {answer}'**
+  String myDataEraseRefused(String answer);
+
+  /// No description provided for @myDataEraseCancel.
+  ///
+  /// In ar, this message translates to:
+  /// **'ارجع في طلبك'**
+  String get myDataEraseCancel;
+
+  /// No description provided for @myDataEraseAsked.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطلب وصل للأكاديمية.'**
+  String get myDataEraseAsked;
+
+  /// No description provided for @myDataEraseCancelled.
+  ///
+  /// In ar, this message translates to:
+  /// **'رجعت في الطلب: الحساب هيفضل.'**
+  String get myDataEraseCancelled;
+
+  /// No description provided for @myDataWhatGoes.
+  ///
+  /// In ar, this message translates to:
+  /// **'إيه اللي بيتمسح وإيه اللي بيفضل'**
+  String get myDataWhatGoes;
+
+  /// No description provided for @myDataWhatStays.
+  ///
+  /// In ar, this message translates to:
+  /// **'إيه اللي بيفضل، من غير اسم'**
+  String get myDataWhatStays;
+
+  /// No description provided for @myDataHistory.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطلبات'**
+  String get myDataHistory;
+
+  /// No description provided for @myDataNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش طلبات لسه.'**
+  String get myDataNone;
+
+  /// No description provided for @myDataAbout.
+  ///
+  /// In ar, this message translates to:
+  /// **'عن {name}'**
+  String myDataAbout(String name);
+
+  /// No description provided for @myDataPrivacy.
+  ///
+  /// In ar, this message translates to:
+  /// **'سياسة الخصوصية'**
+  String get myDataPrivacy;
+
+  /// No description provided for @myDataTerms.
+  ///
+  /// In ar, this message translates to:
+  /// **'شروط الاستخدام'**
+  String get myDataTerms;
+
+  /// No description provided for @myDataDeletion.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسح الحساب'**
+  String get myDataDeletion;
+
   /// No description provided for @navHome.
   ///
   /// In ar, this message translates to:

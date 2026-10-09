@@ -17,6 +17,7 @@ import '../../features/profile/data/profile_repository.dart';
 import '../../features/roadmap/data/learning_repository.dart';
 import '../../features/schedule/data/lessons_repository.dart';
 import '../../features/consent/data/consent_repository.dart';
+import '../../features/privacy/data/privacy_repository.dart';
 import '../../features/recordings/data/recordings_repository.dart';
 import '../../features/support/data/support_repository.dart';
 import '../../features/teaching/data/teaching_repository.dart';
@@ -37,6 +38,7 @@ class Services {
       challenges = ChallengesRepository(api),
       notifications = NotificationsRepository(api),
       consent = ConsentRepository(api),
+      privacy = PrivacyRepository(api),
       recordings = RecordingsRepository(api),
       support = SupportRepository(api),
       live = Live(source: LiveRepository(api), apiBaseUrl: api.dio.options.baseUrl) {
@@ -59,6 +61,7 @@ class Services {
   final ChallengesRepository challenges;
   final NotificationsRepository notifications;
   final ConsentRepository consent;
+  final PrivacyRepository privacy;
   final RecordingsRepository recordings;
   final SupportRepository support;
 
@@ -75,6 +78,7 @@ class Services {
       RepositoryProvider.value(value: lessons),
       RepositoryProvider.value(value: billing),
       RepositoryProvider.value(value: consent),
+      RepositoryProvider.value(value: privacy),
       RepositoryProvider.value(value: recordings),
       RepositoryProvider.value(value: support),
       RepositoryProvider.value(value: learning),

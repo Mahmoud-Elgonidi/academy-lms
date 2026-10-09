@@ -26,6 +26,7 @@ use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\Learning\Filament\Family\LearningFamilyPlugin;
 use Modules\People\Filament\Family\PeopleFamilyPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
+use Modules\Privacy\Filament\Family\PrivacyFamilyPlugin;
 use Modules\Scheduling\Filament\Family\SchedulingFamilyPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
 use Modules\Support\Filament\Family\SupportFamilyPlugin;
@@ -80,6 +81,7 @@ final class FamilyPanelProvider extends PanelProvider
                 BillingFamilyPlugin::make(),
                 ClassroomFamilyPlugin::make(),
                 SupportFamilyPlugin::make(),
+                PrivacyFamilyPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),
             ]);

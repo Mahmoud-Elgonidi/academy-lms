@@ -1279,6 +1279,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/me/data-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My data
+         * @description Whom this person may ask about, what they asked (and what was asked about them), newest first, what an
+         *     erasure removes and what the academy keeps, and the academy's privacy notice, terms and account-deletion page.
+         */
+        get: operations["privacy.requests"];
+        put?: never;
+        /**
+         * Ask for a copy, or for an account to be erased
+         * @description `kind` export (a ZIP of everything the academy holds about the person, built in a few minutes and kept a
+         *     week; one a day) or erasure (the academy answers within 30 days, then the account is erased a day after its
+         *     approval). `subject_id` is one of "subjects" (themselves when left out); `reason` optionally says why (erasure).
+         *     Asked again while one is open, it is the same request. Answers `201`. Send an `Idempotency-Key`.
+         */
+        post: operations["privacy.requests.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/data-requests/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Take an erasure back
+         * @description While the academy has not answered, or in the day after it approved; by whoever asked or the person themselves.
+         */
+        post: operations["privacy.requests.cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/teacher/shifts": {
         parameters: {
             query?: never;
@@ -6002,6 +6050,363 @@ export interface operations {
                     };
                 };
             };
+        };
+    };
+    "privacy.requests": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description Whom this person may ask about: themselves first, then the learners they follow. Empty: a younger student, whose guardian asks. */
+                            subjects: {
+                                id: string;
+                                name: string;
+                                self: boolean;
+                                /** @description Whether a copy can be asked for now: none being prepared, and none ready from the last day. */
+                                can_copy: boolean;
+                            }[];
+                            requests: {
+                                id: string;
+                                /** @description export | erasure */
+                                kind: {
+                                    key: string;
+                                    label: string;
+                                };
+                                /** @description export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled */
+                                status: {
+                                    key: string;
+                                    label: string;
+                                };
+                                /** @description Whom it is about. */
+                                subject: {
+                                    id: string;
+                                    name: string;
+                                    self: boolean;
+                                };
+                                requester: string;
+                                reason: string | null;
+                                /** @description The academy's reason, when it refused. */
+                                answer: string | null;
+                                created_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description When the academy answers by (erasure). */
+                                due_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description When the account is erased, once approved. */
+                                erase_after: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                done_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description Until when a ready copy can be downloaded. */
+                                expires_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description Bytes of a ready copy. */
+                                size: number | null;
+                                /** @description A ready copy's address: opens without signing in, for an hour; ask again for a fresh one. */
+                                download_url: string | null;
+                                /** @description Why an approved erasure went back to the academy (lessons or money that came up meanwhile). */
+                                held_back: string[];
+                                /** @description Whether it can still be taken back. */
+                                can_cancel: boolean;
+                            }[];
+                            /** @description What an erasure removes. */
+                            goes: string[];
+                            /** @description What the academy keeps after an erasure, without the name. */
+                            stays: string[];
+                            /** @constant */
+                            stays_note: "What stays, stays without a name: the account itself becomes \"Deleted account\".";
+                            /**
+                             * @description Hours between the academy's approval and the erasure (it can be taken back until then).
+                             * @constant
+                             */
+                            grace_hours: 24;
+                            /**
+                             * @description Days the academy has to answer an erasure.
+                             * @constant
+                             */
+                            answer_days: 30;
+                            /** @description The academy's public pages, on its own address. */
+                            links: {
+                                privacy: string;
+                                terms: string;
+                                deletion: string;
+                            };
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "privacy.requests.store": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    kind: "export" | "erasure";
+                    /**
+                     * Format: uuid
+                     * @description One of "subjects"; the person themselves when left out.
+                     */
+                    subject_id?: string | null;
+                    reason?: string | null;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description export | erasure */
+                            kind: {
+                                key: unknown;
+                                label: string;
+                            };
+                            /** @description export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled */
+                            status: {
+                                key: unknown;
+                                label: string;
+                            };
+                            /** @description Whom it is about. */
+                            subject: {
+                                id: string;
+                                name: string;
+                                self: boolean;
+                            };
+                            requester: string;
+                            reason: unknown;
+                            /** @description The academy's reason, when it refused. */
+                            answer: unknown;
+                            created_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description When the academy answers by (erasure). */
+                            due_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description When the account is erased, once approved. */
+                            erase_after: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            done_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Until when a ready copy can be downloaded. */
+                            expires_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Bytes of a ready copy. */
+                            size: number | null;
+                            /** @description A ready copy's address: opens without signing in, for an hour; ask again for a fresh one. */
+                            download_url: unknown;
+                            /** @description Why an approved erasure went back to the academy (lessons or money that came up meanwhile). */
+                            held_back: string[];
+                            /** @description Whether it can still be taken back. */
+                            can_cancel: boolean;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "privacy.requests.cancel": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description export | erasure */
+                            kind: {
+                                key: unknown;
+                                label: string;
+                            };
+                            /** @description export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled */
+                            status: {
+                                key: unknown;
+                                label: string;
+                            };
+                            /** @description Whom it is about. */
+                            subject: {
+                                id: string;
+                                name: string;
+                                self: boolean;
+                            };
+                            requester: string;
+                            reason: unknown;
+                            /** @description The academy's reason, when it refused. */
+                            answer: unknown;
+                            created_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description When the academy answers by (erasure). */
+                            due_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description When the account is erased, once approved. */
+                            erase_after: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            done_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Until when a ready copy can be downloaded. */
+                            expires_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Bytes of a ready copy. */
+                            size: number | null;
+                            /** @description A ready copy's address: opens without signing in, for an hour; ask again for a fresh one. */
+                            download_url: unknown;
+                            /** @description Why an approved erasure went back to the academy (lessons or money that came up meanwhile). */
+                            held_back: string[];
+                            /** @description Whether it can still be taken back. */
+                            can_cancel: boolean;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
         };
     };
     "teacher.shifts.show": {

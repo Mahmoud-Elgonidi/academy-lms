@@ -9,6 +9,11 @@ export function seesMoney(stage: Stage): boolean {
   return stage === 'classic';
 }
 
+/** "My data" (a copy, erasure): adults only, in the classic look; a younger student's data is their guardian's to ask about. */
+export function ownsData(stage: Stage): boolean {
+  return stage === 'classic';
+}
+
 /** Whether a lesson offers this person anything to do: cancel, turn down the substitute, rate it once it took place, or dispute what it was recorded as. */
 export function lessonActionsFor(
   lesson: { status: string; can_cancel: boolean; can_refuse_substitute: boolean; can_dispute?: boolean },

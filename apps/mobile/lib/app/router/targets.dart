@@ -17,6 +17,7 @@ String targetOf(String? screen, String? id, Area area) {
       'time_off' => '/teach/more/time-off',
       'payroll_month' => '/teach/earnings',
       'ticket' when id != null => '/teach/more/help/$id',
+      'my_data' => '/teach/more/my-data',
       'session' || 'trial' || 'lesson_rating' => '/teach/today',
       _ => home,
     };
@@ -26,6 +27,7 @@ String targetOf(String? screen, String? id, Area area) {
     (_, 'session' || 'holiday' || 'lesson_rating') => '$base/lessons',
     (Area.family, 'invoice') => '/family/money',
     (Area.family, 'guardian_consent') => '/family/me/privacy',
+    (Area.family, 'my_data') => '/family/me/my-data',
     (Area.family, 'ticket') when id != null => '/family/me/help/$id',
     (Area.middle || Area.teen, 'ticket') when id != null => '/account/help/$id',
     (Area.family, 'report' || 'roadmap') => '/family/progress',

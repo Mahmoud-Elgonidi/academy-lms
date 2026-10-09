@@ -17,6 +17,7 @@ use Modules\Evaluation\Contracts\TeacherComplaints;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
+use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\Support\Console\FollowUpTicketsCommand;
@@ -31,6 +32,7 @@ use Modules\Support\Http\Controllers\TicketFileController;
 use Modules\Support\Listeners\SendSupportNotifications;
 use Modules\Support\Live\MyTicketsChanged;
 use Modules\Support\Live\TicketsChanged;
+use Modules\Support\Privacy\SupportData;
 use Modules\Support\Queries\ComplaintRecordingHolds;
 use Modules\Support\Queries\ConfirmedComplaints;
 use Modules\Support\SupportRules;
@@ -54,6 +56,8 @@ final class SupportServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // The tickets a person opened, for their copy (Privacy).
+        $this->app->make(PersonalData::class)->add(SupportData::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'support');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'support');

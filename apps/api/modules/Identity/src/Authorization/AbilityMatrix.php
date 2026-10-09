@@ -48,6 +48,8 @@ final class AbilityMatrix
             Ability::ManageTeachers => [Role::Owner, Role::Admin, Role::Scheduler],
             // Students and guardians: who enrols them and who follows the families.
             Ability::ManageStudents => [Role::Owner, Role::Admin, Role::Supervisor, Role::Scheduler],
+            // People's copies of their data and erasing their accounts: the academy answers for them (the controller), so its owner and admins.
+            Ability::HandleDataRequests => [Role::Owner, Role::Admin],
         };
     }
 

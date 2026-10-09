@@ -70,6 +70,8 @@
             "Modules\\Crm\\Database\\Seeders\\": "modules/Crm/database/seeders/",
             "Modules\\Support\\": "modules/Support/src/",
             "Modules\\Support\\Database\\Seeders\\": "modules/Support/database/seeders/",
+            "Modules\\Privacy\\": "modules/Privacy/src/",
+            "Modules\\Privacy\\Database\\Seeders\\": "modules/Privacy/database/seeders/",
             "Modules\\Learning\\Database\\Seeders\\": "modules/Learning/database/seeders/",
             "Modules\\Scheduling\\Database\\Factories\\": "modules/Scheduling/database/factories/",
             "Modules\\Scheduling\\Database\\Seeders\\": "modules/Scheduling/database/seeders/"

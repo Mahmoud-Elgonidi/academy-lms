@@ -287,6 +287,38 @@ The rules come with the image (PHP's and Postgres' time zone data). Rebuild and 
 docker compose exec web php artisan scheduling:dst
 ```
 
+## A personal data breach
+
+When personal data may have leaked (a lost laptop with a copy, a key in a log, someone reading another
+academy's records, a backup bucket left open), the clock starts when anyone on the team learns of it:
+the law asks for the authority within **72 hours** (Saudi Arabia: SDAIA, under the PDPL; the EU: each
+academy's supervisory authority, through the academy as controller), and the people at risk without delay.
+
+1. **Stop it**: change the secret that leaked (**Changing a secret** below), suspend the account or the
+   academy from the console, take a public bucket private. Note the time of each step.
+2. **Keep the evidence**: the audit log (back office → Activity, console → Audit), `platform:health --errors`,
+   `docker compose logs` of the parts involved, before they rotate. Do not delete anything.
+3. **Work out what and whom**: which academies, which people, which kinds of data (contact details, a
+   child's data, recordings, invoices). The academy is the controller: tell its owner at once, in writing.
+4. **Report** within 72 hours, with what is known so far (it can be completed later): what happened, when,
+   the data and roughly how many people, the likely effect, what was done and what will be. The academy
+   reports for its people; the platform reports for its own team and helps each academy with the facts.
+5. **Tell the people** when it puts them at risk: plainly, in their language, what happened and what they
+   can do (change a password, watch for messages pretending to be the academy).
+6. **Afterwards**: write down the cause and the fix, and add a test or a check so it cannot happen again.
+
+## A person's data requests are not moving
+
+Copies are built by the worker (**Messages are not going out** above); approved erasures and week-old
+copies are handled every quarter of an hour by the scheduler (`privacy:sweep`). To run it by hand:
+
+```bash
+docker compose exec web php artisan privacy:sweep
+```
+
+An erasure the academy approved is done a day later. If something came up meanwhile (a new lesson, an
+invoice), it goes back to the academy's "Data requests" page with the reason, and nothing is erased.
+
 ## Changing a secret
 
 Edit the value in `.env` (never in the repository, never in a log), then `docker compose up -d`.

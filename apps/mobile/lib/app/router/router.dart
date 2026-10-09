@@ -12,6 +12,7 @@ import '../../features/auth/presentation/pages/code_page.dart';
 import '../../features/auth/presentation/pages/password_page.dart';
 import '../../features/auth/presentation/pages/two_factor_page.dart';
 import '../../features/consent/presentation/privacy_page.dart';
+import '../../features/privacy/presentation/my_data_page.dart';
 import '../../features/recordings/presentation/recordings_page.dart';
 import '../../features/auth/presentation/pages/welcome_page.dart';
 import '../../features/auth/presentation/pages/web_only_page.dart';
@@ -115,7 +116,11 @@ GoRouter buildRouter(SessionCubit session) {
       ...signIn('/welcome'),
       ...signIn('/add'),
       page('/web-only', (_) => const WebOnlyPage()),
-      page('/account', (_) => const AccountPage(standalone: true), routes: [help(HelpScope.self)]),
+      page(
+        '/account',
+        (_) => const AccountPage(standalone: true),
+        routes: [help(HelpScope.self), page('my-data', (_) => const MyDataPage())],
+      ),
       page('/update', (_) => const UpdatePage()),
       page('/inbox', (_) => const InboxPage(), routes: [page('choices', (_) => const ChoicesPage())]),
       page('/open/:screen', (_) => const _Splash(), routes: [page(':id', (_) => const _Splash())]),
@@ -169,6 +174,7 @@ GoRouter buildRouter(SessionCubit session) {
             (_) => const AccountPage(),
             routes: [
               page('privacy', (_) => const PrivacyPage()),
+              page('my-data', (_) => const MyDataPage()),
               page('recordings', (_) => const RecordingsPage(teacher: false)),
               help(HelpScope.family),
             ],
@@ -248,6 +254,7 @@ GoRouter buildRouter(SessionCubit session) {
             routes: [
               page('time-off', (_) => const TimeOffPage()),
               page('recordings', (_) => const RecordingsPage(teacher: true)),
+              page('my-data', (_) => const MyDataPage(teacher: true)),
               help(HelpScope.teacher),
             ],
           ),

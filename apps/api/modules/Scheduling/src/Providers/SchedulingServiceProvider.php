@@ -54,7 +54,9 @@ use Modules\Scheduling\Listeners\FundSessionsFromNewCredit;
 use Modules\Scheduling\Listeners\SendSchedulingNotifications;
 use Modules\Scheduling\Live\BoardChanged;
 use Modules\Scheduling\Live\LessonsChanged;
+use Modules\Scheduling\Privacy\LessonsData;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
@@ -78,6 +80,8 @@ final class SchedulingServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // A person's lessons, disputes and time off, for their copy and erasure (Privacy).
+        $this->app->make(PersonalData::class)->add(LessonsData::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'scheduling');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'scheduling');

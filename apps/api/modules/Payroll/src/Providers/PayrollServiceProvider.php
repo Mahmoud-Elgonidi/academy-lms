@@ -12,9 +12,11 @@ use Modules\Payroll\Filament\Pages\Payroll;
 use Modules\Payroll\Filament\Teacher\MyEarnings;
 use Modules\Payroll\Listeners\AccruePay;
 use Modules\Payroll\Listeners\SendPayrollNotifications;
+use Modules\Payroll\Privacy\EarningsData;
 use Modules\Scheduling\Contracts\Events\SessionCancelled;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\Scheduling\Contracts\Events\SessionFlaggedForReview;
+use Modules\SharedKernel\Privacy\PersonalData;
 
 /**
  * Payroll (docs/architecture/04, M13): rate cards, the teachers' pay ledger,
@@ -25,6 +27,8 @@ final class PayrollServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        // A teacher's pay lines, for their copy (Privacy).
+        $this->app->make(PersonalData::class)->add(EarningsData::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'payroll');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'payroll');

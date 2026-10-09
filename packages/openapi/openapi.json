@@ -9850,6 +9850,1057 @@
                 "security": []
             }
         },
+        "/v1/me/data-requests": {
+            "get": {
+                "operationId": "privacy.requests",
+                "description": "Whom this person may ask about, what they asked (and what was asked about them), newest first, what an\nerasure removes and what the academy keeps, and the academy's privacy notice, terms and account-deletion page.",
+                "summary": "My data",
+                "tags": [
+                    "Privacy"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "subjects": {
+                                                    "type": "array",
+                                                    "description": "Whom this person may ask about: themselves first, then the learners they follow. Empty: a younger student, whose guardian asks.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "self": {
+                                                                "type": "boolean"
+                                                            },
+                                                            "can_copy": {
+                                                                "type": "boolean",
+                                                                "description": "Whether a copy can be asked for now: none being prepared, and none ready from the last day."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "self",
+                                                            "can_copy"
+                                                        ]
+                                                    }
+                                                },
+                                                "requests": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "kind": {
+                                                                "type": "object",
+                                                                "description": "export | erasure",
+                                                                "properties": {
+                                                                    "key": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "key",
+                                                                    "label"
+                                                                ]
+                                                            },
+                                                            "status": {
+                                                                "type": "object",
+                                                                "description": "export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled",
+                                                                "properties": {
+                                                                    "key": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "key",
+                                                                    "label"
+                                                                ]
+                                                            },
+                                                            "subject": {
+                                                                "type": "object",
+                                                                "description": "Whom it is about.",
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "self": {
+                                                                        "type": "boolean"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "id",
+                                                                    "name",
+                                                                    "self"
+                                                                ]
+                                                            },
+                                                            "requester": {
+                                                                "type": "string"
+                                                            },
+                                                            "reason": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "answer": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "The academy's reason, when it refused."
+                                                            },
+                                                            "created_at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            },
+                                                            "due_at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "description": "When the academy answers by (erasure).",
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            },
+                                                            "erase_after": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "description": "When the account is erased, once approved.",
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            },
+                                                            "done_at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            },
+                                                            "expires_at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "description": "Until when a ready copy can be downloaded.",
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            },
+                                                            "size": {
+                                                                "type": [
+                                                                    "integer",
+                                                                    "null"
+                                                                ],
+                                                                "description": "Bytes of a ready copy."
+                                                            },
+                                                            "download_url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "A ready copy's address: opens without signing in, for an hour; ask again for a fresh one."
+                                                            },
+                                                            "held_back": {
+                                                                "type": "array",
+                                                                "description": "Why an approved erasure went back to the academy (lessons or money that came up meanwhile).",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "can_cancel": {
+                                                                "type": "boolean",
+                                                                "description": "Whether it can still be taken back."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "kind",
+                                                            "status",
+                                                            "subject",
+                                                            "requester",
+                                                            "reason",
+                                                            "answer",
+                                                            "created_at",
+                                                            "due_at",
+                                                            "erase_after",
+                                                            "done_at",
+                                                            "expires_at",
+                                                            "size",
+                                                            "download_url",
+                                                            "held_back",
+                                                            "can_cancel"
+                                                        ]
+                                                    }
+                                                },
+                                                "goes": {
+                                                    "type": "array",
+                                                    "description": "What an erasure removes.",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "stays": {
+                                                    "type": "array",
+                                                    "description": "What the academy keeps after an erasure, without the name.",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "stays_note": {
+                                                    "type": "string",
+                                                    "const": "What stays, stays without a name: the account itself becomes \"Deleted account\"."
+                                                },
+                                                "grace_hours": {
+                                                    "type": "integer",
+                                                    "description": "Hours between the academy's approval and the erasure (it can be taken back until then).",
+                                                    "const": 24
+                                                },
+                                                "answer_days": {
+                                                    "type": "integer",
+                                                    "description": "Days the academy has to answer an erasure.",
+                                                    "const": 30
+                                                },
+                                                "links": {
+                                                    "type": "object",
+                                                    "description": "The academy's public pages, on its own address.",
+                                                    "properties": {
+                                                        "privacy": {
+                                                            "type": "string"
+                                                        },
+                                                        "terms": {
+                                                            "type": "string"
+                                                        },
+                                                        "deletion": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "privacy",
+                                                        "terms",
+                                                        "deletion"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "subjects",
+                                                "requests",
+                                                "goes",
+                                                "stays",
+                                                "stays_note",
+                                                "grace_hours",
+                                                "answer_days",
+                                                "links"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "privacy.requests.store",
+                "description": "`kind` export (a ZIP of everything the academy holds about the person, built in a few minutes and kept a\nweek; one a day) or erasure (the academy answers within 30 days, then the account is erased a day after its\napproval). `subject_id` is one of \"subjects\" (themselves when left out); `reason` optionally says why (erasure).\nAsked again while one is open, it is the same request. Answers `201`. Send an `Idempotency-Key`.",
+                "summary": "Ask for a copy, or for an account to be erased",
+                "tags": [
+                    "Privacy"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "kind": {
+                                        "type": "string",
+                                        "enum": [
+                                            "export",
+                                            "erasure"
+                                        ]
+                                    },
+                                    "subject_id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "uuid",
+                                        "description": "One of \"subjects\"; the person themselves when left out."
+                                    },
+                                    "reason": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 1000
+                                    }
+                                },
+                                "required": [
+                                    "kind"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "kind": {
+                                                    "type": "object",
+                                                    "description": "export | erasure",
+                                                    "properties": {
+                                                        "key": {},
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "status": {
+                                                    "type": "object",
+                                                    "description": "export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled",
+                                                    "properties": {
+                                                        "key": {},
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "subject": {
+                                                    "type": "object",
+                                                    "description": "Whom it is about.",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        },
+                                                        "self": {
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name",
+                                                        "self"
+                                                    ]
+                                                },
+                                                "requester": {
+                                                    "type": "string"
+                                                },
+                                                "reason": {},
+                                                "answer": {
+                                                    "description": "The academy's reason, when it refused."
+                                                },
+                                                "created_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "due_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "When the academy answers by (erasure).",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "erase_after": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "When the account is erased, once approved.",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "done_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "expires_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "Until when a ready copy can be downloaded.",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "size": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Bytes of a ready copy."
+                                                },
+                                                "download_url": {
+                                                    "description": "A ready copy's address: opens without signing in, for an hour; ask again for a fresh one."
+                                                },
+                                                "held_back": {
+                                                    "type": "array",
+                                                    "description": "Why an approved erasure went back to the academy (lessons or money that came up meanwhile).",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "can_cancel": {
+                                                    "type": "boolean",
+                                                    "description": "Whether it can still be taken back."
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "kind",
+                                                "status",
+                                                "subject",
+                                                "requester",
+                                                "reason",
+                                                "answer",
+                                                "created_at",
+                                                "due_at",
+                                                "erase_after",
+                                                "done_at",
+                                                "expires_at",
+                                                "size",
+                                                "download_url",
+                                                "held_back",
+                                                "can_cancel"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/me/data-requests/{id}/cancel": {
+            "post": {
+                "operationId": "privacy.requests.cancel",
+                "description": "While the academy has not answered, or in the day after it approved; by whoever asked or the person themselves.",
+                "summary": "Take an erasure back",
+                "tags": [
+                    "Privacy"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "kind": {
+                                                    "type": "object",
+                                                    "description": "export | erasure",
+                                                    "properties": {
+                                                        "key": {},
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "status": {
+                                                    "type": "object",
+                                                    "description": "export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled",
+                                                    "properties": {
+                                                        "key": {},
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "subject": {
+                                                    "type": "object",
+                                                    "description": "Whom it is about.",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        },
+                                                        "self": {
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name",
+                                                        "self"
+                                                    ]
+                                                },
+                                                "requester": {
+                                                    "type": "string"
+                                                },
+                                                "reason": {},
+                                                "answer": {
+                                                    "description": "The academy's reason, when it refused."
+                                                },
+                                                "created_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "due_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "When the academy answers by (erasure).",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "erase_after": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "When the account is erased, once approved.",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "done_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "expires_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "Until when a ready copy can be downloaded.",
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "size": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Bytes of a ready copy."
+                                                },
+                                                "download_url": {
+                                                    "description": "A ready copy's address: opens without signing in, for an hour; ask again for a fresh one."
+                                                },
+                                                "held_back": {
+                                                    "type": "array",
+                                                    "description": "Why an approved erasure went back to the academy (lessons or money that came up meanwhile).",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "can_cancel": {
+                                                    "type": "boolean",
+                                                    "description": "Whether it can still be taken back."
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "kind",
+                                                "status",
+                                                "subject",
+                                                "requester",
+                                                "reason",
+                                                "answer",
+                                                "created_at",
+                                                "due_at",
+                                                "erase_after",
+                                                "done_at",
+                                                "expires_at",
+                                                "size",
+                                                "download_url",
+                                                "held_back",
+                                                "can_cancel"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/teacher/shifts": {
             "get": {
                 "operationId": "teacher.shifts.show",

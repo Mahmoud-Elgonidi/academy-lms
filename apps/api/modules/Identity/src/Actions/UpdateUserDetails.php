@@ -5,7 +5,9 @@ namespace Modules\Identity\Actions;
 use DateTimeZone;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Modules\Identity\Contracts\DTOs\UserDetails;
+use Modules\Identity\Enums\UserStatus;
 use Modules\Identity\Models\User;
 use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -26,6 +28,9 @@ final class UpdateUserDetails
     {
         $academyId = $this->tenants->require()->id;
         $user = User::query()->findOrFail($userId);
+        if ($user->status === UserStatus::Erased) {
+            throw ValidationException::withMessages(['name' => __('identity::users.erased')]);
+        }
         $email = $details->email === null || trim($details->email) === '' ? null : trim($details->email);
 
         Validator::make([

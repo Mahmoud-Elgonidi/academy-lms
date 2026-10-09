@@ -20,6 +20,7 @@ use Modules\Learning\Providers\LearningServiceProvider;
 use Modules\Payroll\Providers\PayrollServiceProvider;
 use Modules\People\Providers\PeopleServiceProvider;
 use Modules\Platform\Providers\PlatformServiceProvider;
+use Modules\Privacy\Providers\PrivacyServiceProvider;
 use Modules\Scheduling\Providers\SchedulingServiceProvider;
 use Modules\SharedKernel\Providers\SharedKernelServiceProvider;
 use Modules\Support\Providers\SupportServiceProvider;
@@ -44,6 +45,7 @@ return [
     CrmServiceProvider::class,
     ImportServiceProvider::class,
     SupportServiceProvider::class,
+    PrivacyServiceProvider::class,
     AppServiceProvider::class,
     AcademyPanelProvider::class,
     TeacherPanelProvider::class,

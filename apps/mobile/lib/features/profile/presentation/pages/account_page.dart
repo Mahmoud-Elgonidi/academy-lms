@@ -39,6 +39,7 @@ class AccountPage extends StatelessWidget {
             if (!standalone) const _Privacy(),
             if (!standalone) const _Recordings(),
             const _Help(),
+            const _MyData(),
             const _ClockPrompt(),
             const _Settings(),
             const _SignInMethods(),
@@ -124,6 +125,36 @@ class _Help extends StatelessWidget {
           key: const Key('open-help'),
           leading: const Icon(Icons.support_agent_outlined),
           title: Text(context.l10n.helpTitle, style: context.text.titleSmall),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: () => context.go(target),
+        ),
+      ),
+    );
+  }
+}
+
+/// One's own data (a copy, erasure) and the academy's privacy pages: a family's from Me, a student's from their
+/// account (a younger student sees that their guardian asks, and the pages); not a child in the kids' look, and a
+/// teacher's is in More.
+class _MyData extends StatelessWidget {
+  const _MyData();
+
+  @override
+  Widget build(BuildContext context) {
+    final target = switch (Area.of(context.watch<SessionCubit>().state)) {
+      Area.family => '/family/me/my-data',
+      Area.middle || Area.teen => '/account/my-data',
+      _ => null,
+    };
+    if (target == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: LmsCard(
+        padding: EdgeInsets.zero,
+        child: ListTile(
+          key: const Key('open-my-data'),
+          leading: const Icon(Icons.fingerprint_rounded),
+          title: Text(context.l10n.myDataTitle, style: context.text.titleSmall),
           trailing: const Icon(Icons.chevron_right_rounded),
           onTap: () => context.go(target),
         ),

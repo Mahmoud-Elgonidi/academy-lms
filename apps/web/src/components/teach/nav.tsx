@@ -27,6 +27,7 @@ export const ME: Item[] = [
   { href: '/teach/notifications', key: 'notifications', icon: 'bell' },
   { href: '/teach/help', key: 'help', icon: 'help' },
   { href: '/teach/account', key: 'account', icon: 'lock' },
+  { href: '/teach/my-data', key: 'myData', icon: 'file' },
 ];
 
 /** The phone's tab bar: the day's work, and the rest under "more". */

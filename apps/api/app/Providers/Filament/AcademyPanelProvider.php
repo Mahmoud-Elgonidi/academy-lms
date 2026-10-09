@@ -34,6 +34,7 @@ use Modules\Learning\Filament\LearningPlugin;
 use Modules\Payroll\Filament\PayrollPlugin;
 use Modules\People\Filament\PeoplePlugin;
 use Modules\Platform\Filament\PlatformPlugin;
+use Modules\Privacy\Filament\PrivacyPlugin;
 use Modules\Scheduling\Filament\SchedulingPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
 use Modules\Support\Filament\SupportPlugin;
@@ -97,6 +98,7 @@ final class AcademyPanelProvider extends PanelProvider
                 PayrollPlugin::make(),
                 ImportPlugin::make(),
                 SupportPlugin::make(),
+                PrivacyPlugin::make(),
                 CommunicationPlugin::make(),
                 ClassroomPlugin::make(),
                 PlatformPlugin::make(),
