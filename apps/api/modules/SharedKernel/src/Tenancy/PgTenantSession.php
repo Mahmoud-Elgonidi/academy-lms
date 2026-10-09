@@ -18,6 +18,8 @@ final class PgTenantSession
 {
     private ?string $tenantId = null;
 
+    private bool $writing = false;
+
     public function __construct(private readonly DatabaseManager $db) {}
 
     public function apply(?string $tenantId): void
@@ -32,11 +34,24 @@ final class PgTenantSession
         }
     }
 
-    /** Re-applies the tenant whenever the app connection is (re)opened. */
+    /**
+     * Re-applies the tenant whenever the app connection is (re)opened. The
+     * connection is opened lazily, so with the database unreachable this
+     * write is what fails; Laravel then reconnects, which announces the
+     * connection again: the write already under way stands for that one
+     * (Laravel retries it once), so a database that is down ends in one
+     * error, not in reconnecting until memory runs out.
+     */
     public function onConnectionEstablished(ConnectionEstablished $event): void
     {
-        if ($event->connectionName === $this->connectionName()) {
+        if ($event->connectionName !== $this->connectionName() || $this->writing) {
+            return;
+        }
+        $this->writing = true;
+        try {
             $this->write($event->connection);
+        } finally {
+            $this->writing = false;
         }
     }
 
