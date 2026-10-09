@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Modules\Platform\Branding\BrandingService;
 use Modules\Platform\Commands\CreatePlatformAdmin;
+use Modules\Platform\Commands\HealthCommand;
 use Modules\Platform\Commands\MeasureUsageCommand;
 use Modules\Platform\Commands\ShowPlatformCode;
 use Modules\Platform\Console\ConsoleService;
@@ -21,11 +22,14 @@ use Modules\Platform\Contracts\PlatformApi;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Platform\Directory\EloquentTenantDirectory;
 use Modules\Platform\Directory\PlatformAccountDirectory;
+use Modules\Platform\Health\WorkerBeat;
+use Modules\Platform\Http\Controllers\HealthController;
 use Modules\Platform\Listeners\RecordConsoleSignIn;
 use Modules\Platform\Models\AcademyBranding;
 use Modules\Platform\Plans\PlanUsage;
 use Modules\Platform\Plans\PlatformAcademyPlan;
 use Modules\Platform\PlatformService;
+use Modules\SharedKernel\Health\Heartbeats;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\FeatureNotInPlan;
 use Modules\SharedKernel\Plans\Limit;
@@ -62,11 +66,18 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'platform');
         Event::listen(Login::class, RecordConsoleSignIn::class);
         if ($this->app->runningInConsole()) {
-            $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class]);
+            $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class, HealthCommand::class]);
         }
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('platform:usage')->dailyAt('02:10')->withoutOverlapping()->onOneServer();
+            // The stack's heartbeats (the scheduler's own, and one through the queue to the worker) and the alerts.
+            $schedule->call(fn () => Heartbeats::beat('scheduler'))->everyMinute()->name('health:scheduler');
+            $schedule->call(fn () => WorkerBeat::dispatch(now()->getTimestamp())->onQueue('default'))->everyMinute()->name('health:worker');
+            $schedule->command('platform:health --alert')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
         });
+
+        // For an uptime monitor (HEALTH_TOKEN): statuses only, no session, no academy.
+        Route::middleware('throttle:30,1')->get('health', HealthController::class)->name('platform.health');
 
         // The plan's storage counts the academy's logo and icon too.
         $this->app->make(UsageMeters::class)->add(Limit::StorageMb, function (): int {

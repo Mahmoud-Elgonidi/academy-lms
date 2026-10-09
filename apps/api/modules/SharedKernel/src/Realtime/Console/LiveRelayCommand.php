@@ -5,6 +5,7 @@ namespace Modules\SharedKernel\Realtime\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Modules\SharedKernel\Health\Heartbeats;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Realtime\RelayPulse;
 use Modules\SharedKernel\Realtime\SignalFolder;
@@ -106,6 +107,7 @@ final class LiveRelayCommand extends Command
     private function pulse(bool $resync = false): void
     {
         $this->send(new RelayPulse($resync));
+        Heartbeats::beat('relay');
         $this->nextPulse = $this->now() + self::PULSE_MS;
     }
 

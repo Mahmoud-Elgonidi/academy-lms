@@ -41,7 +41,7 @@ fi
 dk compose version >/dev/null 2>&1 || fail "Docker Compose v2 (docker compose) is missing. Nothing was changed."
 compose() { dk compose -p "$PROJECT" -f "$HERE/compose.yml" "$@"; }
 
-for f in compose.yml roles.sql postgres-init.sh; do
+for f in compose.yml roles.sql postgres-init.sh postgres-start.sh pg_hba.conf backup.sh; do
     [ -f "$f" ] || fail "$f is missing next to deploy.sh."
 done
 
@@ -168,9 +168,25 @@ APPLE_APP_IDS=
 DEMO_PASSWORD=$(secret | cut -c1-16)
 DEMO_PLATFORM_2FA_SECRET=$(head -c 20 /dev/urandom | base32 | tr -d '=\n')
 BILLING_DEMO_GATEWAY=$demo_gateway
+
+# Health (RUNBOOKS.md): GET /health answers an uptime monitor that sends this
+# token; the console's "System health" page and the alerts go to the platform
+# team (and to HEALTH_ALERT_TO, comma-separated) once mail is set up.
+HEALTH_TOKEN=$(secret)
+HEALTH_ALERT_TO=
+# Backups: the backup part (compose.yml) every day at BACKUP_AT UTC, kept BACKUP_KEEP_DAYS days.
+BACKUPS_EXPECTED=true
+BACKUP_AT=05:30
+BACKUP_KEEP_DAYS=7
 EOF
     chmod 600 .env postgres.env
 fi
+
+# Settings added since this server's .env was written: added once, with their defaults.
+add_if_missing() { grep -qE "^$1=" .env || printf '%s=%s\n' "$1" "$2" >> .env; }
+add_if_missing HEALTH_TOKEN "$(secret)"
+add_if_missing HEALTH_ALERT_TO ""
+add_if_missing BACKUPS_EXPECTED true
 chmod 700 "$HERE" "$DOCKER_CONFIG"
 
 HTTP_PORT="$(setting HTTP_PORT)"

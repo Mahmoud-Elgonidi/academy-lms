@@ -27,6 +27,16 @@ return [
         'ios_url' => env('APP_IOS_URL'),
     ],
 
+    // The stack's health (docs/architecture/03, section 12): the token an
+    // uptime monitor sends to GET /health (empty: no such page), whether this
+    // server has the backup part (then a missing backup or WAL archive is a
+    // fault), and who besides the platform team hears when something breaks.
+    'health' => [
+        'token' => env('HEALTH_TOKEN'),
+        'backups' => (bool) env('BACKUPS_EXPECTED', false),
+        'alert_to' => array_values(array_filter(array_map('trim', explode(',', (string) env('HEALTH_ALERT_TO', ''))))),
+    ],
+
     // Subdomains an academy may not take.
     'reserved_slugs' => ['www', 'api', 'app', 'admin', 'console', 'static', 'cdn', 'mail', 'status', 'docs'],
 ];

@@ -81,16 +81,25 @@ WebSocket upgrade headers.
 ## Day to day (in `~/academy-lms`)
 
 ```bash
-docker compose ps                                  # the eight parts: web, portal, reverb, worker, scheduler, relay, postgres, redis
+docker compose ps                                  # the nine parts: web, portal, reverb, worker, scheduler, relay, backup, postgres, redis
 docker compose logs -f web                         # or portal, worker, scheduler, ...
 docker compose exec web php artisan about
-docker compose exec -T postgres pg_dump -U postgres -Fc lms > lms-$(date +%F).dump   # a backup
+docker compose exec web php artisan platform:health   # every part, the backups, disk, errors (also /console/health)
+./restore.sh list                                  # the backups; ./restore.sh check is a restore drill
 ```
+
+- **When something is wrong**, or for a restore drill or a restore to a moment: [`RUNBOOKS.md`](RUNBOOKS.md).
+- **Backups** are automatic: every change to the database as it happens (at least every 5 minutes), and a
+  base backup, a dump and the app's files every day at `BACKUP_AT` (UTC), kept `BACKUP_KEEP_DAYS` days, in
+  the `backups` volume. They are on this server: copy them elsewhere too (`RUNBOOKS.md`, "Backups").
+- **Health**: the console's System health page; alerts by email to the platform team once mail is set up
+  (`HEALTH_ALERT_TO` adds addresses); an uptime monitor can watch `/health` with `HEALTH_TOKEN` from `.env`.
 
 - **Going back**: run the deploy workflow for an older commit, or put its image in `IMAGE=` in `.env` and
   `docker compose up -d` (migrations already applied stay).
 - **A new setting** the app needs on servers: add it to the `.env` that `deploy.sh` writes on the first
-  deploy, and add it by hand to servers that already have a `.env` (it is never overwritten).
+  deploy, and to its `add_if_missing` list, which adds it once (with its default) to servers that already
+  have a `.env` (the file is never overwritten).
 - **Not on yet**: live lessons through LiveKit (lessons use an outside link: `CLASSROOM_PROVIDER=external`)
   and recording them (LiveKit Egress, with `LIVEKIT_EGRESS_URL`, `RECORDINGS_DISK` and `RECORDINGS_RECORDER_ROOT`),
   email, WhatsApp, texts and push (messages go to the log), real payment gateways (each academy adds its own
@@ -111,5 +120,9 @@ docker compose exec -T postgres pg_dump -U postgres -Fc lms > lms-$(date +%F).du
 | `php.ini` | production PHP settings (opcache, upload size) |
 | `compose.yml` | the stack, with its limits and its one port |
 | `postgres-init.sh` | the LMS roles on a new database (`apps/api/database/setup/roles.sql`) |
-| `deploy.sh` | runs on the server: checks, first-run settings, migrations, start, health check, way back |
+| `postgres-start.sh`, `pg_hba.conf` | how Postgres starts: every finished WAL segment copied into the backups volume, and who may connect (the backup part may take base backups) |
+| `backup.sh` | the backup part: daily base backup, dump and files, retention, restore drills and restoring into a new volume |
+| `restore.sh` | on the server: `list`, `now`, `check [TIME]`, `to TIME\|latest`, `back VOLUME` |
+| `RUNBOOKS.md` | what to do when something is wrong, and how to restore |
+| `deploy.sh` | runs on the server: checks, first-run settings (and settings added since), migrations, start, health check, way back |
 | `setup-nginx.sh`, `nginx/academy-lms.conf` | the server's nginx site, once |

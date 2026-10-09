@@ -6,7 +6,8 @@ name: deploy
 #      the demo data, then the panels, the API sign-in (roles, row-level security
 #      and data together), links on https behind a proxy, a live WebSocket
 #      connection through the web container, and the portal with a
-#      teacher's session;
+#      teacher's session; then backups: a drill, one to a moment before a change,
+#      and the live database put back to that moment and switched back;
 #   3. on main, once the api or web checks pass (or when run by hand from the Actions
 #      tab), pushes the image to GitHub's registry and runs deploy.sh on the
 #      server over SSH.
@@ -79,6 +80,7 @@ jobs:
           dir="$RUNNER_TEMP/academy-lms"
           mkdir -p "$dir/nginx"
           cp infra/deploy/compose.yml infra/deploy/deploy.sh infra/deploy/postgres-init.sh infra/deploy/setup-nginx.sh \
+             infra/deploy/postgres-start.sh infra/deploy/pg_hba.conf infra/deploy/backup.sh infra/deploy/restore.sh \
              apps/api/database/setup/roles.sql "$dir/"
           cp infra/deploy/nginx/academy-lms.conf "$dir/nginx/"
           echo "dir=$dir" >> "$GITHUB_ENV"
@@ -172,9 +174,36 @@ jobs:
           check 200 demo.lms.example /ar/teach -H "Cookie: lms_session=$teacher"
           grep -q 'خالد' /tmp/body || { echo "the portal does not show the teacher's day"; exit 1; }
 
+          # Backups: the WAL archive, a backup, a restore drill to the latest moment and to one
+          # before a change, then the live database put back to that moment and switched back again.
+          sql() { docker compose -p academy-lms -f "$dir/compose.yml" exec -T postgres psql -X -q -U postgres -d lms -Atc "$1"; }
+          sql "create table rehearsal_marker (at timestamptz default now())"
+          (cd "$dir" && bash restore.sh now)
+          sleep 2; before="$(date -u '+%F %T')"; sleep 2
+          sql "insert into rehearsal_marker default values"
+          sql "select pg_switch_wal()" >/dev/null; sleep 5
+          drill() { (cd "$dir" && BACKUP_DRILL_SQL="select count(*) from rehearsal_marker" bash restore.sh check "$@") | tee /tmp/drill; }
+          drill;           grep -q 'drill ok: .*check: 1$' /tmp/drill || { echo "the drill to the latest moment is not right"; exit 1; }
+          drill "$before"; grep -q 'drill ok: .*check: 0$' /tmp/drill || { echo "the drill to a moment before the change is not right"; exit 1; }
+          [ "$(sql "select count(*) from platform_backups where status = 'ok'")" -ge 5 ] || { sql "table platform_backups"; exit 1; }
+          printf 'academy-lms\n' | (cd "$dir" && bash restore.sh to "$before")
+          [ "$(sql "select count(*) from rehearsal_marker")" = 0 ] || { echo "the restore did not go back"; exit 1; }
+          check 200 demo.lms.example /api/v1/auth/login -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' \
+            --data "{\"login\":\"khaled@demo.test\",\"password\":\"$(setting DEMO_PASSWORD)\",\"device_name\":\"rehearsal\"}"
+          printf 'academy-lms\n' | (cd "$dir" && bash restore.sh back academy-lms_postgres-data)
+          [ "$(sql "select count(*) from rehearsal_marker")" = 1 ] || { echo "switching back did not bring the change back"; exit 1; }
+          (cd "$dir" && bash restore.sh list)
+
+          # Health for an uptime monitor: nothing without the token; with it, every check and none failing.
+          check 404 lms.example /health
+          check 200 lms.example /health -H "Authorization: Bearer $(setting HEALTH_TOKEN)"
+          cat /tmp/body; echo
+          python3 -c 'import json,sys; d=json.load(open("/tmp/body")); sys.exit(0 if d["status"] != "fail" and d["checks"]["backups"] == "ok" and d["checks"]["drill"] == "ok" else 1)' \
+            || { echo "the health check is not right"; exit 1; }
+
           # Every part of the stack is up, and only the web port is published, on 127.0.0.1.
           docker compose -p academy-lms -f "$dir/compose.yml" ps
-          [ "$(docker compose -p academy-lms -f "$dir/compose.yml" ps --status running -q | wc -l)" = 8 ]
+          [ "$(docker compose -p academy-lms -f "$dir/compose.yml" ps --status running -q | wc -l)" = 9 ]
           # Only web and postgres have a health check (the image's own, on Caddy's admin port, is off).
           checked="$(docker ps --filter label=com.docker.compose.project=academy-lms --format '{{.Names}} {{.Status}}' | grep -c 'health' || true)"
           [ "$checked" = 2 ] || { echo "expected 2 containers with a health check, found $checked"; exit 1; }
@@ -263,7 +292,8 @@ jobs:
 
           "${ssh_cmd[@]}" "$target" "mkdir -p '$DIR/nginx' && chmod 700 '$DIR'"
           "${scp_cmd[@]}" infra/deploy/compose.yml infra/deploy/deploy.sh infra/deploy/postgres-init.sh \
-            infra/deploy/setup-nginx.sh apps/api/database/setup/roles.sql "$target:$DIR/"
+            infra/deploy/setup-nginx.sh infra/deploy/postgres-start.sh infra/deploy/pg_hba.conf \
+            infra/deploy/backup.sh infra/deploy/restore.sh apps/api/database/setup/roles.sql "$target:$DIR/"
           "${scp_cmd[@]}" infra/deploy/nginx/academy-lms.conf "$target:$DIR/nginx/"
 
           # The registry login travels on stdin (user, then token), never on a command line.

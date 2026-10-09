@@ -94,6 +94,9 @@ services:
 
   # Postgres with the LMS roles (owner for migrations, app under row-level
   # security, platform), made on the first start from roles.sql.
+  # Every finished WAL segment is copied into the backups volume as it fills,
+  # at least every five minutes (postgres-start.sh), and the rules of who may
+  # connect are pg_hba.conf's.
   postgres:
     image: postgres:17
     restart: unless-stopped
@@ -103,10 +106,14 @@ services:
       LMS_OWNER_PASSWORD: ${DB_OWNER_PASSWORD:?}
       LMS_APP_PASSWORD: ${DB_PASSWORD:?}
       LMS_PLATFORM_PASSWORD: ${DB_PLATFORM_PASSWORD:?}
+    command: ["sh", "/etc/academy/postgres-start.sh"]
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - backups:/backups
       - ./roles.sql:/lms-setup/roles.sql:ro
       - ./postgres-init.sh:/docker-entrypoint-initdb.d/10-lms.sh:ro
+      - ./postgres-start.sh:/etc/academy/postgres-start.sh:ro
+      - ./pg_hba.conf:/etc/academy/pg_hba.conf:ro
     healthcheck:
       # Over TCP: while the first start sets up the roles, only the socket is open.
       test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d lms"]
@@ -119,6 +126,33 @@ services:
     deploy:
       resources:
         limits: { memory: "${DB_MEMORY:-1g}", cpus: "${DB_CPUS:-1}" }
+
+  # The backups (backup.sh): a base backup, a dump and the app's files every
+  # day at BACKUP_AT (UTC), kept BACKUP_KEEP_DAYS days, with the WAL archive
+  # between them, so the database can go back to any moment. restore.sh
+  # drills and restores from here; the console shows how the last ones went.
+  backup:
+    image: postgres:17
+    restart: unless-stopped
+    networks: [internal]
+    env_file: [postgres.env]
+    environment:
+      BACKUP_AT: ${BACKUP_AT:-05:30}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-7}
+      BACKUP_FILES_SKIP: ${BACKUP_FILES_SKIP:-recordings}
+    entrypoint: ["bash", "/etc/academy/backup.sh"]
+    command: ["run"]
+    volumes:
+      - backups:/backups
+      - app-storage:/storage:ro
+      - ./backup.sh:/etc/academy/backup.sh:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+    security_opt: ["no-new-privileges:true"]
+    logging: *logging
+    deploy:
+      resources:
+        limits: { memory: "${BACKUP_MEMORY:-512m}", cpus: "${BACKUP_CPUS:-0.5}" }
 
   # Sessions, cache and the queue. Nothing is evicted: a full Redis refuses
   # writes rather than dropping queued messages.
@@ -139,6 +173,9 @@ networks:
   internal: {}
 
 volumes:
-  postgres-data: {}
+  # restore.sh may switch the database to a restored volume (PG_VOLUME in .env).
+  postgres-data:
+    name: ${PG_VOLUME:-academy-lms_postgres-data}
   redis-data: {}
   app-storage: {}
+  backups: {}

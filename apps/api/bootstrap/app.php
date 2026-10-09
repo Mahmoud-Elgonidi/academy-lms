@@ -6,6 +6,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Modules\SharedKernel\Health\RecentErrors;
 use Modules\SharedKernel\Http\Idempotent;
 use Modules\SharedKernel\Http\ProblemDetails;
 use Modules\SharedKernel\Http\ResolveViewerTimezone;
@@ -41,6 +42,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->throttleApi('api');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Every reported error also goes to the platform's health page (redacted, counted by kind).
+        $exceptions->report(function (Throwable $e): void {
+            RecentErrors::record($e);
+        });
+
         // A suspended academy's web pages: one page saying so, not a server error (the API answers 403 academy-suspended).
         $exceptions->render(function (TenantSuspended $e, Request $request) {
             if ($request->is('api/*')) {
