@@ -242,7 +242,7 @@ jobs:
 
           # Every part of the stack is up, and only the web port is published, on 127.0.0.1.
           docker compose -p academy-lms -f "$dir/compose.yml" ps
-          [ "$(docker compose -p academy-lms -f "$dir/compose.yml" ps --status running -q | wc -l)" = 9 ]
+          [ "$(docker compose -p academy-lms -f "$dir/compose.yml" ps --status running -q | wc -l)" = 10 ]
           # None of them fell over and was started again by Docker since it last came up.
           restarts="$(docker inspect --format '{{.Name}} {{.RestartCount}}' $(docker compose -p academy-lms -f "$dir/compose.yml" ps -q) | awk '$2 != 0')"
           [ -z "$restarts" ] || { echo "restarted by Docker: $restarts"; exit 1; }
