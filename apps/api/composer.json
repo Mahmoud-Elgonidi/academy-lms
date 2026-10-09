@@ -72,6 +72,8 @@
             "Modules\\Support\\Database\\Seeders\\": "modules/Support/database/seeders/",
             "Modules\\Privacy\\": "modules/Privacy/src/",
             "Modules\\Privacy\\Database\\Seeders\\": "modules/Privacy/database/seeders/",
+            "Modules\\Safeguarding\\": "modules/Safeguarding/src/",
+            "Modules\\Safeguarding\\Database\\Seeders\\": "modules/Safeguarding/database/seeders/",
             "Modules\\Learning\\Database\\Seeders\\": "modules/Learning/database/seeders/",
             "Modules\\Scheduling\\Database\\Factories\\": "modules/Scheduling/database/factories/",
             "Modules\\Scheduling\\Database\\Seeders\\": "modules/Scheduling/database/seeders/"

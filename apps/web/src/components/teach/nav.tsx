@@ -26,6 +26,8 @@ export const ME: Item[] = [
   { href: '/teach/recordings', key: 'recordings', icon: 'video' },
   { href: '/teach/notifications', key: 'notifications', icon: 'bell' },
   { href: '/teach/help', key: 'help', icon: 'help' },
+  { href: '/teach/concern', key: 'concern', icon: 'hand' },
+  { href: '/teach/documents', key: 'documents', icon: 'file' },
   { href: '/teach/account', key: 'account', icon: 'lock' },
   { href: '/teach/my-data', key: 'myData', icon: 'file' },
 ];

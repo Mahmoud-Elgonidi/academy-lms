@@ -8,6 +8,7 @@ use Modules\Scheduling\Contracts\DTOs\NewSession;
 use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
 use Modules\Scheduling\Domain\Models\BookingHold;
 use Modules\Scheduling\Domain\Models\Session;
+use Modules\Scheduling\Support\MinorsGuard;
 
 /**
  * Books the free trial from a hold: the first held time, then the hold is
@@ -20,11 +21,13 @@ final class ConfirmBooking
     public function __construct(
         private readonly ScheduleSession $schedule,
         private readonly TakeHeldBatch $batch,
+        private readonly MinorsGuard $minors,
     ) {}
 
     public function trial(string $batchId, string $studentId, string $subjectId, string $coordinatorId): Session
     {
         $hold = $this->batch->handle($batchId, $coordinatorId)->first();
+        $this->minors->assert($hold->teacher_id, $studentId);
         $teacherTz = DB::table('users')->where('id', $hold->teacher_id)->value('timezone') ?? 'UTC';
 
         return DB::transaction(function () use ($hold, $batchId, $studentId, $subjectId, $coordinatorId, $teacherTz) {

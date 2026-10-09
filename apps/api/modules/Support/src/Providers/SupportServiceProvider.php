@@ -51,7 +51,7 @@ final class SupportServiceProvider extends ServiceProvider
         $this->app->scoped(SupportRules::class);
         $this->app->bind(TeacherComplaints::class, ConfirmedComplaints::class);
         // And the classroom keeps a lesson's recordings while a complaint about it is open.
-        $this->app->bind(RecordingHolds::class, ComplaintRecordingHolds::class);
+        $this->app->tag([ComplaintRecordingHolds::class], RecordingHolds::SOURCES);
     }
 
     public function boot(): void

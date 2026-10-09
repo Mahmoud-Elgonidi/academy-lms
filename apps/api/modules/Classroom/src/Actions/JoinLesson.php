@@ -9,7 +9,10 @@ use Modules\Classroom\Models\ClassroomSettings;
 use Modules\Classroom\Models\Room;
 use Modules\Classroom\Video\JoinTicket;
 use Modules\Classroom\Video\ProviderManager;
+use Modules\Classroom\Video\Seat;
+use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Contracts\AttendanceApi;
+use Modules\Scheduling\Contracts\DTOs\LessonCard;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
@@ -25,6 +28,7 @@ final class JoinLesson
         private readonly ClassroomAccess $access,
         private readonly ProviderManager $providers,
         private readonly TenantContext $tenant,
+        private readonly PeopleApi $people,
     ) {}
 
     public function handle(string $sessionId, string $userId, ?CarbonImmutable $now = null): JoinTicket
@@ -49,6 +53,20 @@ final class JoinLesson
             'name' => Room::nameFor($this->tenant->require()->id, $lesson->id),
         ]);
 
-        return $this->providers->get($room->provider)->ticket($room, $seat, $lesson);
+        return $this->providers->get($room->provider)->ticket($room, $seat, $lesson)->withCamera($this->cameraOn($seat, $lesson));
+    }
+
+    /** A student comes in with the camera the academy chose (on, off, or off when under 18); everyone else with it on. */
+    private function cameraOn(Seat $seat, LessonCard $lesson): bool
+    {
+        if ($seat->role !== 'student') {
+            return true;
+        }
+
+        return match (ClassroomSettings::current()->student_camera) {
+            'off' => false,
+            'off_for_minors' => $lesson->studentId === null || ! $this->people->isMinor($lesson->studentId),
+            default => true,
+        };
     }
 }

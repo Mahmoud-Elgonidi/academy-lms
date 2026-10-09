@@ -156,3 +156,29 @@ export async function cancelDataRequest(id: string): Promise<Done> {
   refresh();
   return { ok: true };
 }
+
+/**
+ * Tells the academy's safeguarding leads that something is wrong (a family
+ * names the learner, a teacher may name a student). One key per submit, so a
+ * retry raises it once.
+ */
+export async function raiseConcern(
+  form: { learner_id?: string; category: string; text: string; urgent: boolean; session_id?: string; student_id?: string },
+  key: string,
+): Promise<{ ok: true; number: string; message: string } | { ok: false; message?: string; errors?: Record<string, string[]> }> {
+  const body = {
+    category: form.category,
+    text: form.text.trim() || null,
+    urgent: form.urgent,
+    ...(form.learner_id ? { learner_id: form.learner_id } : {}),
+    ...(form.session_id ? { session_id: form.session_id } : {}),
+    ...(form.student_id ? { student_id: form.student_id } : {}),
+  };
+  const done = await send<{ data: { number: string } | null; message: string }>('post', '/v1/safeguarding/concerns', { body, idempotencyKey: key });
+  if (!done.ok) {
+    const problem = failed(done.problem);
+    return problem.ok ? { ok: false } : problem;
+  }
+  refresh();
+  return { ok: true, number: done.data.data?.number ?? '', message: done.data.message };
+}

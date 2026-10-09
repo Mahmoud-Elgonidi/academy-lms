@@ -14,6 +14,7 @@ use Modules\Scheduling\Contracts\DTOs\EnrollmentBooked;
 use Modules\Scheduling\Contracts\DTOs\EnrollmentTerms;
 use Modules\Scheduling\Domain\Models\BookingHold;
 use Modules\Scheduling\Domain\Slots\WeeklyTime;
+use Modules\Scheduling\Support\MinorsGuard;
 
 /**
  * Turns a hold into an enrolment, all or nothing (docs/architecture/01, flow
@@ -37,12 +38,14 @@ final class EnrollStudent
         private readonly CreateRecurringSlots $slots,
         private readonly MaterializeSessions $materialize,
         private readonly FundSessions $fund,
+        private readonly MinorsGuard $minors,
     ) {}
 
     public function handle(string $batchId, string $studentId, string $subjectId, EnrollmentTerms $terms, string $coordinatorId): EnrollmentBooked
     {
         $holds = $this->batch->handle($batchId, $coordinatorId);
         $first = $holds->first();
+        $this->minors->assert($first->teacher_id, $studentId);
         $teacherTz = DB::table('users')->where('id', $first->teacher_id)->value('timezone') ?? 'UTC';
         $duration = (int) $first->starts_at->diffInMinutes($first->ends_at);
 

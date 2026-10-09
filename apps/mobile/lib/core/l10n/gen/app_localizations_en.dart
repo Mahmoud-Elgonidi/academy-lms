@@ -2085,4 +2085,149 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketClosed => 'This ticket is closed. Open a new one if you need anything.';
+
+  @override
+  String get tellUsTitle => 'Report a concern';
+
+  @override
+  String get tellUsTitleStudent => 'Something wrong? Tell us';
+
+  @override
+  String get tellUsTitleKids => 'Is something wrong?';
+
+  @override
+  String get tellUsNavKids => 'Tell a grown-up';
+
+  @override
+  String get tellUsNavMiddle => 'Tell us';
+
+  @override
+  String get tellUsLead =>
+      'If anything about a lesson, a teacher or anyone on the platform worries you, tell us here. Only the people who keep children safe at the academy read it.';
+
+  @override
+  String get tellUsLeadStudent =>
+      'If someone made you feel uncomfortable, scared or unsafe, tell us. Only the people who keep students safe at the academy read it, and you will not get in trouble.';
+
+  @override
+  String get tellUsLeadKids => 'If someone made you sad or scared, press a button. A grown-up at the academy will help.';
+
+  @override
+  String get concernTeacherNav => 'Raise a concern';
+
+  @override
+  String get concernTeacherTitle => 'Raise a safeguarding concern';
+
+  @override
+  String get concernTeacherLead =>
+      'If something about a student\'s safety or wellbeing worries you, or another adult\'s behaviour, tell the academy\'s safeguarding leads here. Only they read it. Do not look into it or contact the family about it yourself.';
+
+  @override
+  String concernAbout(String name) {
+    return 'About $name';
+  }
+
+  @override
+  String get concernWhat => 'What is it about?';
+
+  @override
+  String get concernWhatKids => 'What happened?';
+
+  @override
+  String get concernPick => 'Choose what it is about.';
+
+  @override
+  String get concernText => 'What happened?';
+
+  @override
+  String get concernTextKids => 'Do you want to say more? You don\'t have to.';
+
+  @override
+  String get concernTextHint => 'When it happened, who was there, what was said.';
+
+  @override
+  String get concernLesson => 'In which lesson (if any)?';
+
+  @override
+  String get concernNoLesson => 'Not about a lesson';
+
+  @override
+  String get concernStudent => 'Which student?';
+
+  @override
+  String get concernNoStudent => 'Not about one student';
+
+  @override
+  String get concernUrgent => 'Someone may be in danger right now';
+
+  @override
+  String get concernSend => 'Send';
+
+  @override
+  String get concernSendTeacher => 'Send to the safeguarding leads';
+
+  @override
+  String get concernAgain => 'Tell us something else';
+
+  @override
+  String get concernAgainTeacher => 'Raise another';
+
+  @override
+  String concernNumber(String number) {
+    return 'No. $number';
+  }
+
+  @override
+  String get concernsMine => 'What you told us';
+
+  @override
+  String get concernsNone => 'Nothing yet.';
+
+  @override
+  String get documentsTitle => 'My documents';
+
+  @override
+  String get documentsLead =>
+      'The academy checks these documents against the original; a criminal record check is what teaching students under 18 needs.';
+
+  @override
+  String get documentSend => 'Send a document';
+
+  @override
+  String get documentSendHint => 'A clear photo or the PDF from the authority. Keep the original: the academy may ask to see it.';
+
+  @override
+  String get documentKind => 'Document';
+
+  @override
+  String get documentReference => 'Certificate number (optional)';
+
+  @override
+  String get documentExpires => 'Valid until (optional)';
+
+  @override
+  String documentUntil(String day) {
+    return 'valid until $day';
+  }
+
+  @override
+  String get documentNoEnd => 'no end date';
+
+  @override
+  String get documentPick => 'Choose a photo or PDF';
+
+  @override
+  String get documentPickFirst => 'Choose the photo or PDF first.';
+
+  @override
+  String get documentTooBig => 'The file is larger than 10 MB.';
+
+  @override
+  String get documentSent => 'Sent: the academy will check it.';
+
+  @override
+  String get documentsList => 'What you sent';
+
+  @override
+  String get documentsNone => 'You have not sent any documents yet.';
 }

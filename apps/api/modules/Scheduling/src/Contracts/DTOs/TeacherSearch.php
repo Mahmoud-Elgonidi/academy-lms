@@ -19,5 +19,6 @@ final readonly class TeacherSearch
         public ?string $levelId = null,       // a level of the subject: teachers whose range holds it
         public ?string $categoryId = null,    // a category of the subject: teachers in it (or in all of them)
         public ?string $ageGroup = null,      // People's AgeGroup: teachers who teach that age (or any)
+        public bool $forMinor = false,        // the student is under 18: only teachers People clears for it (safeguarding)
     ) {}
 }

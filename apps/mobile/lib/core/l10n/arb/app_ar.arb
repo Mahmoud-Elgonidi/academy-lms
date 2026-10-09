@@ -1470,5 +1470,71 @@
   },
   "ticketClose": "اقفل التذكرة",
   "ticketCloseHint": "اقفلها لما تتحل أو لو مابقيتش محتاجها. مش هتاخد رسايل تاني.",
-  "ticketClosed": "التذكرة دي اتقفلت. افتح تذكرة جديدة لو محتاج حاجة."
+  "ticketClosed": "التذكرة دي اتقفلت. افتح تذكرة جديدة لو محتاج حاجة.",
+  "tellUsTitle": "بلّغ عن قلق",
+  "tellUsTitleStudent": "فيه حاجة مش مظبوطة؟ قولّنا",
+  "tellUsTitleKids": "فيه حاجة زعّلتك؟",
+  "tellUsNavKids": "قول لحد كبير",
+  "tellUsNavMiddle": "قولّنا",
+  "tellUsLead": "لو أي حاجة في حصة، أو من مدرس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.",
+  "tellUsLeadStudent": "لو حد خلّاك تحس إنك مش مرتاح، أو خايف، أو مش في أمان، قولّنا. اللي بيقراها بس المسؤولين عن حماية الطلاب في الأكاديمية، ومش هتتعاقب.",
+  "tellUsLeadKids": "لو حد زعّلك أو خوّفك، دوس على زرار. حد كبير في الأكاديمية هيساعدك.",
+  "concernTeacherNav": "بلّغ عن قلق",
+  "concernTeacherTitle": "بلّغ عن قلق على أمان طالب",
+  "concernTeacherLead": "لو حاجة في أمان طالب أو حالته قلقاك، أو تصرّف حد كبير تاني، قول لمسؤولين الحماية في الأكاديمية هنا. هما بس اللي بيقروه. ماتحققش فيه ولا تكلّم الأسرة عنه بنفسك.",
+  "concernAbout": "عن {name}",
+  "@concernAbout": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "concernWhat": "الموضوع عن إيه؟",
+  "concernWhatKids": "إيه اللي حصل؟",
+  "concernPick": "اختار الموضوع عن إيه.",
+  "concernText": "إيه اللي حصل؟",
+  "concernTextKids": "عايز تقول أكتر؟ مش لازم.",
+  "concernTextHint": "حصل إمتى، ومين كان موجود، وإيه اللي اتقال.",
+  "concernLesson": "في أنهي حصة (لو فيه)؟",
+  "concernNoLesson": "مش عن حصة",
+  "concernStudent": "أنهي طالب؟",
+  "concernNoStudent": "مش عن طالب معيّن",
+  "concernUrgent": "ممكن حد يكون في خطر دلوقتي",
+  "concernSend": "ابعت",
+  "concernSendTeacher": "ابعت لمسؤولين الحماية",
+  "concernAgain": "قولّنا حاجة تانية",
+  "concernAgainTeacher": "بلّغ عن حاجة تانية",
+  "concernNumber": "رقم {number}",
+  "@concernNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "concernsMine": "اللي قولتهولنا",
+  "concernsNone": "لسه مفيش.",
+  "documentsTitle": "مستنداتي",
+  "documentsLead": "الأكاديمية بتراجع المستندات دي على الأصل؛ وفيش الصحيفة الجنائية هو اللي مطلوب عشان تدرّس للي تحت 18.",
+  "documentSend": "ابعت مستند",
+  "documentSendHint": "صورة واضحة أو الـ PDF من الجهة. خلّي الأصل معاك: الأكاديمية ممكن تطلب تشوفه.",
+  "documentKind": "المستند",
+  "documentReference": "رقم الشهادة (اختياري)",
+  "documentExpires": "صالح لحد (اختياري)",
+  "documentUntil": "صالح لحد {day}",
+  "@documentUntil": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "documentNoEnd": "مالوش تاريخ انتهاء",
+  "documentPick": "اختار صورة أو PDF",
+  "documentPickFirst": "اختار الصورة أو الـ PDF الأول.",
+  "documentTooBig": "الملف أكبر من 10 ميجا.",
+  "documentSent": "اتبعت: الأكاديمية هتراجعه.",
+  "documentsList": "اللي بعته",
+  "documentsNone": "لسه ما بعتش أي مستندات."
 }

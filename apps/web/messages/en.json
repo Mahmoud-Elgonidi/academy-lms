@@ -95,7 +95,8 @@
       "help": "Help",
       "recordings": "Lesson recordings",
       "account": "My account",
-      "myData": "My data"
+      "myData": "My data",
+      "tellUs": "Report a concern"
     },
     "kids": {
       "menu": "Menu",
@@ -107,7 +108,8 @@
       "challenges": "Missions",
       "notifications": "Messages",
       "more": "More",
-      "help": "Help"
+      "help": "Help",
+      "tellUs": "Tell a grown-up"
     },
     "middle": {
       "menu": "Menu",
@@ -121,7 +123,8 @@
       "more": "More",
       "help": "Ask for help",
       "recordings": "My lesson recordings",
-      "account": "My account"
+      "account": "My account",
+      "tellUs": "Tell us"
     },
     "teen": {
       "menu": "Menu",
@@ -135,12 +138,15 @@
       "more": "More",
       "help": "Help",
       "recordings": "My lesson recordings",
-      "account": "My account"
+      "account": "My account",
+      "tellUs": "Report a concern"
     },
     "help": "Support",
     "recordings": "My lesson recordings",
     "account": "My account",
-    "myData": "My data"
+    "myData": "My data",
+    "concern": "Raise a concern",
+    "documents": "My documents"
   },
   "family": {
     "switchLearner": "Choose whose",
@@ -726,5 +732,69 @@
     },
     "back": "Back",
     "failed": "The request did not go through. Try again."
+  },
+  "safeguarding": {
+    "title": {
+      "classic": "Report a concern about a child's safety",
+      "student": "Something wrong? Tell us",
+      "kids": "Is something wrong?",
+      "teacher": "Raise a safeguarding concern"
+    },
+    "lead": {
+      "classic": "If anything about a lesson, a teacher or anyone on the platform worries you, tell us here. Only the people who keep children safe at the academy read it.",
+      "student": "If someone made you feel uncomfortable, scared or unsafe, tell us. Only the people who keep students safe at the academy read it, and you will not get in trouble.",
+      "kids": "If someone made you sad or scared, press a button. A grown-up at the academy will help.",
+      "teacher": "If something about a student's safety or wellbeing worries you, or another adult's behaviour, tell the academy's safeguarding leads here. Only they read it. Do not look into it or contact the family about it yourself."
+    },
+    "about": "About {name}",
+    "what": {
+      "classic": "What is it about?",
+      "student": "What is it about?",
+      "kids": "What happened?"
+    },
+    "pick": "Choose what it is about.",
+    "text": {
+      "classic": "What happened?",
+      "student": "What happened?",
+      "kids": "Do you want to say more? You don't have to."
+    },
+    "textHint": "When it happened, who was there, what was said: in your own words.",
+    "student": "Which student?",
+    "noStudent": "Not about one student",
+    "lesson": "In which lesson (if any)?",
+    "noLesson": "Not about a lesson",
+    "urgent": "Someone may be in danger right now",
+    "send": {
+      "classic": "Send to the academy",
+      "student": "Send",
+      "kids": "Send",
+      "teacher": "Send to the safeguarding leads"
+    },
+    "again": "Tell us something else",
+    "againTeacher": "Raise another",
+    "number": "No. {number}",
+    "mine": "What you told us",
+    "none": "Nothing yet.",
+    "reply": "The academy's reply"
+  },
+  "documents": {
+    "title": "My documents",
+    "lead": "The academy checks these documents against the original; a criminal record check is what teaching students under 18 needs.",
+    "send": "Send a document",
+    "sendHint": "A clear photo or the PDF from the authority. Keep the original: the academy may ask to see it.",
+    "kind": "Document",
+    "reference": "Certificate number",
+    "issuedOn": "Issued on",
+    "expiresOn": "Valid until",
+    "expiresHint": "Leave it empty if it does not run out.",
+    "file": "Scan or PDF (10 MB at most)",
+    "submit": "Send",
+    "sent": "Sent: the academy will check it.",
+    "tooBig": "The file is larger than 10 MB.",
+    "list": "What you sent",
+    "none": "You have not sent any documents yet.",
+    "issued": "issued {day}",
+    "until": "valid until {day}",
+    "noEnd": "no end date"
   }
 }

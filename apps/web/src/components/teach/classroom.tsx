@@ -17,7 +17,8 @@ type Stage = { kind: 'ready' } | { kind: 'in'; ticket: JoinTicket; recording: Le
 /**
  * Going into the lesson: the API gives this person a seat (JoinLesson, which
  * also says when it is too early or the lesson is over). A LiveKit room opens
- * here with camera and microphone; an outside link opens in a new tab.
+ * here with camera and microphone (a student's camera off when the academy
+ * says so; they can switch it on); an outside link opens in a new tab.
  * Attendance comes from the room itself (webhooks), not from this page.
  * Everyone sees when the lesson is being recorded; its teacher starts and
  * stops it here, once everyone it records agreed.
@@ -50,7 +51,7 @@ export function Classroom({ id, back }: { id: string; back: { href: string; labe
           serverUrl={stage.ticket.url}
           token={stage.ticket.token}
           connect
-          video={stage.ticket.can_publish}
+          video={stage.ticket.can_publish && stage.ticket.camera !== false}
           audio={stage.ticket.can_publish}
           onDisconnected={() => setStage({ kind: 'left' })}
           data-lk-theme="default"

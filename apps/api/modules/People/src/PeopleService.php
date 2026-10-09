@@ -3,11 +3,14 @@
 namespace Modules\People;
 
 use Carbon\CarbonImmutable;
+use Modules\People\Actions\Checks\PauseTeacherForMinors;
+use Modules\People\Actions\Checks\ResumeTeacherForMinors;
 use Modules\People\Actions\LinkGuardian;
 use Modules\People\Actions\SaveStudentDetails;
 use Modules\People\Actions\SaveStudentProfile;
 use Modules\People\Actions\SaveTeacherProfile;
 use Modules\People\Actions\SendWelcome;
+use Modules\People\Checks\Clearances;
 use Modules\People\Consent\ConsentRules;
 use Modules\People\Contracts\DTOs\ConsentState;
 use Modules\People\Contracts\DTOs\StudentDetails;
@@ -25,7 +28,41 @@ final class PeopleService implements PeopleApi
         private readonly SaveTeacherProfile $saveTeacherProfile,
         private readonly SaveStudentProfile $saveStudentProfile,
         private readonly ConsentRules $consents,
+        private readonly Clearances $clearances,
     ) {}
+
+    /** Under this age a student is a minor (safeguarding; the consent age is the academy's own). */
+    public const ADULT_AGE = 18;
+
+    public function minors(array $studentIds): array
+    {
+        return $this->consents->under(array_values(array_unique($studentIds)), self::ADULT_AGE);
+    }
+
+    public function isMinor(string $studentId): bool
+    {
+        return $this->minors([$studentId])[$studentId] ?? false;
+    }
+
+    public function clearances(array $teacherIds): array
+    {
+        return $this->clearances->many($teacherIds);
+    }
+
+    public function mayTeach(string $teacherId, string $studentId): bool
+    {
+        return ! $this->isMinor($studentId) || $this->clearances->of($teacherId)->cleared;
+    }
+
+    public function pauseForMinors(string $teacherId, string $reason, string $actorId): void
+    {
+        app(PauseTeacherForMinors::class)->handle($teacherId, $reason, $actorId);
+    }
+
+    public function resumeForMinors(string $teacherId, string $reason, string $actorId): void
+    {
+        app(ResumeTeacherForMinors::class)->handle($teacherId, $reason, $actorId);
+    }
 
     public function saveStudentProfile(string $studentId, ?CarbonImmutable $birthDate, ?LearnerStage $stage): void
     {

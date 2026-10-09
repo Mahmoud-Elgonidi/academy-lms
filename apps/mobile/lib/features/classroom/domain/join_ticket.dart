@@ -12,6 +12,7 @@ class JoinTicket {
     this.name,
     this.role,
     this.canPublish = true,
+    this.camera = true,
     this.recording = const RecordingState(),
   });
 
@@ -23,6 +24,7 @@ class JoinTicket {
     name: json['name'] as String?,
     role: json['role'] as String?,
     canPublish: json['can_publish'] != false,
+    camera: json['camera'] != false,
     recording: RecordingState.fromJson(recording),
   );
 
@@ -33,6 +35,9 @@ class JoinTicket {
   final String? name;
   final String? role;
   final bool canPublish;
+
+  /// Come in with the camera on; false: the academy has this student start with it off (they may switch it on).
+  final bool camera;
   final RecordingState recording;
 
   bool get isLiveKit => provider == 'livekit' && token != null;

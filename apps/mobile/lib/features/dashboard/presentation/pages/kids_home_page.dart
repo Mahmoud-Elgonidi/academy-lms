@@ -69,6 +69,13 @@ class _KidsHome extends StatelessWidget {
                 ],
               ),
             ),
+            // "Is something wrong?": a child tells the academy's grown-ups in one tap from their journey.
+            IconButton(
+              key: const Key('kids-tell-us'),
+              tooltip: l.tellUsNavKids,
+              icon: Icon(Icons.shield_outlined, color: c.brand),
+              onPressed: () => context.push('/account/tell-us'),
+            ),
             const NotificationBell(),
             Semantics(
               label: '${home.journey.stars} ${l.stars}',

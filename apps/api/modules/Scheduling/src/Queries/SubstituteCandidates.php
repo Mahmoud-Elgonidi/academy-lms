@@ -4,18 +4,25 @@ namespace Modules\Scheduling\Queries;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Domain\Models\Session;
+use Modules\Scheduling\Support\MinorsGuard;
 
 /**
  * Who can cover a lesson (docs/architecture/01, flow "ز": the same engine as
  * finding a teacher): active teachers of the subject, on shift and free for
  * the whole lesson (their own time off and the academy's holidays already
- * out), other than its teacher. Those who already taught the student come
+ * out), other than its teacher, and for a student under 18 only teachers
+ * cleared for minors. Those who already taught the student come
  * first, then the least busy.
  */
 final class SubstituteCandidates
 {
-    public function __construct(private readonly AvailabilityQuery $availability) {}
+    public function __construct(
+        private readonly AvailabilityQuery $availability,
+        private readonly MinorsGuard $minors,
+        private readonly PeopleApi $people,
+    ) {}
 
     /**
      * @param  iterable<Session>  $sessions
@@ -43,6 +50,9 @@ final class SubstituteCandidates
         $free = $this->availability->forTeachers($teachers->pluck('id')->unique()->values()->all(), $from, $to, $viewerId);
 
         $students = DB::table('session_participants')->whereIn('session_id', $sessions->pluck('id'))->where('role', 'student')->pluck('user_id', 'session_id');
+        // A lesson with a student under 18 goes only to a teacher cleared for minors (safeguarding).
+        $minors = $this->people->minors($students->unique()->values()->all());
+        $cleared = in_array(true, $minors, true) ? array_flip($this->minors->cleared($teachers->pluck('id')->unique()->values()->all())) : null;
         $taught = DB::table('sessions as s')
             ->join('session_participants as p', fn ($j) => $j->on('p.academy_id', '=', 's.academy_id')->on('p.session_id', '=', 's.id')->where('p.role', '=', 'student'))
             ->whereIn('p.user_id', $students->unique()->values())->where('s.status', 'completed')
@@ -57,6 +67,7 @@ final class SubstituteCandidates
             $result[$session->id] = $teachers
                 ->where('subject_id', $session->subject_id)
                 ->reject(fn ($t) => $t->id === $session->teacher_id)
+                ->reject(fn ($t) => $cleared !== null && ($minors[$student] ?? false) && ! isset($cleared[$t->id]))
                 ->filter(fn ($t) => isset($free[$t->id]) && $free[$t->id]->free->contains($session->starts_at->getTimestamp(), $session->ends_at->getTimestamp()))
                 ->map(fn ($t) => [
                     'id' => $t->id,

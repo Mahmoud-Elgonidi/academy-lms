@@ -11,6 +11,7 @@ use Modules\Scheduling\Contracts\DTOs\NewSession;
 use Modules\Scheduling\Domain\Enums\FundingStatus;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Queries\AvailabilityQuery;
+use Modules\Scheduling\Support\MinorsGuard;
 
 /**
  * Books one lesson outside the weekly times (an extra lesson the family
@@ -26,6 +27,7 @@ final class BookExtraLesson
         private readonly CreditsApi $credits,
         private readonly EnrollmentApi $enrollments,
         private readonly AvailabilityQuery $availability,
+        private readonly MinorsGuard $minors,
     ) {}
 
     public function handle(string $enrollmentId, CarbonImmutable $startsAt, ?string $actorId): Session
@@ -35,6 +37,7 @@ final class BookExtraLesson
             throw ValidationException::withMessages(['enrollment' => __('scheduling::policy.errors.no_extra_credit')]);
         }
 
+        $this->minors->assert($enrollment->teacherId, $enrollment->studentId);
         $duration = (int) (DB::table('recurring_slots')->where('enrollment_id', $enrollmentId)->value('duration_min') ?? 30);
         $startsAt = $startsAt->utc();
         $endsAt = $startsAt->addMinutes($duration);

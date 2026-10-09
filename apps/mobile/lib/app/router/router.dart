@@ -37,6 +37,8 @@ import '../../features/profile/presentation/pages/account_page.dart';
 import '../../features/roadmap/presentation/pages/progress_page.dart';
 import '../../features/roadmap/presentation/pages/reports_page.dart';
 import '../../features/schedule/presentation/pages/lessons_page.dart';
+import '../../features/safeguarding/presentation/documents_page.dart';
+import '../../features/safeguarding/presentation/tell_us_page.dart';
 import '../../features/support/presentation/help_page.dart';
 import '../../features/support/presentation/ticket_page.dart';
 import '../../features/teaching/presentation/pages/earnings_page.dart';
@@ -119,7 +121,11 @@ GoRouter buildRouter(SessionCubit session) {
       page(
         '/account',
         (_) => const AccountPage(standalone: true),
-        routes: [help(HelpScope.self), page('my-data', (_) => const MyDataPage())],
+        routes: [
+          help(HelpScope.self),
+          page('my-data', (_) => const MyDataPage()),
+          page('tell-us', (_) => const TellUsPage(scope: ConcernScope.self)),
+        ],
       ),
       page('/update', (_) => const UpdatePage()),
       page('/inbox', (_) => const InboxPage(), routes: [page('choices', (_) => const ChoicesPage())]),
@@ -176,6 +182,7 @@ GoRouter buildRouter(SessionCubit session) {
               page('privacy', (_) => const PrivacyPage()),
               page('my-data', (_) => const MyDataPage()),
               page('recordings', (_) => const RecordingsPage(teacher: false)),
+              page('tell-us', (_) => const TellUsPage(scope: ConcernScope.family)),
               help(HelpScope.family),
             ],
           ),
@@ -255,6 +262,8 @@ GoRouter buildRouter(SessionCubit session) {
               page('time-off', (_) => const TimeOffPage()),
               page('recordings', (_) => const RecordingsPage(teacher: true)),
               page('my-data', (_) => const MyDataPage(teacher: true)),
+              page('concern', (_) => const TellUsPage(scope: ConcernScope.teacher)),
+              page('documents', (_) => const DocumentsPage()),
               help(HelpScope.teacher),
             ],
           ),

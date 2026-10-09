@@ -11,6 +11,8 @@ describe('where a notification opens', () => {
     expect(targetOf('payroll_month', '2026-09')).toBe('/teach/earnings?month=2026-09');
     expect(targetOf('payroll_month', '../x')).toBe('/teach/earnings');
     expect(targetOf('trial', 'x')).toBe('/teach/trials');
+    expect(targetOf('my_concerns', null)).toBe('/teach/concern');
+    expect(targetOf('my_checks', 'c1')).toBe('/teach/documents');
     expect(targetOf('session', 's1')).toBe('/teach');
     expect(targetOf(undefined, undefined)).toBe('/teach');
   });

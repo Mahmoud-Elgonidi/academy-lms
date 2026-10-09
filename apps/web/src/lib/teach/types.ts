@@ -281,5 +281,7 @@ export type JoinTicket = {
   name: string;
   role: string;
   can_publish: boolean;
+  /** Come in with the camera on; false: the academy has this student start with it off (they may switch it on). */
+  camera?: boolean;
   expires_at: string;
 };

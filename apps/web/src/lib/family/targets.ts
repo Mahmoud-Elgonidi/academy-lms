@@ -20,6 +20,8 @@ export function familyTargetOf(screen: string | null | undefined, money: boolean
       return '/family/homework';
     case 'guardian_consent':
       return '/family/privacy';
+    case 'my_concerns':
+      return '/family/tell-us';
     default:
       return '/family';
   }

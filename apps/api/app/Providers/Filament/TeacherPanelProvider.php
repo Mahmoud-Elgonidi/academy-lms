@@ -25,8 +25,10 @@ use Modules\Identity\Filament\Pages\SignIn;
 use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\Learning\Filament\Teacher\LearningTeacherPlugin;
 use Modules\Payroll\Filament\Teacher\PayrollTeacherPlugin;
+use Modules\People\Filament\Teacher\PeopleTeacherPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
 use Modules\Privacy\Filament\Teacher\PrivacyTeacherPlugin;
+use Modules\Safeguarding\Filament\Teacher\SafeguardingTeacherPlugin;
 use Modules\Scheduling\Filament\Teacher\SchedulingTeacherPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
 use Modules\Support\Filament\Teacher\SupportTeacherPlugin;
@@ -83,6 +85,8 @@ final class TeacherPanelProvider extends PanelProvider
                 PayrollTeacherPlugin::make(),
                 SupportTeacherPlugin::make(),
                 PrivacyTeacherPlugin::make(),
+                SafeguardingTeacherPlugin::make(),
+                PeopleTeacherPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),
             ]);

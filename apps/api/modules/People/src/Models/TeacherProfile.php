@@ -2,6 +2,7 @@
 
 namespace Modules\People\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
@@ -18,6 +19,9 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property list<string> $age_groups
  * @property ?int $max_daily_lessons
  * @property string $status
+ * @property ?CarbonImmutable $minors_paused_at kept from new lessons with minors while a concern is looked into
+ * @property ?string $minors_paused_by
+ * @property ?string $minors_pause_reason
  */
 final class TeacherProfile extends Model
 {
@@ -29,7 +33,7 @@ final class TeacherProfile extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['user_id', 'gender', 'languages', 'dialect', 'accepts_new', 'accepts_trials', 'max_weekly_min', 'max_daily_lessons', 'age_groups', 'status'];
+    protected $fillable = ['user_id', 'gender', 'languages', 'dialect', 'accepts_new', 'accepts_trials', 'max_weekly_min', 'max_daily_lessons', 'age_groups', 'status', 'minors_paused_at', 'minors_paused_by', 'minors_pause_reason'];
 
     protected function casts(): array
     {
@@ -40,6 +44,7 @@ final class TeacherProfile extends Model
             'max_weekly_min' => 'integer',
             'max_daily_lessons' => 'integer',
             'age_groups' => 'array',
+            'minors_paused_at' => 'immutable_datetime',
         ];
     }
 

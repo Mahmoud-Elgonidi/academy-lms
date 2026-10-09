@@ -16,6 +16,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property int $recording_days how long a recording is kept
  * @property bool $recording_family a family watches its own lessons' recordings
  * @property bool $recording_teacher a teacher watches their own lessons' recordings
+ * @property string $student_camera on | off | off_for_minors: how a student comes in (they can always switch it)
  */
 final class ClassroomSettings extends Model
 {
@@ -27,6 +28,9 @@ final class ClassroomSettings extends Model
 
     public const RECORDING_MEDIA = ['by_age', 'video', 'audio'];
 
+    /** How a student comes into a lesson: camera on, off, or off when under 18. */
+    public const STUDENT_CAMERA = ['on', 'off', 'off_for_minors'];
+
     /** The days a recording may be kept: a week to a year (30 unless the academy chose). */
     public const RECORDING_DAYS = [7, 365];
 
@@ -36,7 +40,7 @@ final class ClassroomSettings extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['provider', 'recording', 'recording_media', 'recording_days', 'recording_family', 'recording_teacher'];
+    protected $fillable = ['provider', 'recording', 'recording_media', 'recording_days', 'recording_family', 'recording_teacher', 'student_camera'];
 
     protected $attributes = [
         'recording' => 'off',
@@ -44,6 +48,7 @@ final class ClassroomSettings extends Model
         'recording_days' => 30,
         'recording_family' => true,
         'recording_teacher' => true,
+        'student_camera' => 'on',
     ];
 
     protected function casts(): array

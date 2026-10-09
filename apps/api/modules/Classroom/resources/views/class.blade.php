@@ -38,6 +38,8 @@
         header .lesson { display: flex; flex-direction: column; min-width: 0; flex: 1; }
         header .lesson strong { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         header .lesson small { color: var(--muted); font-size: 12px; }
+        header .concern { color: var(--muted); font-size: 12px; text-decoration: underline; white-space: nowrap; }
+        header .concern:hover { color: var(--text); }
         .chip { font-size: 12px; padding: 2px 10px; border-radius: 999px; background: color-mix(in oklab, var(--brand) 25%, transparent); color: #fff; white-space: nowrap; }
         .quality { font-size: 12px; color: var(--muted); white-space: nowrap; }
         .quality[data-q="poor"], .quality[data-q="lost"] { color: #fbbf24; }
@@ -107,6 +109,13 @@
         </span>
         <span class="rec" id="rec" role="status" @if (! $recording['running']) hidden @endif>{{ __('classroom::recordings.room.on') }}</span>
         <span class="quality" id="quality"></span>
+        @php
+            // Anyone in the lesson can tell the academy's safeguarding leads that something is wrong, without leaving it.
+            $concernRoute = ['student' => 'filament.family.pages.tell-us', 'teacher' => 'filament.teach.pages.raise-concern'][$seat->role] ?? null;
+        @endphp
+        @if ($concernRoute && Route::has($concernRoute))
+            <a class="concern" href="{{ route($concernRoute) }}" target="_blank" rel="noopener">{{ __($l.'room.concern') }}</a>
+        @endif
         <span class="chip">{{ __($l.'roles.'.$seat->role) }}</span>
     </header>
 
@@ -318,7 +327,8 @@
             refreshWaiting();
             if (publishes) {
                 try { await room.localParticipant.setMicrophoneEnabled(true); } catch (e) {}
-                if (withVideo) { try { await room.localParticipant.setCameraEnabled(true); } catch (e) {} }
+                // The academy may have a student come in with the camera off (under-18s, or everyone): they can switch it on.
+                if (withVideo && ticket.camera !== false) { try { await room.localParticipant.setCameraEnabled(true); } catch (e) {} }
             }
             if (!withVideo) await setAudioOnly(true);
             syncButtons();

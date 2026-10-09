@@ -126,6 +126,7 @@ return [
         'quota' => 'The student has used the :n cancellations and reschedules of this block.',
     ],
     'errors' => [
+        'not_cleared' => 'This teacher cannot take new lessons with students under 18 right now (:state).',
         'not_movable' => 'This session cannot be moved: it has started or is closed.',
         'in_the_past' => 'Pick a time in the future.',
         'teacher_busy' => 'The teacher is not free or not on shift then.',

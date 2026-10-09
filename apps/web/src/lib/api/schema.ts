@@ -1259,6 +1259,55 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/teacher/checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My documents
+         * @description Whether the academy asks for a valid criminal record check to teach students under 18 (`required`), where
+         *     the teacher's own stands (`state`: verified, pending, expired, missing, not_required) with the day it runs
+         *     out, the kinds of document one may send, and the documents sent, newest first: a turned-down one with the
+         *     academy's reason.
+         */
+        get: operations["teacher.checks"];
+        put?: never;
+        /**
+         * Send a document
+         * @description Multipart: `kind`, `file` (a picture or PDF, 10 MB), and optionally `reference` (the certificate's number),
+         *     `issued_on` and `expires_on` (dates). One of a kind waits at a time. Answers `201` with the document. Send an
+         *     `Idempotency-Key`.
+         */
+        post: operations["teacher.checks.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/teacher/checks/{check}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A document's scan
+         * @description The picture or PDF the teacher sent, inline; only their own.
+         */
+        get: operations["teacher.checks.file"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/branding": {
         parameters: {
             query?: never;
@@ -1321,6 +1370,56 @@ export interface paths {
          * @description While the academy has not answered, or in the day after it approved; by whoever asked or the person themselves.
          */
         post: operations["privacy.requests.cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/safeguarding/new": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What a concern can be about
+         * @description The look the screen speaks in (kids: a child's words, the text optional, no lesson and no "danger now";
+         *     student; classic; teacher), the choices in those words, the lessons it may be about (the learner's or the
+         *     teacher's from the last month, newest first) and, for a teacher, the students they taught lately. A family
+         *     names the learner with `learner_id` (else the first).
+         */
+        get: operations["safeguarding.new"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/safeguarding/concerns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My concerns
+         * @description The concerns this person raised, newest first: when, what about, where each stands (received, being looked
+         *     into, closed) and the academy's reply once closed. Never the leads' notes or what was done.
+         */
+        get: operations["safeguarding.concerns"];
+        put?: never;
+        /**
+         * Raise a concern
+         * @description `category` is one of what "new" offered; `text` what happened (a child may leave it out); `urgent` when someone
+         *     may be in danger now; `session_id` optionally one of the lessons offered; a teacher may name `student_id`.
+         *     Answers `201` with the concern as its reporter sees it. Send an `Idempotency-Key`.
+         */
+        post: operations["safeguarding.concerns.store"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2422,6 +2521,8 @@ export interface operations {
                             name: string;
                             role: string;
                             can_publish: boolean;
+                            /** @description Come in with the camera on; false: the academy has this student start with it off (they may switch it on). */
+                            camera: boolean;
                             expires_at: string;
                         } | {
                             /** @constant */
@@ -2433,6 +2534,8 @@ export interface operations {
                             name: string;
                             role: string;
                             can_publish: boolean;
+                            /** @description Come in with the camera on; false: the academy has this student start with it off (they may switch it on). */
+                            camera: boolean;
                             expires_at: string;
                         };
                         recording: {
@@ -5983,6 +6086,202 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
         };
     };
+    "teacher.checks": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            required: boolean;
+                            /** @description verified | pending | expired | missing | not_required */
+                            state: string;
+                            /** @description What the state means for the teacher, in words; empty when nothing is asked of them. */
+                            state_label: string;
+                            /** @description The day the verified check runs out (none: it does not). */
+                            valid_until: string | null;
+                            kinds: {
+                                key: string;
+                                label: string;
+                            }[];
+                            checks: {
+                                id: string;
+                                /** @description criminal_record | identity | qualification | other */
+                                kind: {
+                                    key: string;
+                                    label: string;
+                                };
+                                reference: string | null;
+                                issued_on: string | null;
+                                expires_on: string | null;
+                                /** @description pending | verified | rejected */
+                                status: {
+                                    key: string;
+                                    label: string;
+                                };
+                                /** @description Why the academy turned it down (only then). */
+                                reason: string | null;
+                                sent_at: string;
+                                file: {
+                                    name: string;
+                                    url: string;
+                                } | null;
+                            }[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "teacher.checks.store": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** @enum {string} */
+                    kind: "criminal_record" | "identity" | "qualification" | "other";
+                    /**
+                     * Format: binary
+                     * @description Maximum file size: 10240 kilobytes.
+                     */
+                    file: string;
+                    reference?: string | null;
+                    /** Format: date */
+                    issued_on?: string | null;
+                    /** Format: date */
+                    expires_on?: string | null;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description criminal_record | identity | qualification | other */
+                            kind: {
+                                key: string;
+                                label: string;
+                            };
+                            reference: string | null;
+                            issued_on: string | null;
+                            expires_on: string | null;
+                            /** @description pending | verified | rejected */
+                            status: {
+                                key: string;
+                                label: string;
+                            };
+                            /** @description Why the academy turned it down (only then). */
+                            reason: string | null;
+                            sent_at: string;
+                            file: {
+                                name: string;
+                                url: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "teacher.checks.file": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                check: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    "Transfer-Encoding": "chunked";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
     "platform.branding": {
         parameters: {
             query?: never;
@@ -6407,6 +6706,236 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "safeguarding.new": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /**
+                             * @description kids | student | classic | teacher
+                             * @enum {string}
+                             */
+                            look: "teacher" | "kids" | "student" | "classic";
+                            /** @description The learner it would be about; null for a teacher. */
+                            learner: {
+                                id: string;
+                                name: string;
+                            } | null;
+                            categories: {
+                                key: string;
+                                label: string;
+                            }[];
+                            /** @description Whether the person must say what happened (a child may just press the button). */
+                            text_required: boolean;
+                            /** @description Whether to offer "someone may be in danger right now" (not to a child). */
+                            urgent_allowed: boolean;
+                            lessons: {
+                                id: string;
+                                subject: string;
+                                starts_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description The other side of the lesson: its student for a teacher, its teacher for a family. */
+                                with: string;
+                            }[];
+                            /** @description A teacher's students of the last months; empty for a family. */
+                            students: {
+                                id: string;
+                                name: string;
+                            }[];
+                            /**
+                             * @description What to do first when someone is in danger now, in the screen's words.
+                             * @enum {string}
+                             */
+                            danger: "If a child is in danger right now, call the emergency services first, then write it here." | "safeguarding::screens.family.danger.teacher" | "safeguarding::screens.family.danger.kids" | "safeguarding::screens.family.danger.student" | "safeguarding::screens.family.danger.classic";
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "safeguarding.concerns": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            number: string;
+                            category: {
+                                key: string;
+                                label: string;
+                            };
+                            status: {
+                                key: string;
+                                label: string;
+                            };
+                            urgent: boolean;
+                            text: string;
+                            reply: string | null;
+                            created_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            closed_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                        }[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "safeguarding.concerns.store": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description A family: the learner it is about (one of theirs). */
+                    learner_id?: string | null;
+                    /** @enum {string} */
+                    category: "adult_behaviour" | "outside_contact" | "content" | "bullying" | "wellbeing" | "other";
+                    text?: string | null;
+                    urgent?: boolean | null;
+                    /** @description One of the lessons "new" offered. */
+                    session_id?: string | null;
+                    /** @description A teacher: one of the students "new" offered. */
+                    student_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            number: string;
+                            category: {
+                                key: string;
+                                label: string;
+                            };
+                            status: {
+                                key: string;
+                                label: string;
+                            };
+                            urgent: boolean;
+                            text: string;
+                            reply: string | null;
+                            created_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            closed_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                        } | null;
+                        /** @enum {string} */
+                        message: "Thank you. The safeguarding leads have it." | "safeguarding::screens.family.sent.teacher" | "safeguarding::screens.family.sent.kids" | "safeguarding::screens.family.sent.student" | "safeguarding::screens.family.sent.classic";
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
         };
     };
     "teacher.shifts.show": {

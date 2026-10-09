@@ -14,7 +14,7 @@ use Modules\Classroom\Http\Controllers\LiveKitWebhookController;
 use Modules\Classroom\Http\Controllers\RecordingMediaController;
 use Modules\Classroom\Privacy\RecordingsData;
 use Modules\Classroom\Queries\VideoMinutes;
-use Modules\Classroom\Recordings\NoRecordingHolds;
+use Modules\Classroom\Recordings\AllRecordingHolds;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Scheduling\Contracts\AttendanceApi;
@@ -30,8 +30,8 @@ final class ClassroomServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../../config/classroom.php', 'classroom');
-        // Support binds its own (open complaints keep a lesson's recordings); without it nothing holds them.
-        $this->app->bindIf(RecordingHolds::class, NoRecordingHolds::class);
+        // Every module's reasons to keep a lesson's recordings (tagged RecordingHolds::SOURCES), asked together.
+        $this->app->bind(RecordingHolds::class, AllRecordingHolds::class);
     }
 
     public function boot(): void

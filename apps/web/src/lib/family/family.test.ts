@@ -101,3 +101,12 @@ describe("a guardian's children's privacy", () => {
     expect(isGuardian([{ is_self: false }])).toBe(true);
   });
 });
+
+describe('telling the academy something is wrong', () => {
+  it('is in every look, a child\'s too, and opens from its notification', () => {
+    for (const stage of STAGES) {
+      expect(itemsOf(stage, seesMoney(stage)).all.find((i) => i.key === 'tellUs')?.href).toBe('/family/tell-us');
+    }
+    expect(familyTargetOf('my_concerns', false)).toBe('/family/tell-us');
+  });
+});

@@ -38,15 +38,7 @@ final class ConsentRules
         if ($userIds === []) {
             return [];
         }
-        $today = ($now ?? CarbonImmutable::now())->setTimezone($this->tenants->require()->defaultTimezone)->startOfDay();
-        $age = $this->consentAge();
-        $people = DB::table('users as u')
-            ->leftJoin('student_profiles as sp', fn ($j) => $j->on('sp.user_id', '=', 'u.id')->on('sp.academy_id', '=', 'u.academy_id'))
-            ->whereIn('u.id', $userIds)
-            ->select('u.id', 'u.is_managed_minor', 'sp.birth_date')
-            ->selectRaw("exists (select 1 from user_roles r where r.academy_id = u.academy_id and r.user_id = u.id and r.role = 'student') as is_student")
-            ->selectRaw('exists (select 1 from guardian_student g where g.academy_id = u.academy_id and g.student_id = u.id) as has_guardian')
-            ->get();
+        $under = $this->under($userIds, $this->consentAge(), $now);
         $consents = DB::table('guardian_consents as c')
             ->leftJoin('users as g', fn ($j) => $j->on('g.id', '=', 'c.guardian_id')->on('g.academy_id', '=', 'c.academy_id'))
             ->whereIn('c.student_id', $userIds)->whereNull('c.withdrawn_at')->where('c.purpose', 'account')
@@ -54,13 +46,10 @@ final class ConsentRules
             ->keyBy('student_id');
 
         $states = [];
-        foreach ($people as $person) {
-            $needed = (bool) $person->is_student && ($person->birth_date !== null
-                ? CarbonImmutable::parse($person->birth_date, $today->timezone)->addYears($age)->greaterThan($today)
-                : ((bool) $person->is_managed_minor || (bool) $person->has_guardian));
-            $consent = $consents->get($person->id);
-            $states[$person->id] = new ConsentState(
-                studentId: $person->id,
+        foreach ($under as $id => $needed) {
+            $consent = $consents->get($id);
+            $states[$id] = new ConsentState(
+                studentId: $id,
                 needed: $needed,
                 granted: $consent !== null,
                 consentId: $consent?->id,
@@ -72,5 +61,38 @@ final class ConsentRules
         }
 
         return $states;
+    }
+
+    /**
+     * Which of these people are students younger than $age: by their birth
+     * date on the academy's calendar, or, with none, a student the academy
+     * manages for a guardian or who has a guardian at all. Anyone else (staff,
+     * teachers, guardians, adults) is not.
+     *
+     * @param  list<string>  $userIds
+     * @return array<string, bool>
+     */
+    public function under(array $userIds, int $age, ?CarbonImmutable $now = null): array
+    {
+        if ($userIds === []) {
+            return [];
+        }
+        $today = ($now ?? CarbonImmutable::now())->setTimezone($this->tenants->require()->defaultTimezone)->startOfDay();
+        $people = DB::table('users as u')
+            ->leftJoin('student_profiles as sp', fn ($j) => $j->on('sp.user_id', '=', 'u.id')->on('sp.academy_id', '=', 'u.academy_id'))
+            ->whereIn('u.id', $userIds)
+            ->select('u.id', 'u.is_managed_minor', 'sp.birth_date')
+            ->selectRaw("exists (select 1 from user_roles r where r.academy_id = u.academy_id and r.user_id = u.id and r.role = 'student') as is_student")
+            ->selectRaw('exists (select 1 from guardian_student g where g.academy_id = u.academy_id and g.student_id = u.id) as has_guardian')
+            ->get();
+
+        $under = [];
+        foreach ($people as $person) {
+            $under[$person->id] = (bool) $person->is_student && ($person->birth_date !== null
+                ? CarbonImmutable::parse($person->birth_date, $today->timezone)->addYears($age)->greaterThan($today)
+                : ((bool) $person->is_managed_minor || (bool) $person->has_guardian));
+        }
+
+        return $under;
     }
 }

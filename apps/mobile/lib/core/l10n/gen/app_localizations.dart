@@ -3613,6 +3613,276 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'التذكرة دي اتقفلت. افتح تذكرة جديدة لو محتاج حاجة.'**
   String get ticketClosed;
+
+  /// No description provided for @tellUsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'بلّغ عن قلق'**
+  String get tellUsTitle;
+
+  /// No description provided for @tellUsTitleStudent.
+  ///
+  /// In ar, this message translates to:
+  /// **'فيه حاجة مش مظبوطة؟ قولّنا'**
+  String get tellUsTitleStudent;
+
+  /// No description provided for @tellUsTitleKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'فيه حاجة زعّلتك؟'**
+  String get tellUsTitleKids;
+
+  /// No description provided for @tellUsNavKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'قول لحد كبير'**
+  String get tellUsNavKids;
+
+  /// No description provided for @tellUsNavMiddle.
+  ///
+  /// In ar, this message translates to:
+  /// **'قولّنا'**
+  String get tellUsNavMiddle;
+
+  /// No description provided for @tellUsLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو أي حاجة في حصة، أو من مدرس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.'**
+  String get tellUsLead;
+
+  /// No description provided for @tellUsLeadStudent.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو حد خلّاك تحس إنك مش مرتاح، أو خايف، أو مش في أمان، قولّنا. اللي بيقراها بس المسؤولين عن حماية الطلاب في الأكاديمية، ومش هتتعاقب.'**
+  String get tellUsLeadStudent;
+
+  /// No description provided for @tellUsLeadKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو حد زعّلك أو خوّفك، دوس على زرار. حد كبير في الأكاديمية هيساعدك.'**
+  String get tellUsLeadKids;
+
+  /// No description provided for @concernTeacherNav.
+  ///
+  /// In ar, this message translates to:
+  /// **'بلّغ عن قلق'**
+  String get concernTeacherNav;
+
+  /// No description provided for @concernTeacherTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'بلّغ عن قلق على أمان طالب'**
+  String get concernTeacherTitle;
+
+  /// No description provided for @concernTeacherLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو حاجة في أمان طالب أو حالته قلقاك، أو تصرّف حد كبير تاني، قول لمسؤولين الحماية في الأكاديمية هنا. هما بس اللي بيقروه. ماتحققش فيه ولا تكلّم الأسرة عنه بنفسك.'**
+  String get concernTeacherLead;
+
+  /// No description provided for @concernAbout.
+  ///
+  /// In ar, this message translates to:
+  /// **'عن {name}'**
+  String concernAbout(String name);
+
+  /// No description provided for @concernWhat.
+  ///
+  /// In ar, this message translates to:
+  /// **'الموضوع عن إيه؟'**
+  String get concernWhat;
+
+  /// No description provided for @concernWhatKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'إيه اللي حصل؟'**
+  String get concernWhatKids;
+
+  /// No description provided for @concernPick.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار الموضوع عن إيه.'**
+  String get concernPick;
+
+  /// No description provided for @concernText.
+  ///
+  /// In ar, this message translates to:
+  /// **'إيه اللي حصل؟'**
+  String get concernText;
+
+  /// No description provided for @concernTextKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'عايز تقول أكتر؟ مش لازم.'**
+  String get concernTextKids;
+
+  /// No description provided for @concernTextHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصل إمتى، ومين كان موجود، وإيه اللي اتقال.'**
+  String get concernTextHint;
+
+  /// No description provided for @concernLesson.
+  ///
+  /// In ar, this message translates to:
+  /// **'في أنهي حصة (لو فيه)؟'**
+  String get concernLesson;
+
+  /// No description provided for @concernNoLesson.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش عن حصة'**
+  String get concernNoLesson;
+
+  /// No description provided for @concernStudent.
+  ///
+  /// In ar, this message translates to:
+  /// **'أنهي طالب؟'**
+  String get concernStudent;
+
+  /// No description provided for @concernNoStudent.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش عن طالب معيّن'**
+  String get concernNoStudent;
+
+  /// No description provided for @concernUrgent.
+  ///
+  /// In ar, this message translates to:
+  /// **'ممكن حد يكون في خطر دلوقتي'**
+  String get concernUrgent;
+
+  /// No description provided for @concernSend.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت'**
+  String get concernSend;
+
+  /// No description provided for @concernSendTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت لمسؤولين الحماية'**
+  String get concernSendTeacher;
+
+  /// No description provided for @concernAgain.
+  ///
+  /// In ar, this message translates to:
+  /// **'قولّنا حاجة تانية'**
+  String get concernAgain;
+
+  /// No description provided for @concernAgainTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'بلّغ عن حاجة تانية'**
+  String get concernAgainTeacher;
+
+  /// No description provided for @concernNumber.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم {number}'**
+  String concernNumber(String number);
+
+  /// No description provided for @concernsMine.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي قولتهولنا'**
+  String get concernsMine;
+
+  /// No description provided for @concernsNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش.'**
+  String get concernsNone;
+
+  /// No description provided for @documentsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مستنداتي'**
+  String get documentsTitle;
+
+  /// No description provided for @documentsLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية بتراجع المستندات دي على الأصل؛ وفيش الصحيفة الجنائية هو اللي مطلوب عشان تدرّس للي تحت 18.'**
+  String get documentsLead;
+
+  /// No description provided for @documentSend.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت مستند'**
+  String get documentSend;
+
+  /// No description provided for @documentSendHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'صورة واضحة أو الـ PDF من الجهة. خلّي الأصل معاك: الأكاديمية ممكن تطلب تشوفه.'**
+  String get documentSendHint;
+
+  /// No description provided for @documentKind.
+  ///
+  /// In ar, this message translates to:
+  /// **'المستند'**
+  String get documentKind;
+
+  /// No description provided for @documentReference.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم الشهادة (اختياري)'**
+  String get documentReference;
+
+  /// No description provided for @documentExpires.
+  ///
+  /// In ar, this message translates to:
+  /// **'صالح لحد (اختياري)'**
+  String get documentExpires;
+
+  /// No description provided for @documentUntil.
+  ///
+  /// In ar, this message translates to:
+  /// **'صالح لحد {day}'**
+  String documentUntil(String day);
+
+  /// No description provided for @documentNoEnd.
+  ///
+  /// In ar, this message translates to:
+  /// **'مالوش تاريخ انتهاء'**
+  String get documentNoEnd;
+
+  /// No description provided for @documentPick.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار صورة أو PDF'**
+  String get documentPick;
+
+  /// No description provided for @documentPickFirst.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار الصورة أو الـ PDF الأول.'**
+  String get documentPickFirst;
+
+  /// No description provided for @documentTooBig.
+  ///
+  /// In ar, this message translates to:
+  /// **'الملف أكبر من 10 ميجا.'**
+  String get documentTooBig;
+
+  /// No description provided for @documentSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتبعت: الأكاديمية هتراجعه.'**
+  String get documentSent;
+
+  /// No description provided for @documentsList.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي بعته'**
+  String get documentsList;
+
+  /// No description provided for @documentsNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه ما بعتش أي مستندات.'**
+  String get documentsNone;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

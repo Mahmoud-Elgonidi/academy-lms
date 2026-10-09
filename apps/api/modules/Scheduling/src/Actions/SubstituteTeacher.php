@@ -12,6 +12,7 @@ use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionEvent;
 use Modules\Scheduling\Queries\AvailabilityQuery;
+use Modules\Scheduling\Support\MinorsGuard;
 
 /**
  * Another teacher covers one lesson (docs/architecture/02, section 5:
@@ -23,7 +24,10 @@ use Modules\Scheduling\Queries\AvailabilityQuery;
  */
 final class SubstituteTeacher
 {
-    public function __construct(private readonly AvailabilityQuery $availability) {}
+    public function __construct(
+        private readonly AvailabilityQuery $availability,
+        private readonly MinorsGuard $minors,
+    ) {}
 
     public function handle(Session $session, string $teacherId, ?string $actorId): Session
     {
@@ -38,6 +42,7 @@ final class SubstituteTeacher
         if (! $teaches) {
             throw ValidationException::withMessages(['teacher' => __($l.'not_their_subject')]);
         }
+        $this->minors->assert($teacherId, $session->participants()->where('role', ParticipantRole::Student->value)->pluck('user_id')->all());
         $free = $this->availability->forTeachers([$teacherId], $session->starts_at, $session->ends_at, $actorId)[$teacherId]->free ?? null;
         if ($free === null || ! $free->contains($session->starts_at->getTimestamp(), $session->ends_at->getTimestamp())) {
             throw ValidationException::withMessages(['teacher' => __('scheduling::policy.errors.teacher_busy')]);

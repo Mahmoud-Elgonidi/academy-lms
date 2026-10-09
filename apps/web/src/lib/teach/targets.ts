@@ -16,6 +16,10 @@ export function targetOf(screen: string | null | undefined, id: string | null | 
       return id && /^\d{4}-\d{2}$/.test(id) ? `/teach/earnings?month=${id}` : '/teach/earnings';
     case 'trial':
       return '/teach/trials';
+    case 'my_concerns':
+      return '/teach/concern';
+    case 'my_checks':
+      return '/teach/documents';
     default:
       return '/teach';
   }

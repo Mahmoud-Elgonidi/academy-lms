@@ -54,11 +54,24 @@ return [
             'social_linked' => ':name ربط حساب :provider (:via)',
             'social_unlinked' => ':name فصل حساب :provider',
         ],
+        'safeguarding' => [
+            'concern_reported' => 'اتبعت بلاغ الحماية :concern',
+            'concern_acknowledged' => 'بلاغ الحماية :concern اتمسك',
+            'concern_closed' => 'بلاغ الحماية :concern اتقفل: :concern_outcome',
+            'concern_reopened' => 'بلاغ الحماية :concern اتفتح تاني',
+        ],
         'people' => [
             'consent_granted' => ':guardian وافق على حساب :student (:via)',
             'consent_recorded' => 'تسجيل موافقة ولي أمر :student من الإدارة: :note',
             'consent_withdrawn' => ':guardian سحب موافقته على حساب :student',
             'consent_age_saved' => 'سن موافقة ولي الأمر بقى أقل من :age سنة',
+            'check_added' => 'اتضاف :document لـ :teacher',
+            'check_verified' => ':document بتاع :teacher اتأكد (لحد :until)',
+            'check_rejected' => ':document بتاع :teacher اترفض',
+            'minors_paused' => ':teacher اتوقف عن الحصص الجديدة مع أقل من 18',
+            'minors_resumed' => ':teacher رجع يدرّس لأقل من 18: :reason',
+            'minor_check_required' => 'المدرس بقى محتاج فيش جنائي متأكد عشان يدرّس لأقل من 18',
+            'minor_check_optional' => 'المدرس مابقاش محتاج فيش جنائي عشان يدرّس لأقل من 18',
         ],
         'classroom' => [
             'recording_settings_saved' => 'إعدادات تسجيل الحصص: :recording، :media، :days يوم',
@@ -100,6 +113,8 @@ return [
         ],
     ],
     'values' => [
+        'concern_outcome' => ['no_concern' => 'مفيش حاجة تتعمل', 'resolved' => 'اتحل', 'teacher_action' => 'إجراء مع مدرس', 'referred' => 'اتحول لجهة برّه', 'duplicate' => 'مكرر'],
+        'document' => ['criminal_record' => 'الفيش الجنائي', 'identity' => 'البطاقة', 'qualification' => 'المؤهل', 'other' => 'المستند'],
         'method' => ['bank_transfer' => 'تحويل بنكي', 'instapay' => 'InstaPay', 'wallet' => 'محفظة إلكترونية', 'cash' => 'كاش', 'card_terminal' => 'ماكينة كارت', 'other' => 'أخرى', 'online' => 'دفع إلكتروني'],
         'kind' => ['bonus' => 'مكافأة', 'deduction' => 'خصم'],
         'outcome' => ['completed' => 'اتعملت', 'teacher_absent' => 'غياب المدرس', 'student_absent' => 'غياب الطالب', 'cancelled_makeup' => 'اتلغت بتعويض'],
@@ -112,6 +127,7 @@ return [
         'side' => ['family' => 'الأسرة', 'teacher' => 'المدرس', 'staff' => 'الإدارة سجلته'],
     ],
     'groups' => [
+        'safeguarding' => 'حماية الأطفال',
         'billing' => 'الفلوس',
         'scheduling' => 'الحصص والسياسات',
         'payroll' => 'المرتبات',

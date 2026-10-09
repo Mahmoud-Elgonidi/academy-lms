@@ -9,9 +9,11 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
 /**
  * The academy's rules about its students: under which age a guardian must
  * agree to a child's account (18 when it has no row; 16 or 13 where the law
- * the academy works under allows).
+ * the academy works under allows), and whether a teacher needs a verified
+ * criminal record check before teaching anyone under 18.
  *
  * @property int $consent_age
+ * @property bool $require_minor_check
  */
 final class PeopleSettings extends Model
 {
@@ -25,16 +27,16 @@ final class PeopleSettings extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['consent_age'];
+    protected $fillable = ['consent_age', 'require_minor_check'];
 
     protected function casts(): array
     {
-        return ['consent_age' => 'integer'];
+        return ['consent_age' => 'integer', 'require_minor_check' => 'boolean'];
     }
 
     public static function current(): self
     {
-        return self::query()->first() ?? new self(['consent_age' => 18]);
+        return self::query()->first() ?? new self(['consent_age' => 18, 'require_minor_check' => false]);
     }
 
     protected function setKeysForSaveQuery($query): Builder

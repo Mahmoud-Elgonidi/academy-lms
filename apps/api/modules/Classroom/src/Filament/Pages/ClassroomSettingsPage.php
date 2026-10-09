@@ -23,7 +23,8 @@ use UnitEnum;
 /**
  * Where the academy's lessons happen: its own classroom (LiveKit), or each
  * teacher's outside link as the fallback (docs/architecture/03, section 6);
- * and whether lessons are recorded, how, for how long, and who watches.
+ * whether students come in with their camera on (off for under-18s, or for
+ * everyone; they can always switch it); and whether lessons are recorded, how, for how long, and who watches.
  *
  * @property-read Schema $form
  */
@@ -69,6 +70,7 @@ final class ClassroomSettingsPage extends Page
         $settings = ClassroomSettings::current();
         $this->form->fill([
             'provider' => $settings->provider,
+            'student_camera' => $settings->student_camera,
             'recording' => $settings->recording,
             'recording_media' => $settings->recording_media,
             'recording_days' => $settings->recording_days,
@@ -85,6 +87,8 @@ final class ClassroomSettingsPage extends Page
         return $schema->statePath('data')->components([
             Radio::make('provider')->label(__('classroom::classroom.settings.provider'))->required()
                 ->options(collect(ClassroomSettings::PROVIDERS)->mapWithKeys(fn ($p) => [$p => __('classroom::classroom.settings.providers.'.$p)])),
+            Radio::make('student_camera')->label(__('classroom::classroom.settings.student_camera'))->helperText(__('classroom::classroom.settings.student_camera_hint'))->required()
+                ->options(collect(ClassroomSettings::STUDENT_CAMERA)->mapWithKeys(fn ($m) => [$m => __('classroom::classroom.settings.cameras.'.$m)])),
             Section::make(__($r.'section'))->description(__($r.'section_hint'))->schema([
                 Radio::make('recording')->label(__($r.'fields.recording'))->required()->live()
                     ->options(collect(ClassroomSettings::RECORDING)->mapWithKeys(fn ($m) => [$m => __($r.'modes.'.$m)])),
@@ -102,7 +106,7 @@ final class ClassroomSettingsPage extends Page
     {
         $state = $this->form->getState();
         $current = ClassroomSettings::current();
-        app(SaveClassroomSettings::class)->handle($state['provider']);
+        app(SaveClassroomSettings::class)->handle($state['provider'], $state['student_camera'] ?? null);
         app(SaveRecordingSettings::class)->handle([
             'recording' => $state['recording'],
             'recording_media' => $state['recording_media'] ?? $current->recording_media,

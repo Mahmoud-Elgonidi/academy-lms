@@ -54,11 +54,24 @@ return [
             'social_linked' => ':name linked a :provider account (:via)',
             'social_unlinked' => ':name unlinked a :provider account',
         ],
+        'safeguarding' => [
+            'concern_reported' => 'Safeguarding concern :concern raised',
+            'concern_acknowledged' => 'Safeguarding concern :concern taken',
+            'concern_closed' => 'Safeguarding concern :concern closed: :concern_outcome',
+            'concern_reopened' => 'Safeguarding concern :concern opened again',
+        ],
         'people' => [
             'consent_granted' => ':guardian agreed to :student\'s account (:via)',
             'consent_recorded' => 'A guardian\'s consent for :student recorded by the office: :note',
             'consent_withdrawn' => ':guardian withdrew their consent to :student\'s account',
             'consent_age_saved' => 'Guardians now consent for students under :age',
+            'check_added' => 'A :document for :teacher was added',
+            'check_verified' => ':teacher\'s :document verified (until :until)',
+            'check_rejected' => ':teacher\'s :document turned down',
+            'minors_paused' => ':teacher paused from new lessons with under-18s',
+            'minors_resumed' => ':teacher may teach under-18s again: :reason',
+            'minor_check_required' => 'Teachers now need a verified criminal record check to teach under-18s',
+            'minor_check_optional' => 'Teachers no longer need a criminal record check to teach under-18s',
         ],
         'classroom' => [
             'recording_settings_saved' => 'Lesson recording settings: :recording, :media, :days days',
@@ -100,6 +113,8 @@ return [
         ],
     ],
     'values' => [
+        'concern_outcome' => ['no_concern' => 'nothing to act on', 'resolved' => 'dealt with', 'teacher_action' => 'action with a teacher', 'referred' => 'referred outside', 'duplicate' => 'duplicate'],
+        'document' => ['criminal_record' => 'criminal record check', 'identity' => 'ID', 'qualification' => 'qualification', 'other' => 'document'],
         'method' => ['bank_transfer' => 'bank transfer', 'instapay' => 'InstaPay', 'wallet' => 'mobile wallet', 'cash' => 'cash', 'card_terminal' => 'card terminal', 'other' => 'other', 'online' => 'online'],
         'kind' => ['bonus' => 'Bonus', 'deduction' => 'Deduction'],
         'outcome' => ['completed' => 'taught', 'teacher_absent' => 'teacher absent', 'student_absent' => 'student absent', 'cancelled_makeup' => 'cancelled with a makeup'],
@@ -112,6 +127,7 @@ return [
         'side' => ['family' => 'the family', 'teacher' => 'the teacher', 'staff' => 'written down by the office'],
     ],
     'groups' => [
+        'safeguarding' => 'Safeguarding',
         'billing' => 'Money',
         'scheduling' => 'Lessons and policy',
         'payroll' => 'Payroll',

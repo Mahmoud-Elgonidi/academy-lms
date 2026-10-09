@@ -95,3 +95,15 @@ export async function requestTimeOff(payload: TimeOffPayload, key: string): Prom
 export async function withdrawTimeOff(id: string): Promise<Result> {
   return result(await send('delete', '/v1/teacher/time-off/{timeOff}', { params: { timeOff: id } }));
 }
+
+/** Sends a vetting document (a criminal record check, an ID, a qualification) for the academy to check; one key per submit. */
+export async function sendDocument(form: FormData, key: string): Promise<Result> {
+  const sent = new FormData();
+  for (const name of ['kind', 'reference', 'issued_on', 'expires_on']) {
+    const value = String(form.get(name) ?? '').trim();
+    if (value) sent.set(name, value);
+  }
+  const file = form.get('file');
+  if (file instanceof File && file.size > 0) sent.set('file', file, file.name || 'document');
+  return result(await send('post', '/v1/teacher/checks', { form: sent, idempotencyKey: key }));
+}

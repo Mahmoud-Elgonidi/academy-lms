@@ -39,6 +39,7 @@ class AccountPage extends StatelessWidget {
             if (!standalone) const _Privacy(),
             if (!standalone) const _Recordings(),
             const _Help(),
+            const _TellUs(),
             const _MyData(),
             const _ClockPrompt(),
             const _Settings(),
@@ -125,6 +126,41 @@ class _Help extends StatelessWidget {
           key: const Key('open-help'),
           leading: const Icon(Icons.support_agent_outlined),
           title: Text(context.l10n.helpTitle, style: context.text.titleSmall),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: () => context.go(target),
+        ),
+      ),
+    );
+  }
+}
+
+/// Telling the academy's safeguarding leads that something is wrong: everyone, a child in the kids' look too (a
+/// family's from Me, a student's from their account); a teacher's is in More.
+class _TellUs extends StatelessWidget {
+  const _TellUs();
+
+  @override
+  Widget build(BuildContext context) {
+    final area = Area.of(context.watch<SessionCubit>().state);
+    final target = switch (area) {
+      Area.family => '/family/me/tell-us',
+      Area.kids || Area.middle || Area.teen => '/account/tell-us',
+      _ => null,
+    };
+    if (target == null) return const SizedBox.shrink();
+    final l = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: LmsCard(
+        padding: EdgeInsets.zero,
+        child: ListTile(
+          key: const Key('open-tell-us'),
+          leading: const Icon(Icons.shield_outlined),
+          title: Text(switch (area) {
+            Area.kids => l.tellUsNavKids,
+            Area.middle => l.tellUsNavMiddle,
+            _ => l.tellUsTitle,
+          }, style: context.text.titleSmall),
           trailing: const Icon(Icons.chevron_right_rounded),
           onTap: () => context.go(target),
         ),

@@ -75,7 +75,8 @@ class _ClassroomPageState extends State<ClassroomPage> {
       if (ticket.canPublish) {
         await _room.localParticipant?.setMicrophoneEnabled(true);
         try {
-          await _room.localParticipant?.setCameraEnabled(true);
+          // The academy may have a student start with the camera off (under-18s, or everyone): the button turns it on.
+          if (ticket.camera) await _room.localParticipant?.setCameraEnabled(true);
         } on Object {
           // No camera (or refused): the lesson goes on with sound.
         }

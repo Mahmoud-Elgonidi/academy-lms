@@ -8,11 +8,13 @@ use Modules\Scheduling\Contracts\DTOs\TeacherSearch;
 use Modules\Scheduling\Contracts\TrialConversionRates;
 use Modules\Scheduling\Domain\Availability\Candidate;
 use Modules\Scheduling\Domain\Availability\Matcher;
+use Modules\Scheduling\Support\MinorsGuard;
 
 /**
  * "Find a teacher" (docs/architecture/02, section 2): hard filters in SQL
  * (subject and its level and category, age, gender, language, taking new
- * students or trials), then free time (daily caps included) and matching
+ * students or trials), for a student under 18 only teachers cleared for
+ * minors (section 15), then free time (daily caps included) and matching
  * per teacher, then a weighted score.
  *
  * Score (of the weights in the docs, the ones we can measure today):
@@ -30,6 +32,7 @@ final class FindTeachersQuery
         private readonly AvailabilityQuery $availability,
         private readonly Matcher $matcher,
         private readonly TrialConversionRates $conversion,
+        private readonly MinorsGuard $minors,
     ) {}
 
     /**
@@ -67,6 +70,10 @@ final class FindTeachersQuery
             ->select('u.id', 'u.name', 'u.timezone', 'tp.gender', 'tp.languages', 'tp.dialect')
             ->get()
             ->keyBy('id');
+        // A student under 18: only teachers cleared for minors (not paused; a valid check where the academy asks for one).
+        if ($search->forMinor && $teachers->isNotEmpty()) {
+            $teachers = $teachers->only($this->minors->cleared($teachers->keys()->all()));
+        }
 
         if ($teachers->isEmpty()) {
             return [];

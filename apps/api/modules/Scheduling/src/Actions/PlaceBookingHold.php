@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Modules\Scheduling\Domain\Models\BookingHold;
 use Modules\Scheduling\Queries\AvailabilityQuery;
+use Modules\Scheduling\Support\MinorsGuard;
 
 /**
  * Holds the chosen weekly times with a teacher for ten minutes while the
@@ -17,7 +18,10 @@ use Modules\Scheduling\Queries\AvailabilityQuery;
  */
 final class PlaceBookingHold
 {
-    public function __construct(private readonly AvailabilityQuery $availability) {}
+    public function __construct(
+        private readonly AvailabilityQuery $availability,
+        private readonly MinorsGuard $minors,
+    ) {}
 
     /**
      * @param  list<int>  $occurrences  UTC start of every session to hold
@@ -25,6 +29,7 @@ final class PlaceBookingHold
      */
     public function handle(string $teacherId, ?string $studentId, array $occurrences, int $durationMin, string $coordinatorId): string
     {
+        $this->minors->assert($teacherId, $studentId);
         if ($occurrences === [] || $durationMin <= 0) {
             throw ValidationException::withMessages(['hold' => __('scheduling::find.errors.nothing_chosen')]);
         }

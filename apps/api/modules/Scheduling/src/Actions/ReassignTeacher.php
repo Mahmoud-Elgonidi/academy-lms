@@ -16,6 +16,7 @@ use Modules\Scheduling\Domain\Models\SessionEvent;
 use Modules\Scheduling\Domain\Models\SessionParticipant;
 use Modules\Scheduling\Domain\Slots\WeeklyTime;
 use Modules\Scheduling\Queries\AvailabilityQuery;
+use Modules\Scheduling\Support\MinorsGuard;
 use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Time\LocalTimeResolver;
 
@@ -37,6 +38,7 @@ final class ReassignTeacher
         private readonly MaterializeSessions $materialize,
         private readonly FundSessions $fund,
         private readonly LocalTimeResolver $resolver,
+        private readonly MinorsGuard $minors,
     ) {}
 
     /**
@@ -49,6 +51,7 @@ final class ReassignTeacher
         if ($enrollment->teacherId === $teacherId) {
             throw ValidationException::withMessages(['teacher' => __('scheduling::policy.errors.same_teacher')]);
         }
+        $this->minors->assert($teacherId, $enrollment->studentId);
         $newTz = DB::table('users')->where('id', $teacherId)->value('timezone') ?? 'UTC';
         $fromUtc = CarbonImmutable::parse($from->toDateString(), $newTz)->utc()->max(CarbonImmutable::now());
 

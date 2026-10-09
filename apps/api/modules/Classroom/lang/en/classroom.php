@@ -15,6 +15,7 @@ return [
         'observer' => 'You join as a hidden observer: nobody sees or hears you.',
     ],
     'room' => [
+        'concern' => 'Something wrong? Tell us',
         'waiting' => 'Waiting for :name to join…',
         'mic' => 'Microphone',
         'camera' => 'Camera',
@@ -87,6 +88,13 @@ return [
         'providers' => [
             'livekit' => 'The academy\'s classroom (LiveKit): attendance is recorded by itself',
             'external' => 'An outside link per teacher (Zoom or Meet): attendance from the join click only',
+        ],
+        'student_camera' => 'Students come in with their camera',
+        'student_camera_hint' => 'In the academy\'s classroom. A student can always switch their camera on or off during the lesson.',
+        'cameras' => [
+            'on' => 'On',
+            'off_for_minors' => 'Off for students under 18, on for adults',
+            'off' => 'Off for every student',
         ],
         'saved' => 'Saved.',
     ],

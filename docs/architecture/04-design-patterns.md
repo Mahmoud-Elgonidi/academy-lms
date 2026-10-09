@@ -41,6 +41,7 @@
 | M14ب | **Import** | استيراد المدرسين والطلاب وأولياء الأمور والجداول من الشيتات | `PeopleImported` |
 | M15 | **Communication** | القوالب، والقنوات، والتفضيلات، والإشعارات، والمحادثات | `NotificationFailed`، `MessageFlagged` |
 | M16 | **Support** | التذاكر والشكاوى ومواعيد الرد ✅ | `TicketOpened`، `TicketReplied`، `TicketAssigned`، `TicketResolved`، `TicketOverdue`، `ComplaintValidated` |
+| M16ج | **Safeguarding** | بلاغات حماية الأطفال ومتابعتها (مسؤولين الحماية بس) ✅ | `ConcernReported`، `ConcernEscalated`، `ConcernClosed` |
 | M16ب | **Privacy** | نسخة من بيانات الشخص، ومسح الحساب بموافقة الأكاديمية، والصفحات العامة (الخصوصية، والشروط، ومسح الحساب) ✅ | `DataExportReady`، `ErasureRequested`، `ErasureApproved`، `ErasureRefused`، `AccountErased` |
 | M17 | **Reporting** | جداول الحقائق والمؤشرات (للقراءة بس) | — |
 | Infra | **Audit**، **Files**، **SharedKernel** | سجل المراجعة (منفّذ في `SharedKernel\Audit`: `AuditTrail` بيكتب، و`AuditActor` بيقول مين، و`AuditEntries` بيقرا)، والملفات، والأنواع المشتركة (Money، Time، Tenancy) | — |
@@ -55,6 +56,7 @@ flowchart TD
     Evaluation --> People & Scheduling & Learning
     Support --> People & Scheduling & Evaluation & Communication & Identity & Classroom
     Privacy --> People & Communication & Identity & Platform
+    Safeguarding --> People & Scheduling & Communication & Identity & Classroom
     Learning --> Scheduling & Enrollment & Curriculum & People & Communication
     Billing --> People & Catalog & Enrollment & Credits & Communication
     Classroom --> Scheduling & Learning & People & Communication & Platform
@@ -90,6 +92,8 @@ flowchart TD
      - **المنفّذ دلوقتي (الشكاوى)**: Support فوق Evaluation زي CRM، ومحدش بيعتمد عليه. Evaluation بيعرّف عقد `TeacherComplaints` عنده (من غيره محدش عنده شكاوى)، وSupport بيربط `ConfirmedComplaints`، فمؤشر "الشكاوى المؤكدة لكل 100 حصة" بيتقري وقت ما يتطلب زي باقي المؤشرات. و`ComplaintValidated` بيفضل event داخلي لـ Support (إشعار المدرس).
      - **المنفّذ دلوقتي (بيانات الشخص)**: Privacy فوق كل الموديولات ومحدش بيعتمد عليه. كل موديول بيقول هو شايل إيه عن الشخص من خلال `SharedKernel\Privacy\PersonalDataSource` (النسخة، والموانع، والمسح للجزء بتاعه)، وبيسجّله في `PersonalData` من الـ provider بتاعه. فـ Privacy بيلف على المصادر من غير ما يعرف جداول حد، وكل موديول بيفضل صاحب جداوله. والـ arch test بيتأكد إن كل `*\Privacy` بيطبّق العقد. الحساب بيتعمل له export الأول، وبيتمسح آخر واحد.
      - **المنفّذ دلوقتي (تسجيلات الحصة اللي عليها شكوى)**: بنفس الطريقة، Classroom بيعرّف عقد `RecordingHolds` عنده (من غيره محدش بيحفظ تسجيل)، وSupport بيربط `ComplaintRecordingHolds`، فالتسجيل مابيتمسحش طول ما فيه شكوى مفتوحة على حصته. Support بيستخدم `Classroom\Contracts` بس، والـ arch test بيمنعه من باقي Classroom. و`RecordingReady` بيطلع بعد الـ commit لما الملف يبقى جاهز.
+     - **أكتر من مصدر بيحفظ**: Classroom بيربط `AllRecordingHolds`، اللي بيسأل كل class متعلّم بـ `RecordingHolds::SOURCES` (Support بيعلّم `ComplaintRecordingHolds`، وSafeguarding بيعلّم `ConcernRecordingHolds`: بلاغ حماية مفتوح على الحصة). كده كل module فوق بيضيف سببه من غير ما Classroom يعرفه.
+     - **المنفّذ دلوقتي (حماية الأطفال)**: Safeguarding فوق ومحدش بيعتمد عليه. فحص المدرسين والإيقاف عند People (`PeopleApi::clearances()` و`mayTeach()`)، وScheduling بيسأل People في كل باب حجز عن طريق `MinorsGuard` (ومن غير ما يعرف Safeguarding). والإيقاف بسبب بلاغ بيروح من Safeguarding لـ `PeopleApi::pauseForMinors()`.
    - Evaluation بيسمع `SessionFinalized` عشان يطلب تقييم الحصة من الأسرة. المؤشرات نفسها بتتقري من الجداول وقت ما تتطلب (القراءة مسموح فيها join)، ونجوم التقييم تحت الحصة بتدخل صفحة الأسرة عن طريق **render hook** باسم ثابت (`scheduling::family.lesson-card`)، زي Learning.
    - **Import** فوق الكل زي CRM، ومحدش بيعتمد عليه. بيعمل كل حاجة عن طريق contracts الـ modules: الحسابات من `IdentityApi`، والملفات وأولياء الأمور من `PeopleApi`، والمواد من `CatalogApi`، والجدول الشغال من عقد Scheduling `ScheduleImport`، اللي بيفتح التسجيل والرصيد ويعمل `BillingApi::adopt` (اشتراك أول فاتورة فيه هي الباقة الجاية).
      - **المعاينة** بتشغّل الاستيراد كله في transaction واحدة وبعدين `rollBack`، وكل صف في savepoint لوحده. فالمعاينة بتقول بالظبط إيه اللي هيحصل، وحتى الصفوف اللي معتمدة على صفوف قبلها (ولي الأمر اللي اتعمل في صف ومستخدم في اللي بعده). الرسايل مابتطلعش لأنها بتستنى الـ commit.

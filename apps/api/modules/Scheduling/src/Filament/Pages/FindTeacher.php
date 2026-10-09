@@ -476,7 +476,19 @@ final class FindTeacher extends Page
             levelId: ($this->data['level_id'] ?? null) ?: null,
             categoryId: ($this->data['category_id'] ?? null) ?: null,
             ageGroup: ($this->data['age_group'] ?? null) ?: null,
+            forMinor: $this->forMinor(),
         ));
+    }
+
+    /** The student is under 18 (their profile), or, with none chosen, the age group searched for is a child's. */
+    private function forMinor(): bool
+    {
+        $studentId = ($this->data['student_id'] ?? null) ?: null;
+        if ($studentId !== null) {
+            return app(PeopleApi::class)->isMinor($studentId);
+        }
+
+        return in_array($this->data['age_group'] ?? null, [AgeGroup::Kids->value, AgeGroup::Middle->value, AgeGroup::Teen->value], true);
     }
 
     /** @return list<Candidate> */

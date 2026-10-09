@@ -2146,4 +2146,148 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ticketClosed => 'التذكرة دي اتقفلت. افتح تذكرة جديدة لو محتاج حاجة.';
+
+  @override
+  String get tellUsTitle => 'بلّغ عن قلق';
+
+  @override
+  String get tellUsTitleStudent => 'فيه حاجة مش مظبوطة؟ قولّنا';
+
+  @override
+  String get tellUsTitleKids => 'فيه حاجة زعّلتك؟';
+
+  @override
+  String get tellUsNavKids => 'قول لحد كبير';
+
+  @override
+  String get tellUsNavMiddle => 'قولّنا';
+
+  @override
+  String get tellUsLead =>
+      'لو أي حاجة في حصة، أو من مدرس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.';
+
+  @override
+  String get tellUsLeadStudent =>
+      'لو حد خلّاك تحس إنك مش مرتاح، أو خايف، أو مش في أمان، قولّنا. اللي بيقراها بس المسؤولين عن حماية الطلاب في الأكاديمية، ومش هتتعاقب.';
+
+  @override
+  String get tellUsLeadKids => 'لو حد زعّلك أو خوّفك، دوس على زرار. حد كبير في الأكاديمية هيساعدك.';
+
+  @override
+  String get concernTeacherNav => 'بلّغ عن قلق';
+
+  @override
+  String get concernTeacherTitle => 'بلّغ عن قلق على أمان طالب';
+
+  @override
+  String get concernTeacherLead =>
+      'لو حاجة في أمان طالب أو حالته قلقاك، أو تصرّف حد كبير تاني، قول لمسؤولين الحماية في الأكاديمية هنا. هما بس اللي بيقروه. ماتحققش فيه ولا تكلّم الأسرة عنه بنفسك.';
+
+  @override
+  String concernAbout(String name) {
+    return 'عن $name';
+  }
+
+  @override
+  String get concernWhat => 'الموضوع عن إيه؟';
+
+  @override
+  String get concernWhatKids => 'إيه اللي حصل؟';
+
+  @override
+  String get concernPick => 'اختار الموضوع عن إيه.';
+
+  @override
+  String get concernText => 'إيه اللي حصل؟';
+
+  @override
+  String get concernTextKids => 'عايز تقول أكتر؟ مش لازم.';
+
+  @override
+  String get concernTextHint => 'حصل إمتى، ومين كان موجود، وإيه اللي اتقال.';
+
+  @override
+  String get concernLesson => 'في أنهي حصة (لو فيه)؟';
+
+  @override
+  String get concernNoLesson => 'مش عن حصة';
+
+  @override
+  String get concernStudent => 'أنهي طالب؟';
+
+  @override
+  String get concernNoStudent => 'مش عن طالب معيّن';
+
+  @override
+  String get concernUrgent => 'ممكن حد يكون في خطر دلوقتي';
+
+  @override
+  String get concernSend => 'ابعت';
+
+  @override
+  String get concernSendTeacher => 'ابعت لمسؤولين الحماية';
+
+  @override
+  String get concernAgain => 'قولّنا حاجة تانية';
+
+  @override
+  String get concernAgainTeacher => 'بلّغ عن حاجة تانية';
+
+  @override
+  String concernNumber(String number) {
+    return 'رقم $number';
+  }
+
+  @override
+  String get concernsMine => 'اللي قولتهولنا';
+
+  @override
+  String get concernsNone => 'لسه مفيش.';
+
+  @override
+  String get documentsTitle => 'مستنداتي';
+
+  @override
+  String get documentsLead => 'الأكاديمية بتراجع المستندات دي على الأصل؛ وفيش الصحيفة الجنائية هو اللي مطلوب عشان تدرّس للي تحت 18.';
+
+  @override
+  String get documentSend => 'ابعت مستند';
+
+  @override
+  String get documentSendHint => 'صورة واضحة أو الـ PDF من الجهة. خلّي الأصل معاك: الأكاديمية ممكن تطلب تشوفه.';
+
+  @override
+  String get documentKind => 'المستند';
+
+  @override
+  String get documentReference => 'رقم الشهادة (اختياري)';
+
+  @override
+  String get documentExpires => 'صالح لحد (اختياري)';
+
+  @override
+  String documentUntil(String day) {
+    return 'صالح لحد $day';
+  }
+
+  @override
+  String get documentNoEnd => 'مالوش تاريخ انتهاء';
+
+  @override
+  String get documentPick => 'اختار صورة أو PDF';
+
+  @override
+  String get documentPickFirst => 'اختار الصورة أو الـ PDF الأول.';
+
+  @override
+  String get documentTooBig => 'الملف أكبر من 10 ميجا.';
+
+  @override
+  String get documentSent => 'اتبعت: الأكاديمية هتراجعه.';
+
+  @override
+  String get documentsList => 'اللي بعته';
+
+  @override
+  String get documentsNone => 'لسه ما بعتش أي مستندات.';
 }
