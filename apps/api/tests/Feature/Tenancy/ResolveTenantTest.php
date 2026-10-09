@@ -1,10 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
 use Modules\Platform\Enums\AcademyStatus;
 use Modules\Platform\Models\Academy;
+use Modules\SharedKernel\Health\RecentErrors;
+use Modules\SharedKernel\Tenancy\Exceptions\TenantNotResolved;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 beforeEach(function () {
@@ -28,11 +31,21 @@ function login(string $slug, string $email = 'same@example.test', string $passwo
     ]);
 }
 
-it('answers 404 problem details when no academy can be resolved', function () {
+it('answers 404 problem details when no academy can be resolved, and counts it as no error of the app\'s', function () {
+    RecentErrors::forget();
+    Log::spy();
     $this->postJson('/api/v1/auth/login', ['login' => 'x@example.test', 'password' => 'x', 'device_name' => 'pest'])
         ->assertNotFound()
         ->assertHeader('Content-Type', 'application/problem+json')
         ->assertJsonPath('type', 'academy-not-found');
+    $this->get('http://lms.test/admin/login')->assertNotFound();
+
+    expect(RecentErrors::all())->toBe([]);
+    Log::shouldNotHaveReceived('error');
+
+    // Code that needs an academy and runs without one is still the app's error.
+    expect(fn () => app(TenantContext::class)->require())->toThrow(TenantNotResolved::class)
+        ->and((new TenantNotResolved)->byRequest)->toBeFalse();
 });
 
 it('answers 404 for an unknown academy header', function () {

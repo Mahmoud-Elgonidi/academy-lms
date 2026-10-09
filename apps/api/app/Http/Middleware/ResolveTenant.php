@@ -53,7 +53,7 @@ final class ResolveTenant
             throw new AuthenticationException;
         }
 
-        $tenant = $fromToken ?? $fromRequest ?? throw new TenantNotResolved;
+        $tenant = $fromToken ?? $fromRequest ?? throw TenantNotResolved::forRequest();
 
         if (! $tenant->active) {
             throw new TenantSuspended;

@@ -42,6 +42,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->throttleApi('api');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // A request that names no academy is answered 404; it is the caller's, not an error of the app to log or count.
+        $exceptions->dontReportWhen(fn (Throwable $e) => $e instanceof TenantNotResolved && $e->byRequest);
+
         // Every reported error also goes to the platform's health page (redacted, counted by kind).
         $exceptions->report(function (Throwable $e): void {
             RecentErrors::record($e);
