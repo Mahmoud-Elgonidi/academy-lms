@@ -7,22 +7,18 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Modules\People\Contracts\DTOs\TeacherProfileData;
 use Modules\People\Contracts\PeopleApi;
-use Modules\Scheduling\Actions\Shifts\CommentOnShiftProposal;
-use Modules\Scheduling\Actions\Shifts\CounterShiftProposal;
-use Modules\Scheduling\Actions\Shifts\SaveShiftProposal;
 use Modules\Scheduling\Domain\Models\ShiftSchedule;
 use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
 
 /**
- * Teacher profiles, the schedules in force, weekly bookings for the coming
- * weeks, and three shift proposals for the review screen: Sara reorganising
- * her week around university (three booked students affected), Ahmed adding
- * Friday (no conflicts) and Mona answering a counter-offer.
- * Runs after DemoLiveBoardSeeder, inside the demo academy.
+ * Teacher profiles and the schedules in force (for half a year, so the demo
+ * has a past). The bookings come next (DemoRevenueSeeder's months, then
+ * DemoEnrollmentsSeeder), and the shift proposals after them
+ * (DemoShiftProposalsSeeder). Runs after DemoLiveBoardSeeder, inside the demo academy.
  */
 final class DemoShiftsSeeder extends Seeder
 {
-    public function run(PeopleApi $people, SaveShiftProposal $save, CounterShiftProposal $counter, CommentOnShiftProposal $comment): void
+    public function run(PeopleApi $people): void
     {
         $user = fn (string $key) => DB::table('users')->where('email', "{$key}@demo.test")->value('id');
         $subject = fn (string $en) => DB::table('subjects')->where('name_en', $en)->value('id');
@@ -40,7 +36,7 @@ final class DemoShiftsSeeder extends Seeder
             $people->saveTeacherProfile(new TeacherProfileData($user($key), $gender, $languages, array_map($subject, $subjects), $dialect, maxWeeklyMinutes: 30 * 60));
         }
 
-        // Schedules in force since a month ago (history, so written directly).
+        // Schedules in force since half a year ago (history, so written directly).
         $weeks = [
             'mahmoud' => [[6, '16:00', '22:00'], [1, '16:00', '22:00'], [3, '16:00', '22:00']],
             'nour' => [[6, '17:00', '22:00'], [2, '17:00', '22:00'], [4, '18:00', '21:00']],
@@ -49,7 +45,7 @@ final class DemoShiftsSeeder extends Seeder
             'ahmed' => [[1, '17:00', '23:00'], [2, '17:00', '23:00'], [3, '17:00', '23:00'], [4, '17:00', '23:00']],
             'mona' => [[7, '17:00', '22:00'], [4, '17:00', '22:00'], [6, '20:00', '23:00']],
         ];
-        $since = CarbonImmutable::now()->subMonth()->toDateString();
+        $since = CarbonImmutable::now()->subMonths(6)->toDateString();
         foreach ($weeks as $key => $blocks) {
             $teacherId = $user($key);
             $tz = DB::table('users')->where('id', $teacherId)->value('timezone');
@@ -61,34 +57,6 @@ final class DemoShiftsSeeder extends Seeder
                 $version->rules()->create(['teacher_id' => $teacherId, 'weekday' => $block->weekday, 'local_start' => $block->start(), 'duration_min' => $block->durationMin]);
             }
         }
-
-        // Enrolled students, their weekly times, invoices and payments.
-        $this->call(DemoEnrollmentsSeeder::class);
-
-        // Sara: university on Tuesday afternoons; moves Tuesday to the evening and adds Wednesday.
-        $saraTz = 'Africa/Cairo';
-        $proposal = $save->handle(
-            $user('sara'),
-            self::week([[6, '17:00', '22:00'], [7, '18:00', '20:00'], [2, '21:00', '23:00'], [3, '17:00', '21:00']], $saraTz),
-            CarbonImmutable::now($saraTz)->addDays(19)->startOfDay(),
-            'الترم ده عندي محاضرات في الجامعة يوم التلات من 4 لـ 9، فشلت التلات العصر وزوّدت بالليل، وضفت يوم الأربع.',
-        );
-        $comment->handle($proposal, $admin, 'admin', 'تمام يا أستاذة. عندنا مريم وآدم يوم التلات العصر. ينفع مريم تكمّل معاكي التلات 21:00؟');
-        $comment->handle($proposal, $user('sara'), 'teacher', 'مريم ينفع 21:00. آدم صعب عشان فرق التوقيت، يتنقل أحسن.');
-        DB::table('shift_proposals')->where('id', $proposal->id)->update(['submitted_at' => CarbonImmutable::now()->subHours(5)]);
-
-        // Ahmed: adds Friday evening only, so it can start tomorrow.
-        $save->handle(
-            $user('ahmed'),
-            self::week([[1, '17:00', '23:00'], [2, '17:00', '23:00'], [3, '17:00', '23:00'], [4, '17:00', '23:00'], [5, '18:00', '22:00']], 'Africa/Cairo'),
-            CarbonImmutable::now('Africa/Cairo')->addDays(2)->startOfDay(),
-            'ممكن أزوّد الجمعة بالليل عشان الطلب على الإنجليزي.',
-        );
-
-        // Mona asked for Saturday mornings; the admins countered with Saturday evening.
-        $mona = $user('mona');
-        $save->handle($mona, self::week([[7, '17:00', '22:00'], [4, '17:00', '22:00'], [6, '10:00', '14:00']], 'Asia/Amman'), CarbonImmutable::now('Asia/Amman')->addDays(20)->startOfDay(), 'السبت الصبح أنسب لي من الليل.');
-        $counter->handle($mona, self::week([[7, '17:00', '22:00'], [4, '17:00', '22:00'], [6, '10:00', '13:00'], [6, '20:00', '23:00']], 'Asia/Amman'), CarbonImmutable::now('Asia/Amman')->addDays(20)->startOfDay(), 'نخلي السبت الصبح لحد 1 ونحافظ على السبت بالليل عشان سلمى وطلاب أمريكا.', $admin);
     }
 
     /** @param  list<array{0: int, 1: string, 2: string}>  $blocks */

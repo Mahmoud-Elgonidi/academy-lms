@@ -3,8 +3,11 @@
 namespace Modules\Billing\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Billing\BillingService;
@@ -22,14 +25,17 @@ use Modules\Billing\Http\Controllers\StripeConnectController;
 use Modules\Billing\Listeners\IssueRenewalInvoice;
 use Modules\Billing\Listeners\SendBillingNotifications;
 use Modules\Billing\Live\PaymentsChanged;
+use Modules\Billing\Live\RevenueChanged;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Credits\Contracts\Events\CreditBalanceLow;
+use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Realtime\LiveSignals;
+use Modules\SharedKernel\Tenancy\TenantContext;
 
 final class BillingServiceProvider extends ServiceProvider
 {
@@ -62,7 +68,12 @@ final class BillingServiceProvider extends ServiceProvider
             ->middleware(['api', 'throttle:240,1'])->name('billing.webhooks.stripe-connect');
         // A proof's receipt, for the staff who review it and the payer who sent it (signed in on the panels).
         Route::middleware(['web', 'tenant'])->get('billing/proofs/{proof}/file', ProofFileController::class)->name('billing.proofs.file');
-        $this->app->make(LiveSignals::class)->on('payments', fn (string $userId) => new PaymentsChanged($userId));
+        $live = $this->app->make(LiveSignals::class);
+        $live->on('payments', fn (string $userId) => new PaymentsChanged($userId));
+        // The revenue screen: invoices issued, paid or cancelled, for whoever may see the academy's money.
+        $live->on('revenue', fn (string $academyId) => new RevenueChanged($academyId));
+        Broadcast::channel(RevenueChanged::CHANNEL, fn (Authenticatable $user, string $academyId) => $academyId === $this->app->make(TenantContext::class)->id()
+            && Gate::forUser($user)->allows(Ability::ViewBilling->value));
         if ($this->app->runningInConsole()) {
             $this->commands([SweepBillingCommand::class]);
         }

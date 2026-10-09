@@ -42,4 +42,12 @@ interface CreditsApi
     public function isReserved(string $sessionId): bool;
 
     public function balance(string $accountId): CreditBalance;
+
+    /**
+     * Several accounts at once, for screens that look at many courses.
+     *
+     * @param  list<string>  $accountIds
+     * @return array<string, CreditBalance> by account id; an unknown id is left out
+     */
+    public function balances(array $accountIds): array;
 }

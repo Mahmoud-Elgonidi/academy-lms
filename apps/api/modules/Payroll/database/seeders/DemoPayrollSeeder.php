@@ -2,6 +2,7 @@
 
 namespace Modules\Payroll\Database\Seeders;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Modules\Payroll\Actions\AddPayAdjustment;
@@ -15,9 +16,9 @@ use Modules\SharedKernel\Audit\AuditActor;
  * Payroll in the demo, set up the way an academy would: a default card in
  * riyals (by the hour, Quran memorisation a little higher, trials a flat
  * amount) and a card in Egyptian pounds for the teachers paid in Egypt; the
- * lessons that took place priced from them; last month closed with a bonus
- * and a deduction (so its teachers were told their totals), and a bonus in
- * the month still open.
+ * lessons that took place priced from them; the months before closed in
+ * order, last month with a bonus and a deduction (so its teachers were told
+ * their totals), and a bonus in the month still open.
  */
 final class DemoPayrollSeeder extends Seeder
 {
@@ -51,10 +52,16 @@ final class DemoPayrollSeeder extends Seeder
             ['session_type' => 'trial', 'unit' => 'lesson', 'amount' => '150'],
         ], 'teachers' => array_values(array_filter([$teacher('khaled@demo.test'), $teacher('nour@demo.test')]))]);
 
+        // Every month with lessons, from the first (the demo's past months) to this one.
         $current = $months->current();
         $last = $current->subMonth();
-        foreach ([$current->subMonths(2), $last, $current] as $month) {
+        $first = DB::table('sessions')->whereIn('status', ['completed', 'student_absent', 'teacher_absent', 'cancelled'])->min('starts_at');
+        $past = [];
+        for ($month = $first ? $months->of(CarbonImmutable::parse($first))->min($current->subMonths(2)) : $current->subMonths(2); $month->lessThanOrEqualTo($current); $month = $month->addMonth()) {
             $recalculate->handle($month, reprice: false, actorId: $accountant);
+            if ($month->lessThan($last)) {
+                $past[] = $month;
+            }
         }
 
         if ($accountant === null) {
@@ -70,10 +77,11 @@ final class DemoPayrollSeeder extends Seeder
             $adjust->handle($nour, 'bonus', '150', 'غطّت حصة بديلة لزميلة في إجازة.', $accountant, $current);
         }
 
-        // Months close in order: the one before last first, if it paid anything.
-        $before = $current->subMonths(2);
-        if (DB::table('teacher_earnings')->whereDate('period', $before->format('Y-m-d'))->exists()) {
-            $close->handle($before, $accountant);
+        // Months close in order: the ones before last first, those that paid anything.
+        foreach ($past as $month) {
+            if (DB::table('teacher_earnings')->whereDate('period', $month->format('Y-m-d'))->exists()) {
+                $close->handle($month, $accountant);
+            }
         }
         $close->handle($last, $accountant);
     }

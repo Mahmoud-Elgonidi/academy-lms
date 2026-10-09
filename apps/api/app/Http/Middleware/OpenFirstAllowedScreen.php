@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * The back office opens on the live board; staff who do not watch it (sales,
- * the accountant) land on their own first screen instead of a refusal.
+ * the accountant: revenue) land on their own first screen instead of a refusal.
  */
 final class OpenFirstAllowedScreen
 {
@@ -20,7 +20,7 @@ final class OpenFirstAllowedScreen
             && $request->user() !== null && ! Gate::allows(Ability::ViewLiveBoard->value)) {
             $route = match (true) {
                 Gate::allows(Ability::ManageLeads->value) => 'filament.academy.pages.leads',
-                Gate::allows(Ability::ViewBilling->value) => 'filament.academy.resources.invoices.index',
+                Gate::allows(Ability::ViewBilling->value) => 'filament.academy.pages.revenue',
                 Gate::allows(Ability::FindTeachers->value) => 'filament.academy.pages.find-teacher',
                 default => null,
             };

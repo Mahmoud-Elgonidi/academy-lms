@@ -305,7 +305,7 @@ it('keeps leads to sales and the managers', function () {
     app('auth')->forgetGuards();
     $this->flushSession();
     $this->actingAs($accountant)->get('http://noor.lms.test/admin/leads')->assertForbidden();
-    $this->get('http://noor.lms.test/admin')->assertRedirect('http://noor.lms.test/admin/invoices');
+    $this->get('http://noor.lms.test/admin')->assertRedirect('http://noor.lms.test/admin/revenue');
     app('auth')->forgetGuards();
     $this->flushSession();
     $this->actingAs($this->teacher)->get('http://noor.lms.test/teach/trials')->assertOk();

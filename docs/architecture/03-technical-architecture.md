@@ -216,7 +216,7 @@ ALTER TABLE sessions ALTER COLUMN academy_id
 | Import | `import_runs` (الملف، وقراءة أعمدته، والخيارات، والأرقام)، `import_rows` (كل صف، وحكم المعاينة، ونتيجة الاستيراد) |
 | Communication | `notification_templates`، `notification_preferences`، `notifications`، `notification_deliveries`، `conversations`، `messages`، `announcements` |
 | Support | `tickets` (الرقم، والنوع، والأولوية، والدور على مين، ومواعيد الرد، وقرار الشكوى)، و`ticket_messages` (مابتتعدلش ولا بتتمسح)، و`support_settings` (مواعيد الرد بالأولوية) |
-| Reporting | `fact_sessions_daily`، `fact_revenue_daily`، `fact_subscriptions_monthly`، `fact_teacher_utilization_weekly`، `fact_funnel_daily` |
+| Reporting | `fact_sessions_daily`، `fact_revenue_daily`، `fact_subscriptions_monthly`، `fact_teacher_utilization_weekly`، `fact_funnel_daily` (لسه: لوحة الإيرادات في الـ MVP بتقرا `payments` و`invoices` و`invoice_lines` على طول من `Billing\Queries\RevenueBoard`، وبالـ indexes الموجودة؛ جداول الحقائق لما الحجم يحتاجها) |
 | Infra | `audit_logs` (ممنوع عليه UPDATE وDELETE، بـ trigger؛ الصفوف من غير أكاديمية للمنصة بس)، `media` |
 
 ### أهم الأعمدة في الجداول الأساسية

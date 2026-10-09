@@ -70,18 +70,39 @@ final class CreditsService implements CreditsApi
 
     public function balance(string $accountId): CreditBalance
     {
-        $account = CreditAccount::query()->findOrFail($accountId);
-        $next = CreditLot::query()->where('account_id', $accountId)->where('remaining_min', '>', 0)->whereNotNull('expires_at')
-            ->orderBy('expires_at')->first(['expires_at', 'remaining_min']);
+        CreditAccount::query()->findOrFail($accountId);
 
-        return new CreditBalance(
-            accountId: $account->id,
-            availableMin: $account->available_min,
-            reservedMin: $account->reserved_min,
-            consumedMin: $account->consumed_min,
-            nextExpiry: $next?->expires_at,
-            expiringMin: $next?->remaining_min ?? 0,
-            makeupMin: (int) CreditLot::query()->where('account_id', $accountId)->where('source', LotSource::Makeup->value)->sum('remaining_min'),
-        );
+        return $this->balances([$accountId])[$accountId];
+    }
+
+    public function balances(array $accountIds): array
+    {
+        $accounts = CreditAccount::query()->whereIn('id', array_values(array_unique($accountIds)))->get();
+        if ($accounts->isEmpty()) {
+            return [];
+        }
+        $ids = $accounts->modelKeys();
+        // Each account's lot that lapses first, and its makeup minutes.
+        $next = CreditLot::query()->whereIn('account_id', $ids)->where('remaining_min', '>', 0)->whereNotNull('expires_at')
+            ->orderBy('account_id')->orderBy('expires_at')->get(['account_id', 'expires_at', 'remaining_min'])
+            ->unique('account_id')->keyBy('account_id');
+        $makeup = CreditLot::query()->whereIn('account_id', $ids)->where('source', LotSource::Makeup->value)
+            ->groupBy('account_id')->selectRaw('account_id, sum(remaining_min) as minutes')->pluck('minutes', 'account_id');
+
+        $balances = [];
+        foreach ($accounts as $account) {
+            $lot = $next->get($account->id);
+            $balances[$account->id] = new CreditBalance(
+                accountId: $account->id,
+                availableMin: $account->available_min,
+                reservedMin: $account->reserved_min,
+                consumedMin: $account->consumed_min,
+                nextExpiry: $lot?->expires_at,
+                expiringMin: $lot?->remaining_min ?? 0,
+                makeupMin: (int) ($makeup[$account->id] ?? 0),
+            );
+        }
+
+        return $balances;
     }
 }

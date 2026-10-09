@@ -11,6 +11,7 @@ use Modules\Billing\Actions\Payments\SettleCheckout;
 use Modules\Billing\Actions\Payments\StartCheckout;
 use Modules\Billing\Actions\Proofs\SubmitPaymentProof;
 use Modules\Billing\Models\BillingSettings;
+use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\Gateways\DemoGateway;
@@ -32,7 +33,9 @@ final class DemoPaymentsSeeder extends Seeder
         }
         $owner = DB::table('users')->where('email', 'owner@demo.test')->value('id');
 
-        $account = $save->handle(null, ['gateway' => 'demo', 'label' => 'كارت أو مدى (تجريبي)', 'mode' => 'test'], $owner);
+        // The demo card (already there when the academy's past months were paid with it).
+        $account = GatewayAccount::query()->where('gateway', 'demo')->first()
+            ?? $save->handle(null, ['gateway' => 'demo', 'label' => 'كارت أو مدى (تجريبي)', 'mode' => 'test'], $owner);
         $settings = BillingSettings::current();
         $settings->manual_payment_note = "تحويل بنكي: مصرف الراجحي · SA44 2000 0001 2345 6789 1234 · أكاديمية النور\nأو STC Pay على 0500000000، وبعدين اضغطوا «دفعت بالتحويل» وابعتوا صورة الإيصال.";
         $settings->save();
