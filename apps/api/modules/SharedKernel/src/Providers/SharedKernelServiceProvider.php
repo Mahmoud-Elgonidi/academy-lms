@@ -2,6 +2,7 @@
 
 namespace Modules\SharedKernel\Providers;
 
+use Illuminate\Cache\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Events\ConnectionEstablished;
 use Illuminate\Database\Schema\Blueprint;
@@ -13,7 +14,6 @@ use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\OpenPlan;
@@ -67,15 +67,20 @@ final class SharedKernelServiceProvider extends ServiceProvider
      * the apps' API per person (or address, before signing in; the portal
      * passes its visitor's address on), and the pages behind signed links
      * and the class page. Named, so they never share a count with another door.
+     * Given to the limiter when something first asks for it: making it opens
+     * the cache store, which booting (an image build, a console command) must
+     * not do.
      */
     private function registerRateLimits(): void
     {
-        RateLimiter::for('api', fn (Request $request) => $request->user()
-            ? Limit::perMinute(600)->by('user:'.$request->user()->getAuthIdentifier())
-            : Limit::perMinute(240)->by('ip:'.$request->ip()));
-        RateLimiter::for('links', fn (Request $request) => $request->user()
-            ? Limit::perMinute(120)->by('user:'.$request->user()->getAuthIdentifier())
-            : Limit::perMinute(120)->by('ip:'.$request->ip()));
+        $this->callAfterResolving(RateLimiter::class, function (RateLimiter $limiter): void {
+            $limiter->for('api', fn (Request $request) => $request->user()
+                ? Limit::perMinute(600)->by('user:'.$request->user()->getAuthIdentifier())
+                : Limit::perMinute(240)->by('ip:'.$request->ip()));
+            $limiter->for('links', fn (Request $request) => $request->user()
+                ? Limit::perMinute(120)->by('user:'.$request->user()->getAuthIdentifier())
+                : Limit::perMinute(120)->by('ip:'.$request->ip()));
+        });
     }
 
     /**
