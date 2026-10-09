@@ -5,10 +5,12 @@ namespace Modules\Curriculum\Actions\Resources;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Modules\Curriculum\Models\Node;
 use Modules\Curriculum\Models\NodeResource;
+use Modules\SharedKernel\Files\CleanFile;
 use Throwable;
 
 /**
@@ -48,6 +50,7 @@ final class AddNodeResource
             if ($file->getSize() > self::FILES[$type]['max_kb'] * 1024) {
                 throw ValidationException::withMessages(['file' => __('curriculum::curriculum.resources.errors.file_size', ['mb' => self::FILES[$type]['max_kb'] / 1024])]);
             }
+            Validator::make(['file' => $file], ['file' => [new CleanFile]])->validate();
         }
 
         $stored = null;

@@ -1,12 +1,18 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Modules\Identity\Models\User;
+use Modules\SharedKernel\Auth\DummyPassword;
 use Modules\SharedKernel\Http\SecurityHeaders;
 use Modules\SharedKernel\Logging\RedactPersonalData;
 
 /*
  * HTTP hardening (docs/architecture/03, section 11): the headers on every
- * answer, HSTS over https, the API's ceiling, and log lines without people.
+ * answer, HSTS over https, the API's ceiling, no other site's pages calling
+ * the API, sign-ins that take as long with or without an account, and log
+ * lines without people.
  */
 
 beforeEach(function () {
@@ -50,4 +56,46 @@ it('taps every channel that writes lines', function () {
     foreach (['single', 'daily', 'stderr', 'syslog', 'errorlog'] as $channel) {
         expect(config("logging.channels.{$channel}.tap"))->toContain(RedactPersonalData::class);
     }
+});
+
+it('lets no other site\'s page call the API unless the server names it', function () {
+    $preflight = fn (string $origin) => $this->call('OPTIONS', 'http://huda.lms.test/api/v1/auth/login', [], [], [], [
+        'HTTP_ORIGIN' => $origin, 'HTTP_ACCESS_CONTROL_REQUEST_METHOD' => 'POST', 'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' => 'authorization,x-academy',
+    ]);
+
+    expect(config('cors.allowed_origins'))->toBe([])
+        ->and($preflight('https://evil.test')->headers->has('Access-Control-Allow-Origin'))->toBeFalse()
+        ->and($this->withHeader('Origin', 'https://evil.test')->getJson('http://huda.lms.test/api/v1/branding')->headers->has('Access-Control-Allow-Origin'))->toBeFalse();
+
+    config(['cors.allowed_origins' => ['https://app.huda.test']]);
+    expect($preflight('https://app.huda.test')->headers->get('Access-Control-Allow-Origin'))->toBe('https://app.huda.test')
+        // One named origin is always the answer, which a browser on any other page refuses.
+        ->and($preflight('https://evil.test')->headers->get('Access-Control-Allow-Origin'))->not->toBe('https://evil.test')
+        ->and($preflight('https://app.huda.test')->headers->has('Access-Control-Allow-Credentials'))->toBeFalse();
+});
+
+it('checks a password even when no account has that address, so the time says nothing', function () {
+    $this->actAsTenant($this->academy);
+    User::factory()->create(['email' => 'known@huda.test', 'password' => 'right-password']);
+    DummyPassword::check('warm up');
+    $checks = 0;
+    Hash::partialMock()->shouldReceive('check')->andReturnUsing(function () use (&$checks) {
+        $checks++;
+
+        return false;
+    });
+    $attempts = function (callable $try) use (&$checks): int {
+        $checks = 0;
+        $try();
+
+        return $checks;
+    };
+
+    // The apps' sign-in, and each panel's guard (staff, families, the platform team).
+    $api = fn (string $login) => $this->postJson('http://huda.lms.test/api/v1/auth/login', ['login' => $login, 'password' => 'guess', 'device_name' => 'phone'])->assertStatus(422);
+    expect($attempts(fn () => $api('nobody@huda.test')))->toBe(1)
+        ->and($attempts(fn () => $api('known@huda.test')))->toBe(1)
+        ->and($attempts(fn () => Auth::guard('web')->attempt(['email' => 'nobody@huda.test', 'password' => 'guess'])))->toBe(1)
+        ->and($attempts(fn () => Auth::guard('web')->attempt(['email' => 'known@huda.test', 'password' => 'guess'])))->toBe(1)
+        ->and($attempts(fn () => Auth::guard('platform')->attempt(['email' => 'nobody@platform.test', 'password' => 'guess'])))->toBe(1);
 });

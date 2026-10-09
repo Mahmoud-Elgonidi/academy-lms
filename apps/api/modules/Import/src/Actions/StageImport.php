@@ -3,11 +3,13 @@
 namespace Modules\Import\Actions;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Modules\Import\Importers\Importers;
 use Modules\Import\Models\ImportRun;
 use Modules\Import\Support\Places;
 use Modules\Import\Support\SheetReader;
+use Modules\SharedKernel\Files\CleanFile;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Throwable;
 
@@ -34,6 +36,7 @@ final class StageImport
         if (! preg_match('/\.(xlsx|csv|txt)$/i', $fileName)) {
             throw ValidationException::withMessages(['file' => __($e.'type')]);
         }
+        Validator::make(['file' => $path], ['file' => [new CleanFile]])->validate();
         try {
             $rows = $this->reader->read($path, $fileName, self::MAX_ROWS + 1);
         } catch (Throwable) {

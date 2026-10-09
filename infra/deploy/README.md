@@ -106,6 +106,16 @@ docker compose exec web php artisan platform:mail-test   # does the server's mai
   `PRIVACY_CONTACT_EMAIL` in `.env`. Each academy's own (on its address) take its details from the back
   office ("Data requests" → "Privacy page"). The text needs a lawyer's review before launch.
 
+- **Malware scanning of uploads**: off on a new server (`UPLOAD_SCANNER=none`). Once the server can spare
+  about 1.5 GB of memory, set `COMPOSE_PROFILES=scan` and `UPLOAD_SCANNER=clamav` in `.env` (`RUNBOOKS.md`,
+  "Scanning uploads"). After that, every upload is checked by ClamAV, and refused while it does not answer
+  (`UPLOAD_SCAN_REQUIRED`).
+- **Other sites calling the API from a browser**: none are allowed. The portal calls the API from its
+  server, and the apps are not browsers. A web page on another address that must call it goes in
+  `CORS_ALLOWED_ORIGINS` (comma-separated).
+- **Shipping**: on main, the deploy waits until every api and web check that ran on the commit has
+  passed. The last one to finish ships it.
+
 - **Going back**: run the deploy workflow for an older commit, or put its image in `IMAGE=` in `.env` and
   `docker compose up -d` (migrations already applied stay).
 - **A new setting** the app needs on servers: add it to the `.env` that `deploy.sh` writes on the first

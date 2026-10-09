@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Modules\SharedKernel\Files\CleanFile;
 use Modules\Support\Models\TicketMessage;
 
 /**
@@ -19,7 +20,7 @@ final class Attachments
     /** @return array<string, mixed> the rule for the file field */
     public static function rule(): array
     {
-        return ['nullable', 'file', 'max:'.TicketMessage::MAX_KB, 'mimetypes:'.implode(',', TicketMessage::MIMES)];
+        return ['nullable', 'file', 'max:'.TicketMessage::MAX_KB, 'mimetypes:'.implode(',', TicketMessage::MIMES), new CleanFile];
     }
 
     public static function validate(?UploadedFile $file): void

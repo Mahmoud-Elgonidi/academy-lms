@@ -8,13 +8,14 @@ name: deploy
 #      connection through the web container, and the portal with a
 #      teacher's session; then backups: a drill, one to a moment before a change,
 #      and the live database put back to that moment and switched back;
-#   3. on main, once the api or web checks pass (or when run by hand from the Actions
-#      tab), pushes the image to GitHub's registry and runs deploy.sh on the
-#      server over SSH.
+#   3. on main, once every api and web check on the commit has passed (or when run
+#      by hand from the Actions tab), pushes the image to GitHub's registry and
+#      runs deploy.sh on the server over SSH.
 # A push to another branch that touches the image or the deploy does 1 and 2 only.
 
 on:
-  # The image holds the API and the portal: either one's checks passing on main ships it.
+  # The image holds the API and the portal: each one's checks finishing on main starts it,
+  # and it ships when none of them failed (the checks job).
   workflow_run:
     workflows: [api, web]
     types: [completed]
@@ -38,8 +39,40 @@ permissions:
   packages: write
 
 jobs:
-  image:
+  # On main both the api and the web checks start this workflow: ship only once
+  # every one of them that ran on the commit has passed (the last to finish ships).
+  checks:
     if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    outputs:
+      go: ${{ steps.runs.outputs.go }}
+    steps:
+      - name: Every api and web run on this commit has passed
+        id: runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ "$EVENT" != workflow_run ]; then echo "go=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          go=true
+          for workflow in api.yml web.yml; do
+            state=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?head_sha=$SHA&event=push&per_page=1" \
+              --jq '.workflow_runs[0] | if . == null then "none" else .status + "/" + (.conclusion // "") end')
+            echo "$workflow: $state"
+            case "$state" in
+              none|completed/success) ;;
+              completed/*) echo "::warning::$workflow did not pass on ${SHA::12}: nothing ships"; go=false ;;
+              *) echo "$workflow is still running: it ships this commit if it passes"; go=false ;;
+            esac
+          done
+          echo "go=$go" >> "$GITHUB_OUTPUT"
+
+  image:
+    needs: checks
+    if: needs.checks.outputs.go == 'true'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.name.outputs.image }}

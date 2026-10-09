@@ -18,8 +18,8 @@ use Modules\SharedKernel\Money\Money;
 /**
  * Tap (the Gulf): KNET, BENEFIT, mada, cards and Apple Pay on Tap's page
  * (source "src_all"). Amounts go in major units (3 decimals for the dinars).
- * A webhook is only a nudge: the charge is always asked of Tap with the
- * academy's key before anything is recorded.
+ * A webhook is only a nudge, and only a signed one (hashstring): the charge
+ * is always asked of Tap with the academy's key before anything is recorded.
  */
 final class TapGateway implements PaymentGateway
 {
@@ -75,11 +75,33 @@ final class TapGateway implements PaymentGateway
     {
         $charge = $request->json()->all();
         $id = (string) ($charge['id'] ?? '');
-        if (! str_starts_with($id, 'chg_')) {
+        if (! str_starts_with($id, 'chg_') || ! self::signed($charge, (string) $request->header('hashstring'), (string) ($this->credentials['secret_key'] ?? ''))) {
             return null;
         }
 
         return new GatewayEvent($id.':'.($charge['status'] ?? ''), 'charge.'.strtolower((string) ($charge['status'] ?? 'updated')), $id, $charge);
+    }
+
+    /**
+     * Tap signs each webhook (the hashstring header): HMAC-SHA256, with the
+     * account's secret key, of the charge's id, amount (to its currency's
+     * decimals), currency, gateway and payment references, status and
+     * creation time. An unsigned one is not even a nudge.
+     *
+     * @param  array<string, mixed>  $charge
+     */
+    public static function signed(array $charge, string $hash, string $secret): bool
+    {
+        if ($secret === '' || $hash === '') {
+            return false;
+        }
+        $currency = strtoupper((string) ($charge['currency'] ?? ''));
+        $amount = number_format((float) ($charge['amount'] ?? 0), $currency === '' ? 2 : Money::decimals($currency), '.', '');
+        $string = 'x_id'.($charge['id'] ?? '').'x_amount'.$amount.'x_currency'.$currency
+            .'x_gateway_reference'.($charge['reference']['gateway'] ?? '').'x_payment_reference'.($charge['reference']['payment'] ?? '')
+            .'x_status'.($charge['status'] ?? '').'x_created'.($charge['transaction']['created'] ?? '');
+
+        return hash_equals(hash_hmac('sha256', $string, $secret), strtolower($hash));
     }
 
     public function check(): ?string

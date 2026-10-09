@@ -8,7 +8,7 @@ the project's own containers and volumes.
 how long ago it last worked; the same in the terminal:
 
 ```bash
-docker compose ps                                   # ten parts, all "running"
+docker compose ps                                   # ten parts (eleven with scanning), all "running"
 docker compose exec web php artisan platform:health # every check, with a hint for each fault
 docker compose exec web php artisan platform:health --errors   # and the errors of the week: when, where, how often (redacted)
 docker compose logs --tail=100 <part>               # web, portal, worker, scheduler, relay, reverb, backup, offsite, postgres, redis
@@ -277,6 +277,37 @@ While it is down, the academy can take transfers: on the invoice, the payer send
 An academy can switch its lessons to an outside link (Zoom, Meet) at once: back office →
 Settings → Live classroom → "An outside link per teacher" (each teacher's own meeting link). New lesson rooms use
 the new provider; a room already open keeps the one it was made with. Switch back the same way.
+
+## Scanning uploads
+
+Every file people upload (homework, payment receipts, ticket attachments, lesson materials, import
+files, logos) is checked for malware before it is kept, once the server runs ClamAV. It is off on a new
+server because clamd keeps its signatures in memory: it needs about 1.5 GB to spare. To turn it on:
+
+```bash
+# in .env
+COMPOSE_PROFILES=scan
+UPLOAD_SCANNER=clamav
+docker compose up -d clamav            # the first start downloads the signatures: a few minutes
+docker compose logs clamav | grep -i "clamd started"
+docker compose up -d web worker        # read the new .env
+docker compose exec web php artisan platform:health   # "Scanning uploads": ok, with the signatures' date
+```
+
+The stack then has eleven parts. freshclam in the same container updates the signatures by itself; the
+health page shows their date, and the files refused this week.
+
+- **An upload was refused as unsafe:** the person sees "This file did not pass the safety check" and
+  nothing was kept. The log has a warning with the signature's name (not the file). If it is a false
+  alarm, ask for the file in another format (a PDF printed again, an audio file saved again).
+- **"Scanning uploads" fails (clamd does not answer):** uploads are refused while it is down, so no
+  unchecked file gets in. `docker compose ps clamav`, `docker compose logs --tail=100 clamav`, then
+  `docker compose restart clamav`. Running out of memory shows as a restart loop: raise `CLAMAV_MEMORY`
+  in `.env`, or free memory on the server. To keep uploads open while you fix it, set
+  `UPLOAD_SCAN_REQUIRED=false` and `docker compose up -d web worker`. Files then go in unchecked until
+  you set it back.
+- **To turn it off:** `UPLOAD_SCANNER=none`, `COMPOSE_PROFILES=`, `docker compose up -d web worker`,
+  `docker compose stop clamav`.
 
 ## A government changed its clock rules (tzdata)
 

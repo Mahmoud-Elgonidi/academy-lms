@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
 use Modules\Learning\Contracts\Events\HomeworkSubmitted;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\HomeworkSubmission;
+use Modules\SharedKernel\Files\CleanFile;
 use Throwable;
 
 /**
@@ -44,7 +45,7 @@ final class SubmitHomework
         };
         Validator::make(['body' => $body, 'file' => $file], [
             'body' => [$homework->accepts === 'text' ? 'required' : 'nullable', 'string', 'max:5000'],
-            'file' => [in_array($homework->accepts, ['audio', 'file'], true) ? 'required' : 'nullable', 'file', 'max:'.self::MAX_KB, 'mimetypes:'.implode(',', $mimes)],
+            'file' => [in_array($homework->accepts, ['audio', 'file'], true) ? 'required' : 'nullable', 'file', 'max:'.self::MAX_KB, 'mimetypes:'.implode(',', $mimes), new CleanFile],
         ], [], trans('learning::homework.attributes'))->after(function ($v) use ($body, $file) {
             if ($body === null && $file === null) {
                 $v->errors()->add('body', __('learning::homework.errors.empty'));

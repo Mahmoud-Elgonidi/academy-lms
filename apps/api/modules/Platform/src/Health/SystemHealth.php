@@ -6,6 +6,8 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
+use Modules\SharedKernel\Files\ScannerHealth;
+use Modules\SharedKernel\Files\UploadScanner;
 use Modules\SharedKernel\Health\Heartbeats;
 use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Health\RecentErrors;
@@ -29,7 +31,7 @@ class SystemHealth
     public function checks(): array
     {
         $checks = [];
-        foreach (['database', 'cache', 'scheduler', 'worker', 'queue', 'relay', 'reverb', 'backups', 'archive', 'offsite', 'drill', 'disk', 'mail', 'errors'] as $name) {
+        foreach (['database', 'cache', 'scheduler', 'worker', 'queue', 'relay', 'reverb', 'backups', 'archive', 'offsite', 'drill', 'disk', 'mail', 'scanning', 'errors'] as $name) {
             try {
                 $checks[$name] = $this->{$name}();
             } catch (Throwable $e) {
@@ -65,9 +67,12 @@ class SystemHealth
     private function database(): array
     {
         $db = DB::connection('pgsql_platform');
+        $db->getPdo();
+        // One round trip on an open connection: how long the database takes to answer, not to connect or count its files.
         $started = microtime(true);
-        $size = (int) $db->selectOne('select pg_database_size(current_database()) as size')->size;
+        $db->selectOne('select 1');
         $ms = (int) round((microtime(true) - $started) * 1000);
+        $size = (int) $db->selectOne('select pg_database_size(current_database()) as size')->size;
 
         return $this->check($ms > 1000 ? 'warn' : 'ok', __('platform::health.values.database', ['size' => self::bytes($size), 'ms' => $ms]));
     }
@@ -274,6 +279,29 @@ class SystemHealth
         return isset($last['sent'])
             ? $this->check('ok', __('platform::health.values.mail_sent', ['when' => CarbonImmutable::createFromTimestamp((int) $last['sent'])->diffForHumans()]))
             : $this->check('ok', __('platform::health.values.mail_ready', ['mailer' => $mailer]), __('platform::health.hints.mail_test'));
+    }
+
+    /**
+     * Uploads are checked for malware when the server runs a scanner
+     * (UPLOAD_SCANNER=clamav): it answers, and how it went this week (files
+     * refused, the last time it could not answer).
+     */
+    private function scanning(): array
+    {
+        if (config('uploads.scanner') !== 'clamav') {
+            return $this->off();
+        }
+        $scanner = app(UploadScanner::class);
+        if (($error = $scanner->ping()) !== null) {
+            return $this->check('fail', __('platform::health.values.scanner_down', ['error' => mb_substr($error, 0, 160)]), __('platform::health.hints.scanner_down'));
+        }
+        $last = ScannerHealth::last();
+        $value = __('platform::health.values.scanner_ok', ['version' => (string) $scanner->version(), 'infected' => (int) ($last['infected'] ?? 0)]);
+        if (($last['failed'] ?? 0) > ($last['scanned'] ?? 0)) {
+            return $this->check('warn', $value, __('platform::health.hints.scanner_failed', ['error' => $last['error'] ?? '']));
+        }
+
+        return $this->check('ok', $value);
     }
 
     private function errors(): array

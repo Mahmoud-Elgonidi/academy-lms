@@ -29,6 +29,7 @@ use Modules\Platform\Branding\TemplateCatalog;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\Platform\Models\AcademyBranding;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Files\CleanFile;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -115,6 +116,7 @@ final class BrandingSettings extends Page
                                 ->helperText(__('platform::branding.logo_hint'))
                                 ->image()
                                 ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                                ->rules([new CleanFile])
                                 ->maxSize(1024)
                                 ->disk('public')->directory($directory)->visibility('public')
                                 ->live(),
@@ -123,6 +125,7 @@ final class BrandingSettings extends Page
                                 ->helperText(__('platform::branding.favicon_hint'))
                                 ->image()
                                 ->acceptedFileTypes(['image/png'])
+                                ->rules([new CleanFile])
                                 ->maxSize(256)
                                 ->disk('public')->directory($directory)->visibility('public'),
                         ]),

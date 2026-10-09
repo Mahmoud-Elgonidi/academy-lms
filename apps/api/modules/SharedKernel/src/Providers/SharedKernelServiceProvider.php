@@ -13,9 +13,14 @@ use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Modules\SharedKernel\Auth\TimingSafeUserProvider;
+use Modules\SharedKernel\Files\ClamAvScanner;
+use Modules\SharedKernel\Files\NullUploadScanner;
+use Modules\SharedKernel\Files\UploadScanner;
 use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\OpenPlan;
@@ -41,6 +46,11 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->scoped(LocalTimePresenter::class);
         $this->app->singleton(LocalTimeResolver::class);
         $this->app->singleton(LiveSignals::class);
+        // Uploads are checked for malware by clamd when the server runs one (UPLOAD_SCANNER=clamav), else not at all.
+        $this->mergeConfigFrom(__DIR__.'/../../config/uploads.php', 'uploads');
+        $this->app->singleton(UploadScanner::class, fn () => config('uploads.scanner') === 'clamav'
+            ? new ClamAvScanner((string) config('uploads.clamav.host'), (int) config('uploads.clamav.port'), (int) config('uploads.clamav.timeout'))
+            : new NullUploadScanner);
         // The academy's plan: everything until Platform binds the plans; the meters, from each module that counts.
         $this->app->scopedIf(AcademyPlan::class, OpenPlan::class);
         $this->app->singleton(UsageMeters::class);
@@ -52,6 +62,8 @@ final class SharedKernelServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'shared');
+        // Signing in takes as long whether or not the account exists (config/auth.php's providers).
+        Auth::provider('timing-safe', fn ($app, array $config) => new TimingSafeUserProvider($app['hash'], $config['model']));
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'shared');
         if ($this->app->runningInConsole()) {
             $this->commands([LiveRelayCommand::class]);

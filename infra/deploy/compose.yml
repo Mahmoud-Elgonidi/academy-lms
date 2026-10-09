@@ -203,6 +203,24 @@ services:
       resources:
         limits: { memory: "${REDIS_MEMORY:-256m}", cpus: "${REDIS_CPUS:-0.5}" }
 
+  # Malware scanning of uploads, off unless the server asks for it (COMPOSE_PROFILES=scan,
+  # UPLOAD_SCANNER=clamav and CLAMAV_HOST=clamav in .env; RUNBOOKS.md, "Scanning uploads").
+  # clamd keeps its signatures in memory (about 1.2 GB) and freshclam updates them.
+  clamav:
+    image: clamav/clamav:1.4
+    profiles: [scan]
+    restart: unless-stopped
+    networks: [internal]
+    environment:
+      CLAMD_CONF_StreamMaxLength: "${CLAMAV_STREAM_MAX:-110M}"
+    volumes:
+      - clamav-db:/var/lib/clamav
+    security_opt: ["no-new-privileges:true"]
+    logging: *logging
+    deploy:
+      resources:
+        limits: { memory: "${CLAMAV_MEMORY:-1536m}", cpus: "${CLAMAV_CPUS:-1}" }
+
 networks:
   internal: {}
 
@@ -214,3 +232,4 @@ volumes:
   app-storage: {}
   backups: {}
   offsite-state: {}
+  clamav-db: {}

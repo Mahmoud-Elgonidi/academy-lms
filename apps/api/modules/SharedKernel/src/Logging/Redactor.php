@@ -5,8 +5,10 @@ namespace Modules\SharedKernel\Logging;
 /**
  * What a log line must never carry in the clear (docs/architecture/03,
  * section 11): people's emails and phone numbers, access tokens, a signed
- * link's signature, and the values of fields named like secrets. The line
- * stays readable: an email keeps its domain, a number its last two digits.
+ * link's signature, the values of fields named like secrets, and a card
+ * number should one ever reach a line (cards are typed on the gateways'
+ * pages only; this is the net under it). The line stays readable: an email
+ * keeps its domain, a number its last two digits, a card its last four.
  */
 final class Redactor
 {
@@ -28,8 +30,23 @@ final class Redactor
             '/\b\d+\|[A-Za-z0-9]{40,}\b/' => fn () => self::MASK,
             // Emails: the domain stays.
             '/[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,})/' => fn (array $m) => '***@'.$m[1],
+            // Card numbers (13 to 19 digits, spaced or not, of a card scheme, passing Luhn): the last four stay.
+            '/(?<![\w+-])[2-6](?:[ -]?\d){12,18}(?![\w-])/' => fn (array $m) => self::isCard($m[0]) ? '[card ****'.substr(preg_replace('/\D/', '', $m[0]), -4).']' : $m[0],
             // Phone numbers: +E.164, or a local mobile number (05…, 01…); the last two digits stay.
             '/(?<![\w+])\+\d{8,15}\b|(?<![\w.:-])0[15]\d{8,9}\b/' => fn (array $m) => '***'.substr($m[0], -2),
         ], $line);
+    }
+
+    /** The Luhn check every card number passes. */
+    private static function isCard(string $candidate): bool
+    {
+        $digits = (string) preg_replace('/\D/', '', $candidate);
+        $sum = 0;
+        foreach (array_reverse(str_split($digits)) as $i => $d) {
+            $n = (int) $d * ($i % 2 === 1 ? 2 : 1);
+            $sum += $n > 9 ? $n - 9 : $n;
+        }
+
+        return $sum % 10 === 0;
     }
 }

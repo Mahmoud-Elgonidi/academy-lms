@@ -176,6 +176,12 @@ DEMO_PASSWORD=$(secret | cut -c1-16)
 DEMO_PLATFORM_2FA_SECRET=$(head -c 20 /dev/urandom | base32 | tr -d '=\n')
 BILLING_DEMO_GATEWAY=$demo_gateway
 
+# Malware scanning of uploads (RUNBOOKS.md, "Scanning uploads"): off until the server can spare
+# about 1.5 GB of memory for clamd; then COMPOSE_PROFILES=scan and UPLOAD_SCANNER=clamav.
+COMPOSE_PROFILES=
+UPLOAD_SCANNER=none
+CLAMAV_HOST=clamav
+
 # The platform's own privacy notice, terms and account-deletion page (/privacy, /terms,
 # /account-deletion on the platform's address; the app stores link to them): the name it goes
 # by there and the address people write to about their data. Each academy sets its own.
@@ -218,6 +224,9 @@ done
 add_if_missing MAIL_PORT 587
 add_if_missing OFFSITE_S3_PREFIX academy-lms
 add_if_missing OFFSITE_KEEP_DAYS 30
+add_if_missing COMPOSE_PROFILES ""
+add_if_missing UPLOAD_SCANNER none
+add_if_missing CLAMAV_HOST clamav
 chmod 700 "$HERE" "$DOCKER_CONFIG"
 
 HTTP_PORT="$(setting HTTP_PORT)"

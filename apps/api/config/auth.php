@@ -69,13 +69,14 @@ return [
     */
 
     'providers' => [
+        // Eloquent, timing-safe: signing in takes as long whether or not the account exists (SharedKernel\Auth).
         'users' => [
-            'driver' => 'eloquent',
+            'driver' => 'timing-safe',
             'model' => env('AUTH_MODEL', User::class),
         ],
 
         'platform_admins' => [
-            'driver' => 'eloquent',
+            'driver' => 'timing-safe',
             'model' => PlatformAdmin::class,
         ],
 

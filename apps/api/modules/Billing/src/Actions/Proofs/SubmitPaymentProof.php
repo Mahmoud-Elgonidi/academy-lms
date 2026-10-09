@@ -14,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 use Modules\Billing\Contracts\Events\PaymentProofSubmitted;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentProof;
+use Modules\SharedKernel\Files\CleanFile;
 use Modules\SharedKernel\Money\Money;
 use Throwable;
 
@@ -60,7 +61,7 @@ final class SubmitPaymentProof
             'paid_on' => ['required', 'date_format:Y-m-d', 'before_or_equal:'.CarbonImmutable::now()->addDay()->toDateString(), 'after_or_equal:'.$issued->subDays(31)->toDateString()],
             'reference' => ['nullable', 'string', 'max:120'],
             'note' => ['nullable', 'string', 'max:500'],
-            'file' => ['required', 'file', 'max:'.PaymentProof::MAX_KB, 'mimetypes:'.implode(',', PaymentProof::MIMES)],
+            'file' => ['required', 'file', 'max:'.PaymentProof::MAX_KB, 'mimetypes:'.implode(',', PaymentProof::MIMES), new CleanFile],
         ], [
             'paid_on.before_or_equal' => __($l.'errors.future'),
             'paid_on.after_or_equal' => __($l.'errors.too_early'),

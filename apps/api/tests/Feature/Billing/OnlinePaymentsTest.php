@@ -168,9 +168,14 @@ it('pays with Tap in Kuwaiti dinars (three decimals), asking Tap about the charg
     Http::assertSent(fn (HttpRequest $r) => $r->url() === 'https://api.tap.company/v2/charges' && $r['amount'] === 12.5 && $r['currency'] === 'KWD'
         && $r['source']['id'] === 'src_all' && str_contains($r['post']['url'], "/webhooks/payments/{$account->academy_id}/{$account->id}"));
 
-    webhook($account, json_encode(['id' => 'chg_t1', 'status' => 'CAPTURED']))->assertOk();   // Tap still says INITIATED: nothing yet
+    // Tap signs its webhooks (hashstring); an unsigned or wrongly signed one is refused.
+    $event = ['id' => 'chg_t1', 'status' => 'CAPTURED', 'amount' => 12.5, 'currency' => 'KWD', 'reference' => ['gateway' => 'g1', 'payment' => 'tap_p1'], 'transaction' => ['created' => '1760000000000']];
+    $hash = hash_hmac('sha256', 'x_idchg_t1x_amount12.500x_currencyKWDx_gateway_referenceg1x_payment_referencetap_p1x_statusCAPTUREDx_created1760000000000', 'sk_test_tap');
+    webhook($account, json_encode($event))->assertStatus(401);
+    webhook($account, json_encode($event), ['hashstring' => hash_hmac('sha256', 'something else', 'sk_test_tap')])->assertStatus(401);
+    webhook($account, json_encode($event), ['hashstring' => $hash])->assertOk();   // Tap still says INITIATED: nothing yet
     expect($checkout->refresh()->status)->toBe('open');
-    webhook($account, json_encode(['id' => 'chg_t1', 'status' => 'CAPTURED', 'retry' => 1]))->assertOk();   // same event: kept once
+    webhook($account, json_encode($event + ['retry' => 1]), ['hashstring' => $hash])->assertOk();   // same event: kept once
     app(SettleCheckout::class)->handle($checkout);                                                          // the return or the sweeper asks again
 
     expect($checkout->refresh())->status->toBe('paid')->provider_payment_ref->toBe('tap_p1')
