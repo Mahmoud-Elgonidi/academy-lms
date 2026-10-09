@@ -37,7 +37,7 @@ stamp_now() { date -u +%Y%m%dT%H%M%SZ; }
 iso_now() { date -u +%FT%TZ; }
 size_of() { du -sb "$1" 2>/dev/null | cut -f1; }
 # One kept thing per line, oldest first (never a half-written .part).
-kept() { find "$DIR/$1" -mindepth 1 -maxdepth 1 ! -name '*.part' -printf '%f\n' 2>/dev/null | sort; }
+kept() { [ -d "$DIR/$1" ] || return 0; find "$DIR/$1" -mindepth 1 -maxdepth 1 ! -name '*.part' -printf '%f\n' | sort; }
 
 wait_for_postgres() {
     for _ in $(seq 1 60); do
@@ -142,7 +142,11 @@ list() {
         echo "$what:"
         kept "$what" | while read -r name; do printf '  %-40s %s\n' "$name" "$(du -sh "$DIR/$what/$name" | cut -f1)"; done
     done
-    echo "wal: $(find "$DIR/wal" -name '*.gz' | wc -l) segments, $(du -sh "$DIR/wal" | cut -f1)"
+    if [ -d "$DIR/wal" ]; then
+        echo "wal: $(find "$DIR/wal" -name '*.gz' | wc -l) segments, $(du -sh "$DIR/wal" | cut -f1)"
+    else
+        echo "wal: none yet"
+    fi
 }
 
 as_postgres() {
@@ -251,6 +255,7 @@ case "${1:-run}" in
     restore-into) restore_into "${2:-}" "${3:-}" ;;
     run)
         trap 'exit 0' TERM INT
+        mkdir -p "$DIR/base" "$DIR/dumps" "$DIR/files"
         log "backups every day at $AT UTC, kept $KEEP_DAYS days (the latest two always)"
         # A new stack, or a last base backup older than a day: one soon, once things have settled.
         latest="$(kept base | tail -n 1)"

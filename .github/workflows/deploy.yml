@@ -194,16 +194,31 @@ jobs:
           [ "$(sql "select count(*) from rehearsal_marker")" = 1 ] || { echo "switching back did not bring the change back"; exit 1; }
           (cd "$dir" && bash restore.sh list)
 
-          # Health for an uptime monitor: nothing without the token; with it, every check and none failing.
+          # Health for an uptime monitor: nothing without the token; with it, every check and none
+          # failing once the scheduler and the worker, just restarted twice, have beaten again
+          # (the scheduler on the minute, the worker with the job it sends).
           check 404 lms.example /health
-          check 200 lms.example /health -H "Authorization: Bearer $(setting HEALTH_TOKEN)"
+          healthy=""
+          for _ in $(seq 1 30); do
+            got="$(curl -s -o /tmp/body -w '%{http_code}' -H 'Host: lms.example' -H "Authorization: Bearer $(setting HEALTH_TOKEN)" "$base/health" || true)"
+            [ "$got" = 200 ] && { healthy=1; break; }
+            sleep 6
+          done
           cat /tmp/body; echo
-          python3 -c 'import json,sys; d=json.load(open("/tmp/body")); sys.exit(0 if d["status"] != "fail" and d["checks"]["backups"] == "ok" and d["checks"]["drill"] == "ok" else 1)' \
-            || { echo "the health check is not right"; exit 1; }
+          if [ -z "$healthy" ]; then
+            docker compose -p academy-lms -f "$dir/compose.yml" exec -T web php artisan platform:health || true
+            echo "the stack is not healthy"; exit 1
+          fi
+          python3 -c 'import json,sys; d=json.load(open("/tmp/body")); sys.exit(0 if d["checks"]["backups"] == "ok" and d["checks"]["drill"] == "ok" else 1)' \
+            || { echo "the health check does not see the backups and the drill"; exit 1; }
+          docker compose -p academy-lms -f "$dir/compose.yml" exec -T web php artisan platform:health
 
           # Every part of the stack is up, and only the web port is published, on 127.0.0.1.
           docker compose -p academy-lms -f "$dir/compose.yml" ps
           [ "$(docker compose -p academy-lms -f "$dir/compose.yml" ps --status running -q | wc -l)" = 9 ]
+          # None of them fell over and was started again by Docker since it last came up.
+          restarts="$(docker inspect --format '{{.Name}} {{.RestartCount}}' $(docker compose -p academy-lms -f "$dir/compose.yml" ps -q) | awk '$2 != 0')"
+          [ -z "$restarts" ] || { echo "restarted by Docker: $restarts"; exit 1; }
           # Only web and postgres have a health check (the image's own, on Caddy's admin port, is off).
           checked="$(docker ps --filter label=com.docker.compose.project=academy-lms --format '{{.Names}} {{.Status}}' | grep -c 'health' || true)"
           [ "$checked" = 2 ] || { echo "expected 2 containers with a health check, found $checked"; exit 1; }

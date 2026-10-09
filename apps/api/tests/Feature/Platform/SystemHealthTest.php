@@ -156,6 +156,9 @@ it('tells the platform team when a check starts failing, reminds them, and says 
     config(['platform.health.alert_to' => ['ops@example.com']]);
 
     $this->artisan('platform:health --alert')->assertExitCode(1);
+    Mail::assertNothingSent();   // once could be a restart: wait for the next check
+
+    $this->artisan('platform:health --alert')->assertExitCode(1);
     Mail::assertSent(HealthAlert::class, fn (HealthAlert $m) => $m->hasTo('salma@platform.test') && $m->hasTo('ops@example.com') && ! $m->hasTo('old@platform.test')
         && array_keys($m->failing) === ['scheduler'] && ! $m->reminder);
     expect(Mail::sent(HealthAlert::class))->toHaveCount(1);
@@ -166,6 +169,11 @@ it('tells the platform team when a check starts failing, reminds them, and says 
     $this->travel(7)->hours();
     $this->artisan('platform:health --alert');   // a reminder after six hours
     expect(Mail::sent(HealthAlert::class))->toHaveCount(2)->and(Mail::sent(HealthAlert::class)->last()->reminder)->toBeTrue();
+
+    $state['database'] = ['status' => 'fail', 'value' => 'does not answer', 'hint' => null];   // a blip that passes
+    $this->artisan('platform:health --alert');
+    $state['database'] = ['status' => 'ok', 'value' => 'answers', 'hint' => null];
+    expect(Mail::sent(HealthAlert::class))->toHaveCount(2);
 
     $state['scheduler'] = ['status' => 'ok', 'value' => 'a minute ago', 'hint' => null];
     $this->artisan('platform:health --alert')->assertExitCode(0);

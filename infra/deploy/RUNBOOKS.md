@@ -14,10 +14,13 @@ docker compose logs --tail=100 <part>               # web, portal, worker, sched
 ```
 
 Alerts reach the platform team (active console accounts, plus `HEALTH_ALERT_TO` in `.env`) by email when
-a check starts failing, every six hours while it fails, and when it is well again. They need mail set up
+a check fails in two checks in a row, five minutes apart (so a restart does not wake anyone), every six
+hours while it fails, and when it is well again. They need mail set up
 (`MAIL_MAILER` and its settings in `.env`); until then they are in `docker compose logs scheduler`.
 An uptime monitor can watch `GET https://<domain>/health` with `Authorization: Bearer <HEALTH_TOKEN>`:
-200 while nothing fails, 503 when something does, and only the checks' statuses in the answer.
+200 while nothing fails, 503 when something does, and only the checks' statuses in the answer. A stack
+that has just started says the scheduler and the worker fail until their first beat, within a minute or two;
+let the monitor confirm a fault before it calls anyone.
 
 ## Backups
 
