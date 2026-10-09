@@ -81,6 +81,7 @@ final class CreditsService implements CreditsApi
             consumedMin: $account->consumed_min,
             nextExpiry: $next?->expires_at,
             expiringMin: $next?->remaining_min ?? 0,
+            makeupMin: (int) CreditLot::query()->where('account_id', $accountId)->where('source', LotSource::Makeup->value)->sum('remaining_min'),
         );
     }
 }

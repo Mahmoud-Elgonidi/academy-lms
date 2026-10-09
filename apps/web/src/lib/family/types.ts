@@ -39,7 +39,8 @@ export type ExtraOffer = { price: string; price_minor: number; currency: string;
 
 export type Balance = {
   learner: { id: string; name: string };
-  data: { enrollment_id: string; subject: string | null; minutes: number; session_minutes: number | null; sessions: number | null; extra: ExtraOffer | null }[];
+  /** One per balance: a course's own, or a shared package's (shared: all its subjects in subject). */
+  data: { enrollment_id: string; subject: string | null; shared: boolean; minutes: number; session_minutes: number | null; sessions: number | null; extra: ExtraOffer | null }[];
 };
 
 /** A line of an invoice: what it is for, and what came off it (a discount is negative). */
@@ -49,6 +50,9 @@ export type Invoice = {
   id: string;
   number: string;
   for: string;
+  /** One invoice for several children's renewals that fell due in the same week. */
+  family: boolean;
+  student_ids: string[];
   total: string;
   outstanding: string;
   outstanding_minor: number;

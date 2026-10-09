@@ -827,6 +827,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String sharedPackage(String subjects) {
+    return '$subjects · shared package';
+  }
+
+  @override
+  String get familyInvoice => 'family invoice';
+
+  @override
   String lessonUntil(String time) {
     return 'Until $time';
   }

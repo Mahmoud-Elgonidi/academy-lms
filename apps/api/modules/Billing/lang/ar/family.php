@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'shared' => 'باقة مشتركة',
+    'family_invoice' => 'فاتورة العيلة',
     'nav' => 'الرصيد والفواتير',
     'title' => 'الرصيد والفواتير',
     'balance_for' => 'رصيد :name',

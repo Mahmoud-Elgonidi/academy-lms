@@ -9,7 +9,8 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
 /**
  * @property string $id
  * @property string $invoice_id
- * @property string $kind block | extra | adjustment
+ * @property ?string $subscription_id the course the line is for (a family invoice has lines for several)
+ * @property string $kind block | extra | discount | adjustment
  * @property string $description_ar
  * @property string $description_en
  * @property int $quantity
@@ -24,7 +25,7 @@ final class InvoiceLine extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['invoice_id', 'kind', 'description_ar', 'description_en', 'quantity', 'unit_minor', 'amount_minor', 'meta'];
+    protected $fillable = ['invoice_id', 'subscription_id', 'kind', 'description_ar', 'description_en', 'quantity', 'unit_minor', 'amount_minor', 'meta'];
 
     protected function casts(): array
     {

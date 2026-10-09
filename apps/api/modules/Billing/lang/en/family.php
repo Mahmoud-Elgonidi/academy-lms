@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'shared' => 'shared package',
+    'family_invoice' => 'family invoice',
     'nav' => 'Balance & invoices',
     'title' => 'Balance & invoices',
     'balance_for' => ':name\'s balance',

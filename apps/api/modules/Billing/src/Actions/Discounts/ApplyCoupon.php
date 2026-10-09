@@ -20,8 +20,9 @@ use Modules\SharedKernel\Audit\AuditTrail;
  * Puts a coupon on a subscription: its next invoices come out with it
  * taken off. An invoice already issued never changes, so the block waiting
  * to be paid takes it only by being issued again: voided (a credit note for
- * a tax invoice) and issued anew, which needs nothing paid on it, no proof
- * waiting and no online payment under way.
+ * a tax invoice) and issued anew with the same blocks (a family invoice
+ * with all of them), which needs nothing paid on it, no proof waiting and
+ * no online payment under way.
  */
 final class ApplyCoupon
 {
@@ -57,10 +58,17 @@ final class ApplyCoupon
 
             $reissued = null;
             if ($waiting !== null) {
-                $block = (int) $waiting->lines->firstWhere('kind', 'block')->meta['block_no'];
+                // The same blocks again: this course's first, and the family's others when it was a family invoice.
+                $blocks = $waiting->lines->where('kind', 'block')
+                    ->sortBy(fn ($line) => $line->subscription_id === $subscription->id ? 0 : 1)
+                    ->map(function ($line) {
+                        $course = Subscription::query()->with('plan')->findOrFail($line->subscription_id);
+                        [$ar, $en] = $course->subjectNames();
+
+                        return [$course, (int) $line->meta['block_no'], $ar, $en];
+                    })->values()->all();
                 $this->void->handle($waiting->id, __('billing::discounts.reissue_reason', ['code' => $coupon->code]), $actorId);
-                [$ar, $en] = $subscription->subjectNames();
-                $reissued = $this->issue->handle($subscription, $block, $ar, $en, $actorId);
+                $reissued = $this->issue->together($blocks, $actorId);
             }
 
             app(AuditTrail::class)->record('billing.coupon_applied', 'subscription', $subscription->id, array_filter([
@@ -77,8 +85,7 @@ final class ApplyCoupon
     /** The block invoice waiting to be paid, if it can be issued again; refuses when money may be on its way. */
     private function waitingBlock(Subscription $subscription): ?Invoice
     {
-        $invoice = Invoice::query()->with('lines')->where('subscription_id', $subscription->id)->where('status', 'issued')
-            ->whereHas('lines', fn ($q) => $q->where('kind', 'block'))->latest('issued_at')->first();
+        $invoice = Invoice::query()->with('lines')->forSubscription($subscription->id, 'block')->where('status', 'issued')->latest('issued_at')->first();
         if ($invoice === null) {
             return null;
         }

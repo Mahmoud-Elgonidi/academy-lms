@@ -329,15 +329,18 @@ final class FindTeacher extends Page
                 ]))->visible(fn () => $this->matchingPlans() === [])->color('danger'),
                 Radio::make('payer_id')->label(__('scheduling::find.enroll.payer'))
                     ->options(fn () => $this->payers())->required()->live(),
+                // A course joining the student's shared package draws on its balance: no invoice, so no price or coupon.
+                Text::make(fn (Get $get) => $this->joining($get) ? __('scheduling::find.enroll.joins_package') : '')->color('info')
+                    ->visible(fn (Get $get) => $this->joining($get)),
                 TextInput::make('coupon')->label(__('scheduling::find.enroll.coupon'))->maxLength(32)->live(onBlur: true)
                     ->extraInputAttributes(['dir' => 'ltr', 'style' => 'text-transform: uppercase'])
-                    ->visible(fn () => $this->matchingPlans() !== []),
+                    ->visible(fn (Get $get) => $this->matchingPlans() !== [] && ! $this->joining($get)),
                 Text::make(fn (Get $get) => $this->quote($get)?->couponError ?? '')->color('danger')
                     ->visible(fn (Get $get) => filled($this->quote($get)?->couponError)),
                 Text::make(fn (Get $get) => $this->quote($get)?->couponNote ?? '')->color('warning')
                     ->visible(fn (Get $get) => filled($this->quote($get)?->couponNote)),
                 Text::make(fn (Get $get) => $this->priceLine($this->quote($get)))
-                    ->visible(fn (Get $get) => $this->quote($get) !== null),
+                    ->visible(fn (Get $get) => $this->quote($get) !== null && ! $this->joining($get)),
             ])
             ->action(function (array $data, Action $action) {
                 try {
@@ -354,20 +357,24 @@ final class FindTeacher extends Page
                 }
                 $this->bookingDone();
 
+                $date = $booked->firstSession ? $this->studentDate($booked->firstSession) : '—';
                 Notification::make()->success()->persistent()
-                    ->title(__('scheduling::find.booked.series', [
-                        'count' => $booked->sessions,
-                        'date' => $booked->firstSession ? $this->studentDate($booked->firstSession) : '—',
-                        'number' => $booked->invoice->number,
-                        'total' => $booked->invoice->total->format(),
-                    ]))
+                    // A course that joined the student's shared package has no invoice of its own.
+                    ->title($booked->invoice === null
+                        ? __('scheduling::find.booked.joined', ['count' => $booked->sessions, 'date' => $date])
+                        : __('scheduling::find.booked.series', [
+                            'count' => $booked->sessions,
+                            'date' => $date,
+                            'number' => $booked->invoice->number,
+                            'total' => $booked->invoice->total->format(),
+                        ]))
                     ->body($booked->skippedDates !== [] ? __('scheduling::find.booked.skipped', ['dates' => implode('، ', $booked->skippedDates)]) : null)
-                    ->actions([
-                        Action::make('invoice')->label(__('scheduling::find.enroll.open_invoice'))->button()
+                    ->actions(array_values(array_filter([
+                        $booked->invoice === null ? null : Action::make('invoice')->label(__('scheduling::find.enroll.open_invoice'))->button()
                             ->url(route('filament.academy.resources.invoices.view', ['record' => $booked->invoice->id])),
                         Action::make('account')->label(__('scheduling::find.enroll.open_account'))->link()
                             ->url(route('filament.academy.resources.enrollments.view', ['record' => $booked->enrollmentId])),
-                    ])
+                    ])))
                     ->send();
             });
     }
@@ -375,6 +382,15 @@ final class FindTeacher extends Page
     public function heldCount(): int
     {
         return $this->holdBatch ? BookingHold::query()->where('batch_id', $this->holdBatch)->count() : 0;
+    }
+
+    /** Whether the chosen shared plan is one the student already has with this payer: the course joins it. */
+    private function joining(Get $get): bool
+    {
+        $plan = collect($this->matchingPlans())->firstWhere('id', $get('plan_id'));
+
+        return $plan?->shared === true && filled($get('payer_id'))
+            && app(BillingApi::class)->sharedPackage((string) $this->data['student_id'], $plan->id, (string) $get('payer_id')) !== null;
     }
 
     /** @var array<string, ?PriceQuote> quotes worked out in this request */
@@ -501,7 +517,8 @@ final class FindTeacher extends Page
     {
         return array_values(array_filter(
             app(BillingApi::class)->planOptions((int) $this->data['duration']),
-            fn (PlanOption $p) => $p->sessionMinutes === (int) $this->data['duration'] && $p->sessionsPerWeek === count($this->picked),
+            // A shared package's lessons a week are across the student's courses, so only its length has to match.
+            fn (PlanOption $p) => $p->sessionMinutes === (int) $this->data['duration'] && ($p->shared || $p->sessionsPerWeek === count($this->picked)),
         ));
     }
 

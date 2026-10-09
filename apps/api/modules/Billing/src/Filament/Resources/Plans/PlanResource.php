@@ -26,6 +26,7 @@ use Modules\Billing\Domain\BlockTerms;
 use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PlanPrice;
 use Modules\Billing\Models\PriceRegion;
+use Modules\Billing\Models\Subscription;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Money\Money;
 use UnitEnum;
@@ -78,6 +79,13 @@ final class PlanResource extends Resource
                 TextInput::make('name_ar')->label(__('billing::plans.fields.name_ar'))->required()->maxLength(80),
                 TextInput::make('name_en')->label(__('billing::plans.fields.name_en'))->required()->maxLength(80),
             ]),
+            ToggleButtons::make('credit_scope')->label(__('billing::plans.fields.credit_scope'))
+                ->options(['enrollment' => __('billing::plans.scopes.enrollment'), Plan::SHARED => __('billing::plans.scopes.student_pool')])
+                ->inline()->required()->default('enrollment')
+                ->helperText(__('billing::plans.hints.credit_scope'))
+                // Fixed once a student is on the plan.
+                ->disabled(fn (?Plan $record) => $record !== null && Subscription::query()->where('plan_id', $record->id)->exists())
+                ->dehydrated(fn (?Plan $record) => $record === null || ! Subscription::query()->where('plan_id', $record->id)->exists()),
             ToggleButtons::make('session_minutes')->label(__('billing::plans.fields.session_minutes'))
                 ->options([30 => '30', 45 => '45', 60 => '60', 90 => '90'])->inline()->required()->default(30),
             Grid::make(2)->schema([
@@ -112,7 +120,7 @@ final class PlanResource extends Resource
             ->columns([
                 TextColumn::make('name')->label(__('billing::plans.fields.name'))
                     ->state(fn (Plan $p) => $p->name())
-                    ->description(fn (Plan $p) => __('billing::plans.summary', [
+                    ->description(fn (Plan $p) => ($p->isShared() ? __('billing::plans.scopes.student_pool').' · ' : '').__('billing::plans.summary', [
                         'minutes' => $p->session_minutes,
                         'per_week' => trans_choice('billing::plans.per_week', $p->sessions_per_week, ['n' => $p->sessions_per_week]),
                         'block' => $p->sessions_per_block,

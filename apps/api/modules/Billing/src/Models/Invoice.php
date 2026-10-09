@@ -3,6 +3,7 @@
 namespace Modules\Billing\Models;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,7 +20,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property string $id
  * @property ?string $number
  * @property string $billing_account_id
- * @property ?string $subscription_id
+ * @property ?string $subscription_id the one course it is for; null on a family invoice (its lines say which courses)
  * @property string $status draft | issued | paid | void
  * @property string $currency
  * @property int $subtotal_minor
@@ -105,6 +106,18 @@ final class Invoice extends Model
     public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
+    }
+
+    /** Invoices with a line for this course (on its own, or on a family invoice with others). */
+    public function scopeForSubscription(Builder $query, string $subscriptionId, ?string $kind = null): void
+    {
+        $query->whereHas('lines', fn ($q) => $q->where('subscription_id', $subscriptionId)->when($kind, fn ($q) => $q->where('kind', $kind)));
+    }
+
+    /** @return list<string> the courses it is for, from its lines, in the order they are on it */
+    public function subscriptionIds(): array
+    {
+        return $this->lines->pluck('subscription_id')->filter()->unique()->values()->map(fn ($id) => (string) $id)->all();
     }
 
     public function total(): Money

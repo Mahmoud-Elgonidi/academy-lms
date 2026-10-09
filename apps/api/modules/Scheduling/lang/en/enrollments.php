@@ -135,8 +135,13 @@ return [
         'left' => 'Left',
         'none' => 'No movements yet. Credit is added when the invoice is paid.',
     ],
+    'shared' => [
+        'label' => 'shared package with',
+        'alone' => 'shared package',
+    ],
     'invoices' => [
         'title' => 'Invoices',
+        'family' => 'family invoice',
     ],
     'empty' => [
         'title' => 'No enrolled students yet',

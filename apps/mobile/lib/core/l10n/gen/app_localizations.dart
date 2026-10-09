@@ -1472,6 +1472,18 @@ abstract class AppLocalizations {
   /// **'فاضل {n} دقيقة'**
   String minutesLeft(int n);
 
+  /// No description provided for @sharedPackage.
+  ///
+  /// In ar, this message translates to:
+  /// **'{subjects} · باقة مشتركة'**
+  String sharedPackage(String subjects);
+
+  /// No description provided for @familyInvoice.
+  ///
+  /// In ar, this message translates to:
+  /// **'فاتورة العيلة'**
+  String get familyInvoice;
+
   /// No description provided for @lessonUntil.
   ///
   /// In ar, this message translates to:

@@ -36,12 +36,12 @@ final class BuyExtraLessons
 
         return DB::transaction(function () use ($subscriptionId, $lessons, $actorId, $channel) {
             $subscription = Subscription::query()->with('plan')->lockForUpdate()->findOrFail($subscriptionId);
-            $enrollment = $this->enrollments->find($subscription->enrollment_id);
-            if ($subscription->status === 'cancelled' || $enrollment === null || $enrollment->status->value !== 'active') {
+            // A course on (one of a shared package's will do).
+            $active = collect($subscription->enrollmentIds())->contains(fn (string $id) => $this->enrollments->find($id)?->status->value === 'active');
+            if ($subscription->status === 'cancelled' || ! $active) {
                 throw ValidationException::withMessages(['lessons' => __('billing::discounts.errors.extra_inactive')]);
             }
-            $waiting = Invoice::query()->where('subscription_id', $subscription->id)->where('status', 'issued')
-                ->whereHas('lines', fn ($q) => $q->where('kind', 'extra'))->value('number');
+            $waiting = Invoice::query()->forSubscription($subscription->id, 'extra')->where('status', 'issued')->value('number');
             if ($waiting !== null) {
                 throw ValidationException::withMessages(['lessons' => __('billing::discounts.errors.extra_waiting', ['number' => $waiting])]);
             }

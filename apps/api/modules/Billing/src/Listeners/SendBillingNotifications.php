@@ -9,6 +9,7 @@ use Modules\Billing\Contracts\Events\PaymentProofDecided;
 use Modules\Billing\Contracts\Events\PaymentProofSubmitted;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentProof;
+use Modules\Billing\Queries\InvoiceCourses;
 use Modules\Communication\Contracts\DTOs\Day;
 use Modules\Communication\Contracts\DTOs\Message;
 use Modules\Communication\Contracts\DTOs\TemplateDefinition;
@@ -128,11 +129,9 @@ final class SendBillingNotifications
         ], ['screen' => 'invoice', 'id' => $invoice->id], "proof-decided:{$proof->id}"));
     }
 
+    /** The student it is for, or the children on a family invoice. */
     private function studentOf(Invoice $invoice): ?string
     {
-        return $invoice->subscription_id === null ? null : DB::table('subscriptions as s')
-            ->join('enrollments as e', fn ($j) => $j->on('e.academy_id', '=', 's.academy_id')->on('e.id', '=', 's.enrollment_id'))
-            ->join('users as u', fn ($j) => $j->on('u.academy_id', '=', 'e.academy_id')->on('u.id', '=', 'e.student_id'))
-            ->where('s.id', $invoice->subscription_id)->value('u.name');
+        return InvoiceCourses::students(InvoiceCourses::ofOne($invoice->id)) ?: null;
     }
 }

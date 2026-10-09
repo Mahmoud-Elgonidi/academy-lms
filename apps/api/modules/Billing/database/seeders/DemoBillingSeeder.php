@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Modules\Billing\Actions\SaveBillingSettings;
 use Modules\Billing\Actions\SavePlan;
 use Modules\Billing\Actions\SavePriceRegions;
+use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PriceRegion;
 
 /**
@@ -37,6 +38,8 @@ class DemoBillingSeeder extends Seeder
             ['4 حصص · حصة في الأسبوع', '4 sessions · once a week', 45, 4, 1, [300, 295, 62, 72, 80, 1650]],
             ['8 حصص · حصتين في الأسبوع', '8 sessions · twice a week', 45, 8, 2, [560, 550, 115, 133, 150, 3000]],
             ['8 حصص · حصتين في الأسبوع', '8 sessions · twice a week', 60, 8, 2, [720, 705, 148, 170, 192, 3900]],
+            // A shared package: one balance for all of a student's subjects.
+            ['12 حصة في أي مادة', '12 lessons · any subject', 30, 12, 3, [600, 590, 125, 145, 160, 3300], Plan::SHARED],
         ];
         foreach ($catalogue as $i => [$ar, $en, $minutes, $block, $perWeek, $amounts]) {
             $plan = $plans->handle(null, [
@@ -45,6 +48,7 @@ class DemoBillingSeeder extends Seeder
                 'session_minutes' => $minutes,
                 'sessions_per_block' => $block,
                 'sessions_per_week' => $perWeek,
+                'credit_scope' => $catalogue[$i][6] ?? 'enrollment',
                 'prices' => array_map(fn (string $currency, int $amount) => ['price_region_id' => $region[$currency], 'amount' => $amount], ['SAR', 'AED', 'GBP', 'EUR', 'USD', 'EGP'], $amounts),
             ]);
             $plan->forceFill(['sort' => $i])->save();

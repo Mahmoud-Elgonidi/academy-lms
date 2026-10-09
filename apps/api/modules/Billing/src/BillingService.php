@@ -3,6 +3,7 @@
 namespace Modules\Billing;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Actions\BuyExtraLessons;
 use Modules\Billing\Actions\Discounts\ApplyCoupon;
@@ -16,9 +17,11 @@ use Modules\Billing\Contracts\DTOs\NewSubscription;
 use Modules\Billing\Contracts\DTOs\PlanOption;
 use Modules\Billing\Contracts\DTOs\PriceQuote;
 use Modules\Billing\Contracts\DTOs\RegionOption;
+use Modules\Billing\Contracts\DTOs\SharedPackage;
 use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PlanPrice;
 use Modules\Billing\Models\PriceRegion;
+use Modules\Billing\Models\Subscription;
 use Modules\Billing\Queries\CourseBillingQuery;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\SharedKernel\Money\Money;
@@ -64,8 +67,32 @@ final class BillingService implements BillingApi
                 validityDays: $plan->validity_days,
                 prices: $plan->prices->mapWithKeys(fn (PlanPrice $p) => [$p->price_region_id => $p->money()])->all(),
                 names: [$plan->name_ar, $plan->name_en],
+                shared: $plan->isShared(),
             ))
             ->all();
+    }
+
+    public function sharedPackage(string $studentId, string $planId, string $payerId): ?SharedPackage
+    {
+        $subscription = Subscription::query()
+            ->join('billing_accounts as ba', fn ($j) => $j->on('ba.academy_id', '=', 'subscriptions.academy_id')->on('ba.id', '=', 'subscriptions.billing_account_id'))
+            ->join('enrollments as e', fn ($j) => $j->on('e.academy_id', '=', 'subscriptions.academy_id')->on('e.id', '=', 'subscriptions.enrollment_id'))
+            ->where('subscriptions.plan_id', $planId)->where('subscriptions.status', '<>', 'cancelled')
+            ->where('ba.payer_id', $payerId)->where('e.student_id', $studentId)
+            ->whereExists(fn ($q) => $q->from('plans as p')->whereColumn('p.academy_id', 'subscriptions.academy_id')->whereColumn('p.id', 'subscriptions.plan_id')->where('p.credit_scope', Plan::SHARED))
+            ->latest('subscriptions.created_at')
+            ->first(['subscriptions.*']);
+        if ($subscription === null) {
+            return null;
+        }
+
+        return new SharedPackage(
+            subscriptionId: $subscription->id,
+            creditAccountId: $subscription->credit_account_id,
+            paid: $subscription->block_no >= 1,
+            subjectIds: DB::table('enrollments')->where('credit_account_id', $subscription->credit_account_id)->where('status', '<>', 'ended')
+                ->distinct()->pluck('subject_id')->map(fn ($id) => (string) $id)->all(),
+        );
     }
 
     public function regions(): array

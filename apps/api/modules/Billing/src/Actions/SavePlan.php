@@ -7,19 +7,22 @@ use Illuminate\Validation\ValidationException;
 use Modules\Billing\Domain\BlockTerms;
 use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PriceRegion;
+use Modules\Billing\Models\Subscription;
 use Modules\SharedKernel\Money\Money;
 
 /**
  * Creates or updates a block plan and its price in each region. Prices are
  * typed as decimals in the region's currency and stored in minor units.
  * Subscriptions keep the price they were sold at, so a new price applies to
- * new enrolments only.
+ * new enrolments only. A plan is per course or a shared package ("12
+ * lessons in any subject"); which, is fixed once anyone is on it.
  */
 final class SavePlan
 {
     /**
      * @param  array{name_ar: string, name_en: string, session_minutes: int|string, sessions_per_block: int|string, sessions_per_week: int|string,
-     *               validity_days?: int|string|null, renew_at_sessions?: int|string|null, is_active?: bool, prices?: list<array{price_region_id: string, amount: string|int|float|null}>}  $data
+     *               validity_days?: int|string|null, renew_at_sessions?: int|string|null, is_active?: bool, credit_scope?: ?string,
+     *               prices?: list<array{price_region_id: string, amount: string|int|float|null}>}  $data
      */
     public function handle(?Plan $plan, array $data): Plan
     {
@@ -28,6 +31,14 @@ final class SavePlan
         $minutes = (int) $data['session_minutes'];
         if ($perBlock <= 0 || $perWeek <= 0 || $minutes <= 0) {
             throw ValidationException::withMessages(['sessions_per_block' => __('billing::plans.errors.positive')]);
+        }
+
+        $scope = $data['credit_scope'] ?? $plan?->credit_scope ?? 'enrollment';
+        if (! in_array($scope, ['enrollment', Plan::SHARED], true)) {
+            throw ValidationException::withMessages(['credit_scope' => __('billing::plans.errors.scope')]);
+        }
+        if ($plan?->exists && $scope !== $plan->credit_scope && Subscription::query()->where('plan_id', $plan->id)->exists()) {
+            throw ValidationException::withMessages(['credit_scope' => __('billing::plans.errors.scope_locked')]);
         }
 
         $regions = PriceRegion::query()->pluck('currency', 'id');
@@ -47,7 +58,7 @@ final class SavePlan
             $prices[$row['price_region_id']] = $money;
         }
 
-        return DB::transaction(function () use ($plan, $data, $perBlock, $perWeek, $minutes, $prices) {
+        return DB::transaction(function () use ($plan, $data, $perBlock, $perWeek, $minutes, $prices, $scope) {
             $plan ??= new Plan;
             $plan->fill([
                 'name_ar' => trim($data['name_ar']),
@@ -58,6 +69,7 @@ final class SavePlan
                 'validity_days' => (int) ($data['validity_days'] ?? 0) ?: BlockTerms::defaultValidityDays($perBlock, $perWeek),
                 'renew_at_sessions' => max(0, min($perBlock - 1, (int) ($data['renew_at_sessions'] ?? 2))),
                 'is_active' => (bool) ($data['is_active'] ?? true),
+                'credit_scope' => $scope,
             ])->save();
 
             $plan->prices()->whereNotIn('price_region_id', array_keys($prices))->delete();

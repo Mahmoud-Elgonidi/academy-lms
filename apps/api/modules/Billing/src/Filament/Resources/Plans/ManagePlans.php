@@ -92,15 +92,18 @@ final class ManagePlans extends ManageRecords
                 ->modalHeading(__('billing::discounts.sibling.title'))
                 ->modalDescription(__('billing::discounts.sibling.hint'))
                 ->modalWidth('md')
-                ->fillForm(fn () => ['second' => BillingSettings::current()->sibling_second_bp / 100, 'more' => BillingSettings::current()->sibling_more_bp / 100])
+                ->fillForm(fn () => ['second' => BillingSettings::current()->sibling_second_bp / 100, 'more' => BillingSettings::current()->sibling_more_bp / 100,
+                    'family_days' => BillingSettings::current()->family_invoice_days])
                 ->schema([
                     Grid::make(2)->schema([
                         TextInput::make('second')->label(__('billing::discounts.sibling.second'))->numeric()->minValue(0)->maxValue(100)->suffix('%')->required(),
                         TextInput::make('more')->label(__('billing::discounts.sibling.more'))->numeric()->minValue(0)->maxValue(100)->suffix('%')->required(),
                     ]),
+                    TextInput::make('family_days')->label(__('billing::discounts.sibling.family_days'))->helperText(__('billing::discounts.sibling.family_days_hint'))
+                        ->numeric()->integer()->minValue(0)->maxValue(14)->suffix(__('billing::discounts.sibling.days'))->required(),
                 ])
                 ->action(function (array $data) {
-                    app(SaveSiblingDiscount::class)->handle($data['second'], $data['more']);
+                    app(SaveSiblingDiscount::class)->handle($data['second'], $data['more'], $data['family_days']);
                     Notification::make()->success()->title(__('billing::discounts.sibling.saved'))->send();
                 }),
             CreateAction::make()

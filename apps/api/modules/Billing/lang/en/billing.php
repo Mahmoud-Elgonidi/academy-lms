@@ -6,6 +6,7 @@ return [
         'extra' => ':subject — extra lessons (:minutes min each)',
         'sibling' => 'Sibling discount (:rate)',
         'coupon' => 'Coupon :code (:value)',
+        'shared' => 'Shared package',
     ],
     'statuses' => [
         'draft' => 'Draft',

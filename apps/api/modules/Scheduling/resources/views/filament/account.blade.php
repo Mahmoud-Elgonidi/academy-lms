@@ -51,6 +51,11 @@
             <span>{{ $a['subject'] }} · {{ __('scheduling::enrollments.with', ['teacher' => $h['teacher']]) }}</span>
             <span class="ac-pill" data-s="{{ $h['status'] }}">{{ __('scheduling::enrollments.statuses.'.$h['status']) }}</span>
             @if ($a['plan']) <span>· {{ $a['plan'] }} · {{ $a['price'] }}</span> @endif
+            @if ($a['sharedWith'] !== null)
+                <span>· @if ($a['sharedWith'] === []){{ __('scheduling::enrollments.shared.alone') }}@else{{ __('scheduling::enrollments.shared.label') }}
+                    @foreach ($a['sharedWith'] as $other)<a href="{{ route('filament.academy.resources.enrollments.view', ['record' => $other['id']]) }}" wire:navigate>{{ $other['subject'] }}</a>@if (! $loop->last)، @endif @endforeach
+                @endif</span>
+            @endif
             @if ($h['payer'] && $h['payer_id'] !== $h['student_id']) <span>· {{ __('scheduling::enrollments.payer', ['name' => $h['payer']]) }}</span> @endif
         </div>
 
@@ -188,7 +193,7 @@
                         <tbody>
                             @forelse ($a['invoices'] as $i)
                                 <tr>
-                                    <td><a href="{{ $i['url'] }}" wire:navigate>{{ $i['number'] }}</a></td>
+                                    <td><a href="{{ $i['url'] }}" wire:navigate>{{ $i['number'] }}</a>@if ($i['family']) <span class="ac-muted">· {{ __('scheduling::enrollments.invoices.family') }}</span>@endif</td>
                                     <td class="ac-muted">{{ $i['issued'] }}</td>
                                     <td class="num">{{ $i['total'] }}</td>
                                     <td class="num"><span class="ac-pill" data-s="{{ $i['status'] }}">{{ __('billing::billing.statuses.'.$i['status']) }}</span></td>

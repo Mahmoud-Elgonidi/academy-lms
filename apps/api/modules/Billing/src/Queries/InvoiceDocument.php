@@ -30,10 +30,16 @@ final class InvoiceDocument
         $date = fn (?CarbonImmutable $at) => $at?->setTimezone($tz)->locale($locale)->translatedFormat('j F Y');
         $time = fn (?CarbonImmutable $at) => $at?->setTimezone($tz)->locale($locale)->translatedFormat('j F Y · H:i');
         $payer = DB::table('users')->where('id', $invoice->billingAccount->payer_id)->first(['name', 'email', 'phone_e164']);
-        $student = $invoice->subscription_id ? DB::table('subscriptions as s')
-            ->join('enrollments as e', fn ($j) => $j->on('e.academy_id', '=', 's.academy_id')->on('e.id', '=', 's.enrollment_id'))
-            ->join('users as u', fn ($j) => $j->on('u.academy_id', '=', 'e.academy_id')->on('u.id', '=', 'e.student_id'))
-            ->where('s.id', $invoice->subscription_id)->first(['u.name', 'e.id as enrollment_id']) : null;
+        $courses = InvoiceCourses::ofOne($invoice->id);
+        $students = collect($courses)->unique('student_id')->values();
+        // One student: their name and account; a family invoice: each child, linked to their course.
+        $student = $courses === [] ? null : (object) [
+            'name' => InvoiceCourses::students($courses),
+            'enrollment_id' => $students->count() === 1 ? $courses[0]['enrollment_id'] : null,
+        ];
+        // Each course's lines together (what it is, then what comes off it), in the order the courses are named.
+        $order = array_flip(array_column($courses, 'subscription_id'));
+        $lines = $invoice->lines->sortBy(fn ($l) => [$order[$l->subscription_id] ?? PHP_INT_MAX, $l->kind === 'discount' ? 1 : 0])->values();
         $simplified = $invoice->tax_document === TaxDocument::SIMPLIFIED;
         $note = $invoice->creditNote;
 
@@ -47,6 +53,9 @@ final class InvoiceDocument
             'title' => $simplified ? __('billing::invoices.doc.simplified') : ($invoice->tax_rate_bp > 0 ? __('billing::invoices.doc.tax_invoice') : __('billing::invoices.model')),
             'payer' => $payer,
             'student' => $student,
+            'courses' => $courses,
+            'family' => count($courses) > 1,
+            'lines' => $lines,
             'issued' => $simplified ? $time($invoice->issued_at) : $date($invoice->issued_at),
             'due' => $date($invoice->due_at),
             'payments' => $invoice->payments->map(fn ($p) => [

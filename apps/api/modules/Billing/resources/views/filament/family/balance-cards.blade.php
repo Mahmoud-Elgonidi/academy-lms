@@ -3,7 +3,7 @@
 <div class="bf-grid lms-stagger">
     @foreach ($balances as $b)
         <div class="bf-card" @if ($b['sessions'] !== null && $b['sessions'] <= 1) data-low @endif>
-            <small>{{ $b['subject'] }}</small>
+            <small>{{ $b['subject'] }}@if ($b['shared'] ?? false) · {{ __($l.'shared') }}@endif</small>
             <span class="bf-big">{{ $b['sessions'] !== null ? trans_choice($l.'sessions_left', $b['sessions'], ['n' => $b['sessions']]) : __($l.'minutes_left', ['n' => $b['minutes']]) }}</span>
             @if ($b['sessions'] !== null && $b['sessions'] <= 1)
                 <small>{{ __($l.'renew_soon') }}</small>

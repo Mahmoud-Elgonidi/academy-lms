@@ -9,6 +9,7 @@ use Modules\Billing\Contracts\DTOs\NewSubscription;
 use Modules\Billing\Contracts\DTOs\PlanOption;
 use Modules\Billing\Contracts\DTOs\PriceQuote;
 use Modules\Billing\Contracts\DTOs\RegionOption;
+use Modules\Billing\Contracts\DTOs\SharedPackage;
 use Modules\SharedKernel\Money\Money;
 
 /** What other modules may ask of Billing. */
@@ -39,6 +40,13 @@ interface BillingApi
 
     /** @return list<RegionOption> */
     public function regions(): array;
+
+    /**
+     * The student's live shared package on this plan, paid by this payer,
+     * for a new course to join (its lessons then draw on the package's
+     * balance, and it has no invoice of its own). Null when there is none.
+     */
+    public function sharedPackage(string $studentId, string $planId, string $payerId): ?SharedPackage;
 
     /**
      * What a first block would come to for this student and payer: the

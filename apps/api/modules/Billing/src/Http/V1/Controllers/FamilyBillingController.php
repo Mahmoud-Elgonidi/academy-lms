@@ -20,6 +20,7 @@ use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Queries\CourseBillingQuery;
+use Modules\Billing\Queries\InvoiceCourses;
 use Modules\People\Contracts\FamilyView;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Time\LocalTimePresenter;
@@ -52,7 +53,10 @@ final class FamilyBillingController
             $extra = $b['extra'];
             $courses[] = [
                 'enrollment_id' => (string) $b['enrollment_id'],
+                /** The course's subject, or a shared package's subjects together. */
                 'subject' => $b['subject'] === null ? null : (string) $b['subject'],
+                /** A shared package ("12 lessons in any subject"): one balance for all these courses. */
+                'shared' => (bool) $b['shared'],
                 'minutes' => (int) $b['minutes'],
                 /** A lesson's length, when the plan has one. */
                 'session_minutes' => $b['session_minutes'] === null ? null : (int) $b['session_minutes'],
@@ -129,6 +133,8 @@ final class FamilyBillingController
         $rows = collect(FamilyAccount::invoices($me, 'UTC', 50));
         $invoices = Invoice::query()->with('lines')->whereIn('id', $rows->pluck('id'))->orderByDesc('issued_at')->get();
         $for = $rows->pluck('for', 'id');
+        $family = $rows->keyBy('id');
+        $courses = InvoiceCourses::of($invoices->pluck('id')->all());
         $proofs = PaymentProof::latestFor($invoices->pluck('id')->all());
         $takesProofs = $online->takesProofs();
 
@@ -142,11 +148,17 @@ final class FamilyBillingController
                 /** The ways a proof can say it was paid. */
                 'methods' => array_map(fn (string $m) => ['value' => $m, 'label' => __('billing::billing.methods.'.$m)], PaymentProof::METHODS),
             ],
-            'data' => $invoices->map(function (Invoice $i) use ($me, $links, $online, $for, $proofs, $takesProofs) {
+            'data' => $invoices->map(function (Invoice $i) use ($me, $links, $online, $for, $family, $courses, $proofs, $takesProofs) {
                 $outstanding = $i->status === 'issued' ? $i->outstanding() : Money::of(0, $i->currency);
                 $status = InvoiceResource::statusKey($i);
+                $studentIds = [];
+                foreach ($family[$i->id]['students'] ?? [] as $studentId) {
+                    $studentIds[] = (string) $studentId;
+                }
+                // Each course's lines together, as the invoice document shows them.
+                $order = array_flip(array_column($courses[$i->id] ?? [], 'subscription_id'));
                 $lines = [];
-                foreach ($i->lines->sortBy(fn ($l) => $l->kind === 'discount' ? 1 : 0) as $line) {
+                foreach ($i->lines->sortBy(fn ($l) => [$order[$l->subscription_id] ?? PHP_INT_MAX, $l->kind === 'discount' ? 1 : 0]) as $line) {
                     $lines[] = [
                         /** block, extra (extra lessons) or discount (the family discount or a coupon: a negative amount) */
                         'kind' => $line->kind,
@@ -160,8 +172,12 @@ final class FamilyBillingController
                 return [
                     'id' => $i->id,
                     'number' => $i->number,
-                    /** The student and the course. */
+                    /** The student and the course; on a family invoice, each child's. */
                     'for' => $for[$i->id] ?? null,
+                    /** One invoice for several children's renewals that fell due in the same week. */
+                    'family' => (bool) ($family[$i->id]['family'] ?? false),
+                    /** The learners it is for (ids, as learner_id elsewhere). */
+                    'student_ids' => $studentIds,
                     'currency' => $i->currency,
                     'total_minor' => $i->total_minor,
                     'total' => $i->total()->format(),

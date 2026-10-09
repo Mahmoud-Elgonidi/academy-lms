@@ -58,7 +58,7 @@
         <table>
             <thead><tr><th>{{ __($l.'item') }}</th><th class="num">{{ __($l.'qty') }}</th><th class="num">{{ __($l.'amount') }}</th></tr></thead>
             <tbody>
-                @foreach ($inv->lines->sortBy(fn ($l) => $l->kind === 'discount' ? 1 : 0) as $line)
+                @foreach ($d['lines'] as $line)
                     <tr @class(['off' => $line->kind === 'discount'])><td>{{ $line->description() }}</td><td class="num">{{ $line->quantity }}</td><td class="num">{{ $money($line->amount_minor) }}</td></tr>
                 @endforeach
             </tbody>

@@ -285,6 +285,8 @@ final class ViewEnrollment extends ViewRecord
             'studentTz' => $studentTz,
             'subject' => app()->getLocale() === 'ar' ? $h['subject_ar'] : $h['subject_en'],
             'plan' => app()->getLocale() === 'ar' ? $h['plan_ar'] : $h['plan_en'],
+            // A shared package: the student's other courses drawing on the same balance.
+            'sharedWith' => ($h['credit_scope'] ?? null) === 'student_pool' ? $q->sharingBalance($this->record->id, (string) $h['credit_account_id']) : null,
             'price' => $h['amount_minor'] !== null ? Money::of((int) $h['amount_minor'], $h['currency'])->format() : null,
             'sessionsLeft' => $minutes > 0 ? intdiv($remaining, $minutes) : 0,
             'remainingMin' => $remaining,
@@ -323,6 +325,7 @@ final class ViewEnrollment extends ViewRecord
                 'total' => Money::of((int) $i->total_minor, $i->currency)->format(),
                 'issued' => $fmt($i->issued_at, 'j M Y'),
                 'url' => route('filament.academy.resources.invoices.view', ['record' => $i->id]),
+                'family' => (int) $i->courses > 1,
             ], $q->invoices($h['subscription_id'])),
             'makeup' => $makeup,
             'expiry' => $q->nextExpiry($h['credit_account_id']),

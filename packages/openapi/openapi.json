@@ -100,7 +100,12 @@
                                                         "type": [
                                                             "string",
                                                             "null"
-                                                        ]
+                                                        ],
+                                                        "description": "The course's subject, or a shared package's subjects together."
+                                                    },
+                                                    "shared": {
+                                                        "type": "boolean",
+                                                        "description": "A shared package (\"12 lessons in any subject\"): one balance for all these courses."
                                                     },
                                                     "minutes": {
                                                         "type": "integer"
@@ -174,6 +179,7 @@
                                                 "required": [
                                                     "enrollment_id",
                                                     "subject",
+                                                    "shared",
                                                     "minutes",
                                                     "session_minutes",
                                                     "sessions",
@@ -433,7 +439,18 @@
                                                             "string",
                                                             "null"
                                                         ],
-                                                        "description": "The student and the course."
+                                                        "description": "The student and the course; on a family invoice, each child's."
+                                                    },
+                                                    "family": {
+                                                        "type": "boolean",
+                                                        "description": "One invoice for several children's renewals that fell due in the same week."
+                                                    },
+                                                    "student_ids": {
+                                                        "type": "array",
+                                                        "description": "The learners it is for (ids, as learner_id elsewhere).",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
                                                     },
                                                     "currency": {
                                                         "type": "string"
@@ -668,6 +685,8 @@
                                                     "id",
                                                     "number",
                                                     "for",
+                                                    "family",
+                                                    "student_ids",
                                                     "currency",
                                                     "total_minor",
                                                     "total",

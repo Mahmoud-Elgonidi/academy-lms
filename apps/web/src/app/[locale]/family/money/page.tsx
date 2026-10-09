@@ -96,7 +96,10 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
             <ul className="grid gap-3 sm:grid-cols-2">
               {balance.data.map((b) => (
                 <li key={b.enrollment_id} className="rounded-card border border-line bg-white p-4">
-                  <p className="text-sm text-muted">{b.subject}</p>
+                  <p className="text-sm text-muted">
+                    {b.subject}
+                    {b.shared ? ` · ${t('sharedPackage')}` : ''}
+                  </p>
                   <p className="mt-1 font-heading text-2xl font-bold">{t('lessonsLeft', { n: b.sessions ?? 0 })}</p>
                   <p className="text-sm tabular-nums text-muted">{t('minutesLeft', { n: b.minutes })}</p>
                   {b.extra ? <ExtraLessons enrollment={b.enrollment_id} learnerId={learner.id} subject={b.subject ?? ''} offer={b.extra} /> : null}
@@ -119,7 +122,10 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
                 <li key={i.id} className="px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="whitespace-nowrap font-semibold tabular-nums">{i.number}</p>
+                      <p className="flex flex-wrap items-center gap-2">
+                        <span className="whitespace-nowrap font-semibold tabular-nums">{i.number}</span>
+                        {i.family ? <Badge tone="muted">{t('familyInvoice')}</Badge> : null}
+                      </p>
                       <p className="text-sm text-muted">
                         {i.for}
                         {i.issued_at ? ` · ${i.issued_at.label}` : ''}

@@ -69,9 +69,11 @@ return [
         'trial' => 'Trial booked: :date.',
         'trial_told' => 'The family gets the time and a link to join without an account, and so does the teacher.',
         'series' => 'Enrolled: :count sessions, the first on :date. Invoice :number for :total; the sessions are confirmed once it is paid.',
+        'joined' => 'Enrolled: :count sessions, the first on :date, from the student\'s shared package (no new invoice).',
         'skipped' => 'Skipped :dates: the teacher or the student is already booked.',
     ],
     'enroll' => [
+        'joins_package' => 'The student already has this shared package: this course draws on the same balance, with no new invoice. If the package is paid, the course starts at once.',
         'title' => 'Enroll the student',
         'intro' => ':per_week a week · :minutes min · with :teacher',
         'plan' => 'Plan',
@@ -90,6 +92,7 @@ return [
         'open_invoice' => 'Open the invoice',
     ],
     'errors' => [
+        'coupon_on_package' => 'This course joins the student\'s shared package and has no invoice of its own. Put the coupon on the package from the student\'s account.',
         'no_times' => 'Mark the student\'s times on the grid first.',
         'enough' => 'You already picked :n times; remove one first.',
         'nothing_chosen' => 'Pick at least one time.',

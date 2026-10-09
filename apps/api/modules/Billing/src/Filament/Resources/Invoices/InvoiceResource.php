@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Gate;
 use Modules\Billing\Filament\InvoiceActions;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentProof;
+use Modules\Billing\Queries\InvoiceCourses;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -80,20 +81,16 @@ final class InvoiceResource extends Resource
             ->whereColumn('mpp.academy_id', 'invoices.academy_id')->whereColumn('mpp.invoice_id', 'invoices.id')->where('mpp.status', 'pending'));
     }
 
-    /** Invoices with the payer's and the student's names, for the list and its search. */
+    /** Invoices with the payer's name and the students and subjects they are for, for the list and its search. */
     public static function withNames(Builder $query): Builder
     {
         $on = fn (string $alias, string $key, string $from = 'invoices') => fn ($j) => $j->on("{$alias}.academy_id", '=', "{$from}.academy_id")->on("{$alias}.id", '=', $key);
 
-        return $query
-            ->select('invoices.*', 'payer.name as payer_name', 'student.name as student_name', 'subject.name_ar as subject_ar', 'subject.name_en as subject_en')
+        return InvoiceCourses::withNames($query
+            ->select('invoices.*', 'payer.name as payer_name')
             ->selectRaw("exists (select 1 from manual_payment_proofs mpp where mpp.academy_id = invoices.academy_id and mpp.invoice_id = invoices.id and mpp.status = 'pending') as proof_waiting")
             ->join('billing_accounts as ba', $on('ba', 'invoices.billing_account_id'))
-            ->join('users as payer', $on('payer', 'ba.payer_id'))
-            ->leftJoin('subscriptions as sub', $on('sub', 'invoices.subscription_id'))
-            ->leftJoin('enrollments as en', $on('en', 'sub.enrollment_id'))
-            ->leftJoin('users as student', $on('student', 'en.student_id'))
-            ->leftJoin('subjects as subject', $on('subject', 'en.subject_id'));
+            ->join('users as payer', $on('payer', 'ba.payer_id')));
     }
 
     public static function table(Table $table): Table
@@ -109,7 +106,7 @@ final class InvoiceResource extends Resource
                 TextColumn::make('student_name')->label(__('billing::invoices.fields.student'))
                     ->state(fn (Invoice $r) => $r->getAttribute('student_name') ?? $r->getAttribute('payer_name'))
                     ->description(fn (Invoice $r) => self::forLine($r))
-                    ->searchable(query: fn (Builder $query, string $search) => $query->where(fn ($w) => $w->where('student.name', 'ilike', "%{$search}%")->orWhere('payer.name', 'ilike', "%{$search}%"))),
+                    ->searchable(query: fn (Builder $query, string $search) => $query->where(fn ($w) => InvoiceCourses::whereStudentNamed($w, $search)->orWhere('payer.name', 'ilike', "%{$search}%"))),
                 TextColumn::make('total_minor')->label(__('billing::invoices.fields.total'))
                     ->state(fn (Invoice $r) => $r->total()->format())
                     ->description(fn (Invoice $r) => $r->status === 'issued' && $r->paid_minor > 0 ? __('billing::invoices.left', ['amount' => $r->outstanding()->format()]) : null)
@@ -150,7 +147,10 @@ final class InvoiceResource extends Resource
 
     public static function forLine(Invoice $invoice): ?string
     {
-        $subject = app()->getLocale() === 'ar' ? $invoice->getAttribute('subject_ar') : $invoice->getAttribute('subject_en');
+        $subject = $invoice->getAttribute('subject_name');
+        if ((int) $invoice->getAttribute('course_count') > 1) {
+            $subject = trans_choice('billing::invoices.family', (int) $invoice->getAttribute('course_count'), ['n' => (int) $invoice->getAttribute('course_count')]).' · '.$subject;
+        }
         $payer = $invoice->getAttribute('student_name') && $invoice->getAttribute('student_name') !== $invoice->getAttribute('payer_name')
             ? __('billing::invoices.paid_by', ['name' => $invoice->getAttribute('payer_name')])
             : null;

@@ -20,6 +20,7 @@ use Modules\Billing\Models\PaymentCheckout;
 use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
+use Modules\Billing\Queries\InvoiceCourses;
 use Modules\Billing\Queries\InvoiceDocument;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -40,10 +41,7 @@ final class PayController
         $payerId = $request->query('u');
         $this->speak($payerId, $tenants);
         $checkout = $request->query('checkout') ? PaymentCheckout::query()->where('invoice_id', $invoice->id)->find($request->query('checkout')) : null;
-        $student = DB::table('subscriptions as s')
-            ->join('enrollments as e', fn ($j) => $j->on('e.academy_id', '=', 's.academy_id')->on('e.id', '=', 's.enrollment_id'))
-            ->join('users as u', fn ($j) => $j->on('u.academy_id', '=', 'e.academy_id')->on('u.id', '=', 'e.student_id'))
-            ->where('s.id', $invoice->subscription_id)->value('u.name');
+        $student = InvoiceCourses::students(InvoiceCourses::ofOne($invoice->id)) ?: null;
 
         return view('billing::pay.show', [
             'invoice' => $invoice,

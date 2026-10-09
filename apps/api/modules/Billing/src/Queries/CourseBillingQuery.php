@@ -27,9 +27,10 @@ final class CourseBillingQuery
 {
     public function __construct(private readonly SiblingRank $ranks, private readonly CouponCheck $coupons) {}
 
+    /** The subscription a course's lessons are paid from: its own, or the shared package it draws on. */
     public function subscriptionOf(string $enrollmentId): ?Subscription
     {
-        return Subscription::query()->with('plan')->where('enrollment_id', $enrollmentId)->where('status', '<>', 'cancelled')->latest()->first();
+        return Subscription::ofEnrollment($enrollmentId);
     }
 
     public function forEnrollment(string $enrollmentId, bool $enrollmentActive = true): ?CourseBilling
@@ -40,9 +41,10 @@ final class CourseBillingQuery
         }
         $redemption = CouponRedemption::liveFor($subscription->id);
         $blocks = $redemption?->coupon->blocks;
-        $waiting = Invoice::query()->where('subscription_id', $subscription->id)->where('status', 'issued')->with('lines')->get();
-        $extra = $waiting->first(fn (Invoice $i) => $i->lines->contains('kind', 'extra'));
-        $block = $waiting->first(fn (Invoice $i) => $i->lines->contains('kind', 'block'));
+        $waiting = Invoice::query()->forSubscription($subscription->id)->where('status', 'issued')->with('lines')->get();
+        $mine = fn (Invoice $i, string $kind) => $i->lines->contains(fn ($l) => $l->kind === $kind && $l->subscription_id === $subscription->id);
+        $extra = $waiting->first(fn (Invoice $i) => $mine($i, 'extra'));
+        $block = $waiting->first(fn (Invoice $i) => $mine($i, 'block'));
 
         return new CourseBilling(
             subscriptionId: $subscription->id,

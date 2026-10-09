@@ -57,6 +57,27 @@ void main() {
     expect(Balance.fromJson({'subject': 'x', 'minutes': 0}).extra, isNull);
     final invoice = Invoices.fromJson(_invoices()).list.single;
     expect(invoice.lines.where((l) => l.isDiscount).single.description, 'خصم الإخوات (10%)');
+    expect(invoice.family, isFalse);
+    expect(course.shared, isFalse);
+  });
+
+  test('reads a shared package\'s one balance and a family invoice', () {
+    final package = Balance.fromJson({'enrollment_id': 'e2', 'subject': 'إنجليزي، عربي', 'shared': true, 'minutes': 360, 'sessions': 12});
+    expect(package.shared, isTrue);
+    expect(package.sessions, 12);
+    final family = Invoice.fromJson({
+      'id': 'i2',
+      'number': 'NR-000018',
+      'for': 'كريم · قرآن، ندى · باقة مشتركة',
+      'family': true,
+      'student_ids': ['c1', 'c2'],
+      'total': '940 ر.س.',
+      'outstanding_minor': 94000,
+      'status': 'overdue',
+    });
+    expect(family.family, isTrue);
+    expect(family.forWhom, contains('ندى'));
+    expect(family.payable, isTrue);
   });
 
   testWidgets('the payer buys two extra lessons from Money, once, and sees the discount on an invoice', (tester) async {

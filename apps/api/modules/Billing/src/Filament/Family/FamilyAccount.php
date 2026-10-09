@@ -8,8 +8,10 @@ use Modules\Billing\Actions\BuyExtraLessons;
 use Modules\Billing\Filament\Resources\Invoices\InvoiceResource;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentProof;
+use Modules\Billing\Models\Plan;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Queries\CourseBillingQuery;
+use Modules\Billing\Queries\InvoiceCourses;
 use Modules\Credits\Contracts\CreditsApi;
 use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
 use Modules\Enrollment\Contracts\EnrollmentApi;
@@ -20,23 +22,42 @@ use Modules\SharedKernel\Money\Money;
 /** The family's money in plain words: lessons left on each course, and the invoices this person pays. */
 final class FamilyAccount
 {
-    /** @return list<array{subject: ?string, sessions: ?int, minutes: int, session_minutes: ?int}> */
+    /**
+     * Lessons left on each balance: each course's own, or once for a shared
+     * package with all its subjects named (shared: true).
+     *
+     * @return list<array{enrollment_id: string, subject: ?string, shared: bool, sessions: ?int, minutes: int, session_minutes: ?int, extra: ?array<string, mixed>}>
+     */
     public static function balances(string $learnerId, ?string $payerId = null): array
     {
         $enrollments = array_values(array_filter(app(EnrollmentApi::class)->forStudent($learnerId),
             fn (EnrollmentData $e) => in_array($e->status->value, ['active', 'pending_payment'], true) && $e->creditAccountId !== null));
         $subjects = DB::table('subjects')->pluck(app()->getLocale() === 'ar' ? 'name_ar' : 'name_en', 'id');
-        $sessionMinutes = DB::table('subscriptions as s')->join('plans as p', fn ($j) => $j->on('p.academy_id', '=', 's.academy_id')->on('p.id', '=', 's.plan_id'))
-            ->whereIn('s.enrollment_id', array_map(fn (EnrollmentData $e) => $e->id, $enrollments))->where('s.status', '<>', 'cancelled')
-            ->pluck('p.session_minutes', 's.enrollment_id');
+        $plans = DB::table('subscriptions as s')->join('plans as p', fn ($j) => $j->on('p.academy_id', '=', 's.academy_id')->on('p.id', '=', 's.plan_id'))
+            ->whereIn('s.credit_account_id', array_map(fn (EnrollmentData $e) => $e->creditAccountId, $enrollments))->where('s.status', '<>', 'cancelled')
+            ->get(['s.credit_account_id', 'p.session_minutes', 'p.credit_scope'])->keyBy('credit_account_id');
 
-        return array_map(function (EnrollmentData $e) use ($subjects, $sessionMinutes, $payerId) {
-            $minutes = app(CreditsApi::class)->balance($e->creditAccountId)->remainingMin();
-            $per = isset($sessionMinutes[$e->id]) ? (int) $sessionMinutes[$e->id] : null;
+        $rows = [];
+        foreach (collect($enrollments)->groupBy(fn (EnrollmentData $e) => $e->creditAccountId) as $accountId => $courses) {
+            /** @var EnrollmentData $first */
+            $first = $courses->first();
+            $minutes = app(CreditsApi::class)->balance((string) $accountId)->remainingMin();
+            $plan = $plans[$accountId] ?? null;
+            $per = $plan ? (int) $plan->session_minutes : null;
+            $active = $courses->contains(fn (EnrollmentData $e) => $e->status->value === 'active');
 
-            return ['enrollment_id' => $e->id, 'subject' => $subjects[$e->subjectId] ?? null, 'minutes' => $minutes, 'session_minutes' => $per, 'sessions' => $per ? intdiv($minutes, $per) : null,
-                'extra' => $payerId === null ? null : self::extraOffer($e->id, $e->status->value === 'active', $payerId)];
-        }, $enrollments);
+            $rows[] = [
+                'enrollment_id' => $first->id,
+                'subject' => $courses->map(fn (EnrollmentData $e) => $subjects[$e->subjectId] ?? null)->filter()->unique()->implode(app()->getLocale() === 'ar' ? '، ' : ', ') ?: null,
+                'shared' => ($plan->credit_scope ?? null) === Plan::SHARED,
+                'minutes' => $minutes,
+                'session_minutes' => $per,
+                'sessions' => $per ? intdiv($minutes, $per) : null,
+                'extra' => $payerId === null ? null : self::extraOffer($first->id, $active, $payerId),
+            ];
+        }
+
+        return $rows;
     }
 
     /**
@@ -68,21 +89,20 @@ final class FamilyAccount
     {
         $rows = Invoice::query()
             ->join('billing_accounts as ba', fn ($j) => $j->on('ba.academy_id', '=', 'invoices.academy_id')->on('ba.id', '=', 'invoices.billing_account_id'))
-            ->leftJoin('subscriptions as sub', fn ($j) => $j->on('sub.academy_id', '=', 'invoices.academy_id')->on('sub.id', '=', 'invoices.subscription_id'))
-            ->leftJoin('enrollments as en', fn ($j) => $j->on('en.academy_id', '=', 'invoices.academy_id')->on('en.id', '=', 'sub.enrollment_id'))
-            ->leftJoin('users as st', fn ($j) => $j->on('st.academy_id', '=', 'invoices.academy_id')->on('st.id', '=', 'en.student_id'))
-            ->leftJoin('subjects as sj', fn ($j) => $j->on('sj.academy_id', '=', 'invoices.academy_id')->on('sj.id', '=', 'en.subject_id'))
             ->with('lines')
             ->where('ba.payer_id', $payerId)->whereIn('invoices.status', ['issued', 'paid'])
             ->orderByDesc('invoices.issued_at')->limit($limit)
-            ->get(['invoices.*', 'st.name as student_name', 'sj.name_ar as subject_ar', 'sj.name_en as subject_en']);
+            ->get(['invoices.*']);
 
         $proofs = PaymentProof::latestFor($rows->pluck('id')->all());
+        $courses = InvoiceCourses::of($rows->pluck('id')->all());
 
         return $rows->map(fn (Invoice $i) => [
             'id' => $i->id,
             'number' => $i->number,
-            'for' => trim(($i->getAttribute('student_name') ?? '').' · '.(app()->getLocale() === 'ar' ? $i->getAttribute('subject_ar') : $i->getAttribute('subject_en')), ' ·'),
+            'for' => InvoiceCourses::label($courses[$i->id] ?? []),
+            'family' => count($courses[$i->id] ?? []) > 1,
+            'students' => array_values(array_unique(array_column($courses[$i->id] ?? [], 'student_id'))),
             'total' => $i->total()->format(),
             'outstanding' => $i->status === 'issued' ? $i->outstanding()->format() : null,
             'payable' => $i->status === 'issued' && $i->outstanding()->minor > 0,

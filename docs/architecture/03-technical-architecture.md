@@ -404,6 +404,11 @@ interface PaymentGateway
   - الإيصال بيتعرض من `billing/proofs/{proof}/file` لصاحبه ولمن عنده `billing.view` بس، و`no-store`.
   - **trigger** بيرفع `payments:{payer}` لما إثبات يتبعت أو يتحسم، وtrigger على `invoices` بيرفعه لما المدفوع أو الحالة يتغيروا (حتى الدفع اللي بيتسجل من الإدارة)، فصفحات اللي بيدفع بتتحدث لوحدها.
   - في الـ API: `POST /v1/family/invoices/{invoice}/proofs` (multipart، `Idempotency-Key`؛ الـ middleware بياخد بصمة الحقول ومحتوى الملفات)، وكل فاتورة في `GET /v1/family/invoices` معاها `proof` و`can_send_proof`، وفوقهم `manual` (كلام الأكاديمية، وهل بتاخد إثباتات، والطرق).
+- **فاتورة العيلة والباقة المشتركة**:
+  - `invoice_lines.subscription_id`: الكورس اللي السطر ليه (اتملى للفواتير القديمة من `invoices.subscription_id`). `invoices.subscription_id` بيفضل للفاتورة اللي لكورس واحد، وفاضي في فاتورة العيلة. أي سؤال عن "فواتير الكورس ده" بيمشي من السطور (`Invoice::forSubscription`)، والطلاب والمواد اللي الفاتورة ليهم من `Queries\InvoiceCourses` (القوايم، والمستند، ولينك الدفع، والرسايل، و`/my`، والـ API).
+  - `InvoiceIssued` و`InvoicePaid` بيشيلوا `subscriptionIds` (كل كورسات الفاتورة).
+  - `billing_settings.family_invoice_days` (0–14، الافتراضي 7): `IssueRenewal` بيضم تجديدات الإخوات اللي جاية في المدة دي على نفس الفاتورة (`IssueBlockInvoice::together`، بيقفل الاشتراكات بترتيب ثابت).
+  - `plans.credit_scope`: `enrollment` أو `student_pool`. الباقة المشتركة ليها حساب رصيد واحد (`scope_type = student_pool`)، وكل كورسات الطالب عليها بتشاور عليه (`enrollments.credit_account_id`)؛ و index فريد بيمنع اشتراكين شغالين على نفس حساب الرصيد. `BillingApi::sharedPackage` بيرجّع باقة الطالب الشغالة مع اللي بيدفع، و`EnrollStudent` بيدخّل الكورس عليها من غير فاتورة.
 - **الضريبة**: `tax_profiles` لكل أكاديمية: التسجيلات حسب الدولة، والسعر شامل الضريبة أو لأ.
   - أسعار المستهلك في الخليج بتتعرض شاملة الضريبة.
   - هل الضريبة بتتطبق على التدريس عبر الحدود؟ ده إعداد عند الأكاديمية حسب مستشارها الضريبي، مش حاجة ثابتة في الكود.
@@ -552,7 +557,7 @@ interface PaymentGateway
   - `family/learners` (People): الطالب نفسه وأولاده، ومرحلة كل واحد. كل endpoint للأسرة بياخد `learner_id`، ولو مابعتوش بياخد أول واحد (`FamilyView::learner`).
   - `family/lessons` (القادمة أو اللي فاتت، ومعاها الإجازات وتغييرات الساعة)، و`lessons/{id}/cancellation` (هيحصل إيه لو ألغيت، بالسياسة)، و`lessons/{id}/cancel`، و`lessons/{id}/refuse-substitute`. الطفل في شكل kids مابيلغيش.
   - `lessons/{id}/rating` (Evaluation): GET وPUT.
-  - `family/balance` (ولكل كورس اللي بيدفع له: الحصص الزيادة وسعرها والفاتورة المستنية)، و`family/enrollments/{id}/extra-lessons` (فاتورة حصص زيادة، `Idempotency-Key`)، و`family/invoices` (ومعاها لينك المستند الموقّع وطرق الدفع وسطور الفاتورة بالخصومات)، و`family/invoices/{id}/checkout` (Billing). الطالب اللي مابيدفعش مابيشوفش فلوس.
+  - `family/balance` (رصيد لكل كورس، أو مرة واحدة للباقة المشتركة بموادها و`shared`؛ ولكل كورس اللي بيدفع له: الحصص الزيادة وسعرها والفاتورة المستنية)، و`family/enrollments/{id}/extra-lessons` (فاتورة حصص زيادة، `Idempotency-Key`)، و`family/invoices` (ومعاها لينك المستند الموقّع وطرق الدفع وسطور الفاتورة بالخصومات، ولكل كورس سطوره مع بعض، و`family` و`student_ids` لفاتورة العيلة)، و`family/invoices/{id}/checkout` (Billing). الطالب اللي مابيدفعش مابيشوفش فلوس.
   - `family/consents` (People): أولاد ولي الأمر اللي محتاجين موافقة، والنص اللي هيوافق عليه، و`family/consents/{student}` (موافق: `agree` و`version`) و`family/consents/{student}/withdraw`. لولي الأمر بس.
   - `learning/*`: الـ roadmap والتقارير والواجبات (كانت موجودة)، و`learning/journey`: رئيسية الطالب في شكل مرحلته (النجوم، والنقاط والرتبة، والأيام ورا بعض، والإنجازات، ومستويات كل كورس وحالة كل درس، والجاي، والميعاد المتوقع للإنهاء). الطالب نفسه أو أول ابن لولي الأمر (`FamilyView::learner`).
 - **الدعم** (Support، للأسرة والمدرس): `support/new` (الأنواع المسموحة لللي بيسأل، والحصص)، و`support/tickets` (تذاكري، وكتابة تذكرة multipart مع صورة أو PDF و`Idempotency-Key`)، و`support/tickets/{id}` (المحادثة من غير ملاحظات الإدارة ولا قراراتها)، و`.../messages` (الرد)، و`.../reopen`، و`.../close`، و`.../messages/{message}/file`. الأسرة بتبعت `learner_id`.

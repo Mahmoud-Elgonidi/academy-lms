@@ -10,6 +10,11 @@ use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
+ * A course's money agreement: its plan, price and blocks. Its courses are
+ * the enrollments on its credit account: one, or every course a student
+ * takes on a shared package ("12 lessons in any subject"), whose first
+ * course is the enrollment it was opened for.
+ *
  * @property string $id
  * @property string $billing_account_id
  * @property string $enrollment_id
@@ -46,14 +51,45 @@ final class Subscription extends Model
         return $this->belongsTo(BillingAccount::class);
     }
 
+    /** The live subscription an enrollment's lessons are paid from: its own, or the shared package it draws on. */
+    public static function ofEnrollment(string $enrollmentId): ?self
+    {
+        $account = DB::table('enrollments')->where('id', $enrollmentId)->value('credit_account_id');
+
+        return self::query()->with('plan')->where('status', '<>', 'cancelled')
+            ->where(fn ($q) => $account === null ? $q->where('enrollment_id', $enrollmentId) : $q->where('credit_account_id', $account))
+            ->latest()->first();
+    }
+
+    /** @return list<string> the enrollments drawing on it (one, or a shared package's courses), the first first */
+    public function enrollmentIds(): array
+    {
+        return DB::table('enrollments')->where('credit_account_id', $this->credit_account_id)->orderBy('created_at')->orderBy('id')
+            ->pluck('id')->map(fn ($id) => (string) $id)->all() ?: [$this->enrollment_id];
+    }
+
+    public function isShared(): bool
+    {
+        return $this->plan?->isShared() ?? false;
+    }
+
+    /** A block of its waiting to be paid (on its own invoice, or with the family's). */
+    public function hasWaitingBlock(): bool
+    {
+        return Invoice::query()->forSubscription($this->id, 'block')->where('status', 'issued')->exists();
+    }
+
     public function price(): Money
     {
         return Money::of($this->amount_minor, $this->currency);
     }
 
-    /** @return array{0: string, 1: string} the course's subject as invoice lines name it, in Arabic and English */
+    /** @return array{0: string, 1: string} the course's subject as invoice lines name it, in Arabic and English ("shared package" for one) */
     public function subjectNames(): array
     {
+        if ($this->isShared()) {
+            return [__('billing::billing.lines.shared', [], 'ar'), __('billing::billing.lines.shared', [], 'en')];
+        }
         $subject = DB::table('enrollments as e')->join('subjects as s', fn ($j) => $j->on('s.academy_id', '=', 'e.academy_id')->on('s.id', '=', 'e.subject_id'))
             ->where('e.id', $this->enrollment_id)->first(['s.name_ar', 's.name_en']);
 

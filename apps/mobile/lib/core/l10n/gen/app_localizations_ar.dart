@@ -850,6 +850,14 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String sharedPackage(String subjects) {
+    return '$subjects · باقة مشتركة';
+  }
+
+  @override
+  String get familyInvoice => 'فاتورة العيلة';
+
+  @override
   String lessonUntil(String time) {
     return 'الحصة لحد $time';
   }

@@ -1,9 +1,17 @@
 import '../../../core/time/local_time.dart';
 
-/// What is left of a learner's balance for one subject, and extra lessons
-/// the person can buy on it when they pay for it.
+/// What is left of a learner's balance for one subject (or a shared
+/// package's subjects together), and extra lessons the person can buy on it
+/// when they pay for it.
 class Balance {
-  const Balance({required this.subject, required this.sessions, required this.minutes, this.enrollmentId = '', this.extra});
+  const Balance({
+    required this.subject,
+    required this.sessions,
+    required this.minutes,
+    this.enrollmentId = '',
+    this.extra,
+    this.shared = false,
+  });
 
   factory Balance.fromJson(Map<String, dynamic> json) => Balance(
     enrollmentId: json['enrollment_id'] as String? ?? '',
@@ -11,9 +19,13 @@ class Balance {
     sessions: (json['sessions'] as num?)?.toInt() ?? 0,
     minutes: (json['minutes'] as num?)?.toInt() ?? 0,
     extra: json['extra'] == null ? null : ExtraOffer.fromJson(json['extra'] as Map<String, dynamic>),
+    shared: json['shared'] as bool? ?? false,
   );
 
   final String enrollmentId;
+
+  /// A shared package ("12 lessons in any subject"): one balance for all its subjects.
+  final bool shared;
   final String subject;
   final int sessions;
   final int minutes;
@@ -110,6 +122,7 @@ class Invoice {
     this.proof,
     this.canSendProof = false,
     this.lines = const [],
+    this.family = false,
   });
 
   factory Invoice.fromJson(Map<String, dynamic> json) => Invoice(
@@ -127,6 +140,7 @@ class Invoice {
     outstandingDecimal: json['outstanding_decimal'] as String? ?? '',
     proof: json['proof'] == null ? null : ProofState.fromJson(json['proof'] as Map<String, dynamic>),
     canSendProof: json['can_send_proof'] as bool? ?? false,
+    family: json['family'] as bool? ?? false,
     lines: [for (final l in json['lines'] as List<dynamic>? ?? const []) InvoiceLine.fromJson(l as Map<String, dynamic>)],
     payWith: [
       for (final g in json['pay_with'] as List<dynamic>? ?? const [])
@@ -156,6 +170,9 @@ class Invoice {
 
   /// What it is for and what came off it.
   final List<InvoiceLine> lines;
+
+  /// One invoice for several children's renewals that fell due in the same week.
+  final bool family;
 
   bool get payable => outstandingMinor > 0 && status != 'void';
 }

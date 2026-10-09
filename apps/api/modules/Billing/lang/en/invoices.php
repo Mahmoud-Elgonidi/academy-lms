@@ -7,6 +7,7 @@ return [
     'open' => 'Open',
     'print' => 'Print',
     'left' => ':amount left',
+    'family' => 'Family invoice (:n courses)',
     'paid_by' => 'paid by :name',
     'paid_on' => 'Paid :date',
     'due_today' => 'Due today',

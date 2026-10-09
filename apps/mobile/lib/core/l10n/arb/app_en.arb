@@ -230,6 +230,8 @@
   "waitingOther": "Waiting for the other side to join…",
   "you": "You",
   "minutesLeft": "{n} min left",
+  "sharedPackage": "{subjects} · shared package",
+  "familyInvoice": "family invoice",
   "lessonUntil": "Until {time}",
   "meTitle": "Me",
   "openNow": "Open",

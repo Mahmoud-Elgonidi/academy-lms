@@ -16,7 +16,8 @@ use Modules\Scheduling\Domain\Models\SessionEvent;
  * Pays for an enrollment's unpaid upcoming sessions from its credit, in
  * date order (docs/architecture/02, "حالة التمويل"): the first session that
  * cannot be covered stops the run, so credit is never spent on a later
- * lesson while an earlier one waits.
+ * lesson while an earlier one waits. On a shared package that order runs
+ * across every course drawing on the balance.
  */
 final class FundSessions
 {
@@ -33,8 +34,9 @@ final class FundSessions
             return 0;
         }
 
+        $courses = array_map(fn ($e) => $e->id, $this->enrollments->forCreditAccount($accountId)) ?: [$enrollmentId];
         $waiting = Session::query()
-            ->where('enrollment_id', $enrollmentId)
+            ->whereIn('enrollment_id', $courses)
             ->where('status', SessionStatus::Scheduled->value)
             ->where('funding_status', FundingStatus::Unfunded->value)
             ->where('starts_at', '>', $now ?? CarbonImmutable::now())

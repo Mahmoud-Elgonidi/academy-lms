@@ -1927,7 +1927,10 @@ export interface operations {
                         };
                         data: {
                             enrollment_id: string;
+                            /** @description The course's subject, or a shared package's subjects together. */
                             subject: string | null;
+                            /** @description A shared package ("12 lessons in any subject"): one balance for all these courses. */
+                            shared: boolean;
                             minutes: number;
                             /** @description A lesson's length, when the plan has one. */
                             session_minutes: number | null;
@@ -2058,8 +2061,12 @@ export interface operations {
                         data: {
                             id: string;
                             number: string | null;
-                            /** @description The student and the course. */
+                            /** @description The student and the course; on a family invoice, each child's. */
                             for: string | null;
+                            /** @description One invoice for several children's renewals that fell due in the same week. */
+                            family: boolean;
+                            /** @description The learners it is for (ids, as learner_id elsewhere). */
+                            student_ids: string[];
                             currency: string;
                             total_minor: number;
                             total: string;

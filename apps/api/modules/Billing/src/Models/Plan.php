@@ -19,15 +19,18 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property int $renew_at_sessions
  * @property bool $is_active
  * @property int $sort
+ * @property string $credit_scope enrollment (each course its own balance) | student_pool (a shared package: one balance for all of a student's courses on it)
  */
 final class Plan extends Model
 {
     use BelongsToTenant;
     use HasUuids;
 
-    protected $fillable = ['name_ar', 'name_en', 'session_minutes', 'sessions_per_block', 'sessions_per_week', 'validity_days', 'renew_at_sessions', 'is_active', 'sort'];
+    protected $fillable = ['name_ar', 'name_en', 'session_minutes', 'sessions_per_block', 'sessions_per_week', 'validity_days', 'renew_at_sessions', 'is_active', 'sort', 'credit_scope'];
 
-    protected $attributes = ['renew_at_sessions' => 2, 'is_active' => true, 'sort' => 0];
+    public const SHARED = 'student_pool';
+
+    protected $attributes = ['renew_at_sessions' => 2, 'is_active' => true, 'sort' => 0, 'credit_scope' => 'enrollment'];
 
     protected function casts(): array
     {
@@ -50,6 +53,12 @@ final class Plan extends Model
     public function name(): string
     {
         return app()->getLocale() === 'ar' ? $this->name_ar : $this->name_en;
+    }
+
+    /** A shared package: "12 lessons in any subject", one balance for all of a student's courses on it. */
+    public function isShared(): bool
+    {
+        return $this->credit_scope === self::SHARED;
     }
 
     public function terms(): BlockTerms

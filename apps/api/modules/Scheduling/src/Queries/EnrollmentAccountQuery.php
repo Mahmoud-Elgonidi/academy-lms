@@ -25,7 +25,10 @@ final class EnrollmentAccountQuery
             ->join('users as te', $on('te', 'e.teacher_id'))
             ->join('subjects as su', $on('su', 'e.subject_id'))
             ->leftJoin('credit_accounts as ca', $on('ca', 'e.credit_account_id'))
-            ->leftJoin('subscriptions as sb', fn ($j) => $j->on('sb.academy_id', '=', 'e.academy_id')->on('sb.enrollment_id', '=', 'e.id')->where('sb.status', '<>', 'cancelled'))
+            // Its own subscription, or the shared package it draws on: the one on its balance.
+            ->leftJoin('subscriptions as sb', fn ($j) => $j->on('sb.academy_id', '=', 'e.academy_id')
+                ->on(fn ($o) => $o->on('sb.credit_account_id', '=', 'e.credit_account_id')->orOn('sb.enrollment_id', '=', 'e.id'))
+                ->where('sb.status', '<>', 'cancelled'))
             ->leftJoin('plans as pl', fn ($j) => $j->on('pl.academy_id', '=', 'sb.academy_id')->on('pl.id', '=', 'sb.plan_id'))
             ->leftJoin('billing_accounts as ba', fn ($j) => $j->on('ba.academy_id', '=', 'sb.academy_id')->on('ba.id', '=', 'sb.billing_account_id'))
             ->leftJoin('users as pa', fn ($j) => $j->on('pa.academy_id', '=', 'ba.academy_id')->on('pa.id', '=', 'ba.payer_id'))
@@ -36,11 +39,24 @@ final class EnrollmentAccountQuery
                 'su.name_ar as subject_ar', 'su.name_en as subject_en',
                 'ca.available_min', 'ca.reserved_min', 'ca.consumed_min', 'ca.low_balance_min',
                 'sb.id as subscription_id', 'sb.block_no', 'sb.amount_minor', 'sb.currency',
-                'pl.name_ar as plan_ar', 'pl.name_en as plan_en', 'pl.session_minutes', 'pl.sessions_per_block', 'pl.renew_at_sessions',
+                'pl.name_ar as plan_ar', 'pl.name_en as plan_en', 'pl.session_minutes', 'pl.sessions_per_block', 'pl.renew_at_sessions', 'pl.credit_scope',
                 'pa.name as payer', 'pa.id as payer_id', 'st.id as student_id',
             ]);
 
         return $row ? (array) $row : null;
+    }
+
+    /** @return list<array{id: string, subject: string}> the other courses on this balance (a shared package's), not ended */
+    public function sharingBalance(string $enrollmentId, string $creditAccountId): array
+    {
+        $name = app()->getLocale() === 'ar' ? 'su.name_ar' : 'su.name_en';
+
+        return DB::table('enrollments as e')
+            ->join('subjects as su', fn ($j) => $j->on('su.academy_id', '=', 'e.academy_id')->on('su.id', '=', 'e.subject_id'))
+            ->where('e.credit_account_id', $creditAccountId)->where('e.id', '<>', $enrollmentId)->where('e.status', '<>', 'ended')
+            ->orderBy('e.created_at')
+            ->get(['e.id', "{$name} as subject"])
+            ->map(fn ($r) => ['id' => (string) $r->id, 'subject' => (string) $r->subject])->all();
     }
 
     /**
@@ -119,8 +135,15 @@ final class EnrollmentAccountQuery
             return [];
         }
 
-        return DB::table('invoices')->where('subscription_id', $subscriptionId)->orderByDesc('issued_at')
-            ->get(['id', 'number', 'status', 'total_minor', 'paid_minor', 'currency', 'issued_at', 'due_at', 'paid_at'])->all();
+        // Its invoices: on their own, or a family invoice with the other children's courses (courses > 1).
+        $lines = 'from invoice_lines l where l.academy_id = invoices.academy_id and l.invoice_id = invoices.id';
+
+        return DB::table('invoices')
+            ->whereExists(fn ($q) => $q->from('invoice_lines as l')->whereColumn('l.academy_id', 'invoices.academy_id')->whereColumn('l.invoice_id', 'invoices.id')->where('l.subscription_id', $subscriptionId))
+            ->orderByDesc('issued_at')
+            ->select(['id', 'number', 'status', 'total_minor', 'paid_minor', 'currency', 'issued_at', 'due_at', 'paid_at'])
+            ->selectRaw("(select count(distinct l.subscription_id) {$lines}) as courses")
+            ->get()->all();
     }
 
     /** @return array{minutes: int, expires_at: ?string} makeup credit owed and when it lapses */

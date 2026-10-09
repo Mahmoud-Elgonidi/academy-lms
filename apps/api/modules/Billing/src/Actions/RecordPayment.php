@@ -20,9 +20,10 @@ use Modules\SharedKernel\Money\Money;
  * (docs/architecture/03, "يدوي"), or online from a checkout the gateway
  * confirmed (SettleCheckout; one payment per checkout, which the database
  * holds to). When the invoice is paid in full, in the
- * same transaction (docs/architecture/04, rule 4): the block's minutes are
- * granted, the subscription moves to that block, and the enrollment starts.
- * Scheduling then funds the waiting sessions, oldest first.
+ * same transaction (docs/architecture/04, rule 4): each course on it (one,
+ * or a family's several) gets its block's minutes, its subscription moves
+ * to that block, and its enrollments start. Scheduling then funds the
+ * waiting sessions, oldest first.
  */
 final class RecordPayment
 {
@@ -70,7 +71,7 @@ final class RecordPayment
 
             if ($invoice->status === 'paid') {
                 $this->fulfil($invoice, $actorId);
-                DB::afterCommit(fn () => event(new InvoicePaid($invoice->academy_id, $invoice->id, $invoice->subscription_id)));
+                DB::afterCommit(fn () => event(new InvoicePaid($invoice->academy_id, $invoice->id, $invoice->subscriptionIds())));
             }
             if ($checkoutId === null) {
                 app(AuditTrail::class)->record('billing.payment_recorded', 'invoice', $invoice->id, ['number' => $invoice->number, 'amount' => $amount->format(), 'method' => $method, 'reference' => $reference]);
@@ -95,36 +96,44 @@ final class RecordPayment
             $invoice->paid_at = CarbonImmutable::now();
             $invoice->save();
             $this->fulfil($invoice, $actorId);
-            DB::afterCommit(fn () => event(new InvoicePaid($invoice->academy_id, $invoice->id, $invoice->subscription_id)));
+            DB::afterCommit(fn () => event(new InvoicePaid($invoice->academy_id, $invoice->id, $invoice->subscriptionIds())));
         });
     }
 
-    /** What a paid invoice delivers: each block's minutes, and extra lessons' minutes, valid from today. */
+    /** What a paid invoice delivers, to each course on it: its blocks' and extra lessons' minutes, valid from today. */
     private function fulfil(Invoice $invoice, ?string $actorId): void
     {
-        $subscription = $invoice->subscription_id ? Subscription::query()->whereKey($invoice->subscription_id)->lockForUpdate()->first() : null;
-        if ($subscription === null) {
-            return;
-        }
+        $lines = $invoice->lines()->whereIn('kind', ['block', 'extra'])->whereNotNull('subscription_id')->get()->groupBy('subscription_id');
+        // Locked in one order, so two family invoices paid at once cannot wait on each other.
+        foreach ($lines->keys()->sort()->values() as $subscriptionId) {
+            $subscription = Subscription::query()->whereKey($subscriptionId)->lockForUpdate()->first();
+            if ($subscription === null) {
+                continue;
+            }
 
-        foreach ($invoice->lines()->whereIn('kind', ['block', 'extra'])->get() as $line) {
-            $this->credits->grant(
-                $subscription->credit_account_id,
-                LotSource::Purchase,
-                $invoice->id,
-                (int) $line->meta['minutes'],
-                CarbonImmutable::now()->addDays((int) $line->meta['validity_days'])->endOfDay(),
-                "invoice:{$invoice->id}:line:{$line->id}",
-                $actorId,
-                'invoice '.$invoice->number,
-            );
-            if ($line->kind === 'block') {
-                $subscription->block_no = max($subscription->block_no, (int) $line->meta['block_no']);
+            foreach ($lines[$subscriptionId] as $line) {
+                $this->credits->grant(
+                    $subscription->credit_account_id,
+                    LotSource::Purchase,
+                    $invoice->id,
+                    (int) $line->meta['minutes'],
+                    CarbonImmutable::now()->addDays((int) $line->meta['validity_days'])->endOfDay(),
+                    "invoice:{$invoice->id}:line:{$line->id}",
+                    $actorId,
+                    'invoice '.$invoice->number,
+                );
+                if ($line->kind === 'block') {
+                    $subscription->block_no = max($subscription->block_no, (int) $line->meta['block_no']);
+                }
+            }
+
+            $subscription->status = 'active';
+            $subscription->save();
+            // Every course on its balance: one, or each of a shared package's (its own course at least).
+            $courses = array_map(fn ($e) => $e->id, $this->enrollments->forCreditAccount($subscription->credit_account_id));
+            foreach (array_unique([$subscription->enrollment_id, ...$courses]) as $enrollmentId) {
+                $this->enrollments->activate($enrollmentId, $actorId);
             }
         }
-
-        $subscription->status = 'active';
-        $subscription->save();
-        $this->enrollments->activate($subscription->enrollment_id, $actorId);
     }
 }

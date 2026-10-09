@@ -259,6 +259,8 @@ s('weakNetwork', 'النت ضعيف. جرّب "الصوت بس" لو الصور�
 s('waitingOther', 'مستنيين الطرف التاني يدخل…', 'Waiting for the other side to join…')
 s('you', 'انت', 'You')
 s('minutesLeft', 'فاضل {n} دقيقة', '{n} min left', n='int')
+s('sharedPackage', '{subjects} · باقة مشتركة', '{subjects} · shared package', subjects='String')
+s('familyInvoice', 'فاتورة العيلة', 'family invoice')
 s('lessonUntil', 'الحصة لحد {time}', 'Until {time}', time='String')
 
 # Me

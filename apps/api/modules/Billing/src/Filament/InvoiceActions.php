@@ -62,7 +62,7 @@ final class InvoiceActions
                 );
                 Notification::make()->success()
                     ->title($invoice->status === 'paid' ? __('billing::invoices.pay.paid', ['number' => $invoice->number]) : __('billing::invoices.pay.partial', ['left' => $invoice->outstanding()->format()]))
-                    ->body($invoice->status === 'paid' && $invoice->subscription_id ? __('billing::invoices.pay.paid_hint') : null)
+                    ->body($invoice->status === 'paid' && $invoice->subscriptionIds() !== [] ? __('billing::invoices.pay.paid_hint') : null)
                     ->send();
             });
     }

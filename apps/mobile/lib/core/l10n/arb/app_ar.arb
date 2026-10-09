@@ -594,6 +594,15 @@
       }
     }
   },
+  "sharedPackage": "{subjects} · باقة مشتركة",
+  "@sharedPackage": {
+    "placeholders": {
+      "subjects": {
+        "type": "String"
+      }
+    }
+  },
+  "familyInvoice": "فاتورة العيلة",
   "lessonUntil": "الحصة لحد {time}",
   "@lessonUntil": {
     "placeholders": {

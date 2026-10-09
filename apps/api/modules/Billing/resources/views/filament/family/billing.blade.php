@@ -30,7 +30,7 @@
             <div class="bf-inv" wire:key="inv-{{ $inv['id'] }}">
                 <div>
                     <strong>{{ $inv['total'] }}</strong>
-                    <small>· {{ $inv['number'] }}@if ($inv['for']) · {{ $inv['for'] }}@endif</small>
+                    <small>· {{ $inv['number'] }}@if ($inv['family']) · {{ __('billing::family.family_invoice') }}@endif @if ($inv['for']) · {{ $inv['for'] }}@endif</small>
                     @foreach ($inv['discounts'] ?? [] as $off)
                         <small class="bf-off">{{ $off['label'] }} {{ $off['amount'] }}</small>
                     @endforeach

@@ -82,7 +82,7 @@ final class ViewInvoice extends ViewRecord
                 'ref' => $c->provider_payment_ref ?? $c->provider_ref,
                 'failure' => $c->failure,
             ])->all(),
-            'enrollmentUrl' => $d['student'] ? route('filament.academy.resources.enrollments.view', ['record' => $d['student']->enrollment_id]) : null,
+            'enrollmentUrl' => $d['student']?->enrollment_id ? route('filament.academy.resources.enrollments.view', ['record' => $d['student']->enrollment_id]) : null,
         ];
     }
 

@@ -20,8 +20,10 @@ final class FundSessionsFromNewCredit
             return; // makeup minutes are for makeup sessions, booked on purpose
         }
 
-        foreach ($this->enrollments->forCreditAccount($event->accountId) as $enrollment) {
-            $this->fund->handle($enrollment->id);
+        // One run covers every course on the balance (a shared package's too), oldest lesson first.
+        $first = $this->enrollments->forCreditAccount($event->accountId)[0] ?? null;
+        if ($first !== null) {
+            $this->fund->handle($first->id);
         }
     }
 }

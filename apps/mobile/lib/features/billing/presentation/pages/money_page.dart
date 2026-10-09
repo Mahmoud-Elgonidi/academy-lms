@@ -132,7 +132,7 @@ class _MoneyList extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Expanded(child: Text(b.subject, style: context.text.titleSmall)),
+                            Expanded(child: Text(b.shared ? l.sharedPackage(b.subject) : b.subject, style: context.text.titleSmall)),
                             Pill(l.lessonsCount(b.sessions), tone: b.sessions <= 1 ? Tone.attention : Tone.brand),
                           ],
                         ),
@@ -287,7 +287,7 @@ class _InvoiceRow extends StatelessWidget {
                 children: [
                   Text(invoice.forWhom, style: context.text.titleSmall),
                   Text(
-                    '${invoice.number}${invoice.issuedAt == null ? '' : ' · ${invoice.issuedAt!.day(context.locale)}'}',
+                    '${invoice.number}${invoice.family ? ' · ${context.l10n.familyInvoice}' : ''}${invoice.issuedAt == null ? '' : ' · ${invoice.issuedAt!.day(context.locale)}'}',
                     style: context.text.bodySmall,
                   ),
                   for (final off in invoice.lines.where((x) => x.isDiscount))

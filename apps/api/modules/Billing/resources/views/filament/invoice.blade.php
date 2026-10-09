@@ -135,7 +135,14 @@
                 <div>
                     <small>{{ __('billing::invoices.fields.student') }}</small>
                     <strong>{{ $d['student']->name }}</strong>
-                    @if ($d['enrollmentUrl']) <div><a href="{{ $d['enrollmentUrl'] }}" wire:navigate>{{ __('billing::invoices.doc.open_account') }}</a></div> @endif
+                    @if ($d['family'])
+                        <div class="iv-muted">{{ trans_choice('billing::invoices.family', count($d['courses']), ['n' => count($d['courses'])]) }}</div>
+                        @foreach ($d['courses'] as $course)
+                            <div><a href="{{ route('filament.academy.resources.enrollments.view', ['record' => $course['enrollment_id']]) }}" wire:navigate>{{ $course['student'] }} · {{ $course['subject'] }}</a></div>
+                        @endforeach
+                    @elseif ($d['enrollmentUrl'])
+                        <div><a href="{{ $d['enrollmentUrl'] }}" wire:navigate>{{ __('billing::invoices.doc.open_account') }}</a></div>
+                    @endif
                 </div>
             @endif
             <div>
@@ -154,7 +161,7 @@
                 <tr><th>{{ __('billing::invoices.doc.item') }}</th><th class="num">{{ __('billing::invoices.doc.qty') }}</th><th class="num">{{ __('billing::invoices.doc.amount') }}</th></tr>
             </thead>
             <tbody>
-                @foreach ($inv->lines->sortBy(fn ($l) => $l->kind === 'discount' ? 1 : 0) as $line)
+                @foreach ($d['lines'] as $line)
                     <tr @class(['iv-off' => $line->kind === 'discount'])>
                         <td class="iv-line">
                             {{ $line->description() }}
@@ -232,7 +239,7 @@
             @include('billing::invoice.credit-note', ['note' => $d['creditNote']])
         @elseif ($inv->status === 'void')
             <div class="iv-note">{{ __('billing::invoices.doc.voided', ['reason' => $inv->void_reason]) }}</div>
-        @elseif ($inv->status === 'issued' && $inv->subscription_id)
+        @elseif ($inv->status === 'issued' && $d['courses'] !== [])
             <div class="iv-note">{{ __('billing::invoices.doc.on_payment') }}</div>
         @endif
     </article>
