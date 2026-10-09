@@ -20,6 +20,7 @@ use Modules\Scheduling\Domain\Enums\ParticipantRole;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
+use Modules\Scheduling\Filament\DisputeAction;
 use Modules\Scheduling\Queries\FamilyCancellation;
 use Modules\Scheduling\Queries\FamilyNotices;
 use Modules\Scheduling\Queries\LessonList;
@@ -61,7 +62,7 @@ final class FamilyLessons extends Page
             return ['upcoming' => [], 'recent' => []];
         }
         $now = CarbonImmutable::now();
-        $view = new FamilyLessonView($now, app(ViewerTimezone::class)->effective());
+        $view = new FamilyLessonView($now, app(ViewerTimezone::class)->effective(), disputes: app(FamilyView::class)->stage((string) auth()->id()) !== LearnerStage::Kids);
         $query = app(LessonList::class);
         $today = $now->setTimezone(app(ViewerTimezone::class)->effective())->startOfDay()->utc();
 
@@ -97,6 +98,19 @@ final class FamilyLessons extends Page
                 unset($this->lessons);
                 Notification::make()->success()->title(__($l.'done'))->send();
             });
+    }
+
+    /**
+     * Disputing what a recent lesson was recorded as (docs/architecture/01,
+     * section 8): within 48 hours of its end; the academy answers. A child in
+     * the kids' look does not: their guardian does.
+     */
+    public function disputeAction(): Action
+    {
+        return DisputeAction::make('family', fn (array $arguments) => $this->learnersLesson($arguments), function () {
+            unset($this->lessons);
+        })
+            ->visible(fn () => app(FamilyView::class)->stage((string) auth()->id()) !== LearnerStage::Kids);
     }
 
     /** Coming academy holidays (the next six weeks), said above the lessons. */
@@ -146,11 +160,19 @@ final class FamilyLessons extends Page
     /** A lesson of the learner this person follows, still ahead and booked; anything else is refused. */
     private function ownLesson(array $arguments): Session
     {
+        $session = $this->learnersLesson($arguments);
+        abort_unless($session->status === SessionStatus::Scheduled && $session->starts_at->isFuture(), 403);
+
+        return $session;
+    }
+
+    /** A lesson of the learner this person follows; anything else is not found. */
+    private function learnersLesson(array $arguments): Session
+    {
         $session = Session::query()->with('participants')->find($arguments['session'] ?? null);
         $learner = app(FamilyView::class)->current((string) auth()->id());
         abort_unless($session !== null && $learner !== null
             && $session->participants->contains(fn ($p) => $p->role === ParticipantRole::Student && $p->user_id === $learner->id), 404);
-        abort_unless($session->status === SessionStatus::Scheduled && $session->starts_at->isFuture(), 403);
 
         return $session;
     }

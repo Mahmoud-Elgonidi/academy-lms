@@ -23,6 +23,7 @@ return [
         'session' => [
             'cancel_waived' => 'Lesson cancelled with a policy waiver',
             'review_resolved' => 'Lesson under review decided: :outcome',
+            'disputed' => 'Lesson outcome disputed by :side',
         ],
         'shift' => [
             'approved_override' => 'Shifts approved without the teacher: :reason',
@@ -98,6 +99,7 @@ return [
         'how' => ['exit' => 'they left', 'expired' => 'time ran out', 'ended' => 'ended from the console'],
         'recording' => ['off' => 'no recording', 'manual' => 'the teacher starts it', 'auto' => 'every lesson by itself'],
         'media' => ['by_age' => 'by age', 'video' => 'video', 'audio' => 'sound only'],
+        'side' => ['family' => 'the family', 'teacher' => 'the teacher'],
     ],
     'groups' => [
         'billing' => 'Money',

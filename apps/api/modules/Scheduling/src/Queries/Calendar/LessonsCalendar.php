@@ -179,10 +179,11 @@ final class LessonsCalendar
             ->join('users as t', fn ($j) => $j->on('t.academy_id', '=', 's.academy_id')->on('t.id', '=', 's.teacher_id'))
             ->join('subjects as sub', fn ($j) => $j->on('sub.academy_id', '=', 's.academy_id')->on('sub.id', '=', 's.subject_id'))
             ->leftJoin('users as ot', fn ($j) => $j->on('ot.academy_id', '=', 's.academy_id')->on('ot.id', '=', 's.original_teacher_id'))
+            ->leftJoin('session_disputes as d', fn ($j) => $j->on('d.academy_id', '=', 's.academy_id')->on('d.session_id', '=', 's.id'))
             ->get(['s.id', 's.starts_at', 's.ends_at', 's.status', 's.type', 's.funding_status', 's.review_reason', 's.enrollment_id', 's.subject_id',
                 's.teacher_id', 't.name as teacher', 't.timezone as teacher_tz', 'ot.name as original_teacher',
                 'st.user_id as student_id', 'su.name as student', 'su.timezone as student_tz',
-                'sub.name_ar as subject_ar', 'sub.name_en as subject_en',
+                'sub.name_ar as subject_ar', 'sub.name_en as subject_en', 'd.id as dispute_id', 'd.status as dispute_status', 'd.side as dispute_side',
                 DB::raw("s.decision->>'reason' as reason"), DB::raw("s.decision->>'by' as reason_by"), DB::raw("s.decision->>'note' as reason_note")])
             ->map(function (object $r) {
                 $r->starts_at = CarbonImmutable::parse($r->starts_at)->utc();

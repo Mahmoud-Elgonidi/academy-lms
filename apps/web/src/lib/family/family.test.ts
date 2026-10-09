@@ -13,8 +13,8 @@ describe('what a family may do with a lesson', () => {
   });
 
   it('offers cancelling and turning down a substitute only when the API allows them', () => {
-    expect(lessonActionsFor(lesson('scheduled', true), 'classic')).toEqual({ cancel: true, refuse: false, rate: false });
-    expect(lessonActionsFor(lesson('scheduled', false, true), 'teen')).toEqual({ cancel: false, refuse: true, rate: false });
+    expect(lessonActionsFor(lesson('scheduled', true), 'classic')).toEqual({ cancel: true, refuse: false, rate: false, dispute: false });
+    expect(lessonActionsFor(lesson('scheduled', false, true), 'teen')).toEqual({ cancel: false, refuse: true, rate: false, dispute: false });
     expect(lessonActionsFor(lesson('scheduled'), 'middle')).toBeNull();
   });
 
@@ -22,6 +22,13 @@ describe('what a family may do with a lesson', () => {
     expect(lessonActionsFor(lesson('completed'), 'classic')?.rate).toBe(true);
     expect(lessonActionsFor(lesson('student_absent'), 'teen')?.rate).toBe(true);
     expect(lessonActionsFor(lesson('cancelled'), 'classic')).toBeNull();
+  });
+
+  it('offers a dispute only where the API does, never in the kids look', () => {
+    const decided = { status: 'completed', can_cancel: false, can_refuse_substitute: false, can_dispute: true };
+    expect(lessonActionsFor(decided, 'classic')).toEqual({ cancel: false, refuse: false, rate: true, dispute: true });
+    expect(lessonActionsFor({ ...decided, status: 'teacher_absent' }, 'teen')).toEqual({ cancel: false, refuse: false, rate: false, dispute: true });
+    expect(lessonActionsFor(decided, 'kids')).toBeNull();
   });
 });
 

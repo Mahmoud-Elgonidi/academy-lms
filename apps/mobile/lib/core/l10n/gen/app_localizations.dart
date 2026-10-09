@@ -944,6 +944,78 @@ abstract class AppLocalizations {
   /// **'إلغاء الحصة'**
   String get cancelLesson;
 
+  /// No description provided for @disputeLesson.
+  ///
+  /// In ar, this message translates to:
+  /// **'اعترض'**
+  String get disputeLesson;
+
+  /// No description provided for @disputeTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اعتراض على نتيجة الحصة'**
+  String get disputeTitle;
+
+  /// No description provided for @disputeIntroFamily.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحصة متسجلة \"{outcome}\". لو ده مش اللي حصل، قولولنا خلال 48 ساعة من آخرها، والأكاديمية هتراجع حضور الفصل وترد عليكم.'**
+  String disputeIntroFamily(String outcome);
+
+  /// No description provided for @disputeIntroTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحصة متسجلة \"{outcome}\". لو ده مش اللي حصل، قولنا خلال 48 ساعة من آخرها، والأكاديمية هتراجع حضور الفصل وترد عليك.'**
+  String disputeIntroTeacher(String outcome);
+
+  /// No description provided for @disputeWhat.
+  ///
+  /// In ar, this message translates to:
+  /// **'إيه اللي حصل؟'**
+  String get disputeWhat;
+
+  /// No description provided for @disputeNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'التفاصيل'**
+  String get disputeNote;
+
+  /// No description provided for @disputeNoteHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية بس اللي هتقرا ده.'**
+  String get disputeNoteHint;
+
+  /// No description provided for @disputeFillIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار السبب واكتب اللي حصل.'**
+  String get disputeFillIn;
+
+  /// No description provided for @disputeSend.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت الاعتراض'**
+  String get disputeSend;
+
+  /// No description provided for @disputeSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاعتراض وصل، والحصة تحت المراجعة.'**
+  String get disputeSent;
+
+  /// No description provided for @disputeState.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاعتراض: {status}'**
+  String disputeState(String status);
+
+  /// No description provided for @disputeAnswer.
+  ///
+  /// In ar, this message translates to:
+  /// **'رد الأكاديمية: {answer}'**
+  String disputeAnswer(String answer);
+
   /// No description provided for @cancelTitle.
   ///
   /// In ar, this message translates to:

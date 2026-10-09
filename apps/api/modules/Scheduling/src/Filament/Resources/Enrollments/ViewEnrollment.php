@@ -318,7 +318,7 @@ final class ViewEnrollment extends ViewRecord
                 'mode' => json_decode($e->meta ?? '{}', true)['mode'] ?? null,
                 'minutes' => (int) $e->minutes,
                 'sign' => match ($e->type) {
-                    'grant' => '+', 'expire', 'consume' => '−', default => ''
+                    'grant', 'restore' => '+', 'expire', 'consume', 'reclaim' => '−', default => ''
                 },
                 'available' => (int) $e->available_after,
                 'reserved' => (int) $e->reserved_after,

@@ -9,12 +9,14 @@ use Illuminate\Support\Str;
 use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\LearnerStage;
 use Modules\Scheduling\Actions\CancelSession;
+use Modules\Scheduling\Actions\Disputes\DisputeLesson;
 use Modules\Scheduling\Actions\RefuseSubstitute;
 use Modules\Scheduling\Domain\Enums\ParticipantRole;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Http\V1\Requests\CancelLessonRequest;
+use Modules\Scheduling\Http\V1\Requests\DisputeLessonRequest;
 use Modules\Scheduling\Http\V1\Resources\LessonPresenter;
 use Modules\Scheduling\Queries\FamilyCancellation;
 use Modules\Scheduling\Queries\FamilyNotices;
@@ -25,8 +27,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * A learner's lessons for the family app, and what the family may do with
- * one: cancel it under the academy's policy (told the outcome first), or
- * turn down a substitute. A child in the kids' look does neither.
+ * one: cancel it under the academy's policy (told the outcome first), turn
+ * down a substitute, or dispute what a lesson was recorded as. A child in
+ * the kids' look does none of these.
  */
 final class FamilyLessonsController
 {
@@ -113,6 +116,28 @@ final class FamilyLessonsController
         $refuse->handle($lesson, $request->input('note'), (string) $request->user()?->getAuthIdentifier());
 
         return $this->one($lesson->refresh(), ['makeup_days' => (int) PolicyVersion::settingsInForce()->get('makeup_validity_days')]);
+    }
+
+    /**
+     * Dispute a lesson's outcome.
+     *
+     * Within 48 hours of the end of a lesson recorded as held or missed (can_dispute), once per lesson: it goes back
+     * under review and the academy answers (the lesson's dispute). Send an Idempotency-Key.
+     *
+     * @throws NotFoundHttpException not a lesson of someone I follow
+     * @throws AccessDeniedHttpException a child in the kids' look
+     */
+    public function dispute(DisputeLessonRequest $request, string $session, DisputeLesson $dispute): JsonResponse
+    {
+        $me = (string) $request->user()?->getAuthIdentifier();
+        $lesson = Str::isUuid($session) ? Session::query()->with('participants')->find($session) : null;
+        $student = $lesson?->participants->firstWhere('role', ParticipantRole::Student);
+        if ($student === null || ! $this->family->follows($me, $student->user_id)) {
+            throw new NotFoundHttpException;
+        }
+        $dispute->handle($lesson, 'family', $me, (string) $request->string('reason'), (string) $request->string('note'));
+
+        return $this->one($lesson->refresh());
     }
 
     /** @param  array<string, mixed>  $extra */

@@ -16,6 +16,10 @@
     .fl-tag { font-size: .7rem; padding: .05rem .5rem; border-radius: 999px; background: var(--primary-50); color: var(--primary-700); font-weight: 600; margin-inline-start: .25rem; }
     .fl-tag[data-kind="substitute"] { background: var(--warning-50); color: var(--warning-800); }
     .fl-warn { color: var(--danger-600); font-size: .8rem; }
+    .fl-dispute { grid-column: 1 / -1; display: flex; flex-direction: column; gap: .2rem; padding: .5rem .75rem; border-radius: var(--radius-lg, .5rem); background: var(--warning-50); color: var(--warning-800); font-size: .85rem; }
+    .fl-dispute[data-s="upheld"] { background: var(--success-50); color: var(--success-800); }
+    .fl-dispute[data-s="rejected"] { background: var(--gray-100); color: var(--gray-700); }
+    .fl-dispute span { white-space: pre-line; }
     .fl-h2 { font-size: 1rem; font-weight: 700; margin: 1.25rem 0 .6rem; }
     .fl-empty { padding: 1.5rem; text-align: center; color: var(--gray-500); border: 1px dashed var(--gray-300); border-radius: var(--radius-xl, .75rem); }
     @media (max-width: 640px) {
@@ -23,4 +27,7 @@
         .fl-what { grid-column: 1 / -1; grid-row: 2; }
     }
     .dark .fl-card { background: var(--gray-900); border-color: var(--gray-800); }
+    .dark .fl-dispute { background: color-mix(in oklab, var(--warning-500) 12%, transparent); color: var(--warning-200); }
+    .dark .fl-dispute[data-s="upheld"] { background: color-mix(in oklab, var(--success-500) 12%, transparent); color: var(--success-200); }
+    .dark .fl-dispute[data-s="rejected"] { background: rgb(255 255 255 / .05); color: var(--gray-300); }
 </style>

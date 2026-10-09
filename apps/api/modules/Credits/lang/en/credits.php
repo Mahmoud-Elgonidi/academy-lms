@@ -14,6 +14,8 @@ return [
         'release' => 'Back from a session',
         'consume' => 'Session used',
         'expire' => 'Expired',
+        'restore' => 'Back after a review',
+        'reclaim' => 'Taken back after a review',
         'extend' => 'Validity extended',
     ],
     'release_modes' => [

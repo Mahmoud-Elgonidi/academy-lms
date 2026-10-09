@@ -58,7 +58,11 @@ export default async function Lessons({ searchParams }: { searchParams: Promise<
               <li key={lesson.id}>
                 <FamilyLessonCard
                   lesson={lesson}
-                  actions={allowed ? <LessonActions id={lesson.id} allowed={allowed} day={dayLabel(lesson.starts_at.local.slice(0, 10), locale)} /> : undefined}
+                  actions={
+                    allowed ? (
+                      <LessonActions id={lesson.id} allowed={allowed} disputeReasons={lesson.dispute_reasons} day={dayLabel(lesson.starts_at.local.slice(0, 10), locale)} />
+                    ) : undefined
+                  }
                 />
               </li>
             );

@@ -1,54 +1,37 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useEffect, useId, useRef, useState, useTransition, type ReactNode } from 'react';
+import { useState, useTransition } from 'react';
 import { cancelLesson, cancellationOf, rateLesson, ratingOf, refuseSubstitute } from '@/app/[locale]/family/actions';
+import { Dialog } from '@/components/dialog';
+import { DisputeLesson } from '@/components/dispute-lesson';
 import { Icon } from '@/components/icons';
 import { Button, Field, Notice, Select, Textarea, join } from '@/components/ui';
 import type { CancelPreview, Rating } from '@/lib/family/types';
 
-/** A modal dialog (the browser's own, so focus and Escape behave). */
-function Dialog({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  const titleId = useId();
-  const t = useTranslations('family');
-  useEffect(() => {
-    const d = ref.current;
-    if (!d) return;
-    if (open && !d.open) d.showModal();
-    if (!open && d.open) d.close();
-  }, [open]);
-  return (
-    <dialog
-      ref={ref}
-      onClose={onClose}
-      aria-labelledby={titleId}
-      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-card border border-line bg-white p-0 text-ink backdrop:bg-black/40"
-    >
-      <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
-        <h2 id={titleId} className="font-semibold">
-          {title}
-        </h2>
-        <button type="button" onClick={onClose} className="grid size-9 place-items-center rounded-control text-muted hover:bg-paper" aria-label={t('close')}>
-          <Icon name="x" size={18} />
-        </button>
-      </div>
-      <div className="space-y-4 p-5">{children}</div>
-    </dialog>
-  );
-}
-
 /**
  * What a family may do with a lesson, as the API allows it (lessonActionsFor):
  * cancel after seeing what the policy will do, turn down a substitute, rate it
- * once it took place. A kid's look gets none of these; the API refuses them anyway.
+ * once it took place, dispute what it was recorded as. A kid's look gets none
+ * of these; the API refuses them anyway.
  */
-export function LessonActions({ id, day, allowed }: { id: string; day: string; allowed: { cancel: boolean; refuse: boolean; rate: boolean } }) {
+export function LessonActions({
+  id,
+  day,
+  allowed,
+  disputeReasons = [],
+}: {
+  id: string;
+  day: string;
+  allowed: { cancel: boolean; refuse: boolean; rate: boolean; dispute: boolean };
+  disputeReasons?: { key: string; label: string }[];
+}) {
   return (
     <div className="flex flex-wrap gap-2">
       {allowed.refuse ? <RefuseSubstitute id={id} /> : null}
       {allowed.cancel ? <CancelLesson id={id} day={day} /> : null}
       {allowed.rate ? <RateLesson id={id} /> : null}
+      {allowed.dispute ? <DisputeLesson id={id} side="family" reasons={disputeReasons} /> : null}
     </div>
   );
 }

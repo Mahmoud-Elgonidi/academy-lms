@@ -9,8 +9,8 @@ import type { JoinTicket } from '@/lib/teach/types';
  * Writes every portal makes the same way, teachers and families alike: a
  * seat in a lesson (JoinLesson decides whose lesson it is and whether it is
  * open yet), notifications marked read, tickets to the academy, lesson
- * recordings (consent, watching, starting and stopping one), and unlinking
- * Google or Apple from one's account.
+ * recordings (consent, watching, starting and stopping one), unlinking
+ * Google or Apple from one's account, and disputing a lesson's outcome.
  */
 export async function joinLesson(id: string): Promise<{ ok: true; ticket: JoinTicket; recording: LessonRecording } | { ok: false; message?: string }> {
   const joined = await send<{ data: JoinTicket; recording?: LessonRecording }>('post', '/v1/lessons/{session}/join', { params: { session: id } });
@@ -115,6 +115,19 @@ export async function reopenTicket(ticket: string): Promise<TicketResult> {
 export async function closeTicket(ticket: string): Promise<TicketResult> {
   const done = await send('post', '/v1/support/tickets/{ticket}/close', { params: { ticket } });
   if (!done.ok) return failed(done.problem);
+  refresh();
+  return { ok: true };
+}
+
+/**
+ * Disputes what a lesson was recorded as: the family about the learner's
+ * lesson, the teacher about their own. The same confirmation sends the same
+ * key, so a retry disputes once.
+ */
+export async function disputeLesson(side: 'family' | 'teacher', id: string, reason: string, note: string, key: string): Promise<Done> {
+  const options = { params: { session: id }, body: { reason, note: note.trim() }, idempotencyKey: key };
+  const done = side === 'family' ? await send('post', '/v1/lessons/{session}/dispute', options) : await send('post', '/v1/teacher/lessons/{session}/dispute', options);
+  if (!done.ok) return problemOf(done.problem);
   refresh();
   return { ok: true };
 }

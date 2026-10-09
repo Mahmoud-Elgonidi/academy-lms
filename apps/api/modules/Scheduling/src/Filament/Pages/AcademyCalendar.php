@@ -466,6 +466,10 @@ final class AcademyCalendar extends Page
             ]) : null,
             'note' => $cancelled ? $row->reason_note : null,
             'review' => $row->status === 'needs_review' && $row->review_reason ? __('scheduling::board.review_reasons.'.$row->review_reason) : null,
+            'dispute' => $row->dispute_id === null ? null : [
+                'label' => __('scheduling::disputes.sides.'.$row->dispute_side).' · '.__('scheduling::disputes.statuses.'.$row->dispute_status),
+                'url' => LessonDisputes::getUrl(['dispute' => $row->dispute_id]),
+            ],
             'accountUrl' => $row->enrollment_id && EnrollmentResource::canAccess() ? EnrollmentResource::getUrl('view', ['record' => $row->enrollment_id]) : null,
             'boardUrl' => $row->starts_at->isSameDay($now) && in_array($row->status, ['scheduled', 'in_progress'], true) ? LiveBoard::getUrl() : null,
             'teacherUrl' => self::getUrl($params + ['teacher' => $row->teacher_id]),

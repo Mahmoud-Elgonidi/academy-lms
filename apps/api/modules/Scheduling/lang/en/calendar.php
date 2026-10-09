@@ -117,6 +117,8 @@ return [
         'reason' => 'Why it was cancelled',
         'note' => 'Note',
         'review' => 'Why it is under review',
+        'dispute' => 'Dispute',
+        'open_dispute' => 'Open the dispute',
         'account' => "Student's course account",
         'board' => 'Open on the live board',
         'teacher_calendar' => "Teacher's calendar",

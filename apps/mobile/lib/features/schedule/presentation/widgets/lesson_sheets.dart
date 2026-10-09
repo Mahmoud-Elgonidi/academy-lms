@@ -30,6 +30,27 @@ Future<bool> showCancelSheet(BuildContext context, Lesson lesson) async => await
 /// Returns true once rated.
 Future<bool> showRateSheet(BuildContext context, Lesson lesson) async => await _sheet<bool>(context, _RateSheet(lesson)) ?? false;
 
+/// Disputes what [lesson] was recorded as (the family's or the teacher's
+/// reasons, as the API offers them for this lesson); [send] posts it to the
+/// side's own endpoint. Returns true once sent.
+Future<bool> showDisputeSheet(
+  BuildContext context,
+  Lesson lesson, {
+  required bool teacher,
+  required Future<void> Function(String reason, String note) send,
+}) async =>
+    await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      builder: (c) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(c).bottom),
+        child: _DisputeSheet(lesson: lesson, teacher: teacher, send: send),
+      ),
+    ) ??
+    false;
+
 /// Turns down a substitute after asking; returns true once done.
 Future<bool> refuseSubstitute(BuildContext context, Lesson lesson) async {
   final l = context.l10n;
@@ -316,6 +337,112 @@ class _RateSheetState extends State<_RateSheet> {
           ],
         );
       },
+    );
+  }
+}
+
+class _DisputeSheet extends StatefulWidget {
+  const _DisputeSheet({required this.lesson, required this.teacher, required this.send});
+
+  final Lesson lesson;
+  final bool teacher;
+  final Future<void> Function(String reason, String note) send;
+
+  @override
+  State<_DisputeSheet> createState() => _DisputeSheetState();
+}
+
+class _DisputeSheetState extends State<_DisputeSheet> {
+  final _note = TextEditingController();
+  String? _reason;
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    if (_reason == null || _note.text.trim().isEmpty) {
+      setState(() => _error = context.l10n.disputeFillIn);
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await widget.send(_reason!, _note.text);
+      if (mounted) Navigator.pop(context, true);
+    } on ApiProblem catch (p) {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _error = context.problemText(p);
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final lesson = widget.lesson;
+    final locale = context.locale;
+    return _SheetBody(
+      children: [
+        Text(l.disputeTitle, style: context.text.headlineSmall),
+        const SizedBox(height: 6),
+        Text(
+          '${lesson.startsAt.day(locale)} · ${lesson.startsAt.clock(locale)}–${lesson.endsAt.clock(locale)} · ${lesson.subject}',
+          style: context.text.bodyMedium?.copyWith(color: context.colors.muted),
+        ),
+        const SizedBox(height: 14),
+        Note(
+          widget.teacher ? l.disputeIntroTeacher(lesson.statusLabel) : l.disputeIntroFamily(lesson.statusLabel),
+          tone: Tone.brand,
+          icon: Icons.gavel_rounded,
+        ),
+        const SizedBox(height: 18),
+        Text(l.disputeWhat, style: context.text.titleSmall),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final r in lesson.disputeReasons)
+              ChoiceChip(
+                label: Text(r.label),
+                selected: _reason == r.key,
+                onSelected: (_) => setState(() {
+                  _reason = r.key;
+                  _error = null;
+                }),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _note,
+          maxLines: 3,
+          maxLength: 1000,
+          decoration: InputDecoration(labelText: l.disputeNote, helperText: l.disputeNoteHint),
+        ),
+        if (_error != null) ...[Note(_error!, tone: Tone.danger, icon: Icons.error_outline_rounded), const SizedBox(height: 12)],
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(onPressed: _busy ? null : () => Navigator.pop(context, false), child: Text(l.close)),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: FilledButton(onPressed: _busy ? null : _send, child: Text(l.disputeSend)),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

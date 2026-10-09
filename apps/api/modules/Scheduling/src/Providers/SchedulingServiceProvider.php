@@ -23,6 +23,8 @@ use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\Events\DstShiftDecided;
 use Modules\Scheduling\Contracts\Events\DstShiftUpcoming;
 use Modules\Scheduling\Contracts\Events\HolidayDeclared;
+use Modules\Scheduling\Contracts\Events\LessonDisputed;
+use Modules\Scheduling\Contracts\Events\LessonDisputeDecided;
 use Modules\Scheduling\Contracts\Events\SessionCancelled;
 use Modules\Scheduling\Contracts\Events\SessionRescheduled;
 use Modules\Scheduling\Contracts\Events\SessionTeacherSubstituted;
@@ -42,6 +44,7 @@ use Modules\Scheduling\Domain\AttendancePolicy;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Filament\Family\FamilyLessons;
 use Modules\Scheduling\Filament\Pages\Holidays;
+use Modules\Scheduling\Filament\Pages\LessonDisputes;
 use Modules\Scheduling\Filament\Pages\LiveBoard;
 use Modules\Scheduling\Filament\Pages\ReviewShiftProposal;
 use Modules\Scheduling\Filament\Pages\TimeOffReview;
@@ -104,6 +107,7 @@ final class SchedulingServiceProvider extends ServiceProvider
         SendSchedulingNotifications::templates($this->app->make(NotificationsApi::class));
         $links = $this->app->make(NotificationLinks::class);
         $links->register('shift_proposal', fn (array $a, string $panel) => $panel === 'academy' ? ReviewShiftProposal::getUrl(['proposal' => $a['id']], panel: 'academy') : null);
+        $links->register('dispute', fn (array $a, string $panel) => $panel === 'academy' ? LessonDisputes::getUrl(['dispute' => $a['id']], panel: 'academy') : null);
         $links->register('live_board', fn (array $a, string $panel) => $panel === 'academy' ? LiveBoard::getUrl(panel: 'academy') : null);
         $links->register('session', fn (array $a, string $panel) => match ($panel) {
             'academy' => LiveBoard::getUrl(panel: 'academy'),
@@ -134,6 +138,8 @@ final class SchedulingServiceProvider extends ServiceProvider
         Event::listen(SlotTimesShifted::class, [SendSchedulingNotifications::class, 'slotShifted']);
         Event::listen(TeacherLessonsShifted::class, [SendSchedulingNotifications::class, 'teacherShifted']);
         Event::listen(TrialLessonBooked::class, [SendSchedulingNotifications::class, 'trialBooked']);
+        Event::listen(LessonDisputed::class, [SendSchedulingNotifications::class, 'disputed']);
+        Event::listen(LessonDisputeDecided::class, [SendSchedulingNotifications::class, 'disputeDecided']);
         foreach ([ShiftProposalApproved::class, ShiftProposalRejected::class, ShiftProposalChangesRequested::class, ShiftProposalCountered::class] as $answer) {
             Event::listen($answer, [SendSchedulingNotifications::class, 'proposalAnswered']);
         }

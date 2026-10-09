@@ -1,4 +1,4 @@
-{{-- One lesson card (family area). $lesson from FamilyLessonView. With $after, other modules add a row under it (the "scheduling::family.lesson-card" hook: the rating). --}}
+{{-- One lesson card (family area, the teacher's week). $lesson from FamilyLessonView; $cancel, $refuse and $dispute are the page's actions. With $after, other modules add a row under it (the "scheduling::family.lesson-card" hook: the rating). --}}
 @php $l = 'scheduling::family.'; @endphp
 <article class="fl-card" data-status="{{ $lesson['status'] }}" wire:key="fl-{{ $lesson['id'] }}">
     <div class="fl-when">
@@ -26,12 +26,23 @@
                 {{ ($refuse)(['session' => $lesson['id']]) }}
             @endif
         @endisset
+        @isset($dispute)
+            @if ($lesson['disputable'] ?? false)
+                {{ ($dispute)(['session' => $lesson['id']]) }}
+            @endif
+        @endisset
         @isset($cancel)
             @if ($lesson['cancellable'])
                 {{ ($cancel)(['session' => $lesson['id']]) }}
             @endif
         @endisset
     </div>
+    @if ($lesson['dispute'] ?? null)
+        <div class="fl-dispute" data-s="{{ $lesson['dispute']['status'] }}">
+            <strong>{{ $lesson['dispute']['label'] }}</strong>
+            @if ($lesson['dispute']['answer'])<span>{{ __('scheduling::disputes.form.answer', ['answer' => $lesson['dispute']['answer']]) }}</span>@endif
+        </div>
+    @endif
     @if ($after ?? false)
         {{ \Filament\Support\Facades\FilamentView::renderHook('scheduling::family.lesson-card', data: ['lesson' => $lesson]) }}
     @endif

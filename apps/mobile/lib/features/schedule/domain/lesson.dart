@@ -23,6 +23,10 @@ class Lesson extends Equatable {
     this.canCancel = false,
     this.canRefuseSubstitute = false,
     this.cancelledBecause,
+    this.dispute,
+    this.canDispute = false,
+    this.disputeUntil,
+    this.disputeReasons = const [],
   });
 
   factory Lesson.fromJson(Map<String, dynamic> json) {
@@ -45,6 +49,13 @@ class Lesson extends Equatable {
       canCancel: json['can_cancel'] == true,
       canRefuseSubstitute: json['can_refuse_substitute'] == true,
       cancelledBecause: json['cancelled_because'] as String?,
+      dispute: LessonDispute.fromJson(json['dispute']),
+      canDispute: json['can_dispute'] == true,
+      disputeUntil: LocalTime.fromJson(json['dispute_until']),
+      disputeReasons: [
+        for (final r in json['dispute_reasons'] as List<dynamic>? ?? const [])
+          (key: (r as Map<String, dynamic>)['key'] as String, label: r['label'] as String),
+      ],
     );
   }
 
@@ -74,6 +85,14 @@ class Lesson extends Equatable {
   final bool canRefuseSubstitute;
   final String? cancelledBecause;
 
+  /// The viewer's own dispute of what the lesson was recorded as, and the academy's answer.
+  final LessonDispute? dispute;
+
+  /// Recorded as held or missed, within 48 hours of its end: the viewer may dispute it with one of [disputeReasons].
+  final bool canDispute;
+  final LocalTime? disputeUntil;
+  final List<({String key, String label})> disputeReasons;
+
   bool get ahead => status == 'scheduled' || status == 'in_progress';
 
   /// Still to come or on now: booked, and not yet over by the clock.
@@ -82,13 +101,39 @@ class Lesson extends Equatable {
   bool get tookPlace => status == 'completed' || status == 'student_absent';
 
   @override
-  List<Object?> get props => [id, status, joinOpen, canCancel, unfunded];
+  List<Object?> get props => [id, status, joinOpen, canCancel, unfunded, canDispute, dispute];
 
   /// The room opens 10 minutes before and closes 10 minutes after (Classroom).
   static const roomCloses = Duration(minutes: 10);
 
   /// The moments the clock alone changes what this lesson shows: the room opening, the start, the room closing.
   Iterable<DateTime> get clockMoments => [?joinOpensAt?.utc, startsAt.utc, endsAt.utc.add(roomCloses)];
+}
+
+/// A dispute of a lesson's outcome: open, upheld (the outcome changed) or
+/// rejected, why it was raised, and the academy's answer once decided.
+class LessonDispute extends Equatable {
+  const LessonDispute({required this.status, required this.statusLabel, required this.reason, this.answer});
+
+  static LessonDispute? fromJson(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    return LessonDispute(
+      status: raw['status'] as String? ?? 'open',
+      statusLabel: raw['status_label'] as String? ?? '',
+      reason: raw['reason'] as String? ?? '',
+      answer: raw['answer'] as String?,
+    );
+  }
+
+  final String status;
+  final String statusLabel;
+  final String reason;
+  final String? answer;
+
+  bool get open => status == 'open';
+
+  @override
+  List<Object?> get props => [status, answer];
 }
 
 /// A page of lessons: whose, and any notice about the coming weeks

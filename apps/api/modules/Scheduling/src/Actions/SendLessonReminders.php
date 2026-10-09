@@ -16,6 +16,7 @@ use Modules\SharedKernel\Authorization\Ability;
  * section 15, and flow "يوم الحصة"):
  *
  * - a day before, and an hour before, the family is reminded (and the teacher, an hour before);
+ * - ten minutes before, as the classroom opens, the family and the teacher get their way in (a push);
  * - 3 minutes in, a student who has not joined gets "join now" (and the guardians), even in quiet hours;
  * - 2 minutes in, a teacher who has not joined is nudged, and the supervisors told.
  *
@@ -25,6 +26,9 @@ use Modules\SharedKernel\Authorization\Ability;
 final class SendLessonReminders
 {
     public const JOIN_NOW_AFTER_MIN = 3;
+
+    /** The last reminder before a lesson, when its classroom opens (classroom.opens_before_min). */
+    public const SOON_MIN = 10;
 
     public const TEACHER_LATE_AFTER_MIN = 2;
 
@@ -42,9 +46,14 @@ final class SendLessonReminders
         foreach ($this->starting($now->addHours(23), $now->addHours(24), ['funded', 'free', 'makeup']) as $id) {
             $sent += $this->toFamily($id, 'scheduling.reminder_day', "reminder-day:{$id}");
         }
-        foreach ($this->starting($now, $now->addHour()) as $id) {
+        // A lesson booked at the last minute gets only the ten-minute one.
+        foreach ($this->starting($now->addMinutes(self::SOON_MIN), $now->addHour()) as $id) {
             $sent += $this->toFamily($id, 'scheduling.reminder_hour', "reminder-hour:{$id}");
             $sent += $this->toTeacher($id, 'scheduling.reminder_hour_teacher', "reminder-hour:{$id}");
+        }
+        foreach ($this->starting($now, $now->addMinutes(self::SOON_MIN)) as $id) {
+            $sent += $this->toFamily($id, 'scheduling.reminder_soon', "reminder-soon:{$id}");
+            $sent += $this->toTeacher($id, 'scheduling.reminder_soon_teacher', "reminder-soon:{$id}");
         }
         foreach ($this->notJoined('student', $now, self::JOIN_NOW_AFTER_MIN) as $id) {
             $sent += $this->toFamily($id, 'scheduling.join_now', "join-now:{$id}", urgent: true);

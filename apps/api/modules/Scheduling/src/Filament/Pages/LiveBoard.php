@@ -31,6 +31,7 @@ use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\LiveBoard\BoardClassifier;
 use Modules\Scheduling\Domain\LiveBoard\BoardItem;
 use Modules\Scheduling\Domain\Models\Session;
+use Modules\Scheduling\Domain\Models\SessionDispute;
 use Modules\Scheduling\Filament\LiveBoardView;
 use Modules\Scheduling\Filament\PolicyPreview;
 use Modules\Scheduling\Listeners\SendSchedulingNotifications;
@@ -314,11 +315,14 @@ final class LiveBoard extends Page
     {
         return $this->sessionAction('decide')
             ->label(__('scheduling::board.actions.resolve'))
-            ->schema([
+            // A dispute waits on the lesson: the note is the answer whoever raised it reads.
+            ->schema(fn (array $arguments) => [
                 Radio::make('outcome')->label(__('scheduling::board.resolve.outcome'))
                     ->options(collect(ResolveReview::OUTCOMES)->mapWithKeys(fn ($o) => [$o => __('scheduling::board.resolve.outcomes.'.$o)])->all())
                     ->required(),
-                Textarea::make('note')->label(__('scheduling::board.contact.note'))->rows(2)->maxLength(500),
+                Textarea::make('note')->label(__('scheduling::board.contact.note'))->rows(2)->maxLength(500)
+                    ->required($disputed = SessionDispute::query()->where('session_id', $arguments['session'] ?? null)->where('status', 'open')->exists())
+                    ->helperText($disputed ? __('scheduling::disputes.decide.answer_hint') : null),
             ])
             ->action(function (array $data, array $arguments) {
                 app(ResolveReview::class)->handle($this->session($arguments), $data['outcome'], $data['note'] ?? null, (string) auth()->id());

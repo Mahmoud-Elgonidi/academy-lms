@@ -4,6 +4,7 @@ namespace Modules\Credits;
 
 use Carbon\CarbonImmutable;
 use Modules\Credits\Actions\ConsumeCredits;
+use Modules\Credits\Actions\CorrectSettlement;
 use Modules\Credits\Actions\ExtendCredits;
 use Modules\Credits\Actions\GrantCredits;
 use Modules\Credits\Actions\OpenCreditAccount;
@@ -26,6 +27,7 @@ final class CreditsService implements CreditsApi
         private readonly ConsumeCredits $consume,
         private readonly ReleaseCredits $release,
         private readonly ExtendCredits $extend,
+        private readonly CorrectSettlement $correct,
     ) {}
 
     public function openAccount(string $studentId, string $scopeType, ?string $scopeId, ?int $lowBalanceMin = null): string
@@ -66,6 +68,16 @@ final class CreditsService implements CreditsApi
     public function isReserved(string $sessionId): bool
     {
         return CreditReservation::query()->where('session_id', $sessionId)->where('status', 'held')->exists();
+    }
+
+    public function settledAs(string $sessionId): ?string
+    {
+        return CorrectSettlement::settledAs(CreditReservation::query()->where('session_id', $sessionId)->first());
+    }
+
+    public function correct(string $sessionId, string $effect, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): int
+    {
+        return $this->correct->handle($sessionId, $effect, $actorId, $reason, $makeupDays);
     }
 
     public function balance(string $accountId): CreditBalance

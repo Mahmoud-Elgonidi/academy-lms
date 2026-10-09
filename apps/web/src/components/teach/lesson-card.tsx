@@ -1,5 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { DisputeLesson } from '@/components/dispute-lesson';
+import { DisputeState } from '@/components/dispute-state';
 import { Icon } from '@/components/icons';
 import { Badge, buttonLook, join, type Tone } from '@/components/ui';
 import type { Lesson } from '@/lib/teach/types';
@@ -14,7 +16,7 @@ const statusTone: Record<string, Tone> = {
   cancelled: 'danger',
 };
 
-/** One lesson: when (on the teacher's clock, as the API wrote it), with whom, where it stands, and the way in. */
+/** One lesson: when (on the teacher's clock, as the API wrote it), with whom, where it stands, the way in, and a dispute of its outcome. */
 export async function LessonCard({ lesson, featured = false }: { lesson: Lesson; featured?: boolean }) {
   const t = await getTranslations('teach');
   const cancelled = lesson.status === 'cancelled';
@@ -49,6 +51,16 @@ export async function LessonCard({ lesson, featured = false }: { lesson: Lesson;
         </Link>
       ) : lesson.status === 'scheduled' && lesson.join.opens_at && featured ? (
         <p className="w-full text-sm text-muted sm:w-auto">{t('opensAt', { time: clock(lesson.join.opens_at) })}</p>
+      ) : null}
+      {lesson.dispute ? (
+        <div className="w-full">
+          <DisputeState dispute={lesson.dispute} />
+        </div>
+      ) : null}
+      {lesson.can_dispute ? (
+        <div className="w-full border-t border-line pt-3">
+          <DisputeLesson id={lesson.id} side="teacher" reasons={lesson.dispute_reasons} />
+        </div>
       ) : null}
     </article>
   );

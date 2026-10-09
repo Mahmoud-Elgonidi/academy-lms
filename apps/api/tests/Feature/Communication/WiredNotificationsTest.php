@@ -99,7 +99,7 @@ it('tells the family and the teacher about a cancellation or a move, but not who
         ->and(inbox($this->teacher))->toContain('scheduling.session_moved_teacher');
 });
 
-it('reminds a day and an hour before, and says "join now" three minutes in, once each', function () {
+it('reminds a day, an hour and ten minutes before, and says "join now" three minutes in, once each', function () {
     $session = ($this->first)();
 
     // Unpaid: no day-before reminder (the lesson is about to be cancelled under rule 16).
@@ -112,6 +112,13 @@ it('reminds a day and an hour before, and says "join now" three minutes in, once
     app(SendLessonReminders::class)->handle($session->starts_at->subMinutes(58));
     expect(array_count_values(inbox($this->guardian)))->toMatchArray(['scheduling.reminder_day' => 1, 'scheduling.reminder_hour' => 1])
         ->and(inbox($this->teacher))->toBe(['scheduling.reminder_hour_teacher']);
+
+    // Ten minutes before, as the classroom opens: each one's way in, once.
+    app(SendLessonReminders::class)->handle($session->starts_at->subMinutes(10));
+    app(SendLessonReminders::class)->handle($session->starts_at->subMinutes(9));
+    expect(array_count_values(inbox($this->guardian)))->toMatchArray(['scheduling.reminder_hour' => 1, 'scheduling.reminder_soon' => 1])
+        ->and(array_count_values(inbox($this->teacher)))->toBe(['scheduling.reminder_hour_teacher' => 1, 'scheduling.reminder_soon_teacher' => 1])
+        ->and(Notification::query()->where('user_id', $this->guardian->id)->where('template_key', 'scheduling.reminder_soon')->value('body'))->toContain('/class/');
 
     app(RecordParticipantJoin::class)->handle($session->refresh(), $this->teacher->id, $session->starts_at);
     app(SendLessonReminders::class)->handle($session->starts_at->addMinutes(2));

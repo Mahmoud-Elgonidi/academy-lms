@@ -11,6 +11,7 @@ import '../../../schedule/domain/lesson.dart';
 import '../../../schedule/presentation/widgets/lesson_card.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
+import '../widgets/dispute_lesson.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../core/realtime/live.dart';
 
@@ -99,7 +100,13 @@ class _Days extends StatelessWidget {
                     padding: const EdgeInsetsDirectional.only(start: 4, bottom: 10),
                     child: Text(l.noLessonsDay, style: Theme.of(context).textTheme.bodySmall),
                   ),
-                for (final lesson in lessons) ...[LessonCard(lesson: lesson), const SizedBox(height: 10)],
+                for (final lesson in lessons) ...[
+                  LessonCard(
+                    lesson: lesson,
+                    onDispute: teacherDispute(context, lesson, () => context.read<LoadCubit<TeacherLessons>>().load()),
+                  ),
+                  const SizedBox(height: 10),
+                ],
               ];
             }(),
       ]),

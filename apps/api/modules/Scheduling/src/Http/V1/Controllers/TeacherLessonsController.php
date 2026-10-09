@@ -6,19 +6,24 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
+use Modules\Scheduling\Actions\Disputes\DisputeLesson;
 use Modules\Scheduling\Actions\TimeOff\RequestTimeOff;
 use Modules\Scheduling\Actions\TimeOff\WithdrawTimeOff;
 use Modules\Scheduling\Domain\Enums\TimeOffStatus;
 use Modules\Scheduling\Domain\Models\AcademyHoliday;
+use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\TeacherTimeOff;
 use Modules\Scheduling\Filament\TimeOffView;
+use Modules\Scheduling\Http\V1\Requests\DisputeLessonRequest;
 use Modules\Scheduling\Http\V1\Requests\TimeOffRequest;
 use Modules\Scheduling\Http\V1\Resources\LessonPresenter;
 use Modules\Scheduling\Queries\LessonList;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/** The teacher app: my lessons day by day, and my time off (ask, see the answer, withdraw). */
+/** The teacher app: my lessons day by day (and disputing what one was recorded as), and my time off (ask, see the answer, withdraw). */
 final class TeacherLessonsController
 {
     public function __construct(private readonly LocalTimePresenter $time) {}
@@ -46,6 +51,27 @@ final class TeacherLessonsController
             'minutes' => (int) array_sum(array_map(fn (object $r) => $r->starts_at->diffInMinutes($r->ends_at), $held)),
             'data' => array_map(fn (object $r) => $present->lesson($r, $now, 'student'), $rows),
         ]);
+    }
+
+    /**
+     * Dispute a lesson's outcome.
+     *
+     * Within 48 hours of the end of my lesson recorded as held or missed (can_dispute), once per lesson: it goes back
+     * under review and the academy answers (the lesson's dispute). Send an Idempotency-Key.
+     *
+     * @throws NotFoundHttpException not my lesson
+     */
+    public function dispute(DisputeLessonRequest $request, string $session, DisputeLesson $dispute, LessonList $lessons, LessonPresenter $present): JsonResponse
+    {
+        $me = (string) $request->user()?->getAuthIdentifier();
+        $lesson = Str::isUuid($session) ? Session::query()->where('teacher_id', $me)->find($session) : null;
+        if ($lesson === null) {
+            throw new NotFoundHttpException;
+        }
+        $dispute->handle($lesson, 'teacher', $me, (string) $request->string('reason'), (string) $request->string('note'));
+        $row = collect($lessons->forTeacher($me, $lesson->starts_at, $lesson->starts_at->addSecond()))->firstWhere('id', $lesson->id);
+
+        return response()->json(['data' => $present->lesson($row, CarbonImmutable::now(), 'student')]);
     }
 
     /** My time off: requests of the last two months and every one still waiting, with the academy's holidays. */

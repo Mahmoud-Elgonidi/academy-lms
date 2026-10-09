@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/time/local_time.dart';
 import '../../homework/domain/homework.dart';
+import '../../schedule/domain/lesson.dart';
 import '../domain/reports.dart';
 import '../domain/shifts.dart';
 import '../domain/teaching.dart';
@@ -16,6 +17,12 @@ class TeachingRepository {
   /// [from] a day on the teacher's calendar (default today), for [days] days.
   Future<TeacherLessons> lessons({DateTime? from, int days = 7}) async => TeacherLessons.fromJson(
     await _api.get('teacher/lessons', query: {if (from != null) 'from': DateFormat('yyyy-MM-dd').format(from), 'days': days}),
+  );
+
+  /// Disputes what one of my lessons was recorded as; it comes back under review, with the dispute.
+  Future<Lesson> dispute(String lessonId, {required String reason, required String note}) async => Lesson.fromJson(
+    (await _api.post('teacher/lessons/$lessonId/dispute', idempotent: true, body: {'reason': reason, 'note': note.trim()}))['data']
+        as Map<String, dynamic>,
   );
 
   Future<List<TeacherStudent>> students() async => [

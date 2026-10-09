@@ -41,6 +41,16 @@ interface CreditsApi
 
     public function isReserved(string $sessionId): bool;
 
+    /** How a session's credit was settled (consumed, makeup, refund); null while held, or with no reservation. */
+    public function settledAs(string $sessionId): ?string;
+
+    /**
+     * A session decided again (a review, a dispute): its settled credit moves to $effect (consumed or makeup) with
+     * new entries. Returns the minutes that could not be taken back (makeup credit already used). No-op without a
+     * reservation or when nothing changes.
+     */
+    public function correct(string $sessionId, string $effect, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): int;
+
     public function balance(string $accountId): CreditBalance;
 
     /**

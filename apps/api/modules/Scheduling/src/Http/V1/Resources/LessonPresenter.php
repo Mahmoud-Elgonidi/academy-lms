@@ -3,6 +3,7 @@
 namespace Modules\Scheduling\Http\V1\Resources;
 
 use Carbon\CarbonImmutable;
+use Modules\Scheduling\Domain\Disputes\DisputeRules;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 
 /**
@@ -16,7 +17,7 @@ final class LessonPresenter
 
     /**
      * @param  'teacher'|'student'  $counterpart  whom the lesson is with, as the viewer sees it
-     * @param  bool  $mayAct  the viewer may cancel or refuse (not a child in the kids' look, not a teacher)
+     * @param  bool  $mayAct  the viewer may cancel or refuse (not a child in the kids' look, not a teacher); a teacher may still dispute
      * @return array<string, mixed>
      */
     public function lesson(object $r, CarbonImmutable $now, string $counterpart = 'teacher', bool $mayAct = false): array
@@ -28,6 +29,10 @@ final class LessonPresenter
             && $now->lessThanOrEqualTo($r->ends_at->addMinutes((int) config('classroom.closes_after_min', 10)));
         $ahead = $r->status === 'scheduled' && $r->starts_at->greaterThan($now);
         $substitute = $r->original_teacher ?? null;
+        // A dispute is shown to the side that raised it; the other side sees only the outcome it led to.
+        $side = $counterpart === 'teacher' ? 'family' : 'teacher';
+        $dispute = ($mayAct || $side === 'teacher') && ($r->dispute_side ?? null) === $side ? $r : null;
+        $canDispute = ($mayAct || $side === 'teacher') && ($r->dispute_status ?? null) === null && DisputeRules::open($r->status, $r->ends_at, $now);
 
         return [
             'id' => $r->id,
@@ -57,6 +62,19 @@ final class LessonPresenter
             /** Why the academy cancelled it (a holiday, the teacher's leave), when it did. */
             'cancelled_because' => $r->status === 'cancelled' && in_array($r->cancel_reason ?? null, ['holiday', 'teacher_leave', 'substitute_refused'], true)
                 ? __('scheduling::timeoff.family.why.'.$r->cancel_reason) : null,
+            /** The viewer's own dispute of this lesson's outcome, and the academy's answer once decided. */
+            'dispute' => $dispute === null ? null : [
+                /** open, upheld, rejected */
+                'status' => $dispute->dispute_status,
+                'status_label' => __('scheduling::disputes.statuses.'.$dispute->dispute_status),
+                'reason' => __("scheduling::disputes.reasons.{$side}.{$dispute->dispute_reason}"),
+                'answer' => $dispute->dispute_status === 'open' ? null : $dispute->dispute_answer,
+            ],
+            /** Decided and within 48 hours of its end: POST …/lessons/{id}/dispute with one of dispute_reasons and a note. */
+            'can_dispute' => $canDispute,
+            'dispute_until' => $canDispute ? $this->time->present(DisputeRules::closesAt($r->ends_at)) : null,
+            /** The reasons that fit what the lesson was, each with its label. */
+            'dispute_reasons' => $canDispute ? array_map(fn (string $k) => ['key' => $k, 'label' => __("scheduling::disputes.reasons.{$side}.{$k}")], DisputeRules::reasons($side, $r->status)) : [],
         ];
     }
 }

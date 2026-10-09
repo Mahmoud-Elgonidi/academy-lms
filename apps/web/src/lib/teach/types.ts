@@ -25,7 +25,16 @@ export type Lesson = {
   join: { open: boolean; opens_at: LocalTime | null };
   substitute_for: string | null;
   cancelled_because: string | null;
+  /** The viewer's own dispute of what the lesson was recorded as. */
+  dispute: LessonDispute | null;
+  /** Within 48 hours of a lesson recorded as held or missed: dispute it with one of dispute_reasons. */
+  can_dispute: boolean;
+  dispute_until: LocalTime | null;
+  dispute_reasons: { key: string; label: string }[];
 };
+
+/** open, upheld (the outcome changed) or rejected; the academy's answer once decided. */
+export type LessonDispute = { status: 'open' | 'upheld' | 'rejected'; status_label: string; reason: string; answer: string | null };
 
 /** GET teacher/lessons: days on the teacher's calendar. */
 export type LessonDays = { from: string; to: string; count: number; minutes: number; data: Lesson[] };

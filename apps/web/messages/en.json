@@ -670,5 +670,19 @@
       "failed": "Linking did not finish. Try again.",
       "off": "Linking is not available right now."
     }
+  },
+  "dispute": {
+    "button": "Dispute",
+    "title": "Dispute this lesson's outcome",
+    "introFamily": "If the lesson was recorded wrongly, tell us what happened within 48 hours of its end. The academy checks the classroom's attendance and answers you.",
+    "introTeacher": "If the lesson was recorded wrongly, tell us what happened within 48 hours of its end. The academy checks the classroom's attendance and answers you.",
+    "reason": "What happened?",
+    "note": "Details",
+    "noteHint": "Only the academy reads this.",
+    "fillIn": "Pick a reason and say what happened.",
+    "send": "Send the dispute",
+    "sent": "Your dispute reached the academy; the lesson is under review.",
+    "state": "Dispute: {status}",
+    "answer": "The academy's answer: {answer}"
   }
 }

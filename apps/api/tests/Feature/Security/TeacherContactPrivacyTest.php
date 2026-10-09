@@ -35,7 +35,8 @@ it('never shows a teacher a family\'s email or phone number', function () {
 
     $demo = Academy::query()->findOrFail($academy)->toTenantRef();
     $this->actAsTenant($demo);
-    $teachers = User::query()->whereHas('roleRecords', fn ($q) => $q->where('role', 'teacher'))->get();
+    // With their roles, as a signed-in request has them: the /teach pages open for real (a lazy load would be a 500, not a page).
+    $teachers = User::query()->with('roleRecords')->whereHas('roleRecords', fn ($q) => $q->where('role', 'teacher'))->get();
     $this->clearTenant();
     $apiRoutes = collect(Route::getRoutes()->getRoutes())
         ->filter(fn ($r) => in_array('GET', $r->methods(), true) && str_starts_with($r->uri(), 'api/v1/') && ! str_starts_with($r->uri(), 'api/v1/family/'));
@@ -44,6 +45,7 @@ it('never shows a teacher a family\'s email or phone number', function () {
 
     $seen = 0;
     $leaks = [];
+    $failed = [];
     foreach ($teachers as $teacher) {
         $one = fn (string $table, string $column = 'teacher_id') => $db->table($table)->where('academy_id', $academy)->where($column, $teacher->id)->orderByDesc('created_at')->value('id');
         $session = $db->table('sessions')->where('academy_id', $academy)->where('teacher_id', $teacher->id)->orderByRaw("status = 'completed' desc")->orderByDesc('starts_at')->value('id');
@@ -90,6 +92,9 @@ it('never shows a teacher a family\'s email or phone number', function () {
             $this->flushSession();
             $response = $this->actingAs($teacher, 'web')->get('http://demo.lms.test/'.$url);
             $seen += $response->isSuccessful() ? 1 : 0;
+            if ($response->getStatusCode() >= 500) {
+                $failed[] = "{$teacher->email}: GET /{$page} answered {$response->getStatusCode()}";
+            }
             foreach ($secrets as $secret) {
                 if (str_contains((string) $response->getContent(), $secret)) {
                     $leaks[] = "{$teacher->email}: GET /{$page} shows {$secret}";
@@ -110,6 +115,7 @@ it('never shows a teacher a family\'s email or phone number', function () {
     expect($teachers->count())->toBeGreaterThan(2)
         ->and($seen)->toBeGreaterThan(100)
         ->and(array_values(array_unique($leaks)))->toBe([])
+        ->and($failed)->toBe([])
         ->and($control->getStatusCode())->toBe(200)
         ->and((string) $control->getContent())->toContain($lead->phone_e164);
 });

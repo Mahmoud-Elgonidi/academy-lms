@@ -23,6 +23,7 @@ return [
         'session' => [
             'cancel_waived' => 'إلغاء حصة باستثناء من السياسة',
             'review_resolved' => 'حسم حصة تحت المراجعة: :outcome',
+            'disputed' => 'اعتراض :side على نتيجة حصة',
         ],
         'shift' => [
             'approved_override' => 'اعتماد شفتات من غير موافقة المدرس: :reason',
@@ -98,6 +99,7 @@ return [
         'how' => ['exit' => 'خرج بنفسه', 'expired' => 'الوقت خلص', 'ended' => 'اتقفل من لوحة المنصة'],
         'recording' => ['off' => 'مفيش تسجيل', 'manual' => 'المدرس يبدأه', 'auto' => 'كل حصة لوحدها'],
         'media' => ['by_age' => 'حسب السن', 'video' => 'فيديو', 'audio' => 'صوت بس'],
+        'side' => ['family' => 'الأسرة', 'teacher' => 'المدرس'],
     ],
     'groups' => [
         'billing' => 'الفلوس',

@@ -1,0 +1,88 @@
+<?php
+
+// Disputes over a lesson's outcome (docs/architecture/01, section 8): the family or the teacher, the academy decides.
+return [
+    'nav' => 'Disputes',
+    'title' => 'Lesson disputes',
+    'sides' => ['family' => 'Family', 'teacher' => 'Teacher'],
+    'statuses' => ['open' => 'Waiting for a decision', 'upheld' => 'Upheld', 'rejected' => 'Rejected'],
+    'reasons' => [
+        'family' => [
+            'teacher_absent' => 'The teacher did not come',
+            'cut_short' => 'The lesson ended early',
+            'student_attended' => 'The student was there',
+            'technical' => 'A technical problem not on our side',
+            'other' => 'Something else',
+        ],
+        'teacher' => [
+            'teacher_attended' => 'I was there',
+            'student_absent' => 'The student did not come',
+            'technical' => 'A technical problem not on my side',
+            'other' => 'Something else',
+        ],
+    ],
+    'outcomes' => [
+        'completed' => 'Held',
+        'student_absent' => 'Student absent',
+        'teacher_absent' => 'Teacher absent',
+        'needs_review' => 'Under review',
+        'cancelled' => 'Cancelled with a makeup',
+    ],
+    'form' => [
+        'button' => 'Dispute',
+        'heading' => 'Dispute this lesson\'s outcome',
+        'description' => [
+            'family' => 'The lesson is recorded as ":outcome". If that is not what happened, tell us within :hours hours of its end; the academy checks the classroom\'s attendance and answers you.',
+            'teacher' => 'The lesson is recorded as ":outcome". If that is not what happened, tell us within :hours hours of its end; the academy checks the classroom\'s attendance and answers you.',
+        ],
+        'reason' => 'What happened?',
+        'note' => 'Details',
+        'note_hint' => [
+            'family' => 'Say exactly what happened; only the academy reads it.',
+            'teacher' => 'Say exactly what happened; only the academy reads it.',
+        ],
+        'submit' => 'Send the dispute',
+        'sent' => 'Your dispute reached the academy',
+        'sent_body' => 'The lesson is under review; the answer comes here and in your notifications.',
+        'state' => 'Dispute: :status',
+        'answer' => 'The academy\'s answer: :answer',
+    ],
+    'page' => [
+        'subtitle' => 'The family or the teacher can dispute a lesson\'s outcome within :hours hours of its end. The lesson waits for your decision; credit and pay follow it.',
+        'groups' => ['open' => 'Waiting for a decision', 'decided' => 'Decided in the last 30 days'],
+        'empty' => ['open' => 'No disputes waiting.', 'decided' => 'No disputes decided in the last month.'],
+        'recorded_as' => 'Recorded as ":outcome"',
+        'roles' => ['teacher' => 'Teacher in the room', 'student' => 'Student in the room'],
+        'never_came' => 'Never came in',
+        'was_there' => ':minutes of :of min · came in at :at',
+        'late' => ' · :late min late',
+        'decided' => 'Now ":after" · :by · :at',
+        'calendar' => 'Lesson on the calendar',
+    ],
+    'decide' => [
+        'action' => 'Decide',
+        'heading' => 'Decide the dispute on :student\'s lesson',
+        'context' => 'From the :side: :reason. The lesson is recorded as ":before".',
+        'outcome' => 'What was the lesson after all?',
+        'effects' => [
+            'completed' => 'The minutes are used and the teacher is paid in full.',
+            'teacher_absent' => 'The minutes go back to the family as makeup credit; the teacher is not paid.',
+            'student_absent' => 'The minutes are used; the teacher gets the policy\'s share for an absence.',
+            'cancelled_makeup' => 'The lesson is cancelled and the minutes come back as makeup credit.',
+        ],
+        'answer' => 'Answer to whoever disputed',
+        'answer_hint' => 'They receive it and see it next to the lesson. Say briefly what you found.',
+        'submit' => 'Decide and send the answer',
+        'done' => ['upheld' => 'Dispute upheld; the lesson was corrected.', 'rejected' => 'The lesson stays as it was; the answer was sent.'],
+        'short' => ':minutes minutes of the makeup had already been booked before the decision, so the family keeps them.',
+    ],
+    'errors' => [
+        'reason' => 'Choose a reason that fits the lesson\'s outcome.',
+        'note' => 'Say what happened (up to :max characters).',
+        'closed' => 'A lesson can be disputed once it is decided, within :hours hours of its end.',
+        'already' => 'This lesson has already been disputed.',
+        'not_yours' => 'You cannot dispute this lesson.',
+        'answer' => 'Write the academy\'s answer; whoever disputed will read it.',
+        'decided' => 'This dispute is already decided.',
+    ],
+];

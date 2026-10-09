@@ -14,6 +14,7 @@ import '../../../dashboard/presentation/widgets/next_lesson_card.dart';
 import '../../../schedule/presentation/widgets/lesson_card.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
+import '../widgets/dispute_lesson.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../../../core/realtime/live.dart';
@@ -96,7 +97,10 @@ class _TodayList extends StatelessWidget {
           NextLessonCard(lesson: next, onOpened: () => context.read<LoadCubit<_Today>>().load()),
           const SizedBox(height: 16),
         ],
-        for (final lesson in lessons.where((x) => x.id != next?.id)) ...[LessonCard(lesson: lesson), const SizedBox(height: 10)],
+        for (final lesson in lessons.where((x) => x.id != next?.id)) ...[
+          LessonCard(lesson: lesson, onDispute: teacherDispute(context, lesson, () => context.read<LoadCubit<_Today>>().load())),
+          const SizedBox(height: 10),
+        ],
         if (todo != null && (todo.reports > 0 || todo.homework > 0)) ...[
           const SizedBox(height: 6),
           Row(

@@ -368,6 +368,46 @@
     }
   },
   "cancelLesson": "إلغاء الحصة",
+  "disputeLesson": "اعترض",
+  "disputeTitle": "اعتراض على نتيجة الحصة",
+  "disputeIntroFamily": "الحصة متسجلة \"{outcome}\". لو ده مش اللي حصل، قولولنا خلال 48 ساعة من آخرها، والأكاديمية هتراجع حضور الفصل وترد عليكم.",
+  "@disputeIntroFamily": {
+    "placeholders": {
+      "outcome": {
+        "type": "String"
+      }
+    }
+  },
+  "disputeIntroTeacher": "الحصة متسجلة \"{outcome}\". لو ده مش اللي حصل، قولنا خلال 48 ساعة من آخرها، والأكاديمية هتراجع حضور الفصل وترد عليك.",
+  "@disputeIntroTeacher": {
+    "placeholders": {
+      "outcome": {
+        "type": "String"
+      }
+    }
+  },
+  "disputeWhat": "إيه اللي حصل؟",
+  "disputeNote": "التفاصيل",
+  "disputeNoteHint": "الأكاديمية بس اللي هتقرا ده.",
+  "disputeFillIn": "اختار السبب واكتب اللي حصل.",
+  "disputeSend": "ابعت الاعتراض",
+  "disputeSent": "الاعتراض وصل، والحصة تحت المراجعة.",
+  "disputeState": "الاعتراض: {status}",
+  "@disputeState": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "disputeAnswer": "رد الأكاديمية: {answer}",
+  "@disputeAnswer": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
   "cancelTitle": "تلغي حصة {day}؟",
   "@cancelTitle": {
     "placeholders": {

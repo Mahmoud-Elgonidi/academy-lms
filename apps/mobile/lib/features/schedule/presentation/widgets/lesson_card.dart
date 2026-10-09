@@ -11,12 +11,15 @@ import '../../domain/lesson.dart';
 /// its state, and what can be done now (join, cancel, turn down a
 /// substitute, rate).
 class LessonCard extends StatelessWidget {
-  const LessonCard({required this.lesson, this.onCancel, this.onRefuse, this.onRate, this.highlight = false, super.key});
+  const LessonCard({required this.lesson, this.onCancel, this.onRefuse, this.onRate, this.onDispute, this.highlight = false, super.key});
 
   final Lesson lesson;
   final VoidCallback? onCancel;
   final VoidCallback? onRefuse;
   final VoidCallback? onRate;
+
+  /// Disputing what the lesson was recorded as (the family's or the teacher's own sheet).
+  final VoidCallback? onDispute;
   final bool highlight;
 
   @override
@@ -88,6 +91,14 @@ class LessonCard extends StatelessWidget {
             Note(l.substituteFor(l0.substituteFor!), tone: Tone.attention, icon: Icons.swap_horiz_rounded),
           ],
           if (l0.cancelledBecause != null) ...[const SizedBox(height: 10), Text(l0.cancelledBecause!, style: context.text.bodySmall)],
+          if (l0.dispute case final d?) ...[
+            const SizedBox(height: 10),
+            Note(
+              [l.disputeState(d.statusLabel), if (d.answer != null) l.disputeAnswer(d.answer!)].join('\n'),
+              tone: d.open ? Tone.attention : (d.status == 'upheld' ? Tone.brand : Tone.neutral),
+              icon: Icons.gavel_rounded,
+            ),
+          ],
           if (l0.joinOpen) ...[
             const SizedBox(height: 12),
             SizedBox(
@@ -102,7 +113,7 @@ class LessonCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(l.joinOpensAt(l0.joinOpensAt!.clock(locale)), style: context.text.bodySmall),
           ],
-          if (onCancel != null || onRefuse != null || onRate != null) ...[
+          if (onCancel != null || onRefuse != null || onRate != null || onDispute != null) ...[
             const SizedBox(height: 6),
             Wrap(
               spacing: 4,
@@ -110,6 +121,8 @@ class LessonCard extends StatelessWidget {
                 if (onRate != null)
                   TextButton.icon(onPressed: onRate, icon: const Icon(Icons.star_outline_rounded), label: Text(l.rateLesson)),
                 if (onRefuse != null) TextButton(onPressed: onRefuse, child: Text(l.refuseSubstitute)),
+                if (onDispute != null)
+                  TextButton.icon(onPressed: onDispute, icon: const Icon(Icons.gavel_rounded), label: Text(l.disputeLesson)),
                 if (onCancel != null)
                   TextButton(
                     style: TextButton.styleFrom(foregroundColor: c.dangerInk),

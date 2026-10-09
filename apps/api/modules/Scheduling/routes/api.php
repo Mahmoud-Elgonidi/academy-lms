@@ -17,6 +17,7 @@ Route::middleware(['auth:sanctum', 'can:shifts.propose-own'])->prefix('teacher/s
 // The teacher's lessons, and their time off.
 Route::middleware('auth:sanctum')->prefix('teacher')->group(function () {
     Route::get('lessons', [TeacherLessonsController::class, 'lessons'])->name('teacher.lessons');
+    Route::post('lessons/{session}/dispute', [TeacherLessonsController::class, 'dispute'])->middleware('idempotent')->name('teacher.lessons.dispute');
     Route::middleware('can:time-off.request-own')->group(function () {
         Route::get('time-off', [TeacherLessonsController::class, 'timeOff'])->name('teacher.time-off');
         Route::post('time-off', [TeacherLessonsController::class, 'requestTimeOff'])->middleware('idempotent')->name('teacher.time-off.request');
@@ -24,10 +25,11 @@ Route::middleware('auth:sanctum')->prefix('teacher')->group(function () {
     });
 });
 
-// Students and guardians: a learner's lessons, cancelling one under the policy, turning down a substitute.
+// Students and guardians: a learner's lessons, cancelling one under the policy, turning down a substitute, disputing an outcome.
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('family/lessons', [FamilyLessonsController::class, 'index'])->name('family.lessons');
     Route::get('lessons/{session}/cancellation', [FamilyLessonsController::class, 'cancellation'])->name('lessons.cancellation');
     Route::post('lessons/{session}/cancel', [FamilyLessonsController::class, 'cancel'])->middleware('idempotent')->name('lessons.cancel');
     Route::post('lessons/{session}/refuse-substitute', [FamilyLessonsController::class, 'refuseSubstitute'])->middleware('idempotent')->name('lessons.refuse-substitute');
+    Route::post('lessons/{session}/dispute', [FamilyLessonsController::class, 'dispute'])->middleware('idempotent')->name('lessons.dispute');
 });

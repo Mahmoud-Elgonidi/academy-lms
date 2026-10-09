@@ -9,12 +9,15 @@ export function seesMoney(stage: Stage): boolean {
   return stage === 'classic';
 }
 
-/** Whether a lesson offers this person anything to do: cancel, turn down the substitute, or rate it once it took place. */
-export function lessonActionsFor(lesson: { status: string; can_cancel: boolean; can_refuse_substitute: boolean }, stage: Stage): { cancel: boolean; refuse: boolean; rate: boolean } | null {
+/** Whether a lesson offers this person anything to do: cancel, turn down the substitute, rate it once it took place, or dispute what it was recorded as. */
+export function lessonActionsFor(
+  lesson: { status: string; can_cancel: boolean; can_refuse_substitute: boolean; can_dispute?: boolean },
+  stage: Stage,
+): { cancel: boolean; refuse: boolean; rate: boolean; dispute: boolean } | null {
   if (!canAct(stage)) return null;
   const rate = lesson.status === 'completed' || lesson.status === 'student_absent';
-  const found = { cancel: lesson.can_cancel, refuse: lesson.can_refuse_substitute, rate };
-  return found.cancel || found.refuse || found.rate ? found : null;
+  const found = { cancel: lesson.can_cancel, refuse: lesson.can_refuse_substitute, rate, dispute: lesson.can_dispute === true };
+  return found.cancel || found.refuse || found.rate || found.dispute ? found : null;
 }
 
 /** A guardian follows at least one child (not only themself): their children's privacy is theirs to answer. */

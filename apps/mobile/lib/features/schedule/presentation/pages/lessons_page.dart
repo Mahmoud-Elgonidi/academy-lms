@@ -131,6 +131,21 @@ class _LessonDays extends StatelessWidget {
                       if (await refuseSubstitute(context, lesson) && context.mounted) await reload();
                     }
                   : null,
+              onDispute: lesson.canDispute && context.shape.stage != Stage.kids
+                  ? () async {
+                      final repo = context.read<LessonsRepository>();
+                      final sent = await showDisputeSheet(
+                        context,
+                        lesson,
+                        teacher: false,
+                        send: (reason, note) => repo.dispute(lesson.id, reason: reason, note: note),
+                      );
+                      if (sent && context.mounted) {
+                        showSnack(context, l.disputeSent);
+                        await reload();
+                      }
+                    }
+                  : null,
               onRate: past && lesson.tookPlace && context.shape.stage != Stage.kids
                   ? () async {
                       if (await showRateSheet(context, lesson) && context.mounted) showSnack(context, l.rated);

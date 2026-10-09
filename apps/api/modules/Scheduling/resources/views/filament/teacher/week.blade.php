@@ -23,7 +23,7 @@
         <h2 class="fl-h2">{{ $day['label'] }}</h2>
         <div class="fl-list lms-stagger">
             @foreach ($day['lessons'] as $lesson)
-                @include('scheduling::filament.family.lesson-card', ['lesson' => $lesson])
+                @include('scheduling::filament.family.lesson-card', ['lesson' => $lesson, 'dispute' => $this->disputeAction])
             @endforeach
         </div>
     @empty

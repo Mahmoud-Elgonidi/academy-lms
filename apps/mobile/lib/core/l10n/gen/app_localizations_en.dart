@@ -518,6 +518,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelLesson => 'Cancel the lesson';
 
   @override
+  String get disputeLesson => 'Dispute';
+
+  @override
+  String get disputeTitle => 'Dispute this lesson\'s outcome';
+
+  @override
+  String disputeIntroFamily(String outcome) {
+    return 'The lesson is recorded as \"$outcome\". If that is not what happened, tell us within 48 hours of its end; the academy checks the attendance and answers you.';
+  }
+
+  @override
+  String disputeIntroTeacher(String outcome) {
+    return 'The lesson is recorded as \"$outcome\". If that is not what happened, tell us within 48 hours of its end; the academy checks the attendance and answers you.';
+  }
+
+  @override
+  String get disputeWhat => 'What happened?';
+
+  @override
+  String get disputeNote => 'Details';
+
+  @override
+  String get disputeNoteHint => 'Only the academy reads this.';
+
+  @override
+  String get disputeFillIn => 'Pick a reason and say what happened.';
+
+  @override
+  String get disputeSend => 'Send the dispute';
+
+  @override
+  String get disputeSent => 'Your dispute reached the academy; the lesson is under review.';
+
+  @override
+  String disputeState(String status) {
+    return 'Dispute: $status';
+  }
+
+  @override
+  String disputeAnswer(String answer) {
+    return 'The academy\'s answer: $answer';
+  }
+
+  @override
   String cancelTitle(String day) {
     return 'Cancel the lesson on $day?';
   }

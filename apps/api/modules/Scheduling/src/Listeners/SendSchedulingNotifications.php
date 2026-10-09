@@ -15,6 +15,8 @@ use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Contracts\Events\DstShiftDecided;
 use Modules\Scheduling\Contracts\Events\DstShiftUpcoming;
 use Modules\Scheduling\Contracts\Events\HolidayDeclared;
+use Modules\Scheduling\Contracts\Events\LessonDisputed;
+use Modules\Scheduling\Contracts\Events\LessonDisputeDecided;
 use Modules\Scheduling\Contracts\Events\SessionCancelled;
 use Modules\Scheduling\Contracts\Events\SessionRescheduled;
 use Modules\Scheduling\Contracts\Events\SessionTeacherSubstituted;
@@ -30,6 +32,7 @@ use Modules\Scheduling\Contracts\Events\TimeOffRequested;
 use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
 use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Domain\Models\Session;
+use Modules\Scheduling\Domain\Models\SessionDispute;
 use Modules\Scheduling\Domain\Models\ShiftNotice;
 use Modules\Scheduling\Domain\Models\TeacherTimeOff;
 use Modules\Scheduling\Queries\SessionPeople;
@@ -60,6 +63,8 @@ final class SendSchedulingNotifications
             ['reminder_day', 'lessons', $a.'family', ['push', 'email'], $lesson],
             ['reminder_hour', 'lessons', $a.'family', ['push', 'whatsapp'], $lesson + $link],
             ['reminder_hour_teacher', 'staff', $a.'teacher', ['push'], $lesson + $link],
+            ['reminder_soon', 'lessons', $a.'family', ['push'], $lesson + $link],
+            ['reminder_soon_teacher', 'staff', $a.'teacher', ['push'], $lesson + $link],
             ['join_now', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson + $link],
             ['teacher_join_now', 'staff', $a.'teacher', ['whatsapp', 'push'], $lesson + $link],
             ['teacher_late', 'staff', $a.'supervisors', ['push'], $lesson],
@@ -84,6 +89,11 @@ final class SendSchedulingNotifications
             ['lessons_shifted_family_open', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 19:00', 'zone' => 'الرياض', 'from' => 'الأحد 1 نوفمبر']],
             ['lessons_shifted_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 19:00', 'from' => 'الأحد 1 نوفمبر', 'until' => 'السبت 28 نوفمبر', 'why' => '']],
             ['lessons_shifted_teacher_open', 'staff', $a.'teacher', ['push', 'whatsapp'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 19:00', 'from' => 'الأحد 1 نوفمبر', 'why' => '']],
+            ['dispute_opened', 'staff', $a.'session_managers', ['push', 'email'], $lesson + ['side' => 'الأسرة', 'reason' => 'المدرس ما حضرش', 'before' => 'اتعملت']],
+            ['dispute_decided', 'lessons', $a.'family', ['push', 'whatsapp'], $lesson + ['outcome' => 'الاعتراض اتقبل.', 'after' => 'غياب المدرس', 'answer' => 'راجعنا الحضور، وليكم حصة تعويض.']],
+            ['dispute_decided_teacher', 'staff', $a.'teacher', ['push'], $lesson + ['outcome' => 'الاعتراض اتقبل.', 'after' => 'اتعملت', 'answer' => 'راجعنا الحضور واتسجلت لك.']],
+            ['lesson_corrected', 'lessons', $a.'family', ['push'], $lesson + ['after' => 'اتعملت']],
+            ['lesson_corrected_teacher', 'staff', $a.'teacher', ['push'], $lesson + ['after' => 'غياب المدرس']],
             ['teacher_lessons_shifted', 'staff', $a.'teacher', ['push', 'whatsapp', 'email'], ['from' => 'الأحد 1 نوفمبر', 'until' => 'السبت 28 نوفمبر', 'shift' => 'ساعة متأخر', 'count' => '12']],
         ] as [$name, $category, $audience, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
@@ -111,6 +121,46 @@ final class SendSchedulingNotifications
 
         $this->notifications->send(new Message('scheduling.session_cancelled', $this->without($s['family'], $event->actorId), $data, $action, "cancelled:{$s['session_id']}"));
         $this->notifications->send(new Message('scheduling.session_cancelled_teacher', $this->without([$s['teacher_id']], $event->actorId), $data, $action, "cancelled:{$s['session_id']}"));
+    }
+
+    /** A family or a teacher disputed a lesson: whoever manages lessons decides it. */
+    public function disputed(LessonDisputed $event): void
+    {
+        $s = $this->sessions->of($event->sessionId);
+        $dispute = SessionDispute::query()->find($event->disputeId);
+        if ($s === null || $dispute === null) {
+            return;
+        }
+
+        $this->notifications->send(new Message('scheduling.dispute_opened', $this->without($this->identity->usersWithAbility(Ability::ManageSessions), $dispute->raised_by), self::lessonData($s) + [
+            'side' => new Translatable('scheduling::disputes.sides.'.$dispute->side),
+            'reason' => new Translatable("scheduling::disputes.reasons.{$dispute->side}.{$dispute->reason}"),
+            'before' => new Translatable('scheduling::disputes.outcomes.'.$dispute->outcome_before),
+        ], ['screen' => 'dispute', 'id' => $dispute->id], "dispute:{$dispute->id}"));
+    }
+
+    /** Whoever disputed reads the academy's answer; when the outcome changed, the other side hears what it is now. */
+    public function disputeDecided(LessonDisputeDecided $event): void
+    {
+        $s = $this->sessions->of($event->sessionId);
+        $dispute = SessionDispute::query()->find($event->disputeId);
+        if ($s === null || $dispute === null) {
+            return;
+        }
+        $data = self::lessonData($s) + ['after' => new Translatable('scheduling::disputes.outcomes.'.$event->outcomeAfter)];
+        $answer = $data + ['outcome' => new Translatable('scheduling::notifications.dispute_answers.'.$event->status), 'answer' => (string) $dispute->decision_note];
+        $family = $this->without($s['family'], $dispute->decided_by);
+        $teacher = $this->without([$s['teacher_id']], $dispute->decided_by);
+        $action = ['screen' => 'session', 'id' => $s['session_id']];
+        $key = "dispute:{$dispute->id}:decided";
+
+        [$raiser, $other] = $dispute->side === 'family'
+            ? [['scheduling.dispute_decided', $family], ['scheduling.lesson_corrected_teacher', $teacher]]
+            : [['scheduling.dispute_decided_teacher', $teacher], ['scheduling.lesson_corrected', $family]];
+        $this->notifications->send(new Message($raiser[0], $raiser[1], $answer, $action, $key));
+        if ($event->status === 'upheld') {
+            $this->notifications->send(new Message($other[0], $other[1], $data, $action, $key));
+        }
     }
 
     public function rescheduled(SessionRescheduled $event): void

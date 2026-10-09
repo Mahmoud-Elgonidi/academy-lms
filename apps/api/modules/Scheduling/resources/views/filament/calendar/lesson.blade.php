@@ -40,10 +40,16 @@
             @if ($lesson['review'])
                 <div><dt>{{ __($l.'details.review') }}</dt><dd>{{ $lesson['review'] }}</dd></div>
             @endif
+            @if ($lesson['dispute'])
+                <div><dt>{{ __($l.'details.dispute') }}</dt><dd>{{ $lesson['dispute']['label'] }}</dd></div>
+            @endif
         </dl>
         <div class="cal-dt-links">
             @if ($lesson['boardUrl'])
                 <x-filament::button tag="a" :href="$lesson['boardUrl']" icon="heroicon-o-bolt" size="sm">{{ __($l.'details.board') }}</x-filament::button>
+            @endif
+            @if ($lesson['dispute'])
+                <x-filament::button tag="a" :href="$lesson['dispute']['url']" icon="heroicon-o-scale" size="sm" color="warning">{{ __($l.'details.open_dispute') }}</x-filament::button>
             @endif
             @if ($lesson['accountUrl'])
                 <x-filament::button tag="a" :href="$lesson['accountUrl']" icon="heroicon-o-user" size="sm" color="gray">{{ __($l.'details.account') }}</x-filament::button>

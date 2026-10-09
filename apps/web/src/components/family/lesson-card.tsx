@@ -1,6 +1,7 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { Link } from '@/i18n/navigation';
+import { DisputeState } from '@/components/dispute-state';
 import { Icon } from '@/components/icons';
 import { Badge, buttonLook, join, type Tone } from '@/components/ui';
 import type { FamilyLesson } from '@/lib/family/types';
@@ -51,6 +52,7 @@ export async function FamilyLessonCard({ lesson, featured = false, actions }: { 
           <p className="w-full text-sm text-muted sm:w-auto">{t('opensAt', { time: clock(lesson.join.opens_at) })}</p>
         ) : null}
       </div>
+      {lesson.dispute ? <DisputeState dispute={lesson.dispute} /> : null}
       {actions ? <div className="mt-3 border-t border-line pt-3">{actions}</div> : null}
     </article>
   );

@@ -228,7 +228,7 @@ return [
         'flag_technical' => 'Sends the session to review; credit stays reserved until you decide',
         'allow_unfunded' => 'The session goes ahead; follow up on payment afterwards',
         'resolve' => 'Completed, absent, or cancelled with makeup',
-        'dispute' => 'Within 48 hours; credit is held until the decision',
+        'dispute' => 'The lesson goes back under review; credit and pay follow the decision',
         'soon_messages' => 'Arrives with WhatsApp messages and notifications',
         'soon_billing' => 'Arrives with invoices and payments',
         'observe' => 'Opens the lesson in a new tab; nobody sees or hears you.',

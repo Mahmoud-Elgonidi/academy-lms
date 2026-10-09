@@ -1,9 +1,9 @@
 import '../../../core/network/api_client.dart';
 import '../domain/lesson.dart';
 
-/// A learner's lessons and what the family may do with one. Cancelling and
-/// turning down a substitute carry an `Idempotency-Key`, so a retry on a bad
-/// network never does it twice.
+/// A learner's lessons and what the family may do with one. Cancelling,
+/// turning down a substitute and disputing carry an `Idempotency-Key`, so a
+/// retry on a bad network never does it twice.
 class LessonsRepository {
   LessonsRepository(this._api);
 
@@ -28,6 +28,12 @@ class LessonsRepository {
     final json = await _api.post('lessons/$lessonId/refuse-substitute', idempotent: true);
     return (json['makeup_days'] as num?)?.toInt() ?? 0;
   }
+
+  /// Disputes what the lesson was recorded as; the lesson comes back under review, with the dispute.
+  Future<Lesson> dispute(String lessonId, {required String reason, required String note}) async => Lesson.fromJson(
+    (await _api.post('lessons/$lessonId/dispute', idempotent: true, body: {'reason': reason, 'note': note.trim()}))['data']
+        as Map<String, dynamic>,
+  );
 
   Future<Rating> rating(String lessonId) async => Rating.fromJson(await _api.get('lessons/$lessonId/rating'));
 

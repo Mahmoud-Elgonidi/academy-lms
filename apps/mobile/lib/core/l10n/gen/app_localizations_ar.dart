@@ -533,6 +533,50 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancelLesson => 'إلغاء الحصة';
 
   @override
+  String get disputeLesson => 'اعترض';
+
+  @override
+  String get disputeTitle => 'اعتراض على نتيجة الحصة';
+
+  @override
+  String disputeIntroFamily(String outcome) {
+    return 'الحصة متسجلة \"$outcome\". لو ده مش اللي حصل، قولولنا خلال 48 ساعة من آخرها، والأكاديمية هتراجع حضور الفصل وترد عليكم.';
+  }
+
+  @override
+  String disputeIntroTeacher(String outcome) {
+    return 'الحصة متسجلة \"$outcome\". لو ده مش اللي حصل، قولنا خلال 48 ساعة من آخرها، والأكاديمية هتراجع حضور الفصل وترد عليك.';
+  }
+
+  @override
+  String get disputeWhat => 'إيه اللي حصل؟';
+
+  @override
+  String get disputeNote => 'التفاصيل';
+
+  @override
+  String get disputeNoteHint => 'الأكاديمية بس اللي هتقرا ده.';
+
+  @override
+  String get disputeFillIn => 'اختار السبب واكتب اللي حصل.';
+
+  @override
+  String get disputeSend => 'ابعت الاعتراض';
+
+  @override
+  String get disputeSent => 'الاعتراض وصل، والحصة تحت المراجعة.';
+
+  @override
+  String disputeState(String status) {
+    return 'الاعتراض: $status';
+  }
+
+  @override
+  String disputeAnswer(String answer) {
+    return 'رد الأكاديمية: $answer';
+  }
+
+  @override
   String cancelTitle(String day) {
     return 'تلغي حصة $day؟';
   }
