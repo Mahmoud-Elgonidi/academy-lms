@@ -19,9 +19,9 @@ jobs:
       run:
         working-directory: apps/web
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -69,7 +69,7 @@ jobs:
     env:
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -78,7 +78,7 @@ jobs:
           coverage: none
 
       - name: Composer cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/composer/files
           key: composer-${{ hashFiles('apps/api/composer.lock') }}
@@ -104,7 +104,7 @@ jobs:
           nohup php artisan reverb:start --host=127.0.0.1 --port=8080 > ../../reverb.log 2>&1 &
           nohup php artisan live:relay > ../../relay.log 2>&1 &
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -133,7 +133,7 @@ jobs:
         run: |
           tail -n 80 api-serve.log web-serve.log reverb.log relay.log apps/api/storage/logs/laravel.log 2>/dev/null || true
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: playwright-report
