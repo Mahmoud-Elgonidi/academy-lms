@@ -83,6 +83,7 @@
                         <div>
                             <strong>{{ __($l.'backups.kinds.'.$b['kind']) }}</strong>
                             <small>{{ $b['when'] }}@if ($b['size']) · {{ $b['size'] }}@endif · {{ $b['took'] }}s</small>
+                            @if (in_array($b['kind'], ['offsite', 'drill'], true) && $b['name'])<code>{{ $b['name'] }}</code>@endif
                             @if ($b['detail'])<small>{{ \Illuminate\Support\Str::limit($b['detail'], 220) }}</small>@endif
                         </div>
                         <div class="ph-side"><span class="ph-chip" data-status="{{ $b['status'] === 'ok' ? 'ok' : 'fail' }}">{{ __($l.'status.'.($b['status'] === 'ok' ? 'ok' : 'fail')) }}</span></div>

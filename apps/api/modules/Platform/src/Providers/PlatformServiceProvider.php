@@ -12,6 +12,7 @@ use Illuminate\Support\ServiceProvider;
 use Modules\Platform\Branding\BrandingService;
 use Modules\Platform\Commands\CreatePlatformAdmin;
 use Modules\Platform\Commands\HealthCommand;
+use Modules\Platform\Commands\MailTestCommand;
 use Modules\Platform\Commands\MeasureUsageCommand;
 use Modules\Platform\Commands\ShowPlatformCode;
 use Modules\Platform\Console\ConsoleService;
@@ -66,7 +67,7 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'platform');
         Event::listen(Login::class, RecordConsoleSignIn::class);
         if ($this->app->runningInConsole()) {
-            $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class, HealthCommand::class]);
+            $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class, HealthCommand::class, MailTestCommand::class]);
         }
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('platform:usage')->dailyAt('02:10')->withoutOverlapping()->onOneServer();

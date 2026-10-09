@@ -9,12 +9,14 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Schema\Grammars\PostgresGrammar;
 use Illuminate\Http\Request;
 use Illuminate\Log\Context\Repository as ContextRepository;
+use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\OpenPlan;
 use Modules\SharedKernel\Plans\UsageMeters;
@@ -112,6 +114,9 @@ final class SharedKernelServiceProvider extends ServiceProvider
         Event::listen(JobProcessed::class, $clear);
         Event::listen(JobFailed::class, $clear);
         Event::listen(JobExceptionOccurred::class, $clear);
+
+        // Mail that left, for the health page (a failure is noted by whoever sent it).
+        Event::listen(MessageSent::class, fn () => MailHealth::sent());
     }
 
     private function registerBlueprintMacros(): void

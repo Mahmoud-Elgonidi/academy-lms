@@ -81,7 +81,7 @@ jobs:
           mkdir -p "$dir/nginx"
           cp infra/deploy/compose.yml infra/deploy/deploy.sh infra/deploy/postgres-init.sh infra/deploy/setup-nginx.sh \
              infra/deploy/postgres-start.sh infra/deploy/pg_hba.conf infra/deploy/backup.sh infra/deploy/restore.sh \
-             apps/api/database/setup/roles.sql "$dir/"
+             infra/deploy/offsite.sh apps/api/database/setup/roles.sql "$dir/"
           cp infra/deploy/nginx/academy-lms.conf "$dir/nginx/"
           echo "dir=$dir" >> "$GITHUB_ENV"
 
@@ -193,6 +193,33 @@ jobs:
           printf 'academy-lms\n' | (cd "$dir" && bash restore.sh back academy-lms_postgres-data)
           [ "$(sql "select count(*) from rehearsal_marker")" = 1 ] || { echo "switching back did not bring the change back"; exit 1; }
           (cd "$dir" && bash restore.sh list)
+
+          # The off-site copy: a bucket on this machine (rclone's S3 server), a key made by the image's
+          # own age, the backups sent to the bucket encrypted, then a restore drill from the bucket alone
+          # with the private key, and the settings of then fetched back. The offsite part started idle.
+          docker compose -p academy-lms -f "$dir/compose.yml" logs offsite | grep -q 'off-site copy off' \
+            || { docker compose -p academy-lms -f "$dir/compose.yml" logs offsite; echo "the offsite part is not idle without a bucket"; exit 1; }
+          docker run -d --name rehearsal-bucket --network academy-lms_internal --network-alias rehearsal-bucket --entrypoint sh \
+            rclone/rclone:1.68.2 -c 'mkdir -p /data/rehearsal && exec rclone serve s3 /data --addr :8333 --auth-key rehearsal,rehearsal-secret' >/dev/null
+          docker run --rm --entrypoint age-keygen "$IMAGE" > "$RUNNER_TEMP/offsite.key" 2>/dev/null
+          chmod 600 "$RUNNER_TEMP/offsite.key"
+          offsite_setting() { sed -i "s#^$1=.*#$1=$2#" "$dir/.env"; }
+          offsite_setting OFFSITE_S3_ENDPOINT http://rehearsal-bucket:8333
+          offsite_setting OFFSITE_S3_BUCKET rehearsal
+          offsite_setting OFFSITE_S3_ACCESS_KEY rehearsal
+          offsite_setting OFFSITE_S3_SECRET_KEY rehearsal-secret
+          offsite_setting OFFSITE_AGE_RECIPIENT "$(sed -n 's/^# public key: //p' "$RUNNER_TEMP/offsite.key")"
+          docker compose -p academy-lms -f "$dir/compose.yml" run --rm --no-deps -T offsite now
+          (cd "$dir" && bash restore.sh offsite) | tee /tmp/offsite
+          grep -q '^  base/' /tmp/offsite && grep -q '^  config/' /tmp/offsite || { echo "the bucket lacks a base backup or the settings"; exit 1; }
+          (cd "$dir" && BACKUP_DRILL_SQL="select count(*) from rehearsal_marker" bash restore.sh check offsite "$RUNNER_TEMP/offsite.key") | tee /tmp/drill
+          grep -q 'drill ok: .*check: 1$' /tmp/drill || { echo "the drill from the off-site copy is not right"; exit 1; }
+          (cd "$dir" && bash restore.sh fetch "$RUNNER_TEMP/offsite.key" latest)
+          cmp <(sort "$dir/.env") <(sort "$dir/.env.offsite") || { echo "the fetched settings are not this server's"; exit 1; }
+          rm -f "$dir/.env.offsite" "$dir/postgres.env.offsite"; docker volume rm academy-lms_offsite-restore >/dev/null
+          docker compose -p academy-lms -f "$dir/compose.yml" up -d offsite
+          for _ in $(seq 1 20); do docker compose -p academy-lms -f "$dir/compose.yml" logs offsite | grep -q 'off-site copy to' && break; sleep 2; done
+          docker compose -p academy-lms -f "$dir/compose.yml" logs offsite | grep -q 'off-site copy to' || { echo "the offsite part did not start sending"; exit 1; }
 
           # Health for an uptime monitor: nothing without the token; with it, every check and none
           # failing once the scheduler and the worker, just restarted twice, have beaten again
@@ -308,7 +335,7 @@ jobs:
           "${ssh_cmd[@]}" "$target" "mkdir -p '$DIR/nginx' && chmod 700 '$DIR'"
           "${scp_cmd[@]}" infra/deploy/compose.yml infra/deploy/deploy.sh infra/deploy/postgres-init.sh \
             infra/deploy/setup-nginx.sh infra/deploy/postgres-start.sh infra/deploy/pg_hba.conf \
-            infra/deploy/backup.sh infra/deploy/restore.sh apps/api/database/setup/roles.sql "$target:$DIR/"
+            infra/deploy/backup.sh infra/deploy/restore.sh infra/deploy/offsite.sh apps/api/database/setup/roles.sql "$target:$DIR/"
           "${scp_cmd[@]}" infra/deploy/nginx/academy-lms.conf "$target:$DIR/nginx/"
 
           # The registry login travels on stdin (user, then token), never on a command line.

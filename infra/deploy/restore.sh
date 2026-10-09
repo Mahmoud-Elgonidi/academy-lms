@@ -10,6 +10,16 @@
 #                                  The live database is kept, untouched, in its own volume.
 #   ./restore.sh back VOLUME       use that kept volume again (undoes "to")
 #
+# From the off-site copy (the offsite part; the private key in a file only you can read):
+#
+#   ./restore.sh offsite                   what is in the bucket
+#   ./restore.sh check offsite KEYFILE     a restore drill from the bucket: the latest it has, fetched,
+#                                          decrypted, brought up and checked apart from everything, thrown away
+#   ./restore.sh fetch KEYFILE [TIME]      the newest base backup before TIME (or the newest), its WAL, dump,
+#                                          files and the settings of then into the volume academy-lms_offsite-restore,
+#                                          and those settings next to this file as .env.offsite and postgres.env.offsite
+#   ./restore.sh to TIME|latest offsite    "to", from what fetch brought (the server is lost: RUNBOOKS.md)
+#
 # "to" and "back" stop the app while they switch and ask you to type the
 # project's name first. Files (proofs, homework, materials) are not put back
 # by "to": they are in the backups' files/ folder when needed (RUNBOOKS.md).
@@ -37,6 +47,20 @@ set_setting() {
     if grep -qE "^$1=" .env; then sed -i "s#^$1=.*#$1=$2#" .env; else printf '%s=%s\n' "$1" "$2" >> .env; fi
 }
 current_volume() { local v; v="$(setting PG_VOLUME)"; printf '%s' "${v:-${PROJECT}_postgres-data}"; }
+FETCHED="${PROJECT}_offsite-restore"
+key_file() {
+    local key="${1:?usage: the file with the private key, e.g. ~/offsite.key}"
+    [ -r "$key" ] || fail "Cannot read the key file $key."
+    grep -q '^AGE-SECRET-KEY-' "$key" || fail "$key holds no age private key (AGE-SECRET-KEY-...)."
+    printf '%s' "$(cd "$(dirname "$key")" && pwd)/$(basename "$key")"
+}
+# The off-site copy's latest (or TIME's) base backup and all it needs, decrypted into VOLUME.
+fetch_into() {
+    local volume="$1" key="$2" when="${3:-}"
+    dk volume rm "$volume" >/dev/null 2>&1 || true
+    dk volume create --label "com.docker.compose.project=$PROJECT" "$volume" >/dev/null
+    compose run --rm --no-deps -T -v "$volume:/fetched" -v "$key:/run/offsite.key:ro" offsite fetch /fetched "$when"
+}
 
 confirm() {
     printf '%s\nType %s to go on: ' "$1" "$PROJECT"
@@ -57,7 +81,7 @@ wait_healthy() {
 switch_to() {
     local volume="$1"
     say "Stopping the app and the database"
-    compose stop web portal reverb worker scheduler relay backup
+    compose stop web portal reverb worker scheduler relay backup offsite
     compose stop postgres
     set_setting PG_VOLUME "$volume"
     say "Starting the database from $volume"
@@ -74,16 +98,63 @@ switch_to() {
 case "${1:-}" in
     list) compose run --rm --no-deps -T backup list ;;
     now) compose run --rm --no-deps -T backup now ;;
-    check) compose run --rm --no-deps -T ${BACKUP_DRILL_SQL:+-e BACKUP_DRILL_SQL} backup drill "${2:-}" ;;
+    check)
+        if [ "${2:-}" = offsite ]; then
+            key="$(key_file "${3:-}")"
+            drill_volume="${PROJECT}_offsite-drill"
+            trap 'dk volume rm "$drill_volume" >/dev/null 2>&1 || true' EXIT
+            say "Fetching the latest from the off-site copy"
+            fetch_into "$drill_volume" "$key"
+            say "Restore drill from it"
+            compose run --rm --no-deps -T -e BACKUP_DIR=/fetched -e BACKUP_DRILL_FROM=off-site ${BACKUP_DRILL_SQL:+-e BACKUP_DRILL_SQL} \
+                -v "$drill_volume:/fetched" backup drill
+        else
+            compose run --rm --no-deps -T ${BACKUP_DRILL_SQL:+-e BACKUP_DRILL_SQL} backup drill "${2:-}"
+        fi
+        ;;
+    offsite) compose run --rm --no-deps -T offsite list ;;
+    fetch)
+        key="$(key_file "${2:-}")"
+        when="${3:-}"; [ "$when" = latest ] && when=""
+        say "Fetching from the off-site copy into the volume $FETCHED"
+        fetch_into "$FETCHED" "$key" "$when"
+        # The settings of then, with this server's own image, port and database volume.
+        for f in env postgres.env; do
+            out=".$f.offsite"; [ "$f" = env ] && out=".env.offsite"; [ "$f" = postgres.env ] && out="postgres.env.offsite"
+            if compose run --rm --no-deps -T -v "$FETCHED:/fetched:ro" offsite show /fetched "$f" > "$out.part" 2>/dev/null && [ -s "$out.part" ]; then
+                chmod 600 "$out.part"; mv "$out.part" "$out"
+            else
+                rm -f "$out.part"
+            fi
+        done
+        if [ -f .env.offsite ]; then
+            for k in IMAGE HTTP_PORT PG_VOLUME; do
+                v="$(setting "$k")"
+                grep -v "^$k=" .env.offsite > .env.offsite.part || true
+                [ -z "$v" ] || printf '%s=%s\n' "$k" "$v" >> .env.offsite.part
+                chmod 600 .env.offsite.part; mv .env.offsite.part .env.offsite
+            done
+            say "Fetched. The settings of then are in .env.offsite and postgres.env.offsite (this server's IMAGE, HTTP_PORT and PG_VOLUME kept)."
+            echo "    The server is lost and this is the new one: mv .env.offsite .env && mv postgres.env.offsite postgres.env,"
+            echo "    then ./restore.sh to ${3:-latest} offsite (RUNBOOKS.md, \"The server is lost\")."
+        else
+            say "Fetched (the bucket had no settings). Next: ./restore.sh to ${3:-latest} offsite"
+        fi
+        ;;
     to)
-        when="${2:?usage: restore.sh to TIME|latest}"
+        when="${2:?usage: restore.sh to TIME|latest [offsite]}"
         [ "$when" = latest ] && when=""
+        from=()
+        if [ "${3:-}" = offsite ]; then
+            dk volume inspect "$FETCHED" >/dev/null 2>&1 || fail "Nothing fetched yet: ./restore.sh fetch KEYFILE ${2}"
+            from=(-e BACKUP_DIR=/fetched -v "$FETCHED:/fetched")
+        fi
         previous="$(current_volume)"
         volume="${PROJECT}_pgdata-$(date -u +%Y%m%dT%H%M%SZ)"
-        confirm "The live database goes back to ${when:-the latest moment the backups have}. Everything after it is no longer in use (it stays in volume $previous)."
+        confirm "The live database goes back to ${when:-the latest moment the ${3:+off-site }backups have}. Everything after it is no longer in use (it stays in volume $previous)."
         say "Restoring into $volume"
         dk volume create --label "com.docker.compose.project=$PROJECT" --label com.docker.compose.volume=postgres-data "$volume" >/dev/null
-        if ! compose run --rm --no-deps -T -v "$volume:/restore" backup restore-into /restore "$when"; then
+        if ! compose run --rm --no-deps -T "${from[@]}" -v "$volume:/restore" backup restore-into /restore "$when"; then
             dk volume rm "$volume" >/dev/null 2>&1 || true
             fail "The restore did not come up. Nothing was changed."
         fi
@@ -97,5 +168,5 @@ case "${1:-}" in
         switch_to "$volume"
         say "Done: the database is the one in $volume."
         ;;
-    *) sed -n '2,17p' "$0"; exit 2 ;;
+    *) sed -n '2,27p' "$0"; exit 2 ;;
 esac

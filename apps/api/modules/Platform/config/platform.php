@@ -30,10 +30,12 @@ return [
     // The stack's health (docs/architecture/03, section 12): the token an
     // uptime monitor sends to GET /health (empty: no such page), whether this
     // server has the backup part (then a missing backup or WAL archive is a
-    // fault), and who besides the platform team hears when something breaks.
+    // fault) and an off-site copy set up (the offsite part: a bucket and the
+    // public key), and who besides the platform team hears when something breaks.
     'health' => [
         'token' => env('HEALTH_TOKEN'),
         'backups' => (bool) env('BACKUPS_EXPECTED', false),
+        'offsite' => filled(env('OFFSITE_S3_BUCKET')) && filled(env('OFFSITE_AGE_RECIPIENT')),
         'alert_to' => array_values(array_filter(array_map('trim', explode(',', (string) env('HEALTH_ALERT_TO', ''))))),
     ],
 

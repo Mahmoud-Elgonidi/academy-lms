@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Modules\SharedKernel\Health\Heartbeats;
+use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Health\RecentErrors;
 use Throwable;
 
@@ -14,8 +15,9 @@ use Throwable;
  * Is the stack well (docs/architecture/03, section 12)? Each check reads
  * the thing itself: the database and the cache answer, the scheduler, the
  * queue worker and the live relay spoke lately, Reverb takes connections,
- * the last backup is recent and the WAL archive keeps up, a restore was
- * drilled lately, the disk has room, and errors are few. A check is ok,
+ * the last backup is recent, the WAL archive keeps up and both reach the
+ * off-site copy, a restore was drilled lately, the disk has room, mail goes
+ * out, and errors are few. A check is ok,
  * warn (look soon) or fail (look now); "off" when this server has no such
  * part. The console page, GET /health and the alerts all read this.
  */
@@ -27,7 +29,7 @@ class SystemHealth
     public function checks(): array
     {
         $checks = [];
-        foreach (['database', 'cache', 'scheduler', 'worker', 'queue', 'relay', 'reverb', 'backups', 'archive', 'drill', 'disk', 'errors'] as $name) {
+        foreach (['database', 'cache', 'scheduler', 'worker', 'queue', 'relay', 'reverb', 'backups', 'archive', 'offsite', 'drill', 'disk', 'mail', 'errors'] as $name) {
             try {
                 $checks[$name] = $this->{$name}();
             } catch (Throwable $e) {
@@ -51,10 +53,12 @@ class SystemHealth
         return $worst;
     }
 
-    /** @return list<object{kind: string, status: string, started_at: string, finished_at: string, size_bytes: ?int, name: ?string, detail: ?string}> newest first */
+    /** @return list<object{kind: string, status: string, started_at: string, finished_at: string, size_bytes: ?int, name: ?string, detail: ?string}> newest first (the off-site copy's hourly "the WAL is going" lines left out) */
     public function backupRuns(int $limit = 12): array
     {
-        return DB::connection('pgsql_platform')->table('platform_backups')->orderByDesc('finished_at')->limit($limit)
+        return DB::connection('pgsql_platform')->table('platform_backups')
+            ->whereNot(fn ($q) => $q->where('kind', 'offsite')->where('name', 'wal')->where('status', 'ok'))
+            ->orderByDesc('finished_at')->limit($limit)
             ->get(['kind', 'status', 'started_at', 'finished_at', 'size_bytes', 'name', 'detail'])->all();
     }
 
@@ -137,7 +141,7 @@ class SystemHealth
             return $this->off();
         }
         $last = $this->lastOk('base');
-        $failed = DB::connection('pgsql_platform')->table('platform_backups')->where('kind', '!=', 'drill')->where('status', 'failed')
+        $failed = DB::connection('pgsql_platform')->table('platform_backups')->whereNotIn('kind', ['drill', 'offsite'])->where('status', 'failed')
             ->where('finished_at', '>', $last ?? '1970-01-01')->exists();
         if ($last === null) {
             return $this->check('fail', __('platform::health.values.never'), __('platform::health.hints.backups'));
@@ -171,6 +175,49 @@ class SystemHealth
         return $this->check($status, $value, $status === 'ok' ? null : __('platform::health.hints.archive'));
     }
 
+    /**
+     * The off-site copy (infra/deploy/offsite.sh): the WAL reaches the bucket
+     * (a line each hour while it does, at once when it stops or starts again)
+     * and so does each day's base backup. Where there are backups but no
+     * bucket, a reminder that they would go with the server.
+     */
+    private function offsite(): array
+    {
+        if (! config('platform.health.backups')) {
+            return $this->off();
+        }
+        if (! config('platform.health.offsite')) {
+            return $this->check('warn', __('platform::health.values.offsite_off'), __('platform::health.hints.offsite_off'));
+        }
+        $rows = DB::connection('pgsql_platform')->table('platform_backups')->where('kind', 'offsite');
+        $wal = (clone $rows)->where('name', 'wal')->orderByDesc('finished_at')->first(['status', 'finished_at', 'detail']);
+        $walOk = $this->lastOk('offsite', 'wal');
+        $baseOk = $this->lastOk('offsite', 'base/%');
+        $hint = __('platform::health.hints.offsite');
+
+        if ($wal?->status === 'failed') {
+            $since = CarbonImmutable::parse((clone $rows)->where('name', 'wal')->where('status', 'failed')
+                ->where('finished_at', '>', $walOk ?? '1970-01-01')->min('finished_at'));
+
+            return $this->check($since->lessThan(now()->subHour()) ? 'fail' : 'warn',
+                __('platform::health.values.offsite_failing', ['since' => $since->diffForHumans(), 'error' => mb_substr((string) $wal->detail, 0, 160)]), $hint);
+        }
+        if ($walOk === null) {
+            return $this->check('warn', __('platform::health.values.never'), $hint);
+        }
+        $failed = (clone $rows)->where('status', 'failed')->where('finished_at', '>', $baseOk ?? '1970-01-01')->exists();
+        $status = match (true) {
+            $walOk->lessThan(now()->subHours(12)) || $baseOk?->lessThan(now()->subHours(50)) => 'fail',
+            $walOk->lessThan(now()->subHours(3)) || $baseOk === null || $baseOk->lessThan(now()->subHours(26)) || $failed => 'warn',
+            default => 'ok',
+        };
+
+        return $this->check($status, __('platform::health.values.offsite', [
+            'wal' => $walOk->diffForHumans(),
+            'base' => $baseOk?->diffForHumans() ?? __('platform::health.values.never'),
+        ]), $status === 'ok' ? null : $hint);
+    }
+
     private function drill(): array
     {
         if (! config('platform.health.backups')) {
@@ -199,6 +246,34 @@ class SystemHealth
 
         return $this->check($status, __('platform::health.values.disk', ['free' => self::bytes((int) $free), 'pct' => (int) round($share * 100)]),
             $status === 'ok' ? null : __('platform::health.hints.disk'));
+    }
+
+    /**
+     * Mail goes out: alerts, welcome links and codes by email need a real
+     * mailer on a server (not the log), someone to send the alerts to, and
+     * the last message to have left (MailHealth, from every sender).
+     */
+    private function mail(): array
+    {
+        $mailer = (string) config('mail.default');
+        if (in_array($mailer, ['log', 'array'], true)) {
+            return app()->isProduction()
+                ? $this->check('warn', __('platform::health.values.mail_log'), __('platform::health.hints.mail_log'))
+                : $this->off();
+        }
+        $last = MailHealth::last();
+        if (MailHealth::failing()) {
+            return $this->check('fail', __('platform::health.values.mail_failed', [
+                'when' => CarbonImmutable::createFromTimestamp((int) $last['failed'])->diffForHumans(), 'error' => $last['error'] ?? '',
+            ]), __('platform::health.hints.mail_failed'));
+        }
+        if (AlertRecipients::all() === []) {
+            return $this->check('warn', __('platform::health.values.mail_nobody'), __('platform::health.hints.mail_nobody'));
+        }
+
+        return isset($last['sent'])
+            ? $this->check('ok', __('platform::health.values.mail_sent', ['when' => CarbonImmutable::createFromTimestamp((int) $last['sent'])->diffForHumans()]))
+            : $this->check('ok', __('platform::health.values.mail_ready', ['mailer' => $mailer]), __('platform::health.hints.mail_test'));
     }
 
     private function errors(): array
@@ -232,9 +307,10 @@ class SystemHealth
         return $this->check($status, __('platform::health.values.ago', ['when' => $at->diffForHumans()]), $status === 'ok' ? null : __('platform::health.hints.'.$part));
     }
 
-    private function lastOk(string $kind): ?CarbonImmutable
+    private function lastOk(string $kind, ?string $name = null): ?CarbonImmutable
     {
-        $at = DB::connection('pgsql_platform')->table('platform_backups')->where('kind', $kind)->where('status', 'ok')->max('finished_at');
+        $at = DB::connection('pgsql_platform')->table('platform_backups')->where('kind', $kind)->where('status', 'ok')
+            ->when($name !== null, fn ($q) => $q->where('name', 'like', $name))->max('finished_at');
 
         return $at === null ? null : CarbonImmutable::parse($at);
     }

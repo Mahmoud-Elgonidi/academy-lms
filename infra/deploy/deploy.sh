@@ -41,7 +41,7 @@ fi
 dk compose version >/dev/null 2>&1 || fail "Docker Compose v2 (docker compose) is missing. Nothing was changed."
 compose() { dk compose -p "$PROJECT" -f "$HERE/compose.yml" "$@"; }
 
-for f in compose.yml roles.sql postgres-init.sh postgres-start.sh pg_hba.conf backup.sh; do
+for f in compose.yml roles.sql postgres-init.sh postgres-start.sh pg_hba.conf backup.sh offsite.sh; do
     [ -f "$f" ] || fail "$f is missing next to deploy.sh."
 done
 
@@ -140,8 +140,15 @@ REVERB_SCHEME=http
 REVERB_PUBLIC_PORT=443
 REVERB_PUBLIC_SCHEME=https
 
-# Messages: in the log until the academy's own mail, WhatsApp and push are set up.
+# Email (alerts to the platform team, welcome links, codes by email): in the log until an
+# SMTP account is set here (the domain's own mail, Amazon SES, Postmark, Brevo, ...), then
+# MAIL_MAILER=smtp, docker compose up -d, and the console's "Send a test email" (RUNBOOKS.md, "Email").
+# Port 587 is STARTTLS; for 465 add MAIL_SCHEME=smtps.
 MAIL_MAILER=log
+MAIL_HOST=
+MAIL_PORT=587
+MAIL_USERNAME=
+MAIL_PASSWORD=
 MAIL_FROM_ADDRESS=no-reply@$DOMAIN
 MAIL_FROM_NAME="Academy LMS"
 
@@ -178,6 +185,17 @@ HEALTH_ALERT_TO=
 BACKUPS_EXPECTED=true
 BACKUP_AT=05:30
 BACKUP_KEEP_DAYS=7
+# The off-site copy (the offsite part; RUNBOOKS.md, "The off-site copy"): off until a bucket
+# (any S3-compatible storage) and an age public key are set. Only the public key is here:
+# the private one, which reads the copies, stays with the platform team, off this server.
+OFFSITE_S3_ENDPOINT=
+OFFSITE_S3_REGION=
+OFFSITE_S3_BUCKET=
+OFFSITE_S3_PREFIX=academy-lms
+OFFSITE_S3_ACCESS_KEY=
+OFFSITE_S3_SECRET_KEY=
+OFFSITE_AGE_RECIPIENT=
+OFFSITE_KEEP_DAYS=30
 EOF
     chmod 600 .env postgres.env
 fi
@@ -187,6 +205,13 @@ add_if_missing() { grep -qE "^$1=" .env || printf '%s=%s\n' "$1" "$2" >> .env; }
 add_if_missing HEALTH_TOKEN "$(secret)"
 add_if_missing HEALTH_ALERT_TO ""
 add_if_missing BACKUPS_EXPECTED true
+for k in MAIL_HOST MAIL_USERNAME MAIL_PASSWORD OFFSITE_S3_ENDPOINT OFFSITE_S3_REGION OFFSITE_S3_BUCKET \
+    OFFSITE_S3_ACCESS_KEY OFFSITE_S3_SECRET_KEY OFFSITE_AGE_RECIPIENT; do
+    add_if_missing "$k" ""
+done
+add_if_missing MAIL_PORT 587
+add_if_missing OFFSITE_S3_PREFIX academy-lms
+add_if_missing OFFSITE_KEEP_DAYS 30
 chmod 700 "$HERE" "$DOCKER_CONFIG"
 
 HTTP_PORT="$(setting HTTP_PORT)"

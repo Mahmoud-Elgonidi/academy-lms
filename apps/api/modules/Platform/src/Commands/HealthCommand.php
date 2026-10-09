@@ -6,10 +6,12 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Modules\Platform\Health\AlertRecipients;
 use Modules\Platform\Health\HealthAlert;
 use Modules\Platform\Health\SystemHealth;
-use Modules\Platform\Models\PlatformAdmin;
+use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Health\RecentErrors;
+use Throwable;
 
 /**
  * The stack's health in the terminal; with --alert (the scheduler, every
@@ -21,7 +23,7 @@ final class HealthCommand extends Command
 {
     protected $signature = 'platform:health {--alert : tell the platform team what changed} {--errors : list the errors the app reported lately, as the health page does (redacted)}';
 
-    protected $description = "The stack's health: database, cache, scheduler, worker, relay, backups, disk, errors";
+    protected $description = "The stack's health: database, cache, scheduler, worker, relay, backups and their off-site copy, disk, mail, errors";
 
     private const ALERTED = 'health:alerted';
 
@@ -73,9 +75,18 @@ final class HealthCommand extends Command
         foreach ($failing as $name => $check) {
             Log::warning("health: {$name} is failing: {$check['value']}");
         }
-        $to = PlatformAdmin::query()->where('is_active', true)->pluck('email')->merge(config('platform.health.alert_to'))->filter()->unique()->values()->all();
+        $to = AlertRecipients::all();
         if ($to !== []) {
-            Mail::to($to)->send(new HealthAlert($failing, $recovered, $remind));
+            try {
+                Mail::to($to)->send(new HealthAlert($failing, $recovered, $remind));
+            } catch (Throwable $e) {
+                // Mail is down: the health page and GET /health say so; the next check tries again.
+                MailHealth::failed($e);
+                Log::error('health: the alert could not be sent: '.MailHealth::last()['error']);
+                $this->error('alert not sent: mail fails');
+
+                return;
+            }
         }
         Cache::forever(self::ALERTED, ['names' => array_keys($failing), 'at' => now()->getTimestamp()]);
         $this->info('alert sent to '.count($to));

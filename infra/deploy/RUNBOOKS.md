@@ -8,16 +8,16 @@ the project's own containers and volumes.
 how long ago it last worked; the same in the terminal:
 
 ```bash
-docker compose ps                                   # nine parts, all "running"
+docker compose ps                                   # ten parts, all "running"
 docker compose exec web php artisan platform:health # every check, with a hint for each fault
 docker compose exec web php artisan platform:health --errors   # and the errors of the week: when, where, how often (redacted)
-docker compose logs --tail=100 <part>               # web, portal, worker, scheduler, relay, reverb, backup, postgres, redis
+docker compose logs --tail=100 <part>               # web, portal, worker, scheduler, relay, reverb, backup, offsite, postgres, redis
 ```
 
 Alerts reach the platform team (active console accounts, plus `HEALTH_ALERT_TO` in `.env`) by email when
 a check fails in two checks in a row, five minutes apart (so a restart does not wake anyone), every six
-hours while it fails, and when it is well again. They need mail set up
-(`MAIL_MAILER` and its settings in `.env`); until then they are in `docker compose logs scheduler`.
+hours while it fails, and when it is well again. They need mail set up (see **Email** below); until
+then they are in `docker compose logs scheduler`, and the health page's "Email" check says so.
 An uptime monitor can watch `GET https://<domain>/health` with `Authorization: Bearer <HEALTH_TOKEN>`:
 200 while nothing fails, 503 when something does, and only the checks' statuses in the answer. A stack
 that has just started says the scheduler and the worker fail until their first beat, within a minute or two;
@@ -43,11 +43,72 @@ at most. Each run, and each drill, is listed on the System health page.
 ```
 
 **They are on the same server as the database.** A disk that dies, or a server that is lost, takes them
-too. Copy them elsewhere regularly, e.g. every night from another machine, or by hand:
+too: set up **the off-site copy** (next), which sends each of them elsewhere as it appears.
+
+## The off-site copy
+
+The `offsite` part sends everything the backup part keeps to a bucket on another provider (any
+S3-compatible storage: Cloudflare R2, Backblaze B2, Wasabi, AWS S3, a MinIO of your own), encrypted
+on the way with [age](https://age-encryption.org) to a **public key**. The server can write the copies
+but cannot read them; the **private key** that reads them stays with the platform team, never on the
+server. What goes:
+
+| What | When | Kept in the bucket |
+|---|---|---|
+| Every change (each WAL segment) | within 5 minutes of being archived (`OFFSITE_EVERY`) | from the oldest kept base backup on |
+| Each base backup, dump with its roles, copy of the files | as soon as the backup part makes it | `OFFSITE_KEEP_DAYS` days (default 30), the latest two always |
+| The server's settings (`.env`, `postgres.env`) | whenever they change | the same |
+
+The settings go too because a restore needs them: `APP_KEY` decrypts the gateways' keys and the
+authenticator secrets, and the restored database has the passwords written there. Nothing in the bucket
+is ever written over. So the database can come back even when the server does not, losing about ten
+minutes at most.
+
+**Set it up once:**
+
+1. **The key**, on your own computer (`age-keygen` from your package manager, or
+   [the releases](https://github.com/age-encryption/age/releases)):
+   ```bash
+   age-keygen -o academy-lms-offsite.key     # prints "Public key: age1..."
+   ```
+   Keep `academy-lms-offsite.key` in the team's password manager **and** somewhere offline (a USB stick
+   in a drawer). Without it the copies cannot be read: there is no other way in. Two people can each
+   have their own key: put both public keys, comma-separated.
+   (No age at hand? `docker compose run --rm --no-deps --entrypoint age-keygen offsite` prints a new
+   key on the server's screen, kept nowhere: copy it away, then clear the terminal.)
+2. **The bucket**: a new, private bucket, and an access key for it alone. Better still, with object
+   versioning or an object lock of 30 days, so that someone who takes the server cannot delete the
+   copies: then give the key no right to delete, set `OFFSITE_KEEP_DAYS=0`, and let the bucket's own
+   lifecycle rule remove what is older than 30 days.
+3. **The settings**, in `.env` on the server:
+   ```bash
+   OFFSITE_S3_ENDPOINT=https://<account>.r2.cloudflarestorage.com   # empty for AWS S3
+   OFFSITE_S3_REGION=auto                                            # R2: auto; AWS: the bucket's region
+   OFFSITE_S3_BUCKET=academy-lms-backups
+   OFFSITE_S3_PREFIX=academy-lms
+   OFFSITE_S3_ACCESS_KEY=...
+   OFFSITE_S3_SECRET_KEY=...
+   OFFSITE_AGE_RECIPIENT=age1...                                     # the PUBLIC key only
+   OFFSITE_KEEP_DAYS=30
+   ```
+   then `docker compose up -d`. Within minutes `docker compose logs offsite` says what it sent, and the
+   health page's "Off-site copy" turns OK.
+
+**Day to day:**
 
 ```bash
-docker compose cp backup:/backups ./backups-$(date +%F)   # then move that folder off the server
+./restore.sh offsite                                     # what is in the bucket
+./restore.sh check offsite ~/academy-lms-offsite.key      # a restore drill from the bucket alone
 ```
+
+The drill fetches the latest base backup and its changes from the bucket, decrypts them with the key,
+brings the database up apart from everything, checks it and throws it away; it is recorded like the
+other drills (`off-site: latest`). Do it with the quarterly drill. Copy the key to the server only for
+that (`chmod 600`), and delete it right after: `shred -u ~/academy-lms-offsite.key`.
+
+If the health page says the off-site copy is not sending: `docker compose logs --tail=50 offsite`.
+A wrong key or bucket name is said there in plain words; a bucket that does not answer is retried
+every five minutes, and what waited goes as soon as it answers.
 
 ## Restore drill (every three months at least)
 
@@ -90,6 +151,69 @@ closest to (and after) the moment:
 docker compose run --rm --no-deps -v academy-lms_app-storage:/files --entrypoint tar backup \
     -xzf /backups/files/storage-<stamp>.tar.gz -C /files
 ```
+
+## The server is lost
+
+The disk died, the provider closed the account, or the server cannot be trusted any more. With the
+off-site copy and its private key, on a **new** server:
+
+1. Deploy as for the first time (README.md: "The server, once", then the deploy workflow, or
+   `deploy.sh` by hand) **without** demo data. The stack comes up empty, with new secrets.
+2. Put the off-site settings into the new `.env` (the same bucket, prefix and keys as before), and copy
+   the private key over (`chmod 600 ~/academy-lms-offsite.key`). Do not run `docker compose up` yet.
+3. Fetch the backups and the settings of then:
+   ```bash
+   ./restore.sh fetch ~/academy-lms-offsite.key latest      # or a moment: "2026-10-09 10:15" (UTC)
+   ```
+   It brings the newest base backup made before that moment, the changes after it, its dump and
+   files, into the volume `academy-lms_offsite-restore`, and writes the old server's settings next to
+   `restore.sh` as `.env.offsite` and `postgres.env.offsite` (with this server's `IMAGE`, `HTTP_PORT`
+   and `PG_VOLUME`).
+4. Take the old settings, so the restored database's passwords and the encrypted keys match:
+   ```bash
+   mv .env.offsite .env && mv postgres.env.offsite postgres.env
+   ```
+5. Put the database back, from what was fetched (it asks you to type `academy-lms`):
+   ```bash
+   ./restore.sh to latest offsite                           # the same moment as in step 3
+   ```
+6. The files, from the fetched copy:
+   ```bash
+   docker run --rm -v academy-lms_offsite-restore:/fetched:ro -v academy-lms_app-storage:/files \
+       postgres:17 sh -c 'tar -xzf /fetched/files/storage-*.tar.gz -C /files'
+   ```
+7. Point the domain at the new server (DNS, then `setup-nginx.sh` and the certificate as in README.md),
+   check `/console/health`, then remove what was fetched and the key:
+   `docker volume rm academy-lms_offsite-restore && shred -u ~/academy-lms-offsite.key`.
+
+## Email
+
+Alerts to the platform team, welcome and password links, and sign-in codes by email go through the
+server's mail settings. Until they are set, `MAIL_MAILER=log` writes every message to the log and
+nobody receives it; the health page's "Email" check warns about it on the server.
+
+1. An SMTP account that may send from the domain: the domain's own mail, or a sending service (Amazon
+   SES, Postmark, Brevo, Mailgun, ...). Add its SPF and DKIM records to the domain's DNS, as the
+   service says, or the messages land in spam.
+2. In `.env`:
+   ```bash
+   MAIL_MAILER=smtp
+   MAIL_HOST=smtp.example.com
+   MAIL_PORT=587                      # STARTTLS; for 465 add MAIL_SCHEME=smtps
+   MAIL_USERNAME=...
+   MAIL_PASSWORD=...
+   MAIL_FROM_ADDRESS=no-reply@<domain>
+   ```
+   then `docker compose up -d`.
+3. Send a test: the **Send a test email** button on the console's System health page (to you), or
+   ```bash
+   docker compose exec web php artisan platform:mail-test                 # to the platform team
+   docker compose exec web php artisan platform:mail-test you@example.com
+   ```
+
+When a message cannot leave (a wrong password, a server that does not answer), the "Email" check turns
+red with the reason, `GET /health` answers 503 (so the uptime monitor calls), and alerts are tried
+again at the next check.
 
 ## The database's change archive fails
 

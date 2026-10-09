@@ -176,6 +176,9 @@ recover() {
     {
         echo "restore_command = 'gzip -dc $DIR/wal/%f.gz > %p'"
         echo "recovery_target_action = 'promote'"
+        # The base backup's own line of history: after "restore.sh to" and "back", the archive also
+        # holds the abandoned timeline, which is no child of the newer base backups.
+        echo "recovery_target_timeline = 'current'"
         [ -z "$when" ] || echo "recovery_target_time = '$(date -u -d "$when" '+%F %T+00')'"
     } >> "$target/postgresql.auto.conf"
     touch "$target/recovery.signal"
@@ -199,18 +202,21 @@ recover() {
         || { tail -n 30 "$target.s/log" >&2; log "still recovering after an hour"; return 1; }
     # Recovery is done: its settings go, so they never run again by chance.
     psql -X -q -h "$target.s" -p 5432 -U postgres -d postgres \
-        -c 'alter system reset restore_command' -c 'alter system reset recovery_target_action' -c 'alter system reset recovery_target_time' >/dev/null
+        -c 'alter system reset restore_command' -c 'alter system reset recovery_target_action' -c 'alter system reset recovery_target_time' \
+        -c 'alter system reset recovery_target_timeline' >/dev/null
 }
 
 stop_server() { as_postgres pg_ctl -D "$1" -m fast -w stop >/dev/null 2>&1 || true; }
 
 drill() {
-    local when="${1:-}" work="${BACKUP_DRILL_DIR:-/tmp/drill}" started summary extra=""
+    local when="${1:-}" work="${BACKUP_DRILL_DIR:-/tmp/drill}" started summary extra="" label
+    # "off-site: …" when the backups drilled were fetched from the off-site copy (restore.sh check offsite).
+    label="${BACKUP_DRILL_FROM:+$BACKUP_DRILL_FROM: }${when:-latest}"
     started="$(iso_now)"
     rm -rf "$work" "$work.s"
     trap 'stop_server "'"$work"'"; rm -rf "'"$work"'" "'"$work"'.s"' EXIT
     if ! recover "$work" "$when"; then
-        record drill failed "$started" "" "${when:-latest}" "the restore did not come up"
+        record drill failed "$started" "" "$label" "the restore did not come up"
         log "DRILL FAILED"; return 1
     fi
     local q="psql -X -h $work.s -p 5432 -U postgres -d lms -Atc"
@@ -231,10 +237,10 @@ drill() {
     summary="restored to ${restored:-the base backup}: $academies academies, $users people, $lessons lessons, $invoices invoices; latest dump reads: $dump_ok"
     [ -z "$extra" ] || summary="$summary; check: $extra"
     if [ "$academies" -ge 1 ] && [ "$dump_ok" = yes ]; then
-        record drill ok "$started" "" "${when:-latest}" "$summary"
+        record drill ok "$started" "" "$label" "$summary"
         log "drill ok: $summary"
     else
-        record drill failed "$started" "" "${when:-latest}" "$summary"
+        record drill failed "$started" "" "$label" "$summary"
         log "DRILL FAILED: $summary"; return 1
     fi
 }

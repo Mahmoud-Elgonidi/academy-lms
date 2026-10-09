@@ -81,20 +81,25 @@ WebSocket upgrade headers.
 ## Day to day (in `~/academy-lms`)
 
 ```bash
-docker compose ps                                  # the nine parts: web, portal, reverb, worker, scheduler, relay, backup, postgres, redis
+docker compose ps                                  # the ten parts: web, portal, reverb, worker, scheduler, relay, backup, offsite, postgres, redis
 docker compose logs -f web                         # or portal, worker, scheduler, ...
 docker compose exec web php artisan about
-docker compose exec web php artisan platform:health   # every part, the backups, disk, errors (also /console/health)
+docker compose exec web php artisan platform:health   # every part, the backups and their off-site copy, disk, mail, errors (also /console/health)
 docker compose exec web php artisan platform:health --errors   # the errors themselves, for a 500 someone saw
 ./restore.sh list                                  # the backups; ./restore.sh check is a restore drill
+./restore.sh offsite                               # what the off-site copy holds
+docker compose exec web php artisan platform:mail-test   # does the server's mail reach the platform team?
 ```
 
 - **When something is wrong**, or for a restore drill or a restore to a moment: [`RUNBOOKS.md`](RUNBOOKS.md).
 - **Backups** are automatic: every change to the database as it happens (at least every 5 minutes), and a
   base backup, a dump and the app's files every day at `BACKUP_AT` (UTC), kept `BACKUP_KEEP_DAYS` days, in
-  the `backups` volume. They are on this server: copy them elsewhere too (`RUNBOOKS.md`, "Backups").
+  the `backups` volume. **The off-site copy** (the `offsite` part) sends each of them, encrypted to the
+  platform team's public key, to a bucket elsewhere once `OFFSITE_*` are set in `.env` (`RUNBOOKS.md`, "The
+  off-site copy"; "The server is lost" says how to come back on a new server).
 - **Health**: the console's System health page; alerts by email to the platform team once mail is set up
-  (`HEALTH_ALERT_TO` adds addresses); an uptime monitor can watch `/health` with `HEALTH_TOKEN` from `.env`.
+  (`MAIL_*` in `.env`, then "Send a test email" on that page; `RUNBOOKS.md`, "Email"; `HEALTH_ALERT_TO` adds
+  addresses); an uptime monitor can watch `/health` with `HEALTH_TOKEN` from `.env`.
 
 - **Going back**: run the deploy workflow for an older commit, or put its image in `IMAGE=` in `.env` and
   `docker compose up -d` (migrations already applied stay).
@@ -103,7 +108,8 @@ docker compose exec web php artisan platform:health --errors   # the errors them
   have a `.env` (the file is never overwritten).
 - **Not on yet**: live lessons through LiveKit (lessons use an outside link: `CLASSROOM_PROVIDER=external`)
   and recording them (LiveKit Egress, with `LIVEKIT_EGRESS_URL`, `RECORDINGS_DISK` and `RECORDINGS_RECORDER_ROOT`),
-  email, WhatsApp, texts and push (messages go to the log), real payment gateways (each academy adds its own
+  email until an SMTP account is set (`MAIL_*`), WhatsApp, texts and push (messages go to the log), the off-site
+  copy until a bucket and key are set (`OFFSITE_*`), real payment gateways (each academy adds its own
   keys), signing in with Google and Apple (the platform's clients: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
   `GOOGLE_APP_CLIENT_IDS`, `APPLE_SERVICES_ID`, `APPLE_APP_IDS`; each provider sends people back to
   `https://$DOMAIN/auth/social/{google|apple}/callback`), and academies' own domains.
@@ -123,7 +129,8 @@ docker compose exec web php artisan platform:health --errors   # the errors them
 | `postgres-init.sh` | the LMS roles on a new database (`apps/api/database/setup/roles.sql`) |
 | `postgres-start.sh`, `pg_hba.conf` | how Postgres starts: every finished WAL segment copied into the backups volume, and who may connect (the backup part may take base backups) |
 | `backup.sh` | the backup part: daily base backup, dump and files, retention, restore drills and restoring into a new volume |
-| `restore.sh` | on the server: `list`, `now`, `check [TIME]`, `to TIME\|latest`, `back VOLUME` |
+| `offsite.sh` | the offsite part (on the app's image, with `age`, `rclone` and `psql`): each backup and WAL segment and the settings sent, encrypted, to a bucket elsewhere; retention there; fetching back with the private key |
+| `restore.sh` | on the server: `list`, `now`, `check [TIME]`, `to TIME\|latest [offsite]`, `back VOLUME`, and from the off-site copy `offsite`, `check offsite KEYFILE`, `fetch KEYFILE [TIME]` |
 | `RUNBOOKS.md` | what to do when something is wrong, and how to restore |
 | `deploy.sh` | runs on the server: checks, first-run settings (and settings added since), migrations, start, health check, way back |
 | `setup-nginx.sh`, `nginx/academy-lms.conf` | the server's nginx site, once |

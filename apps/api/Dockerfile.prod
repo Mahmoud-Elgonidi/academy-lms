@@ -4,7 +4,8 @@
 # command picks the part (infra/deploy/entrypoint.sh): web (FrankenPHP serving
 # public/, with Reverb's browser connections passed on under /app/ and the
 # portal's pages to the portal), portal (apps/web, Next's own server), reverb,
-# worker, scheduler, relay, and the one-off migrate and seed-demo.
+# worker, scheduler, relay, and the one-off migrate and seed-demo; the offsite
+# part runs infra/deploy/offsite.sh on it.
 #
 # Built from the repository root:
 #   docker build -f apps/api/Dockerfile.prod -t academy-lms .
@@ -23,12 +24,15 @@ RUN npm run build \
 
 FROM dunglas/frankenphp:1-php8.3-bookworm
 
+# age, rclone and psql are the off-site copy's (infra/deploy/offsite.sh): it
+# encrypts each backup to the platform team's public key and sends it to a bucket.
 RUN install-php-extensions pdo_pgsql pgsql intl zip bcmath pcntl redis opcache \
     && apt-get update \
-    && apt-get install -y --no-install-recommends libcap2-bin \
+    && apt-get install -y --no-install-recommends libcap2-bin age postgresql-client \
     && rm -rf /var/lib/apt/lists/* \
     && cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
+COPY --from=rclone/rclone:1.68.2 /usr/local/bin/rclone /usr/local/bin/rclone
 COPY infra/deploy/php.ini "$PHP_INI_DIR/conf.d/zz-academy.ini"
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

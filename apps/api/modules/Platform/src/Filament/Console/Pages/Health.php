@@ -4,21 +4,28 @@ namespace Modules\Platform\Filament\Console\Pages;
 
 use BackedEnum;
 use Carbon\CarbonImmutable;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Computed;
 use Modules\Platform\Filament\Console\ConsoleView;
 use Modules\Platform\Health\SystemHealth;
+use Modules\Platform\Health\TestMail;
 use Modules\Platform\Models\Academy;
+use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Health\RecentErrors;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use Throwable;
 
 /**
  * The stack's health for the platform team (docs/architecture/03, section
- * 12): every check, the backups and restore drills, and the latest errors.
- * What it shows changes with the clock (how long since each part spoke), so
- * it checks again every minute while it is in front.
+ * 12): every check, the backups, their off-site copy and restore drills,
+ * and the latest errors. What it shows changes with the clock (how long since
+ * each part spoke), so it checks again every minute while it is in front. A
+ * test email shows whether the server's mail reaches the team.
  */
 final class Health extends Page
 {
@@ -57,6 +64,25 @@ final class Health extends Page
     public function overall(): string
     {
         return SystemHealth::overall($this->checks);
+    }
+
+    /** @return list<Action> */
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('testMail')->label(__('platform::health.mail.test'))->icon('heroicon-m-envelope')->color('gray')
+                ->action(function () {
+                    $email = (string) auth('platform')->user()?->email;
+                    try {
+                        Mail::to($email)->send(new TestMail);
+                        Notification::make()->success()->title(__('platform::health.mail.test_sent', ['email' => $email]))->send();
+                    } catch (Throwable $e) {
+                        MailHealth::failed($e);
+                        Notification::make()->danger()->title(__('platform::health.mail.test_failed'))->body(MailHealth::last()['error'] ?? null)->send();
+                    }
+                    unset($this->checks);
+                }),
+        ];
     }
 
     public function checkedAt(): string

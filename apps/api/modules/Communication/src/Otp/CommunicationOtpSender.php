@@ -8,6 +8,8 @@ use Modules\Communication\Channels\ChannelManager;
 use Modules\Communication\Mail\OtpMail;
 use Modules\Identity\Contracts\DTOs\OtpMessage;
 use Modules\Identity\Contracts\OtpSender;
+use Modules\SharedKernel\Health\MailHealth;
+use Throwable;
 
 /**
  * Identity's codes, by the platform's channels: WhatsApp's authentication
@@ -34,9 +36,19 @@ final class CommunicationOtpSender implements OtpSender
             'whatsapp' => $this->channels->whatsapp()->sendCode($message->destination, $message->code, $message->locale),
             'sms' => $this->channels->sms()?->send($message->destination, $this->text($message))
                 ?? throw new InvalidArgumentException('Texts are turned off.'),
-            'email' => Mail::to($message->destination)->send(new OtpMail($message)),
+            'email' => $this->mail($message),
             default => throw new InvalidArgumentException("Unknown channel [{$message->channel}]."),
         };
+    }
+
+    private function mail(OtpMessage $message): void
+    {
+        try {
+            Mail::to($message->destination)->send(new OtpMail($message));
+        } catch (Throwable $e) {
+            MailHealth::failed($e);
+            throw $e;
+        }
     }
 
     private function text(OtpMessage $message): string

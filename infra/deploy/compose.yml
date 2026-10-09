@@ -154,6 +154,40 @@ services:
       resources:
         limits: { memory: "${BACKUP_MEMORY:-512m}", cpus: "${BACKUP_CPUS:-0.5}" }
 
+  # The off-site copy (offsite.sh): what the backup part keeps, sent as it
+  # appears to a bucket elsewhere, encrypted to OFFSITE_AGE_RECIPIENT (public
+  # keys: this server cannot read the copies). Idle until OFFSITE_S3_BUCKET and
+  # the key are set in .env. It reads the backups (as root: they belong to
+  # Postgres and to the backup part) and the settings, and writes nothing here
+  # but what it remembers of the bucket.
+  offsite:
+    image: ${IMAGE:?deploy.sh sets IMAGE in .env}
+    restart: unless-stopped
+    networks: [internal]
+    env_file: [.env, postgres.env]
+    environment:
+      PGHOST: postgres
+      PGUSER: postgres
+      PGDATABASE: lms
+    user: "0:0"
+    entrypoint: ["bash", "/etc/academy/offsite.sh"]
+    command: ["run"]
+    volumes:
+      - backups:/backups:ro
+      - offsite-state:/state
+      - ./offsite.sh:/etc/academy/offsite.sh:ro
+      - ./.env:/deploy/.env:ro
+      - ./postgres.env:/deploy/postgres.env:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      disable: true
+    logging: *logging
+    deploy:
+      resources:
+        limits: { memory: "${OFFSITE_MEMORY:-256m}", cpus: "${OFFSITE_CPUS:-0.5}" }
+
   # Sessions, cache and the queue. Nothing is evicted: a full Redis refuses
   # writes rather than dropping queued messages.
   redis:
@@ -179,3 +213,4 @@ volumes:
   redis-data: {}
   app-storage: {}
   backups: {}
+  offsite-state: {}
