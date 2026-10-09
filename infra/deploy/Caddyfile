@@ -16,6 +16,19 @@
 :8080 {
 	encode zstd gzip
 
+	# The security headers (apps/api/modules/SharedKernel/src/Http/SecurityHeaders.php)
+	# on what neither the app nor the portal answers itself: built assets and the
+	# public disk's files. An answer that already has one keeps its own.
+	header {
+		?X-Content-Type-Options nosniff
+		?X-Frame-Options SAMEORIGIN
+		?Referrer-Policy strict-origin-when-cross-origin
+		?Content-Security-Policy "base-uri 'self'; object-src 'none'; frame-ancestors 'self'"
+		?Permissions-Policy "geolocation=(), usb=(), serial=(), hid=(), bluetooth=()"
+		-Server
+		-X-Powered-By
+	}
+
 	# Reverb: the browsers' live connections (wss://<academy host>/app/<key>).
 	handle /app/* {
 		reverse_proxy reverb:8080

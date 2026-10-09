@@ -259,6 +259,22 @@ ACADEMY=demo API_INTERNAL_URL=http://127.0.0.1:8000 npm run start
 7. **"نزّل Excel"**: ملخص الفترة، وكل المدفوعات، وكل الفواتير.
 8. سجّل دفعة على أي فاتورة من تاب تاني: اللوحة بتتحدث لوحدها من غير refresh (لو Reverb والـ relay شغالين).
 
+### جرّب فحوصات الأمان
+
+الأمان متشاف كاختبارات بتشتغل مع كل push (القائمة كاملة في [03 — القسم 11](docs/architecture/03-technical-architecture.md#11-الأمن-والخصوصية-والامتثال)):
+
+```bash
+cd apps/api
+php vendor/bin/pest tests/Feature/Security   # عزل الأكاديميات (أكتر من 700 محاولة)، والمدرس مابيشوفش أرقام الأسر، والـ headers، والحدود، والـ logs
+SWEEP_DUMP=1 php vendor/bin/pest tests/Feature/Security/TenantIsolationSweepTest.php   # نفس الفحص، ومعاه كل محاولة وردّها
+curl -sI http://localhost:8000/admin/login | grep -iE 'content-security|x-frame|nosniff|referrer'
+```
+
+وفي GitHub:
+- `composer audit` و`npm audit` بيوقفوا الـ build لو فيه ثغرة معروفة.
+- Dependabot بيفتح تحديثات كل أسبوع.
+- gitleaks بيقرا التاريخ كله مع كل push (`.github/workflows/secrets.yml`).
+
 ### جرّب أسئلة التقرير
 
 كل مادة ليها أسئلتها بعد الأجزاء الثابتة في تقرير الحصة. في الديمو: **قرآن · حفظ** (إصدارين: الآيات اللي اتحفظت، والتجويد، وبعدين اتضاف "راجع المحفوظ" و"محتاج متابعة من المشرف" للأكاديمية بس)، و**تجويد**، و**نحو**. والإنجليزي من غير أسئلة.
@@ -361,7 +377,7 @@ git pull
 
 أي push على `main` بيعدّي اختبارات الـ API أو الويب بيتنشر لوحده (`.github/workflows/deploy.yml`):
 1. GitHub بيبني صورة الإنتاج (الـ API واللوحات وبوابة الويب في صورة واحدة).
-2. بيجرّب النشر كله على جهازه: الصفحات، والدخول بالـ API، والاتصال اللحظي، وبوابة المدرس بحساب مدرس.
+2. بيجرّب النشر كله على جهازه: الصفحات، و headers الأمان، والدخول بالـ API، والاتصال اللحظي، وبوابة المدرس بحساب مدرس.
 3. بيرفع الصورة على registry بتاع GitHub.
 4. بيشغّل `infra/deploy/deploy.sh` على السيرفر بـ SSH.
 

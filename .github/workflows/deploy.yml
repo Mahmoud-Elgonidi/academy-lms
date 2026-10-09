@@ -113,6 +113,21 @@ jobs:
           [ -n "$css" ] || { echo "no stylesheet on the sign-in page"; exit 1; }
           check 200 demo.lms.example "$css"
 
+          # The security headers: on the app's pages (with HSTS over https), and from Caddy on static files.
+          secured() {
+            local host="$1" path="$2"; shift 2
+            curl -s -o /dev/null -D /tmp/headers -H "Host: $host" "$@" "$base$path"
+            for want in 'x-content-type-options: nosniff' 'x-frame-options: SAMEORIGIN' 'referrer-policy: strict-origin-when-cross-origin' \
+                        "content-security-policy: base-uri 'self'; object-src 'none'; frame-ancestors 'self'"; do
+              grep -qiF "$want" /tmp/headers || { echo "no '$want' on $host$path"; cat /tmp/headers; exit 1; }
+            done
+            echo "headers ok $host$path"
+          }
+          secured demo.lms.example /admin/login -H 'X-Forwarded-Proto: https'
+          grep -qi '^strict-transport-security: max-age=' /tmp/headers || { echo "no HSTS over https"; exit 1; }
+          secured demo.lms.example /api/v1/branding -H 'Accept: application/json'
+          secured demo.lms.example "$css"
+
           # Signing in through the API with the server's own demo password (a teacher: the owner
           # must set up two-step sign-in in the back office first, and is told so).
           check 200 demo.lms.example /api/v1/auth/login -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' \
@@ -145,6 +160,8 @@ jobs:
           asset="$( (grep -oE '/_next/static/[^"]+\.(css|js)' /tmp/body || true) | head -n 1)"
           [ -n "$asset" ] || { echo "no portal asset on the sign-in page"; exit 1; }
           check 200 demo.lms.example "$asset"
+          secured demo.lms.example /ar/sign-in -H 'X-Forwarded-Proto: https'
+          grep -qi '^strict-transport-security: max-age=' /tmp/headers || { echo "no HSTS on the portal over https"; exit 1; }
           check 307 demo.lms.example /ar/teach -H 'X-Forwarded-Proto: https'
           location="$(curl -s -o /dev/null -w '%{redirect_url}' -H 'Host: demo.lms.example' -H 'X-Forwarded-Proto: https' "$base/ar/teach")"
           echo "-> $location"

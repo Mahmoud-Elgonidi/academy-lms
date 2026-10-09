@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Modules\SharedKernel\Http\Idempotent;
 use Modules\SharedKernel\Http\ProblemDetails;
 use Modules\SharedKernel\Http\ResolveViewerTimezone;
+use Modules\SharedKernel\Http\SecurityHeaders;
 use Modules\SharedKernel\Http\SetLocale;
 use Modules\SharedKernel\Plans\RequirePlanFeature;
 use Modules\SharedKernel\Tenancy\Exceptions\TenantNotResolved;
@@ -34,6 +35,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // The tenant must be known before authentication, rate limiting and
         // route model binding touch the database.
         $middleware->prependToPriorityList(AuthenticatesRequests::class, ResolveTenant::class);
+
+        // Every answer carries the security headers; the apps' API has a ceiling per person.
+        $middleware->append(SecurityHeaders::class);
+        $middleware->throttleApi('api');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // A suspended academy's web pages: one page saying so, not a server error (the API answers 403 academy-suspended).

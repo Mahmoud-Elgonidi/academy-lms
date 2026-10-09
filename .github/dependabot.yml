@@ -1,0 +1,39 @@
+# Dependency updates (docs/architecture/03, section 11): once a week, minor and
+# patch updates grouped into one pull request per app; security updates come as
+# soon as GitHub knows of them. Each pull request runs that app's own checks.
+version: 2
+updates:
+  - package-ecosystem: composer
+    directory: /apps/api
+    schedule: { interval: weekly, day: saturday }
+    open-pull-requests-limit: 5
+    groups:
+      api-minor:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule: { interval: weekly, day: saturday }
+    open-pull-requests-limit: 5
+    groups:
+      web-minor:
+        update-types: [minor, patch]
+
+  - package-ecosystem: pub
+    directory: /apps/mobile
+    schedule: { interval: weekly, day: saturday }
+    open-pull-requests-limit: 5
+    groups:
+      mobile-minor:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
+    groups:
+      actions:
+        patterns: ['*']
+
+  - package-ecosystem: docker
+    directory: /apps/api
+    schedule: { interval: monthly }

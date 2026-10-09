@@ -1,5 +1,6 @@
 <?php
 
+use Modules\SharedKernel\Logging\RedactPersonalData;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -59,6 +60,7 @@ return [
         ],
 
         'single' => [
+            'tap' => [RedactPersonalData::class],
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
@@ -66,6 +68,7 @@ return [
         ],
 
         'daily' => [
+            'tap' => [RedactPersonalData::class],
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
@@ -74,6 +77,7 @@ return [
         ],
 
         'monthly' => [
+            'tap' => [RedactPersonalData::class],
             'driver' => 'monthly',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
@@ -91,6 +95,7 @@ return [
         ],
 
         'papertrail' => [
+            'tap' => [RedactPersonalData::class],
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'debug'),
             'handler' => env('LOG_PAPERTRAIL_HANDLER', SyslogUdpHandler::class),
@@ -103,6 +108,7 @@ return [
         ],
 
         'stderr' => [
+            'tap' => [RedactPersonalData::class],
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'debug'),
             'handler' => StreamHandler::class,
@@ -114,6 +120,7 @@ return [
         ],
 
         'syslog' => [
+            'tap' => [RedactPersonalData::class],
             'driver' => 'syslog',
             'level' => env('LOG_LEVEL', 'debug'),
             'facility' => env('LOG_SYSLOG_FACILITY', LOG_USER),
@@ -121,6 +128,7 @@ return [
         ],
 
         'errorlog' => [
+            'tap' => [RedactPersonalData::class],
             'driver' => 'errorlog',
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,

@@ -29,6 +29,10 @@ jobs:
 
       - run: npm ci
 
+      # What the portal runs with: a known high or critical vulnerability fails the build.
+      - name: Known vulnerabilities in dependencies
+        run: npm audit --omit=dev --audit-level=high
+
       # The portal's calls are typed from packages/openapi/openapi.json: a path the API
       # no longer has fails the typecheck, so the generated types must match the document.
       - name: API types up to date

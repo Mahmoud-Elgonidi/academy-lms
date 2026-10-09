@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Modules\Evaluation\Actions\RateLesson;
@@ -63,7 +64,9 @@ final class RateLessonController
 
     private function speak(string $raterId, TenantContext $tenants): void
     {
-        $locale = $raterId !== '' ? DB::table('users')->where('id', $raterId)->value('locale') : null;
-        app()->setLocale($locale ?: $tenants->require()->defaultLocale);
+        // A link always names who rates, someone of this academy.
+        $user = Str::isUuid($raterId) ? DB::table('users')->where('id', $raterId)->first(['locale']) : null;
+        abort_if($user === null, 404);
+        app()->setLocale($user->locale ?: $tenants->require()->defaultLocale);
     }
 }

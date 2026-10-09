@@ -10,6 +10,7 @@ use Modules\Evaluation\Actions\RateLesson;
 use Modules\Evaluation\Filament\KpiView;
 use Modules\Evaluation\Filament\Pages\TeacherPerformance;
 use Modules\Evaluation\Models\LessonRating;
+use Modules\Evaluation\Queries\LessonFacts;
 use Modules\Evaluation\Queries\PerformanceEvents;
 use Modules\Evaluation\Queries\TeacherKpis;
 use Modules\SharedKernel\Time\ViewerTimezone;
@@ -76,9 +77,10 @@ final class RatingsController
         ]);
     }
 
+    /** A lesson this academy has (another academy's is not found). */
     private function known(string $session): void
     {
-        if (! Str::isUuid($session)) {
+        if (! Str::isUuid($session) || app(LessonFacts::class)->find($session) === null) {
             throw new NotFoundHttpException;
         }
     }

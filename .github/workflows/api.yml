@@ -58,6 +58,10 @@ jobs:
         env:
           COMPOSER_AUTH: '{"github-oauth": {"github.com": "${{ secrets.GITHUB_TOKEN }}"}}'
 
+      # A dependency with a published security advisory fails the build (docs/architecture/03, section 11).
+      - name: Known vulnerabilities in dependencies
+        run: composer audit --no-interaction --locked
+
       - name: Create database roles (owner / app / platform)
         env:
           PGPASSWORD: postgres

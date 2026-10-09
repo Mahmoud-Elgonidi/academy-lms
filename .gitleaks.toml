@@ -1,0 +1,11 @@
+# Secret scanning (.github/workflows/secrets.yml): gitleaks' own rules, and the
+# few values that look like keys but are not.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known values that are not secrets"
+regexes = [
+  # RFC 6455's sample WebSocket key ("the sample nonce"), in the deploy rehearsal.
+  '''dGhlIHNhbXBsZSBub25jZQ==''',
+]

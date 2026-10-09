@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\People\Actions\Consent\GrantConsent;
 use Modules\People\Consent\ConsentRules;
@@ -59,7 +60,9 @@ final class ConsentLinkController
 
     private function speak(string $guardianId, TenantContext $tenants): void
     {
-        $locale = $guardianId !== '' ? DB::table('users')->where('id', $guardianId)->value('locale') : null;
-        app()->setLocale($locale ?: $tenants->require()->defaultLocale);
+        // A link always names its guardian, someone of this academy.
+        $user = Str::isUuid($guardianId) ? DB::table('users')->where('id', $guardianId)->first(['locale']) : null;
+        abort_if($user === null, 404);
+        app()->setLocale($user->locale ?: $tenants->require()->defaultLocale);
     }
 }

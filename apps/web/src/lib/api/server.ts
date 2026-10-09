@@ -53,6 +53,9 @@ async function outgoing(token?: string): Promise<Record<string, string>> {
   const host = incoming.get('x-forwarded-host') ?? incoming.get('host');
   if (host) sent['X-Forwarded-Host'] = host;
   sent['X-Forwarded-Proto'] = incoming.get('x-forwarded-proto') ?? 'http';
+  // The visitor's address, so the API's limits count each person, not the portal.
+  const from = incoming.get('x-forwarded-for');
+  if (from) sent['X-Forwarded-For'] = from;
   if (process.env.ACADEMY) sent['X-Academy'] = process.env.ACADEMY;
   return sent;
 }

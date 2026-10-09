@@ -2,15 +2,18 @@
 
 namespace Modules\SharedKernel\Providers;
 
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Events\ConnectionEstablished;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Schema\Grammars\PostgresGrammar;
+use Illuminate\Http\Request;
 use Illuminate\Log\Context\Repository as ContextRepository;
 use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\OpenPlan;
@@ -55,6 +58,24 @@ final class SharedKernelServiceProvider extends ServiceProvider
 
         $this->restoreTenantInQueuedJobs();
         $this->registerBlueprintMacros();
+        $this->registerRateLimits();
+    }
+
+    /**
+     * Ceilings for every open door (docs/architecture/03, section 11), on top
+     * of the tight ones a door keeps for itself (sign-in, codes, proofs):
+     * the apps' API per person (or address, before signing in; the portal
+     * passes its visitor's address on), and the pages behind signed links
+     * and the class page. Named, so they never share a count with another door.
+     */
+    private function registerRateLimits(): void
+    {
+        RateLimiter::for('api', fn (Request $request) => $request->user()
+            ? Limit::perMinute(600)->by('user:'.$request->user()->getAuthIdentifier())
+            : Limit::perMinute(240)->by('ip:'.$request->ip()));
+        RateLimiter::for('links', fn (Request $request) => $request->user()
+            ? Limit::perMinute(120)->by('user:'.$request->user()->getAuthIdentifier())
+            : Limit::perMinute(120)->by('ip:'.$request->ip()));
     }
 
     /**

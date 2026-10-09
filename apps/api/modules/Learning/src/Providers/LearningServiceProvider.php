@@ -57,7 +57,7 @@ final class LearningServiceProvider extends ServiceProvider
         // Files handed in, for the panels (session sign-in); the apps use the API route.
         Route::middleware(['web', 'tenant'])->get('learning/files/{submission}', SubmissionFileController::class)->name('learning.files');
         // A lesson's file behind a signed address (MaterialLinks), for whoever was shown the lesson: no sign-in needed.
-        Route::middleware(['web', 'tenant', 'signed:relative'])->get('materials/{resource}', MaterialController::class)->name('learning.material');
+        Route::middleware(['web', 'tenant', 'signed:relative', 'throttle:links'])->get('materials/{resource}', MaterialController::class)->name('learning.material');
 
         LearningPlugin::registerAccountSection();
 
