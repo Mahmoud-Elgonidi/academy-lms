@@ -121,6 +121,7 @@ return [
     'statuses' => ['active' => 'On', 'disabled' => 'Off', 'invited' => 'Has not chosen a password yet'],
     'filters' => ['subject' => 'Subject', 'gender' => 'Gender', 'status' => 'Account', 'courses' => 'Has a running course'],
     'actions' => [
+        'calendar' => 'Lessons on the calendar',
         'disable' => 'Turn the account off',
         'disable_body' => 'They can no longer sign in anywhere, and are signed out of the devices they use. You can turn it back on later.',
         'disabled' => 'Account turned off',

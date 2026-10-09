@@ -11,11 +11,14 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Component;
 use Filament\Support\Exceptions\Halt;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Modules\Identity\Contracts\DTOs\UserDetails;
 use Modules\People\Actions\Directory\SetPersonActive;
 use Modules\People\Actions\SendWelcome;
 use Modules\People\Queries\Models\Person;
+use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Contact\Phone;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Timezones;
@@ -23,6 +26,8 @@ use Modules\SharedKernel\Time\Timezones;
 /** What the teachers', students' and guardians' screens share: who a person is and how to reach them, and turning an account off. */
 final class DirectoryForm
 {
+    private const CALENDAR = 'filament.academy.pages.calendar';
+
     /** @return list<Component|Field> name, email, number, time zone and language, under a prefix ('' or 'guardian_') */
     public static function contact(string $prefix = '', bool $required = true): array
     {
@@ -97,6 +102,14 @@ final class DirectoryForm
 
             throw new Halt;
         }
+    }
+
+    /** The person's lessons on the academy calendar (Scheduling's screen, reached by its route name), for whoever may see it. */
+    public static function calendarAction(string $filter, Closure $id): Action
+    {
+        return Action::make('calendar')->label(__('people::directory.actions.calendar'))->icon('heroicon-o-calendar-days')->color('gray')
+            ->visible(fn () => Route::has(self::CALENDAR) && Gate::allows(Ability::ViewLiveBoard->value))
+            ->url(fn () => route(self::CALENDAR, [$filter => $id()]));
     }
 
     /**

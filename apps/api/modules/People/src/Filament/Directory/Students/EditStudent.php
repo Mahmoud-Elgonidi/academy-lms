@@ -43,6 +43,9 @@ final class EditStudent extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return DirectoryForm::accountActions(fn () => Person::query()->findOrFail($this->getRecord()->getKey()), fn () => $this->refreshFormData([]));
+        return [
+            DirectoryForm::calendarAction('student', fn () => (string) $this->getRecord()->getKey()),
+            ...DirectoryForm::accountActions(fn () => Person::query()->findOrFail($this->getRecord()->getKey()), fn () => $this->refreshFormData([])),
+        ];
     }
 }

@@ -32,6 +32,7 @@ use Modules\Scheduling\Actions\RescheduleSession;
 use Modules\Scheduling\Domain\Availability\IntervalSet;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Policy\PolicyEvent;
+use Modules\Scheduling\Filament\Pages\AcademyCalendar;
 use Modules\Scheduling\Filament\PolicyPreview;
 use Modules\Scheduling\Queries\AvailabilityQuery;
 use Modules\Scheduling\Queries\EnrollmentAccountQuery;
@@ -215,6 +216,12 @@ final class ViewEnrollment extends ViewRecord
 
                     return __('scheduling::enrollments.look.done', ['stage' => __('scheduling::enrollments.look.stages.'.app(PeopleApi::class)->studentProfile($this->record->student_id)->stage->value)]);
                 })),
+            Action::make('calendar')
+                ->label(__('scheduling::calendar.course'))
+                ->icon(Heroicon::OutlinedCalendarDays)
+                ->color('gray')
+                ->visible(fn () => AcademyCalendar::canAccess())
+                ->url(fn () => AcademyCalendar::getUrl(['student' => $this->record->student_id, 'subject' => $this->record->subject_id])),
         ];
     }
 
