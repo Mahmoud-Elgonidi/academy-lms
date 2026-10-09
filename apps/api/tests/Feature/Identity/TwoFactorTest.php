@@ -1,5 +1,6 @@
 <?php
 
+use Filament\Auth\Pages\Login;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
@@ -238,4 +239,32 @@ it('shows it in My settings, and lets the platform team reset it with a reason',
     expect($row->actor_type)->toBe('platform')->and($row->actor_name)->toBe('سلمى')
         ->and(json_decode($row->data, true)['reason'])->toContain('ضيّع موبايله');
     expect(fn () => app(ResetTwoFactor::class)->handle($academy, $this->accountant->id, $ref, 'سامي ضيّع موبايله تاني يا جماعة.'))->toThrow(ValidationException::class);
+});
+
+it('says a recovery code is wrong, not a server error, to someone who has none left (panels and the console)', function () {
+    // An academy panel: the teacher's codes are all used up.
+    $this->actAsTenant($this->noor);
+    Filament::setCurrentPanel('teach');
+    $this->teacher->refresh()->saveAppAuthenticationRecoveryCodes(null);
+    Livewire::test(SignIn::class)
+        ->fillForm(['email' => 'khaled@noor.test', 'password' => 'a-long-password'])->call('authenticate')
+        ->set('data.multiFactor.app.useRecoveryCode', true)
+        ->set('data.multiFactor.app.recoveryCode', 'aaaaaaaaaa-bbbbbbbbbb')
+        ->call('authenticate')
+        ->assertHasErrors();
+    expect(Auth::guard('web')->check())->toBeFalse();
+
+    // The console: an admin whose authenticator was set without codes (as the demo's is).
+    $this->clearTenant();
+    PlatformAdmin::query()->forceCreate(['name' => 'Demo', 'email' => 'demo@platform.test', 'password' => 'a-long-password'])
+        ->saveAppAuthenticationSecret(UserFactory::TWO_FACTOR_SECRET);
+    Filament::setCurrentPanel('console');
+    Livewire::test(Login::class)
+        ->fillForm(['email' => 'demo@platform.test', 'password' => 'a-long-password'])->call('authenticate')
+        ->assertNotSet('userUndertakingMultiFactorAuthentication', null)
+        ->set('data.multiFactor.app.useRecoveryCode', true)
+        ->set('data.multiFactor.app.recoveryCode', 'JBSWY3DPEHPK3PXP')
+        ->call('authenticate')
+        ->assertHasErrors();
+    expect(Auth::guard('platform')->check())->toBeFalse();
 });

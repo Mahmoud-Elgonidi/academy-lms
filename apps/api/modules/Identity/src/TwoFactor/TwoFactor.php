@@ -36,7 +36,7 @@ final class TwoFactor
         $academy = app(TenantContext::class)->current();
         $name = $academy === null ? null : (app()->getLocale() === 'ar' ? $academy->nameAr : $academy->nameEn);
 
-        return AppAuthentication::make()->recoverable()->brandName($name ?: config('app.name'));
+        return AuthenticatorApp::make()->recoverable()->brandName($name ?: config('app.name'));
     }
 
     /** Whether this code from the person's authenticator app, or one of their recovery codes (used up), is right. */

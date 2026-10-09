@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\FontProviders\GoogleFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -20,6 +19,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Identity\Filament\Console\IdentityConsolePlugin;
 use Modules\Identity\Filament\InitialsAvatar;
+use Modules\Identity\TwoFactor\AuthenticatorApp;
 use Modules\Platform\Filament\Console\ConsolePlugin;
 use Modules\Platform\Http\Middleware\ConsoleContext;
 
@@ -40,7 +40,7 @@ final class ConsolePanelProvider extends PanelProvider
             ->path('console')
             ->authGuard('platform')
             ->login()
-            ->multiFactorAuthentication([AppAuthentication::make()->recoverable()], isRequired: true)
+            ->multiFactorAuthentication([AuthenticatorApp::make()->recoverable()], isRequired: true)
             ->brandName(fn (): string => __('platform::console.brand'))
             ->colors(['primary' => Color::Indigo, 'gray' => Color::Slate])
             ->font('IBM Plex Sans Arabic', provider: GoogleFontProvider::class)
