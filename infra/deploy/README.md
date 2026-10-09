@@ -85,6 +85,7 @@ docker compose ps                                  # the nine parts: web, portal
 docker compose logs -f web                         # or portal, worker, scheduler, ...
 docker compose exec web php artisan about
 docker compose exec web php artisan platform:health   # every part, the backups, disk, errors (also /console/health)
+docker compose exec web php artisan platform:health --errors   # the errors themselves, for a 500 someone saw
 ./restore.sh list                                  # the backups; ./restore.sh check is a restore drill
 ```
 

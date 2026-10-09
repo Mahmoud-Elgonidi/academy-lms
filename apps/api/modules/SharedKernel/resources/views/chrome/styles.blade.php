@@ -141,12 +141,17 @@
     .fi-simple-layout::after { width: 44rem; height: 44rem; bottom: -22rem; inset-inline-start: -14rem; background: radial-gradient(circle, color-mix(in oklab, var(--warning-200) 60%, transparent), transparent 65%); }
     .fi-simple-main-ctn { position: relative; }
     .fi-simple-main-ctn::before { content: ''; position: absolute; z-index: -1; inset: 0; pointer-events: none; background-image: radial-gradient(color-mix(in oklab, var(--gray-500) 28%, transparent) 1px, transparent 1.4px); background-size: 22px 22px; -webkit-mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, black, transparent); mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, black, transparent); }
-    .fi-simple-main { position: relative; background-color: color-mix(in oklab, white 86%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 0 0 1px var(--lms-line), 0 2px 4px rgb(0 0 0 / .03), 0 30px 60px -32px rgb(0 0 0 / .3); }
+    /* The frosted glass is a layer behind the card, not the card itself: a backdrop-filter makes an element the box its
+       position: fixed children are placed in, and the dialogs opened on these pages (setting up the authenticator) would
+       be caught inside the card, their buttons cut off. */
+    .fi-simple-main { position: relative; isolation: isolate; background-color: transparent; box-shadow: 0 0 0 1px var(--lms-line), 0 2px 4px rgb(0 0 0 / .03), 0 30px 60px -32px rgb(0 0 0 / .3); }
+    .fi-simple-main::after { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background-color: color-mix(in oklab, white 86%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
     .fi-simple-main::before { content: ''; position: absolute; inset-inline: 22%; top: 0; height: 4px; border-radius: 0 0 4px 4px; background: var(--lms-pill); }
     .fi-simple-header div.fi-logo { margin-bottom: calc(1rem - .3em); font-size: 1.4rem; font-weight: 800; }
     /* The one-time code: big, spaced digits, read left to right in every language. */
     .lms-otp-input { text-align: center; font-size: 1.35rem; font-weight: 700; letter-spacing: .45em; font-variant-numeric: tabular-nums; }
-    .dark .fi-simple-main { background-color: color-mix(in oklab, var(--gray-900) 85%, transparent); box-shadow: 0 0 0 1px rgb(255 255 255 / .08), 0 30px 60px -32px rgb(0 0 0 / .7); }
+    .dark .fi-simple-main { box-shadow: 0 0 0 1px rgb(255 255 255 / .08), 0 30px 60px -32px rgb(0 0 0 / .7); }
+    .dark .fi-simple-main::after { background-color: color-mix(in oklab, var(--gray-900) 85%, transparent); }
     .dark .fi-simple-layout::before { background: radial-gradient(circle, color-mix(in oklab, var(--primary-500) 22%, transparent), transparent 65%); }
     .dark .fi-simple-layout::after { background: radial-gradient(circle, color-mix(in oklab, var(--warning-500) 12%, transparent), transparent 65%); }
 

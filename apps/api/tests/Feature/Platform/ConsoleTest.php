@@ -165,3 +165,22 @@ it('shows the audit log across academies, filtered by academy or the platform\'s
     $page->set('academy', $this->noor->id)->set('group', 'billing');
     expect($page->instance()->feed['rows'])->toBe([]);
 });
+
+it('prints an admin\'s console code on a server only for the demo admin, whose key the server holds', function () {
+    $key = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP';
+    $this->admin->saveAppAuthenticationSecret($key);
+    $this->artisan('platform:code salma@platform.test')->assertSuccessful();   // local development and tests: anyone's
+
+    app()->detectEnvironment(fn () => 'production');
+    try {
+        config(['app.demo.platform_2fa_secret' => null]);
+        $this->artisan('platform:code salma@platform.test')->expectsOutputToContain('Only in local development')->assertFailed();
+        config(['app.demo.platform_2fa_secret' => 'ANOTHERKEYANOTHERKEYANOTHERKEY23']);
+        $this->artisan('platform:code salma@platform.test')->assertFailed();
+        config(['app.demo.platform_2fa_secret' => $key]);
+        $this->artisan('platform:code salma@platform.test')->assertSuccessful();
+        $this->artisan('platform:code nobody@platform.test')->expectsOutputToContain('No such admin')->assertFailed();
+    } finally {
+        app()->detectEnvironment(fn () => 'testing');
+    }
+});

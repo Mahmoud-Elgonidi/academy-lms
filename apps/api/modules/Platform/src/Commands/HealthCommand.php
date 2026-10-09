@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Mail;
 use Modules\Platform\Health\HealthAlert;
 use Modules\Platform\Health\SystemHealth;
 use Modules\Platform\Models\PlatformAdmin;
+use Modules\SharedKernel\Health\RecentErrors;
 
 /**
  * The stack's health in the terminal; with --alert (the scheduler, every
@@ -18,7 +19,7 @@ use Modules\Platform\Models\PlatformAdmin;
  */
 final class HealthCommand extends Command
 {
-    protected $signature = 'platform:health {--alert : tell the platform team what changed}';
+    protected $signature = 'platform:health {--alert : tell the platform team what changed} {--errors : list the errors the app reported lately, as the health page does (redacted)}';
 
     protected $description = "The stack's health: database, cache, scheduler, worker, relay, backups, disk, errors";
 
@@ -35,6 +36,16 @@ final class HealthCommand extends Command
             fn (string $name, array $c) => [$name, $c['status'], $c['value'], (string) $c['hint']], array_keys($checks), $checks));
         $overall = SystemHealth::overall($checks);
         $this->line('overall: '.$overall);
+
+        // From the server, without the console: what broke, where, how often (messages redacted like the logs).
+        if ($this->option('errors')) {
+            $errors = RecentErrors::all();
+            $errors === []
+                ? $this->line('no errors reported this week')
+                : $this->table(['last (UTC)', 'times', 'request', 'error', 'thrown at'], array_map(fn (array $e) => [
+                    gmdate('Y-m-d H:i', $e['last']), $e['count'], $e['where'], $e['class'].': '.$e['message'], $e['place'],
+                ], array_values($errors)));
+        }
 
         if ($this->option('alert')) {
             $this->notifyTeam($checks);

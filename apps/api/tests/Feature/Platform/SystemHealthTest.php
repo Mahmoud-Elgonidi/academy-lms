@@ -2,6 +2,7 @@
 
 use Filament\Facades\Filament;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -105,6 +106,17 @@ it('counts errors by kind, redacted, and warns when they pile up', function () {
         ->and($first['place'])->toStartWith('tests/Feature/Platform/SystemHealthTest.php:')
         ->and(RecentErrors::countLast(1))->toBe(7)
         ->and(app(SystemHealth::class)->checks()['errors'])->toMatchArray(['status' => 'warn', 'value' => '7 in the last hour, 7 in 24 hours']);
+});
+
+it('lists the latest errors from the server\'s command line, redacted', function () {
+    Artisan::call('platform:health', ['--errors' => true]);
+    expect(Artisan::output())->toContain('no errors reported this week');
+
+    RecentErrors::record(new RuntimeException('Mail to salma@example.com failed'));
+    Artisan::call('platform:health', ['--errors' => true]);
+    expect(Artisan::output())->toContain('RuntimeException: Mail to ***@example.com failed')
+        ->toContain('tests/Feature/Platform/SystemHealthTest.php:')
+        ->not->toContain('salma@');
 });
 
 it('shows the platform team every check, the backups and the latest errors', function () {

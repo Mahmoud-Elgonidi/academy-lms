@@ -10,6 +10,7 @@ how long ago it last worked; the same in the terminal:
 ```bash
 docker compose ps                                   # nine parts, all "running"
 docker compose exec web php artisan platform:health # every check, with a hint for each fault
+docker compose exec web php artisan platform:health --errors   # and the errors of the week: when, where, how often (redacted)
 docker compose logs --tail=100 <part>               # web, portal, worker, scheduler, relay, reverb, backup, postgres, redis
 ```
 
