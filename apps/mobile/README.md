@@ -66,11 +66,22 @@ With the API's Reverb and relay running (`php artisan reverb:start`, `php artisa
 
 `.github/workflows/app-release.yml` hands the Android app to testers. On main, once the mobile checks on a commit pass (or when run by hand from the Actions tab, with an optional line for the testers), it:
 
-1. builds release APKs, one per kind of phone (`arm64-v8a` for most phones, `armeabi-v7a` for older ones, `x86_64` for emulators), version from `pubspec.yaml` and build number from the run;
+1. builds release APKs, one per kind of phone (`arm64-v8a` for most phones, `armeabi-v7a` for older ones, `x86_64` for emulators), named after the app and its version (`Academy-v1.0.0-build12-arm64-v8a.apk`: the name under the icon, `pubspec.yaml`'s version, the run's build number);
 2. tags the commit `app-v{version}-b{build}` and makes a GitHub pre-release holding the APKs and the notes;
-3. posts the notes (version, server, the app's changes since the last release tag: `tool/release/notes.sh`) and the two phone APKs in the testers' Telegram channel (`tool/release/telegram.sh`; a file over Telegram's 50 MB is linked to the release instead).
+3. posts each phone APK in the testers' Telegram channel as its own post, with the notes under it (`tool/release/notes.sh`: the app's name and version, the server, and what changed since the last release), the kind of phone it is for, cut at a line to fit Telegram's caption with a link to the release for the rest (`tool/release/telegram.sh`; a file over Telegram's 50 MB becomes a message with the link instead).
 
-The APKs also stay on the run for 30 days. A push to another branch that touches `android/`, `tool/release/` or the workflow builds the APKs only.
+The APKs also stay on the run for 30 days. Re-running a build (say, once the Telegram secrets are in) keeps its tag and release and posts again. A push to another branch that touches `android/`, `tool/release/` or the workflow builds the APKs and shows the notes and the posts it would make (a dry run) on the run's summary.
+
+What testers read under "what changed" comes from the commits since the last release: a commit says it in Egyptian Arabic with `App-Change:` lines in its last paragraph, with the other trailers (one line per change; `App-Change: -` leaves a commit out):
+
+```
+Lessons: join from the lesson card
+
+App-Change: تقدر تدخل الحصة من الكارت على طول
+Co-Authored-By: …
+```
+
+A commit without them that changes the app (`apps/mobile` without its tests, tools and docs, or `packages/openapi`) is listed by its subject. The first build lists only `App-Change` lines.
 
 Settings (repository → Settings → Secrets and variables → Actions):
 
@@ -79,7 +90,7 @@ Settings (repository → Settings → Secrets and variables → Actions):
 | `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | secrets | The release key. Without it the APKs carry the build machine's debug key, which changes every run, so a phone must uninstall one build before it can install the next. |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | secrets | The bot (from @BotFather) and the channel (`@name`, or its `-100…` id for a private one). Make the bot an admin of the channel. `TELEGRAM_THREAD_ID` sends into a topic of a group. Without them the APKs are on the GitHub release only. |
 | `FCM_API_KEY`, `FCM_APP_ID`, `FCM_SENDER_ID`, `FCM_PROJECT_ID` | secrets | Push (see above). |
-| `APP_API_BASE_URL` | variable | The API the app talks to; default `https://{DEPLOY_DOMAIN}/api/v1` (`https://progma.store/api/v1`). |
+| `APP_API_BASE_URL` | variable | The API the app talks to; default `https://{DEPLOY_DOMAIN}/api/v1` (today `https://lms.progma.store/api/v1`). |
 | `GOOGLE_SERVER_CLIENT_ID` | variable | Google sign-in (see above). |
 
 Making the release key, once, on your own machine (keep `release.jks` and its passwords somewhere safe: the stores accept updates only signed with it):

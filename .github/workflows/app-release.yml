@@ -2,10 +2,13 @@ name: app-release
 
 # Hands the Android app to testers (apps/mobile/README.md, "Releases"):
 #   on main, once the mobile checks on a commit passed (or when run by hand from the Actions tab):
-#   release APKs, one per kind of phone, signed with the release key from the secrets; a tag
-#   (app-v{version}-b{build}) and a GitHub release holding them; and the notes and the APKs in
-#   the testers' Telegram channel.
-# A push to another branch that touches the Android build or this pipeline builds the APKs only.
+#   release APKs, one per kind of phone, named after the app and its version
+#   ({App}-v{version}-build{build}-{abi}.apk) and signed with the release key from the secrets;
+#   a tag (app-v{version}-b{build}) and a GitHub release holding them; and each phone APK posted
+#   in the testers' Telegram channel with the notes under it (the app's name, its version and
+#   what changed since the last release: commits' App-Change lines, tool/release/notes.sh).
+# A push to another branch that touches the Android build or this pipeline builds the APKs and
+# shows the notes and the Telegram posts it would make (dry run) on the run's summary.
 #
 # Settings: secrets ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS,
 # ANDROID_KEY_PASSWORD (without them the APKs carry this machine's debug key, and a phone cannot
@@ -70,15 +73,21 @@ jobs:
 
       - run: flutter pub get
 
-      # The version name is pubspec's; the build number grows with every run of this workflow
-      # (Android adds 1000 × the kind of phone to it for each split APK).
+      # The app's name is the one under its icon; the version name is pubspec's; the build number
+      # grows with every run of this workflow (Android adds 1000 × the kind of phone to it for
+      # each split APK).
       - name: Version
         id: version
         run: |
+          app=$(sed -n 's/.*android:label="\([^"]*\)".*/\1/p' android/app/src/main/AndroidManifest.xml | head -n 1)
           name=$(sed -n 's/^version: *\([^+]*\).*/\1/p' pubspec.yaml)
-          echo "name=$name" >> "$GITHUB_OUTPUT"
-          echo "build=$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
-          echo "tag=app-v$name-b$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+          {
+            echo "app=$app"
+            echo "name=$name"
+            echo "build=$GITHUB_RUN_NUMBER"
+            echo "tag=app-v$name-b$GITHUB_RUN_NUMBER"
+            echo "base=$(echo "$app" | tr -c 'A-Za-z0-9_\n' '-')-v$name-build$GITHUB_RUN_NUMBER"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Signing key
         id: signing
@@ -124,53 +133,62 @@ jobs:
             --dart-define-from-file=release-defines.json
           mkdir -p "$RUNNER_TEMP/apks"
           for abi in arm64-v8a armeabi-v7a x86_64; do
-            cp "build/app/outputs/flutter-apk/app-$abi-release.apk" \
-              "$RUNNER_TEMP/apks/academy-${{ steps.version.outputs.name }}-b${{ steps.version.outputs.build }}-$abi.apk"
+            cp "build/app/outputs/flutter-apk/app-$abi-release.apk" "$RUNNER_TEMP/apks/${{ steps.version.outputs.base }}-$abi.apk"
           done
           ls -l "$RUNNER_TEMP/apks"
           rm -f android/key.properties android/app/release.jks
 
       - uses: actions/upload-artifact@v4
         with:
-          name: apks-${{ steps.version.outputs.name }}-b${{ steps.version.outputs.build }}
+          name: ${{ steps.version.outputs.base }}
           path: ${{ runner.temp }}/apks/*.apk
           retention-days: 30
 
       - name: Notes for the testers
-        if: env.PUBLISH == 'true'
         env:
           LINE: ${{ github.event.inputs.line }}
         run: |
-          bash tool/release/notes.sh "${{ steps.version.outputs.name }}" "${{ steps.version.outputs.build }}" \
-            "${{ steps.signing.outputs.kind }}" "$(echo "$API_BASE_URL" | sed -E 's#^https?://([^/]+).*#\1#')" "$LINE" \
-            > "$RUNNER_TEMP/notes.txt"
-          cat "$RUNNER_TEMP/notes.txt" >> "$GITHUB_STEP_SUMMARY"
+          bash tool/release/notes.sh "${{ steps.version.outputs.app }}" "${{ steps.version.outputs.name }}" \
+            "${{ steps.version.outputs.build }}" "${{ steps.signing.outputs.kind }}" \
+            "$(echo "$API_BASE_URL" | sed -E 's#^https?://([^/]+).*#\1#')" "$LINE" > "$RUNNER_TEMP/notes.txt"
+          { echo '### Notes'; echo '```'; cat "$RUNNER_TEMP/notes.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Tag and GitHub release
         if: env.PUBLISH == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
+        # A re-run of the same build (say, once the Telegram secrets are in) keeps its tag and release.
         run: |
-          git tag "$TAG" "$SHA"
-          git push origin "refs/tags/$TAG"
+          if ! git rev-parse -q --verify "refs/tags/$TAG" > /dev/null; then
+            git tag "$TAG" "$SHA"
+            git push origin "refs/tags/$TAG"
+          fi
+          gh release view "$TAG" > /dev/null 2>&1 && exit 0
+          { cat "$RUNNER_TEMP/notes.txt"; echo; echo "أغلب الموبايلات: ملف arm64-v8a. الموبايلات القديمة: armeabi-v7a. المحاكي: x86_64."; } \
+            > "$RUNNER_TEMP/release-notes.txt"
           gh release create "$TAG" "$RUNNER_TEMP"/apks/*.apk --prerelease \
-            --title "App ${{ steps.version.outputs.name }} (build ${{ steps.version.outputs.build }})" \
-            --notes-file "$RUNNER_TEMP/notes.txt"
+            --title "${{ steps.version.outputs.app }} ${{ steps.version.outputs.name }} (build ${{ steps.version.outputs.build }})" \
+            --notes-file "$RUNNER_TEMP/release-notes.txt"
 
+      # Each phone APK is its own post: the file, and under it the notes with the kind of phone.
+      # Off main (a push to a branch) it only shows on the summary what it would post.
       - name: Telegram
-        if: env.PUBLISH == 'true'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_THREAD_ID: ${{ secrets.TELEGRAM_THREAD_ID }}
           RELEASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}
         run: |
+          apks=("$RUNNER_TEMP/apks/${{ steps.version.outputs.base }}-arm64-v8a.apk::📲 لأغلب الموبايلات (arm64-v8a)"
+            "$RUNNER_TEMP/apks/${{ steps.version.outputs.base }}-armeabi-v7a.apk::📲 للموبايلات القديمة (armeabi-v7a)")
+          if [ "$PUBLISH" != true ]; then
+            { echo '### Telegram (dry run)'; echo '```'; TELEGRAM_DRY_RUN=1 bash tool/release/telegram.sh "$RUNNER_TEMP/notes.txt" "${apks[@]}"; echo '```'; } \
+              >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
             echo "::warning::No TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID secret: the APKs are on the GitHub release only."
             exit 0
           fi
-          dir="$RUNNER_TEMP/apks" base="academy-${{ steps.version.outputs.name }}-b${{ steps.version.outputs.build }}"
-          bash tool/release/telegram.sh "$RUNNER_TEMP/notes.txt" \
-            "$dir/$base-arm64-v8a.apk::أغلب الموبايلات (arm64-v8a)" \
-            "$dir/$base-armeabi-v7a.apk::الموبايلات القديمة (armeabi-v7a)"
+          bash tool/release/telegram.sh "$RUNNER_TEMP/notes.txt" "${apks[@]}"
