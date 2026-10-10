@@ -31,7 +31,7 @@
     </style>
 
     <div class="doc-actions no-print">
-        <button type="button" onclick="window.print()">{{ __($l.'print') }}</button>
+        <button type="button" data-print>{{ __($l.'print') }}</button>
         @if ($back) <a href="{{ $back }}">{{ __($l.'back') }}</a> @endif
     </div>
 
@@ -84,4 +84,7 @@
             <div class="doc-note">{{ __($l.'voided', ['reason' => $inv->void_reason]) }}</div>
         @endif
     </article>
+    <script>
+        document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
+    </script>
 </x-billing::pay.layout>

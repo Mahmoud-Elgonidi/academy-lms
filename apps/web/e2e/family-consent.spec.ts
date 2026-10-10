@@ -1,5 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
-import { PASSWORD, signInWithPassword } from './helpers';
+import type { Page } from '@playwright/test';
+import { PASSWORD, expect, signInWithPassword, test } from './helpers';
 
 // Rana (12) waits for her father's consent in the demo data; the test gives it, and can run again (it takes it back first).
 const CHILD = process.env.E2E_CONSENT_CHILD ?? 'rana@demo.test';

@@ -12,7 +12,9 @@ use Symfony\Component\HttpFoundation\Response;
  * plugin or foreign <base> runs in them, links to other sites take only our
  * origin with them (signed links carry their signature in the address),
  * features the product never uses stay off, and over https the browser keeps
- * to https. A header an answer already set (a file's own policy) is kept.
+ * to https. A page also says which scripts may run: its own files and those
+ * with this request's nonce (ContentSecurityPolicy). A header an answer
+ * already set (a file's own policy) is kept.
  * The portal sends the same set (apps/web/next.config.ts) and the image's
  * web server adds it to static files (infra/deploy/Caddyfile).
  */
@@ -22,7 +24,7 @@ final class SecurityHeaders
         'X-Content-Type-Options' => 'nosniff',
         'X-Frame-Options' => 'SAMEORIGIN',
         'Referrer-Policy' => 'strict-origin-when-cross-origin',
-        'Content-Security-Policy' => "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+        'Content-Security-Policy' => ContentSecurityPolicy::BASE,
         'Permissions-Policy' => 'geolocation=(), usb=(), serial=(), hid=(), bluetooth=()',
     ];
 
@@ -31,9 +33,14 @@ final class SecurityHeaders
 
     public function handle(Request $request, Closure $next): Response
     {
+        $nonce = ContentSecurityPolicy::start();
         $response = $next($request);
 
-        foreach (self::HEADERS as $name => $value) {
+        $headers = self::HEADERS;
+        if (str_starts_with((string) $response->headers->get('Content-Type'), 'text/html')) {
+            $headers['Content-Security-Policy'] = ContentSecurityPolicy::forPage($nonce);
+        }
+        foreach ($headers as $name => $value) {
             if (! $response->headers->has($name)) {
                 $response->headers->set($name, $value);
             }

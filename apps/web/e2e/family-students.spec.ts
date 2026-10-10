@@ -1,5 +1,4 @@
-import { expect, test } from '@playwright/test';
-import { fitsTheScreen } from './helpers';
+import { expect, fitsTheScreen, test } from './helpers';
 
 const PAGES = ['/ar/family', '/ar/family/challenges', '/ar/family/lessons', '/ar/family/homework', '/ar/family/progress', '/ar/family/notifications', '/ar/family/more'];
 

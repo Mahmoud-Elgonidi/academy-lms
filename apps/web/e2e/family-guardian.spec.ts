@@ -1,5 +1,4 @@
-import { expect, test } from '@playwright/test';
-import { fitsTheScreen } from './helpers';
+import { expect, fitsTheScreen, test } from './helpers';
 
 // Ziad's guardian, in the classic look: lessons, money and cheering on.
 test.use({ storageState: 'e2e/.auth/guardian.json' });

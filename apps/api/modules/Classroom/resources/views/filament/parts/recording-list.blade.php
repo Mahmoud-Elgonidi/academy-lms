@@ -7,9 +7,9 @@
             <x-filament::icon-button icon="heroicon-o-x-mark" color="gray" wire:click="closePlayer" :label="__($l.'office.close')" />
         </div>
         @if ($playing['media'] === 'audio')
-            <audio controls autoplay controlsList="nodownload" src="{{ $playing['url'] }}" oncontextmenu="return false"></audio>
+            <audio controls autoplay controlsList="nodownload" src="{{ $playing['url'] }}" x-on:contextmenu.prevent></audio>
         @else
-            <video controls autoplay playsinline controlsList="nodownload noplaybackrate" disablePictureInPicture src="{{ $playing['url'] }}" oncontextmenu="return false"></video>
+            <video controls autoplay playsinline controlsList="nodownload noplaybackrate" disablePictureInPicture src="{{ $playing['url'] }}" x-on:contextmenu.prevent></video>
         @endif
     </section>
 @endif

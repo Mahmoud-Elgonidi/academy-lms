@@ -14,6 +14,7 @@ use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -22,6 +23,7 @@ use Modules\SharedKernel\Files\ClamAvScanner;
 use Modules\SharedKernel\Files\NullUploadScanner;
 use Modules\SharedKernel\Files\UploadScanner;
 use Modules\SharedKernel\Health\MailHealth;
+use Modules\SharedKernel\Http\ContentSecurityPolicy;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\OpenPlan;
 use Modules\SharedKernel\Plans\UsageMeters;
@@ -65,6 +67,8 @@ final class SharedKernelServiceProvider extends ServiceProvider
         // Signing in takes as long whether or not the account exists (config/auth.php's providers).
         Auth::provider('timing-safe', fn ($app, array $config) => new TimingSafeUserProvider($app['hash'], $config['model']));
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'shared');
+        // Every <script> a template writes carries the request's nonce (the page's script-src).
+        Blade::precompiler(fn (string $template): string => ContentSecurityPolicy::nonceScripts($template));
         if ($this->app->runningInConsole()) {
             $this->commands([LiveRelayCommand::class]);
         }

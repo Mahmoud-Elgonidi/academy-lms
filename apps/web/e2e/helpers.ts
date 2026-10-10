@@ -1,4 +1,23 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, test as base, type Page } from '@playwright/test';
+
+/**
+ * Every test also fails when a page refused one of its own scripts: the
+ * portal's script policy (src/lib/csp.ts) must leave the portal working.
+ */
+export const test = base.extend<{ scriptPolicy: void }>({
+  scriptPolicy: [
+    async ({ page }, use) => {
+      const refused: string[] = [];
+      page.on('console', (message) => {
+        if (/Content Security Policy/i.test(message.text())) refused.push(message.text());
+      });
+      await use();
+      expect(refused, 'scripts the page refused').toEqual([]);
+    },
+    { auto: true },
+  ],
+});
+export { expect };
 
 /** The demo data's teacher with history (Ziad's teacher), and the password every demo account has here. */
 export const TEACHER = process.env.E2E_TEACHER ?? 'khaled@demo.test';

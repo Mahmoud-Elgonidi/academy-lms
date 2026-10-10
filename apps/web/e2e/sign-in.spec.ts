@@ -1,5 +1,4 @@
-import { expect, test } from '@playwright/test';
-import { PASSWORD, TEACHER, signInWithPassword } from './helpers';
+import { PASSWORD, TEACHER, expect, signInWithPassword, test } from './helpers';
 
 test('a page needs a session, and signing in comes back to it', async ({ page }) => {
   await page.goto('/ar/teach/week');

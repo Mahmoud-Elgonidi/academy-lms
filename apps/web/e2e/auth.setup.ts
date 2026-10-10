@@ -1,5 +1,4 @@
-import { expect, test as setup } from '@playwright/test';
-import { GUARDIAN, KID, PASSWORD, STUDENT, TEACHER, signInWithPassword } from './helpers';
+import { GUARDIAN, KID, PASSWORD, STUDENT, TEACHER, expect, signInWithPassword, test as setup } from './helpers';
 
 // One signed-in teacher for the teacher tests (the session lives in an httpOnly cookie).
 setup('sign in as the demo teacher', async ({ page }) => {

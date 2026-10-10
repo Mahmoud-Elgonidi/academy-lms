@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
+import { headers } from 'next/headers';
 import type { CSSProperties, ReactNode } from 'react';
 import { routing } from '@/i18n/routing';
+import { NONCE_HEADER } from '@/lib/csp';
 import { TIMEZONE_COOKIE } from '@/lib/session';
 import { branding, neutralOf } from '@/lib/viewer';
 import '../globals.css';
@@ -45,6 +47,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const look = await branding();
+  const nonce = (await headers()).get(NONCE_HEADER) ?? undefined;
   const { tokens, radii } = look;
   const plex = (font: string) => font === 'IBM Plex Sans Arabic';
   const style = {
@@ -64,7 +67,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} className={`${plexArabic.variable} ${plexLatin.variable}`} style={style}>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: zoneScript }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: zoneScript }} />
         {look.fonts_url && !(plex(tokens.heading_font) && plex(tokens.body_font)) ? (
           // The academy's own fonts, chosen in its branding (as on the panels).
           <link rel="stylesheet" href={look.fonts_url} />

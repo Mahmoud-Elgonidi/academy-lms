@@ -1,18 +1,22 @@
 <?php
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Vite;
 use Modules\Identity\Models\User;
 use Modules\SharedKernel\Auth\DummyPassword;
+use Modules\SharedKernel\Http\ContentSecurityPolicy;
 use Modules\SharedKernel\Http\SecurityHeaders;
 use Modules\SharedKernel\Logging\RedactPersonalData;
 
 /*
  * HTTP hardening (docs/architecture/03, section 11): the headers on every
- * answer, HSTS over https, the API's ceiling, no other site's pages calling
- * the API, sign-ins that take as long with or without an account, and log
- * lines without people.
+ * answer, pages that run only their own scripts, HSTS over https, the API's
+ * ceiling, no other site's pages calling the API, sign-ins that take as long
+ * with or without an account, and log lines without people.
  */
 
 beforeEach(function () {
@@ -23,12 +27,64 @@ it('sends the security headers on pages, the API and errors, and HSTS only over 
     foreach (['http://huda.lms.test/up', 'http://huda.lms.test/api/v1/branding', 'http://huda.lms.test/admin/login', 'http://huda.lms.test/api/v1/nothing-here'] as $url) {
         $response = $this->get($url);
         foreach (SecurityHeaders::HEADERS as $name => $value) {
-            expect($response->headers->get($name))->toBe($value, "{$name} on {$url}");
+            // A page's policy also names its scripts (below).
+            expect($response->headers->get($name))->toStartWith($value, "{$name} on {$url}");
         }
         expect($response->headers->has('Strict-Transport-Security'))->toBeFalse();
     }
 
     expect($this->get('https://huda.lms.test/api/v1/branding')->headers->get('Strict-Transport-Security'))->toBe(SecurityHeaders::HSTS);
+});
+
+it('lets a page run only its own scripts and those carrying the request\'s nonce', function () {
+    $nonces = [];
+    foreach (['/admin/login', '/teach/login', '/my/login', '/console/login', '/privacy', '/admin/login'] as $path) {
+        $response = $this->get("http://huda.lms.test{$path}")->assertOk();
+        $policy = (string) $response->headers->get('Content-Security-Policy');
+
+        expect($policy)->toMatch("/^base-uri 'self'; object-src 'none'; frame-ancestors 'self'; script-src 'self' 'nonce-[A-Za-z0-9]{40}' 'unsafe-eval'\$/", $path);
+        preg_match("/'nonce-([A-Za-z0-9]+)'/", $policy, $m);
+        $nonces[] = $m[1];
+        $html = $response->getContent();
+        $scripts = preg_match_all('/<script\b/i', $html);
+        expect(substr_count($html, 'nonce="'.$m[1].'"'))->toBeGreaterThanOrEqual($scripts, "every script on {$path} carries the nonce");
+        if ($path !== '/privacy') {
+            expect($scripts)->toBeGreaterThan(5, "{$path} runs Livewire, Filament and ours");
+        }
+    }
+    expect(array_unique($nonces))->toHaveCount(count($nonces));
+
+    // The API's answers keep the base policy.
+    expect($this->getJson('http://huda.lms.test/api/v1/branding')->headers->get('Content-Security-Policy'))->toBe(ContentSecurityPolicy::BASE);
+});
+
+it('gives the nonce to the scripts a template writes, never to what fills it', function () {
+    ContentSecurityPolicy::start();
+    $nonce = Vite::cspNonce();
+
+    $html = Blade::render('<script>ours()</script><SCRIPT type="module" src="/a.js"></SCRIPT><script nonce="kept"></script>{{ $text }}{!! $html !!}', [
+        'text' => '<script>typed()</script>',
+        'html' => '<script>slipped()</script>',
+    ]);
+
+    expect($html)->toContain('<script nonce="'.$nonce.'">ours()</script>')
+        ->toContain('<script nonce="'.$nonce.'" type="module" src="/a.js">')
+        ->toContain('<script nonce="kept">')
+        ->toContain('&lt;script&gt;typed()')
+        ->toContain('<script>slipped()</script>');
+});
+
+it('writes no script the nonce cannot reach: no inline handlers, javascript: links or scripts kept from Blade', function () {
+    $templates = collect(File::allFiles(base_path('modules')))
+        ->filter(fn ($file) => str_ends_with($file->getFilename(), '.blade.php'));
+
+    expect($templates)->not->toBeEmpty();
+    foreach ($templates as $file) {
+        $source = $file->getContents();
+        expect($source)->not->toMatch('/<[a-z][^>]*\son[a-z]+\s*=\s*["\'{]/i', $file->getRelativePathname().' has an inline handler')
+            ->not->toMatch('/javascript:/i', $file->getRelativePathname().' has a javascript: link')
+            ->not->toMatch('/@verbatim(?:(?!@endverbatim).)*<script/is', $file->getRelativePathname().' keeps a script from Blade');
+    }
 });
 
 it('caps the apps\' API per address before signing in, each address on its own', function () {
