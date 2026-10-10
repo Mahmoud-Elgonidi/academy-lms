@@ -12,8 +12,8 @@ name: app-release
 #
 # Settings: secrets ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS,
 # ANDROID_KEY_PASSWORD (without them the APKs carry this machine's debug key, and a phone cannot
-# install one build over another), TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID (optional
-# TELEGRAM_THREAD_ID), FCM_API_KEY, FCM_APP_ID, FCM_SENDER_ID, FCM_PROJECT_ID (push); variables
+# install one build over another), TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID (without it, the one chat
+# the bot heard from in the last 24 hours, which is told its id; optional TELEGRAM_THREAD_ID), FCM_API_KEY, FCM_APP_ID, FCM_SENDER_ID, FCM_PROJECT_ID (push); variables
 # APP_API_BASE_URL (default https://{DEPLOY_DOMAIN}/api/v1) and GOOGLE_SERVER_CLIENT_ID.
 
 on:
@@ -179,6 +179,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_THREAD_ID: ${{ secrets.TELEGRAM_THREAD_ID }}
           RELEASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}
+          SECRETS_URL: ${{ github.server_url }}/${{ github.repository }}/settings/secrets/actions/new
         run: |
           apks=("$RUNNER_TEMP/apks/${{ steps.version.outputs.base }}-arm64-v8a.apk::📲 لأغلب الموبايلات (arm64-v8a)"
             "$RUNNER_TEMP/apks/${{ steps.version.outputs.base }}-armeabi-v7a.apk::📲 للموبايلات القديمة (armeabi-v7a)")
@@ -187,8 +188,8 @@ jobs:
               >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-            echo "::warning::No TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID secret: the APKs are on the GitHub release only."
+          if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
+            echo "::warning::No TELEGRAM_BOT_TOKEN secret: the APKs are on the GitHub release only."
             exit 0
           fi
           bash tool/release/telegram.sh "$RUNNER_TEMP/notes.txt" "${apks[@]}"

@@ -88,7 +88,7 @@ Settings (repository → Settings → Secrets and variables → Actions):
 | Name | Kind | What |
 |---|---|---|
 | `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | secrets | The release key. Without it the APKs carry the build machine's debug key, which changes every run, so a phone must uninstall one build before it can install the next. |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | secrets | The bot (from @BotFather) and the channel (`@name`, or its `-100…` id for a private one). Make the bot an admin of the channel. `TELEGRAM_THREAD_ID` sends into a topic of a group. Without them the APKs are on the GitHub release only. |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | secrets | The bot (from @BotFather) and where it posts: a channel (`@name`, or its `-100…` id for a private one; make the bot an admin there) or a person (their id; they press Start on the bot). Without `TELEGRAM_CHAT_ID` the bot posts to the one chat it heard from in the last 24 hours (the channel it was made an admin of, else the one person who pressed Start) and tells that chat its id, to save here so later builds find it too. `TELEGRAM_THREAD_ID` sends into a topic of a group. Without the token the APKs are on the GitHub release only. |
 | `FCM_API_KEY`, `FCM_APP_ID`, `FCM_SENDER_ID`, `FCM_PROJECT_ID` | secrets | Push (see above). |
 | `APP_API_BASE_URL` | variable | The API the app talks to; default `https://{DEPLOY_DOMAIN}/api/v1` (today `https://lms.progma.store/api/v1`). |
 | `GOOGLE_SERVER_CLIENT_ID` | variable | Google sign-in (see above). |
