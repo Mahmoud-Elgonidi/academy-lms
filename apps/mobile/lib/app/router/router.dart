@@ -30,6 +30,8 @@ import '../../features/challenges/presentation/pages/challenges_page.dart';
 import '../../features/challenges/presentation/widgets/cheers.dart';
 import '../../features/dashboard/presentation/pages/teen_home_page.dart';
 import '../../features/homework/presentation/pages/homework_page.dart';
+import '../../features/messages/presentation/conversation_page.dart';
+import '../../features/messages/presentation/messages_page.dart';
 import '../../features/notifications/presentation/pages/choices_page.dart';
 import '../../features/notifications/presentation/pages/inbox_page.dart';
 import '../../features/notifications/presentation/pages/update_page.dart';
@@ -73,6 +75,13 @@ GoRouter buildRouter(SessionCubit session) {
     'help',
     (_) => HelpPage(scope: scope),
     routes: [page(':id', (s) => TicketPage(ticketId: s.pathParameters['id']!))],
+  );
+
+  // Conversations with a teacher or a student, and each one, under the look's own place: Me, More, or a student's account.
+  GoRoute messages(MessagesScope scope) => page(
+    'messages',
+    (_) => MessagesPage(scope: scope),
+    routes: [page(':id', (s) => ConversationPage(conversationId: s.pathParameters['id']!))],
   );
 
   List<RouteBase> signIn(String base) => [
@@ -123,6 +132,7 @@ GoRouter buildRouter(SessionCubit session) {
         (_) => const AccountPage(standalone: true),
         routes: [
           help(HelpScope.self),
+          messages(MessagesScope.self),
           page('my-data', (_) => const MyDataPage()),
           page('tell-us', (_) => const TellUsPage(scope: ConcernScope.self)),
         ],
@@ -184,6 +194,7 @@ GoRouter buildRouter(SessionCubit session) {
               page('recordings', (_) => const RecordingsPage(teacher: false)),
               page('tell-us', (_) => const TellUsPage(scope: ConcernScope.family)),
               help(HelpScope.family),
+              messages(MessagesScope.family),
             ],
           ),
         ],
@@ -265,6 +276,7 @@ GoRouter buildRouter(SessionCubit session) {
               page('concern', (_) => const TellUsPage(scope: ConcernScope.teacher)),
               page('documents', (_) => const DocumentsPage()),
               help(HelpScope.teacher),
+              messages(MessagesScope.teacher),
             ],
           ),
         ],

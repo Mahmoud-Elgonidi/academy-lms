@@ -1645,5 +1645,23 @@
   "documentTooBig": "الملف أكبر من 10 ميجا.",
   "documentSent": "اتبعت: الأكاديمية هتراجعه.",
   "documentsList": "اللي بعته",
-  "documentsNone": "لسه ما بعتش أي مستندات."
+  "documentsNone": "لسه ما بعتش أي مستندات.",
+  "messagesTitle": "الرسايل",
+  "messagesFamilyTitle": "الرسايل مع المدرسين",
+  "messagesStudentTitle": "الرسايل مع مدرسينك",
+  "messagesKidsTitle": "كلّم مدرسك",
+  "messagesEmptyTeacher": "لما يبقى عندك طلاب، هتلاقيهم هنا وتقدر تكلّمهم وتكلّم أهلهم.",
+  "messagesEmptyFamily": "لما يبقى للطالب مدرس، هتلاقيه هنا.",
+  "messagesStart": "لسه ماحدش كتب",
+  "messagesYou": "إنت",
+  "messagesAlsoHere": "معاكم: {names}",
+  "@messagesAlsoHere": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "messagesFirst": "ابدأ المحادثة: الكلام هنا بيشوفه أولياء الأمور والأكاديمية.",
+  "messagesWrite": "اكتب رسالة…"
 }

@@ -218,3 +218,22 @@ export async function raiseConcern(
   refresh();
   return { ok: true, number: done.data.data?.number ?? '', message: done.data.message };
 }
+
+/** Opens the conversation with someone on my list (made the first time); a family names the learner. */
+export async function openConversation(withId: string, learnerId?: string): Promise<{ ok: true; id: string } | { ok: false; message?: string }> {
+  const done = await send<{ data: { id: string } }>('post', '/v1/messages/conversations', { body: { with_id: withId, learner_id: learnerId ?? null } });
+  if (!done.ok) return problemOf(done.problem);
+  return { ok: true, id: done.data.data.id };
+}
+
+/** Writes in a conversation; what was hidden from the words comes back, to say so. */
+export async function sendChatMessage(conversation: string, body: string, key: string): Promise<{ ok: true; hidden: string | null } | { ok: false; message?: string }> {
+  const done = await send<{ data: { hidden: string | null } }>('post', '/v1/messages/conversations/{conversation}/messages', {
+    params: { conversation },
+    body: { body },
+    idempotencyKey: key,
+  });
+  if (!done.ok) return problemOf(done.problem);
+  refresh();
+  return { ok: true, hidden: done.data.data.hidden };
+}

@@ -60,6 +60,13 @@ return [
             'concern_closed' => 'بلاغ الحماية :concern اتقفل: :concern_outcome',
             'concern_reopened' => 'بلاغ الحماية :concern اتفتح تاني',
         ],
+        'messaging' => [
+            'conversation_viewed' => 'فتح محادثة :teacher مع :student',
+            'original_revealed' => 'شاف الكلام اللي اتخفى من رسالة في محادثة :teacher مع :student',
+            'conversation_locked' => 'وقّف محادثة :teacher مع :student',
+            'conversation_unlocked' => 'رجّع محادثة :teacher مع :student',
+            'settings_saved' => 'الرسايل بين المدرسين والأسر بقت :state',
+        ],
         'people' => [
             'consent_granted' => ':guardian وافق على حساب :student (:via)',
             'consent_recorded' => 'تسجيل موافقة ولي أمر :student من الإدارة: :note',
@@ -120,6 +127,7 @@ return [
         'outcome' => ['completed' => 'اتعملت', 'teacher_absent' => 'غياب المدرس', 'student_absent' => 'غياب الطالب', 'cancelled_makeup' => 'اتلغت بتعويض'],
         'mode' => ['test' => 'تجريبي', 'live' => 'حقيقي'],
         'via' => ['self' => 'بنفسه', 'guardian' => 'ولي الأمر', 'family' => 'من حسابه', 'link' => 'من اللينك اللي وصله', 'staff' => 'سجلتها الإدارة', 'email' => 'أول دخول بنفس الإيميل', 'settings' => 'من إعداداته'],
+        'state' => ['on' => 'شغالة', 'off' => 'مقفولة'],
         'provider' => ['google' => 'جوجل', 'apple' => 'أبل'],
         'how' => ['exit' => 'خرج بنفسه', 'expired' => 'الوقت خلص', 'ended' => 'اتقفل من لوحة المنصة'],
         'recording' => ['off' => 'مفيش تسجيل', 'manual' => 'المدرس يبدأه', 'auto' => 'كل حصة لوحدها'],
@@ -127,6 +135,7 @@ return [
         'side' => ['family' => 'الأسرة', 'teacher' => 'المدرس', 'staff' => 'الإدارة سجلته'],
     ],
     'groups' => [
+        'messaging' => 'المحادثات',
         'safeguarding' => 'حماية الأطفال',
         'billing' => 'الفلوس',
         'scheduling' => 'الحصص والسياسات',

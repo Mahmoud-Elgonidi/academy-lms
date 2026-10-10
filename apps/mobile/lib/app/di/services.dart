@@ -19,6 +19,7 @@ import '../../features/schedule/data/lessons_repository.dart';
 import '../../features/consent/data/consent_repository.dart';
 import '../../features/privacy/data/privacy_repository.dart';
 import '../../features/recordings/data/recordings_repository.dart';
+import '../../features/messages/data/messages_repository.dart';
 import '../../features/safeguarding/data/safeguarding_repository.dart';
 import '../../features/support/data/support_repository.dart';
 import '../../features/teaching/data/teaching_repository.dart';
@@ -43,6 +44,7 @@ class Services {
       recordings = RecordingsRepository(api),
       support = SupportRepository(api),
       safeguarding = SafeguardingRepository(api),
+      messages = MessagesRepository(api),
       live = Live(source: LiveRepository(api), apiBaseUrl: api.dio.options.baseUrl) {
     home = HomeLoader(lessons: lessons, billing: billing, learning: learning, homework: homework, family: family);
   }
@@ -67,6 +69,7 @@ class Services {
   final RecordingsRepository recordings;
   final SupportRepository support;
   final SafeguardingRepository safeguarding;
+  final MessagesRepository messages;
 
   /// The person's own signals while the app is open (screens reload on them).
   final Live live;
@@ -85,6 +88,7 @@ class Services {
       RepositoryProvider.value(value: recordings),
       RepositoryProvider.value(value: support),
       RepositoryProvider.value(value: safeguarding),
+      RepositoryProvider.value(value: messages),
       RepositoryProvider.value(value: learning),
       RepositoryProvider.value(value: homework),
       RepositoryProvider.value(value: classroom),

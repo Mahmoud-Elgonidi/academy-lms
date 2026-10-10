@@ -33,7 +33,7 @@ export async function FamilyShell({ person, look, locale, fam, fontClasses, chil
           <p className="font-heading text-[15px] font-bold leading-tight">{academy}</p>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-2">
-          <SideNav stage={fam.stage} money={money} guardian={guardian} unread={live.unread} />
+          <SideNav stage={fam.stage} money={money} guardian={guardian} unread={live.unread} chats={live.chats} />
         </div>
         <div className="space-y-1 border-t border-line p-3">
           <p className="truncate px-3 pb-1 text-sm font-semibold">{person.name}</p>
@@ -60,7 +60,7 @@ export async function FamilyShell({ person, look, locale, fam, fontClasses, chil
           {children}
         </main>
       </div>
-      <TabBar stage={fam.stage} money={money} unread={live.unread} />
+      <TabBar stage={fam.stage} money={money} unread={live.unread} chats={live.chats} />
     </div>
   );
 }

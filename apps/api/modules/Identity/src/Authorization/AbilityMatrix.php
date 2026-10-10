@@ -52,6 +52,10 @@ final class AbilityMatrix
             Ability::HandleDataRequests => [Role::Owner, Role::Admin],
             // Concerns about a child's safety and the teachers' vetting: the academy's own leads, kept to the fewest.
             Ability::HandleSafeguarding => [Role::Owner, Role::Admin],
+            // Teachers' and families' conversations: who follows the teachers reads them (each opening is logged);
+            // locking one and switching messages off is the owner's and admins'.
+            Ability::OverseeConversations => [Role::Owner, Role::Admin, Role::Supervisor],
+            Ability::ManageConversations => [Role::Owner, Role::Admin],
         };
     }
 

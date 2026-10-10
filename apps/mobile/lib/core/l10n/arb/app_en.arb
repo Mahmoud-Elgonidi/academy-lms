@@ -674,5 +674,16 @@
   "documentTooBig": "The file is larger than 10 MB.",
   "documentSent": "Sent: the academy will check it.",
   "documentsList": "What you sent",
-  "documentsNone": "You have not sent any documents yet."
+  "documentsNone": "You have not sent any documents yet.",
+  "messagesTitle": "Messages",
+  "messagesFamilyTitle": "Messages with teachers",
+  "messagesStudentTitle": "Messages with your teachers",
+  "messagesKidsTitle": "Talk to your teacher",
+  "messagesEmptyTeacher": "When you have students, you will find them here to talk to them and their families.",
+  "messagesEmptyFamily": "When the student has a teacher, you will find them here.",
+  "messagesStart": "Nobody has written yet",
+  "messagesYou": "You",
+  "messagesAlsoHere": "Also here: {names}",
+  "messagesFirst": "Start the conversation: guardians and the academy can read what is said here.",
+  "messagesWrite": "Write a message…"
 }

@@ -3,7 +3,7 @@
  * `id` the API puts on every message (as the app's targetOf does for the
  * family and the student stages). Money opens only for whoever sees money.
  */
-export function familyTargetOf(screen: string | null | undefined, money: boolean): string {
+export function familyTargetOf(screen: string | null | undefined, money: boolean, id?: string | null): string {
   switch (screen) {
     case 'session':
     case 'holiday':
@@ -22,6 +22,8 @@ export function familyTargetOf(screen: string | null | undefined, money: boolean
       return '/family/privacy';
     case 'my_concerns':
       return '/family/tell-us';
+    case 'conversation':
+      return id ? `/family/messages/${id}` : '/family/messages';
     default:
       return '/family';
   }

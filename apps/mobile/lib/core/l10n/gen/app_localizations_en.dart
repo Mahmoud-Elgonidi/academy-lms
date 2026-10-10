@@ -2380,4 +2380,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get documentsNone => 'You have not sent any documents yet.';
+
+  @override
+  String get messagesTitle => 'Messages';
+
+  @override
+  String get messagesFamilyTitle => 'Messages with teachers';
+
+  @override
+  String get messagesStudentTitle => 'Messages with your teachers';
+
+  @override
+  String get messagesKidsTitle => 'Talk to your teacher';
+
+  @override
+  String get messagesEmptyTeacher => 'When you have students, you will find them here to talk to them and their families.';
+
+  @override
+  String get messagesEmptyFamily => 'When the student has a teacher, you will find them here.';
+
+  @override
+  String get messagesStart => 'Nobody has written yet';
+
+  @override
+  String get messagesYou => 'You';
+
+  @override
+  String messagesAlsoHere(String names) {
+    return 'Also here: $names';
+  }
+
+  @override
+  String get messagesFirst => 'Start the conversation: guardians and the academy can read what is said here.';
+
+  @override
+  String get messagesWrite => 'Write a message…';
 }

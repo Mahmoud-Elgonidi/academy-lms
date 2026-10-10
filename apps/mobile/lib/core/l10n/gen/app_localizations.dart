@@ -4141,6 +4141,72 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'لسه ما بعتش أي مستندات.'**
   String get documentsNone;
+
+  /// No description provided for @messagesTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرسايل'**
+  String get messagesTitle;
+
+  /// No description provided for @messagesFamilyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرسايل مع المدرسين'**
+  String get messagesFamilyTitle;
+
+  /// No description provided for @messagesStudentTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرسايل مع مدرسينك'**
+  String get messagesStudentTitle;
+
+  /// No description provided for @messagesKidsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلّم مدرسك'**
+  String get messagesKidsTitle;
+
+  /// No description provided for @messagesEmptyTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'لما يبقى عندك طلاب، هتلاقيهم هنا وتقدر تكلّمهم وتكلّم أهلهم.'**
+  String get messagesEmptyTeacher;
+
+  /// No description provided for @messagesEmptyFamily.
+  ///
+  /// In ar, this message translates to:
+  /// **'لما يبقى للطالب مدرس، هتلاقيه هنا.'**
+  String get messagesEmptyFamily;
+
+  /// No description provided for @messagesStart.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه ماحدش كتب'**
+  String get messagesStart;
+
+  /// No description provided for @messagesYou.
+  ///
+  /// In ar, this message translates to:
+  /// **'إنت'**
+  String get messagesYou;
+
+  /// No description provided for @messagesAlsoHere.
+  ///
+  /// In ar, this message translates to:
+  /// **'معاكم: {names}'**
+  String messagesAlsoHere(String names);
+
+  /// No description provided for @messagesFirst.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدأ المحادثة: الكلام هنا بيشوفه أولياء الأمور والأكاديمية.'**
+  String get messagesFirst;
+
+  /// No description provided for @messagesWrite.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب رسالة…'**
+  String get messagesWrite;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

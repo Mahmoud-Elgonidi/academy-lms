@@ -15,6 +15,7 @@ export const TEACHING: Item[] = [
   { href: '/teach/reports', key: 'reports', icon: 'report' },
   { href: '/teach/marking', key: 'marking', icon: 'mark' },
   { href: '/teach/students', key: 'students', icon: 'people' },
+  { href: '/teach/messages', key: 'messages', icon: 'chat' },
   { href: '/teach/trials', key: 'trials', icon: 'spark' },
 ];
 
@@ -41,7 +42,7 @@ function useActive() {
 }
 
 /** The side menu on wide screens: the pages the academy's plan includes. */
-export function SideNav({ unread, features }: { unread: number; features: readonly string[] }) {
+export function SideNav({ unread, chats, features }: { unread: number; chats: number; features: readonly string[] }) {
   const t = useTranslations('nav');
   const common = useTranslations('common');
   const active = useActive();
@@ -62,6 +63,7 @@ export function SideNav({ unread, features }: { unread: number; features: readon
               <Icon name={item.icon} className={active(item.href) ? 'text-brand' : 'text-muted'} />
               {t(item.key)}
               {item.key === 'notifications' ? <Unread n={unread} label={common('newMessages', { n: unread })} /> : null}
+              {item.key === 'messages' ? <Unread n={chats} label={common('newChats', { n: chats })} /> : null}
             </Link>
           </li>
         ))}
@@ -77,7 +79,7 @@ export function SideNav({ unread, features }: { unread: number; features: readon
 }
 
 /** The tab bar at the bottom of a phone's screen. */
-export function TabBar({ unread }: { unread: number }) {
+export function TabBar({ unread, chats }: { unread: number; chats: number }) {
   const t = useTranslations('nav');
   const common = useTranslations('common');
   const active = useActive();
@@ -96,7 +98,7 @@ export function TabBar({ unread }: { unread: number }) {
               >
                 <Icon name={tab.icon} size={22} className={on ? 'text-brand' : undefined} />
                 {t(tab.key)}
-                {tab.key === 'menu' ? <Unread n={unread} label={common('newMessages', { n: unread })} dot /> : null}
+                {tab.key === 'menu' ? <Unread n={unread + chats} label={common('newMessages', { n: unread + chats })} dot /> : null}
               </Link>
             </li>
           );

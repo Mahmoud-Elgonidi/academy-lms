@@ -54,6 +54,8 @@ enum Ability: string
     case ManageStudents = 'students.manage';
     case HandleDataRequests = 'privacy.handle';
     case HandleSafeguarding = 'safeguarding.handle';
+    case OverseeConversations = 'conversations.oversee';
+    case ManageConversations = 'conversations.manage';
 
     /** The plan area this ability belongs to, if a plan may leave it out. */
     public function feature(): ?Feature

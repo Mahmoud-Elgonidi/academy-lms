@@ -1197,6 +1197,94 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/messages/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My conversations
+         * @description A teacher: each student they teach (or wrote with); a family: the learner's teachers (`learner_id`, else the
+         *     first learner). Those with the newest message first; `id` is null until someone opens it.
+         */
+        get: operations["messages.conversations"];
+        put?: never;
+        /**
+         * Open a conversation
+         * @description With `with_id` from my list (a teacher: a student they teach; a family: a teacher of `learner_id`). It is made
+         *     the first time; one that exists is returned as it is.
+         */
+        post: operations["messages.conversations.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/messages/unread": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Unread messages
+         * @description How many messages from others wait in all my conversations (a guardian: all their children's), for a badge.
+         */
+        get: operations["messages.unread"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/messages/conversations/{conversation}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One conversation
+         * @description Who is in it and the newest 200 messages, oldest first, as I read them (contacts hidden). Opening it marks
+         *     it read.
+         */
+        get: operations["messages.conversations.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/messages/conversations/{conversation}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Write
+         * @description `body` up to 2000 characters. A phone number, an email, a link (not the academy's) or an account name in it
+         *     is hidden before anyone reads it; `hidden` says so. Send an `Idempotency-Key`.
+         */
+        post: operations["messages.conversations.send"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/teacher/earnings": {
         parameters: {
             query?: never;
@@ -5994,6 +6082,355 @@ export interface operations {
                 content?: never;
             };
             401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "messages.conversations": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description Null until the conversation is opened. */
+                            id: string | null;
+                            /** @description Who it is with: a student for a teacher, a teacher for a family. */
+                            with: {
+                                id: string;
+                                name: string;
+                            };
+                            last_message: {
+                                body: string;
+                                mine: boolean;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            } | null;
+                            /** @description Messages from the others since I last read it. */
+                            unread: number;
+                            can_write: boolean;
+                            /** @description Why I cannot write, in words: messages off, paused by the academy, no longer teaching. */
+                            why_not: string | null;
+                        }[];
+                        meta: {
+                            /** @description The learner (a family's list). */
+                            learner: {
+                                id: string;
+                                name: string;
+                            } | null;
+                            /** @description What everyone in a conversation should know: guardians read it, the academy reviews it, contacts are hidden. */
+                            notice: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "messages.conversations.store": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The person on the other side, as my list names them. */
+                    with_id: string;
+                    /** @description A family: the learner it is about. */
+                    learner_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description Who it is with: the student for the teacher, the teacher for the family. */
+                            with: {
+                                id: string;
+                                name: string;
+                            };
+                            /** @description Everyone in it, by name only: the teacher, the student, each guardian. */
+                            members: {
+                                id: string;
+                                name: string;
+                                /** @description teacher | student | guardian */
+                                side: string;
+                                label: string;
+                                /** @description The reader. */
+                                me: boolean;
+                            }[];
+                            /** @description The newest 200, oldest first. */
+                            messages: {
+                                id: string;
+                                /** @description teacher | student | guardian */
+                                side: string;
+                                side_label: string;
+                                author: string;
+                                mine: boolean;
+                                /** @description As everyone reads it: anything hidden shows as [•••]. */
+                                body: string;
+                                /** @description What was hidden from it, in words; null when nothing was. */
+                                hidden: string | null;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                            can_write: boolean;
+                            /** @description Why I cannot write, in words. */
+                            why_not: string | null;
+                            /** @description What everyone in it should know: guardians read it, the academy reviews it, contacts are hidden. */
+                            notice: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "messages.unread": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            count: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "messages.conversations.show": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                conversation: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description Who it is with: the student for the teacher, the teacher for the family. */
+                            with: {
+                                id: string;
+                                name: string;
+                            };
+                            /** @description Everyone in it, by name only: the teacher, the student, each guardian. */
+                            members: {
+                                id: string;
+                                name: string;
+                                /** @description teacher | student | guardian */
+                                side: string;
+                                label: string;
+                                /** @description The reader. */
+                                me: boolean;
+                            }[];
+                            /** @description The newest 200, oldest first. */
+                            messages: {
+                                id: string;
+                                /** @description teacher | student | guardian */
+                                side: string;
+                                side_label: string;
+                                author: string;
+                                mine: boolean;
+                                /** @description As everyone reads it: anything hidden shows as [•••]. */
+                                body: string;
+                                /** @description What was hidden from it, in words; null when nothing was. */
+                                hidden: string | null;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                            can_write: boolean;
+                            /** @description Why I cannot write, in words. */
+                            why_not: string | null;
+                            /** @description What everyone in it should know: guardians read it, the academy reviews it, contacts are hidden. */
+                            notice: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "messages.conversations.send": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                conversation: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    body: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @description teacher | student | guardian */
+                            side: string;
+                            side_label: string;
+                            author: string;
+                            mine: boolean;
+                            /** @description As everyone reads it: anything hidden shows as [•••]. */
+                            body: string;
+                            /** @description What was hidden from it, in words; null when nothing was. */
+                            hidden: string | null;
+                            at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
         };
     };
     "teacher.earnings": {

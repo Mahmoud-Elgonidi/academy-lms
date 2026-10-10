@@ -17,6 +17,7 @@ use Modules\Evaluation\Providers\EvaluationServiceProvider;
 use Modules\Identity\Providers\IdentityServiceProvider;
 use Modules\Import\Providers\ImportServiceProvider;
 use Modules\Learning\Providers\LearningServiceProvider;
+use Modules\Messaging\Providers\MessagingServiceProvider;
 use Modules\Payroll\Providers\PayrollServiceProvider;
 use Modules\People\Providers\PeopleServiceProvider;
 use Modules\Platform\Providers\PlatformServiceProvider;
@@ -48,6 +49,7 @@ return [
     SupportServiceProvider::class,
     PrivacyServiceProvider::class,
     SafeguardingServiceProvider::class,
+    MessagingServiceProvider::class,
     AppServiceProvider::class,
     AcademyPanelProvider::class,
     TeacherPanelProvider::class,

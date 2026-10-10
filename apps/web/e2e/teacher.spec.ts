@@ -1,7 +1,7 @@
 import { expect, fitsTheScreen, test } from './helpers';
 
 test('every teacher page opens, fits a phone, and reads right to left', async ({ page }) => {
-  for (const path of ['/ar/teach', '/ar/teach/week', '/ar/teach/reports', '/ar/teach/marking', '/ar/teach/students', '/ar/teach/trials', '/ar/teach/hours', '/ar/teach/time-off', '/ar/teach/earnings', '/ar/teach/performance', '/ar/teach/recordings', '/ar/teach/notifications', '/ar/teach/more']) {
+  for (const path of ['/ar/teach', '/ar/teach/week', '/ar/teach/reports', '/ar/teach/marking', '/ar/teach/students', '/ar/teach/messages', '/ar/teach/trials', '/ar/teach/hours', '/ar/teach/time-off', '/ar/teach/earnings', '/ar/teach/performance', '/ar/teach/recordings', '/ar/teach/notifications', '/ar/teach/more']) {
     const response = await page.goto(path);
     expect(response?.status(), path).toBe(200);
     await expect(page.locator('h1').first(), path).toBeVisible();
@@ -146,4 +146,14 @@ test('the language switches, keeping the page', async ({ page }) => {
   await expect(page).toHaveURL(/\/en\/teach\/more$/);
   await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
   await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible();
+});
+
+test('the teacher talks with a student and their family, or reads why not', async ({ page }) => {
+  await page.goto('/ar/teach/messages');
+  await expect(page.locator('h1')).toHaveText('الرسايل');
+  await expect(page.getByText('ولي أمر الطالب موجود في كل محادثة')).toBeVisible();
+  await page.locator('main li').first().locator('a, button').first().click();
+  await expect(page).toHaveURL(/\/ar\/teach\/messages\/[0-9a-f-]+$/);
+  // Either the teacher may write here, or the page says why not (a minor and a check still waiting, the academy's pause).
+  await expect(page.locator('textarea[name="body"]').or(page.getByText(/وقّفت|مابقاش بيدرّس|مقفولة/))).toBeVisible();
 });

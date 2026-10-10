@@ -9278,6 +9278,889 @@
                 }
             }
         },
+        "/v1/messages/conversations": {
+            "get": {
+                "operationId": "messages.conversations",
+                "description": "A teacher: each student they teach (or wrote with); a family: the learner's teachers (`learner_id`, else the\nfirst learner). Those with the newest message first; `id` is null until someone opens it.",
+                "summary": "My conversations",
+                "tags": [
+                    "Messaging"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "description": "Null until the conversation is opened."
+                                                    },
+                                                    "with": {
+                                                        "type": "object",
+                                                        "description": "Who it is with: a student for a teacher, a teacher for a family.",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name"
+                                                        ]
+                                                    },
+                                                    "last_message": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "body": {
+                                                                "type": "string"
+                                                            },
+                                                            "mine": {
+                                                                "type": "boolean"
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "body",
+                                                            "mine",
+                                                            "at"
+                                                        ]
+                                                    },
+                                                    "unread": {
+                                                        "type": "integer",
+                                                        "description": "Messages from the others since I last read it."
+                                                    },
+                                                    "can_write": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "why_not": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "description": "Why I cannot write, in words: messages off, paused by the academy, no longer teaching."
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "with",
+                                                    "last_message",
+                                                    "unread",
+                                                    "can_write",
+                                                    "why_not"
+                                                ]
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "learner": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The learner (a family's list).",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "notice": {
+                                                    "type": "string",
+                                                    "description": "What everyone in a conversation should know: guardians read it, the academy reviews it, contacts are hidden."
+                                                }
+                                            },
+                                            "required": [
+                                                "learner",
+                                                "notice"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "messages.conversations.store",
+                "description": "With `with_id` from my list (a teacher: a student they teach; a family: a teacher of `learner_id`). It is made\nthe first time; one that exists is returned as it is.",
+                "summary": "Open a conversation",
+                "tags": [
+                    "Messaging"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "with_id": {
+                                        "type": "string",
+                                        "description": "The person on the other side, as my list names them."
+                                    },
+                                    "learner_id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "A family: the learner it is about."
+                                    }
+                                },
+                                "required": [
+                                    "with_id"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "with": {
+                                                    "type": "object",
+                                                    "description": "Who it is with: the student for the teacher, the teacher for the family.",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "members": {
+                                                    "type": "array",
+                                                    "description": "Everyone in it, by name only: the teacher, the student, each guardian.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "side": {
+                                                                "type": "string",
+                                                                "description": "teacher | student | guardian"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "me": {
+                                                                "type": "boolean",
+                                                                "description": "The reader."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "side",
+                                                            "label",
+                                                            "me"
+                                                        ]
+                                                    }
+                                                },
+                                                "messages": {
+                                                    "type": "array",
+                                                    "description": "The newest 200, oldest first.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "side": {
+                                                                "type": "string",
+                                                                "description": "teacher | student | guardian"
+                                                            },
+                                                            "side_label": {
+                                                                "type": "string"
+                                                            },
+                                                            "author": {
+                                                                "type": "string"
+                                                            },
+                                                            "mine": {
+                                                                "type": "boolean"
+                                                            },
+                                                            "body": {
+                                                                "type": "string",
+                                                                "description": "As everyone reads it: anything hidden shows as [\u2022\u2022\u2022]."
+                                                            },
+                                                            "hidden": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "What was hidden from it, in words; null when nothing was."
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "side",
+                                                            "side_label",
+                                                            "author",
+                                                            "mine",
+                                                            "body",
+                                                            "hidden",
+                                                            "at"
+                                                        ]
+                                                    }
+                                                },
+                                                "can_write": {
+                                                    "type": "boolean"
+                                                },
+                                                "why_not": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Why I cannot write, in words."
+                                                },
+                                                "notice": {
+                                                    "type": "string",
+                                                    "description": "What everyone in it should know: guardians read it, the academy reviews it, contacts are hidden."
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "with",
+                                                "members",
+                                                "messages",
+                                                "can_write",
+                                                "why_not",
+                                                "notice"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/messages/unread": {
+            "get": {
+                "operationId": "messages.unread",
+                "description": "How many messages from others wait in all my conversations (a guardian: all their children's), for a badge.",
+                "summary": "Unread messages",
+                "tags": [
+                    "Messaging"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "required": [
+                                                "count"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/messages/conversations/{conversation}": {
+            "get": {
+                "operationId": "messages.conversations.show",
+                "description": "Who is in it and the newest 200 messages, oldest first, as I read them (contacts hidden). Opening it marks\nit read.",
+                "summary": "One conversation",
+                "tags": [
+                    "Messaging"
+                ],
+                "parameters": [
+                    {
+                        "name": "conversation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "with": {
+                                                    "type": "object",
+                                                    "description": "Who it is with: the student for the teacher, the teacher for the family.",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "members": {
+                                                    "type": "array",
+                                                    "description": "Everyone in it, by name only: the teacher, the student, each guardian.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "side": {
+                                                                "type": "string",
+                                                                "description": "teacher | student | guardian"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "me": {
+                                                                "type": "boolean",
+                                                                "description": "The reader."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "side",
+                                                            "label",
+                                                            "me"
+                                                        ]
+                                                    }
+                                                },
+                                                "messages": {
+                                                    "type": "array",
+                                                    "description": "The newest 200, oldest first.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "side": {
+                                                                "type": "string",
+                                                                "description": "teacher | student | guardian"
+                                                            },
+                                                            "side_label": {
+                                                                "type": "string"
+                                                            },
+                                                            "author": {
+                                                                "type": "string"
+                                                            },
+                                                            "mine": {
+                                                                "type": "boolean"
+                                                            },
+                                                            "body": {
+                                                                "type": "string",
+                                                                "description": "As everyone reads it: anything hidden shows as [\u2022\u2022\u2022]."
+                                                            },
+                                                            "hidden": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "What was hidden from it, in words; null when nothing was."
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "side",
+                                                            "side_label",
+                                                            "author",
+                                                            "mine",
+                                                            "body",
+                                                            "hidden",
+                                                            "at"
+                                                        ]
+                                                    }
+                                                },
+                                                "can_write": {
+                                                    "type": "boolean"
+                                                },
+                                                "why_not": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Why I cannot write, in words."
+                                                },
+                                                "notice": {
+                                                    "type": "string",
+                                                    "description": "What everyone in it should know: guardians read it, the academy reviews it, contacts are hidden."
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "with",
+                                                "members",
+                                                "messages",
+                                                "can_write",
+                                                "why_not",
+                                                "notice"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/messages/conversations/{conversation}/messages": {
+            "post": {
+                "operationId": "messages.conversations.send",
+                "description": "`body` up to 2000 characters. A phone number, an email, a link (not the academy's) or an account name in it\nis hidden before anyone reads it; `hidden` says so. Send an `Idempotency-Key`.",
+                "summary": "Write",
+                "tags": [
+                    "Messaging"
+                ],
+                "parameters": [
+                    {
+                        "name": "conversation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "body": {
+                                        "type": "string",
+                                        "maxLength": 2000
+                                    }
+                                },
+                                "required": [
+                                    "body"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "side": {
+                                                    "type": "string",
+                                                    "description": "teacher | student | guardian"
+                                                },
+                                                "side_label": {
+                                                    "type": "string"
+                                                },
+                                                "author": {
+                                                    "type": "string"
+                                                },
+                                                "mine": {
+                                                    "type": "boolean"
+                                                },
+                                                "body": {
+                                                    "type": "string",
+                                                    "description": "As everyone reads it: anything hidden shows as [\u2022\u2022\u2022]."
+                                                },
+                                                "hidden": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "What was hidden from it, in words; null when nothing was."
+                                                },
+                                                "at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "side",
+                                                "side_label",
+                                                "author",
+                                                "mine",
+                                                "body",
+                                                "hidden",
+                                                "at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/teacher/earnings": {
             "get": {
                 "operationId": "teacher.earnings",

@@ -13,7 +13,7 @@ function useActive() {
   return (href: string) => (href === '/family' ? path === '/family' : path === href || path.startsWith(`${href}/`));
 }
 
-export function SideNav({ stage, money, guardian = false, unread }: { stage: Stage; money: boolean; guardian?: boolean; unread: number }) {
+export function SideNav({ stage, money, guardian = false, unread, chats }: { stage: Stage; money: boolean; guardian?: boolean; unread: number; chats: number }) {
   const t = useTranslations(`nav.${stage}`);
   const common = useTranslations('common');
   const active = useActive();
@@ -33,6 +33,7 @@ export function SideNav({ stage, money, guardian = false, unread }: { stage: Sta
               <Icon name={item.icon} className={active(item.href) ? 'text-brand' : 'text-muted'} />
               {t(item.key)}
               {item.key === 'notifications' ? <Unread n={unread} label={common('newMessages', { n: unread })} /> : null}
+              {item.key === 'messages' ? <Unread n={chats} label={common('newChats', { n: chats })} /> : null}
             </Link>
           </li>
         ))}
@@ -42,7 +43,7 @@ export function SideNav({ stage, money, guardian = false, unread }: { stage: Sta
 }
 
 /** The phone's tab bar; the kids' one is bigger, with room for small fingers. */
-export function TabBar({ stage, money, unread }: { stage: Stage; money: boolean; unread: number }) {
+export function TabBar({ stage, money, unread, chats }: { stage: Stage; money: boolean; unread: number; chats: number }) {
   const t = useTranslations(`nav.${stage}`);
   const common = useTranslations('common');
   const active = useActive();
@@ -69,7 +70,7 @@ export function TabBar({ stage, money, unread }: { stage: Stage; money: boolean;
                   <Icon name={tab.icon} size={kids ? 24 : 22} className={on ? 'text-brand' : undefined} />
                 </span>
                 {t(tab.key)}
-                {tab.key === 'more' ? <Unread n={unread} label={common('newMessages', { n: unread })} dot className={kids ? 'top-2.5 end-[calc(50%-1.1rem)]' : undefined} /> : null}
+                {tab.key === 'more' ? <Unread n={unread + chats} label={common('newMessages', { n: unread + chats })} dot className={kids ? 'top-2.5 end-[calc(50%-1.1rem)]' : undefined} /> : null}
               </Link>
             </li>
           );

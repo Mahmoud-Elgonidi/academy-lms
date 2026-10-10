@@ -12,7 +12,9 @@ export type NavItem = { href: string; key: string; icon: IconName };
  * Everyone but a child in the kids' look can write to the academy (help)
  * and link Google or Apple to their account; adults in the classic look
  * see their data (a copy, erasure). Everyone, a child too, can tell the
- * academy's safeguarding leads that something is wrong (tell us).
+ * academy's safeguarding leads that something is wrong (tell us), and
+ * talk with the learner's teachers (messages; the guardians are in every
+ * conversation).
  */
 export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: NavItem[]; tabs: NavItem[] } {
   const lessons: NavItem = { href: '/family/lessons', key: 'lessons', icon: 'calendar' };
@@ -20,6 +22,7 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: 
   const progress: NavItem = { href: '/family/progress', key: 'progress', icon: 'chart' };
   const challenges: NavItem = { href: '/family/challenges', key: 'challenges', icon: 'trophy' };
   const inbox: NavItem = { href: '/family/notifications', key: 'notifications', icon: 'bell' };
+  const messages: NavItem = { href: '/family/messages', key: 'messages', icon: 'chat' };
   const more: NavItem = { href: '/family/more', key: 'more', icon: 'menu' };
   const home: NavItem = { href: '/family', key: 'home', icon: stage === 'kids' ? 'map' : stage === 'teen' ? 'flag' : 'home' };
   const pay: NavItem[] = money ? [{ href: '/family/money', key: 'money', icon: 'coins' }] : [];
@@ -37,9 +40,9 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: 
 
   if (stage === 'classic') {
     return {
-      all: [home, lessons, progress, homework, ...pay, challenges, inbox, ...recordings, ...privacy, ...help, tellUs, ...account, myData],
+      all: [home, lessons, messages, progress, homework, ...pay, challenges, inbox, ...recordings, ...privacy, ...help, tellUs, ...account, myData],
       tabs: [home, lessons, progress, ...(money ? pay : [homework]), more],
     };
   }
-  return { all: [home, challenges, lessons, homework, progress, inbox, ...recordings, ...help, tellUs, ...account], tabs: [home, challenges, lessons, homework, more] };
+  return { all: [home, challenges, lessons, messages, homework, progress, inbox, ...recordings, ...help, tellUs, ...account], tabs: [home, challenges, lessons, homework, more] };
 }

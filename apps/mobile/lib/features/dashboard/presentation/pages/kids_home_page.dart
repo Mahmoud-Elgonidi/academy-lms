@@ -69,6 +69,13 @@ class _KidsHome extends StatelessWidget {
                 ],
               ),
             ),
+            // Talking to their teacher (their family reads it too), one tap from the journey.
+            IconButton(
+              key: const Key('kids-messages'),
+              tooltip: l.messagesKidsTitle,
+              icon: Icon(Icons.forum_outlined, color: c.brand),
+              onPressed: () => context.push('/account/messages'),
+            ),
             // "Is something wrong?": a child tells the academy's grown-ups in one tap from their journey.
             IconButton(
               key: const Key('kids-tell-us'),

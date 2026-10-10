@@ -57,6 +57,14 @@ class MorePage extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('open-messages'),
+                  leading: const Icon(Icons.forum_outlined),
+                  title: Text(l.messagesTitle),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.go('/teach/more/messages'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('open-support'),
                   leading: const Icon(Icons.support_agent_outlined),
                   title: Text(l.supportTitle),

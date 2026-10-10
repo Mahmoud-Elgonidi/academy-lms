@@ -60,6 +60,13 @@ return [
             'concern_closed' => 'Safeguarding concern :concern closed: :concern_outcome',
             'concern_reopened' => 'Safeguarding concern :concern opened again',
         ],
+        'messaging' => [
+            'conversation_viewed' => 'Opened the conversation of :teacher with :student',
+            'original_revealed' => 'Read what was hidden from a message in the conversation of :teacher with :student',
+            'conversation_locked' => 'Paused the conversation of :teacher with :student',
+            'conversation_unlocked' => 'Let the conversation of :teacher with :student go on',
+            'settings_saved' => 'Messages between teachers and families are now :state',
+        ],
         'people' => [
             'consent_granted' => ':guardian agreed to :student\'s account (:via)',
             'consent_recorded' => 'A guardian\'s consent for :student recorded by the office: :note',
@@ -120,6 +127,7 @@ return [
         'outcome' => ['completed' => 'taught', 'teacher_absent' => 'teacher absent', 'student_absent' => 'student absent', 'cancelled_makeup' => 'cancelled with a makeup'],
         'mode' => ['test' => 'test', 'live' => 'live'],
         'via' => ['self' => 'themself', 'guardian' => 'as guardian', 'family' => 'from their account', 'link' => 'from the link they got', 'staff' => 'recorded by the office', 'email' => 'first sign-in with the same email', 'settings' => 'from their settings'],
+        'state' => ['on' => 'on', 'off' => 'off'],
         'provider' => ['google' => 'Google', 'apple' => 'Apple'],
         'how' => ['exit' => 'they left', 'expired' => 'time ran out', 'ended' => 'ended from the console'],
         'recording' => ['off' => 'no recording', 'manual' => 'the teacher starts it', 'auto' => 'every lesson by itself'],
@@ -127,6 +135,7 @@ return [
         'side' => ['family' => 'the family', 'teacher' => 'the teacher', 'staff' => 'written down by the office'],
     ],
     'groups' => [
+        'messaging' => 'Conversations',
         'safeguarding' => 'Safeguarding',
         'billing' => 'Money',
         'scheduling' => 'Lessons and policy',

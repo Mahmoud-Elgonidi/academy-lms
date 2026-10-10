@@ -39,6 +39,7 @@ class AccountPage extends StatelessWidget {
             const SizedBox(height: 14),
             if (!standalone) const _Privacy(),
             if (!standalone) const _Recordings(),
+            const _Messages(),
             const _Help(),
             const _TellUs(),
             const _MyData(),
@@ -128,6 +129,41 @@ class _Help extends StatelessWidget {
           key: const Key('open-help'),
           leading: const Icon(Icons.support_agent_outlined),
           title: Text(context.l10n.helpTitle, style: context.text.titleSmall),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: () => context.go(target),
+        ),
+      ),
+    );
+  }
+}
+
+/// Conversations with the learner's teachers: a family's from Me, a student's from their account (a child's too);
+/// a teacher's are in More.
+class _Messages extends StatelessWidget {
+  const _Messages();
+
+  @override
+  Widget build(BuildContext context) {
+    final area = Area.of(context.watch<SessionCubit>().state);
+    final target = switch (area) {
+      Area.family => '/family/me/messages',
+      Area.kids || Area.middle || Area.teen => '/account/messages',
+      _ => null,
+    };
+    if (target == null) return const SizedBox.shrink();
+    final l = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: LmsCard(
+        padding: EdgeInsets.zero,
+        child: ListTile(
+          key: const Key('open-messages'),
+          leading: const Icon(Icons.forum_outlined),
+          title: Text(switch (area) {
+            Area.kids => l.messagesKidsTitle,
+            Area.family => l.messagesFamilyTitle,
+            _ => l.messagesStudentTitle,
+          }, style: context.text.titleSmall),
           trailing: const Icon(Icons.chevron_right_rounded),
           onTap: () => context.go(target),
         ),

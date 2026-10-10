@@ -2437,4 +2437,39 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get documentsNone => 'لسه ما بعتش أي مستندات.';
+
+  @override
+  String get messagesTitle => 'الرسايل';
+
+  @override
+  String get messagesFamilyTitle => 'الرسايل مع المدرسين';
+
+  @override
+  String get messagesStudentTitle => 'الرسايل مع مدرسينك';
+
+  @override
+  String get messagesKidsTitle => 'كلّم مدرسك';
+
+  @override
+  String get messagesEmptyTeacher => 'لما يبقى عندك طلاب، هتلاقيهم هنا وتقدر تكلّمهم وتكلّم أهلهم.';
+
+  @override
+  String get messagesEmptyFamily => 'لما يبقى للطالب مدرس، هتلاقيه هنا.';
+
+  @override
+  String get messagesStart => 'لسه ماحدش كتب';
+
+  @override
+  String get messagesYou => 'إنت';
+
+  @override
+  String messagesAlsoHere(String names) {
+    return 'معاكم: $names';
+  }
+
+  @override
+  String get messagesFirst => 'ابدأ المحادثة: الكلام هنا بيشوفه أولياء الأمور والأكاديمية.';
+
+  @override
+  String get messagesWrite => 'اكتب رسالة…';
 }

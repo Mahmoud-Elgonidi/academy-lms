@@ -24,6 +24,7 @@ use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Identity\Filament\Pages\SignIn;
 use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\Learning\Filament\Family\LearningFamilyPlugin;
+use Modules\Messaging\Filament\Family\MessagingFamilyPlugin;
 use Modules\People\Filament\Family\PeopleFamilyPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
 use Modules\Privacy\Filament\Family\PrivacyFamilyPlugin;
@@ -84,6 +85,7 @@ final class FamilyPanelProvider extends PanelProvider
                 SupportFamilyPlugin::make(),
                 PrivacyFamilyPlugin::make(),
                 SafeguardingFamilyPlugin::make(),
+                MessagingFamilyPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),
             ]);

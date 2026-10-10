@@ -30,6 +30,7 @@
     "downloadFile": "Download the file",
     "markAllRead": "Mark all read",
     "newMessages": "{n, plural, =1 {1 new message} other {# new messages}}",
+    "newChats": "{n, plural, =1 {1 new message from a teacher or student} other {# new messages in conversations}}",
     "academyOnly": "Academy only"
   },
   "signIn": {
@@ -72,6 +73,7 @@
     "reports": "Reports",
     "marking": "Marking",
     "students": "My students",
+    "messages": "Messages",
     "trials": "Trial lessons",
     "hours": "My hours",
     "timeOff": "Time off",
@@ -85,6 +87,7 @@
       "menu": "Menu",
       "home": "Home",
       "lessons": "Lessons",
+      "messages": "Messages",
       "progress": "Progress",
       "homework": "Homework",
       "money": "Payments",
@@ -102,6 +105,7 @@
       "menu": "Menu",
       "home": "Journey",
       "lessons": "Lessons",
+      "messages": "Talk to your teacher",
       "progress": "My path",
       "homework": "Homework",
       "money": "Payments",
@@ -115,6 +119,7 @@
       "menu": "Menu",
       "home": "Home",
       "lessons": "Lessons",
+      "messages": "Teacher messages",
       "progress": "Levels",
       "homework": "Homework",
       "money": "Payments",
@@ -130,6 +135,7 @@
       "menu": "Menu",
       "home": "Plan",
       "lessons": "Lessons",
+      "messages": "Messages",
       "progress": "Reports",
       "homework": "Homework",
       "money": "Payments",
@@ -592,6 +598,25 @@
     "bannerMany": "{names} are waiting for your consent to sign in.",
     "bannerAction": "Read and agree",
     "nameSeparator": ", "
+  },
+  "chat": {
+    "teacherTitle": "Messages",
+    "title": {
+      "classic": "Messages with teachers",
+      "teen": "Messages with your teachers",
+      "middle": "Messages with your teachers",
+      "kids": "Talk to your teacher"
+    },
+    "emptyTeacher": "When you have students, you will find them here to talk to them and their families.",
+    "emptyFamily": "When the student has a teacher, you will find them here.",
+    "start": "Nobody has written yet",
+    "you": "You",
+    "back": "All conversations",
+    "inIt": "Also here: {names}",
+    "conversation": "Conversation",
+    "first": "Start the conversation: guardians and the academy can read what is said here.",
+    "write": "Write a message…",
+    "send": "Send"
   },
   "support": {
     "title": "Help",

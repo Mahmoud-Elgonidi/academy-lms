@@ -20,6 +20,8 @@ export function targetOf(screen: string | null | undefined, id: string | null | 
       return '/teach/concern';
     case 'my_checks':
       return '/teach/documents';
+    case 'conversation':
+      return id ? `/teach/messages/${id}` : '/teach/messages';
     default:
       return '/teach';
   }

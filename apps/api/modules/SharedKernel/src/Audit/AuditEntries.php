@@ -22,6 +22,7 @@ final class AuditEntries
         'support' => ['support.'],
         'privacy' => ['privacy.'],
         'safeguarding' => ['safeguarding.'],
+        'messaging' => ['messaging.'],
         'impersonation' => ['impersonation.'],
         'platform' => ['academy.', 'platform.'],
     ];

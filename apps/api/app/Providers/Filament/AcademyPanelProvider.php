@@ -31,6 +31,7 @@ use Modules\Identity\Http\Middleware\RequireTwoFactor;
 use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\Import\Filament\ImportPlugin;
 use Modules\Learning\Filament\LearningPlugin;
+use Modules\Messaging\Filament\MessagingPlugin;
 use Modules\Payroll\Filament\PayrollPlugin;
 use Modules\People\Filament\PeoplePlugin;
 use Modules\Platform\Filament\PlatformPlugin;
@@ -101,6 +102,7 @@ final class AcademyPanelProvider extends PanelProvider
                 SupportPlugin::make(),
                 PrivacyPlugin::make(),
                 SafeguardingPlugin::make(),
+                MessagingPlugin::make(),
                 CommunicationPlugin::make(),
                 ClassroomPlugin::make(),
                 PlatformPlugin::make(),

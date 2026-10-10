@@ -110,3 +110,13 @@ describe('telling the academy something is wrong', () => {
     expect(familyTargetOf('my_concerns', false)).toBe('/family/tell-us');
   });
 });
+
+describe('messages with the teachers', () => {
+  it('are in every look, a child\'s too, and a notification opens the conversation', () => {
+    for (const stage of STAGES) {
+      expect(itemsOf(stage, seesMoney(stage)).all.find((i) => i.key === 'messages')?.href).toBe('/family/messages');
+    }
+    expect(familyTargetOf('conversation', false, 'c1')).toBe('/family/messages/c1');
+    expect(familyTargetOf('conversation', true)).toBe('/family/messages');
+  });
+});

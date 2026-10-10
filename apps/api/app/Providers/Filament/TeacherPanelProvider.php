@@ -24,6 +24,7 @@ use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Identity\Filament\Pages\SignIn;
 use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\Learning\Filament\Teacher\LearningTeacherPlugin;
+use Modules\Messaging\Filament\Teacher\MessagingTeacherPlugin;
 use Modules\Payroll\Filament\Teacher\PayrollTeacherPlugin;
 use Modules\People\Filament\Teacher\PeopleTeacherPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
@@ -86,6 +87,7 @@ final class TeacherPanelProvider extends PanelProvider
                 SupportTeacherPlugin::make(),
                 PrivacyTeacherPlugin::make(),
                 SafeguardingTeacherPlugin::make(),
+                MessagingTeacherPlugin::make(),
                 PeopleTeacherPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),

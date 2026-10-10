@@ -15,7 +15,7 @@ export default async function Notifications() {
     get<{ data: Notification[]; meta: { unread: number } }>('/v1/notifications'),
   ]);
   const title = (await getTranslations(`nav.${fam.stage}`))('notifications');
-  const items = inbox.data.map((n) => ({ ...n, href: familyTargetOf(n.action?.screen, seesMoney(fam.stage)) }));
+  const items = inbox.data.map((n) => ({ ...n, href: familyTargetOf(n.action?.screen, seesMoney(fam.stage), n.action?.id) }));
   return (
     <div>
       <Heading title={title} hint={inbox.meta.unread > 0 ? t('unread', { n: inbox.meta.unread }) : undefined} />
