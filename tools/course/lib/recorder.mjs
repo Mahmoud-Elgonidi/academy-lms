@@ -75,7 +75,7 @@ export async function ensureSession(browser, series, user, base) {
   return file;
 }
 
-function stepsApi(page, series, rec) {
+function stepsApi(page, series, rec, voice) {
   const touch = series.device === 'phone';
   const vp = deviceOf(series).viewport;
   let pointer = { x: vp.width * 0.62, y: vp.height * 0.72 };
@@ -107,9 +107,11 @@ function stepsApi(page, series, rec) {
   const ring = (b) => page.evaluate((b) => window.__course.ring(b), b);
 
   let caption = null;
+  let spoken = 0;
   const finishCaption = async () => {
     if (!caption) return;
-    const left = caption.start + readSeconds(caption.text) - now();
+    // With a narrator the caption stays until the voice is done (and a breath after); without one, until it could be read.
+    const left = caption.start + (caption.audio ? Math.max(caption.seconds + 0.45, 2.5) : readSeconds(caption.text)) - now();
     if (left > 0) await sleep(left * 1000);
     caption.end = now();
     caption = null;
@@ -121,7 +123,9 @@ function stepsApi(page, series, rec) {
     /** Shows a caption; the actions after it happen while it is up, and the next one waits until this one could be read. */
     async say(text, { lead = 900 } = {}) {
       await finishCaption();
-      caption = { text, start: now(), end: null };
+      const clip = voice?.lines[spoken++];
+      if (voice && clip?.caption !== text) throw new Error(`The narration was made for other steps (expected "${clip?.caption}", got "${text}").`);
+      caption = { text, start: now(), end: null, ...(clip ? { spoken: clip.text, audio: clip.file, seconds: clip.seconds } : {}) };
       rec.captions.push(caption);
       await sleep(lead);
     },
@@ -216,9 +220,10 @@ function stepsApi(page, series, rec) {
 
 /**
  * Records one lesson into `dir`: frames/*.jpg with their times, and
- * recording.json (frames, captions, length) for the encoder.
+ * recording.json (frames, captions with their spoken lines, length) for the
+ * encoder. With a narration (lib/voice.mjs) each step waits for its line.
  */
-export async function recordLesson({ browser, series, lesson, user, base, dir }) {
+export async function recordLesson({ browser, series, lesson, user, base, dir, voice = null }) {
   const storageState = await ensureSession(browser, series, user, base);
   const framesDir = join(dir, 'frames');
   mkdirSync(framesDir, { recursive: true });
@@ -248,7 +253,7 @@ export async function recordLesson({ browser, series, lesson, user, base, dir })
   await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 92, maxWidth: series.device === 'phone' ? 780 : app.width, maxHeight: series.device === 'phone' ? 1688 : app.height, everyNthFrame: 1 });
   await sleep(600);
 
-  const s = stepsApi(page, series, rec);
+  const s = stepsApi(page, series, rec, voice);
   try {
     await lesson.steps(s);
     await s.finishCaption();
@@ -266,7 +271,8 @@ export async function recordLesson({ browser, series, lesson, user, base, dir })
   const recording = {
     length: ended - t0,
     frames: rec.frames.map((f) => ({ file: f.file, t: f.t - t0 })),
-    captions: rec.captions.map((c) => ({ text: c.text, start: Math.max(0, c.start - t0), end: (c.end ?? ended) - t0 })),
+    captions: rec.captions.map((c) => ({ text: c.text, start: Math.max(0, c.start - t0), end: (c.end ?? ended) - t0, ...(c.audio ? { spoken: c.spoken, audio: c.audio, seconds: c.seconds } : {}) })),
+    voice: voice ? { intro: voice.intro, outro: voice.outro } : null,
     errors,
   };
   writeFileSync(join(dir, 'recording.json'), JSON.stringify(recording));

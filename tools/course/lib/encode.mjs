@@ -6,9 +6,9 @@ import { backgroundHtml, captionHtml, endHtml, titleHtml } from './render.mjs';
 
 /**
  * Puts a recorded lesson together: title card, the screen inside the lesson's
- * frame with its captions, end card; one H.264 MP4 (1080p, 30 fps, a silent
- * stereo track so every player treats it as a video), the captions as SRT and
- * the narration script for a voice-over.
+ * frame with its captions, end card; one H.264 MP4 (1080p, 30 fps) with the
+ * narrator's voice laid on it (or a silent track without one), the subtitles as
+ * SRT and the narration script.
  */
 const ffmpeg = (args, label) => {
   const r = spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', ...args], { encoding: 'utf8', maxBuffer: 1 << 26 });
@@ -83,43 +83,70 @@ export async function encodeLesson({ renderer, series, lesson, next, dir, out, r
     '-map', '[v]', '-t', length.toFixed(3), ...X264, main,
   ], 'lesson');
 
-  // Cards.
+  // Cards: long enough for the narrator's welcome and goodbye when there is one.
+  const voice = recording.voice;
+  const titleSeconds = Math.max(CARD_SECONDS.title, voice ? voice.intro.seconds + 1.1 : 0);
+  const endSeconds = Math.max(CARD_SECONDS.end, voice ? voice.outro.seconds + 1.0 : 0);
   const card = (png, seconds, file) => ffmpeg([
-    '-loop', '1', '-framerate', String(FRAME.fps), '-t', String(seconds), '-i', png,
-    '-vf', `fade=t=in:st=0:d=0.45,fade=t=out:st=${seconds - 0.45}:d=0.45,format=yuv420p`,
+    '-loop', '1', '-framerate', String(FRAME.fps), '-t', seconds.toFixed(3), '-i', png,
+    '-vf', `fade=t=in:st=0:d=0.45,fade=t=out:st=${(seconds - 0.45).toFixed(3)}:d=0.45,format=yuv420p`,
     ...X264, file,
   ], 'card');
-  card(join(stills, 'title.png'), CARD_SECONDS.title, join(dir, 'title.mp4'));
-  card(join(stills, 'end.png'), CARD_SECONDS.end, join(dir, 'end.mp4'));
+  card(join(stills, 'title.png'), titleSeconds, join(dir, 'title.mp4'));
+  card(join(stills, 'end.png'), endSeconds, join(dir, 'end.mp4'));
+  const total = titleSeconds + length + endSeconds;
+
+  // The sound: each spoken line laid at the moment its caption shows (the welcome on the title card, the goodbye on the end card), evened to one loudness; silence without a narrator.
+  const clips = voice ? [
+    { file: voice.intro.file, at: 0.5 },
+    ...recording.captions.filter((c) => c.audio).map((c) => ({ file: c.audio, at: titleSeconds + c.start })),
+    { file: voice.outro.file, at: titleSeconds + length + 0.35 },
+  ] : [];
+  const sound = join(dir, 'sound.m4a');
+  if (clips.length) {
+    ffmpeg([
+      ...clips.flatMap((c) => ['-i', c.file]),
+      '-filter_complex', [
+        ...clips.map((c, i) => `[${i}:a]aresample=48000,aformat=channel_layouts=mono,adelay=${Math.round(c.at * 1000)}:all=1[a${i}]`),
+        `${clips.map((_, i) => `[a${i}]`).join('')}amix=inputs=${clips.length}:normalize=0:dropout_transition=0,apad,atrim=0:${total.toFixed(3)},loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,aformat=channel_layouts=stereo[out]`,
+      ].join(';'),
+      '-map', '[out]', '-c:a', 'aac', '-b:a', '128k', sound,
+    ], 'narration');
+  } else {
+    ffmpeg(['-f', 'lavfi', '-i', 'anullsrc=r=48000:cl=stereo', '-t', total.toFixed(3), '-c:a', 'aac', '-b:a', '64k', sound], 'silence');
+  }
 
   writeFileSync(join(dir, 'parts.txt'), ['title.mp4', 'main.mp4', 'end.mp4'].map((f) => `file '${f}'`).join('\n') + '\n');
   const video = `${out}.mp4`;
   ffmpeg([
     '-f', 'concat', '-safe', '0', '-i', join(dir, 'parts.txt'),
-    '-f', 'lavfi', '-i', 'anullsrc=r=48000:cl=stereo',
-    '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '64k', '-shortest', '-movflags', '+faststart', video,
+    '-i', sound,
+    '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'copy', '-shortest', '-movflags', '+faststart', video,
   ], 'final');
   ffmpeg(['-i', join(stills, 'title.png'), '-vf', 'scale=960:-2', '-q:v', '3', `${out}.jpg`], 'poster');
 
-  // Captions and script, timed on the finished video (after the title card).
-  const offset = CARD_SECONDS.title;
-  writeFileSync(`${out}.srt`, recording.captions.map((c, i) => `${i + 1}\n${stamp(c.start + offset)} --> ${stamp(c.end + offset)}\n${c.text}\n`).join('\n'));
-  const total = offset + length + CARD_SECONDS.end;
+  // Subtitles (what is said, or the captions when nothing is) and the narration script, timed on the finished video.
+  const cues = [
+    ...(voice ? [{ start: 0.5 - titleSeconds, end: voice.intro.seconds + 0.5 - titleSeconds, text: voice.intro.text }] : []),
+    ...recording.captions.map((c) => ({ start: c.start, end: c.audio ? c.start + c.seconds : c.end, text: c.spoken ?? c.text })),
+    ...(voice ? [{ start: length + 0.35, end: length + 0.35 + voice.outro.seconds, text: voice.outro.text }] : []),
+  ];
+  writeFileSync(`${out}.srt`, cues.map((c, i) => `${i + 1}\n${stamp(c.start + titleSeconds)} --> ${stamp(c.end + titleSeconds)}\n${c.text}\n`).join('\n'));
   writeFileSync(`${out}.md`, [
     `# ${series.title} — الدرس ${lesson.n}: ${lesson.title}`,
     '',
-    `المدة: ${mmss(total)} · لمين: ${lesson.who ?? series.audience}`,
+    `المدة: ${mmss(total)} · لمين: ${lesson.who ?? series.audience}${voice ? '' : ' · من غير تعليق صوتي'}`,
     '',
     lesson.goal ? `**الهدف:** ${lesson.goal}\n` : '',
     lesson.learn?.length ? `**هتتعلم:**\n${lesson.learn.map((l) => `- ${l}`).join('\n')}\n` : '',
     '## نص التعليق الصوتي',
     '',
-    `**[0:00]** (كارت العنوان) ${lesson.title}. ${lesson.goal ?? ''}`.trim(),
+    `**[0:00]** (كارت العنوان) ${voice ? voice.intro.text : `${lesson.title}. ${lesson.goal ?? ''}`.trim()}`,
     '',
-    ...recording.captions.map((c) => `**[${mmss(c.start + offset)}]** ${c.text}\n`),
-    `**[${mmss(offset + length)}]** (كارت النهاية) ${next ? `الدرس الجاي: ${next.title}.` : `ده آخر درس في ${series.title}.`}`,
+    ...recording.captions.map((c) => `**[${mmss(c.start + titleSeconds)}]** ${c.spoken ?? c.text}\n\n> على الشاشة: ${c.text}\n`),
+    `**[${mmss(titleSeconds + length)}]** (كارت النهاية) ${voice ? voice.outro.text : next ? `الدرس الجاي: ${next.title}.` : `ده آخر درس في ${series.title}.`}`,
     '',
-  ].filter((l) => l !== null).join('\n'));
+  ].join('\n'));
 
-  return { video, seconds: total, captions: recording.captions.length };
+  return { video, seconds: total, captions: recording.captions.length, voiced: Boolean(voice), titleSeconds };
 }
