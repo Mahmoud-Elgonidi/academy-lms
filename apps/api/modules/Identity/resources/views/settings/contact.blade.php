@@ -8,7 +8,7 @@
                 <span dir="ltr">{{ $row['value'] ?? __('identity::settings.contact.none') }}</span>
             </div>
             @unless ($managed)
-                {{ ($this->changeContactAction)(['kind' => $row['kind']]) }}
+                {{ ($this->changeContactAction)(['kind' => $row['kind'], 'has' => filled($row['value'])]) }}
             @endunless
         </li>
     @endforeach

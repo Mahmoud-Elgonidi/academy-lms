@@ -97,8 +97,7 @@ final class MySettings extends EditProfile
             Section::make(__('identity::settings.contact.title'))
                 ->description(__('identity::settings.contact.hint'))
                 ->schema([View::make('identity::settings.contact')->viewData(fn (): array => [
-                    'rows' => $this->contactRows(),
-                    'managed' => (bool) $this->getUser()->getAttribute('is_managed_minor'),
+                    ...$this->contactRows(),
                 ])])
                 // Not while the platform team is signed in as this person (RequestContactChange refuses too).
                 ->visible(fn (): bool => AuditActor::current()->onBehalfOf === null),
@@ -135,7 +134,8 @@ final class MySettings extends EditProfile
     {
         $l = 'identity::settings.contact.';
         $kind = fn (array $arguments): string => ($arguments['kind'] ?? '') === 'phone' ? 'phone' : 'email';
-        $has = fn (array $arguments): bool => filled($this->getUser()->getAttribute($kind($arguments) === 'email' ? 'email' : 'phone_e164'));
+        // Whether there is one to change, or one to add (the row says).
+        $has = fn (array $arguments): bool => (bool) ($arguments['has'] ?? true);
 
         return Action::make('changeContact')
             ->label(fn (array $arguments): string => __($l.($has($arguments) ? 'change_' : 'add_').$kind($arguments)))
@@ -200,14 +200,17 @@ final class MySettings extends EditProfile
             });
     }
 
-    /** @return list<array{kind: string, label: string, value: ?string}> */
+    /** @return array{rows: list<array{kind: string, label: string, value: ?string}>, managed: bool} as stored now (just changed, it shows) */
     private function contactRows(): array
     {
-        $user = $this->getUser();
+        $now = User::query()->whereKey($this->getUser()->getAuthIdentifier())->first(['email', 'phone_e164', 'is_managed_minor']);
 
         return [
-            ['kind' => 'email', 'label' => __('identity::settings.contact.email'), 'value' => $user->getAttribute('email')],
-            ['kind' => 'phone', 'label' => __('identity::settings.contact.phone'), 'value' => $user->getAttribute('phone_e164')],
+            'rows' => [
+                ['kind' => 'email', 'label' => __('identity::settings.contact.email'), 'value' => $now?->email],
+                ['kind' => 'phone', 'label' => __('identity::settings.contact.phone'), 'value' => $now?->phone_e164],
+            ],
+            'managed' => (bool) $now?->is_managed_minor,
         ];
     }
 
