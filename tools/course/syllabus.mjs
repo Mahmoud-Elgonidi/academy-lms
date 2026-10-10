@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+// Writes the course's syllabus (docs/course/README.md) from the series files, so
+// the lessons that are filmed and the syllabus people read never drift apart.
+import { writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const here = dirname(fileURLToPath(import.meta.url));
+export const ORDER = ['academy', 'teacher', 'guardian', 'student', 'platform'];
+const PLACES = { desktop: 'شاشة الكمبيوتر', phone: 'الموبايل' };
+
+export async function loadSeries() {
+  return Promise.all(ORDER.map(async (key) => (await import(pathToFileURL(join(here, 'series', `${key}.mjs`)).href)).default));
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const all = await loadSeries();
+  const total = all.reduce((n, s) => n + s.lessons.length, 0);
+  const lines = [
+    '# كورس استخدام المنصة',
+    '',
+    `خمس سلاسل فيديو (${total} درس) بتشرح المنصة خطوة بخطوة لكل واحد حسب دوره. كل درس فيديو قصير (من دقيقتين لخمسة) متصوّر من الشاشات الحقيقية على بيانات الأكاديمية التجريبية، وعليه ترجمة بالعامية المصرية، ومعاه ملف ترجمة (SRT) ونص للتعليق الصوتي.`,
+    '',
+    'الفيديوهات بتتعمل بأداة `tools/course` (شوف [الطريقة](#إزاي-الفيديوهات-بتتعمل) تحت)، والفهرس ده بيتكتب من نفس ملفات السلاسل (`node tools/course/syllabus.mjs`)، فاللي في الفيديو واللي هنا دايمًا واحد.',
+    '',
+    '| السلسلة | لمين | الدروس | بتتصوّر على |',
+    '|---|---|---|---|',
+    ...all.map((s) => `| [${s.title}](#${s.title.replace(/ /g, '-')}) | ${s.audience} | ${s.lessons.length} | ${PLACES[s.device]} |`),
+    '',
+  ];
+  for (const s of all) {
+    lines.push(`## ${s.title}`, '', `${s.audience} · ${PLACES[s.device]}`, '');
+    for (const l of s.lessons) {
+      lines.push(`### ${l.n}. ${l.title}${l.steps ? '' : ' *(لسه هيتصوّر)*'}`, '');
+      if (l.who) lines.push(`*${l.who}*`, '');
+      lines.push(l.goal, '');
+      for (const item of l.learn ?? []) lines.push(`- ${item}`);
+      lines.push('');
+    }
+  }
+  lines.push(
+    '## إزاي الفيديوهات بتتعمل',
+    '',
+    '- كل درس سكريبت خطوات في `tools/course/series/<السلسلة>.mjs`: «قول» (ترجمة على الشاشة)، و«دوس»، و«اكتب»، و«اختار»، و«انزل لتحت». الأداة بتشغّل الخطوات دي على الشاشات الحقيقية في متصفح، وبتصوّرها من Chrome نفسه (فريم مع كل تغيير، بوقته)، وبتظهر مؤشر وحلقة حوالين الحاجة اللي بنتكلم عنها.',
+    '- بعد كده `ffmpeg` بيركّب: كارت العنوان، والشاشة جوه إطار السلسلة بزوايا مدوّرة، والترجمة تحتها (أو جنب الموبايل)، وكارت النهاية. الناتج MP4 بدقة 1080p و30 فريم، ومعاه ملف SRT، ونص التعليق الصوتي بالتوقيتات، وصورة غلاف.',
+    '- التشغيل: API شغال على بيانات تجريبية جديدة (`php artisan migrate:fresh --database=pgsql_owner --force && php artisan db:seed --force`)، وبعدين من `tools/course`:',
+    '',
+    '  ```sh',
+    '  npm ci',
+    '  export COURSE_PASSWORD=…          # كلمة سر حسابات الديمو',
+    '  export COURSE_TOTP_OWNER=…        # مفتاح التحقق بخطوتين لصاحب الأكاديمية التجريبية',
+    '  node record.mjs academy 7          # سلسلة ودرس (أو أكتر)، أو السلسلة كلها من غير أرقام',
+    '  ```',
+    '',
+    '  الناتج في `tools/course/out/<السلسلة>/` (برّه git).',
+    '- كلمات السر ومفاتيح التحقق بتيجي من متغيرات البيئة بس، عمرها ما تتكتب في الملفات.',
+    '- الدروس اللي بتغيّر البيانات (تسجيل طالب مثلًا) بتتصوّر على بيانات تجريبية جديدة، بالترتيب.',
+    '',
+  );
+  writeFileSync(join(here, '../../docs/course/README.md'), lines.join('\n'));
+  console.log(`docs/course/README.md: ${all.length} series, ${total} lessons`);
+}

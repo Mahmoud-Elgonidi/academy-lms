@@ -1,0 +1,217 @@
+<title>كورس استخدام المنصة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Reem+Kufi:wght@500;700&display=swap">
+<style>
+  /* Layout: a study desk. The lesson playing on one side, the series' lessons on the other; the five series are tabs in their own colours. */
+  :root {
+    --bg: #f3f6f6;
+    --surface: #ffffff;
+    --sunk: #e9eeee;
+    --ink: #10201f;
+    --muted: #5a6b6a;
+    --line: #d7e0df;
+    --focus: #0f766e;
+    --display: 'Reem Kufi', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    --body: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    --tone: #14b8a6;
+    --tone-ink: #0b1220;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0b1414; --surface: #111d1d; --sunk: #0d1818; --ink: #e5eeed; --muted: #8fa3a1; --line: #223332; --focus: #5eead4; color-scheme: dark; }
+  }
+  :root[data-theme="dark"] { --bg: #0b1414; --surface: #111d1d; --sunk: #0d1818; --ink: #e5eeed; --muted: #8fa3a1; --line: #223332; --focus: #5eead4; color-scheme: dark; }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 1rem; line-height: 1.7; direction: rtl; }
+  .wrap { max-width: 78rem; margin: 0 auto; padding-inline: 1rem; padding-block: 1.5rem 3rem; display: flex; flex-direction: column; gap: 1.5rem; }
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: .5rem; }
+
+  .top { display: flex; flex-direction: column; gap: .6rem; }
+  .eyebrow { font-size: .82rem; letter-spacing: .02em; color: var(--muted); font-weight: 500; }
+  h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem); line-height: 1.2; }
+  .lead { max-width: 62ch; color: var(--muted); margin: 0; }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
+  .tab { display: inline-flex; align-items: center; gap: .55rem; padding: .5rem .9rem; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 500; }
+  .tab .dot { width: .7rem; height: .7rem; border-radius: 50%; background: var(--c); flex: none; }
+  .tab small { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .tab[aria-selected="true"] { background: var(--c); border-color: var(--c); color: #0b1220; }
+  .tab[aria-selected="true"] small { color: #0b1220; opacity: .75; }
+  .tab[aria-selected="true"] .dot { background: #0b1220; }
+
+  .desk { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: 1.25rem; align-items: start; }
+  @media (max-width: 64rem) { .desk { grid-template-columns: minmax(0, 1fr); } }
+
+  .player { position: relative; aspect-ratio: 16 / 9; max-width: 100%; border-radius: 1rem; overflow: hidden; background: #0b1220; box-shadow: 0 0 0 1px var(--line); }
+  .player video { position: absolute; inset: 0; width: 100%; height: 100%; display: block; background: #0b1220; }
+  .soon { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: .6rem; padding: clamp(1rem, 4vw, 3rem); color: #e2e8f0;
+    background: radial-gradient(60rem 30rem at 90% -20%, color-mix(in srgb, var(--tone) 35%, transparent), transparent 60%), linear-gradient(160deg, #0f172a, #0b1220); }
+  .soon strong { font-family: var(--display); font-size: clamp(1.3rem, 1rem + 1.6vw, 2.2rem); line-height: 1.3; color: #f8fafc; }
+  .soon .pill { align-self: flex-start; }
+
+  .now { display: flex; flex-direction: column; gap: .5rem; padding-block: 1rem .25rem; }
+  .now h2 { font-family: var(--display); font-weight: 700; font-size: clamp(1.4rem, 1.1rem + 1.2vw, 1.9rem); line-height: 1.3; }
+  .now p { margin: 0; max-width: 65ch; }
+  .learn { margin: 0; padding-inline-start: 1.2rem; color: var(--muted); }
+  .meta { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+  .pill { display: inline-flex; align-items: center; gap: .35rem; font-size: .8rem; font-weight: 700; padding: .15rem .65rem; border-radius: 999px; background: var(--tone); color: var(--tone-ink); }
+  .pill.quiet { background: var(--sunk); color: var(--muted); font-weight: 500; }
+
+  .script { margin-top: .75rem; border-top: 1px solid var(--line); padding-top: .75rem; }
+  .script h3 { font-size: 1rem; margin-bottom: .4rem; }
+  .cues { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .15rem; max-height: 22rem; overflow-y: auto; }
+  .cue { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr); gap: .6rem; width: 100%; text-align: start; background: none; border: 0; padding: .45rem .5rem; border-radius: .6rem; cursor: pointer; line-height: 1.6; }
+  .cue:hover { background: var(--sunk); }
+  .cue time { font-variant-numeric: tabular-nums; color: var(--muted); direction: ltr; text-align: end; font-size: .9rem; padding-top: .1rem; }
+  .cue[aria-current="true"] { background: color-mix(in srgb, var(--tone) 18%, transparent); }
+  .cue[aria-current="true"] time { color: var(--ink); font-weight: 700; }
+
+  .lessons { background: var(--surface); border: 1px solid var(--line); border-radius: 1rem; padding: .75rem; display: flex; flex-direction: column; gap: .5rem; }
+  .lessons header { display: flex; flex-direction: column; gap: .1rem; padding: .25rem .5rem .5rem; border-bottom: 1px solid var(--line); }
+  .lessons header strong { font-family: var(--display); font-size: 1.2rem; }
+  .lessons header span { color: var(--muted); font-size: .88rem; }
+  .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .15rem; }
+  .row { display: grid; grid-template-columns: 2rem minmax(0, 1fr) auto; gap: .6rem; align-items: center; width: 100%; text-align: start; background: none; border: 0; border-radius: .7rem; padding: .55rem .5rem; cursor: pointer; }
+  .row:hover { background: var(--sunk); }
+  .row .num { width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; font-size: .85rem; font-weight: 700; font-variant-numeric: tabular-nums; background: var(--sunk); color: var(--muted); }
+  .row.ready .num { background: var(--tone); color: var(--tone-ink); }
+  .row .t { min-width: 0; line-height: 1.45; }
+  .row .t small { display: block; color: var(--muted); font-size: .8rem; }
+  .row .len { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .row[aria-current="true"] { background: color-mix(in srgb, var(--tone) 16%, transparent); }
+
+  .notes { color: var(--muted); font-size: .88rem; max-width: 70ch; display: flex; flex-direction: column; gap: .3rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+  .notes p { margin: 0; }
+  @media (prefers-reduced-motion: no-preference) { .row, .tab, .cue { transition: background-color .15s ease; } }
+</style>
+
+<div class="wrap" dir="rtl" lang="ar">
+  <header class="top">
+    <span class="eyebrow">دليل المنصة المصوّر</span>
+    <h1>كورس استخدام المنصة</h1>
+    <p class="lead" id="lead"></p>
+    <nav class="tabs" role="tablist" aria-label="السلاسل" id="tabs"></nav>
+  </header>
+
+  <section class="desk" id="desk">
+    <div>
+      <div class="player" id="player"></div>
+      <div class="now" id="now"></div>
+      <div class="script" id="script" hidden>
+        <h3>نص الدرس <span class="eyebrow">· دوس على أي سطر عشان تروح له</span></h3>
+        <ol class="cues" id="cues"></ol>
+      </div>
+    </div>
+    <aside class="lessons" aria-label="دروس السلسلة">
+      <header><strong id="series-title"></strong><span id="series-for"></span></header>
+      <ol class="list" id="list"></ol>
+    </aside>
+  </section>
+
+  <footer class="notes">
+    <p>الفيديوهات متصوّرة من الشاشات الحقيقية على بيانات أكاديمية تجريبية، والأسماء والأرقام فيها مش لناس حقيقيين.</p>
+    <p>الترجمة جوه الفيديو نفسه، ونص كل درس تحت المشغّل بالتوقيت، وهو نفس النص اللي هيتسجّل بيه التعليق الصوتي.</p>
+  </footer>
+</div>
+
+<script>
+  document.documentElement.setAttribute('dir', 'rtl');
+  document.documentElement.setAttribute('lang', 'ar');
+  const COURSE = /*COURSE_DATA*/[];
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); n.append(...kids.filter((k) => k != null)); return n; };
+  const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+
+  const total = COURSE.reduce((n, s) => n + s.lessons.length, 0);
+  const ready = COURSE.reduce((n, s) => n + s.lessons.filter((l) => l.video).length, 0);
+  $('lead').textContent = `خمس سلاسل (${total} درس) بتشرح المنصة خطوة بخطوة لكل واحد حسب دوره: الأكاديمية، والمدرس، وولي الأمر، والطالب، وفريق المنصة. كل درس فيديو قصير عليه ترجمة بالعامية المصرية. جاهز منها دلوقتي ${ready}.`;
+
+  let series = COURSE.find((s) => s.key === location.hash.slice(1)) ?? COURSE.find((s) => s.lessons.some((l) => l.video)) ?? COURSE[0];
+  let lesson = null;
+
+  function renderTabs() {
+    $('tabs').replaceChildren(...COURSE.map((s) => {
+      const done = s.lessons.filter((l) => l.video).length;
+      const b = el('button', { className: 'tab', type: 'button', role: 'tab', id: `tab-${s.key}` },
+        el('span', { className: 'dot' }), el('span', { textContent: s.title }), el('small', { textContent: `${done}/${s.lessons.length}` }));
+      b.style.setProperty('--c', s.color);
+      b.setAttribute('aria-selected', String(s === series));
+      b.addEventListener('click', () => pickSeries(s));
+      return b;
+    }));
+  }
+
+  function pickSeries(s, n) {
+    series = s;
+    document.documentElement.style.setProperty('--tone', s.color);
+    try { history.replaceState(null, '', `#${s.key}`); } catch {}
+    renderTabs();
+    $('series-title').textContent = s.title;
+    $('series-for').textContent = `${s.audience} · ${s.device === 'phone' ? 'على الموبايل' : 'على الكمبيوتر'}`;
+    const remembered = Number(store.get(`course:${s.key}`));
+    pickLesson(s.lessons.find((l) => l.n === (n ?? remembered)) ?? s.lessons.find((l) => l.video) ?? s.lessons[0], false);
+  }
+
+  function pickLesson(l, play) {
+    lesson = l;
+    store.set(`course:${series.key}`, String(l.n));
+    $('list').replaceChildren(...series.lessons.map((x) => el('li', {}, (() => {
+      const b = el('button', { type: 'button', className: `row${x.video ? ' ready' : ''}` },
+        el('span', { className: 'num', textContent: x.n }),
+        el('span', { className: 't', textContent: x.title }, x.who ? el('small', { textContent: x.who }) : null),
+        el('span', { className: 'len', textContent: x.video ? clock(x.seconds) : 'قريب' }));
+      b.setAttribute('aria-current', String(x === l));
+      b.addEventListener('click', () => pickLesson(x, true));
+      return b;
+    })())));
+
+    const player = $('player');
+    if (l.video) {
+      const v = el('video', { controls: true, preload: 'metadata', poster: l.poster, playsInline: true });
+      v.append(el('source', { src: l.video, type: 'video/mp4' }));
+      v.addEventListener('timeupdate', () => markCue(v.currentTime));
+      player.replaceChildren(v);
+      if (play) v.play().catch(() => {});
+    } else {
+      player.replaceChildren(el('div', { className: 'soon' },
+        el('span', { className: 'pill', textContent: 'لسه هيتصوّر' }),
+        el('strong', { textContent: l.title }),
+        el('span', { textContent: l.goal })));
+    }
+
+    $('now').replaceChildren(
+      el('div', { className: 'meta' },
+        el('span', { className: 'pill', textContent: `${series.title} · الدرس ${l.n} من ${series.lessons.length}` }),
+        l.who ? el('span', { className: 'pill quiet', textContent: l.who }) : null,
+        l.video ? el('span', { className: 'pill quiet', textContent: clock(l.seconds) }) : null),
+      el('h2', { textContent: l.title }),
+      el('p', { textContent: l.goal }),
+      l.learn.length ? el('ul', { className: 'learn' }, ...l.learn.map((t) => el('li', { textContent: t }))) : null);
+
+    $('script').hidden = !l.cues;
+    $('cues').replaceChildren(...(l.cues ?? []).map((c) => el('li', {}, (() => {
+      const b = el('button', { type: 'button', className: 'cue' }, el('time', { textContent: clock(c.t) }), el('span', { textContent: c.text }));
+      b.dataset.t = c.t;
+      b.addEventListener('click', () => { const v = player.querySelector('video'); if (v) { v.currentTime = c.t; v.play().catch(() => {}); } });
+      return b;
+    })())));
+  }
+
+  let lastCue = null;
+  function markCue(t) {
+    const rows = [...$('cues').querySelectorAll('.cue')];
+    const now = rows.filter((r) => Number(r.dataset.t) <= t + 0.05).pop() ?? null;
+    if (now === lastCue) return;
+    lastCue?.setAttribute('aria-current', 'false');
+    now?.setAttribute('aria-current', 'true');
+    lastCue = now;
+    if (now) { const box = $('cues'); const top = now.offsetTop - box.offsetTop; if (top < box.scrollTop || top > box.scrollTop + box.clientHeight - now.clientHeight) box.scrollTop = top - 8; }
+  }
+
+  window.addEventListener('hashchange', () => { const s = COURSE.find((x) => x.key === location.hash.slice(1)); if (s && s !== series) pickSeries(s); });
+  pickSeries(series);
+</script>

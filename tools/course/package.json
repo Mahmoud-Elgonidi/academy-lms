@@ -1,0 +1,12 @@
+{
+  "name": "academy-course",
+  "private": true,
+  "type": "module",
+  "description": "The platform's video course, made from the demo data: each lesson is a script of steps that drives the real screens, recorded and captioned.",
+  "scripts": {
+    "record": "node record.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.56.1"
+  }
+}

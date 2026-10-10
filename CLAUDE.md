@@ -8,6 +8,7 @@ Multi-tenant SaaS LMS for online 1:1 tutoring academies. Architecture (Arabic): 
 - `packages/openapi` — the committed OpenAPI document of `/api/v1` (`composer openapi`).
 - `apps/mobile` — the Flutter app (guardians, students by stage, teachers). Features in `lib/features/<x>/{data,domain,presentation}`; see its README.
 - `apps/web` — the Next.js portal: teachers (`/teach`), students and guardians (`/family`). App Router under `src/app/[locale]`; see its README.
+- `tools/course` — the video course (five series, syllabus in `docs/course/README.md`, written by `node syllabus.mjs`): each lesson is a script of steps in `series/*.mjs` played on the real screens with demo data, filmed through Chrome's screencast and put together with ffmpeg (`node record.mjs <series> [n…]`; passwords and 2FA secrets only from `COURSE_*` env vars; videos stay out of git).
 
 ## Commands (run in `apps/api`)
 - `composer migrate` — migrations run as `lms_owner`; plain `php artisan migrate` is meant to fail.
