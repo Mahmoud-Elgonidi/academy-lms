@@ -357,10 +357,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get myDataTitle => 'بياناتي';
 
   @override
-  String get myDataLead => 'كل اللي الأكاديمية محتفظة بيه عنك وعن ولادك: نزّل نسخة، أو اطلب مسح حساب.';
+  String get myDataLead => 'كل اللي الأكاديمية محتفظة بيه عنك وعن ولادك: صحّح بياناتك، أو نزّل نسخة، أو اطلب مسح حساب.';
 
   @override
-  String get myDataLeadTeacher => 'كل اللي الأكاديمية محتفظة بيه عنك: نزّل نسخة، أو اطلب مسح حسابك.';
+  String get myDataLeadTeacher => 'كل اللي الأكاديمية محتفظة بيه عنك: صحّح اسمك، أو نزّل نسخة، أو اطلب مسح حسابك.';
 
   @override
   String get myDataYoung => 'ولي أمرك هو اللي بيطلب بخصوص بياناتك من حسابه.';
@@ -449,6 +449,91 @@ class AppLocalizationsAr extends AppLocalizations {
   String myDataAbout(String name) {
     return 'عن $name';
   }
+
+  @override
+  String get myDataFixTitle => 'تصحيح البيانات';
+
+  @override
+  String get myDataFixEdit => 'صحّح';
+
+  @override
+  String myDataFixEditTitle(String name) {
+    return 'تصحيح بيانات $name';
+  }
+
+  @override
+  String get myDataFixSave => 'احفظ';
+
+  @override
+  String get myDataFixSaved => 'اتحفظ.';
+
+  @override
+  String get myDataFixUnchanged => 'مفيش حاجة اتغيرت.';
+
+  @override
+  String get myDataFixUnset => 'مش متسجل';
+
+  @override
+  String get myDataFixContact => 'الإيميل ورقم الموبايل بتغيّرهم من «حسابي».';
+
+  @override
+  String myDataFixBody(int days) {
+    return 'حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال $days يوم.';
+  }
+
+  @override
+  String get myDataFixAsk => 'اطلب تصحيح';
+
+  @override
+  String myDataFixAskTitle(String name) {
+    return 'اطلب تصحيح بيانات $name';
+  }
+
+  @override
+  String myDataFixAskBody(int days) {
+    return 'اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال $days يوم، وبيوصلك ردها.';
+  }
+
+  @override
+  String get myDataFixSays => 'إيه اللي محتاج يتصلح';
+
+  @override
+  String get myDataFixPlaceholder => 'مثلًا: تاريخ الميلاد المتسجل 2016 والصح 2017.';
+
+  @override
+  String myDataFixTooShort(int min) {
+    return 'اكتب $min حروف على الأقل.';
+  }
+
+  @override
+  String get myDataFixSend => 'ابعت الطلب';
+
+  @override
+  String get myDataFixAsked => 'الطلب وصل للأكاديمية.';
+
+  @override
+  String myDataFixWaiting(String when) {
+    return 'اتطلب: الأكاديمية هترد قبل $when.';
+  }
+
+  @override
+  String get myDataFixDone => 'اتصلح';
+
+  @override
+  String myDataFixDoneWith(String answer) {
+    return 'اتصلح: $answer';
+  }
+
+  @override
+  String myDataFixRefused(String answer) {
+    return 'الأكاديمية ماصلحتش: $answer';
+  }
+
+  @override
+  String get myDataFixCancel => 'الغي الطلب';
+
+  @override
+  String get myDataFixCancelled => 'الطلب اتلغى.';
 
   @override
   String get myDataPrivacy => 'سياسة الخصوصية';
@@ -1014,6 +1099,68 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get meTitle => 'حسابي';
+
+  @override
+  String get contactTitle => 'الإيميل والموبايل';
+
+  @override
+  String get contactHint => 'دول طرق دخولك، والأكواد والرسايل بتوصلك عليهم. لما تغيّر واحد، بنبعت كود على الجديد عشان نتأكد إنه بتاعك.';
+
+  @override
+  String get contactEmail => 'الإيميل';
+
+  @override
+  String get contactPhone => 'رقم الموبايل';
+
+  @override
+  String get contactNone => 'مش متسجل';
+
+  @override
+  String get contactChangeEmail => 'غيّر الإيميل';
+
+  @override
+  String get contactChangePhone => 'غيّر الرقم';
+
+  @override
+  String get contactAddEmail => 'ضيف إيميل';
+
+  @override
+  String get contactAddPhone => 'ضيف رقم';
+
+  @override
+  String get contactNewEmail => 'الإيميل الجديد';
+
+  @override
+  String get contactNewPhone => 'الرقم الجديد';
+
+  @override
+  String get contactPhoneHint => 'بكود الدولة، أو رقم محلي من نفس بلدك.';
+
+  @override
+  String get contactSend => 'ابعت كود';
+
+  @override
+  String get contactCode => 'الكود اللي وصلك';
+
+  @override
+  String contactCodeHint(String contact, String until) {
+    return 'بعتنا كود على $contact. صالح لحد $until.';
+  }
+
+  @override
+  String get contactConfirm => 'أكّد';
+
+  @override
+  String get contactResend => 'ابعت كود تاني';
+
+  @override
+  String get contactDoneEmail => 'الإيميل اتغيّر. من دلوقتي بتدخل وبتوصلك الرسايل عليه.';
+
+  @override
+  String get contactDonePhone => 'الرقم اتغيّر. من دلوقتي بتدخل وبتوصلك الرسايل عليه.';
+
+  @override
+  String get contactManaged => 'الأكاديمية أو ولي أمرك هم اللي بيغيّروا الإيميل والرقم بتوعك.';
 
   @override
   String get openNow => 'داخل فيه';

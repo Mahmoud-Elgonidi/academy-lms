@@ -1,18 +1,23 @@
 <?php
 
 return [
-    'kinds' => ['export' => 'A copy of the data', 'erasure' => 'Erase the account'],
+    'kinds' => ['export' => 'A copy of the data', 'erasure' => 'Erase the account', 'correction' => 'Correct the data'],
+    'correction_statuses' => ['pending' => 'Waiting', 'done' => 'Corrected', 'refused' => 'Refused', 'cancelled' => 'Cancelled'],
     'statuses' => [
         'pending' => 'Waiting', 'ready' => 'Ready to download', 'expired' => 'Expired', 'failed' => 'Could not be built',
         'approved' => 'Approved', 'done' => 'Erased', 'refused' => 'Refused', 'cancelled' => 'Cancelled',
     ],
     'reason' => 'Reason',
+    'says' => 'What needs correcting',
+    'answer' => 'Answer',
     'errors' => [
         'not_yours' => 'You cannot ask this for that person.',
         'erased' => 'This account is already erased.',
         'export_recent' => 'You asked for a copy in the last 24 hours: download it here, or ask again tomorrow.',
         'not_open' => 'This request is already closed.',
         'answer' => 'Write the reason the person who asked will read.',
+        'says' => 'Write what is wrong and what is right (:min to :max characters).',
+        'correction_open' => 'A correction request is still waiting for the academy. Wait for the answer, or cancel it and write a new one with everything that needs correcting.',
     ],
     'goes' => [
         'account' => 'The account: name, email, phone, password and ways in; every device is signed out',

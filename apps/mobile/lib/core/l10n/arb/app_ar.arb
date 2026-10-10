@@ -243,8 +243,8 @@
   },
   "consentNudgeAction": "اقرا ووافق",
   "myDataTitle": "بياناتي",
-  "myDataLead": "كل اللي الأكاديمية محتفظة بيه عنك وعن ولادك: نزّل نسخة، أو اطلب مسح حساب.",
-  "myDataLeadTeacher": "كل اللي الأكاديمية محتفظة بيه عنك: نزّل نسخة، أو اطلب مسح حسابك.",
+  "myDataLead": "كل اللي الأكاديمية محتفظة بيه عنك وعن ولادك: صحّح بياناتك، أو نزّل نسخة، أو اطلب مسح حساب.",
+  "myDataLeadTeacher": "كل اللي الأكاديمية محتفظة بيه عنك: صحّح اسمك، أو نزّل نسخة، أو اطلب مسح حسابك.",
   "myDataYoung": "ولي أمرك هو اللي بيطلب بخصوص بياناتك من حسابه.",
   "myDataCopyTitle": "نسخة من البيانات",
   "myDataCopyBody": "ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل {days} أيام.",
@@ -325,6 +325,85 @@
       }
     }
   },
+  "myDataFixTitle": "تصحيح البيانات",
+  "myDataFixEdit": "صحّح",
+  "myDataFixEditTitle": "تصحيح بيانات {name}",
+  "@myDataFixEditTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "myDataFixSave": "احفظ",
+  "myDataFixSaved": "اتحفظ.",
+  "myDataFixUnchanged": "مفيش حاجة اتغيرت.",
+  "myDataFixUnset": "مش متسجل",
+  "myDataFixContact": "الإيميل ورقم الموبايل بتغيّرهم من «حسابي».",
+  "myDataFixBody": "حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال {days} يوم.",
+  "@myDataFixBody": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "myDataFixAsk": "اطلب تصحيح",
+  "myDataFixAskTitle": "اطلب تصحيح بيانات {name}",
+  "@myDataFixAskTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "myDataFixAskBody": "اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال {days} يوم، وبيوصلك ردها.",
+  "@myDataFixAskBody": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "myDataFixSays": "إيه اللي محتاج يتصلح",
+  "myDataFixPlaceholder": "مثلًا: تاريخ الميلاد المتسجل 2016 والصح 2017.",
+  "myDataFixTooShort": "اكتب {min} حروف على الأقل.",
+  "@myDataFixTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "myDataFixSend": "ابعت الطلب",
+  "myDataFixAsked": "الطلب وصل للأكاديمية.",
+  "myDataFixWaiting": "اتطلب: الأكاديمية هترد قبل {when}.",
+  "@myDataFixWaiting": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "myDataFixDone": "اتصلح",
+  "myDataFixDoneWith": "اتصلح: {answer}",
+  "@myDataFixDoneWith": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "myDataFixRefused": "الأكاديمية ماصلحتش: {answer}",
+  "@myDataFixRefused": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "myDataFixCancel": "الغي الطلب",
+  "myDataFixCancelled": "الطلب اتلغى.",
   "myDataPrivacy": "سياسة الخصوصية",
   "myDataTerms": "شروط الاستخدام",
   "myDataDeletion": "مسح الحساب",
@@ -738,6 +817,36 @@
     }
   },
   "meTitle": "حسابي",
+  "contactTitle": "الإيميل والموبايل",
+  "contactHint": "دول طرق دخولك، والأكواد والرسايل بتوصلك عليهم. لما تغيّر واحد، بنبعت كود على الجديد عشان نتأكد إنه بتاعك.",
+  "contactEmail": "الإيميل",
+  "contactPhone": "رقم الموبايل",
+  "contactNone": "مش متسجل",
+  "contactChangeEmail": "غيّر الإيميل",
+  "contactChangePhone": "غيّر الرقم",
+  "contactAddEmail": "ضيف إيميل",
+  "contactAddPhone": "ضيف رقم",
+  "contactNewEmail": "الإيميل الجديد",
+  "contactNewPhone": "الرقم الجديد",
+  "contactPhoneHint": "بكود الدولة، أو رقم محلي من نفس بلدك.",
+  "contactSend": "ابعت كود",
+  "contactCode": "الكود اللي وصلك",
+  "contactCodeHint": "بعتنا كود على {contact}. صالح لحد {until}.",
+  "@contactCodeHint": {
+    "placeholders": {
+      "contact": {
+        "type": "String"
+      },
+      "until": {
+        "type": "String"
+      }
+    }
+  },
+  "contactConfirm": "أكّد",
+  "contactResend": "ابعت كود تاني",
+  "contactDoneEmail": "الإيميل اتغيّر. من دلوقتي بتدخل وبتوصلك الرسايل عليه.",
+  "contactDonePhone": "الرقم اتغيّر. من دلوقتي بتدخل وبتوصلك الرسايل عليه.",
+  "contactManaged": "الأكاديمية أو ولي أمرك هم اللي بيغيّروا الإيميل والرقم بتوعك.",
   "openNow": "داخل فيه",
   "switchTo": "انتقل",
   "addAccount": "ضيف حساب تاني",

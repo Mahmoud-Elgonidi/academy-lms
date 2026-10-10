@@ -40,6 +40,18 @@ it('caps the apps\' API per address before signing in, each address on its own',
     $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.9'])->getJson('http://huda.lms.test/api/v1/branding')->assertOk();
 });
 
+it('counts each tight door on its own, so using one never shuts another', function () {
+    $this->actAsTenant($this->academy);
+    $user = User::factory()->create();
+    $api = fn () => $this->actingAs($user, 'sanctum')->withHeaders(['X-Academy' => 'huda']);
+
+    // Twenty tries at taking back a request (throttle:20,1) ...
+    $statuses = collect(range(1, 21))->map(fn () => $api()->postJson('/api/v1/me/data-requests/01a00000-0000-7000-8000-000000000000/cancel')->getStatusCode());
+    expect($statuses->take(20)->unique()->all())->toBe([404])->and($statuses->last())->toBe(429);
+    // ... leave the door for a new email (throttle:10,1) open.
+    $api()->postJson('/api/v1/me/contact', ['kind' => 'email', 'value' => 'not an email'])->assertUnprocessable();
+});
+
 it('writes log lines without emails, phone numbers or secrets', function () {
     $path = storage_path('framework/testing/redact-'.uniqid().'.log');
     config(['logging.channels.redact_check' => ['driver' => 'single', 'path' => $path, 'tap' => [RedactPersonalData::class]]]);

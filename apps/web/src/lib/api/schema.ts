@@ -630,6 +630,49 @@ export interface paths {
         patch: operations["identity.me.update"];
         trace?: never;
     };
+    "/v1/me/contact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a code to a new email or mobile number
+         * @description `kind` email or phone; `value` the new address (a local number takes the calling code of the person's time
+         *     zone). Refused (422 on `value`) when it is not well formed, is the current one, or is another account's here.
+         *     Answers 202 with the challenge to confirm.
+         */
+        post: operations["identity.contact.send"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/contact/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm the new address with its code
+         * @description The address becomes the account's (to sign in with and to hear from the academy), and the account hears
+         *     that it changed on every way it can. Answers the account, like `GET me`.
+         */
+        post: operations["identity.contact.confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/me/sessions": {
         parameters: {
             query?: never;
@@ -1337,17 +1380,20 @@ export interface paths {
         };
         /**
          * My data
-         * @description Whom this person may ask about, what they asked (and what was asked about them), newest first, what an
-         *     erasure removes and what the academy keeps, and the academy's privacy notice, terms and account-deletion page.
+         * @description Whom this person may ask about and what they may put right for each on the spot (PATCH me/details), what
+         *     they asked (and what was asked about them), newest first, what an erasure removes and what the academy
+         *     keeps, and the academy's privacy notice, terms and account-deletion page.
          */
         get: operations["privacy.requests"];
         put?: never;
         /**
-         * Ask for a copy, or for an account to be erased
+         * Ask for a copy, a correction, or for an account to be erased
          * @description `kind` export (a ZIP of everything the academy holds about the person, built in a few minutes and kept a
-         *     week; one a day) or erasure (the academy answers within 30 days, then the account is erased a day after its
-         *     approval). `subject_id` is one of "subjects" (themselves when left out); `reason` optionally says why (erasure).
-         *     Asked again while one is open, it is the same request. Answers `201`. Send an `Idempotency-Key`.
+         *     week; one a day), correction (`says` what is wrong and what it should be, for what cannot be put right with
+         *     PATCH me/details; one open at a time; the academy answers within 30 days) or erasure (the academy answers
+         *     within 30 days, then the account is erased a day after its approval). `subject_id` is one of "subjects"
+         *     (themselves when left out); `reason` optionally says why (erasure). An erasure asked again while one is open
+         *     is the same request. Answers `201`. Send an `Idempotency-Key`.
          */
         post: operations["privacy.requests.store"];
         delete?: never;
@@ -1366,14 +1412,37 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Take an erasure back
-         * @description While the academy has not answered, or in the day after it approved; by whoever asked or the person themselves.
+         * Take a correction or an erasure back
+         * @description A correction while the academy has not answered; an erasure until then, or in the day after it approved; by
+         *     whoever asked or the person themselves.
          */
         post: operations["privacy.requests.cancel"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/v1/me/details/{subject}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Correct details
+         * @description Send only what changes; fields this person may not correct for the subject (see `details` on GET
+         *     me/data-requests) are ignored. A choice's empty value clears it (teacher_gender: no preference). Answers what
+         *     changed and the details as they are now.
+         */
+        patch: operations["privacy.details.update"];
         trace?: never;
     };
     "/v1/safeguarding/new": {
@@ -2000,6 +2069,8 @@ export interface components {
             email: string | null;
             phone: string | null;
             username: string | null;
+            /** @description Whether the person may change their email and mobile themselves (me/contact): not a child the academy runs under a guardian, never while the platform team is signed in as them. */
+            can_change_contact: string;
             locale: string | null;
             timezone: string | null;
             /** @description The zone this response's times are written in (device, else profile, else academy). */
@@ -3961,6 +4032,105 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": components["schemas"]["UpdateProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description `UserResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["UserResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "identity.contact.send": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    kind: "email" | "phone";
+                    /** @description The new email, or the new mobile number. */
+                    value: string;
+                    /**
+                     * @description A phone's code goes by WhatsApp unless "sms" is asked for.
+                     * @enum {string|null}
+                     */
+                    channel?: "whatsapp" | "sms" | "email" | null;
+                };
+            };
+        };
+        responses: {
+            /** @description `SentCodeResource` */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SentCodeResource"];
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "identity.contact.confirm": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    challenge_id: string;
+                    code: string;
+                };
             };
         };
         responses: {
@@ -6390,15 +6560,91 @@ export interface operations {
                                 self: boolean;
                                 /** @description Whether a copy can be asked for now: none being prepared, and none ready from the last day. */
                                 can_copy: boolean;
+                                /** @description What can be put right here, with what is held now (`shown` is ready to display). Null: nothing (an erased account). */
+                                details: {
+                                    /** @description name | gender | country | school_grade | teacher_gender */
+                                    key: string;
+                                    label: string;
+                                    /** @description What is held (a choice's value; null: not set, or no preference for teacher_gender). */
+                                    value: string | null;
+                                    /** @description Ready to display. */
+                                    shown: string;
+                                }[] | null;
+                                /** @description The latest correction asked of the academy about this person (not taken back), or null. */
+                                correction: {
+                                    id: string;
+                                    /** @description export | erasure | correction */
+                                    kind: {
+                                        key: string;
+                                        label: string;
+                                    };
+                                    /** @description export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled; correction: pending | done (corrected; `answer` may say what changed) | refused | cancelled */
+                                    status: {
+                                        key: string;
+                                        label: string;
+                                    };
+                                    /** @description Whom it is about. */
+                                    subject: {
+                                        id: string;
+                                        name: string;
+                                        self: boolean;
+                                    };
+                                    requester: string;
+                                    /** @description Why (erasure), or what should be corrected (correction). */
+                                    reason: string | null;
+                                    /** @description The academy's reason when it refused; for a correction it made, what it changed (optional). */
+                                    answer: string | null;
+                                    created_at: {
+                                        utc: string;
+                                        local: string;
+                                        timezone: null;
+                                        label: string;
+                                    } | null;
+                                    /** @description When the academy answers by (erasure, correction). */
+                                    due_at: {
+                                        utc: string;
+                                        local: string;
+                                        timezone: null;
+                                        label: string;
+                                    } | null;
+                                    /** @description When the account is erased, once approved. */
+                                    erase_after: {
+                                        utc: string;
+                                        local: string;
+                                        timezone: null;
+                                        label: string;
+                                    } | null;
+                                    done_at: {
+                                        utc: string;
+                                        local: string;
+                                        timezone: null;
+                                        label: string;
+                                    } | null;
+                                    /** @description Until when a ready copy can be downloaded. */
+                                    expires_at: {
+                                        utc: string;
+                                        local: string;
+                                        timezone: null;
+                                        label: string;
+                                    } | null;
+                                    /** @description Bytes of a ready copy. */
+                                    size: number | null;
+                                    /** @description A ready copy's address: opens without signing in, for an hour; ask again for a fresh one. */
+                                    download_url: string | null;
+                                    /** @description Why an approved erasure went back to the academy (lessons or money that came up meanwhile). */
+                                    held_back: string[];
+                                    /** @description Whether it can still be taken back. */
+                                    can_cancel: boolean;
+                                };
                             }[];
                             requests: {
                                 id: string;
-                                /** @description export | erasure */
+                                /** @description export | erasure | correction */
                                 kind: {
                                     key: string;
                                     label: string;
                                 };
-                                /** @description export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled */
+                                /** @description export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled; correction: pending | done (corrected; `answer` may say what changed) | refused | cancelled */
                                 status: {
                                     key: string;
                                     label: string;
@@ -6410,8 +6656,9 @@ export interface operations {
                                     self: boolean;
                                 };
                                 requester: string;
+                                /** @description Why (erasure), or what should be corrected (correction). */
                                 reason: string | null;
-                                /** @description The academy's reason, when it refused. */
+                                /** @description The academy's reason when it refused; for a correction it made, what it changed (optional). */
                                 answer: string | null;
                                 created_at: {
                                     utc: string;
@@ -6419,7 +6666,7 @@ export interface operations {
                                     timezone: null;
                                     label: string;
                                 } | null;
-                                /** @description When the academy answers by (erasure). */
+                                /** @description When the academy answers by (erasure, correction). */
                                 due_at: {
                                     utc: string;
                                     local: string;
@@ -6467,10 +6714,24 @@ export interface operations {
                              */
                             grace_hours: 24;
                             /**
-                             * @description Days the academy has to answer an erasure.
+                             * @description Days the academy has to answer an erasure or a correction.
                              * @constant
                              */
                             answer_days: 30;
+                            /** @description The values each detail can take, for the correction form: gender, country, school_grade, teacher_gender (an empty value: no preference). */
+                            choices: {
+                                [key: string]: {
+                                    value: string;
+                                    label: string;
+                                }[];
+                            };
+                            /**
+                             * @description Shortest and longest correction request.
+                             * @constant
+                             */
+                            says_min: 10;
+                            /** @constant */
+                            says_max: 1000;
                             /** @description The academy's public pages, on its own address. */
                             links: {
                                 privacy: string;
@@ -6516,13 +6777,15 @@ export interface operations {
             content: {
                 "application/json": {
                     /** @enum {string} */
-                    kind: "export" | "erasure";
+                    kind: "export" | "erasure" | "correction";
                     /**
                      * Format: uuid
                      * @description One of "subjects"; the person themselves when left out.
                      */
                     subject_id?: string | null;
                     reason?: string | null;
+                    /** @description A correction: what is wrong and what it should be. */
+                    says?: string | null;
                 };
             };
         };
@@ -6535,12 +6798,12 @@ export interface operations {
                     "application/json": {
                         data: {
                             id: string;
-                            /** @description export | erasure */
+                            /** @description export | erasure | correction */
                             kind: {
                                 key: unknown;
                                 label: string;
                             };
-                            /** @description export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled */
+                            /** @description export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled; correction: pending | done (corrected; `answer` may say what changed) | refused | cancelled */
                             status: {
                                 key: unknown;
                                 label: string;
@@ -6552,8 +6815,9 @@ export interface operations {
                                 self: boolean;
                             };
                             requester: string;
+                            /** @description Why (erasure), or what should be corrected (correction). */
                             reason: unknown;
-                            /** @description The academy's reason, when it refused. */
+                            /** @description The academy's reason when it refused; for a correction it made, what it changed (optional). */
                             answer: unknown;
                             created_at: {
                                 utc: string;
@@ -6561,7 +6825,7 @@ export interface operations {
                                 timezone: null;
                                 label: string;
                             } | null;
-                            /** @description When the academy answers by (erasure). */
+                            /** @description When the academy answers by (erasure, correction). */
                             due_at: {
                                 utc: string;
                                 local: string;
@@ -6639,12 +6903,12 @@ export interface operations {
                     "application/json": {
                         data: {
                             id: string;
-                            /** @description export | erasure */
+                            /** @description export | erasure | correction */
                             kind: {
                                 key: unknown;
                                 label: string;
                             };
-                            /** @description export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled */
+                            /** @description export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled; correction: pending | done (corrected; `answer` may say what changed) | refused | cancelled */
                             status: {
                                 key: unknown;
                                 label: string;
@@ -6656,8 +6920,9 @@ export interface operations {
                                 self: boolean;
                             };
                             requester: string;
+                            /** @description Why (erasure), or what should be corrected (correction). */
                             reason: unknown;
-                            /** @description The academy's reason, when it refused. */
+                            /** @description The academy's reason when it refused; for a correction it made, what it changed (optional). */
                             answer: unknown;
                             created_at: {
                                 utc: string;
@@ -6665,7 +6930,7 @@ export interface operations {
                                 timezone: null;
                                 label: string;
                             } | null;
-                            /** @description When the academy answers by (erasure). */
+                            /** @description When the academy answers by (erasure, correction). */
                             due_at: {
                                 utc: string;
                                 local: string;
@@ -6706,6 +6971,75 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "privacy.details.update": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                subject: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    name?: string;
+                    /** @description One of `choices.gender` on GET me/data-requests. */
+                    gender?: string | null;
+                    /** @description One of `choices.country`: an ISO country code ("SA"). */
+                    country?: string | null;
+                    /** @description One of `choices.school_grade`. */
+                    school_grade?: string | null;
+                    /** @description One of `choices.teacher_gender`; empty: no preference. */
+                    teacher_gender?: string | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The fields that changed (empty: nothing did). */
+                            changed: unknown[];
+                            /** @description The details as they are now, like `details` on GET me/data-requests. */
+                            details: {
+                                /** @description name | gender | country | school_grade | teacher_gender */
+                                key: string;
+                                label: string;
+                                /** @description What is held (a choice's value; null: not set, or no preference for teacher_gender). */
+                                value: string | null;
+                                /** @description Ready to display. */
+                                shown: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
         };
     };
     "safeguarding.new": {

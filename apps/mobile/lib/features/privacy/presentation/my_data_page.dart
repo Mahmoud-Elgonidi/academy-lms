@@ -14,11 +14,13 @@ import '../data/privacy_repository.dart';
 import '../domain/my_data.dart';
 
 /// "My data" (the same as in /my, /teach and the portal): for each person one
-/// may ask about, a copy to download and erasure of the account (asked,
-/// answered by the academy, taken back until it is done); every request; and
-/// the academy's privacy notice, terms and account-deletion page. A younger
-/// student sees only that their guardian asks, and the pages. Live on the
-/// person's own channel (privacy.changed).
+/// may ask about, their details put right on the spot (the name; a student's
+/// gender, country, grade and who should teach them) or a correction asked of
+/// the academy for the rest, a copy to download and erasure of the account
+/// (asked, answered by the academy, taken back until it is done); every
+/// request; and the academy's privacy notice, terms and account-deletion
+/// page. A younger student sees only that their guardian asks, and the pages.
+/// Live on the person's own channel (privacy.changed).
 class MyDataPage extends StatelessWidget {
   const MyDataPage({this.teacher = false, super.key});
 
@@ -105,6 +107,27 @@ class _PersonCardState extends State<_PersonCard> {
     }
   }
 
+  Future<void> _correct() async {
+    // What changed, or null when they went back.
+    final changes = await showDialog<Map<String, String?>>(
+      context: context,
+      builder: (_) => _CorrectDialog(subject: widget.subject, choices: widget.mine.choices),
+    );
+    if (changes == null || !mounted) return;
+    if (changes.isEmpty) return showSnack(context, context.l10n.myDataFixUnchanged);
+    await _run(() => context.read<PrivacyRepository>().correct(widget.subject.id, changes), context.l10n.myDataFixSaved);
+  }
+
+  Future<void> _askCorrection() async {
+    final says = await showDialog<String>(
+      context: context,
+      builder: (_) => _AskCorrectionDialog(name: widget.subject.name, mine: widget.mine),
+    );
+    if (says != null && mounted) {
+      await _run(() => context.read<PrivacyRepository>().askCorrection(widget.subject.id, says), context.l10n.myDataFixAsked);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -112,6 +135,8 @@ class _PersonCardState extends State<_PersonCard> {
     final subject = widget.subject;
     final copy = widget.mine.copyOf(subject.id);
     final erasure = widget.mine.erasureOf(subject.id);
+    final fix = subject.correction;
+    final waiting = fix?.status == 'pending';
     final repo = context.read<PrivacyRepository>();
     return LmsCard(
       child: Column(
@@ -119,6 +144,61 @@ class _PersonCardState extends State<_PersonCard> {
         children: [
           Text(subject.name, style: context.text.titleMedium),
           const SizedBox(height: 12),
+          Text(l.myDataFixTitle, style: context.text.titleSmall),
+          const SizedBox(height: 6),
+          for (final d in subject.details)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(d.label, style: context.text.bodySmall?.copyWith(color: c.muted)),
+                  ),
+                  Expanded(flex: 3, child: Text(d.shown, style: context.text.bodyMedium)),
+                ],
+              ),
+            ),
+          if (subject.details.isNotEmpty)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: OutlinedButton.icon(
+                key: Key('fix-${subject.id}'),
+                icon: const Icon(Icons.edit_outlined),
+                label: Text(l.myDataFixEdit),
+                onPressed: _busy ? null : _correct,
+              ),
+            ),
+          const SizedBox(height: 6),
+          if (subject.self) Text(l.myDataFixContact, style: context.text.bodySmall?.copyWith(color: c.muted)),
+          Text(l.myDataFixBody(widget.mine.answerDays), style: context.text.bodySmall),
+          const SizedBox(height: 8),
+          if (waiting)
+            Note([l.myDataFixWaiting(fix!.dueAt?.label ?? ''), if (fix.reason != null) '«${fix.reason}»'].join('\n'), tone: Tone.attention),
+          if (fix?.status == 'done') Note(fix!.answer == null ? l.myDataFixDone : l.myDataFixDoneWith(fix.answer!), tone: Tone.brand),
+          if (fix?.status == 'refused') Note(l.myDataFixRefused(fix!.answer ?? '')),
+          if (waiting && fix!.canCancel)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                key: Key('cancel-fix-${subject.id}'),
+                icon: const Icon(Icons.undo_rounded),
+                label: Text(l.myDataFixCancel),
+                onPressed: _busy ? null : () => _run(() => repo.cancel(fix.id), l.myDataFixCancelled),
+              ),
+            ),
+          if (!waiting)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                key: Key('ask-fix-${subject.id}'),
+                icon: const Icon(Icons.rate_review_outlined),
+                label: Text(l.myDataFixAsk),
+                onPressed: _busy ? null : _askCorrection,
+              ),
+            ),
+          const Divider(height: 28),
           Text(l.myDataCopyTitle, style: context.text.titleSmall),
           const SizedBox(height: 4),
           Text(l.myDataCopyBody(7), style: context.text.bodySmall),
@@ -242,6 +322,148 @@ class _EraseDialogState extends State<_EraseDialog> {
           style: FilledButton.styleFrom(backgroundColor: context.colors.danger),
           onPressed: () => Navigator.pop(context, _reason.text),
           child: Text(l.myDataEraseAction),
+        ),
+      ],
+    );
+  }
+}
+
+/// Correcting the details on the spot; it pops what changed (an empty value clears a choice), or nothing when they go back.
+class _CorrectDialog extends StatefulWidget {
+  const _CorrectDialog({required this.subject, required this.choices});
+
+  final DataSubject subject;
+  final Map<String, List<DetailChoice>> choices;
+
+  @override
+  State<_CorrectDialog> createState() => _CorrectDialogState();
+}
+
+class _CorrectDialogState extends State<_CorrectDialog> {
+  late final _name = TextEditingController(text: _was('name'));
+  late final Map<String, String> _values = {for (final d in widget.subject.details) d.key: d.value ?? ''};
+
+  String _was(String key) => widget.subject.details.where((d) => d.key == key).firstOrNull?.value ?? '';
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  Map<String, String?> _changes() {
+    final next = {..._values, 'name': _name.text.trim()};
+    return {
+      for (final d in widget.subject.details)
+        if ((next[d.key] ?? '') != (d.value ?? '')) d.key: (next[d.key] ?? '').isEmpty ? null : next[d.key],
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return AlertDialog(
+      title: Text(l.myDataFixEditTitle(widget.subject.name)),
+      scrollable: true,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final d in widget.subject.details)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: d.key == 'name'
+                  ? TextField(
+                      key: const Key('fix-name'),
+                      controller: _name,
+                      maxLength: 255,
+                      decoration: InputDecoration(labelText: d.label),
+                      onChanged: (_) => setState(() {}),
+                    )
+                  : DropdownButtonFormField<String>(
+                      key: Key('fix-${d.key}'),
+                      initialValue: _values[d.key],
+                      isExpanded: true,
+                      decoration: InputDecoration(labelText: d.label),
+                      items: [
+                        if (!(widget.choices[d.key] ?? const []).any((c) => c.value.isEmpty))
+                          DropdownMenuItem(value: '', child: Text(l.myDataFixUnset)),
+                        for (final c in widget.choices[d.key] ?? const <DetailChoice>[])
+                          DropdownMenuItem(
+                            value: c.value,
+                            child: Text(c.label, overflow: TextOverflow.ellipsis),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _values[d.key] = v ?? ''),
+                    ),
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l.back)),
+        FilledButton(
+          key: const Key('fix-save'),
+          onPressed: _name.text.trim().isEmpty ? null : () => Navigator.pop(context, _changes()),
+          child: Text(l.myDataFixSave),
+        ),
+      ],
+    );
+  }
+}
+
+/// "Ask to correct": what is wrong and what is right; it pops the words, or nothing when they go back.
+class _AskCorrectionDialog extends StatefulWidget {
+  const _AskCorrectionDialog({required this.name, required this.mine});
+
+  final String name;
+  final MyData mine;
+
+  @override
+  State<_AskCorrectionDialog> createState() => _AskCorrectionDialogState();
+}
+
+class _AskCorrectionDialogState extends State<_AskCorrectionDialog> {
+  final _says = TextEditingController();
+
+  @override
+  void dispose() {
+    _says.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final short = _says.text.trim().length < widget.mine.saysMin;
+    return AlertDialog(
+      title: Text(l.myDataFixAskTitle(widget.name)),
+      scrollable: true,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l.myDataFixAskBody(widget.mine.answerDays), style: context.text.bodySmall),
+          const SizedBox(height: 12),
+          TextField(
+            key: const Key('fix-says'),
+            controller: _says,
+            maxLength: widget.mine.saysMax,
+            maxLines: 5,
+            minLines: 3,
+            decoration: InputDecoration(
+              labelText: l.myDataFixSays,
+              hintText: l.myDataFixPlaceholder,
+              helperText: short ? l.myDataFixTooShort(widget.mine.saysMin) : null,
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l.back)),
+        FilledButton(
+          key: const Key('fix-send'),
+          onPressed: short ? null : () => Navigator.pop(context, _says.text.trim()),
+          child: Text(l.myDataFixSend),
         ),
       ],
     );

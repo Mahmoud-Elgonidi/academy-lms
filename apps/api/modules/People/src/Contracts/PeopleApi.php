@@ -33,6 +33,17 @@ interface PeopleApi
     /** Saves those; a detail left null keeps what the student has. */
     public function saveStudentDetails(string $studentId, StudentDetails $details): void;
 
+    /** Sets those exactly as given (null clears one): a correction by the student or their guardian. */
+    public function correctStudentDetails(string $studentId, StudentDetails $details): void;
+
+    /**
+     * What each of those may be, named in the current language (for a form):
+     * gender, country (ISO codes), school_grade and teacher_gender ("" is either).
+     *
+     * @return array{gender: array<string, string>, country: array<string, string>, school_grade: array<string, string>, teacher_gender: array<string, string>}
+     */
+    public function studentDetailChoices(): array;
+
     /**
      * Sends each person the academy made an account for (after commit) their
      * own link to choose a password; who already has one, and a child under a

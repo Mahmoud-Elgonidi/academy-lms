@@ -9,13 +9,14 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
  * A person's request about their data (docs/architecture/03, section 11):
- * a copy of it (built on its own, there for a week) or erasure (answered by
+ * a copy of it (built on its own, there for a week), erasure (answered by
  * the academy within 30 days: refused with a reason, or approved and done a
- * day later). Asked by the person, by their guardian, or written down by the
- * academy for them.
+ * day later), or correction of what is wrong (in their words; answered within
+ * 30 days, done with a note or refused with a reason). Asked by the person,
+ * by their guardian, or written down by the academy for them.
  *
  * @property string $id
- * @property string $kind export | erasure
+ * @property string $kind export | erasure | correction
  * @property string $subject_id
  * @property string $requested_by
  * @property string $status
@@ -41,7 +42,12 @@ final class DataRequest extends Model
 
     public const ERASURE = 'erasure';
 
-    /** An erasure is answered within this many days (PDPL, GDPR). */
+    public const CORRECTION = 'correction';
+
+    /** The kinds the academy answers (within ANSWER_DAYS). */
+    public const ANSWERED = [self::ERASURE, self::CORRECTION];
+
+    /** An erasure or a correction is answered within this many days (PDPL, GDPR). */
     public const ANSWER_DAYS = 30;
 
     /** An approved erasure happens this many hours later: time for the last messages, and to take it back. */
@@ -71,6 +77,12 @@ final class DataRequest extends Model
         ];
     }
 
+    /** The status in the reader's words ("done" is "erased" for an erasure, "corrected" for a correction). */
+    public function statusLabel(): string
+    {
+        return __($this->kind === self::CORRECTION ? "privacy::requests.correction_statuses.{$this->status}" : "privacy::requests.statuses.{$this->status}");
+    }
+
     public function isOpen(): bool
     {
         return in_array($this->status, self::OPEN, true);
@@ -84,6 +96,6 @@ final class DataRequest extends Model
 
     public function isOverdue(?CarbonImmutable $now = null): bool
     {
-        return $this->kind === self::ERASURE && $this->status === 'pending' && $this->due_at !== null && $this->due_at->lessThan($now ?? CarbonImmutable::now());
+        return in_array($this->kind, self::ANSWERED, true) && $this->status === 'pending' && $this->due_at !== null && $this->due_at->lessThan($now ?? CarbonImmutable::now());
     }
 }

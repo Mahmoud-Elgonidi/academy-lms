@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
+use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -26,6 +27,8 @@ final class UserResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone_e164,
             'username' => $this->username,
+            // Whether the person may change their email and mobile themselves (me/contact): not a child the academy runs under a guardian, never while the platform team is signed in as them.
+            'can_change_contact' => ! $this->is_managed_minor && AuditActor::current()->onBehalfOf === null,
             'locale' => $this->locale,
             'timezone' => $this->timezone,
             // The zone this response's times are written in (device, else profile, else academy).

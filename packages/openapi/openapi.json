@@ -4130,6 +4130,193 @@
                 }
             }
         },
+        "/v1/me/contact": {
+            "post": {
+                "operationId": "identity.contact.send",
+                "description": "`kind` email or phone; `value` the new address (a local number takes the calling code of the person's time\nzone). Refused (422 on `value`) when it is not well formed, is the current one, or is another account's here.\nAnswers 202 with the challenge to confirm.",
+                "summary": "Send a code to a new email or mobile number",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "kind": {
+                                        "type": "string",
+                                        "enum": [
+                                            "email",
+                                            "phone"
+                                        ]
+                                    },
+                                    "value": {
+                                        "type": "string",
+                                        "description": "The new email, or the new mobile number.",
+                                        "maxLength": 255
+                                    },
+                                    "channel": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "A phone's code goes by WhatsApp unless \"sms\" is asked for.",
+                                        "enum": [
+                                            "whatsapp",
+                                            "sms",
+                                            "email",
+                                            null
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "kind",
+                                    "value"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "`SentCodeResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SentCodeResource"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/me/contact/confirm": {
+            "post": {
+                "operationId": "identity.contact.confirm",
+                "description": "The address becomes the account's (to sign in with and to hear from the academy), and the account hears\nthat it changed on every way it can. Answers the account, like `GET me`.",
+                "summary": "Confirm the new address with its code",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "challenge_id": {
+                                        "type": "string",
+                                        "maxLength": 64
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "maxLength": 12
+                                    }
+                                },
+                                "required": [
+                                    "challenge_id",
+                                    "code"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`UserResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UserResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/me/sessions": {
             "get": {
                 "operationId": "identity.sessions",
@@ -10366,7 +10553,7 @@
         "/v1/me/data-requests": {
             "get": {
                 "operationId": "privacy.requests",
-                "description": "Whom this person may ask about, what they asked (and what was asked about them), newest first, what an\nerasure removes and what the academy keeps, and the academy's privacy notice, terms and account-deletion page.",
+                "description": "Whom this person may ask about and what they may put right for each on the spot (PATCH me/details), what\nthey asked (and what was asked about them), newest first, what an erasure removes and what the academy\nkeeps, and the academy's privacy notice, terms and account-deletion page.",
                 "summary": "My data",
                 "tags": [
                     "Privacy"
@@ -10429,13 +10616,305 @@
                                                             "can_copy": {
                                                                 "type": "boolean",
                                                                 "description": "Whether a copy can be asked for now: none being prepared, and none ready from the last day."
+                                                            },
+                                                            "details": {
+                                                                "type": [
+                                                                    "array",
+                                                                    "null"
+                                                                ],
+                                                                "description": "What can be put right here, with what is held now (`shown` is ready to display). Null: nothing (an erased account).",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "key": {
+                                                                            "type": "string",
+                                                                            "description": "name | gender | country | school_grade | teacher_gender"
+                                                                        },
+                                                                        "label": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "value": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ],
+                                                                            "description": "What is held (a choice's value; null: not set, or no preference for teacher_gender)."
+                                                                        },
+                                                                        "shown": {
+                                                                            "type": "string",
+                                                                            "description": "Ready to display."
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "key",
+                                                                        "label",
+                                                                        "value",
+                                                                        "shown"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "correction": {
+                                                                "type": "object",
+                                                                "description": "The latest correction asked of the academy about this person (not taken back), or null.",
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "kind": {
+                                                                        "type": "object",
+                                                                        "description": "export | erasure | correction",
+                                                                        "properties": {
+                                                                            "key": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "label": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "key",
+                                                                            "label"
+                                                                        ]
+                                                                    },
+                                                                    "status": {
+                                                                        "type": "object",
+                                                                        "description": "export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled; correction: pending | done (corrected; `answer` may say what changed) | refused | cancelled",
+                                                                        "properties": {
+                                                                            "key": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "label": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "key",
+                                                                            "label"
+                                                                        ]
+                                                                    },
+                                                                    "subject": {
+                                                                        "type": "object",
+                                                                        "description": "Whom it is about.",
+                                                                        "properties": {
+                                                                            "id": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "name": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "self": {
+                                                                                "type": "boolean"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "id",
+                                                                            "name",
+                                                                            "self"
+                                                                        ]
+                                                                    },
+                                                                    "requester": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "reason": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "Why (erasure), or what should be corrected (correction)."
+                                                                    },
+                                                                    "answer": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "The academy's reason when it refused; for a correction it made, what it changed (optional)."
+                                                                    },
+                                                                    "created_at": {
+                                                                        "type": [
+                                                                            "object",
+                                                                            "null"
+                                                                        ],
+                                                                        "properties": {
+                                                                            "utc": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "local": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "timezone": {
+                                                                                "type": "null"
+                                                                            },
+                                                                            "label": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "utc",
+                                                                            "local",
+                                                                            "timezone",
+                                                                            "label"
+                                                                        ]
+                                                                    },
+                                                                    "due_at": {
+                                                                        "type": [
+                                                                            "object",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "When the academy answers by (erasure, correction).",
+                                                                        "properties": {
+                                                                            "utc": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "local": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "timezone": {
+                                                                                "type": "null"
+                                                                            },
+                                                                            "label": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "utc",
+                                                                            "local",
+                                                                            "timezone",
+                                                                            "label"
+                                                                        ]
+                                                                    },
+                                                                    "erase_after": {
+                                                                        "type": [
+                                                                            "object",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "When the account is erased, once approved.",
+                                                                        "properties": {
+                                                                            "utc": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "local": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "timezone": {
+                                                                                "type": "null"
+                                                                            },
+                                                                            "label": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "utc",
+                                                                            "local",
+                                                                            "timezone",
+                                                                            "label"
+                                                                        ]
+                                                                    },
+                                                                    "done_at": {
+                                                                        "type": [
+                                                                            "object",
+                                                                            "null"
+                                                                        ],
+                                                                        "properties": {
+                                                                            "utc": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "local": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "timezone": {
+                                                                                "type": "null"
+                                                                            },
+                                                                            "label": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "utc",
+                                                                            "local",
+                                                                            "timezone",
+                                                                            "label"
+                                                                        ]
+                                                                    },
+                                                                    "expires_at": {
+                                                                        "type": [
+                                                                            "object",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "Until when a ready copy can be downloaded.",
+                                                                        "properties": {
+                                                                            "utc": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "local": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "timezone": {
+                                                                                "type": "null"
+                                                                            },
+                                                                            "label": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "utc",
+                                                                            "local",
+                                                                            "timezone",
+                                                                            "label"
+                                                                        ]
+                                                                    },
+                                                                    "size": {
+                                                                        "type": [
+                                                                            "integer",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "Bytes of a ready copy."
+                                                                    },
+                                                                    "download_url": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "A ready copy's address: opens without signing in, for an hour; ask again for a fresh one."
+                                                                    },
+                                                                    "held_back": {
+                                                                        "type": "array",
+                                                                        "description": "Why an approved erasure went back to the academy (lessons or money that came up meanwhile).",
+                                                                        "items": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "can_cancel": {
+                                                                        "type": "boolean",
+                                                                        "description": "Whether it can still be taken back."
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "id",
+                                                                    "kind",
+                                                                    "status",
+                                                                    "subject",
+                                                                    "requester",
+                                                                    "reason",
+                                                                    "answer",
+                                                                    "created_at",
+                                                                    "due_at",
+                                                                    "erase_after",
+                                                                    "done_at",
+                                                                    "expires_at",
+                                                                    "size",
+                                                                    "download_url",
+                                                                    "held_back",
+                                                                    "can_cancel"
+                                                                ]
                                                             }
                                                         },
                                                         "required": [
                                                             "id",
                                                             "name",
                                                             "self",
-                                                            "can_copy"
+                                                            "can_copy",
+                                                            "details",
+                                                            "correction"
                                                         ]
                                                     }
                                                 },
@@ -10449,7 +10928,7 @@
                                                             },
                                                             "kind": {
                                                                 "type": "object",
-                                                                "description": "export | erasure",
+                                                                "description": "export | erasure | correction",
                                                                 "properties": {
                                                                     "key": {
                                                                         "type": "string"
@@ -10465,7 +10944,7 @@
                                                             },
                                                             "status": {
                                                                 "type": "object",
-                                                                "description": "export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled",
+                                                                "description": "export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled; correction: pending | done (corrected; `answer` may say what changed) | refused | cancelled",
                                                                 "properties": {
                                                                     "key": {
                                                                         "type": "string"
@@ -10506,14 +10985,15 @@
                                                                 "type": [
                                                                     "string",
                                                                     "null"
-                                                                ]
+                                                                ],
+                                                                "description": "Why (erasure), or what should be corrected (correction)."
                                                             },
                                                             "answer": {
                                                                 "type": [
                                                                     "string",
                                                                     "null"
                                                                 ],
-                                                                "description": "The academy's reason, when it refused."
+                                                                "description": "The academy's reason when it refused; for a correction it made, what it changed (optional)."
                                                             },
                                                             "created_at": {
                                                                 "type": [
@@ -10546,7 +11026,7 @@
                                                                     "object",
                                                                     "null"
                                                                 ],
-                                                                "description": "When the academy answers by (erasure).",
+                                                                "description": "When the academy answers by (erasure, correction).",
                                                                 "properties": {
                                                                     "utc": {
                                                                         "type": "string"
@@ -10719,8 +11199,39 @@
                                                 },
                                                 "answer_days": {
                                                     "type": "integer",
-                                                    "description": "Days the academy has to answer an erasure.",
+                                                    "description": "Days the academy has to answer an erasure or a correction.",
                                                     "const": 30
+                                                },
+                                                "choices": {
+                                                    "type": "object",
+                                                    "description": "The values each detail can take, for the correction form: gender, country, school_grade, teacher_gender (an empty value: no preference).",
+                                                    "additionalProperties": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "value": {
+                                                                    "type": "string"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "value",
+                                                                "label"
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "says_min": {
+                                                    "type": "integer",
+                                                    "description": "Shortest and longest correction request.",
+                                                    "const": 10
+                                                },
+                                                "says_max": {
+                                                    "type": "integer",
+                                                    "const": 1000
                                                 },
                                                 "links": {
                                                     "type": "object",
@@ -10751,6 +11262,9 @@
                                                 "stays_note",
                                                 "grace_hours",
                                                 "answer_days",
+                                                "choices",
+                                                "says_min",
+                                                "says_max",
                                                 "links"
                                             ]
                                         }
@@ -10769,8 +11283,8 @@
             },
             "post": {
                 "operationId": "privacy.requests.store",
-                "description": "`kind` export (a ZIP of everything the academy holds about the person, built in a few minutes and kept a\nweek; one a day) or erasure (the academy answers within 30 days, then the account is erased a day after its\napproval). `subject_id` is one of \"subjects\" (themselves when left out); `reason` optionally says why (erasure).\nAsked again while one is open, it is the same request. Answers `201`. Send an `Idempotency-Key`.",
-                "summary": "Ask for a copy, or for an account to be erased",
+                "description": "`kind` export (a ZIP of everything the academy holds about the person, built in a few minutes and kept a\nweek; one a day), correction (`says` what is wrong and what it should be, for what cannot be put right with\nPATCH me/details; one open at a time; the academy answers within 30 days) or erasure (the academy answers\nwithin 30 days, then the account is erased a day after its approval). `subject_id` is one of \"subjects\"\n(themselves when left out); `reason` optionally says why (erasure). An erasure asked again while one is open\nis the same request. Answers `201`. Send an `Idempotency-Key`.",
+                "summary": "Ask for a copy, a correction, or for an account to be erased",
                 "tags": [
                     "Privacy"
                 ],
@@ -10823,7 +11337,8 @@
                                         "type": "string",
                                         "enum": [
                                             "export",
-                                            "erasure"
+                                            "erasure",
+                                            "correction"
                                         ]
                                     },
                                     "subject_id": {
@@ -10839,6 +11354,15 @@
                                             "string",
                                             "null"
                                         ],
+                                        "maxLength": 1000
+                                    },
+                                    "says": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "A correction: what is wrong and what it should be.",
+                                        "minLength": 10,
                                         "maxLength": 1000
                                     }
                                 },
@@ -10865,7 +11389,7 @@
                                                 },
                                                 "kind": {
                                                     "type": "object",
-                                                    "description": "export | erasure",
+                                                    "description": "export | erasure | correction",
                                                     "properties": {
                                                         "key": {},
                                                         "label": {
@@ -10879,7 +11403,7 @@
                                                 },
                                                 "status": {
                                                     "type": "object",
-                                                    "description": "export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled",
+                                                    "description": "export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled; correction: pending | done (corrected; `answer` may say what changed) | refused | cancelled",
                                                     "properties": {
                                                         "key": {},
                                                         "label": {
@@ -10914,9 +11438,11 @@
                                                 "requester": {
                                                     "type": "string"
                                                 },
-                                                "reason": {},
+                                                "reason": {
+                                                    "description": "Why (erasure), or what should be corrected (correction)."
+                                                },
                                                 "answer": {
-                                                    "description": "The academy's reason, when it refused."
+                                                    "description": "The academy's reason when it refused; for a correction it made, what it changed (optional)."
                                                 },
                                                 "created_at": {
                                                     "type": [
@@ -10949,7 +11475,7 @@
                                                         "object",
                                                         "null"
                                                     ],
-                                                    "description": "When the academy answers by (erasure).",
+                                                    "description": "When the academy answers by (erasure, correction).",
                                                     "properties": {
                                                         "utc": {
                                                             "type": "string"
@@ -11112,8 +11638,8 @@
         "/v1/me/data-requests/{id}/cancel": {
             "post": {
                 "operationId": "privacy.requests.cancel",
-                "description": "While the academy has not answered, or in the day after it approved; by whoever asked or the person themselves.",
-                "summary": "Take an erasure back",
+                "description": "A correction while the academy has not answered; an erasure until then, or in the day after it approved; by\nwhoever asked or the person themselves.",
+                "summary": "Take a correction or an erasure back",
                 "tags": [
                     "Privacy"
                 ],
@@ -11170,7 +11696,7 @@
                                                 },
                                                 "kind": {
                                                     "type": "object",
-                                                    "description": "export | erasure",
+                                                    "description": "export | erasure | correction",
                                                     "properties": {
                                                         "key": {},
                                                         "label": {
@@ -11184,7 +11710,7 @@
                                                 },
                                                 "status": {
                                                     "type": "object",
-                                                    "description": "export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled",
+                                                    "description": "export: pending (being built) | ready | expired | failed; erasure: pending (the academy's turn) | approved (erased at erase_after) | done | refused | cancelled; correction: pending | done (corrected; `answer` may say what changed) | refused | cancelled",
                                                     "properties": {
                                                         "key": {},
                                                         "label": {
@@ -11219,9 +11745,11 @@
                                                 "requester": {
                                                     "type": "string"
                                                 },
-                                                "reason": {},
+                                                "reason": {
+                                                    "description": "Why (erasure), or what should be corrected (correction)."
+                                                },
                                                 "answer": {
-                                                    "description": "The academy's reason, when it refused."
+                                                    "description": "The academy's reason when it refused; for a correction it made, what it changed (optional)."
                                                 },
                                                 "created_at": {
                                                     "type": [
@@ -11254,7 +11782,7 @@
                                                         "object",
                                                         "null"
                                                     ],
-                                                    "description": "When the academy answers by (erasure).",
+                                                    "description": "When the academy answers by (erasure, correction).",
                                                     "properties": {
                                                         "utc": {
                                                             "type": "string"
@@ -11404,6 +11932,173 @@
                                 }
                             }
                         }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/me/details/{subject}": {
+            "patch": {
+                "operationId": "privacy.details.update",
+                "description": "Send only what changes; fields this person may not correct for the subject (see `details` on GET\nme/data-requests) are ignored. A choice's empty value clears it (teacher_gender: no preference). Answers what\nchanged and the details as they are now.",
+                "summary": "Correct details",
+                "tags": [
+                    "Privacy"
+                ],
+                "parameters": [
+                    {
+                        "name": "subject",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "gender": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "One of `choices.gender` on GET me/data-requests.",
+                                        "maxLength": 40
+                                    },
+                                    "country": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "One of `choices.country`: an ISO country code (\"SA\").",
+                                        "maxLength": 40
+                                    },
+                                    "school_grade": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "One of `choices.school_grade`.",
+                                        "maxLength": 40
+                                    },
+                                    "teacher_gender": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "One of `choices.teacher_gender`; empty: no preference.",
+                                        "maxLength": 40
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "changed": {
+                                                    "type": "array",
+                                                    "description": "The fields that changed (empty: nothing did).",
+                                                    "items": {}
+                                                },
+                                                "details": {
+                                                    "type": "array",
+                                                    "description": "The details as they are now, like `details` on GET me/data-requests.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "key": {
+                                                                "type": "string",
+                                                                "description": "name | gender | country | school_grade | teacher_gender"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "value": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "What is held (a choice's value; null: not set, or no preference for teacher_gender)."
+                                                            },
+                                                            "shown": {
+                                                                "type": "string",
+                                                                "description": "Ready to display."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "key",
+                                                            "label",
+                                                            "value",
+                                                            "shown"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "changed",
+                                                "details"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
@@ -17943,6 +18638,10 @@
                             "null"
                         ]
                     },
+                    "can_change_contact": {
+                        "type": "string",
+                        "description": "Whether the person may change their email and mobile themselves (me/contact): not a child the academy runs under a guardian, never while the platform team is signed in as them."
+                    },
                     "locale": {
                         "type": [
                             "string",
@@ -18011,6 +18710,7 @@
                     "email",
                     "phone",
                     "username",
+                    "can_change_contact",
                     "locale",
                     "timezone",
                     "display_timezone",

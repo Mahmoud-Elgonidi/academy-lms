@@ -20,6 +20,7 @@ use Modules\People\Contracts\LearnerStage;
 use Modules\People\Contracts\PeopleApi;
 use Modules\People\Models\GuardianStudent;
 use Modules\People\Models\StudentProfile;
+use Modules\People\Support\Countries;
 
 final class PeopleService implements PeopleApi
 {
@@ -83,6 +84,24 @@ final class PeopleService implements PeopleApi
         $profile = StudentProfile::query()->find($studentId);
 
         return new StudentDetails($profile?->gender, $profile?->country, $profile?->school_grade, $profile?->teacher_gender);
+    }
+
+    public function studentDetailChoices(): array
+    {
+        $o = 'people::directory.options.';
+        $teacher = (array) __($o.'teacher_genders');
+
+        return [
+            'gender' => (array) __($o.'student_genders'),
+            'country' => Countries::options(),
+            'school_grade' => array_intersect_key((array) __($o.'grades'), array_flip(SaveStudentDetails::GRADES)),
+            'teacher_gender' => ['' => $teacher['any'] ?? ''] + array_intersect_key($teacher, array_flip(SaveStudentDetails::TEACHER_GENDERS)),
+        ];
+    }
+
+    public function correctStudentDetails(string $studentId, StudentDetails $details): void
+    {
+        app(SaveStudentDetails::class)->handle($studentId, $details);
     }
 
     public function saveStudentDetails(string $studentId, StudentDetails $details): void

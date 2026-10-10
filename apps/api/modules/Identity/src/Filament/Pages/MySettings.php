@@ -7,6 +7,7 @@ use Filament\Actions\Action;
 use Filament\Auth\Pages\EditProfile;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Component;
@@ -18,6 +19,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Modules\Identity\Actions\ChangePassword;
+use Modules\Identity\Actions\Contact\ConfirmContactChange;
+use Modules\Identity\Actions\Contact\RequestContactChange;
 use Modules\Identity\Actions\Social\UnlinkSocialIdentity;
 use Modules\Identity\Actions\UpdatePreferences;
 use Modules\Identity\Actions\UpdateProfile;
@@ -31,10 +34,11 @@ use Modules\SharedKernel\Time\ViewerTimezone;
 use SensitiveParameter;
 
 /**
- * "My settings": name, language, timezone, the screen choices modules declare
- * (e.g. the live board layout), password, Google and Apple sign-in (link
- * through the provider, unlink here), and two-step sign-in (Filament's
- * authenticator app section). Saves through the same Actions the API uses.
+ * "My settings": name, language, timezone, the email and mobile number (a
+ * new one after a code sent to it), the screen choices modules declare (e.g.
+ * the live board layout), password, Google and Apple sign-in (link through
+ * the provider, unlink here), and two-step sign-in (Filament's authenticator
+ * app section). Saves through the same Actions the API uses.
  */
 final class MySettings extends EditProfile
 {
@@ -42,6 +46,9 @@ final class MySettings extends EditProfile
 
     /** @var list<array{admin: string, when: string, minutes: int, reason: string}>|null */
     private ?array $signIns = null;
+
+    /** @var array{challenge: string, kind: string, sent_to: string, channel: string}|null the new email or number waiting for its code */
+    public ?array $contactPending = null;
 
     /** Back from linking Google or Apple (SocialSignInController::finish). */
     public function mount(): void
@@ -87,6 +94,15 @@ final class MySettings extends EditProfile
                         ->helperText(__('identity::settings.timezone_hint')),
                 ]),
 
+            Section::make(__('identity::settings.contact.title'))
+                ->description(__('identity::settings.contact.hint'))
+                ->schema([View::make('identity::settings.contact')->viewData(fn (): array => [
+                    'rows' => $this->contactRows(),
+                    'managed' => (bool) $this->getUser()->getAttribute('is_managed_minor'),
+                ])])
+                // Not while the platform team is signed in as this person (RequestContactChange refuses too).
+                ->visible(fn (): bool => AuditActor::current()->onBehalfOf === null),
+
             Section::make(__('identity::settings.sections.screens'))
                 ->schema($this->preferenceComponents())
                 ->visible(fn (): bool => $this->store()->definitions() !== []),
@@ -112,6 +128,87 @@ final class MySettings extends EditProfile
                 ->visible(fn (): bool => $this->platformSignIns() !== [])
                 ->collapsible(),
         ]);
+    }
+
+    /** Step one of a new email or number: where to send the code. */
+    public function changeContactAction(): Action
+    {
+        $l = 'identity::settings.contact.';
+        $kind = fn (array $arguments): string => ($arguments['kind'] ?? '') === 'phone' ? 'phone' : 'email';
+        $has = fn (array $arguments): bool => filled($this->getUser()->getAttribute($kind($arguments) === 'email' ? 'email' : 'phone_e164'));
+
+        return Action::make('changeContact')
+            ->label(fn (array $arguments): string => __($l.($has($arguments) ? 'change_' : 'add_').$kind($arguments)))
+            ->color('gray')->outlined()->size('sm')
+            ->modalHeading(fn (array $arguments): string => __($l.($has($arguments) ? 'change_' : 'add_').$kind($arguments)))
+            ->modalWidth('md')
+            ->modalSubmitActionLabel(__($l.'send'))
+            ->schema(fn (array $arguments): array => [
+                TextInput::make('value')->label(__($l.'new_'.$kind($arguments)))->required()->maxLength(255)
+                    ->type($kind($arguments) === 'email' ? 'email' : 'tel')
+                    ->helperText($kind($arguments) === 'phone' ? __($l.'phone_hint') : null)
+                    ->extraInputAttributes(['dir' => 'ltr', 'autocomplete' => $kind($arguments) === 'email' ? 'email' : 'tel']),
+            ])
+            ->action(function (array $arguments, array $data, Action $action) use ($kind): void {
+                try {
+                    $sent = app(RequestContactChange::class)->handle($this->getUser(), $kind($arguments), (string) $data['value'], null, request()->ip());
+                } catch (ValidationException $e) {
+                    Notification::make()->danger()->title((string) collect($e->errors())->flatten()->first())->send();
+                    $action->halt();
+
+                    return;
+                }
+                $this->contactPending = ['challenge' => $sent->challengeId, 'kind' => $kind($arguments), 'sent_to' => $sent->sentTo, 'channel' => $sent->channel];
+                $this->replaceMountedAction('confirmContact');
+            });
+    }
+
+    /** Step two: the code that came to the new address makes it this person's. */
+    public function confirmContactAction(): Action
+    {
+        $l = 'identity::settings.contact.';
+
+        return Action::make('confirmContact')
+            ->modalHeading(fn (): string => __($l.'change_'.($this->contactPending['kind'] ?? 'email')))
+            ->modalDescription(fn (): string => __($l.'code_hint', [
+                'contact' => $this->contactPending['sent_to'] ?? '',
+                'channel' => __($l.'channels.'.($this->contactPending['channel'] ?? 'email')),
+                'minutes' => (int) config('identity.otp.minutes'),
+            ]))
+            ->modalWidth('md')
+            ->modalSubmitActionLabel(__($l.'confirm'))
+            ->schema([
+                TextInput::make('code')->label(__($l.'code'))->required()->maxLength(12)
+                    ->extraInputAttributes(['dir' => 'ltr', 'inputmode' => 'numeric', 'autocomplete' => 'one-time-code']),
+            ])
+            ->action(function (array $data, Action $action) use ($l): void {
+                $pending = $this->contactPending;
+                if ($pending === null) {
+                    return;
+                }
+                try {
+                    app(ConfirmContactChange::class)->handle($this->getUser(), $pending['challenge'], (string) $data['code']);
+                } catch (ValidationException $e) {
+                    Notification::make()->danger()->title((string) collect($e->errors())->flatten()->first())->send();
+                    $action->halt();
+
+                    return;
+                }
+                $this->contactPending = null;
+                Notification::make()->success()->title(__($l.'done_'.$pending['kind']))->send();
+                $this->redirect(self::getUrl(), navigate: true);
+            });
+    }
+
+    /** @return list<array{kind: string, label: string, value: ?string}> */
+    private function contactRows(): array
+    {
+        $user = $this->getUser();
+
+        return [
+            ['kind' => 'email', 'label' => __('identity::settings.contact.email'), 'value' => $user->getAttribute('email')],
+            ['kind' => 'phone', 'label' => __('identity::settings.contact.phone'), 'value' => $user->getAttribute('phone_e164')],
+        ];
     }
 
     /** Unlink Google or Apple, after a word on what it means. */

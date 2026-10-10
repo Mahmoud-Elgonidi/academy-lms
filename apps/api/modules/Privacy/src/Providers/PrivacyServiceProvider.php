@@ -8,8 +8,11 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
+use Modules\Identity\Contracts\Events\ContactChanged;
 use Modules\Privacy\Console\SweepDataRequestsCommand;
 use Modules\Privacy\Contracts\Events\AccountErased;
+use Modules\Privacy\Contracts\Events\CorrectionAnswered;
+use Modules\Privacy\Contracts\Events\CorrectionRequested;
 use Modules\Privacy\Contracts\Events\DataExportReady;
 use Modules\Privacy\Contracts\Events\ErasureApproved;
 use Modules\Privacy\Contracts\Events\ErasureRefused;
@@ -62,6 +65,9 @@ final class PrivacyServiceProvider extends ServiceProvider
         Event::listen(ErasureApproved::class, [SendPrivacyNotifications::class, 'erasureApproved']);
         Event::listen(ErasureRefused::class, [SendPrivacyNotifications::class, 'erasureRefused']);
         Event::listen(AccountErased::class, [SendPrivacyNotifications::class, 'accountErased']);
+        Event::listen(CorrectionRequested::class, [SendPrivacyNotifications::class, 'correctionRequested']);
+        Event::listen(CorrectionAnswered::class, [SendPrivacyNotifications::class, 'correctionAnswered']);
+        Event::listen(ContactChanged::class, [SendPrivacyNotifications::class, 'contactChanged']);
 
         $links = $this->app->make(NotificationLinks::class);
         $links->register('my_data', fn (array $a, string $panel) => match ($panel) {
@@ -69,6 +75,8 @@ final class PrivacyServiceProvider extends ServiceProvider
             'teach' => route('filament.teach.pages.my-data'),
             default => null,
         });
+        // A changed email or number opens the person's own settings, where both are.
+        $links->register('account', fn (array $a, string $panel) => in_array($panel, ['academy', 'teach', 'family'], true) ? route("filament.{$panel}.auth.profile") : null);
         $links->register('data_request', fn (array $a, string $panel) => $panel === 'academy' ? route('filament.academy.pages.data-requests', ['request' => $a['id'] ?? null]) : null);
 
         // "My data" follows its requests on the person's own channel (a copy ready, the academy's answer).

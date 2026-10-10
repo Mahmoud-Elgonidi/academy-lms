@@ -2,25 +2,30 @@
 
 import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
-import { askDataCopy, askErasure, cancelDataRequest } from '@/lib/actions/shared';
-import { Badge, Button, Card, Empty, Field, Notice, Textarea } from '@/components/ui';
+import { askCorrection, askDataCopy, askErasure, cancelDataRequest, correctDetails } from '@/lib/actions/shared';
+import { Badge, Button, Card, Empty, Field, Input, Notice, Select, Textarea } from '@/components/ui';
 import { latestOf, type MyData } from '@/lib/privacy';
+
+type Subject = MyData['subjects'][number];
 
 /**
  * "My data", the same for teachers and families: for each person one may ask
- * about, a copy (prepared, then downloaded for a week) and erasure (asked
- * with a reason if they like, answered by the academy, taken back until it
- * is done); then every request, and the academy's public pages. The API
- * checks each step again. Live through LiveRefresh (privacy.changed).
+ * about, their details put right on the spot (the name; a student's gender,
+ * country, grade and who should teach them) or a correction asked of the
+ * academy for the rest, a copy (prepared, then downloaded for a week) and
+ * erasure (asked with a reason if they like, answered by the academy, taken
+ * back until it is done); then every request, and the academy's public
+ * pages. The email and number change on `account`. The API checks each step
+ * again. Live through LiveRefresh (privacy.changed).
  */
-export function MyDataView({ mine }: { mine: MyData }) {
+export function MyDataView({ mine, account }: { mine: MyData; account: string }) {
   const t = useTranslations('myData');
   return (
     <div className="space-y-5">
       {mine.subjects.length === 0 ? <Notice tone="info">{t('young')}</Notice> : null}
       <div className="space-y-4">
         {mine.subjects.map((subject) => (
-          <Person key={subject.id} subject={subject} mine={mine} />
+          <Person key={subject.id} subject={subject} mine={mine} account={account} />
         ))}
       </div>
 
@@ -55,7 +60,7 @@ export function MyDataView({ mine }: { mine: MyData }) {
   );
 }
 
-function Person({ subject, mine }: { subject: MyData['subjects'][number]; mine: MyData }) {
+function Person({ subject, mine, account }: { subject: Subject; mine: MyData; account: string }) {
   const t = useTranslations('myData');
   const { copy, erasure } = latestOf(mine.requests, subject.id);
   const [pending, start] = useTransition();
@@ -84,6 +89,8 @@ function Person({ subject, mine }: { subject: MyData['subjects'][number]; mine: 
         </div>
       ) : null}
       <div className="mt-3 grid gap-3 md:grid-cols-2">
+        <Fix subject={subject} mine={mine} account={account} />
+
         <section className="space-y-2 rounded-control border border-line p-3">
           <h3 className="font-semibold">{t('copy.title')}</h3>
           <p className="text-sm text-muted">{t('copy.body', { days: 7 })}</p>
@@ -155,5 +162,148 @@ function Person({ subject, mine }: { subject: MyData['subjects'][number]; mine: 
       </div>
       {subject.self ? null : <Badge tone="muted">{t('learner')}</Badge>}
     </Card>
+  );
+}
+
+/** Putting the details right: on the spot where one may, else a correction the academy makes (one open at a time). */
+function Fix({ subject, mine, account }: { subject: Subject; mine: MyData; account: string }) {
+  const t = useTranslations('myData');
+  const [pending, start] = useTransition();
+  const [notice, setNotice] = useState<{ tone: 'brand' | 'danger'; text: string }>();
+  const [editing, setEditing] = useState(false);
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [asking, setAsking] = useState(false);
+  const [says, setSays] = useState('');
+  const [key, setKey] = useState(() => crypto.randomUUID());
+  const details = subject.details ?? [];
+  const fix = subject.correction;
+  const waiting = fix?.status.key === 'pending';
+
+  const edit = () => {
+    setValues(Object.fromEntries(details.map((d) => [d.key, d.value ?? ''])));
+    setNotice(undefined);
+    setEditing(true);
+  };
+  const save = () =>
+    start(async () => {
+      const changes: Record<string, string | null> = {};
+      for (const d of details) {
+        const next = (values[d.key] ?? '').trim();
+        if (next !== (d.value ?? '')) changes[d.key] = next === '' ? null : next;
+      }
+      const done = Object.keys(changes).length === 0 ? { ok: true as const, changed: [] } : await correctDetails(subject.id, changes);
+      if (!done.ok) return setNotice({ tone: 'danger', text: done.message ?? t('failed') });
+      setEditing(false);
+      setNotice({ tone: 'brand', text: done.changed.length === 0 ? t('fix.unchanged') : t('fix.saved') });
+    });
+  const ask = () =>
+    start(async () => {
+      if (says.trim().length < mine.says_min) return setNotice({ tone: 'danger', text: t('fix.tooShort', { min: mine.says_min }) });
+      const done = await askCorrection(subject.id, says, key);
+      if (!done.ok) return setNotice({ tone: 'danger', text: done.message ?? t('failed') });
+      setKey(crypto.randomUUID());
+      setAsking(false);
+      setSays('');
+      setNotice(undefined);
+    });
+  const cancel = (id: string) =>
+    start(async () => {
+      const done = await cancelDataRequest(id);
+      setNotice(done.ok ? undefined : { tone: 'danger', text: done.message ?? t('failed') });
+    });
+
+  return (
+    <section className="space-y-3 rounded-control border border-line p-3 md:col-span-2" data-part="fix">
+      <h3 className="font-semibold">{t('fix.title')}</h3>
+      {notice ? <Notice tone={notice.tone}>{notice.text}</Notice> : null}
+      {details.length > 0 && !editing ? (
+        <>
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+            {details.map((d) => (
+              <div key={d.key} className="contents">
+                <dt className="text-muted">{d.label}</dt>
+                <dd className="font-medium break-words">{d.shown}</dd>
+              </div>
+            ))}
+          </dl>
+          <Button variant="quiet" disabled={pending} onClick={edit}>
+            {t('fix.edit')}
+          </Button>
+        </>
+      ) : null}
+      {editing ? (
+        <div className="space-y-3 rounded-control bg-paper p-3">
+          {details.map((d) =>
+            d.key === 'name' ? (
+              <Field key={d.key} label={d.label}>
+                <Input required maxLength={255} value={values.name ?? ''} onChange={(e) => setValues({ ...values, name: e.target.value })} />
+              </Field>
+            ) : (
+              <Field key={d.key} label={d.label}>
+                <Select value={values[d.key] ?? ''} onChange={(e) => setValues({ ...values, [d.key]: e.target.value })}>
+                  {(mine.choices[d.key] ?? []).some((c) => c.value === '') ? null : <option value="">—</option>}
+                  {(mine.choices[d.key] ?? []).map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            ),
+          )}
+          <div className="flex flex-wrap gap-2">
+            <Button disabled={pending || (values.name ?? '').trim() === ''} onClick={save}>
+              {t('fix.save')}
+            </Button>
+            <Button variant="quiet" disabled={pending} onClick={() => setEditing(false)}>
+              {t('back')}
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      {subject.self ? (
+        <p className="text-sm text-muted">
+          {t('fix.contact')}{' '}
+          <a href={account} className="font-semibold text-brand hover:underline">
+            {t('fix.account')}
+          </a>
+        </p>
+      ) : null}
+      <p className="text-sm text-muted">{t('fix.body', { days: mine.answer_days })}</p>
+      {waiting ? (
+        <Notice tone="attention">
+          {t('fix.waiting', { when: fix.due_at?.label ?? '' })}
+          {fix.reason ? <span className="mt-1 block text-muted">«{fix.reason}»</span> : null}
+        </Notice>
+      ) : null}
+      {fix?.status.key === 'done' ? <Notice tone="brand">{fix.answer ? `${t('fix.done')}: ${fix.answer}` : t('fix.done')}</Notice> : null}
+      {fix?.status.key === 'refused' ? <Notice tone="info">{t('fix.refused', { answer: fix.answer ?? '' })}</Notice> : null}
+      {waiting && fix.can_cancel ? (
+        <Button variant="quiet" disabled={pending} onClick={() => cancel(fix.id)}>
+          {t('fix.cancel')}
+        </Button>
+      ) : null}
+      {!waiting && !asking ? (
+        <Button variant="quiet" disabled={pending} onClick={() => setAsking(true)}>
+          {t('fix.ask')}
+        </Button>
+      ) : null}
+      {!waiting && asking ? (
+        <div className="space-y-2 rounded-control bg-paper p-3">
+          <p className="text-sm">{t('fix.askBody', { days: mine.answer_days })}</p>
+          <Field label={t('fix.says')}>
+            <Textarea rows={3} minLength={mine.says_min} maxLength={mine.says_max} placeholder={t('fix.placeholder')} value={says} onChange={(e) => setSays(e.target.value)} />
+          </Field>
+          <div className="flex flex-wrap gap-2">
+            <Button disabled={pending} onClick={ask}>
+              {t('fix.send')}
+            </Button>
+            <Button variant="quiet" disabled={pending} onClick={() => setAsking(false)}>
+              {t('back')}
+            </Button>
+          </div>
+        </div>
+      ) : null}
+    </section>
   );
 }

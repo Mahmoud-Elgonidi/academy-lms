@@ -10,8 +10,9 @@ use Modules\Privacy\Subjects;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
- * Data requests as people see them: the academy's (erasures waiting
- * first, oldest first, with what holds each back; then the last 90 days),
+ * Data requests as people see them: the academy's (erasures and
+ * corrections waiting first, oldest first, an erasure with what holds it
+ * back; then the last 90 days),
  * and a person's own (what they asked, for themselves or a child, and what
  * was asked about them). A ready copy carries a signed address on the
  * academy's host, good for an hour, that opens without signing in (the
@@ -30,13 +31,13 @@ final class DataRequests
     /** @return array{open: list<array<string, mixed>>, recent: list<array<string, mixed>>} */
     public function forAcademy(): array
     {
-        $open = DataRequest::query()->where('kind', DataRequest::ERASURE)->whereIn('status', DataRequest::OPEN)->orderBy('created_at')->get();
+        $open = DataRequest::query()->whereIn('kind', DataRequest::ANSWERED)->whereIn('status', DataRequest::OPEN)->orderBy('created_at')->get();
         $recent = DataRequest::query()->where(fn ($q) => $q->where('kind', DataRequest::EXPORT)->orWhereNotIn('status', DataRequest::OPEN))
             ->where('created_at', '>=', now()->subDays(90))->orderByDesc('created_at')->limit(100)->get();
         $names = Subjects::names([...$open->pluck('subject_id'), ...$open->pluck('requested_by'), ...$recent->pluck('subject_id'), ...$recent->pluck('requested_by'), ...$recent->pluck('decided_by')->filter()]);
 
         return [
-            'open' => $open->map(fn (DataRequest $r) => $this->row($r, $names) + ['blockers' => $r->status === 'pending' ? $this->preview->blockers($r->subject_id) : []])->all(),
+            'open' => $open->map(fn (DataRequest $r) => $this->row($r, $names) + ['blockers' => $r->kind === DataRequest::ERASURE && $r->status === 'pending' ? $this->preview->blockers($r->subject_id) : []])->all(),
             'recent' => $recent->map(fn (DataRequest $r) => $this->row($r, $names))->all(),
         ];
     }
@@ -72,6 +73,7 @@ final class DataRequests
             'id' => $r->id,
             'kind' => $r->kind,
             'status' => $r->status,
+            'status_label' => $r->statusLabel(),
             'subject_id' => $r->subject_id,
             'subject' => $names[$r->subject_id] ?? Subjects::name($r->subject_id),
             'requested_by' => $r->requested_by,

@@ -10,8 +10,10 @@ import type { JoinTicket } from '@/lib/teach/types';
  * seat in a lesson (JoinLesson decides whose lesson it is and whether it is
  * open yet), notifications marked read, tickets to the academy, lesson
  * recordings (consent, watching, starting and stopping one), unlinking
- * Google or Apple from one's account, disputing a lesson's outcome, and
- * one's own data (a copy, erasure, taking an erasure back).
+ * Google or Apple from one's account, disputing a lesson's outcome, a new
+ * email or mobile number (confirmed by a code sent to it), and one's own
+ * data (details put right, a copy, a correction, erasure, taking a request
+ * back).
  */
 export async function joinLesson(id: string): Promise<{ ok: true; ticket: JoinTicket; recording: LessonRecording } | { ok: false; message?: string }> {
   const joined = await send<{ data: JoinTicket; recording?: LessonRecording }>('post', '/v1/lessons/{session}/join', { params: { session: id } });
@@ -149,9 +151,43 @@ export async function askErasure(subject: string, reason: string, key: string): 
   return { ok: true };
 }
 
-/** Takes an erasure back while the academy has not answered, or in the day after it approved. */
+/** Takes a correction back while the academy has not answered; an erasure until then, or in the day after it approved. */
 export async function cancelDataRequest(id: string): Promise<Done> {
   const done = await send('post', '/v1/me/data-requests/{id}/cancel', { params: { id } });
+  if (!done.ok) return problemOf(done.problem);
+  refresh();
+  return { ok: true };
+}
+
+/** Puts details right on the spot (one's own name; a student's details, by the student or a guardian): only what changed is sent. */
+export async function correctDetails(subject: string, changes: Record<string, string | null>): Promise<{ ok: true; changed: string[] } | { ok: false; message?: string }> {
+  const done = await send<{ data: { changed: string[] } }>('patch', '/v1/me/details/{subject}', { params: { subject }, body: changes });
+  if (!done.ok) return problemOf(done.problem);
+  refresh();
+  return { ok: true, changed: done.data.data.changed };
+}
+
+/** Asks the academy to correct what cannot be corrected here: one open at a time, answered within 30 days. */
+export async function askCorrection(subject: string, says: string, key: string): Promise<Done> {
+  const done = await send('post', '/v1/me/data-requests', { body: { kind: 'correction', subject_id: subject, says: says.trim() }, idempotencyKey: key });
+  if (!done.ok) return problemOf(done.problem);
+  refresh();
+  return { ok: true };
+}
+
+/** Sends a code to a new email or mobile number of one's own; nothing changes until the code comes back. */
+export async function sendContactCode(
+  kind: 'email' | 'phone',
+  value: string,
+): Promise<{ ok: true; challenge: string; sentTo: string; until: string } | { ok: false; message?: string }> {
+  const done = await send<{ challenge_id: string; sent_to: string; expires_at: { label: string } }>('post', '/v1/me/contact', { body: { kind, value: value.trim() } });
+  if (!done.ok) return problemOf(done.problem);
+  return { ok: true, challenge: done.data.challenge_id, sentTo: done.data.sent_to, until: done.data.expires_at.label };
+}
+
+/** Confirms the new address with its code: it becomes the account's way in and where messages go. */
+export async function confirmContact(challenge: string, code: string): Promise<Done> {
+  const done = await send('post', '/v1/me/contact/confirm', { body: { challenge_id: challenge, code: code.trim() } });
   if (!done.ok) return problemOf(done.problem);
   refresh();
   return { ok: true };

@@ -1,9 +1,9 @@
-/** "My data" as the API gives it (GET /v1/me/data-requests): whom one may ask about, the requests, and the academy's public pages. */
+/** "My data" as the API gives it (GET /v1/me/data-requests): whom one may ask about, what may be put right for each, the requests, and the academy's public pages. */
 export type LocalTime = { utc: string; local: string; timezone: string | null; label: string };
 
 export type DataRequest = {
   id: string;
-  kind: { key: 'export' | 'erasure'; label: string };
+  kind: { key: 'export' | 'erasure' | 'correction'; label: string };
   status: { key: string; label: string };
   subject: { id: string; name: string; self: boolean };
   requester: string;
@@ -20,14 +20,22 @@ export type DataRequest = {
   can_cancel: boolean;
 };
 
+/** A detail one may put right on the spot: the name, and a student's gender, country, grade and who should teach them. */
+export type Detail = { key: 'name' | 'gender' | 'country' | 'school_grade' | 'teacher_gender'; label: string; value: string | null; shown: string };
+
+export type Choice = { value: string; label: string };
+
 export type MyData = {
-  subjects: { id: string; name: string; self: boolean; can_copy: boolean }[];
+  subjects: { id: string; name: string; self: boolean; can_copy: boolean; details: Detail[] | null; correction: DataRequest | null }[];
   requests: DataRequest[];
   goes: string[];
   stays: string[];
   stays_note: string;
   grace_hours: number;
   answer_days: number;
+  choices: Record<string, Choice[]>;
+  says_min: number;
+  says_max: number;
   links: { privacy: string; terms: string; deletion: string };
 };
 

@@ -7,6 +7,7 @@ return [
         'suspended' => 'This academy is suspended.',
         'user' => 'This person does not exist or their account is not active.',
         'password' => 'The password cannot be changed while the platform team is signed in as you.',
+        'contact' => 'The email or number cannot be changed while the platform team is signed in as someone.',
     ],
     'banner' => [
         'text' => ':admin of the platform team is signed in as :user',

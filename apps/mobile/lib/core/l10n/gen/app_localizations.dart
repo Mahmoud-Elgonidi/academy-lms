@@ -635,13 +635,13 @@ abstract class AppLocalizations {
   /// No description provided for @myDataLead.
   ///
   /// In ar, this message translates to:
-  /// **'كل اللي الأكاديمية محتفظة بيه عنك وعن ولادك: نزّل نسخة، أو اطلب مسح حساب.'**
+  /// **'كل اللي الأكاديمية محتفظة بيه عنك وعن ولادك: صحّح بياناتك، أو نزّل نسخة، أو اطلب مسح حساب.'**
   String get myDataLead;
 
   /// No description provided for @myDataLeadTeacher.
   ///
   /// In ar, this message translates to:
-  /// **'كل اللي الأكاديمية محتفظة بيه عنك: نزّل نسخة، أو اطلب مسح حسابك.'**
+  /// **'كل اللي الأكاديمية محتفظة بيه عنك: صحّح اسمك، أو نزّل نسخة، أو اطلب مسح حسابك.'**
   String get myDataLeadTeacher;
 
   /// No description provided for @myDataYoung.
@@ -787,6 +787,144 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'عن {name}'**
   String myDataAbout(String name);
+
+  /// No description provided for @myDataFixTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصحيح البيانات'**
+  String get myDataFixTitle;
+
+  /// No description provided for @myDataFixEdit.
+  ///
+  /// In ar, this message translates to:
+  /// **'صحّح'**
+  String get myDataFixEdit;
+
+  /// No description provided for @myDataFixEditTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصحيح بيانات {name}'**
+  String myDataFixEditTitle(String name);
+
+  /// No description provided for @myDataFixSave.
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ'**
+  String get myDataFixSave;
+
+  /// No description provided for @myDataFixSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتحفظ.'**
+  String get myDataFixSaved;
+
+  /// No description provided for @myDataFixUnchanged.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش حاجة اتغيرت.'**
+  String get myDataFixUnchanged;
+
+  /// No description provided for @myDataFixUnset.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش متسجل'**
+  String get myDataFixUnset;
+
+  /// No description provided for @myDataFixContact.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإيميل ورقم الموبايل بتغيّرهم من «حسابي».'**
+  String get myDataFixContact;
+
+  /// No description provided for @myDataFixBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال {days} يوم.'**
+  String myDataFixBody(int days);
+
+  /// No description provided for @myDataFixAsk.
+  ///
+  /// In ar, this message translates to:
+  /// **'اطلب تصحيح'**
+  String get myDataFixAsk;
+
+  /// No description provided for @myDataFixAskTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اطلب تصحيح بيانات {name}'**
+  String myDataFixAskTitle(String name);
+
+  /// No description provided for @myDataFixAskBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال {days} يوم، وبيوصلك ردها.'**
+  String myDataFixAskBody(int days);
+
+  /// No description provided for @myDataFixSays.
+  ///
+  /// In ar, this message translates to:
+  /// **'إيه اللي محتاج يتصلح'**
+  String get myDataFixSays;
+
+  /// No description provided for @myDataFixPlaceholder.
+  ///
+  /// In ar, this message translates to:
+  /// **'مثلًا: تاريخ الميلاد المتسجل 2016 والصح 2017.'**
+  String get myDataFixPlaceholder;
+
+  /// No description provided for @myDataFixTooShort.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب {min} حروف على الأقل.'**
+  String myDataFixTooShort(int min);
+
+  /// No description provided for @myDataFixSend.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت الطلب'**
+  String get myDataFixSend;
+
+  /// No description provided for @myDataFixAsked.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطلب وصل للأكاديمية.'**
+  String get myDataFixAsked;
+
+  /// No description provided for @myDataFixWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتطلب: الأكاديمية هترد قبل {when}.'**
+  String myDataFixWaiting(String when);
+
+  /// No description provided for @myDataFixDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتصلح'**
+  String get myDataFixDone;
+
+  /// No description provided for @myDataFixDoneWith.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتصلح: {answer}'**
+  String myDataFixDoneWith(String answer);
+
+  /// No description provided for @myDataFixRefused.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية ماصلحتش: {answer}'**
+  String myDataFixRefused(String answer);
+
+  /// No description provided for @myDataFixCancel.
+  ///
+  /// In ar, this message translates to:
+  /// **'الغي الطلب'**
+  String get myDataFixCancel;
+
+  /// No description provided for @myDataFixCancelled.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطلب اتلغى.'**
+  String get myDataFixCancelled;
 
   /// No description provided for @myDataPrivacy.
   ///
@@ -1747,6 +1885,126 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'حسابي'**
   String get meTitle;
+
+  /// No description provided for @contactTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإيميل والموبايل'**
+  String get contactTitle;
+
+  /// No description provided for @contactHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'دول طرق دخولك، والأكواد والرسايل بتوصلك عليهم. لما تغيّر واحد، بنبعت كود على الجديد عشان نتأكد إنه بتاعك.'**
+  String get contactHint;
+
+  /// No description provided for @contactEmail.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإيميل'**
+  String get contactEmail;
+
+  /// No description provided for @contactPhone.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم الموبايل'**
+  String get contactPhone;
+
+  /// No description provided for @contactNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش متسجل'**
+  String get contactNone;
+
+  /// No description provided for @contactChangeEmail.
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّر الإيميل'**
+  String get contactChangeEmail;
+
+  /// No description provided for @contactChangePhone.
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّر الرقم'**
+  String get contactChangePhone;
+
+  /// No description provided for @contactAddEmail.
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف إيميل'**
+  String get contactAddEmail;
+
+  /// No description provided for @contactAddPhone.
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف رقم'**
+  String get contactAddPhone;
+
+  /// No description provided for @contactNewEmail.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإيميل الجديد'**
+  String get contactNewEmail;
+
+  /// No description provided for @contactNewPhone.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرقم الجديد'**
+  String get contactNewPhone;
+
+  /// No description provided for @contactPhoneHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'بكود الدولة، أو رقم محلي من نفس بلدك.'**
+  String get contactPhoneHint;
+
+  /// No description provided for @contactSend.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت كود'**
+  String get contactSend;
+
+  /// No description provided for @contactCode.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكود اللي وصلك'**
+  String get contactCode;
+
+  /// No description provided for @contactCodeHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'بعتنا كود على {contact}. صالح لحد {until}.'**
+  String contactCodeHint(String contact, String until);
+
+  /// No description provided for @contactConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'أكّد'**
+  String get contactConfirm;
+
+  /// No description provided for @contactResend.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت كود تاني'**
+  String get contactResend;
+
+  /// No description provided for @contactDoneEmail.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإيميل اتغيّر. من دلوقتي بتدخل وبتوصلك الرسايل عليه.'**
+  String get contactDoneEmail;
+
+  /// No description provided for @contactDonePhone.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرقم اتغيّر. من دلوقتي بتدخل وبتوصلك الرسايل عليه.'**
+  String get contactDonePhone;
+
+  /// No description provided for @contactManaged.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية أو ولي أمرك هم اللي بيغيّروا الإيميل والرقم بتوعك.'**
+  String get contactManaged;
 
   /// No description provided for @openNow.
   ///

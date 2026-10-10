@@ -26,10 +26,16 @@
         .md-details summary { cursor: pointer; font-size: .85rem; color: var(--primary-700); }
         .md-details ul { margin: .4rem 0 0; padding-inline-start: 1.1rem; font-size: .84rem; color: var(--gray-600); }
         .md-links { display: flex; gap: 1rem; flex-wrap: wrap; font-size: .85rem; }
+        .md-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .25rem .9rem; margin: 0; font-size: .87rem; }
+        .md-facts dt { color: var(--gray-500); }
+        .md-facts dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; }
         .md-empty { padding: 1rem; text-align: center; color: var(--gray-500); border: 1px dashed var(--gray-300); border-radius: var(--radius-xl, .75rem); font-size: .9rem; }
         .dark .md-card, .dark .md-list { background: var(--gray-900); border-color: var(--gray-800); }
         .dark .md-part { border-color: var(--gray-800); }
         .dark .md-state { background: var(--gray-800); }
+        .dark .md-state[data-tone="good"] { background: color-mix(in oklab, var(--success-500) 16%, transparent); color: var(--success-300); }
+        .dark .md-state[data-tone="warn"] { background: color-mix(in oklab, var(--warning-500) 16%, transparent); color: var(--warning-300); }
+        .dark .md-state[data-tone="bad"] { background: color-mix(in oklab, var(--danger-500) 16%, transparent); color: var(--danger-300); }
     </style>
 
     <p class="md-lead">{{ __($l.'lead') }}</p>
@@ -39,10 +45,47 @@
             @php
                 $export = $card['export'];
                 $erasure = $card['erasure'];
+                $fix = $card['correction'];
+                $details = $card['details'];
+                $value = function (string $field) use ($details, $m) {
+                    $v = $details['values'][$field] ?? null;
+                    return $field === 'name' ? $v : ($m['choices'][$field][$v ?? ''] ?? null);
+                };
             @endphp
             <article class="md-card" wire:key="card-{{ $card['id'] }}">
                 <h3>{{ $card['name'] }}</h3>
                 <div class="md-parts">
+                    <section class="md-part">
+                        <h4>{{ __($l.'fix.title') }}</h4>
+                        @if ($details)
+                            <dl class="md-facts">
+                                @foreach ($details['fields'] as $field)
+                                    <dt>{{ __($l.'fix.fields.'.$field) }}</dt>
+                                    <dd>{{ $value($field) ?? __($l.'fix.unset') }}</dd>
+                                @endforeach
+                            </dl>
+                            <div>{{ ($this->correctAction)(['subject' => $card['id']]) }}</div>
+                        @endif
+                        @if ($card['self'] && $m['settings_url'])
+                            <p>{{ __($l.'fix.contact') }} <x-filament::link :href="$m['settings_url']" size="sm">{{ __($l.'fix.settings') }}</x-filament::link></p>
+                        @endif
+                        <p>{{ __($l.'fix.body', ['days' => \Modules\Privacy\Models\DataRequest::ANSWER_DAYS]) }}</p>
+                        @if ($fix && $fix['status'] === 'pending')
+                            <div class="md-state" data-tone="warn">{{ __($l.'fix.waiting', ['when' => $this->when($fix['due_at'])]) }}<br><span class="md-muted">«{{ $fix['reason'] }}»</span></div>
+                        @elseif ($fix && $fix['status'] === 'done')
+                            <div class="md-state" data-tone="good">{{ __($l.'fix.done') }}@if ($fix['answer']): {{ $fix['answer'] }}@endif</div>
+                        @elseif ($fix && $fix['status'] === 'refused')
+                            <div class="md-state">{{ __($l.'fix.refused', ['answer' => $fix['answer']]) }}</div>
+                        @endif
+                        <div class="md-row">
+                            @if ($fix && $fix['status'] === 'pending')
+                                <x-filament::button size="sm" color="gray" icon="heroicon-o-arrow-uturn-left" wire:click="cancelRequest('{{ $fix['id'] }}')">{{ __($l.'fix.cancel') }}</x-filament::button>
+                            @else
+                                {{ ($this->askCorrectionAction)(['subject' => $card['id']]) }}
+                            @endif
+                        </div>
+                    </section>
+
                     <section class="md-part">
                         <h4>{{ __($l.'copy.title') }}</h4>
                         <p>{{ __($l.'copy.body', ['days' => \Modules\Privacy\Models\DataRequest::KEEP_DAYS]) }}</p>
@@ -100,7 +143,7 @@
                             {{ __('privacy::requests.kinds.'.$r['kind']) }} · {{ __($l.'about', ['name' => $r['subject']]) }}
                             @if ($r['requested_by'] !== auth()->id() && $r['requested_by'] !== $r['subject_id'])<span class="md-muted">({{ __($l.'by_office') }})</span>@endif
                         </span>
-                        <span class="md-muted">{{ __('privacy::requests.statuses.'.$r['status']) }} · {{ $this->when($r['created_at']) }}</span>
+                        <span class="md-muted">{{ $r['status_label'] }} · {{ $this->when($r['created_at']) }}</span>
                     </li>
                 @endforeach
             </ul>

@@ -6,8 +6,10 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Modules\Privacy\Actions\AnswerCorrection;
 use Modules\Privacy\Actions\BuildDataExport;
 use Modules\Privacy\Actions\RefuseErasure;
+use Modules\Privacy\Actions\RequestCorrection;
 use Modules\Privacy\Actions\RequestDataExport;
 use Modules\Privacy\Actions\RequestErasure;
 use Modules\Privacy\Actions\SavePrivacySettings;
@@ -20,12 +22,23 @@ use Modules\Privacy\Actions\SweepDataRequests;
  * it back, ready to approve); Omar's father asks to erase his own account
  * (an invoice is still due); Hamza's father asked a month ago and was
  * refused (a course was running then); Maryam's father has a copy of her
- * data to download; a teacher's copy from last month has expired.
+ * data to download; a teacher's copy from last month has expired. Two
+ * corrections: Yousef's father asks for his birth date to be put right
+ * (waiting for the academy), and Maryam's father's request about the name on
+ * her invoices was done last week, with what changed.
  */
 final class DemoPrivacySeeder extends Seeder
 {
-    public function run(RequestDataExport $export, RequestErasure $erasure, RefuseErasure $refuse, BuildDataExport $build, SavePrivacySettings $settings, SweepDataRequests $sweep): void
-    {
+    public function run(
+        RequestDataExport $export,
+        RequestErasure $erasure,
+        RefuseErasure $refuse,
+        BuildDataExport $build,
+        SavePrivacySettings $settings,
+        SweepDataRequests $sweep,
+        RequestCorrection $correction,
+        AnswerCorrection $answer,
+    ): void {
         $id = fn (string $email) => DB::table('users')->where('email', $email)->value('id');
         $owner = $id('owner@demo.test');
         if ($owner === null) {
@@ -68,6 +81,17 @@ final class DemoPrivacySeeder extends Seeder
         if (($maryam = $id('maryam@demo.test')) && ($maryamsFather = $id('maryam.guardian@demo.test'))) {
             $copy = $at($now->subHours(5), fn () => $export->handle($maryam, $maryamsFather, 'family'));
             $at($now->subHours(5)->addMinutes(2), fn () => $build->handle($copy));
+        }
+        // Yousef's birth date is a year off: his father asks the academy to put it right.
+        if (($yousef = $id('yousef@demo.test')) && ($yousefsGuardian = $id('yousef.guardian@demo.test'))) {
+            $at($now->subDays(2)->setTime(21, 5), fn () => $correction->handle($yousef, $yousefsGuardian, 'family',
+                'تاريخ ميلاد يوسف المتسجل غلط: هو مولود 2018 مش 2017.'));
+        }
+        // The name on Maryam's invoices was misspelt; the academy corrected it last week and said what changed.
+        if (($maryam = $id('maryam@demo.test')) && ($maryamsFather = $id('maryam.guardian@demo.test'))) {
+            $asked = $at($now->subDays(9)->setTime(16, 20), fn () => $correction->handle($maryam, $maryamsFather, 'family',
+                'اسم مريم في الفواتير مكتوب «مريام». ياريت تصلحوه.'));
+            $at($now->subDays(8)->setTime(11, 0), fn () => $answer->done($asked, $owner, 'صلحنا الاسم في الفواتير الجاية، والفاتورة اللي فاتت طلعنالها إشعار دائن وفاتورة جديدة بالاسم الصح.'));
         }
         // A teacher's copy from last month, past its week.
         if ($teacher = $id('teacher@demo.test')) {

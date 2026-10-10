@@ -34,6 +34,11 @@
         .dr-table td.num { white-space: nowrap; font-variant-numeric: tabular-nums; }
         .dark .dr-card, .dark .dr-scroll { background: var(--gray-900); border-color: var(--gray-800); }
         .dark .dr-reason { background: var(--gray-800); }
+        .dark .dr-block[data-tone="warn"], .dark .dr-pill[data-tone="warn"] { background: color-mix(in oklab, var(--warning-500) 16%, transparent); color: var(--warning-300); }
+        .dark .dr-block[data-tone="good"], .dark .dr-pill[data-tone="good"] { background: color-mix(in oklab, var(--success-500) 16%, transparent); color: var(--success-300); }
+        .dark .dr-pill[data-tone="bad"] { background: color-mix(in oklab, var(--danger-500) 16%, transparent); color: var(--danger-300); }
+        .dark .dr-pill { background: var(--gray-800); color: var(--gray-300); }
+        .dark .dr-actions, .dark .dr-table td { border-color: var(--gray-800); }
     </style>
 
     <section>
@@ -46,6 +51,7 @@
                     <article class="dr-card" wire:key="open-{{ $r['id'] }}" @if ($r['id'] === $this->request) data-focus @endif @if ($r['overdue']) data-late @endif>
                         <div class="dr-head">
                             <div>
+                                <span class="dr-pill" data-tone="{{ $r['kind'] === 'erasure' ? 'bad' : '' }}">{{ __('privacy::requests.kinds.'.$r['kind']) }}</span>
                                 <strong>{{ $r['subject'] }}</strong>
                                 <span class="dr-muted">
                                     {{ $r['requested_by'] === $r['subject_id'] ? __($l.'themselves') : __($l.'asked_by', ['name' => $r['requester']]) }}
@@ -62,10 +68,13 @@
                         </div>
 
                         @if ($r['reason'])
-                            <p class="dr-reason"><span class="dr-muted">{{ __($l.'reason') }}:</span> {{ $r['reason'] }}</p>
+                            <p class="dr-reason"><span class="dr-muted">{{ $r['kind'] === 'correction' ? __('privacy::requests.says') : __($l.'reason') }}:</span> {{ $r['reason'] }}</p>
+                        @endif
+                        @if ($r['kind'] === 'correction')
+                            <p class="dr-muted">{{ __($l.'correction_where') }}</p>
                         @endif
 
-                        @if ($r['status'] === 'pending')
+                        @if ($r['kind'] === 'erasure' && $r['status'] === 'pending')
                             @if ($r['held_back'] !== [])
                                 <div class="dr-block" data-tone="warn"><strong>{{ __($l.'held_back') }}</strong><ul>@foreach ($r['held_back'] as $b)<li>{{ $b }}</li>@endforeach</ul></div>
                             @endif
@@ -77,7 +86,10 @@
                         @endif
 
                         <div class="dr-actions">
-                            @if ($r['status'] === 'pending')
+                            @if ($r['kind'] === 'correction')
+                                {{ ($this->correctedAction)(['id' => $r['id']]) }}
+                                {{ ($this->refuseCorrectionAction)(['id' => $r['id']]) }}
+                            @elseif ($r['status'] === 'pending')
                                 {{ ($this->approveAction)(['id' => $r['id']])->disabled($r['blockers'] !== []) }}
                                 {{ ($this->refuseAction)(['id' => $r['id']]) }}
                             @endif
@@ -111,7 +123,7 @@
                                 <td>{{ $r['subject'] ?: '—' }}</td>
                                 <td>{{ $r['requested_by'] === $r['subject_id'] ? __($l.'themselves') : $r['requester'] }}</td>
                                 <td>
-                                    <span class="dr-pill" data-tone="{{ match ($r['status']) { 'ready', 'done' => 'good', 'refused', 'failed' => 'bad', default => '' } }}">{{ __('privacy::requests.statuses.'.$r['status']) }}</span>
+                                    <span class="dr-pill" data-tone="{{ match ($r['status']) { 'ready', 'done' => 'good', 'refused', 'failed' => 'bad', default => '' } }}">{{ $r['status_label'] }}</span>
                                     @if ($r['answer'])<div class="dr-muted">{{ $r['answer'] }}</div>@endif
                                 </td>
                                 <td class="num">{{ $this->when($r['created_at']) }}</td>

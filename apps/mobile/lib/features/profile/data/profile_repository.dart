@@ -38,6 +38,35 @@ class SignInMethod {
   final LocalTime? lastUsedAt;
 }
 
+/// The account's email and mobile number (`GET me`), and whether the person may change them themselves.
+class ContactDetails {
+  const ContactDetails({required this.canChange, this.email, this.phone});
+
+  factory ContactDetails.fromJson(Map<String, dynamic> json) =>
+      ContactDetails(email: json['email'] as String?, phone: json['phone'] as String?, canChange: json['can_change_contact'] == true);
+
+  final String? email;
+  final String? phone;
+
+  /// Not a child the academy runs under a guardian, and not the platform team signed in as someone.
+  final bool canChange;
+}
+
+/// A code sent to a new address: the challenge to confirm, where it went (masked), and until when it works.
+class ContactCode {
+  const ContactCode({required this.challengeId, required this.sentTo, this.expiresAt});
+
+  factory ContactCode.fromJson(Map<String, dynamic> json) => ContactCode(
+    challengeId: json['challenge_id'] as String,
+    sentTo: json['sent_to'] as String? ?? '',
+    expiresAt: LocalTime.fromJson(json['expires_at']),
+  );
+
+  final String challengeId;
+  final String sentTo;
+  final LocalTime? expiresAt;
+}
+
 class ProfileRepository {
   ProfileRepository(this._api);
 
@@ -48,6 +77,17 @@ class ProfileRepository {
   ];
 
   Future<void> signOutDevice(int id) => _api.delete('me/sessions/$id');
+
+  Future<ContactDetails> contact() async => ContactDetails.fromJson((await _api.get('me'))['data'] as Map<String, dynamic>);
+
+  /// Sends a code to a new email or mobile number ([kind] email or phone); nothing changes until it comes back.
+  Future<ContactCode> sendContactCode(String kind, String value) async =>
+      ContactCode.fromJson(await _api.post('me/contact', body: {'kind': kind, 'value': value.trim()}));
+
+  /// Confirms the new address with its code: it becomes the account's way in and where messages go.
+  Future<ContactDetails> confirmContact(String challengeId, String code) async => ContactDetails.fromJson(
+    (await _api.post('me/contact/confirm', body: {'challenge_id': challengeId, 'code': code.trim()}))['data'] as Map<String, dynamic>,
+  );
 
   Future<List<SignInMethod>> signInMethods() async => _methods(await _api.get('me/social'));
 

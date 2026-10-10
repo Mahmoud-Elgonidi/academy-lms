@@ -12,6 +12,7 @@ use Modules\SharedKernel\Http\ProblemDetails;
 use Modules\SharedKernel\Http\ResolveViewerTimezone;
 use Modules\SharedKernel\Http\SecurityHeaders;
 use Modules\SharedKernel\Http\SetLocale;
+use Modules\SharedKernel\Http\ThrottlePerRoute;
 use Modules\SharedKernel\Plans\RequirePlanFeature;
 use Modules\SharedKernel\Tenancy\Exceptions\TenantNotResolved;
 use Modules\SharedKernel\Tenancy\Exceptions\TenantSuspended;
@@ -31,6 +32,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'timezone' => ResolveViewerTimezone::class,
             'idempotent' => Idempotent::class,
             'plan.feature' => RequirePlanFeature::class,
+            // throttle:N,M counts each route on its own (Laravel's would share one count per person across routes).
+            'throttle' => ThrottlePerRoute::class,
         ]);
 
         // The tenant must be known before authentication, rate limiting and

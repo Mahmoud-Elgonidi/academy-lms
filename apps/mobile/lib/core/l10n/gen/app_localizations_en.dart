@@ -341,10 +341,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myDataTitle => 'My data';
 
   @override
-  String get myDataLead => 'Everything the academy keeps about you and your children: download a copy, or ask for an account to be erased.';
+  String get myDataLead =>
+      'Everything the academy keeps about you and your children: correct your details, download a copy, or ask for an account to be erased.';
 
   @override
-  String get myDataLeadTeacher => 'Everything the academy keeps about you: download a copy, or ask for your account to be erased.';
+  String get myDataLeadTeacher =>
+      'Everything the academy keeps about you: correct your name, download a copy, or ask for your account to be erased.';
 
   @override
   String get myDataYoung => 'Your guardian asks about your data from their account.';
@@ -433,6 +435,91 @@ class AppLocalizationsEn extends AppLocalizations {
   String myDataAbout(String name) {
     return 'About $name';
   }
+
+  @override
+  String get myDataFixTitle => 'Correct the data';
+
+  @override
+  String get myDataFixEdit => 'Correct';
+
+  @override
+  String myDataFixEditTitle(String name) {
+    return 'Correct $name\'s details';
+  }
+
+  @override
+  String get myDataFixSave => 'Save';
+
+  @override
+  String get myDataFixSaved => 'Saved.';
+
+  @override
+  String get myDataFixUnchanged => 'Nothing changed.';
+
+  @override
+  String get myDataFixUnset => 'Not set';
+
+  @override
+  String get myDataFixContact => 'The email and mobile number change on Me.';
+
+  @override
+  String myDataFixBody(int days) {
+    return 'Something else wrong (a birth date, a name on an invoice, words in a report)? Write it to the academy; it answers within $days days.';
+  }
+
+  @override
+  String get myDataFixAsk => 'Ask for a correction';
+
+  @override
+  String myDataFixAskTitle(String name) {
+    return 'Ask to correct $name\'s data';
+  }
+
+  @override
+  String myDataFixAskBody(int days) {
+    return 'Write what is wrong and what is right. The academy answers within $days days, and you get its answer.';
+  }
+
+  @override
+  String get myDataFixSays => 'What needs correcting';
+
+  @override
+  String get myDataFixPlaceholder => 'For example: the birth year on file is 2016; it is 2017.';
+
+  @override
+  String myDataFixTooShort(int min) {
+    return 'Write at least $min characters.';
+  }
+
+  @override
+  String get myDataFixSend => 'Send the request';
+
+  @override
+  String get myDataFixAsked => 'The request reached the academy.';
+
+  @override
+  String myDataFixWaiting(String when) {
+    return 'Asked: the academy answers by $when.';
+  }
+
+  @override
+  String get myDataFixDone => 'Corrected';
+
+  @override
+  String myDataFixDoneWith(String answer) {
+    return 'Corrected: $answer';
+  }
+
+  @override
+  String myDataFixRefused(String answer) {
+    return 'The academy did not correct it: $answer';
+  }
+
+  @override
+  String get myDataFixCancel => 'Cancel the request';
+
+  @override
+  String get myDataFixCancelled => 'The request was cancelled.';
 
   @override
   String get myDataPrivacy => 'Privacy notice';
@@ -991,6 +1078,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get meTitle => 'Me';
+
+  @override
+  String get contactTitle => 'Email and mobile';
+
+  @override
+  String get contactHint =>
+      'These are your ways in, and where codes and messages reach you. When you change one, we send a code to the new one to make sure it is yours.';
+
+  @override
+  String get contactEmail => 'Email';
+
+  @override
+  String get contactPhone => 'Mobile number';
+
+  @override
+  String get contactNone => 'Not set';
+
+  @override
+  String get contactChangeEmail => 'Change email';
+
+  @override
+  String get contactChangePhone => 'Change number';
+
+  @override
+  String get contactAddEmail => 'Add an email';
+
+  @override
+  String get contactAddPhone => 'Add a number';
+
+  @override
+  String get contactNewEmail => 'New email';
+
+  @override
+  String get contactNewPhone => 'New number';
+
+  @override
+  String get contactPhoneHint => 'With the country code, or a local number from your own country.';
+
+  @override
+  String get contactSend => 'Send a code';
+
+  @override
+  String get contactCode => 'The code you received';
+
+  @override
+  String contactCodeHint(String contact, String until) {
+    return 'We sent a code to $contact. It works until $until.';
+  }
+
+  @override
+  String get contactConfirm => 'Confirm';
+
+  @override
+  String get contactResend => 'Send another code';
+
+  @override
+  String get contactDoneEmail => 'Your email changed. From now on you sign in and get messages there.';
+
+  @override
+  String get contactDonePhone => 'Your number changed. From now on you sign in and get messages there.';
+
+  @override
+  String get contactManaged => 'The academy or your guardian changes your email and number.';
 
   @override
   String get openNow => 'Open';

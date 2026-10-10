@@ -677,6 +677,30 @@
       "denied": "Linking was cancelled.",
       "failed": "Linking did not finish. Try again.",
       "off": "Linking is not available right now."
+    },
+    "contact": {
+      "title": "Email and mobile",
+      "hint": "These are your ways in, and where codes and messages reach you. When you change one, we send a code to the new one to make sure it is yours.",
+      "email": "Email",
+      "phone": "Mobile number",
+      "none": "Not set",
+      "change_email": "Change email",
+      "change_phone": "Change number",
+      "add_email": "Add an email",
+      "add_phone": "Add a number",
+      "new_email": "New email",
+      "new_phone": "New number",
+      "phoneHint": "With the country code, or a local number from your own country.",
+      "send": "Send a code",
+      "code": "The code you received",
+      "codeHint": "We sent a code to {contact}. It works until {until}.",
+      "confirm": "Confirm",
+      "resend": "Send another code",
+      "back": "Back",
+      "done_email": "Your email changed. From now on you sign in and get messages there.",
+      "done_phone": "Your number changed. From now on you sign in and get messages there.",
+      "managed": "The academy or your guardian changes your email and number.",
+      "failed": "That did not go through. Try again."
     }
   },
   "dispute": {
@@ -695,8 +719,8 @@
   },
   "myData": {
     "title": "My data",
-    "lead": "Everything the academy keeps about you and your children: download a copy, or ask for an account to be erased.",
-    "leadTeacher": "Everything the academy keeps about you: download a copy, or ask for your account to be erased.",
+    "lead": "Everything the academy keeps about you and your children: correct your details, download a copy, or ask for an account to be erased.",
+    "leadTeacher": "Everything the academy keeps about you: correct your name, download a copy, or ask for your account to be erased.",
     "young": "Your guardian asks about your data from their account.",
     "copy": {
       "title": "A copy of the data",
@@ -731,7 +755,27 @@
       "deletion": "Delete your account"
     },
     "back": "Back",
-    "failed": "The request did not go through. Try again."
+    "failed": "The request did not go through. Try again.",
+    "fix": {
+      "title": "Correct the data",
+      "edit": "Correct",
+      "save": "Save",
+      "saved": "Saved.",
+      "unchanged": "Nothing changed.",
+      "contact": "The email and mobile number change in",
+      "account": "My account",
+      "body": "Something else wrong (a birth date, a name on an invoice, words in a report)? Write it to the academy; it answers within {days} days.",
+      "ask": "Ask for a correction",
+      "askBody": "Write what is wrong and what is right. The academy answers within {days} days, and you get its answer.",
+      "says": "What needs correcting",
+      "placeholder": "For example: the birth year on file is 2016; it is 2017.",
+      "tooShort": "Write at least {min} characters.",
+      "send": "Send the request",
+      "waiting": "Asked: the academy answers by {when}.",
+      "done": "Corrected",
+      "refused": "The academy did not correct it: {answer}",
+      "cancel": "Cancel the request"
+    }
   },
   "safeguarding": {
     "title": {

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Identity\Http\V1\Controllers\AccountsController;
 use Modules\Identity\Http\V1\Controllers\AuthController;
 use Modules\Identity\Http\V1\Controllers\CodeSignInController;
+use Modules\Identity\Http\V1\Controllers\ContactController;
 use Modules\Identity\Http\V1\Controllers\RealtimeController;
 use Modules\Identity\Http\V1\Controllers\SessionsController;
 use Modules\Identity\Http\V1\Controllers\SocialSignInController;
@@ -27,6 +28,9 @@ Route::middleware('throttle:20,1')->group(function (): void {
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('me', [AuthController::class, 'me'])->name('identity.me');
     Route::patch('me', [AuthController::class, 'updateMe'])->name('identity.me.update');
+    // A new email or mobile number, confirmed by a code sent to it.
+    Route::post('me/contact', [ContactController::class, 'send'])->middleware('throttle:10,1')->name('identity.contact.send');
+    Route::post('me/contact/confirm', [ContactController::class, 'confirm'])->middleware('throttle:20,1')->name('identity.contact.confirm');
     Route::get('me/sessions', [SessionsController::class, 'index'])->name('identity.sessions');
     Route::delete('me/sessions/{session}', [SessionsController::class, 'destroy'])->whereNumber('session')->name('identity.sessions.end');
     Route::get('me/social', [SocialSignInController::class, 'mine'])->name('identity.social.mine');

@@ -1,9 +1,10 @@
 import '../../../core/network/api_client.dart';
 import '../domain/my_data.dart';
 
-/// One's own data, the same as "My data" in /my, /teach and the portal: a
-/// copy, erasure of an account (one's own, or a followed learner's), and
-/// taking an erasure back. The API checks each step again.
+/// One's own data, the same as "My data" in /my, /teach and the portal:
+/// details put right on the spot, a copy, a correction the academy makes,
+/// erasure of an account (one's own, or a followed learner's), and taking a
+/// request back. The API checks each step again.
 class PrivacyRepository {
   PrivacyRepository(this._api);
 
@@ -21,6 +22,16 @@ class PrivacyRepository {
     idempotent: true,
   );
 
-  /// Takes an erasure back while it waits, or in the day after the academy approved it.
+  /// Takes a correction back while it waits; an erasure too, or in the day after the academy approved it.
   Future<void> cancel(String id) => _api.post('me/data-requests/$id/cancel');
+
+  /// Puts [subject]'s details right (only what changed is sent); answers the fields that changed.
+  Future<List<String>> correct(String subject, Map<String, String?> changes) async {
+    final json = await _api.patch('me/details/$subject', body: changes);
+    return [for (final f in (json['data'] as Map<String, dynamic>)['changed'] as List<dynamic>) f as String];
+  }
+
+  /// Asks the academy to correct what cannot be corrected here; it answers within 30 days.
+  Future<void> askCorrection(String subject, String says) =>
+      _api.post('me/data-requests', body: {'kind': 'correction', 'subject_id': subject, 'says': says.trim()}, idempotent: true);
 }

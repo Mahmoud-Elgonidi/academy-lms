@@ -3,10 +3,12 @@
 namespace Modules\Identity\Actions;
 
 use DateTimeZone;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Modules\Identity\Contracts\DTOs\UserDetails;
+use Modules\Identity\Contracts\Events\ContactChanged;
 use Modules\Identity\Enums\UserStatus;
 use Modules\Identity\Models\User;
 use Modules\SharedKernel\Audit\AuditTrail;
@@ -15,7 +17,8 @@ use Modules\SharedKernel\Tenancy\TenantContext;
 /**
  * Staff change a person's name, email, number, language or time zone. The
  * email and number are ways in (a sign-in code goes there), so a change to
- * either is in the audit log; a person still needs one way in.
+ * either is in the audit log and the person hears of it (ContactChanged); a
+ * person still needs one way in.
  */
 final class UpdateUserDetails
 {
@@ -67,6 +70,13 @@ final class UpdateUserDetails
                 'email' => $before['email'] !== $user->email,
                 'phone' => $before['phone'] !== $user->phone_e164,
             ]);
+            // The person hears it (a new address is a new way into their account), unless it was only cleared.
+            foreach (['email' => $before['email'] !== $user->email && $user->email !== null, 'phone' => $before['phone'] !== $user->phone_e164 && $user->phone_e164 !== null] as $kind => $changed) {
+                if ($changed) {
+                    $id = $user->id;
+                    DB::afterCommit(fn () => event(new ContactChanged($id, $kind, false)));
+                }
+            }
         }
 
         return $user;

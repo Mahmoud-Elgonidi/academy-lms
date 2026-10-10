@@ -125,7 +125,8 @@ final class Challenges
                 return [$challenge->attempts >= $max ? 'locked' : 'wrong', $challenge];
             }
 
-            $challenge->forceFill(['verified_at' => now(), 'consumed_at' => $purpose === OtpPurpose::SignIn ? now() : null])->save();
+            // A sign-in or a new address is done with it at once; discovery's code goes on to the account picked.
+            $challenge->forceFill(['verified_at' => now(), 'consumed_at' => $purpose === OtpPurpose::Discover ? null : now()])->save();
 
             return ['ok', $challenge];
         });

@@ -17,9 +17,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
+use Modules\Privacy\Actions\AnswerCorrection;
 use Modules\Privacy\Actions\ApproveErasure;
 use Modules\Privacy\Actions\CancelDataRequest;
 use Modules\Privacy\Actions\RefuseErasure;
+use Modules\Privacy\Actions\RequestCorrection;
 use Modules\Privacy\Actions\RequestDataExport;
 use Modules\Privacy\Actions\RequestErasure;
 use Modules\Privacy\Actions\SavePrivacySettings;
@@ -33,8 +35,9 @@ use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
  * People's requests about their data, for the owner and admins: erasures
- * waiting for an answer (oldest first, late ones marked, with what still
- * holds each back), approved ones in their last day, and everything of
+ * and corrections waiting for an answer (oldest first, late ones marked; an
+ * erasure with what still holds it back), approved erasures in their last
+ * day, and everything of
  * the last 90 days (a copy can be downloaded here). A request made by phone
  * or in person is written down here for the person; the academy's details
  * on its privacy notice and terms are set here too.
@@ -65,7 +68,7 @@ final class DataRequests extends Page
 
     public static function getNavigationBadge(): ?string
     {
-        $open = DataRequest::query()->where('kind', DataRequest::ERASURE)->where('status', 'pending')->count();
+        $open = DataRequest::query()->whereIn('kind', DataRequest::ANSWERED)->where('status', 'pending')->count();
 
         return $open > 0 ? (string) $open : null;
     }
@@ -126,15 +129,20 @@ final class DataRequests extends Page
                             ->orderBy('name')->limit(20)->pluck('name', 'id')->all())
                         ->getOptionLabelUsing(fn ($value) => DB::table('users')->where('id', $value)->value('name')),
                     Select::make('kind')->label(__($l.'actions.kind'))->required()->native(false)->live()
-                        ->options([DataRequest::EXPORT => __('privacy::requests.kinds.export'), DataRequest::ERASURE => __('privacy::requests.kinds.erasure')]),
+                        ->options(collect([DataRequest::EXPORT, DataRequest::ERASURE, DataRequest::CORRECTION])->mapWithKeys(fn (string $k) => [$k => __("privacy::requests.kinds.{$k}")])->all()),
                     Textarea::make('reason')->label(__('privacy::requests.reason'))->rows(2)->maxLength(RequestErasure::REASON_MAX)
                         ->visible(fn ($get) => $get('kind') === DataRequest::ERASURE),
+                    Textarea::make('says')->label(__('privacy::requests.says'))->rows(3)->required()
+                        ->minLength(RequestCorrection::SAYS_MIN)->maxLength(RequestCorrection::SAYS_MAX)
+                        ->visible(fn ($get) => $get('kind') === DataRequest::CORRECTION),
                 ])
                 ->action(function (array $data) use ($l) {
                     $me = (string) auth()->id();
-                    $data['kind'] === DataRequest::EXPORT
-                        ? app(RequestDataExport::class)->handle((string) $data['person'], $me, 'staff')
-                        : app(RequestErasure::class)->handle((string) $data['person'], $me, 'staff', $data['reason'] ?? null);
+                    match ($data['kind']) {
+                        DataRequest::EXPORT => app(RequestDataExport::class)->handle((string) $data['person'], $me, 'staff'),
+                        DataRequest::CORRECTION => app(RequestCorrection::class)->handle((string) $data['person'], $me, 'staff', (string) $data['says']),
+                        default => app(RequestErasure::class)->handle((string) $data['person'], $me, 'staff', $data['reason'] ?? null),
+                    };
                     unset($this->board);
                     Notification::make()->success()->title(__($l.'done.recorded'))->send();
                 }),
@@ -181,6 +189,35 @@ final class DataRequests extends Page
             ->schema([Textarea::make('answer')->label(__($l.'actions.answer'))->required()->rows(3)->maxLength(RefuseErasure::ANSWER_MAX)])
             ->action(function (array $arguments, array $data) use ($l) {
                 app(RefuseErasure::class)->handle($this->find($arguments), (string) auth()->id(), (string) $data['answer']);
+                unset($this->board);
+                Notification::make()->success()->title(__($l.'done.refused'))->send();
+            });
+    }
+
+    /** A correction made where the data lives (the person's page, a credit note, a report), with a note for whoever asked. */
+    public function correctedAction(): Action
+    {
+        $l = 'privacy::screens.office.';
+
+        return Action::make('corrected')->label(__($l.'actions.corrected'))->icon(Heroicon::OutlinedCheck)->color('primary')->size('sm')
+            ->modalDescription(__($l.'actions.corrected_hint'))->modalWidth(Width::Large)->modalSubmitActionLabel(__($l.'actions.corrected'))
+            ->schema([Textarea::make('answer')->label(__($l.'actions.note'))->rows(3)->maxLength(AnswerCorrection::ANSWER_MAX)])
+            ->action(function (array $arguments, array $data) use ($l) {
+                app(AnswerCorrection::class)->done($this->find($arguments), (string) auth()->id(), $data['answer'] ?? null);
+                unset($this->board);
+                Notification::make()->success()->title(__($l.'done.corrected'))->send();
+            });
+    }
+
+    public function refuseCorrectionAction(): Action
+    {
+        $l = 'privacy::screens.office.';
+
+        return Action::make('refuseCorrection')->label(__($l.'actions.refuse'))->icon(Heroicon::OutlinedXMark)->color('gray')->size('sm')
+            ->modalDescription(__($l.'actions.refuse_correction_hint'))->modalWidth(Width::Large)->modalSubmitActionLabel(__($l.'actions.refuse'))
+            ->schema([Textarea::make('answer')->label(__($l.'actions.answer'))->required()->rows(3)->maxLength(AnswerCorrection::ANSWER_MAX)])
+            ->action(function (array $arguments, array $data) use ($l) {
+                app(AnswerCorrection::class)->refuse($this->find($arguments), (string) auth()->id(), (string) $data['answer']);
                 unset($this->board);
                 Notification::make()->success()->title(__($l.'done.refused'))->send();
             });

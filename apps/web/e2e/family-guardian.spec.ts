@@ -109,3 +109,38 @@ test('a guardian agrees to their child\'s lessons being recorded, and takes it b
   await withdraw.click();
   await expect(agree).toBeVisible();
 });
+
+test('a guardian puts their child\'s details right, and asks the academy for what cannot be changed here', async ({ page }) => {
+  await page.goto('/ar/family/my-data');
+  await fitsTheScreen(page);
+  // The child's card: the facts, corrected on the spot.
+  const child = page.getByRole('article').filter({ has: page.getByText('من ولادك') }).first();
+  const fix = child.locator('[data-part="fix"]');
+  // A grade other than the one on file, so it changes on every run.
+  const grade = (await fix.locator('dt', { hasText: 'الصف' }).locator('xpath=following-sibling::dd[1]').innerText()) === 'جامعة' ? 'تالتة ثانوي' : 'جامعة';
+  await fix.getByRole('button', { name: 'صحّح' }).click();
+  await fix.getByLabel('الصف').selectOption({ label: grade });
+  await fix.getByRole('button', { name: 'احفظ' }).click();
+  await expect(fix.getByText('اتحفظ.')).toBeVisible();
+  await expect(fix.getByText(grade, { exact: true })).toBeVisible();
+
+  // The rest is a request the academy answers; it can be taken back while it waits.
+  await fix.getByRole('button', { name: 'اطلب تصحيح' }).click();
+  await fix.getByLabel('إيه اللي محتاج يتصلح').fill('تاريخ الميلاد المتسجل غلط: الصح 2013.');
+  await fix.getByRole('button', { name: 'ابعت الطلب' }).click();
+  await expect(fix.getByText(/اتطلب: الأكاديمية هترد قبل/)).toBeVisible();
+  await fix.getByRole('button', { name: 'الغي الطلب' }).click();
+  await expect(fix.getByRole('button', { name: 'اطلب تصحيح' })).toBeVisible();
+});
+
+test('a guardian\'s account shows the email and number, and a new one waits for its code', async ({ page }) => {
+  await page.goto('/ar/family/account');
+  await fitsTheScreen(page);
+  const email = page.locator('li[data-kind="email"]');
+  await expect(email).toContainText('@');
+  await email.getByRole('button', { name: 'غيّر الإيميل' }).click();
+  await page.getByLabel('الإيميل الجديد').fill('not an email');
+  await page.getByRole('button', { name: 'ابعت كود' }).click();
+  await expect(page.getByText('اكتب إيميل صحيح.')).toBeVisible();
+  await page.getByRole('button', { name: 'رجوع' }).click();
+});

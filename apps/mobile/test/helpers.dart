@@ -194,6 +194,9 @@ Map<String, Object?> me({bool mismatch = false}) => {
     'timezone': 'Asia/Riyadh',
     'display_timezone': 'Asia/Riyadh',
     'timezone_mismatch': mismatch,
+    'email': 'rami@demo.test',
+    'phone': '+966500000010',
+    'can_change_contact': true,
   },
 };
 

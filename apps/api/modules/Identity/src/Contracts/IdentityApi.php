@@ -15,6 +15,9 @@ interface IdentityApi
     /** Staff change a person's name, ways in (audited), language or time zone. */
     public function updateUser(string $userId, UserDetails $details): void;
 
+    /** A person's name as they or their guardian corrected it (the name alone; nothing else of the account changes). */
+    public function rename(string $userId, string $name): void;
+
     /** Turns a person's account off (signed out everywhere) or on again; never the owner's or one's own. Audited. */
     public function setActive(string $userId, bool $active): void;
 

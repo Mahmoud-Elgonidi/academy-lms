@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { MyDataView } from '@/components/my-data';
 import { Heading } from '@/components/ui';
@@ -11,11 +11,11 @@ import type { MyData } from '@/lib/privacy';
 export default async function FamilyMyData() {
   const fam = await family();
   if (!ownsData(fam.stage)) notFound();
-  const [t, mine] = await Promise.all([getTranslations('myData'), get<{ data: MyData }>('/v1/me/data-requests')]);
+  const [t, locale, mine] = await Promise.all([getTranslations('myData'), getLocale(), get<{ data: MyData }>('/v1/me/data-requests')]);
   return (
     <div>
       <Heading title={t('title')} hint={t('lead')} />
-      <MyDataView mine={mine.data} />
+      <MyDataView mine={mine.data} account={`/${locale}/family/account`} />
     </div>
   );
 }

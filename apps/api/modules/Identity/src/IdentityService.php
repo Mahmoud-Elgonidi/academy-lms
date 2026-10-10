@@ -4,6 +4,7 @@ namespace Modules\Identity;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\ValidationException;
 use Modules\Identity\Actions\CreateUser;
 use Modules\Identity\Actions\SetUserActive;
 use Modules\Identity\Actions\UpdateUserDetails;
@@ -12,6 +13,7 @@ use Modules\Identity\Contracts\DTOs\NewUser;
 use Modules\Identity\Contracts\DTOs\UserDetails;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Enums\Role;
+use Modules\Identity\Enums\UserStatus;
 use Modules\Identity\Http\Controllers\WelcomeController;
 use Modules\Identity\Models\PersonalAccessToken;
 use Modules\Identity\Models\User;
@@ -35,6 +37,19 @@ final class IdentityService implements IdentityApi
     public function updateUser(string $userId, UserDetails $details): void
     {
         app(UpdateUserDetails::class)->handle($userId, $details);
+    }
+
+    public function rename(string $userId, string $name): void
+    {
+        $name = trim($name);
+        if ($name === '' || mb_strlen($name) > 255) {
+            throw ValidationException::withMessages(['name' => __('identity::users.name_required')]);
+        }
+        $user = User::query()->findOrFail($userId);
+        if ($user->status === UserStatus::Erased) {
+            throw ValidationException::withMessages(['name' => __('identity::users.erased')]);
+        }
+        $user->forceFill(['name' => $name])->save();
     }
 
     public function setActive(string $userId, bool $active): void

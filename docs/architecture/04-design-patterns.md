@@ -25,7 +25,7 @@
 | # | Module | المسؤولية | أهم الـ Events |
 |---|---|---|---|
 | M1 | **Platform** | الأكاديميات، والدومينات، والـ branding، وباقات SaaS، والحدود، والاستخدام، والـ Cells | `AcademyCreated`، `AcademySuspended`، `AcademyPlanChanged`، `DomainVerified` (الباقة دلوقتي بتتقرا وقت الطلب، فمحدش محتاج يسمع تغييرها) |
-| M2 | **Identity** | تسجيل الدخول، والدخول بخطوتين، والأدوار، والأجهزة، والـ OTP، والدخول بحساب مستخدم، وبوابة الدخول (`SignInGate`) | `UserCreated`، `UserInvited`، `RoleAssigned` |
+| M2 | **Identity** | تسجيل الدخول، والدخول بخطوتين، والأدوار، والأجهزة، والـ OTP، والدخول بحساب مستخدم، وبوابة الدخول (`SignInGate`)، وتغيير الإيميل والموبايل بكود | `UserCreated`، `UserInvited`، `RoleAssigned`، `ContactChanged` |
 | M3 | **Catalog** | المواد، والمستويات، والتصنيفات | — |
 | M4 | **People** | ملفات المدرسين والطلاب، وعلاقات أولياء الأمور، وموافقة ولي الأمر على حساب الطفل | `TeacherOnboarded`، `TeacherSubjectsChanged`، `TeacherTierChanged`، `StudentCreated`، `GuardianLinked`، `UserTimezoneChanged`، `ConsentRequested`، `ConsentGranted`، `ConsentWithdrawn` |
 | M5 | **Curriculum** | البرامج، والإصدارات، وعُقد المنهج، والموارد، وتعريفات الاختبارات | `CurriculumVersionPublished` |
@@ -42,7 +42,7 @@
 | M15 | **Communication** | القوالب، والقنوات، والتفضيلات، والإشعارات، والمحادثات | `NotificationFailed`، `MessageFlagged` |
 | M16 | **Support** | التذاكر والشكاوى ومواعيد الرد ✅ | `TicketOpened`، `TicketReplied`، `TicketAssigned`، `TicketResolved`، `TicketOverdue`، `ComplaintValidated` |
 | M16ج | **Safeguarding** | بلاغات حماية الأطفال ومتابعتها (مسؤولين الحماية بس) ✅ | `ConcernReported`، `ConcernEscalated`، `ConcernClosed` |
-| M16ب | **Privacy** | نسخة من بيانات الشخص، ومسح الحساب بموافقة الأكاديمية، والصفحات العامة (الخصوصية، والشروط، ومسح الحساب) ✅ | `DataExportReady`، `ErasureRequested`، `ErasureApproved`، `ErasureRefused`، `AccountErased` |
+| M16ب | **Privacy** | نسخة من بيانات الشخص، وتصحيح البيانات (على طول، أو بطلب للأكاديمية)، ومسح الحساب بموافقة الأكاديمية، والصفحات العامة (الخصوصية، والشروط، ومسح الحساب) ✅ | `DataExportReady`، `ErasureRequested`، `ErasureApproved`، `ErasureRefused`، `AccountErased`، `CorrectionRequested`، `CorrectionAnswered` |
 | M17 | **Reporting** | جداول الحقائق والمؤشرات (للقراءة بس) | — |
 | Infra | **Audit**، **Files**، **SharedKernel** | سجل المراجعة (منفّذ في `SharedKernel\Audit`: `AuditTrail` بيكتب، و`AuditActor` بيقول مين، و`AuditEntries` بيقرا)، والملفات، والأنواع المشتركة (Money، Time، Tenancy) | — |
 

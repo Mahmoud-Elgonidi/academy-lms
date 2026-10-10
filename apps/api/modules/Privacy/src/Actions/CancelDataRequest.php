@@ -12,7 +12,8 @@ use Modules\SharedKernel\Authorization\Ability;
 
 /**
  * Taking an erasure back while it waits, or in the day after the academy
- * approved it: by whoever asked, the person themselves, or the academy.
+ * approved it, or a correction while it waits: by whoever asked, the person
+ * themselves, or the academy.
  */
 final class CancelDataRequest
 {
@@ -26,11 +27,11 @@ final class CancelDataRequest
 
         return DB::transaction(function () use ($request) {
             $request = DataRequest::query()->lockForUpdate()->findOrFail($request->id);
-            if ($request->kind !== DataRequest::ERASURE || ! $request->isOpen()) {
+            if (! in_array($request->kind, DataRequest::ANSWERED, true) || ! $request->isOpen()) {
                 throw ValidationException::withMessages(['request' => __('privacy::requests.errors.not_open')]);
             }
             $request->forceFill(['status' => 'cancelled', 'erase_after' => null])->save();
-            $this->audit->record('privacy.erasure_cancelled', 'user', $request->subject_id, ['request' => $request->id]);
+            $this->audit->record("privacy.{$request->kind}_cancelled", 'user', $request->subject_id, ['request' => $request->id]);
 
             return $request;
         });

@@ -15,8 +15,9 @@ import '../../../consent/presentation/privacy_page.dart';
 import '../../data/profile_repository.dart';
 import '../widgets/accounts_card.dart';
 
-/// "Me": the accounts on this phone, the clock, language and sounds, Google
-/// and Apple sign-in, the devices signed in to this account, and signing out.
+/// "Me": the accounts on this phone, the clock, language and sounds, the
+/// email and mobile number (a new one by code), Google and Apple sign-in, the
+/// devices signed in to this account, and signing out.
 class AccountPage extends StatelessWidget {
   const AccountPage({this.standalone = false, super.key});
 
@@ -43,6 +44,7 @@ class AccountPage extends StatelessWidget {
             const _MyData(),
             const _ClockPrompt(),
             const _Settings(),
+            const _Contact(),
             const _SignInMethods(),
             const SizedBox(height: 18),
             const _Devices(),
@@ -505,4 +507,204 @@ class _SignInMethodsCardState extends State<_SignInMethodsCard> {
       );
     },
   );
+}
+
+/// The email and mobile number on this account (the same as "Email and mobile" on My settings): a new one gets a code,
+/// and nothing changes until the code comes back. Not a child in the kids' look (their guardian or the academy
+/// changes them); a child the academy runs under a guardian sees them without changing them.
+class _Contact extends StatelessWidget {
+  const _Contact();
+
+  @override
+  Widget build(BuildContext context) {
+    if (Area.of(context.watch<SessionCubit>().state) == Area.kids) return const SizedBox.shrink();
+    return BlocProvider(
+      create: (c) => LoadCubit<ContactDetails>(c.read<ProfileRepository>().contact)..load(),
+      child: BlocBuilder<LoadCubit<ContactDetails>, LoadState<ContactDetails>>(
+        builder: (context, state) {
+          final contact = state.data;
+          if (contact == null) return const SizedBox.shrink();
+          final l = context.l10n;
+          Widget row(String kind, String label, String? value) => Row(
+            key: Key('contact-$kind'),
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: context.text.titleSmall),
+                    Text(
+                      value ?? l.contactNone,
+                      textDirection: TextDirection.ltr,
+                      style: context.text.bodySmall?.copyWith(color: context.colors.muted),
+                    ),
+                  ],
+                ),
+              ),
+              if (contact.canChange)
+                OutlinedButton(
+                  key: Key('change-$kind'),
+                  onPressed: () => _change(context, kind),
+                  child: Text(switch ((kind, value == null)) {
+                    ('email', false) => l.contactChangeEmail,
+                    ('email', true) => l.contactAddEmail,
+                    (_, false) => l.contactChangePhone,
+                    _ => l.contactAddPhone,
+                  }),
+                ),
+            ],
+          );
+          return Padding(
+            padding: const EdgeInsets.only(top: 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SectionLabel(l.contactTitle),
+                LmsCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(l.contactHint, style: context.text.bodySmall?.copyWith(color: context.colors.muted)),
+                      const Divider(height: 22),
+                      row('email', l.contactEmail, contact.email),
+                      const Divider(height: 22),
+                      row('phone', l.contactPhone, contact.phone),
+                      if (!contact.canChange) ...[
+                        const SizedBox(height: 10),
+                        Text(l.contactManaged, style: context.text.bodySmall?.copyWith(color: context.colors.muted)),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _change(BuildContext context, String kind) async {
+    final cubit = context.read<LoadCubit<ContactDetails>>();
+    final done = await showDialog<bool>(
+      context: context,
+      builder: (_) => RepositoryProvider.value(
+        value: context.read<ProfileRepository>(),
+        child: _ContactDialog(kind: kind),
+      ),
+    );
+    if (done != true || !context.mounted) return;
+    showSnack(context, kind == 'email' ? context.l10n.contactDoneEmail : context.l10n.contactDonePhone);
+    await cubit.load();
+  }
+}
+
+/// A new email or number in two steps: the address (a code goes to it), then the code. Pops true once confirmed.
+class _ContactDialog extends StatefulWidget {
+  const _ContactDialog({required this.kind});
+
+  final String kind;
+
+  @override
+  State<_ContactDialog> createState() => _ContactDialogState();
+}
+
+class _ContactDialogState extends State<_ContactDialog> {
+  final _value = TextEditingController();
+  final _code = TextEditingController();
+  ContactCode? _sent;
+  String? _error;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _value.dispose();
+    _code.dispose();
+    super.dispose();
+  }
+
+  Future<void> _step(Future<void> Function(ProfileRepository repo) step) async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await step(context.read<ProfileRepository>());
+    } on ApiProblem catch (p) {
+      if (mounted) setState(() => _error = context.problemText(p));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _send() => _step((repo) async {
+    final sent = await repo.sendContactCode(widget.kind, _value.text);
+    if (mounted) setState(() => _sent = sent);
+  });
+
+  Future<void> _confirm() => _step((repo) async {
+    await repo.confirmContact(_sent!.challengeId, _code.text);
+    if (mounted) Navigator.pop(context, true);
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final email = widget.kind == 'email';
+    final sent = _sent;
+    return AlertDialog(
+      title: Text(email ? l.contactNewEmail : l.contactNewPhone),
+      scrollable: true,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (sent == null)
+            TextField(
+              key: const Key('contact-value'),
+              controller: _value,
+              keyboardType: email ? TextInputType.emailAddress : TextInputType.phone,
+              textDirection: TextDirection.ltr,
+              autofillHints: [email ? AutofillHints.email : AutofillHints.telephoneNumber],
+              decoration: InputDecoration(
+                labelText: email ? l.contactNewEmail : l.contactNewPhone,
+                helperText: email ? null : l.contactPhoneHint,
+              ),
+              onChanged: (_) => setState(() {}),
+            )
+          else ...[
+            Text(l.contactCodeHint(sent.sentTo, sent.expiresAt?.label ?? ''), style: context.text.bodySmall),
+            const SizedBox(height: 12),
+            TextField(
+              key: const Key('contact-code'),
+              controller: _code,
+              keyboardType: TextInputType.number,
+              textDirection: TextDirection.ltr,
+              autofillHints: const [AutofillHints.oneTimeCode],
+              maxLength: 12,
+              decoration: InputDecoration(labelText: l.contactCode),
+              onChanged: (_) => setState(() {}),
+            ),
+          ],
+          if (_error != null) ...[const SizedBox(height: 8), Note(_error!, tone: Tone.danger)],
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l.back)),
+        if (sent != null) TextButton(onPressed: _busy ? null : _send, child: Text(l.contactResend)),
+        if (sent == null)
+          FilledButton(
+            key: const Key('contact-send'),
+            onPressed: _busy || _value.text.trim().isEmpty ? null : _send,
+            child: Text(l.contactSend),
+          )
+        else
+          FilledButton(
+            key: const Key('contact-confirm'),
+            onPressed: _busy || _code.text.trim().isEmpty ? null : _confirm,
+            child: Text(l.contactConfirm),
+          ),
+      ],
+    );
+  }
 }
