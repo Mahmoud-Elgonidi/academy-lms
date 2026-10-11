@@ -10,8 +10,9 @@ use Modules\Curriculum\Actions\SaveProgram;
 
 /**
  * Demo programs through the real actions: Arabic grammar, Juz' Amma
- * memorisation and Nour Al-Bayan (published), and an English course still
- * in draft. Arabic has no program, to show that state too.
+ * memorisation, Nour Al-Bayan and Everyday English (an academy's curriculum
+ * in any language: Layan's journey reads left to right). Arabic has no
+ * program, to show that state too.
  */
 final class DemoCurriculumSeeder extends Seeder
 {
@@ -70,10 +71,20 @@ final class DemoCurriculumSeeder extends Seeder
                 ['الإخفاء', 'Ikhfa', null, 1, 2],
             ]],
         ]],
-        'English' => ['إنجليزي للحياة اليومية', 'Everyday English', false, [
-            ['Starter', 'Starter', [
-                ['التعارف', 'Greetings and introductions', null],
-                ['الأرقام والوقت', 'Numbers and time', null],
+        'English' => ['إنجليزي للحياة اليومية', 'Everyday English', true, [
+            ['المستوى الأول: البداية', 'Level 1: Starter', [
+                ['أهلًا', 'Hello', [
+                    ['التعارف', 'Greetings and introductions', "Says hello and goodbye\nIntroduces themselves and asks someone's name"],
+                    ['الأرقام والوقت', 'Numbers and time', 'Counts to a hundred and tells the time'],
+                    ['الألوان والأشياء', 'Colours and things', null],
+                ]],
+            ]],
+            ['المستوى الثاني: يومي', 'Level 2: My day', [
+                ['يومي', 'Every day', [
+                    ['الروتين اليومي', 'Daily routine', 'Says what they do each day in the present simple'],
+                    ['الأكل والشرب', 'Food and drink', null],
+                    ['في السوق', 'Shopping', null, 1, 2],
+                ]],
             ]],
         ]],
     ];

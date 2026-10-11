@@ -11,7 +11,8 @@ use Modules\Curriculum\Models\Node;
  * Practice items in the demo academy, through the real action, on the
  * lessons the demo students are at or have just done: the verses of the
  * short surahs in order, the word that ends a verse, a verb and its present,
- * a tajweed rule and its example, a letter and its name. The games play
+ * a tajweed rule and its example, a letter and its name, and English words
+ * and phrases (they read left to right in an Arabic app). The games play
  * these (docs/architecture/02, section 18). Runs after the programs.
  */
 final class DemoPracticeSeeder extends Seeder
@@ -122,6 +123,40 @@ final class DemoPracticeSeeder extends Seeder
             ['kind' => 'choice', 'prompt' => 'حروف الإدغام بغنة:', 'options' => ['ي ن م و', 'ل ر', 'ء هـ ع ح'], 'answer' => 0],
             ['kind' => 'choice', 'prompt' => 'حكم النون في «مِن ربهم»', 'options' => ['إدغام بغير غنة', 'إدغام بغنة', 'إظهار'], 'answer' => 0],
             ['kind' => 'choice', 'prompt' => 'حكم النون في «مَن يعمل»', 'options' => ['إدغام بغنة', 'إدغام بغير غنة', 'إخفاء'], 'answer' => 0],
+        ]],
+        ['English', 'Greetings and introductions', [
+            ['kind' => 'choice', 'prompt' => '"How are you?" The answer:', 'options' => ["I'm fine, thanks.", "I'm ten.", "It's blue."], 'answer' => 0],
+            ['kind' => 'choice', 'prompt' => '"What\'s your name?" The answer:', 'options' => ['My name is Sara.', "I'm from Jeddah.", 'Goodbye!'], 'answer' => 0],
+            ['kind' => 'choice', 'prompt' => 'You meet your teacher in the morning. You say:', 'options' => ['Good morning!', 'Good night!', 'See you!'], 'answer' => 0],
+            ['kind' => 'choice', 'prompt' => '"Nice to meet you." The answer:', 'options' => ['Nice to meet you too.', 'Yes, please.', "I'm sorry."], 'answer' => 0],
+            ['kind' => 'order', 'prompt' => 'Put the words in order', 'parts' => ['Where', 'are', 'you', 'from?']],
+            ['kind' => 'order', 'prompt' => 'Put the words in order', 'parts' => ['Nice', 'to', 'meet', 'you']],
+            ['kind' => 'pair', 'left' => 'Thank you', 'right' => 'شكرًا'],
+            ['kind' => 'pair', 'left' => 'Good morning', 'right' => 'صباح الخير'],
+            ['kind' => 'pair', 'left' => 'Goodbye', 'right' => 'مع السلامة'],
+            ['kind' => 'pair', 'left' => 'Please', 'right' => 'من فضلك'],
+        ]],
+        ['English', 'Numbers and time', [
+            ['kind' => 'choice', 'prompt' => 'Which number is "twelve"?', 'options' => ['12', '20', '2'], 'answer' => 0],
+            ['kind' => 'choice', 'prompt' => '"It\'s half past three." The time is:', 'options' => ['3:30', '3:15', '2:30'], 'answer' => 0],
+            ['kind' => 'choice', 'prompt' => '"It\'s quarter to five." The time is:', 'options' => ['4:45', '5:15', '5:45'], 'answer' => 0],
+            ['kind' => 'choice', 'prompt' => 'How many days are there in a week?', 'options' => ['seven', 'five', 'ten'], 'answer' => 0],
+            ['kind' => 'order', 'prompt' => 'Count up', 'parts' => ['one', 'two', 'three', 'four', 'five']],
+            ['kind' => 'order', 'prompt' => 'Put the days in order', 'parts' => ['Saturday', 'Sunday', 'Monday', 'Tuesday']],
+            ['kind' => 'pair', 'left' => 'eleven', 'right' => '11'],
+            ['kind' => 'pair', 'left' => 'fifteen', 'right' => '15'],
+            ['kind' => 'pair', 'left' => 'thirty', 'right' => '30'],
+            ['kind' => 'pair', 'left' => 'a hundred', 'right' => '100'],
+        ]],
+        ['English', 'Daily routine', [
+            ['kind' => 'choice', 'prompt' => "I ___ up at seven o'clock.", 'options' => ['get', 'go', 'have'], 'answer' => 0],
+            ['kind' => 'choice', 'prompt' => 'She ___ breakfast at eight.', 'options' => ['has', 'have', 'having'], 'answer' => 0],
+            ['kind' => 'choice', 'prompt' => 'We go to school ___ bus.', 'options' => ['by', 'on', 'at'], 'answer' => 0],
+            ['kind' => 'order', 'prompt' => 'Put the day in order', 'parts' => ['wake up', 'have breakfast', 'go to school', 'do homework', 'go to bed']],
+            ['kind' => 'pair', 'left' => 'brush', 'right' => 'my teeth'],
+            ['kind' => 'pair', 'left' => 'take', 'right' => 'a shower'],
+            ['kind' => 'pair', 'left' => 'do', 'right' => 'my homework'],
+            ['kind' => 'pair', 'left' => 'go', 'right' => 'to bed'],
         ]],
     ];
 

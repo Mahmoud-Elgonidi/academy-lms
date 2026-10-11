@@ -15,6 +15,7 @@ use Modules\Scheduling\Actions\FundSessions;
 use Modules\Scheduling\Actions\MaterializeSessions;
 use Modules\Scheduling\Actions\PlaceBookingHold;
 use Modules\Scheduling\Actions\RecordParticipantJoin;
+use Modules\Scheduling\Actions\RecordParticipantLeave;
 use Modules\Scheduling\Actions\RescheduleSession;
 use Modules\Scheduling\Contracts\DTOs\EnrollmentTerms;
 use Modules\Scheduling\Domain\Models\Session;
@@ -26,7 +27,9 @@ use Modules\SharedKernel\Money\Money;
  * paid, due, overdue. Ziad, Yousef and Maryam started 26 days ago (one per
  * student look: middle school, a child, secondary school): about seven
  * lessons each, Ziad's teacher missed one (a makeup lot) and Maryam missed
- * one herself; renewal invoices went out on their own.
+ * one herself; renewal invoices went out on their own. They came in a few
+ * minutes late here and there, once later still, and left once before the
+ * end, so the journey's lesson stars differ (docs/architecture/02, section 18).
  */
 class DemoEnrollmentsSeeder extends Seeder
 {
@@ -35,6 +38,7 @@ class DemoEnrollmentsSeeder extends Seeder
         EnrollStudent $enroll,
         BillingApi $billing,
         RecordParticipantJoin $join,
+        RecordParticipantLeave $leave,
         ApplyAttendanceDeadlines $deadlines,
         MaterializeSessions $materialize,
         FundSessions $fund,
@@ -70,19 +74,25 @@ class DemoEnrollmentsSeeder extends Seeder
 
         // A month of history (the shift schedules have been in force for a month): enrolled 26 days ago,
         // paid, then each past lesson as it happened; a teacher who never came, or a student who did not.
-        $history = function (string $teacher, string $student, string $subjectName, array $times, int $minutes, string $currency, string $reference, ?int $teacherMissed = null, ?int $studentMissed = null) use ($enrol, $user, $billing, $accountant, $join, $deadlines, $materialize, $fund, $realNow) {
+        $history = function (string $teacher, string $student, string $subjectName, array $times, int $minutes, string $currency, string $reference, ?int $teacherMissed = null, ?int $studentMissed = null) use ($enrol, $user, $billing, $accountant, $join, $leave, $deadlines, $materialize, $fund, $realNow) {
             CarbonImmutable::setTestNow($realNow->subDays(26));
             $booked = $enrol($teacher, $student, $subjectName, $times, $minutes, $currency, CarbonImmutable::now()->addDay());
             $billing->recordPayment($booked->invoice->id, $currency === 'SAR' ? 'bank_transfer' : 'card_terminal', $booked->invoice->total, $reference, CarbonImmutable::now(), $accountant);
 
             $past = Session::query()->where('enrollment_id', $booked->enrollmentId)->where('ends_at', '<', $realNow->subHours(6))->orderBy('starts_at')->with('participants')->get()->take(7);
+            // Minutes late to each lesson (within the share of the lesson that still completes it), and the one left early.
+            $late = [1, 6, 1, 3, 1, $minutes > 30 ? 11 : 7, 1];
             foreach ($past->values() as $i => $session) {
                 CarbonImmutable::setTestNow($session->starts_at->addMinute());
                 if ($i !== $teacherMissed) {
                     $join->handle($session, $session->teacher_id);
                 }
                 if ($i !== $studentMissed) {
+                    CarbonImmutable::setTestNow($session->starts_at->addMinutes($late[$i] ?? 1));
                     $join->handle($session->refresh(), $user($student));
+                    if ($i === 4 && $i !== $teacherMissed) {
+                        $leave->handle($session->refresh(), $user($student), $session->ends_at->subMinutes(6));
+                    }
                 }
                 CarbonImmutable::setTestNow($i === $teacherMissed ? $session->starts_at->addMinutes(10) : $session->ends_at->addMinutes(11));
                 $deadlines->handle();

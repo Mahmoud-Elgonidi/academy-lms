@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Learning\Actions\AssignHomework;
+use Modules\Learning\Actions\ChoosePracticeGame;
 use Modules\Learning\Actions\MarkMissedHomework;
 use Modules\Learning\Actions\MarkOverdueReports;
 use Modules\Learning\Actions\ReviewHomework;
@@ -19,6 +20,8 @@ use Modules\Learning\Actions\SubmitSessionReport;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\ReportTemplate;
 use Modules\Learning\Models\SessionReport;
+use Modules\SharedKernel\Games\CatalogGame;
+use Modules\SharedKernel\Games\GameCatalog;
 
 /**
  * Demo reports and homework through the real actions. Every enrollment
@@ -31,7 +34,8 @@ use Modules\Learning\Models\SessionReport;
  * voice recordings. The academy's own questions for three subjects (Quran
  * memorisation in two versions: a revision question and a follow-up only
  * the academy reads came in the middle of Yousef's month), answered in
- * every report; English has none.
+ * every report; English has none. Maryam's teacher set a game round as
+ * homework, and Yousef's chose the game for his last one.
  */
 final class DemoLearningSeeder extends Seeder
 {
@@ -46,6 +50,8 @@ final class DemoLearningSeeder extends Seeder
         MarkOverdueReports $overdue,
         MarkMissedHomework $missed,
         AssignHomework $assign,
+        ChoosePracticeGame $chooseGame,
+        GameCatalog $games,
     ): void {
         $realNow = CarbonImmutable::now();
         $owner = DB::table('users')->where('email', 'owner@demo.test')->value('id');
@@ -230,6 +236,14 @@ final class DemoLearningSeeder extends Seeder
                 'title' => 'جولة تدريب على الإظهار والإدغام', 'accepts' => 'practice',
                 'due_at' => $realNow->addDays(2)->setTime(18, 0), 'practice_nodes' => $lessons,
             ]);
+        }
+
+        // Yousef's teacher chose the game for his last homework too: it flags the lesson on his journey, and he may play it or record.
+        $last = ($reportsFor['yousef'][2] ?? collect())->filter(fn (SessionReport $r) => $r->refresh()->submitted_at !== null)->last();
+        $game = collect($games->games())->filter(fn (CatalogGame $g) => $g->fits('kids'))->sortBy('sort')->first();
+        if ($last !== null && $game !== null) {
+            CarbonImmutable::setTestNow($last->submitted_at->addMinutes(5));
+            $chooseGame->handle($last, $last->teacher_id, $game->key, practiceOnly: false, beforeNext: false);
         }
 
         CarbonImmutable::setTestNow($realNow);
