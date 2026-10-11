@@ -126,6 +126,18 @@ jobs:
           PY
           echo "API: $API_BASE_URL"
 
+      # A private repository's runner has about 7 GB of memory, and the project's own Gradle settings
+      # ask a developer's machine for an 8 GB heap: here Gradle, the Kotlin compiler and the native
+      # builds share what there is (the runner's ~/.gradle/gradle.properties wins over the project's).
+      - name: Gradle memory
+        run: |
+          mkdir -p ~/.gradle
+          printf '%s\n' \
+            'org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=768m -XX:ReservedCodeCacheSize=256m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8' \
+            'kotlin.daemon.jvmargs=-Xmx1g' \
+            'org.gradle.workers.max=2' >> ~/.gradle/gradle.properties
+          free -h
+
       - name: Build the APKs
         run: |
           flutter build apk --release --split-per-abi \
