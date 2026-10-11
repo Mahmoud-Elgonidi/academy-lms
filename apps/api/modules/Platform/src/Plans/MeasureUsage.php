@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantResolver;
+use Throwable;
 
 /**
  * Counts every active academy's usage and keeps it for the month
@@ -25,8 +26,12 @@ final class MeasureUsage
     {
         $count = 0;
         foreach ($this->academies->active() as $academy) {
-            $this->tenants->run($academy, fn () => $this->current($at));
-            $count++;
+            try {
+                $this->tenants->run($academy, fn () => $this->current($at));
+                $count++;
+            } catch (Throwable $e) {
+                report($e);   // one academy's failure is reported, the others are still counted
+            }
         }
 
         return $count;

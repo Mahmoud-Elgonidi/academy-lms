@@ -2,7 +2,8 @@ name: api
 
 on:
   push:
-    branches: [main]
+    # Working branches are checked as they are pushed, so nothing reaches main untested.
+    branches: [main, 'claude/**']
     # The deploy (.github/workflows/deploy.yml) follows these checks on main, so a
     # change to the image or the deploy runs them too.
     paths: ['apps/api/**', 'packages/openapi/**', '.github/workflows/api.yml',
@@ -98,9 +99,13 @@ jobs:
             echo "::error::packages/openapi/openapi.json is out of date: run 'composer openapi' in apps/api and commit it."; exit 1; }
 
   # Apps already in people's phones keep working: no breaking change to the API without saying so
-  # (label the pull request "api-breaking" when one is meant, with a new version for the apps).
+  # (label the pull request "api-breaking" when one is meant, or give a pushed commit an
+  # "Api-Breaking: <why>" trailer, with a new version for the apps). A push is compared with
+  # the commit before it, a pull request with its base branch.
   openapi-breaking:
-    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'api-breaking')
+    if: >-
+      (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'api-breaking'))
+      || (github.event_name == 'push' && !contains(github.event.head_commit.message, 'Api-Breaking:'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -115,9 +120,12 @@ jobs:
       - name: Install oasdiff
         run: go install github.com/oasdiff/oasdiff@latest
 
-      - name: No breaking changes against the base branch
+      - name: No breaking changes against what came before
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
         run: |
-          if ! git show "origin/${{ github.base_ref }}:packages/openapi/openapi.json" > /tmp/base.json 2>/dev/null; then
-            echo "The base branch has no OpenAPI document yet."; exit 0
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] \
+             || ! git show "$BASE:packages/openapi/openapi.json" > /tmp/base.json 2>/dev/null; then
+            echo "Nothing earlier to compare with."; exit 0
           fi
           "$(go env GOPATH)/bin/oasdiff" breaking /tmp/base.json packages/openapi/openapi.json --fail-on ERR

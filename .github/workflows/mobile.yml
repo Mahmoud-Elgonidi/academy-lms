@@ -2,7 +2,7 @@ name: mobile
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'claude/**']
     paths: ['apps/mobile/**', 'packages/openapi/**', '.github/workflows/mobile.yml']
   pull_request:
     paths: ['apps/mobile/**', 'packages/openapi/**', '.github/workflows/mobile.yml']

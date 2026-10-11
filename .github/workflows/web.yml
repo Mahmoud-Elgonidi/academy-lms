@@ -2,10 +2,11 @@ name: web
 
 on:
   push:
-    branches: [main]
-    paths: ['apps/web/**', 'packages/openapi/**', '.github/workflows/web.yml']
+    branches: [main, 'claude/**']
+    # The end-to-end run drives the real API: a change there can break a portal flow too.
+    paths: ['apps/web/**', 'apps/api/**', 'packages/openapi/**', '.github/workflows/web.yml']
   pull_request:
-    paths: ['apps/web/**', 'packages/openapi/**', '.github/workflows/web.yml']
+    paths: ['apps/web/**', 'apps/api/**', 'packages/openapi/**', '.github/workflows/web.yml']
   workflow_dispatch:
 
 concurrency:
