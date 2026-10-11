@@ -4,14 +4,14 @@ import { Icon } from '@/components/icons';
 import { Empty, Heading, Progress } from '@/components/ui';
 import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
-import type { Journey } from '@/lib/family/types';
+import type { JourneyMap } from '@/lib/journey/types';
 
-/** The learner's courses, each with how far along and where now; each opens its roadmap and reports. */
+/** The learner's courses (from the journey), each with how far along and where now; each opens its roadmap and reports. */
 export default async function ProgressPage() {
   const [t, fam] = await Promise.all([getTranslations('family'), family()]);
   const learner = fam.current;
   if (!learner) return <Empty>{t('noLearner')}</Empty>;
-  const journey = await get<{ data: Journey }>('/v1/learning/journey', { query: { learner_id: learner.id } });
+  const journey = await get<{ data: JourneyMap }>('/v1/learning/journey/map', { query: { learner_id: learner.id } });
   const courses = journey.data.courses;
   return (
     <div>
@@ -35,10 +35,10 @@ export default async function ProgressPage() {
                 </span>
                 {c.percent !== null ? (
                   <span className="mt-3 block">
-                    <Progress value={c.percent} label={c.program ?? c.subject} />
+                    <Progress value={c.percent} label={c.program ?? c.subject ?? ''} />
                     <span className="mt-1.5 flex flex-wrap justify-between gap-2 text-sm text-muted">
                       <span>{t('percentDone', { p: c.percent })}</span>
-                      {c.next[0]?.title ? <span>{t('hereNow', { title: c.next[0].title })}</span> : null}
+                      {c.current?.title ? <span>{t('hereNow', { title: c.current.title })}</span> : null}
                     </span>
                   </span>
                 ) : (

@@ -4,12 +4,14 @@ import { refresh } from 'next/cache';
 import { cookies, headers } from 'next/headers';
 import { call, send, type Outcome } from '@/lib/api/server';
 import { LEARNER_COOKIE } from '@/lib/family/context';
-import type { CancelPreview, Claimed, Rating } from '@/lib/family/types';
+import type { CancelPreview, Rating } from '@/lib/family/types';
+import type { OpenedChest } from '@/lib/journey/types';
 
 /**
  * The family's writes, through the same endpoints (and so the same Actions)
  * as the app and the /my panel. The API checks each one again: whose lesson
- * or homework it is, the policy, and that a kid neither cancels nor rates.
+ * or homework it is, the policy, that a kid neither cancels nor rates, and
+ * that only the student opens their week's chest.
  */
 export type Result = { ok: boolean; message?: string; errors?: Record<string, string[]> };
 
@@ -86,10 +88,14 @@ export async function handIn(id: string, form: FormData): Promise<Result> {
   return result(await send('post', '/v1/learning/homework/{homework}/submissions', { params: { homework: id }, form: sent }));
 }
 
-/** Collects a finished challenge's reward (the student only; the API checks it again). One key per press, so a retry collects once. */
-export async function claimChallenge(challenge: string, period: string, key: string): Promise<Result & { claimed?: Claimed }> {
-  const done = await send<{ data: Claimed }>('post', '/v1/learning/challenges/claim', { body: { challenge, period }, idempotencyKey: key });
-  return done.ok ? { ...result(done), claimed: done.data.data } : result(done);
+/**
+ * Opens the week's chest on the journey once every lesson of the week was
+ * attended and every homework due in it handed in (the student only; the API
+ * checks it again). One key per press, so a retry opens it once.
+ */
+export async function openChest(period: string, key: string): Promise<Result & { opened?: OpenedChest }> {
+  const done = await send<{ data: OpenedChest }>('post', '/v1/learning/journey/chest', { body: { period }, idempotencyKey: key });
+  return done.ok ? { ...result(done), opened: done.data.data } : result(done);
 }
 
 /** A guardian cheers their child on (a few a day). */

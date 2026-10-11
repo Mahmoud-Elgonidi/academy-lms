@@ -2,7 +2,8 @@ import { getTranslations } from 'next-intl/server';
 import { HandIn } from '@/components/family/hand-in';
 import { Handed } from '@/components/handed';
 import { Icon } from '@/components/icons';
-import { Badge, Card, Empty, Heading, Notice, type Tone } from '@/components/ui';
+import { Badge, Card, Empty, Heading, Notice, buttonLook, join, type Tone } from '@/components/ui';
+import { Link } from '@/i18n/navigation';
 import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
 import type { Homework } from '@/lib/family/types';
@@ -12,7 +13,9 @@ const tone: Record<string, Tone> = { assigned: 'info', missed: 'attention', subm
 /**
  * The learner's homework, open first (as the API orders it): hand it in here
  * (words, a recording, a picture or PDF) until the teacher marks it, then the
- * grade and the teacher's words. A guardian may hand in for a child.
+ * grade and the teacher's words. A guardian may hand in for a child. Homework
+ * that asks for practice in the games plays from the journey ("play") and
+ * shows how the round went; one handed in only by playing has no form.
  */
 export default async function HomeworkPage() {
   const [t, fam] = await Promise.all([getTranslations('family'), family()]);
@@ -40,7 +43,7 @@ export default async function HomeworkPage() {
       ) : (
         <ul className="stagger space-y-4">
           {homework.data.map((h) => (
-            <li key={h.id}>
+            <li key={h.id} id={`hw-${h.id}`} className="scroll-mt-24">
               <Card as="article">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <h2 className="font-heading text-lg font-bold">{h.title}</h2>
@@ -58,6 +61,24 @@ export default async function HomeworkPage() {
                   </section>
                 ) : null}
 
+                {h.practice || h.accepts === 'practice' ? (
+                  <section className="mt-4 flex flex-wrap items-center gap-3 rounded-control border border-brand-line bg-brand-soft p-4" aria-label={t('practiceTitle')}>
+                    <span className="grid size-10 shrink-0 place-items-center rounded-control bg-white text-brand-strong" aria-hidden="true">
+                      <Icon name="gamepad" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold text-brand-strong">{t('practiceTitle')}</span>
+                      <span className="block text-sm">{h.practice?.label ?? t('practiceWaiting')}</span>
+                    </span>
+                    {h.status === 'assigned' || h.status === 'missed' ? (
+                      <Link href={`/family/journey?homework=${h.id}`} className={join(buttonLook('primary'), 'min-h-10 px-5 text-sm')}>
+                        <Icon name="play" size={16} />
+                        {t('practicePlay')}
+                      </Link>
+                    ) : null}
+                  </section>
+                ) : null}
+
                 {h.status === 'reviewed' ? (
                   <section className="mt-4 rounded-control border border-brand-line bg-brand-soft p-4">
                     <div className="flex flex-wrap items-center gap-2">
@@ -72,11 +93,11 @@ export default async function HomeworkPage() {
                     </div>
                     {h.feedback ? <p className="mt-1 whitespace-pre-line">{h.feedback}</p> : null}
                   </section>
-                ) : (
+                ) : h.accepts !== 'practice' ? (
                   <div className="mt-4 border-t border-line pt-4">
                     <HandIn id={h.id} accepts={h.accepts} kids={kids} />
                   </div>
-                )}
+                ) : null}
               </Card>
             </li>
           ))}

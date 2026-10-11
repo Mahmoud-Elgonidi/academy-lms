@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { momentsOf, needsFallback, socketOptions, waitUntilNext, type Realtime } from './live';
+import { SIGNALS, momentsOf, needsFallback, socketOptions, waitUntilNext, type Realtime } from './live';
 
 const realtime: Realtime = { enabled: true, key: 'k', host: null, port: 443, tls: true, channel: 'user.1' };
 
@@ -56,5 +56,11 @@ describe('the slow timer', () => {
     expect(needsFallback({ connected: false, lastHeard: now, lastRefresh: now - 61_000 }, now)).toBe(true);
     expect(needsFallback({ connected: false, lastHeard: now, lastRefresh: now - 30_000 }, now)).toBe(false);
     expect(needsFallback({ connected: true, lastHeard: now - 151_000, lastRefresh: now - 61_000 }, now)).toBe(true);
+  });
+});
+
+describe('the signals a page follows', () => {
+  it('include what the journey shows: lessons, homework and practice (rounds, creatures, limits)', () => {
+    expect(SIGNALS).toEqual(expect.arrayContaining(['lessons.changed', 'homework.changed', 'practice.changed']));
   });
 });

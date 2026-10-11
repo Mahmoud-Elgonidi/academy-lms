@@ -1,11 +1,11 @@
 import { expect, fitsTheScreen, test } from './helpers';
 
-const PAGES = ['/ar/family', '/ar/family/challenges', '/ar/family/lessons', '/ar/family/homework', '/ar/family/progress', '/ar/family/notifications', '/ar/family/more'];
+const PAGES = ['/ar/family', '/ar/family/journey', '/ar/family/lessons', '/ar/family/homework', '/ar/family/progress', '/ar/family/notifications', '/ar/family/more'];
 
 test.describe('a kid (Yousef)', () => {
   test.use({ storageState: 'e2e/.auth/kid.json' });
 
-  test('has their journey, missions and big tabs, and fits a phone', async ({ page }) => {
+  test('has their journey and big tabs, and fits a phone', async ({ page }) => {
     for (const path of PAGES) {
       const response = await page.goto(path);
       expect(response?.status(), path).toBe(200);
@@ -16,7 +16,8 @@ test.describe('a kid (Yousef)', () => {
     await expect(page.locator('[data-stage="kids"]')).toBeVisible();
     const tabs = page.getByRole('navigation', { name: 'القايمة' }).last();
     await expect(tabs.getByRole('link', { name: 'رحلتي' })).toBeVisible();
-    await expect(tabs.getByRole('link', { name: 'مهماتي' })).toBeVisible();
+    await expect(tabs.getByRole('link', { name: 'كلّم مدرسك' })).toBeVisible();
+    await expect(tabs.getByRole('link', { name: 'مهماتي' })).toHaveCount(0);
   });
 
   test('never sees money, cancelling or rating', async ({ page }) => {
@@ -29,23 +30,12 @@ test.describe('a kid (Yousef)', () => {
       await expect(page.getByRole('button', { name: 'قيّم الحصة' })).toHaveCount(0);
     }
   });
-
-  test('collects a finished mission and sees what it brought', async ({ page }) => {
-    await page.goto('/ar/family/challenges');
-    await expect(page.locator('h1')).toHaveText('مهمات الأسبوع');
-    const collect = page.getByRole('button', { name: /^استلم / });
-    test.skip((await collect.count()) === 0, 'nothing to collect in this data');
-    const before = await collect.count();
-    await collect.first().click();
-    await expect(page.getByRole('status').filter({ hasText: /^خدت / })).toBeVisible();
-    await expect(collect).toHaveCount(before - 1);
-  });
 });
 
 test.describe('a middle-school student (Ziad)', () => {
   test.use({ storageState: 'e2e/.auth/student.json' });
 
-  test('has their quests and levels, and fits a phone', async ({ page }) => {
+  test('has their journey and levels, and fits a phone', async ({ page }) => {
     for (const path of PAGES) {
       const response = await page.goto(path);
       expect(response?.status(), path).toBe(200);
@@ -54,7 +44,8 @@ test.describe('a middle-school student (Ziad)', () => {
     }
     await expect(page.locator('[data-stage="middle"]')).toBeVisible();
     const tabs = page.getByRole('navigation', { name: 'القايمة' }).last();
-    await expect(tabs.getByRole('link', { name: 'تحدياتي' })).toBeVisible();
+    await expect(tabs.getByRole('link', { name: 'الرسايل' })).toBeVisible();
+    await expect(tabs.getByRole('link', { name: 'تحدياتي' })).toHaveCount(0);
   });
 
   test('hands homework in in words', async ({ page }) => {

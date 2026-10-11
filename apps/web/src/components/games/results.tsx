@@ -6,7 +6,7 @@ import { useRouter } from '@/i18n/navigation';
 import { nameCreature } from '@/app/[locale]/family/games/actions';
 import { hex } from '@/lib/games/art';
 import { sound } from '@/lib/games/sound';
-import type { Island } from '@/lib/games/types';
+import type { HatchedCreature } from '@/lib/journey/types';
 import { CreatureArt, EggIcon } from './art';
 import type { Played } from './use-play';
 
@@ -23,7 +23,7 @@ export function useStarSounds(stars: number) {
 }
 
 /** A round's result over the island (the world's look): stars one by one, how many right first time, homework handed in, the egg filling. */
-export function Done({ played, onAgain, onLeave }: { played: Played; onAgain: () => void; onLeave: () => void }) {
+export function Done({ played, leave, onAgain, onLeave }: { played: Played; /** What the way back says (back to the island, by default). */ leave?: string; onAgain: () => void; onLeave: () => void }) {
   const t = useTranslations('games');
   const r = played.result;
   const again = useRef<HTMLButtonElement>(null);
@@ -59,7 +59,7 @@ export function Done({ played, onAgain, onLeave }: { played: Played; onAgain: ()
             {t('again')}
           </button>
           <button type="button" className="gw-bigbtn gw-3d" onClick={onLeave}>
-            {t('map.toIsland')}
+            {leave ?? t('map.toIsland')}
           </button>
         </div>
       </div>
@@ -68,28 +68,36 @@ export function Done({ played, onAgain, onLeave }: { played: Played; onAgain: ()
 }
 
 /**
- * A creature hatched from a round's stars (the approved design, Hatch): the
- * night, a nest, an egg to tap three times, then the creature comes out
- * among feathers and the child names it (its own name or one of two more)
- * and puts it in the album.
+ * An egg hatches (the approved design, Hatch): the night, a nest, an egg to
+ * tap three times, then the creature comes out among feathers and the child
+ * names it (its own name or one of two more) and puts it in the album. A
+ * round may have hatched it already; the egg the journey's stars filled is
+ * asked for on the third tap (`crack`, POST games/hatch).
  */
-export function Hatch({ played, islands, onLeave }: { played: Played; islands: Island[]; onLeave: () => void }) {
+export function Hatch({ creature, crack, need, islandName, onLeave }: {
+  creature: HatchedCreature | null;
+  crack?: () => Promise<{ creature: HatchedCreature | null } | { failed: string }>;
+  need: number;
+  /** Where a creature lives, by its island's key. */
+  islandName: (island: string) => string;
+  onLeave: () => void;
+}) {
   const t = useTranslations('games');
   const locale = useLocale();
   const router = useRouter();
-  const c = played.result.creature!;
-  const need = played.result.egg.need;
+  const [found, setFound] = useState<HatchedCreature | null>(creature);
   const [taps, setTaps] = useState(0);
   const [knocking, setKnocking] = useState(false);
   const [hatched, setHatched] = useState(false);
+  const [problem, setProblem] = useState('');
   const [name, setName] = useState(0);
   const [saving, begin] = useTransition();
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const root = useRef<HTMLDivElement>(null);
   const egg = useRef<HTMLButtonElement>(null);
-  const pitch = typeof c.look.pitch === 'number' ? c.look.pitch : 1;
-  const islandName = islands.find((i) => i.key === c.island)?.name ?? '';
-  const feathers = [hex(c.look.body, '#C9A06B'), '#FFD43B', hex(c.look.wing, '#B197FC'), hex(c.look.belly, '#C9A06B'), '#63E6BE'];
+  const c = found;
+  const pitch = typeof c?.look.pitch === 'number' ? c.look.pitch : 1;
+  const feathers = [hex(c?.look.body, '#C9A06B'), '#FFD43B', hex(c?.look.wing, '#B197FC'), hex(c?.look.belly, '#C9A06B'), '#63E6BE'];
   const hints = [t('hatch.tap0'), t('hatch.tap1'), t('hatch.tap2'), t('hatch.tap3')];
 
   const later = (fn: () => void, ms: number) => timers.current.push(setTimeout(fn, still() ? 0 : ms));
@@ -102,25 +110,46 @@ export function Hatch({ played, islands, onLeave }: { played: Played; islands: I
     if (hatched) root.current?.querySelector<HTMLElement>('[role=radio]')?.focus({ preventScroll: true });
   }, [hatched]);
 
+  const open = (out: HatchedCreature) => {
+    later(() => {
+      sound.play('hatch');
+      setHatched(true);
+    }, 480);
+    const voice = typeof out.look.pitch === 'number' ? out.look.pitch : 1;
+    later(() => sound.voice(voice), 1200);
+  };
+
   const tap = () => {
-    if (hatched) return;
+    if (hatched || taps >= 3) return;
     const now = taps + 1;
     setTaps(now);
+    setProblem('');
     sound.play('knock');
     setKnocking(false);
     later(() => setKnocking(true), 20);
     later(() => setKnocking(false), 470);
-    if (now >= 3) {
-      later(() => {
-        sound.play('hatch');
-        setHatched(true);
-      }, 480);
-      later(() => sound.voice(pitch), 1200);
-    }
+    if (now < 3) return;
+    if (found) return open(found);
+    if (!crack) return;
+    begin(async () => {
+      const got = await crack();
+      if ('failed' in got) {
+        // Nothing hatched: tap again to try once more.
+        setProblem(got.failed);
+        setTaps(2);
+        return;
+      }
+      if (!got.creature) {
+        setProblem(t('hatch.none'));
+        return;
+      }
+      setFound(got.creature);
+      open(got.creature);
+    });
   };
 
   const keep = () => {
-    if (saving) return;
+    if (saving || !c) return;
     sound.play('win');
     const chosen = c.names[name] ?? c.name;
     begin(async () => {
@@ -182,7 +211,7 @@ export function Hatch({ played, islands, onLeave }: { played: Played; islands: I
           <ellipse cx="130" cy="30" rx="96" ry="18" fill="#3E2614" />
         </svg>
 
-        {!hatched ? (
+        {!hatched || !c ? (
           <div>
             <button
               ref={egg}
@@ -204,7 +233,9 @@ export function Hatch({ played, islands, onLeave }: { played: Played; islands: I
               </svg>
             </button>
             <div className="gw-tap-hint gw-abs" style={{ top: 580, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 3 }}>
-              <span style={{ padding: '6px 18px', borderRadius: 999, background: '#FFD43B', color: '#24124F', border: '3px solid #24124F', fontSize: 17, fontWeight: 800 }}>{hints[Math.min(taps, 3)]}</span>
+              <span role={problem ? 'alert' : undefined} style={{ padding: '6px 18px', borderRadius: 999, background: '#FFD43B', color: '#24124F', border: '3px solid #24124F', fontSize: 17, fontWeight: 800 }}>
+                {problem || hints[Math.min(taps, 3)]}
+              </span>
             </div>
           </div>
         ) : (
@@ -253,7 +284,7 @@ export function Hatch({ played, islands, onLeave }: { played: Played; islands: I
                     {c.name}
                   </h3>
                 </div>
-                <span style={{ flex: 'none', padding: '2px 10px', borderRadius: 999, background: '#FFF4D6', border: '2px solid #24124F', fontSize: 13, fontWeight: 800 }}>{islandName}</span>
+                <span style={{ flex: 'none', padding: '2px 10px', borderRadius: 999, background: '#FFF4D6', border: '2px solid #24124F', fontSize: 13, fontWeight: 800 }}>{islandName(c.island)}</span>
               </div>
               <div style={{ marginTop: 10, fontSize: 15, fontWeight: 700 }}>{t('hatch.ask')}</div>
               <div role="radiogroup" aria-label={t('hatch.namesLabel')} style={{ marginTop: 6, display: 'flex', gap: 8, flexWrap: 'wrap' }}>

@@ -23,10 +23,11 @@ export { expect };
 export const TEACHER = process.env.E2E_TEACHER ?? 'khaled@demo.test';
 export const PASSWORD = process.env.E2E_PASSWORD ?? 'password';
 
-/** Families in the demo data: Ziad's guardian (an overdue invoice to pay), Yousef (a kid) and Ziad (middle school) themselves. */
+/** Families in the demo data: Ziad's guardian (an overdue invoice to pay), Yousef (a kid), Ziad (middle school) and Maryam (a teen) themselves. */
 export const GUARDIAN = process.env.E2E_GUARDIAN ?? 'ziad.guardian@demo.test';
 export const KID = process.env.E2E_KID ?? 'yousef@demo.test';
 export const STUDENT = process.env.E2E_STUDENT ?? 'ziad@demo.test';
+export const TEEN = process.env.E2E_TEEN ?? 'maryam@demo.test';
 
 export async function signInWithPassword(page: Page, login: string, password: string) {
   await page.goto('/ar/sign-in');

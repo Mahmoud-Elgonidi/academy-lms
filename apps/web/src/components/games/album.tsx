@@ -97,7 +97,7 @@ export function Album({ creatures, need, guardian, learnerName, island: firstIsl
     <div className="gw-album">
       <header className="gw-album-head">
         <div>
-          <Link className="gw-circle gw-3d" href={island ? `/family/games?island=${encodeURIComponent(island)}` : '/family/games'} aria-label={t('album.back')}>
+          <Link className="gw-circle gw-3d" href={island ? `/family/journey?island=${encodeURIComponent(island)}` : '/family/journey'} aria-label={t('album.back')}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#24124F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={locale === 'ar' ? undefined : { transform: 'scaleX(-1)' }}>
               <path d="M9 5l7 7-7 7" />
             </svg>

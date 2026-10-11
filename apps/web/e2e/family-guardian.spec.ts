@@ -4,16 +4,17 @@ import { expect, fitsTheScreen, test } from './helpers';
 test.use({ storageState: 'e2e/.auth/guardian.json' });
 
 test('every family page opens, fits a phone, and reads right to left', async ({ page }) => {
-  for (const path of ['/ar/family', '/ar/family/lessons', '/ar/family/lessons?when=past', '/ar/family/progress', '/ar/family/homework', '/ar/family/money', '/ar/family/challenges', '/ar/family/recordings', '/ar/family/notifications', '/ar/family/more']) {
+  for (const path of ['/ar/family', '/ar/family/lessons', '/ar/family/lessons?when=past', '/ar/family/progress', '/ar/family/homework', '/ar/family/money', '/ar/family/journey', '/ar/family/recordings', '/ar/family/notifications', '/ar/family/more']) {
     const response = await page.goto(path);
     expect(response?.status(), path).toBe(200);
     await expect(page.locator('h1').first(), path).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
     await fitsTheScreen(page);
   }
-  // The classic tab bar has the money, not the challenges.
+  // The classic tab bar has the money and the journey, not the progress.
   const tabs = page.getByRole('navigation', { name: 'القايمة' }).last();
   await expect(tabs.getByRole('link', { name: 'الفلوس' })).toBeVisible();
+  await expect(tabs.getByRole('link', { name: 'الرحلة' })).toBeVisible();
   await tabs.getByRole('link', { name: 'الحصص' }).click();
   await expect(page).toHaveURL(/\/ar\/family\/lessons$/);
 });
@@ -80,13 +81,14 @@ test('a guardian who paid by transfer sends the receipt, and the invoice says it
 });
 
 test('a guardian cheers their child on', async ({ page }) => {
-  await page.goto('/ar/family/challenges');
-  await expect(page.getByRole('heading', { name: /^شجّع / })).toBeVisible();
-  test.skip(await page.getByText('خلّصت تشجيعات النهارده').isVisible(), 'no cheers left today');
-  await page.getByRole('button', { name: 'نجمة' }).click();
+  await page.goto('/ar/family/journey');
+  const cheers = page.getByRole('region', { name: /^شجّع / });
+  await expect(cheers).toBeVisible();
+  test.skip(await cheers.getByText('خلّصت تشجيعات النهارده').isVisible(), 'no cheers left today');
+  await cheers.getByRole('button', { name: 'نجمة' }).click();
   await expect(page.getByText(/^التشجيع وصل لـ /)).toBeVisible();
-  // Only the student collects rewards.
-  await expect(page.getByRole('button', { name: /^استلم / })).toHaveCount(0);
+  // Only the student opens the week's chest.
+  await expect(page.getByRole('button', { name: 'افتح الصندوق' })).toHaveCount(0);
 });
 
 test('a guardian agrees to their child\'s lessons being recorded, and takes it back', async ({ page }) => {

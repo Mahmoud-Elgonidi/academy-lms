@@ -1,0 +1,106 @@
+/*
+ * The kids' journey around the islands world (components/games/islands.css): the stops of an
+ * opened island, the lesson's boat, the course chips, the missions strip, the egg and the week's
+ * chest, a stop's sheet. Game art, like the world: its own palette (sea, sand, navy outlines, 3D
+ * buttons), not the academy's brand. Motion is transform and opacity, inside
+ * prefers-reduced-motion: no-preference. Change these with the panel's.
+ */
+
+.jr-kids { display: flex; flex-direction: column; gap: 14px; }
+.jr-title { margin: 0; max-width: 168px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.5; }
+.jr-rank { margin-inline-start: 4px; padding: 0 8px; border-radius: 999px; background: var(--gw-sun); font-size: 12.5px; line-height: 20px; }
+.jr-label { max-width: 210px; }
+.jr-label-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jr-here { position: absolute; top: -34px; left: 0; right: 0; margin-inline: auto; width: max-content; padding: 2px 10px; border-radius: 999px; background: #FF6B6B; color: #FFFFFF; border: 3px solid var(--gw-ink); box-shadow: 0 3px 0 var(--gw-ink); font-size: 12.5px; font-weight: 800; white-space: nowrap; }
+.jr-chips { position: absolute; top: 70px; left: 0; right: 0; z-index: 6; display: flex; gap: 6px; padding: 0 14px 4px; overflow-x: auto; scrollbar-width: none; }
+.jr-chips button { flex: none; height: 34px; padding: 0 14px; border-radius: 999px; border: 3px solid var(--gw-ink); background: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer; }
+.jr-chips button[aria-pressed="true"] { background: var(--gw-sun); box-shadow: 0 3px 0 var(--gw-ink); }
+.jr-nomap { bottom: auto; top: 50%; }
+
+/* Under the map: as wide as a phone's page, a little wider on a big screen. */
+.jr-below { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 760px; margin-inline: auto; }
+.jr-h2 { margin: 0 0 8px; font-size: 20px; font-weight: 800; }
+.jr-empty { margin: 0; padding: 14px; border-radius: 22px; border: 3px dashed #9FB3C8; background: #FFFFFF; font-weight: 700; text-align: center; }
+.jr-strip { list-style: none; margin: 0 calc(-1 * 1rem); padding: 4px 1rem 10px; display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.jr-strip > li { flex: none; width: min(78vw, 260px); scroll-snap-align: start; }
+/* A big screen has room for every mission, side by side. */
+@media (min-width: 640px) { .jr-strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); margin: 0; padding: 4px 0 10px; overflow: visible; } .jr-strip > li { width: auto; } }
+.jr-mission { position: relative; height: 100%; min-height: 150px; box-sizing: border-box; display: flex; flex-direction: column; gap: 3px; padding: 14px 14px 12px; border-radius: 24px; background: #FFFFFF; border: 3px solid var(--gw-ink); box-shadow: 0 5px 0 var(--gw-ink); color: var(--gw-ink); }
+.jr-mission[data-kind="lesson"] { background: #D0EBFF; }
+.jr-mission[data-kind="homework"] { background: #FFF4D6; }
+.jr-mission[data-kind="review"] { background: #E6FCF5; }
+.jr-mission[data-state="done"] { background: #D3F9D8; }
+.jr-mission b { font-size: 17px; font-weight: 800; line-height: 1.25; }
+.jr-mission small { font-size: 13.5px; font-weight: 700; color: #3B4F72; }
+.jr-mission .jr-result { color: #2B8A3E; }
+.jr-mission-icon { font-size: 26px; line-height: 1; }
+.jr-brings { position: absolute; top: 10px; inset-inline-end: 12px; padding: 1px 8px; border-radius: 999px; background: var(--gw-sun); border: 2px solid var(--gw-ink); font-size: 12.5px; font-weight: 800; }
+.jr-actions { margin-top: auto; padding-top: 6px; display: flex; gap: 8px; flex-wrap: wrap; }
+.jr-go { margin-top: auto; align-self: flex-start; height: 40px; padding: 0 16px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: var(--gw-sun); border: 3px solid var(--gw-ink); box-shadow: 0 3px 0 var(--gw-ink); color: var(--gw-ink); font-size: 15px; font-weight: 800; text-decoration: none; box-sizing: border-box; cursor: pointer; }
+.jr-actions .jr-go { margin-top: 0; }
+.jr-go[data-kind="quiet"] { background: #FFFFFF; }
+.jr-count { margin-top: auto; align-self: flex-start; padding: 2px 10px; border-radius: 999px; background: #FFFFFF; border: 2px solid var(--gw-ink); font-size: 13px; font-weight: 800; }
+
+.jr-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; }
+.jr-egg, .jr-chest { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 24px; border: 3px solid var(--gw-ink); box-shadow: 0 5px 0 var(--gw-ink); background: #FFF4D6; color: var(--gw-ink); text-align: start; box-sizing: border-box; font: inherit; }
+.jr-egg[data-ready="yes"] { background: #FFE066; cursor: pointer; }
+.jr-chest { background: #F3F0FF; }
+.jr-chest[data-state="done"] { background: #FFE066; cursor: pointer; }
+.jr-chest[data-state="opened"] { background: #D3F9D8; }
+.jr-chest[data-state="missed"] { background: #F1F3F5; }
+.jr-egg b, .jr-chest b { display: block; font-size: 16px; font-weight: 800; line-height: 1.25; }
+.jr-egg small, .jr-chest small { display: block; font-size: 13px; font-weight: 700; color: #3B4F72; }
+.jr-egg i, .jr-chest i { display: block; margin-top: 6px; height: 12px; border-radius: 999px; background: #FFFFFF; border: 2px solid var(--gw-ink); overflow: hidden; }
+.jr-egg i b, .jr-chest i b { height: 100%; background: var(--gw-sun); }
+.jr-chest i b { background: #9775FA; }
+.jr-chest-icon { font-size: 38px; line-height: 1; }
+
+/* An opened island's stops: a winding path down the sheet. */
+.jr-island-title { margin: 0; font-size: 24px; font-weight: 800; line-height: 1.15; }
+.jr-path { list-style: none; margin: 4px 0 0; padding: 6px 0 4px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.jr-path > li { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
+.jr-sign { padding: 2px 12px; border-radius: 10px; background: #FFF4D6; border: 2px solid var(--gw-ink); font-size: 12.5px; font-weight: 800; }
+.jr-stop-row { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.jr-stop { position: relative; width: 64px; height: 64px; border-radius: 999px; border: 4px solid var(--gw-ink); box-shadow: 0 5px 0 var(--gw-ink); background: #FFFFFF; display: grid; place-items: center; font-size: 30px; font-weight: 800; color: var(--gw-ink); padding: 0; }
+.jr-stop[data-mark="done"] { background: #69DB7C; }
+.jr-stop[data-mark="review"] { background: #FFC078; }
+.jr-stop[data-mark="here"] { background: var(--gw-sun); width: 74px; height: 74px; }
+.jr-stop[data-mark="todo"] { background: #E9ECEF; opacity: .8; box-shadow: 0 3px 0 #ADB5BD; border-color: #ADB5BD; }
+.jr-flag { position: absolute; top: -4px; inset-inline-end: -22px; font-size: 22px; }
+.jr-stop-title { max-width: 220px; text-align: center; font-size: 14.5px; font-weight: 800; line-height: 1.25; }
+.jr-stop-title[data-mark="todo"] { color: #7A869A; }
+.jr-stop-title b { display: block; color: #E03131; font-size: 13px; }
+.jr-boat { display: flex; align-items: center; gap: 10px; margin-top: 4px; padding: 8px 12px; border-radius: 20px; background: #D0EBFF; border: 3px solid var(--gw-ink); box-shadow: 0 4px 0 var(--gw-ink); max-width: 340px; box-sizing: border-box; }
+.jr-boat > span[aria-hidden] { font-size: 30px; }
+.jr-boat-text { display: flex; flex-direction: column; min-width: 0; }
+.jr-boat-text b { font-size: 15px; font-weight: 800; }
+.jr-boat-text small { font-size: 12.5px; font-weight: 700; color: #3B4F72; }
+.jr-boat .jr-count { margin-top: 3px; }
+.jr-boat .jr-go { margin: 0; flex: none; }
+
+/* A stop's sheet over the map or the island. */
+.jr-sheet-bg { position: fixed; inset: 0; z-index: 47; background: rgba(19, 41, 75, .5); border: 0; padding: 0; }
+.jr-sheet { position: fixed; z-index: 48; left: 0; right: 0; bottom: 0; max-width: 520px; max-height: 86dvh; margin-inline: auto; overflow-y: auto; overscroll-behavior: contain; box-sizing: border-box; padding: 10px 16px calc(18px + env(safe-area-inset-bottom)); border-radius: 30px 30px 0 0; background: #FFFFFF; border-top: 4px solid var(--gw-ink); display: flex; flex-direction: column; gap: 12px; }
+.jr-grab { width: 48px; height: 5px; border-radius: 999px; background: #CED4DA; margin: 0 auto; }
+.jr-sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.jr-sheet-head small { display: block; font-size: 13px; font-weight: 700; color: #3B4F72; }
+.jr-sheet-head h2 { margin: 0; font-size: 24px; font-weight: 800; line-height: 1.2; }
+.jr-mark { display: inline-block; margin-top: 4px; padding: 1px 10px; border-radius: 999px; border: 2px solid var(--gw-ink); font-size: 13px; font-weight: 800; background: #FFFFFF; }
+.jr-mark[data-mark="done"] { background: #D3F9D8; }
+.jr-mark[data-mark="review"] { background: #FFE8CC; }
+.jr-mark[data-mark="here"] { background: var(--gw-sun); }
+.jr-sheet-missions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.jr-sheet-missions .jr-mission { min-height: 0; }
+.jr-race { margin: 0; padding: 8px 12px; border-radius: 16px; background: #E7F5FF; border: 2px solid var(--gw-ink); font-size: 14.5px; font-weight: 800; }
+.jr-note { margin: 0; padding: 10px 12px; border-radius: 16px; background: #F1F3F5; font-size: 14.5px; font-weight: 700; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .jr-strip > li { animation: gw-rise .45s cubic-bezier(.2, .9, .3, 1.1) calc(var(--i, 0) * 70ms) backwards; }
+  .jr-path > li { animation: gw-rise .45s cubic-bezier(.2, .9, .3, 1.1) calc(.5s + var(--i, 0) * 60ms) backwards; }
+  .jr-stop[data-mark="here"] > span { display: inline-block; animation: gw-bob 1.8s ease-in-out infinite; }
+  .jr-here { animation: gw-bob 1.8s ease-in-out infinite; }
+  .jr-sheet { animation: gw-sheetin .35s cubic-bezier(.2, .9, .3, 1.05) backwards; }
+  .jr-sheet-bg { animation: gw-fade .25s ease-out backwards; }
+  .jr-egg i b, .jr-chest i b { animation: gw-fill .9s cubic-bezier(.2, .8, .3, 1) .3s backwards; transform-origin: 0 50%; }
+  [dir="rtl"] .jr-egg i b, [dir="rtl"] .jr-chest i b { transform-origin: 100% 50%; }
+}

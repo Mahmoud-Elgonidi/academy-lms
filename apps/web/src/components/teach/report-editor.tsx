@@ -9,7 +9,7 @@ import { Badge, Button, Card, Field, Input, Notice, Select, Textarea, join } fro
 import { ReportAnswers } from '@/components/report-answers';
 import { formProblem } from '@/lib/problems';
 import { answersOf, answersPayload, missingAnswers, type Answers, type Question } from '@/lib/report-answers';
-import { ACCEPTS, OUTCOMES, type Accepts, type Outcome, type ReportForm, type ReportItem } from '@/lib/teach/types';
+import { ACCEPTS, OUTCOMES, type HomeworkAccepts, type Outcome, type ReportForm, type ReportItem } from '@/lib/teach/types';
 
 type Item = ReportItem & { noteOpen: boolean };
 
@@ -40,7 +40,9 @@ export function ReportEditor({ form }: { form: ReportForm }) {
   const [giving, setGiving] = useState(hw !== null);
   const [title, setTitle] = useState(hw?.title ?? '');
   const [instructions, setInstructions] = useState(hw?.instructions ?? '');
-  const [accepts, setAccepts] = useState<Accepts>(hw?.accepts ?? 'any');
+  const [accepts, setAccepts] = useState<HomeworkAccepts>(hw?.accepts ?? 'any');
+  // Homework handed in by playing (chosen in the panel) keeps that way when the report is saved again.
+  const acceptsChoices: HomeworkAccepts[] = hw?.accepts === 'practice' ? [...ACCEPTS, 'practice'] : [...ACCEPTS];
   const [dueDays, setDueDays] = useState(3);
   const [answers, setAnswers] = useState<Answers>(answersOf(form.answers));
   const [problem, setProblem] = useState<{ message?: string; errors: Record<string, string[]> }>({ errors: {} });
@@ -265,8 +267,8 @@ export function ReportEditor({ form }: { form: ReportForm }) {
                 </Field>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label={t('acceptsLabel')}>
-                    <Select value={accepts} onChange={(e) => setAccepts(e.target.value as Accepts)}>
-                      {ACCEPTS.map((a) => (
+                    <Select value={accepts} onChange={(e) => setAccepts(e.target.value as HomeworkAccepts)}>
+                      {acceptsChoices.map((a) => (
                         <option key={a} value={a}>
                           {t(`accepts_${a}`)}
                         </option>

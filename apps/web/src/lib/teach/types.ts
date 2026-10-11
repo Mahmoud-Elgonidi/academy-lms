@@ -75,6 +75,12 @@ export type ReportItem = {
 export type Accepts = 'any' | 'text' | 'audio' | 'file';
 export const ACCEPTS: readonly Accepts[] = ['any', 'text', 'audio', 'file'];
 
+/** How homework is handed in: as one of those, or by playing (practice: its round on the journey hands it in). */
+export type HomeworkAccepts = Accepts | 'practice';
+
+/** A homework's practice in the games (its lessons' items): how the best round went, or not yet. */
+export type HomeworkPractice = { done: boolean; correct: number | null; total: number | null; stars: number | null; game: string | null; label: string };
+
 export type Submission = {
   id: string;
   body: string | null;
@@ -88,7 +94,9 @@ export type Homework = {
   student: Person | null;
   title: string;
   instructions: string | null;
-  accepts: Accepts;
+  accepts: HomeworkAccepts;
+  /** It asks for practice in the games on its lessons (null: not). */
+  practice?: HomeworkPractice | null;
   /** assigned, submitted, reviewed, missed. */
   status: string;
   status_label: string;

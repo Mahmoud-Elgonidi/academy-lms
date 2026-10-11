@@ -1,69 +1,30 @@
 'use client';
 
-import { useCallback, useState, useTransition, type ReactNode } from 'react';
+import { useState, useTransition, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { cheer, chooseLearner } from '@/app/[locale]/family/actions';
+import { cheer } from '@/app/[locale]/family/actions';
 import { saveLimits } from '@/app/[locale]/family/games/actions';
 import { Icon } from '@/components/icons';
-import { Notice, join } from '@/components/ui';
-import { Link } from '@/i18n/navigation';
+import { join } from '@/components/ui';
 import { sound } from '@/lib/games/sound';
-import type { GameLimits, World } from '@/lib/games/types';
+import type { Allowance, GameLimits, Glance } from '@/lib/games/types';
 import { minuteChoices, usedShare } from '@/lib/games/world';
 import { CreatureArt } from './art';
-import { GameRound } from './round';
-import { useMuted } from './use-muted';
-import { usePlay } from './use-play';
 import './games.css';
 import './islands.css';
 
 /**
- * A guardian's view of their children's games (the approved design,
- * Guardian), in the academy's colours: which child, today's play time
- * against the limit with the minutes a day and the night lock, what the
- * child practised this week, a creature hatched today to cheer, the safety
- * promise, and the quests to play together. Pay and KPIs never appear here.
+ * A guardian's look at their child's games (the approved design, Guardian),
+ * in the academy's colours, as parts of the child's journey: today's play
+ * time against the limit with the minutes a day and the night lock, what the
+ * child practised this week, a creature hatched today to cheer, and the
+ * safety promise. Pay and KPIs never appear here.
  */
-export function GuardianGames({ world, kids, current }: { world: World; kids: { id: string; name: string }[]; current: string }) {
+export function GuardianGames({ learnerId, allowance, limits, glance }: { learnerId: string; allowance: Allowance; limits: GameLimits | null; glance: Glance | null }) {
   const t = useTranslations('games');
-  const common = useTranslations('common');
-  const [note, setNote] = useState('');
-  const say = useCallback((text: string) => setNote(text), []);
-  const play = usePlay(world.learner_id, world.quests, say);
-  const muted = useMuted();
-  const [switching, startSwitch] = useTransition();
-  const glance = world.glance;
-  const a = world.allowance;
-
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-3">
-      <header className="flex min-h-14 flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-bold">{t('guardian.title')}</h1>
-        {kids.length > 1 ? (
-          <div role="tablist" aria-label={t('guardian.children')} className="flex flex-wrap justify-end gap-1.5">
-            {kids.map((child) => (
-              <button
-                key={child.id}
-                type="button"
-                role="tab"
-                aria-selected={child.id === current}
-                disabled={switching}
-                onClick={() => startSwitch(() => chooseLearner(child.id))}
-                className={join(
-                  'min-h-10 rounded-full border px-4 text-[14.5px] transition-colors',
-                  child.id === current ? 'border-brand bg-brand font-semibold text-white' : 'border-line bg-white hover:bg-brand-soft',
-                )}
-              >
-                {child.name}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </header>
-
-      {note ? <Notice tone="attention">{note}</Notice> : null}
-
-      <PlayTime world={world} />
+    <div className="flex flex-col gap-3">
+      {limits ? <PlayTime learnerId={learnerId} allowance={allowance} limits={limits} /> : null}
 
       <section className="rounded-card border border-line bg-white p-4" aria-labelledby="gw-learned">
         <h2 id="gw-learned" className="mb-2 font-semibold">
@@ -93,64 +54,12 @@ export function GuardianGames({ world, kids, current }: { world: World; kids: { 
         </div>
       </section>
 
-      {glance?.hatched ? <Hatched hatched={glance.hatched} learnerId={world.learner_id} /> : null}
+      {glance?.hatched ? <Hatched hatched={glance.hatched} learnerId={learnerId} /> : null}
 
       <div className="flex items-start gap-2.5 rounded-card bg-brand-soft px-3 py-2.5 text-[13.5px] leading-relaxed text-brand-strong">
         <Icon name="shield" size={20} className="mt-0.5 shrink-0" />
         <span>{t('guardian.safety')}</span>
       </div>
-
-      {world.quests.length > 0 ? (
-        <section className="rounded-card border border-line bg-white p-4" aria-labelledby="gw-together">
-          <h2 id="gw-together" className="mb-2 font-semibold">
-            {t('guardian.together')}
-          </h2>
-          <ul className="flex flex-col gap-2">
-            {world.quests.map((q) => (
-              <li key={q.key} className="flex items-center gap-2.5">
-                <span className="grid size-9 shrink-0 place-items-center rounded-control bg-brand-soft text-brand-strong" aria-hidden="true">
-                  <Icon name="gamepad" size={18} />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <b className="block truncate">{q.title || t(`reasons.${q.reason}`)}</b>
-                  <small className="text-muted">
-                    {t(`reasons.${q.reason}`)} · {q.game.title}
-                  </small>
-                </span>
-                <button
-                  type="button"
-                  className="min-h-10 shrink-0 rounded-control bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-strong disabled:opacity-50"
-                  onClick={() => {
-                    setNote('');
-                    play.start(q.game.id, q.key);
-                  }}
-                  disabled={!a.may || play.pending}
-                >
-                  {t('play')}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {play.played ? (
-        <section className="appear rounded-card border border-line bg-white p-4" role="status">
-          <h2 className="font-semibold">
-            {t(`result.${Math.min(3, play.played.result.stars)}` as 'result.0')} <span className="text-reward">{'★'.repeat(play.played.result.stars)}</span>
-          </h2>
-          <p className="text-sm text-muted">{t('result.score', { correct: play.played.result.correct, total: play.played.result.total })}</p>
-          <button type="button" className="mt-2 text-sm font-semibold text-brand-strong hover:underline" onClick={play.leave}>
-            {common('close')}
-          </button>
-        </section>
-      ) : null}
-
-      <Link href="/family/games/album" className="text-center text-sm font-semibold text-brand-strong hover:underline">
-        {t('guardian.album', { name: kids.find((c) => c.id === current)?.name ?? '' })}
-      </Link>
-
-      {play.round ? <GameRound round={play.round} look="classic" muted={muted} onFinish={play.finish} onClose={play.leave} /> : null}
     </div>
   );
 }
@@ -167,10 +76,8 @@ function Line({ tone, icon, children }: { tone: string; icon: 'check' | 'alert' 
 }
 
 /** Today's play time against the limit, and the guardian's choices: minutes a day, the night lock, games on or off. */
-function PlayTime({ world }: { world: World }) {
+function PlayTime({ learnerId, allowance: a, limits }: { learnerId: string; allowance: Allowance; limits: GameLimits }) {
   const t = useTranslations('games');
-  const limits = world.limits!;
-  const a = world.allowance;
   const [saved, setSaved] = useState('');
   const [pending, begin] = useTransition();
   const [shown, setShown] = useState<GameLimits>(limits);
@@ -190,7 +97,7 @@ function PlayTime({ world }: { world: World }) {
     setShown(next);
     setSaved('');
     begin(async () => {
-      const done = await saveLimits(world.learner_id, next);
+      const done = await saveLimits(learnerId, next);
       setSaved(done.ok ? t('guardian.saved') : (done.message ?? t('failed')));
       if (!done.ok) setShown(limits);
     });
@@ -268,7 +175,7 @@ function Switch({ label, on, disabled, onChange }: { label: string; on: boolean;
 }
 
 /** A creature hatched today: the child's, to cheer (Learning's cheers, a few a day). */
-function Hatched({ hatched, learnerId }: { hatched: NonNullable<NonNullable<World['glance']>['hatched']>; learnerId: string }) {
+function Hatched({ hatched, learnerId }: { hatched: NonNullable<Glance['hatched']>; learnerId: string }) {
   const t = useTranslations('games');
   const [hearts, setHearts] = useState(false);
   const [said, setSaid] = useState('');

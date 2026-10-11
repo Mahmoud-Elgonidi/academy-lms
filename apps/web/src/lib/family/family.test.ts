@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { itemsOf } from './nav-items';
+import { isAt, itemsOf } from './nav-items';
 import { isGuardian, lessonActionsFor, seesMoney } from './rules';
 import { familyTargetOf } from './targets';
 import { STAGES } from './types';
@@ -42,35 +42,62 @@ describe('the places of each look', () => {
     expect(itemsOf('classic', true).tabs.map((i) => i.key)).toContain('money');
   });
 
-  it('keeps five tabs, the last one "more", and every place in the menu', () => {
+  it('keeps four or five tabs, the last one "more", and every place in the menu', () => {
     for (const stage of STAGES) {
       for (const money of [true, false]) {
         const { all, tabs } = itemsOf(stage, money);
-        expect(tabs).toHaveLength(5);
+        expect(tabs.length).toBe(stage === 'kids' || stage === 'middle' ? 4 : 5);
         expect(tabs.at(-1)?.key).toBe('more');
         for (const tab of tabs.slice(0, -1)) expect(all).toContainEqual(tab);
       }
     }
   });
 
-  it('puts the games second for kids and middle school, the challenges second for teens, and homework in the menu for a guardian who pays nothing', () => {
-    expect(itemsOf('kids', false).tabs.map((i) => i.key)).toEqual(['home', 'games', 'challenges', 'lessons', 'more']);
-    expect(itemsOf('middle', false).tabs.map((i) => i.key)).toEqual(['home', 'games', 'challenges', 'lessons', 'more']);
-    expect(itemsOf('teen', false).tabs[1]?.key).toBe('challenges');
-    expect(itemsOf('classic', false).tabs.map((i) => i.key)).toEqual(['home', 'lessons', 'progress', 'homework', 'more']);
+  it('names the same places everywhere: the journey first for students, then their lessons, then by age', () => {
+    expect(itemsOf('kids', false).tabs.map((i) => i.key)).toEqual(['home', 'lessons', 'messages', 'more']);
+    expect(itemsOf('middle', false).tabs.map((i) => i.key)).toEqual(['home', 'lessons', 'messages', 'more']);
+    expect(itemsOf('teen', false).tabs.map((i) => i.key)).toEqual(['home', 'lessons', 'homework', 'progress', 'more']);
+    expect(itemsOf('classic', true).tabs.map((i) => i.key)).toEqual(['home', 'lessons', 'journey', 'money', 'more']);
+    expect(itemsOf('classic', false).tabs.map((i) => i.key)).toEqual(['home', 'lessons', 'journey', 'homework', 'more']);
   });
 });
 
-describe('the games', () => {
-  it('are in every look, a tab of their own for kids and middle school, in the menu for the rest', () => {
-    for (const stage of STAGES) {
-      const { all, tabs } = itemsOf(stage, seesMoney(stage), stage === 'classic');
-      expect(all.find((i) => i.key === 'games')?.href).toBe('/family/games');
-      expect(tabs.some((i) => i.key === 'games')).toBe(stage === 'kids' || stage === 'middle');
-      // Homework stays in the menu when the games take its tab.
+describe('the journey', () => {
+  it("is a student's home and a place of its own for guardians and adults, where progress was", () => {
+    for (const stage of ['kids', 'middle', 'teen'] as const) {
+      const { all } = itemsOf(stage, false);
+      const home = all.find((i) => i.key === 'home')!;
+      expect(home.href).toBe('/family');
+      expect(isAt(home, '/family/journey')).toBe(true);
+      expect(all.some((i) => i.key === 'journey')).toBe(false);
+      // Homework stays in the menu (kids and middle school have it as missions too).
       expect(all.some((i) => i.key === 'homework')).toBe(true);
     }
-    expect(familyTargetOf('games', false)).toBe('/family/games');
+    const classic = itemsOf('classic', true, true).all;
+    expect(classic.find((i) => i.key === 'journey')?.href).toBe('/family/journey');
+    expect(classic.some((i) => i.key === 'progress')).toBe(false);
+    expect(isAt(classic.find((i) => i.key === 'home')!, '/family/journey')).toBe(false);
+  });
+
+  it('has no games, challenges or badges places any more', () => {
+    for (const stage of STAGES) {
+      const { all, tabs } = itemsOf(stage, seesMoney(stage), stage === 'classic');
+      expect([...all, ...tabs].map((i) => i.href)).not.toContain('/family/games');
+      expect([...all, ...tabs].map((i) => i.href)).not.toContain('/family/challenges');
+    }
+  });
+
+  it('opens from the notifications about it, its games and its missions', () => {
+    expect(familyTargetOf('journey', false)).toBe('/family/journey');
+    expect(familyTargetOf('games', false)).toBe('/family/journey');
+    expect(familyTargetOf('challenges', true)).toBe('/family/journey');
+  });
+
+  it('marks a place by its own address and the ones below it', () => {
+    expect(isAt({ href: '/family' }, '/family')).toBe(true);
+    expect(isAt({ href: '/family' }, '/family/lessons')).toBe(false);
+    expect(isAt({ href: '/family/lessons' }, '/family/lessons/abc')).toBe(true);
+    expect(isAt({ href: '/family/journey' }, '/family/journeys')).toBe(false);
   });
 });
 
@@ -89,7 +116,6 @@ describe('where a notification opens', () => {
     expect(familyTargetOf('lesson_rating', false)).toBe('/family/lessons');
     expect(familyTargetOf('report', false)).toBe('/family/progress');
     expect(familyTargetOf('homework', false)).toBe('/family/homework');
-    expect(familyTargetOf('challenges', false)).toBe('/family/challenges');
   });
 
   it('opens an invoice only for whoever sees money, and anything else at home', () => {

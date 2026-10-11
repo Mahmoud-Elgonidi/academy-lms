@@ -4,24 +4,28 @@ import { Icon } from '@/components/icons';
 import { RoadmapView } from '@/components/roadmap-view';
 import { Badge, Card, Empty, SectionTitle } from '@/components/ui';
 import { get } from '@/lib/api/server';
+import { family } from '@/lib/family/context';
 import { ReportAnswers } from '@/components/report-answers';
 import type { FamilyReport, Roadmap } from '@/lib/family/types';
 
 /** One course: its roadmap, and the teacher's reports after each lesson (newest first, without internal notes). */
 export default async function Course({ params }: { params: Promise<{ enrollment: string }> }) {
   const { enrollment } = await params;
-  const [t, nav, roadmap, reports] = await Promise.all([
+  const [t, fam, roadmap, reports] = await Promise.all([
     getTranslations('family'),
-    getTranslations('nav.classic'),
+    family(),
     get<{ data: Roadmap | null }>('/v1/learning/enrollments/{enrollment}/roadmap', { params: { enrollment } }),
     get<{ data: FamilyReport[] }>('/v1/learning/enrollments/{enrollment}/reports', { params: { enrollment } }),
   ]);
+  const nav = await getTranslations(`nav.${fam.stage}`);
+  // Back to where it was opened from: the journey in the classic look, the courses list in a student's.
+  const back = fam.stage === 'classic' ? { href: '/family/journey', label: nav('journey') } : { href: '/family/progress', label: nav('progress') };
   const map = roadmap.data;
   return (
     <div>
-      <Link href="/family/progress" className="mb-3 inline-flex items-center gap-1 text-sm text-muted hover:text-ink">
+      <Link href={back.href} className="mb-3 inline-flex items-center gap-1 text-sm text-muted hover:text-ink">
         <Icon name="chevron" size={16} className="ltr:-scale-x-100" />
-        {nav('progress')}
+        {back.label}
       </Link>
       <h1 className="mb-5 text-2xl font-bold">{map?.program.name ?? t('roadmap')}</h1>
       {map ? <RoadmapView map={map} /> : null}

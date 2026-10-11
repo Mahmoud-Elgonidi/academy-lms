@@ -454,10 +454,7 @@ export interface paths {
         };
         /**
          * A learner's games world
-         * @description The islands in order with their creatures (found or not) and games (playable when the learner has practice items
-         *     of the kinds it plays), the quests (what to practise now: homework, the last lesson, reviews, the current lesson;
-         *     each with the game for it), stars and the next egg, today's minutes, and the last rounds. For the student
-         *     themself (learner_id left out) or a guardian's child; a guardian also gets the limits they can set.
+         * @deprecated
          */
         get: operations["games.world"];
         put?: never;
@@ -479,8 +476,8 @@ export interface paths {
         put?: never;
         /**
          * Start a round
-         * @description Of a game (id or key) for a quest (its key), for a homework's practice (homework_id), or with all of the learner's
-         *     practice. Answers the page to open (page_url, sandboxed; never cached personal data) and the round to hand it
+         * @description Of a game (id or key) on a lesson of the learner's journey (station), for a homework's practice (homework_id), for
+         *     a quest (its key), or with all of the learner's practice. Answers the page to open (page_url, sandboxed; never cached personal data) and the round to hand it
          *     through the bridge: {lms: 1, type: "start", round}. 403 games-off / games-paused / games-night / games-limit, 422
          *     games-not-enough-items when the learner has too few items for that game.
          */
@@ -507,6 +504,28 @@ export interface paths {
          *     answers the same stars. Send an Idempotency-Key.
          */
         post: operations["games.plays.finish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/games/hatch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hatch an egg
+         * @description When the journey's stars filled an egg (games.egg.ready on learning/journey/map), the learner taps it open: the
+         *     next creature hatches on the island they are on (island: the key of the island their level is drawn as). Answers
+         *     the creature with the three names the child chooses from, or null when no egg was ready. Send an Idempotency-Key.
+         */
+        post: operations["games.hatch"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1150,13 +1169,58 @@ export interface paths {
         };
         /**
          * A learner's journey
-         * @description What the student's own home shows in each stage's look: stars (lessons mastered), points and rank, the lesson
-         *     streak, badges, and per course its levels (worlds) with each lesson's state, where they are, what is next and
-         *     the expected finish. learner_id defaults to the student themself, or a guardian's first child.
+         * @deprecated
          */
         get: operations["learning.journey"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/learning/journey/map": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A learner's journey
+         * @description For each course: its curriculum's levels as islands (done, here or ahead, each drawn as one of the world's
+         *     islands) and its lessons as stations on them (done, review, here or todo; playable when the learner may
+         *     practise it now), with the games that can play the lesson's own practice items. The missions to do now: the
+         *     next lesson (with when the classroom opens), the teacher's homework and lessons due for review, each on its
+         *     station. The stars (lessons by lateness and staying to the end, practice, homework, mastered lessons, chests),
+         *     the rank, the egg and the week's chest. style: playful, calm (no islands) or plain (no stars).
+         */
+        get: operations["learning.journey.map"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/learning/journey/chest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Open the week's chest
+         * @description The student opens it once every lesson of the week was attended and every homework due in it handed in (period:
+         *     the week's Saturday, as the journey lists it). Its stars add to theirs; the kids' chest brings the next sticker.
+         *     Once a week. Send an Idempotency-Key.
+         */
+        post: operations["learning.journey.chest"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1257,9 +1321,7 @@ export interface paths {
         };
         /**
          * A learner's challenges
-         * @description For the student themself (learner_id left out) or a guardian's child. Each challenge has its target, progress and
-         *     state: active, missed, done (ready to collect, by the student) or claimed. Rewards finished last week or last month
-         *     come first while they can still be collected. cheers: the guardians' cheers the student has not seen yet.
+         * @deprecated
          */
         get: operations["learning.challenges"];
         put?: never;
@@ -1281,8 +1343,7 @@ export interface paths {
         put?: never;
         /**
          * Collect a reward
-         * @description The student collects a challenge they finished (challenge and period as listed). Its points add to theirs; the
-         *     kids' chest also brings the next sticker. Once only. Send an Idempotency-Key.
+         * @deprecated
          */
         post: operations["learning.challenges.claim"];
         delete?: never;
@@ -3817,7 +3878,10 @@ export interface operations {
                             /** @description Whether the learner may start a round now, and why not: off (the academy), paused (a guardian), night (a guardian's night lock, 21:00 to 7:00 on the learner's clock), limit (today's minutes). */
                             allowance: unknown[];
                             stars: number;
-                            /** @description Stars toward the next egg on an island. */
+                            /**
+                             * @description Stars toward the next egg on an island.
+                             *     Eggs fill from all of the journey's stars (lessons, homework and chests too).
+                             */
                             egg: {
                                 have: number;
                                 /** @constant */
@@ -3926,6 +3990,11 @@ export interface operations {
                     quest?: string | null;
                     /** Format: uuid */
                     homework_id?: string | null;
+                    /**
+                     * Format: uuid
+                     * @description A lesson on the learner's journey they may practise now (a station): the round takes its items.
+                     */
+                    station?: string | null;
                 };
             };
         };
@@ -4022,6 +4091,7 @@ export interface operations {
                             seconds: string;
                             /** @description A creature hatched by this round: with the three names the child chooses from, and how many they have found of all. */
                             creature: unknown[] | null;
+                            /** @description Stars of the journey toward the next egg. */
                             egg: {
                                 have: number;
                                 /** @constant */
@@ -4031,6 +4101,65 @@ export interface operations {
                                 title: string;
                                 handed_in: string;
                             } | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "games.hatch": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    learner_id?: string | null;
+                    island?: string | null;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The creature that hatched, with the three names the child chooses from (null: no egg was ready). */
+                            creature: unknown[] | null;
+                            egg: {
+                                have: number;
+                                /** @constant */
+                                need: 12;
+                            };
                         };
                     };
                 };
@@ -5986,6 +6115,200 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "learning.journey.map": {
+        parameters: {
+            query?: {
+                learner_id?: string | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            learner_id: string;
+                            stage: string;
+                            /** @description playful (each stage's look, islands and games), calm (levels and missions) or plain (no stars) */
+                            style: string;
+                            /**
+                             * @description self: the student; guardian: a guardian looking at their child
+                             * @enum {string}
+                             */
+                            viewer: "self" | "guardian";
+                            stars: {
+                                total: number;
+                                rank: unknown[];
+                                /** @description Where the stars came from: lessons (by lateness, and staying to the end), practice rounds, homework, lessons mastered, chests. */
+                                from: unknown[];
+                                /** @constant */
+                                per_egg: 12;
+                            };
+                            /** @description Lessons attended in a row. */
+                            streak: number;
+                            /** @description The latest lesson of the last week and the stars it brought. */
+                            last_lesson: {
+                                id: string;
+                                starts_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                stars: string;
+                                late_min: string;
+                                on_time: string;
+                                stayed: string;
+                                labels: string[];
+                            } | null;
+                            courses: unknown[];
+                            missions: unknown[];
+                            chest: {
+                                period: string;
+                                target: string;
+                                progress: string;
+                                /** @description active, missed, done (ready to open, by the student) or opened */
+                                state: string;
+                                stars: string;
+                                sticker: {
+                                    key: string;
+                                    name: string;
+                                } | null;
+                                ends_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                can_open: string;
+                            } | null;
+                            games: {
+                                /** @description Whether the learner may start a round now, and why not: off (the academy), paused (a guardian), night (a guardian's night lock), limit (today's minutes). */
+                                allowance: unknown[];
+                                /** @description Stars toward the next egg; ready: an egg can hatch now. */
+                                egg: {
+                                    have: number;
+                                    need: number;
+                                    ready: boolean;
+                                };
+                                buddy: unknown[] | null;
+                                creatures_found: number;
+                                creatures_total: number;
+                                recent: unknown[];
+                                /** @description A guardian's limits for this child (null for the student). */
+                                limits: {
+                                    [key: string]: unknown;
+                                } | null;
+                                /** @description A guardian's look at the child's week (null for the student). */
+                                glance: {
+                                    [key: string]: unknown;
+                                } | null;
+                            } | null;
+                            cheers: {
+                                id: string;
+                                kind: string;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                            /** @description For a guardian: cheers they may still send this learner today. */
+                            cheers_left: unknown;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "learning.journey.chest": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: date */
+                    period: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @constant */
+                            stars: 10;
+                            sticker: {
+                                key: string;
+                                name: string;
+                            } | null;
+                            total_before: number;
+                            total: number;
+                            ranked_up: boolean;
+                            rank: unknown[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AccessDeniedHttpException"];
             422: components["responses"]["ValidationException"];
         };
     };
