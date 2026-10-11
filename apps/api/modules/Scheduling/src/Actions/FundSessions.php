@@ -46,6 +46,12 @@ final class FundSessions
         $funded = 0;
         foreach ($waiting as $session) {
             $ok = DB::transaction(function () use ($session, $accountId) {
+                // Read again under the lesson's lock: one cancelled or paid for meanwhile is skipped, never paid for twice
+                // or held for nothing; one moved meanwhile is paid for at its new time.
+                $session = Session::query()->whereKey($session->id)->lock('for no key update')->first();
+                if ($session === null || $session->status !== SessionStatus::Scheduled || $session->funding_status !== FundingStatus::Unfunded) {
+                    return null;
+                }
                 if (! $this->credits->reserve($session->id, $accountId, $session->durationMinutes(), $session->starts_at, "session:{$session->id}:reserve")) {
                     return false;
                 }
@@ -55,6 +61,9 @@ final class FundSessions
 
                 return true;
             });
+            if ($ok === null) {
+                continue;
+            }
             if (! $ok) {
                 break;
             }

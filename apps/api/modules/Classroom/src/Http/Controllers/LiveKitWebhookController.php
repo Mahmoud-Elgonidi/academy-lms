@@ -7,19 +7,26 @@ use Illuminate\Http\Response;
 use Modules\Classroom\Actions\HandleLiveKitWebhook;
 use Modules\Classroom\Models\Room;
 use Modules\Classroom\Video\LiveKit\WebhookReceiver;
+use Modules\Classroom\Video\ProviderManager;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantResolver;
 use RuntimeException;
 
 /**
- * LiveKit posts room, participant and recording (egress) events here. The
- * signature is checked first; the academy comes from the room name
- * ("{academy}_{session}"), and the event is handled as that academy.
+ * LiveKit posts room, participant and recording (egress) events here, taken
+ * only on a server with LiveKit of its own. The signature is checked first;
+ * the academy comes from the room name ("{academy}_{session}"), and the event
+ * is handled as that academy.
  */
 final class LiveKitWebhookController
 {
-    public function __invoke(Request $request, TenantResolver $tenants, TenantContext $context, HandleLiveKitWebhook $handle): Response
+    public function __invoke(Request $request, TenantResolver $tenants, TenantContext $context, HandleLiveKitWebhook $handle, ProviderManager $providers): Response
     {
+        // No LiveKit of this server's own (no secret, or the development one anyone can sign with): nothing to take.
+        if (! $providers->liveKitReady()) {
+            return response('', 401);
+        }
+
         try {
             $event = (new WebhookReceiver(config('classroom.livekit.key'), config('classroom.livekit.secret')))
                 ->receive($request->getContent(), $request->header('Authorization'));

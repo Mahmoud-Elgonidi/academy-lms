@@ -3,6 +3,7 @@
 namespace Modules\Scheduling\Domain\Models;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +12,7 @@ use Modules\Scheduling\Domain\Enums\FundingStatus;
 use Modules\Scheduling\Domain\Enums\ParticipantRole;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Enums\SessionType;
+use Modules\Scheduling\Domain\LessonChanged;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
@@ -97,5 +99,25 @@ final class Session extends Model
         $this->status = $next;
         $this->review_reason = $next === SessionStatus::NeedsReview ? $reviewReason : null;
         $this->version++;
+    }
+
+    /**
+     * Every change of a lesson (its state, time or teacher) bumps its version.
+     * Saving one locks the row and checks the version is still the one read:
+     * two people, or a person and the sweeper, deciding the same lesson at once
+     * cannot both go through; the second waits for the first, then is refused
+     * (LessonChanged) and its transaction rolls back. No key update, so the
+     * lesson's own log rows (which hold a key share on it) never deadlock with it.
+     */
+    protected function performUpdate(Builder $query)
+    {
+        if ($this->exists && $this->isDirty('version')) {
+            $current = self::query()->whereKey($this->getKey())->lock('for no key update')->value('version');
+            if ((int) $current !== (int) $this->getOriginal('version')) {
+                throw new LessonChanged($this->getKey());
+            }
+        }
+
+        return parent::performUpdate($query);
     }
 }

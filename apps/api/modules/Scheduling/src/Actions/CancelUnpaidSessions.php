@@ -3,6 +3,8 @@
 namespace Modules\Scheduling\Actions;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Modules\Scheduling\Domain\Enums\FundingStatus;
 use Modules\Scheduling\Domain\Enums\SessionEventKind;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
@@ -52,8 +54,20 @@ final class CancelUnpaidSessions
 
         $cancelled = 0;
         foreach ($due() as $session) {
-            $this->cancel->handle($session, 'system', 'unpaid', null, null, at: $now);
-            $cancelled++;
+            try {
+                $cancelled += DB::transaction(function () use ($session, $now) {
+                    // Read again under the lesson's lock: one paid for (or decided) a moment ago stays as it is.
+                    $current = Session::query()->whereKey($session->id)->lock('for no key update')->first();
+                    if ($current === null || $current->status !== SessionStatus::Scheduled || $current->funding_status !== FundingStatus::Unfunded) {
+                        return 0;
+                    }
+                    $this->cancel->handle($current, 'system', 'unpaid', null, null, at: $now);
+
+                    return 1;
+                });
+            } catch (ValidationException) {
+                continue;   // someone else changed it meanwhile: theirs stands, and the rest still go
+            }
         }
 
         return $cancelled;

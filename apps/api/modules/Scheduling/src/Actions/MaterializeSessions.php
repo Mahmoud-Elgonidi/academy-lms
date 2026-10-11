@@ -3,6 +3,7 @@
 namespace Modules\Scheduling\Actions;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Scheduling\Contracts\DTOs\NewSession;
@@ -18,7 +19,9 @@ use Modules\SharedKernel\Time\LocalTimeResolver;
  * date) makes a second run a no-op. A date the teacher or the student is
  * already booked on is skipped and reported, never double-booked; a date on
  * an academy holiday is left out. Times are resolved on the teacher's clock,
- * so DST moves the student's side only.
+ * so DST moves the student's side only. Two runs at once (the nightly one
+ * and a teacher change) make each date once: the unique occurrence key
+ * holds it, and the run that comes second leaves the date alone.
  */
 final class MaterializeSessions
 {
@@ -85,6 +88,11 @@ final class MaterializeSessions
                     ), $actorId));
                 } catch (ValidationException) {
                     $skipped[] = ['slot_id' => $slot->id, 'date' => $date];
+                } catch (UniqueConstraintViolationException $e) {
+                    // Another run (the nightly one, a teacher change) made this date's lesson a moment ago.
+                    if (! str_contains($e->getMessage(), 'occurrence_key')) {
+                        throw $e;
+                    }
                 }
             }
         }

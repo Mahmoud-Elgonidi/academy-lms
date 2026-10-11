@@ -39,6 +39,7 @@ it('moves a time that does not exist forward by the gap', function (string $date
     'Cairo, Friday 30 April 2027 (00:00 → 01:00)' => ['2027-04-30', '00:30', 'Africa/Cairo', '2027-04-29 22:30', '01:30'],
     'London, Sunday 28 March 2027 (01:00 → 02:00)' => ['2027-03-28', '01:30', 'Europe/London', '2027-03-28 01:30', '02:30'],
     'Sydney, Sunday 3 October 2027 (02:00 → 03:00)' => ['2027-10-03', '02:30', 'Australia/Sydney', '2027-10-02 16:30', '03:30'],
+    'Casablanca after Ramadan, Sunday 14 March 2027 (02:00 → 03:00)' => ['2027-03-14', '02:30', 'Africa/Casablanca', '2027-03-14 02:30', '03:30'],
 ]);
 
 it('takes the earlier of a time that happens twice', function (string $date, string $time, string $tz, string $utc) {
@@ -49,6 +50,7 @@ it('takes the earlier of a time that happens twice', function (string $date, str
 })->with([
     'Cairo, Thursday 28 October 2027 (24:00 → 23:00)' => ['2027-10-28', '23:30', 'Africa/Cairo', '2027-10-28 20:30'],
     'New York, Sunday 7 November 2027 (02:00 → 01:00)' => ['2027-11-07', '01:30', 'America/New_York', '2027-11-07 05:30'],
+    'Casablanca for Ramadan, Sunday 7 February 2027 (03:00 → 02:00)' => ['2027-02-07', '02:30', 'Africa/Casablanca', '2027-02-07 01:30'],
 ]);
 
 it('keeps a teacher-anchored 19:00 Cairo slot right for students in Riyadh and London through 2027', function (string $date, string $riyadh, string $london) {

@@ -24,6 +24,8 @@ use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionEvent;
 
 beforeEach(function () {
+    // Monday 5 October 2026, noon: the lessons below are this evening, whatever day the tests run.
+    CarbonImmutable::setTestNow('2026-10-05 12:00 UTC');
     $this->academy = $this->actAsTenant($this->createAcademy(['slug' => 'noor']));
     $this->teacher = User::factory()->withRole(Role::Teacher)->create();
     $this->student = User::factory()->withRole(Role::Student)->create(['timezone' => 'Asia/Qatar']);
@@ -31,6 +33,8 @@ beforeEach(function () {
     $this->subject = app(CatalogApi::class)->createSubject('تجويد', 'Tajweed');
     $this->start = CarbonImmutable::parse('2026-10-05 19:00', 'UTC');
 });
+
+afterEach(fn () => CarbonImmutable::setTestNow());
 
 function book(string $start = '19:00', int $minutes = 45, ?string $teacherId = null, ?string $studentId = null): Session
 {

@@ -64,6 +64,7 @@ final class SubstituteTeacher
                 DB::afterCommit(fn () => event(new SessionTeacherSubstituted($session->academy_id, $session->id, $from, $teacherId, $actorId)));
             });
         } catch (QueryException $e) {
+            $session->refresh();    // rolled back: the lesson as it stands, so another substitute can be tried on it
             if (str_contains($e->getMessage(), 'session_participants_no_double_booking')) {
                 throw ValidationException::withMessages(['teacher' => __('scheduling::policy.errors.someone_busy')]);
             }

@@ -44,7 +44,8 @@ final class ClassroomAccess
 
     private function isSupervisor(string $userId): bool
     {
-        $user = app('auth')->getProvider()?->retrieveById($userId);
+        // The academy's users by name: under the API's token guard the current guard has no provider of its own.
+        $user = app('auth')->createUserProvider('users')?->retrieveById($userId);
 
         return $user !== null && Gate::forUser($user)->allows(Ability::ViewLiveBoard->value);
     }

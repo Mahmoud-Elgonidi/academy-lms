@@ -18,7 +18,7 @@ it('signs access tokens LiveKit accepts, with the grants of the seat', function 
 
 it('accepts only webhooks signed for our key with the body\'s hash', function () {
     $body = json_encode(['event' => 'participant_joined', 'id' => 'EV_1', 'room' => ['name' => 'r']]);
-    $sign = fn (string $content, string $key = 'devkey', string $secret = 'secret') => Jwt::encode(['iss' => $key, 'exp' => time() + 300, 'sha256' => base64_encode(hash('sha256', $content, true))], $secret);
+    $sign = fn (string $content, string $key = 'devkey', string $secret = 'secret') => Jwt::encode(['iss' => $key, 'exp' => CarbonImmutable::now()->getTimestamp() + 300, 'sha256' => base64_encode(hash('sha256', $content, true))], $secret);
     $receiver = new WebhookReceiver('devkey', 'secret');
 
     expect($receiver->receive($body, $sign($body))['id'])->toBe('EV_1')

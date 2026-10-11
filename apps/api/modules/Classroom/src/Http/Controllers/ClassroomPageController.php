@@ -75,12 +75,8 @@ final class ClassroomPageController
     public function go(Request $request, string $session, JoinLesson $join): RedirectResponse
     {
         $viewer = $this->viewer($request, $session) ?? abort(403);
-        $ticket = $join->handle($session, $viewer);
-        if ($ticket->seat->role !== 'observer') {
-            $this->lessons->participantJoined($session, $ticket->seat->identity, now()->toImmutable(), 'external_link');
-        }
 
-        return redirect()->away($ticket->url);
+        return redirect()->away($join->enter($session, $viewer)->url);
     }
 
     /** The teacher (or a supervisor) starts recording the lesson, when the academy records lessons and everyone agreed. */

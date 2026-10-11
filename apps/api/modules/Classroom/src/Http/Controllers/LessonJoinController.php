@@ -20,7 +20,7 @@ final class LessonJoinController
     public function __invoke(Request $request, string $session, JoinLesson $join, AttendanceApi $lessons, RecordingState $recording): JsonResponse
     {
         $viewer = (string) $request->user()->getAuthIdentifier();
-        $ticket = $join->handle($session, $viewer);
+        $ticket = $join->enter($session, $viewer);
         $lesson = $lessons->lesson($session);
         $state = $lesson !== null ? $recording->for($viewer, $lesson) : ['mode' => 'off', 'controls' => false, 'running' => false, 'missing' => []];
 

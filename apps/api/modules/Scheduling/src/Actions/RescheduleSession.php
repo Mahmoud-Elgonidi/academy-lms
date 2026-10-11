@@ -78,6 +78,7 @@ final class RescheduleSession
                 DB::afterCommit(fn () => event(new SessionRescheduled($session->academy_id, $session->id, $old->utc()->toIso8601ZuluString(), $actorId)));
             });
         } catch (QueryException $e) {
+            $session->refresh();    // rolled back: the lesson as it stands, so another time can be tried on it
             if (str_contains($e->getMessage(), 'session_participants_no_double_booking')) {
                 throw ValidationException::withMessages(['starts_at' => __('scheduling::policy.errors.someone_busy')]);
             }

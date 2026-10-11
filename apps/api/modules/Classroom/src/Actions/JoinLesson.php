@@ -53,7 +53,24 @@ final class JoinLesson
             'name' => Room::nameFor($this->tenant->require()->id, $lesson->id),
         ]);
 
-        return $this->providers->get($room->provider)->ticket($room, $seat, $lesson)->withCamera($this->cameraOn($seat, $lesson));
+        // A LiveKit room on a server that no longer has LiveKit: the teacher's outside link still works.
+        return $this->providers->get($this->providers->effective($room->provider))->ticket($room, $seat, $lesson)->withCamera($this->cameraOn($seat, $lesson));
+    }
+
+    /**
+     * Someone is going in now (the class page's "go", the apps' and the portal's join): their ticket, and,
+     * for an outside link, which tells us nothing itself, their join is recorded here (not a supervisor's),
+     * so a lesson held on Meet or Zoom is not taken for one nobody came to.
+     */
+    public function enter(string $sessionId, string $userId, ?CarbonImmutable $now = null): JoinTicket
+    {
+        $now ??= CarbonImmutable::now();
+        $ticket = $this->handle($sessionId, $userId, $now);
+        if ($ticket->provider === 'external' && $ticket->seat->role !== 'observer') {
+            $this->lessons->participantJoined($sessionId, $ticket->seat->identity, $now, 'external_link');
+        }
+
+        return $ticket;
     }
 
     /** A student comes in with the camera the academy chose (on, off, or off when under 18); everyone else with it on. */

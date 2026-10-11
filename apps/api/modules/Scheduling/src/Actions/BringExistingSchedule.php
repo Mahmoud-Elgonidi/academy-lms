@@ -19,6 +19,7 @@ use Modules\Scheduling\Contracts\DTOs\BroughtSchedule;
 use Modules\Scheduling\Contracts\DTOs\ExistingSchedule;
 use Modules\Scheduling\Contracts\ScheduleImport;
 use Modules\Scheduling\Domain\Slots\WeeklyTime;
+use Modules\Scheduling\Support\MinorsGuard;
 use Modules\SharedKernel\Time\LocalTimeResolver;
 use Modules\SharedKernel\Time\Timezones;
 
@@ -41,6 +42,7 @@ final class BringExistingSchedule implements ScheduleImport
         private readonly MaterializeSessions $materialize,
         private readonly FundSessions $fund,
         private readonly LocalTimeResolver $resolver,
+        private readonly MinorsGuard $minors,
     ) {}
 
     public function exists(string $studentId, string $teacherId, string $subjectId): bool
@@ -62,6 +64,8 @@ final class BringExistingSchedule implements ScheduleImport
         if (! DB::table('teacher_subjects')->where('teacher_id', $s->teacherId)->where('subject_id', $s->subjectId)->exists()) {
             throw ValidationException::withMessages(['subject' => __($l.'not_their_subject')]);
         }
+        // New lessons with a child, like any other door: only with a teacher cleared for children.
+        $this->minors->assert($s->teacherId, $s->studentId);
         if ($s->durationMin < 10 || $s->durationMin > 240) {
             throw ValidationException::withMessages(['duration' => __($l.'duration')]);
         }

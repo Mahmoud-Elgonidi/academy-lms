@@ -313,5 +313,6 @@ return [
         'extend_overlap' => 'The teacher or the student has a session right after.',
         'cannot_flag' => 'This session cannot go to review now.',
         'cannot_resolve' => 'This session does not need a decision.',
+        'changed' => 'Someone else changed this lesson just now. Look at it again, then try.',
     ],
 ];

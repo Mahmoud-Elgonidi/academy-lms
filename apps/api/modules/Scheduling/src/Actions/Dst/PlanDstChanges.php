@@ -148,9 +148,17 @@ final class PlanDstChanges
         }
         sort($moments);
         foreach ($moments as $ts) {
-            if (self::difference($anchor, $other, CarbonImmutable::createFromTimestampUTC($ts)) !== $base) {
-                return CarbonImmutable::createFromTimestampUTC($ts);
+            if (self::difference($anchor, $other, CarbonImmutable::createFromTimestampUTC($ts)) === $base) {
+                continue;
             }
+            // Both clocks may change the same day, hours apart (Casablanca and New York, 14 March 2027):
+            // a difference back where it was by the day's last change never changed for the lessons.
+            $sameDay = array_filter($moments, fn (int $m) => $m > $ts && $m <= $ts + 86400);
+            if ($sameDay !== [] && self::difference($anchor, $other, CarbonImmutable::createFromTimestampUTC(max($sameDay))) === $base) {
+                continue;
+            }
+
+            return CarbonImmutable::createFromTimestampUTC($ts);
         }
 
         return null;

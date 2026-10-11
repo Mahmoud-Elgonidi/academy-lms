@@ -4,6 +4,7 @@ namespace Modules\Classroom\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Classroom\Video\ProviderManager;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
@@ -56,9 +57,18 @@ final class ClassroomSettings extends Model
         return ['recording_days' => 'integer', 'recording_family' => 'boolean', 'recording_teacher' => 'boolean'];
     }
 
+    /** The academy's settings; its provider as lessons use it on this server (the outside link where there is no LiveKit). */
     public static function current(): self
     {
-        return self::query()->first() ?? new self(['provider' => config('classroom.provider', 'livekit')]);
+        $settings = self::query()->first() ?? new self(['provider' => config('classroom.provider', 'livekit')]);
+        $provider = app(ProviderManager::class)->effective($settings->provider);
+        if ($provider !== $settings->provider) {
+            // Not saved: the academy's own choice stays for a server that gets LiveKit later.
+            $settings->provider = $provider;
+            $settings->syncOriginalAttribute('provider');
+        }
+
+        return $settings;
     }
 
     public function records(): bool

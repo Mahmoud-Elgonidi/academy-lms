@@ -45,7 +45,7 @@ function ticketFor(User $user, string $time): array
 function livekitPost(array $event): TestResponse
 {
     $body = json_encode($event);
-    $jwt = Jwt::encode(['iss' => 'devkey', 'exp' => time() + 300, 'sha256' => base64_encode(hash('sha256', $body, true))], config('classroom.livekit.secret'));
+    $jwt = Jwt::encode(['iss' => 'devkey', 'exp' => CarbonImmutable::now()->getTimestamp() + 300, 'sha256' => base64_encode(hash('sha256', $body, true))], config('classroom.livekit.secret'));
 
     return test()->call('POST', '/webhooks/livekit', [], [], [], ['HTTP_AUTHORIZATION' => $jwt, 'CONTENT_TYPE' => 'application/webhook+json'], $body);
 }

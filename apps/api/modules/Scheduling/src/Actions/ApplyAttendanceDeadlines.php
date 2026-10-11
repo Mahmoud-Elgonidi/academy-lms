@@ -11,6 +11,7 @@ use Modules\Scheduling\Domain\AttendancePolicy;
 use Modules\Scheduling\Domain\Enums\ParticipantRole;
 use Modules\Scheduling\Domain\Enums\SessionEventKind;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
+use Modules\Scheduling\Domain\LessonChanged;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionEvent;
@@ -50,39 +51,50 @@ final class ApplyAttendanceDeadlines
             ->get();
 
         foreach ($open as $session) {
-            $teacher = $session->participant(ParticipantRole::Teacher);
-            $student = $session->participant(ParticipantRole::Student);
-            $teacherIn = $teacher?->first_join_at !== null;
-            $studentIn = $student?->first_join_at !== null;
-
-            if (! $teacherIn && $now->greaterThanOrEqualTo($session->starts_at->addMinutes($policy->teacherAbsentAfterMin))) {
-                $studentIn ? $this->teacherAbsent($session, $now) : $this->flagForReview->handle($session, 'nobody_joined', null, null);
-                $changed++;
-
-                continue;
-            }
-
-            if ($teacherIn && ! $studentIn && $now->greaterThanOrEqualTo($session->starts_at->addMinutes($policy->studentWaitMin($session->durationMinutes())))) {
-                $this->markStudentAbsent->handle($session, null, 'system', $now);
-                $changed++;
-
-                continue;
-            }
-
-            if ($teacherIn && $studentIn && $now->greaterThanOrEqualTo($session->ends_at->addMinutes($policy->finalizeAfterEndMin))) {
-                // From the classroom's stretches when there are any (both in at once, inside the lesson);
-                // otherwise from the first joins, as before Classroom.
-                $taught = $this->taught->hasSegments($session->id)
-                    ? $this->taught->of($session->id, $session->starts_at, $session->ends_at, $now)
-                    : (int) max(0, $teacher->first_join_at->max($student->first_join_at)->max($session->starts_at)->diffInMinutes($session->ends_at, false));
-                $taught >= $policy->completionShare * $session->durationMinutes()
-                    ? $this->complete($session, (int) $taught, $now)
-                    : $this->flagForReview->handle($session, 'short_delivery', null, null);
-                $changed++;
+            try {
+                $changed += $this->deadline($session, $now, $policy);
+            } catch (LessonChanged) {
+                continue;   // someone decided it while we ran: theirs stands
             }
         }
 
         return $changed;
+    }
+
+    /** @return int 1 when the lesson changed */
+    private function deadline(Session $session, CarbonImmutable $now, AttendancePolicy $policy): int
+    {
+        $teacher = $session->participant(ParticipantRole::Teacher);
+        $student = $session->participant(ParticipantRole::Student);
+        $teacherIn = $teacher?->first_join_at !== null;
+        $studentIn = $student?->first_join_at !== null;
+
+        if (! $teacherIn && $now->greaterThanOrEqualTo($session->starts_at->addMinutes($policy->teacherAbsentAfterMin))) {
+            $studentIn ? $this->teacherAbsent($session, $now) : $this->flagForReview->handle($session, 'nobody_joined', null, null);
+
+            return 1;
+        }
+
+        if ($teacherIn && ! $studentIn && $now->greaterThanOrEqualTo($session->starts_at->addMinutes($policy->studentWaitMin($session->durationMinutes())))) {
+            $this->markStudentAbsent->handle($session, null, 'system', $now);
+
+            return 1;
+        }
+
+        if ($teacherIn && $studentIn && $now->greaterThanOrEqualTo($session->ends_at->addMinutes($policy->finalizeAfterEndMin))) {
+            // From the classroom's stretches when there are any (both in at once, inside the lesson);
+            // otherwise from the first joins, as before Classroom.
+            $taught = $this->taught->hasSegments($session->id)
+                ? $this->taught->of($session->id, $session->starts_at, $session->ends_at, $now)
+                : (int) max(0, $teacher->first_join_at->max($student->first_join_at)->max($session->starts_at)->diffInMinutes($session->ends_at, false));
+            $taught >= $policy->completionShare * $session->durationMinutes()
+                ? $this->complete($session, (int) $taught, $now)
+                : $this->flagForReview->handle($session, 'short_delivery', null, null);
+
+            return 1;
+        }
+
+        return 0;
     }
 
     /** Rule 9: the student is owed a makeup, the teacher is not paid. */

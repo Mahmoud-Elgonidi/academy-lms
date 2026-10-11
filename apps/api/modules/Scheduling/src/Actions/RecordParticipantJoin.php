@@ -23,6 +23,8 @@ final class RecordParticipantJoin
         $at ??= CarbonImmutable::now();
 
         DB::transaction(function () use ($session, $userId, $at, $source) {
+            // The lesson as it stands now, held while it starts: a decision made meanwhile (the sweeper, a cancel) is seen, never undone.
+            $session = Session::query()->whereKey($session->id)->lock('for no key update')->firstOrFail();
             $participant = $session->participants()->where('user_id', $userId)->firstOrFail();
             if ($participant->first_join_at === null) {
                 $participant->first_join_at = $at;

@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Gate;
 use Modules\Classroom\Actions\Recordings\SaveRecordingSettings;
 use Modules\Classroom\Actions\SaveClassroomSettings;
 use Modules\Classroom\Models\ClassroomSettings;
+use Modules\Classroom\Video\ProviderManager;
 use Modules\SharedKernel\Authorization\Ability;
 use UnitEnum;
 
@@ -86,7 +87,8 @@ final class ClassroomSettingsPage extends Page
 
         return $schema->statePath('data')->components([
             Radio::make('provider')->label(__('classroom::classroom.settings.provider'))->required()
-                ->options(collect(ClassroomSettings::PROVIDERS)->mapWithKeys(fn ($p) => [$p => __('classroom::classroom.settings.providers.'.$p)])),
+                ->options(collect(app(ProviderManager::class)->available())->mapWithKeys(fn ($p) => [$p => __('classroom::classroom.settings.providers.'.$p)]))
+                ->helperText(app(ProviderManager::class)->liveKitReady() ? null : __('classroom::classroom.errors.livekit_unavailable')),
             Radio::make('student_camera')->label(__('classroom::classroom.settings.student_camera'))->helperText(__('classroom::classroom.settings.student_camera_hint'))->required()
                 ->options(collect(ClassroomSettings::STUDENT_CAMERA)->mapWithKeys(fn ($m) => [$m => __('classroom::classroom.settings.cameras.'.$m)])),
             Section::make(__($r.'section'))->description(__($r.'section_hint'))->schema([
