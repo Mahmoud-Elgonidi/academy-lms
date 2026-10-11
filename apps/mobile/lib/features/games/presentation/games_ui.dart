@@ -52,6 +52,7 @@ class Button3d extends StatefulWidget {
     this.height,
     this.label,
     this.enabled = true,
+    this.shrink = false,
   });
 
   final Widget child;
@@ -66,6 +67,9 @@ class Button3d extends StatefulWidget {
   final double? height;
   final String? label;
   final bool enabled;
+
+  /// As wide as its words (a chip), not as wide as it may be.
+  final bool shrink;
 
   @override
   State<Button3d> createState() => _Button3dState();
@@ -99,8 +103,8 @@ class _Button3dState extends State<Button3d> {
             border: Border.all(color: widget.ink, width: widget.border),
             boxShadow: on && widget.depth > 0 ? [BoxShadow(color: widget.ink, offset: Offset(0, widget.depth - sink))] : null,
           ),
-          alignment: Alignment.center,
-          child: widget.child,
+          alignment: widget.shrink ? null : Alignment.center,
+          child: widget.shrink ? Center(widthFactor: 1, heightFactor: widget.height == null ? 1 : null, child: widget.child) : widget.child,
         ),
       ),
     );
@@ -173,6 +177,26 @@ class StarsPill extends StatelessWidget {
           CountUp(stars, style: gwText(context, 16)),
         ],
       ),
+    ),
+  );
+}
+
+/// Three stars, [stars] of them lit (drawn, so every phone shows them).
+class StarRow extends StatelessWidget {
+  const StarRow(this.stars, {super.key, this.size = 16, this.on = const Color(0xFFFCC419), this.off = const Color(0xFFDEE2E6)});
+
+  final int stars;
+  final double size;
+  final Color on;
+  final Color off;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: context.l10n.gamesStars(stars),
+    excludeSemantics: true,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [for (var i = 0; i < 3; i++) Icon(Icons.star_rounded, size: size, color: i < stars ? on : off)],
     ),
   );
 }

@@ -54,9 +54,9 @@ class _GuardianGamesState extends State<GuardianGames> {
       );
       if (!mounted) return;
       await context.read<LoadCubit<GamesWorld>>().load();
-      messenger.showSnackBar(SnackBar(content: Text(l.gamesSaved)));
+      (messenger..removeCurrentSnackBar()).showSnackBar(SnackBar(content: Text(l.gamesSaved)));
     } on ApiProblem catch (p) {
-      if (mounted) messenger.showSnackBar(SnackBar(content: Text(context.problemText(p))));
+      if (mounted) (messenger..removeCurrentSnackBar()).showSnackBar(SnackBar(content: Text(context.problemText(p))));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -69,9 +69,9 @@ class _GuardianGamesState extends State<GuardianGames> {
     setState(() => _hearts++);
     try {
       await context.read<ChallengesRepository>().cheer(_w.learnerId, 'heart');
-      messenger.showSnackBar(SnackBar(content: Text(l.gamesCheered)));
+      (messenger..removeCurrentSnackBar()).showSnackBar(SnackBar(content: Text(l.gamesCheered)));
     } on ApiProblem catch (p) {
-      if (mounted) messenger.showSnackBar(SnackBar(content: Text(context.problemText(p))));
+      if (mounted) (messenger..removeCurrentSnackBar()).showSnackBar(SnackBar(content: Text(context.problemText(p))));
     }
   }
 
@@ -135,14 +135,10 @@ class _GuardianGamesState extends State<GuardianGames> {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsetsDirectional.only(end: 6),
-                        child: ChoiceChip(
-                          label: SizedBox(
-                            width: double.infinity,
-                            child: Text(label, textAlign: TextAlign.center),
-                          ),
+                        child: _Choice(
+                          label: label,
                           selected: limits.dailyMinutes == minutes,
-                          showCheckmark: false,
-                          onSelected: _saving ? null : (_) => _save(minutes: minutes, keepMinutes: false),
+                          onTap: _saving ? null : () => _save(minutes: minutes, keepMinutes: false),
                         ),
                       ),
                     ),
@@ -309,6 +305,48 @@ class _GuardianGamesState extends State<GuardianGames> {
           ),
           FilledButton(onPressed: _cheer, child: Text(l.gamesCheer)),
         ],
+      ),
+    );
+  }
+}
+
+/// One choice of minutes a day: the academy's colour when chosen.
+class _Choice extends StatelessWidget {
+  const _Choice({required this.label, required this.selected, required this.onTap});
+
+  final String label;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Semantics(
+      inMutuallyExclusiveGroup: true,
+      checked: selected,
+      button: true,
+      child: Material(
+        color: selected ? c.brand : c.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: selected ? c.brand : c.line),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: SizedBox(
+            height: 44,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(label, style: context.text.labelLarge?.copyWith(color: selected ? Colors.white : c.ink)),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

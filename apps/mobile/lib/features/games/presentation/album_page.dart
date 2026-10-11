@@ -98,6 +98,7 @@ class _AlbumState extends State<_Album> {
     }
     final said = await showModalBottomSheet<String>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: _ink.withValues(alpha: 0.5),
@@ -178,6 +179,7 @@ class _AlbumState extends State<_Album> {
                         alignment: AlignmentDirectional.centerStart,
                         child: FractionallySizedBox(
                           widthFactor: all.isEmpty ? 0 : found / all.length,
+                          heightFactor: 1,
                           child: const ColoredBox(color: _purple),
                         ),
                       ),
@@ -527,7 +529,7 @@ class _CreatureSheetState extends State<_CreatureSheet> {
                 TextSpan(
                   children: [
                     TextSpan(text: c.story),
-                    if (c.nickname?.isNotEmpty ?? false)
+                    if ((c.nickname?.isNotEmpty ?? false) && c.nickname != c.name)
                       TextSpan(
                         text: ' (${c.name})',
                         style: const TextStyle(color: _sub),
@@ -554,6 +556,7 @@ class _CreatureSheetState extends State<_CreatureSheet> {
                         checked: c.shownName == name,
                         child: Button3d(
                           height: 36,
+                          shrink: true,
                           ink: _ink,
                           depth: c.shownName == name ? 4 : 0,
                           color: c.shownName == name ? const Color(0xFFB197FC) : Colors.white,

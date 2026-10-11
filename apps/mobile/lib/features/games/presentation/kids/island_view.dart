@@ -413,14 +413,12 @@ class _GameCardTile extends StatelessWidget {
                       children: [
                         Text(g.title, style: gwText(context, 19, height: 1.15)),
                         Container(
-                          height: 20,
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: badgeKind == 'homework' ? const Color(0xFFFF6B6B) : gwSun,
                             borderRadius: BorderRadius.circular(999),
                             border: Border.all(color: gwInk, width: 2),
                           ),
-                          alignment: Alignment.center,
                           child: Text(
                             badge,
                             style: gwText(context, 11.5, color: badgeKind == 'homework' ? Colors.white : gwInk, height: 1),

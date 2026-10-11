@@ -64,7 +64,9 @@ class _HatchViewState extends State<HatchView> {
     GameSound.play(GameEffect.win);
     final names = _c.names.isEmpty ? [_c.name] : _c.names;
     try {
-      await context.read<GamesRepository>().name(_c.key, names[_name.clamp(0, names.length - 1)]);
+      final name = names[_name.clamp(0, names.length - 1)];
+      // Its own name keeps no nickname.
+      await context.read<GamesRepository>().name(_c.key, name == _c.name ? '' : name);
       widget.onNamed(_c.key);
     } on ApiProblem catch (p) {
       if (mounted) {
@@ -361,6 +363,7 @@ class _HatchViewState extends State<HatchView> {
                     checked: _name == i,
                     child: Button3d(
                       height: 44,
+                      shrink: true,
                       ink: _ink,
                       depth: _name == i ? 4 : 0,
                       color: _name == i ? const Color(0xFFB197FC) : Colors.white,

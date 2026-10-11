@@ -66,10 +66,12 @@ class GamesHub extends StatelessWidget {
 
     final children = <Widget>[
       // Head: what this is, and the stars (middle) or the streak of days (older).
-      SizedBox(
-        height: 70,
+      ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 70),
         child: Row(
           children: [
+            // Pushed over a look's tab (the teens' plan): the way back.
+            if (ModalRoute.of(context)?.canPop ?? false) BackButton(color: p.muted),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -184,7 +186,7 @@ class GamesHub extends StatelessWidget {
                     Expanded(
                       child: Text(r.game, style: t(14, weight: FontWeight.w500)),
                     ),
-                    Text('${'★' * r.stars}${'☆' * (3 - r.stars).clamp(0, 3)}', style: const TextStyle(color: Color(0xFFFCC419))),
+                    StarRow(r.stars, off: p.line),
                   ],
                 ),
                 Text(
@@ -441,7 +443,7 @@ class _Constellation extends CustomPainter {
     }
     for (var i = 0; i < _points.length; i++) {
       final on = i < lit;
-      if (on)
+      if (on) {
         canvas.drawCircle(
           _points[i],
           10,
@@ -449,6 +451,7 @@ class _Constellation extends CustomPainter {
             ..color = accent.withValues(alpha: 0.25)
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
         );
+      }
       canvas.drawCircle(_points[i], on ? 6 : 3.5, Paint()..color = on ? accent : const Color(0xFF475569));
     }
   }
@@ -602,11 +605,7 @@ class _GamesGrid extends StatelessWidget {
       itemBuilder: (context, i) {
         final (island, g) = games[i];
         final on = may && g.playable;
-        final status = !g.playable
-            ? l.gamesNeedsPractice
-            : g.plays > 0
-            ? '${'★' * g.best}${'☆' * (3 - g.best).clamp(0, 3)}'
-            : l.gamesBadgeNew;
+        final status = !g.playable ? l.gamesNeedsPractice : l.gamesBadgeNew;
         return Opacity(
           opacity: on ? 1 : 0.5,
           child: Material(
@@ -630,12 +629,15 @@ class _GamesGrid extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
                     ),
-                    Text(
-                      status,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, color: p.accent),
-                    ),
+                    if (g.playable && g.plays > 0)
+                      StarRow(g.best, size: 15, on: p.accent, off: p.line)
+                    else
+                      Text(
+                        status,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 12, color: p.accent),
+                      ),
                   ],
                 ),
               ),

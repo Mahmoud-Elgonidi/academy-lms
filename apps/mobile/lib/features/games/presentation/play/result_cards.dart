@@ -42,8 +42,9 @@ class KidsResultCard extends StatelessWidget {
           .scaleXY(begin: 0, end: 1, duration: 500.ms, curve: const Cubic(0.3, 1.8, 0.5, 1))
           .rotate(begin: -40 / 360, end: 0, duration: 500.ms)
           .fadeIn(duration: 200.ms);
-      if (on)
+      if (on) {
         a = a.callback(duration: 1.ms, callback: (_) => GameSound.play(i == 2 && result.stars == 3 ? GameEffect.win : GameEffect.star));
+      }
       return a;
     }
 
@@ -245,10 +246,7 @@ class HubResultCard extends StatelessWidget {
         : l.gamesSoClose;
     final calm = context.calm;
     Widget star(int i) {
-      final Widget s = Text(
-        '★',
-        style: TextStyle(fontSize: 34, height: 1, color: i < result.stars ? const Color(0xFFFCC419) : const Color(0xFFDEE2E6)),
-      );
+      final Widget s = Icon(Icons.star_rounded, size: 42, color: i < result.stars ? const Color(0xFFFCC419) : const Color(0xFFDEE2E6));
       if (calm) return s;
       var a = s
           .animate(delay: Duration(milliseconds: 200 + i * 250))
