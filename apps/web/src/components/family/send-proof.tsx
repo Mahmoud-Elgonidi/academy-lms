@@ -19,8 +19,10 @@ function today(): string {
  * Paid by hand (a bank transfer, InstaPay, a wallet): the academy's own words
  * on how, then the receipt and what it says. It waits for the academy, which
  * checks the money arrived (one key per submit, so a retry sends it once).
+ * It stays on the page while a proof waits (canSend false), so the word that
+ * it was sent outlives the refresh that takes the form away.
  */
-export function SendProof({ invoice, manual, primary }: { invoice: Invoice; manual: ManualPayment; primary: boolean }) {
+export function SendProof({ invoice, manual, primary, canSend }: { invoice: Invoice; manual: ManualPayment; primary: boolean; canSend: boolean }) {
   const t = useTranslations('family');
   const common = useTranslations('common');
   const [open, setOpen] = useState(false);
@@ -30,6 +32,10 @@ export function SendProof({ invoice, manual, primary }: { invoice: Invoice; manu
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [pending, start] = useTransition();
   const key = useRef<string | null>(null);
+
+  if (!canSend) {
+    return message ? <Notice tone={message.tone}>{message.text}</Notice> : null;
+  }
 
   if (!open) {
     return (

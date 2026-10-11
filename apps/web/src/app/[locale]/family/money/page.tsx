@@ -78,7 +78,7 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
                   <div className="mt-4 space-y-3 border-t border-line pt-4">
                     {i.proof ? <ProofLine proof={i.proof} /> : null}
                     {i.pay_with.length > 0 || !i.can_send_proof ? <PayInvoice invoice={i} /> : null}
-                    {i.can_send_proof ? <SendProof invoice={i} manual={invoices.manual} primary={i.pay_with.length === 0} /> : null}
+                    <SendProof invoice={i} manual={invoices.manual} primary={i.pay_with.length === 0} canSend={i.can_send_proof} />
                   </div>
                 </article>
               </li>

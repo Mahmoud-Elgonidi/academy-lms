@@ -53,6 +53,7 @@ return [
             'two_factor_reset' => 'Two-step sign-in of :name reset by the platform team: :reason',
             'social_linked' => ':name linked a :provider account (:via)',
             'social_unlinked' => ':name unlinked a :provider account',
+            'demo_passwords_reset' => ":count demo accounts took the server's new demo password",
         ],
         'safeguarding' => [
             'concern_reported' => 'Safeguarding concern :concern raised',
@@ -117,6 +118,7 @@ return [
         'platform' => [
             'signed_in' => 'Signed in to the console',
             'plan_saved' => 'The :plan plan edited',
+            'demo_secrets_reset' => "Demo console account :name took the server's new demo password and key",
         ],
     ],
     'values' => [

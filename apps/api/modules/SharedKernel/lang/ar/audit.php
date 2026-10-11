@@ -53,6 +53,7 @@ return [
             'two_factor_reset' => 'فريق المنصة صفّر الدخول بخطوتين لـ :name: :reason',
             'social_linked' => ':name ربط حساب :provider (:via)',
             'social_unlinked' => ':name فصل حساب :provider',
+            'demo_passwords_reset' => ':count من الحسابات التجريبية خدوا كلمة السر التجريبية الجديدة بتاعة السيرفر',
         ],
         'safeguarding' => [
             'concern_reported' => 'اتبعت بلاغ الحماية :concern',
@@ -117,6 +118,7 @@ return [
         'platform' => [
             'signed_in' => 'دخول على لوحة المنصة',
             'plan_saved' => 'تعديل الباقة :plan',
+            'demo_secrets_reset' => 'حساب لوحة المنصة التجريبي :name خد كلمة السر والمفتاح التجريبيين الجداد',
         ],
     ],
     'values' => [

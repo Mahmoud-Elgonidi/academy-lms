@@ -355,3 +355,24 @@ invoice), it goes back to the academy's "Data requests" page with the reason, an
 Edit the value in `.env` (never in the repository, never in a log), then `docker compose up -d`.
 Do not change `APP_KEY` on a live server: it decrypts the gateways' keys, the authenticator secrets and
 the sessions. `HEALTH_TOKEN` can change any time (and the uptime monitor with it).
+
+**The demo password and the demo console key** (say they were shown to someone): `DEMO_PASSWORD` and
+`DEMO_PLATFORM_2FA_SECRET` are only read when the demo is loaded, so new values in `.env` need one more
+step to reach the accounts. As the deploy user, in `~/academy-lms`:
+
+```bash
+sed -i "s/^DEMO_PASSWORD=.*/DEMO_PASSWORD=$(head -c 30 /dev/urandom | base64 | tr '+/' 'Kq' | tr -d '\n=' | cut -c1-16)/" .env
+sed -i "s/^DEMO_PLATFORM_2FA_SECRET=.*/DEMO_PLATFORM_2FA_SECRET=$(head -c 20 /dev/urandom | base32 | tr -d '=\n')/" .env
+docker compose up -d
+docker compose exec web php artisan identity:demo-secrets
+```
+
+Every demo account (`…@demo.test`, in each active academy) and the demo console team (`…@platform.test`)
+take the new values, their sign-ins end (apps and panels ask again), and each academy's activity log and
+the console's say so; an address on `.test` is never a real person's, so no real account changes. The
+console admin's authenticator app needs the new key (`grep DEMO_PLATFORM_2FA_SECRET .env`, or
+`platform:code admin@platform.test` for one code); an owner, admin or accountant keeps the authenticator
+they set up themselves.
+
+**A real platform team**: `docker compose exec web php artisan platform:admin you@company.com "Your name"`
+adds one (it asks for the password and sets up the authenticator at the first sign-in to `/console`).

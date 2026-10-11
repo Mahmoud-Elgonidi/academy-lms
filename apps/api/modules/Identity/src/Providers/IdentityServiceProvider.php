@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
 use Modules\Identity\Authorization\AbilityMatrix;
+use Modules\Identity\Commands\RotateDemoSecrets;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Contracts\OtpSender;
 use Modules\Identity\Contracts\PersonalChannel;
@@ -70,5 +71,9 @@ final class IdentityServiceProvider extends ServiceProvider
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('model:prune', ['--model' => [OtpChallenge::class, SocialSignIn::class]])->daily()->onOneServer();
         });
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([RotateDemoSecrets::class]);
+        }
     }
 }

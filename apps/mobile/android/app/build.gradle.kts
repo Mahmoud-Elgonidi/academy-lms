@@ -25,7 +25,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // The app's identity on Google Play (and com.academylms.academyApp on iOS): it can never change once
+        // a build is uploaded to a store, so settle the store name before the first upload (docs/HANDOVER.md).
         applicationId = "com.academylms.academy_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
