@@ -41,6 +41,8 @@ use Modules\Curriculum\Models\NodeItem;
 use Modules\Curriculum\Models\NodeResource;
 use Modules\Curriculum\Models\Program;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Games\CatalogGame;
+use Modules\SharedKernel\Games\GameCatalog;
 use Modules\SharedKernel\Games\ItemKind;
 
 /**
@@ -49,7 +51,8 @@ use Modules\SharedKernel\Games\ItemKind;
  * follow it. Each lesson opens its materials: files and links, for
  * everyone or for teachers only, added, renamed, moved or taken off at any
  * time (published or not), and its practice: the questions, orders and
- * pairs the learner's games play after the lesson (SaveNodeItems).
+ * pairs the learner's games play after the lesson (SaveNodeItems), with the
+ * games those items are enough for, and how much of the program has practice.
  *
  * @property Program $record
  */
@@ -117,6 +120,41 @@ final class EditCurriculum extends Page
     {
         return NodeItem::query()->whereIn('node_id', array_map(fn ($n) => $n->id, $this->tree->lessons()))
             ->selectRaw('node_id, count(*) as n')->groupBy('node_id')->pluck('n', 'node_id')->map(fn ($n) => (int) $n)->all();
+    }
+
+    /**
+     * The games each lesson's practice is enough for (the platform's live games: the items of the kinds a game
+     * plays reach its smallest round), so the academy sees its curriculum become a game.
+     *
+     * @return array<string, list<array{title: string, stages: string}>> lesson id => games
+     */
+    #[Computed]
+    public function playsIn(): array
+    {
+        $kinds = [];
+        foreach (NodeItem::query()->whereIn('node_id', array_map(fn ($n) => $n->id, $this->tree->lessons()))
+            ->selectRaw('node_id, kind, count(*) as n')->groupBy('node_id', 'kind')->get() as $row) {
+            $kinds[$row->node_id][$row->kind] = (int) $row->n;
+        }
+        $games = app(GameCatalog::class)->games();
+        $out = [];
+        foreach ($kinds as $lesson => $counts) {
+            $out[$lesson] = array_values(array_map(fn (CatalogGame $g) => [
+                'title' => $g->title(),
+                'stages' => implode('، ', array_map(fn (string $s) => __('shared::games.stages.'.$s), $g->stages)),
+            ], array_filter($games, fn (CatalogGame $g) => array_sum(array_map(fn (ItemKind $k) => $counts[$k->value] ?? 0, $g->kinds)) >= $g->minItems)));
+        }
+
+        return $out;
+    }
+
+    /** @return array{with: int, total: int, missing: list<string>} lessons with practice, of all, and the first without */
+    public function practiceSummary(): array
+    {
+        $lessons = $this->tree->lessons();
+        $without = array_values(array_filter($lessons, fn ($l) => ($this->practiceCounts[$l->id] ?? 0) === 0));
+
+        return ['with' => count($lessons) - count($without), 'total' => count($lessons), 'missing' => array_map(fn ($l) => $l->title(), $without)];
     }
 
     /** @return list<NodeResource> */
@@ -304,7 +342,7 @@ final class EditCurriculum extends Page
                 $this->attempt($action, fn () => app(SaveNodeItems::class)->handle(
                     $this->node($arguments['node']), array_values($data['items'] ?? []), (string) auth()->id(),
                 ), __($l.'saved'));
-                unset($this->practiceCounts);
+                unset($this->practiceCounts, $this->playsIn);
             });
     }
 

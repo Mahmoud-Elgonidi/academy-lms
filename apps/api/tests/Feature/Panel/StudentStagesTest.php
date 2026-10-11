@@ -12,8 +12,10 @@ use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Identity\Models\User;
 use Modules\Learning\Actions\SubmitSessionReport;
 use Modules\Learning\Filament\Family\FamilyHomework;
+use Modules\Learning\Filament\Family\FamilyJourney;
 use Modules\Learning\Filament\Family\FamilyProgress;
 use Modules\Learning\Filament\Family\FamilyReports;
+use Modules\Learning\Filament\Family\JourneyBoard;
 use Modules\Learning\Filament\Family\JourneyWidget;
 use Modules\Learning\Filament\Family\LearningHomeWidget;
 use Modules\Learning\Models\SessionReport;
@@ -33,10 +35,10 @@ uses(EnrolledStudent::class, QuranProgram::class);
 
 /*
  * A student's own area takes the look of their stage (children, middle
- * school, secondary school) from their age or the academy's choice: the
- * roadmap and where they are on it on the home page, in that stage's
- * spirit, built from what really happened. Guardians and adults keep the
- * classic look.
+ * school, secondary school) from their age or the academy's choice: their
+ * journey through the curriculum is the home page, in that stage's spirit,
+ * built from what really happened. Guardians and adults keep the classic
+ * look, with the journey on its own page.
  */
 
 beforeEach(function () {
@@ -130,7 +132,7 @@ it('counts stars, points, the streak and badges from what really happened', func
     expect(app(JourneyQuery::class)->for($this->student->id)['streak'])->toBe(0);
 });
 
-it('shows a child the adventure map with their stars and where they are, and three tabs', function () {
+it('shows a child their journey as the home: the islands, where they are, and their tabs', function () {
     aged($this->student, 9);
     taught(0, [[0, 'mastered']]);
     taught(1, [[1, 'mastered']]);
@@ -140,16 +142,18 @@ it('shows a child the adventure map with their stars and where they are, and thr
         ->assertSeeLivewire(JourneyWidget::class)
         ->assertDontSeeLivewire(LearningHomeWidget::class)
         ->assertDontSeeLivewire(BalanceWidget::class);
-    Livewire::test(JourneyWidget::class)
-        ->assertSee(trans_choice('learning::journey.kids.stars', 2, ['n' => 2]))
-        ->assertSee(__('learning::journey.kids.here'))
+    $board = Livewire::test(JourneyBoard::class);
+    expect($board->instance()->look())->toBe('kids')
+        ->and($board->instance()->journey['stars']['total'])->toBe(2 + 2 * 5);   // two lessons taught, two mastered
+    $board->assertSee(__('learning::map.island.here'))
+        ->assertSee('Level 1')->assertSee('Level 2')
         ->assertSee('Lesson 3')
-        ->assertSee(trans_choice('learning::journey.kids.left', 3, ['n' => 3]))    // 2 of the 5 stops on the first island
-        ->assertSee(__('learning::journey.kids.next_island', ['title' => 'Level 2']));
+        ->assertSee(__('learning::map.island.ahead', ['title' => 'Level 1']), false);
 
     Livewire::test(FamilyLessons::class)->assertActionHidden('cancel');   // their guardian cancels for them
 
     expect(FamilyProgress::shouldRegisterNavigation())->toBeFalse()
+        ->and(FamilyJourney::shouldRegisterNavigation())->toBeFalse()     // the journey is their home
         ->and(FamilyReports::shouldRegisterNavigation())->toBeFalse()
         ->and(FamilyBilling::shouldRegisterNavigation())->toBeFalse()
         ->and([FamilyHome::getNavigationLabel(), FamilyLessons::getNavigationLabel(), FamilyHomework::getNavigationLabel()])
@@ -161,45 +165,44 @@ it('shows a child the adventure map with their stars and where they are, and thr
         ->assertSee('data-stage="kids"', false)
         ->assertSee('Baloo Bhaijaan 2 Variable', false)
         ->assertSee('class="lms-tabs"', false)
-        // Motion: the shared layer, the star count that counts up, and a cheer for new stars (the widget is drawn with the page).
+        // Motion: the shared layer, the star count that counts up, and a cheer for new stars (the journey is drawn with the page).
         ->assertSee('window.LmsMotion', false)
-        ->assertSee('data-count="2"', false)
-        ->assertSee('data-celebrate="stars:'.$this->student->id.'"', false);
+        ->assertSee('data-count="12"', false)
+        ->assertSee('data-celebrate="journey-stars-'.$this->student->id.'"', false);
 });
 
-it('gives middle school worlds, a rank with the points to the next, and badges', function () {
+it('gives middle school their levels with the stars to the next rank', function () {
     aged($this->student, 13);
     taught(0, [[0, 'mastered']]);
     inFamilyArea($this->student);
 
-    Livewire::test(JourneyWidget::class)
-        ->assertSee(__('learning::journey.ranks.beginner'))
-        ->assertSee(__('learning::journey.middle.to_next', ['n' => 180, 'rank' => __('learning::journey.ranks.explorer')]))   // 120 of 300
-        ->assertSee(__('learning::journey.middle.world', ['n' => 1, 'of' => 2]))
-        ->assertSee(__('learning::journey.badges.first_star')[0])
-        ->assertDontSee(__('learning::journey.middle.world', ['n' => 2, 'of' => 2]));
-    Livewire::test(FamilyProgress::class)->assertOk()
-        ->assertSee(__('learning::journey.middle.world', ['n' => 2, 'of' => 2]));   // every world on the worlds page
+    $board = Livewire::test(JourneyBoard::class);
+    expect($board->instance()->look())->toBe('middle');
+    $board->assertSee(__('learning::journey.ranks.beginner'))
+        ->assertSee(__('learning::map.to_next', ['n' => 24, 'rank' => __('learning::journey.ranks.explorer')]))   // 6 of 30
+        ->assertSee(__('learning::map.island.n_of', ['n' => 1, 'of' => 2]))
+        ->assertSee(__('learning::map.island.n_of', ['n' => 2, 'of' => 2]));
 
-    expect(FamilyProgress::getNavigationLabel())->toBe(__('learning::family.progress.nav.middle'))
+    expect(FamilyProgress::shouldRegisterNavigation())->toBeFalse()
         ->and(FamilyReports::shouldRegisterNavigation())->toBeTrue()
         ->and(FamilyBilling::shouldRegisterNavigation())->toBeFalse();
 });
 
-it('gives a teenager a plan: milestones, the next lessons and what to review', function () {
+it('gives a teenager the calm journey: the level, the next lesson, the levels and what to review', function () {
     aged($this->student, 16);
     taught(0, [[0, 'mastered']]);
     taught(1, [[1, 'mastered']]);
     taught(2, [[0, 'needs_review', 2], [2, 'introduced', 4]]);
     inFamilyArea($this->student);
 
-    Livewire::test(JourneyWidget::class)
-        ->assertSee(__('learning::journey.teen.milestones'))
-        ->assertSee(__('learning::journey.teen.lessons', ['done' => 2, 'total' => 7]))
-        ->assertSeeInOrder([__('learning::journey.teen.up_next'), 'Lesson 3', 'Lesson 4', 'Lesson 5'])
-        ->assertSeeInOrder([__('learning::journey.teen.review'), 'Lesson 1'])
-        ->assertSee(__('learning::journey.teen.goal'));
-    expect(FamilyProgress::getNavigationLabel())->toBe(__('learning::family.progress.nav.teen'));
+    $board = Livewire::test(JourneyBoard::class);
+    expect($board->instance()->look())->toBe('calm');
+    $board->assertSee(__('learning::map.calm.level', ['n' => 1, 'of' => 2]))
+        ->assertSee(__('learning::map.calm.next_lesson'))
+        ->assertSeeInOrder([__('learning::map.calm.levels'), 'Lesson 1', 'Lesson 2', 'Lesson 3'])
+        ->assertSee(__('learning::map.station.states.review'));
+    expect(FamilyHome::getNavigationLabel())->toBe(__('family.home.teen'))
+        ->and(FamilyHomework::getNavigationSort())->toBeLessThan(FamilyReports::getNavigationSort());
 });
 
 it('keeps guardians on the classic look, with money shown to whoever pays', function () {
@@ -207,10 +210,11 @@ it('keeps guardians on the classic look, with money shown to whoever pays', func
     inFamilyArea($this->guardian);
 
     Livewire::test(FamilyHome::class)->assertOk()
-        ->assertDontSeeLivewire(JourneyWidget::class)
+        ->assertDontSeeLivewire(JourneyBoard::class)       // the journey's card, and the journey on its own page
         ->assertSeeLivewire(LearningHomeWidget::class)
         ->assertSeeLivewire(BalanceWidget::class);
-    expect(FamilyProgress::shouldRegisterNavigation())->toBeTrue()
+    expect(FamilyJourney::shouldRegisterNavigation())->toBeTrue()
+        ->and(FamilyProgress::shouldRegisterNavigation())->toBeFalse()
         ->and(FamilyBilling::shouldRegisterNavigation())->toBeTrue()
         ->and(FamilyLessons::getNavigationLabel())->toBe(__('scheduling::family.nav.classic'));
 

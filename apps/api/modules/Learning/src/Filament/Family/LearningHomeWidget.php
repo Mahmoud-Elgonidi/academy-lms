@@ -9,7 +9,7 @@ use Modules\Learning\Models\SessionReport;
 use Modules\People\Contracts\LearnerStage;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
-/** Home, for guardians and adults: progress on each course, homework to do, and the teacher's last words. Students with a stage get JourneyWidget. */
+/** Home, for guardians and adults: progress on each course, homework to do, and the teacher's last words (the journey's card is JourneyWidget). */
 final class LearningHomeWidget extends Widget
 {
     protected string $view = 'learning::filament.family.home';

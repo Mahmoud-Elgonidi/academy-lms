@@ -11,7 +11,7 @@ use Modules\Identity\Models\User;
 use Modules\Learning\Actions\AssignHomework;
 use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Actions\SubmitSessionReport;
-use Modules\Learning\Filament\Family\ChallengesWidget;
+use Modules\Learning\Filament\Family\JourneyBoard;
 use Modules\Learning\Models\ChallengeClaim;
 use Modules\Learning\Models\Cheer;
 use Modules\Learning\Models\SessionReport;
@@ -243,40 +243,28 @@ it('lets a guardian watch and cheer, never collect; the child sees each cheer on
     $this->withToken(challengesApp($this->stranger))->getJson('/api/v1/learning/challenges?learner_id='.$this->student->id)->assertNotFound();
 });
 
-it('shows the same challenges on the family home: the child collects with a burst, the guardian cheers', function () {
+it('keeps the cheers on the family home\'s journey: the guardian cheers, the child sees it once', function () {
     lookOf($this->student, LearnerStage::Kids);
     tuesdayTaught();
     CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-07 09:00', 'UTC'));
     $this->actAsTenant($this->academy);
     Filament::setCurrentPanel('family');
-    $l = 'learning::challenges.';
 
     $this->actingAs($this->guardian);
     app()->forgetInstance(FamilyView::class);
-    Livewire::test(ChallengesWidget::class)
-        ->assertSee(__($l.'web.of', ['name' => strtok($this->student->name, ' ')]))
-        ->assertSee(__($l.'kids.attend')[0])
-        ->assertSee(__($l.'web.done'))
-        ->assertDontSee(__($l.'web.collect', ['reward' => __($l.'units.kids', ['n' => 50])]))
+    Livewire::test(JourneyBoard::class)
+        ->assertSee(trans_choice('learning::map.cheers.left', 5, ['count' => 5]))
         ->call('cheer', 'heart')
-        ->assertSee(trans_choice($l.'web.cheers_left', 4))
-        ->call('claim', 'attend', '2026-10-03')
-        ->assertForbidden();
+        ->assertSee(trans_choice('learning::map.cheers.left', 4, ['count' => 4]));
     expect(Cheer::query()->where('student_id', $this->student->id)->where('kind', 'heart')->exists())->toBeTrue()
         ->and(ChallengeClaim::query()->exists())->toBeFalse();
 
     $this->actingAs($this->student);
     app()->forgetInstance(FamilyView::class);
-    Livewire::test(ChallengesWidget::class)
-        ->assertSee(__($l.'web.title.kids'))
-        ->assertSee(__($l.'web.cheer_from', ['names' => strtok($this->guardian->name, ' ')]))
-        ->assertSee(__($l.'web.collect', ['reward' => __($l.'units.kids', ['n' => 50])]))
-        ->call('claim', 'attend', '2026-10-03')
-        ->assertDispatched('lc-collected', text: '+'.__($l.'units.kids', ['n' => 50]))
-        ->call('claim', 'attend', '2026-10-03')
-        ->assertNotDispatched('lc-collected')
-        ->call('seen')
-        ->assertDontSee(__($l.'web.cheer_from', ['names' => strtok($this->guardian->name, ' ')]));
-    expect(ChallengeClaim::query()->where('student_id', $this->student->id)->pluck('points', 'challenge')->all())->toBe(['attend' => 50])
-        ->and(Cheer::query()->whereNull('seen_at')->exists())->toBeFalse();
+    Livewire::test(JourneyBoard::class)
+        ->assertSee(__('learning::map.cheers.from', ['name' => strtok($this->guardian->name, ' '), 'kind' => __('learning::challenges.cheers.heart')]))
+        ->call('cheersSeen');
+    Livewire::test(JourneyBoard::class)
+        ->assertDontSee(__('learning::map.cheers.from', ['name' => strtok($this->guardian->name, ' '), 'kind' => __('learning::challenges.cheers.heart')]));
+    expect(Cheer::query()->whereNull('seen_at')->exists())->toBeFalse();
 });

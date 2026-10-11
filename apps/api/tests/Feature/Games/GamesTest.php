@@ -17,6 +17,8 @@ use Modules\Games\Actions\StartPlay;
 use Modules\Games\Domain\Round;
 use Modules\Games\Filament\Family\FamilyCreatures;
 use Modules\Games\Filament\Family\FamilyGames;
+use Modules\Games\Filament\Family\JourneyGuardian;
+use Modules\Games\Filament\Family\JourneyPlay;
 use Modules\Games\Models\CreatureFind;
 use Modules\Games\Models\GamePlay;
 use Modules\Games\Privacy\GamesData;
@@ -301,32 +303,32 @@ it('lets a guardian play on their child\'s screen, but no one finishes another f
         ->and(DB::table('practice_rounds')->value('played_by'))->toBe($this->guardian->id);
 });
 
-it('plays in the family area: a quest, the round in its frame, the result, and the guardian\'s limits', function () {
+it('plays on the journey in the family area: a station\'s round in its frame, the result, a homework link, and the guardian\'s limits', function () {
     Filament::setCurrentPanel('family');
     $this->actingAs($this->student);
     $this->actAsTenant($this->academy);
 
-    $page = Livewire::test(FamilyGames::class)->assertOk();
-    $quest = $page->instance()->world['quests'][0];
-    $page->call('play', $quest['game']['id'], $quest['key']);
+    $page = Livewire::test(JourneyPlay::class)->assertOk()->dispatch('journey-play', game: 'bird-balloons', station: $this->lessons[0]);
     $round = $page->get('round');
     expect($round['src'])->toContain('/games/')
         ->and($round['stage'])->toBe('kids')
+        ->and($round['station'])->toBe($this->lessons[0])
         ->and($round['items'])->not->toBeEmpty();
     $page->assertSeeHtml('data-round-player');
 
-    $page->call('finish', playedRound($round['items']))->assertSet('round', null);
-    expect($page->get('result'))->toMatchArray(['stars' => 3, 'correct' => count($round['items'])])
-        ->and($page->instance()->limits)->toBeNull();
+    $page->call('finish', playedRound($round['items']))->assertSet('round', null)->assertDispatched('journey-changed');
+    expect($page->get('result'))->toMatchArray(['stars' => 3, 'correct' => count($round['items'])]);
 
-    // A homework link starts that homework's round.
+    // A homework link (the old games page) leads to the journey, which starts that homework's round.
     $homework = practiceHomework([$this->lessons[1]]);
-    $linked = Livewire::withQueryParams(['homework' => $homework->id])->test(FamilyGames::class);
+    Livewire::withQueryParams(['homework' => $homework->id])->test(FamilyGames::class)
+        ->assertRedirect(route('filament.family.pages.journey', ['homework' => $homework->id]));
+    $linked = Livewire::test(JourneyPlay::class, ['start' => ['game' => 'bird-balloons', 'homework' => $homework->id]]);
     expect($linked->get('round')['focus'])->toBe('جولة على سورة الناس');
 
     $this->actingAs($this->guardian);
     app()->forgetInstance(FamilyView::class);
-    $guardian = Livewire::test(FamilyGames::class)->assertOk();
+    $guardian = Livewire::test(JourneyGuardian::class)->assertOk();
     expect($guardian->instance()->glance)->not->toBeNull()
         ->and($guardian->instance()->limits)->toMatchArray(['enabled' => true, 'daily_minutes' => null, 'night_lock' => false]);
     $guardian->call('setMinutes', 20)->call('setNight', true);
@@ -335,12 +337,11 @@ it('plays in the family area: a quest, the round in its frame, the result, and t
     $guardian->call('setEnabled', false)->call('setMinutes', null);
     expect((array) DB::table('game_limits')->where('student_id', $this->student->id)->first(['enabled', 'daily_minutes', 'night_lock']))
         ->toBe(['enabled' => false, 'daily_minutes' => null, 'night_lock' => true]);
-    $guardian->call('chooseChild', $this->student->id)->assertOk();
 
     // The child cannot set their own limits.
     $this->actingAs($this->student);
     app()->forgetInstance(FamilyView::class);
-    Livewire::test(FamilyGames::class)->call('setMinutes', 120)->assertForbidden();
+    Livewire::test(JourneyGuardian::class)->call('setMinutes', 120)->assertForbidden();
 });
 
 it('gives a copy of the learner\'s rounds, creatures and limits, and erases them', function () {
@@ -483,11 +484,11 @@ it('shows a guardian the week: the lesson practised most, the hardest question, 
     Filament::setCurrentPanel('family');
     $this->actingAs($this->guardian);
     app()->forgetInstance(FamilyView::class);
-    Livewire::test(FamilyGames::class)->assertSee($glance['hatched']['name'])->call('cheer')->assertOk();
+    Livewire::test(JourneyGuardian::class)->assertSee($glance['hatched']['name'])->call('cheer')->assertOk();
     expect(Cheer::query()->where('student_id', $this->student->id)->sole())->toMatchArray(['from_id' => $this->guardian->id, 'kind' => 'heart']);
     $this->actingAs($this->student);
     app()->forgetInstance(FamilyView::class);
-    Livewire::test(FamilyGames::class)->call('cheer')->assertForbidden();
+    Livewire::test(JourneyGuardian::class)->call('cheer')->assertForbidden();
 
     // A week later the glance is quiet again.
     expect(app(GuardianGlance::class)->for($this->student->id, CarbonImmutable::now()->addDays(8)))
@@ -500,9 +501,7 @@ it('hatches in the family area, names the creature and opens the album, where th
     $this->actAsTenant($this->academy);
     perfectRounds(3);
 
-    $page = Livewire::test(FamilyGames::class);
-    $quest = $page->instance()->world['quests'][0];
-    $page->call('play', $quest['game']['id'], $quest['key']);
+    $page = Livewire::test(JourneyPlay::class)->dispatch('journey-play', game: 'bird-balloons', station: $this->lessons[0]);
     $page->call('finish', playedRound($page->get('round')['items']));
     $creature = $page->get('result')['creature'];
     expect($creature)->toMatchArray(['found' => 1, 'total' => 20])
@@ -523,7 +522,7 @@ it('hatches in the family area, names the creature and opens the album, where th
     $this->actingAs($this->guardian);
     app()->forgetInstance(FamilyView::class);
     Livewire::test(FamilyCreatures::class)->assertOk()->assertSee('ريشو')->call('chooseBuddy', $creature['key'])->assertForbidden();
-    Livewire::test(FamilyGames::class)->call('nameCreature', $creature['key'], 'بسبوسة')->assertForbidden();
+    Livewire::test(JourneyPlay::class)->call('nameCreature', $creature['key'], 'بسبوسة')->assertForbidden();
 });
 
 /** The first lesson taught, marked done and reported by its teacher. */

@@ -9,14 +9,16 @@ use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\LearnerStage;
 
 /**
- * The family area's home: the cards each module adds (the journey or the
- * progress, next lessons, homework, balance), in the viewer's look.
+ * The family area's home, in the viewer's look: a student's is their journey
+ * (rounds, missions, the chest: the journey draws its own header); a
+ * guardian's or an adult's has the cards each module adds (the journey's
+ * card, next lessons, homework, balance).
  */
 final class FamilyHome extends Dashboard
 {
     public static function getNavigationIcon(): string|\BackedEnum|Htmlable|null
     {
-        return in_array(self::stage(), [LearnerStage::Kids, LearnerStage::Middle], true) ? Heroicon::OutlinedRocketLaunch : Heroicon::OutlinedHome;
+        return self::stage() === LearnerStage::Classic ? Heroicon::OutlinedHome : Heroicon::OutlinedRocketLaunch;
     }
 
     public static function getNavigationLabel(): string
@@ -29,6 +31,12 @@ final class FamilyHome extends Dashboard
         $name = (string) auth()->user()?->name;
 
         return __('family.home_title.'.self::stage()->value, ['name' => self::stage() === LearnerStage::Classic ? $name : strtok($name, ' ')]);
+    }
+
+    /** A student's journey draws its own header (their name, stars, rank). */
+    public function getHeading(): string|Htmlable
+    {
+        return self::stage() === LearnerStage::Classic ? $this->getTitle() : '';
     }
 
     private static function stage(): LearnerStage

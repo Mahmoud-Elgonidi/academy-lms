@@ -34,7 +34,7 @@ final class PeopleFamilyPlugin implements Plugin
         // A guardian with a child waiting for their consent sees it on every page but the one where they give it.
         $panel->renderHook(PanelsRenderHook::PAGE_START, fn (array $scopes = []) => in_array(FamilyPrivacy::class, $scopes, true) ? '' : self::waitingBanner());
         $panel->renderHook(PanelsRenderHook::BODY_START, fn () => ($stage = self::stage()) ? view('people::family.stage', ['stage' => $stage->value]) : '');
-        $panel->renderHook(PanelsRenderHook::BODY_END, fn () => self::stage() ? view('people::family.tabs') : '');
+        $panel->renderHook(PanelsRenderHook::BODY_END, fn () => ($stage = self::stage()) ? view('people::family.tabs', ['stage' => $stage->value]) : '');
     }
 
     public function boot(Panel $panel): void {}

@@ -1,8 +1,9 @@
 {{--
-    The islands world's behaviour (the approved design), for Alpine: LmsIslands.world() is
-    the map (zoom into an island, its circle reveal, the sheet, locked islands wobbling with a
-    toast, music by island), LmsIslands.hatch(config) an egg that hatches after three taps. The
-    rounds themselves go to Livewire ($wire.play), which checks everything again.
+    The islands world's behaviour (the approved design), for Alpine, shared by the journey's map
+    (Learning) and the games' rounds and eggs (Games): LmsIslands.world() is the map (zoom into
+    an island, its circle reveal, a station's sheet, locked islands wobbling with a toast, music
+    by island), LmsIslands.hatch(config) an egg that hatches after three taps. Rounds and eggs go
+    out as browser events to the games' Livewire component, which checks everything again.
 --}}
 <script>
     window.LmsIslands ??= (() => {
@@ -23,11 +24,17 @@
             try { return JSON.parse(root.querySelector('[data-gw-config]')?.dataset.gwConfig || '{}'); } catch (e) { return {}; }
         }
 
+        /**
+         * The journey's map (the approved islands design): the course's levels as islands, zoom into one
+         * that is open (its circle reveal, its music), a locked one wobbles and says why, a station's sheet
+         * over the opened island. Rounds and eggs leave the page as browser events ("journey-play",
+         * "journey-hatch") for the games' own component, which checks everything again.
+         */
         function world() {
             let config = { islands: {} };
             let root = null;   // the component's element, kept outside Alpine's reactive data
             return {
-                view: 'map', id: null, zoom: false, reveal: false, wob: '', toast: '', muted: false,
+                view: 'map', id: null, station: null, zoom: false, reveal: false, wob: '', toast: '', muted: false,
                 rx: 195, ry: 300, timers: [], tt: null,
 
                 init() {
@@ -42,8 +49,11 @@
                     this.ro.observe(root);
                     window.addEventListener('resize', this.onResize = () => fit(root));
                     document.addEventListener('lms-games:muted', this.onMuted = (e) => { this.muted = e.detail.muted; });
-                    document.addEventListener('keydown', this.onKey = (e) => { if (e.key === 'Escape' && this.view === 'island' && ! document.querySelector('.gw-play, .gw-done, .gw-hatch')) this.back(); });
-                    if (config.open) this.$nextTick(() => this.open(config.open, true));
+                    document.addEventListener('keydown', this.onKey = (e) => {
+                        if (e.key !== 'Escape' || document.querySelector('.gw-play, .gw-done, .gw-hatch')) return;
+                        if (this.station) this.closeStation(); else if (this.view === 'island') this.back();
+                    });
+                    if (config.open) this.$nextTick(() => { this.open(config.open, true); if (config.station) this.station = config.station; });
                 },
                 destroy() {
                     this.timers.forEach(clearTimeout);
@@ -75,7 +85,7 @@
                     this.open(key);
                 },
                 open(key, quiet) {
-                    if (this.view !== 'map') return;
+                    if (this.view !== 'map' || ! config.islands[key]) return;
                     const i = config.islands[key];
                     if (! quiet) {
                         sound()?.start();
@@ -83,7 +93,7 @@
                         this.later(() => sound()?.cue(i.music), 650);
                     }
                     sound()?.scale(i.music);
-                    this.id = key; this.zoom = true; this.view = 'zooming'; this.toast = '';
+                    this.id = key; this.zoom = true; this.view = 'zooming'; this.toast = ''; this.station = null;
                     this.later(() => {
                         // The circle opens where the island now is on the screen.
                         const stage = root.querySelector('.gw-stage');
@@ -100,13 +110,22 @@
                     if (this.view !== 'island') return;
                     sound()?.play('back');
                     sound()?.scale('map');
-                    this.reveal = false;
+                    this.reveal = false; this.station = null;
                     this.later(() => {
                         this.view = 'map'; this.zoom = false;
                         document.documentElement.style.overflow = '';
                         this.$nextTick(() => root.querySelector(`[data-island="${this.id}"]`)?.focus({ preventScroll: true }));
                     }, 520);
                 },
+                /** A station's sheet over the opened island (or straight from a mission: its island opens first). */
+                visit(island, station) {
+                    if (this.view === 'island' && this.id === island) { this.openStation(station); return; }
+                    if (this.view !== 'map') return;
+                    this.open(island);
+                    this.later(() => { this.station = station; }, 700);
+                },
+                openStation(id) { sound()?.play('pop'); this.station = id; this.$nextTick(() => root.querySelector(`[data-station-sheet="${id}"] .gw-sheet-close`)?.focus({ preventScroll: true })); },
+                closeStation() { const id = this.station; this.station = null; this.$nextTick(() => root.querySelector(`[data-stop="${id}"]`)?.focus({ preventScroll: true })); },
                 locked(key, text) {
                     sound()?.start();
                     sound()?.play('locked');
@@ -131,12 +150,19 @@
                     else s.setMuted(true);
                     this.muted = s.muted();
                 },
-                play(game, quest, playable, why) {
+                /** A round: on a station ({game, station}) or for a homework ({game, homework}). */
+                play(round, playable = true, why = '') {
                     if (! config.may) { sound()?.play('locked'); return this.say(config.refusal); }
                     if (! playable) { sound()?.play('locked'); return this.say(why); }
                     sound()?.play('pop');
                     sound()?.stop(false);
-                    this.$wire.play(game, quest);
+                    this.$dispatch('journey-play', round);
+                },
+                /** The egg the stars filled: the games' component hatches it. */
+                hatch(island) {
+                    sound()?.start();
+                    sound()?.play('knock');
+                    this.$dispatch('journey-hatch', { island });
                 },
             };
         }

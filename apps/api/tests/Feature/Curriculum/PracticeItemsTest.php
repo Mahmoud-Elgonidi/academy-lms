@@ -8,11 +8,13 @@ use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\Filament\Programs\EditCurriculum;
 use Modules\Curriculum\Models\Node;
 use Modules\Curriculum\Models\NodeItem;
+use Modules\SharedKernel\Games\GameCatalog;
 use Modules\SharedKernel\Games\ItemKind;
 use Tests\Support\EnrolledStudent;
 use Tests\Support\QuranProgram;
+use Tests\Support\StarterGames;
 
-uses(EnrolledStudent::class, QuranProgram::class);
+uses(EnrolledStudent::class, QuranProgram::class, StarterGames::class);
 
 /*
  * A lesson's practice items (docs/architecture/02, section 18): the words
@@ -118,4 +120,31 @@ it('writes a lesson\'s practice in the curriculum builder, also on a published p
         ->assertHasNoActionErrors();
 
     expect(NodeItem::query()->where('node_id', $this->first->id)->orderBy('ordinal')->pluck('kind')->all())->toBe(['choice', 'pair']);
+});
+
+it('shows in the builder the games a lesson\'s practice is enough for, and how much of the program has practice', function () {
+    $this->installStarterGames();
+    Filament::setCurrentPanel('academy');
+    $this->actingAs($this->admin);
+    $title = fn (string $key) => app(GameCatalog::class)->game($key)->title();
+
+    // One question and one pair: too few for any game yet.
+    app(SaveNodeItems::class)->handle($this->first, [
+        ['kind' => 'choice', 'prompt' => 'أكمل: الحمد لله رب …', 'options' => ['العالمين', 'الدين'], 'answer' => 0],
+        ['kind' => 'pair', 'left' => 'مالك', 'right' => 'يوم الدين'],
+    ], $this->admin->id);
+    $builder = Livewire::test(EditCurriculum::class, ['record' => $this->program->id])
+        ->assertSee(__('curriculum::curriculum.practice.plays_none'))
+        ->assertSee(__('curriculum::curriculum.practice.program', ['with' => 1, 'total' => 7]));
+    expect($builder->instance()->playsIn[$this->first->id])->toBe([]);
+
+    // Two questions, an order and a pair: the balloons (two questions), the gates and the bridge (one order); the twins need three pairs.
+    app(SaveNodeItems::class)->handle($this->first, fatihaItems(), $this->admin->id);
+    $builder = Livewire::test(EditCurriculum::class, ['record' => $this->program->id])
+        ->assertSee(__('curriculum::curriculum.practice.plays_in'))
+        ->assertSee($title('bird-balloons'))->assertSee($title('bird-gates'))->assertSee($title('turtle-bridge'))
+        ->assertDontSee($title('bird-twins'));
+    expect(array_column($builder->instance()->playsIn[$this->first->id], 'title'))->toEqualCanonicalizing([$title('bird-gates'), $title('bird-balloons'), $title('turtle-bridge')])
+        ->and($builder->instance()->practiceSummary())->toMatchArray(['with' => 1, 'total' => 7])
+        ->and($builder->instance()->practiceSummary()['missing'])->toHaveCount(6);
 });

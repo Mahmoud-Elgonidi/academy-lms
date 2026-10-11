@@ -7,6 +7,14 @@
             @if ($lesson->weight !== 1) · {{ __('curriculum::curriculum.builder.weight_short', ['n' => $lesson->weight]) }} @endif
             @if ($lesson->masteryRule === 'score_twice') · {{ __('curriculum::curriculum.mastery_rules.score_twice') }} @endif
         </small>
+        @if (array_key_exists($lesson->id, $this->playsIn))
+            {{-- What the learner plays it in: the games its practice is enough for. --}}
+            @php $plays = $this->playsIn[$lesson->id]; @endphp
+            <small class="cb-plays" @if ($plays === []) data-none @endif>
+                🎮 {{ $plays === [] ? __('curriculum::curriculum.practice.plays_none') : __('curriculum::curriculum.practice.plays_in') }}
+                @foreach ($plays as $g)<span title="{{ $g['stages'] }}">{{ $g['title'] }}</span>@endforeach
+            </small>
+        @endif
     </span>
     @php $count = $this->materialCounts[$lesson->id] ?? 0; $open = $this->openLesson === $lesson->id; @endphp
     <button type="button" class="cb-mats" wire:click="toggleMaterials('{{ $lesson->id }}')" aria-expanded="{{ $open ? 'true' : 'false' }}" @if ($count > 0) data-has @endif>

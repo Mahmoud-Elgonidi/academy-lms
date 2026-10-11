@@ -38,13 +38,16 @@
                     <p class="lf-note">{{ $hw->instructions }}</p>
                 @endif
                 @if ($hw->hasPractice())
-                    {{-- Practice in the games on the lesson's own items (Games' page, by route name: no module is named here). --}}
+                    {{-- Practice in the games on the lesson's own items: "العب" opens its round on the journey (when the academy has games). --}}
                     <div class="lf-practice">
                         <span>🎮 {{ $hw->practice_result ? __($h.'practice.result', $hw->practice_result) : __($h.'practice.waiting') }}</span>
                         @if (\Illuminate\Support\Facades\Route::has('filament.family.pages.games'))
-                            <x-filament::button tag="a" size="sm" color="success" icon="heroicon-m-play" :href="route('filament.family.pages.games', ['homework' => $hw->id])">{{ __($h.'practice.play') }}</x-filament::button>
+                            <x-filament::button tag="a" size="sm" color="success" icon="heroicon-m-play" :href="\Modules\Learning\Filament\Family\FamilyJourney::getUrl(['homework' => $hw->id])">{{ __($h.'practice.play') }}</x-filament::button>
                         @endif
                     </div>
+                    @if ($hw->accepts === 'practice')
+                        <small class="lf-muted">{{ __($h.'practice.by_playing') }}</small>
+                    @endif
                 @endif
 
                 @if ($hw->accepts !== 'practice')

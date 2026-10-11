@@ -41,6 +41,8 @@
                 <div><strong data-count="{{ $stats['creatures'] }}">{{ $stats['creatures'] }}</strong><small>{{ __($l.'creatures') }}</small></div>
             </div>
             <p class="gs-hint">{{ __($l.'practice_hint') }}</p>
+            {{-- The journey's style (Learning's, through this hook). --}}
+            {{ \Filament\Support\Facades\FilamentView::renderHook('games::settings') }}
         </section>
         <section class="gs-box">
             <h3>{{ __($l.'catalog') }}</h3>

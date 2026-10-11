@@ -48,6 +48,12 @@
         .dark .cb-materials { background: var(--gray-800); }
         .dark .cb-mat { background: var(--gray-900); border-color: var(--gray-700); }
         .dark .cb-mats { border-color: var(--gray-700); }
+        .cb-plays { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; margin-top: .15rem; color: var(--success-700) !important; }
+        .cb-plays span { padding: 0 .45rem; border-radius: 999px; background: var(--success-50); font-weight: 600; }
+        .cb-plays[data-none] { color: var(--warning-700) !important; }
+        .dark .cb-plays span { background: color-mix(in oklab, var(--success-500) 15%, transparent); }
+        .cb-coverage { font-weight: 600; color: var(--warning-700); }
+        .cb-coverage[data-full] { color: var(--success-700); }
         .cb-empty { padding: 2rem; text-align: center; color: var(--gray-500); border: 1px dashed var(--gray-300); border-radius: var(--radius-xl); }
         .dark .cb-level { background: var(--gray-900); border-color: var(--gray-800); }
         .dark .cb-level > .cb-head { background: var(--gray-800); }
@@ -58,7 +64,14 @@
             <div class="cb-note">{{ __('curriculum::curriculum.builder.published_note') }}</div>
         @endif
         @if ($lessons !== [])
-            <div class="cb-totals">{{ __('curriculum::curriculum.builder.totals', ['levels' => $levels, 'lessons' => count($lessons), 'sessions' => $sessions]) }}</div>
+            @php $practice = $this->practiceSummary(); @endphp
+            <div class="cb-totals">
+                {{ __('curriculum::curriculum.builder.totals', ['levels' => $levels, 'lessons' => count($lessons), 'sessions' => $sessions]) }}
+                · <span class="cb-coverage" @if ($practice['with'] === $practice['total']) data-full @endif>🎮 {{ __('curriculum::curriculum.practice.program', ['with' => $practice['with'], 'total' => $practice['total']]) }}</span>
+                @if ($practice['missing'] !== [] && $practice['with'] > 0)
+                    <br><small>{{ __('curriculum::curriculum.practice.missing', ['lessons' => implode('، ', array_slice($practice['missing'], 0, 5))]) }}@if (count($practice['missing']) > 5) {{ trans_choice('curriculum::curriculum.practice.more', count($practice['missing']) - 5, ['count' => count($practice['missing']) - 5]) }}@endif</small>
+                @endif
+            </div>
         @endif
 
         @php $n = 0; @endphp

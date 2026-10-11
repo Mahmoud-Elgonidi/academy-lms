@@ -13,6 +13,7 @@ return [
         'waiting' => 'Not practised yet.',
         'play' => 'Play the practice',
         'done' => 'Practice done',
+        'by_playing' => 'This homework hands itself in as soon as you finish its round in the game.',
     ],
     'errors' => [
         'closed' => 'This homework has already been marked.',

@@ -107,6 +107,11 @@ return [
         'add' => 'New item',
         'save' => 'Save practice',
         'saved' => 'Practice saved.',
+        'plays_in' => 'Plays in:',
+        'plays_none' => 'Not enough practice for any game yet. Add a few more.',
+        'program' => ':with of :total lessons have practice',
+        'missing' => 'Still without practice: :lessons',
+        'more' => '{1} and one more|[2,*] and :count more',
         'fields' => [
             'items' => 'Practice',
             'kind' => 'Kind',

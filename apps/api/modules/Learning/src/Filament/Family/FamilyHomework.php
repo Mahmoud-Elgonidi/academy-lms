@@ -15,12 +15,15 @@ use Livewire\Attributes\Computed;
 use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Authorization\LearningAccess;
 use Modules\Learning\Models\Homework;
+use Modules\People\Contracts\LearnerStage;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
  * The learner's homework: what is still to do, with the answer written,
- * a file or a recording made right here (Quran recitation, reading); then
- * what was handed in, with the teacher's mark.
+ * a file or a recording made right here (Quran recitation, reading), or
+ * played in the games when it asks for practice (the round opens on the
+ * journey, and its result shows here); then what was handed in, with the
+ * teacher's mark.
  */
 final class FamilyHomework extends Page
 {
@@ -37,6 +40,12 @@ final class FamilyHomework extends Page
 
     /** @var array<string, mixed> homework id => an uploaded file or recording */
     public array $files = [];
+
+    /** Secondary school keeps it in their tab bar, after the lessons (رحلتي · حصصي · الواجبات · التقارير); the others under "more". */
+    public static function getNavigationSort(): ?int
+    {
+        return FamilyLearning::stage() === LearnerStage::Teen ? 12 : self::$navigationSort;
+    }
 
     public static function getNavigationLabel(): string
     {

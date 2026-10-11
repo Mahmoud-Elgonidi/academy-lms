@@ -5,6 +5,7 @@ namespace Modules\Games\Providers;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Modules\Games\Filament\Family\GamesFamilyPlugin;
 use Modules\Games\Listeners\HatchOnMastery;
 use Modules\Games\Privacy\GamesData;
 use Modules\Games\Queries\GamesForJourney;
@@ -42,5 +43,8 @@ final class GamesServiceProvider extends ServiceProvider
 
         // A lesson the teacher marks mastered hatches the learner's next creature.
         Event::listen(NodeMastered::class, HatchOnMastery::class);
+
+        // The rounds, results and eggs on the learner's journey, and a guardian's part of it (the family area).
+        GamesFamilyPlugin::registerComponents();
     }
 }

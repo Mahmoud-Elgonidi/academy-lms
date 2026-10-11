@@ -31,6 +31,12 @@ final class FamilyReports extends Page
         return FamilyLearning::stage() !== LearnerStage::Kids;
     }
 
+    /** Secondary school keeps it in their tab bar, right after the homework (رحلتي · حصصي · الواجبات · التقارير). */
+    public static function getNavigationSort(): ?int
+    {
+        return FamilyLearning::stage() === LearnerStage::Teen ? 13 : self::$navigationSort;
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('learning::family.reports.nav.'.FamilyLearning::stage()->value);

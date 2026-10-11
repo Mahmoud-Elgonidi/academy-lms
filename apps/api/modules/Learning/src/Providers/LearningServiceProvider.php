@@ -20,6 +20,7 @@ use Modules\Learning\Contracts\Events\SessionReportOverdue;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
 use Modules\Learning\Contracts\JourneyGames;
 use Modules\Learning\Contracts\LearningApi;
+use Modules\Learning\Filament\Family\FamilyJourney;
 use Modules\Learning\Filament\LearningPlugin;
 use Modules\Learning\Filament\Pages\ReportsOversight;
 use Modules\Learning\Filament\Teacher\HomeworkToMark;
@@ -69,6 +70,7 @@ final class LearningServiceProvider extends ServiceProvider
         Route::middleware(['web', 'tenant', 'signed:relative', 'throttle:links'])->get('materials/{resource}', MaterialController::class)->name('learning.material');
 
         LearningPlugin::registerAccountSection();
+        LearningPlugin::registerJourneyStyle();
 
         Event::listen(SessionFinalized::class, OpenReportWhenSessionCloses::class);
 
@@ -76,6 +78,10 @@ final class LearningServiceProvider extends ServiceProvider
         $links = $this->app->make(NotificationLinks::class);
         $links->register('write_report', fn (array $a, string $panel) => $panel === 'teach' ? WriteReport::getUrl(['report' => $a['id']], panel: 'teach') : ReportsOversight::getUrl());
         $links->register('homework_to_mark', fn (array $a, string $panel) => $panel === 'teach' ? HomeworkToMark::getUrl(panel: 'teach') : null);
+        // The journey, in the family area (a student's home, the journey page of guardians); the games and the old challenges open it too.
+        foreach (['journey', 'games', 'challenges'] as $screen) {
+            $links->register($screen, fn (array $a, string $panel) => $panel === 'family' ? FamilyJourney::getUrl(panel: 'family') : null);
+        }
         Event::listen(SessionReportSubmitted::class, [SendLearningNotifications::class, 'reportSubmitted']);
         Event::listen(HomeworkAssigned::class, [SendLearningNotifications::class, 'homeworkAssigned']);
         Event::listen(HomeworkReviewed::class, [SendLearningNotifications::class, 'homeworkReviewed']);

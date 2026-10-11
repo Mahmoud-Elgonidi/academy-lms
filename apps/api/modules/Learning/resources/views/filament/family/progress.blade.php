@@ -1,8 +1,5 @@
 @php $l = 'learning::family.progress.'; $p = 'learning::progress.'; @endphp
 <x-filament-panels::page>
-    @if ($this->journey)
-        @include('learning::filament.family.journey.'.$this->journey['stage'], $this->journey + ['full' => true])
-    @else
     @include('learning::filament.family.styles')
     <div class="lf-stack lms-stagger">
         @forelse ($this->courses as $course)
@@ -48,5 +45,4 @@
             <div class="lf-empty">{{ __($l.'none') }}</div>
         @endforelse
     </div>
-    @endif
 </x-filament-panels::page>

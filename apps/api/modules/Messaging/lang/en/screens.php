@@ -5,8 +5,8 @@ return [
         'teacher' => 'Messages',
         'classic' => 'Messages',
         'teen' => 'Messages',
-        'middle' => 'Teacher messages',
-        'kids' => 'Talk to your teacher',
+        'middle' => 'Messages',
+        'kids' => 'My teacher',
     ],
     'title' => [
         'teacher' => 'Messages',

@@ -17,7 +17,7 @@ use Modules\People\Contracts\FamilyView;
  * the hatched ones in colour with their voice and story, the rest as a
  * shadow with how they hatch. The learner picks the buddy that keeps them
  * company and names their creatures; a guardian only looks. Reached from
- * the islands (not the menu).
+ * the journey (not the menu).
  */
 final class FamilyCreatures extends Page
 {

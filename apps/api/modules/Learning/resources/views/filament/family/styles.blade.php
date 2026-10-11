@@ -21,6 +21,9 @@
     .lf-answers small { color: var(--gray-600); font-size: .75rem; }
     .dark .lf-answers li { background: color-mix(in oklab, var(--primary-500) 14%, transparent); }
     .dark .lf-answers small { color: var(--gray-400); }
+    .lf-journey { border-color: var(--primary-200); background: linear-gradient(135deg, var(--primary-50), white 70%); }
+    .lf-go { font-weight: 700; font-size: .9rem; color: var(--primary-700); white-space: nowrap; }
+    .dark .lf-go { color: var(--primary-300); }
     .lf-pill { font-size: .75rem; padding: .1rem .55rem; border-radius: 999px; background: var(--gray-100); color: var(--gray-700); white-space: nowrap; }
     .lf-pill[data-tone="good"] { background: var(--success-50); color: var(--success-700); }
     .lf-pill[data-tone="warn"] { background: var(--warning-50); color: var(--warning-700); }
@@ -28,4 +31,5 @@
     .lf-note { margin: 0; white-space: pre-line; font-size: .92rem; line-height: 1.7; }
     .dark .lf-card { background: var(--gray-900); border-color: var(--gray-800); }
     .dark .lf-fact { background: var(--gray-800); }
+    .dark .lf-journey { border-color: var(--primary-800); background: linear-gradient(135deg, color-mix(in oklab, var(--primary-500) 14%, transparent), var(--gray-900) 70%); }
 </style>

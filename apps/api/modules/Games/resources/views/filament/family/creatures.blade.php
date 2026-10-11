@@ -28,7 +28,7 @@
 @endphp
 <x-filament-panels::page>
     @include('shared::games.art-styles')
-    @include('games::islands.styles')
+    @include('shared::games.world-styles')
     @include('shared::games.sound')
     <style>
         .gw-album { --gw-ink: #24124F; --gw-sun: #FFD43B; position: relative; max-width: 560px; margin-inline: auto; padding: 0 16px 24px; border-radius: 28px; background: #FFF4D6; color: #24124F; font-family: var(--lms-font-heading, system-ui, sans-serif); }
@@ -88,7 +88,7 @@
         }" x-on:keydown.escape.window="open = null">
         <header class="gw-album-head">
             <div>
-                <a class="gw-circle gw-3d" href="{{ \Modules\Games\Filament\Family\FamilyGames::getUrl($this->island ? ['island' => $this->island] : []) }}" wire:navigate aria-label="{{ __($a.'back') }}">
+                <a class="gw-circle gw-3d" href="{{ \Illuminate\Support\Facades\Route::has('filament.family.pages.journey') ? route('filament.family.pages.journey') : \Filament\Facades\Filament::getUrl() }}" wire:navigate aria-label="{{ __($a.'back') }}">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#24124F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{ app()->getLocale() === 'ar' ? '' : 'transform: scaleX(-1)' }}"><path d="M9 5l7 7-7 7"/></svg>
                 </a>
                 <h1>{{ __($a.'title') }}</h1>
