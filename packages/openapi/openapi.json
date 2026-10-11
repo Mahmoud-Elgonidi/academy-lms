@@ -3354,6 +3354,11 @@
                                                     "type": "array",
                                                     "items": {}
                                                 },
+                                                "history": {
+                                                    "type": "array",
+                                                    "description": "The last ten rounds, oldest first: the share right first time (0 to 1) and the stars.",
+                                                    "items": {}
+                                                },
                                                 "limits": {
                                                     "type": [
                                                         "object",
@@ -3428,6 +3433,137 @@
                                                         "academy_minutes",
                                                         "choices"
                                                     ]
+                                                },
+                                                "glance": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "A guardian's look at the child's week (null for the student): the lesson practised most, the question hardest first time, the best round, and a creature hatched today on the child's clock.",
+                                                    "properties": {
+                                                        "rounds": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                        },
+                                                        "practised": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The lesson the child went back to most this week: its title, rounds, and in how many games.",
+                                                            "properties": {
+                                                                "title": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "rounds": {
+                                                                    "type": "string"
+                                                                },
+                                                                "games": {
+                                                                    "type": "integer"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "title",
+                                                                "rounds",
+                                                                "games"
+                                                            ]
+                                                        },
+                                                        "hardest": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The question the child got wrong first time most often this week, written as question \u2192 answer.",
+                                                            "properties": {
+                                                                "text": {
+                                                                    "type": "string"
+                                                                },
+                                                                "wrong": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "text",
+                                                                "wrong"
+                                                            ]
+                                                        },
+                                                        "best": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The round with the most right first time this week.",
+                                                            "properties": {
+                                                                "correct": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "total": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "game": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "correct",
+                                                                "total",
+                                                                "game"
+                                                            ]
+                                                        },
+                                                        "hatched": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "A creature hatched today: its name (the child's own when they gave one), look, island, and how many the child has found.",
+                                                            "properties": {
+                                                                "key": {
+                                                                    "type": "string"
+                                                                },
+                                                                "name": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "kind_name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "look": {
+                                                                    "type": "string"
+                                                                },
+                                                                "island": {
+                                                                    "type": "string"
+                                                                },
+                                                                "source": {
+                                                                    "type": "string"
+                                                                },
+                                                                "found": {
+                                                                    "type": "integer",
+                                                                    "minimum": 0
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "key",
+                                                                "name",
+                                                                "kind_name",
+                                                                "look",
+                                                                "island",
+                                                                "source",
+                                                                "found"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "rounds",
+                                                        "practised",
+                                                        "hardest",
+                                                        "best",
+                                                        "hatched"
+                                                    ]
                                                 }
                                             },
                                             "required": [
@@ -3443,7 +3579,9 @@
                                                 "streak",
                                                 "islands",
                                                 "recent",
-                                                "limits"
+                                                "history",
+                                                "limits",
+                                                "glance"
                                             ]
                                         }
                                     },
@@ -3673,7 +3811,7 @@
         "/v1/games/plays/{play}/finish": {
             "post": {
                 "operationId": "games.plays.finish",
-                "description": "Every try the page reported (item and whether it was right), in order. Answers the stars, how many were right\nfirst time, a creature if one hatched, the next egg, and the homework handed in by this practice. Finishing again\nanswers the same stars. Send an Idempotency-Key.",
+                "description": "Every try the page reported (item and whether it was right), in order. Answers the stars, how many were right\nfirst time, how long it took, a creature if one hatched, the next egg, and the homework handed in by this practice. Finishing again\nanswers the same stars. Send an Idempotency-Key.",
                 "summary": "Finish a round",
                 "tags": [
                     "Games"
@@ -3766,44 +3904,17 @@
                                                 "total": {
                                                     "type": "string"
                                                 },
+                                                "seconds": {
+                                                    "type": "string",
+                                                    "description": "How long the round took, in seconds (the race against yourself)."
+                                                },
                                                 "creature": {
                                                     "type": [
-                                                        "object",
+                                                        "array",
                                                         "null"
                                                     ],
-                                                    "properties": {
-                                                        "key": {
-                                                            "type": "string"
-                                                        },
-                                                        "name": {
-                                                            "type": "string"
-                                                        },
-                                                        "emoji": {
-                                                            "type": "string"
-                                                        },
-                                                        "rarity": {
-                                                            "type": "string"
-                                                        },
-                                                        "island": {
-                                                            "type": "string"
-                                                        },
-                                                        "look": {
-                                                            "type": "array",
-                                                            "items": {}
-                                                        },
-                                                        "story": {
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "key",
-                                                        "name",
-                                                        "emoji",
-                                                        "rarity",
-                                                        "island",
-                                                        "look",
-                                                        "story"
-                                                    ]
+                                                    "description": "A creature hatched by this round: with the three names the child chooses from, and how many they have found of all.",
+                                                    "items": {}
                                                 },
                                                 "egg": {
                                                     "type": "object",
@@ -3844,6 +3955,7 @@
                                                 "stars",
                                                 "correct",
                                                 "total",
+                                                "seconds",
                                                 "creature",
                                                 "egg",
                                                 "homework"
@@ -4037,7 +4149,7 @@
         "/v1/games/creatures": {
             "get": {
                 "operationId": "games.creatures",
-                "description": "Every creature of the world in its order: hatched ones with when, how (stars or a mastered lesson), the name the\nlearner gave and whether it is their buddy; the rest with only how they look (to draw as a shadow) and their island.",
+                "description": "Every creature of the world in its order: hatched ones with when, how (stars or a mastered lesson), the name the\nlearner gave, whether it is their buddy and names to choose from; the rest with only how they look (to draw as a\nshadow) and their island.",
                 "summary": "A learner's album of creatures",
                 "tags": [
                     "Games"
@@ -4200,8 +4312,8 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {}
+                                            "type": "object",
+                                            "additionalProperties": {}
                                         }
                                     },
                                     "required": [

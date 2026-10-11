@@ -21,6 +21,7 @@ use Modules\Games\Models\GamePlay;
 use Modules\Games\Models\GameSettings;
 use Modules\Games\Queries\GamesWorld;
 use Modules\Games\Queries\GuardianGlance;
+use Modules\Games\Support\HatchNames;
 use Modules\Identity\Contracts\PersonalChannel;
 use Modules\Learning\Contracts\LearningApi;
 use Modules\People\Contracts\FamilyView;
@@ -242,15 +243,13 @@ final class FamilyGames extends Page
     {
         $catalog = app(GameCatalog::class);
         $island = collect($catalog->islands())->firstWhere('key', $c->islandKey);
-        $names = (array) __('games::games.hatch.names');
-        $at = crc32($c->key) % max(1, count($names));
 
         return [
             'key' => $c->key, 'name' => $c->name(), 'emoji' => $c->emoji, 'rarity' => $c->rarity, 'look' => $c->look,
             'island' => $island?->name() ?? '',
             'found' => CreatureFind::query()->where('student_id', $learner)->count(),
             'total' => array_sum(array_map(fn ($i) => count($i->creatures), $catalog->islands())),
-            'names' => array_values(array_unique([$c->name(), $names[$at] ?? '', $names[($at + 5) % max(1, count($names))] ?? ''])),
+            'names' => HatchNames::for($c),
         ];
     }
 

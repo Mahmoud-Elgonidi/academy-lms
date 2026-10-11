@@ -11,10 +11,13 @@ use Modules\Games\Actions\NameCreature;
 use Modules\Games\Actions\SaveGameLimit;
 use Modules\Games\Actions\StartPlay;
 use Modules\Games\Domain\Round;
+use Modules\Games\Models\CreatureFind;
 use Modules\Games\Models\GameLimit;
 use Modules\Games\Models\GamePlay;
 use Modules\Games\Models\GameSettings;
 use Modules\Games\Queries\GamesWorld;
+use Modules\Games\Queries\GuardianGlance;
+use Modules\Games\Support\HatchNames;
 use Modules\People\Contracts\FamilyView;
 use Modules\SharedKernel\Games\CatalogCreature;
 use Modules\SharedKernel\Games\GameCatalog;
@@ -47,7 +50,7 @@ final class GamesController
      * each with the game for it), stars and the next egg, today's minutes, and the last rounds. For the student
      * themself (learner_id left out) or a guardian's child; a guardian also gets the limits they can set.
      */
-    public function world(Request $request, GamesWorld $world): JsonResponse
+    public function world(Request $request, GamesWorld $world, GuardianGlance $glance): JsonResponse
     {
         $request->validate(['learner_id' => ['nullable', 'string', 'max:64']]);
         [$me, $learner] = $this->learner($request);
@@ -88,8 +91,12 @@ final class GamesController
                 'creatures' => array_map(fn (array $c) => ['found_at' => $this->time->present($c['found_at'])] + $c, $i['creatures']),
             ] + $i, $w['islands']),
             'recent' => array_map(fn (array $r) => ['at' => $this->time->present($r['at'])] + $r, $w['recent']),
+            /** The last ten rounds, oldest first: the share right first time (0 to 1) and the stars. */
+            'history' => array_map(fn (array $h) => ['at' => $this->time->present($h['at'])] + $h, $w['history']),
             /** A guardian's limits for this child (null for the student). */
             'limits' => $guardian ? $this->limits($learner) : null,
+            /** A guardian's look at the child's week (null for the student): the lesson practised most, the question hardest first time, the best round, and a creature hatched today on the child's clock. */
+            'glance' => $guardian ? $this->glance($glance->for($learner)) : null,
         ]]);
     }
 
@@ -97,14 +104,15 @@ final class GamesController
      * A learner's album of creatures.
      *
      * Every creature of the world in its order: hatched ones with when, how (stars or a mastered lesson), the name the
-     * learner gave and whether it is their buddy; the rest with only how they look (to draw as a shadow) and their island.
+     * learner gave, whether it is their buddy and names to choose from; the rest with only how they look (to draw as a
+     * shadow) and their island.
      */
     public function creatures(Request $request, GamesWorld $world): JsonResponse
     {
         $request->validate(['learner_id' => ['nullable', 'string', 'max:64']]);
         [, $learner] = $this->learner($request);
 
-        return response()->json(['data' => array_map(fn (array $c) => ['found_at' => $this->time->present($c['found_at'])] + $c, $world->album($learner))]);
+        return response()->json(['data' => array_map(fn (array $c) => $this->albumEntry($c), $world->album($learner))]);
     }
 
     /**
@@ -138,7 +146,7 @@ final class GamesController
         }
         $found = collect($world->album($learner))->firstWhere('key', $creature) ?? throw new NotFoundHttpException;
 
-        return response()->json(['data' => ['found_at' => $this->time->present($found['found_at'])] + $found]);
+        return response()->json(['data' => $this->albumEntry($found)]);
     }
 
     /**
@@ -176,7 +184,7 @@ final class GamesController
      * Finish a round.
      *
      * Every try the page reported (item and whether it was right), in order. Answers the stars, how many were right
-     * first time, a creature if one hatched, the next egg, and the homework handed in by this practice. Finishing again
+     * first time, how long it took, a creature if one hatched, the next egg, and the homework handed in by this practice. Finishing again
      * answers the same stars. Send an Idempotency-Key.
      */
     public function finish(Request $request, string $play, FinishPlay $finish): JsonResponse
@@ -195,7 +203,14 @@ final class GamesController
             'stars' => (int) $p->stars,
             'correct' => (int) $p->correct,
             'total' => $p->total,
-            'creature' => $r['creature'] === null ? null : $this->creature($r['creature']),
+            /** How long the round took, in seconds (the race against yourself). */
+            'seconds' => $p->seconds,
+            /** A creature hatched by this round: with the three names the child chooses from, and how many they have found of all. */
+            'creature' => $r['creature'] === null ? null : $this->creature($r['creature']) + [
+                'names' => HatchNames::for($r['creature']),
+                'found' => CreatureFind::query()->where('student_id', $p->student_id)->count(),
+                'total' => array_sum(array_map(fn ($i) => count($i->creatures), $this->catalog->islands())),
+            ],
             'egg' => ['have' => $stars % Round::STARS_PER_EGG, 'need' => Round::STARS_PER_EGG],
             'homework' => $r['homework'] === null ? null : ['title' => $r['homework'], 'handed_in' => $r['handed_in']],
         ]]);
@@ -240,6 +255,37 @@ final class GamesController
             /** The academy's own minutes a day (null: no limit); a guardian's choice never goes over it. */
             'academy_minutes' => GameSettings::current()->daily_minutes,
             'choices' => SaveGameLimit::MINUTES,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $g  GuardianGlance's answer
+     * @return array<string, mixed>
+     */
+    private function glance(array $g): array
+    {
+        return [
+            'rounds' => $g['rounds'],
+            /** The lesson the child went back to most this week: its title, rounds, and in how many games. */
+            'practised' => $g['practised'],
+            /** The question the child got wrong first time most often this week, written as question → answer. */
+            'hardest' => $g['hardest'],
+            /** The round with the most right first time this week. */
+            'best' => $g['best'],
+            /** A creature hatched today: its name (the child's own when they gave one), look, island, and how many the child has found. */
+            'hatched' => $g['hatched'],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $c  an album entry (GamesWorld::album)
+     * @return array<string, mixed>
+     */
+    private function albumEntry(array $c): array
+    {
+        return ['found_at' => $this->time->present($c['found_at'])] + $c + [
+            /** Names to choose from for a hatched creature (its own first; empty for one not hatched yet). */
+            'names' => $c['found'] ? HatchNames::of($c['key'], $c['name']) : [],
         ];
     }
 

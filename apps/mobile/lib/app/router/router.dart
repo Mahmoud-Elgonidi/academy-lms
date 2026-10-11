@@ -29,6 +29,8 @@ import '../../features/challenges/presentation/pages/album_page.dart';
 import '../../features/challenges/presentation/pages/challenges_page.dart';
 import '../../features/challenges/presentation/widgets/cheers.dart';
 import '../../features/dashboard/presentation/pages/teen_home_page.dart';
+import '../../features/games/presentation/album_page.dart';
+import '../../features/games/presentation/games_page.dart';
 import '../../features/homework/presentation/pages/homework_page.dart';
 import '../../features/messages/presentation/conversation_page.dart';
 import '../../features/messages/presentation/messages_page.dart';
@@ -82,6 +84,15 @@ GoRouter buildRouter(SessionCubit session) {
     'messages',
     (_) => MessagesPage(scope: scope),
     routes: [page(':id', (s) => ConversationPage(conversationId: s.pathParameters['id']!))],
+  );
+
+  // The games of a look and their album (an island to open, a creature just named).
+  GoRoute games(String path, String base) => page(
+    path,
+    (s) => GamesPage(base: base, island: s.uri.queryParameters['island']),
+    routes: [
+      page('album', (s) => GamesAlbumPage(base: base, island: s.uri.queryParameters['island'], fresh: s.uri.queryParameters['new'])),
+    ],
   );
 
   List<RouteBase> signIn(String base) => [
@@ -181,7 +192,11 @@ GoRouter buildRouter(SessionCubit session) {
           ),
         ),
         branches: [
-          branch('/family/home', (_) => const FamilyHomePage(), routes: [page('challenges', (_) => const ChallengesPage())]),
+          branch(
+            '/family/home',
+            (_) => const FamilyHomePage(),
+            routes: [page('challenges', (_) => const ChallengesPage()), games('games', '/family/home/games')],
+          ),
           branch('/family/lessons', (_) => const LessonsPage()),
           branch('/family/progress', (_) => const ProgressPage()),
           branch('/family/money', (_) => const MoneyPage()),
@@ -200,16 +215,18 @@ GoRouter buildRouter(SessionCubit session) {
         ],
       ),
 
-      // A child in the kids' look: four big tabs, the missions with their chest.
+      // A child in the kids' look: big tabs, the islands, the missions with their chest.
       _studentShell(
         tabs: (l, ready) => [
           ShellTab(Icons.map_outlined, Icons.map_rounded, l.navJourney),
+          ShellTab(Icons.sailing_outlined, Icons.sailing_rounded, l.navIslands),
           ShellTab(Icons.redeem_outlined, Icons.redeem_rounded, l.navMissions, count: ready),
           ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navMyLessons),
           ShellTab(Icons.mic_none_rounded, Icons.mic_rounded, l.navMyHomework),
         ],
         branches: [
           branch('/kids/journey', (_) => const KidsHomePage()),
+          StatefulShellBranch(routes: [games('/kids/islands', '/kids/islands')]),
           branch('/kids/missions', (_) => const ChallengesPage(), routes: [page('album', (_) => const AlbumPage())]),
           branch('/kids/lessons', (_) => const LessonsPage()),
           branch('/kids/homework', (_) => const HomeworkPage()),
@@ -219,12 +236,14 @@ GoRouter buildRouter(SessionCubit session) {
       _studentShell(
         tabs: (l, ready) => [
           ShellTab(Icons.home_outlined, Icons.home_rounded, l.navHome),
+          ShellTab(Icons.videogame_asset_outlined, Icons.videogame_asset_rounded, l.navGames),
           ShellTab(Icons.sports_esports_outlined, Icons.sports_esports_rounded, l.navQuests, count: ready),
           ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navMyLessons),
           ShellTab(Icons.assignment_outlined, Icons.assignment_rounded, l.navMyHomework),
         ],
         branches: [
           branch('/middle/home', (_) => const MiddleHomePage()),
+          StatefulShellBranch(routes: [games('/middle/games', '/middle/games')]),
           branch('/middle/quests', (_) => const ChallengesPage(), routes: [page('badges', (_) => const BadgesPage())]),
           branch('/middle/lessons', (_) => const LessonsPage()),
           branch('/middle/homework', (_) => const HomeworkPage()),
@@ -240,7 +259,7 @@ GoRouter buildRouter(SessionCubit session) {
           ShellTab(Icons.article_outlined, Icons.article_rounded, l.navReports),
         ],
         branches: [
-          branch('/teen/plan', (_) => const TeenHomePage()),
+          branch('/teen/plan', (_) => const TeenHomePage(), routes: [games('games', '/teen/plan/games')]),
           branch('/teen/goals', (_) => const ChallengesPage()),
           branch('/teen/lessons', (_) => const LessonsPage()),
           branch('/teen/homework', (_) => const HomeworkPage()),

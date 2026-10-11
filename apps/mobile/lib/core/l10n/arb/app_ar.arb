@@ -1663,5 +1663,554 @@
     }
   },
   "messagesFirst": "ابدأ المحادثة: الكلام هنا بيشوفه أولياء الأمور والأكاديمية.",
-  "messagesWrite": "اكتب رسالة…"
+  "messagesWrite": "اكتب رسالة…",
+  "navIslands": "الجزر",
+  "navGames": "الألعاب",
+  "gamesTitleMiddle": "عالم الألعاب",
+  "gamesTitleTeen": "التدريب بالألعاب",
+  "gamesTitleClassic": "الألعاب",
+  "gamesWorld": "عالم {name}",
+  "@gamesWorld": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesStars": "{n, plural, =0{من غير نجوم} =1{نجمة واحدة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}",
+  "@gamesStars": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesSoundOn": "شغّل المزيكا والأصوات",
+  "gamesSoundOff": "اقفل المزيكا والأصوات",
+  "gamesLockedIsland": "{island} لسه بتتجهّز، وهتتفتح بألعاب جديدة قريب",
+  "@gamesLockedIsland": {
+    "placeholders": {
+      "island": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesSecret": "جزيرة سرّية! فيها كائن أسطوري. هتعرف سرها قريب",
+  "gamesSecretLabel": "جزيرة سرّية",
+  "gamesNew": "جديد",
+  "gamesOf": "{found} من {total}",
+  "@gamesOf": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesHomeworkPin": "واجب",
+  "gamesAriaOpen": "{island}، مفتوحة",
+  "@gamesAriaOpen": {
+    "placeholders": {
+      "island": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesAriaLocked": "{island}، لسه مقفولة",
+  "@gamesAriaLocked": {
+    "placeholders": {
+      "island": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesAriaHomework": "{island}، فيها الواجب",
+  "@gamesAriaHomework": {
+    "placeholders": {
+      "island": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesToMap": "الخريطة",
+  "gamesIslandGames": "ألعاب الجزيرة",
+  "gamesBadgeHomework": "واجب",
+  "gamesBadgeNew": "جديدة",
+  "gamesBadgeSoon": "قريب",
+  "gamesIslandCreatures": "كائنات الجزيرة",
+  "gamesCreaturesCard": "كائنات الجزيرة · {found} من {total}",
+  "@gamesCreaturesCard": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesEggCard": "البيضة الجاية: {have} من {need} ⭐",
+  "@gamesEggCard": {
+    "placeholders": {
+      "have": {
+        "type": "int"
+      },
+      "need": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesIslandDone": "لمّيت كل كائنات الجزيرة!",
+  "gamesClose": "اقفل اللعبة وارجع",
+  "gamesToIsland": "ارجع للجزيرة",
+  "gamesAlbum": "كائناتي",
+  "gamesNeedsPractice": "محتاجة تدريبات من النوع ده في دروسك.",
+  "gamesItems": "{n, plural, =1{سؤال واحد} =2{سؤالين} few{{n} أسئلة} other{{n} سؤال}}",
+  "@gamesItems": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesReasonHomework": "تدريب الواجب",
+  "gamesReasonLastLesson": "آخر درس",
+  "gamesReasonReview": "مراجعة",
+  "gamesReasonCurrent": "الدرس اللي عليه الدور",
+  "gamesReasonFree": "لعب حر",
+  "gamesPractising": "بتتمرن على: {what}",
+  "@gamesPractising": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesResult0": "كمّل وحاول تاني!",
+  "gamesResult1": "بداية حلوة!",
+  "gamesResult2": "شاطر!",
+  "gamesResult3": "رائع! كله صح تقريبًا",
+  "gamesScore": "{correct} من {total} صح من أول مرة",
+  "@gamesScore": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesHatched": "فقس {name}!",
+  "@gamesHatched": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesHomeworkDone": "الواجب «{title}» اتسلّم بالتدريب ده.",
+  "@gamesHomeworkDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesEgg": "البيضة الجاية: {have} من {need} نجمة",
+  "@gamesEgg": {
+    "placeholders": {
+      "have": {
+        "type": "int"
+      },
+      "need": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesAgain": "العب تاني",
+  "gamesPlay": "العب",
+  "gamesLoading": "بنجهّز الجولة…",
+  "gamesSending": "بنحسب النجوم…",
+  "gamesPageProblem": "اللعبة ما اشتغلتش. جرّب تاني.",
+  "gamesHatchReady": "البيضة جاهزة!",
+  "gamesHatchReadySub": "جمعت {need} نجمة في الألعاب",
+  "@gamesHatchReadySub": {
+    "placeholders": {
+      "need": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesHatchDone": "فقست!",
+  "gamesHatchDoneSub": "كل ما تجمع {need} نجمة، تفقسلك بيضة جديدة",
+  "@gamesHatchDoneSub": {
+    "placeholders": {
+      "need": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesHatchTap0": "دوس على البيضة 3 مرات",
+  "gamesHatchTap1": "كمان مرتين!",
+  "gamesHatchTap2": "مرة كمان!",
+  "gamesHatchTap3": "بتفقس...",
+  "gamesHatchEgg": "البيضة، دوس عليها. فاضل {left}",
+  "@gamesHatchEgg": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesHatchNew": "كائن جديد في ألبومك · {found} من {total}",
+  "@gamesHatchNew": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesHatchAsk": "تحب تسميه إيه؟",
+  "gamesHatchKeep": "حطّه في الألبوم",
+  "gamesAlbumTitle": "ألبوم كائناتي",
+  "gamesAlbumHint": "كل {need} نجمة في الألعاب بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.",
+  "@gamesAlbumHint": {
+    "placeholders": {
+      "need": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesAlbumGuardian": "ده ألبوم {name}. هو بس اللي يختار صاحبه ويسمّي كائناته.",
+  "@gamesAlbumGuardian": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesAlbumAll": "الكل",
+  "gamesRarityCommon": "عادي",
+  "gamesRarityRare": "نادر",
+  "gamesRarityLegendary": "أسطوري",
+  "gamesAllIslands": "كل الجزر",
+  "gamesNotYet": "لسه",
+  "gamesAriaFound": "{name}، من {island}",
+  "@gamesAriaFound": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "island": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesAriaShadow": "كائن لسه ما فقسش، من {island}",
+  "@gamesAriaShadow": {
+    "placeholders": {
+      "island": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesVoice": "اسمع صوته",
+  "gamesMakeBuddy": "خليه صاحبك",
+  "gamesIsBuddy": "ده صاحبك 💛",
+  "gamesBuddyDone": "{name} هيطير معاك في الألعاب من دلوقتي",
+  "@gamesBuddyDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesShadowStory": "لسه ما فقسش.",
+  "gamesHowCommon": "إزاي تفقسه: العب ألعاب {island} واجمع نجوم: كل {need} نجمة بيضة.",
+  "@gamesHowCommon": {
+    "placeholders": {
+      "island": {
+        "type": "String"
+      },
+      "need": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesHowRare": "إزاي تفقسه: كائن نادر في {island}: بيفقس بعد الكائنات العادية بتاعتها.",
+  "@gamesHowRare": {
+    "placeholders": {
+      "island": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesHowLegendary": "إزاي تفقسه: أسطوري! آخر كائن في {island}. اجمع اللي قبله كلهم.",
+  "@gamesHowLegendary": {
+    "placeholders": {
+      "island": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesNameIt": "سمّيه:",
+  "gamesNamed": "اتسمّى {name}",
+  "@gamesNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesFromStars": "فقس من نجوم الألعاب",
+  "gamesFromMastery": "فقس لما اتقنت درس",
+  "gamesRace": "سباق مع نفسك",
+  "gamesFrom": "من {what}",
+  "@gamesFrom": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesStart": "البداية",
+  "gamesFinish": "النهاية",
+  "gamesBestGhost": "أحسن مرة",
+  "gamesYou": "إنت",
+  "gamesRaceReady": "{items} من «{title}». سابق أحسن مرة ليك",
+  "@gamesRaceReady": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesBest": "أحسن وقت: {s}",
+  "@gamesBest": {
+    "placeholders": {
+      "s": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesFirstTime": "أول مرة! حط رقمك",
+  "gamesGo": "يلا",
+  "gamesSeconds": "{s}ث",
+  "@gamesSeconds": {
+    "placeholders": {
+      "s": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesBeat": "كسرت رقمك! 🔥",
+  "gamesSoClose": "قربت!",
+  "gamesFirst": "أول رقم ليك!",
+  "gamesOver": "{correct} من {total} صح في {s}",
+  "@gamesOver": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "s": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesMore": "تحديات تانية",
+  "gamesAllGames": "الألعاب",
+  "gamesReviewMinutes": "مراجعة {n} دقايق",
+  "@gamesReviewMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesStreak": "{n, plural, =0{ابدأ سلسلتك} =1{يوم واحد} =2{يومين} few{{n} أيام} other{{n} يوم}}",
+  "@gamesStreak": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesConstellation": "كوكبة الأسبوع",
+  "gamesLit": "{lit} من {max} نجمة",
+  "@gamesLit": {
+    "placeholders": {
+      "lit": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesLitHint": "كل نجمة بتكسبها في المراجعة بتنوّر نجمة هنا",
+  "gamesDeck": "{items} كارت · {game}",
+  "@gamesDeck": {
+    "placeholders": {
+      "items": {
+        "type": "int"
+      },
+      "game": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesStartReview": "ابدأ المراجعة",
+  "gamesReviewAgain": "راجع تاني",
+  "gamesRecent": "آخر جولات",
+  "gamesNone": "لسه مفيش تدريبات من دروسك. أول ما المدرس يحط تدريبات على الدرس، هتلاقيها هنا.",
+  "gamesGuardianTitle": "ألعاب {name}",
+  "@gamesGuardianTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesPlayTime": "وقت اللعب النهارده",
+  "gamesTimeText": "{used} من {limit} دقيقة لعب النهارده. فاضل {left} دقيقة.",
+  "@gamesTimeText": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      },
+      "left": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesTimeOpen": "{used} دقيقة لعب النهارده، من غير حد.",
+  "@gamesTimeOpen": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesMinutesShort": "دقيقة",
+  "gamesMaxTime": "أقصى وقت في اليوم",
+  "gamesChoice": "{n} د",
+  "@gamesChoice": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesAcademyChoice": "الأكاديمية",
+  "gamesNightLock": "قفل اللعب من 9 بالليل لـ 7 الصبح",
+  "gamesEnabled": "الألعاب شغالة",
+  "gamesLearned": "اتراجع إيه في اللعب",
+  "gamesRoundsCount": "{n, plural, =1{مرة واحدة} =2{مرتين} few{{n} مرات} other{{n} مرة}}",
+  "@gamesRoundsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesGamesCount": "{n, plural, =1{لعبة واحدة} =2{لعبتين} few{{n} ألعاب} other{{n} لعبة}}",
+  "@gamesGamesCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesPractised": "اتراجع «{title}» {rounds} في {games}",
+  "@gamesPractised": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "rounds": {
+        "type": "String"
+      },
+      "games": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesHardest": "أصعب سؤال: «{text}». ممكن تراجعوه سوا.",
+  "@gamesHardest": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesBestRound": "أحسن جولة: {correct} من {total} صح من أول مرة في «{game}»",
+  "@gamesBestRound": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "game": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesQuiet": "مفيش لعب الأسبوع ده. الألعاب بتتمرن على دروسه بس، والمدرس بيحط التدريبات على الدرس.",
+  "gamesHatchedToday": "فقس «{name}» النهارده",
+  "@gamesHatchedToday": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesHatchedStars": "من نجوم الألعاب · {found} في الألبوم",
+  "@gamesHatchedStars": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesHatchedMastery": "من درس اتقنه · {found} في الألبوم",
+  "@gamesHatchedMastery": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      }
+    }
+  },
+  "gamesCheer": "هنّيه",
+  "gamesCheered": "وصلته تهنئتك 💛",
+  "gamesSafety": "مفيش شراء جوه الألعاب ولا إعلانات ولا كلام مع حد غريب. كل كائن وكل نجمة بتتكسب بالمذاكرة.",
+  "gamesTogether": "العبوا سوا",
+  "gamesSaved": "اتحفظ.",
+  "gamesCardTitle": "الألعاب",
+  "gamesCardKids": "الجزر بتستناك 🏝️",
+  "gamesCardLead": "اتمرن على دروسك بألعاب: {what}",
+  "@gamesCardLead": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "gamesCardGuardian": "وقت اللعب، اللي اتراجع، والحدود"
 }

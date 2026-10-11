@@ -16,6 +16,7 @@ import '../../data/home_loader.dart';
 import '../bloc/learner_cubit.dart';
 import '../widgets/learner_switcher.dart';
 import '../widgets/next_lesson_card.dart';
+import '../../../games/presentation/games_page.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../../../core/realtime/live.dart';
 
@@ -134,6 +135,11 @@ class _Home extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         FamilyChallengesCard(learnerId: learnerId, name: name),
+        const SizedBox(height: 12),
+        GamesCard(
+          to: '/family/home/games',
+          lead: (context.read<SessionCubit>().state.current?.isGuardian ?? false) ? l.gamesCardGuardian : l.gamesTitleClassic,
+        ),
         if (report != null) ...[
           const SizedBox(height: 16),
           LmsCard(

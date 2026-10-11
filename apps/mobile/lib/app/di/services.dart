@@ -10,6 +10,7 @@ import '../../features/challenges/data/challenges_repository.dart';
 import '../../features/classroom/data/classroom_repository.dart';
 import '../../features/dashboard/data/family_repository.dart';
 import '../../features/dashboard/data/home_loader.dart';
+import '../../features/games/data/games_repository.dart';
 import '../../features/homework/data/homework_repository.dart';
 import '../../features/live/data/live_repository.dart';
 import '../../features/notifications/data/notifications_repository.dart';
@@ -38,6 +39,7 @@ class Services {
       profile = ProfileRepository(api),
       teaching = TeachingRepository(api),
       challenges = ChallengesRepository(api),
+      games = GamesRepository(api),
       notifications = NotificationsRepository(api),
       consent = ConsentRepository(api),
       privacy = PrivacyRepository(api),
@@ -63,6 +65,7 @@ class Services {
   final ProfileRepository profile;
   final TeachingRepository teaching;
   final ChallengesRepository challenges;
+  final GamesRepository games;
   final NotificationsRepository notifications;
   final ConsentRepository consent;
   final PrivacyRepository privacy;
@@ -95,6 +98,7 @@ class Services {
       RepositoryProvider.value(value: profile),
       RepositoryProvider.value(value: teaching),
       RepositoryProvider.value(value: challenges),
+      RepositoryProvider.value(value: games),
       RepositoryProvider.value(value: notifications),
       RepositoryProvider.value(value: home),
       RepositoryProvider.value(value: live),

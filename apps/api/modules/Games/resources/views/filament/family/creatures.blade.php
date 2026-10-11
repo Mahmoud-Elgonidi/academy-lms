@@ -15,12 +15,7 @@
     $ring = ['common' => '#24124F', 'rare' => '#1C7ED6', 'legendary' => '#F08C00'];
     $rarityBg = ['common' => '#F1F3F5', 'rare' => '#D0EBFF', 'legendary' => '#FFE8A3'];
     $need = \Modules\Games\Domain\Round::STARS_PER_EGG;
-    $names = (array) __($l.'hatch.names');
-    $suggest = function (array $c) use ($names) {
-        $at = crc32($c['key']) % max(1, count($names));
-
-        return array_values(array_unique(array_filter([$c['name'], $names[$at] ?? null, $names[($at + 5) % max(1, count($names))] ?? null])));
-    };
+    $suggest = fn (array $c) => \Modules\Games\Support\HatchNames::of($c['key'], $c['name']);
     $guardian = $this->isGuardian();
     $learner = app(\Modules\People\Contracts\FamilyView::class)->current((string) auth()->id());
     $config = [

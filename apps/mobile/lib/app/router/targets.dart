@@ -49,6 +49,10 @@ String targetOf(String? screen, String? id, Area area) {
     (Area.middle, 'challenges') => '/middle/quests',
     (Area.teen, 'challenges') => '/teen/goals',
     (Area.teen, 'report') => '/teen/reports',
+    (Area.kids, 'games') => '/kids/islands',
+    (Area.middle, 'games') => '/middle/games',
+    (Area.teen, 'games') => '/teen/plan/games',
+    (Area.family, 'games') => '/family/home/games',
     (Area.kids || Area.middle || Area.teen, 'homework') => '$base/homework',
     _ => home,
   };

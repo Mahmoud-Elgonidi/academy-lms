@@ -55,6 +55,7 @@ class Live {
   static const concerns = 'concerns.changed';
   static const checks = 'checks.changed';
   static const messages = 'messages.changed';
+  static const practice = 'practice.changed';
 
   /// Everything may have changed: after the app comes back, the socket comes back, or the relay restarts.
   static const resync = 'resync';

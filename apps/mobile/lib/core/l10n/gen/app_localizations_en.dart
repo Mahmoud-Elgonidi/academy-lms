@@ -2415,4 +2415,536 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get messagesWrite => 'Write a message…';
+
+  @override
+  String get navIslands => 'Islands';
+
+  @override
+  String get navGames => 'Games';
+
+  @override
+  String get gamesTitleMiddle => 'Games world';
+
+  @override
+  String get gamesTitleTeen => 'Practise with games';
+
+  @override
+  String get gamesTitleClassic => 'Games';
+
+  @override
+  String gamesWorld(String name) {
+    return '$name\'s world';
+  }
+
+  @override
+  String gamesStars(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n stars', one: 'one star', zero: 'no stars');
+    return '$_temp0';
+  }
+
+  @override
+  String get gamesSoundOn => 'Turn music and sounds on';
+
+  @override
+  String get gamesSoundOff => 'Turn music and sounds off';
+
+  @override
+  String gamesLockedIsland(String island) {
+    return '$island is still getting ready and opens soon with new games';
+  }
+
+  @override
+  String get gamesSecret => 'A secret island! A legendary creature lives there. You\'ll find out soon';
+
+  @override
+  String get gamesSecretLabel => 'Secret island';
+
+  @override
+  String get gamesNew => 'New';
+
+  @override
+  String gamesOf(int found, int total) {
+    return '$found of $total';
+  }
+
+  @override
+  String get gamesHomeworkPin => 'Homework';
+
+  @override
+  String gamesAriaOpen(String island) {
+    return '$island, open';
+  }
+
+  @override
+  String gamesAriaLocked(String island) {
+    return '$island, still locked';
+  }
+
+  @override
+  String gamesAriaHomework(String island) {
+    return '$island, with your homework';
+  }
+
+  @override
+  String get gamesToMap => 'Map';
+
+  @override
+  String get gamesIslandGames => 'The island\'s games';
+
+  @override
+  String get gamesBadgeHomework => 'Homework';
+
+  @override
+  String get gamesBadgeNew => 'New';
+
+  @override
+  String get gamesBadgeSoon => 'Soon';
+
+  @override
+  String get gamesIslandCreatures => 'The island\'s creatures';
+
+  @override
+  String gamesCreaturesCard(int found, int total) {
+    return 'Island creatures · $found of $total';
+  }
+
+  @override
+  String gamesEggCard(int have, int need) {
+    return 'Next egg: $have of $need ⭐';
+  }
+
+  @override
+  String get gamesIslandDone => 'You found every creature here!';
+
+  @override
+  String get gamesClose => 'Close the game';
+
+  @override
+  String get gamesToIsland => 'Back to the island';
+
+  @override
+  String get gamesAlbum => 'My creatures';
+
+  @override
+  String get gamesNeedsPractice => 'It needs practice of this kind in your lessons.';
+
+  @override
+  String gamesItems(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n questions', one: 'one question');
+    return '$_temp0';
+  }
+
+  @override
+  String get gamesReasonHomework => 'Homework practice';
+
+  @override
+  String get gamesReasonLastLesson => 'Last lesson';
+
+  @override
+  String get gamesReasonReview => 'Review';
+
+  @override
+  String get gamesReasonCurrent => 'Your current lesson';
+
+  @override
+  String get gamesReasonFree => 'Free play';
+
+  @override
+  String gamesPractising(String what) {
+    return 'Practising: $what';
+  }
+
+  @override
+  String get gamesResult0 => 'Keep going, try again!';
+
+  @override
+  String get gamesResult1 => 'A good start!';
+
+  @override
+  String get gamesResult2 => 'Well done!';
+
+  @override
+  String get gamesResult3 => 'Brilliant! Almost all right';
+
+  @override
+  String gamesScore(int correct, int total) {
+    return '$correct of $total right first time';
+  }
+
+  @override
+  String gamesHatched(String name) {
+    return '$name hatched!';
+  }
+
+  @override
+  String gamesHomeworkDone(String title) {
+    return 'The homework “$title” is handed in with this practice.';
+  }
+
+  @override
+  String gamesEgg(int have, int need) {
+    return 'Next egg: $have of $need stars';
+  }
+
+  @override
+  String get gamesAgain => 'Play again';
+
+  @override
+  String get gamesPlay => 'Play';
+
+  @override
+  String get gamesLoading => 'Getting the round ready…';
+
+  @override
+  String get gamesSending => 'Counting the stars…';
+
+  @override
+  String get gamesPageProblem => 'The game didn\'t start. Try again.';
+
+  @override
+  String get gamesHatchReady => 'The egg is ready!';
+
+  @override
+  String gamesHatchReadySub(int need) {
+    return 'You won $need stars in the games';
+  }
+
+  @override
+  String get gamesHatchDone => 'It hatched!';
+
+  @override
+  String gamesHatchDoneSub(int need) {
+    return 'Every $need stars hatch a new egg';
+  }
+
+  @override
+  String get gamesHatchTap0 => 'Tap the egg 3 times';
+
+  @override
+  String get gamesHatchTap1 => 'Two more!';
+
+  @override
+  String get gamesHatchTap2 => 'One more!';
+
+  @override
+  String get gamesHatchTap3 => 'Hatching...';
+
+  @override
+  String gamesHatchEgg(int left) {
+    return 'The egg, tap it. $left to go';
+  }
+
+  @override
+  String gamesHatchNew(int found, int total) {
+    return 'New in your album · $found of $total';
+  }
+
+  @override
+  String get gamesHatchAsk => 'What will you call it?';
+
+  @override
+  String get gamesHatchKeep => 'Put it in the album';
+
+  @override
+  String get gamesAlbumTitle => 'My creatures';
+
+  @override
+  String gamesAlbumHint(int need) {
+    return 'Every $need stars in the games hatch an egg, and every lesson you master hatches a creature.';
+  }
+
+  @override
+  String gamesAlbumGuardian(String name) {
+    return 'This is $name\'s album. Only they choose their buddy and name their creatures.';
+  }
+
+  @override
+  String get gamesAlbumAll => 'All';
+
+  @override
+  String get gamesRarityCommon => 'Common';
+
+  @override
+  String get gamesRarityRare => 'Rare';
+
+  @override
+  String get gamesRarityLegendary => 'Legendary';
+
+  @override
+  String get gamesAllIslands => 'All islands';
+
+  @override
+  String get gamesNotYet => 'Not yet';
+
+  @override
+  String gamesAriaFound(String name, String island) {
+    return '$name, from $island';
+  }
+
+  @override
+  String gamesAriaShadow(String island) {
+    return 'A creature not hatched yet, from $island';
+  }
+
+  @override
+  String get gamesVoice => 'Hear it';
+
+  @override
+  String get gamesMakeBuddy => 'Make it your buddy';
+
+  @override
+  String get gamesIsBuddy => 'Your buddy 💛';
+
+  @override
+  String gamesBuddyDone(String name) {
+    return '$name flies with you in the games now';
+  }
+
+  @override
+  String get gamesShadowStory => 'Not hatched yet.';
+
+  @override
+  String gamesHowCommon(String island, int need) {
+    return 'How to hatch it: play the games of $island and win stars: every $need stars hatch an egg.';
+  }
+
+  @override
+  String gamesHowRare(String island) {
+    return 'How to hatch it: a rare creature of $island: it hatches after its common ones.';
+  }
+
+  @override
+  String gamesHowLegendary(String island) {
+    return 'How to hatch it: legendary! The last creature of $island. Collect all the others first.';
+  }
+
+  @override
+  String get gamesNameIt => 'Name it:';
+
+  @override
+  String gamesNamed(String name) {
+    return 'Now called $name';
+  }
+
+  @override
+  String get gamesFromStars => 'Hatched from game stars';
+
+  @override
+  String get gamesFromMastery => 'Hatched when you mastered a lesson';
+
+  @override
+  String get gamesRace => 'Race yourself';
+
+  @override
+  String gamesFrom(String what) {
+    return 'From $what';
+  }
+
+  @override
+  String get gamesStart => 'Start';
+
+  @override
+  String get gamesFinish => 'Finish';
+
+  @override
+  String get gamesBestGhost => 'Your best';
+
+  @override
+  String get gamesYou => 'You';
+
+  @override
+  String gamesRaceReady(String items, String title) {
+    return '$items from “$title”. Race your best time';
+  }
+
+  @override
+  String gamesBest(String s) {
+    return 'Best time: $s';
+  }
+
+  @override
+  String get gamesFirstTime => 'First go! Set your time';
+
+  @override
+  String get gamesGo => 'Go';
+
+  @override
+  String gamesSeconds(int s) {
+    return '${s}s';
+  }
+
+  @override
+  String get gamesBeat => 'New record! 🔥';
+
+  @override
+  String get gamesSoClose => 'So close!';
+
+  @override
+  String get gamesFirst => 'Your first time!';
+
+  @override
+  String gamesOver(int correct, int total, String s) {
+    return '$correct of $total right in $s';
+  }
+
+  @override
+  String get gamesMore => 'More challenges';
+
+  @override
+  String get gamesAllGames => 'Games';
+
+  @override
+  String gamesReviewMinutes(int n) {
+    return '$n-minute review';
+  }
+
+  @override
+  String gamesStreak(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n days', one: '1 day', zero: 'Start your streak');
+    return '$_temp0';
+  }
+
+  @override
+  String get gamesConstellation => 'This week\'s constellation';
+
+  @override
+  String gamesLit(int lit, int max) {
+    return '$lit of $max stars';
+  }
+
+  @override
+  String get gamesLitHint => 'Every star you win in review lights one here';
+
+  @override
+  String gamesDeck(int items, String game) {
+    return '$items cards · $game';
+  }
+
+  @override
+  String get gamesStartReview => 'Start review';
+
+  @override
+  String get gamesReviewAgain => 'Review again';
+
+  @override
+  String get gamesRecent => 'Last rounds';
+
+  @override
+  String get gamesNone => 'No practice from your lessons yet. Once your teacher adds practice to a lesson, it shows here.';
+
+  @override
+  String gamesGuardianTitle(String name) {
+    return '$name\'s games';
+  }
+
+  @override
+  String get gamesPlayTime => 'Play time today';
+
+  @override
+  String gamesTimeText(int used, int limit, int left) {
+    return '$used of $limit minutes played today. $left minutes left.';
+  }
+
+  @override
+  String gamesTimeOpen(int used) {
+    return '$used minutes played today, no limit.';
+  }
+
+  @override
+  String get gamesMinutesShort => 'min';
+
+  @override
+  String get gamesMaxTime => 'Most time a day';
+
+  @override
+  String gamesChoice(int n) {
+    return '$n m';
+  }
+
+  @override
+  String get gamesAcademyChoice => 'Academy';
+
+  @override
+  String get gamesNightLock => 'Lock games from 9 pm to 7 am';
+
+  @override
+  String get gamesEnabled => 'Games on';
+
+  @override
+  String get gamesLearned => 'What was practised';
+
+  @override
+  String gamesRoundsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n times', two: 'twice', one: 'once');
+    return '$_temp0';
+  }
+
+  @override
+  String gamesGamesCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n games', one: 'one game');
+    return '$_temp0';
+  }
+
+  @override
+  String gamesPractised(String title, String rounds, String games) {
+    return 'Practised “$title” $rounds in $games';
+  }
+
+  @override
+  String gamesHardest(String text) {
+    return 'Hardest question: “$text”. Worth going over together.';
+  }
+
+  @override
+  String gamesBestRound(int correct, int total, String game) {
+    return 'Best round: $correct of $total right first time in “$game”';
+  }
+
+  @override
+  String get gamesQuiet => 'No play this week. The games only practise their lessons, from the practice the teacher adds.';
+
+  @override
+  String gamesHatchedToday(String name) {
+    return '“$name” hatched today';
+  }
+
+  @override
+  String gamesHatchedStars(int found) {
+    return 'From game stars · $found in the album';
+  }
+
+  @override
+  String gamesHatchedMastery(int found) {
+    return 'From a mastered lesson · $found in the album';
+  }
+
+  @override
+  String get gamesCheer => 'Cheer';
+
+  @override
+  String get gamesCheered => 'Your cheer is on its way 💛';
+
+  @override
+  String get gamesSafety =>
+      'No purchases inside the games, no ads, no chat with strangers. Every creature and every star is earned by studying.';
+
+  @override
+  String get gamesTogether => 'Play together';
+
+  @override
+  String get gamesSaved => 'Saved.';
+
+  @override
+  String get gamesCardTitle => 'Games';
+
+  @override
+  String get gamesCardKids => 'The islands are waiting 🏝️';
+
+  @override
+  String gamesCardLead(String what) {
+    return 'Practise your lessons with games: $what';
+  }
+
+  @override
+  String get gamesCardGuardian => 'Play time, what was practised, and limits';
 }

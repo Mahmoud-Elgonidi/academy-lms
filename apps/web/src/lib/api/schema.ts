@@ -503,7 +503,7 @@ export interface paths {
         /**
          * Finish a round
          * @description Every try the page reported (item and whether it was right), in order. Answers the stars, how many were right
-         *     first time, a creature if one hatched, the next egg, and the homework handed in by this practice. Finishing again
+         *     first time, how long it took, a creature if one hatched, the next egg, and the homework handed in by this practice. Finishing again
          *     answers the same stars. Send an Idempotency-Key.
          */
         post: operations["games.plays.finish"];
@@ -544,7 +544,8 @@ export interface paths {
         /**
          * A learner's album of creatures
          * @description Every creature of the world in its order: hatched ones with when, how (stars or a mastered lesson), the name the
-         *     learner gave and whether it is their buddy; the rest with only how they look (to draw as a shadow) and their island.
+         *     learner gave, whether it is their buddy and names to choose from; the rest with only how they look (to draw as a
+         *     shadow) and their island.
          */
         get: operations["games.creatures"];
         put?: never;
@@ -3834,6 +3835,8 @@ export interface operations {
                             streak: number;
                             islands: unknown[];
                             recent: unknown[];
+                            /** @description The last ten rounds, oldest first: the share right first time (0 to 1) and the stars. */
+                            history: unknown[];
                             /** @description A guardian's limits for this child (null for the student). */
                             limits: {
                                 enabled: boolean;
@@ -3852,6 +3855,37 @@ export interface operations {
                                     90,
                                     120
                                 ];
+                            } | null;
+                            /** @description A guardian's look at the child's week (null for the student): the lesson practised most, the question hardest first time, the best round, and a creature hatched today on the child's clock. */
+                            glance: {
+                                rounds: number;
+                                /** @description The lesson the child went back to most this week: its title, rounds, and in how many games. */
+                                practised: {
+                                    title: string | null;
+                                    rounds: string;
+                                    games: number;
+                                } | null;
+                                /** @description The question the child got wrong first time most often this week, written as question → answer. */
+                                hardest: {
+                                    text: string;
+                                    wrong: string;
+                                } | null;
+                                /** @description The round with the most right first time this week. */
+                                best: {
+                                    correct: number;
+                                    total: number;
+                                    game: string;
+                                } | null;
+                                /** @description A creature hatched today: its name (the child's own when they gave one), look, island, and how many the child has found. */
+                                hatched: {
+                                    key: string;
+                                    name: string | null;
+                                    kind_name: string;
+                                    look: string;
+                                    island: string;
+                                    source: string;
+                                    found: number;
+                                } | null;
                             } | null;
                         };
                     };
@@ -3984,15 +4018,10 @@ export interface operations {
                             stars: number;
                             correct: number;
                             total: string;
-                            creature: {
-                                key: string;
-                                name: string;
-                                emoji: string;
-                                rarity: string;
-                                island: string;
-                                look: unknown[];
-                                story: string;
-                            } | null;
+                            /** @description How long the round took, in seconds (the race against yourself). */
+                            seconds: string;
+                            /** @description A creature hatched by this round: with the three names the child chooses from, and how many they have found of all. */
+                            creature: unknown[] | null;
                             egg: {
                                 have: number;
                                 /** @constant */
@@ -4159,7 +4188,9 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: unknown[];
+                        data: {
+                            [key: string]: unknown;
+                        };
                     };
                 };
             };

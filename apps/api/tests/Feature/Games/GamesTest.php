@@ -156,7 +156,8 @@ it('plays a round with the learner\'s own items, scores first tries, and keeps i
     $done = $this->withToken(gamesToken($this->student))->withHeaders(['Idempotency-Key' => (string) Str::uuid()])
         ->postJson('/api/v1/games/plays/'.$start['play_id'].'/finish', ['answers' => $answers])->assertOk()->json('data');
     expect($done)->toMatchArray(['stars' => 2, 'correct' => 2, 'total' => 3, 'creature' => null, 'homework' => null])
-        ->and($done['egg'])->toBe(['have' => 2, 'need' => 12]);
+        ->and($done['egg'])->toBe(['have' => 2, 'need' => 12])
+        ->and($done['seconds'])->toBeInt()->toBeGreaterThanOrEqual(0);
 
     $this->actAsTenant($this->academy);
     expect(DB::table('practice_rounds')->where('student_id', $this->student->id)->sole())->toMatchArray(['game' => 'bird-balloons', 'focus' => 'current', 'correct' => 2, 'total' => 3, 'stars' => 2])
@@ -377,7 +378,10 @@ it('lets the learner name what they hatched and choose a buddy, while a guardian
     expect($album)->toHaveCount(20)
         ->and(collect($album)->where('found', true)->pluck('key')->all())->toBe([$first->key, $second->key])
         ->and(collect($album)->firstWhere('found', false))->toHaveKeys(['look', 'island', 'island_name'])
-        ->and(collect($album)->firstWhere('key', $first->key))->toMatchArray(['source' => 'stars', 'nickname' => null, 'buddy' => false]);
+        ->and(collect($album)->firstWhere('key', $first->key))->toMatchArray(['source' => 'stars', 'nickname' => null, 'buddy' => false])
+        ->and(collect($album)->firstWhere('key', $first->key)['names'])->toHaveCount(3)
+        ->and(collect($album)->firstWhere('key', $first->key)['names'][0])->toBe(collect($album)->firstWhere('key', $first->key)['name'])
+        ->and(collect($album)->firstWhere('found', false)['names'])->toBe([]);
 
     $url = '/api/v1/games/creatures/'.$first->key;
     $this->withToken(gamesToken($this->student))->putJson($url, ['name' => '  بندق   الصغير '])->assertOk()->assertJsonPath('data.nickname', 'بندق الصغير');
@@ -618,4 +622,26 @@ it('gives the studio counts across academies: players, rounds, eggs, and how eac
     expect($stats->overview())->toBe(['players' => 1, 'academies' => 1, 'rounds' => 5, 'per_player' => 5.0, 'finished' => 83, 'eggs' => 1, 'mastery_eggs' => 0])
         ->and($stats->roundsByGame())->toBe([$balloons => 5])
         ->and($stats->game($balloons))->toMatchArray(['rounds' => 5, 'finished' => 83, 'stars' => 2.8, 'positions' => [80, 100, 100], 'academies' => 1]);
+});
+
+it('gives the apps what the screens show: the hatch names, and a guardian\'s look at the week', function () {
+    $quest = 'current:'.$this->booked->enrollmentId;
+    $hatched = null;
+    for ($i = 0; $i < 4; $i++) {
+        $start = $this->withToken(gamesToken($this->student))->postJson('/api/v1/games/plays', ['game' => 'bird-balloons', 'quest' => $quest])->assertCreated()->json('data');
+        $hatched = $this->withToken(gamesToken($this->student))->withHeaders(['Idempotency-Key' => (string) Str::uuid()])
+            ->postJson('/api/v1/games/plays/'.$start['play_id'].'/finish', ['answers' => playedRound($start['round']['items'])])->assertOk()->json('data.creature');
+    }
+    expect($hatched)->toMatchArray(['found' => 1, 'total' => 20])
+        ->and($hatched['names'])->toHaveCount(3)
+        ->and($hatched['names'][0])->toBe($hatched['name'])
+        ->and($hatched)->toHaveKeys(['key', 'look', 'island', 'story']);
+
+    $this->withToken(gamesToken($this->student))->getJson('/api/v1/games/world')->assertJsonPath('data.glance', null);
+    $glance = $this->withToken(gamesToken($this->guardian))->getJson('/api/v1/games/world?learner_id='.$this->student->id)->assertOk()->json('data.glance');
+    expect($glance['rounds'])->toBe(4)
+        ->and($glance['practised'])->toBe(['title' => 'Lesson 1', 'rounds' => 4, 'games' => 1])
+        ->and($glance['hardest'])->toBeNull()
+        ->and($glance['best'])->toMatchArray(['correct' => 3, 'total' => 3])
+        ->and($glance['hatched'])->toMatchArray(['key' => $hatched['key'], 'source' => 'stars', 'found' => 1]);
 });

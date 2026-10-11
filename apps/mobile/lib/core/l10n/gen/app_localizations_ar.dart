@@ -2472,4 +2472,551 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get messagesWrite => 'اكتب رسالة…';
+
+  @override
+  String get navIslands => 'الجزر';
+
+  @override
+  String get navGames => 'الألعاب';
+
+  @override
+  String get gamesTitleMiddle => 'عالم الألعاب';
+
+  @override
+  String get gamesTitleTeen => 'التدريب بالألعاب';
+
+  @override
+  String get gamesTitleClassic => 'الألعاب';
+
+  @override
+  String gamesWorld(String name) {
+    return 'عالم $name';
+  }
+
+  @override
+  String gamesStars(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n نجمة',
+      few: '$n نجوم',
+      two: 'نجمتين',
+      one: 'نجمة واحدة',
+      zero: 'من غير نجوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get gamesSoundOn => 'شغّل المزيكا والأصوات';
+
+  @override
+  String get gamesSoundOff => 'اقفل المزيكا والأصوات';
+
+  @override
+  String gamesLockedIsland(String island) {
+    return '$island لسه بتتجهّز، وهتتفتح بألعاب جديدة قريب';
+  }
+
+  @override
+  String get gamesSecret => 'جزيرة سرّية! فيها كائن أسطوري. هتعرف سرها قريب';
+
+  @override
+  String get gamesSecretLabel => 'جزيرة سرّية';
+
+  @override
+  String get gamesNew => 'جديد';
+
+  @override
+  String gamesOf(int found, int total) {
+    return '$found من $total';
+  }
+
+  @override
+  String get gamesHomeworkPin => 'واجب';
+
+  @override
+  String gamesAriaOpen(String island) {
+    return '$island، مفتوحة';
+  }
+
+  @override
+  String gamesAriaLocked(String island) {
+    return '$island، لسه مقفولة';
+  }
+
+  @override
+  String gamesAriaHomework(String island) {
+    return '$island، فيها الواجب';
+  }
+
+  @override
+  String get gamesToMap => 'الخريطة';
+
+  @override
+  String get gamesIslandGames => 'ألعاب الجزيرة';
+
+  @override
+  String get gamesBadgeHomework => 'واجب';
+
+  @override
+  String get gamesBadgeNew => 'جديدة';
+
+  @override
+  String get gamesBadgeSoon => 'قريب';
+
+  @override
+  String get gamesIslandCreatures => 'كائنات الجزيرة';
+
+  @override
+  String gamesCreaturesCard(int found, int total) {
+    return 'كائنات الجزيرة · $found من $total';
+  }
+
+  @override
+  String gamesEggCard(int have, int need) {
+    return 'البيضة الجاية: $have من $need ⭐';
+  }
+
+  @override
+  String get gamesIslandDone => 'لمّيت كل كائنات الجزيرة!';
+
+  @override
+  String get gamesClose => 'اقفل اللعبة وارجع';
+
+  @override
+  String get gamesToIsland => 'ارجع للجزيرة';
+
+  @override
+  String get gamesAlbum => 'كائناتي';
+
+  @override
+  String get gamesNeedsPractice => 'محتاجة تدريبات من النوع ده في دروسك.';
+
+  @override
+  String gamesItems(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n سؤال', few: '$n أسئلة', two: 'سؤالين', one: 'سؤال واحد');
+    return '$_temp0';
+  }
+
+  @override
+  String get gamesReasonHomework => 'تدريب الواجب';
+
+  @override
+  String get gamesReasonLastLesson => 'آخر درس';
+
+  @override
+  String get gamesReasonReview => 'مراجعة';
+
+  @override
+  String get gamesReasonCurrent => 'الدرس اللي عليه الدور';
+
+  @override
+  String get gamesReasonFree => 'لعب حر';
+
+  @override
+  String gamesPractising(String what) {
+    return 'بتتمرن على: $what';
+  }
+
+  @override
+  String get gamesResult0 => 'كمّل وحاول تاني!';
+
+  @override
+  String get gamesResult1 => 'بداية حلوة!';
+
+  @override
+  String get gamesResult2 => 'شاطر!';
+
+  @override
+  String get gamesResult3 => 'رائع! كله صح تقريبًا';
+
+  @override
+  String gamesScore(int correct, int total) {
+    return '$correct من $total صح من أول مرة';
+  }
+
+  @override
+  String gamesHatched(String name) {
+    return 'فقس $name!';
+  }
+
+  @override
+  String gamesHomeworkDone(String title) {
+    return 'الواجب «$title» اتسلّم بالتدريب ده.';
+  }
+
+  @override
+  String gamesEgg(int have, int need) {
+    return 'البيضة الجاية: $have من $need نجمة';
+  }
+
+  @override
+  String get gamesAgain => 'العب تاني';
+
+  @override
+  String get gamesPlay => 'العب';
+
+  @override
+  String get gamesLoading => 'بنجهّز الجولة…';
+
+  @override
+  String get gamesSending => 'بنحسب النجوم…';
+
+  @override
+  String get gamesPageProblem => 'اللعبة ما اشتغلتش. جرّب تاني.';
+
+  @override
+  String get gamesHatchReady => 'البيضة جاهزة!';
+
+  @override
+  String gamesHatchReadySub(int need) {
+    return 'جمعت $need نجمة في الألعاب';
+  }
+
+  @override
+  String get gamesHatchDone => 'فقست!';
+
+  @override
+  String gamesHatchDoneSub(int need) {
+    return 'كل ما تجمع $need نجمة، تفقسلك بيضة جديدة';
+  }
+
+  @override
+  String get gamesHatchTap0 => 'دوس على البيضة 3 مرات';
+
+  @override
+  String get gamesHatchTap1 => 'كمان مرتين!';
+
+  @override
+  String get gamesHatchTap2 => 'مرة كمان!';
+
+  @override
+  String get gamesHatchTap3 => 'بتفقس...';
+
+  @override
+  String gamesHatchEgg(int left) {
+    return 'البيضة، دوس عليها. فاضل $left';
+  }
+
+  @override
+  String gamesHatchNew(int found, int total) {
+    return 'كائن جديد في ألبومك · $found من $total';
+  }
+
+  @override
+  String get gamesHatchAsk => 'تحب تسميه إيه؟';
+
+  @override
+  String get gamesHatchKeep => 'حطّه في الألبوم';
+
+  @override
+  String get gamesAlbumTitle => 'ألبوم كائناتي';
+
+  @override
+  String gamesAlbumHint(int need) {
+    return 'كل $need نجمة في الألعاب بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.';
+  }
+
+  @override
+  String gamesAlbumGuardian(String name) {
+    return 'ده ألبوم $name. هو بس اللي يختار صاحبه ويسمّي كائناته.';
+  }
+
+  @override
+  String get gamesAlbumAll => 'الكل';
+
+  @override
+  String get gamesRarityCommon => 'عادي';
+
+  @override
+  String get gamesRarityRare => 'نادر';
+
+  @override
+  String get gamesRarityLegendary => 'أسطوري';
+
+  @override
+  String get gamesAllIslands => 'كل الجزر';
+
+  @override
+  String get gamesNotYet => 'لسه';
+
+  @override
+  String gamesAriaFound(String name, String island) {
+    return '$name، من $island';
+  }
+
+  @override
+  String gamesAriaShadow(String island) {
+    return 'كائن لسه ما فقسش، من $island';
+  }
+
+  @override
+  String get gamesVoice => 'اسمع صوته';
+
+  @override
+  String get gamesMakeBuddy => 'خليه صاحبك';
+
+  @override
+  String get gamesIsBuddy => 'ده صاحبك 💛';
+
+  @override
+  String gamesBuddyDone(String name) {
+    return '$name هيطير معاك في الألعاب من دلوقتي';
+  }
+
+  @override
+  String get gamesShadowStory => 'لسه ما فقسش.';
+
+  @override
+  String gamesHowCommon(String island, int need) {
+    return 'إزاي تفقسه: العب ألعاب $island واجمع نجوم: كل $need نجمة بيضة.';
+  }
+
+  @override
+  String gamesHowRare(String island) {
+    return 'إزاي تفقسه: كائن نادر في $island: بيفقس بعد الكائنات العادية بتاعتها.';
+  }
+
+  @override
+  String gamesHowLegendary(String island) {
+    return 'إزاي تفقسه: أسطوري! آخر كائن في $island. اجمع اللي قبله كلهم.';
+  }
+
+  @override
+  String get gamesNameIt => 'سمّيه:';
+
+  @override
+  String gamesNamed(String name) {
+    return 'اتسمّى $name';
+  }
+
+  @override
+  String get gamesFromStars => 'فقس من نجوم الألعاب';
+
+  @override
+  String get gamesFromMastery => 'فقس لما اتقنت درس';
+
+  @override
+  String get gamesRace => 'سباق مع نفسك';
+
+  @override
+  String gamesFrom(String what) {
+    return 'من $what';
+  }
+
+  @override
+  String get gamesStart => 'البداية';
+
+  @override
+  String get gamesFinish => 'النهاية';
+
+  @override
+  String get gamesBestGhost => 'أحسن مرة';
+
+  @override
+  String get gamesYou => 'إنت';
+
+  @override
+  String gamesRaceReady(String items, String title) {
+    return '$items من «$title». سابق أحسن مرة ليك';
+  }
+
+  @override
+  String gamesBest(String s) {
+    return 'أحسن وقت: $s';
+  }
+
+  @override
+  String get gamesFirstTime => 'أول مرة! حط رقمك';
+
+  @override
+  String get gamesGo => 'يلا';
+
+  @override
+  String gamesSeconds(int s) {
+    return '$sث';
+  }
+
+  @override
+  String get gamesBeat => 'كسرت رقمك! 🔥';
+
+  @override
+  String get gamesSoClose => 'قربت!';
+
+  @override
+  String get gamesFirst => 'أول رقم ليك!';
+
+  @override
+  String gamesOver(int correct, int total, String s) {
+    return '$correct من $total صح في $s';
+  }
+
+  @override
+  String get gamesMore => 'تحديات تانية';
+
+  @override
+  String get gamesAllGames => 'الألعاب';
+
+  @override
+  String gamesReviewMinutes(int n) {
+    return 'مراجعة $n دقايق';
+  }
+
+  @override
+  String gamesStreak(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n يوم',
+      few: '$n أيام',
+      two: 'يومين',
+      one: 'يوم واحد',
+      zero: 'ابدأ سلسلتك',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get gamesConstellation => 'كوكبة الأسبوع';
+
+  @override
+  String gamesLit(int lit, int max) {
+    return '$lit من $max نجمة';
+  }
+
+  @override
+  String get gamesLitHint => 'كل نجمة بتكسبها في المراجعة بتنوّر نجمة هنا';
+
+  @override
+  String gamesDeck(int items, String game) {
+    return '$items كارت · $game';
+  }
+
+  @override
+  String get gamesStartReview => 'ابدأ المراجعة';
+
+  @override
+  String get gamesReviewAgain => 'راجع تاني';
+
+  @override
+  String get gamesRecent => 'آخر جولات';
+
+  @override
+  String get gamesNone => 'لسه مفيش تدريبات من دروسك. أول ما المدرس يحط تدريبات على الدرس، هتلاقيها هنا.';
+
+  @override
+  String gamesGuardianTitle(String name) {
+    return 'ألعاب $name';
+  }
+
+  @override
+  String get gamesPlayTime => 'وقت اللعب النهارده';
+
+  @override
+  String gamesTimeText(int used, int limit, int left) {
+    return '$used من $limit دقيقة لعب النهارده. فاضل $left دقيقة.';
+  }
+
+  @override
+  String gamesTimeOpen(int used) {
+    return '$used دقيقة لعب النهارده، من غير حد.';
+  }
+
+  @override
+  String get gamesMinutesShort => 'دقيقة';
+
+  @override
+  String get gamesMaxTime => 'أقصى وقت في اليوم';
+
+  @override
+  String gamesChoice(int n) {
+    return '$n د';
+  }
+
+  @override
+  String get gamesAcademyChoice => 'الأكاديمية';
+
+  @override
+  String get gamesNightLock => 'قفل اللعب من 9 بالليل لـ 7 الصبح';
+
+  @override
+  String get gamesEnabled => 'الألعاب شغالة';
+
+  @override
+  String get gamesLearned => 'اتراجع إيه في اللعب';
+
+  @override
+  String gamesRoundsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n مرة', few: '$n مرات', two: 'مرتين', one: 'مرة واحدة');
+    return '$_temp0';
+  }
+
+  @override
+  String gamesGamesCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n لعبة', few: '$n ألعاب', two: 'لعبتين', one: 'لعبة واحدة');
+    return '$_temp0';
+  }
+
+  @override
+  String gamesPractised(String title, String rounds, String games) {
+    return 'اتراجع «$title» $rounds في $games';
+  }
+
+  @override
+  String gamesHardest(String text) {
+    return 'أصعب سؤال: «$text». ممكن تراجعوه سوا.';
+  }
+
+  @override
+  String gamesBestRound(int correct, int total, String game) {
+    return 'أحسن جولة: $correct من $total صح من أول مرة في «$game»';
+  }
+
+  @override
+  String get gamesQuiet => 'مفيش لعب الأسبوع ده. الألعاب بتتمرن على دروسه بس، والمدرس بيحط التدريبات على الدرس.';
+
+  @override
+  String gamesHatchedToday(String name) {
+    return 'فقس «$name» النهارده';
+  }
+
+  @override
+  String gamesHatchedStars(int found) {
+    return 'من نجوم الألعاب · $found في الألبوم';
+  }
+
+  @override
+  String gamesHatchedMastery(int found) {
+    return 'من درس اتقنه · $found في الألبوم';
+  }
+
+  @override
+  String get gamesCheer => 'هنّيه';
+
+  @override
+  String get gamesCheered => 'وصلته تهنئتك 💛';
+
+  @override
+  String get gamesSafety => 'مفيش شراء جوه الألعاب ولا إعلانات ولا كلام مع حد غريب. كل كائن وكل نجمة بتتكسب بالمذاكرة.';
+
+  @override
+  String get gamesTogether => 'العبوا سوا';
+
+  @override
+  String get gamesSaved => 'اتحفظ.';
+
+  @override
+  String get gamesCardTitle => 'الألعاب';
+
+  @override
+  String get gamesCardKids => 'الجزر بتستناك 🏝️';
+
+  @override
+  String gamesCardLead(String what) {
+    return 'اتمرن على دروسك بألعاب: $what';
+  }
+
+  @override
+  String get gamesCardGuardian => 'وقت اللعب، اللي اتراجع، والحدود';
 }

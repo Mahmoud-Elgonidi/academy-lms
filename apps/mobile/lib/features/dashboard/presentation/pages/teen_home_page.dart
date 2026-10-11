@@ -15,6 +15,7 @@ import '../../../challenges/presentation/widgets/teasers.dart';
 import '../../data/home_loader.dart';
 import '../../domain/journey.dart';
 import '../widgets/next_lesson_card.dart';
+import '../../../games/presentation/games_page.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../../../core/realtime/live.dart';
 
@@ -139,6 +140,8 @@ class _TeenHome extends StatelessWidget {
             ),
           ),
         ],
+        const SizedBox(height: 12),
+        GamesCard(to: '/teen/plan/games', lead: l.gamesTitleTeen),
       ]),
     );
   }
