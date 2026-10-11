@@ -99,7 +99,8 @@
       "recordings": "Lesson recordings",
       "account": "My account",
       "myData": "My data",
-      "tellUs": "Report a concern"
+      "tellUs": "Report a concern",
+      "games": "Games"
     },
     "kids": {
       "menu": "Menu",
@@ -113,7 +114,8 @@
       "notifications": "Messages",
       "more": "More",
       "help": "Help",
-      "tellUs": "Tell a grown-up"
+      "tellUs": "Tell a grown-up",
+      "games": "Islands 🏝️"
     },
     "middle": {
       "menu": "Menu",
@@ -129,7 +131,8 @@
       "help": "Ask for help",
       "recordings": "My lesson recordings",
       "account": "My account",
-      "tellUs": "Tell us"
+      "tellUs": "Tell us",
+      "games": "Games"
     },
     "teen": {
       "menu": "Menu",
@@ -145,7 +148,8 @@
       "help": "Help",
       "recordings": "My lesson recordings",
       "account": "My account",
-      "tellUs": "Report a concern"
+      "tellUs": "Report a concern",
+      "games": "Practice"
     },
     "help": "Support",
     "recordings": "My lesson recordings",
@@ -865,5 +869,189 @@
     "issued": "issued {day}",
     "until": "valid until {day}",
     "noEnd": "no end date"
+  },
+  "games": {
+    "title": {
+      "kids": "Adventure islands",
+      "middle": "Games world",
+      "teen": "Practice in games",
+      "classic": "Games"
+    },
+    "noLearner": "There is no learner to show games for.",
+    "stars": "{n, plural, =0 {no stars} one {one star} other {# stars}}",
+    "items": "{n, plural, one {one question} other {# questions}}",
+    "refused": {
+      "off": "Games are off at the academy right now.",
+      "paused": "A guardian has paused games for now.",
+      "night": "The birds are asleep 🌙 Games are back at 7 in the morning.",
+      "limit": "Today’s play time is used up. See you tomorrow! 🌙"
+    },
+    "reasons": {
+      "homework": "Homework practice",
+      "last_lesson": "Last lesson",
+      "review": "Review",
+      "current": "Your current lesson",
+      "free": "Free play"
+    },
+    "play": "Play",
+    "locked": "Needs practice of this kind in your lessons.",
+    "practising": "Practising: {what}",
+    "notEnough": "Your lessons do not have enough practice for this game yet. Try another game.",
+    "failed": "The game didn’t start. Try again.",
+    "result": {
+      "0": "Keep going, try again!",
+      "1": "A good start!",
+      "2": "Well done!",
+      "3": "Brilliant! Almost all right",
+      "score": "{correct} of {total} right first time"
+    },
+    "hatched": "{name} hatched!",
+    "homeworkDone": "The homework “{title}” is handed in with this practice.",
+    "egg": "Next egg: {have} of {need} stars",
+    "again": "Play again",
+    "map": {
+      "world": "{name}’s world",
+      "soundOn": "Turn music and sounds on",
+      "soundOff": "Turn music and sounds off",
+      "locked": "{island} is still getting ready and opens soon with new games",
+      "secret": "A secret island! A legendary creature lives there. You’ll find out soon",
+      "secretLabel": "Secret island",
+      "new": "New",
+      "of": "{found} of {total}",
+      "homework": "Homework",
+      "ariaOpen": "{island}, open",
+      "ariaLocked": "{island}, still locked",
+      "ariaHomework": "{island}, with your homework",
+      "back": "Map",
+      "games": "The island’s games",
+      "badge": {
+        "homework": "Homework",
+        "new": "New",
+        "soon": "Soon"
+      },
+      "creatures": "The island’s creatures",
+      "creaturesCard": "Island creatures · {found} of {total}",
+      "eggCard": "Next egg: {have} of {need} ⭐",
+      "islandDone": "You found every creature here!",
+      "close": "Close the game",
+      "toIsland": "Back to the island",
+      "album": "My creatures"
+    },
+    "hatch": {
+      "ready": "The egg is ready!",
+      "readySub": "You won {need} stars in the games",
+      "done": "It hatched!",
+      "doneSub": "Every {need} stars hatch a new egg",
+      "tap0": "Tap the egg 3 times",
+      "tap1": "Two more!",
+      "tap2": "One more!",
+      "tap3": "Hatching...",
+      "egg": "The egg, tap it. {left} to go",
+      "new": "New in your album · {found} of {total}",
+      "ask": "What will you call it?",
+      "namesLabel": "Its name",
+      "keep": "Put it in the album"
+    },
+    "album": {
+      "title": "My creatures",
+      "count": "{found} of {total}",
+      "hint": "Every {need} stars in the games hatch an egg, and every lesson you master hatches a creature.",
+      "tabs": "Kind of creature",
+      "all": "All",
+      "rarity": {
+        "common": "Common",
+        "rare": "Rare",
+        "legendary": "Legendary"
+      },
+      "islands": "Islands",
+      "allIslands": "All islands",
+      "notYet": "Not yet",
+      "ariaFound": "{name}, from {island}",
+      "ariaLocked": "A creature not hatched yet, from {island}",
+      "close": "Close",
+      "voice": "Hear it",
+      "buddy": "Make it your buddy",
+      "isBuddy": "Your buddy 💛",
+      "buddyDone": "{name} flies with you in the games now",
+      "lockedStory": "Not hatched yet.",
+      "how": "How to hatch it: {how}",
+      "howCommon": "Play the games of {island} and win stars: every {need} stars hatch an egg.",
+      "howRare": "A rare creature of {island}: it hatches after its common ones.",
+      "howLegendary": "Legendary! The last creature of {island}. Collect all the others first.",
+      "nameIt": "Name it:",
+      "named": "Now called {name}",
+      "from": {
+        "stars": "Hatched from game stars",
+        "mastery": "Hatched when you mastered a lesson"
+      },
+      "back": "Back to the islands",
+      "guardian": "This is {name}’s album. Only they choose their buddy and name their creatures."
+    },
+    "hub": {
+      "race": "Race yourself",
+      "from": "From {what}",
+      "start": "Start",
+      "finish": "Finish",
+      "bestGhost": "Your best",
+      "you": "You",
+      "ready": "{items} from “{title}”. Race your best time",
+      "best": "Best time: {s}",
+      "firstTime": "First go! Set your time",
+      "go": "Go",
+      "seconds": "{s}s",
+      "beat": "New record! 🔥",
+      "close": "So close!",
+      "first": "Your first time!",
+      "over": "{correct} of {total} right in {s}",
+      "more": "More challenges",
+      "games": "Games",
+      "review": "{n}-minute review",
+      "streak": "{n, plural, =0 {Start your streak} one {1 day} other {# days}}",
+      "streakLabel": "{n} days of review in a row",
+      "constellation": "This week’s constellation",
+      "lit": "{lit} of {max} stars",
+      "litHint": "Every star you win in review lights one here",
+      "deck": "{items} cards · {game}",
+      "startReview": "Start review",
+      "again": "Review again",
+      "recent": "Last rounds",
+      "none": "No practice from your lessons yet. Once your teacher adds practice to a lesson, it shows here.",
+      "dismiss": "Close"
+    },
+    "guardian": {
+      "title": "Your children’s games",
+      "children": "Your children",
+      "time": "Play time today",
+      "timeText": "{used} of {limit} minutes played today. {left} minutes left.",
+      "timeOpen": "{used} minutes played today, no limit.",
+      "minutes": "min",
+      "ring": "{used} minutes played of {limit}",
+      "max": "Most time a day",
+      "maxLabel": "Most play time a day",
+      "choice": "{n} m",
+      "academy": "Academy",
+      "night": "Lock games from 9 pm to 7 am",
+      "enabled": "Games on",
+      "learned": "What was practised",
+      "practised": "Practised “{title}” {rounds} in {games}",
+      "rounds": "{n, plural, one {once} =2 {twice} other {# times}}",
+      "gamesCount": "{n, plural, one {one game} other {# games}}",
+      "hardest": "Hardest question: “{text}”. Worth going over together.",
+      "best": "Best round: {correct} of {total} right first time in “{game}”",
+      "quiet": "No play this week. The games only practise their lessons, from the practice the teacher adds.",
+      "hatched": "“{name}” hatched today",
+      "hatchedStars": "From game stars · {found} in the album",
+      "hatchedMastery": "From a mastered lesson · {found} in the album",
+      "cheer": "Cheer",
+      "cheered": "Your cheer is on its way 💛",
+      "safety": "No purchases inside the games, no ads, no chat with strangers. Every creature and every star is earned by studying.",
+      "together": "Play together",
+      "saved": "Saved.",
+      "album": "{name}’s album"
+    },
+    "card": {
+      "title": "Practise with games",
+      "lead": "Games that practise the lessons and homework, with no ads and nothing to buy"
+    }
   }
 }

@@ -53,9 +53,24 @@ describe('the places of each look', () => {
     }
   });
 
-  it('puts the challenges second for students and homework in the menu for a guardian who pays nothing', () => {
-    expect(itemsOf('kids', false).tabs[1]?.key).toBe('challenges');
+  it('puts the games second for kids and middle school, the challenges second for teens, and homework in the menu for a guardian who pays nothing', () => {
+    expect(itemsOf('kids', false).tabs.map((i) => i.key)).toEqual(['home', 'games', 'challenges', 'lessons', 'more']);
+    expect(itemsOf('middle', false).tabs.map((i) => i.key)).toEqual(['home', 'games', 'challenges', 'lessons', 'more']);
+    expect(itemsOf('teen', false).tabs[1]?.key).toBe('challenges');
     expect(itemsOf('classic', false).tabs.map((i) => i.key)).toEqual(['home', 'lessons', 'progress', 'homework', 'more']);
+  });
+});
+
+describe('the games', () => {
+  it('are in every look, a tab of their own for kids and middle school, in the menu for the rest', () => {
+    for (const stage of STAGES) {
+      const { all, tabs } = itemsOf(stage, seesMoney(stage), stage === 'classic');
+      expect(all.find((i) => i.key === 'games')?.href).toBe('/family/games');
+      expect(tabs.some((i) => i.key === 'games')).toBe(stage === 'kids' || stage === 'middle');
+      // Homework stays in the menu when the games take its tab.
+      expect(all.some((i) => i.key === 'homework')).toBe(true);
+    }
+    expect(familyTargetOf('games', false)).toBe('/family/games');
   });
 });
 

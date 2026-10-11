@@ -17,7 +17,7 @@
     .fi-page:has(.gw-kids) .fi-page-header-main-ctn { padding-top: 0; }
     .gw-map { position: relative; width: 100%; max-width: 520px; margin-inline: auto; height: calc(var(--gw-h, 760px) * var(--gw-s, 1)); border-radius: 28px; overflow: hidden; background: #2F9BE3; box-shadow: 0 6px 0 #1C7ED6; }
     @media (max-width: 639.98px) { .gw-map { width: 100vw; max-width: none; margin-inline: calc(50% - 50vw); margin-top: -1rem; border-radius: 0 0 28px 28px; box-shadow: none; } }
-    .gw-stage { position: absolute; top: 0; left: 0; width: 390px; height: var(--gw-h, 760px); transform: scale(var(--gw-s, 1)); transform-origin: 0 0; overflow: hidden; direction: rtl; }
+    .gw-stage { position: absolute; top: 0; left: 0; width: 390px; height: var(--gw-h, 760px); transform: scale(var(--gw-s, 1)); transform-origin: 0 0; overflow: hidden; }
     .gw-world { position: absolute; inset: 0; }
     .gw-isl { position: absolute; cursor: pointer; background: none; border: 0; padding: 0; }
     .gw-isl > span { display: block; position: relative; width: 100%; height: 100%; }
@@ -41,7 +41,7 @@
 
     /* An opened island: a phone-shaped 390 picture scaled to the screen (--gw-ps), over everything. */
     .gw-open { position: fixed; inset: 0; z-index: 45; background: rgba(19, 41, 75, .6); overflow: hidden; }
-    .gw-phone { position: absolute; top: 0; left: 50%; width: 390px; margin-left: -195px; height: calc(100dvh / var(--gw-ps, 1)); transform: scale(var(--gw-ps, 1)); transform-origin: 50% 0; overflow: hidden; direction: rtl; }
+    .gw-phone { position: absolute; top: 0; left: 50%; width: 390px; margin-left: -195px; height: calc(100dvh / var(--gw-ps, 1)); transform: scale(var(--gw-ps, 1)); transform-origin: 50% 0; overflow: hidden; }
     .gw-back { position: absolute; top: 14px; inset-inline-start: 14px; height: 44px; padding: 0 14px 0 10px; border-radius: 999px; background: #FFFFFF; border: 3px solid var(--gw-ink); box-shadow: 0 3px 0 var(--gw-ink); display: flex; align-items: center; gap: 4px; font-size: 15px; font-weight: 800; z-index: 3; }
     [dir="ltr"] .gw-back svg { transform: scaleX(-1); }
     .gw-sheet { position: absolute; left: 0; right: 0; top: 296px; bottom: 0; background: #FFFFFF; border-radius: 30px 30px 0 0; border-top: 4px solid var(--gw-ink); padding: 14px 16px calc(16px + env(safe-area-inset-bottom)); box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; overscroll-behavior: contain; }
@@ -89,7 +89,7 @@
 
     /* A creature hatches (the night of the design): its own 390 x 844 picture scaled to the screen (--gw-hs). */
     .gw-hatch { position: fixed; inset: 0; z-index: 60; background: #2B1A66; overflow: hidden; color: #FFFFFF; }
-    .gw-hatch-stage { position: absolute; top: 50%; left: 50%; width: 390px; height: 844px; margin: -422px 0 0 -195px; transform: scale(var(--gw-hs, 1)); direction: rtl; }
+    .gw-hatch-stage { position: absolute; top: 50%; left: 50%; width: 390px; height: 844px; margin: -422px 0 0 -195px; transform: scale(var(--gw-hs, 1)); }
     .gw-hatch-card { position: absolute; left: 16px; right: 16px; bottom: 22px; padding: 14px 16px 16px; border-radius: 26px; background: #FFFFFF; color: #24124F; border: 4px solid #24124F; box-shadow: 0 6px 0 #120A33; z-index: 6; }
     .gw-name { height: 44px; padding: 0 16px; border-radius: 999px; font-size: 17px; font-weight: 800; border: 3px solid #24124F; background: #FFFFFF; cursor: pointer; }
     .gw-name[aria-checked="true"] { background: #B197FC; box-shadow: 0 4px 0 #24124F; }

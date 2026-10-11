@@ -14,7 +14,9 @@ export type NavItem = { href: string; key: string; icon: IconName };
  * see their data (a copy, erasure). Everyone, a child too, can tell the
  * academy's safeguarding leads that something is wrong (tell us), and
  * talk with the learner's teachers (messages; the guardians are in every
- * conversation).
+ * conversation). Games practise the learner's own lessons: a tab of their
+ * own for kids (the islands) and middle school, in the menu for the rest
+ * (homework then goes to "more" for those two, as in the app).
  */
 export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: NavItem[]; tabs: NavItem[] } {
   const lessons: NavItem = { href: '/family/lessons', key: 'lessons', icon: 'calendar' };
@@ -24,6 +26,7 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: 
   const inbox: NavItem = { href: '/family/notifications', key: 'notifications', icon: 'bell' };
   const messages: NavItem = { href: '/family/messages', key: 'messages', icon: 'chat' };
   const more: NavItem = { href: '/family/more', key: 'more', icon: 'menu' };
+  const games: NavItem = { href: '/family/games', key: 'games', icon: stage === 'kids' ? 'boat' : 'gamepad' };
   const home: NavItem = { href: '/family', key: 'home', icon: stage === 'kids' ? 'map' : stage === 'teen' ? 'flag' : 'home' };
   const pay: NavItem[] = money ? [{ href: '/family/money', key: 'money', icon: 'coins' }] : [];
   const privacy: NavItem[] = guardian ? [{ href: '/family/privacy', key: 'privacy', icon: 'shield' }] : [];
@@ -40,9 +43,11 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: 
 
   if (stage === 'classic') {
     return {
-      all: [home, lessons, messages, progress, homework, ...pay, challenges, inbox, ...recordings, ...privacy, ...help, tellUs, ...account, myData],
+      all: [home, lessons, messages, progress, homework, ...pay, challenges, games, inbox, ...recordings, ...privacy, ...help, tellUs, ...account, myData],
       tabs: [home, lessons, progress, ...(money ? pay : [homework]), more],
     };
   }
-  return { all: [home, challenges, lessons, messages, homework, progress, inbox, ...recordings, ...help, tellUs, ...account], tabs: [home, challenges, lessons, homework, more] };
+  const all = [home, games, challenges, lessons, messages, homework, progress, inbox, ...recordings, ...help, tellUs, ...account];
+  if (stage === 'teen') return { all, tabs: [home, challenges, lessons, homework, more] };
+  return { all, tabs: [home, games, challenges, lessons, more] };
 }

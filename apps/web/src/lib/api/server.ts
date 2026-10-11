@@ -6,7 +6,7 @@ import type { paths } from './schema';
 import { SESSION_COOKIE, TIMEZONE_COOKIE } from '../session';
 
 /** Laravel inside the stack (compose: http://web:8080); `php artisan serve` on a laptop. */
-const API = process.env.API_INTERNAL_URL ?? 'http://127.0.0.1:8000';
+export const API = process.env.API_INTERNAL_URL ?? 'http://127.0.0.1:8000';
 
 type Method = 'get' | 'post' | 'put' | 'patch' | 'delete';
 

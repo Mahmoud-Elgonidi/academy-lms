@@ -9,7 +9,7 @@
 export type Realtime = { enabled: boolean; key: string | null; host: string | null; port: number | null; tls: boolean; channel: string };
 
 /** The person's own signals (no data): the page asks the API again for what it shows. */
-export const SIGNALS = ['lessons.changed', 'homework.changed', 'inbox.changed', 'payments.changed', 'consents.changed', 'tickets.changed', 'privacy.changed', 'concerns.changed', 'checks.changed', 'messages.changed'] as const;
+export const SIGNALS = ['lessons.changed', 'homework.changed', 'inbox.changed', 'payments.changed', 'consents.changed', 'tickets.changed', 'privacy.changed', 'concerns.changed', 'checks.changed', 'messages.changed', 'practice.changed'] as const;
 
 /** The relay's public channel: "alive" every minute, "resync" when it starts (every open screen catches up). */
 export const RELAY = { channel: 'lms.live', alive: 'alive', resync: 'resync' } as const;

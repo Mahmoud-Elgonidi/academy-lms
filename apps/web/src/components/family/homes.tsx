@@ -39,6 +39,23 @@ async function HomeworkDue({ homework, kids = false }: { homework: Homework | un
   );
 }
 
+/** Practice in games, for the looks where the games are not a tab of their own (teens, adults, guardians). */
+async function GamesCard() {
+  const t = await getTranslations('games');
+  return (
+    <Link href="/family/games" className="lift flex items-center gap-3 rounded-card border border-line bg-white p-4">
+      <span className="grid size-11 shrink-0 place-items-center rounded-control bg-brand-soft text-brand-strong">
+        <Icon name="gamepad" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold">{t('card.title')}</span>
+        <span className="block text-sm text-muted">{t('card.lead')}</span>
+      </span>
+      <Icon name="chevron" size={18} className="text-muted rtl:-scale-x-100" />
+    </Link>
+  );
+}
+
 function openHomework(list: Homework[]): Homework | undefined {
   return list.find((h) => h.status === 'assigned' || h.status === 'missed');
 }
@@ -84,6 +101,7 @@ export async function ClassicHome({ name, learner, lessons, notices, balanceLess
         ) : null}
       </div>
       <HomeworkDue homework={openHomework(homework)} />
+      <GamesCard />
       {courses.length > 0 ? (
         <section>
           <SectionTitle>{t('progressOf', { name: learner.name })}</SectionTitle>
@@ -303,6 +321,7 @@ export async function TeenHome({ learner, journey, lessons, homework }: { learne
       ))}
       <NextLesson lesson={nextOf(lessons)} />
       <HomeworkDue homework={openHomework(homework)} />
+      <GamesCard />
     </div>
   );
 }

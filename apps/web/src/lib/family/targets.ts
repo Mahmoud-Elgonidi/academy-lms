@@ -16,6 +16,8 @@ export function familyTargetOf(screen: string | null | undefined, money: boolean
       return '/family/progress';
     case 'challenges':
       return '/family/challenges';
+    case 'games':
+      return '/family/games';
     case 'homework':
       return '/family/homework';
     case 'guardian_consent':
