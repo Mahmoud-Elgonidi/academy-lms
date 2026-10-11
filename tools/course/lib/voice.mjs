@@ -11,13 +11,14 @@ import { fileURLToPath } from 'node:url';
  *
  * Settings come from the environment only: ELEVENLABS_API_KEY (the key; never
  * in a file or a log), ELEVENLABS_VOICE_ID (the voice), ELEVENLABS_MODEL
- * (eleven_multilingual_v2 by default) and ELEVENLABS_SPEED. Without a voice the
+ * (eleven_multilingual_v2 by default), ELEVENLABS_SPEED and ELEVENLABS_API_BASE
+ * (https://api.eu.residency.elevenlabs.io for an account kept in the EU). Without a voice the
  * course is captions only. Spoken lines are kept in .voice/ by what was said and
  * how, so filming a lesson again costs nothing for the lines that did not change.
  */
 const here = dirname(fileURLToPath(import.meta.url));
 const cacheDir = join(here, '../.voice');
-const API = 'https://api.elevenlabs.io/v1';
+const API = `${(process.env.ELEVENLABS_API_BASE || 'https://api.elevenlabs.io').replace(/\/+$/, '')}/v1`;
 
 export function voiceSettings() {
   const voice = process.env.ELEVENLABS_VOICE_ID;
