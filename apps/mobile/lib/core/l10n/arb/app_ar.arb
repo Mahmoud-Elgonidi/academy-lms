@@ -409,14 +409,12 @@
   "myDataDeletion": "مسح الحساب",
   "navHome": "الرئيسية",
   "navLessons": "الحصص",
-  "navProgress": "التقدم",
+  "navJourneyTab": "الرحلة",
   "navMoney": "الفلوس",
   "navMe": "حسابي",
   "navJourney": "رحلتي",
   "navMyLessons": "حصصي",
   "navMyHomework": "واجباتي",
-  "navBadges": "إنجازاتي",
-  "navPlan": "الخطة",
   "navHomework": "الواجبات",
   "navReports": "التقارير",
   "navToday": "النهارده",
@@ -424,9 +422,6 @@
   "navStudents": "طلابي",
   "navEarnings": "أرباحي",
   "navMore": "المزيد",
-  "navMissions": "مهماتي",
-  "navQuests": "تحدياتي",
-  "navGoals": "أهدافي",
   "greetingMorning": "صباح الخير يا {name}",
   "@greetingMorning": {
     "placeholders": {
@@ -605,14 +600,6 @@
     }
   },
   "yourRating": "تقييمك",
-  "progressOf": "تقدّم {name}",
-  "@progressOf": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "percentDone": "{p}% من البرنامج",
   "@percentDone": {
     "placeholders": {
@@ -1054,82 +1041,8 @@
   },
   "fillTimeOff": "اختار الأيام والسبب الأول.",
   "noTimeOff": "مفيش طلبات.",
-  "kidsHello": "أهلًا يا بطل",
-  "kidsJourney": "رحلتي في {program}",
-  "@kidsJourney": {
-    "placeholders": {
-      "program": {
-        "type": "String"
-      }
-    }
-  },
-  "kidsStations": "{n, plural, =0{أول محطة مستنياك!} =1{خلّصت محطة!} =2{خلّصت محطتين!} few{خلّصت {n} محطات!} other{خلّصت {n} محطة!}}",
-  "@kidsStations": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "kidsNext": "الجاية: {title}",
-  "@kidsNext": {
-    "placeholders": {
-      "title": {
-        "type": "String"
-      }
-    }
-  },
   "youAreHere": "انت هنا!",
-  "levelRank": "المستوى {index} · {rank}",
-  "@levelRank": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      },
-      "rank": {
-        "type": "String"
-      }
-    }
-  },
-  "pointsTo": "نقاطك لـ {rank}",
-  "@pointsTo": {
-    "placeholders": {
-      "rank": {
-        "type": "String"
-      }
-    }
-  },
-  "pointsLeft": "باقيلك {n} نقطة.",
-  "@pointsLeft": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
   "topRank": "وصلت لأعلى رتبة!",
-  "worldStage": "العالم {index} · {title}",
-  "@worldStage": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      },
-      "title": {
-        "type": "String"
-      }
-    }
-  },
-  "stageOf": "المرحلة {i} من {n}",
-  "@stageOf": {
-    "placeholders": {
-      "i": {
-        "type": "int"
-      },
-      "n": {
-        "type": "int"
-      }
-    }
-  },
   "streak": "{n} حصص ورا بعض",
   "@streak": {
     "placeholders": {
@@ -1149,26 +1062,7 @@
       }
     }
   },
-  "planFor": "خطتك يا {name}",
-  "@planFor": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "goal": "هدفك",
   "finishOn": "هتخلّص على كده",
-  "pace": "سرعتك",
-  "perWeek": "{n} درس في الأسبوع",
-  "@perWeek": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "milestones": "المحطات",
   "programDone": "خلّصت البرنامج!",
   "weeksLeftLevel": "{n, plural, =0{المستوى ده قرّب يخلص} =1{باقي أسبوع في المستوى ده} =2{باقي أسبوعين في المستوى ده} few{باقي {n} أسابيع في المستوى ده} other{باقي {n} أسبوع في المستوى ده}}",
   "@weeksLeftLevel": {
@@ -1178,52 +1072,10 @@
       }
     }
   },
-  "stars": "نجوم",
-  "points": "نقطة",
-  "missionsTitle": "مهمات الأسبوع",
-  "questsTitle": "تحديات الأسبوع",
-  "goalsTitle": "أهداف الأسبوع",
-  "monthGoal": "هدف الشهر",
-  "bossFights": "تحدي الزعيم",
-  "waitingRewards": "جوايز مستنياك",
-  "fromLastWeek": "من الأسبوع اللي فات",
   "fromLastMonth": "من الشهر اللي فات",
-  "weekEnds": "{n, plural, =0{آخر يوم في الأسبوع!} =1{باقي يوم على آخر الأسبوع} =2{باقي يومين على آخر الأسبوع} few{باقي {n} أيام على آخر الأسبوع} other{باقي {n} يوم على آخر الأسبوع}}",
-  "@weekEnds": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
   "doneMark": "تم!",
-  "collect": "استلم",
-  "missionsOf": "{done} من {total} مهمات",
-  "@missionsOf": {
-    "placeholders": {
-      "done": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "challengesDone": "{done} من {total} خلصوا",
-  "@challengesDone": {
-    "placeholders": {
-      "done": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "chestReady": "الصندوق جاهز! دوس عليه",
-  "chestSurprise": "جواه ستيكر مفاجأة",
   "chestOpened": "فتحت صندوق الأسبوع ده",
-  "noChallenges": "مفيش تحديات دلوقتي. لما يكون عندك حصص الأسبوع ده، هتظهر هنا.",
   "album": "ألبوم الستيكرز",
   "albumLead": "كل صندوق بتفتحه بيجيبلك ستيكر جديد.",
   "newSticker": "ستيكر جديد في ألبومك!",
@@ -1238,40 +1090,12 @@
     }
   },
   "awesome": "تمام!",
-  "yourPoints": "نقطك",
-  "yourGems": "جواهرك",
-  "pointsWord": "النقط",
-  "thisWeek": "الأسبوع ده",
-  "readyCount": "{n, plural, =1{جايزة مستنياك} =2{جايزتين مستنيينك} few{{n} جوايز مستنياك} other{{n} جايزة مستنياك}}",
-  "@readyCount": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "cheerFrom": "تشجيع من {name}!",
-  "@cheerFrom": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "cheerFromFamily": "تشجيع من أهلك!",
   "cheerThanks": "شكرًا!",
   "cheerClap": "تصفيقة",
   "cheerStar": "نجمة",
   "cheerHeart": "قلب",
   "cheerFire": "شعلة حماس",
-  "childChallenges": "تحديات {name}",
-  "@childChallenges": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "myChallenges": "تحدياتي",
   "cheerOn": "شجّع {name}",
   "@cheerOn": {
     "placeholders": {
@@ -1296,8 +1120,6 @@
       }
     }
   },
-  "seeAll": "شوف الكل",
-  "allBadges": "كل الإنجازات",
   "sounds": "الأصوات",
   "soundsHint": "أصوات خفيفة لما تدوس أو تستلم جايزة",
   "reportsOpen": "مستنية منك",
@@ -1664,19 +1486,6 @@
   },
   "messagesFirst": "ابدأ المحادثة: الكلام هنا بيشوفه أولياء الأمور والأكاديمية.",
   "messagesWrite": "اكتب رسالة…",
-  "navIslands": "الجزر",
-  "navGames": "الألعاب",
-  "gamesTitleMiddle": "عالم الألعاب",
-  "gamesTitleTeen": "التدريب بالألعاب",
-  "gamesTitleClassic": "الألعاب",
-  "gamesWorld": "عالم {name}",
-  "@gamesWorld": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "gamesStars": "{n, plural, =0{من غير نجوم} =1{نجمة واحدة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}",
   "@gamesStars": {
     "placeholders": {
@@ -1687,17 +1496,6 @@
   },
   "gamesSoundOn": "شغّل المزيكا والأصوات",
   "gamesSoundOff": "اقفل المزيكا والأصوات",
-  "gamesLockedIsland": "{island} لسه بتتجهّز، وهتتفتح بألعاب جديدة قريب",
-  "@gamesLockedIsland": {
-    "placeholders": {
-      "island": {
-        "type": "String"
-      }
-    }
-  },
-  "gamesSecret": "جزيرة سرّية! فيها كائن أسطوري. هتعرف سرها قريب",
-  "gamesSecretLabel": "جزيرة سرّية",
-  "gamesNew": "جديد",
   "gamesOf": "{found} من {total}",
   "@gamesOf": {
     "placeholders": {
@@ -1710,36 +1508,9 @@
     }
   },
   "gamesHomeworkPin": "واجب",
-  "gamesAriaOpen": "{island}، مفتوحة",
-  "@gamesAriaOpen": {
-    "placeholders": {
-      "island": {
-        "type": "String"
-      }
-    }
-  },
-  "gamesAriaLocked": "{island}، لسه مقفولة",
-  "@gamesAriaLocked": {
-    "placeholders": {
-      "island": {
-        "type": "String"
-      }
-    }
-  },
-  "gamesAriaHomework": "{island}، فيها الواجب",
-  "@gamesAriaHomework": {
-    "placeholders": {
-      "island": {
-        "type": "String"
-      }
-    }
-  },
   "gamesToMap": "الخريطة",
   "gamesIslandGames": "ألعاب الجزيرة",
   "gamesBadgeHomework": "واجب",
-  "gamesBadgeNew": "جديدة",
-  "gamesBadgeSoon": "قريب",
-  "gamesIslandCreatures": "كائنات الجزيرة",
   "gamesCreaturesCard": "كائنات الجزيرة · {found} من {total}",
   "@gamesCreaturesCard": {
     "placeholders": {
@@ -1766,7 +1537,6 @@
   "gamesClose": "اقفل اللعبة وارجع",
   "gamesToIsland": "ارجع للجزيرة",
   "gamesAlbum": "كائناتي",
-  "gamesNeedsPractice": "محتاجة تدريبات من النوع ده في دروسك.",
   "gamesItems": "{n, plural, =1{سؤال واحد} =2{سؤالين} few{{n} أسئلة} other{{n} سؤال}}",
   "@gamesItems": {
     "placeholders": {
@@ -1775,11 +1545,6 @@
       }
     }
   },
-  "gamesReasonHomework": "تدريب الواجب",
-  "gamesReasonLastLesson": "آخر درس",
-  "gamesReasonReview": "مراجعة",
-  "gamesReasonCurrent": "الدرس اللي عليه الدور",
-  "gamesReasonFree": "لعب حر",
   "gamesPractising": "بتتمرن على: {what}",
   "@gamesPractising": {
     "placeholders": {
@@ -1836,7 +1601,7 @@
   "gamesSending": "بنحسب النجوم…",
   "gamesPageProblem": "اللعبة ما اشتغلتش. جرّب تاني.",
   "gamesHatchReady": "البيضة جاهزة!",
-  "gamesHatchReadySub": "جمعت {need} نجمة في الألعاب",
+  "gamesHatchReadySub": "جمعت {need} نجمة في رحلتك",
   "@gamesHatchReadySub": {
     "placeholders": {
       "need": {
@@ -1879,7 +1644,7 @@
   "gamesHatchAsk": "تحب تسميه إيه؟",
   "gamesHatchKeep": "حطّه في الألبوم",
   "gamesAlbumTitle": "ألبوم كائناتي",
-  "gamesAlbumHint": "كل {need} نجمة في الألعاب بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.",
+  "gamesAlbumHint": "كل {need} نجمة في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.",
   "@gamesAlbumHint": {
     "placeholders": {
       "need": {
@@ -1932,7 +1697,7 @@
     }
   },
   "gamesShadowStory": "لسه ما فقسش.",
-  "gamesHowCommon": "إزاي تفقسه: العب ألعاب {island} واجمع نجوم: كل {need} نجمة بيضة.",
+  "gamesHowCommon": "إزاي تفقسه: اجمع نجوم وانت على {island}: كل {need} نجمة بيضة.",
   "@gamesHowCommon": {
     "placeholders": {
       "island": {
@@ -1968,32 +1733,9 @@
       }
     }
   },
-  "gamesFromStars": "فقس من نجوم الألعاب",
+  "gamesFromStars": "فقس من نجوم رحلتك",
   "gamesFromMastery": "فقس لما اتقنت درس",
   "gamesRace": "سباق مع نفسك",
-  "gamesFrom": "من {what}",
-  "@gamesFrom": {
-    "placeholders": {
-      "what": {
-        "type": "String"
-      }
-    }
-  },
-  "gamesStart": "البداية",
-  "gamesFinish": "النهاية",
-  "gamesBestGhost": "أحسن مرة",
-  "gamesYou": "إنت",
-  "gamesRaceReady": "{items} من «{title}». سابق أحسن مرة ليك",
-  "@gamesRaceReady": {
-    "placeholders": {
-      "items": {
-        "type": "String"
-      },
-      "title": {
-        "type": "String"
-      }
-    }
-  },
   "gamesBest": "أحسن وقت: {s}",
   "@gamesBest": {
     "placeholders": {
@@ -2002,8 +1744,6 @@
       }
     }
   },
-  "gamesFirstTime": "أول مرة! حط رقمك",
-  "gamesGo": "يلا",
   "gamesSeconds": "{s}ث",
   "@gamesSeconds": {
     "placeholders": {
@@ -2029,52 +1769,7 @@
       }
     }
   },
-  "gamesMore": "تحديات تانية",
-  "gamesAllGames": "الألعاب",
-  "gamesReviewMinutes": "مراجعة {n} دقايق",
-  "@gamesReviewMinutes": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "gamesStreak": "{n, plural, =0{ابدأ سلسلتك} =1{يوم واحد} =2{يومين} few{{n} أيام} other{{n} يوم}}",
-  "@gamesStreak": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "gamesConstellation": "كوكبة الأسبوع",
-  "gamesLit": "{lit} من {max} نجمة",
-  "@gamesLit": {
-    "placeholders": {
-      "lit": {
-        "type": "int"
-      },
-      "max": {
-        "type": "int"
-      }
-    }
-  },
-  "gamesLitHint": "كل نجمة بتكسبها في المراجعة بتنوّر نجمة هنا",
-  "gamesDeck": "{items} كارت · {game}",
-  "@gamesDeck": {
-    "placeholders": {
-      "items": {
-        "type": "int"
-      },
-      "game": {
-        "type": "String"
-      }
-    }
-  },
-  "gamesStartReview": "ابدأ المراجعة",
   "gamesReviewAgain": "راجع تاني",
-  "gamesRecent": "آخر جولات",
-  "gamesNone": "لسه مفيش تدريبات من دروسك. أول ما المدرس يحط تدريبات على الدرس، هتلاقيها هنا.",
   "gamesGuardianTitle": "ألعاب {name}",
   "@gamesGuardianTitle": {
     "placeholders": {
@@ -2181,7 +1876,7 @@
       }
     }
   },
-  "gamesHatchedStars": "من نجوم الألعاب · {found} في الألبوم",
+  "gamesHatchedStars": "من نجوم الرحلة · {found} في الألبوم",
   "@gamesHatchedStars": {
     "placeholders": {
       "found": {
@@ -2202,7 +1897,6 @@
   "gamesSafety": "مفيش شراء جوه الألعاب ولا إعلانات ولا كلام مع حد غريب. كل كائن وكل نجمة بتتكسب بالمذاكرة.",
   "gamesTogether": "العبوا سوا",
   "gamesSaved": "اتحفظ.",
-  "gamesCardTitle": "الألعاب",
   "gamesCardKids": "الجزر بتستناك 🏝️",
   "gamesCardLead": "اتمرن على دروسك بألعاب: {what}",
   "@gamesCardLead": {
@@ -2212,5 +1906,240 @@
       }
     }
   },
-  "gamesCardGuardian": "وقت اللعب، اللي اتراجع، والحدود"
+  "journeyTitle": "رحلة {name}",
+  "@journeyTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "journeyYours": "رحلتك يا {name}",
+  "@journeyYours": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "journeyLevel": "المستوى {n}",
+  "@journeyLevel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyLevelOf": "المستوى {i} من {n}",
+  "@journeyLevelOf": {
+    "placeholders": {
+      "i": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyLevels": "المستويات",
+  "journeyLessonsDone": "{done} من {total} دروس",
+  "@journeyLessonsDone": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyAheadLocked": "بتتفتح لما تخلّص {title}",
+  "@journeyAheadLocked": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "journeyAheadFirst": "بتتفتح لما توصلها",
+  "journeyAriaDone": "{title}، خلّصتها",
+  "@journeyAriaDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "journeyAriaHere": "{title}، انت هنا",
+  "@journeyAriaHere": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "journeyAriaAhead": "{title}، لسه مقفولة",
+  "@journeyAriaAhead": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "journeyStationDone": "خلّصته",
+  "journeyStationReview": "محتاج مراجعة",
+  "journeyStationHere": "انت هنا",
+  "journeyStationTodo": "لسه جاي",
+  "journeyStationTodoNote": "الدرس ده لسه جاي. هتتدرّب عليه لما توصله.",
+  "journeyStationReviewNote": "وقت تراجع الدرس ده: العب لعبة عليه.",
+  "journeyPractised": "اتدرّبت عليه {rounds} · {p}% صح",
+  "@journeyPractised": {
+    "placeholders": {
+      "rounds": {
+        "type": "String"
+      },
+      "p": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyPlayStation": "العب على الدرس ده",
+  "journeyNoGames": "مفيش لعبة على تدريبات الدرس ده لسه.",
+  "journeyRaceLast": "آخر مرة: {s}",
+  "@journeyRaceLast": {
+    "placeholders": {
+      "s": {
+        "type": "String"
+      }
+    }
+  },
+  "journeyMissions": "مهماتك",
+  "journeyMissionsOf": "مهمات {name}",
+  "@journeyMissionsOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "journeyMissionsOn": "{n, plural, =1{مهمة} =2{مهمتين} few{{n} مهمات} other{{n} مهمة}}",
+  "@journeyMissionsOn": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyOpenMissions": "{n, plural, =1{مهمة مستنية} =2{مهمتين مستنيين} few{{n} مهمات مستنية} other{{n} مهمة مستنية}}",
+  "@journeyOpenMissions": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyNoMissions": "مفيش مهمات دلوقتي. استمتع بيومك!",
+  "journeyReview": "راجع",
+  "journeyLate": "متأخر",
+  "journeyChestTitle": "صندوق الأسبوع",
+  "journeyChestProgress": "{done} من {total} مهمات الأسبوع",
+  "@journeyChestProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyChestHint": "احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ {n} نجوم",
+  "@journeyChestHint": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyChestMissed": "الصندوق ده فاتك. فيه صندوق جديد الأسبوع ده!",
+  "journeyChestWaiting": "الصندوق جاهز يتفتح من حساب {name}",
+  "@journeyChestWaiting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "journeyChestGot": "{n, plural, =1{+نجمة في رحلتك!} =2{+نجمتين في رحلتك!} few{+{n} نجوم في رحلتك!} other{+{n} نجمة في رحلتك!}}",
+  "@journeyChestGot": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyYourStars": "نجومك",
+  "journeyStarsTo": "{n, plural, =1{باقيلك نجمة لـ {rank}} =2{باقيلك نجمتين لـ {rank}} few{باقيلك {n} نجوم لـ {rank}} other{باقيلك {n} نجمة لـ {rank}}}",
+  "@journeyStarsTo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "journeyStarsCount": "{n, plural, =0{مفيش نجوم لسه} =1{نجمة واحدة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}",
+  "@journeyStarsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyStarsOf": "نجوم {name}",
+  "@journeyStarsOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "journeyLastLesson": "آخر حصة",
+  "journeyLastLessonOf": "آخر حصة لـ {name}",
+  "@journeyLastLessonOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "journeyLessonStars": "{n, plural, =0{ماخدتش نجوم في آخر حصة} =1{خدت نجمة في آخر حصة} =2{خدت نجمتين في آخر حصة!} few{خدت {n} نجوم في آخر حصة!} other{خدت {n} نجمة في آخر حصة!}}",
+  "@journeyLessonStars": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyLessonCanBring": "{n, plural, =1{تجيبلك نجمة} =2{تجيبلك نجمتين} few{تجيبلك لحد {n} نجوم} other{تجيبلك لحد {n} نجمة}}",
+  "@journeyLessonCanBring": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyEggReady": "بيضتك جاهزة!",
+  "journeyEggHint": "افقسها وشوف مين هيطلع",
+  "journeyEggHatch": "افقسها",
+  "journeyEggNone": "مفيش بيضة جاهزة دلوقتي. كمّل جمع نجوم!",
+  "journeyNoCourses": "مفيش كورسات شغالة لسه.",
+  "journeyNoCurriculum": "الكورس ده لسه مالوش منهج. مهماته بتظهر هنا.",
+  "journeyCourses": "مواد الدروس والتقارير",
+  "homeworkPracticeTitle": "التدريب بالألعاب",
+  "homeworkPracticeNotYet": "لسه ما اتلعبتش جولته.",
+  "homeworkByPlaying": "الواجب ده بيتسلّم لما تلعب جولته.",
+  "homeworkNoGame": "مفيش لعبة للواجب ده دلوقتي."
 }

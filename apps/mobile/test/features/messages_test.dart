@@ -67,7 +67,9 @@ void main() {
   test('a notification opens the conversation in every look', () {
     expect(targetOf('conversation', 'k1', Area.teacher), '/teach/more/messages/k1');
     expect(targetOf('conversation', 'k1', Area.family), '/family/me/messages/k1');
-    expect(targetOf('conversation', 'k1', Area.kids), '/account/messages/k1');
+    // A child's and middle school's own tab.
+    expect(targetOf('conversation', 'k1', Area.kids), '/kids/messages/k1');
+    expect(targetOf('conversation', null, Area.middle), '/middle/messages');
     expect(targetOf('conversation', null, Area.teen), '/account/messages');
   });
 

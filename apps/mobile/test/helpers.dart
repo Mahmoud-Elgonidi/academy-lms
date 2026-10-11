@@ -240,8 +240,33 @@ void familyRoutes(FakeApi api) {
     ..on('GET', 'family/invoices', {'owed': null, 'data': <Object>[]})
     ..on('GET', 'learning/students', {'data': <Object>[]})
     ..on('GET', 'learning/homework', {'data': <Object>[]})
+    ..on('GET', 'learning/journey/map', quietJourney())
     ..on('GET', 'me/sessions', {'data': <Object>[]});
 }
+
+/// A journey with nothing on it yet: no courses, missions, chest or games.
+Map<String, Object?> quietJourney({String viewer = 'guardian', String stage = 'classic'}) => {
+  'data': {
+    'learner_id': 'c1',
+    'stage': stage,
+    'style': 'playful',
+    'viewer': viewer,
+    'stars': {
+      'total': 0,
+      'rank': {'key': 'beginner', 'label': 'مبتدئ', 'next': 30, 'next_label': 'مستكشف', 'progress': 0},
+      'from': <String, int>{},
+      'per_egg': 12,
+    },
+    'streak': 0,
+    'last_lesson': null,
+    'courses': <Object>[],
+    'missions': <Object>[],
+    'chest': null,
+    'games': null,
+    'cheers': <Object>[],
+    'cheers_left': 5,
+  },
+};
 
 const teacher = Account(
   academySlug: 'demo',

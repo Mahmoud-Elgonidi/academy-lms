@@ -6,12 +6,20 @@ import '../../roadmap/data/learning_repository.dart';
 import '../../roadmap/domain/learning.dart';
 import '../../schedule/data/lessons_repository.dart';
 import '../../schedule/domain/lesson.dart';
-import '../domain/journey.dart';
-import 'family_repository.dart';
+import '../../journey/data/journey_repository.dart';
+import '../../journey/domain/journey.dart';
 
 /// What the guardian's home shows about one child.
 class FamilyHome {
-  const FamilyHome({required this.lessons, required this.balance, this.invoices, this.report, this.reportCourse, this.homework});
+  const FamilyHome({
+    required this.lessons,
+    required this.balance,
+    this.invoices,
+    this.report,
+    this.reportCourse,
+    this.homework,
+    this.journey,
+  });
 
   final LessonList lessons;
   final List<Balance> balance;
@@ -20,31 +28,22 @@ class FamilyHome {
   final Course? reportCourse;
   final Homework? homework;
 
-  Lesson? get next => lessons.lessons.where((l) => l.upcoming).firstOrNull;
-}
-
-/// What a student's own home shows.
-class StudentHome {
-  const StudentHome({required this.journey, required this.lessons, this.homework, this.openHomework = 0});
-
-  final Journey journey;
-  final LessonList lessons;
-  final Homework? homework;
-  final int openHomework;
+  /// The learner's journey, for its card ("Salma's journey").
+  final JourneyMap? journey;
 
   Lesson? get next => lessons.lessons.where((l) => l.upcoming).firstOrNull;
 }
 
 /// Loads a home in one go; the parts that are only extras (money, the last
-/// report, homework) never stop the home from showing.
+/// report, homework, the journey) never stop the home from showing.
 class HomeLoader {
-  HomeLoader({required this.lessons, required this.billing, required this.learning, required this.homework, required this.family});
+  HomeLoader({required this.lessons, required this.billing, required this.learning, required this.homework, required this.journey});
 
   final LessonsRepository lessons;
   final BillingRepository billing;
   final LearningRepository learning;
   final HomeworkRepository homework;
-  final FamilyRepository family;
+  final JourneyRepository journey;
 
   static Future<T?> _optional<T>(Future<T> future) async {
     try {
@@ -61,6 +60,7 @@ class HomeLoader {
       _optional(billing.invoices()),
       _optional(learning.students()),
       _optional(homework.list(studentId: learnerId)),
+      _optional(journey.map(learnerId: learnerId)),
     ]);
     final students = results[3] as List<StudentCourses>?;
     final courses = students?.where((s) => learnerId == null || s.id == learnerId).expand((s) => s.courses).toList() ?? const <Course>[];
@@ -82,17 +82,7 @@ class HomeLoader {
       report: report,
       reportCourse: reportCourse,
       homework: work,
-    );
-  }
-
-  Future<StudentHome> studentHome() async {
-    final results = await Future.wait<Object?>([family.journey(), lessons.family(), _optional(homework.list())]);
-    final work = (results[2] as List<Homework>?)?.where((h) => h.open).toList() ?? const <Homework>[];
-    return StudentHome(
-      journey: results[0]! as Journey,
-      lessons: results[1]! as LessonList,
-      homework: work.firstOrNull,
-      openHomework: work.length,
+      journey: results[5] as JourneyMap?,
     );
   }
 }

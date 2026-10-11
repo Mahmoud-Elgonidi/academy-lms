@@ -7,54 +7,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
-import '../../../../core/state/load_cubit.dart';
 import '../../../../shared/motion/celebration.dart';
 import '../../../../shared/motion/juice.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../data/challenges_repository.dart';
-import '../../domain/challenges.dart';
 import 'art.dart';
 
-/// Pops up the cheers a guardian sent, once, wherever the student is in
-/// their area; then tells the API they were seen.
-class CheersListener extends StatefulWidget {
-  const CheersListener({required this.child, super.key});
-
-  final Widget child;
-
-  @override
-  State<CheersListener> createState() => _CheersListenerState();
-}
-
-class _CheersListenerState extends State<CheersListener> {
-  final _shown = <String>{};
-
-  bool _fresh(ChallengeBoard? b) => b != null && b.canClaim && b.cheers.any((c) => !_shown.contains(c.id));
-
-  @override
-  Widget build(BuildContext context) => BlocListener<LoadCubit<ChallengeBoard>, LoadState<ChallengeBoard>>(
-    listenWhen: (_, b) => _fresh(b.data),
-    listener: (context, state) async {
-      final cheers = state.data!.cheers.where((c) => !_shown.contains(c.id)).toList();
-      _shown.addAll(cheers.map((c) => c.id));
-      final repo = context.read<ChallengesRepository>();
-      await showCheers(context, cheers);
-      try {
-        await repo.seen();
-      } on ApiProblem {
-        // Seen again next time: harmless.
-      }
-    },
-    child: widget.child,
-  );
-}
-
-/// "A cheer from Mum!": the cheers, big and bouncing, with a burst and a sound.
-Future<void> showCheers(BuildContext context, List<CheerNote> cheers) async {
-  if (cheers.isEmpty) return;
+/// "A cheer from your family!": the cheers ([kinds]: clap, star, heart,
+/// fire), big and bouncing, with a burst and a sound.
+Future<void> showCheers(BuildContext context, List<String> kinds) async {
+  if (kinds.isEmpty) return;
   final l = context.l10n;
-  final names = cheers.map((c) => c.from).where((n) => n.isNotEmpty).toSet().join(context.locale == 'ar' ? '، ' : ', ');
   Juice.big(Sound.cheer);
   Celebration.show(context, burst: Burst.stars);
   await showGeneralDialog<void>(
@@ -68,7 +32,6 @@ Future<void> showCheers(BuildContext context, List<CheerNote> cheers) async {
       child: child,
     ),
     pageBuilder: (context, _, _) {
-      final kinds = cheers.map((c) => c.kind).toList();
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(28),
@@ -95,7 +58,7 @@ Future<void> showCheers(BuildContext context, List<CheerNote> cheers) async {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Text(l.cheerFrom(names), textAlign: TextAlign.center, style: context.text.headlineSmall),
+                  Text(l.cheerFromFamily, textAlign: TextAlign.center, style: context.text.headlineSmall),
                   const SizedBox(height: 6),
                   Text(
                     kinds.toSet().map((k) => cheerName(l, k)).join(' · '),
@@ -119,10 +82,16 @@ Future<void> showCheers(BuildContext context, List<CheerNote> cheers) async {
 
 /// A guardian's four cheer buttons: a tap sends one, and it flies off.
 class CheerBar extends StatefulWidget {
-  const CheerBar({required this.board, required this.name, super.key});
+  const CheerBar({required this.learnerId, required this.left, required this.name, this.onSent, super.key});
 
-  final ChallengeBoard board;
+  final String learnerId;
+
+  /// Cheers they may still send today.
+  final int left;
   final String name;
+
+  /// A cheer was sent: read again how many are left.
+  final VoidCallback? onSent;
 
   @override
   State<CheerBar> createState() => _CheerBarState();
@@ -139,10 +108,10 @@ class _CheerBarState extends State<CheerBar> {
     _fly(kind);
     final l = context.l10n;
     try {
-      await context.read<ChallengesRepository>().cheer(widget.board.learnerId, kind);
+      await context.read<ChallengesRepository>().cheer(widget.learnerId, kind);
       if (!mounted) return;
       showSnack(context, l.cheerSent(widget.name));
-      unawaited(context.read<LoadCubit<ChallengeBoard>>().load());
+      widget.onSent?.call();
     } on ApiProblem catch (p) {
       if (mounted) showSnack(context, context.problemText(p));
     } finally {
@@ -189,7 +158,7 @@ class _CheerBarState extends State<CheerBar> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final left = widget.board.cheersLeft;
+    final left = widget.left;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

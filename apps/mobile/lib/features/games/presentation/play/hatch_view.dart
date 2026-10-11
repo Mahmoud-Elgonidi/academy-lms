@@ -16,31 +16,47 @@ import '../games_ui.dart';
 const _night = Color(0xFF2B1A66);
 const _ink = Color(0xFF24124F);
 
-/// A creature hatched from a round's stars (the design's Hatch): the night, a
-/// nest, an egg to tap three times, then the creature comes out among
-/// feathers and the child names it and puts it in the album. The picture is
-/// 390 × 844, scaled to the screen.
+/// A creature hatched from the journey's stars (the design's Hatch): the
+/// night, a nest, an egg to tap three times, then the creature comes out
+/// among feathers and the child names it and puts it in the album. The
+/// picture is 390 × 844, scaled to the screen.
 class HatchView extends StatefulWidget {
-  const HatchView({super.key, required this.creature, required this.need, required this.onLeave, required this.onNamed});
+  const HatchView({
+    super.key,
+    required this.creature,
+    required this.need,
+    required this.onLeave,
+    required this.onNamed,
+    this.cracked = false,
+  });
 
   final Hatched creature;
   final int need;
   final VoidCallback onLeave;
   final ValueChanged<String> onNamed;
 
+  /// The egg was already knocked three times (on the journey's map): it opens at once.
+  final bool cracked;
+
   @override
   State<HatchView> createState() => _HatchViewState();
 }
 
 class _HatchViewState extends State<HatchView> {
-  int _taps = 0;
+  late int _taps = widget.cracked ? 3 : 0;
   int _knock = 0;
-  bool _hatched = false;
+  late bool _hatched = widget.cracked;
   int _name = 0;
   bool _saving = false;
   String? _toast;
 
   Hatched get _c => widget.creature;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.cracked) GameSound.play(GameEffect.hatch);
+  }
 
   void _tap() {
     if (_hatched || _taps >= 3) return;
@@ -88,7 +104,7 @@ class _HatchViewState extends State<HatchView> {
     Widget egg = Semantics(
       button: true,
       label: l.gamesHatchEgg(math.max(0, 3 - _taps)),
-      child: GestureDetector(onTap: _tap, child: SvgArt(_eggSvg(_taps), width: 160, height: 200)),
+      child: GestureDetector(onTap: _tap, child: SvgArt(eggCrackSvg(_taps), width: 160, height: 200)),
     );
     if (!calm) {
       egg = _knock == 0
@@ -398,7 +414,8 @@ class _HatchViewState extends State<HatchView> {
   }
 }
 
-String _eggSvg(int taps) {
+/// The egg in the nest, cracked a little more with each of three knocks.
+String eggCrackSvg(int taps) {
   String crack(String d, int after) =>
       '<path d="$d" fill="none" stroke="#24124F" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" opacity="${taps >= after ? 1 : 0}"/>';
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 200">'

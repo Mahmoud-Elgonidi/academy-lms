@@ -11,15 +11,6 @@ Color hexColor(String? hex, Color fallback) {
   return Color(int.parse('FF${hex.substring(1)}', radix: 16));
 }
 
-/// Why a quest is shown, in words.
-String questReason(AppLocalizations l, String? reason) => switch (reason) {
-  'homework' => l.gamesReasonHomework,
-  'last_lesson' => l.gamesReasonLastLesson,
-  'review' => l.gamesReasonReview,
-  'free' => l.gamesReasonFree,
-  _ => l.gamesReasonCurrent,
-};
-
 /// A round's headline by its stars.
 String resultTitle(AppLocalizations l, int stars) => switch (stars) {
   <= 0 => l.gamesResult0,
@@ -206,3 +197,62 @@ String eggSvg({String belly = '#F3E3C3', String body = '#E0C79A', String line = 
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22"><ellipse cx="9" cy="12" rx="8" ry="10" fill="$belly" stroke="$line" stroke-width="1.6"/>'
     '<path d="M3 12 L6 9 L9 13 L12 9 L15 12" fill="none" stroke="$line" stroke-width="1.4"/>'
     '<circle cx="6" cy="7" r="1.6" fill="$body"/><circle cx="12" cy="16" r="2" fill="$body"/></svg>';
+
+/// Which picture a game's tile shows: its own for the world's first games,
+/// else by the kinds it plays; a lock while it cannot be played.
+String gameArt(String key, List<String> kinds, {bool playable = true}) {
+  if (!playable) return 'lock';
+  return switch (key) {
+    'bird-gates' => 'gates',
+    'bird-balloons' => 'balloons',
+    'bird-twins' => 'cards',
+    'turtle-bridge' => 'bridge',
+    _ => kinds.contains('pair') ? 'cards' : (kinds.contains('choice') ? 'balloons' : 'gates'),
+  };
+}
+
+/// A game's picture on its coloured tile (the islands' own art).
+class GameTileArt extends StatelessWidget {
+  const GameTileArt(this.art, {super.key, this.size = 60});
+
+  /// What [gameArt] picked.
+  final String art;
+  final double size;
+
+  /// The card colour behind a game of this art.
+  static Color cardColor(String art) => (_paint[art] ?? _paint['gates']!).$1;
+
+  @override
+  Widget build(BuildContext context) {
+    final tile = (_paint[art] ?? _paint['gates']!).$2;
+    final lock = art == 'lock';
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: tile,
+        borderRadius: BorderRadius.circular(size * 0.3),
+        border: Border.all(color: gwInk, width: 3),
+      ),
+      clipBehavior: Clip.antiAlias,
+      alignment: Alignment.center,
+      child: SvgArt(_tileSvg[art] ?? _tileSvg['gates']!, width: lock ? size * 0.43 : size * 0.8, height: lock ? size * 0.43 : size * 0.73),
+    );
+  }
+}
+
+const _paint = <String, (Color, Color)>{
+  'gates': (Color(0xFFD0EBFF), Color(0xFF74C0FC)),
+  'balloons': (Color(0xFFFFE8CC), Color(0xFFFFA94D)),
+  'cards': (Color(0xFFC3FAE8), Color(0xFF38D9A9)),
+  'bridge': (Color(0xFFC3FAE8), Color(0xFF63E6BE)),
+  'lock': (Color(0xFFF1F3F5), Color(0xFFDEE2E6)),
+};
+
+const _tileSvg = <String, String>{
+  'gates': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 44"><ellipse cx="34" cy="22" rx="10" ry="16" fill="none" stroke="#FFD43B" stroke-width="5"/><g transform="translate(2 12) scale(0.3)"><ellipse cx="50" cy="44" rx="30" ry="25" fill="#FFFFFF" stroke="#13294B" stroke-width="7"/><path d="M22 40 L6 46 L22 52 Z" fill="#FF922B"/><path d="M48 40 C50 14 80 8 84 24 C78 34 66 42 56 46 Z" fill="#4DABF7" stroke="#13294B" stroke-width="7"/></g></svg>',
+  'balloons': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 46"><ellipse cx="16" cy="18" rx="11" ry="13" fill="#FF6B6B" stroke="#13294B" stroke-width="2.5"/><ellipse cx="32" cy="16" rx="10" ry="12" fill="#38D9A9" stroke="#13294B" stroke-width="2.5"/><path d="M16 31 Q18 38 15 44 M32 28 Q34 36 31 44" stroke="#13294B" stroke-width="1.6" fill="none"/></svg>',
+  'cards': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 46"><g transform="rotate(-12 18 24)"><rect x="6" y="8" width="22" height="30" rx="4" fill="#6236E0" stroke="#13294B" stroke-width="2.5"/></g><g transform="rotate(10 30 24)"><rect x="20" y="6" width="22" height="30" rx="4" fill="#FFFFFF" stroke="#13294B" stroke-width="2.5"/><path d="M24 16 h14 M24 22 h10" stroke="#13294B" stroke-width="2.5" stroke-linecap="round"/></g></svg>',
+  'bridge': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60"><ellipse cx="18" cy="34" rx="12" ry="10" fill="#8CE99A" stroke="#13294B" stroke-width="3"/><ellipse cx="48" cy="34" rx="28" ry="20" fill="#2F9E44" stroke="#13294B" stroke-width="3"/></svg>',
+  'lock': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#13294B" stroke-width="2.6" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+};

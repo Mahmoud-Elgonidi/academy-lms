@@ -10,19 +10,18 @@ import '../../../../core/time/formats.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
-import '../../../challenges/presentation/widgets/teasers.dart';
 import '../../../consent/presentation/privacy_page.dart';
 import '../../data/home_loader.dart';
 import '../bloc/learner_cubit.dart';
 import '../widgets/learner_switcher.dart';
 import '../widgets/next_lesson_card.dart';
-import '../../../games/presentation/games_page.dart';
+import '../../../journey/presentation/widgets/home_card.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../../../core/realtime/live.dart';
 
 /// The guardian's (and an adult student's) home: the next lesson with its
-/// join button, what is left and what is owed, the latest report, and the
-/// homework due.
+/// join button, what is left and what is owed, the way into the learner's
+/// journey, the latest report, and the homework due.
 class FamilyHomePage extends StatelessWidget {
   const FamilyHomePage({super.key});
 
@@ -68,7 +67,7 @@ class FamilyHomePage extends StatelessWidget {
                       key: ValueKey(learnerId),
                       create: (c) => LoadCubit<FamilyHome>(
                         () => c.read<HomeLoader>().familyHome(learnerId),
-                        refreshOn: c.read<Live>().on({Live.lessons, Live.homework, Live.payments, Live.inbox}),
+                        refreshOn: c.read<Live>().on({Live.lessons, Live.homework, Live.payments, Live.inbox, Live.practice}),
                         refreshAt: (d) => d.lessons.clockMoments,
                       )..load(),
                       child: LoadView<FamilyHome>(
@@ -134,11 +133,11 @@ class _Home extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        FamilyChallengesCard(learnerId: learnerId, name: name),
-        const SizedBox(height: 12),
-        GamesCard(
-          to: '/family/home/games',
-          lead: (context.read<SessionCubit>().state.current?.isGuardian ?? false) ? l.gamesCardGuardian : l.gamesTitleClassic,
+        JourneyHomeCard(
+          name: name,
+          to: '/family/journey',
+          map: home.journey,
+          self: context.watch<LearnerCubit>().state.selected?.isSelf ?? false,
         ),
         if (report != null) ...[
           const SizedBox(height: 16),

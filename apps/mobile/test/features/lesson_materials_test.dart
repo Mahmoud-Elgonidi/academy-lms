@@ -50,7 +50,7 @@ void main() {
     expect(Course.fromJson({'id': 'e2'}).materials, isEmpty);
   });
 
-  testWidgets('the family sees the lesson now\'s materials on Progress', (tester) async {
+  testWidgets('the family sees the lesson now\'s materials under the journey', (tester) async {
     final app = await TestApp.create(accounts: [guardian]);
     familyRoutes(app.api);
     app.api.on('GET', 'learning/students', {
@@ -76,8 +76,11 @@ void main() {
     });
     await _open(tester, app);
 
-    await tester.tap(find.text('التقدم').last);
+    await tester.tap(find.text('الرحلة').last);
     await frames(tester, 12);
+    await tester.tap(find.byKey(const Key('journey-courses-action')));
+    await frames(tester, 12);
+    expect(find.text('مواد الدروس والتقارير'), findsOneWidget);
     expect(find.text('مواد الدرس'), findsOneWidget);
     expect(find.text('صفحة الكوثر'), findsOneWidget);
     expect(find.text('تلاوة الكوثر'), findsOneWidget);

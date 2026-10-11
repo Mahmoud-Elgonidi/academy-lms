@@ -8,8 +8,8 @@ enum Area {
   teacher('/teach', '/teach/today'),
   family('/family', '/family/home'),
   kids('/kids', '/kids/journey'),
-  middle('/middle', '/middle/home'),
-  teen('/teen', '/teen/plan'),
+  middle('/middle', '/middle/journey'),
+  teen('/teen', '/teen/journey'),
   web('/web-only', '/web-only');
 
   const Area(this.prefix, this.home);

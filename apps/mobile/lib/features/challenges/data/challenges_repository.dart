@@ -1,21 +1,15 @@
 import '../../../core/network/api_client.dart';
 import '../domain/challenges.dart';
 
-/// The game layer: a learner's challenges, collecting a reward, and cheers.
+/// The kids' sticker album, and cheers: a guardian's, and the student seeing them.
 class ChallengesRepository {
   ChallengesRepository(this._api);
 
   final ApiClient _api;
 
-  /// The student's own board ([learnerId] null) or a guardian's child's.
+  /// The student's own board ([learnerId] null) or a guardian's child's: the sticker album.
   Future<ChallengeBoard> board({String? learnerId}) async =>
       ChallengeBoard.fromJson((await _api.get('learning/challenges', query: {'learner_id': ?learnerId}))['data'] as Map<String, dynamic>);
-
-  /// Collects a finished challenge, once (the key is kept across retries).
-  Future<ClaimResult> claim(Challenge challenge) async => ClaimResult.fromJson(
-    (await _api.post('learning/challenges/claim', body: {'challenge': challenge.key, 'period': challenge.period}, idempotent: true))['data']
-        as Map<String, dynamic>,
-  );
 
   /// A guardian cheers a learner on: clap, star, heart or fire.
   Future<void> cheer(String learnerId, String kind) => _api.post('learning/cheers', body: {'learner_id': learnerId, 'kind': kind});

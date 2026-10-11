@@ -16,13 +16,15 @@ import '../player/game_session.dart';
 import 'hatch_view.dart';
 import 'result_cards.dart';
 
-/// What a round is started with: the game, the quest it plays (or all of the
-/// learner's practice), whose screen it is on, and the island's sky around it.
+/// What a round is started with: the game, what it plays (a station of the
+/// journey, a homework's practice, or all of the learner's practice), whose
+/// screen it is on, and the island's sky around it.
 class PlayRequest {
   const PlayRequest({
     required this.gameId,
     required this.look,
-    this.quest,
+    this.station,
+    this.homeworkId,
     this.learnerId,
     this.sky,
     this.bestBefore,
@@ -30,7 +32,12 @@ class PlayRequest {
   });
 
   final String gameId;
-  final String? quest;
+
+  /// A lesson on the learner's journey they may practise now.
+  final String? station;
+
+  /// A homework handed in by this practice.
+  final String? homeworkId;
 
   /// A guardian's child (null: the student themself).
   final String? learnerId;
@@ -39,7 +46,7 @@ class PlayRequest {
   final String look;
   final String? sky;
 
-  /// The quest's best time before this round (the race against yourself).
+  /// The station's best time before this round (the race against yourself).
   final int? bestBefore;
 
   /// A guardian playing on their child's screen: no naming creatures.
@@ -117,7 +124,7 @@ class _PlayPageState extends State<PlayPage> {
     final games = context.read<GamesRepository>();
     await GameSound.load();
     try {
-      final round = await games.start(_r.gameId, quest: _r.quest, learnerId: _r.learnerId);
+      final round = await games.start(_r.gameId, station: _r.station, homeworkId: _r.homeworkId, learnerId: _r.learnerId);
       if (!mounted) return;
       setState(() {
         _round = round;

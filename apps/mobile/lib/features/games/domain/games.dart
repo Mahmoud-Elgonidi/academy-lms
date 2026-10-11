@@ -121,174 +121,6 @@ class Allowance {
   final bool nightLock;
 }
 
-/// A game of an island.
-class GameCard {
-  const GameCard({
-    required this.id,
-    required this.key,
-    required this.island,
-    required this.title,
-    required this.summary,
-    required this.howToPlay,
-    required this.kinds,
-    required this.playable,
-    this.plays = 0,
-    this.best = 0,
-    this.questKey,
-    this.questReason,
-    this.questTitle,
-  });
-
-  factory GameCard.fromJson(Map<String, dynamic> json) {
-    final quest = json['quest'] is Map<String, dynamic> ? json['quest'] as Map<String, dynamic> : null;
-    return GameCard(
-      id: json['id'] as String,
-      key: json['key'] as String? ?? '',
-      island: json['island'] as String? ?? '',
-      title: json['title'] as String? ?? '',
-      summary: json['summary'] as String? ?? '',
-      howToPlay: json['how_to_play'] as String? ?? '',
-      kinds: [for (final k in json['kinds'] as List<dynamic>? ?? const []) k as String],
-      playable: json['playable'] == true,
-      plays: _int(json['plays']),
-      best: _int(json['best']),
-      questKey: quest?['key'] as String?,
-      questReason: quest?['reason'] as String?,
-      questTitle: quest?['title'] as String?,
-    );
-  }
-
-  final String id;
-  final String key;
-  final String island;
-  final String title;
-  final String summary;
-  final String howToPlay;
-
-  /// choice, order, pair.
-  final List<String> kinds;
-
-  /// The learner has enough practice of its kinds for a round.
-  final bool playable;
-  final int plays;
-
-  /// The most stars in one round.
-  final int best;
-  final String? questKey;
-  final String? questReason;
-  final String? questTitle;
-}
-
-/// What to practise now: homework, the last lesson, a review, where the course stands.
-class Quest {
-  const Quest({
-    required this.key,
-    required this.reason,
-    required this.reasonLabel,
-    required this.title,
-    required this.done,
-    required this.items,
-    required this.game,
-    this.homeworkId,
-    this.dueAt,
-    this.rounds = 0,
-    this.bestSeconds,
-    this.lastSeconds,
-  });
-
-  factory Quest.fromJson(Map<String, dynamic> json) => Quest(
-    key: json['key'] as String,
-    reason: json['reason'] as String? ?? 'current',
-    reasonLabel: json['reason_label'] as String? ?? '',
-    title: json['title'] as String? ?? '',
-    done: json['done'] == true,
-    items: _int(json['items']),
-    game: GameCard.fromJson(_map(json['game'])),
-    homeworkId: json['homework_id'] as String?,
-    dueAt: LocalTime.fromJson(json['due_at']),
-    rounds: _int(json['rounds']),
-    bestSeconds: (json['best_seconds'] as num?)?.toInt(),
-    lastSeconds: (json['last_seconds'] as num?)?.toInt(),
-  );
-
-  final String key;
-  final String reason;
-  final String reasonLabel;
-  final String title;
-  final bool done;
-  final int items;
-  final GameCard game;
-  final String? homeworkId;
-  final LocalTime? dueAt;
-
-  /// Rounds played on this quest's lessons only, with their best and last time (the race against yourself).
-  final int rounds;
-  final int? bestSeconds;
-  final int? lastSeconds;
-
-  String get shownTitle => title.isNotEmpty ? title : reasonLabel;
-}
-
-/// An island of the world, with its creatures and games.
-class Island {
-  const Island({
-    required this.key,
-    required this.name,
-    required this.story,
-    required this.emoji,
-    required this.colors,
-    required this.music,
-    required this.open,
-    required this.fresh,
-    required this.homework,
-    required this.creatures,
-    required this.games,
-    this.next,
-  });
-
-  factory Island.fromJson(Map<String, dynamic> json) => Island(
-    key: json['key'] as String,
-    name: json['name'] as String? ?? '',
-    story: json['story'] as String? ?? '',
-    emoji: json['emoji'] as String? ?? '',
-    colors: {for (final e in _map(json['colors']).entries) e.key: '${e.value}'},
-    music: json['music'] as String? ?? 'major',
-    open: json['open'] == true,
-    fresh: json['fresh'] == true,
-    homework: json['homework'] == true,
-    creatures: [for (final c in _list(json['creatures'])) Creature.fromJson(c)],
-    games: [for (final g in _list(json['games'])) GameCard.fromJson(g)],
-    next: json['next'] is Map<String, dynamic> ? Look.fromJson((json['next'] as Map<String, dynamic>)['look']) : null,
-  );
-
-  final String key;
-  final String name;
-  final String story;
-  final String emoji;
-
-  /// sky, sea, land, … as `#RRGGBB`.
-  final Map<String, String> colors;
-
-  /// The scale of its music: major, pentatonic, dorian, lydian, phrygian.
-  final String music;
-
-  /// It has games for this learner's look.
-  final bool open;
-
-  /// A playable game the learner has not played yet.
-  final bool fresh;
-
-  /// One of its games is a homework's.
-  final bool homework;
-  final List<Creature> creatures;
-  final List<GameCard> games;
-
-  /// How the next creature to hatch here looks.
-  final Look? next;
-
-  int get found => creatures.where((c) => c.found).length;
-}
-
 /// A finished round: when, how many right first time, the stars.
 class PastRound {
   const PastRound({required this.stars, required this.share, this.at, this.game = '', this.correct = 0, this.total = 0});
@@ -403,80 +235,6 @@ class Glance {
   bool get quiet => practisedTitle == null && hardest == null && bestCorrect == null;
 }
 
-/// A learner's whole games world.
-class GamesWorld {
-  const GamesWorld({
-    required this.learnerId,
-    required this.stage,
-    required this.allowance,
-    required this.stars,
-    required this.eggHave,
-    required this.eggNeed,
-    required this.found,
-    required this.total,
-    required this.quests,
-    required this.islands,
-    required this.recent,
-    required this.history,
-    required this.streak,
-    this.buddy,
-    this.limits,
-    this.glance,
-  });
-
-  factory GamesWorld.fromJson(Map<String, dynamic> json) => GamesWorld(
-    learnerId: json['learner_id'] as String? ?? '',
-    stage: json['stage'] as String? ?? 'kids',
-    allowance: Allowance.fromJson(json['allowance']),
-    stars: _int(json['stars']),
-    eggHave: _int(_map(json['egg'])['have']),
-    eggNeed: _int(_map(json['egg'])['need']) == 0 ? 12 : _int(_map(json['egg'])['need']),
-    found: _int(json['creatures_found']),
-    total: _int(json['creatures_total']),
-    buddy: json['buddy'] is Map<String, dynamic> ? Creature.fromJson(json['buddy'] as Map<String, dynamic>) : null,
-    quests: [for (final q in _list(json['quests'])) Quest.fromJson(q)],
-    islands: [for (final i in _list(json['islands'])) Island.fromJson(i)],
-    recent: [for (final r in _list(json['recent'])) PastRound.fromJson(r)],
-    history: [for (final r in _list(json['history'])) PastRound.fromJson(r)],
-    streak: _int(json['streak']),
-    limits: json['limits'] is Map<String, dynamic> ? GameLimits.fromJson(json['limits'] as Map<String, dynamic>) : null,
-    glance: json['glance'] is Map<String, dynamic> ? Glance.fromJson(json['glance'] as Map<String, dynamic>) : null,
-  );
-
-  final String learnerId;
-
-  /// kids, middle, teen or classic.
-  final String stage;
-  final Allowance allowance;
-  final int stars;
-  final int eggHave;
-  final int eggNeed;
-  final int found;
-  final int total;
-  final Creature? buddy;
-  final List<Quest> quests;
-  final List<Island> islands;
-  final List<PastRound> recent;
-
-  /// The last ten rounds, oldest first.
-  final List<PastRound> history;
-
-  /// Days in a row with a finished round.
-  final int streak;
-
-  /// A guardian's limits for this child (null for the student).
-  final GameLimits? limits;
-
-  /// A guardian's look at the child's week (null for the student).
-  final Glance? glance;
-
-  /// The island of the first quest (where the map points), else the first open one.
-  Island? get current {
-    final key = quests.isEmpty ? null : quests.first.game.island;
-    return islands.where((i) => i.key == key).firstOrNull ?? islands.where((i) => i.open).firstOrNull;
-  }
-}
-
 /// A round to play: the page to open and what to hand it.
 class StartedRound {
   const StartedRound({
@@ -488,11 +246,10 @@ class StartedRound {
     required this.howToPlay,
     required this.island,
     required this.round,
-    this.questKey,
     this.focusTitle,
   });
 
-  factory StartedRound.fromJson(Map<String, dynamic> json, {String? questKey}) {
+  factory StartedRound.fromJson(Map<String, dynamic> json) {
     final game = _map(json['game']);
     final focus = json['focus'] is Map<String, dynamic> ? json['focus'] as Map<String, dynamic> : null;
     return StartedRound(
@@ -504,7 +261,6 @@ class StartedRound {
       howToPlay: game['how_to_play'] as String? ?? '',
       island: game['island'] as String? ?? '',
       round: _map(json['round']),
-      questKey: questKey,
       focusTitle: focus?['title'] as String?,
     );
   }
@@ -521,7 +277,6 @@ class StartedRound {
 
   /// What the page is handed: `{lms: 1, type: "start", round: this}` (items, stage, locale, dir, title; muted is added).
   final Map<String, dynamic> round;
-  final String? questKey;
   final String? focusTitle;
 
   /// The ids of the round's items: only answers about these count.

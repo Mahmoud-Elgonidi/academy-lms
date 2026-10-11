@@ -24,16 +24,21 @@ enum MessagesScope { family, self, teacher }
 /// first, with what is new since they last read; the student's guardians are
 /// in every conversation. It follows them live.
 class MessagesPage extends StatelessWidget {
-  const MessagesPage({required this.scope, super.key});
+  const MessagesPage({required this.scope, this.at, super.key});
 
   final MessagesScope scope;
 
+  /// Where this list is, when it is a tab of its own (a child's "talk to your teacher", middle school's messages).
+  final String? at;
+
   /// Where a conversation of this look opens.
-  String get base => switch (scope) {
-    MessagesScope.family => '/family/me/messages',
-    MessagesScope.self => '/account/messages',
-    MessagesScope.teacher => '/teach/more/messages',
-  };
+  String get base =>
+      at ??
+      switch (scope) {
+        MessagesScope.family => '/family/me/messages',
+        MessagesScope.self => '/account/messages',
+        MessagesScope.teacher => '/teach/more/messages',
+      };
 
   @override
   Widget build(BuildContext context) {

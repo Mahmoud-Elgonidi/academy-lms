@@ -5,26 +5,6 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 
-/// The icon of a challenge (the API's `icon`).
-IconData challengeIcon(String icon) => switch (icon) {
-  'calendar' => Icons.event_available_rounded,
-  'homework' => Icons.assignment_turned_in_rounded,
-  'clock' => Icons.alarm_on_rounded,
-  'star' => Icons.stars_rounded,
-  'bolt' => Icons.bolt_rounded,
-  'trophy' => Icons.emoji_events_rounded,
-  'crown' => Icons.workspace_premium_rounded,
-  'chest' => Icons.redeem_rounded,
-  _ => Icons.stars_rounded,
-};
-
-/// What a stage's points are: gems for kids, XP in middle school, points after.
-IconData unitIcon(String stage) => switch (stage) {
-  'kids' => Icons.diamond_rounded,
-  'middle' => Icons.bolt_rounded,
-  _ => Icons.stars_rounded,
-};
-
 IconData cheerIcon(String kind) => switch (kind) {
   'star' => Icons.star_rounded,
   'heart' => Icons.favorite_rounded,
@@ -41,13 +21,6 @@ Color cheerColour(BuildContext context, String kind) {
     _ => c.brand,
   };
 }
-
-/// "+50 gems": the plus kept on the number in either direction.
-String plusReward(int reward, String label) => label.replaceFirst('$reward', '\u2066+$reward\u2069');
-
-/// What the points are called for whoever looks: "your gems" for a child, "points" for a guardian.
-String pointsName(AppLocalizations l, String stage, {required bool self}) =>
-    !self ? l.pointsWord : (stage == 'kids' ? l.yourGems : l.yourPoints);
 
 String cheerName(AppLocalizations l, String kind) => switch (kind) {
   'star' => l.cheerStar,

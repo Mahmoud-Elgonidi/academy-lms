@@ -46,7 +46,7 @@ void main() {
     expect(targetOf('homework_to_mark', 'h1', Area.teacher), '/teach/marking');
     expect(targetOf('invoice', 'i1', Area.family), '/family/money');
     expect(targetOf('session', 's1', Area.kids), '/kids/lessons');
-    expect(targetOf('challenges', null, Area.middle), '/middle/quests');
+    expect(targetOf('challenges', null, Area.middle), '/middle/journey');
     expect(targetOf('homework', 'h1', Area.teen), '/teen/homework');
     // Something a look has no screen for opens its home.
     expect(targetOf('invoice', 'i1', Area.kids), '/kids/journey');

@@ -537,7 +537,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navLessons => 'Lessons';
 
   @override
-  String get navProgress => 'Progress';
+  String get navJourneyTab => 'Journey';
 
   @override
   String get navMoney => 'Payments';
@@ -553,12 +553,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navMyHomework => 'Homework';
-
-  @override
-  String get navBadges => 'Badges';
-
-  @override
-  String get navPlan => 'Plan';
 
   @override
   String get navHomework => 'Homework';
@@ -580,15 +574,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navMore => 'More';
-
-  @override
-  String get navMissions => 'Missions';
-
-  @override
-  String get navQuests => 'Quests';
-
-  @override
-  String get navGoals => 'Goals';
 
   @override
   String greetingMorning(String name) {
@@ -811,11 +796,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yourRating => 'Your rating';
-
-  @override
-  String progressOf(String name) {
-    return '$name\'s progress';
-  }
 
   @override
   String percentDone(int p) {
@@ -1396,60 +1376,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noTimeOff => 'No requests.';
 
   @override
-  String get kidsHello => 'Hi, champ';
-
-  @override
-  String kidsJourney(String program) {
-    return 'My journey: $program';
-  }
-
-  @override
-  String kidsStations(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: 'You finished $n stops!',
-      one: 'You finished a stop!',
-      zero: 'Your first stop is waiting!',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String kidsNext(String title) {
-    return 'Next: $title';
-  }
-
-  @override
   String get youAreHere => 'You\'re here!';
 
   @override
-  String levelRank(int index, String rank) {
-    return 'Level $index · $rank';
-  }
-
-  @override
-  String pointsTo(String rank) {
-    return 'Points to $rank';
-  }
-
-  @override
-  String pointsLeft(int n) {
-    return '$n points to go.';
-  }
-
-  @override
   String get topRank => 'You reached the top rank!';
-
-  @override
-  String worldStage(int index, String title) {
-    return 'World $index · $title';
-  }
-
-  @override
-  String stageOf(int i, int n) {
-    return 'Stage $i of $n';
-  }
 
   @override
   String streak(int n) {
@@ -1462,26 +1392,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String planFor(String name) {
-    return 'Your plan, $name';
-  }
-
-  @override
-  String get goal => 'Your goal';
-
-  @override
   String get finishOn => 'At this pace you finish';
-
-  @override
-  String get pace => 'Your pace';
-
-  @override
-  String perWeek(int n) {
-    return '$n lessons a week';
-  }
-
-  @override
-  String get milestones => 'Milestones';
 
   @override
   String get programDone => 'You finished the program!';
@@ -1499,74 +1410,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get stars => 'Stars';
-
-  @override
-  String get points => 'points';
-
-  @override
-  String get missionsTitle => 'This week\'s missions';
-
-  @override
-  String get questsTitle => 'This week\'s quests';
-
-  @override
-  String get goalsTitle => 'This week\'s goals';
-
-  @override
-  String get monthGoal => 'This month\'s goal';
-
-  @override
-  String get bossFights => 'Boss fights';
-
-  @override
-  String get waitingRewards => 'Rewards waiting for you';
-
-  @override
-  String get fromLastWeek => 'From last week';
-
-  @override
   String get fromLastMonth => 'From last month';
-
-  @override
-  String weekEnds(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: '$n days left this week',
-      one: '1 day left this week',
-      zero: 'Last day of the week!',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get doneMark => 'Done!';
 
   @override
-  String get collect => 'Collect';
-
-  @override
-  String missionsOf(int done, int total) {
-    return '$done of $total missions';
-  }
-
-  @override
-  String challengesDone(int done, int total) {
-    return '$done of $total done';
-  }
-
-  @override
   String get chestReady => 'The chest is ready! Tap it';
 
   @override
-  String get chestSurprise => 'A surprise sticker inside';
-
-  @override
   String get chestOpened => 'You opened this week\'s chest';
-
-  @override
-  String get noChallenges => 'No challenges right now. They show up here once you have lessons this week.';
 
   @override
   String get album => 'Sticker album';
@@ -1592,27 +1445,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get awesome => 'Awesome!';
 
   @override
-  String get yourPoints => 'Your points';
-
-  @override
-  String get yourGems => 'Your gems';
-
-  @override
-  String get pointsWord => 'Points';
-
-  @override
-  String get thisWeek => 'This week';
-
-  @override
-  String readyCount(int n) {
-    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n rewards waiting', one: 'A reward is waiting');
-    return '$_temp0';
-  }
-
-  @override
-  String cheerFrom(String name) {
-    return 'A cheer from $name!';
-  }
+  String get cheerFromFamily => 'A cheer from your family!';
 
   @override
   String get cheerThanks => 'Thanks!';
@@ -1628,14 +1461,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cheerFire => 'Fire';
-
-  @override
-  String childChallenges(String name) {
-    return '$name\'s challenges';
-  }
-
-  @override
-  String get myChallenges => 'My challenges';
 
   @override
   String cheerOn(String name) {
@@ -1658,12 +1483,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get seeAll => 'See all';
-
-  @override
-  String get allBadges => 'All badges';
 
   @override
   String get sounds => 'Sounds';
@@ -2417,26 +2236,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get messagesWrite => 'Write a message…';
 
   @override
-  String get navIslands => 'Islands';
-
-  @override
-  String get navGames => 'Games';
-
-  @override
-  String get gamesTitleMiddle => 'Games world';
-
-  @override
-  String get gamesTitleTeen => 'Practise with games';
-
-  @override
-  String get gamesTitleClassic => 'Games';
-
-  @override
-  String gamesWorld(String name) {
-    return '$name\'s world';
-  }
-
-  @override
   String gamesStars(int n) {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n stars', one: 'one star', zero: 'no stars');
     return '$_temp0';
@@ -2449,41 +2248,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gamesSoundOff => 'Turn music and sounds off';
 
   @override
-  String gamesLockedIsland(String island) {
-    return '$island is still getting ready and opens soon with new games';
-  }
-
-  @override
-  String get gamesSecret => 'A secret island! A legendary creature lives there. You\'ll find out soon';
-
-  @override
-  String get gamesSecretLabel => 'Secret island';
-
-  @override
-  String get gamesNew => 'New';
-
-  @override
   String gamesOf(int found, int total) {
     return '$found of $total';
   }
 
   @override
   String get gamesHomeworkPin => 'Homework';
-
-  @override
-  String gamesAriaOpen(String island) {
-    return '$island, open';
-  }
-
-  @override
-  String gamesAriaLocked(String island) {
-    return '$island, still locked';
-  }
-
-  @override
-  String gamesAriaHomework(String island) {
-    return '$island, with your homework';
-  }
 
   @override
   String get gamesToMap => 'Map';
@@ -2493,15 +2263,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gamesBadgeHomework => 'Homework';
-
-  @override
-  String get gamesBadgeNew => 'New';
-
-  @override
-  String get gamesBadgeSoon => 'Soon';
-
-  @override
-  String get gamesIslandCreatures => 'The island\'s creatures';
 
   @override
   String gamesCreaturesCard(int found, int total) {
@@ -2526,28 +2287,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gamesAlbum => 'My creatures';
 
   @override
-  String get gamesNeedsPractice => 'It needs practice of this kind in your lessons.';
-
-  @override
   String gamesItems(int n) {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n questions', one: 'one question');
     return '$_temp0';
   }
-
-  @override
-  String get gamesReasonHomework => 'Homework practice';
-
-  @override
-  String get gamesReasonLastLesson => 'Last lesson';
-
-  @override
-  String get gamesReasonReview => 'Review';
-
-  @override
-  String get gamesReasonCurrent => 'Your current lesson';
-
-  @override
-  String get gamesReasonFree => 'Free play';
 
   @override
   String gamesPractising(String what) {
@@ -2606,7 +2349,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String gamesHatchReadySub(int need) {
-    return 'You won $need stars in the games';
+    return 'You collected $need stars on your journey';
   }
 
   @override
@@ -2650,7 +2393,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String gamesAlbumHint(int need) {
-    return 'Every $need stars in the games hatch an egg, and every lesson you master hatches a creature.';
+    return 'Every $need stars on your journey hatch an egg, and every lesson you master hatches a creature.';
   }
 
   @override
@@ -2705,7 +2448,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String gamesHowCommon(String island, int need) {
-    return 'How to hatch it: play the games of $island and win stars: every $need stars hatch an egg.';
+    return 'How to hatch it: collect stars while you are on $island: every $need stars hatch an egg.';
   }
 
   @override
@@ -2727,7 +2470,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get gamesFromStars => 'Hatched from game stars';
+  String get gamesFromStars => 'Hatched from your journey’s stars';
 
   @override
   String get gamesFromMastery => 'Hatched when you mastered a lesson';
@@ -2736,37 +2479,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gamesRace => 'Race yourself';
 
   @override
-  String gamesFrom(String what) {
-    return 'From $what';
-  }
-
-  @override
-  String get gamesStart => 'Start';
-
-  @override
-  String get gamesFinish => 'Finish';
-
-  @override
-  String get gamesBestGhost => 'Your best';
-
-  @override
-  String get gamesYou => 'You';
-
-  @override
-  String gamesRaceReady(String items, String title) {
-    return '$items from “$title”. Race your best time';
-  }
-
-  @override
   String gamesBest(String s) {
     return 'Best time: $s';
   }
-
-  @override
-  String get gamesFirstTime => 'First go! Set your time';
-
-  @override
-  String get gamesGo => 'Go';
 
   @override
   String gamesSeconds(int s) {
@@ -2788,49 +2503,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get gamesMore => 'More challenges';
-
-  @override
-  String get gamesAllGames => 'Games';
-
-  @override
-  String gamesReviewMinutes(int n) {
-    return '$n-minute review';
-  }
-
-  @override
-  String gamesStreak(int n) {
-    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n days', one: '1 day', zero: 'Start your streak');
-    return '$_temp0';
-  }
-
-  @override
-  String get gamesConstellation => 'This week\'s constellation';
-
-  @override
-  String gamesLit(int lit, int max) {
-    return '$lit of $max stars';
-  }
-
-  @override
-  String get gamesLitHint => 'Every star you win in review lights one here';
-
-  @override
-  String gamesDeck(int items, String game) {
-    return '$items cards · $game';
-  }
-
-  @override
-  String get gamesStartReview => 'Start review';
-
-  @override
   String get gamesReviewAgain => 'Review again';
-
-  @override
-  String get gamesRecent => 'Last rounds';
-
-  @override
-  String get gamesNone => 'No practice from your lessons yet. Once your teacher adds practice to a lesson, it shows here.';
 
   @override
   String gamesGuardianTitle(String name) {
@@ -2910,7 +2583,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String gamesHatchedStars(int found) {
-    return 'From game stars · $found in the album';
+    return 'From the journey’s stars · $found in the album';
   }
 
   @override
@@ -2935,9 +2608,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gamesSaved => 'Saved.';
 
   @override
-  String get gamesCardTitle => 'Games';
-
-  @override
   String get gamesCardKids => 'The islands are waiting 🏝️';
 
   @override
@@ -2946,5 +2616,222 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get gamesCardGuardian => 'Play time, what was practised, and limits';
+  String journeyTitle(String name) {
+    return '$name\'s journey';
+  }
+
+  @override
+  String journeyYours(String name) {
+    return 'Your journey, $name';
+  }
+
+  @override
+  String journeyLevel(int n) {
+    return 'Level $n';
+  }
+
+  @override
+  String journeyLevelOf(int i, int n) {
+    return 'Level $i of $n';
+  }
+
+  @override
+  String get journeyLevels => 'Levels';
+
+  @override
+  String journeyLessonsDone(int done, int total) {
+    return '$done of $total lessons';
+  }
+
+  @override
+  String journeyAheadLocked(String title) {
+    return 'Opens once you finish $title';
+  }
+
+  @override
+  String get journeyAheadFirst => 'Opens when you get there';
+
+  @override
+  String journeyAriaDone(String title) {
+    return '$title, done';
+  }
+
+  @override
+  String journeyAriaHere(String title) {
+    return '$title, you\'re here';
+  }
+
+  @override
+  String journeyAriaAhead(String title) {
+    return '$title, still locked';
+  }
+
+  @override
+  String get journeyStationDone => 'Done';
+
+  @override
+  String get journeyStationReview => 'To review';
+
+  @override
+  String get journeyStationHere => 'You\'re here';
+
+  @override
+  String get journeyStationTodo => 'Still ahead';
+
+  @override
+  String get journeyStationTodoNote => 'This lesson is still ahead. You\'ll practise it when you get there.';
+
+  @override
+  String get journeyStationReviewNote => 'Time to review this lesson: play a game on it.';
+
+  @override
+  String journeyPractised(String rounds, int p) {
+    return 'Practised $rounds · $p% right';
+  }
+
+  @override
+  String get journeyPlayStation => 'Play this lesson';
+
+  @override
+  String get journeyNoGames => 'No game plays this lesson\'s practice yet.';
+
+  @override
+  String journeyRaceLast(String s) {
+    return 'Last time: $s';
+  }
+
+  @override
+  String get journeyMissions => 'Your missions';
+
+  @override
+  String journeyMissionsOf(String name) {
+    return '$name\'s missions';
+  }
+
+  @override
+  String journeyMissionsOn(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n missions', one: '1 mission');
+    return '$_temp0';
+  }
+
+  @override
+  String journeyOpenMissions(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n missions waiting', one: '1 mission waiting');
+    return '$_temp0';
+  }
+
+  @override
+  String get journeyNoMissions => 'No missions right now. Enjoy your day!';
+
+  @override
+  String get journeyReview => 'Review';
+
+  @override
+  String get journeyLate => 'Late';
+
+  @override
+  String get journeyChestTitle => 'This week\'s chest';
+
+  @override
+  String journeyChestProgress(int done, int total) {
+    return '$done of $total of the week\'s missions';
+  }
+
+  @override
+  String journeyChestHint(int n) {
+    return 'Attend every lesson of the week and hand in its homework: the chest opens with $n stars';
+  }
+
+  @override
+  String get journeyChestMissed => 'You missed this one. A new chest is waiting this week!';
+
+  @override
+  String journeyChestWaiting(String name) {
+    return 'The chest is ready to open on $name\'s account';
+  }
+
+  @override
+  String journeyChestGot(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '+$n stars on your journey!', one: '+1 star on your journey!');
+    return '$_temp0';
+  }
+
+  @override
+  String get journeyYourStars => 'Your stars';
+
+  @override
+  String journeyStarsTo(int n, String rank) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n stars to $rank', one: '1 star to $rank');
+    return '$_temp0';
+  }
+
+  @override
+  String journeyStarsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n stars', one: '1 star', zero: 'No stars yet');
+    return '$_temp0';
+  }
+
+  @override
+  String journeyStarsOf(String name) {
+    return '$name\'s stars';
+  }
+
+  @override
+  String get journeyLastLesson => 'Your last lesson';
+
+  @override
+  String journeyLastLessonOf(String name) {
+    return '$name\'s last lesson';
+  }
+
+  @override
+  String journeyLessonStars(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n stars from your last lesson!',
+      one: '1 star from your last lesson',
+      zero: 'No stars from your last lesson',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journeyLessonCanBring(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'Brings up to $n stars', one: 'Brings 1 star');
+    return '$_temp0';
+  }
+
+  @override
+  String get journeyEggReady => 'Your egg is ready!';
+
+  @override
+  String get journeyEggHint => 'Hatch it and see who comes out';
+
+  @override
+  String get journeyEggHatch => 'Hatch it';
+
+  @override
+  String get journeyEggNone => 'No egg is ready yet. Keep collecting stars!';
+
+  @override
+  String get journeyNoCourses => 'No courses running yet.';
+
+  @override
+  String get journeyNoCurriculum => 'This course has no curriculum yet. Its missions show here.';
+
+  @override
+  String get journeyCourses => 'Lesson materials and reports';
+
+  @override
+  String get homeworkPracticeTitle => 'Practice in the games';
+
+  @override
+  String get homeworkPracticeNotYet => 'Its round is not played yet.';
+
+  @override
+  String get homeworkByPlaying => 'This homework is handed in by playing its round.';
+
+  @override
+  String get homeworkNoGame => 'No game for this homework right now.';
 }

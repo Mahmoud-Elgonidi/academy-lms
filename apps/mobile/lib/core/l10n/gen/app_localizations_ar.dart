@@ -551,7 +551,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navLessons => 'الحصص';
 
   @override
-  String get navProgress => 'التقدم';
+  String get navJourneyTab => 'الرحلة';
 
   @override
   String get navMoney => 'الفلوس';
@@ -567,12 +567,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get navMyHomework => 'واجباتي';
-
-  @override
-  String get navBadges => 'إنجازاتي';
-
-  @override
-  String get navPlan => 'الخطة';
 
   @override
   String get navHomework => 'الواجبات';
@@ -594,15 +588,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get navMore => 'المزيد';
-
-  @override
-  String get navMissions => 'مهماتي';
-
-  @override
-  String get navQuests => 'تحدياتي';
-
-  @override
-  String get navGoals => 'أهدافي';
 
   @override
   String greetingMorning(String name) {
@@ -824,11 +809,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get yourRating => 'تقييمك';
-
-  @override
-  String progressOf(String name) {
-    return 'تقدّم $name';
-  }
 
   @override
   String percentDone(int p) {
@@ -1439,62 +1419,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noTimeOff => 'مفيش طلبات.';
 
   @override
-  String get kidsHello => 'أهلًا يا بطل';
-
-  @override
-  String kidsJourney(String program) {
-    return 'رحلتي في $program';
-  }
-
-  @override
-  String kidsStations(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: 'خلّصت $n محطة!',
-      few: 'خلّصت $n محطات!',
-      two: 'خلّصت محطتين!',
-      one: 'خلّصت محطة!',
-      zero: 'أول محطة مستنياك!',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String kidsNext(String title) {
-    return 'الجاية: $title';
-  }
-
-  @override
   String get youAreHere => 'انت هنا!';
 
   @override
-  String levelRank(int index, String rank) {
-    return 'المستوى $index · $rank';
-  }
-
-  @override
-  String pointsTo(String rank) {
-    return 'نقاطك لـ $rank';
-  }
-
-  @override
-  String pointsLeft(int n) {
-    return 'باقيلك $n نقطة.';
-  }
-
-  @override
   String get topRank => 'وصلت لأعلى رتبة!';
-
-  @override
-  String worldStage(int index, String title) {
-    return 'العالم $index · $title';
-  }
-
-  @override
-  String stageOf(int i, int n) {
-    return 'المرحلة $i من $n';
-  }
 
   @override
   String streak(int n) {
@@ -1507,26 +1435,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String planFor(String name) {
-    return 'خطتك يا $name';
-  }
-
-  @override
-  String get goal => 'هدفك';
-
-  @override
   String get finishOn => 'هتخلّص على كده';
-
-  @override
-  String get pace => 'سرعتك';
-
-  @override
-  String perWeek(int n) {
-    return '$n درس في الأسبوع';
-  }
-
-  @override
-  String get milestones => 'المحطات';
 
   @override
   String get programDone => 'خلّصت البرنامج!';
@@ -1546,76 +1455,16 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get stars => 'نجوم';
-
-  @override
-  String get points => 'نقطة';
-
-  @override
-  String get missionsTitle => 'مهمات الأسبوع';
-
-  @override
-  String get questsTitle => 'تحديات الأسبوع';
-
-  @override
-  String get goalsTitle => 'أهداف الأسبوع';
-
-  @override
-  String get monthGoal => 'هدف الشهر';
-
-  @override
-  String get bossFights => 'تحدي الزعيم';
-
-  @override
-  String get waitingRewards => 'جوايز مستنياك';
-
-  @override
-  String get fromLastWeek => 'من الأسبوع اللي فات';
-
-  @override
   String get fromLastMonth => 'من الشهر اللي فات';
-
-  @override
-  String weekEnds(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: 'باقي $n يوم على آخر الأسبوع',
-      few: 'باقي $n أيام على آخر الأسبوع',
-      two: 'باقي يومين على آخر الأسبوع',
-      one: 'باقي يوم على آخر الأسبوع',
-      zero: 'آخر يوم في الأسبوع!',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get doneMark => 'تم!';
 
   @override
-  String get collect => 'استلم';
-
-  @override
-  String missionsOf(int done, int total) {
-    return '$done من $total مهمات';
-  }
-
-  @override
-  String challengesDone(int done, int total) {
-    return '$done من $total خلصوا';
-  }
-
-  @override
   String get chestReady => 'الصندوق جاهز! دوس عليه';
 
   @override
-  String get chestSurprise => 'جواه ستيكر مفاجأة';
-
-  @override
   String get chestOpened => 'فتحت صندوق الأسبوع ده';
-
-  @override
-  String get noChallenges => 'مفيش تحديات دلوقتي. لما يكون عندك حصص الأسبوع ده، هتظهر هنا.';
 
   @override
   String get album => 'ألبوم الستيكرز';
@@ -1641,34 +1490,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get awesome => 'تمام!';
 
   @override
-  String get yourPoints => 'نقطك';
-
-  @override
-  String get yourGems => 'جواهرك';
-
-  @override
-  String get pointsWord => 'النقط';
-
-  @override
-  String get thisWeek => 'الأسبوع ده';
-
-  @override
-  String readyCount(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: '$n جايزة مستنياك',
-      few: '$n جوايز مستنياك',
-      two: 'جايزتين مستنيينك',
-      one: 'جايزة مستنياك',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String cheerFrom(String name) {
-    return 'تشجيع من $name!';
-  }
+  String get cheerFromFamily => 'تشجيع من أهلك!';
 
   @override
   String get cheerThanks => 'شكرًا!';
@@ -1684,14 +1506,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cheerFire => 'شعلة حماس';
-
-  @override
-  String childChallenges(String name) {
-    return 'تحديات $name';
-  }
-
-  @override
-  String get myChallenges => 'تحدياتي';
 
   @override
   String cheerOn(String name) {
@@ -1716,12 +1530,6 @@ class AppLocalizationsAr extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get seeAll => 'شوف الكل';
-
-  @override
-  String get allBadges => 'كل الإنجازات';
 
   @override
   String get sounds => 'الأصوات';
@@ -2474,26 +2282,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get messagesWrite => 'اكتب رسالة…';
 
   @override
-  String get navIslands => 'الجزر';
-
-  @override
-  String get navGames => 'الألعاب';
-
-  @override
-  String get gamesTitleMiddle => 'عالم الألعاب';
-
-  @override
-  String get gamesTitleTeen => 'التدريب بالألعاب';
-
-  @override
-  String get gamesTitleClassic => 'الألعاب';
-
-  @override
-  String gamesWorld(String name) {
-    return 'عالم $name';
-  }
-
-  @override
   String gamesStars(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
@@ -2514,41 +2302,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gamesSoundOff => 'اقفل المزيكا والأصوات';
 
   @override
-  String gamesLockedIsland(String island) {
-    return '$island لسه بتتجهّز، وهتتفتح بألعاب جديدة قريب';
-  }
-
-  @override
-  String get gamesSecret => 'جزيرة سرّية! فيها كائن أسطوري. هتعرف سرها قريب';
-
-  @override
-  String get gamesSecretLabel => 'جزيرة سرّية';
-
-  @override
-  String get gamesNew => 'جديد';
-
-  @override
   String gamesOf(int found, int total) {
     return '$found من $total';
   }
 
   @override
   String get gamesHomeworkPin => 'واجب';
-
-  @override
-  String gamesAriaOpen(String island) {
-    return '$island، مفتوحة';
-  }
-
-  @override
-  String gamesAriaLocked(String island) {
-    return '$island، لسه مقفولة';
-  }
-
-  @override
-  String gamesAriaHomework(String island) {
-    return '$island، فيها الواجب';
-  }
 
   @override
   String get gamesToMap => 'الخريطة';
@@ -2558,15 +2317,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get gamesBadgeHomework => 'واجب';
-
-  @override
-  String get gamesBadgeNew => 'جديدة';
-
-  @override
-  String get gamesBadgeSoon => 'قريب';
-
-  @override
-  String get gamesIslandCreatures => 'كائنات الجزيرة';
 
   @override
   String gamesCreaturesCard(int found, int total) {
@@ -2591,28 +2341,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gamesAlbum => 'كائناتي';
 
   @override
-  String get gamesNeedsPractice => 'محتاجة تدريبات من النوع ده في دروسك.';
-
-  @override
   String gamesItems(int n) {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n سؤال', few: '$n أسئلة', two: 'سؤالين', one: 'سؤال واحد');
     return '$_temp0';
   }
-
-  @override
-  String get gamesReasonHomework => 'تدريب الواجب';
-
-  @override
-  String get gamesReasonLastLesson => 'آخر درس';
-
-  @override
-  String get gamesReasonReview => 'مراجعة';
-
-  @override
-  String get gamesReasonCurrent => 'الدرس اللي عليه الدور';
-
-  @override
-  String get gamesReasonFree => 'لعب حر';
 
   @override
   String gamesPractising(String what) {
@@ -2671,7 +2403,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String gamesHatchReadySub(int need) {
-    return 'جمعت $need نجمة في الألعاب';
+    return 'جمعت $need نجمة في رحلتك';
   }
 
   @override
@@ -2715,7 +2447,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String gamesAlbumHint(int need) {
-    return 'كل $need نجمة في الألعاب بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.';
+    return 'كل $need نجمة في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.';
   }
 
   @override
@@ -2770,7 +2502,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String gamesHowCommon(String island, int need) {
-    return 'إزاي تفقسه: العب ألعاب $island واجمع نجوم: كل $need نجمة بيضة.';
+    return 'إزاي تفقسه: اجمع نجوم وانت على $island: كل $need نجمة بيضة.';
   }
 
   @override
@@ -2792,7 +2524,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get gamesFromStars => 'فقس من نجوم الألعاب';
+  String get gamesFromStars => 'فقس من نجوم رحلتك';
 
   @override
   String get gamesFromMastery => 'فقس لما اتقنت درس';
@@ -2801,37 +2533,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gamesRace => 'سباق مع نفسك';
 
   @override
-  String gamesFrom(String what) {
-    return 'من $what';
-  }
-
-  @override
-  String get gamesStart => 'البداية';
-
-  @override
-  String get gamesFinish => 'النهاية';
-
-  @override
-  String get gamesBestGhost => 'أحسن مرة';
-
-  @override
-  String get gamesYou => 'إنت';
-
-  @override
-  String gamesRaceReady(String items, String title) {
-    return '$items من «$title». سابق أحسن مرة ليك';
-  }
-
-  @override
   String gamesBest(String s) {
     return 'أحسن وقت: $s';
   }
-
-  @override
-  String get gamesFirstTime => 'أول مرة! حط رقمك';
-
-  @override
-  String get gamesGo => 'يلا';
 
   @override
   String gamesSeconds(int s) {
@@ -2853,57 +2557,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get gamesMore => 'تحديات تانية';
-
-  @override
-  String get gamesAllGames => 'الألعاب';
-
-  @override
-  String gamesReviewMinutes(int n) {
-    return 'مراجعة $n دقايق';
-  }
-
-  @override
-  String gamesStreak(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: '$n يوم',
-      few: '$n أيام',
-      two: 'يومين',
-      one: 'يوم واحد',
-      zero: 'ابدأ سلسلتك',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get gamesConstellation => 'كوكبة الأسبوع';
-
-  @override
-  String gamesLit(int lit, int max) {
-    return '$lit من $max نجمة';
-  }
-
-  @override
-  String get gamesLitHint => 'كل نجمة بتكسبها في المراجعة بتنوّر نجمة هنا';
-
-  @override
-  String gamesDeck(int items, String game) {
-    return '$items كارت · $game';
-  }
-
-  @override
-  String get gamesStartReview => 'ابدأ المراجعة';
-
-  @override
   String get gamesReviewAgain => 'راجع تاني';
-
-  @override
-  String get gamesRecent => 'آخر جولات';
-
-  @override
-  String get gamesNone => 'لسه مفيش تدريبات من دروسك. أول ما المدرس يحط تدريبات على الدرس، هتلاقيها هنا.';
 
   @override
   String gamesGuardianTitle(String name) {
@@ -2983,7 +2637,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String gamesHatchedStars(int found) {
-    return 'من نجوم الألعاب · $found في الألبوم';
+    return 'من نجوم الرحلة · $found في الألبوم';
   }
 
   @override
@@ -3007,9 +2661,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gamesSaved => 'اتحفظ.';
 
   @override
-  String get gamesCardTitle => 'الألعاب';
-
-  @override
   String get gamesCardKids => 'الجزر بتستناك 🏝️';
 
   @override
@@ -3018,5 +2669,260 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get gamesCardGuardian => 'وقت اللعب، اللي اتراجع، والحدود';
+  String journeyTitle(String name) {
+    return 'رحلة $name';
+  }
+
+  @override
+  String journeyYours(String name) {
+    return 'رحلتك يا $name';
+  }
+
+  @override
+  String journeyLevel(int n) {
+    return 'المستوى $n';
+  }
+
+  @override
+  String journeyLevelOf(int i, int n) {
+    return 'المستوى $i من $n';
+  }
+
+  @override
+  String get journeyLevels => 'المستويات';
+
+  @override
+  String journeyLessonsDone(int done, int total) {
+    return '$done من $total دروس';
+  }
+
+  @override
+  String journeyAheadLocked(String title) {
+    return 'بتتفتح لما تخلّص $title';
+  }
+
+  @override
+  String get journeyAheadFirst => 'بتتفتح لما توصلها';
+
+  @override
+  String journeyAriaDone(String title) {
+    return '$title، خلّصتها';
+  }
+
+  @override
+  String journeyAriaHere(String title) {
+    return '$title، انت هنا';
+  }
+
+  @override
+  String journeyAriaAhead(String title) {
+    return '$title، لسه مقفولة';
+  }
+
+  @override
+  String get journeyStationDone => 'خلّصته';
+
+  @override
+  String get journeyStationReview => 'محتاج مراجعة';
+
+  @override
+  String get journeyStationHere => 'انت هنا';
+
+  @override
+  String get journeyStationTodo => 'لسه جاي';
+
+  @override
+  String get journeyStationTodoNote => 'الدرس ده لسه جاي. هتتدرّب عليه لما توصله.';
+
+  @override
+  String get journeyStationReviewNote => 'وقت تراجع الدرس ده: العب لعبة عليه.';
+
+  @override
+  String journeyPractised(String rounds, int p) {
+    return 'اتدرّبت عليه $rounds · $p% صح';
+  }
+
+  @override
+  String get journeyPlayStation => 'العب على الدرس ده';
+
+  @override
+  String get journeyNoGames => 'مفيش لعبة على تدريبات الدرس ده لسه.';
+
+  @override
+  String journeyRaceLast(String s) {
+    return 'آخر مرة: $s';
+  }
+
+  @override
+  String get journeyMissions => 'مهماتك';
+
+  @override
+  String journeyMissionsOf(String name) {
+    return 'مهمات $name';
+  }
+
+  @override
+  String journeyMissionsOn(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n مهمة', few: '$n مهمات', two: 'مهمتين', one: 'مهمة');
+    return '$_temp0';
+  }
+
+  @override
+  String journeyOpenMissions(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n مهمة مستنية',
+      few: '$n مهمات مستنية',
+      two: 'مهمتين مستنيين',
+      one: 'مهمة مستنية',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get journeyNoMissions => 'مفيش مهمات دلوقتي. استمتع بيومك!';
+
+  @override
+  String get journeyReview => 'راجع';
+
+  @override
+  String get journeyLate => 'متأخر';
+
+  @override
+  String get journeyChestTitle => 'صندوق الأسبوع';
+
+  @override
+  String journeyChestProgress(int done, int total) {
+    return '$done من $total مهمات الأسبوع';
+  }
+
+  @override
+  String journeyChestHint(int n) {
+    return 'احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ $n نجوم';
+  }
+
+  @override
+  String get journeyChestMissed => 'الصندوق ده فاتك. فيه صندوق جديد الأسبوع ده!';
+
+  @override
+  String journeyChestWaiting(String name) {
+    return 'الصندوق جاهز يتفتح من حساب $name';
+  }
+
+  @override
+  String journeyChestGot(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '+$n نجمة في رحلتك!',
+      few: '+$n نجوم في رحلتك!',
+      two: '+نجمتين في رحلتك!',
+      one: '+نجمة في رحلتك!',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get journeyYourStars => 'نجومك';
+
+  @override
+  String journeyStarsTo(int n, String rank) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'باقيلك $n نجمة لـ $rank',
+      few: 'باقيلك $n نجوم لـ $rank',
+      two: 'باقيلك نجمتين لـ $rank',
+      one: 'باقيلك نجمة لـ $rank',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journeyStarsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n نجمة',
+      few: '$n نجوم',
+      two: 'نجمتين',
+      one: 'نجمة واحدة',
+      zero: 'مفيش نجوم لسه',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journeyStarsOf(String name) {
+    return 'نجوم $name';
+  }
+
+  @override
+  String get journeyLastLesson => 'آخر حصة';
+
+  @override
+  String journeyLastLessonOf(String name) {
+    return 'آخر حصة لـ $name';
+  }
+
+  @override
+  String journeyLessonStars(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'خدت $n نجمة في آخر حصة!',
+      few: 'خدت $n نجوم في آخر حصة!',
+      two: 'خدت نجمتين في آخر حصة!',
+      one: 'خدت نجمة في آخر حصة',
+      zero: 'ماخدتش نجوم في آخر حصة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journeyLessonCanBring(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'تجيبلك لحد $n نجمة',
+      few: 'تجيبلك لحد $n نجوم',
+      two: 'تجيبلك نجمتين',
+      one: 'تجيبلك نجمة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get journeyEggReady => 'بيضتك جاهزة!';
+
+  @override
+  String get journeyEggHint => 'افقسها وشوف مين هيطلع';
+
+  @override
+  String get journeyEggHatch => 'افقسها';
+
+  @override
+  String get journeyEggNone => 'مفيش بيضة جاهزة دلوقتي. كمّل جمع نجوم!';
+
+  @override
+  String get journeyNoCourses => 'مفيش كورسات شغالة لسه.';
+
+  @override
+  String get journeyNoCurriculum => 'الكورس ده لسه مالوش منهج. مهماته بتظهر هنا.';
+
+  @override
+  String get journeyCourses => 'مواد الدروس والتقارير';
+
+  @override
+  String get homeworkPracticeTitle => 'التدريب بالألعاب';
+
+  @override
+  String get homeworkPracticeNotYet => 'لسه ما اتلعبتش جولته.';
+
+  @override
+  String get homeworkByPlaying => 'الواجب ده بيتسلّم لما تلعب جولته.';
+
+  @override
+  String get homeworkNoGame => 'مفيش لعبة للواجب ده دلوقتي.';
 }

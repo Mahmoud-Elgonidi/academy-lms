@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/network/api_problem.dart';
 import '../../data/family_repository.dart';
-import '../../domain/journey.dart';
+import '../../domain/learner.dart';
 
 /// family: a guardian picks which child the tabs show; self: a student's own area.
 enum LearnerScope { family, self }

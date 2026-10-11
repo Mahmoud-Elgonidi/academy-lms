@@ -108,7 +108,7 @@ class KidsResultCard extends StatelessWidget {
                     children: [
                       SvgArt(eggSvg(), width: 22, height: 27),
                       const SizedBox(width: 8),
-                      Text(l.gamesEggCard(result.eggHave, result.eggNeed), style: gwText(context, 14)),
+                      Flexible(flex: 3, child: Text(l.gamesEggCard(result.eggHave, result.eggNeed), style: gwText(context, 14))),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Semantics(

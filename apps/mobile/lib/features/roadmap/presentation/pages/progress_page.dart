@@ -15,8 +15,9 @@ import '../../../../shared/motion/motion.dart';
 import '../../../../core/realtime/live.dart';
 import '../widgets/material_chips.dart';
 
-/// Where each course stands for the learner: the program, how far, the
-/// lesson now, the weeks left, open homework; a course opens its reports.
+/// The learner's courses under the journey (where Progress was): the
+/// program, how far, the lesson now and its materials, the weeks left, open
+/// homework; a course opens its reports.
 class ProgressPage extends StatelessWidget {
   const ProgressPage({super.key});
 
@@ -26,7 +27,7 @@ class ProgressPage extends StatelessWidget {
     final learners = context.watch<LearnerCubit>().state;
     final learner = learners.selected;
     return Scaffold(
-      appBar: AppBar(title: Text(learner == null ? l.navProgress : l.progressOf(learner.firstName))),
+      appBar: AppBar(title: Text(l.journeyCourses)),
       body: Column(
         children: [
           const LearnerSwitcher(),

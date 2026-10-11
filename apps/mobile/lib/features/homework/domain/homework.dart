@@ -17,6 +17,7 @@ class Homework {
     this.feedback,
     this.reportId,
     this.reviewedAt,
+    this.practice,
   });
 
   factory Homework.fromJson(Map<String, dynamic> json) => Homework(
@@ -34,13 +35,14 @@ class Homework {
     submissions: [for (final s in json['submissions'] as List<dynamic>? ?? const []) Submission.fromJson(s as Map<String, dynamic>)],
     reportId: json['report_id'] as String?,
     reviewedAt: LocalTime.fromJson(json['reviewed_at']),
+    practice: json['practice'] is Map<String, dynamic> ? HomeworkPractice.fromJson(json['practice'] as Map<String, dynamic>) : null,
   );
 
   final String id;
   final String title;
   final String? instructions;
 
-  /// any, text, audio or file.
+  /// any, text, audio, file or practice (handed in by playing its round in the games).
   final String accepts;
 
   /// assigned, submitted, reviewed, missed.
@@ -55,12 +57,41 @@ class Homework {
   final String? reportId;
   final LocalTime? reviewedAt;
 
+  /// Practice in the games on its lessons (null: none): how the best round went, or not yet.
+  final HomeworkPractice? practice;
+
   bool get open => status == 'assigned' || status == 'missed';
+
+  /// Handed in by playing only: no words, recording or file.
+  bool get byPlaying => accepts == 'practice';
 
   /// What it can be handed in as: words, a voice recording, a file (`any` takes all three).
   bool get takesText => accepts == 'text' || accepts == 'any';
   bool get takesAudio => accepts == 'audio' || accepts == 'any';
   bool get takesFile => accepts == 'file' || accepts == 'any';
+}
+
+/// A homework's practice in the games: done or not, and its best round.
+class HomeworkPractice {
+  const HomeworkPractice({required this.done, required this.label, this.correct, this.total, this.stars, this.game});
+
+  factory HomeworkPractice.fromJson(Map<String, dynamic> json) => HomeworkPractice(
+    done: json['done'] == true,
+    label: json['label'] as String? ?? '',
+    correct: (json['correct'] as num?)?.toInt(),
+    total: (json['total'] as num?)?.toInt(),
+    stars: (json['stars'] as num?)?.toInt(),
+    game: json['game'] as String?,
+  );
+
+  final bool done;
+
+  /// "التدريب: 9 من 10 صح · 3 ⭐ (…)", in the viewer's language.
+  final String label;
+  final int? correct;
+  final int? total;
+  final int? stars;
+  final String? game;
 }
 
 /// A file handed in with homework: a recording plays in the app, a picture shows.

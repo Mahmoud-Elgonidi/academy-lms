@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,10 +20,14 @@ import '../../../../shared/motion/celebration.dart';
 import '../../../../shared/motion/juice.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../core/realtime/live.dart';
+import '../../../games/presentation/play/play_page.dart';
+import '../../../journey/data/journey_repository.dart';
+import '../../../journey/presentation/journey_ui.dart';
 
 /// The student's homework: open ones first, each handed in from here in
-/// words, a voice recording made in the app, or a picture or PDF; marked
-/// ones show the teacher's grade and words.
+/// words, a voice recording made in the app, or a picture or PDF, or by
+/// playing its round in the games (practice homework, with how it went);
+/// marked ones show the teacher's grade and words.
 class HomeworkPage extends StatelessWidget {
   const HomeworkPage({super.key});
 
@@ -31,7 +37,8 @@ class HomeworkPage extends StatelessWidget {
     final kids = context.shape.stage == Stage.kids;
     return BlocProvider(
       create: (c) =>
-          LoadCubit<List<Homework>>(() => c.read<HomeworkRepository>().list(), refreshOn: c.read<Live>().on({Live.homework}))..load(),
+          LoadCubit<List<Homework>>(() => c.read<HomeworkRepository>().list(), refreshOn: c.read<Live>().on({Live.homework, Live.practice}))
+            ..load(),
       child: Scaffold(
         appBar: AppBar(title: Text(kids ? l.navMyHomework : l.homeworkTitle)),
         body: LoadView<List<Homework>>(
@@ -128,6 +135,34 @@ class _HomeworkCardState extends State<_HomeworkCard> {
     }
   }
 
+  /// Its practice round: the game the teacher chose, else the best one on its lesson (from the journey).
+  Future<void> _play() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    final l = context.l10n;
+    final h = widget.homework;
+    final list = context.read<LoadCubit<List<Homework>>>();
+    try {
+      final map = await context.read<JourneyRepository>().map();
+      if (!mounted) return;
+      final mission = map.mission('homework:${h.id}');
+      final game = mission == null ? null : map.gameFor(mission);
+      final allowance = map.games?.allowance;
+      if (game == null || map.plain) {
+        showSnack(context, l.homeworkNoGame);
+      } else if (allowance != null && !allowance.may) {
+        showSnack(context, allowance.reasonLabel ?? '');
+      } else {
+        await openRound(context, PlayRequest(gameId: game, homeworkId: h.id, look: map.roundLook));
+        unawaited(list.load());
+      }
+    } on ApiProblem catch (p) {
+      if (mounted) showSnack(context, context.problemText(p));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -163,7 +198,11 @@ class _HomeworkCardState extends State<_HomeworkCard> {
               icon: Icons.rate_review_outlined,
             ),
           ],
-          if (h.open) ...[
+          if (h.practice != null || h.byPlaying) ...[
+            const SizedBox(height: 10),
+            _Practice(practice: h.practice, open: h.open, byPlaying: h.byPlaying, busy: _busy, onPlay: _play),
+          ],
+          if (h.open && !h.byPlaying) ...[
             const SizedBox(height: 12),
             if (!_writing)
               SizedBox(
@@ -212,6 +251,61 @@ class _HomeworkCardState extends State<_HomeworkCard> {
                 child: FilledButton(onPressed: _busy || !_ready ? null : _handIn, child: Text(l.send)),
               ),
             ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A homework's practice in the games: how its best round went (or not
+/// yet), and "play" while it is open.
+class _Practice extends StatelessWidget {
+  const _Practice({required this.practice, required this.open, required this.byPlaying, required this.busy, required this.onPlay});
+
+  final HomeworkPractice? practice;
+  final bool open;
+
+  /// Handed in by playing only.
+  final bool byPlaying;
+  final bool busy;
+  final VoidCallback onPlay;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final done = practice?.done ?? false;
+    return Container(
+      key: const Key('homework-practice'),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: done ? c.brandSoft : c.infoSoft, borderRadius: BorderRadius.circular(context.shape.card - 4)),
+      child: Row(
+        children: [
+          Icon(done ? Icons.check_circle_rounded : Icons.sports_esports_outlined, color: done ? c.brandDeep : c.infoInk),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l.homeworkPracticeTitle, style: context.text.titleSmall),
+                Text(
+                  done && (practice?.label.isNotEmpty ?? false)
+                      ? practice!.label
+                      : (byPlaying ? l.homeworkByPlaying : l.homeworkPracticeNotYet),
+                  style: context.text.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          if (open) ...[
+            const SizedBox(width: 8),
+            FilledButton.icon(
+              style: FilledButton.styleFrom(minimumSize: const Size(64, 40), padding: const EdgeInsets.symmetric(horizontal: 14)),
+              onPressed: busy ? null : onPlay,
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: Text(done ? l.gamesAgain : l.gamesPlay),
+            ),
           ],
         ],
       ),

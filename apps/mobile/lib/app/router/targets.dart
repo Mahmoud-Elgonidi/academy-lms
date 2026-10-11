@@ -30,6 +30,8 @@ String targetOf(String? screen, String? id, Area area) {
   final base = area.prefix;
   return switch ((area, screen)) {
     (_, 'session' || 'holiday' || 'lesson_rating') => '$base/lessons',
+    // The journey: games, the old challenges and the journey itself (a lesson's stars, an egg).
+    (Area.kids || Area.middle || Area.teen || Area.family, 'journey' || 'games' || 'challenges') => '$base/journey',
     (Area.family, 'invoice') => '/family/money',
     (Area.family, 'guardian_consent') => '/family/me/privacy',
     (Area.family, 'my_data') => '/family/me/my-data',
@@ -40,20 +42,15 @@ String targetOf(String? screen, String? id, Area area) {
     (Area.family, 'ticket') when id != null => '/family/me/help/$id',
     (Area.family, 'conversation') when id != null => '/family/me/messages/$id',
     (Area.family, 'conversation') => '/family/me/messages',
-    (Area.kids || Area.middle || Area.teen, 'conversation') when id != null => '/account/messages/$id',
-    (Area.kids || Area.middle || Area.teen, 'conversation') => '/account/messages',
+    (Area.kids || Area.middle, 'conversation') when id != null => '$base/messages/$id',
+    (Area.kids || Area.middle, 'conversation') => '$base/messages',
+    (Area.teen, 'conversation') when id != null => '/account/messages/$id',
+    (Area.teen, 'conversation') => '/account/messages',
     (Area.middle || Area.teen, 'ticket') when id != null => '/account/help/$id',
-    (Area.family, 'report' || 'roadmap') => '/family/progress',
-    (Area.family, 'challenges') => '/family/home/challenges',
-    (Area.kids, 'challenges') => '/kids/missions',
-    (Area.middle, 'challenges') => '/middle/quests',
-    (Area.teen, 'challenges') => '/teen/goals',
+    (Area.family, 'report' || 'roadmap') => '/family/journey/courses',
     (Area.teen, 'report') => '/teen/reports',
-    (Area.kids, 'games') => '/kids/islands',
-    (Area.middle, 'games') => '/middle/games',
-    (Area.teen, 'games') => '/teen/plan/games',
-    (Area.family, 'games') => '/family/home/games',
-    (Area.kids || Area.middle || Area.teen, 'homework') => '$base/homework',
+    (Area.kids || Area.middle, 'homework') => '$base/more/homework',
+    (Area.teen, 'homework') => '/teen/homework',
     _ => home,
   };
 }

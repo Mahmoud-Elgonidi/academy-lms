@@ -12,6 +12,7 @@ import '../../features/dashboard/data/family_repository.dart';
 import '../../features/dashboard/data/home_loader.dart';
 import '../../features/games/data/games_repository.dart';
 import '../../features/homework/data/homework_repository.dart';
+import '../../features/journey/data/journey_repository.dart';
 import '../../features/live/data/live_repository.dart';
 import '../../features/notifications/data/notifications_repository.dart';
 import '../../features/profile/data/profile_repository.dart';
@@ -40,6 +41,7 @@ class Services {
       teaching = TeachingRepository(api),
       challenges = ChallengesRepository(api),
       games = GamesRepository(api),
+      journey = JourneyRepository(api),
       notifications = NotificationsRepository(api),
       consent = ConsentRepository(api),
       privacy = PrivacyRepository(api),
@@ -48,7 +50,7 @@ class Services {
       safeguarding = SafeguardingRepository(api),
       messages = MessagesRepository(api),
       live = Live(source: LiveRepository(api), apiBaseUrl: api.dio.options.baseUrl) {
-    home = HomeLoader(lessons: lessons, billing: billing, learning: learning, homework: homework, family: family);
+    home = HomeLoader(lessons: lessons, billing: billing, learning: learning, homework: homework, journey: journey);
   }
 
   final ApiClient api;
@@ -66,6 +68,7 @@ class Services {
   final TeachingRepository teaching;
   final ChallengesRepository challenges;
   final GamesRepository games;
+  final JourneyRepository journey;
   final NotificationsRepository notifications;
   final ConsentRepository consent;
   final PrivacyRepository privacy;
@@ -99,6 +102,7 @@ class Services {
       RepositoryProvider.value(value: teaching),
       RepositoryProvider.value(value: challenges),
       RepositoryProvider.value(value: games),
+      RepositoryProvider.value(value: journey),
       RepositoryProvider.value(value: notifications),
       RepositoryProvider.value(value: home),
       RepositoryProvider.value(value: live),

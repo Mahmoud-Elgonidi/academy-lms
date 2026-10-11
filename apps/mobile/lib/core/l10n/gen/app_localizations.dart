@@ -956,11 +956,11 @@ abstract class AppLocalizations {
   /// **'الحصص'**
   String get navLessons;
 
-  /// No description provided for @navProgress.
+  /// No description provided for @navJourneyTab.
   ///
   /// In ar, this message translates to:
-  /// **'التقدم'**
-  String get navProgress;
+  /// **'الرحلة'**
+  String get navJourneyTab;
 
   /// No description provided for @navMoney.
   ///
@@ -991,18 +991,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'واجباتي'**
   String get navMyHomework;
-
-  /// No description provided for @navBadges.
-  ///
-  /// In ar, this message translates to:
-  /// **'إنجازاتي'**
-  String get navBadges;
-
-  /// No description provided for @navPlan.
-  ///
-  /// In ar, this message translates to:
-  /// **'الخطة'**
-  String get navPlan;
 
   /// No description provided for @navHomework.
   ///
@@ -1045,24 +1033,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المزيد'**
   String get navMore;
-
-  /// No description provided for @navMissions.
-  ///
-  /// In ar, this message translates to:
-  /// **'مهماتي'**
-  String get navMissions;
-
-  /// No description provided for @navQuests.
-  ///
-  /// In ar, this message translates to:
-  /// **'تحدياتي'**
-  String get navQuests;
-
-  /// No description provided for @navGoals.
-  ///
-  /// In ar, this message translates to:
-  /// **'أهدافي'**
-  String get navGoals;
 
   /// No description provided for @greetingMorning.
   ///
@@ -1441,12 +1411,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تقييمك'**
   String get yourRating;
-
-  /// No description provided for @progressOf.
-  ///
-  /// In ar, this message translates to:
-  /// **'تقدّم {name}'**
-  String progressOf(String name);
 
   /// No description provided for @percentDone.
   ///
@@ -2420,71 +2384,17 @@ abstract class AppLocalizations {
   /// **'مفيش طلبات.'**
   String get noTimeOff;
 
-  /// No description provided for @kidsHello.
-  ///
-  /// In ar, this message translates to:
-  /// **'أهلًا يا بطل'**
-  String get kidsHello;
-
-  /// No description provided for @kidsJourney.
-  ///
-  /// In ar, this message translates to:
-  /// **'رحلتي في {program}'**
-  String kidsJourney(String program);
-
-  /// No description provided for @kidsStations.
-  ///
-  /// In ar, this message translates to:
-  /// **'{n, plural, =0{أول محطة مستنياك!} =1{خلّصت محطة!} =2{خلّصت محطتين!} few{خلّصت {n} محطات!} other{خلّصت {n} محطة!}}'**
-  String kidsStations(int n);
-
-  /// No description provided for @kidsNext.
-  ///
-  /// In ar, this message translates to:
-  /// **'الجاية: {title}'**
-  String kidsNext(String title);
-
   /// No description provided for @youAreHere.
   ///
   /// In ar, this message translates to:
   /// **'انت هنا!'**
   String get youAreHere;
 
-  /// No description provided for @levelRank.
-  ///
-  /// In ar, this message translates to:
-  /// **'المستوى {index} · {rank}'**
-  String levelRank(int index, String rank);
-
-  /// No description provided for @pointsTo.
-  ///
-  /// In ar, this message translates to:
-  /// **'نقاطك لـ {rank}'**
-  String pointsTo(String rank);
-
-  /// No description provided for @pointsLeft.
-  ///
-  /// In ar, this message translates to:
-  /// **'باقيلك {n} نقطة.'**
-  String pointsLeft(int n);
-
   /// No description provided for @topRank.
   ///
   /// In ar, this message translates to:
   /// **'وصلت لأعلى رتبة!'**
   String get topRank;
-
-  /// No description provided for @worldStage.
-  ///
-  /// In ar, this message translates to:
-  /// **'العالم {index} · {title}'**
-  String worldStage(int index, String title);
-
-  /// No description provided for @stageOf.
-  ///
-  /// In ar, this message translates to:
-  /// **'المرحلة {i} من {n}'**
-  String stageOf(int i, int n);
 
   /// No description provided for @streak.
   ///
@@ -2498,41 +2408,11 @@ abstract class AppLocalizations {
   /// **'{earned} من {total}'**
   String badgesCount(int earned, int total);
 
-  /// No description provided for @planFor.
-  ///
-  /// In ar, this message translates to:
-  /// **'خطتك يا {name}'**
-  String planFor(String name);
-
-  /// No description provided for @goal.
-  ///
-  /// In ar, this message translates to:
-  /// **'هدفك'**
-  String get goal;
-
   /// No description provided for @finishOn.
   ///
   /// In ar, this message translates to:
   /// **'هتخلّص على كده'**
   String get finishOn;
-
-  /// No description provided for @pace.
-  ///
-  /// In ar, this message translates to:
-  /// **'سرعتك'**
-  String get pace;
-
-  /// No description provided for @perWeek.
-  ///
-  /// In ar, this message translates to:
-  /// **'{n} درس في الأسبوع'**
-  String perWeek(int n);
-
-  /// No description provided for @milestones.
-  ///
-  /// In ar, this message translates to:
-  /// **'المحطات'**
-  String get milestones;
 
   /// No description provided for @programDone.
   ///
@@ -2546,71 +2426,11 @@ abstract class AppLocalizations {
   /// **'{n, plural, =0{المستوى ده قرّب يخلص} =1{باقي أسبوع في المستوى ده} =2{باقي أسبوعين في المستوى ده} few{باقي {n} أسابيع في المستوى ده} other{باقي {n} أسبوع في المستوى ده}}'**
   String weeksLeftLevel(int n);
 
-  /// No description provided for @stars.
-  ///
-  /// In ar, this message translates to:
-  /// **'نجوم'**
-  String get stars;
-
-  /// No description provided for @points.
-  ///
-  /// In ar, this message translates to:
-  /// **'نقطة'**
-  String get points;
-
-  /// No description provided for @missionsTitle.
-  ///
-  /// In ar, this message translates to:
-  /// **'مهمات الأسبوع'**
-  String get missionsTitle;
-
-  /// No description provided for @questsTitle.
-  ///
-  /// In ar, this message translates to:
-  /// **'تحديات الأسبوع'**
-  String get questsTitle;
-
-  /// No description provided for @goalsTitle.
-  ///
-  /// In ar, this message translates to:
-  /// **'أهداف الأسبوع'**
-  String get goalsTitle;
-
-  /// No description provided for @monthGoal.
-  ///
-  /// In ar, this message translates to:
-  /// **'هدف الشهر'**
-  String get monthGoal;
-
-  /// No description provided for @bossFights.
-  ///
-  /// In ar, this message translates to:
-  /// **'تحدي الزعيم'**
-  String get bossFights;
-
-  /// No description provided for @waitingRewards.
-  ///
-  /// In ar, this message translates to:
-  /// **'جوايز مستنياك'**
-  String get waitingRewards;
-
-  /// No description provided for @fromLastWeek.
-  ///
-  /// In ar, this message translates to:
-  /// **'من الأسبوع اللي فات'**
-  String get fromLastWeek;
-
   /// No description provided for @fromLastMonth.
   ///
   /// In ar, this message translates to:
   /// **'من الشهر اللي فات'**
   String get fromLastMonth;
-
-  /// No description provided for @weekEnds.
-  ///
-  /// In ar, this message translates to:
-  /// **'{n, plural, =0{آخر يوم في الأسبوع!} =1{باقي يوم على آخر الأسبوع} =2{باقي يومين على آخر الأسبوع} few{باقي {n} أيام على آخر الأسبوع} other{باقي {n} يوم على آخر الأسبوع}}'**
-  String weekEnds(int n);
 
   /// No description provided for @doneMark.
   ///
@@ -2618,47 +2438,17 @@ abstract class AppLocalizations {
   /// **'تم!'**
   String get doneMark;
 
-  /// No description provided for @collect.
-  ///
-  /// In ar, this message translates to:
-  /// **'استلم'**
-  String get collect;
-
-  /// No description provided for @missionsOf.
-  ///
-  /// In ar, this message translates to:
-  /// **'{done} من {total} مهمات'**
-  String missionsOf(int done, int total);
-
-  /// No description provided for @challengesDone.
-  ///
-  /// In ar, this message translates to:
-  /// **'{done} من {total} خلصوا'**
-  String challengesDone(int done, int total);
-
   /// No description provided for @chestReady.
   ///
   /// In ar, this message translates to:
   /// **'الصندوق جاهز! دوس عليه'**
   String get chestReady;
 
-  /// No description provided for @chestSurprise.
-  ///
-  /// In ar, this message translates to:
-  /// **'جواه ستيكر مفاجأة'**
-  String get chestSurprise;
-
   /// No description provided for @chestOpened.
   ///
   /// In ar, this message translates to:
   /// **'فتحت صندوق الأسبوع ده'**
   String get chestOpened;
-
-  /// No description provided for @noChallenges.
-  ///
-  /// In ar, this message translates to:
-  /// **'مفيش تحديات دلوقتي. لما يكون عندك حصص الأسبوع ده، هتظهر هنا.'**
-  String get noChallenges;
 
   /// No description provided for @album.
   ///
@@ -2702,41 +2492,11 @@ abstract class AppLocalizations {
   /// **'تمام!'**
   String get awesome;
 
-  /// No description provided for @yourPoints.
+  /// No description provided for @cheerFromFamily.
   ///
   /// In ar, this message translates to:
-  /// **'نقطك'**
-  String get yourPoints;
-
-  /// No description provided for @yourGems.
-  ///
-  /// In ar, this message translates to:
-  /// **'جواهرك'**
-  String get yourGems;
-
-  /// No description provided for @pointsWord.
-  ///
-  /// In ar, this message translates to:
-  /// **'النقط'**
-  String get pointsWord;
-
-  /// No description provided for @thisWeek.
-  ///
-  /// In ar, this message translates to:
-  /// **'الأسبوع ده'**
-  String get thisWeek;
-
-  /// No description provided for @readyCount.
-  ///
-  /// In ar, this message translates to:
-  /// **'{n, plural, =1{جايزة مستنياك} =2{جايزتين مستنيينك} few{{n} جوايز مستنياك} other{{n} جايزة مستنياك}}'**
-  String readyCount(int n);
-
-  /// No description provided for @cheerFrom.
-  ///
-  /// In ar, this message translates to:
-  /// **'تشجيع من {name}!'**
-  String cheerFrom(String name);
+  /// **'تشجيع من أهلك!'**
+  String get cheerFromFamily;
 
   /// No description provided for @cheerThanks.
   ///
@@ -2768,18 +2528,6 @@ abstract class AppLocalizations {
   /// **'شعلة حماس'**
   String get cheerFire;
 
-  /// No description provided for @childChallenges.
-  ///
-  /// In ar, this message translates to:
-  /// **'تحديات {name}'**
-  String childChallenges(String name);
-
-  /// No description provided for @myChallenges.
-  ///
-  /// In ar, this message translates to:
-  /// **'تحدياتي'**
-  String get myChallenges;
-
   /// No description provided for @cheerOn.
   ///
   /// In ar, this message translates to:
@@ -2797,18 +2545,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{n, plural, =0{خلّصت تشجيعات النهارده} =1{فاضل تشجيع واحد النهارده} =2{فاضل تشجيعين النهارده} few{فاضل {n} تشجيعات النهارده} other{فاضل {n} تشجيع النهارده}}'**
   String cheersLeft(int n);
-
-  /// No description provided for @seeAll.
-  ///
-  /// In ar, this message translates to:
-  /// **'شوف الكل'**
-  String get seeAll;
-
-  /// No description provided for @allBadges.
-  ///
-  /// In ar, this message translates to:
-  /// **'كل الإنجازات'**
-  String get allBadges;
 
   /// No description provided for @sounds.
   ///
@@ -4208,42 +3944,6 @@ abstract class AppLocalizations {
   /// **'اكتب رسالة…'**
   String get messagesWrite;
 
-  /// No description provided for @navIslands.
-  ///
-  /// In ar, this message translates to:
-  /// **'الجزر'**
-  String get navIslands;
-
-  /// No description provided for @navGames.
-  ///
-  /// In ar, this message translates to:
-  /// **'الألعاب'**
-  String get navGames;
-
-  /// No description provided for @gamesTitleMiddle.
-  ///
-  /// In ar, this message translates to:
-  /// **'عالم الألعاب'**
-  String get gamesTitleMiddle;
-
-  /// No description provided for @gamesTitleTeen.
-  ///
-  /// In ar, this message translates to:
-  /// **'التدريب بالألعاب'**
-  String get gamesTitleTeen;
-
-  /// No description provided for @gamesTitleClassic.
-  ///
-  /// In ar, this message translates to:
-  /// **'الألعاب'**
-  String get gamesTitleClassic;
-
-  /// No description provided for @gamesWorld.
-  ///
-  /// In ar, this message translates to:
-  /// **'عالم {name}'**
-  String gamesWorld(String name);
-
   /// No description provided for @gamesStars.
   ///
   /// In ar, this message translates to:
@@ -4262,30 +3962,6 @@ abstract class AppLocalizations {
   /// **'اقفل المزيكا والأصوات'**
   String get gamesSoundOff;
 
-  /// No description provided for @gamesLockedIsland.
-  ///
-  /// In ar, this message translates to:
-  /// **'{island} لسه بتتجهّز، وهتتفتح بألعاب جديدة قريب'**
-  String gamesLockedIsland(String island);
-
-  /// No description provided for @gamesSecret.
-  ///
-  /// In ar, this message translates to:
-  /// **'جزيرة سرّية! فيها كائن أسطوري. هتعرف سرها قريب'**
-  String get gamesSecret;
-
-  /// No description provided for @gamesSecretLabel.
-  ///
-  /// In ar, this message translates to:
-  /// **'جزيرة سرّية'**
-  String get gamesSecretLabel;
-
-  /// No description provided for @gamesNew.
-  ///
-  /// In ar, this message translates to:
-  /// **'جديد'**
-  String get gamesNew;
-
   /// No description provided for @gamesOf.
   ///
   /// In ar, this message translates to:
@@ -4297,24 +3973,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'واجب'**
   String get gamesHomeworkPin;
-
-  /// No description provided for @gamesAriaOpen.
-  ///
-  /// In ar, this message translates to:
-  /// **'{island}، مفتوحة'**
-  String gamesAriaOpen(String island);
-
-  /// No description provided for @gamesAriaLocked.
-  ///
-  /// In ar, this message translates to:
-  /// **'{island}، لسه مقفولة'**
-  String gamesAriaLocked(String island);
-
-  /// No description provided for @gamesAriaHomework.
-  ///
-  /// In ar, this message translates to:
-  /// **'{island}، فيها الواجب'**
-  String gamesAriaHomework(String island);
 
   /// No description provided for @gamesToMap.
   ///
@@ -4333,24 +3991,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'واجب'**
   String get gamesBadgeHomework;
-
-  /// No description provided for @gamesBadgeNew.
-  ///
-  /// In ar, this message translates to:
-  /// **'جديدة'**
-  String get gamesBadgeNew;
-
-  /// No description provided for @gamesBadgeSoon.
-  ///
-  /// In ar, this message translates to:
-  /// **'قريب'**
-  String get gamesBadgeSoon;
-
-  /// No description provided for @gamesIslandCreatures.
-  ///
-  /// In ar, this message translates to:
-  /// **'كائنات الجزيرة'**
-  String get gamesIslandCreatures;
 
   /// No description provided for @gamesCreaturesCard.
   ///
@@ -4388,47 +4028,11 @@ abstract class AppLocalizations {
   /// **'كائناتي'**
   String get gamesAlbum;
 
-  /// No description provided for @gamesNeedsPractice.
-  ///
-  /// In ar, this message translates to:
-  /// **'محتاجة تدريبات من النوع ده في دروسك.'**
-  String get gamesNeedsPractice;
-
   /// No description provided for @gamesItems.
   ///
   /// In ar, this message translates to:
   /// **'{n, plural, =1{سؤال واحد} =2{سؤالين} few{{n} أسئلة} other{{n} سؤال}}'**
   String gamesItems(int n);
-
-  /// No description provided for @gamesReasonHomework.
-  ///
-  /// In ar, this message translates to:
-  /// **'تدريب الواجب'**
-  String get gamesReasonHomework;
-
-  /// No description provided for @gamesReasonLastLesson.
-  ///
-  /// In ar, this message translates to:
-  /// **'آخر درس'**
-  String get gamesReasonLastLesson;
-
-  /// No description provided for @gamesReasonReview.
-  ///
-  /// In ar, this message translates to:
-  /// **'مراجعة'**
-  String get gamesReasonReview;
-
-  /// No description provided for @gamesReasonCurrent.
-  ///
-  /// In ar, this message translates to:
-  /// **'الدرس اللي عليه الدور'**
-  String get gamesReasonCurrent;
-
-  /// No description provided for @gamesReasonFree.
-  ///
-  /// In ar, this message translates to:
-  /// **'لعب حر'**
-  String get gamesReasonFree;
 
   /// No description provided for @gamesPractising.
   ///
@@ -4523,7 +4127,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesHatchReadySub.
   ///
   /// In ar, this message translates to:
-  /// **'جمعت {need} نجمة في الألعاب'**
+  /// **'جمعت {need} نجمة في رحلتك'**
   String gamesHatchReadySub(int need);
 
   /// No description provided for @gamesHatchDone.
@@ -4595,7 +4199,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesAlbumHint.
   ///
   /// In ar, this message translates to:
-  /// **'كل {need} نجمة في الألعاب بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.'**
+  /// **'كل {need} نجمة في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.'**
   String gamesAlbumHint(int need);
 
   /// No description provided for @gamesAlbumGuardian.
@@ -4685,7 +4289,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesHowCommon.
   ///
   /// In ar, this message translates to:
-  /// **'إزاي تفقسه: العب ألعاب {island} واجمع نجوم: كل {need} نجمة بيضة.'**
+  /// **'إزاي تفقسه: اجمع نجوم وانت على {island}: كل {need} نجمة بيضة.'**
   String gamesHowCommon(String island, int need);
 
   /// No description provided for @gamesHowRare.
@@ -4715,7 +4319,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesFromStars.
   ///
   /// In ar, this message translates to:
-  /// **'فقس من نجوم الألعاب'**
+  /// **'فقس من نجوم رحلتك'**
   String get gamesFromStars;
 
   /// No description provided for @gamesFromMastery.
@@ -4730,59 +4334,11 @@ abstract class AppLocalizations {
   /// **'سباق مع نفسك'**
   String get gamesRace;
 
-  /// No description provided for @gamesFrom.
-  ///
-  /// In ar, this message translates to:
-  /// **'من {what}'**
-  String gamesFrom(String what);
-
-  /// No description provided for @gamesStart.
-  ///
-  /// In ar, this message translates to:
-  /// **'البداية'**
-  String get gamesStart;
-
-  /// No description provided for @gamesFinish.
-  ///
-  /// In ar, this message translates to:
-  /// **'النهاية'**
-  String get gamesFinish;
-
-  /// No description provided for @gamesBestGhost.
-  ///
-  /// In ar, this message translates to:
-  /// **'أحسن مرة'**
-  String get gamesBestGhost;
-
-  /// No description provided for @gamesYou.
-  ///
-  /// In ar, this message translates to:
-  /// **'إنت'**
-  String get gamesYou;
-
-  /// No description provided for @gamesRaceReady.
-  ///
-  /// In ar, this message translates to:
-  /// **'{items} من «{title}». سابق أحسن مرة ليك'**
-  String gamesRaceReady(String items, String title);
-
   /// No description provided for @gamesBest.
   ///
   /// In ar, this message translates to:
   /// **'أحسن وقت: {s}'**
   String gamesBest(String s);
-
-  /// No description provided for @gamesFirstTime.
-  ///
-  /// In ar, this message translates to:
-  /// **'أول مرة! حط رقمك'**
-  String get gamesFirstTime;
-
-  /// No description provided for @gamesGo.
-  ///
-  /// In ar, this message translates to:
-  /// **'يلا'**
-  String get gamesGo;
 
   /// No description provided for @gamesSeconds.
   ///
@@ -4814,77 +4370,11 @@ abstract class AppLocalizations {
   /// **'{correct} من {total} صح في {s}'**
   String gamesOver(int correct, int total, String s);
 
-  /// No description provided for @gamesMore.
-  ///
-  /// In ar, this message translates to:
-  /// **'تحديات تانية'**
-  String get gamesMore;
-
-  /// No description provided for @gamesAllGames.
-  ///
-  /// In ar, this message translates to:
-  /// **'الألعاب'**
-  String get gamesAllGames;
-
-  /// No description provided for @gamesReviewMinutes.
-  ///
-  /// In ar, this message translates to:
-  /// **'مراجعة {n} دقايق'**
-  String gamesReviewMinutes(int n);
-
-  /// No description provided for @gamesStreak.
-  ///
-  /// In ar, this message translates to:
-  /// **'{n, plural, =0{ابدأ سلسلتك} =1{يوم واحد} =2{يومين} few{{n} أيام} other{{n} يوم}}'**
-  String gamesStreak(int n);
-
-  /// No description provided for @gamesConstellation.
-  ///
-  /// In ar, this message translates to:
-  /// **'كوكبة الأسبوع'**
-  String get gamesConstellation;
-
-  /// No description provided for @gamesLit.
-  ///
-  /// In ar, this message translates to:
-  /// **'{lit} من {max} نجمة'**
-  String gamesLit(int lit, int max);
-
-  /// No description provided for @gamesLitHint.
-  ///
-  /// In ar, this message translates to:
-  /// **'كل نجمة بتكسبها في المراجعة بتنوّر نجمة هنا'**
-  String get gamesLitHint;
-
-  /// No description provided for @gamesDeck.
-  ///
-  /// In ar, this message translates to:
-  /// **'{items} كارت · {game}'**
-  String gamesDeck(int items, String game);
-
-  /// No description provided for @gamesStartReview.
-  ///
-  /// In ar, this message translates to:
-  /// **'ابدأ المراجعة'**
-  String get gamesStartReview;
-
   /// No description provided for @gamesReviewAgain.
   ///
   /// In ar, this message translates to:
   /// **'راجع تاني'**
   String get gamesReviewAgain;
-
-  /// No description provided for @gamesRecent.
-  ///
-  /// In ar, this message translates to:
-  /// **'آخر جولات'**
-  String get gamesRecent;
-
-  /// No description provided for @gamesNone.
-  ///
-  /// In ar, this message translates to:
-  /// **'لسه مفيش تدريبات من دروسك. أول ما المدرس يحط تدريبات على الدرس، هتلاقيها هنا.'**
-  String get gamesNone;
 
   /// No description provided for @gamesGuardianTitle.
   ///
@@ -4997,7 +4487,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesHatchedStars.
   ///
   /// In ar, this message translates to:
-  /// **'من نجوم الألعاب · {found} في الألبوم'**
+  /// **'من نجوم الرحلة · {found} في الألبوم'**
   String gamesHatchedStars(int found);
 
   /// No description provided for @gamesHatchedMastery.
@@ -5036,12 +4526,6 @@ abstract class AppLocalizations {
   /// **'اتحفظ.'**
   String get gamesSaved;
 
-  /// No description provided for @gamesCardTitle.
-  ///
-  /// In ar, this message translates to:
-  /// **'الألعاب'**
-  String get gamesCardTitle;
-
   /// No description provided for @gamesCardKids.
   ///
   /// In ar, this message translates to:
@@ -5054,11 +4538,323 @@ abstract class AppLocalizations {
   /// **'اتمرن على دروسك بألعاب: {what}'**
   String gamesCardLead(String what);
 
-  /// No description provided for @gamesCardGuardian.
+  /// No description provided for @journeyTitle.
   ///
   /// In ar, this message translates to:
-  /// **'وقت اللعب، اللي اتراجع، والحدود'**
-  String get gamesCardGuardian;
+  /// **'رحلة {name}'**
+  String journeyTitle(String name);
+
+  /// No description provided for @journeyYours.
+  ///
+  /// In ar, this message translates to:
+  /// **'رحلتك يا {name}'**
+  String journeyYours(String name);
+
+  /// No description provided for @journeyLevel.
+  ///
+  /// In ar, this message translates to:
+  /// **'المستوى {n}'**
+  String journeyLevel(int n);
+
+  /// No description provided for @journeyLevelOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'المستوى {i} من {n}'**
+  String journeyLevelOf(int i, int n);
+
+  /// No description provided for @journeyLevels.
+  ///
+  /// In ar, this message translates to:
+  /// **'المستويات'**
+  String get journeyLevels;
+
+  /// No description provided for @journeyLessonsDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'{done} من {total} دروس'**
+  String journeyLessonsDone(int done, int total);
+
+  /// No description provided for @journeyAheadLocked.
+  ///
+  /// In ar, this message translates to:
+  /// **'بتتفتح لما تخلّص {title}'**
+  String journeyAheadLocked(String title);
+
+  /// No description provided for @journeyAheadFirst.
+  ///
+  /// In ar, this message translates to:
+  /// **'بتتفتح لما توصلها'**
+  String get journeyAheadFirst;
+
+  /// No description provided for @journeyAriaDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'{title}، خلّصتها'**
+  String journeyAriaDone(String title);
+
+  /// No description provided for @journeyAriaHere.
+  ///
+  /// In ar, this message translates to:
+  /// **'{title}، انت هنا'**
+  String journeyAriaHere(String title);
+
+  /// No description provided for @journeyAriaAhead.
+  ///
+  /// In ar, this message translates to:
+  /// **'{title}، لسه مقفولة'**
+  String journeyAriaAhead(String title);
+
+  /// No description provided for @journeyStationDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'خلّصته'**
+  String get journeyStationDone;
+
+  /// No description provided for @journeyStationReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'محتاج مراجعة'**
+  String get journeyStationReview;
+
+  /// No description provided for @journeyStationHere.
+  ///
+  /// In ar, this message translates to:
+  /// **'انت هنا'**
+  String get journeyStationHere;
+
+  /// No description provided for @journeyStationTodo.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه جاي'**
+  String get journeyStationTodo;
+
+  /// No description provided for @journeyStationTodoNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدرس ده لسه جاي. هتتدرّب عليه لما توصله.'**
+  String get journeyStationTodoNote;
+
+  /// No description provided for @journeyStationReviewNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'وقت تراجع الدرس ده: العب لعبة عليه.'**
+  String get journeyStationReviewNote;
+
+  /// No description provided for @journeyPractised.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتدرّبت عليه {rounds} · {p}% صح'**
+  String journeyPractised(String rounds, int p);
+
+  /// No description provided for @journeyPlayStation.
+  ///
+  /// In ar, this message translates to:
+  /// **'العب على الدرس ده'**
+  String get journeyPlayStation;
+
+  /// No description provided for @journeyNoGames.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش لعبة على تدريبات الدرس ده لسه.'**
+  String get journeyNoGames;
+
+  /// No description provided for @journeyRaceLast.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر مرة: {s}'**
+  String journeyRaceLast(String s);
+
+  /// No description provided for @journeyMissions.
+  ///
+  /// In ar, this message translates to:
+  /// **'مهماتك'**
+  String get journeyMissions;
+
+  /// No description provided for @journeyMissionsOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'مهمات {name}'**
+  String journeyMissionsOf(String name);
+
+  /// No description provided for @journeyMissionsOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{مهمة} =2{مهمتين} few{{n} مهمات} other{{n} مهمة}}'**
+  String journeyMissionsOn(int n);
+
+  /// No description provided for @journeyOpenMissions.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{مهمة مستنية} =2{مهمتين مستنيين} few{{n} مهمات مستنية} other{{n} مهمة مستنية}}'**
+  String journeyOpenMissions(int n);
+
+  /// No description provided for @journeyNoMissions.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش مهمات دلوقتي. استمتع بيومك!'**
+  String get journeyNoMissions;
+
+  /// No description provided for @journeyReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'راجع'**
+  String get journeyReview;
+
+  /// No description provided for @journeyLate.
+  ///
+  /// In ar, this message translates to:
+  /// **'متأخر'**
+  String get journeyLate;
+
+  /// No description provided for @journeyChestTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'صندوق الأسبوع'**
+  String get journeyChestTitle;
+
+  /// No description provided for @journeyChestProgress.
+  ///
+  /// In ar, this message translates to:
+  /// **'{done} من {total} مهمات الأسبوع'**
+  String journeyChestProgress(int done, int total);
+
+  /// No description provided for @journeyChestHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ {n} نجوم'**
+  String journeyChestHint(int n);
+
+  /// No description provided for @journeyChestMissed.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصندوق ده فاتك. فيه صندوق جديد الأسبوع ده!'**
+  String get journeyChestMissed;
+
+  /// No description provided for @journeyChestWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصندوق جاهز يتفتح من حساب {name}'**
+  String journeyChestWaiting(String name);
+
+  /// No description provided for @journeyChestGot.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{+نجمة في رحلتك!} =2{+نجمتين في رحلتك!} few{+{n} نجوم في رحلتك!} other{+{n} نجمة في رحلتك!}}'**
+  String journeyChestGot(int n);
+
+  /// No description provided for @journeyYourStars.
+  ///
+  /// In ar, this message translates to:
+  /// **'نجومك'**
+  String get journeyYourStars;
+
+  /// No description provided for @journeyStarsTo.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{باقيلك نجمة لـ {rank}} =2{باقيلك نجمتين لـ {rank}} few{باقيلك {n} نجوم لـ {rank}} other{باقيلك {n} نجمة لـ {rank}}}'**
+  String journeyStarsTo(int n, String rank);
+
+  /// No description provided for @journeyStarsCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مفيش نجوم لسه} =1{نجمة واحدة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}'**
+  String journeyStarsCount(int n);
+
+  /// No description provided for @journeyStarsOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'نجوم {name}'**
+  String journeyStarsOf(String name);
+
+  /// No description provided for @journeyLastLesson.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر حصة'**
+  String get journeyLastLesson;
+
+  /// No description provided for @journeyLastLessonOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر حصة لـ {name}'**
+  String journeyLastLessonOf(String name);
+
+  /// No description provided for @journeyLessonStars.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{ماخدتش نجوم في آخر حصة} =1{خدت نجمة في آخر حصة} =2{خدت نجمتين في آخر حصة!} few{خدت {n} نجوم في آخر حصة!} other{خدت {n} نجمة في آخر حصة!}}'**
+  String journeyLessonStars(int n);
+
+  /// No description provided for @journeyLessonCanBring.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{تجيبلك نجمة} =2{تجيبلك نجمتين} few{تجيبلك لحد {n} نجوم} other{تجيبلك لحد {n} نجمة}}'**
+  String journeyLessonCanBring(int n);
+
+  /// No description provided for @journeyEggReady.
+  ///
+  /// In ar, this message translates to:
+  /// **'بيضتك جاهزة!'**
+  String get journeyEggReady;
+
+  /// No description provided for @journeyEggHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'افقسها وشوف مين هيطلع'**
+  String get journeyEggHint;
+
+  /// No description provided for @journeyEggHatch.
+  ///
+  /// In ar, this message translates to:
+  /// **'افقسها'**
+  String get journeyEggHatch;
+
+  /// No description provided for @journeyEggNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش بيضة جاهزة دلوقتي. كمّل جمع نجوم!'**
+  String get journeyEggNone;
+
+  /// No description provided for @journeyNoCourses.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش كورسات شغالة لسه.'**
+  String get journeyNoCourses;
+
+  /// No description provided for @journeyNoCurriculum.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكورس ده لسه مالوش منهج. مهماته بتظهر هنا.'**
+  String get journeyNoCurriculum;
+
+  /// No description provided for @journeyCourses.
+  ///
+  /// In ar, this message translates to:
+  /// **'مواد الدروس والتقارير'**
+  String get journeyCourses;
+
+  /// No description provided for @homeworkPracticeTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'التدريب بالألعاب'**
+  String get homeworkPracticeTitle;
+
+  /// No description provided for @homeworkPracticeNotYet.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه ما اتلعبتش جولته.'**
+  String get homeworkPracticeNotYet;
+
+  /// No description provided for @homeworkByPlaying.
+  ///
+  /// In ar, this message translates to:
+  /// **'الواجب ده بيتسلّم لما تلعب جولته.'**
+  String get homeworkByPlaying;
+
+  /// No description provided for @homeworkNoGame.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش لعبة للواجب ده دلوقتي.'**
+  String get homeworkNoGame;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

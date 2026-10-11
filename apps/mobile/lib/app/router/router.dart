@@ -20,18 +20,13 @@ import '../../features/billing/presentation/pages/money_page.dart';
 import '../../features/classroom/presentation/pages/classroom_page.dart';
 import '../../features/dashboard/presentation/bloc/learner_cubit.dart';
 import '../../features/dashboard/presentation/pages/family_home_page.dart';
-import '../../features/dashboard/presentation/pages/kids_home_page.dart';
-import '../../features/dashboard/presentation/pages/middle_home_page.dart';
-import '../../features/dashboard/presentation/pages/badges_page.dart';
 import '../../features/challenges/data/challenges_repository.dart';
 import '../../features/challenges/domain/challenges.dart';
 import '../../features/challenges/presentation/pages/album_page.dart';
-import '../../features/challenges/presentation/pages/challenges_page.dart';
-import '../../features/challenges/presentation/widgets/cheers.dart';
-import '../../features/dashboard/presentation/pages/teen_home_page.dart';
 import '../../features/games/presentation/album_page.dart';
-import '../../features/games/presentation/games_page.dart';
 import '../../features/homework/presentation/pages/homework_page.dart';
+import '../../features/journey/presentation/journey_page.dart';
+import '../../features/profile/presentation/pages/student_more_page.dart';
 import '../../features/messages/presentation/conversation_page.dart';
 import '../../features/messages/presentation/messages_page.dart';
 import '../../features/notifications/presentation/pages/choices_page.dart';
@@ -86,12 +81,39 @@ GoRouter buildRouter(SessionCubit session) {
     routes: [page(':id', (s) => ConversationPage(conversationId: s.pathParameters['id']!))],
   );
 
-  // The games of a look and their album (an island to open, a creature just named).
-  GoRoute games(String path, String base) => page(
+  // A look's journey and the creatures' album under it (an island's creatures, a creature just named).
+  GoRoute journey(String path, {List<RouteBase> routes = const []}) => page(
     path,
-    (s) => GamesPage(base: base, island: s.uri.queryParameters['island']),
+    (_) => const JourneyPage(),
     routes: [
-      page('album', (s) => GamesAlbumPage(base: base, island: s.uri.queryParameters['island'], fresh: s.uri.queryParameters['new'])),
+      page('album', (s) => GamesAlbumPage(base: path, island: s.uri.queryParameters['island'], fresh: s.uri.queryParameters['new'])),
+      ...routes,
+    ],
+  );
+
+  // A student's conversations with their teachers as a tab of its own, and each one.
+  GoRoute messagesTab(String path) => page(
+    path,
+    (_) => MessagesPage(scope: MessagesScope.self, at: path),
+    routes: [page(':id', (s) => ConversationPage(conversationId: s.pathParameters['id']!))],
+  );
+
+  // The kids' sticker album (the week's chests), read from their board.
+  Widget stickers() =>
+      BlocProvider(create: (c) => LoadCubit<ChallengeBoard>(c.read<ChallengesRepository>().board)..load(), child: const AlbumPage());
+
+  // An address from before the journey: it leads to where that is now (an album to the album).
+  String to(GoRouterState s, String target, [String? album]) {
+    final query = s.uri.hasQuery ? '?${s.uri.query}' : '';
+    return album != null && s.uri.path.endsWith('/album') ? '$album$query' : target;
+  }
+
+  GoRoute moved(String path, String target, {String? album, List<String> under = const []}) => GoRoute(
+    path: path,
+    redirect: (_, s) => to(s, target, album),
+    routes: [
+      if (album != null) GoRoute(path: 'album', redirect: (_, s) => to(s, target, album)),
+      for (final p in under) GoRoute(path: p, redirect: (_, s) => to(s, target, album)),
     ],
   );
 
@@ -184,7 +206,7 @@ GoRouter buildRouter(SessionCubit session) {
               tabs: [
                 ShellTab(Icons.home_outlined, Icons.home_rounded, context.l10n.navHome),
                 ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, context.l10n.navLessons),
-                ShellTab(Icons.insights_outlined, Icons.insights_rounded, context.l10n.navProgress),
+                ShellTab(Icons.map_outlined, Icons.map_rounded, context.l10n.navJourneyTab),
                 ShellTab(Icons.account_balance_wallet_outlined, Icons.account_balance_wallet_rounded, context.l10n.navMoney),
                 ShellTab(Icons.person_outline_rounded, Icons.person_rounded, context.l10n.navMe),
               ],
@@ -195,10 +217,24 @@ GoRouter buildRouter(SessionCubit session) {
           branch(
             '/family/home',
             (_) => const FamilyHomePage(),
-            routes: [page('challenges', (_) => const ChallengesPage()), games('games', '/family/home/games')],
+            routes: [
+              GoRoute(path: 'challenges', redirect: (_, _) => '/family/journey'),
+              GoRoute(
+                path: 'games',
+                redirect: (_, s) => to(s, '/family/journey', '/family/journey/album'),
+                routes: [GoRoute(path: 'album', redirect: (_, s) => to(s, '/family/journey', '/family/journey/album'))],
+              ),
+            ],
           ),
           branch('/family/lessons', (_) => const LessonsPage()),
-          branch('/family/progress', (_) => const ProgressPage()),
+          StatefulShellBranch(
+            routes: [
+              journey(
+                '/family/journey',
+                routes: [page('courses', (_) => const ProgressPage()), page('homework', (_) => const HomeworkPage())],
+              ),
+            ],
+          ),
           branch('/family/money', (_) => const MoneyPage()),
           branch(
             '/family/me',
@@ -215,57 +251,75 @@ GoRouter buildRouter(SessionCubit session) {
         ],
       ),
 
-      // A child in the kids' look: big tabs, the islands, the missions with their chest.
+      // A child in the kids' look: big tabs, their journey (the islands of their course), talking to their teacher.
       _studentShell(
-        tabs: (l, ready) => [
+        tabs: (l) => [
           ShellTab(Icons.map_outlined, Icons.map_rounded, l.navJourney),
-          ShellTab(Icons.sailing_outlined, Icons.sailing_rounded, l.navIslands),
-          ShellTab(Icons.redeem_outlined, Icons.redeem_rounded, l.navMissions, count: ready),
           ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navMyLessons),
-          ShellTab(Icons.mic_none_rounded, Icons.mic_rounded, l.navMyHomework),
+          ShellTab(Icons.forum_outlined, Icons.forum_rounded, l.messagesKidsTitle),
+          ShellTab(Icons.more_horiz_rounded, Icons.more_horiz_rounded, l.navMore),
         ],
         branches: [
-          branch('/kids/journey', (_) => const KidsHomePage()),
-          StatefulShellBranch(routes: [games('/kids/islands', '/kids/islands')]),
-          branch('/kids/missions', (_) => const ChallengesPage(), routes: [page('album', (_) => const AlbumPage())]),
+          StatefulShellBranch(routes: [journey('/kids/journey')]),
           branch('/kids/lessons', (_) => const LessonsPage()),
-          branch('/kids/homework', (_) => const HomeworkPage()),
+          StatefulShellBranch(routes: [messagesTab('/kids/messages')]),
+          branch(
+            '/kids/more',
+            (_) => const StudentMorePage(),
+            routes: [page('homework', (_) => const HomeworkPage()), page('stickers', (_) => stickers())],
+          ),
         ],
       ),
+      moved('/kids/islands', '/kids/journey', album: '/kids/journey/album'),
+      moved('/kids/missions', '/kids/journey', album: '/kids/more/stickers'),
+      moved('/kids/homework', '/kids/more/homework'),
 
       _studentShell(
-        tabs: (l, ready) => [
-          ShellTab(Icons.home_outlined, Icons.home_rounded, l.navHome),
-          ShellTab(Icons.videogame_asset_outlined, Icons.videogame_asset_rounded, l.navGames),
-          ShellTab(Icons.sports_esports_outlined, Icons.sports_esports_rounded, l.navQuests, count: ready),
+        tabs: (l) => [
+          ShellTab(Icons.map_outlined, Icons.map_rounded, l.navJourney),
           ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navMyLessons),
-          ShellTab(Icons.assignment_outlined, Icons.assignment_rounded, l.navMyHomework),
+          ShellTab(Icons.forum_outlined, Icons.forum_rounded, l.messagesTitle),
+          ShellTab(Icons.more_horiz_rounded, Icons.more_horiz_rounded, l.navMore),
         ],
         branches: [
-          branch('/middle/home', (_) => const MiddleHomePage()),
-          StatefulShellBranch(routes: [games('/middle/games', '/middle/games')]),
-          branch('/middle/quests', (_) => const ChallengesPage(), routes: [page('badges', (_) => const BadgesPage())]),
+          StatefulShellBranch(routes: [journey('/middle/journey')]),
           branch('/middle/lessons', (_) => const LessonsPage()),
-          branch('/middle/homework', (_) => const HomeworkPage()),
+          StatefulShellBranch(routes: [messagesTab('/middle/messages')]),
+          branch('/middle/more', (_) => const StudentMorePage(), routes: [page('homework', (_) => const HomeworkPage())]),
         ],
       ),
+      moved('/middle/home', '/middle/journey'),
+      moved('/middle/games', '/middle/journey', album: '/middle/journey/album'),
+      moved('/middle/quests', '/middle/journey', under: ['badges']),
+      moved('/middle/homework', '/middle/more/homework'),
 
       _studentShell(
-        tabs: (l, ready) => [
-          ShellTab(Icons.flag_outlined, Icons.flag_rounded, l.navPlan),
-          ShellTab(Icons.track_changes_outlined, Icons.track_changes_rounded, l.navGoals, count: ready),
-          ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navLessons),
+        tabs: (l) => [
+          ShellTab(Icons.map_outlined, Icons.map_rounded, l.navJourney),
+          ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navMyLessons),
           ShellTab(Icons.assignment_outlined, Icons.assignment_rounded, l.navHomework),
           ShellTab(Icons.article_outlined, Icons.article_rounded, l.navReports),
         ],
         branches: [
-          branch('/teen/plan', (_) => const TeenHomePage(), routes: [games('games', '/teen/plan/games')]),
-          branch('/teen/goals', (_) => const ChallengesPage()),
+          StatefulShellBranch(routes: [journey('/teen/journey')]),
           branch('/teen/lessons', (_) => const LessonsPage()),
           branch('/teen/homework', (_) => const HomeworkPage()),
           branch('/teen/reports', (_) => const ReportsPage()),
         ],
       ),
+      GoRoute(
+        path: '/teen/plan',
+        redirect: (_, s) => to(s, '/teen/journey', '/teen/journey/album'),
+        routes: [
+          GoRoute(
+            path: 'games',
+            redirect: (_, s) => to(s, '/teen/journey', '/teen/journey/album'),
+            routes: [GoRoute(path: 'album', redirect: (_, s) => to(s, '/teen/journey', '/teen/journey/album'))],
+          ),
+        ],
+      ),
+      moved('/teen/goals', '/teen/journey'),
+      moved('/family/progress', '/family/journey'),
 
       // Teachers.
       StatefulShellRoute(
@@ -307,23 +361,16 @@ GoRouter buildRouter(SessionCubit session) {
 Widget _branches(BuildContext context, StatefulNavigationShell shell, List<Widget> children) =>
     AnimatedBranches(index: shell.currentIndex, children: children);
 
-/// A student's own area: their challenges load with it, so the challenges
-/// tab shows the rewards waiting, and guardians' cheers pop up on any tab.
+/// A student's own area: they are its only learner.
 StatefulShellRoute _studentShell({
-  required List<ShellTab> Function(AppLocalizations l, int ready) tabs,
+  required List<ShellTab> Function(AppLocalizations l) tabs,
   required List<StatefulShellBranch> branches,
 }) => StatefulShellRoute(
   navigatorContainerBuilder: _branches,
-  builder: (context, state, shell) => MultiBlocProvider(
-    providers: [
-      BlocProvider(create: (c) => LearnerCubit(c.read(), LearnerScope.self)..load()),
-      BlocProvider(create: (c) => LoadCubit<ChallengeBoard>(c.read<ChallengesRepository>().board)..load()),
-    ],
-    child: CheersListener(
-      child: BlocBuilder<LoadCubit<ChallengeBoard>, LoadState<ChallengeBoard>>(
-        buildWhen: (a, b) => a.data?.ready != b.data?.ready,
-        builder: (context, board) => AppShell(shell: shell, tabs: tabs(context.l10n, board.data?.ready ?? 0)),
-      ),
+  builder: (context, state, shell) => BlocProvider(
+    create: (c) => LearnerCubit(c.read(), LearnerScope.self)..load(),
+    child: Builder(
+      builder: (context) => AppShell(shell: shell, tabs: tabs(context.l10n)),
     ),
   ),
   branches: branches,
