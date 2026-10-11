@@ -35,6 +35,7 @@ final class DesignerPrompt
           round.items   the learner's items (shapes below), already in the order to play
           round.stage   'kids' | 'middle' | 'teen' | 'classic' (the learner's look; adapt pace and style to it)
           round.locale  'ar' | 'en'   round.dir 'rtl' | 'ltr' (also set on <html> by the bridge)
+          item.dir      'rtl' | 'ltr' | 'auto': the way the item's own words read. Academies teach many subjects and languages (the Quran, Arabic, English, ...), so an item may read the other way from the screen: put each item's words in an element with dir set to item.dir, and never assume the items are Arabic or English.
         LMS.answer(item.id, correct)  Report the learner's result on an item (see the learning rules for when).
         LMS.finish()                  The round is over. Call it exactly once; the platform then shows the stars and rewards, so keep your own ending celebration under two seconds before calling it.
         LMS.muted                     true while sound is off (LMS.sfx and LMS.tone already respect it; check it if you make your own sounds).

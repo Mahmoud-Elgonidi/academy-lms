@@ -35,4 +35,8 @@ return [
         'title' => ':from is cheering you on!',
         'body' => ':from sent you :kind. Keep going!',
     ],
+    'lesson_stars' => [
+        'title' => ':stars from your :subject lesson',
+        'body' => ':how. Your stars are on your journey!',
+    ],
 ];

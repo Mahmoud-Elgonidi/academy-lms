@@ -18,6 +18,7 @@ use Modules\Learning\Contracts\Events\HomeworkSubmitted;
 use Modules\Learning\Contracts\Events\NodeMastered;
 use Modules\Learning\Contracts\Events\SessionReportOverdue;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
+use Modules\Learning\Contracts\JourneyGames;
 use Modules\Learning\Contracts\LearningApi;
 use Modules\Learning\Filament\LearningPlugin;
 use Modules\Learning\Filament\Pages\ReportsOversight;
@@ -32,6 +33,7 @@ use Modules\Learning\Listeners\SendLearningNotifications;
 use Modules\Learning\Live\HomeworkChanged;
 use Modules\Learning\Live\PracticeChanged;
 use Modules\Learning\Privacy\LearningData;
+use Modules\Learning\Queries\Journey\NoJourneyGames;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
@@ -44,6 +46,8 @@ final class LearningServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(LearningApi::class, LearningService::class);
+        // The journey without games until the Games module binds its own.
+        $this->app->bindIf(JourneyGames::class, NoJourneyGames::class);
     }
 
     public function boot(): void
@@ -79,6 +83,7 @@ final class LearningServiceProvider extends ServiceProvider
         Event::listen(HomeworkSubmitted::class, [SendLearningNotifications::class, 'homeworkSubmitted']);
         Event::listen(SessionReportOverdue::class, [SendLearningNotifications::class, 'reportOverdue']);
         Event::listen(CheerSent::class, [SendLearningNotifications::class, 'cheerSent']);
+        Event::listen(SessionFinalized::class, [SendLearningNotifications::class, 'lessonStars']);
         Event::listen(CurriculumAttached::class, RebuildProgressOnProgramChange::class);
 
         // Homework pages refresh when homework changes (the homework triggers raise "homework:{person}").

@@ -6,31 +6,35 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Modules\Games\Domain\Round;
 use Modules\Games\Models\CreatureFind;
-use Modules\Games\Models\GamePlay;
+use Modules\Learning\Contracts\LearningApi;
 use Modules\SharedKernel\Games\CatalogCreature;
 use Modules\SharedKernel\Games\GameCatalog;
 
 /**
  * A learner hatches the next creature (docs/architecture/02, section 18):
- * every Round::STARS_PER_EGG stars won in the games hatch one on the island
- * they were won on (then the next island with one left), and every lesson
+ * every Round::STARS_PER_EGG stars of their journey (lessons, rounds,
+ * homework, mastered lessons, chests: LearningApi::stars) hatch one on the
+ * island they are on (then the next island with one left), and every lesson
  * the teacher marks mastered hatches the next in the world's order. Each
  * creature once; a learner who has them all hatches nothing more.
  */
 final class HatchCreature
 {
-    public function __construct(private readonly GameCatalog $catalog) {}
+    public function __construct(
+        private readonly GameCatalog $catalog,
+        private readonly LearningApi $learning,
+    ) {}
 
-    /** After a round: an egg for each STARS_PER_EGG stars not hatched yet. */
-    public function byStars(GamePlay $play, string $islandKey): ?CatalogCreature
+    /** An egg for each STARS_PER_EGG stars of the journey not hatched yet (after a round, or when the learner taps a full egg). */
+    public function byStars(string $studentId, ?string $islandKey, ?string $playId = null): ?CatalogCreature
     {
-        $stars = (int) GamePlay::query()->where('student_id', $play->student_id)->whereNotNull('finished_at')->sum('stars');
-        $hatched = CreatureFind::query()->where('student_id', $play->student_id)->where('source', 'stars')->count();
+        $stars = $this->learning->stars($studentId);
+        $hatched = CreatureFind::query()->where('student_id', $studentId)->where('source', 'stars')->count();
         if (intdiv($stars, Round::STARS_PER_EGG) <= $hatched) {
             return null;
         }
 
-        return $this->hatch($play->student_id, $islandKey, ['source' => 'stars', 'play_id' => $play->id]);
+        return $this->hatch($studentId, $islandKey, ['source' => 'stars', 'play_id' => $playId]);
     }
 
     /** A lesson mastered: once per lesson. */

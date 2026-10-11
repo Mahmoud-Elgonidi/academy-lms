@@ -28,6 +28,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?int $correct
  * @property int $total
  * @property ?int $stars
+ * @property ?string $island_key the island a journey station's round was played on (its level's look)
  */
 final class GamePlay extends Model
 {

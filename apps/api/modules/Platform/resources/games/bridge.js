@@ -3,7 +3,7 @@
  * in the page). A game talks to the screen that opened it only through
  * window.LMS:
  *
- *   LMS.onStart(function (round) { ... })   round.items, round.stage, round.locale, round.dir, round.title
+ *   LMS.onStart(function (round) { ... })   round.items (each with dir: the way its words read), round.stage, round.locale, round.dir, round.title
  *   LMS.answer(item.id, true|false)        every try at an item
  *   LMS.finish()                            the round is over (the screen shows the stars)
  *   LMS.muted                               true while sound is off
@@ -50,6 +50,11 @@
       muted = !!round.muted;
       document.documentElement.lang = round.locale || 'ar';
       document.documentElement.dir = round.dir || 'rtl';
+      // The practice words may be in another language than the screen (an English lesson in an
+      // Arabic app): every line of text reads the way its own words do (item.dir says it too).
+      var bidi = document.createElement('style');
+      bidi.textContent = 'body, body * { unicode-bidi: plaintext; }';
+      (document.head || document.documentElement).appendChild(bidi);
       startHandlers.forEach(function (handler) { run(handler); });
     } else if (message.type === 'mute') {
       muted = !!message.muted;

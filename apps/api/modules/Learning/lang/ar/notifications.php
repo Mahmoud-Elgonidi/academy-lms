@@ -35,4 +35,8 @@ return [
         'title' => ':from بيشجّعك!',
         'body' => ':from بعتلك :kind. كمّل كده!',
     ],
+    'lesson_stars' => [
+        'title' => ':stars من حصة :subject',
+        'body' => ':how. نجومك اتضافت لرحلتك!',
+    ],
 ];

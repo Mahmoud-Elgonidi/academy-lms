@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Learning\Http\V1\Controllers\ChallengesController;
+use Modules\Learning\Http\V1\Controllers\JourneyController;
 use Modules\Learning\Http\V1\Controllers\LearnerController;
 use Modules\Learning\Http\V1\Controllers\TeacherReportsController;
 
@@ -19,6 +20,9 @@ Route::middleware(['auth:sanctum', 'can:reports.write'])->prefix('teacher')->gro
 Route::middleware('auth:sanctum')->prefix('learning')->group(function () {
     Route::get('students', [LearnerController::class, 'students'])->name('learning.students');
     Route::get('journey', [LearnerController::class, 'journey'])->name('learning.journey');
+    // The journey: the curriculum as islands and stations, the missions, the stars and the week's chest.
+    Route::get('journey/map', [JourneyController::class, 'map'])->name('learning.journey.map');
+    Route::post('journey/chest', [JourneyController::class, 'chest'])->middleware('idempotent')->name('learning.journey.chest');
     Route::get('enrollments/{enrollment}/roadmap', [LearnerController::class, 'roadmap'])->name('learning.roadmap');
     Route::get('enrollments/{enrollment}/reports', [LearnerController::class, 'reports'])->name('learning.reports');
     Route::get('homework', [LearnerController::class, 'homework'])->name('learning.homework');

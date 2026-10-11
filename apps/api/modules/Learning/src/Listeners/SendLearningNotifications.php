@@ -16,10 +16,13 @@ use Modules\Learning\Contracts\Events\HomeworkSubmitted;
 use Modules\Learning\Contracts\Events\NodeMastered;
 use Modules\Learning\Contracts\Events\SessionReportOverdue;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
+use Modules\Learning\Domain\Journey\LessonStars;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\RoadmapQuery;
 use Modules\People\Contracts\PeopleApi;
+use Modules\Scheduling\Contracts\AttendanceApi;
+use Modules\Scheduling\Contracts\Events\SessionFinalized;
 
 /**
  * What the family and the teacher hear about reports, homework and progress
@@ -45,6 +48,7 @@ final class SendLearningNotifications
             ['homework_submitted', 'staff', $teacher, ['push'], ['student' => 'زياد', 'title' => 'صرّف الفعل كتب']],
             ['report_overdue', 'staff', $teacher, ['push', 'whatsapp'], ['student' => 'زياد', 'when' => 'الأحد 4 أكتوبر · 18:00']],
             ['cheer', 'learning', 'learning::notifications.audience.student', ['push'], ['from' => 'ماما', 'kind' => 'تصفيقة']],
+            ['lesson_stars', 'learning', 'learning::notifications.audience.student', ['push'], ['stars' => '⭐⭐⭐⭐', 'how' => 'في الميعاد · فضلت لآخر الحصة', 'subject' => 'القرآن']],
         ] as [$name, $category, $audience, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
                 key: "learning.{$name}", category: $category,
@@ -61,6 +65,37 @@ final class SendLearningNotifications
             'from' => $this->name($event->fromId),
             'kind' => new Translatable('learning::challenges.cheers.'.$event->kind),
         ], ['screen' => 'challenges'], "cheer:{$event->cheerId}"));
+    }
+
+    /**
+     * The student hears the stars a lesson brought on their journey: on time or how late, and staying to the end
+     * (Domain\Journey\LessonStars). Once per lesson.
+     */
+    public function lessonStars(SessionFinalized $event): void
+    {
+        if ($event->outcome !== 'completed') {
+            return;
+        }
+        $card = app(AttendanceApi::class)->lesson($event->sessionId);
+        if ($card?->studentId === null) {
+            return;
+        }
+        $lesson = collect(app(AttendanceApi::class)->lessonsOfStudent($card->studentId, $card->startsAt, $card->startsAt->addSecond()))->firstWhere('id', $card->id);
+        $stars = $lesson === null ? null : LessonStars::for($lesson->status, $lesson->startsAt, $lesson->endsAt, $lesson->joinedAt, $lesson->lastLeftAt);
+        if ($stars === null || $stars['stars'] === 0) {
+            return;
+        }
+        $how = match (true) {
+            $stars['late_min'] === null => 'marked',
+            $stars['on_time'] => $stars['stayed'] ? 'on_time_stayed' : 'on_time',
+            default => $stars['stayed'] ? 'late_stayed' : 'late',
+        };
+
+        $this->notifications->send(new Message('learning.lesson_stars', [$card->studentId], [
+            'stars' => str_repeat('⭐', $stars['stars']),
+            'how' => new Translatable('learning::map.notice.'.$how, ['n' => (int) $stars['late_min']]),
+            'subject' => new Localized($card->subjectAr, $card->subjectEn),
+        ], ['screen' => 'journey'], "lesson_stars:{$card->id}"));
     }
 
     public function reportSubmitted(SessionReportSubmitted $event): void

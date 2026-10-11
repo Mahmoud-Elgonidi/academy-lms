@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Games\Actions\ChooseBuddy;
 use Modules\Games\Actions\FinishPlay;
+use Modules\Games\Actions\HatchCreature;
 use Modules\Games\Actions\NameCreature;
 use Modules\Games\Actions\SaveGameLimit;
 use Modules\Games\Actions\StartPlay;
@@ -18,6 +19,7 @@ use Modules\Games\Models\GameSettings;
 use Modules\Games\Queries\GamesWorld;
 use Modules\Games\Queries\GuardianGlance;
 use Modules\Games\Support\HatchNames;
+use Modules\Learning\Contracts\LearningApi;
 use Modules\People\Contracts\FamilyView;
 use Modules\SharedKernel\Games\CatalogCreature;
 use Modules\SharedKernel\Games\GameCatalog;
@@ -40,6 +42,7 @@ final class GamesController
         private readonly FamilyView $family,
         private readonly LocalTimePresenter $time,
         private readonly GameCatalog $catalog,
+        private readonly LearningApi $learning,
     ) {}
 
     /**
@@ -49,6 +52,9 @@ final class GamesController
      * of the kinds it plays), the quests (what to practise now: homework, the last lesson, reviews, the current lesson;
      * each with the game for it), stars and the next egg, today's minutes, and the last rounds. For the student
      * themself (learner_id left out) or a guardian's child; a guardian also gets the limits they can set.
+     * Kept for earlier app versions: the games are now on the stations of the journey (learning/journey/map).
+     *
+     * @deprecated
      */
     public function world(Request $request, GamesWorld $world, GuardianGlance $glance): JsonResponse
     {
@@ -152,8 +158,8 @@ final class GamesController
     /**
      * Start a round.
      *
-     * Of a game (id or key) for a quest (its key), for a homework's practice (homework_id), or with all of the learner's
-     * practice. Answers the page to open (page_url, sandboxed; never cached personal data) and the round to hand it
+     * Of a game (id or key) on a lesson of the learner's journey (station), for a homework's practice (homework_id), for
+     * a quest (its key), or with all of the learner's practice. Answers the page to open (page_url, sandboxed; never cached personal data) and the round to hand it
      * through the bridge: {lms: 1, type: "start", round}. 403 games-off / games-paused / games-night / games-limit, 422
      * games-not-enough-items when the learner has too few items for that game.
      */
@@ -164,18 +170,20 @@ final class GamesController
             'game' => ['required', 'string', 'max:64'],
             'quest' => ['nullable', 'string', 'max:120'],
             'homework_id' => ['nullable', 'uuid'],
+            /** A lesson on the learner's journey they may practise now (a station): the round takes its items. */
+            'station' => ['nullable', 'uuid'],
         ]);
         [$me, $learner] = $this->learner($request);
-        $r = $start->handle($learner, $me, $data['game'], $data['quest'] ?? null, $data['homework_id'] ?? null);
+        $r = $start->handle($learner, $me, $data['game'], $data['quest'] ?? null, $data['homework_id'] ?? null, $data['station'] ?? null);
         $ar = app()->getLocale() === 'ar';
 
         return response()->json(['data' => [
             'play_id' => $r['play']->id,
             'page_url' => route('games.play', $r['game']->versionId),
-            'game' => ['id' => $r['game']->id, 'key' => $r['game']->key, 'title' => $r['game']->title(), 'how_to_play' => $r['game']->howToPlay(), 'island' => $r['game']->islandKey],
+            'game' => ['id' => $r['game']->id, 'key' => $r['game']->key, 'title' => $r['game']->title(), 'how_to_play' => $r['game']->howToPlay(), 'island' => $r['play']->island_key ?? $r['game']->islandKey],
             'focus' => $r['focus'] === null ? null : ['reason' => $r['focus']->reason, 'title' => $r['focus']->title],
             /** What the page is handed: {lms: 1, type: "start", round: this}. */
-            'round' => ['items' => $r['round'], 'stage' => $r['stage'], 'locale' => $ar ? 'ar' : 'en', 'dir' => $ar ? 'rtl' : 'ltr', 'title' => $r['game']->title()],
+            'round' => ['items' => array_values($r['round']), 'stage' => $r['stage'], 'locale' => $ar ? 'ar' : 'en', 'dir' => $ar ? 'rtl' : 'ltr', 'title' => $r['game']->title()],
             'max_seconds' => Round::MAX_SECONDS,
         ]], 201);
     }
@@ -197,7 +205,7 @@ final class GamesController
         }
         $r = $finish->handle($row, $me, (array) $request->input('answers', []));
         $p = $r['play'];
-        $stars = (int) GamePlay::query()->where('student_id', $p->student_id)->whereNotNull('finished_at')->sum('stars');
+        $stars = $this->learning->stars($p->student_id);
 
         return response()->json(['data' => [
             'stars' => (int) $p->stars,
@@ -211,9 +219,38 @@ final class GamesController
                 'found' => CreatureFind::query()->where('student_id', $p->student_id)->count(),
                 'total' => array_sum(array_map(fn ($i) => count($i->creatures), $this->catalog->islands())),
             ],
+            /** Stars of the journey toward the next egg. */
             'egg' => ['have' => $stars % Round::STARS_PER_EGG, 'need' => Round::STARS_PER_EGG],
             'homework' => $r['homework'] === null ? null : ['title' => $r['homework'], 'handed_in' => $r['handed_in']],
         ]]);
+    }
+
+    /**
+     * Hatch an egg.
+     *
+     * When the journey's stars filled an egg (games.egg.ready on learning/journey/map), the learner taps it open: the
+     * next creature hatches on the island they are on (island: the key of the island their level is drawn as). Answers
+     * the creature with the three names the child chooses from, or null when no egg was ready. Send an Idempotency-Key.
+     */
+    public function hatch(Request $request, HatchCreature $hatch): JsonResponse
+    {
+        $data = $request->validate([
+            'learner_id' => ['nullable', 'string', 'max:64'],
+            'island' => ['nullable', 'string', 'max:31'],
+        ]);
+        [, $learner] = $this->learner($request);
+        $creature = $hatch->byStars($learner, $data['island'] ?? null);
+        $stars = $this->learning->stars($learner);
+
+        return response()->json(['data' => [
+            /** The creature that hatched, with the three names the child chooses from (null: no egg was ready). */
+            'creature' => $creature === null ? null : $this->creature($creature) + [
+                'names' => HatchNames::for($creature),
+                'found' => CreatureFind::query()->where('student_id', $learner)->count(),
+                'total' => array_sum(array_map(fn ($i) => count($i->creatures), $this->catalog->islands())),
+            ],
+            'egg' => ['have' => $stars % Round::STARS_PER_EGG, 'need' => Round::STARS_PER_EGG],
+        ]], 201);
     }
 
     /**

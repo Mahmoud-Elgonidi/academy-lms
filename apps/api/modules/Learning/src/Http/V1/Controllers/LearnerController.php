@@ -81,7 +81,10 @@ final class LearnerController
      *
      * What the student's own home shows in each stage's look: stars (lessons mastered), points and rank, the lesson
      * streak, badges, and per course its levels (worlds) with each lesson's state, where they are, what is next and
-     * the expected finish. learner_id defaults to the student themself, or a guardian's first child.
+     * the expected finish. learner_id defaults to the student themself, or a guardian's first child. Kept for
+     * earlier app versions: the journey is now learning/journey/map.
+     *
+     * @deprecated
      */
     public function journey(Request $request, JourneyQuery $journey, LocalTimePresenter $time, FamilyView $family): JsonResponse
     {

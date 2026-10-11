@@ -11,6 +11,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  *
  * @property int $report_due_hours after the lesson ends
  * @property int $homework_days default time to hand homework in
+ * @property string $journey_style playful | calm | plain (how students see their journey)
  */
 final class LearningSettings extends Model
 {
@@ -22,9 +23,9 @@ final class LearningSettings extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['report_due_hours', 'homework_days'];
+    protected $fillable = ['report_due_hours', 'homework_days', 'journey_style'];
 
-    protected $attributes = ['report_due_hours' => 12, 'homework_days' => 3];
+    protected $attributes = ['report_due_hours' => 12, 'homework_days' => 3, 'journey_style' => 'playful'];
 
     protected function casts(): array
     {

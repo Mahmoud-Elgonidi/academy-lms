@@ -5,6 +5,7 @@ namespace Modules\Learning\Contracts;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\ValidationException;
 use Modules\Learning\Contracts\DTOs\HomeworkLine;
+use Modules\Learning\Contracts\DTOs\JourneyStation;
 use Modules\Learning\Contracts\DTOs\PlanLine;
 use Modules\Learning\Contracts\DTOs\PracticeFocus;
 use Modules\Learning\Contracts\DTOs\PracticeRecorded;
@@ -30,6 +31,17 @@ interface LearningApi
      * @return list<PracticeFocus>
      */
     public function practiceFocus(string $studentId, ?CarbonImmutable $now = null): array;
+
+    /**
+     * The lessons on the learner's journey they may practise now (what they learnt, where they are, their last
+     * report's lessons and homework asking for practice), each with the island its level is drawn as.
+     *
+     * @return list<JourneyStation>
+     */
+    public function journeyStations(string $studentId): array;
+
+    /** The learner's stars on their journey: lessons, practice, homework, lessons mastered and the week's chests. */
+    public function stars(string $studentId): int;
 
     /** A practice round finished in a game: kept, counted per lesson, and handed in for homework that asks for it. */
     public function recordPractice(PracticeRound $round): PracticeRecorded;

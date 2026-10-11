@@ -82,7 +82,7 @@ final class FinishPlay
                 playedAt: $now,
                 byNode: array_filter($byNode, fn (array $c) => $c['answered'] > 0),
             ));
-            $creature = $this->hatch->byStars($play, $game?->islandKey ?? '');
+            $creature = $this->hatch->byStars($play->student_id, $play->island_key ?? $game?->islandKey, $play->id);
 
             return ['play' => $play, 'creature' => $creature, 'handed_in' => $recorded->handedIn, 'homework' => $recorded->homeworkTitle];
         });

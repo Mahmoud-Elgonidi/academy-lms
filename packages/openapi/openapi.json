@@ -3237,8 +3237,8 @@
         "/v1/games/world": {
             "get": {
                 "operationId": "games.world",
-                "description": "The islands in order with their creatures (found or not) and games (playable when the learner has practice items\nof the kinds it plays), the quests (what to practise now: homework, the last lesson, reviews, the current lesson;\neach with the game for it), stars and the next egg, today's minutes, and the last rounds. For the student\nthemself (learner_id left out) or a guardian's child; a guardian also gets the limits they can set.",
                 "summary": "A learner's games world",
+                "deprecated": true,
                 "tags": [
                     "Games"
                 ],
@@ -3309,7 +3309,7 @@
                                                 },
                                                 "egg": {
                                                     "type": "object",
-                                                    "description": "Stars toward the next egg on an island.",
+                                                    "description": "Stars toward the next egg on an island.\nEggs fill from all of the journey's stars (lessons, homework and chests too).",
                                                     "properties": {
                                                         "have": {
                                                             "type": "integer"
@@ -3604,7 +3604,7 @@
         "/v1/games/plays": {
             "post": {
                 "operationId": "games.plays.start",
-                "description": "Of a game (id or key) for a quest (its key), for a homework's practice (homework_id), or with all of the learner's\npractice. Answers the page to open (page_url, sandboxed; never cached personal data) and the round to hand it\nthrough the bridge: {lms: 1, type: \"start\", round}. 403 games-off / games-paused / games-night / games-limit, 422\ngames-not-enough-items when the learner has too few items for that game.",
+                "description": "Of a game (id or key) on a lesson of the learner's journey (station), for a homework's practice (homework_id), for\na quest (its key), or with all of the learner's practice. Answers the page to open (page_url, sandboxed; never cached personal data) and the round to hand it\nthrough the bridge: {lms: 1, type: \"start\", round}. 403 games-off / games-paused / games-night / games-limit, 422\ngames-not-enough-items when the learner has too few items for that game.",
                 "summary": "Start a round",
                 "tags": [
                     "Games"
@@ -3669,6 +3669,14 @@
                                             "null"
                                         ],
                                         "format": "uuid"
+                                    },
+                                    "station": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "uuid",
+                                        "description": "A lesson on the learner's journey they may practise now (a station): the round takes its items."
                                     }
                                 },
                                 "required": [
@@ -3918,6 +3926,7 @@
                                                 },
                                                 "egg": {
                                                     "type": "object",
+                                                    "description": "Stars of the journey toward the next egg.",
                                                     "properties": {
                                                         "have": {
                                                             "type": "integer"
@@ -3959,6 +3968,135 @@
                                                 "creature",
                                                 "egg",
                                                 "homework"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/games/hatch": {
+            "post": {
+                "operationId": "games.hatch",
+                "description": "When the journey's stars filled an egg (games.egg.ready on learning/journey/map), the learner taps it open: the\nnext creature hatches on the island they are on (island: the key of the island their level is drawn as). Answers\nthe creature with the three names the child chooses from, or null when no egg was ready. Send an Idempotency-Key.",
+                "summary": "Hatch an egg",
+                "tags": [
+                    "Games"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "learner_id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 64
+                                    },
+                                    "island": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 31
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "creature": {
+                                                    "type": [
+                                                        "array",
+                                                        "null"
+                                                    ],
+                                                    "description": "The creature that hatched, with the three names the child chooses from (null: no egg was ready).",
+                                                    "items": {}
+                                                },
+                                                "egg": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "have": {
+                                                            "type": "integer"
+                                                        },
+                                                        "need": {
+                                                            "type": "integer",
+                                                            "const": 12
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "have",
+                                                        "need"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "creature",
+                                                "egg"
                                             ]
                                         }
                                     },
@@ -8386,8 +8524,8 @@
         "/v1/learning/journey": {
             "get": {
                 "operationId": "learning.journey",
-                "description": "What the student's own home shows in each stage's look: stars (lessons mastered), points and rank, the lesson\nstreak, badges, and per course its levels (worlds) with each lesson's state, where they are, what is next and\nthe expected finish. learner_id defaults to the student themself, or a guardian's first child.",
                 "summary": "A learner's journey",
+                "deprecated": true,
                 "tags": [
                     "Learning"
                 ],
@@ -8499,6 +8637,567 @@
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/learning/journey/map": {
+            "get": {
+                "operationId": "learning.journey.map",
+                "description": "For each course: its curriculum's levels as islands (done, here or ahead, each drawn as one of the world's\nislands) and its lessons as stations on them (done, review, here or todo; playable when the learner may\npractise it now), with the games that can play the lesson's own practice items. The missions to do now: the\nnext lesson (with when the classroom opens), the teacher's homework and lessons due for review, each on its\nstation. The stars (lessons by lateness and staying to the end, practice, homework, mastered lessons, chests),\nthe rank, the egg and the week's chest. style: playful, calm (no islands) or plain (no stars).",
+                "summary": "A learner's journey",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "learner_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 64
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "learner_id": {
+                                                    "type": "string"
+                                                },
+                                                "stage": {
+                                                    "type": "string"
+                                                },
+                                                "style": {
+                                                    "type": "string",
+                                                    "description": "playful (each stage's look, islands and games), calm (levels and missions) or plain (no stars)"
+                                                },
+                                                "viewer": {
+                                                    "type": "string",
+                                                    "description": "self: the student; guardian: a guardian looking at their child",
+                                                    "enum": [
+                                                        "self",
+                                                        "guardian"
+                                                    ]
+                                                },
+                                                "stars": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "total": {
+                                                            "type": "integer"
+                                                        },
+                                                        "rank": {
+                                                            "type": "array",
+                                                            "items": {}
+                                                        },
+                                                        "from": {
+                                                            "type": "array",
+                                                            "description": "Where the stars came from: lessons (by lateness, and staying to the end), practice rounds, homework, lessons mastered, chests.",
+                                                            "items": {}
+                                                        },
+                                                        "per_egg": {
+                                                            "type": "integer",
+                                                            "const": 12
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "total",
+                                                        "rank",
+                                                        "from",
+                                                        "per_egg"
+                                                    ]
+                                                },
+                                                "streak": {
+                                                    "type": "integer",
+                                                    "description": "Lessons attended in a row."
+                                                },
+                                                "last_lesson": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The latest lesson of the last week and the stars it brought.",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "starts_at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "null"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "stars": {
+                                                            "type": "string"
+                                                        },
+                                                        "late_min": {
+                                                            "type": "string"
+                                                        },
+                                                        "on_time": {
+                                                            "type": "string"
+                                                        },
+                                                        "stayed": {
+                                                            "type": "string"
+                                                        },
+                                                        "labels": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "starts_at",
+                                                        "stars",
+                                                        "late_min",
+                                                        "on_time",
+                                                        "stayed",
+                                                        "labels"
+                                                    ]
+                                                },
+                                                "courses": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "missions": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "chest": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "period": {
+                                                            "type": "string"
+                                                        },
+                                                        "target": {
+                                                            "type": "string"
+                                                        },
+                                                        "progress": {
+                                                            "type": "string"
+                                                        },
+                                                        "state": {
+                                                            "type": "string",
+                                                            "description": "active, missed, done (ready to open, by the student) or opened"
+                                                        },
+                                                        "stars": {
+                                                            "type": "string"
+                                                        },
+                                                        "sticker": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "key": {
+                                                                    "type": "string"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "key",
+                                                                "name"
+                                                            ]
+                                                        },
+                                                        "ends_at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "null"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "can_open": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "period",
+                                                        "target",
+                                                        "progress",
+                                                        "state",
+                                                        "stars",
+                                                        "sticker",
+                                                        "ends_at",
+                                                        "can_open"
+                                                    ]
+                                                },
+                                                "games": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "allowance": {
+                                                            "type": "array",
+                                                            "description": "Whether the learner may start a round now, and why not: off (the academy), paused (a guardian), night (a guardian's night lock), limit (today's minutes).",
+                                                            "items": {}
+                                                        },
+                                                        "egg": {
+                                                            "type": "object",
+                                                            "description": "Stars toward the next egg; ready: an egg can hatch now.",
+                                                            "properties": {
+                                                                "have": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "need": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "ready": {
+                                                                    "type": "boolean"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "have",
+                                                                "need",
+                                                                "ready"
+                                                            ]
+                                                        },
+                                                        "buddy": {
+                                                            "type": [
+                                                                "array",
+                                                                "null"
+                                                            ],
+                                                            "items": {}
+                                                        },
+                                                        "creatures_found": {
+                                                            "type": "integer"
+                                                        },
+                                                        "creatures_total": {
+                                                            "type": "integer"
+                                                        },
+                                                        "recent": {
+                                                            "type": "array",
+                                                            "items": {}
+                                                        },
+                                                        "limits": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "A guardian's limits for this child (null for the student).",
+                                                            "additionalProperties": {}
+                                                        },
+                                                        "glance": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "A guardian's look at the child's week (null for the student).",
+                                                            "additionalProperties": {}
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "allowance",
+                                                        "egg",
+                                                        "buddy",
+                                                        "creatures_found",
+                                                        "creatures_total",
+                                                        "recent",
+                                                        "limits",
+                                                        "glance"
+                                                    ]
+                                                },
+                                                "cheers": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string"
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "kind",
+                                                            "at"
+                                                        ]
+                                                    }
+                                                },
+                                                "cheers_left": {
+                                                    "description": "For a guardian: cheers they may still send this learner today."
+                                                }
+                                            },
+                                            "required": [
+                                                "learner_id",
+                                                "stage",
+                                                "style",
+                                                "viewer",
+                                                "stars",
+                                                "streak",
+                                                "last_lesson",
+                                                "courses",
+                                                "missions",
+                                                "chest",
+                                                "games",
+                                                "cheers",
+                                                "cheers_left"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/learning/journey/chest": {
+            "post": {
+                "operationId": "learning.journey.chest",
+                "description": "The student opens it once every lesson of the week was attended and every homework due in it handed in (period:\nthe week's Saturday, as the journey lists it). Its stars add to theirs; the kids' chest brings the next sticker.\nOnce a week. Send an Idempotency-Key.",
+                "summary": "Open the week's chest",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "period": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "required": [
+                                    "period"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "stars": {
+                                                    "type": "integer",
+                                                    "const": 10
+                                                },
+                                                "sticker": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "total_before": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                },
+                                                "ranked_up": {
+                                                    "type": "boolean"
+                                                },
+                                                "rank": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "required": [
+                                                "stars",
+                                                "sticker",
+                                                "total_before",
+                                                "total",
+                                                "ranked_up",
+                                                "rank"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AccessDeniedHttpException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -10086,8 +10785,8 @@
         "/v1/learning/challenges": {
             "get": {
                 "operationId": "learning.challenges",
-                "description": "For the student themself (learner_id left out) or a guardian's child. Each challenge has its target, progress and\nstate: active, missed, done (ready to collect, by the student) or claimed. Rewards finished last week or last month\ncome first while they can still be collected. cheers: the guardians' cheers the student has not seen yet.",
                 "summary": "A learner's challenges",
+                "deprecated": true,
                 "tags": [
                     "Learning"
                 ],
@@ -10331,8 +11030,8 @@
         "/v1/learning/challenges/claim": {
             "post": {
                 "operationId": "learning.challenges.claim",
-                "description": "The student collects a challenge they finished (challenge and period as listed). Its points add to theirs; the\nkids' chest also brings the next sticker. Once only. Send an Idempotency-Key.",
                 "summary": "Collect a reward",
+                "deprecated": true,
                 "tags": [
                     "Learning"
                 ],

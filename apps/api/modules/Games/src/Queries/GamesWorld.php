@@ -7,6 +7,7 @@ use Modules\Games\Domain\Round;
 use Modules\Games\Models\CreatureFind;
 use Modules\Games\Models\GamePlay;
 use Modules\Learning\Contracts\DTOs\PracticeFocus;
+use Modules\Learning\Contracts\LearningApi;
 use Modules\People\Contracts\PeopleApi;
 use Modules\SharedKernel\Games\CatalogCreature;
 use Modules\SharedKernel\Games\CatalogGame;
@@ -28,6 +29,7 @@ final class GamesWorld
         private readonly PracticePool $pool,
         private readonly PlayAllowance $allowance,
         private readonly PeopleApi $people,
+        private readonly LearningApi $learning,
     ) {}
 
     /** @return array<string, mixed> */
@@ -52,6 +54,7 @@ final class GamesWorld
         /** @var Collection<string, CreatureFind> $finds */
         $finds = CreatureFind::query()->where('student_id', $studentId)->get()->keyBy('creature_key');
         $stars = (int) (clone $finished)->sum('stars');
+        $journeyStars = $this->learning->stars($studentId);
         $byGame = (clone $finished)->selectRaw('game_id, count(*) as plays, max(stars) as best')->groupBy('game_id')->get()->keyBy('game_id');
         $titles = [];
         foreach ($this->catalog->games() as $g) {
@@ -63,7 +66,8 @@ final class GamesWorld
             'stage' => $stage,
             'allowance' => $this->allowance->for($studentId),
             'stars' => $stars,
-            'egg' => ['have' => $stars % Round::STARS_PER_EGG, 'need' => Round::STARS_PER_EGG],
+            // Eggs fill from all of the journey's stars (lessons, homework and chests too).
+            'egg' => ['have' => $journeyStars % Round::STARS_PER_EGG, 'need' => Round::STARS_PER_EGG],
             'found' => $finds->count(),
             'total' => array_sum(array_map(fn (CatalogIsland $i) => count($i->creatures), $this->catalog->islands())),
             'buddy' => $buddy === null ? null : $this->creatureOf($buddy->creature_key, $finds),

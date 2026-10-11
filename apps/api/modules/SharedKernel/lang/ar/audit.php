@@ -117,6 +117,7 @@ return [
         ],
         'games' => [
             'settings_saved' => 'تعديل ألعاب الأكاديمية (:state، :minutes دقيقة في اليوم)',
+            'journey_style_saved' => 'غيّر شكل رحلة الطلاب: :style',
         ],
         'platform' => [
             'signed_in' => 'دخول على لوحة المنصة',
@@ -130,6 +131,7 @@ return [
         ],
     ],
     'values' => [
+        'style' => ['playful' => 'مرح (جزر وألعاب)', 'calm' => 'هادي (مستويات ومهمات)', 'plain' => 'من غير نجوم'],
         'concern_outcome' => ['no_concern' => 'مفيش حاجة تتعمل', 'resolved' => 'اتحل', 'teacher_action' => 'إجراء مع مدرس', 'referred' => 'اتحول لجهة برّه', 'duplicate' => 'مكرر'],
         'document' => ['criminal_record' => 'الفيش الجنائي', 'identity' => 'البطاقة', 'qualification' => 'المؤهل', 'other' => 'المستند'],
         'method' => ['bank_transfer' => 'تحويل بنكي', 'instapay' => 'InstaPay', 'wallet' => 'محفظة إلكترونية', 'cash' => 'كاش', 'card_terminal' => 'ماكينة كارت', 'other' => 'أخرى', 'online' => 'دفع إلكتروني'],

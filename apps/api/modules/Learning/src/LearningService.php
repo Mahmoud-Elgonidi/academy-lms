@@ -16,6 +16,8 @@ use Modules\Learning\Domain\PlannedItem;
 use Modules\Learning\Domain\TodaysPlan;
 use Modules\Learning\Materials\MaterialLinks;
 use Modules\Learning\Models\Homework;
+use Modules\Learning\Queries\Journey\JourneyMap;
+use Modules\Learning\Queries\Journey\StarsQuery;
 use Modules\Learning\Queries\PracticeFocusQuery;
 use Modules\Learning\Queries\ProgressQuery;
 
@@ -61,6 +63,16 @@ final class LearningService implements LearningApi
     public function practiceFocus(string $studentId, ?CarbonImmutable $now = null): array
     {
         return app(PracticeFocusQuery::class)->for($studentId, $now);
+    }
+
+    public function journeyStations(string $studentId): array
+    {
+        return app(JourneyMap::class)->stations($studentId);
+    }
+
+    public function stars(string $studentId): int
+    {
+        return app(StarsQuery::class)->total($studentId);
     }
 
     public function recordPractice(PracticeRound $round): PracticeRecorded

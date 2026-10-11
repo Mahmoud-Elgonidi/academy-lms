@@ -117,6 +117,7 @@ return [
         ],
         'games' => [
             'settings_saved' => "Changed the academy's games (:state, :minutes minutes a day)",
+            'journey_style_saved' => 'Changed how students see their journey: :style',
         ],
         'platform' => [
             'signed_in' => 'Signed in to the console',
@@ -130,6 +131,7 @@ return [
         ],
     ],
     'values' => [
+        'style' => ['playful' => 'playful (islands and games)', 'calm' => 'calm (levels and missions)', 'plain' => 'plain (no stars)'],
         'concern_outcome' => ['no_concern' => 'nothing to act on', 'resolved' => 'dealt with', 'teacher_action' => 'action with a teacher', 'referred' => 'referred outside', 'duplicate' => 'duplicate'],
         'document' => ['criminal_record' => 'criminal record check', 'identity' => 'ID', 'qualification' => 'qualification', 'other' => 'document'],
         'method' => ['bank_transfer' => 'bank transfer', 'instapay' => 'InstaPay', 'wallet' => 'mobile wallet', 'cash' => 'cash', 'card_terminal' => 'card terminal', 'other' => 'other', 'online' => 'online'],

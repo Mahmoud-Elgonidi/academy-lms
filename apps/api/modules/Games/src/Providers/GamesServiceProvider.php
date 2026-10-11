@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Games\Listeners\HatchOnMastery;
 use Modules\Games\Privacy\GamesData;
+use Modules\Games\Queries\GamesForJourney;
 use Modules\Games\Queries\PracticePool;
 use Modules\Learning\Contracts\Events\NodeMastered;
+use Modules\Learning\Contracts\JourneyGames;
 use Modules\SharedKernel\Privacy\PersonalData;
 
 /**
@@ -23,6 +25,8 @@ final class GamesServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(PracticePool::class);
+        // The games on the learner's journey (Learning's contract).
+        $this->app->singleton(JourneyGames::class, GamesForJourney::class);
     }
 
     public function boot(): void

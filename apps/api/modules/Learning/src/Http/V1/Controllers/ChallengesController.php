@@ -40,7 +40,10 @@ final class ChallengesController
      *
      * For the student themself (learner_id left out) or a guardian's child. Each challenge has its target, progress and
      * state: active, missed, done (ready to collect, by the student) or claimed. Rewards finished last week or last month
-     * come first while they can still be collected. cheers: the guardians' cheers the student has not seen yet.
+     * come first while they can still be collected. cheers: the guardians' cheers the student has not seen yet. Kept for
+     * earlier app versions: the journey (learning/journey/map) has the week's chest and the cheers.
+     *
+     * @deprecated
      */
     public function index(Request $request, ChallengesQuery $challenges): JsonResponse
     {
@@ -104,7 +107,10 @@ final class ChallengesController
      * Collect a reward.
      *
      * The student collects a challenge they finished (challenge and period as listed). Its points add to theirs; the
-     * kids' chest also brings the next sticker. Once only. Send an Idempotency-Key.
+     * kids' chest also brings the next sticker. Once only. Send an Idempotency-Key. Kept for earlier app versions: the
+     * week's chest opens at learning/journey/chest.
+     *
+     * @deprecated
      *
      * @throws AccessDeniedHttpException only the student collects
      */

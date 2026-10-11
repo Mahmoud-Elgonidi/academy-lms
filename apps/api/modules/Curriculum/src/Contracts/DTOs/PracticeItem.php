@@ -30,7 +30,27 @@ final readonly class PracticeItem
             ItemKind::Choice => ['id' => $this->id, 'kind' => 'choice', 'prompt' => (string) $this->prompt, 'options' => $this->options, 'answer' => (int) $this->answer],
             ItemKind::Order => ['id' => $this->id, 'kind' => 'order', 'prompt' => (string) $this->prompt, 'parts' => $this->parts],
             ItemKind::Pair => ['id' => $this->id, 'kind' => 'pair', 'left' => (string) $this->left, 'right' => (string) $this->right],
-        };
+        } + ['dir' => $this->direction()];
+    }
+
+    /**
+     * Which way the item's words read: an academy's lesson may be in another language than the screen (an English
+     * lesson in an Arabic app). From the first letter of its words: rtl for Arabic, Hebrew and the like, else ltr.
+     */
+    public function direction(): string
+    {
+        $text = implode(' ', array_filter([$this->prompt, ...$this->options, ...$this->parts, $this->left, $this->right], fn ($t) => is_string($t) && $t !== ''));
+
+        return self::directionOf($text);
+    }
+
+    public static function directionOf(string $text): string
+    {
+        if (preg_match('/\p{L}/u', $text, $m) !== 1) {
+            return 'auto';
+        }
+
+        return preg_match('/[\p{Arabic}\p{Hebrew}\p{Syriac}\p{Thaana}\p{Nko}]/u', $m[0]) === 1 ? 'rtl' : 'ltr';
     }
 
     /** A short line for lists (the builder, the teacher's view of what was practised). */

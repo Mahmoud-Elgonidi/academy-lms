@@ -4,7 +4,7 @@ namespace Modules\Scheduling\Contracts\DTOs;
 
 use Carbon\CarbonImmutable;
 
-/** One of a student's lessons as their challenges count it: its outcome and when the student first came in. */
+/** One of a student's lessons as their challenges and journey count it: its outcome, when the student first came in, and how long they stayed. */
 final readonly class LearnerLesson
 {
     public function __construct(
@@ -14,6 +14,11 @@ final readonly class LearnerLesson
         public CarbonImmutable $startsAt,
         public ?CarbonImmutable $joinedAt,
         public ?string $enrollmentId,
+        public ?CarbonImmutable $endsAt = null,
+        /** When the student last left the room (null: never left, or never came). */
+        public ?CarbonImmutable $lastLeftAt = null,
+        /** Minutes the student was in the room, counted when they left. */
+        public int $attendedMin = 0,
     ) {}
 
     /** Lessons the student could not have attended (cancelled, or the teacher's absence) count for nothing. */
