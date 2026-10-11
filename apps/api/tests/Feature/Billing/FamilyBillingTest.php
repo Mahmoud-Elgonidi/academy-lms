@@ -163,6 +163,24 @@ it('leaves a sibling far from renewing, or every child when the window is off, o
     expect(Invoice::query()->latest('number')->firstOrFail()->subscriptionIds())->toBe([familySubscription($maryam)->id]);
 });
 
+it('renews only a course that is on: a paused or ended one is neither invoiced on its own nor taken along', function (string $status) {
+    $ziad = familyEnrol(0, $this->quran, hour: 16);
+    $maryam = familyEnrol(1, $this->quran, hour: 17);
+    familyPay($ziad->invoice->id);
+    familyPay($maryam->invoice->id);
+    // Enrollment's own way to pause or end a course comes later (F2); its status is what Billing reads.
+    Enrollment::query()->whereKey($maryam->enrollmentId)->update(['status' => $status]);
+
+    // Maryam's balance reaches her mark: nothing goes out for her.
+    useLessons($maryam->enrollmentId, 6);
+    expect(Invoice::query()->count())->toBe(2)
+        ->and(app(IssueRenewal::class)->handle(familySubscription($maryam)))->toBeNull();
+
+    // Ziad's does: his renewal goes out alone, though Maryam is within the family window.
+    useLessons($ziad->enrollmentId, 6);
+    expect(Invoice::query()->latest('number')->firstOrFail()->subscriptionIds())->toBe([familySubscription($ziad)->id]);
+})->with(['paused', 'ended']);
+
 it('issues a family invoice again with a coupon, keeping every child on it', function () {
     $ziad = familyEnrol(0, $this->quran, hour: 16);
     $maryam = familyEnrol(1, $this->quran, hour: 17);

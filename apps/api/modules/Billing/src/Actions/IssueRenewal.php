@@ -16,16 +16,17 @@ use Modules\Credits\Contracts\CreditsApi;
  * taken along when they would within the lessons of that many days at its
  * plan's pace. A family then pays once for the children's renewals of that
  * week instead of once per child. A course with a block already waiting is
- * left as it is; nothing already issued changes.
+ * left as it is; nothing already issued changes. A course that is not on
+ * (paused, ended: Subscription::taught) is never renewed, on its own or along.
  */
 final class IssueRenewal
 {
     public function __construct(private readonly IssueBlockInvoice $issue, private readonly CreditsApi $credits) {}
 
-    /** The renewal invoice, or null when the course's next block is already waiting. */
+    /** The renewal invoice, or null when the course's next block is already waiting, or it is not on (paused, ended). */
     public function handle(Subscription $due, ?string $actorId = null): ?Invoice
     {
-        if ($due->hasWaitingBlock()) {
+        if ($due->hasWaitingBlock() || ! Subscription::query()->whereKey($due->id)->where('status', 'active')->taught()->exists()) {
             return null;
         }
 
@@ -46,8 +47,7 @@ final class IssueRenewal
             ->where('id', '<>', $due->id)
             ->where('status', 'active')
             ->where('block_no', '>=', 1)
-            ->whereExists(fn ($q) => $q->from('enrollments as e')->whereColumn('e.academy_id', 'subscriptions.academy_id')
-                ->whereColumn('e.credit_account_id', 'subscriptions.credit_account_id')->where('e.status', 'active'))
+            ->taught()
             ->orderBy('created_at')->orderBy('id')
             ->get()
             ->filter(fn (Subscription $s) => ! $s->hasWaitingBlock() && $this->comesDueWithin($s, $days))

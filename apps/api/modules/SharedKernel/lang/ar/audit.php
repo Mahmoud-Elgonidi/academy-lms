@@ -16,6 +16,7 @@ return [
             'coupon_removed' => 'شيل الكوبون :code من اشتراك',
             'sibling_discount_saved' => 'خصم الإخوات: التاني :second%، والتالت وبعده :more%',
             'extra_lessons' => 'فاتورة :number بـ :lessons حصص زيادة (:total)',
+            'plan_saved' => 'حفظ الباقة ":name" (:prices)',
         ],
         'policy' => [
             'saved' => 'إصدار :version من سياسة الإلغاء والتعويض',

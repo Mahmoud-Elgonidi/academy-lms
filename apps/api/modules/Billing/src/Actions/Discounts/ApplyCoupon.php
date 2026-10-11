@@ -9,6 +9,7 @@ use Modules\Billing\Actions\IssueBlockInvoice;
 use Modules\Billing\Actions\VoidInvoice;
 use Modules\Billing\Discounts\CouponCheck;
 use Modules\Billing\Models\BillingAccount;
+use Modules\Billing\Models\Coupon;
 use Modules\Billing\Models\CouponRedemption;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\PaymentCheckout;
@@ -44,6 +45,8 @@ final class ApplyCoupon
                 throw ValidationException::withMessages(['coupon' => __('billing::discounts.errors.has_coupon')]);
             }
             $payerId = (string) BillingAccount::query()->whereKey($subscription->billing_account_id)->value('payer_id');
+            // The coupon held until this is done, so two payers cannot both take its last use (nor one payer it twice).
+            Coupon::query()->where('code', Coupon::normalize($code))->lockForUpdate()->first();
             $coupon = $this->check->usable($code, $payerId, $subscription->currency, $subscription->plan_id);
 
             $waiting = $reissue ? $this->waitingBlock($subscription) : null;

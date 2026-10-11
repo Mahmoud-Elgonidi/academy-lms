@@ -78,7 +78,9 @@ final class PayrollMonth
     {
         $rows = DB::table('teacher_earnings as e')
             ->leftJoin('teacher_earnings as o', fn ($j) => $j->on('o.academy_id', '=', 'e.academy_id')->on('o.id', '=', 'e.reverses_id'))
-            ->leftJoin('teacher_earnings as later', fn ($j) => $j->on('later.academy_id', '=', 'e.academy_id')->on('later.reverses_id', '=', 'e.id'))
+            // Taken back in this month: a reversal paid in a later month (this one was closed) leaves this one as it was.
+            ->leftJoin('teacher_earnings as later', fn ($j) => $j->on('later.academy_id', '=', 'e.academy_id')->on('later.reverses_id', '=', 'e.id')
+                ->where('later.period', '<=', $month->format('Y-m-d')))
             ->leftJoin('sessions as s', fn ($j) => $j->on('s.academy_id', '=', 'e.academy_id')->on('s.id', '=', 'e.session_id'))
             ->leftJoin('session_participants as p', fn ($j) => $j->on('p.academy_id', '=', 's.academy_id')->on('p.session_id', '=', 's.id')->where('p.role', 'student'))
             ->leftJoin('users as st', fn ($j) => $j->on('st.academy_id', '=', 'p.academy_id')->on('st.id', '=', 'p.user_id'))

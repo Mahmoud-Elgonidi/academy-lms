@@ -8,6 +8,7 @@ use Modules\Billing\Domain\BlockTerms;
 use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PriceRegion;
 use Modules\Billing\Models\Subscription;
+use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Money\Money;
 
 /**
@@ -76,6 +77,12 @@ final class SavePlan
             foreach ($prices as $regionId => $money) {
                 $plan->prices()->updateOrCreate(['price_region_id' => $regionId], ['amount_minor' => $money->minor, 'currency' => $money->currency]);
             }
+            // What families will be billed: who set it, and when.
+            app(AuditTrail::class)->record('billing.plan_saved', 'plan', $plan->id, [
+                'name' => $plan->name(),
+                'prices' => implode(' · ', array_map(fn (Money $m) => $m->format(), $prices)) ?: '—',
+                'active' => $plan->is_active,
+            ]);
 
             return $plan;
         });

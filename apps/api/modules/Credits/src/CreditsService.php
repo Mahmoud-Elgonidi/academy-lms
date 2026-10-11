@@ -94,12 +94,11 @@ final class CreditsService implements CreditsApi
             return [];
         }
         $ids = $accounts->modelKeys();
-        // Each account's lot that lapses first, and its makeup minutes.
+        // Each account's lot that lapses first, and its makeup minutes (booked or not).
         $next = CreditLot::query()->whereIn('account_id', $ids)->where('remaining_min', '>', 0)->whereNotNull('expires_at')
             ->orderBy('account_id')->orderBy('expires_at')->get(['account_id', 'expires_at', 'remaining_min'])
             ->unique('account_id')->keyBy('account_id');
-        $makeup = CreditLot::query()->whereIn('account_id', $ids)->where('source', LotSource::Makeup->value)
-            ->groupBy('account_id')->selectRaw('account_id, sum(remaining_min) as minutes')->pluck('minutes', 'account_id');
+        $makeup = CreditLot::makeupOwed($ids);
 
         $balances = [];
         foreach ($accounts as $account) {

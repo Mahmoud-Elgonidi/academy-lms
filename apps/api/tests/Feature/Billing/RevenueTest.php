@@ -187,6 +187,43 @@ it('keeps each currency apart and leaves cancelled invoices out', function () {
         ->and($ziad->invoice->total->currency)->toBe('SAR');
 });
 
+it('adds every breakdown up to what came in, each currency on its own, dinars to the fils', function () {
+    $kuwait = PriceRegion::query()->create(['name_ar' => 'الكويت', 'name_en' => 'Kuwait', 'currency' => 'KWD']);
+    $this->plan->prices()->create(['price_region_id' => $kuwait->id, 'amount_minor' => 12345, 'currency' => 'KWD']);
+    app(SaveSiblingDiscount::class)->handle(10, 15);
+    $ziad = revenueEnrol(0, $this->quran, hour: 16, regionId: $kuwait->id);
+    $maryam = revenueEnrol(1, $this->arabic, hour: 17, regionId: $kuwait->id);
+    $yousef = revenueEnrol(2, $this->quran, hour: 18);
+    revenuePay($ziad->invoice->id);
+    revenuePay($maryam->invoice->id, 'cash');
+    revenuePay($yousef->invoice->id, 'instapay');
+    // Ziad and Maryam renew on one family invoice in dinars, of which an odd amount arrives.
+    revenueTeach($maryam->enrollmentId, 4);
+    revenueTeach($ziad->enrollmentId, 6);
+    $family = Invoice::query()->where('status', 'issued')->where('currency', 'KWD')->sole();
+    revenuePay($family->id, 'wallet', 7777, CarbonImmutable::now()->addHour());
+
+    $board = app(RevenueBoard::class);
+    $period = $board->period('this_month');
+    expect($board->currencies())->toBe(['KWD', 'SAR'])
+        ->and(Invoice::query()->findOrFail($maryam->invoice->id)->total_minor)->toBe(11110);     // 12.345 less 10%, half up
+
+    foreach (['KWD' => 12345 + 11110 + 7777, 'SAR' => 40000] as $currency => $in) {
+        $summary = $board->summary($period, $currency);
+        $by = $board->breakdown($period, $currency);
+        expect($summary['collected']->minor)->toBe($in)
+            ->and($summary['collected']->currency)->toBe($currency)
+            ->and($summary['net']->minor + $summary['tax']->minor)->toBe($in);
+        foreach (['methods', 'kinds', 'subjects', 'plans'] as $group) {
+            expect(array_sum(array_column($by[$group], 'minor')))->toBe($in, "{$currency} by {$group}");
+        }
+    }
+    $kwd = collect($board->breakdown($period, 'KWD')['subjects'])->mapWithKeys(fn ($r) => [$r['key'] => $r['minor']])->all();
+    // The 7.777 KWD is shared 12345 : 11110 between the children's courses, in whole fils.
+    expect($kwd)->toEqualCanonicalizing([$this->quran => 12345 + 4093, $this->arabic => 11110 + 3684])
+        ->and(collect($board->breakdown($period, 'SAR')['methods'])->pluck('minor', 'key')->all())->toBe(['instapay' => 40000]);
+});
+
 it('forecasts the renewals coming from each course\'s balance and pace, priced as the invoice will be', function () {
     app(SaveSiblingDiscount::class)->handle(10, 15, 0);   // no family invoices: each course on its own
     $ziad = revenueEnrol(0, $this->quran, hour: 16);

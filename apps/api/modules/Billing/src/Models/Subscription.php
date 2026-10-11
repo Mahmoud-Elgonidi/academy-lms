@@ -2,6 +2,7 @@
 
 namespace Modules\Billing\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -71,6 +72,16 @@ final class Subscription extends Model
     public function isShared(): bool
     {
         return $this->plan?->isShared() ?? false;
+    }
+
+    /**
+     * Those with a course on (one of a shared package's will do): not waiting
+     * for its first payment, paused or ended. Only these renew.
+     */
+    public function scopeTaught(Builder $query): void
+    {
+        $query->whereExists(fn ($q) => $q->from('enrollments as e')->whereColumn('e.academy_id', 'subscriptions.academy_id')
+            ->whereColumn('e.credit_account_id', 'subscriptions.credit_account_id')->where('e.status', 'active'));
     }
 
     /** A block of its waiting to be paid (on its own invoice, or with the family's). */

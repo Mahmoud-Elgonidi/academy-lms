@@ -76,6 +76,7 @@ return [
         'one_region' => 'Keep at least one price region.',
         'currency' => 'Unknown currency :currency.',
         'region_in_use' => 'Payers are billed in this region; it cannot be removed or change currency.',
+        'region_priced' => 'Plans are priced in :currency in this region. Take those prices off the plans first, then change its currency.',
         'settings' => 'Check the rate (0–100%), the days (0–90) and the prefix (letters and digits only).',
     ],
 ];

@@ -17,11 +17,14 @@ use Modules\Credits\Models\CreditReservation;
  * moves the other way with new entries, never by changing old ones
  * (docs/architecture/02, section 5).
  *
- *  - used, now not held (the teacher was absent after all): the minutes come
- *    back as a makeup lot ("restore");
- *  - turned into makeup, now held after all: the makeup lot's minutes still
- *    there are taken back ("reclaim"); what the family already booked with
- *    them stays theirs, and the shortfall is returned to the caller.
+ *  - used, now not held (the teacher was absent after all): the minutes it
+ *    used come back as a makeup lot ("restore"); after a reclaim that fell
+ *    short, only what that reclaim took (the makeup the family already
+ *    booked is the one the lesson owed);
+ *  - turned into makeup, now held after all: its makeup credit still there
+ *    (newest first: a lesson decided again more than once may have had more
+ *    than one) is taken back ("reclaim"); what the family already booked with
+ *    it stays theirs, and the shortfall is returned to the caller.
  *
  * Nothing happens when the lesson had no reservation (a free trial, an
  * unpaid lesson) or when it already stands where it should.
@@ -47,36 +50,48 @@ final class CorrectSettlement
             if ($now === null || $now === $want) {
                 return 0;
             }
-            $key = "session:{$sessionId}:correct:".CreditEntry::query()->where('session_id', $sessionId)->whereIn('type', ['restore', 'reclaim'])->count();
+            $corrections = CreditEntry::query()->where('session_id', $sessionId)->whereIn('type', ['restore', 'reclaim'])->count();
+            $key = "session:{$sessionId}:correct:{$corrections}";
 
             if ($now === 'consumed' && $want === 'makeup') {
-                $lot = CreditLot::query()->create([
+                // What it used: all its minutes, or what the last reclaim took back (the rest was never used again).
+                $last = $corrections === 0 ? null : CreditEntry::query()->where('idempotency_key', 'session:'.$sessionId.':correct:'.($corrections - 1))->first();
+                $used = $last?->type === 'reclaim' ? $last->minutes : $reservation->minutes;
+                $lot = $used === 0 ? null : CreditLot::query()->create([
                     'account_id' => $account->id,
                     'source' => LotSource::Makeup,
                     'source_id' => $sessionId,
-                    'granted_min' => $reservation->minutes,
-                    'remaining_min' => $reservation->minutes,
+                    'granted_min' => $used,
+                    'remaining_min' => $used,
                     'expires_at' => CarbonImmutable::now()->addDays($makeupDays ?? ReleaseCredits::MAKEUP_DAYS)->endOfDay(),
                 ]);
                 $reservation->status = 'released';
                 $reservation->save();
-                $account->consumed_min -= $reservation->minutes;
-                $account->available_min += $reservation->minutes;
+                $account->consumed_min -= $used;
+                $account->available_min += $used;
                 $account->version++;
                 $account->save();
-                CreditEntry::record($account, 'restore', $reservation->minutes, $key, lotId: $lot->id, sessionId: $sessionId, actorId: $actorId, reason: $reason, meta: ['from' => 'consumed', 'to' => 'makeup']);
-                DB::afterCommit(fn () => event(new CreditsGranted($account->academy_id, $account->id, $lot->id, LotSource::Makeup->value, $lot->granted_min)));
+                CreditEntry::record($account, 'restore', $used, $key, lotId: $lot?->id, sessionId: $sessionId, actorId: $actorId, reason: $reason, meta: ['from' => 'consumed', 'to' => 'makeup']);
+                if ($lot !== null) {
+                    DB::afterCommit(fn () => event(new CreditsGranted($account->academy_id, $account->id, $lot->id, LotSource::Makeup->value, $lot->granted_min)));
+                }
 
                 return 0;
             }
 
             if ($now === 'makeup' && $want === 'consumed') {
-                $lot = CreditLot::query()->where('account_id', $account->id)->where('source', LotSource::Makeup->value)
-                    ->where('source_id', $sessionId)->lockForUpdate()->first();
-                $taken = min($reservation->minutes, (int) ($lot?->remaining_min ?? 0));
-                if ($lot !== null && $taken > 0) {
-                    $lot->remaining_min -= $taken;
+                $lots = CreditLot::query()->where('account_id', $account->id)->where('source', LotSource::Makeup->value)
+                    ->where('source_id', $sessionId)->where('remaining_min', '>', 0)
+                    ->orderByDesc('created_at')->orderByDesc('id')->lockForUpdate()->get();
+                $taken = 0;
+                foreach ($lots as $lot) {
+                    $take = min($reservation->minutes - $taken, $lot->remaining_min);
+                    if ($take <= 0) {
+                        break;
+                    }
+                    $lot->remaining_min -= $take;
                     $lot->save();
+                    $taken += $take;
                 }
                 $reservation->status = 'consumed';
                 $reservation->save();
@@ -85,7 +100,7 @@ final class CorrectSettlement
                 $account->version++;
                 $account->save();
                 $short = $reservation->minutes - $taken;
-                CreditEntry::record($account, 'reclaim', $taken, $key, lotId: $lot?->id, sessionId: $sessionId, actorId: $actorId, reason: $reason,
+                CreditEntry::record($account, 'reclaim', $taken, $key, lotId: $lots->first()?->id, sessionId: $sessionId, actorId: $actorId, reason: $reason,
                     meta: ['from' => 'makeup', 'to' => 'consumed', 'short' => $short]);
 
                 return $short;

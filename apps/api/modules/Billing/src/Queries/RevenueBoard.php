@@ -252,9 +252,7 @@ final class RevenueBoard
     public function forecast(string $currency, int $days = 30): array
     {
         $subscriptions = Subscription::query()->with('plan')
-            ->where('currency', $currency)->where('status', 'active')->where('block_no', '>=', 1)
-            ->whereExists(fn ($q) => $q->from('enrollments as e')->whereColumn('e.academy_id', 'subscriptions.academy_id')
-                ->whereColumn('e.credit_account_id', 'subscriptions.credit_account_id')->where('e.status', 'active'))
+            ->where('currency', $currency)->where('status', 'active')->where('block_no', '>=', 1)->taught()
             ->whereNotExists(fn ($q) => $q->from('invoice_lines as l')
                 ->join('invoices as i', fn ($j) => $j->on('i.academy_id', '=', 'l.academy_id')->on('i.id', '=', 'l.invoice_id'))
                 ->whereColumn('l.academy_id', 'subscriptions.academy_id')->whereColumn('l.subscription_id', 'subscriptions.id')

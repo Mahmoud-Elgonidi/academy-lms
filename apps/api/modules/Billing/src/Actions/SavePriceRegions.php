@@ -5,6 +5,7 @@ namespace Modules\Billing\Actions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Models\BillingAccount;
+use Modules\Billing\Models\PlanPrice;
 use Modules\Billing\Models\PriceRegion;
 use Modules\SharedKernel\Money\Money;
 use Throwable;
@@ -12,7 +13,8 @@ use Throwable;
 /**
  * The academy's price regions (Gulf, Egypt, Europe, US…), each with one
  * currency; exactly one is the default. A region payers already use cannot
- * be removed, and its currency cannot change.
+ * be removed, and its currency cannot change; nor can the currency of one
+ * its plans are priced in.
  */
 final class SavePriceRegions
 {
@@ -44,6 +46,10 @@ final class SavePriceRegions
                 $currency = strtoupper($row['currency']);
                 if ($region->exists && $region->currency !== $currency && BillingAccount::query()->where('price_region_id', $region->id)->exists()) {
                     throw ValidationException::withMessages(['regions' => __('billing::plans.errors.region_in_use')]);
+                }
+                // Its plans' prices are amounts in the old currency (a dinar has three decimals, a riyal two): they are not carried over.
+                if ($region->exists && $region->currency !== $currency && PlanPrice::query()->where('price_region_id', $region->id)->exists()) {
+                    throw ValidationException::withMessages(['regions' => __('billing::plans.errors.region_priced', ['currency' => $region->currency])]);
                 }
                 $region->fill([
                     'name_ar' => trim($row['name_ar']),

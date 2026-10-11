@@ -43,4 +43,34 @@ final class CreditLot extends Model
     {
         return new LotBalance($this->id, $this->source->value, $this->remaining_min, $this->expires_at, $this->created_at);
     }
+
+    /**
+     * Makeup minutes each account still owes as lessons: those not booked yet
+     * and those set aside for a makeup lesson (which draws on makeup lots only,
+     * so its first lot says which it is). Renewal leaves them all aside.
+     *
+     * @param  list<string>  $accountIds
+     * @return array<string, int> by account id; an account with none is left out
+     */
+    public static function makeupOwed(array $accountIds): array
+    {
+        if ($accountIds === []) {
+            return [];
+        }
+        $free = self::query()->whereIn('account_id', $accountIds)->where('source', LotSource::Makeup->value)
+            ->groupBy('account_id')->selectRaw('account_id, sum(remaining_min) as minutes')->pluck('minutes', 'account_id');
+        $booked = CreditReservation::query()->whereIn('account_id', $accountIds)->where('status', 'held')
+            ->whereExists(fn ($q) => $q->from('credit_lots as l')->whereColumn('l.academy_id', 'credit_reservations.academy_id')
+                ->whereRaw("l.id = (credit_reservations.allocations->0->>'lot_id')::uuid")->where('l.source', LotSource::Makeup->value))
+            ->groupBy('account_id')->selectRaw('account_id, sum(minutes) as minutes')->pluck('minutes', 'account_id');
+
+        $owed = [];
+        foreach ([$free, $booked] as $minutes) {
+            foreach ($minutes as $accountId => $sum) {
+                $owed[(string) $accountId] = ($owed[(string) $accountId] ?? 0) + (int) $sum;
+            }
+        }
+
+        return $owed;
+    }
 }

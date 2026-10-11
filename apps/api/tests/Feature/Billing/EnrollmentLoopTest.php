@@ -288,3 +288,23 @@ it('leaves makeup minutes out of the renewal mark', function () {
     teachSession($sessions[5]);
     expect(Invoice::query()->count())->toBe(2);   // 60 left: two sessions, the mark
 });
+
+it('sends the renewal invoice when a lesson the teacher missed brings the paid minutes to the mark', function () {
+    $booked = enrolOnPlan();
+    app(RecordPayment::class)->handle($booked->invoice->id, 'cash', Money::parse('400', 'SAR'), null, CarbonImmutable::now(), null, $this->accountant->id);
+    $sessions = Session::query()->where('enrollment_id', $booked->enrollmentId)->orderBy('starts_at')->get();
+    foreach ($sessions->take(5) as $session) {
+        teachSession($session);
+    }
+    expect(Invoice::query()->count())->toBe(1);   // three paid lessons left
+
+    // The teacher misses the sixth: it is owed as a makeup, and two paid lessons are left, the mark.
+    CarbonImmutable::setTestNow($sessions[5]->starts_at->addMinute());
+    app(RecordParticipantJoin::class)->handle($sessions[5], $this->student->id);
+    CarbonImmutable::setTestNow($sessions[5]->starts_at->addMinutes(10));
+    app(ApplyAttendanceDeadlines::class)->handle();
+
+    expect($sessions[5]->refresh()->status)->toBe(SessionStatus::TeacherAbsent)
+        ->and(Invoice::query()->count())->toBe(2)
+        ->and(Invoice::query()->where('number', 'NR-000002')->firstOrFail()->lines()->first()->meta['block_no'])->toBe(2);
+});

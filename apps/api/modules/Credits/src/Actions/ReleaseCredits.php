@@ -22,6 +22,8 @@ final class ReleaseCredits
 {
     public const MAKEUP_DAYS = 30;
 
+    public function __construct(private readonly LowBalanceWatch $watch) {}
+
     public function handle(string $sessionId, ReleaseMode $mode, string $idempotencyKey, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): void
     {
         DB::transaction(function () use ($sessionId, $mode, $idempotencyKey, $actorId, $reason, $makeupDays) {
@@ -36,6 +38,8 @@ final class ReleaseCredits
                 return;
             }
 
+            // Turned into makeup credit, a paid lesson's minutes stop counting towards renewal: it may be due now.
+            $before = $this->watch->measure($account);
             $reservation->status = 'released';
             $reservation->save();
 
@@ -61,6 +65,7 @@ final class ReleaseCredits
             $account->save();
 
             CreditEntry::record($account, 'release', $reservation->minutes, $idempotencyKey, lotId: $lot?->id, sessionId: $sessionId, actorId: $actorId, reason: $reason, meta: ['mode' => $mode->value]);
+            $this->watch->check($account, $before);
 
             if ($lot !== null) {
                 DB::afterCommit(fn () => event(new CreditsGranted($account->academy_id, $account->id, $lot->id, LotSource::Makeup->value, $lot->granted_min)));

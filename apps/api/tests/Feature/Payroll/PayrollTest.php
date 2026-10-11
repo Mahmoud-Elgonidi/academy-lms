@@ -29,6 +29,7 @@ use Modules\Payroll\Queries\PayrollMonth;
 use Modules\Payroll\Support\PayrollMonths;
 use Modules\Scheduling\Actions\ApplyAttendanceDeadlines;
 use Modules\Scheduling\Actions\CancelSession;
+use Modules\Scheduling\Actions\FlagForReview;
 use Modules\Scheduling\Actions\RecordParticipantJoin;
 use Modules\Scheduling\Actions\RecordParticipantLeave;
 use Modules\Scheduling\Actions\ResolveReview;
@@ -261,6 +262,47 @@ it('closes a month once it is over, in order; a closed month takes no more lines
         ->toThrow(QueryException::class, 'payroll month 2026-10 is closed')
         ->and(fn () => DB::table('teacher_earnings')->where('session_id', $taughtLesson->id)->update(['amount_minor' => 1]))->toThrow(QueryException::class, 'append-only')
         ->and(fn () => DB::table('teacher_earnings')->where('session_id', $taughtLesson->id)->delete())->toThrow(QueryException::class, 'append-only');
+});
+
+it('takes back a closed month\'s lesson decided again in the first open month, and the closed month\'s spreadsheet stays as it was', function () {
+    payDefaultCard();
+    $lesson = teachForPay('2026-10-06');
+    $sheet = function (string $month) {
+        $path = app(ExportPayrollMonth::class)->handle(CarbonImmutable::parse($month));
+        $reader = new Reader;
+        $reader->open($path);
+        $rows = [];
+        foreach ($reader->getSheetIterator() as $sheet) {
+            foreach ($sheet->getRowIterator() as $row) {
+                $rows[$sheet->getName()][] = $row->toArray();
+            }
+        }
+        $reader->close();
+        @unlink($path);
+
+        return $rows;
+    };
+
+    CarbonImmutable::setTestNow('2026-11-02 09:00 UTC');
+    app(ClosePayrollMonth::class)->handle(CarbonImmutable::parse('2026-10-01'), $this->accountant->id);
+    $closed = $sheet('2026-10-01');
+
+    // The family says the teacher never came; the manager agrees.
+    app(FlagForReview::class)->handle($lesson->refresh(), 'other', null, $this->admin->id);
+    app(ResolveReview::class)->handle($lesson->refresh(), 'teacher_absent', null, $this->admin->id);
+    $lines = payLines($lesson->id);
+    expect($lines->map(fn (TeacherEarning $l) => [$l->kind, $l->period->format('Y-m'), $l->amount_minor])->all())
+        ->toBe([['lesson', '2026-10', 6000], ['reversal', '2026-11', -6000]])
+        ->and($lines[1]->reverses_id)->toBe($lines[0]->id);
+
+    // And then that it took place after all: paid again, in November too.
+    app(FlagForReview::class)->handle($lesson->refresh(), 'other', null, $this->admin->id);
+    app(ResolveReview::class)->handle($lesson->refresh(), 'completed', null, $this->admin->id);
+    expect(payLines($lesson->id)->map(fn (TeacherEarning $l) => [$l->kind, $l->period->format('Y-m'), $l->amount_minor])->all())
+        ->toBe([['lesson', '2026-10', 6000], ['reversal', '2026-11', -6000], ['lesson', '2026-11', 6000]])
+        ->and(app(PayrollMonth::class)->teachers(CarbonImmutable::parse('2026-10-01'))[0]['total']->minor)->toBe(6000)
+        ->and(app(PayrollMonth::class)->teachers(CarbonImmutable::parse('2026-11-01'))[0]['total']->minor)->toBe(0)
+        ->and($sheet('2026-10-01'))->toBe($closed);
 });
 
 it('tells each teacher their total when the month is closed', function () {

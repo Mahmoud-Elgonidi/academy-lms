@@ -4,6 +4,7 @@ namespace Modules\Billing\Filament\Resources\Plans;
 
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -11,8 +12,10 @@ use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
 use Filament\Schemas\Components\Grid;
+use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Validation\ValidationException;
 use Modules\Billing\Actions\Discounts\SaveSiblingDiscount;
 use Modules\Billing\Actions\SaveBillingSettings;
 use Modules\Billing\Actions\SavePlan;
@@ -45,7 +48,8 @@ final class ManagePlans extends ManageRecords
                 ->schema([
                     Repeater::make('regions')->hiddenLabel()
                         ->schema([
-                            TextInput::make('id')->hidden(),
+                            // Sent back with the row (a hidden() field is not), so a region kept is the same region: its prices and payers stay on it.
+                            Hidden::make('id'),
                             TextInput::make('name_ar')->label(__('billing::plans.fields.name_ar'))->required()->maxLength(60),
                             TextInput::make('name_en')->label(__('billing::plans.fields.name_en'))->required()->maxLength(60),
                             Select::make('currency')->label(__('billing::plans.fields.currency'))
@@ -55,7 +59,14 @@ final class ManagePlans extends ManageRecords
                         ->columns(4)->defaultItems(1)->addActionLabel(__('billing::plans.regions.add'))->reorderable(),
                 ])
                 ->action(function (array $data) {
-                    app(SavePriceRegions::class)->handle(array_values($data['regions']));
+                    try {
+                        app(SavePriceRegions::class)->handle(array_values($data['regions']));
+                    } catch (ValidationException $e) {
+                        // About the regions as a whole, not one field: said in a notification, the dialog left open as typed.
+                        Notification::make()->danger()->title(implode(' ', $e->validator->errors()->all()))->send();
+
+                        throw new Halt;
+                    }
                     Notification::make()->success()->title(__('billing::plans.saved'))->send();
                 }),
             Action::make('tax')

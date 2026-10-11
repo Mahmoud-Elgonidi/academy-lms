@@ -15,6 +15,7 @@ return [
             'coupon_removed' => 'Took coupon :code off a subscription',
             'sibling_discount_saved' => 'Sibling discount: second child :second%, third and after :more%',
             'extra_lessons' => 'Invoice :number for :lessons extra lessons (:total)',
+            'plan_saved' => 'Plan ":name" saved (:prices)',
             'proof_rejected' => 'Proof of :amount on invoice :number turned down: :reason',
         ],
         'policy' => [

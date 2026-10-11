@@ -23,7 +23,7 @@ final readonly class CreditBalance
         return $this->availableMin + $this->reservedMin;
     }
 
-    /** What renewal counts: the paid-for minutes left, makeup minutes aside (they are owed lessons). */
+    /** What renewal counts: the paid-for minutes left, makeup minutes aside, booked or not (they are owed lessons). */
     public function renewableMin(): int
     {
         return $this->remainingMin() - $this->makeupMin;
