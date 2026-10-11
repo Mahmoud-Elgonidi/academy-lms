@@ -3,7 +3,8 @@ name: app-release
 # Hands the Android app to testers (apps/mobile/README.md, "Releases"):
 #   on main, once the mobile checks on a commit passed (or when run by hand from the Actions tab):
 #   release APKs, one per kind of phone, named after the app and its version
-#   ({App}-v{version}-build{build}-{abi}.apk) and signed with the release key from the secrets;
+#   ({App}-v{version}-build{build}-{abi}.apk) and signed with the release key from the secrets,
+#   and the bundle for Google Play ({App}-v{version}-build{build}.aab, the same key as Play's upload key);
 #   a tag (app-v{version}-b{build}) and a GitHub release holding them; and each phone APK posted
 #   in the testers' Telegram channel with the notes under it (the app's name, its version and
 #   what changed since the last release: commits' App-Change lines, tool/release/notes.sh).
@@ -148,12 +149,33 @@ jobs:
             cp "build/app/outputs/flutter-apk/app-$abi-release.apk" "$RUNNER_TEMP/apks/${{ steps.version.outputs.base }}-$abi.apk"
           done
           ls -l "$RUNNER_TEMP/apks"
+
+      # Google Play takes one bundle (Play makes each phone's APK from it), signed with the same key,
+      # which Play knows as the upload key. Its version code is the build number. Uploaded by hand
+      # from the run's artifacts or the GitHub release (docs/store/google-play.md).
+      - name: Build the bundle for Google Play
+        run: |
+          flutter build appbundle --release \
+            --build-name="${{ steps.version.outputs.name }}" --build-number="${{ steps.version.outputs.build }}" \
+            --dart-define-from-file=release-defines.json
+          mkdir -p "$RUNNER_TEMP/aab"
+          cp build/app/outputs/bundle/release/app-release.aab "$RUNNER_TEMP/aab/${{ steps.version.outputs.base }}.aab"
+          ls -l "$RUNNER_TEMP/aab"
           rm -f android/key.properties android/app/release.jks
+          if [ "${{ steps.signing.outputs.kind }}" != release ]; then
+            echo "::warning::The bundle carries the debug key: Google Play refuses it. Add the ANDROID_KEYSTORE_* secrets."
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.version.outputs.base }}
           path: ${{ runner.temp }}/apks/*.apk
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.version.outputs.base }}-google-play
+          path: ${{ runner.temp }}/aab/*.aab
           retention-days: 30
 
       - name: Notes for the testers
@@ -177,9 +199,9 @@ jobs:
             git push origin "refs/tags/$TAG"
           fi
           gh release view "$TAG" > /dev/null 2>&1 && exit 0
-          { cat "$RUNNER_TEMP/notes.txt"; echo; echo "أغلب الموبايلات: ملف arm64-v8a. الموبايلات القديمة: armeabi-v7a. المحاكي: x86_64."; } \
+          { cat "$RUNNER_TEMP/notes.txt"; echo; echo "أغلب الموبايلات: ملف arm64-v8a. الموبايلات القديمة: armeabi-v7a. المحاكي: x86_64. ملف .aab لـ Google Play بس."; } \
             > "$RUNNER_TEMP/release-notes.txt"
-          gh release create "$TAG" "$RUNNER_TEMP"/apks/*.apk --prerelease \
+          gh release create "$TAG" "$RUNNER_TEMP"/apks/*.apk "$RUNNER_TEMP"/aab/*.aab --prerelease \
             --title "${{ steps.version.outputs.app }} ${{ steps.version.outputs.name }} (build ${{ steps.version.outputs.build }})" \
             --notes-file "$RUNNER_TEMP/release-notes.txt"
 
