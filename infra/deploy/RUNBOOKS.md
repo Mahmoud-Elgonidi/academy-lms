@@ -256,6 +256,10 @@ docker compose exec web php artisan queue:failed        # what failed and why
 docker compose exec web php artisan queue:retry all     # once the cause is fixed
 ```
 
+If they go out, only late (System health shows the queue waiting; reminders should arrive ten minutes
+before a lesson): more workers take it at once. `QUEUE_WORKERS=3` (or 4) in `.env`, `WORKER_MEMORY` about
+100 MB more for each, then `docker compose up -d worker`.
+
 ## Screens do not update by themselves (relay or Reverb)
 
 Open screens fall back to asking every 30 seconds, so nothing is lost; they are just slower.

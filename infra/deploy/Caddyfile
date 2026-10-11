@@ -5,7 +5,11 @@
 {
 	admin off
 	auto_https off
-	frankenphp
+	# PHP threads: FrankenPHP's default is twice the host's CPUs, which on a large
+	# shared server is more requests at once than WEB_MEMORY holds.
+	frankenphp {
+		num_threads {$WEB_PHP_THREADS:8}
+	}
 	# The server's nginx (and the portal) reach this from private addresses: their
 	# X-Forwarded-Proto and -Host pass on, so the portal knows the page is https.
 	servers {

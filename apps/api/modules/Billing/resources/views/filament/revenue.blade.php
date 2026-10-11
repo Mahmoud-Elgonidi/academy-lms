@@ -208,7 +208,7 @@
                     <span class="rv-sum">{{ $forecast['total']->format() }}</span>
                 </header>
                 <p class="rv-note">{{ __($l.'forecast.hint') }}</p>
-                @forelse (array_slice($forecast['items'], 0, 8) as $item)
+                @forelse ($forecast['items'] as $item)
                     <div class="rv-row" wire:key="soon-{{ $item['subscription_id'] }}">
                         <div>
                             <strong>{{ $item['student'] }} · {{ $item['subject'] }}</strong>
@@ -222,8 +222,8 @@
                 @empty
                     <p class="rv-muted">{{ __($l.'forecast.empty', ['days' => $forecast['days']]) }}</p>
                 @endforelse
-                @if ($forecast['count'] > 8)
-                    <p class="rv-muted">{{ trans_choice($l.'forecast.more', $forecast['count'] - 8, ['n' => $forecast['count'] - 8]) }}</p>
+                @if ($forecast['count'] > count($forecast['items']))
+                    <p class="rv-muted">{{ trans_choice($l.'forecast.more', $forecast['count'] - count($forecast['items']), ['n' => $forecast['count'] - count($forecast['items'])]) }}</p>
                 @endif
             </section>
         @endif

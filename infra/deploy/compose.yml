@@ -71,12 +71,22 @@ services:
       resources:
         limits: { memory: "${REVERB_MEMORY:-256m}", cpus: "${REVERB_CPUS:-0.5}" }
 
+  # QUEUE_WORKERS processes take the queue (notifications first), and one the games
+  # designer's. Push goes out from here: the platform's Firebase service account
+  # (FCM_CREDENTIALS_FILE, by default secrets/fcm.json in this folder), read-only.
   worker:
     <<: *app
     command: ["worker"]
+    volumes:
+      - app-storage:/app/storage/app
+      - ${FCM_CREDENTIALS_FILE:-./secrets/fcm.json}:/run/secrets/fcm.json:ro
+    environment:
+      FCM_CREDENTIALS: /run/secrets/fcm.json
+    # On a stop each worker finishes the message in hand (entrypoint.sh) before it goes.
+    stop_grace_period: 60s
     deploy:
       resources:
-        limits: { memory: "${WORKER_MEMORY:-384m}", cpus: "${WORKER_CPUS:-1}" }
+        limits: { memory: "${WORKER_MEMORY:-512m}", cpus: "${WORKER_CPUS:-1}" }
 
   scheduler:
     <<: *app
@@ -106,7 +116,10 @@ services:
       LMS_OWNER_PASSWORD: ${DB_OWNER_PASSWORD:?}
       LMS_APP_PASSWORD: ${DB_PASSWORD:?}
       LMS_PLATFORM_PASSWORD: ${DB_PLATFORM_PASSWORD:?}
-    command: ["sh", "/etc/academy/postgres-start.sh"]
+    # The planner's costs for the server's SSD (random reads cost little more than
+    # sequential ones; the cache is about what DB_MEMORY leaves): a teacher's or a
+    # student's lessons are then read through their indexes, not the whole table.
+    command: ["sh", "/etc/academy/postgres-start.sh", "-c", "random_page_cost=${PG_RANDOM_PAGE_COST:-1.1}", "-c", "effective_cache_size=${PG_EFFECTIVE_CACHE_SIZE:-768MB}"]
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - backups:/backups

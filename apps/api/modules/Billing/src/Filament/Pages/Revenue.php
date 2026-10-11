@@ -30,6 +30,9 @@ use Modules\SharedKernel\Time\ViewerTimezone;
  */
 final class Revenue extends Page
 {
+    /** Renewals listed on the screen (the rest are counted). */
+    public const FORECAST_SHOWN = 8;
+
     protected string $view = 'billing::filament.revenue';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
@@ -153,7 +156,7 @@ final class Revenue extends Page
         ], app(RevenueBoard::class)->overdue($code));
     }
 
-    /** @return array{total: Money, count: int, days: int, items: list<array<string, mixed>>}|null */
+    /** @return array{total: Money, count: int, days: int, items: list<array<string, mixed>>}|null items: the first FORECAST_SHOWN, ready to show */
     #[Computed]
     public function forecast(): ?array
     {
@@ -167,7 +170,7 @@ final class Revenue extends Page
             'amount' => Money::of($i['minor'], $code)->format(),
             'when' => $i['on']->lessThanOrEqualTo($today) ? __('billing::revenue.forecast.now')
                 : __('billing::revenue.forecast.on', ['date' => $i['on']->locale(app()->getLocale())->translatedFormat('j M')]),
-        ], $forecast['items']);
+        ], array_slice($forecast['items'], 0, self::FORECAST_SHOWN));
 
         return $forecast;
     }

@@ -278,9 +278,10 @@ final class RevenueBoard
         }
 
         $names = $this->courseNames(array_map(fn (array $d) => $d[0], $due));
+        $discounts = $this->discounts->blockLines(array_map(fn (array $d) => $d[0], $due));
         $items = [];
         foreach ($due as [$subscription, $on]) {
-            $lines = $subscription->amount_minor + array_sum(array_column($this->discounts->lines($subscription, $subscription->amount_minor, withCoupon: true), 'amount_minor'));
+            $lines = $subscription->amount_minor + array_sum(array_column($discounts[$subscription->id], 'amount_minor'));
             $items[] = $names[$subscription->id] + [
                 'subscription_id' => $subscription->id,
                 'on' => $on,

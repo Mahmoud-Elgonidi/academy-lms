@@ -123,9 +123,10 @@ docker compose exec web php artisan platform:mail-test   # does the server's mai
 
 - **Going back**: run the deploy workflow for an older commit, or put its image in `IMAGE=` in `.env` and
   `docker compose up -d` (migrations already applied stay).
-- **A new setting** the app needs on servers: add it to the `.env` that `deploy.sh` writes on the first
-  deploy, and to its `add_if_missing` list, which adds it once (with its default) to servers that already
-  have a `.env` (the file is never overwritten).
+- **A new setting** the app needs on servers: add it, with a safe default or empty, to the settings
+  `deploy.sh` writes on the first deploy (`settings()`), and to the table below. The next deploy adds it once,
+  at the end of the `.env` of every server that lacks it; a value already there is never changed. A module's
+  setting missing from both, without a default fit for a server, fails `tests/Unit/Deploy/ServerEnvTest.php`.
 - **Not on yet**: live lessons through LiveKit (lessons use an outside link: `CLASSROOM_PROVIDER=external`)
   and recording them (LiveKit Egress, with `LIVEKIT_EGRESS_URL`, `RECORDINGS_DISK` and `RECORDINGS_RECORDER_ROOT`),
   email until an SMTP account is set (`MAIL_*`), WhatsApp, texts and push (messages go to the log), the off-site
@@ -136,6 +137,35 @@ docker compose exec web php artisan platform:mail-test   # does the server's mai
 - **Removing it all**: `docker compose down -v` here (the data goes too), delete this folder, and
   `sudo rm /etc/nginx/sites-enabled/academy-lms.conf /etc/nginx/sites-available/academy-lms.conf && sudo
   systemctl reload nginx`.
+
+## Settings
+
+The server's `.env` (in `~/academy-lms`, readable by the deploy user only) holds everything below. The
+first deploy writes it with random secrets and safe defaults; each later deploy adds, with its default, any
+setting this version reads that the file lacks, and says which. Change a value by hand, then
+`docker compose up -d` (the parts read it when they start). Secrets live only here, never in the repository.
+
+| Settings | What they do | Where the value comes from |
+|---|---|---|
+| `IMAGE`, `HTTP_PORT` | the version running, and the one port on 127.0.0.1 | `deploy.sh` |
+| `APP_KEY`, `DB_*PASSWORD`, `REVERB_APP_KEY`/`SECRET`, `HEALTH_TOKEN`, `DEMO_PASSWORD`, `DEMO_PLATFORM_2FA_SECRET` | encryption key, database roles, live connections, `/health`, the demo's sign-in | random, from the first deploy; never change `APP_KEY` or the database passwords (gateway keys and two-step secrets are encrypted with it) |
+| `PLATFORM_DOMAIN`, `PLATFORM_HOME_ACADEMY`, `PLATFORM_CONSOLE_DOMAIN`, `PLATFORM_CONSOLE_URL` | the platform's domain, an academy on the bare domain, the console's own address | you |
+| `TRUSTED_PROXIES` | which addresses' forwarded headers count (the server's nginx, Docker's networks) | the default fits nginx on the same server |
+| `CORS_ALLOWED_ORIGINS` | other web pages allowed to call the API from a browser | empty (none); comma-separated origins |
+| `APP_MIN_VERSION`, `APP_ANDROID_URL`, `APP_IOS_URL` | the oldest app version let in (older ones are told to update) and the store pages that message links to | the release you require; Google Play and App Store pages |
+| `QUEUE_WORKERS`, `WEB_PHP_THREADS` | queue workers in the worker part (notifications first; default 2), PHP threads in the web part (default 8) | raise `QUEUE_WORKERS` when System health shows the queue waiting, with `WORKER_MEMORY` (about 100 MB each) |
+| `MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_*` (`MAIL_SCHEME=smtps` for port 465) | email: alerts, welcome links, codes, notifications | an SMTP account (the domain's mail, Amazon SES, Postmark, Brevo, ...); in the log until `MAIL_MAILER=smtp` |
+| `WHATSAPP_DRIVER`, `WHATSAPP_META_TOKEN`, `WHATSAPP_META_PHONE_NUMBER_ID`, `WHATSAPP_META_TEMPLATE`, `WHATSAPP_META_OTP_TEMPLATE` | WhatsApp messages and sign-in codes | the platform's WhatsApp Business account in Meta's Cloud API: a permanent token, the number's id, and the two templates approved under those names; `WHATSAPP_DRIVER=meta` |
+| `SMS_DRIVER`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`, `TWILIO_MESSAGING_SERVICE_SID` | texts (codes, reminders) | the platform's Twilio account (a number or sender id, or a messaging service); `SMS_DRIVER=twilio` |
+| `PUSH_DRIVER`, `FCM_PROJECT_ID`, `FCM_CREDENTIALS_FILE` | push to the apps | the apps' Firebase project: its id, and a service-account key (Firebase console › Project settings › Service accounts › Generate new private key) saved as `secrets/fcm.json` in this folder (or the path given here), then `PUSH_DRIVER=fcm`. Only the worker sees it, read-only (`/run/secrets/fcm.json`); `deploy.sh` leaves an empty stand-in until then and keeps it readable by the container's user. Never in git or the image; keep a copy with the platform team (the off-site copy does not send it) |
+| `CLASSROOM_PROVIDER`, `LIVEKIT_URL`, `LIVEKIT_API_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | live lessons: by each teacher's outside link, or LiveKit | a LiveKit Cloud project (or your own server): its wss address, its API address, and an API key and secret; then `CLASSROOM_PROVIDER=livekit` and its webhook pointed at `https://$DOMAIN/webhooks/livekit`. Blank, LiveKit is off and its webhooks refused |
+| `LIVEKIT_EGRESS_URL`, `RECORDINGS_DISK`, `RECORDINGS_RECORDER_ROOT`, `AWS_*` | recording lessons (LiveKit Egress) and where the files go | a bucket for `RECORDINGS_DISK=s3` (needs the S3 adapter in the image first: `league/flysystem-aws-s3-v3`); recordings are not in the backups |
+| `STRIPE_PLATFORM_SECRET`, `STRIPE_CONNECT_CLIENT_ID`, `STRIPE_CONNECT_WEBHOOK_SECRET`, `STRIPE_APPLICATION_FEE_BP` | academies connecting their own Stripe account to the platform's (Connect), and the platform's fee | the platform's Stripe account: secret key, Connect client id, the Connect webhook's signing secret; fee in basis points (0: none). Academies' own gateway keys are not here: each adds its own in the back office |
+| `SOCIAL_REDIRECT_BASE`, `GOOGLE_*`, `APPLE_*` | signing in with Google and Apple | the platform's own OAuth clients (see "Not on yet" above) |
+| `UPLOAD_SCANNER`, `UPLOAD_SCAN_REQUIRED`, `CLAMAV_HOST`, `COMPOSE_PROFILES` | malware scanning of uploads | `COMPOSE_PROFILES=scan` and `UPLOAD_SCANNER=clamav` once the server can spare 1.5 GB |
+| `HEALTH_ALERT_TO`, `BACKUPS_EXPECTED`, `BACKUP_AT`, `BACKUP_KEEP_DAYS`, `OFFSITE_*` | alerts' extra addresses; the daily backup's time and retention; the off-site copy | you; the bucket and the platform team's age public key (`RUNBOOKS.md`) |
+| `ANTHROPIC_API_KEY`, `GAME_DESIGNER_MODEL`, `PLATFORM_LEGAL_NAME`, `PRIVACY_CONTACT_EMAIL` | the games designer; the platform's privacy pages | the platform's Claude key and model; the legal name and the data contact |
+| `WEB_MEMORY`, `WORKER_MEMORY`, ... `*_CPUS`, `REDIS_MAXMEMORY` (not written: compose.yml's defaults) | each part's memory and CPU limits | add to raise one |
 
 ## The files
 

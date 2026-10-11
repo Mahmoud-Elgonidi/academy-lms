@@ -120,8 +120,12 @@ jobs:
           echo "dir=$dir" >> "$GITHUB_ENV"
 
           DOMAIN=lms.example DEMO_DATA=1 bash "$dir/deploy.sh" "$IMAGE" </dev/null
-          # A second run is an update: nothing new to write, same port, same data.
+          # A second run is an update, here of a server whose .env is older than this version (a
+          # setting missing, one changed by hand): same port, same data, the missing one added, the other kept.
+          sed -i '/^CORS_ALLOWED_ORIGINS=/d; s/^HEALTH_ALERT_TO=.*/HEALTH_ALERT_TO=ops@lms.example/' "$dir/.env"
           DOMAIN=lms.example bash "$dir/deploy.sh" "$IMAGE" </dev/null
+          grep -qx 'CORS_ALLOWED_ORIGINS=' "$dir/.env" && grep -qx 'HEALTH_ALERT_TO=ops@lms.example' "$dir/.env" \
+            || { echo "the update did not add the missing setting, or changed one set by hand"; exit 1; }
 
           setting() { grep -E "^$1=" "$dir/.env" | cut -d= -f2-; }
           base="http://127.0.0.1:$(setting HTTP_PORT)"

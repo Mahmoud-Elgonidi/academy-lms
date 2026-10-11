@@ -27,11 +27,34 @@ fi
 php artisan optimize >/dev/null
 
 case "${1:-web}" in
-    web) exec frankenphp run --config /etc/academy/Caddyfile --adapter caddyfile ;;
+    web) export WEB_PHP_THREADS="${WEB_PHP_THREADS:-8}"; exec frankenphp run --config /etc/academy/Caddyfile --adapter caddyfile ;;
     reverb) exec php artisan reverb:start --host=0.0.0.0 --port=8080 ;;
     worker)
-        ( while true; do php artisan queue:work designer --queue=designer --tries=1 --timeout=1000 --max-time=3600; sleep 1; done ) &
-        exec php artisan queue:work --queue=notifications,default --tries=3 --max-time=3600 ;;
+        # QUEUE_WORKERS workers (default 2: one slow outside call, WhatsApp, SMS, push or mail,
+        # does not hold up the lesson reminders behind it) and the games designer's. queue:work
+        # ends itself every hour, after a job that ran too long or past its memory: each is
+        # started again on its own, so that never stops the container and the others with it.
+        # A stop is passed on, and each worker finishes the job in hand.
+        keep() {
+            trap 'stop=1; kill -TERM "$child" 2>/dev/null || true' TERM INT
+            stop=0
+            while [ "$stop" = 0 ]; do
+                php artisan queue:work "$@" & child=$!
+                wait "$child" || true
+                if [ "$stop" = 1 ]; then wait "$child" || true; fi
+                [ "$stop" = 1 ] || sleep 1
+            done
+        }
+        keep designer --queue=designer --tries=1 --timeout=1000 --max-time=3600 & pids=$!
+        n="${QUEUE_WORKERS:-2}"
+        while [ "$n" -gt 0 ]; do
+            keep --queue=notifications,default --tries=3 --max-time=3600 & pids="$pids $!"
+            n=$((n - 1))
+        done
+        trap 'kill -TERM $pids 2>/dev/null || true' TERM INT
+        wait || true
+        wait
+        exit 0 ;;
     scheduler) exec php artisan schedule:work ;;
     relay) exec php artisan live:relay ;;
     migrate) exec php artisan migrate --database=pgsql_owner --force ;;

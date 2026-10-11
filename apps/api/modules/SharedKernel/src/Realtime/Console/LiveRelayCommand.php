@@ -73,7 +73,7 @@ final class LiveRelayCommand extends Command
 
         while (! $this->shouldStop()) {
             $now = $this->now();
-            $wait = min($folder->waitMs($now) ?? PHP_INT_MAX, (int) max(0, $this->nextPulse - $now), (int) max(0, $this->stopAt - $now));
+            $wait = self::waitMs($folder->waitMs($now), $this->nextPulse - $now, $this->stopAt - $now);
             $raised = $this->next($pdo, $wait);
             if ($raised !== null) {
                 $folder->changed($raised, $this->now());
@@ -92,6 +92,16 @@ final class LiveRelayCommand extends Command
                 $this->pulse();
             }
         }
+    }
+
+    /**
+     * How long to sleep on the socket, in whole milliseconds: until the folded signals are due, the
+     * next pulse or the stop, whichever comes first. Kept in floats until the end: with no stop
+     * (INF, the default), (int) INF is 0, and the relay would spin on the socket instead of sleeping.
+     */
+    public static function waitMs(?int $folded, float $untilPulse, float $untilStop): int
+    {
+        return (int) max(0, min($folded ?? PHP_INT_MAX, $untilPulse, $untilStop));
     }
 
     /** The next "{topic}:{id}" raised by the database, or null after $waitMs with none. */

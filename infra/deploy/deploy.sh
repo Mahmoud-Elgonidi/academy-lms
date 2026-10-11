@@ -68,21 +68,17 @@ set_setting() {
 }
 
 # ---------------------------------------------------------------------------
-# First deploy: this server's settings and secrets, written once and kept.
-if [ ! -f .env ]; then
-    say "First deploy: writing this server's settings (.env, postgres.env, readable by $(id -un) only)"
-    port=""
-    for p in $(seq 18080 18099); do
-        if ! port_taken "$p"; then port="$p"; break; fi
-    done
-    [ -n "$port" ] || fail "No free port between 18080 and 18099 on 127.0.0.1. Nothing was changed."
-
-    printf 'POSTGRES_PASSWORD=%s\n' "$(secret)" > postgres.env
-    demo_gateway=false
-    [ "$DEMO_DATA" = 1 ] && demo_gateway=true
-    cat > .env <<EOF
-# This server's settings for the LMS (infra/deploy/README.md). Written by
-# deploy.sh on the first deploy and never overwritten; keep it private.
+# Every setting this version reads on a server, with its default (secrets made
+# fresh each time it is printed): the first deploy writes all of it, and a later
+# one adds what an older .env lacks (below). Each is explained in README.md, "Settings".
+port=""
+demo_gateway=false
+[ "$DEMO_DATA" = 1 ] && demo_gateway=true
+settings() {
+    cat <<EOF
+# This server's settings for the LMS (infra/deploy/README.md, "Settings"). Written
+# by deploy.sh on the first deploy; later deploys only add settings it lacks, at
+# the end, and never change a value. Keep it private.
 IMAGE=$IMAGE
 HTTP_PORT=$port
 
@@ -105,6 +101,18 @@ PLATFORM_CONSOLE_URL=
 
 # The server's nginx and the container's web server, on Docker's private networks.
 TRUSTED_PROXIES=127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+# Other web pages allowed to call the API from a browser (comma-separated origins). None:
+# the portal calls it from its own server, and the apps are not browsers.
+CORS_ALLOWED_ORIGINS=
+
+# The apps: the oldest version still let in (older ones are asked to update), and their store pages.
+APP_MIN_VERSION=1.0.0
+APP_ANDROID_URL=
+APP_IOS_URL=
+
+# How many workers take the queue (notifications first) and PHP threads answer the web.
+QUEUE_WORKERS=2
+WEB_PHP_THREADS=8
 
 DB_CONNECTION=pgsql
 DB_HOST=postgres
@@ -152,14 +160,55 @@ MAIL_PASSWORD=
 MAIL_FROM_ADDRESS=no-reply@$DOMAIN
 MAIL_FROM_NAME="Academy LMS"
 
-# Lessons by an outside link until LiveKit is set up for this server.
+# WhatsApp, texts and push: in the log until the platform's accounts are set here
+# (README.md, "Settings"), then docker compose up -d. WhatsApp: Meta's Cloud API
+# (WHATSAPP_DRIVER=meta, the business number's id and token, the approved templates).
+# Texts: Twilio (SMS_DRIVER=twilio). Push: Firebase (PUSH_DRIVER=fcm, the project id,
+# and the service-account file at FCM_CREDENTIALS_FILE, read-only in the worker).
+WHATSAPP_DRIVER=log
+WHATSAPP_META_TOKEN=
+WHATSAPP_META_PHONE_NUMBER_ID=
+WHATSAPP_META_TEMPLATE=academy_notification
+WHATSAPP_META_OTP_TEMPLATE=sign_in_code
+SMS_DRIVER=log
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_FROM=
+TWILIO_MESSAGING_SERVICE_SID=
+PUSH_DRIVER=log
+FCM_PROJECT_ID=
+FCM_CREDENTIALS_FILE=./secrets/fcm.json
+
+# Lessons by an outside link until LiveKit is set up for this server: then
+# CLASSROOM_PROVIDER=livekit with the LiveKit project's addresses (LIVEKIT_URL for
+# browsers and apps, LIVEKIT_API_URL for the server) and its API key and secret.
+# Blank, academies cannot choose LiveKit and its webhooks are refused.
 CLASSROOM_PROVIDER=external
+LIVEKIT_URL=
+LIVEKIT_API_URL=
+LIVEKIT_API_KEY=
+LIVEKIT_API_SECRET=
 # Recording lessons (when an academy turns it on) needs LiveKit Egress too: it
-# writes into the same S3 bucket (RECORDINGS_DISK=s3), or into a volume the app
-# also reads (RECORDINGS_RECORDER_ROOT: the app's recordings folder as Egress sees it).
+# writes into the same S3 bucket (RECORDINGS_DISK=s3 with AWS_*, once the image
+# has the S3 adapter), or into a volume the app also reads
+# (RECORDINGS_RECORDER_ROOT: the app's recordings folder as Egress sees it).
 LIVEKIT_EGRESS_URL=
 RECORDINGS_DISK=local
 RECORDINGS_RECORDER_ROOT=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=
+AWS_BUCKET=
+AWS_ENDPOINT=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+# Academies paid through their own Stripe account connected to the platform's
+# (Stripe Connect): the platform's secret key, Connect client id and Connect
+# webhook's signing secret, and the platform's fee in basis points (0: none).
+STRIPE_PLATFORM_SECRET=
+STRIPE_CONNECT_CLIENT_ID=
+STRIPE_CONNECT_WEBHOOK_SECRET=
+STRIPE_APPLICATION_FEE_BP=0
 
 # Signing in with Google and Apple: off until the platform's own clients are
 # registered with each (their callback is https://$DOMAIN/auth/social/{google|apple}/callback).
@@ -180,6 +229,7 @@ BILLING_DEMO_GATEWAY=$demo_gateway
 # about 1.5 GB of memory for clamd; then COMPOSE_PROFILES=scan and UPLOAD_SCANNER=clamav.
 COMPOSE_PROFILES=
 UPLOAD_SCANNER=none
+UPLOAD_SCAN_REQUIRED=true
 CLAMAV_HOST=clamav
 
 # The games studio's designer (console › Game studio): Claude, with the platform's own
@@ -215,25 +265,54 @@ OFFSITE_S3_SECRET_KEY=
 OFFSITE_AGE_RECIPIENT=
 OFFSITE_KEEP_DAYS=30
 EOF
+}
+
+# First deploy: this server's settings and secrets, written once and kept.
+if [ ! -f .env ]; then
+    say "First deploy: writing this server's settings (.env, postgres.env, readable by $(id -un) only)"
+    for p in $(seq 18080 18099); do
+        if ! port_taken "$p"; then port="$p"; break; fi
+    done
+    [ -n "$port" ] || fail "No free port between 18080 and 18099 on 127.0.0.1. Nothing was changed."
+
+    printf 'POSTGRES_PASSWORD=%s\n' "$(secret)" > postgres.env
+    settings > .env
     chmod 600 .env postgres.env
 fi
 
-# Settings added since this server's .env was written: added once, with their defaults.
-add_if_missing() { grep -qE "^$1=" .env || printf '%s=%s\n' "$1" "$2" >> .env; }
-add_if_missing HEALTH_TOKEN "$(secret)"
-add_if_missing HEALTH_ALERT_TO ""
-add_if_missing BACKUPS_EXPECTED true
-for k in MAIL_HOST MAIL_USERNAME MAIL_PASSWORD OFFSITE_S3_ENDPOINT OFFSITE_S3_REGION OFFSITE_S3_BUCKET \
-    OFFSITE_S3_ACCESS_KEY OFFSITE_S3_SECRET_KEY OFFSITE_AGE_RECIPIENT PLATFORM_LEGAL_NAME PRIVACY_CONTACT_EMAIL \
-    ANTHROPIC_API_KEY GAME_DESIGNER_MODEL; do
-    add_if_missing "$k" ""
-done
-add_if_missing MAIL_PORT 587
-add_if_missing OFFSITE_S3_PREFIX academy-lms
-add_if_missing OFFSITE_KEEP_DAYS 30
-add_if_missing COMPOSE_PROFILES ""
-add_if_missing UPLOAD_SCANNER none
-add_if_missing CLAMAV_HOST clamav
+# Settings this version reads that an older .env lacks: added once, at the end, with
+# their defaults; a value already there is never changed. Not these, which must match
+# what the server already has (the database's passwords, the key the data is
+# encrypted with, the demo accounts): a server without them is not one deploy.sh made.
+fixed=" IMAGE HTTP_PORT APP_KEY DB_PASSWORD DB_OWNER_PASSWORD DB_PLATFORM_PASSWORD DEMO_PASSWORD DEMO_PLATFORM_2FA_SECRET "
+added=""
+while IFS= read -r line; do
+    key="${line%%=*}"
+    case "$fixed" in *" $key "*) continue ;; esac
+    grep -qE "^$key=" .env || added="$added$line"$'\n'
+done < <(settings | grep -E '^[A-Z][A-Z0-9_]*=')
+if [ -n "$added" ]; then
+    printf '\n# Added by deploy.sh on %s: settings this version reads, with their defaults (README.md, "Settings").\n%s' \
+        "$(date -u +%F)" "$added" >> .env
+    say "Settings new to this server, added to .env with their defaults: $(printf '%s' "$added" | cut -d= -f1 | tr '\n' ' ')"
+fi
+
+# Push (PUSH_DRIVER=fcm): the platform's Firebase service-account file, read-only in the
+# worker (compose.yml), never in git or the image. An empty one stands in until it is put
+# there; the worker reads it as www-data, so it is readable by all, in this private folder.
+fcm="$(setting FCM_CREDENTIALS_FILE)"
+fcm="${fcm:-./secrets/fcm.json}"
+case "$fcm" in /*) ;; *) fcm="$HERE/${fcm#./}" ;; esac
+case "$fcm" in
+    "$HERE"/*)
+        mkdir -p "$(dirname "$fcm")"
+        [ -e "$fcm" ] || : > "$fcm"
+        chmod 644 "$fcm" ;;
+    *)
+        [ -f "$fcm" ] || fail "FCM_CREDENTIALS_FILE in .env names $fcm, which is not there. Put the service-account file there, or set ./secrets/fcm.json."
+        [ -r "$fcm" ] && [ "$(( 0$(stat -c %a "$fcm") & 4 ))" -ne 0 ] \
+            || echo "    !! $fcm is not readable by all: the worker (www-data) cannot read it. Keep it in this folder's secrets/ instead." ;;
+esac
 chmod 700 "$HERE" "$DOCKER_CONFIG"
 
 HTTP_PORT="$(setting HTTP_PORT)"
