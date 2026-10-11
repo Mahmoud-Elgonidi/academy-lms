@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- The mark in one colour, for Android's themed icons (the phone paints it in its own colours). -->
+  <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M321 812 L512 388 L703 812" stroke-width="112"/>
+    <path d="M409 662 Q512 706 615 662" stroke-width="83"/>
+  </g>
+  <path d="M512 150 Q529 239 618 256 Q529 273 512 362 Q495 273 406 256 Q495 239 512 150Z" fill="#fff"/>
+</svg>

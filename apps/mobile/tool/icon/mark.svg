@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- The app icon's front layer: an A (Academy) reaching a gold star (the app's reward colour), on nothing. -->
+  <defs>
+    <radialGradient id="halo" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#FFE7A3" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#FFE7A3" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="chalk" gradientUnits="userSpaceOnUse" x1="0" y1="380" x2="0" y2="870">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E3F4EE"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFD873"/>
+      <stop offset="1" stop-color="#F2A825"/>
+    </linearGradient>
+    <filter id="lift" x="-20%" y="-20%" width="140%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="16"/>
+      <feOffset dy="20"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".32"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="512" cy="260" r="207" fill="url(#halo)"/>
+  <g filter="url(#lift)" fill="none" stroke="url(#chalk)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M321 812 L512 388 L703 812" stroke-width="112"/>
+    <path d="M409 662 Q512 706 615 662" stroke-width="83"/>
+  </g>
+  <path d="M512 150 Q529 239 618 256 Q529 273 512 362 Q495 273 406 256 Q495 239 512 150Z" fill="url(#gold)"/>
+</svg>

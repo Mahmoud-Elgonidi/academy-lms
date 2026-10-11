@@ -62,6 +62,10 @@ With the API's Reverb and relay running (`php artisan reverb:start`, `php artisa
 - **Links**: `academyapp://app/open/{screen}/{id}` (Android intent filter, iOS URL type; on the web `/#/open/{screen}/{id}`), the same targets as a notification.
 - **Forced update**: `GET /branding` carries `app.min_version` (and the store links) from the API's `APP_MIN_VERSION`, `APP_ANDROID_URL`, `APP_IOS_URL`; an older app opens on the update screen only.
 
+## The icon
+
+The icon (an A reaching a gold star, in the product's own green: one build serves every academy, so it carries none of theirs) is drawn from three SVG layers in `tool/icon/`: `background.svg`, `mark.svg` and `monochrome.svg` (the mark in one colour, for Android 13's themed icons). `python3 tool/icon.py` draws every picture from them with headless Chrome (`CHROME=/path/to/chrome` if it is not on the PATH) and writes Android's legacy, round and adaptive icons (`mipmap-*`, put together by `mipmap-anydpi-v26`), every picture iOS's `AppIcon.appiconset/Contents.json` names (without transparency, as the App Store asks), the web icons, the apple-touch-icon and the favicon, and `tool/icon/store/play-512.png` for Google Play. Change a layer, run it and commit what it writes; never edit the PNGs by hand.
+
 ## Releases
 
 `.github/workflows/app-release.yml` hands the Android app to testers. On main, once the mobile checks on a commit pass (or when run by hand from the Actions tab, with an optional line for the testers), it:
