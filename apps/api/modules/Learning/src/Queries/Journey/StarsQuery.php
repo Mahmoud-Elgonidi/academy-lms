@@ -33,6 +33,9 @@ final class StarsQuery
     public function for(string $studentId, ?CarbonImmutable $now = null): array
     {
         $now ??= CarbonImmutable::now();
+        // Every lesson the student ever had (and the next two weeks, for the missions): the read goes through their own
+        // participations (session_participants by user), so it grows with their history, not the academy's; an
+        // enrolment's start would drop a trial before it and change the totals (JourneyEdgesTest measures both).
         $lessons = $this->attendance->lessonsOfStudent($studentId, CarbonImmutable::parse('2000-01-01', 'UTC'), $now->addDays(15));
 
         $byLesson = [];

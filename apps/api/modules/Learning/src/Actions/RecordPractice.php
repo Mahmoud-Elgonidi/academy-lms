@@ -5,7 +5,6 @@ namespace Modules\Learning\Actions;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use Modules\Learning\Contracts\DTOs\PracticeFocus;
 use Modules\Learning\Contracts\DTOs\PracticeRecorded;
 use Modules\Learning\Contracts\DTOs\PracticeRound;
@@ -38,11 +37,11 @@ final class RecordPractice
         ])->validate();
 
         return DB::transaction(function () use ($round) {
+            // A homework the teacher took back (or that no longer asks for practice) while the round was played:
+            // the round still counts as practice, for no homework.
             $homework = $round->homeworkId === null ? null
                 : Homework::query()->where('student_id', $round->studentId)->lockForUpdate()->find($round->homeworkId);
-            if ($round->homeworkId !== null && ($homework === null || ! $homework->hasPractice())) {
-                throw ValidationException::withMessages(['homework' => __('learning::homework.errors.no_practice')]);
-            }
+            $homework = $homework?->hasPractice() ? $homework : null;
 
             $entry = PracticeRoundEntry::query()->create([
                 'student_id' => $round->studentId,

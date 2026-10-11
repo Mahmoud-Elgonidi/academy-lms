@@ -20,6 +20,7 @@ return [
         'not_submitted' => 'This homework has not been handed in yet.',
         'empty' => 'Write an answer or attach a file.',
         'no_practice' => 'This homework has no practice in the games.',
+        'by_playing' => 'This homework is handed in by playing its round in the game.',
     ],
     'game' => [
         'page' => 'Homework game for :student',
@@ -49,6 +50,6 @@ return [
         'never' => 'Has not played yet.',
         'close' => 'Close the try',
         'trying' => 'A try: nothing is counted',
-        'errors' => ['report' => 'The report is not sent yet, or has no lessons.', 'game' => 'This game is not available.'],
+        'errors' => ['report' => 'The report is not sent yet, or has no lessons.', 'game' => 'This game is not available.', 'no_fit' => "This game is not made for the student's age, or these lessons do not have enough practice for it."],
     ],
 ];

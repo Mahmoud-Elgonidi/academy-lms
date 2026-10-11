@@ -32,6 +32,9 @@ interface LearningApi
      */
     public function practiceFocus(string $studentId, ?CarbonImmutable $now = null): array;
 
+    /** One homework of the learner's that asks for practice, as its quest, however late it is (null: it asks for none, or was marked). */
+    public function homeworkFocus(string $studentId, string $homeworkId): ?PracticeFocus;
+
     /**
      * The lessons on the learner's journey they may practise now (what they learnt, where they are, their last
      * report's lessons and homework asking for practice), each with the island its level is drawn as.

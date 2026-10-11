@@ -6,7 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Learning\Contracts\Events\CheerSent;
-use Modules\Learning\Domain\Challenges\ChallengeCatalog;
+use Modules\Learning\Domain\Journey\Cheers;
 use Modules\Learning\Models\Cheer;
 use Modules\People\Contracts\FamilyView;
 
@@ -30,7 +30,7 @@ final class SendCheer
         }
         $today = Cheer::query()->where('from_id', $fromId)->where('student_id', $studentId)
             ->where('created_at', '>', CarbonImmutable::now()->subDay())->count();
-        if ($today >= ChallengeCatalog::CHEERS_PER_DAY) {
+        if ($today >= Cheers::PER_DAY) {
             throw ValidationException::withMessages(['kind' => __('learning::challenges.errors.too_many_cheers')]);
         }
 

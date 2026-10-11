@@ -4110,6 +4110,9 @@
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
                     },
+                    "403": {
+                        "$ref": "#/components/responses/AccessDeniedHttpException"
+                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
                     }

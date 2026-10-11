@@ -15,6 +15,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property string $student_id
  * @property string $creature_key
  * @property string $source stars | mastery
+ * @property ?int $egg stars: which of the learner's eggs it hatched from (1, 2, ...)
  * @property ?string $node_id
  * @property ?string $play_id
  * @property ?string $nickname the name the learner gave it
@@ -34,6 +35,6 @@ final class CreatureFind extends Model
 
     protected function casts(): array
     {
-        return ['found_at' => 'immutable_datetime', 'buddy' => 'boolean'];
+        return ['found_at' => 'immutable_datetime', 'buddy' => 'boolean', 'egg' => 'integer'];
     }
 }

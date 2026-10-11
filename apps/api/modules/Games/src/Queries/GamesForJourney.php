@@ -48,6 +48,8 @@ final class GamesForJourney implements JourneyGames
 
         $byStation = [];
         $stats = [];
+        // The race on a lesson: the rounds played on that lesson alone, newest first (grouped once, not per lesson).
+        $onOne = $past->groupBy(fn (GamePlay $p) => count($nodes = array_values(array_unique(array_column((array) $p->items, 'node')))) === 1 ? $nodes[0] : '');
         // Every station's items in one read (the pool keeps them per lesson).
         if ($stations !== []) {
             $this->pool->itemsOf(array_map(fn (JourneyStation $s) => $s->id, $stations));
@@ -79,12 +81,8 @@ final class GamesForJourney implements JourneyGames
                 'items' => $size($g),
             ], $fit);
 
-            $mine = $past->filter(function (GamePlay $p) use ($station) {
-                $nodes = array_unique(array_column((array) $p->items, 'node'));
-
-                return $nodes === [$station->id];
-            });
-            if ($mine->isNotEmpty()) {
+            $mine = $onOne->get($station->id);
+            if ($mine !== null) {
                 $stats[$station->id] = [
                     'rounds' => $mine->count(),
                     'best_seconds' => $mine->whereNotNull('seconds')->min('seconds'),

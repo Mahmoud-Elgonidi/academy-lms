@@ -50,9 +50,10 @@ final class StartPlay
             return $this->onStation($studentId, $viewerId, $game, $stage, $station);
         }
 
-        $focus = $this->pool->focus($studentId);
+        // A homework's own practice however late it is (the journey offers each one); a quest from what to practise now.
+        $focus = $homeworkId !== null ? [] : $this->pool->focus($studentId);
         $chosen = match (true) {
-            $homeworkId !== null => collect($focus)->first(fn (PracticeFocus $f) => $f->homeworkId === $homeworkId),
+            $homeworkId !== null => $this->learning->homeworkFocus($studentId, $homeworkId),
             $quest !== null => collect($focus)->first(fn (PracticeFocus $f) => $f->key() === $quest),
             default => null,
         };

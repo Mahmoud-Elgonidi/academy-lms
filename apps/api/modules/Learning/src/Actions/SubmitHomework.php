@@ -17,7 +17,8 @@ use Throwable;
 
 /**
  * The student (or a guardian for a child) hands homework in: text, a file,
- * or a voice recording, as the homework accepts. Late is allowed; a second
+ * or a voice recording, as the homework accepts (practice-only homework is
+ * handed in by playing, not here). Late is allowed; a second
  * hand-in adds to the first until the teacher has marked it. Files go to the
  * private disk under the academy's folder and are never public.
  */
@@ -36,6 +37,10 @@ final class SubmitHomework
     {
         if ($homework->status === 'reviewed') {
             throw ValidationException::withMessages(['homework' => __('learning::homework.errors.closed')]);
+        }
+        // Practice only: handed in by playing its round (RecordPractice), never by a written answer instead.
+        if ($homework->accepts === 'practice') {
+            throw ValidationException::withMessages(['homework' => __('learning::homework.errors.by_playing')]);
         }
         $body = trim((string) $body) ?: null;
         $mimes = match ($homework->accepts) {

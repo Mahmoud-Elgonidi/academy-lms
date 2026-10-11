@@ -26,8 +26,8 @@ final class GamesServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(PracticePool::class);
-        // The games on the learner's journey (Learning's contract).
-        $this->app->singleton(JourneyGames::class, GamesForJourney::class);
+        // The games on the learner's journey (Learning's contract): per request, like the practice pool it reads through.
+        $this->app->scoped(JourneyGames::class, GamesForJourney::class);
     }
 
     public function boot(): void

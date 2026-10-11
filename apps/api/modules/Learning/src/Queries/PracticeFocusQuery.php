@@ -4,6 +4,7 @@ namespace Modules\Learning\Queries;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Enrollment\Contracts\EnrollmentStatus;
@@ -27,6 +28,9 @@ final class PracticeFocusQuery
     public const LAST_LESSON_DAYS = 14;
 
     public const REVIEW_MAX = 4;
+
+    /** Homework whose practice still counts: not marked yet (a better round keeps the better result). */
+    private const HOMEWORK_STATUSES = ['assigned', 'submitted', 'missed'];
 
     public function __construct(
         private readonly EnrollmentApi $enrollments,
@@ -56,12 +60,10 @@ final class PracticeFocusQuery
 
         $focus = [];
         $homework = Homework::query()->where('student_id', $studentId)->whereNotNull('practice_nodes')
-            ->whereIn('status', ['assigned', 'submitted', 'missed'])->where('due_at', '>', $now->subDays(3))
+            ->whereIn('status', self::HOMEWORK_STATUSES)->where('due_at', '>', $now->subDays(3))
             ->orderBy('due_at')->limit(3)->get();
         foreach ($homework as $h) {
-            $nodes = array_values($h->practice_nodes ?? []);
-            $focus[] = new PracticeFocus('homework', $h->enrollment_id, $nodes, $h->title, $h->id, $h->due_at,
-                done: $h->practice_result !== null && ($h->accepts !== 'practice' || $h->status !== 'assigned'), game: $h->practice_game);
+            $focus[] = self::ofHomework($h);
         }
 
         foreach ($courses as $course) {
@@ -87,5 +89,23 @@ final class PracticeFocusQuery
         }
 
         return $focus;
+    }
+
+    /**
+     * One homework of the learner's that asks for practice, as its quest, however late it is and whatever else is
+     * open (the journey and the homework page offer each one to play); null when it asks for none or was marked.
+     */
+    public function homework(string $studentId, string $homeworkId): ?PracticeFocus
+    {
+        $h = ! Str::isUuid($homeworkId) ? null : Homework::query()->where('student_id', $studentId)->whereNotNull('practice_nodes')
+            ->whereIn('status', self::HOMEWORK_STATUSES)->find($homeworkId);
+
+        return $h === null ? null : self::ofHomework($h);
+    }
+
+    private static function ofHomework(Homework $h): PracticeFocus
+    {
+        return new PracticeFocus('homework', $h->enrollment_id, array_values($h->practice_nodes ?? []), $h->title, $h->id, $h->due_at,
+            done: $h->practice_result !== null && ($h->accepts !== 'practice' || $h->status !== 'assigned'), game: $h->practice_game);
     }
 }

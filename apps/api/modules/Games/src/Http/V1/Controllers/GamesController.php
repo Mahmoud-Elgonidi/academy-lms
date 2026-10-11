@@ -231,6 +231,8 @@ final class GamesController
      * When the journey's stars filled an egg (games.egg.ready on learning/journey/map), the learner taps it open: the
      * next creature hatches on the island they are on (island: the key of the island their level is drawn as). Answers
      * the creature with the three names the child chooses from, or null when no egg was ready. Send an Idempotency-Key.
+     *
+     * @throws AccessDeniedHttpException a guardian does not open their child's egg
      */
     public function hatch(Request $request, HatchCreature $hatch): JsonResponse
     {
@@ -238,7 +240,11 @@ final class GamesController
             'learner_id' => ['nullable', 'string', 'max:64'],
             'island' => ['nullable', 'string', 'max:31'],
         ]);
-        [, $learner] = $this->learner($request);
+        [$me, $learner] = $this->learner($request);
+        // The child taps their own egg open, as on the family screens; a guardian sees it fill.
+        if ($me !== $learner) {
+            throw new AccessDeniedHttpException;
+        }
         $creature = $hatch->byStars($learner, $data['island'] ?? null);
         $stars = $this->learning->stars($learner);
 

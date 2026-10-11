@@ -4165,6 +4165,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AccessDeniedHttpException"];
             422: components["responses"]["ValidationException"];
         };
     };

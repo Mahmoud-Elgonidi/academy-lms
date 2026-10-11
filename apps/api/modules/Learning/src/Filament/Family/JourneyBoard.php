@@ -17,7 +17,7 @@ use Modules\Identity\Contracts\PersonalChannel;
 use Modules\Learning\Actions\MarkCheersSeen;
 use Modules\Learning\Actions\OpenWeeklyChest;
 use Modules\Learning\Actions\SendCheer;
-use Modules\Learning\Domain\Challenges\ChallengeCatalog;
+use Modules\Learning\Domain\Journey\Cheers;
 use Modules\Learning\Models\Cheer;
 use Modules\Learning\Queries\Journey\JourneyMap;
 use Modules\People\Contracts\DTOs\Learner;
@@ -249,7 +249,7 @@ final class JourneyBoard extends Component
     {
         $learner = $this->learner();
 
-        return $learner === null || $this->isSelf() ? 0 : max(0, ChallengeCatalog::CHEERS_PER_DAY - Cheer::query()->where('from_id', (string) auth()->id())
+        return $learner === null || $this->isSelf() ? 0 : max(0, Cheers::PER_DAY - Cheer::query()->where('from_id', (string) auth()->id())
             ->where('student_id', $learner->id)->where('created_at', '>', now()->subDay())->count());
     }
 

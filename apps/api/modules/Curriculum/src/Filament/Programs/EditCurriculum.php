@@ -318,7 +318,9 @@ final class EditCurriculum extends Page
                         Grid::make(3)->schema([
                             Select::make('kind')->label(__($l.'fields.kind'))->required()->native(false)->live()->default('choice')
                                 ->options(collect(ItemKind::cases())->mapWithKeys(fn (ItemKind $k) => [$k->value => $k->label()])->all()),
+                            // An item reads the way its own words read (an English lesson in an Arabic builder), as the games show it.
                             TextInput::make('prompt')->label(__($l.'fields.prompt'))->maxLength(ItemKind::PROMPT_MAX)->columnSpan(2)
+                                ->extraInputAttributes(['dir' => 'auto'])
                                 ->placeholder(fn (Get $get) => __($l.'placeholders.prompt_'.($get('kind') ?? 'choice')))
                                 ->required(fn (Get $get) => $get('kind') === 'choice')
                                 ->visible(fn (Get $get) => $get('kind') !== 'pair'),
@@ -333,8 +335,10 @@ final class EditCurriculum extends Page
                             ->placeholder(__($l.'placeholders.part'))->reorderable()
                             ->visible(fn (Get $get) => $get('kind') === 'order')->required(fn (Get $get) => $get('kind') === 'order'),
                         Grid::make(2)->schema([
-                            TextInput::make('left')->label(__($l.'fields.left'))->maxLength(ItemKind::SIDE_MAX)->required(fn (Get $get) => $get('kind') === 'pair'),
-                            TextInput::make('right')->label(__($l.'fields.right'))->maxLength(ItemKind::SIDE_MAX)->required(fn (Get $get) => $get('kind') === 'pair'),
+                            TextInput::make('left')->label(__($l.'fields.left'))->maxLength(ItemKind::SIDE_MAX)->required(fn (Get $get) => $get('kind') === 'pair')
+                                ->extraInputAttributes(['dir' => 'auto']),
+                            TextInput::make('right')->label(__($l.'fields.right'))->maxLength(ItemKind::SIDE_MAX)->required(fn (Get $get) => $get('kind') === 'pair')
+                                ->extraInputAttributes(['dir' => 'auto']),
                         ])->visible(fn (Get $get) => $get('kind') === 'pair'),
                     ]),
             ])

@@ -9,8 +9,9 @@ use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Learning\Contracts\DTOs\JourneyStation;
 use Modules\Learning\Contracts\JourneyGames;
-use Modules\Learning\Domain\Challenges\ChallengeCatalog;
 use Modules\Learning\Domain\Journey\Stars;
+use Modules\Learning\Domain\Journey\Stickers;
+use Modules\Learning\Domain\Journey\Week;
 use Modules\Learning\Models\ChallengeClaim;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\LearningSettings;
@@ -343,11 +344,14 @@ final class JourneyMap
             ->where(fn ($q) => $q->where(fn ($q) => $q->whereIn('status', ['assigned', 'missed'])->where('due_at', '>', $now->subDays(self::LATE_HOMEWORK_DAYS)))
                 ->orWhere(fn ($q) => $q->whereIn('status', ['submitted', 'reviewed'])->where('updated_at', '>', $now->subDays(self::DONE_HOMEWORK_DAYS))))
             ->orderBy('due_at')->get();
+        // The lessons of each homework's report, in one read.
+        $reported = ReportItem::query()->whereIn('report_id', $rows->whereNull('practice_nodes')->pluck('report_id')->filter()->unique()->values())
+            ->get(['report_id', 'node_id'])->groupBy('report_id');
 
-        return $rows->map(function (Homework $h) use ($byCourse, $now) {
+        return $rows->map(function (Homework $h) use ($byCourse, $reported, $now) {
             $course = $h->enrollment_id === null ? null : $byCourse->get($h->enrollment_id);
             // On the furthest of its lessons (the practice it asks for, else its report's lessons): what it was set on.
-            $nodes = $h->practice_nodes ?? ($h->report_id === null ? [] : ReportItem::query()->where('report_id', $h->report_id)->pluck('node_id')->all());
+            $nodes = $h->practice_nodes ?? ($h->report_id === null ? [] : ($reported->get($h->report_id)?->pluck('node_id')->all() ?? []));
             [$island, $station] = [null, null];
             foreach ($course['islands'] ?? [] as $is) {
                 foreach ($is['stations'] as $st) {
@@ -410,7 +414,7 @@ final class JourneyMap
     private function chest(string $studentId, string $stage, array $lessons, CarbonImmutable $now): ?array
     {
         $zone = $this->zone($studentId);
-        $week = $now->setTimezone($zone)->startOfWeek(ChallengeCatalog::WEEK_STARTS)->startOfDay();
+        $week = Week::start($now, $zone);
         $opened = ChallengeClaim::query()->where('student_id', $studentId)->where('challenge', 'chest')->get();
         $last = $this->week($studentId, $stage, $week->subWeek(), $lessons, $opened, $now);
         if ($last !== null && $last['state'] === 'done') {
@@ -454,7 +458,7 @@ final class JourneyMap
             },
             'stars' => Stars::CHEST,
             /** The sticker it brings for the kids' album (the one it brought, once opened). */
-            'sticker' => $stage === 'kids' ? ($claim?->sticker ?? ChallengeCatalog::sticker($opened->count())) : null,
+            'sticker' => $stage === 'kids' ? ($claim?->sticker ?? Stickers::nth($opened->count())) : null,
             'ends_at' => $to,
         ];
     }
@@ -470,7 +474,7 @@ final class JourneyMap
 
         return [
             'earned' => $earned,
-            'items' => array_map(fn (string $key, int $i) => ['key' => $key, 'earned' => $i < $earned], ChallengeCatalog::STICKERS, array_keys(ChallengeCatalog::STICKERS)),
+            'items' => array_map(fn (string $key, int $i) => ['key' => $key, 'earned' => $i < $earned], Stickers::ALBUM, array_keys(Stickers::ALBUM)),
         ];
     }
 

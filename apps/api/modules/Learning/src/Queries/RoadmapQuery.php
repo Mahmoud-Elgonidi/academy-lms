@@ -49,7 +49,8 @@ final class RoadmapQuery
         $tree = $this->curriculum->tree($enrollment->curriculumVersionId);
         $states = $this->progress->states($enrollmentId);
         $position = $this->progress->position($enrollmentId);
-        $calculated = ProgressCalculator::position($tree, $states, [], $this->progress->lessonsPerWeek($enrollmentId));
+        $perWeek = $this->progress->lessonsPerWeek($enrollmentId);
+        $calculated = ProgressCalculator::position($tree, $states, [], $perWeek);
         $current = $position?->current_node_id ?? $calculated->currentNodeId;
         $files = $materials === self::MATERIALS_NONE ? [] : $this->materials->forLessons(array_map(fn ($n) => $n->id, $tree->lessons()), $materials === self::MATERIALS_TEACHERS);
         $this->practice = DB::table('practice_stats')->where('enrollment_id', $enrollmentId)->get()->keyBy('node_id')->all();
@@ -88,7 +89,7 @@ final class RoadmapQuery
             'lessons' => ['mastered' => count(array_filter($tree->lessons(), fn ($n) => isset($states[$n->id]) && $states[$n->id]->isMastered())), 'total' => count($tree->lessons())],
             'pace' => $position?->pace === null ? null : (float) $position->pace,
             'eta_weeks' => $position?->eta_weeks === null ? null : (float) $position->eta_weeks,
-            'lessons_per_week' => $this->progress->lessonsPerWeek($enrollmentId),
+            'lessons_per_week' => $perWeek,
             'current' => $current === null ? null : $this->here($tree, $current),
             'finished' => $current === null && $tree->lessons() !== [],
             'levels' => $levels,

@@ -16,7 +16,9 @@ use Modules\SharedKernel\Games\GameCatalog;
  * homework, mastered lessons, chests: LearningApi::stars) hatch one on the
  * island they are on (then the next island with one left), and every lesson
  * the teacher marks mastered hatches the next in the world's order. Each
- * creature once; a learner who has them all hatches nothing more.
+ * creature once, and each egg once (creature_finds.egg, unique: a round
+ * ending and the map's tap at the same moment hatch one creature between
+ * them); a learner who has them all hatches nothing more.
  */
 final class HatchCreature
 {
@@ -34,7 +36,8 @@ final class HatchCreature
             return null;
         }
 
-        return $this->hatch($studentId, $islandKey, ['source' => 'stars', 'play_id' => $playId]);
+        // The egg is numbered from what was read: another request that read the same hatches the same egg, which the database takes once.
+        return $this->hatch($studentId, $islandKey, ['source' => 'stars', 'egg' => $hatched + 1, 'play_id' => $playId]);
     }
 
     /** A lesson mastered: once per lesson. */
@@ -74,7 +77,7 @@ final class HatchCreature
         try {
             DB::transaction(fn () => CreatureFind::query()->create(['student_id' => $studentId, 'creature_key' => $creature->key, 'found_at' => now()] + $why));
         } catch (UniqueConstraintViolationException) {
-            return null;   // hatched at the same moment by another round
+            return null;   // this egg or this creature hatched at the same moment by another request
         }
 
         return $creature;

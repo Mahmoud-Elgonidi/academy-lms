@@ -9,6 +9,7 @@ use Modules\Learning\Actions\RecordPractice;
 use Modules\Learning\Actions\SendCheer;
 use Modules\Learning\Contracts\DTOs\HomeworkLine;
 use Modules\Learning\Contracts\DTOs\PlanLine;
+use Modules\Learning\Contracts\DTOs\PracticeFocus;
 use Modules\Learning\Contracts\DTOs\PracticeRecorded;
 use Modules\Learning\Contracts\DTOs\PracticeRound;
 use Modules\Learning\Contracts\LearningApi;
@@ -63,6 +64,11 @@ final class LearningService implements LearningApi
     public function practiceFocus(string $studentId, ?CarbonImmutable $now = null): array
     {
         return app(PracticeFocusQuery::class)->for($studentId, $now);
+    }
+
+    public function homeworkFocus(string $studentId, string $homeworkId): ?PracticeFocus
+    {
+        return app(PracticeFocusQuery::class)->homework($studentId, $homeworkId);
     }
 
     public function journeyStations(string $studentId): array

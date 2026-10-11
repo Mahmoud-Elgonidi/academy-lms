@@ -49,9 +49,11 @@ final class FinishPlay
                 return ['play' => $play, 'creature' => null, 'handed_in' => false, 'homework' => null];
             }
             $now = CarbonImmutable::now();
-            $score = Round::score($play->itemIds(), $answers);
+            $ids = $play->itemIds();
+            $score = Round::score($ids, $answers);
             $play->forceFill([
-                'answers' => $answers,
+                // Only tries at the round's own items are kept; anything else the page sent is dropped.
+                'answers' => array_values(array_filter($answers, fn (array $a) => in_array($a['item'], $ids, true))),
                 'finished_at' => $now,
                 'seconds' => min(Round::MAX_SECONDS, max(0, $now->getTimestamp() - $play->started_at->getTimestamp())),
                 'correct' => $score['correct'],

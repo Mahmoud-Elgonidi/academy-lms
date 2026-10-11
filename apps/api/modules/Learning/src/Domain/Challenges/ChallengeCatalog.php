@@ -2,7 +2,9 @@
 
 namespace Modules\Learning\Domain\Challenges;
 
-use Carbon\CarbonImmutable;
+use Modules\Learning\Domain\Journey\Cheers;
+use Modules\Learning\Domain\Journey\Stickers;
+use Modules\Learning\Domain\Journey\Week;
 
 /**
  * The challenges each stage plays (docs/architecture/02, "التحديات"), all
@@ -15,11 +17,14 @@ use Carbon\CarbonImmutable;
  * - middle: weekly quests for XP, and a "boss" for finishing the level.
  * - teen, and adult students (classic): weekly goals and a month without
  *   missing a lesson.
+ *
+ * Kept for earlier app versions (learning/challenges); the journey's week,
+ * stickers and cheers are Domain\Journey's, which this refers to.
  */
 final class ChallengeCatalog
 {
-    /** Weeks start on Saturday, on the student's own clock. */
-    public const WEEK_STARTS = CarbonImmutable::SATURDAY;
+    /** Weeks start on Saturday, on the student's own clock (the journey's week). */
+    public const WEEK_STARTS = Week::STARTS;
 
     /** Minutes after the start that still count as coming in on time. */
     public const ON_TIME_GRACE_MIN = 3;
@@ -27,8 +32,8 @@ final class ChallengeCatalog
     /** Days with a finished practice round that make the week's practice challenge. */
     public const PRACTICE_DAYS = 3;
 
-    /** A guardian's cheers to one learner in a day. */
-    public const CHEERS_PER_DAY = 5;
+    /** A guardian's cheers to one learner in a day (the journey's). */
+    public const CHEERS_PER_DAY = Cheers::PER_DAY;
 
     /**
      * Per stage, in the order shown: [challenge, period (week|month|world), reward in points].
@@ -42,11 +47,8 @@ final class ChallengeCatalog
         'classic' => [['attend', 'week', 80], ['homework', 'week', 80], ['master', 'week', 150], ['month', 'month', 300]],
     ];
 
-    /** The kids' album: one sticker per chest, in this order (then round again). */
-    public const STICKERS = [
-        'lion', 'rocket', 'sun', 'whale', 'cat', 'tree', 'kite', 'castle', 'camel', 'owl', 'turtle', 'balloon',
-        'moon', 'fish', 'bee', 'rainbow', 'plane', 'crown', 'cupcake', 'dino', 'flower', 'robot', 'boat', 'trophy',
-    ];
+    /** The kids' album: one sticker per chest, in this order (then round again): the journey's. */
+    public const STICKERS = Stickers::ALBUM;
 
     /** @return list<array{0: string, 1: string, 2: int}> */
     public static function for(string $stage): array
@@ -68,6 +70,6 @@ final class ChallengeCatalog
     /** The sticker the n-th chest (0-based) brings. */
     public static function sticker(int $n): string
     {
-        return self::STICKERS[$n % count(self::STICKERS)];
+        return Stickers::nth($n);
     }
 }

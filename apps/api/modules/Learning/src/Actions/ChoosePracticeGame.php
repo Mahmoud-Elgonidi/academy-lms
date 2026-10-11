@@ -5,9 +5,12 @@ namespace Modules\Learning\Actions;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
+use Modules\Curriculum\Contracts\CurriculumApi;
+use Modules\Curriculum\Contracts\DTOs\PracticeItem;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\LearningSettings;
 use Modules\Learning\Models\SessionReport;
+use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\SharedKernel\Games\GameCatalog;
 
@@ -26,11 +29,13 @@ final class ChoosePracticeGame
         private readonly AssignHomework $assign,
         private readonly GameCatalog $catalog,
         private readonly AttendanceApi $attendance,
+        private readonly CurriculumApi $curriculum,
+        private readonly PeopleApi $people,
     ) {}
 
     /**
      * @throws AuthorizationException not the report's teacher
-     * @throws ValidationException no lessons in the report, an unknown game, or homework already handed in
+     * @throws ValidationException no lessons in the report, an unknown game or one the learner cannot play, or homework already handed in
      */
     public function handle(SessionReport $report, string $teacherId, string $gameKey, bool $practiceOnly, bool $beforeNext, ?CarbonImmutable $now = null): Homework
     {
@@ -45,6 +50,12 @@ final class ChoosePracticeGame
         $game = $this->catalog->game($gameKey);
         if ($game === null) {
             throw ValidationException::withMessages(['game' => __('learning::homework.game.errors.game')]);
+        }
+        // Only a game the learner can play: made for their look, with enough of these lessons' items of the kinds it plays.
+        $items = array_merge(...array_values($this->curriculum->practiceItems($lessons)));
+        $playable = count(array_filter($items, fn (PracticeItem $i) => $game->plays($i->kind)));
+        if (! $game->fits($this->people->studentProfile($report->student_id)->stage->value) || $playable < $game->minItems) {
+            throw ValidationException::withMessages(['game' => __('learning::homework.game.errors.no_fit')]);
         }
         $existing = $report->homework()->first();
         if ($existing !== null && ($existing->status !== 'assigned' || $existing->submissions()->exists())) {

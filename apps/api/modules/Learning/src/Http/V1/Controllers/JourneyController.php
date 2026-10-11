@@ -6,7 +6,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Learning\Actions\OpenWeeklyChest;
 use Modules\Learning\Contracts\DTOs\JourneyGamesLayer;
-use Modules\Learning\Domain\Challenges\ChallengeCatalog;
+use Modules\Learning\Domain\Journey\Cheers;
 use Modules\Learning\Domain\Journey\Stars;
 use Modules\Learning\Models\Cheer;
 use Modules\Learning\Queries\Journey\JourneyMap;
@@ -136,7 +136,7 @@ final class JourneyController
             'cheers' => ! $self ? [] : Cheer::query()->where('student_id', $learner)->whereNull('seen_at')->orderBy('created_at')->limit(10)->get()
                 ->map(fn (Cheer $c) => ['id' => $c->id, 'kind' => $c->kind, 'at' => $this->time->present($c->created_at)])->all(),
             /** For a guardian: cheers they may still send this learner today. */
-            'cheers_left' => $self ? 0 : max(0, ChallengeCatalog::CHEERS_PER_DAY - Cheer::query()->where('from_id', $me)->where('student_id', $learner)->where('created_at', '>', now()->subDay())->count()),
+            'cheers_left' => $self ? 0 : max(0, Cheers::PER_DAY - Cheer::query()->where('from_id', $me)->where('student_id', $learner)->where('created_at', '>', now()->subDay())->count()),
         ]]);
     }
 
