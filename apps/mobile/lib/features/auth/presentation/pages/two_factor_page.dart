@@ -7,6 +7,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../bloc/sign_in_cubit.dart';
 import '../widgets/sign_in_frame.dart';
+import '../../../../shared/widgets/latin_digits.dart';
 
 /// The second step for an account with two-step sign-in: the six digits the
 /// authenticator app shows now, or one of the recovery codes. Several chosen
@@ -82,6 +83,7 @@ class _TwoFactorPageState extends State<TwoFactorPage> {
                   autofocus: true,
                   autocorrect: false,
                   autofillHints: const [AutofillHints.oneTimeCode],
+                  inputFormatters: const [LatinDigits()],
                   maxLength: 40,
                   textAlign: TextAlign.center,
                   textDirection: TextDirection.ltr,

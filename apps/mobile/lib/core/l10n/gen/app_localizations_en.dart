@@ -1006,6 +1006,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get joining => 'Joining…';
 
   @override
+  String get linkNotOpened => 'No app on this phone can open this link.';
+
+  @override
   String get openedOutside => 'The lesson opened in another app.';
 
   @override

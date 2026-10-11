@@ -11,6 +11,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/shifts.dart';
 import 'shifts_page.dart';
+import '../../../../shared/widgets/latin_digits.dart';
 
 /// What the editor starts from: the open proposal, or the week in force.
 class ShiftDraft {
@@ -215,6 +216,7 @@ class _ShiftEditorPageState extends State<ShiftEditorPage> {
                 child: TextField(
                   controller: _min,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: const [LatinDigits(decimal: true)],
                   decoration: InputDecoration(labelText: l.minHours),
                 ),
               ),
@@ -223,6 +225,7 @@ class _ShiftEditorPageState extends State<ShiftEditorPage> {
                 child: TextField(
                   controller: _max,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: const [LatinDigits(decimal: true)],
                   decoration: InputDecoration(labelText: l.maxHours),
                 ),
               ),

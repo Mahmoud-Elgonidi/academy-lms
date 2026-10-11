@@ -19,6 +19,8 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 typedef Reply = (int, Object?);
 
@@ -105,6 +107,37 @@ class FakePush implements PushTokens {
   Stream<String> get refreshed => _refreshed.stream;
 
   void rotate(String next) => _refreshed.add(token = next);
+}
+
+/// The phone's browser and other apps (a lesson's outside room, the privacy
+/// pages): records each link and its mode, and opens nothing. [opens] false
+/// answers as a phone with no app for the link.
+class FakeLauncher extends UrlLauncherPlatform {
+  FakeLauncher._();
+
+  /// Stands in for the platform's launcher until the next [install].
+  static FakeLauncher install() {
+    final fake = FakeLauncher._();
+    UrlLauncherPlatform.instance = fake;
+    return fake;
+  }
+
+  final opened = <(String, PreferredLaunchMode)>[];
+  bool opens = true;
+
+  List<String> get urls => [for (final (url, _) in opened) url];
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> canLaunch(String url) async => opens;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    opened.add((url, options.mode));
+    return opens;
+  }
 }
 
 /// A whole app wired to a [FakeApi], with secrets and preferences in memory.

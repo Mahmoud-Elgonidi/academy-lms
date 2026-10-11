@@ -1,5 +1,8 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- The API, and live lessons (LiveKit): camera, microphone, audio routing, headsets. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- The API, and live lessons (LiveKit): camera, microphone, audio routing, headsets.
+         The microphone also records voice homework; push adds POST_NOTIFICATIONS and WAKE_LOCK
+         (firebase_messaging's own manifest). Receipts and files come through the system picker: no storage permission. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -8,7 +11,12 @@
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <!-- Children use the app, so Google Play's Families policy applies: no advertising ID. Firebase and
+         Play services can bring this permission in through their own manifests; the merged manifest drops it. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
+    <!-- Release builds speak https only (debug builds allow the local API over http: src/debug). -->
     <application
+        android:usesCleartextTraffic="false"
         android:label="Academy"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"

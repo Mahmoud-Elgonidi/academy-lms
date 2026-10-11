@@ -89,20 +89,26 @@ class _NextLessonCardState extends State<NextLessonCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // The room's state takes what is left of the line and wraps on a small phone or with large text.
           Row(
             children: [
               Text(
                 l.nextLesson,
                 style: TextStyle(color: ink.withValues(alpha: 0.85), fontWeight: FontWeight.w600, fontSize: kids ? 16 : 13),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               if (status != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                  decoration: BoxDecoration(color: ink.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(999)),
-                  child: Text(
-                    status,
-                    style: const TextStyle(color: ink, fontSize: 12, fontWeight: FontWeight.w700),
+                Expanded(
+                  child: Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                      decoration: BoxDecoration(color: ink.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(12)),
+                      child: Text(
+                        status,
+                        style: const TextStyle(color: ink, fontSize: 12, fontWeight: FontWeight.w700),
+                      ),
+                    ),
                   ),
                 ),
             ],

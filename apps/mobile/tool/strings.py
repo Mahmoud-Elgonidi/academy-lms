@@ -308,6 +308,7 @@ s('proofFileTooBig', 'الملف أكبر من 10 ميجا.', 'The file is large
 
 # Classroom
 s('joining', 'بندخّلك الحصة…', 'Joining…')
+s('linkNotOpened', 'مفيش برنامج على الموبايل يفتح اللينك ده.', 'No app on this phone can open this link.')
 s('openedOutside', 'الحصة اتفتحت في تطبيق تاني.', 'The lesson opened in another app.')
 s('leave', 'اخرج من الحصة', 'Leave the lesson')
 s('micOff', 'اقفل المايك', 'Mute')

@@ -17,6 +17,7 @@ import '../../data/billing_repository.dart';
 import '../../domain/billing.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../core/realtime/live.dart';
+import '../../../../shared/widgets/latin_digits.dart';
 
 class _Money {
   const _Money(this.invoices, this.balance);
@@ -101,7 +102,8 @@ class _MoneyList extends StatelessWidget {
                 ),
                 if (due.proof case final proof?) ...[const SizedBox(height: 10), _ProofLine(proof: proof)],
                 const SizedBox(height: 12),
-                if (due.payWith.isNotEmpty || !due.canSendProof)
+                // No gateway takes it and its proof waits for the academy: nothing to press, the line above says where it stands.
+                if (due.payWith.isNotEmpty || (!due.canSendProof && due.proof?.status != 'pending'))
                   SizedBox(
                     width: double.infinity,
                     child: _PayButton(invoice: due),
@@ -497,22 +499,36 @@ class _ProofSheetState extends State<_ProofSheet> {
 
   Future<void> _pick() async {
     final l = context.l10n;
-    final picked = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: _mimes.keys.toList());
-    if (picked == null || !mounted) return;
-    final bytes = await picked.xFile.readAsBytes();
+    PlatformFile? picked;
+    try {
+      picked = await FilePicker.pickFile(type: FileType.custom, allowedExtensions: _mimes.keys.toList());
+    } on Object {
+      if (mounted) setState(() => _error = l.problem);
+      return;
+    }
+    final file = picked;
+    if (file == null || !mounted) return;
+    // A big video picked by mistake is turned down before it is read into memory.
+    final size = file.lengthSync();
+    if (size != null && size > _maxBytes) {
+      setState(() => _error = l.proofFileTooBig);
+      return;
+    }
+    final bytes = await file.readAsBytes();
     if (!mounted) return;
     if (bytes.length > _maxBytes) {
       setState(() => _error = l.proofFileTooBig);
       return;
     }
-    final ext = (picked.extension ?? '').toLowerCase();
+    final ext = (file.extension ?? '').toLowerCase();
     setState(() {
-      _receipt = Receipt(bytes: bytes, name: picked.name, mime: _mimes[ext] ?? 'application/octet-stream');
+      _receipt = Receipt(bytes: bytes, name: file.name, mime: _mimes[ext] ?? 'application/octet-stream');
       _error = null;
     });
   }
 
   Future<void> _send() async {
+    if (_busy) return;
     final l = context.l10n;
     final receipt = _receipt;
     if (receipt == null) {
@@ -589,6 +605,7 @@ class _ProofSheetState extends State<_ProofSheet> {
                     child: TextField(
                       controller: _amount,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: const [LatinDigits(decimal: true)],
                       decoration: InputDecoration(labelText: l.proofAmount),
                     ),
                   ),

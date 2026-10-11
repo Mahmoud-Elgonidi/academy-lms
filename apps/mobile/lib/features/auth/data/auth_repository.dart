@@ -53,6 +53,14 @@ class AuthRepository {
     ),
   );
 
+  /// The platform's own privacy notice, terms or account-deletion page ([page]: `privacy`, `terms`,
+  /// `account-deletion`) in [lang], on the API's host: before signing in no academy is chosen yet (the code finds
+  /// accounts in every academy), so these are the platform's; signed in, "My data" links the academy's own.
+  Uri legalPage(String page, String lang) {
+    final api = Uri.parse(_api.dio.options.baseUrl);
+    return Uri(scheme: api.scheme, host: api.host, port: api.hasPort ? api.port : null, path: '/$page', queryParameters: {'lang': lang});
+  }
+
   /// The second step: the code the authenticator app shows now, or a recovery code.
   Future<Account> completeTwoFactor(TwoFactorStep step, String code) async => accountFromToken(
     await _api.post(

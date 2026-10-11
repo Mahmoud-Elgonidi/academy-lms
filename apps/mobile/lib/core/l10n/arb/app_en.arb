@@ -277,6 +277,7 @@
   "proofNeedsReceipt": "Choose the receipt first.",
   "proofFileTooBig": "The file is larger than 10 MB.",
   "joining": "Joining…",
+  "linkNotOpened": "No app on this phone can open this link.",
   "openedOutside": "The lesson opened in another app.",
   "leave": "Leave the lesson",
   "micOff": "Mute",

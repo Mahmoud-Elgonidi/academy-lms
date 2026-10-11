@@ -9,6 +9,7 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../bloc/sign_in_cubit.dart';
 import '../widgets/sign_in_frame.dart';
+import '../../../../shared/widgets/latin_digits.dart';
 
 /// Step two: the six digits. A new code after the wait, or by text instead
 /// of WhatsApp.
@@ -90,7 +91,7 @@ class _CodePageState extends State<CodePage> {
                 autofocus: true,
                 keyboardType: TextInputType.number,
                 autofillHints: const [AutofillHints.oneTimeCode],
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
+                inputFormatters: [const LatinDigits(), FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
                 textAlign: TextAlign.center,
                 textDirection: TextDirection.ltr,
                 style: TextStyle(fontSize: 28, letterSpacing: 12, fontWeight: FontWeight.w700, color: context.colors.ink),

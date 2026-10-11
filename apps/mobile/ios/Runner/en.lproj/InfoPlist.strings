@@ -1,0 +1,4 @@
+/* Why the app asks, in English (Info.plist has the same keys as the fallback). */
+"NSCameraUsageDescription" = "The camera shows you to your teacher during a live lesson.";
+"NSMicrophoneUsageDescription" = "The microphone lets your teacher hear you during a live lesson, and records your voice homework.";
+"NSPhotoLibraryUsageDescription" = "Choose a photo from your library: a payment receipt, homework, or a document the academy asked for.";

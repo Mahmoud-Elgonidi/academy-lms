@@ -10,6 +10,7 @@ import '../../../core/state/load_cubit.dart';
 import '../../../shared/motion/motion.dart';
 import '../../../shared/widgets/lms.dart';
 import '../../../shared/widgets/load_view.dart';
+import '../../../shared/widgets/open_link.dart';
 import '../data/privacy_repository.dart';
 import '../domain/my_data.dart';
 
@@ -490,7 +491,7 @@ class _Pages extends StatelessWidget {
                 key: Key('page-$key'),
                 leading: const Icon(Icons.open_in_new_rounded),
                 title: Text(names[key]!),
-                onTap: () => launchUrl(Uri.parse(links[key]!), mode: LaunchMode.inAppBrowserView),
+                onTap: () => openLink(context, Uri.parse(links[key]!)),
               ),
         ],
       ),

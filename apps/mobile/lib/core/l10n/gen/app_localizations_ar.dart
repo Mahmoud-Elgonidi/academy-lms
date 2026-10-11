@@ -1027,6 +1027,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get joining => 'بندخّلك الحصة…';
 
   @override
+  String get linkNotOpened => 'مفيش برنامج على الموبايل يفتح اللينك ده.';
+
+  @override
   String get openedOutside => 'الحصة اتفتحت في تطبيق تاني.';
 
   @override

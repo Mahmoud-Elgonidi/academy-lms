@@ -14,6 +14,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../consent/presentation/privacy_page.dart';
 import '../../data/profile_repository.dart';
 import '../widgets/accounts_card.dart';
+import '../../../../shared/widgets/latin_digits.dart';
 
 /// "Me": the accounts on this phone, the clock, language and sounds, the
 /// email and mobile number (a new one by code), Google and Apple sign-in, the
@@ -700,6 +701,7 @@ class _ContactDialogState extends State<_ContactDialog> {
               key: const Key('contact-value'),
               controller: _value,
               keyboardType: email ? TextInputType.emailAddress : TextInputType.phone,
+              inputFormatters: const [LatinDigits()],
               textDirection: TextDirection.ltr,
               autofillHints: [email ? AutofillHints.email : AutofillHints.telephoneNumber],
               decoration: InputDecoration(
@@ -715,6 +717,7 @@ class _ContactDialogState extends State<_ContactDialog> {
               key: const Key('contact-code'),
               controller: _code,
               keyboardType: TextInputType.number,
+              inputFormatters: const [LatinDigits()],
               textDirection: TextDirection.ltr,
               autofillHints: const [AutofillHints.oneTimeCode],
               maxLength: 12,

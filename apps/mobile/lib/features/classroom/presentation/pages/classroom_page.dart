@@ -43,6 +43,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
   /// What the lesson's own start or stop said last; the room's word wins when it speaks.
   bool? _running;
   bool _recordBusy = false;
+  bool _leaving = false;
 
   @override
   void initState() {
@@ -56,7 +57,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
   void dispose() {
     _tick?.cancel();
     _room.removeListener(_changed);
-    unawaited(_room.disconnect().then((_) => _room.dispose()));
+    unawaited(closeRoom(disconnect: _room.disconnect, dispose: _room.dispose));
     super.dispose();
   }
 
@@ -71,6 +72,8 @@ class _ClassroomPageState extends State<ClassroomPage> {
           : await context.read<ClassroomRepository>().join(widget.lessonId);
       _recording = ticket.recording;
       await _room.connect(ticket.url, ticket.token!);
+      // Left while it connected: the microphone and camera stay off.
+      if (!mounted) return;
       _clock.start();
       if (ticket.canPublish) {
         await _room.localParticipant?.setMicrophoneEnabled(true);
@@ -148,9 +151,11 @@ class _ClassroomPageState extends State<ClassroomPage> {
     }
   }
 
-  Future<void> _leave() async {
-    await _room.disconnect();
-    if (mounted) context.canPop() ? context.pop() : context.go('/');
+  /// Out of the lesson at once, even when the network is gone; closing the page leaves the room ([dispose]).
+  void _leave() {
+    if (_leaving) return;
+    _leaving = true;
+    context.canPop() ? context.pop() : context.go('/');
   }
 
   @override
@@ -359,6 +364,19 @@ class _ClassroomPageState extends State<ClassroomPage> {
       ),
     );
   }
+}
+
+/// Leaves a lesson's room and lets it go. A room that never connected, or
+/// lost the network, answers the disconnect with a timeout after ten seconds:
+/// it is let go all the same (its timers and listeners stop).
+@visibleForTesting
+Future<void> closeRoom({required Future<void> Function() disconnect, required Future<void> Function() dispose}) async {
+  try {
+    await disconnect();
+  } on Object {
+    // Nothing more to say to the server.
+  }
+  await dispose();
 }
 
 class _RoundButton extends StatelessWidget {

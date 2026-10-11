@@ -13,6 +13,7 @@ import '../../../../shared/widgets/load_view.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/teaching.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../core/realtime/live.dart';
 
 /// Asking for time off on the teacher's own clock (whole days, or part of
 /// one day), and the requests so far; a pending one can be withdrawn.
@@ -23,7 +24,8 @@ class TimeOffPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final zone = context.select<SessionCubit, String?>((s) => s.state.me?.displayTimezone ?? s.state.timezone);
     return BlocProvider(
-      create: (c) => LoadCubit<TimeOffList>(c.read<TeachingRepository>().timeOff)..load(),
+      // A decision on leave moves lessons (the lessons signal); coming back to the app catches up too.
+      create: (c) => LoadCubit<TimeOffList>(c.read<TeachingRepository>().timeOff, refreshOn: c.read<Live>().on({Live.lessons}))..load(),
       child: Scaffold(
         appBar: AppBar(
           title: Column(

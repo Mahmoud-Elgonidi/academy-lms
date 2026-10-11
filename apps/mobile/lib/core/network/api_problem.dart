@@ -17,6 +17,9 @@ class ApiProblem implements Exception {
 
   factory ApiProblem.offline() => const ApiProblem(type: 'offline', title: '', status: 0);
 
+  /// An answer the app could not read: shown as "something went wrong".
+  factory ApiProblem.unreadable() => const ApiProblem(type: 'unreadable', title: '', status: 0);
+
   factory ApiProblem.fromDio(DioException e) {
     final response = e.response;
     if (response == null) {

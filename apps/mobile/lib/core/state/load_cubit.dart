@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../network/api_problem.dart';
@@ -70,6 +71,11 @@ class LoadCubit<T> extends Cubit<LoadState<T>> {
       }
     } on ApiProblem catch (problem) {
       if (!isClosed) emit(LoadState<T>(data: state.data, problem: problem, loading: false));
+    } on Object catch (error) {
+      // An answer the app cannot read (a field missing or of another type): the screen says something went
+      // wrong and offers to try again, instead of loading for ever.
+      debugPrint('LoadCubit<$T>: $error');
+      if (!isClosed) emit(LoadState<T>(data: state.data, problem: ApiProblem.unreadable(), loading: false));
     }
   }
 }

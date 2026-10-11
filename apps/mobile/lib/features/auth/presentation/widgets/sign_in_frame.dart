@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../shared/widgets/open_link.dart';
+import '../../data/auth_repository.dart';
 
 /// The frame of every sign-in step: a back button (after the first), the
-/// title and lead, the step's content, and its main button at the bottom.
+/// title and lead, the step's content, its main button at the bottom, and
+/// the privacy notice and terms under it (the stores ask for them before
+/// signing in).
 class SignInFrame extends StatelessWidget {
   const SignInFrame({
     required this.title,
@@ -58,13 +63,44 @@ class SignInFrame extends StatelessWidget {
                   ],
                 ),
               ),
-              if (bottom != null) Padding(padding: const EdgeInsets.fromLTRB(22, 8, 22, 18), child: bottom),
+              if (bottom != null) Padding(padding: const EdgeInsets.fromLTRB(22, 8, 22, 0), child: bottom),
+              const Padding(padding: EdgeInsets.fromLTRB(22, 0, 22, 6), child: _LegalLinks()),
             ],
           ),
         ),
       ),
     ),
   );
+}
+
+/// The platform's privacy notice and terms, in the browser: before signing in no academy is chosen yet.
+class _LegalLinks extends StatelessWidget {
+  const _LegalLinks();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final auth = context.read<AuthRepository>();
+    Widget link(String page, String label) => TextButton(
+      key: Key('legal-$page'),
+      style: TextButton.styleFrom(
+        foregroundColor: context.colors.muted,
+        textStyle: context.text.bodySmall,
+        visualDensity: VisualDensity.compact,
+      ),
+      onPressed: () => openLink(context, auth.legalPage(page, context.locale)),
+      child: Text(label),
+    );
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        link('privacy', l.myDataPrivacy),
+        Text('·', style: context.text.bodySmall),
+        link('terms', l.myDataTerms),
+      ],
+    );
+  }
 }
 
 class _Mark extends StatelessWidget {

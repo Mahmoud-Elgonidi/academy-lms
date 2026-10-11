@@ -16,6 +16,7 @@ import '../../../homework/presentation/widgets/submission_view.dart';
 import '../../../roadmap/domain/report_answers.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/reports.dart';
+import '../../../../shared/widgets/latin_digits.dart';
 
 /// Writing a report from the phone: today's plan (what happened with each
 /// lesson, a score, a note), focus and overall, words for the family and
@@ -414,6 +415,7 @@ class _EditorState extends State<_Editor> {
                 controller: _typed[q.key],
                 enabled: !locked,
                 keyboardType: q.type == 'number' ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
+                inputFormatters: q.type == 'number' ? const [LatinDigits(decimal: true)] : null,
                 maxLength: q.type == 'text' ? 500 : null,
                 decoration: InputDecoration(
                   labelText: q.required ? q.label : '${q.label} ${l.optional}',

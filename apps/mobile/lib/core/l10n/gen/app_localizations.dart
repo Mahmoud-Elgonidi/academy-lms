@@ -1754,6 +1754,12 @@ abstract class AppLocalizations {
   /// **'بندخّلك الحصة…'**
   String get joining;
 
+  /// No description provided for @linkNotOpened.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش برنامج على الموبايل يفتح اللينك ده.'**
+  String get linkNotOpened;
+
   /// No description provided for @openedOutside.
   ///
   /// In ar, this message translates to:

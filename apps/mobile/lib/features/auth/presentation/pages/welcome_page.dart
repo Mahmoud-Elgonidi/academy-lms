@@ -11,6 +11,7 @@ import '../../../../core/social/social_sign_in.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../bloc/sign_in_cubit.dart';
 import '../widgets/sign_in_frame.dart';
+import '../../../../shared/widgets/latin_digits.dart';
 
 /// Step one: a mobile number (with its country) or an email.
 class WelcomePage extends StatefulWidget {
@@ -203,7 +204,7 @@ class _WelcomePageState extends State<WelcomePage> {
                       controller: _phone,
                       keyboardType: TextInputType.phone,
                       autofillHints: const [AutofillHints.telephoneNumberNational],
-                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9 ]'))],
+                      inputFormatters: [const LatinDigits(), FilteringTextInputFormatter.allow(RegExp(r'[0-9 ]'))],
                       textDirection: TextDirection.ltr,
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => _send(),

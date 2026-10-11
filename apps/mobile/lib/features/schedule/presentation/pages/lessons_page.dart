@@ -102,6 +102,8 @@ class _LessonDays extends StatelessWidget {
     }
     Future<void> reload() => context.read<LoadCubit<LessonList>>().load();
     final nextId = past ? null : data.lessons.where((x) => x.upcoming).firstOrNull?.id;
+    // A child in the kids' look only joins: cancelling, turning down a substitute, disputing and rating are the family's.
+    final kids = context.shape.stage == Stage.kids;
     return ListView(
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
@@ -118,7 +120,7 @@ class _LessonDays extends StatelessWidget {
             LessonCard(
               lesson: lesson,
               highlight: lesson.id == nextId,
-              onCancel: lesson.canCancel
+              onCancel: lesson.canCancel && !kids
                   ? () async {
                       if (await showCancelSheet(context, lesson) && context.mounted) {
                         showSnack(context, l.cancelled);
@@ -126,12 +128,12 @@ class _LessonDays extends StatelessWidget {
                       }
                     }
                   : null,
-              onRefuse: lesson.canRefuseSubstitute
+              onRefuse: lesson.canRefuseSubstitute && !kids
                   ? () async {
                       if (await refuseSubstitute(context, lesson) && context.mounted) await reload();
                     }
                   : null,
-              onDispute: lesson.canDispute && context.shape.stage != Stage.kids
+              onDispute: lesson.canDispute && !kids
                   ? () async {
                       final repo = context.read<LessonsRepository>();
                       final sent = await showDisputeSheet(
@@ -146,7 +148,7 @@ class _LessonDays extends StatelessWidget {
                       }
                     }
                   : null,
-              onRate: past && lesson.tookPlace && context.shape.stage != Stage.kids
+              onRate: past && lesson.tookPlace && !kids
                   ? () async {
                       if (await showRateSheet(context, lesson) && context.mounted) showSnack(context, l.rated);
                     }

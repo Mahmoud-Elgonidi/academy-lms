@@ -51,11 +51,15 @@ class _WeekPageState extends State<WeekPage> {
       ),
       body: BlocProvider(
         key: ValueKey(_offset),
-        create: (c) => LoadCubit<TeacherLessons>(() async {
-          final week = await c.read<TeachingRepository>().lessons(from: from);
-          if (_today == null && mounted) setState(() => _today = week.from);
-          return week;
-        }, refreshOn: c.read<Live>().on({Live.lessons}))..load(),
+        create: (c) => LoadCubit<TeacherLessons>(
+          () async {
+            final week = await c.read<TeachingRepository>().lessons(from: from);
+            if (_today == null && mounted) setState(() => _today = week.from);
+            return week;
+          },
+          refreshOn: c.read<Live>().on({Live.lessons}),
+          refreshAt: (w) => w.lessons.expand((l) => l.clockMoments),
+        )..load(),
         child: LoadView<TeacherLessons>(builder: (context, week) => _Days(week: week)),
       ),
     );
