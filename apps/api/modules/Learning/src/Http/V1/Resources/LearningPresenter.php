@@ -99,6 +99,16 @@ final class LearningPresenter
             'grade' => $h->grade,
             'feedback' => $h->feedback,
             'reviewed_at' => $this->time->present($h->reviewed_at),
+            // Practice in the games on the report's lessons (null: none): how the best round went, or not yet.
+            'practice' => $h->hasPractice() ? [
+                'done' => $h->practice_result !== null,
+                'correct' => $h->practice_result['correct'] ?? null,
+                'total' => $h->practice_result['total'] ?? null,
+                'stars' => $h->practice_result['stars'] ?? null,
+                'game' => $h->practice_result['game'] ?? null,
+                'label' => $h->practice_result === null ? __('learning::homework.practice.waiting')
+                    : __('learning::homework.practice.result', ['correct' => $h->practice_result['correct'], 'total' => $h->practice_result['total'], 'stars' => $h->practice_result['stars'], 'game' => $h->practice_result['game']]),
+            ] : null,
             'submissions' => $h->submissions->map(fn (HomeworkSubmission $s) => [
                 'id' => $s->id,
                 'body' => $s->body,

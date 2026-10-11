@@ -3,6 +3,9 @@
     @if ($homework->instructions)
         <p style="margin:0; color:var(--gray-600); white-space:pre-line">{{ $homework->instructions }}</p>
     @endif
+    @if ($homework->hasPractice())
+        <p style="margin:0; padding:.45rem .7rem; border-radius:var(--radius-lg); background:var(--success-50); color:var(--success-800)">🎮 {{ $homework->practice_result ? __('learning::homework.practice.result', $homework->practice_result) : __('learning::homework.practice.waiting') }}</p>
+    @endif
     @foreach ($homework->submissions as $s)
         <div style="border:1px solid var(--gray-200); border-radius:var(--radius-lg); padding:.6rem .75rem; display:flex; flex-direction:column; gap:.4rem">
             <small style="color:var(--gray-500)">{{ $at($s->submitted_at) }}</small>

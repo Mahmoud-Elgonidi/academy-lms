@@ -5,7 +5,7 @@
 #              and the portal's pages (/ar, /en, /_next, /bff) passed on to the portal
 #   portal     the teachers' portal (apps/web), Next's own server on 3000
 #   reverb     Reverb, the browsers' live connections
-#   worker     the queue (notifications first)
+#   worker     the queue (notifications first), and beside it the games designer's (rounds take minutes)
 #   scheduler  the scheduler (attendance, reminders, sweeps, the night's sessions)
 #   relay      live:relay, database changes to Reverb
 #   migrate    migrations, as lms_owner
@@ -29,7 +29,9 @@ php artisan optimize >/dev/null
 case "${1:-web}" in
     web) exec frankenphp run --config /etc/academy/Caddyfile --adapter caddyfile ;;
     reverb) exec php artisan reverb:start --host=0.0.0.0 --port=8080 ;;
-    worker) exec php artisan queue:work --queue=notifications,default --tries=3 --max-time=3600 ;;
+    worker)
+        ( while true; do php artisan queue:work designer --queue=designer --tries=1 --timeout=1000 --max-time=3600; sleep 1; done ) &
+        exec php artisan queue:work --queue=notifications,default --tries=3 --max-time=3600 ;;
     scheduler) exec php artisan schedule:work ;;
     relay) exec php artisan live:relay ;;
     migrate) exec php artisan migrate --database=pgsql_owner --force ;;

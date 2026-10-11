@@ -39,6 +39,23 @@ return [
         'alert_to' => array_values(array_filter(array_map('trim', explode(',', (string) env('HEALTH_ALERT_TO', ''))))),
     ],
 
+    // The games studio's designer (docs/architecture/02, section 18): Claude,
+    // with the platform's own key (empty: the studio says the designer is not
+    // set up). The server names the Claude model (GAME_DESIGNER_MODEL); it falls
+    // back to its default model when the requested one declines a story.
+    'games' => [
+        'designer' => [
+            // claude, or demo (one of the platform's own games back, no key; never in production)
+            'driver' => env('GAME_DESIGNER', 'claude'),
+            'key' => env('ANTHROPIC_API_KEY'),
+            'base_url' => env('ANTHROPIC_BASE_URL'),
+            'model' => env('GAME_DESIGNER_MODEL'),
+            'effort' => env('GAME_DESIGNER_EFFORT', 'high'),
+            'max_tokens' => (int) env('GAME_DESIGNER_MAX_TOKENS', 64000),
+            'timeout' => (int) env('GAME_DESIGNER_TIMEOUT', 900),
+        ],
+    ],
+
     // Subdomains an academy may not take.
     'reserved_slugs' => ['www', 'api', 'app', 'admin', 'console', 'static', 'cdn', 'mail', 'status', 'docs'],
 ];

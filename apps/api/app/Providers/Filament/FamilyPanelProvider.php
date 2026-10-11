@@ -20,6 +20,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Billing\Filament\Family\BillingFamilyPlugin;
 use Modules\Classroom\Filament\Family\ClassroomFamilyPlugin;
+use Modules\Games\Filament\Family\GamesFamilyPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Identity\Filament\Pages\SignIn;
 use Modules\Identity\TwoFactor\TwoFactor;
@@ -54,6 +55,8 @@ final class FamilyPanelProvider extends PanelProvider
             ->pages([FamilyHome::class])
             // Live screens: one socket per page (Reverb, EnableBrowserEcho below), and the helper they share.
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::live'))
+            // Games open in sandboxed frames through the shared player.
+            ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::games.player'))
             // Motion: pages slide in, cards follow, bars fill, numbers count up; none for reduced motion.
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('shared::motion.styles'))
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::motion.script'))
@@ -86,6 +89,7 @@ final class FamilyPanelProvider extends PanelProvider
                 PrivacyFamilyPlugin::make(),
                 SafeguardingFamilyPlugin::make(),
                 MessagingFamilyPlugin::make(),
+                GamesFamilyPlugin::make(),
                 PlatformPlugin::make(),
                 IdentityPlugin::make(),
             ]);

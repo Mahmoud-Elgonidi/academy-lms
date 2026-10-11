@@ -22,4 +22,8 @@ return [
     'server-error' => 'حدث خطأ من جهتنا.',
     // The web pages of a suspended academy (the API answers academy-suspended).
     'suspended_page' => ['title' => 'الأكاديمية متوقفة مؤقتًا', 'body' => 'الموقع ده مش متاح دلوقتي. لو انت من الأكاديمية، تواصل مع الإدارة.'],
+    'games-off' => 'الألعاب مقفولة في الأكاديمية.',
+    'games-paused' => 'ولي الأمر قفل الألعاب دلوقتي.',
+    'games-limit' => 'خلصت دقايق اللعب النهارده.',
+    'games-not-enough-items' => 'التدريبات مش كفاية للعبة دي.',
 ];

@@ -24,6 +24,9 @@ final class ChallengeCatalog
     /** Minutes after the start that still count as coming in on time. */
     public const ON_TIME_GRACE_MIN = 3;
 
+    /** Days with a finished practice round that make the week's practice challenge. */
+    public const PRACTICE_DAYS = 3;
+
     /** A guardian's cheers to one learner in a day. */
     public const CHEERS_PER_DAY = 5;
 
@@ -33,9 +36,9 @@ final class ChallengeCatalog
      * @var array<string, list<array{0: string, 1: string, 2: int}>>
      */
     public const STAGES = [
-        'kids' => [['attend', 'week', 50], ['homework', 'week', 30], ['on_time', 'week', 30], ['chest', 'week', 50]],
-        'middle' => [['attend', 'week', 100], ['homework', 'week', 80], ['master', 'week', 120], ['focus', 'week', 60], ['boss', 'world', 300]],
-        'teen' => [['attend', 'week', 80], ['homework', 'week', 80], ['master', 'week', 150], ['month', 'month', 300]],
+        'kids' => [['attend', 'week', 50], ['homework', 'week', 30], ['on_time', 'week', 30], ['practice', 'week', 40], ['chest', 'week', 50]],
+        'middle' => [['attend', 'week', 100], ['homework', 'week', 80], ['master', 'week', 120], ['focus', 'week', 60], ['practice', 'week', 60], ['boss', 'world', 300]],
+        'teen' => [['attend', 'week', 80], ['homework', 'week', 80], ['master', 'week', 150], ['practice', 'week', 60], ['month', 'month', 300]],
         'classic' => [['attend', 'week', 80], ['homework', 'week', 80], ['master', 'week', 150], ['month', 'month', 300]],
     ];
 

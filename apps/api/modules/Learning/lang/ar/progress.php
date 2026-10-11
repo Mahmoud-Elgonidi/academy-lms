@@ -28,4 +28,5 @@ return [
     'absent' => 'غياب',
     'due' => 'التسليم :date',
     'grade' => 'الدرجة :n/5',
+    'practice' => 'التدريب في الألعاب: :correct صح من :answered (:rounds جولة)',
 ];

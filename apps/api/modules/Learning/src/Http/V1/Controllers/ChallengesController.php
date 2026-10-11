@@ -27,7 +27,7 @@ final class ChallengesController
 {
     private const ICONS = [
         'attend' => 'calendar', 'homework' => 'homework', 'on_time' => 'clock', 'master' => 'star',
-        'focus' => 'bolt', 'month' => 'trophy', 'boss' => 'crown', 'chest' => 'chest',
+        'focus' => 'bolt', 'month' => 'trophy', 'boss' => 'crown', 'chest' => 'chest', 'practice' => 'game',
     ];
 
     public function __construct(

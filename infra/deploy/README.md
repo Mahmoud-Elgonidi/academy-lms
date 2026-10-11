@@ -106,6 +106,11 @@ docker compose exec web php artisan platform:mail-test   # does the server's mai
   `PRIVACY_CONTACT_EMAIL` in `.env`. Each academy's own (on its address) take its details from the back
   office ("Data requests" → "Privacy page"). The text needs a lawyer's review before launch.
 
+- **The games designer** (console › Game studio): set `ANTHROPIC_API_KEY` (the platform's own Claude key)
+  and `GAME_DESIGNER_MODEL` (the Claude model it designs with) in `.env`, then `docker compose up -d worker`.
+  It works on its own queue beside the worker (a design takes a few minutes). Without them the studio says the
+  designer is not set up; the games, their islands and publishing still work.
+
 - **Malware scanning of uploads**: off on a new server (`UPLOAD_SCANNER=none`). Once the server can spare
   about 1.5 GB of memory, set `COMPOSE_PROFILES=scan` and `UPLOAD_SCANNER=clamav` in `.env` (`RUNBOOKS.md`,
   "Scanning uploads"). After that, every upload is checked by ClamAV, and refused while it does not answer
@@ -137,7 +142,7 @@ docker compose exec web php artisan platform:mail-test   # does the server's mai
 | File | What it is |
 |---|---|
 | `../../apps/api/Dockerfile.prod` | the one production image (FrankenPHP, PHP 8.3, no dev packages, runs as `www-data`; a Node stage builds the portal, and the image carries its standalone server and Node) |
-| `entrypoint.sh` | what each container runs: `web`, `portal`, `reverb`, `worker`, `scheduler`, `relay`, `migrate`, `seed-demo` |
+| `entrypoint.sh` | what each container runs: `web`, `portal`, `reverb`, `worker` (and the games designer's queue), `scheduler`, `relay`, `migrate`, `seed-demo` |
 | `Caddyfile` | the web server inside the image: the app, Reverb under `/app/`, and the portal (`apps/web`) under `/ar`, `/en`, `/_next` and `/bff`; it trusts the forwarded headers of nginx (private addresses), so the portal knows a page is https |
 | `php.ini` | production PHP settings (opcache, upload size) |
 | `compose.yml` | the stack, with its limits and its one port |

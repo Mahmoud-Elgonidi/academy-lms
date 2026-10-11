@@ -7,6 +7,7 @@ use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
 use Modules\Curriculum\Contracts\DTOs\ProgramOption;
 use Modules\Curriculum\Contracts\DTOs\ResourceFile;
 use Modules\Curriculum\Models\Node;
+use Modules\Curriculum\Models\NodeItem;
 use Modules\Curriculum\Models\NodeResource;
 use Modules\Curriculum\Models\Program;
 
@@ -51,6 +52,18 @@ final class CurriculumService implements CurriculumApi
         $r = NodeResource::query()->where('kind', 'file')->find($resourceId);
 
         return $r === null ? null : new ResourceFile($r->id, NodeResource::DISK, (string) $r->file_path, (string) $r->file_name, (string) $r->mime, (int) $r->size, $r->audience);
+    }
+
+    public function practiceItems(array $nodeIds): array
+    {
+        if ($nodeIds === []) {
+            return [];
+        }
+
+        return NodeItem::query()->whereIn('node_id', array_values(array_unique($nodeIds)))->orderBy('ordinal')->get()
+            ->groupBy('node_id')
+            ->map(fn ($list) => $list->map(fn (NodeItem $item) => $item->toData())->values()->all())
+            ->all();
     }
 
     private function option(Program $program): ProgramOption

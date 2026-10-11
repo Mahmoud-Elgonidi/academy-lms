@@ -5,6 +5,8 @@ namespace Modules\Platform\Providers;
 use Filament\Notifications\Notification;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -23,19 +25,28 @@ use Modules\Platform\Contracts\PlatformApi;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Platform\Directory\EloquentTenantDirectory;
 use Modules\Platform\Directory\PlatformAccountDirectory;
+use Modules\Platform\Games\Designer\ClaudeGameDesigner;
+use Modules\Platform\Games\Designer\DemoGameDesigner;
+use Modules\Platform\Games\Designer\GameDesigner;
+use Modules\Platform\Games\PlatformGameCatalog;
 use Modules\Platform\Health\WorkerBeat;
+use Modules\Platform\Http\Controllers\GamePageController;
 use Modules\Platform\Http\Controllers\HealthController;
 use Modules\Platform\Listeners\RecordConsoleSignIn;
+use Modules\Platform\Live\GameStudioChanged;
 use Modules\Platform\Models\AcademyBranding;
+use Modules\Platform\Models\PlatformAdmin;
 use Modules\Platform\Plans\PlanUsage;
 use Modules\Platform\Plans\PlatformAcademyPlan;
 use Modules\Platform\PlatformService;
+use Modules\SharedKernel\Games\GameCatalog;
 use Modules\SharedKernel\Health\Heartbeats;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\FeatureNotInPlan;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\PlanLimitReached;
 use Modules\SharedKernel\Plans\UsageMeters;
+use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Tenancy\TenantResolver;
 
 final class PlatformServiceProvider extends ServiceProvider
@@ -58,6 +69,12 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->scoped(PlatformAcademyPlan::class);
         $this->app->alias(PlatformAcademyPlan::class, AcademyPlan::class);
         $this->app->scoped(PlanUsage::class);
+
+        // The games: the catalog the academies see, and the studio's designer (Claude).
+        $this->app->scoped(PlatformGameCatalog::class);
+        $this->app->alias(PlatformGameCatalog::class, GameCatalog::class);
+        $this->app->bind(GameDesigner::class, fn () => config('platform.games.designer.driver') === 'demo' && ! $this->app->isProduction()
+            ? new DemoGameDesigner : new ClaudeGameDesigner);
     }
 
     public function boot(): void
@@ -95,6 +112,13 @@ final class PlatformServiceProvider extends ServiceProvider
                 $stopPropagation();
             }
         });
+
+        // A live game's page (sandboxed, its own policy: Games\GamePage), and the studio's live screens.
+        Route::middleware('throttle:240,1')->get('games/{version}', GamePageController::class)->whereUuid('version')->name('games.play');
+        Route::middleware(['web', 'auth:platform', 'throttle:120,1'])->post('console/broadcasting/auth', fn (Request $request) => Broadcast::auth($request))
+            ->name('console.broadcasting.auth');
+        Broadcast::channel(GameStudioChanged::CHANNEL, fn ($user) => $user instanceof PlatformAdmin, ['guards' => ['platform']]);
+        $this->app->make(LiveSignals::class)->on('game-studio', fn (string $draftId) => new GameStudioChanged($draftId));
 
         Route::prefix('api/v1')
             ->middleware(['api', 'tenant', 'locale'])

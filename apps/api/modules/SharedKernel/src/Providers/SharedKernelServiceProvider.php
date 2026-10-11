@@ -22,6 +22,8 @@ use Modules\SharedKernel\Auth\TimingSafeUserProvider;
 use Modules\SharedKernel\Files\ClamAvScanner;
 use Modules\SharedKernel\Files\NullUploadScanner;
 use Modules\SharedKernel\Files\UploadScanner;
+use Modules\SharedKernel\Games\GameCatalog;
+use Modules\SharedKernel\Games\NoGames;
 use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Http\ContentSecurityPolicy;
 use Modules\SharedKernel\Plans\AcademyPlan;
@@ -56,6 +58,8 @@ final class SharedKernelServiceProvider extends ServiceProvider
         // The academy's plan: everything until Platform binds the plans; the meters, from each module that counts.
         $this->app->scopedIf(AcademyPlan::class, OpenPlan::class);
         $this->app->singleton(UsageMeters::class);
+        // The platform's games: none until Platform binds its catalog.
+        $this->app->singletonIf(GameCatalog::class, NoGames::class);
         // What each module holds about a person, for the Privacy module's copies and erasures.
         $this->app->singleton(PersonalData::class);
     }

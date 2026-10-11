@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>جسر السلاحف</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body { font-family: "Segoe UI", Tahoma, "Noto Sans Arabic", system-ui, sans-serif; color: #0b3a4a; user-select: none; -webkit-user-select: none; touch-action: manipulation;
+    background: linear-gradient(180deg, #9be7ff 0%, #c8f3ff 30%, #2fb5c9 30.2%, #1a8fb0 100%); }
+  #waves { position: absolute; left: 0; right: 0; top: 30%; height: 70%; overflow: hidden; }
+  .wave { position: absolute; left: -10%; width: 120%; height: 16px; border-radius: 50%; border-top: 3px solid rgba(255,255,255,.35); animation: drift 6s ease-in-out infinite alternate; }
+  @keyframes drift { from { transform: translateX(-3%); } to { transform: translateX(3%); } }
+  #beach { position: absolute; right: 0; top: 22%; width: 26%; height: 22%; background: radial-gradient(ellipse at 100% 100%, #ffe7a8 0%, #f7d07a 60%, transparent 61%); }
+  #rock { position: absolute; left: 0; top: 24%; width: 22%; height: 20%; background: radial-gradient(ellipse at 0% 100%, #8fd18f 0%, #5fb36b 58%, transparent 59%); }
+  #prompt { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 6; background: rgba(255,255,255,.85); border-radius: 999px; padding: 6px 16px;
+    font-weight: 900; font-size: clamp(14px, 4.2vw, 21px); box-shadow: 0 4px 0 rgba(11,58,74,.15); text-align: center; max-width: 92%; }
+  #dots { position: absolute; top: 52px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; z-index: 6; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.6); }
+  .dot.done { background: #ffd23f; } .dot.now { background: #fff; box-shadow: 0 0 0 2px #0b3a4a; }
+  #bridge { position: absolute; top: 33%; right: 22%; left: 18%; height: 70px; display: flex; flex-direction: row; align-items: center; justify-content: space-evenly; z-index: 3; }
+  .slot { width: 64px; height: 44px; border-radius: 50%; border: 3px dashed rgba(255,255,255,.55); flex: none; }
+  .shell { position: absolute; top: 0; left: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; cursor: pointer; will-change: transform; }
+  .shell .back { position: relative; min-width: 76px; height: 54px; padding: 0 12px; border-radius: 50% 50% 42% 42% / 64% 64% 36% 36%;
+    background: radial-gradient(circle at 50% 35%, #a3d977 0%, #5aa44a 70%); border: 3px solid #3c7d33; display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 0 -6px 0 rgba(0,0,0,.15); }
+  .shell .back span { background: rgba(255,255,255,.92); border-radius: 10px; padding: 2px 8px; font-weight: 900; font-size: clamp(14px, 4vw, 20px); white-space: nowrap; }
+  .shell .head { position: absolute; top: 14px; right: -12px; width: 18px; height: 16px; border-radius: 50%; background: #8bcf6b; border: 2px solid #3c7d33; }
+  .shell .fin { position: absolute; bottom: -4px; width: 14px; height: 9px; border-radius: 50%; background: #8bcf6b; border: 2px solid #3c7d33; }
+  .shell.placed { cursor: default; }
+  .shell.bad .back { animation: spin .5s; border-color: #e63946; }
+  @keyframes spin { 30% { transform: rotate(-14deg); } 60% { transform: rotate(10deg); } }
+  #baby { position: absolute; top: 0; left: 0; z-index: 5; font-size: 0; width: 54px; height: 40px; will-change: transform; }
+  #baby .legs { animation: walk .3s steps(2) infinite; }
+  @keyframes walk { 50% { transform: translateY(2px); } }
+  .bubble { position: absolute; top: 0; left: 0; border-radius: 50%; border: 2px solid rgba(255,255,255,.7); z-index: 2; pointer-events: none; }
+  .splash { position: absolute; z-index: 7; width: 10px; height: 10px; border-radius: 50%; background: #e0fbff; pointer-events: none; }
+  #banner { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 9; pointer-events: none; }
+  #banner span { font-size: clamp(30px, 10vw, 64px); font-weight: 900; color: #fff; text-shadow: 0 5px 0 #0b6e8a, 0 0 28px rgba(255,255,255,.8); opacity: 0; }
+</style>
+</head>
+<body>
+<div id="waves"></div>
+<div id="beach"></div>
+<div id="rock"></div>
+<div id="prompt"></div>
+<div id="dots"></div>
+<div id="bridge"></div>
+<svg id="baby" viewBox="0 0 54 40">
+  <g class="legs"><ellipse cx="14" cy="34" rx="6" ry="4" fill="#8bcf6b"/><ellipse cx="38" cy="34" rx="6" ry="4" fill="#8bcf6b"/></g>
+  <ellipse cx="26" cy="24" rx="20" ry="13" fill="#5aa44a" stroke="#3c7d33" stroke-width="2.5"/>
+  <path d="M14 22 L26 16 L38 22 L26 30 Z" fill="#a3d977" opacity=".8"/>
+  <circle cx="6" cy="20" r="7" fill="#8bcf6b" stroke="#3c7d33" stroke-width="2"/>
+  <circle cx="4" cy="18" r="1.8" fill="#0b3a4a"/>
+</svg>
+<div id="banner"><span></span></div>
+<script>
+(function () {
+  var W = 0, H = 0, items = [], index = 0, item = null, next = 0, mistakes = 0, shells = [], slots = [], last = 0, busy = false;
+  var baby = document.getElementById('baby');
+
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function measure() { W = window.innerWidth; H = window.innerHeight; }
+
+  function waves() {
+    var box = document.getElementById('waves');
+    for (var i = 0; i < 9; i++) { var w = el('div', 'wave'); w.style.top = (i * 11 + 4) + '%'; w.style.animationDelay = (-i * .7) + 's'; box.appendChild(w); }
+  }
+
+  function banner(text) {
+    var s = document.querySelector('#banner span'); s.textContent = text;
+    s.animate([{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1.1)', offset: .35 }, { opacity: 1, transform: 'scale(1)', offset: .75 }, { opacity: 0, transform: 'translateY(-30px)' }], { duration: 1300, easing: 'ease-out' });
+  }
+
+  function dots() {
+    var d = document.getElementById('dots'); d.innerHTML = '';
+    items.forEach(function (_, i) { d.appendChild(el('span', 'dot' + (i < index ? ' done' : i === index ? ' now' : ''))); });
+  }
+
+  function placeBaby(x, y, flip) { baby.style.transform = 'translate(' + (x - 27) + 'px,' + (y - 20) + 'px)' + (flip ? ' scaleX(-1)' : ''); }
+
+  function startItem() {
+    item = items[index]; next = 0; mistakes = 0; busy = false;
+    document.getElementById('prompt').textContent = item.prompt || 'ابنِ الجسر بالترتيب';
+    dots();
+    var bridge = document.getElementById('bridge'); bridge.innerHTML = ''; slots = [];
+    var slotW = Math.min(84, bridge.clientWidth / item.parts.length - 6);
+    item.parts.forEach(function () { var s = el('div', 'slot'); s.style.width = slotW + 'px'; bridge.appendChild(s); slots.push(s); });
+    shells.forEach(function (s) { s.el.remove(); }); shells = [];
+    baby.style.transition = 'none';
+    placeBaby(W * .88, H * .3, false);
+    var order = LMS.shuffle(item.parts.map(function (_, i) { return i; }));
+    var cols = Math.min(order.length, W < 520 ? 3 : 4), rows = Math.ceil(order.length / cols);
+    order.forEach(function (partIndex, k) {
+      var s = el('div', 'shell'), back = el('div', 'back');
+      back.appendChild(el('span', null, item.parts[partIndex]));
+      back.appendChild(el('i', 'head'));
+      var f1 = el('i', 'fin'); f1.style.left = '8px'; var f2 = el('i', 'fin'); f2.style.right = '8px';
+      back.appendChild(f1); back.appendChild(f2);
+      s.appendChild(back);
+      document.body.appendChild(s);
+      var col = k % cols, row = Math.floor(k / cols);
+      var rec = { el: s, part: partIndex, hx: (W / cols) * (col + .5), hy: H * .58 + row * Math.min(90, (H * .38) / rows), phase: Math.random() * 6, placed: false };
+      s.addEventListener('pointerdown', function (e) { e.preventDefault(); tap(rec); });
+      s.animate([{ opacity: 0, transform: 'translate(' + rec.hx + 'px,' + (H + 40) + 'px)' }, { opacity: 1, transform: 'translate(' + (rec.hx - 45) + 'px,' + rec.hy + 'px)' }], { duration: 700, delay: k * 90, easing: 'cubic-bezier(.3,1.3,.5,1)', fill: 'backwards' });
+      shells.push(rec);
+    });
+  }
+
+  function tap(rec) {
+    if (busy || rec.placed) return;
+    if (item.parts[rec.part] === item.parts[next]) {
+      rec.placed = true; rec.el.classList.add('placed');
+      var r = slots[next].getBoundingClientRect(), mine = rec.el.getBoundingClientRect();
+      rec.tx = r.left + r.width / 2 - mine.width / 2; rec.ty = r.top + r.height / 2 - mine.height / 2;
+      rec.scale = Math.min(1, (r.width + 8) / mine.width);
+      rec.el.style.transition = 'transform .45s cubic-bezier(.3,1.3,.5,1)';
+      rec.el.style.transform = 'translate(' + rec.tx + 'px,' + rec.ty + 'px) scale(' + rec.scale + ')';
+      slots[next].style.visibility = 'hidden';
+      LMS.sfx('correct'); splash(r.left + r.width / 2, r.top + r.height / 2);
+      next++;
+      if (next >= item.parts.length) { busy = true; setTimeout(cross, 600); }
+    } else {
+      mistakes++;
+      rec.el.classList.remove('bad'); void rec.el.offsetWidth; rec.el.classList.add('bad');
+      setTimeout(function () { rec.el.classList.remove('bad'); }, 520);
+      LMS.sfx('wrong');
+    }
+  }
+
+  function splash(x, y) {
+    for (var i = 0; i < 10; i++) {
+      var s = el('div', 'splash'); s.style.left = x + 'px'; s.style.top = y + 'px'; document.body.appendChild(s);
+      var a = Math.PI + Math.random() * Math.PI, d = 30 + Math.random() * 40;
+      s.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: 'translate(' + Math.cos(a) * d + 'px,' + Math.sin(a) * d + 'px) scale(.3)', opacity: 0 }], { duration: 600 }).onfinish = function () { this.effect.target.remove(); };
+    }
+  }
+
+  function cross() {
+    LMS.answer(item.id, mistakes === 0);
+    var path = shells.filter(function (s) { return s.placed; }).sort(function (a, b) { return b.tx - a.tx; });
+    var step = 0;
+    baby.style.transition = 'transform .38s ease-in-out';
+    function hop() {
+      if (step < path.length) {
+        var s = path[step++], box = s.el.getBoundingClientRect(); placeBaby(box.left + box.width / 2, box.top + 4, false); LMS.sfx('step');
+        s.el.animate([{ transform: s.el.style.transform }, { transform: s.el.style.transform + ' translateY(6px)' }, { transform: s.el.style.transform }], { duration: 380 });
+        setTimeout(hop, 400);
+      } else {
+        placeBaby(W * .1, H * .3, false); LMS.sfx('win');
+        banner(mistakes === 0 ? 'وصلت! 🐢' : 'برافو!');
+        setTimeout(function () { index++; if (index >= items.length) { dots(); setTimeout(function () { LMS.finish(); }, 500); } else startItem(); }, 1500);
+      }
+    }
+    hop();
+  }
+
+  function frame(now) {
+    var dt = last ? Math.min(50, now - last) : 16; last = now;
+    shells.forEach(function (s) {
+      if (s.placed) return;
+      s.el.style.transform = 'translate(' + (s.hx - 45 + Math.sin(now / 900 + s.phase) * 8) + 'px,' + (s.hy + Math.sin(now / 600 + s.phase) * 5) + 'px) rotate(' + Math.sin(now / 1000 + s.phase) * 5 + 'deg)';
+    });
+    if (Math.random() < dt / 600) {
+      var b = el('div', 'bubble'), size = 6 + Math.random() * 10; b.style.width = b.style.height = size + 'px';
+      b.style.left = (Math.random() * W) + 'px'; b.style.top = H + 'px'; document.body.appendChild(b);
+      b.animate([{ transform: 'translateY(0)', opacity: .8 }, { transform: 'translateY(-' + (H * .6) + 'px)', opacity: 0 }], { duration: 3000 + Math.random() * 2000, easing: 'ease-out' }).onfinish = function () { b.remove(); };
+    }
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', function () { measure(); });
+  LMS.onStart(function (round) {
+    items = round.items.filter(function (i) { return i.kind === 'order' && i.parts && i.parts.length > 1; });
+    measure(); waves(); requestAnimationFrame(frame);
+    if (items.length === 0) { LMS.finish(); return; }
+    startItem();
+  });
+})();
+</script>
+</body>
+</html>

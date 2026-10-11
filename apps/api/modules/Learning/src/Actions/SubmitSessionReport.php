@@ -40,7 +40,7 @@ final class SubmitSessionReport
     /**
      * @param  array{engagement?: ?int, overall?: ?int, notes_for_student?: ?string, notes_internal?: ?string, absence_note?: ?string,
      *     items?: list<array{node_id: string, outcome: string, score?: ?int, note?: ?string}>, answers?: array<string, mixed>,
-     *     homework?: ?array{title?: ?string, instructions?: ?string, accepts?: ?string, due_days?: ?int}}  $data
+     *     homework?: ?array{title?: ?string, instructions?: ?string, accepts?: ?string, due_days?: ?int, practice?: ?bool}}  $data
      */
     public function handle(SessionReport $report, string $actorId, array $data): SessionReport
     {
@@ -126,6 +126,7 @@ final class SubmitSessionReport
             'homework.instructions' => ['nullable', 'string', 'max:3000'],
             'homework.accepts' => ['nullable', Rule::in(Homework::ACCEPTS)],
             'homework.due_days' => ['nullable', 'integer', 'between:1,30'],
+            'homework.practice' => ['nullable', 'boolean'],
         ];
 
         return Validator::make($data, $rules, [], trans('learning::reports.attributes'))->validate() + $data;
@@ -133,9 +134,11 @@ final class SubmitSessionReport
 
     /**
      * Homework from this report: set it, change it while nothing was handed
-     * in, or take it back when the title was cleared.
+     * in, or take it back when the title was cleared. With practice (or when
+     * practice is all it asks for), it points at the report's lessons: the
+     * learner practises their items in the games.
      *
-     * @param  array{title?: ?string, instructions?: ?string, accepts?: ?string, due_days?: ?int}|null  $input
+     * @param  array{title?: ?string, instructions?: ?string, accepts?: ?string, due_days?: ?int, practice?: ?bool}|null  $input
      */
     private function homework(SessionReport $report, string $actorId, ?array $input, CarbonImmutable $now): void
     {
@@ -151,11 +154,15 @@ final class SubmitSessionReport
             return;
         }
 
+        $accepts = in_array($input['accepts'] ?? null, Homework::ACCEPTS, true) ? $input['accepts'] : 'any';
+        $lessons = $report->items()->pluck('node_id')->all();
+        $practice = ($accepts === 'practice' || filter_var($input['practice'] ?? false, FILTER_VALIDATE_BOOLEAN)) && $lessons !== [];
         $fields = [
             'title' => $title,
             'instructions' => ($input['instructions'] ?? null) ?: null,
-            'accepts' => in_array($input['accepts'] ?? null, Homework::ACCEPTS, true) ? $input['accepts'] : 'any',
+            'accepts' => $accepts === 'practice' && ! $practice ? 'any' : $accepts,
             'due_at' => ($report->submitted_at ?? $now)->addDays((int) ($input['due_days'] ?? LearningSettings::current()->homework_days)),
+            'practice_nodes' => $practice ? array_values($lessons) : null,
         ];
         if ($existing === null) {
             $this->assign->handle($fields + [

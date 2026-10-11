@@ -11,6 +11,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "anthropic-ai/sdk": "^0.57",
         "brick/money": "^0.15.2",
         "chillerlan/php-qrcode": "^5.0",
         "dedoc/scramble": "^0.13",
@@ -75,6 +76,8 @@
             "Modules\\Safeguarding\\": "modules/Safeguarding/src/",
             "Modules\\Messaging\\": "modules/Messaging/src/",
             "Modules\\Messaging\\Database\\Seeders\\": "modules/Messaging/database/seeders/",
+            "Modules\\Games\\": "modules/Games/src/",
+            "Modules\\Games\\Database\\Seeders\\": "modules/Games/database/seeders/",
             "Modules\\Safeguarding\\Database\\Seeders\\": "modules/Safeguarding/database/seeders/",
             "Modules\\Learning\\Database\\Seeders\\": "modules/Learning/database/seeders/",
             "Modules\\Scheduling\\Database\\Factories\\": "modules/Scheduling/database/factories/",

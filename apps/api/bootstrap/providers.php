@@ -14,6 +14,7 @@ use Modules\Crm\Providers\CrmServiceProvider;
 use Modules\Curriculum\Providers\CurriculumServiceProvider;
 use Modules\Enrollment\Providers\EnrollmentServiceProvider;
 use Modules\Evaluation\Providers\EvaluationServiceProvider;
+use Modules\Games\Providers\GamesServiceProvider;
 use Modules\Identity\Providers\IdentityServiceProvider;
 use Modules\Import\Providers\ImportServiceProvider;
 use Modules\Learning\Providers\LearningServiceProvider;
@@ -50,6 +51,7 @@ return [
     PrivacyServiceProvider::class,
     SafeguardingServiceProvider::class,
     MessagingServiceProvider::class,
+    GamesServiceProvider::class,
     AppServiceProvider::class,
     AcademyPanelProvider::class,
     TeacherPanelProvider::class,

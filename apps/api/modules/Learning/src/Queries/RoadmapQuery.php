@@ -2,6 +2,7 @@
 
 namespace Modules\Learning\Queries;
 
+use Illuminate\Support\Facades\DB;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\Contracts\DTOs\CurriculumNode;
 use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
@@ -35,6 +36,9 @@ final class RoadmapQuery
     ) {}
 
     /** @return array<string, mixed>|null null when the enrollment follows no program */
+    /** @var array<string, object> this roadmap's practice, by lesson */
+    private array $practice = [];
+
     public function for(string $enrollmentId, ?string $materials = self::MATERIALS_NONE): ?array
     {
         $enrollment = $this->enrollments->find($enrollmentId);
@@ -48,6 +52,7 @@ final class RoadmapQuery
         $calculated = ProgressCalculator::position($tree, $states, [], $this->progress->lessonsPerWeek($enrollmentId));
         $current = $position?->current_node_id ?? $calculated->currentNodeId;
         $files = $materials === self::MATERIALS_NONE ? [] : $this->materials->forLessons(array_map(fn ($n) => $n->id, $tree->lessons()), $materials === self::MATERIALS_TEACHERS);
+        $this->practice = DB::table('practice_stats')->where('enrollment_id', $enrollmentId)->get()->keyBy('node_id')->all();
 
         $levels = [];
         foreach ($tree->childrenOf(null) as $top) {
@@ -128,6 +133,13 @@ final class RoadmapQuery
             'weight' => $n->weight,
             // Files and links on the lesson (a file's url is signed for twelve hours); empty when not asked for.
             'materials' => array_map(fn (MaterialLine $m) => $m->toArray(), $materials),
+            // How practice in the games went on this lesson's items (null: not practised yet).
+            'practice' => ($s = $this->practice[$n->id] ?? null) === null ? null : [
+                'rounds' => (int) $s->rounds,
+                'answered' => (int) $s->answered,
+                'correct' => (int) $s->correct,
+                'percent' => $s->answered > 0 ? (int) round(100 * $s->correct / $s->answered) : null,
+            ],
         ];
     }
 

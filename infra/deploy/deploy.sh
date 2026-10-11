@@ -182,6 +182,12 @@ COMPOSE_PROFILES=
 UPLOAD_SCANNER=none
 CLAMAV_HOST=clamav
 
+# The games studio's designer (console › Game studio): Claude, with the platform's own
+# key and the model it designs with (a Claude model id; the most capable one designs best).
+# Empty: the studio says the designer is not set up, and the games themselves still work.
+ANTHROPIC_API_KEY=
+GAME_DESIGNER_MODEL=
+
 # The platform's own privacy notice, terms and account-deletion page (/privacy, /terms,
 # /account-deletion on the platform's address; the app stores link to them): the name it goes
 # by there and the address people write to about their data. Each academy sets its own.
@@ -218,7 +224,8 @@ add_if_missing HEALTH_TOKEN "$(secret)"
 add_if_missing HEALTH_ALERT_TO ""
 add_if_missing BACKUPS_EXPECTED true
 for k in MAIL_HOST MAIL_USERNAME MAIL_PASSWORD OFFSITE_S3_ENDPOINT OFFSITE_S3_REGION OFFSITE_S3_BUCKET \
-    OFFSITE_S3_ACCESS_KEY OFFSITE_S3_SECRET_KEY OFFSITE_AGE_RECIPIENT PLATFORM_LEGAL_NAME PRIVACY_CONTACT_EMAIL; do
+    OFFSITE_S3_ACCESS_KEY OFFSITE_S3_SECRET_KEY OFFSITE_AGE_RECIPIENT PLATFORM_LEGAL_NAME PRIVACY_CONTACT_EMAIL \
+    ANTHROPIC_API_KEY GAME_DESIGNER_MODEL; do
     add_if_missing "$k" ""
 done
 add_if_missing MAIL_PORT 587

@@ -18,6 +18,7 @@
         .lf-err { color: var(--danger-600); font-size: .85rem; }
         .lf-file { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; font-size: .9rem; }
         .lf-due[data-late] { color: var(--danger-600); font-weight: 600; }
+        .lf-practice { display: flex; gap: .6rem; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: .6rem .8rem; border-radius: var(--radius-lg, .5rem); background: var(--success-50); color: var(--success-800); font-size: .88rem; }
         .lf-h2 { font-size: 1rem; font-weight: 700; margin: .5rem 0 0; }
         .dark .lf-rec-btn { background: var(--gray-900); border-color: var(--gray-700); }
     </style>
@@ -36,7 +37,17 @@
                 @if ($hw->instructions)
                     <p class="lf-note">{{ $hw->instructions }}</p>
                 @endif
+                @if ($hw->hasPractice())
+                    {{-- Practice in the games on the lesson's own items (Games' page, by route name: no module is named here). --}}
+                    <div class="lf-practice">
+                        <span>🎮 {{ $hw->practice_result ? __($h.'practice.result', $hw->practice_result) : __($h.'practice.waiting') }}</span>
+                        @if (\Illuminate\Support\Facades\Route::has('filament.family.pages.games'))
+                            <x-filament::button tag="a" size="sm" color="success" icon="heroicon-m-play" :href="route('filament.family.pages.games', ['homework' => $hw->id])">{{ __($h.'practice.play') }}</x-filament::button>
+                        @endif
+                    </div>
+                @endif
 
+                @if ($hw->accepts !== 'practice')
                 <form class="lf-form" wire:submit="handIn('{{ $hw->id }}')">
                     @if (in_array($hw->accepts, ['any', 'text'], true))
                         <textarea wire:model="answers.{{ $hw->id }}" placeholder="{{ __($l.'answer') }}" aria-label="{{ __($h.'attributes.body') }}"></textarea>
@@ -64,6 +75,7 @@
                         <x-filament::button type="submit" icon="heroicon-o-paper-airplane" wire:target="handIn('{{ $hw->id }}'), files.{{ $hw->id }}">{{ __($l.'hand_in') }}</x-filament::button>
                     </div>
                 </form>
+                @endif
             </article>
         @empty
             <div class="lf-empty">{{ __($l.'none_open') }}</div>
@@ -80,6 +92,9 @@
                         </div>
                         <span class="lf-pill" data-tone="{{ $hw->status === 'reviewed' ? 'good' : '' }}">{{ __($h.'statuses.'.$hw->status) }}@if ($hw->grade) · {{ $hw->grade }}/5 @endif</span>
                     </div>
+                    @if ($hw->practice_result)
+                        <p class="lf-muted">🎮 {{ __($h.'practice.result', $hw->practice_result) }}</p>
+                    @endif
                     @include('learning::filament.teacher.submissions', ['homework' => $hw, 'at' => $at])
                 </article>
             @endforeach

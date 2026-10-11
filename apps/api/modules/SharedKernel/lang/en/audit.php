@@ -115,10 +115,17 @@ return [
             'reactivated' => 'Academy back on',
             'plan_changed' => 'The academy moved to the :plan plan: :reason',
         ],
+        'games' => [
+            'settings_saved' => "Changed the academy's games (:state, :minutes minutes a day)",
+        ],
         'platform' => [
             'signed_in' => 'Signed in to the console',
             'plan_saved' => 'The :plan plan edited',
             'demo_secrets_reset' => "Demo console account :name took the server's new demo password and key",
+            'game_draft_started' => 'Started designing a new game (:kinds)',
+            'game_published' => 'Published the game :game (version :version)',
+            'game_retired' => 'Retired the game :game',
+            'game_revived' => 'Brought back the game :game',
         ],
     ],
     'values' => [
@@ -137,6 +144,7 @@ return [
         'side' => ['family' => 'the family', 'teacher' => 'the teacher', 'staff' => 'written down by the office'],
     ],
     'groups' => [
+        'games' => 'Games',
         'messaging' => 'Conversations',
         'safeguarding' => 'Safeguarding',
         'billing' => 'Money',

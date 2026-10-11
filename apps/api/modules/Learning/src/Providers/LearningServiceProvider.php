@@ -30,6 +30,7 @@ use Modules\Learning\Listeners\OpenReportWhenSessionCloses;
 use Modules\Learning\Listeners\RebuildProgressOnProgramChange;
 use Modules\Learning\Listeners\SendLearningNotifications;
 use Modules\Learning\Live\HomeworkChanged;
+use Modules\Learning\Live\PracticeChanged;
 use Modules\Learning\Privacy\LearningData;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\SharedKernel\Plans\Limit;
@@ -82,6 +83,7 @@ final class LearningServiceProvider extends ServiceProvider
 
         // Homework pages refresh when homework changes (the homework triggers raise "homework:{person}").
         $this->app->make(LiveSignals::class)->on('homework', fn (string $userId) => new HomeworkChanged($userId));
+        $this->app->make(LiveSignals::class)->on('practice', fn (string $userId) => new PracticeChanged($userId));
 
         if ($this->app->runningInConsole()) {
             $this->commands([SweepLearningCommand::class]);

@@ -28,4 +28,5 @@ return [
     'absent' => 'Absent',
     'due' => 'due :date',
     'grade' => 'grade :n/5',
+    'practice' => 'Practice in the games: :correct right of :answered (:rounds rounds)',
 ];

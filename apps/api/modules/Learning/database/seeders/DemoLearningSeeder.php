@@ -8,6 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\Learning\Actions\AssignHomework;
 use Modules\Learning\Actions\MarkMissedHomework;
 use Modules\Learning\Actions\MarkOverdueReports;
 use Modules\Learning\Actions\ReviewHomework;
@@ -44,6 +45,7 @@ final class DemoLearningSeeder extends Seeder
         ReviewHomework $mark,
         MarkOverdueReports $overdue,
         MarkMissedHomework $missed,
+        AssignHomework $assign,
     ): void {
         $realNow = CarbonImmutable::now();
         $owner = DB::table('users')->where('email', 'owner@demo.test')->value('id');
@@ -68,7 +70,7 @@ final class DemoLearningSeeder extends Seeder
                 [[[4, 'practiced', 4]], 5, 4, 'المضارع محتاج حصة كمان قبل ما ننتقل للأمر.', 2,
                     ['title' => 'سجّل نفسك وانت بتقرا فقرة الكتاب ص 14 وتحدد الأفعال المضارعة', 'accepts' => 'audio', 'due_days' => 4]],
             ],
-            // Yousef (9, Juz' Amma): the first island done, Al-Fatiha back for a review, halfway through the second.
+            // Yousef (9, Juz' Amma): the first island done, Al-Fatiha back for a review, halfway through the second; his last homework comes with a game round.
             'yousef' => [
                 [[[0, 'introduced', 4]], 5, 5, 'بداية حلوة! يوسف حافظ الفاتحة كويس، هنظبط المدود مع بعض.', 2,
                     ['title' => 'سمّع الفاتحة وسجّل صوتك', 'accepts' => 'audio', 'due_days' => 2]],
@@ -79,9 +81,9 @@ final class DemoLearningSeeder extends Seeder
                 [[[2, 'mastered', 5], [3, 'practiced', 4]], 5, 5, 'خلّص قصار السور كلها! 🎉', 2, null],
                 [[[4, 'introduced', 4], [0, 'needs_review', 2]], 4, 4, 'بدأنا الكوثر والماعون. الفاتحة محتاجة مراجعة بسيطة في المدود.', 2, null],
                 [[[4, 'practiced', 5], [5, 'introduced', 3]], 5, 5, 'الكوثر والماعون حفظهم كويس جدًا. الحصة الجاية قريش.', 2,
-                    ['title' => 'سجّل سورة قريش', 'accepts' => 'audio', 'due_days' => 5]],
+                    ['title' => 'سجّل سورة قريش', 'accepts' => 'audio', 'due_days' => 5, 'practice' => true]],
             ],
-            // Maryam (16, Nour Al-Bayan): the first level done, one lesson back for review; she missed one lesson.
+            // Maryam (16, Nour Al-Bayan): the first level done, one lesson back for review; she missed one lesson. Her teacher has just set a game round as homework.
             'maryam' => [
                 [[[0, 'introduced', 4]], 4, 4, 'مخارج الحروف كويسة، محتاجين نشتغل على الحروف الحلقية.', 3,
                     ['title' => 'اقري صفحة الحروف المفردة وسجّلي نفسك', 'accepts' => 'audio', 'due_days' => 3]],
@@ -214,6 +216,20 @@ final class DemoLearningSeeder extends Seeder
                     $mark->handle($h->refresh(), $h->teacher_id, $score, $comment);
                 }
             }
+        }
+
+        // Maryam's teacher has just set a game round on izhar and idgham: playing it hands it in.
+        [$maryam, $maryamCourse] = $reportsFor['maryam'] ?? [null, null];
+        $versionId = $maryamCourse ? $enrollments->find($maryamCourse)?->curriculumVersionId : null;
+        if ($versionId !== null) {
+            $lessons = collect($curriculum->tree($versionId)->lessons())->whereIn('titleEn', ['Izhar', 'Idgham'])->pluck('id')->values()->all();
+            CarbonImmutable::setTestNow($realNow->subHours(20));
+            $assign->handle([
+                'teacher_id' => (string) DB::table('enrollments')->where('id', $maryamCourse)->value('teacher_id'),
+                'student_id' => $maryam, 'enrollment_id' => $maryamCourse,
+                'title' => 'جولة تدريب على الإظهار والإدغام', 'accepts' => 'practice',
+                'due_at' => $realNow->addDays(2)->setTime(18, 0), 'practice_nodes' => $lessons,
+            ]);
         }
 
         CarbonImmutable::setTestNow($realNow);

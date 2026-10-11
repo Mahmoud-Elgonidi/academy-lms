@@ -5,12 +5,14 @@ return [
     'kids' => [
         'attend' => ['Come to all your lessons', 'Every lesson brings you closer to the treasure!'],
         'homework' => ['Hand in your homework', 'Hand in this week\'s homework for gems!'],
+        'practice' => ['Practise on the islands', 'Play a practice round on 3 days this week for gems!'],
         'on_time' => ['Be right on time', 'Join your lesson right when it starts.'],
         'chest' => ['Treasure chest', 'Finish every mission and the chest opens!'],
     ],
     'middle' => [
         'attend' => ['On fire', 'Come to every lesson this week.'],
         'homework' => ['Homework on time', 'Hand in this week\'s homework before it is due.'],
+        'practice' => ['Practice week', 'Finish a practice round in the games on 3 days this week.'],
         'master' => ['Master a new lesson', 'When your teacher marks a lesson mastered this week.'],
         'focus' => ['Full focus', 'Score 4 or 5 for focus in this week\'s lessons.'],
         'boss' => ['Boss level: :world', 'Finish every lesson of world :index to open the next.'],
@@ -18,6 +20,7 @@ return [
     'teen' => [
         'attend' => ['Full attendance', 'Come to every lesson this week.'],
         'homework' => ['Homework on time', 'Hand in this week\'s homework before it is due.'],
+        'practice' => ['Steady practice', 'Practise your lessons in the games on 3 days this week.'],
         'master' => ['Master new lessons', 'Lessons you master this week bring your goal closer.'],
         'month' => ['A month without missing', 'Come to every lesson this month.'],
     ],

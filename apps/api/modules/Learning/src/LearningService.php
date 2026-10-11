@@ -5,13 +5,17 @@ namespace Modules\Learning;
 use Carbon\CarbonImmutable;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\Learning\Actions\RecordPractice;
 use Modules\Learning\Contracts\DTOs\HomeworkLine;
 use Modules\Learning\Contracts\DTOs\PlanLine;
+use Modules\Learning\Contracts\DTOs\PracticeRecorded;
+use Modules\Learning\Contracts\DTOs\PracticeRound;
 use Modules\Learning\Contracts\LearningApi;
 use Modules\Learning\Domain\PlannedItem;
 use Modules\Learning\Domain\TodaysPlan;
 use Modules\Learning\Materials\MaterialLinks;
 use Modules\Learning\Models\Homework;
+use Modules\Learning\Queries\PracticeFocusQuery;
 use Modules\Learning\Queries\ProgressQuery;
 
 final class LearningService implements LearningApi
@@ -51,5 +55,15 @@ final class LearningService implements LearningApi
             ->orderByDesc('created_at')->first();
 
         return $h === null ? null : new HomeworkLine($h->id, $h->title, $h->instructions, $h->status, $h->due_at, $h->grade, $h->feedback, (int) $h->submissions_count);
+    }
+
+    public function practiceFocus(string $studentId, ?CarbonImmutable $now = null): array
+    {
+        return app(PracticeFocusQuery::class)->for($studentId, $now);
+    }
+
+    public function recordPractice(PracticeRound $round): PracticeRecorded
+    {
+        return app(RecordPractice::class)->handle($round);
     }
 }

@@ -8,6 +8,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -77,6 +78,7 @@ final class WriteReport extends Page
                 'title' => $homework?->title,
                 'instructions' => $homework?->instructions,
                 'accepts' => $homework->accepts ?? 'any',
+                'practice' => $homework?->hasPractice() ?? false,
                 'due_days' => $homework ? max(1, (int) round($this->sessionReport->submitted_at?->diffInDays($homework->due_at) ?? LearningSettings::current()->homework_days)) : LearningSettings::current()->homework_days,
             ],
         ]);
@@ -165,6 +167,7 @@ final class WriteReport extends Page
                         Select::make('homework.due_days')->label(__('learning::teacher.write.due_days'))->native(false)
                             ->options(collect([1, 2, 3, 5, 7, 14])->mapWithKeys(fn ($d) => [$d => trans_choice('learning::teacher.write.days', $d, ['n' => $d])])),
                     ]),
+                    Toggle::make('homework.practice')->label(__('learning::homework.practice.with'))->helperText(__('learning::homework.practice.with_hint')),
                 ]),
         ])));
     }

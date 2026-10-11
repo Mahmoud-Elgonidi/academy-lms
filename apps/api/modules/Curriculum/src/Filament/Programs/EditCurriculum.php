@@ -5,8 +5,11 @@ namespace Modules\Curriculum\Filament\Programs;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -14,6 +17,7 @@ use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
@@ -22,6 +26,7 @@ use Livewire\Attributes\Computed;
 use Modules\Catalog\Contracts\CatalogApi;
 use Modules\Curriculum\Actions\DeleteNode;
 use Modules\Curriculum\Actions\MoveNode;
+use Modules\Curriculum\Actions\Practice\SaveNodeItems;
 use Modules\Curriculum\Actions\PublishVersion;
 use Modules\Curriculum\Actions\Resources\AddNodeResource;
 use Modules\Curriculum\Actions\Resources\MoveNodeResource;
@@ -32,16 +37,19 @@ use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
 use Modules\Curriculum\Models\CurriculumVersion;
 use Modules\Curriculum\Models\Node;
+use Modules\Curriculum\Models\NodeItem;
 use Modules\Curriculum\Models\NodeResource;
 use Modules\Curriculum\Models\Program;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Games\ItemKind;
 
 /**
  * The content of a program: levels, units and lessons in teaching order.
  * Add, edit, move and (while a draft) delete; then publish so enrollments
  * follow it. Each lesson opens its materials: files and links, for
  * everyone or for teachers only, added, renamed, moved or taken off at any
- * time (published or not).
+ * time (published or not), and its practice: the questions, orders and
+ * pairs the learner's games play after the lesson (SaveNodeItems).
  *
  * @property Program $record
  */
@@ -100,6 +108,14 @@ final class EditCurriculum extends Page
     public function materialCounts(): array
     {
         return NodeResource::query()->whereIn('node_id', array_map(fn ($n) => $n->id, $this->tree->lessons()))
+            ->selectRaw('node_id, count(*) as n')->groupBy('node_id')->pluck('n', 'node_id')->map(fn ($n) => (int) $n)->all();
+    }
+
+    /** @return array<string, int> lesson id => how many practice items it has */
+    #[Computed]
+    public function practiceCounts(): array
+    {
+        return NodeItem::query()->whereIn('node_id', array_map(fn ($n) => $n->id, $this->tree->lessons()))
             ->selectRaw('node_id, count(*) as n')->groupBy('node_id')->pluck('n', 'node_id')->map(fn ($n) => (int) $n)->all();
     }
 
@@ -232,6 +248,77 @@ final class EditCurriculum extends Page
                 unset($this->materialCounts);
                 Notification::make()->success()->title(__($l.'removed'))->send();
             });
+    }
+
+    /**
+     * A lesson's practice, edited as one list: each item a question with
+     * choices, parts in their order, or a pair (what the games play).
+     */
+    public function practiceAction(): Action
+    {
+        $l = 'curriculum::curriculum.practice.';
+
+        return Action::make('practice')
+            ->label(fn (array $arguments) => trans_choice($l.'count', $this->practiceCounts[$arguments['node']] ?? 0, ['count' => $this->practiceCounts[$arguments['node']] ?? 0]))
+            ->icon(Heroicon::OutlinedPuzzlePiece)
+            ->link()->size('sm')
+            ->modalHeading(fn (array $arguments) => __($l.'title', ['lesson' => $this->node($arguments['node'])->toData()->title()]))
+            ->modalDescription(__($l.'hint'))
+            ->modalWidth('4xl')
+            ->modalSubmitActionLabel(__($l.'save'))
+            ->fillForm(fn (array $arguments) => ['items' => NodeItem::query()->where('node_id', $arguments['node'])->orderBy('ordinal')->get()
+                ->map(fn (NodeItem $i) => ['id' => $i->id, 'kind' => $i->kind, 'prompt' => $i->prompt] + $i->data)->all()])
+            ->schema([
+                Repeater::make('items')->hiddenLabel()
+                    ->addActionLabel(__($l.'add'))
+                    ->maxItems(SaveNodeItems::MAX)
+                    ->reorderable()->collapsible()->cloneable()
+                    ->defaultItems(0)
+                    ->itemLabel(fn (array $state) => self::itemLabel($state))
+                    ->schema([
+                        Hidden::make('id'),
+                        Grid::make(3)->schema([
+                            Select::make('kind')->label(__($l.'fields.kind'))->required()->native(false)->live()->default('choice')
+                                ->options(collect(ItemKind::cases())->mapWithKeys(fn (ItemKind $k) => [$k->value => $k->label()])->all()),
+                            TextInput::make('prompt')->label(__($l.'fields.prompt'))->maxLength(ItemKind::PROMPT_MAX)->columnSpan(2)
+                                ->placeholder(fn (Get $get) => __($l.'placeholders.prompt_'.($get('kind') ?? 'choice')))
+                                ->required(fn (Get $get) => $get('kind') === 'choice')
+                                ->visible(fn (Get $get) => $get('kind') !== 'pair'),
+                        ]),
+                        TagsInput::make('options')->label(__($l.'fields.options'))->helperText(__($l.'hints.options'))
+                            ->placeholder(__($l.'placeholders.option'))->live()->reorderable()
+                            ->visible(fn (Get $get) => $get('kind') === 'choice')->required(fn (Get $get) => $get('kind') === 'choice'),
+                        Select::make('answer')->label(__($l.'fields.answer'))->native(false)
+                            ->options(fn (Get $get) => array_values((array) ($get('options') ?? [])))
+                            ->visible(fn (Get $get) => $get('kind') === 'choice')->required(fn (Get $get) => $get('kind') === 'choice'),
+                        TagsInput::make('parts')->label(__($l.'fields.parts'))->helperText(__($l.'hints.parts'))
+                            ->placeholder(__($l.'placeholders.part'))->reorderable()
+                            ->visible(fn (Get $get) => $get('kind') === 'order')->required(fn (Get $get) => $get('kind') === 'order'),
+                        Grid::make(2)->schema([
+                            TextInput::make('left')->label(__($l.'fields.left'))->maxLength(ItemKind::SIDE_MAX)->required(fn (Get $get) => $get('kind') === 'pair'),
+                            TextInput::make('right')->label(__($l.'fields.right'))->maxLength(ItemKind::SIDE_MAX)->required(fn (Get $get) => $get('kind') === 'pair'),
+                        ])->visible(fn (Get $get) => $get('kind') === 'pair'),
+                    ]),
+            ])
+            ->action(function (array $data, array $arguments, Action $action) use ($l) {
+                $this->attempt($action, fn () => app(SaveNodeItems::class)->handle(
+                    $this->node($arguments['node']), array_values($data['items'] ?? []), (string) auth()->id(),
+                ), __($l.'saved'));
+                unset($this->practiceCounts);
+            });
+    }
+
+    /** @param  array<string, mixed>  $state */
+    private static function itemLabel(array $state): string
+    {
+        $kind = ItemKind::tryFrom((string) ($state['kind'] ?? ''));
+        $text = match ($kind) {
+            ItemKind::Choice, ItemKind::Order => (string) ($state['prompt'] ?? '') ?: implode(' · ', (array) ($state['parts'] ?? [])),
+            ItemKind::Pair => trim(($state['left'] ?? '').' ↔ '.($state['right'] ?? '')),
+            default => '',
+        };
+
+        return trim(($kind?->label() ?? '').($text !== '' ? ' · '.mb_strimwidth($text, 0, 70, '…') : ''));
     }
 
     /** @return list<Component|Field> */

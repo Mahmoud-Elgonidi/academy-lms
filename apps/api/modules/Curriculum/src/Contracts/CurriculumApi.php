@@ -4,6 +4,7 @@ namespace Modules\Curriculum\Contracts;
 
 use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
 use Modules\Curriculum\Contracts\DTOs\LessonResource;
+use Modules\Curriculum\Contracts\DTOs\PracticeItem;
 use Modules\Curriculum\Contracts\DTOs\ProgramOption;
 use Modules\Curriculum\Contracts\DTOs\ResourceFile;
 
@@ -28,4 +29,12 @@ interface CurriculumApi
 
     /** Where a lesson's file is kept, for whoever serves it; null for a link or one that is gone. */
     public function resourceFile(string $resourceId): ?ResourceFile;
+
+    /**
+     * The practice items on these lessons, in their order (what games play).
+     *
+     * @param  list<string>  $nodeIds
+     * @return array<string, list<PracticeItem>> by lesson
+     */
+    public function practiceItems(array $nodeIds): array;
 }

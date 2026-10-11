@@ -52,6 +52,8 @@ php artisan schedule:work >/tmp/schedule.log 2>&1 &
 # Notifications go out from the queue. sync.sh restarts the worker after an
 # update (queue:restart), and this loop starts it again on the new code.
 ( while true; do php artisan queue:work --queue=notifications,default --tries=3 --max-time=3600 >>/tmp/queue.log 2>&1; sleep 1; done ) &
+# The games designer (console › Game studio) works on its own queue: a round takes minutes.
+( while true; do php artisan queue:work designer --queue=designer --tries=1 --timeout=1000 --max-time=3600 >>/tmp/designer.log 2>&1; sleep 1; done ) &
 
 echo ""
 echo "  Back office:  http://demo.localhost:8000/admin  (or http://localhost:8000/admin)"

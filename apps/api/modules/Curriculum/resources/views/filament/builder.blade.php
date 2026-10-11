@@ -32,6 +32,9 @@
         .cb-mats svg { width: .8rem; height: .8rem; }
         .cb-mats[data-has] { color: var(--primary-700); border-color: var(--primary-200); background: var(--primary-50); }
         .cb-mats[aria-expanded="true"] { border-color: var(--primary-500); }
+        .cb-practice { white-space: nowrap; }
+        .cb-practice .fi-link { font-size: .72rem; color: var(--gray-500); }
+        .cb-practice[data-has] .fi-link { color: var(--success-700); }
         .cb-materials { margin-inline-start: 2.6rem; margin-inline-end: 1rem; margin-bottom: .5rem; padding: .5rem; border-radius: var(--radius-lg); background: var(--gray-50); display: flex; flex-direction: column; gap: .35rem; }
         .cb-mat { display: flex; align-items: center; gap: .6rem; padding: .35rem .5rem; border-radius: var(--radius-md, .5rem); background: white; border: 1px solid var(--gray-200); }
         .cb-mat small { color: var(--gray-500); font-size: .72rem; overflow-wrap: anywhere; }

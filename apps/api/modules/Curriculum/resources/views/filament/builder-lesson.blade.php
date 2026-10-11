@@ -13,6 +13,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m20 11.5-7.7 7.7a4.5 4.5 0 0 1-6.4-6.4l7.8-7.8a3 3 0 0 1 4.2 4.2l-7.8 7.8a1.5 1.5 0 0 1-2.1-2.1l7.1-7.1"/></svg>
         {{ trans_choice('curriculum::curriculum.resources.count', $count, ['count' => $count]) }}
     </button>
+    <span class="cb-practice" @if (($this->practiceCounts[$lesson->id] ?? 0) > 0) data-has @endif>{{ ($this->practiceAction)(['node' => $lesson->id]) }}</span>
     <span class="cb-tools">
         <button type="button" class="cb-move" wire:click="move('{{ $lesson->id }}', 'up')">▲</button>
         <button type="button" class="cb-move" wire:click="move('{{ $lesson->id }}', 'down')">▼</button>

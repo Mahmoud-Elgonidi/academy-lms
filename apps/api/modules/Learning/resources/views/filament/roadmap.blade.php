@@ -1,4 +1,4 @@
-{{-- The roadmap: levels → units → lessons, ✓ mastered, ● here, ↻ review, ○ to come, and the lessons' materials under them. Needs $map (RoadmapQuery::for). --}}
+{{-- The roadmap: levels → units → lessons, ✓ mastered, ● here, ↻ review, ○ to come, 🎮 how practice in the games went, and the lessons' materials under them. Needs $map (RoadmapQuery::for). --}}
 @php
     $mat = fn (array $lessons) => array_values(array_filter($lessons, fn ($l) => ($l['materials'] ?? []) !== []));
 @endphp
@@ -21,6 +21,7 @@
     .rm-l[data-s="here"] { background: var(--primary-50); border-color: var(--primary-400); color: var(--primary-800); font-weight: 700; }
     .rm-l[data-s="review"] { background: var(--warning-50); border-color: var(--warning-300); color: var(--warning-800); }
     .rm-l .rm-clip { display: inline-flex; align-items: center; gap: .1rem; color: var(--gray-400); font-weight: 600; }
+    .rm-l .rm-play { font-size: .7rem; font-weight: 700; color: var(--success-700); }
     .rm-mats { display: flex; flex-direction: column; gap: .3rem; margin-top: .45rem; padding-top: .45rem; border-top: 1px dashed var(--gray-200); }
     .rm-mat { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .4rem; font-size: .75rem; }
     .rm-mat > span { color: var(--gray-600); font-weight: 600; margin-inline-end: .2rem; }
@@ -44,7 +45,7 @@
                 @if ($level['lessons'] !== [])
                     <div class="rm-lessons">
                         @foreach ($level['lessons'] as $l)
-                            <span class="rm-l" data-s="{{ $l['state'] }}" title="{{ __('learning::progress.states.'.$l['state']) }}"><b>{{ ['done' => '✓', 'here' => '●', 'review' => '↻', 'todo' => '○'][$l['state']] }}</b>{{ $l['title'] }}@if (($l['materials'] ?? []) !== [])<span class="rm-clip" title="{{ trans_choice('learning::progress.materials_count', count($l['materials']), ['count' => count($l['materials'])]) }}"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m20 11.5-7.7 7.7a4.5 4.5 0 0 1-6.4-6.4l7.8-7.8a3 3 0 0 1 4.2 4.2l-7.8 7.8a1.5 1.5 0 0 1-2.1-2.1l7.1-7.1"/></svg>{{ count($l['materials']) }}</span>@endif</span>
+                            <span class="rm-l" data-s="{{ $l['state'] }}" title="{{ __('learning::progress.states.'.$l['state']) }}"><b>{{ ['done' => '✓', 'here' => '●', 'review' => '↻', 'todo' => '○'][$l['state']] }}</b>{{ $l['title'] }}@if (($l['materials'] ?? []) !== [])<span class="rm-clip" title="{{ trans_choice('learning::progress.materials_count', count($l['materials']), ['count' => count($l['materials'])]) }}"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m20 11.5-7.7 7.7a4.5 4.5 0 0 1-6.4-6.4l7.8-7.8a3 3 0 0 1 4.2 4.2l-7.8 7.8a1.5 1.5 0 0 1-2.1-2.1l7.1-7.1"/></svg>{{ count($l['materials']) }}</span>@endif@if ($l['practice'] ?? null)<span class="rm-play" title="{{ __('learning::progress.practice', ['correct' => $l['practice']['correct'], 'answered' => $l['practice']['answered'], 'rounds' => $l['practice']['rounds']]) }}">🎮{{ $l['practice']['percent'] }}%</span>@endif</span>
                         @endforeach
                     </div>
                 @endif
@@ -54,7 +55,7 @@
                         <small>{{ $unit['title'] }} · {{ $unit['percent'] }}%</small>
                         <div class="rm-lessons">
                             @foreach ($unit['lessons'] as $l)
-                                <span class="rm-l" data-s="{{ $l['state'] }}" title="{{ __('learning::progress.states.'.$l['state']) }}"><b>{{ ['done' => '✓', 'here' => '●', 'review' => '↻', 'todo' => '○'][$l['state']] }}</b>{{ $l['title'] }}@if (($l['materials'] ?? []) !== [])<span class="rm-clip" title="{{ trans_choice('learning::progress.materials_count', count($l['materials']), ['count' => count($l['materials'])]) }}"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m20 11.5-7.7 7.7a4.5 4.5 0 0 1-6.4-6.4l7.8-7.8a3 3 0 0 1 4.2 4.2l-7.8 7.8a1.5 1.5 0 0 1-2.1-2.1l7.1-7.1"/></svg>{{ count($l['materials']) }}</span>@endif</span>
+                                <span class="rm-l" data-s="{{ $l['state'] }}" title="{{ __('learning::progress.states.'.$l['state']) }}"><b>{{ ['done' => '✓', 'here' => '●', 'review' => '↻', 'todo' => '○'][$l['state']] }}</b>{{ $l['title'] }}@if (($l['materials'] ?? []) !== [])<span class="rm-clip" title="{{ trans_choice('learning::progress.materials_count', count($l['materials']), ['count' => count($l['materials'])]) }}"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m20 11.5-7.7 7.7a4.5 4.5 0 0 1-6.4-6.4l7.8-7.8a3 3 0 0 1 4.2 4.2l-7.8 7.8a1.5 1.5 0 0 1-2.1-2.1l7.1-7.1"/></svg>{{ count($l['materials']) }}</span>@endif@if ($l['practice'] ?? null)<span class="rm-play" title="{{ __('learning::progress.practice', ['correct' => $l['practice']['correct'], 'answered' => $l['practice']['answered'], 'rounds' => $l['practice']['rounds']]) }}">🎮{{ $l['practice']['percent'] }}%</span>@endif</span>
                             @endforeach
                         </div>
                         @include('learning::filament.roadmap-materials', ['lessons' => $mat($unit['lessons'])])

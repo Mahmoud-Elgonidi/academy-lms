@@ -22,4 +22,8 @@ return [
     'server-error' => 'Something went wrong on our side.',
     // The web pages of a suspended academy (the API answers academy-suspended).
     'suspended_page' => ['title' => 'This academy is paused', 'body' => 'This site is not available right now. If you belong to the academy, please contact its office.'],
+    'games-off' => 'Games are off at the academy.',
+    'games-paused' => 'A guardian has paused games.',
+    'games-limit' => 'Today’s play time is used up.',
+    'games-not-enough-items' => 'Not enough practice for this game.',
 ];

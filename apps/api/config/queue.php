@@ -44,6 +44,24 @@ return [
             'after_commit' => false,
         ],
 
+        // The games designer's rounds take minutes (Platform\Jobs\DesignGameJob): the
+        // app's queue store, its own queue and worker, and a reservation that outlasts a round.
+        'designer' => env('QUEUE_CONNECTION', 'database') === 'redis' ? [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => 'designer',
+            'retry_after' => 1200,
+            'block_for' => null,
+            'after_commit' => false,
+        ] : [
+            'driver' => 'database',
+            'connection' => env('DB_QUEUE_CONNECTION'),
+            'table' => env('DB_QUEUE_TABLE', 'jobs'),
+            'queue' => 'designer',
+            'retry_after' => 1200,
+            'after_commit' => false,
+        ],
+
         'beanstalkd' => [
             'driver' => 'beanstalkd',
             'host' => env('BEANSTALKD_QUEUE_HOST', 'localhost'),

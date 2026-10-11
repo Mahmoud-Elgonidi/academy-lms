@@ -42,6 +42,9 @@ final class LearningData implements PersonalDataSource
                 ->get(['session_starts_at as lesson_at', 'kind', 'engagement', 'overall', 'notes_for_student', 'absence_note', 'submitted_at'])->map(fn (object $r) => (array) $r)->all(),
             'challenges' => DB::table('challenge_claims')->where('student_id', $userId)->orderBy('claimed_at')
                 ->get(['challenge', 'period', 'points', 'sticker', 'claimed_at'])->map(fn (object $c) => (array) $c)->all(),
+            // Practice rounds in the games are kept with the learner's record (like lessons); the copy has them all.
+            'practice' => DB::table('practice_rounds')->where('student_id', $userId)->orderBy('played_at')
+                ->get(['game', 'focus', 'correct', 'total', 'stars', 'seconds', 'played_at'])->map(fn (object $r) => (array) $r)->all(),
             'cheers' => DB::table('cheers')->where(fn ($q) => $q->where('student_id', $userId)->orWhere('from_id', $userId))->orderBy('created_at')
                 ->select(['kind', 'created_at'])->selectRaw("case when from_id = ? then 'sent' else 'received' end as direction", [$userId])
                 ->get()->map(fn (object $c) => (array) $c)->all(),

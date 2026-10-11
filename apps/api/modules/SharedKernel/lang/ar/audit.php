@@ -115,10 +115,17 @@ return [
             'reactivated' => 'تشغيل الأكاديمية تاني',
             'plan_changed' => 'باقة الأكاديمية بقت :plan: :reason',
         ],
+        'games' => [
+            'settings_saved' => 'تعديل ألعاب الأكاديمية (:state، :minutes دقيقة في اليوم)',
+        ],
         'platform' => [
             'signed_in' => 'دخول على لوحة المنصة',
             'plan_saved' => 'تعديل الباقة :plan',
             'demo_secrets_reset' => 'حساب لوحة المنصة التجريبي :name خد كلمة السر والمفتاح التجريبيين الجداد',
+            'game_draft_started' => 'بداية تصميم لعبة جديدة (:kinds)',
+            'game_published' => 'نشر اللعبة :game (نسخة :version)',
+            'game_retired' => 'إيقاف اللعبة :game',
+            'game_revived' => 'إرجاع اللعبة :game',
         ],
     ],
     'values' => [
@@ -137,6 +144,7 @@ return [
         'side' => ['family' => 'الأسرة', 'teacher' => 'المدرس', 'staff' => 'الإدارة سجلته'],
     ],
     'groups' => [
+        'games' => 'الألعاب',
         'messaging' => 'المحادثات',
         'safeguarding' => 'حماية الأطفال',
         'billing' => 'الفلوس',

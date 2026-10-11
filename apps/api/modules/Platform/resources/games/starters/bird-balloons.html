@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>بالونات الحكمة</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body { font-family: "Segoe UI", Tahoma, "Noto Sans Arabic", system-ui, sans-serif; color: #2b2150;
+    background: linear-gradient(180deg, #ffd6e8 0%, #c9e8ff 50%, #b8f0d8 100%); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+  #hills { position: absolute; bottom: 0; left: 0; width: 100%; height: 22%; }
+  #board { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: min(92%, 560px); z-index: 5; text-align: center; }
+  #rope { display: flex; justify-content: space-between; padding: 0 18%; height: 26px; }
+  #rope i { width: 3px; background: #8a6d3b; display: block; }
+  #sign { background: #fff8e8; border: 4px solid #8a6d3b; border-radius: 18px; padding: 12px 16px; font-weight: 900; font-size: clamp(17px, 5vw, 26px);
+    box-shadow: 0 6px 0 rgba(138, 109, 59, .35); line-height: 1.5; transform-origin: 50% -30px; }
+  #sign.swing { animation: swing .9s ease-out; }
+  @keyframes swing { 20% { transform: rotate(4deg); } 45% { transform: rotate(-3deg); } 70% { transform: rotate(1.5deg); } }
+  #meta { display: flex; justify-content: center; gap: 10px; margin-top: 8px; font-weight: 800; }
+  #meta span { background: rgba(255,255,255,.7); border-radius: 999px; padding: 3px 12px; }
+  #combo { opacity: 0; transition: opacity .2s; color: #e85d75; }
+  .balloon { position: absolute; top: 0; left: 0; cursor: pointer; z-index: 3; will-change: transform; display: flex; flex-direction: column; align-items: center; }
+  .balloon .body { position: relative; border-radius: 50% 50% 48% 48% / 56% 56% 44% 44%; display: flex; align-items: center; justify-content: center;
+    box-shadow: inset -10px -14px 0 rgba(0,0,0,.12), inset 8px 8px 0 rgba(255,255,255,.25); padding: 10px; text-align: center; }
+  .balloon .body::after { content: ""; position: absolute; top: 14%; left: 22%; width: 18%; height: 22%; border-radius: 50%; background: rgba(255,255,255,.55); }
+  .balloon .knot { width: 12px; height: 9px; margin-top: -2px; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  .balloon .string { width: 2px; height: 46px; background: rgba(43,33,80,.35); }
+  .balloon .label { position: relative; z-index: 1; color: #fff; font-weight: 900; font-size: clamp(15px, 4.4vw, 22px); text-shadow: 0 2px 0 rgba(0,0,0,.25); line-height: 1.3; word-break: break-word; }
+  .balloon.wrong .body { animation: no .45s; }
+  @keyframes no { 25% { transform: rotate(-10deg) scale(.95); } 50% { transform: rotate(9deg); } 75% { transform: rotate(-5deg); } }
+  .bit { position: absolute; z-index: 6; pointer-events: none; border-radius: 3px; }
+  .star { position: absolute; z-index: 6; pointer-events: none; font-size: 22px; }
+  #bird { position: absolute; top: 0; left: 0; z-index: 4; width: 70px; pointer-events: none; will-change: transform; }
+  #bird .wing { transform-origin: 40px 26px; animation: flap .28s ease-in-out infinite alternate; }
+  @keyframes flap { from { transform: rotate(-22deg); } to { transform: rotate(24deg); } }
+  #banner { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 9; pointer-events: none; }
+  #banner span { font-size: clamp(30px, 10vw, 64px); font-weight: 900; color: #fff; text-shadow: 0 5px 0 #e85d75, 0 0 28px rgba(232,93,117,.8); opacity: 0; }
+</style>
+</head>
+<body>
+<svg id="hills" viewBox="0 0 400 90" preserveAspectRatio="none">
+  <path d="M0 90 C50 30 110 40 160 60 C210 20 290 26 330 52 C360 40 385 44 400 50 L400 90 Z" fill="#8fdcb0"/>
+  <path d="M0 90 C70 62 140 70 210 76 C280 62 340 66 400 80 L400 90 Z" fill="#5cc28f"/>
+</svg>
+<div id="board">
+  <div id="rope"><i></i><i></i></div>
+  <div id="sign"></div>
+  <div id="meta"><span id="count"></span><span id="combo"></span></div>
+</div>
+<svg id="bird" viewBox="0 0 80 60">
+  <ellipse cx="40" cy="34" rx="24" ry="17" fill="#7b61ff"/>
+  <ellipse cx="44" cy="39" rx="13" ry="9" fill="#c4b8ff"/>
+  <path d="M62 30 L78 27 L64 37 Z" fill="#ffb703"/>
+  <circle cx="53" cy="28" r="7" fill="#fff"/><circle cx="55" cy="28" r="4" fill="#2b2150"/>
+  <path d="M18 32 L4 24 L8 36 L2 42 L18 39 Z" fill="#5a3fe0"/>
+  <g class="wing"><path d="M40 26 C24 4 12 8 16 20 C20 28 32 31 40 28 Z" fill="#5a3fe0"/></g>
+</svg>
+<div id="banner"><span></span></div>
+<script>
+(function () {
+  var COLORS = ['#ff5d8f', '#ffb703', '#3a86ff', '#06d6a0', '#8338ec', '#fb5607'];
+  var W = 0, H = 0, items = [], index = 0, item = null, balloons = [], tries = 0, combo = 0, speed = 1, last = 0, locked = false;
+  var bird = document.getElementById('bird'), birdT = 0;
+
+  function measure() { W = window.innerWidth; H = window.innerHeight; }
+
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  function banner(text) {
+    var s = document.querySelector('#banner span');
+    s.textContent = text;
+    s.animate([{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1.12)', offset: .35 }, { opacity: 1, transform: 'scale(1)', offset: .75 }, { opacity: 0, transform: 'translateY(-30px)' }], { duration: 1300, easing: 'ease-out' });
+  }
+
+  function startItem() {
+    item = items[index]; tries = 0; locked = false;
+    var sign = document.getElementById('sign');
+    sign.textContent = item.prompt || 'فرقع البالونة الصح';
+    sign.classList.remove('swing'); void sign.offsetWidth; sign.classList.add('swing');
+    document.getElementById('count').textContent = (index + 1) + ' / ' + items.length;
+    var order = LMS.shuffle(item.options.map(function (_, i) { return i; }));
+    var n = order.length, size = Math.min(150, Math.max(96, (W - 20) / n - 12));
+    var top = document.getElementById('board').getBoundingClientRect().bottom;
+    order.forEach(function (optionIndex, slot) {
+      var b = el('div', 'balloon');
+      var body = el('div', 'body');
+      var color = COLORS[(slot + index) % COLORS.length];
+      body.style.width = size + 'px'; body.style.height = (size * 1.18) + 'px'; body.style.background = color;
+      body.appendChild(el('span', 'label', item.options[optionIndex]));
+      var knot = el('div', 'knot'); knot.style.background = color;
+      b.appendChild(body); b.appendChild(knot); b.appendChild(el('div', 'string'));
+      document.body.appendChild(b);
+      var lane = (W / n) * (slot + 0.5) - size / 2;
+      var room = Math.max(40, H * .62 - top - size * 1.6);
+      var rec = { el: b, option: optionIndex, x: lane, baseX: lane, y: H + 40 + slot * 60, size: size, phase: Math.random() * 6, rest: top + 20 + Math.random() * room, gone: false };
+      b.addEventListener('pointerdown', function (e) { e.preventDefault(); tap(rec); });
+      balloons.push(rec);
+    });
+    LMS.sfx('whoosh');
+  }
+
+  function tap(rec) {
+    if (locked || rec.gone) return;
+    tries++;
+    var right = rec.option === item.answer;
+    if (tries === 1) LMS.answer(item.id, right);
+    if (right) {
+      locked = true;
+      combo = tries === 1 ? combo + 1 : 0;
+      showCombo();
+      pop(rec, true);
+      LMS.sfx('pop'); setTimeout(function () { LMS.sfx('correct'); }, 120);
+      flyBird(rec);
+      balloons.forEach(function (o) { if (o !== rec) drift(o); });
+      setTimeout(next, 1100);
+    } else {
+      combo = 0; showCombo();
+      rec.el.classList.remove('wrong'); void rec.el.offsetWidth; rec.el.classList.add('wrong');
+      LMS.sfx('wrong');
+      drift(rec);
+    }
+  }
+
+  function showCombo() {
+    var c = document.getElementById('combo');
+    if (combo >= 2) { c.textContent = '× ' + combo + ' 🔥'; c.style.opacity = 1; } else { c.style.opacity = 0; }
+  }
+
+  function pop(rec) {
+    rec.gone = true;
+    var r = rec.el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + rec.size * .55;
+    rec.el.animate([{ transform: rec.el.style.transform + ' scale(1)', opacity: 1 }, { transform: rec.el.style.transform + ' scale(1.35)', opacity: 0 }], { duration: 160 }).onfinish = function () { rec.el.remove(); };
+    for (var i = 0; i < 16; i++) {
+      var p = el('div', 'bit');
+      p.style.width = p.style.height = (5 + Math.random() * 7) + 'px';
+      p.style.background = COLORS[i % COLORS.length]; p.style.left = cx + 'px'; p.style.top = cy + 'px';
+      document.body.appendChild(p);
+      var a = Math.random() * Math.PI * 2, d = 50 + Math.random() * 90;
+      p.animate([{ transform: 'translate(0,0) rotate(0)', opacity: 1 }, { transform: 'translate(' + Math.cos(a) * d + 'px,' + (Math.sin(a) * d + 60) + 'px) rotate(400deg)', opacity: 0 }],
+        { duration: 800 + Math.random() * 400, easing: 'cubic-bezier(.2,.7,.4,1)' }).onfinish = function () { this.effect.target.remove(); };
+    }
+    for (var s = 0; s < 3; s++) {
+      var st = el('div', 'star', '⭐'); st.style.left = cx + 'px'; st.style.top = cy + 'px'; document.body.appendChild(st);
+      st.animate([{ transform: 'translate(0,0) scale(.4)', opacity: 1 }, { transform: 'translate(' + ((s - 1) * 60) + 'px,-90px) scale(1.2)', opacity: 0 }], { duration: 900, easing: 'ease-out' }).onfinish = function () { this.effect.target.remove(); };
+    }
+  }
+
+  function drift(rec) {
+    rec.gone = true;
+    rec.el.animate([{ opacity: 1 }, { opacity: 0, transform: rec.el.style.transform + ' translateY(-' + (H * .5) + 'px) rotate(18deg) scale(.8)' }], { duration: 1000, easing: 'ease-in' }).onfinish = function () { rec.el.remove(); };
+  }
+
+  function flyBird(rec) {
+    var r = rec.el.getBoundingClientRect();
+    bird.style.transition = 'transform .5s cubic-bezier(.3,1.3,.5,1)';
+    bird.style.transform = 'translate(' + (r.left + r.width / 2 - 35) + 'px,' + (r.top - 30) + 'px) scaleX(-1)';
+    birdT = performance.now() + 900;
+  }
+
+  function next() {
+    balloons = [];
+    index++;
+    if (combo >= 3 && combo % 3 === 0) banner('نار! 🔥');
+    if (index >= items.length) { finale(); return; }
+    startItem();
+  }
+
+  function finale() {
+    LMS.sfx('win'); banner('برافو!');
+    for (var i = 0; i < 6; i++) setTimeout(function () {
+      var rec = { el: el('div'), size: 60, gone: false };
+      rec.el.style.position = 'absolute'; rec.el.style.left = (Math.random() * W) + 'px'; rec.el.style.top = (Math.random() * H * .6) + 'px';
+      rec.el.style.width = '60px'; rec.el.style.height = '60px'; document.body.appendChild(rec.el); pop(rec);
+    }, i * 160);
+    setTimeout(function () { LMS.finish(); }, 1700);
+  }
+
+  function frame(now) {
+    var dt = last ? Math.min(50, now - last) : 16; last = now;
+    balloons.forEach(function (b) {
+      if (b.gone) return;
+      b.y += (b.rest - b.y) * Math.min(1, dt / 1000 * 1.6 * speed);
+      var y = b.y + Math.sin(now / 700 + b.phase) * 6;
+      b.x = b.baseX + Math.sin(now / 900 + b.phase) * 10;
+      b.el.style.transform = 'translate3d(' + b.x + 'px,' + y + 'px,0) rotate(' + Math.sin(now / 800 + b.phase) * 4 + 'deg)';
+    });
+    if (now > birdT) {
+      bird.style.transition = 'none';
+      var bx = W * .5 + Math.sin(now / 1500) * W * .38, by = H * .78 + Math.sin(now / 600) * 12;
+      bird.style.transform = 'translate(' + (bx - 35) + 'px,' + by + 'px)' + (Math.cos(now / 1500) > 0 ? '' : ' scaleX(-1)');
+    }
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', measure);
+  LMS.onStart(function (round) {
+    items = round.items.filter(function (i) { return i.kind === 'choice' && i.options && i.options.length > 1; });
+    speed = { kids: .8, middle: 1, teen: 1.35 }[round.stage] || 1;
+    measure(); requestAnimationFrame(frame);
+    if (items.length === 0) { LMS.finish(); return; }
+    startItem();
+  });
+})();
+</script>
+</body>
+</html>

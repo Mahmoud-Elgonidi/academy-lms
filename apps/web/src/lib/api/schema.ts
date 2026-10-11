@@ -445,6 +445,95 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/games/world": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A learner's games world
+         * @description The islands in order with their creatures (found or not) and games (playable when the learner has practice items
+         *     of the kinds it plays), the quests (what to practise now: homework, the last lesson, reviews, the current lesson;
+         *     each with the game for it), stars and the next egg, today's minutes, and the last rounds. For the student
+         *     themself (learner_id left out) or a guardian's child; a guardian also gets the limits they can set.
+         */
+        get: operations["games.world"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/games/plays": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start a round
+         * @description Of a game (id or key) for a quest (its key), for a homework's practice (homework_id), or with all of the learner's
+         *     practice. Answers the page to open (page_url, sandboxed; never cached personal data) and the round to hand it
+         *     through the bridge: {lms: 1, type: "start", round}. 403 games-off / games-paused / games-limit, 422
+         *     games-not-enough-items when the learner has too few items for that game.
+         */
+        post: operations["games.plays.start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/games/plays/{play}/finish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish a round
+         * @description Every try the page reported (item and whether it was right), in order. Answers the stars, how many were right
+         *     first time, a creature if one hatched, the next egg, and the homework handed in by this practice. Finishing again
+         *     answers the same stars. Send an Idempotency-Key.
+         */
+        post: operations["games.plays.finish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/games/limits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set a child's play
+         * @description A guardian turns games on or off for their child and sets the minutes a day (one of the choices; null: the
+         *     academy's, never more).
+         */
+        put: operations["games.limits"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/auth/login": {
         parameters: {
             query?: never;
@@ -3646,6 +3735,290 @@ export interface operations {
             403: components["responses"]["AuthorizationException"];
         };
     };
+    "games.world": {
+        parameters: {
+            query?: {
+                learner_id?: string | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            learner_id: string;
+                            stage: string;
+                            /** @description Whether the learner may start a round now, and why not: off (the academy), paused (a guardian), limit (today's minutes). */
+                            allowance: unknown[];
+                            stars: number;
+                            /** @description Stars toward the next egg on an island. */
+                            egg: {
+                                have: number;
+                                /** @constant */
+                                need: 12;
+                            };
+                            creatures_found: string;
+                            quests: unknown[];
+                            islands: unknown[];
+                            recent: unknown[];
+                            /** @description A guardian's limits for this child (null for the student). */
+                            limits: {
+                                enabled: boolean;
+                                daily_minutes: number | null;
+                                /** @description The academy's own minutes a day (null: no limit); a guardian's choice never goes over it. */
+                                academy_minutes: number | null;
+                                choices: [
+                                    10,
+                                    15,
+                                    20,
+                                    30,
+                                    45,
+                                    60,
+                                    90,
+                                    120
+                                ];
+                            } | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "games.plays.start": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    learner_id?: string | null;
+                    game: string;
+                    quest?: string | null;
+                    /** Format: uuid */
+                    homework_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            play_id: string;
+                            page_url: string;
+                            game: {
+                                id: string;
+                                key: string;
+                                title: string;
+                                how_to_play: string;
+                                island: string;
+                            };
+                            focus: {
+                                reason: string;
+                                title: string;
+                            } | null;
+                            /** @description What the page is handed: {lms: 1, type: "start", round: this}. */
+                            round: {
+                                items: unknown[];
+                                stage: string;
+                                /** @enum {string} */
+                                locale: "ar" | "en";
+                                /** @enum {string} */
+                                dir: "rtl" | "ltr";
+                                title: string;
+                            };
+                            /** @constant */
+                            max_seconds: 1200;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "games.plays.finish": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                play: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    answers: string[];
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            stars: number;
+                            correct: number;
+                            total: string;
+                            creature: {
+                                key: string;
+                                name: string;
+                                emoji: string;
+                                rarity: string;
+                                island: string;
+                            } | null;
+                            egg: {
+                                have: number;
+                                /** @constant */
+                                need: 12;
+                            };
+                            homework: {
+                                title: string;
+                                handed_in: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "games.limits": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    learner_id: string;
+                    enabled: boolean;
+                    daily_minutes?: number | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            enabled: boolean;
+                            daily_minutes: number | null;
+                            /** @description The academy's own minutes a day (null: no limit); a guardian's choice never goes over it. */
+                            academy_minutes: number | null;
+                            choices: [
+                                10,
+                                15,
+                                20,
+                                30,
+                                45,
+                                60,
+                                90,
+                                120
+                            ];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AccessDeniedHttpException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
     "identity.login": {
         parameters: {
             query?: never;
@@ -5203,6 +5576,15 @@ export interface operations {
                                 timezone: null;
                                 label: string;
                             } | null;
+                            /** @description Practice in the games on the report's lessons (null: none): how the best round went, or not yet. */
+                            practice: {
+                                done: boolean;
+                                correct: string | null;
+                                total: string | null;
+                                stars: string | null;
+                                game: string | null;
+                                label: string;
+                            } | null;
                             submissions: {
                                 id: string;
                                 body: string | null;
@@ -5296,6 +5678,15 @@ export interface operations {
                                 utc: string;
                                 local: string;
                                 timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Practice in the games on the report's lessons (null: none): how the best round went, or not yet. */
+                            practice: {
+                                done: boolean;
+                                correct: string | null;
+                                total: string | null;
+                                stars: string | null;
+                                game: string | null;
                                 label: string;
                             } | null;
                             submissions: {
@@ -5491,6 +5882,13 @@ export interface operations {
                                     weight: number;
                                     /** @description Files and links on the lesson (a file's url is signed for twelve hours); empty when not asked for. */
                                     materials: unknown[];
+                                    /** @description How practice in the games went on this lesson's items (null: not practised yet). */
+                                    practice: {
+                                        rounds: number;
+                                        answered: number;
+                                        correct: number;
+                                        percent: number | null;
+                                    } | null;
                                 }[];
                                 units: {
                                     id: string;
@@ -5508,6 +5906,13 @@ export interface operations {
                                         weight: number;
                                         /** @description Files and links on the lesson (a file's url is signed for twelve hours); empty when not asked for. */
                                         materials: unknown[];
+                                        /** @description How practice in the games went on this lesson's items (null: not practised yet). */
+                                        practice: {
+                                            rounds: number;
+                                            answered: number;
+                                            correct: number;
+                                            percent: number | null;
+                                        } | null;
                                     }[];
                                 }[];
                             }[];
@@ -5681,6 +6086,15 @@ export interface operations {
                                 timezone: null;
                                 label: string;
                             } | null;
+                            /** @description Practice in the games on the report's lessons (null: none): how the best round went, or not yet. */
+                            practice: {
+                                done: boolean;
+                                correct: string | null;
+                                total: string | null;
+                                stars: string | null;
+                                game: string | null;
+                                label: string;
+                            } | null;
                             submissions: {
                                 id: string;
                                 body: string | null;
@@ -5773,6 +6187,15 @@ export interface operations {
                                 utc: string;
                                 local: string;
                                 timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description Practice in the games on the report's lessons (null: none): how the best round went, or not yet. */
+                            practice: {
+                                done: boolean;
+                                correct: string | null;
+                                total: string | null;
+                                stars: string | null;
+                                game: string | null;
                                 label: string;
                             } | null;
                             submissions: {

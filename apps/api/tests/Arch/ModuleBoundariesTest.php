@@ -6,7 +6,7 @@
  * no cycles, and only platform code may use the BYPASSRLS connection.
  */
 
-const MODULES_ABOVE_KERNEL = ['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging', 'App'];
+const MODULES_ABOVE_KERNEL = ['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging', 'Modules\Games', 'App'];
 
 arch('the shared kernel depends on no module')
     ->expect('Modules\SharedKernel')
@@ -253,8 +253,26 @@ arch('hiding contacts is pure: text in, text out')
     ->expect('Modules\Messaging\Domain')
     ->toOnlyUse(['Modules\Messaging\Domain']);
 
+arch('games sit on top: practice from curriculum and learning, the look from people and the catalog from the shared kernel, all through contracts, and nothing depends on them')
+    ->expect('Modules\Games')
+    ->not->toUse([
+        'Modules\Platform', 'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\Identity\Preferences', 'Modules\Identity\Authorization',
+        'Modules\People\Models', 'Modules\People\Actions', 'Modules\People\Filament', 'Modules\People\Checks',
+        'Modules\Curriculum\Models', 'Modules\Curriculum\Actions', 'Modules\Curriculum\Filament',
+        'Modules\Learning\Models', 'Modules\Learning\Actions', 'Modules\Learning\Queries', 'Modules\Learning\Domain', 'Modules\Learning\Filament',
+        'Modules\Catalog', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Classroom', 'Modules\Communication', 'Modules\Crm',
+        'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging', 'App',
+    ])
+    ->ignoring('Modules\Games\Database')
+    ->and(['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging'])
+    ->not->toUse('Modules\Games');
+
+arch('a round\'s rules are pure: the catalog\'s game in, picks and scores out')
+    ->expect('Modules\Games\Domain')
+    ->toOnlyUse(['Modules\Games\Domain', 'Modules\SharedKernel\Games']);
+
 arch('each module says what it holds about a person through the shared kernel\'s PersonalDataSource')
-    ->expect(['Modules\Identity\Privacy', 'Modules\People\Privacy', 'Modules\Communication\Privacy', 'Modules\Learning\Privacy', 'Modules\Scheduling\Privacy', 'Modules\Enrollment\Privacy', 'Modules\Billing\Privacy', 'Modules\Evaluation\Privacy', 'Modules\Classroom\Privacy', 'Modules\Support\Privacy', 'Modules\Crm\Privacy', 'Modules\Payroll\Privacy', 'Modules\Import\Privacy', 'Modules\Safeguarding\Privacy', 'Modules\Messaging\Privacy'])
+    ->expect(['Modules\Identity\Privacy', 'Modules\People\Privacy', 'Modules\Communication\Privacy', 'Modules\Learning\Privacy', 'Modules\Scheduling\Privacy', 'Modules\Enrollment\Privacy', 'Modules\Billing\Privacy', 'Modules\Evaluation\Privacy', 'Modules\Classroom\Privacy', 'Modules\Support\Privacy', 'Modules\Crm\Privacy', 'Modules\Payroll\Privacy', 'Modules\Import\Privacy', 'Modules\Safeguarding\Privacy', 'Modules\Messaging\Privacy', 'Modules\Games\Privacy'])
     ->toImplement('Modules\SharedKernel\Privacy\PersonalDataSource');
 
 arch('the video adapters only talk to the provider: no queries, no attendance, no tenancy')
@@ -282,14 +300,15 @@ arch('the app layer uses modules only through contracts, plugins and the shared 
         'Modules\Import\Models', 'Modules\Import\Actions',
         'Modules\Support\Models', 'Modules\Support\Actions',
         'Modules\Messaging\Models', 'Modules\Messaging\Actions',
+        'Modules\Games\Models', 'Modules\Games\Actions',
     ]);
 
 arch('actions and models are final')
     ->expect([
         'Modules\Platform\Actions', 'Modules\Identity\Actions', 'Modules\Catalog\Actions', 'Modules\People\Actions', 'Modules\Scheduling\Actions',
-        'Modules\Credits\Actions', 'Modules\Enrollment\Actions', 'Modules\Billing\Actions', 'Modules\Curriculum\Actions', 'Modules\Learning\Actions', 'Modules\Communication\Actions', 'Modules\Classroom\Actions', 'Modules\Crm\Actions', 'Modules\Evaluation\Actions', 'Modules\Payroll\Actions', 'Modules\Import\Actions', 'Modules\Support\Actions', 'Modules\Messaging\Actions',
+        'Modules\Credits\Actions', 'Modules\Enrollment\Actions', 'Modules\Billing\Actions', 'Modules\Curriculum\Actions', 'Modules\Learning\Actions', 'Modules\Communication\Actions', 'Modules\Classroom\Actions', 'Modules\Crm\Actions', 'Modules\Evaluation\Actions', 'Modules\Payroll\Actions', 'Modules\Import\Actions', 'Modules\Support\Actions', 'Modules\Messaging\Actions', 'Modules\Games\Actions',
         'Modules\Platform\Models', 'Modules\Identity\Models', 'Modules\Catalog\Models', 'Modules\People\Models', 'Modules\Scheduling\Domain\Models',
-        'Modules\Credits\Models', 'Modules\Enrollment\Models', 'Modules\Billing\Models', 'Modules\Curriculum\Models', 'Modules\Learning\Models', 'Modules\Communication\Models', 'Modules\Classroom\Models', 'Modules\Crm\Models', 'Modules\Evaluation\Models', 'Modules\Payroll\Models', 'Modules\Import\Models', 'Modules\Support\Models', 'Modules\Messaging\Models',
+        'Modules\Credits\Models', 'Modules\Enrollment\Models', 'Modules\Billing\Models', 'Modules\Curriculum\Models', 'Modules\Learning\Models', 'Modules\Communication\Models', 'Modules\Classroom\Models', 'Modules\Crm\Models', 'Modules\Evaluation\Models', 'Modules\Payroll\Models', 'Modules\Import\Models', 'Modules\Support\Models', 'Modules\Messaging\Models', 'Modules\Games\Models',
     ])
     ->toBeFinal();
 

@@ -4,13 +4,17 @@ namespace Modules\Platform\Filament\Console;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Illuminate\Support\Facades\Route;
 use Modules\Platform\Filament\Console\Pages\Academies;
 use Modules\Platform\Filament\Console\Pages\AcademyOverview;
 use Modules\Platform\Filament\Console\Pages\AuditLog;
+use Modules\Platform\Filament\Console\Pages\GameDraftPage;
+use Modules\Platform\Filament\Console\Pages\GameStudio;
 use Modules\Platform\Filament\Console\Pages\Health;
 use Modules\Platform\Filament\Console\Pages\Plans;
+use Modules\Platform\Http\Controllers\GameDraftPageController;
 
-/** The platform team's console: the academies, their use, plans and status, the plans on sale, the audit log across them, and the stack's health. */
+/** The platform team's console: the academies, their use, plans and status, the plans on sale, the games studio, the audit log across them, and the stack's health. */
 final class ConsolePlugin implements Plugin
 {
     public static function make(): self
@@ -25,7 +29,9 @@ final class ConsolePlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([Academies::class, AcademyOverview::class, Plans::class, AuditLog::class, Health::class]);
+        $panel->pages([Academies::class, AcademyOverview::class, Plans::class, GameStudio::class, GameDraftPage::class, AuditLog::class, Health::class]);
+        // A draft game's page for the studio's preview (sandboxed, never cached).
+        $panel->authenticatedRoutes(fn () => Route::get('games/drafts/{draft}/page', GameDraftPageController::class)->name('games.draft-page'));
     }
 
     public function boot(Panel $panel): void {}

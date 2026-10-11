@@ -3234,6 +3234,766 @@
                 }
             }
         },
+        "/v1/games/world": {
+            "get": {
+                "operationId": "games.world",
+                "description": "The islands in order with their creatures (found or not) and games (playable when the learner has practice items\nof the kinds it plays), the quests (what to practise now: homework, the last lesson, reviews, the current lesson;\neach with the game for it), stars and the next egg, today's minutes, and the last rounds. For the student\nthemself (learner_id left out) or a guardian's child; a guardian also gets the limits they can set.",
+                "summary": "A learner's games world",
+                "tags": [
+                    "Games"
+                ],
+                "parameters": [
+                    {
+                        "name": "learner_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 64
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "learner_id": {
+                                                    "type": "string"
+                                                },
+                                                "stage": {
+                                                    "type": "string"
+                                                },
+                                                "allowance": {
+                                                    "type": "array",
+                                                    "description": "Whether the learner may start a round now, and why not: off (the academy), paused (a guardian), limit (today's minutes).",
+                                                    "items": {}
+                                                },
+                                                "stars": {
+                                                    "type": "integer"
+                                                },
+                                                "egg": {
+                                                    "type": "object",
+                                                    "description": "Stars toward the next egg on an island.",
+                                                    "properties": {
+                                                        "have": {
+                                                            "type": "integer"
+                                                        },
+                                                        "need": {
+                                                            "type": "integer",
+                                                            "const": 12
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "have",
+                                                        "need"
+                                                    ]
+                                                },
+                                                "creatures_found": {
+                                                    "type": "string"
+                                                },
+                                                "quests": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "islands": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "recent": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "limits": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "A guardian's limits for this child (null for the student).",
+                                                    "properties": {
+                                                        "enabled": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "daily_minutes": {
+                                                            "type": [
+                                                                "integer",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "academy_minutes": {
+                                                            "type": [
+                                                                "integer",
+                                                                "null"
+                                                            ],
+                                                            "description": "The academy's own minutes a day (null: no limit); a guardian's choice never goes over it."
+                                                        },
+                                                        "choices": {
+                                                            "type": "array",
+                                                            "prefixItems": [
+                                                                {
+                                                                    "type": "integer",
+                                                                    "const": 10
+                                                                },
+                                                                {
+                                                                    "type": "integer",
+                                                                    "const": 15
+                                                                },
+                                                                {
+                                                                    "type": "integer",
+                                                                    "const": 20
+                                                                },
+                                                                {
+                                                                    "type": "integer",
+                                                                    "const": 30
+                                                                },
+                                                                {
+                                                                    "type": "integer",
+                                                                    "const": 45
+                                                                },
+                                                                {
+                                                                    "type": "integer",
+                                                                    "const": 60
+                                                                },
+                                                                {
+                                                                    "type": "integer",
+                                                                    "const": 90
+                                                                },
+                                                                {
+                                                                    "type": "integer",
+                                                                    "const": 120
+                                                                }
+                                                            ],
+                                                            "minItems": 8,
+                                                            "maxItems": 8
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "enabled",
+                                                        "daily_minutes",
+                                                        "academy_minutes",
+                                                        "choices"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "learner_id",
+                                                "stage",
+                                                "allowance",
+                                                "stars",
+                                                "egg",
+                                                "creatures_found",
+                                                "quests",
+                                                "islands",
+                                                "recent",
+                                                "limits"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/games/plays": {
+            "post": {
+                "operationId": "games.plays.start",
+                "description": "Of a game (id or key) for a quest (its key), for a homework's practice (homework_id), or with all of the learner's\npractice. Answers the page to open (page_url, sandboxed; never cached personal data) and the round to hand it\nthrough the bridge: {lms: 1, type: \"start\", round}. 403 games-off / games-paused / games-limit, 422\ngames-not-enough-items when the learner has too few items for that game.",
+                "summary": "Start a round",
+                "tags": [
+                    "Games"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "learner_id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 64
+                                    },
+                                    "game": {
+                                        "type": "string",
+                                        "maxLength": 64
+                                    },
+                                    "quest": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 120
+                                    },
+                                    "homework_id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "uuid"
+                                    }
+                                },
+                                "required": [
+                                    "game"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "play_id": {
+                                                    "type": "string"
+                                                },
+                                                "page_url": {
+                                                    "type": "string"
+                                                },
+                                                "game": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "title": {
+                                                            "type": "string"
+                                                        },
+                                                        "how_to_play": {
+                                                            "type": "string"
+                                                        },
+                                                        "island": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "key",
+                                                        "title",
+                                                        "how_to_play",
+                                                        "island"
+                                                    ]
+                                                },
+                                                "focus": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "reason": {
+                                                            "type": "string"
+                                                        },
+                                                        "title": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "reason",
+                                                        "title"
+                                                    ]
+                                                },
+                                                "round": {
+                                                    "type": "object",
+                                                    "description": "What the page is handed: {lms: 1, type: \"start\", round: this}.",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {}
+                                                        },
+                                                        "stage": {
+                                                            "type": "string"
+                                                        },
+                                                        "locale": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                                "ar",
+                                                                "en"
+                                                            ]
+                                                        },
+                                                        "dir": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                                "rtl",
+                                                                "ltr"
+                                                            ]
+                                                        },
+                                                        "title": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "items",
+                                                        "stage",
+                                                        "locale",
+                                                        "dir",
+                                                        "title"
+                                                    ]
+                                                },
+                                                "max_seconds": {
+                                                    "type": "integer",
+                                                    "const": 1200
+                                                }
+                                            },
+                                            "required": [
+                                                "play_id",
+                                                "page_url",
+                                                "game",
+                                                "focus",
+                                                "round",
+                                                "max_seconds"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/games/plays/{play}/finish": {
+            "post": {
+                "operationId": "games.plays.finish",
+                "description": "Every try the page reported (item and whether it was right), in order. Answers the stars, how many were right\nfirst time, a creature if one hatched, the next egg, and the homework handed in by this practice. Finishing again\nanswers the same stars. Send an Idempotency-Key.",
+                "summary": "Finish a round",
+                "tags": [
+                    "Games"
+                ],
+                "parameters": [
+                    {
+                        "name": "play",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "answers": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "maxItems": 500
+                                    }
+                                },
+                                "required": [
+                                    "answers"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "stars": {
+                                                    "type": "integer"
+                                                },
+                                                "correct": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "string"
+                                                },
+                                                "creature": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "key": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        },
+                                                        "emoji": {
+                                                            "type": "string"
+                                                        },
+                                                        "rarity": {
+                                                            "type": "string"
+                                                        },
+                                                        "island": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "key",
+                                                        "name",
+                                                        "emoji",
+                                                        "rarity",
+                                                        "island"
+                                                    ]
+                                                },
+                                                "egg": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "have": {
+                                                            "type": "integer"
+                                                        },
+                                                        "need": {
+                                                            "type": "integer",
+                                                            "const": 12
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "have",
+                                                        "need"
+                                                    ]
+                                                },
+                                                "homework": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "title": {
+                                                            "type": "string"
+                                                        },
+                                                        "handed_in": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "title",
+                                                        "handed_in"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "stars",
+                                                "correct",
+                                                "total",
+                                                "creature",
+                                                "egg",
+                                                "homework"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/games/limits": {
+            "put": {
+                "operationId": "games.limits",
+                "description": "A guardian turns games on or off for their child and sets the minutes a day (one of the choices; null: the\nacademy's, never more).",
+                "summary": "Set a child's play",
+                "tags": [
+                    "Games"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "learner_id": {
+                                        "type": "string",
+                                        "maxLength": 64
+                                    },
+                                    "enabled": {
+                                        "type": "boolean"
+                                    },
+                                    "daily_minutes": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "learner_id",
+                                    "enabled"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "enabled": {
+                                                    "type": "boolean"
+                                                },
+                                                "daily_minutes": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "academy_minutes": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "The academy's own minutes a day (null: no limit); a guardian's choice never goes over it."
+                                                },
+                                                "choices": {
+                                                    "type": "array",
+                                                    "prefixItems": [
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 10
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 15
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 20
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 30
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 45
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 60
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 90
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "const": 120
+                                                        }
+                                                    ],
+                                                    "minItems": 8,
+                                                    "maxItems": 8
+                                                }
+                                            },
+                                            "required": [
+                                                "enabled",
+                                                "daily_minutes",
+                                                "academy_minutes",
+                                                "choices"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AccessDeniedHttpException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/auth/login": {
             "post": {
                 "operationId": "identity.login",
@@ -6657,6 +7417,53 @@
                                                             "label"
                                                         ]
                                                     },
+                                                    "practice": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "Practice in the games on the report's lessons (null: none): how the best round went, or not yet.",
+                                                        "properties": {
+                                                            "done": {
+                                                                "type": "boolean"
+                                                            },
+                                                            "correct": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "total": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "stars": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "game": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "done",
+                                                            "correct",
+                                                            "total",
+                                                            "stars",
+                                                            "game",
+                                                            "label"
+                                                        ]
+                                                    },
                                                     "submissions": {
                                                         "type": "array",
                                                         "items": {
@@ -6761,6 +7568,7 @@
                                                     "grade",
                                                     "feedback",
                                                     "reviewed_at",
+                                                    "practice",
                                                     "submissions"
                                                 ]
                                             }
@@ -6977,6 +7785,53 @@
                                                         "label"
                                                     ]
                                                 },
+                                                "practice": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "Practice in the games on the report's lessons (null: none): how the best round went, or not yet.",
+                                                    "properties": {
+                                                        "done": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "correct": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "total": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "stars": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "game": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "done",
+                                                        "correct",
+                                                        "total",
+                                                        "stars",
+                                                        "game",
+                                                        "label"
+                                                    ]
+                                                },
                                                 "submissions": {
                                                     "type": "array",
                                                     "items": {
@@ -7081,6 +7936,7 @@
                                                 "grade",
                                                 "feedback",
                                                 "reviewed_at",
+                                                "practice",
                                                 "submissions"
                                             ]
                                         }
@@ -7536,6 +8392,36 @@
                                                                             "type": "array",
                                                                             "description": "Files and links on the lesson (a file's url is signed for twelve hours); empty when not asked for.",
                                                                             "items": {}
+                                                                        },
+                                                                        "practice": {
+                                                                            "type": [
+                                                                                "object",
+                                                                                "null"
+                                                                            ],
+                                                                            "description": "How practice in the games went on this lesson's items (null: not practised yet).",
+                                                                            "properties": {
+                                                                                "rounds": {
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "answered": {
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "correct": {
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "percent": {
+                                                                                    "type": [
+                                                                                        "integer",
+                                                                                        "null"
+                                                                                    ]
+                                                                                }
+                                                                            },
+                                                                            "required": [
+                                                                                "rounds",
+                                                                                "answered",
+                                                                                "correct",
+                                                                                "percent"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
@@ -7547,7 +8433,8 @@
                                                                         "last_score",
                                                                         "est_sessions",
                                                                         "weight",
-                                                                        "materials"
+                                                                        "materials",
+                                                                        "practice"
                                                                     ]
                                                                 }
                                                             },
@@ -7610,6 +8497,36 @@
                                                                                         "type": "array",
                                                                                         "description": "Files and links on the lesson (a file's url is signed for twelve hours); empty when not asked for.",
                                                                                         "items": {}
+                                                                                    },
+                                                                                    "practice": {
+                                                                                        "type": [
+                                                                                            "object",
+                                                                                            "null"
+                                                                                        ],
+                                                                                        "description": "How practice in the games went on this lesson's items (null: not practised yet).",
+                                                                                        "properties": {
+                                                                                            "rounds": {
+                                                                                                "type": "integer"
+                                                                                            },
+                                                                                            "answered": {
+                                                                                                "type": "integer"
+                                                                                            },
+                                                                                            "correct": {
+                                                                                                "type": "integer"
+                                                                                            },
+                                                                                            "percent": {
+                                                                                                "type": [
+                                                                                                    "integer",
+                                                                                                    "null"
+                                                                                                ]
+                                                                                            }
+                                                                                        },
+                                                                                        "required": [
+                                                                                            "rounds",
+                                                                                            "answered",
+                                                                                            "correct",
+                                                                                            "percent"
+                                                                                        ]
                                                                                     }
                                                                                 },
                                                                                 "required": [
@@ -7621,7 +8538,8 @@
                                                                                     "last_score",
                                                                                     "est_sessions",
                                                                                     "weight",
-                                                                                    "materials"
+                                                                                    "materials",
+                                                                                    "practice"
                                                                                 ]
                                                                             }
                                                                         }
@@ -8202,6 +9120,53 @@
                                                             "label"
                                                         ]
                                                     },
+                                                    "practice": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "Practice in the games on the report's lessons (null: none): how the best round went, or not yet.",
+                                                        "properties": {
+                                                            "done": {
+                                                                "type": "boolean"
+                                                            },
+                                                            "correct": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "total": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "stars": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "game": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "done",
+                                                            "correct",
+                                                            "total",
+                                                            "stars",
+                                                            "game",
+                                                            "label"
+                                                        ]
+                                                    },
                                                     "submissions": {
                                                         "type": "array",
                                                         "items": {
@@ -8306,6 +9271,7 @@
                                                     "grade",
                                                     "feedback",
                                                     "reviewed_at",
+                                                    "practice",
                                                     "submissions"
                                                 ]
                                             }
@@ -8519,6 +9485,53 @@
                                                         "label"
                                                     ]
                                                 },
+                                                "practice": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "Practice in the games on the report's lessons (null: none): how the best round went, or not yet.",
+                                                    "properties": {
+                                                        "done": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "correct": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "total": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "stars": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "game": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "done",
+                                                        "correct",
+                                                        "total",
+                                                        "stars",
+                                                        "game",
+                                                        "label"
+                                                    ]
+                                                },
                                                 "submissions": {
                                                     "type": "array",
                                                     "items": {
@@ -8623,6 +9636,7 @@
                                                 "grade",
                                                 "feedback",
                                                 "reviewed_at",
+                                                "practice",
                                                 "submissions"
                                             ]
                                         }

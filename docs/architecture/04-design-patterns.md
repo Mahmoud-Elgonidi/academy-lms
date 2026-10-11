@@ -42,6 +42,7 @@
 | M15 | **Communication** | القوالب، والقنوات، والتفضيلات، والإشعارات | `NotificationFailed` |
 | M16 | **Support** | التذاكر والشكاوى ومواعيد الرد ✅ | `TicketOpened`، `TicketReplied`، `TicketAssigned`، `TicketResolved`، `TicketOverdue`، `ComplaintValidated` |
 | M15ب | **Messaging** | المحادثة بين المدرس والطالب وأولياء أمره، وإخفاء وسائل التواصل، والمراقبة ✅ | `MessageSent` |
+| M15ج | **Games** | جزر الألعاب: جولات الطالب على تدريبات منهجه، والكائنات، وحدود اللعب (العالم نفسه واستوديو التصميم عند Platform) ✅ | — |
 | M16ج | **Safeguarding** | بلاغات حماية الأطفال ومتابعتها (مسؤولين الحماية بس) ✅ | `ConcernReported`، `ConcernEscalated`، `ConcernClosed` |
 | M16ب | **Privacy** | نسخة من بيانات الشخص، وتصحيح البيانات (على طول، أو بطلب للأكاديمية)، ومسح الحساب بموافقة الأكاديمية، والصفحات العامة (الخصوصية، والشروط، ومسح الحساب) ✅ | `DataExportReady`، `ErasureRequested`، `ErasureApproved`، `ErasureRefused`، `AccountErased`، `CorrectionRequested`، `CorrectionAnswered` |
 | M17 | **Reporting** | جداول الحقائق والمؤشرات (للقراءة بس) | — |
@@ -59,6 +60,7 @@ flowchart TD
     Privacy --> People & Communication & Identity & Platform
     Safeguarding --> People & Scheduling & Communication & Identity & Classroom
     Messaging --> People & Scheduling & Enrollment & Communication & Identity & Platform
+    Games --> Learning & Curriculum & People & Identity
     Learning --> Scheduling & Enrollment & Curriculum & People & Communication
     Billing --> People & Catalog & Enrollment & Credits & Communication
     Classroom --> Scheduling & Learning & People & Communication & Platform
@@ -97,6 +99,7 @@ flowchart TD
      - **أكتر من مصدر بيحفظ**: Classroom بيربط `AllRecordingHolds`، اللي بيسأل كل class متعلّم بـ `RecordingHolds::SOURCES` (Support بيعلّم `ComplaintRecordingHolds`، وSafeguarding بيعلّم `ConcernRecordingHolds`: بلاغ حماية مفتوح على الحصة). كده كل module فوق بيضيف سببه من غير ما Classroom يعرفه.
      - **المنفّذ دلوقتي (حماية الأطفال)**: Safeguarding فوق ومحدش بيعتمد عليه. فحص المدرسين والإيقاف عند People (`PeopleApi::clearances()` و`mayTeach()`)، وScheduling بيسأل People في كل باب حجز عن طريق `MinorsGuard` (ومن غير ما يعرف Safeguarding). والإيقاف بسبب بلاغ بيروح من Safeguarding لـ `PeopleApi::pauseForMinors()`.
      - **المنفّذ دلوقتي (المحادثة)**: Messaging فوق ومحدش بيعتمد عليه. كانت مكتوبة تحت Communication، بس Communication مابيعرفش غير Identity وPlatform، والمحادثة محتاجة تعرف مين بيدرّس لمين (الكورسات والحصص) ومين ولي أمر مين ومين مسموحله بالأطفال (`PeopleApi::mayTeach()`)، فبقت module لوحدها. بتبعت إشعاراتها عن طريق `NotificationsApi` زي الباقي، وإخفاء وسائل التواصل حساب صافي (`Messaging\Domain\ContactMasker`: نص داخل ونص خارج، والـ arch test بيمنع أي حاجة تانية فيه).
+     - **المنفّذ دلوقتي (الألعاب)**: Games فوق ومحدش بيعتمد عليه. بياخد إيه اللي يتدرب عليه من `LearningApi::practiceFocus` وكلام التدريب من `CurriculumApi::practiceItems` ومرحلة الطالب من `PeopleApi`، وبيرجّع الجولة لـ Learning بـ `LearningApi::recordPractice` (هي اللي بتسلّم الواجب وبتجمع التدريب على الدرس)، وبيسمع `NodeMastered` عشان الكائنات. العالم نفسه (الجزر والألعاب وإصداراتها) عند Platform، والأكاديمية بتقراه بس عن طريق عقد في الـ SharedKernel (`Games\GameCatalog`، اللي Platform بيربطه بـ `PlatformGameCatalog`)، فمفيش موديول أكاديمية بيلمس Platform. وقواعد الجولة حساب صافي (`Games\Domain\Round`، والـ arch test بيمنع أي حاجة تانية فيه).
    - Evaluation بيسمع `SessionFinalized` عشان يطلب تقييم الحصة من الأسرة. المؤشرات نفسها بتتقري من الجداول وقت ما تتطلب (القراءة مسموح فيها join)، ونجوم التقييم تحت الحصة بتدخل صفحة الأسرة عن طريق **render hook** باسم ثابت (`scheduling::family.lesson-card`)، زي Learning.
    - **Import** فوق الكل زي CRM، ومحدش بيعتمد عليه. بيعمل كل حاجة عن طريق contracts الـ modules: الحسابات من `IdentityApi`، والملفات وأولياء الأمور من `PeopleApi`، والمواد من `CatalogApi`، والجدول الشغال من عقد Scheduling `ScheduleImport`، اللي بيفتح التسجيل والرصيد ويعمل `BillingApi::adopt` (اشتراك أول فاتورة فيه هي الباقة الجاية).
      - **المعاينة** بتشغّل الاستيراد كله في transaction واحدة وبعدين `rollBack`، وكل صف في savepoint لوحده. فالمعاينة بتقول بالظبط إيه اللي هيحصل، وحتى الصفوف اللي معتمدة على صفوف قبلها (ولي الأمر اللي اتعمل في صف ومستخدم في اللي بعده). الرسايل مابتطلعش لأنها بتستنى الـ commit.

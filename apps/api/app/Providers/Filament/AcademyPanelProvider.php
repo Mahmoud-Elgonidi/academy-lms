@@ -25,6 +25,7 @@ use Modules\Communication\Filament\CommunicationPlugin;
 use Modules\Crm\Filament\CrmPlugin;
 use Modules\Curriculum\Filament\CurriculumPlugin;
 use Modules\Evaluation\Filament\EvaluationPlugin;
+use Modules\Games\Filament\GamesPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
 use Modules\Identity\Filament\Pages\SignIn;
 use Modules\Identity\Http\Middleware\RequireTwoFactor;
@@ -103,6 +104,7 @@ final class AcademyPanelProvider extends PanelProvider
                 PrivacyPlugin::make(),
                 SafeguardingPlugin::make(),
                 MessagingPlugin::make(),
+                GamesPlugin::make(),
                 CommunicationPlugin::make(),
                 ClassroomPlugin::make(),
                 PlatformPlugin::make(),

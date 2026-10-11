@@ -110,6 +110,7 @@ final class ChallengesQuery
             $rows[] = match ($key) {
                 'attend' => $count === 0 ? null : $row('attend', $count, $attended, $missedOne),
                 'homework' => $this->homework($studentId, $stage, $from, $to, $now, $row),
+                'practice' => $this->practice($studentId, $from, $to, $now, $row),
                 'on_time' => $count === 0 ? null : (function () use ($lessons, $count, $open, $row) {
                     $target = min(2, $count);
                     $onTime = count(array_filter($lessons, fn (LearnerLesson $l) => $l->onTime(ChallengeCatalog::ON_TIME_GRACE_MIN)));
@@ -154,6 +155,23 @@ final class ChallengesQuery
         $missed = $due->contains(fn (Homework $h) => ! $inTime($h) && $h->due_at->lessThan($now));
 
         return $row('homework', $due->count(), $handedIn, $missed);
+    }
+
+    /**
+     * Practice in the games: days of the week with a finished round. Shown
+     * only when there is practice to do (a round in the last month, or
+     * homework asking for practice), so a learner without any is not held back.
+     */
+    private function practice(string $studentId, CarbonImmutable $from, CarbonImmutable $to, CarbonImmutable $now, callable $row): ?array
+    {
+        $days = DB::table('practice_rounds')->where('student_id', $studentId)
+            ->where('played_at', '>=', $from->utc())->where('played_at', '<', $to->utc())->pluck('played_at')
+            ->map(fn ($at) => CarbonImmutable::parse($at)->setTimezone($from->getTimezone())->toDateString())->unique()->count();
+        $any = $days > 0
+            || DB::table('practice_rounds')->where('student_id', $studentId)->where('played_at', '>=', $now->subDays(30)->utc())->exists()
+            || Homework::query()->where('student_id', $studentId)->whereNotNull('practice_nodes')->where('status', 'assigned')->exists();
+
+        return $any ? $row('practice', ChallengeCatalog::PRACTICE_DAYS, $days) : null;
     }
 
     /**

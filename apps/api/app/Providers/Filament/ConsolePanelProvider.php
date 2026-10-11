@@ -22,6 +22,7 @@ use Modules\Identity\Filament\InitialsAvatar;
 use Modules\Identity\TwoFactor\AuthenticatorApp;
 use Modules\Platform\Filament\Console\ConsolePlugin;
 use Modules\Platform\Http\Middleware\ConsoleContext;
+use Modules\Platform\Http\Middleware\ConsoleEcho;
 
 /**
  * The platform team's console at /console (or its own host, PLATFORM_CONSOLE_DOMAIN).
@@ -45,6 +46,10 @@ final class ConsolePanelProvider extends PanelProvider
             ->colors(['primary' => Color::Indigo, 'gray' => Color::Slate])
             ->font('IBM Plex Sans Arabic', provider: GoogleFontProvider::class)
             ->defaultAvatarProvider(InitialsAvatar::class)
+            // Live screens (the games studio follows its drafts): one socket per page, authorised for the platform team.
+            ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::live'))
+            // The studio's preview opens games through the shared player (sandboxed frames).
+            ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::games.player'))
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('shared::motion.styles'))
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::motion.script'))
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('shared::chrome.styles'))
@@ -64,6 +69,7 @@ final class ConsolePanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 ConsoleContext::class,
+                ConsoleEcho::class,
             ], isPersistent: true)
             ->authMiddleware([Authenticate::class], isPersistent: true)
             ->plugins([
