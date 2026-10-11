@@ -77,7 +77,7 @@
 | الصورة | المقاس | المصدر |
 |---|---|---|
 | الأيقونة | 512×512 PNG | `apps/mobile/tool/icon` (`python3 tool/icon.py`) |
-| Feature graphic | 1024×500 PNG | `apps/mobile/tool/icon/store/feature.svg` |
+| Feature graphic | 1024×500 PNG | `apps/mobile/tool/icon/store/feature-1024x500.png`، مرسومة من `feature.html` بـ `python3 tool/store_art.py` |
 | Screenshots | 2 لحد 8 للموبايل، بالطول | من الديمو: الرحلة، والحصص، والتقرير، والواجب، والفواتير، وشاشة المدرس |
 
 ## 4. الإقرارات في الـ Console (App content)
