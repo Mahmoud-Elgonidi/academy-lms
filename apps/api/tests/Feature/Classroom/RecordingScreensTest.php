@@ -137,7 +137,7 @@ it('shows everyone in the lesson when it records, and lets its teacher start and
 
     // Someone has not agreed: the button waits and says who.
     $this->actingAs($this->teacher)->get("http://noor.lms.test/class/{$this->lesson->id}")
-        ->assertOk()->assertSee(__('classroom::recordings.room.start'))->assertSee($this->student->name.'.', false);
+        ->assertOk()->assertSee(__('classroom::recordings.room.start'))->assertSee($this->student->name.'.');   // escaped, as the page writes it (a name may hold an apostrophe)
     $this->postJson("http://noor.lms.test/class/{$this->lesson->id}/recording")->assertStatus(422)
         ->assertJsonPath('message', __('classroom::recordings.errors.consent_missing', ['names' => $this->student->name]));
 

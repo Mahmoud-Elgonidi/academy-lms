@@ -50,7 +50,7 @@ it('keeps a lesson\'s items in order, tidied, each in its shape, and hands the g
     $items = app(CurriculumApi::class)->practiceItems([$this->first->id, $this->lessons[1]]);
     expect(array_keys($items))->toBe([$this->first->id])
         ->and(array_map(fn ($i) => $i->kind, $items[$this->first->id]))->toBe([ItemKind::Choice, ItemKind::Order, ItemKind::Pair, ItemKind::Choice])
-        ->and($items[$this->first->id][1]->forRound())->toBe(['id' => $saved[1]->id, 'kind' => 'order', 'prompt' => 'رتّب الآيات', 'parts' => ['بسم الله الرحمن الرحيم', 'الحمد لله رب العالمين', 'الرحمن الرحيم']])
+        ->and($items[$this->first->id][1]->forRound())->toBe(['id' => $saved[1]->id, 'kind' => 'order', 'prompt' => 'رتّب الآيات', 'parts' => ['بسم الله الرحمن الرحيم', 'الحمد لله رب العالمين', 'الرحمن الرحيم'], 'dir' => 'rtl'])
         ->and($items[$this->first->id][0]->forRound())->not->toHaveKey('node')
         ->and($items[$this->first->id][2]->summary())->toBe('مالك ↔ يوم الدين');
 });
