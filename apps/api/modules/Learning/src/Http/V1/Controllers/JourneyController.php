@@ -127,6 +127,11 @@ final class JourneyController
                 'ends_at' => $this->time->present($j['chest']['ends_at']),
                 'can_open' => $self && $j['chest']['state'] === 'done',
             ],
+            /** The kids' sticker album (one sticker for each week's chest opened); null in other looks and the plain style. */
+            'stickers' => $j['stickers'] === null ? null : [
+                'earned' => (int) $j['stickers']['earned'],
+                'items' => array_map(fn (array $s) => $s + ['name' => __('learning::challenges.stickers.'.$s['key'])], $j['stickers']['items']),
+            ],
             'games' => $j['games'] === null ? null : $this->games($j['games']),
             'cheers' => ! $self ? [] : Cheer::query()->where('student_id', $learner)->whereNull('seen_at')->orderBy('created_at')->limit(10)->get()
                 ->map(fn (Cheer $c) => ['id' => $c->id, 'kind' => $c->kind, 'at' => $this->time->present($c->created_at)])->all(),

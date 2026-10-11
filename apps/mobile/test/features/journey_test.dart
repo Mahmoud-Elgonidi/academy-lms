@@ -798,6 +798,26 @@ void main() {
     await _close(tester);
   });
 
+  testWidgets('the kids\' sticker album reads the stickers of their journey', (tester) async {
+    final app = await TestApp.create(accounts: [_student('kids')]);
+    final journey = _journey();
+    (journey['data']! as Map<String, Object?>)['stickers'] = {
+      'earned': 1,
+      'items': [
+        {'key': 'lion', 'name': 'أسد', 'earned': true},
+        {'key': 'rocket', 'name': 'صاروخ', 'earned': false},
+      ],
+    };
+    _studentRoutes(app.api, 'kids', journey);
+    await _open(tester, app);
+    _router(tester).go('/kids/more/stickers');
+    await frames(tester, 12);
+    expect(find.text('1 من 2'), findsOneWidget);
+    expect(find.text('أسد'), findsOneWidget);
+    expect(app.api.sent('GET', 'learning/challenges'), isEmpty);
+    await _close(tester);
+  });
+
   testWidgets('the old places lead to the journey', (tester) async {
     final app = await TestApp.create(accounts: [_student('kids')]);
     _studentRoutes(app.api, 'kids', _journey());

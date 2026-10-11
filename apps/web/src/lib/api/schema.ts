@@ -6207,6 +6207,11 @@ export interface operations {
                                 } | null;
                                 can_open: string;
                             } | null;
+                            /** @description The kids' sticker album (one sticker for each week's chest opened); null in other looks and the plain style. */
+                            stickers: {
+                                earned: number;
+                                items: unknown[];
+                            } | null;
                             games: {
                                 /** @description Whether the learner may start a round now, and why not: off (the academy), paused (a guardian), night (a guardian's night lock), limit (today's minutes). */
                                 allowance: unknown[];

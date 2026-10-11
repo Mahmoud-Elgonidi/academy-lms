@@ -8906,6 +8906,26 @@
                                                         "can_open"
                                                     ]
                                                 },
+                                                "stickers": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The kids' sticker album (one sticker for each week's chest opened); null in other looks and the plain style.",
+                                                    "properties": {
+                                                        "earned": {
+                                                            "type": "integer"
+                                                        },
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {}
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "earned",
+                                                        "items"
+                                                    ]
+                                                },
                                                 "games": {
                                                     "type": [
                                                         "object",
@@ -9042,6 +9062,7 @@
                                                 "courses",
                                                 "missions",
                                                 "chest",
+                                                "stickers",
                                                 "games",
                                                 "cheers",
                                                 "cheers_left"

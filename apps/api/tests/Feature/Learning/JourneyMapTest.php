@@ -190,7 +190,10 @@ it('gives the stars of a lesson and of homework, opens the week\'s chest once, a
 
     // 16 stars: an egg is ready, and the child taps it open on the island they are on.
     $data = $this->withToken($token)->getJson('/api/v1/learning/journey/map')->json('data');
-    expect($data['stars']['total'])->toBe(16)->and($data['games']['egg'])->toMatchArray(['ready' => true]);
+    expect($data['stars']['total'])->toBe(16)->and($data['games']['egg'])->toMatchArray(['ready' => true])
+        ->and($data['stickers']['earned'])->toBe(1)
+        ->and($data['stickers']['items'][0])->toMatchArray(['key' => 'lion', 'earned' => true])
+        ->and($data['stickers']['items'][1]['earned'])->toBeFalse();
     $creature = $this->withToken($token)->postJson('/api/v1/games/hatch', ['island' => 'birds'], ['Idempotency-Key' => 'hatch'])
         ->assertCreated()->json('data.creature');
     expect($creature['island'])->toBe('birds')->and($creature['names'])->toHaveCount(3);
@@ -225,7 +228,8 @@ it('keeps the journey without games when the academy turns them off, and without
     $this->actAsTenant($this->academy);
     app(SaveJourneyStyle::class)->handle('plain');
     $data = $this->withToken(mapApp($this->student))->getJson('/api/v1/learning/journey/map')->assertOk()->json('data');
-    expect($data['style'])->toBe('plain')->and($data['stars']['total'])->toBe(0)->and($data['chest'])->toBeNull()->and($data['games'])->toBeNull();
+    expect($data['style'])->toBe('plain')->and($data['stars']['total'])->toBe(0)->and($data['chest'])->toBeNull()->and($data['games'])->toBeNull()
+        ->and($data['stickers'])->toBeNull();
 });
 
 it('lets a guardian look at their child\'s journey, never someone else\'s', function () {

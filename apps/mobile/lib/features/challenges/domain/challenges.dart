@@ -16,8 +16,8 @@ class Sticker {
   final bool earned;
 }
 
-/// The kids' sticker album, read from their board (`GET learning/challenges`,
-/// kept for it: the journey lists only the week's chest).
+/// The kids' sticker album, read from their journey (`GET learning/journey/map`:
+/// one sticker for each week's chest they opened).
 class ChallengeBoard {
   const ChallengeBoard({required this.learnerId, this.stickers, this.stickersEarned = 0});
 

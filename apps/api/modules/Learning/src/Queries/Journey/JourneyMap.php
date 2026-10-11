@@ -115,6 +115,7 @@ final class JourneyMap
             'courses' => $courses,
             'missions' => $missions,
             'chest' => $style === 'plain' ? null : $this->chest($studentId, $stage, $stars['lessons_list'], $now),
+            'stickers' => $stage === 'kids' && $style !== 'plain' ? $this->stickers($studentId) : null,
             'games' => $layer,
         ];
     }
@@ -455,6 +456,21 @@ final class JourneyMap
             /** The sticker it brings for the kids' album (the one it brought, once opened). */
             'sticker' => $stage === 'kids' ? ($claim?->sticker ?? ChallengeCatalog::sticker($opened->count())) : null,
             'ends_at' => $to,
+        ];
+    }
+
+    /**
+     * The kids' sticker album: one sticker for each week's chest they opened, in the album's order.
+     *
+     * @return array{earned: int, items: list<array{key: string, earned: bool}>}
+     */
+    private function stickers(string $studentId): array
+    {
+        $earned = ChallengeClaim::query()->where('student_id', $studentId)->where('challenge', 'chest')->count();
+
+        return [
+            'earned' => $earned,
+            'items' => array_map(fn (string $key, int $i) => ['key' => $key, 'earned' => $i < $earned], ChallengeCatalog::STICKERS, array_keys(ChallengeCatalog::STICKERS)),
         ];
     }
 

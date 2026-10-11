@@ -98,7 +98,7 @@ GoRouter buildRouter(SessionCubit session) {
     routes: [page(':id', (s) => ConversationPage(conversationId: s.pathParameters['id']!))],
   );
 
-  // The kids' sticker album (the week's chests), read from their board.
+  // The kids' sticker album (the week's chests), read from their journey.
   Widget stickers() =>
       BlocProvider(create: (c) => LoadCubit<ChallengeBoard>(c.read<ChallengesRepository>().board)..load(), child: const AlbumPage());
 

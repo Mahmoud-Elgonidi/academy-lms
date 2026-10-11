@@ -7,9 +7,9 @@ class ChallengesRepository {
 
   final ApiClient _api;
 
-  /// The student's own board ([learnerId] null) or a guardian's child's: the sticker album.
+  /// The student's own sticker album ([learnerId] null) or a guardian's child's, from their journey.
   Future<ChallengeBoard> board({String? learnerId}) async =>
-      ChallengeBoard.fromJson((await _api.get('learning/challenges', query: {'learner_id': ?learnerId}))['data'] as Map<String, dynamic>);
+      ChallengeBoard.fromJson((await _api.get('learning/journey/map', query: {'learner_id': ?learnerId}))['data'] as Map<String, dynamic>);
 
   /// A guardian cheers a learner on: clap, star, heart or fire.
   Future<void> cheer(String learnerId, String kind) => _api.post('learning/cheers', body: {'learner_id': learnerId, 'kind': kind});
