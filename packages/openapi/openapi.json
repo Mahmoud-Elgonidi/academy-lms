@@ -3301,7 +3301,7 @@
                                                 },
                                                 "allowance": {
                                                     "type": "array",
-                                                    "description": "Whether the learner may start a round now, and why not: off (the academy), paused (a guardian), limit (today's minutes).",
+                                                    "description": "Whether the learner may start a round now, and why not: off (the academy), paused (a guardian), night (a guardian's night lock, 21:00 to 7:00 on the learner's clock), limit (today's minutes).",
                                                     "items": {}
                                                 },
                                                 "stars": {
@@ -3327,9 +3327,24 @@
                                                 "creatures_found": {
                                                     "type": "string"
                                                 },
+                                                "creatures_total": {
+                                                    "type": "number"
+                                                },
+                                                "buddy": {
+                                                    "type": [
+                                                        "array",
+                                                        "null"
+                                                    ],
+                                                    "description": "The creature that keeps the learner company (their chosen buddy, else the last one hatched; null before the first).",
+                                                    "items": {}
+                                                },
                                                 "quests": {
                                                     "type": "array",
                                                     "items": {}
+                                                },
+                                                "streak": {
+                                                    "type": "integer",
+                                                    "description": "Days in a row with a finished round, ending today (or yesterday while today is open), on the learner's clock.\nDays in a row (to today, on the learner's clock) with a finished round."
                                                 },
                                                 "islands": {
                                                     "type": "array",
@@ -3354,6 +3369,10 @@
                                                                 "integer",
                                                                 "null"
                                                             ]
+                                                        },
+                                                        "night_lock": {
+                                                            "type": "boolean",
+                                                            "description": "No games from 21:00 to 7:00 on the child's clock."
                                                         },
                                                         "academy_minutes": {
                                                             "type": [
@@ -3405,6 +3424,7 @@
                                                     "required": [
                                                         "enabled",
                                                         "daily_minutes",
+                                                        "night_lock",
                                                         "academy_minutes",
                                                         "choices"
                                                     ]
@@ -3417,7 +3437,10 @@
                                                 "stars",
                                                 "egg",
                                                 "creatures_found",
+                                                "creatures_total",
+                                                "buddy",
                                                 "quests",
+                                                "streak",
                                                 "islands",
                                                 "recent",
                                                 "limits"
@@ -3443,7 +3466,7 @@
         "/v1/games/plays": {
             "post": {
                 "operationId": "games.plays.start",
-                "description": "Of a game (id or key) for a quest (its key), for a homework's practice (homework_id), or with all of the learner's\npractice. Answers the page to open (page_url, sandboxed; never cached personal data) and the round to hand it\nthrough the bridge: {lms: 1, type: \"start\", round}. 403 games-off / games-paused / games-limit, 422\ngames-not-enough-items when the learner has too few items for that game.",
+                "description": "Of a game (id or key) for a quest (its key), for a homework's practice (homework_id), or with all of the learner's\npractice. Answers the page to open (page_url, sandboxed; never cached personal data) and the round to hand it\nthrough the bridge: {lms: 1, type: \"start\", round}. 403 games-off / games-paused / games-night / games-limit, 422\ngames-not-enough-items when the learner has too few items for that game.",
                 "summary": "Start a round",
                 "tags": [
                     "Games"
@@ -3763,6 +3786,13 @@
                                                         },
                                                         "island": {
                                                             "type": "string"
+                                                        },
+                                                        "look": {
+                                                            "type": "array",
+                                                            "items": {}
+                                                        },
+                                                        "story": {
+                                                            "type": "string"
                                                         }
                                                     },
                                                     "required": [
@@ -3770,7 +3800,9 @@
                                                         "name",
                                                         "emoji",
                                                         "rarity",
-                                                        "island"
+                                                        "island",
+                                                        "look",
+                                                        "story"
                                                     ]
                                                 },
                                                 "egg": {
@@ -3837,7 +3869,7 @@
         "/v1/games/limits": {
             "put": {
                 "operationId": "games.limits",
-                "description": "A guardian turns games on or off for their child and sets the minutes a day (one of the choices; null: the\nacademy's, never more).",
+                "description": "A guardian turns games on or off for their child, sets the minutes a day (one of the choices; null: the academy's,\nnever more) and the night lock (no games from 21:00 to 7:00 on the child's clock; left out: unchanged).",
                 "summary": "Set a child's play",
                 "tags": [
                     "Games"
@@ -3890,6 +3922,9 @@
                                             "integer",
                                             "null"
                                         ]
+                                    },
+                                    "night_lock": {
+                                        "type": "boolean"
                                     }
                                 },
                                 "required": [
@@ -3919,6 +3954,10 @@
                                                         "integer",
                                                         "null"
                                                     ]
+                                                },
+                                                "night_lock": {
+                                                    "type": "boolean",
+                                                    "description": "No games from 21:00 to 7:00 on the child's clock."
                                                 },
                                                 "academy_minutes": {
                                                     "type": [
@@ -3970,9 +4009,199 @@
                                             "required": [
                                                 "enabled",
                                                 "daily_minutes",
+                                                "night_lock",
                                                 "academy_minutes",
                                                 "choices"
                                             ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AccessDeniedHttpException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/games/creatures": {
+            "get": {
+                "operationId": "games.creatures",
+                "description": "Every creature of the world in its order: hatched ones with when, how (stars or a mastered lesson), the name the\nlearner gave and whether it is their buddy; the rest with only how they look (to draw as a shadow) and their island.",
+                "summary": "A learner's album of creatures",
+                "tags": [
+                    "Games"
+                ],
+                "parameters": [
+                    {
+                        "name": "learner_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 64
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/games/creatures/{creature}": {
+            "put": {
+                "operationId": "games.creatures.update",
+                "description": "The learner's own, hatched creatures only: a name (letters only, at most 24; empty takes its own name back) and/or\nbuddy: true (one at a time). A guardian looks but does not change them (403).",
+                "summary": "Name a creature or make it the buddy",
+                "tags": [
+                    "Games"
+                ],
+                "parameters": [
+                    {
+                        "name": "creature",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "learner_id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 64
+                                    },
+                                    "name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 24
+                                    },
+                                    "buddy": {
+                                        "enum": [
+                                            "yes",
+                                            "on",
+                                            "1",
+                                            1,
+                                            "true",
+                                            true
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [

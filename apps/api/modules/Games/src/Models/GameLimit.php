@@ -7,12 +7,14 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
  * A guardian's choice for their child: games on or off, and minutes a day
- * (null: the academy's). Changed only through SaveGameLimit.
+ * (null: the academy's), and no play at night. Changed only through
+ * SaveGameLimit.
  *
  * @property string $academy_id
  * @property string $student_id
  * @property bool $enabled
  * @property ?int $daily_minutes
+ * @property bool $night_lock no play from 21:00 to 07:00 on the learner's clock
  * @property string $updated_by
  */
 final class GameLimit extends Model
@@ -31,6 +33,6 @@ final class GameLimit extends Model
 
     protected function casts(): array
     {
-        return ['enabled' => 'boolean', 'daily_minutes' => 'integer'];
+        return ['enabled' => 'boolean', 'daily_minutes' => 'integer', 'night_lock' => 'boolean'];
     }
 }

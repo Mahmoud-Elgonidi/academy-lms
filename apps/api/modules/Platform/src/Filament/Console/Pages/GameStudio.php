@@ -19,6 +19,7 @@ use Modules\Platform\Actions\Games\OpenGameDraft;
 use Modules\Platform\Actions\Games\SetGameStatus;
 use Modules\Platform\Actions\Games\StartGameDraft;
 use Modules\Platform\Games\SampleItems;
+use Modules\Platform\Games\StudioStats;
 use Modules\Platform\Live\GameStudioChanged;
 use Modules\Platform\Models\Games\Game;
 use Modules\Platform\Models\Games\GameCreature;
@@ -27,10 +28,12 @@ use Modules\Platform\Models\Games\GameIsland;
 use Modules\SharedKernel\Games\ItemKind;
 
 /**
- * The games studio (docs/architecture/02, section 18): the world's islands,
- * their creatures and the games on each (try one, develop it into a new
- * version, retire it or bring it back), the drafts in progress, and a new
- * game from a story, which Claude designs.
+ * The games studio (docs/architecture/02, section 18; the approved design,
+ * Studio): how the games do across academies, the world's islands drawn as
+ * the children see them, their creatures and the games on each (try one,
+ * open its page, develop it into a new version, retire it or bring it back),
+ * the islands' music and sounds, the drafts in progress, and a new game from
+ * a story, which Claude designs.
  */
 final class GameStudio extends Page
 {
@@ -45,6 +48,9 @@ final class GameStudio extends Page
     public ?string $trying = null;
 
     public string $tryStage = 'kids';
+
+    /** The island whose scene is open in the preview. */
+    public ?string $previewing = null;
 
     public static function getNavigationLabel(): string
     {
@@ -102,13 +108,17 @@ final class GameStudio extends Page
     public function world(): array
     {
         $games = Game::query()->with('current')->orderBy('sort')->orderBy('key')->get()->groupBy('island_id');
+        $rounds = app(StudioStats::class)->roundsByGame();
         $out = GameIsland::query()->with('creatures')->orderBy('sort')->get()->map(fn (GameIsland $island) => [
             'id' => $island->id,
+            'key' => $island->key,
+            'music' => $island->music,
             'name' => $island->name(),
             'story' => app()->getLocale() === 'ar' ? $island->story_ar : $island->story_en,
             'emoji' => $island->emoji,
             'colors' => $island->colors,
-            'creatures' => $island->creatures->map(fn (GameCreature $c) => ['emoji' => $c->emoji, 'name' => app()->getLocale() === 'ar' ? $c->name_ar : $c->name_en, 'rarity' => $c->rarity])->all(),
+            'creatures' => $island->creatures->map(fn (GameCreature $c) => ['emoji' => $c->emoji, 'name' => app()->getLocale() === 'ar' ? $c->name_ar : $c->name_en, 'rarity' => $c->rarity, 'look' => $c->look,
+                'story' => app()->getLocale() === 'ar' ? $c->story_ar : $c->story_en])->all(),
             'games' => ($games[$island->id] ?? collect())->map(fn (Game $g) => [
                 'id' => $g->id,
                 'key' => $g->key,
@@ -118,10 +128,25 @@ final class GameStudio extends Page
                 'version' => $g->current?->version,
                 'stages' => array_map(fn ($s) => __('shared::games.stages.'.$s), $g->stages),
                 'kinds' => array_map(fn ($k) => ItemKind::tryFrom($k)?->label() ?? $k, $g->kinds),
+                'rounds' => $rounds[$g->id] ?? 0,
+                'url' => GameEditor::getUrl(['game' => $g->id]),
             ])->values()->all(),
         ])->all();
 
         return $out;
+    }
+
+    /** @return array{players: int, academies: int, rounds: int, per_player: float, finished: int, eggs: int, mastery_eggs: int} */
+    #[Computed]
+    public function stats(): array
+    {
+        return app(StudioStats::class)->overview();
+    }
+
+    public function preview(string $islandId): void
+    {
+        $this->previewing = $islandId;
+        $this->dispatch('open-modal', id: 'island-preview');
     }
 
     /** The game being tried in the modal, at its published version, with sample items. */

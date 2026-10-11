@@ -26,19 +26,23 @@
     .gs-creatures span { font-size: 1.45rem; width: 2.4rem; height: 2.4rem; display: grid; place-items: center; border-radius: 999px; background: var(--gray-50); border: 2px solid var(--gray-100); }
     .gs-creatures span[data-rarity="rare"] { border-color: var(--info-300, var(--primary-300)); }
     .gs-creatures span[data-rarity="legendary"] { border-color: var(--warning-400); box-shadow: 0 0 0 3px var(--warning-50); }
-    .gs-games { display: flex; flex-direction: column; gap: .5rem; padding: .8rem 1rem 1rem; }
-    .gs-game { display: flex; gap: .7rem; justify-content: space-between; align-items: flex-start; padding: .7rem .8rem; border-radius: var(--radius-lg, .5rem); background: var(--gray-50); }
+    .gs-games { display: flex; flex-direction: column; gap: .7rem; }
+    .gs-game { display: flex; gap: 1rem; align-items: center; padding: .75rem; }
     .gs-game[data-status="retired"] { opacity: .65; }
-    .gs-game-main { min-width: 0; display: flex; flex-direction: column; gap: .25rem; }
-    .gs-game-main > div:first-child { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; }
-    .gs-game-main strong { font-weight: 700; }
-    .gs-game-main small { color: var(--gray-500); font-size: .72rem; }
-    .gs-game-main p { font-size: .8rem; color: var(--gray-600); line-height: 1.55; }
+    .gs-game-art { flex: none; width: 7.5rem; height: 5.6rem; border-radius: var(--radius-lg, .5rem); overflow: hidden; position: relative; display: block; }
+    .gs-game-art > span { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.54); display: block; }
+    .gs-game-main { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: .3rem; }
+    .gs-game-main > div:first-child { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+    .gs-game-main strong { font-weight: 800; font-size: 1rem; }
+    .gs-game-main a:hover strong { color: var(--primary-600); }
+    .gs-game-main small { color: var(--gray-500); font-size: .76rem; }
+    .gs-game-main p { font-size: .84rem; color: var(--gray-600); line-height: 1.55; }
     .gs-tags { display: flex; flex-wrap: wrap; gap: .3rem; }
-    .gs-tags span { font-size: .68rem; font-weight: 600; padding: .1rem .5rem; border-radius: 999px; background: white; border: 1px solid var(--gray-200); color: var(--gray-600); }
-    .gs-tags span[data-kind] { border-color: var(--primary-200); color: var(--primary-700); }
-    .gs-game-actions { display: flex; flex-direction: column; gap: .3rem; flex-shrink: 0; }
-    .gs-empty { font-size: .82rem; color: var(--gray-500); padding: .4rem 0; }
+    .gs-tags span { font-size: .7rem; font-weight: 600; padding: .1rem .55rem; border-radius: 999px; background: var(--gray-50); border: 1px solid var(--gray-200); color: var(--gray-600); }
+    .gs-tags span[data-kind] { background: var(--primary-50); border-color: var(--primary-200); color: var(--primary-700); }
+    .gs-game-actions { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; flex: none; max-width: 24rem; }
+    @media (max-width: 760px) { .gs-game { flex-wrap: wrap; } .gs-game-actions { max-width: none; width: 100%; justify-content: flex-start; } }
+    .gs-empty { font-size: .85rem; color: var(--gray-500); padding: 1rem; text-align: center; }
     .gs-stages { display: flex; gap: .35rem; flex-wrap: wrap; justify-content: center; }
     .gs-stages button { font-size: .78rem; font-weight: 600; padding: .3rem .8rem; border-radius: 999px; border: 1px solid var(--gray-200); background: white; color: var(--gray-700); }
     .gs-stages button[aria-pressed="true"] { background: var(--primary-600); border-color: var(--primary-600); color: white; }
@@ -104,4 +108,83 @@
     @keyframes gd-bob { 50% { transform: translateY(-6px) scale(1.06); } }
     @keyframes gd-dot { 0%, 100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
     @keyframes gd-in { from { opacity: 0; transform: translateY(8px); } }
+    /* The studio's numbers, tabs and island cards (the approved design, Studio). */
+    .gs-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: .8rem; }
+    .gs-stat { padding: .9rem 1.1rem; }
+    .gs-stat small { display: block; font-size: .8rem; color: var(--gray-500); }
+    .gs-stat b { display: block; font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .gs-stat span { font-size: .78rem; color: var(--gray-500); }
+    .gs-stat span[data-good] { color: var(--success-700); }
+    .gs-tabs { display: flex; gap: .3rem; border-bottom: 1px solid var(--gray-200); overflow-x: auto; }
+    .gs-tabs button { padding: .6rem 1rem; font-weight: 600; font-size: .92rem; color: var(--gray-500); border-bottom: 3px solid transparent; white-space: nowrap; }
+    .gs-tabs button[aria-selected="true"] { color: var(--primary-700); border-color: var(--primary-600); }
+    .gs-icards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: .9rem; }
+    .gs-icard { overflow: hidden; display: flex; flex-direction: column; }
+    .gs-icard-art { position: relative; height: 8.2rem; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .gs-icard-art > .gs-icard-island { position: relative; transform: scale(.72); transform-origin: center; }
+    .gs-icard-art .gs-pos, .gs-icard-art .gs-pub { position: absolute; top: .55rem; font-size: .7rem; font-weight: 800; padding: .1rem .55rem; border-radius: 999px; z-index: 2; }
+    .gs-icard-art .gs-pos { inset-inline-start: .6rem; background: white; color: #13294B; }
+    .gs-icard-art .gs-pub { inset-inline-end: .6rem; background: var(--success-100); color: var(--success-800); }
+    .gs-icard-art .gs-pub[data-state="draft"] { background: var(--warning-100); color: var(--warning-800); }
+    .gs-icard-body { display: flex; flex-direction: column; gap: .45rem; padding: .9rem 1rem 1rem; flex: 1; }
+    .gs-icard-body h3 { font-weight: 800; font-size: 1.05rem; }
+    .gs-chiprow { display: flex; flex-wrap: wrap; gap: .3rem; }
+    .gs-chiprow span { font-size: .72rem; font-weight: 600; padding: .12rem .55rem; border-radius: 999px; background: var(--primary-50); color: var(--primary-700); }
+    .gs-chiprow span[data-tone="green"] { background: var(--success-50); color: var(--success-700); }
+    .gs-chiprow span[data-tone="orange"] { background: var(--warning-50); color: var(--warning-800); }
+    .gs-icard-body p { font-size: .8rem; color: var(--gray-600); }
+    .gs-icard-body footer { margin-top: auto; display: flex; gap: .5rem; padding-top: .4rem; }
+    .gs-ccards { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: .7rem; }
+    .gs-ccard { display: flex; flex-direction: column; align-items: center; gap: .2rem; padding: .8rem .5rem; text-align: center; }
+    .gs-ccard strong { font-size: .9rem; } .gs-ccard small { font-size: .72rem; color: var(--gray-500); }
+    .gs-ccard[data-rarity="rare"] { border-color: var(--info-300, var(--primary-300)); }
+    .gs-ccard[data-rarity="legendary"] { border-color: var(--warning-400); }
+    .gs-sounds { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap: .7rem; }
+    .gs-sound { display: flex; align-items: center; gap: .7rem; padding: .7rem .9rem; }
+    .gs-sound > span { font-size: 1.6rem; }
+    .gs-sound div { flex: 1; min-width: 0; } .gs-sound small { display: block; color: var(--gray-500); font-size: .76rem; }
+    .gs-scene-box { position: relative; width: 390px; max-width: 100%; height: 330px; margin-inline: auto; border-radius: 1rem; overflow: hidden; }
+
+    /* One game's page (the approved design, Studio-Game). */
+    .ge { display: flex; flex-direction: column; gap: 1rem; }
+    .ge-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+    .ge-crumbs { font-size: .8rem; color: var(--gray-500); } .ge-crumbs a { color: var(--primary-600); text-decoration: underline; }
+    .ge-head h1 { font-size: 1.6rem; font-weight: 800; display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+    .ge-actions { display: flex; gap: .5rem; }
+    .ge-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+    @media (max-width: 1023.98px) { .ge-grid { grid-template-columns: 1fr; } }
+    .ge-main, .ge-side { display: flex; flex-direction: column; gap: 1rem; }
+    .ge-card { display: flex; flex-direction: column; gap: .7rem; padding: 1.1rem 1.2rem; }
+    .ge-card h2 { font-weight: 800; font-size: 1.02rem; }
+    .ge-card label { display: flex; flex-direction: column; gap: .3rem; font-size: .85rem; font-weight: 600; }
+    .ge-card input, .ge-card textarea, .ge-card select { width: 100%; border-radius: .6rem; border: 1px solid var(--gray-300); padding: .55rem .7rem; font-weight: 400; background: white; color: var(--gray-900); }
+    .ge-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
+    @media (max-width: 639.98px) { .ge-two { grid-template-columns: 1fr; } }
+    .ge-label { font-size: .85rem; font-weight: 600; margin-bottom: .3rem; }
+    .ge-pills { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .ge-pills button { padding: .45rem 1rem; border-radius: 999px; border: 1px solid var(--gray-300); font-weight: 600; font-size: .88rem; }
+    .ge-pills button[aria-pressed="true"] { background: var(--primary-600); border-color: var(--primary-600); color: white; }
+    .ge-muted { font-size: .84rem; color: var(--gray-500); line-height: 1.6; }
+    .ge-chips { display: flex; flex-wrap: wrap; gap: .35rem; } .ge-chips span { font-size: .78rem; font-weight: 600; padding: .15rem .6rem; border-radius: 999px; background: var(--primary-50); color: var(--primary-700); }
+    .ge-table { overflow-x: auto; border: 1px solid var(--gray-200); border-radius: var(--radius-lg, .5rem); }
+    .ge-table table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    .ge-table th { text-align: start; font-size: .74rem; font-weight: 700; color: var(--gray-500); padding: .55rem .7rem; background: var(--gray-50); white-space: nowrap; }
+    .ge-table td { padding: .55rem .7rem; border-top: 1px solid var(--gray-100); vertical-align: top; }
+    .ge-table td small { color: var(--gray-400); font-size: .7rem; }
+    .ge-table td:first-child { color: var(--gray-500); width: 3.2rem; }
+    .ge-right { display: inline-block; font-weight: 700; padding: .05rem .5rem; border-radius: 999px; background: var(--success-50); color: var(--success-700); }
+    .ge-sample { display: flex; flex-direction: column; gap: .35rem; padding-inline-start: 1.1rem; list-style: decimal; font-size: .86rem; }
+    .ge-sample small { color: var(--gray-500); margin-inline-start: .4rem; }
+    .ge-error { color: var(--danger-600); font-size: .8rem; }
+    .ge-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+    .ge-stats div { padding: .55rem .7rem; border-radius: .7rem; background: var(--gray-50); }
+    .ge-stats small { display: block; font-size: .74rem; color: var(--gray-500); } .ge-stats b { font-size: 1.2rem; font-weight: 800; }
+    .ge-bars { display: flex; flex-direction: column; gap: .35rem; }
+    .ge-bars div { display: grid; grid-template-columns: 4.5rem 1fr 2.6rem; gap: .5rem; align-items: center; font-size: .8rem; }
+    .ge-bars i { height: .55rem; border-radius: 999px; background: var(--gray-100); overflow: hidden; }
+    .ge-bars b { display: block; height: 100%; background: var(--primary-600); border-radius: 999px; }
+    .ge-bars b[data-weak] { background: var(--warning-500); }
+    .ge-bars em { font-style: normal; font-weight: 700; text-align: end; }
+    .ge-hint { padding: .6rem .8rem; border-radius: .7rem; background: var(--warning-50); color: var(--warning-800); font-size: .82rem; line-height: 1.6; }
+    .dark .ge-card input, .dark .ge-card textarea, .dark .ge-card select { background: var(--gray-900); color: var(--gray-100); border-color: var(--gray-700); }
 </style>

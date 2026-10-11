@@ -61,7 +61,7 @@ final class PracticeFocusQuery
         foreach ($homework as $h) {
             $nodes = array_values($h->practice_nodes ?? []);
             $focus[] = new PracticeFocus('homework', $h->enrollment_id, $nodes, $h->title, $h->id, $h->due_at,
-                done: $h->practice_result !== null && ($h->accepts !== 'practice' || $h->status !== 'assigned'));
+                done: $h->practice_result !== null && ($h->accepts !== 'practice' || $h->status !== 'assigned'), game: $h->practice_game);
         }
 
         foreach ($courses as $course) {

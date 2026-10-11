@@ -17,6 +17,8 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property string $source stars | mastery
  * @property ?string $node_id
  * @property ?string $play_id
+ * @property ?string $nickname the name the learner gave it
+ * @property bool $buddy the one that keeps them company
  * @property CarbonImmutable $found_at
  */
 final class CreatureFind extends Model
@@ -32,6 +34,6 @@ final class CreatureFind extends Model
 
     protected function casts(): array
     {
-        return ['found_at' => 'immutable_datetime'];
+        return ['found_at' => 'immutable_datetime', 'buddy' => 'boolean'];
     }
 }

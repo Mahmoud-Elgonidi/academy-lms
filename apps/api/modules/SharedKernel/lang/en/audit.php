@@ -124,6 +124,7 @@ return [
             'demo_secrets_reset' => "Demo console account :name took the server's new demo password and key",
             'game_draft_started' => 'Started designing a new game (:kinds)',
             'game_published' => 'Published the game :game (version :version)',
+            'game_details_saved' => 'Game details changed: :game',
             'game_retired' => 'Retired the game :game',
             'game_revived' => 'Brought back the game :game',
         ],

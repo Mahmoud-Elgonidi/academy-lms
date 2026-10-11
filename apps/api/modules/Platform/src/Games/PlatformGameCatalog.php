@@ -96,6 +96,6 @@ final class PlatformGameCatalog implements GameCatalog
 
     private static function creatureOf(GameCreature $c, string $islandKey): CatalogCreature
     {
-        return new CatalogCreature($c->key, $islandKey, $c->name_ar, $c->name_en, $c->emoji, $c->rarity, $c->sort);
+        return new CatalogCreature($c->key, $islandKey, $c->name_ar, $c->name_en, $c->emoji, $c->rarity, $c->sort, (array) ($c->look ?? []), (string) $c->story_ar, (string) $c->story_en);
     }
 }

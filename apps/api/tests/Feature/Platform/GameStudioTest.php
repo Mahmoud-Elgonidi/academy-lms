@@ -16,6 +16,7 @@ use Modules\Platform\Actions\Games\SetGameStatus;
 use Modules\Platform\Actions\Games\StartGameDraft;
 use Modules\Platform\Actions\Games\StopGameDesign;
 use Modules\Platform\Filament\Console\Pages\GameDraftPage;
+use Modules\Platform\Filament\Console\Pages\GameEditor;
 use Modules\Platform\Filament\Console\Pages\GameStudio;
 use Modules\Platform\Games\Designer\ClaudeGameDesigner;
 use Modules\Platform\Games\Designer\DesignBrief;
@@ -272,6 +273,41 @@ it('runs the studio in the console: the world, trying a game, a new game from a 
     expect($draft->refresh()->rounds)->toBe(2);
     $page->callAction('publish', data: ['key' => 'night-balloons'])->assertHasNoActionErrors();
     expect(Game::query()->where('key', 'night-balloons')->value('status'))->toBe('live');
+});
+
+it('opens a game in the studio: its words, island and looks saved and audited, its page left as published', function () {
+    Filament::setCurrentPanel('console');
+    $this->actingAs($this->admin, 'platform');
+    $game = Game::query()->where('key', 'bird-gates')->firstOrFail();
+    $version = $game->current_version_id;
+    $turtles = GameIsland::query()->where('key', 'turtles')->value('id');
+
+    $studio = Livewire::test(GameStudio::class)->assertSee(GameEditor::getUrl(['game' => $game->id]));
+    expect($studio->instance()->stats)->toMatchArray(['players' => 0, 'rounds' => 0, 'eggs' => 0]);
+    $studio->call('preview', $this->birds)->assertSet('previewing', $this->birds)->assertDispatched('open-modal', id: 'island-preview');
+
+    // What a round looks like, from sample items of the kinds it plays.
+    $page = Livewire::test(GameEditor::class, ['game' => $game->id])->assertOk()->assertSee('رتّب الجملة');
+    expect(collect($page->instance()->sample)->pluck('kind')->unique()->all())->toBe(['order'])
+        ->and($page->instance()->performance['rounds'])->toBe(0);
+
+    $page->set('details.title_en', 'Feather Gates')->set('details.island_id', $turtles)->call('toggleStage', 'teen')->call('save')->assertHasNoErrors();
+    $game->refresh();
+    expect($game->title_en)->toBe('Feather Gates')
+        ->and($game->island_id)->toBe($turtles)
+        ->and($game->stages)->toBe(['kids', 'middle', 'teen'])
+        ->and($game->current_version_id)->toBe($version)
+        ->and(DB::connection('pgsql_platform')->table('audit_logs')->where('action', 'platform.game_details_saved')->count())->toBe(1);
+
+    $page->set('details.title_ar', '')->set('details.stages', [])->call('save')->assertHasErrors(['details.title_ar', 'details.stages']);
+    $page->set('details.title_ar', 'بوابات')->set('details.stages', ['kids'])->set('details.island_id', (string) Str::uuid())->call('save')->assertHasErrors(['details.island_id']);
+    $page->call('setTryStage', 'teen')->assertSet('tryStage', 'teen')->call('setTryStage', 'nope')->assertSet('tryStage', 'kids');
+
+    $page->call('setStatus', 'retired');
+    expect($game->refresh()->status)->toBe('retired');
+    $page->call('setStatus', 'live')->call('develop');
+    $draft = GameDraft::query()->where('game_id', $game->id)->sole();
+    $page->assertRedirect(GameDraftPage::getUrl(['draft' => $draft->id]));
 });
 
 it('keeps the studio to the platform team', function () {

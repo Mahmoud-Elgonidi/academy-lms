@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Learning\Actions\RecordPractice;
+use Modules\Learning\Actions\SendCheer;
 use Modules\Learning\Contracts\DTOs\HomeworkLine;
 use Modules\Learning\Contracts\DTOs\PlanLine;
 use Modules\Learning\Contracts\DTOs\PracticeRecorded;
@@ -65,5 +66,10 @@ final class LearningService implements LearningApi
     public function recordPractice(PracticeRound $round): PracticeRecorded
     {
         return app(RecordPractice::class)->handle($round);
+    }
+
+    public function cheer(string $fromId, string $studentId, string $kind = 'heart'): void
+    {
+        app(SendCheer::class)->handle($fromId, $studentId, $kind);
     }
 }

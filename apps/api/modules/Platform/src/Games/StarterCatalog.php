@@ -13,42 +13,42 @@ use Illuminate\Support\Str;
  */
 final class StarterCatalog
 {
-    /** key => [name_ar, name_en, story_ar, story_en, emoji, colors, music, creatures [key, ar, en, emoji, rarity]] */
+    /** key => [name_ar, name_en, story_ar, story_en, emoji, colors, music, creatures [key, ar, en, emoji, rarity, look, story_ar, story_en]] */
     public const ISLANDS = [
         'birds' => ['جزيرة الطيور', 'Birds Island', 'ريشة العصفورة بتستناك فوق السحاب: كل ما تتعلم أكتر، الأعشاش تتملي.', 'Risha the bird waits above the clouds: the more you learn, the fuller the nests.',
             '🐦', ['sky' => '#5ec8f2', 'sea' => '#a8e2f7', 'land' => '#7fd1a8', 'accent' => '#ffb703'], 'major', [
-                ['risha', 'ريشة', 'Risha', '🐦', 'common'],
-                ['dove', 'قمرية', 'Dove', '🕊️', 'common'],
-                ['parrot', 'بغبغان', 'Parrot', '🦜', 'rare'],
-                ['falcon', 'صقر', 'Falcon', '🦅', 'legendary'],
+                ['risha', 'ريشة', 'Risha', '🐦', 'common', ['kind' => 'bird', 'body' => '#74C0FC', 'wing' => '#4DABF7', 'belly' => '#E7F5FF', 'tuft' => '#FF6B6B', 'beak' => '#FF922B', 'pitch' => 1.0], 'أول طيرة في الجزيرة. بتطير جنبك وانت بتلعب.', 'The first bird on the island. She flies beside you while you play.'],
+                ['dove', 'قمرية', 'Dove', '🕊️', 'common', ['kind' => 'bird', 'body' => '#F1F3F5', 'wing' => '#ADB5BD', 'belly' => '#FFFFFF', 'tuft' => '#868E96', 'beak' => '#FFD43B', 'pitch' => 0.8], 'قمرية هادية بتحب الصبح، وبتغني لما تخلّص درس.', 'A calm dove who loves mornings and sings when you finish a lesson.'],
+                ['parrot', 'بغبغان', 'Parrot', '🦜', 'rare', ['kind' => 'bird', 'body' => '#8CE99A', 'wing' => '#40C057', 'belly' => '#EBFBEE', 'tuft' => '#FF6B6B', 'beak' => '#FFD43B', 'crest' => '#FF6B6B', 'pitch' => 1.4], 'بغبغان نادر بيكرر كل كلمة حلوة تقولها.', 'A rare parrot who repeats every good word you say.'],
+                ['falcon', 'صقر', 'Falcon', '🦅', 'legendary', ['kind' => 'bird', 'body' => '#FFC078', 'wing' => '#5C3D1E', 'belly' => '#FFF4E6', 'tuft' => '#FFC078', 'beak' => '#13294B', 'crest' => '#FF922B', 'pitch' => 0.7], 'صقر أسطوري، مابيجيش غير للي بيتقن.', 'A legendary falcon who only comes to those who master.'],
             ]],
         'turtles' => ['جزيرة السلاحف', 'Turtle Island', 'على الشط سلاحف صغيرة مستنية جسر يوصلها للبحر.', 'Little turtles on the beach wait for a bridge to the sea.',
             '🐢', ['sky' => '#9be7ff', 'sea' => '#1a8fb0', 'land' => '#f7d07a', 'accent' => '#5aa44a'], 'pentatonic', [
-                ['shell', 'صدفة', 'Shelly', '🐢', 'common'],
-                ['crab', 'كابوريا', 'Crab', '🦀', 'common'],
-                ['octopus', 'أخطبوط', 'Octopus', '🐙', 'rare'],
-                ['whale', 'حوت', 'Whale', '🐋', 'legendary'],
+                ['shell', 'صدفة', 'Shelly', '🐢', 'common', ['kind' => 'turtle', 'body' => '#8CE99A', 'wing' => '#2F9E44', 'belly' => '#40C057', 'pitch' => 0.9], 'سلحفاة صغيرة بتحب البحر وبتمشي على مهلها.', 'A little turtle who loves the sea and takes her time.'],
+                ['crab', 'كابوريا', 'Crab', '🦀', 'common', ['kind' => 'crab', 'body' => '#FF6B6B', 'wing' => '#C92A2A', 'belly' => '#FFC9C9', 'pitch' => 1.3], 'كابوريا بتمشي بالعرض وبتصقف بمقصاتها.', 'A crab who walks sideways and claps her claws.'],
+                ['octopus', 'أخطبوط', 'Octopus', '🐙', 'rare', ['kind' => 'octopus', 'body' => '#B197FC', 'wing' => '#7048E8', 'belly' => '#E5DBFF', 'pitch' => 1.1], 'أخطبوط نادر بيعرف يعمل 8 حاجات مع بعض.', 'A rare octopus who does eight things at once.'],
+                ['whale', 'حوت', 'Whale', '🐋', 'legendary', ['kind' => 'whale', 'body' => '#4DABF7', 'wing' => '#1C7ED6', 'belly' => '#E7F5FF', 'pitch' => 0.5], 'حوت أسطوري، صوته بيوصل لكل الجزر.', 'A legendary whale whose song reaches every island.'],
             ]],
         'monkeys' => ['غابة القرود', 'Monkey Jungle', 'في الغابة الموز معلّق فوق: جاوب صح وطلّع القرود لفوق.', 'In the jungle the bananas hang high: answer right and the monkeys climb.',
             '🐒', ['sky' => '#b8f0a0', 'sea' => '#3fae5a', 'land' => '#2d7d46', 'accent' => '#ffd23f'], 'dorian', [
-                ['monkey', 'موزة', 'Banana', '🐒', 'common'],
-                ['sloth', 'كسلان', 'Sloth', '🦥', 'common'],
-                ['elephant', 'فيلو', 'Elephanto', '🐘', 'rare'],
-                ['tiger', 'نمورة', 'Tigra', '🐯', 'legendary'],
+                ['monkey', 'موزة', 'Banana', '🐒', 'common', ['kind' => 'monkey', 'body' => '#A9733E', 'wing' => '#8C5A2B', 'belly' => '#F3D7AE', 'pitch' => 1.5], 'قرد شقي بيحب الموز ويتنطط من شجرة لشجرة.', 'A cheeky monkey who loves bananas and jumps tree to tree.'],
+                ['sloth', 'كسلان', 'Sloth', '🦥', 'common', ['kind' => 'sloth', 'body' => '#C2A385', 'wing' => '#6B4F3A', 'belly' => '#EDE0D4', 'pitch' => 0.6], 'كسلان بيحب النوم، بس بيصحى عشان الدرس.', 'A sleepy sloth who wakes up for lessons.'],
+                ['elephant', 'فيلو', 'Elephanto', '🐘', 'rare', ['kind' => 'elephant', 'body' => '#ADB5BD', 'wing' => '#FFA8C5', 'belly' => '#DEE2E6', 'pitch' => 0.55], 'فيل نادر، عمره ما بينسى حاجة اتعلمها.', 'A rare elephant who never forgets what he learned.'],
+                ['tiger', 'نمورة', 'Tigra', '🐯', 'legendary', ['kind' => 'tiger', 'body' => '#FF922B', 'wing' => '#13294B', 'belly' => '#FFF4E6', 'pitch' => 0.75], 'نمرة أسطورية، أسرع واحدة في الغابة.', 'A legendary tiger, the fastest in the jungle.'],
             ]],
         'penguins' => ['جزيرة البطاريق', 'Penguin Island', 'جليد وتزحلق وبطاريق بتحب السرعة.', 'Ice, slides and penguins who love speed.',
             '🐧', ['sky' => '#d6f1ff', 'sea' => '#5aa9e6', 'land' => '#ffffff', 'accent' => '#3a86ff'], 'lydian', [
-                ['penguin', 'بطبوط', 'Pengo', '🐧', 'common'],
-                ['seal', 'فقمة', 'Seal', '🦭', 'common'],
-                ['polar', 'دبدوب', 'Polar', '🐻‍❄️', 'rare'],
-                ['fox', 'ثعلب الجليد', 'Snow Fox', '🦊', 'legendary'],
+                ['penguin', 'بطبوط', 'Pengo', '🐧', 'common', ['kind' => 'penguin', 'body' => '#1F2A44', 'wing' => '#1F2A44', 'belly' => '#FFFFFF', 'beak' => '#FF922B', 'pitch' => 1.2], 'بطريق بيتزحلق على بطنه في الجليد.', 'A penguin who slides on his belly across the ice.'],
+                ['seal', 'فقمة', 'Seal', '🦭', 'common', ['kind' => 'seal', 'body' => '#A5B4C4', 'wing' => '#748596', 'belly' => '#DDE6EE', 'pitch' => 0.9], 'فقمة بتحب تلعب بالكورة.', 'A seal who loves playing with a ball.'],
+                ['polar', 'دبدوب', 'Polar', '🐻‍❄️', 'rare', ['kind' => 'bear', 'body' => '#F8F9FA', 'wing' => '#CED4DA', 'belly' => '#E9ECEF', 'pitch' => 0.6], 'دبدوب جليد نادر، حضنه دافي.', 'A rare polar bear with a warm hug.'],
+                ['fox', 'ثعلب الجليد', 'Snow Fox', '🦊', 'legendary', ['kind' => 'fox', 'body' => '#F1F3F5', 'wing' => '#74C0FC', 'belly' => '#FFFFFF', 'pitch' => 1.0], 'ثعلب الجليد الأسطوري، ذكي وسريع.', 'The legendary snow fox, clever and quick.'],
             ]],
         'volcano' => ['جزيرة البركان', 'Volcano Island', 'البركان نايم، واللي يجمع كل الكائنات يصحّي التنين.', 'The volcano sleeps; whoever collects every creature wakes the dragon.',
             '🌋', ['sky' => '#ffcf9e', 'sea' => '#6b2737', 'land' => '#3d2c2e', 'accent' => '#ff5d3a'], 'phrygian', [
-                ['lizard', 'سحلية', 'Lizard', '🦎', 'common'],
-                ['chick', 'كتكوت النار', 'Fire Chick', '🐣', 'common'],
-                ['trex', 'ديناصور', 'Dino', '🦖', 'rare'],
-                ['dragon', 'تنين', 'Dragon', '🐉', 'legendary'],
+                ['lizard', 'سحلية', 'Lizard', '🦎', 'common', ['kind' => 'lizard', 'body' => '#69DB7C', 'wing' => '#2F9E44', 'belly' => '#D3F9D8', 'pitch' => 1.3], 'سحلية بتحب الشمس وبتغير لونها.', 'A lizard who loves the sun and changes colour.'],
+                ['chick', 'كتكوت النار', 'Fire Chick', '🐣', 'common', ['kind' => 'chick', 'body' => '#FFD43B', 'wing' => '#FAB005', 'belly' => '#FFF3BF', 'tuft' => '#FF6B3D', 'beak' => '#FF922B', 'pitch' => 1.7], 'كتكوت النار، صغير بس شجاع.', 'The fire chick, small but brave.'],
+                ['trex', 'ديناصور', 'Dino', '🦖', 'rare', ['kind' => 'dino', 'body' => '#63E6BE', 'wing' => '#0CA678', 'belly' => '#C3FAE8', 'pitch' => 0.5], 'ديناصور نادر، صوته عالي بس قلبه طيب.', 'A rare dinosaur with a loud roar and a kind heart.'],
+                ['dragon', 'تنين', 'Dragon', '🐉', 'legendary', ['kind' => 'dragon', 'body' => '#38D9A9', 'wing' => '#9775FA', 'belly' => '#C3FAE8', 'tuft' => '#FF922B', 'pitch' => 0.45], 'التنين الأسطوري، بيصحى لما تجمع كل الكائنات.', 'The legendary dragon, who wakes when you collect them all.'],
             ]],
     ];
 
@@ -77,10 +77,11 @@ final class StarterCatalog
                     'emoji' => $emoji, 'colors' => json_encode($colors), 'music' => $music, 'sort' => ++$sort, 'created_at' => $now, 'updated_at' => $now,
                 ]);
             }
-            foreach ($creatures as $i => [$creature, $cAr, $cEn, $cEmoji, $rarity]) {
+            foreach ($creatures as $i => [$creature, $cAr, $cEn, $cEmoji, $rarity, $look, $storyAr, $storyEn]) {
                 $db->table('game_creatures')->insertOrIgnore([
                     'id' => (string) Str::uuid7(), 'island_id' => $islandId, 'key' => $key.'.'.$creature, 'name_ar' => $cAr, 'name_en' => $cEn,
-                    'emoji' => $cEmoji, 'rarity' => $rarity, 'sort' => $i + 1, 'created_at' => $now, 'updated_at' => $now,
+                    'emoji' => $cEmoji, 'rarity' => $rarity, 'look' => json_encode($look), 'story_ar' => $storyAr, 'story_en' => $storyEn,
+                    'sort' => $i + 1, 'created_at' => $now, 'updated_at' => $now,
                 ]);
             }
         }

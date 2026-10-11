@@ -3,6 +3,7 @@
 namespace Modules\Learning\Contracts;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Validation\ValidationException;
 use Modules\Learning\Contracts\DTOs\HomeworkLine;
 use Modules\Learning\Contracts\DTOs\PlanLine;
 use Modules\Learning\Contracts\DTOs\PracticeFocus;
@@ -32,4 +33,13 @@ interface LearningApi
 
     /** A practice round finished in a game: kept, counted per lesson, and handed in for homework that asks for it. */
     public function recordPractice(PracticeRound $round): PracticeRecorded;
+
+    /**
+     * A guardian cheers their child on (a few a day; the child sees it and hears it by push).
+     *
+     * @param  string  $kind  clap, star, heart or fire
+     *
+     * @throws ValidationException not their child, or too many today
+     */
+    public function cheer(string $fromId, string $studentId, string $kind = 'heart'): void;
 }

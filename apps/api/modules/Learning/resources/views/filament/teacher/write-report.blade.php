@@ -21,7 +21,12 @@
         <form wire:submit="submit" class="flex flex-col gap-6">
             {{ $this->form }}
             @unless ($locked)
-                <div><x-filament::button type="submit">{{ $this->sessionReport->isOpen() ? __('learning::teacher.write.submit') : __('learning::teacher.write.save') }}</x-filament::button></div>
+                <div class="flex flex-wrap gap-2">
+                    <x-filament::button type="submit">{{ $this->sessionReport->isOpen() ? __('learning::teacher.write.submit') : __('learning::teacher.write.save') }}</x-filament::button>
+                    @if (! $this->sessionReport->isOpen() && $this->sessionReport->kind === 'lesson')
+                        <x-filament::button color="gray" icon="heroicon-m-puzzle-piece" tag="a" :href="\Modules\Learning\Filament\Teacher\HomeworkGame::getUrl(['report' => $this->sessionReport->id])">{{ __('learning::homework.game.open') }}</x-filament::button>
+                    @endif
+                </div>
             @endunless
         </form>
 

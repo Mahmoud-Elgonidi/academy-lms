@@ -11,15 +11,21 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\Games\Actions\FinishPlay;
+use Modules\Games\Actions\NameCreature;
 use Modules\Games\Actions\SaveGameLimit;
 use Modules\Games\Actions\StartPlay;
 use Modules\Games\Domain\Round;
+use Modules\Games\Models\CreatureFind;
 use Modules\Games\Models\GameLimit;
 use Modules\Games\Models\GamePlay;
 use Modules\Games\Models\GameSettings;
 use Modules\Games\Queries\GamesWorld;
+use Modules\Games\Queries\GuardianGlance;
 use Modules\Identity\Contracts\PersonalChannel;
+use Modules\Learning\Contracts\LearningApi;
 use Modules\People\Contracts\FamilyView;
+use Modules\SharedKernel\Games\CatalogCreature;
+use Modules\SharedKernel\Games\GameCatalog;
 use Modules\SharedKernel\Http\ProblemException;
 
 /**
@@ -27,8 +33,10 @@ use Modules\SharedKernel\Http\ProblemException;
  * section 18): the learner on screen's islands, creatures and quests from
  * their own practice; a round plays in a sandboxed frame (shared::games.player)
  * and its result (stars, a creature hatched, homework handed in) comes back
- * here. Opened with ?homework= it starts that homework's practice. A
- * guardian sets their child's play.
+ * here. Opened with ?homework= it starts that homework's practice, with
+ * ?island= that island. A child's look is the islands world of the approved
+ * design (games::filament.family.kids): a creature hatched comes out of its
+ * egg there and the child names it. A guardian sets their child's play.
  */
 final class FamilyGames extends Page
 {
@@ -42,6 +50,10 @@ final class FamilyGames extends Page
 
     #[Url(as: 'homework')]
     public ?string $homework = null;
+
+    /** An island to open on arrival (from the album). */
+    #[Url(as: 'island')]
+    public ?string $island = null;
 
     /** The round being played: its id, page, items and look (what the player hands the game). */
     public ?array $round = null;
@@ -62,6 +74,12 @@ final class FamilyGames extends Page
     public function getTitle(): string|Htmlable
     {
         return __('games::games.title.'.$this->look());
+    }
+
+    /** Every look has its own header in the screen itself (the map, the race, the review, a guardian's view). */
+    public function getHeading(): string|Htmlable
+    {
+        return '';
     }
 
     public function mount(): void
@@ -93,6 +111,14 @@ final class FamilyGames extends Page
         return PersonalChannel::name((string) auth()->id());
     }
 
+    /** The learner's first name, for "Yousef's world". */
+    public function learnerName(): string
+    {
+        $name = (string) app(FamilyView::class)->current((string) auth()->id())?->name;
+
+        return explode(' ', trim($name))[0] ?? $name;
+    }
+
     public function isGuardian(): bool
     {
         return $this->learnerId() !== null && $this->learnerId() !== (string) auth()->id();
@@ -107,7 +133,7 @@ final class FamilyGames extends Page
         return $learner === null ? null : app(GamesWorld::class)->for($learner);
     }
 
-    /** @return array{enabled: bool, daily_minutes: ?int, academy: ?int, choices: list<int>}|null */
+    /** @return array{enabled: bool, daily_minutes: ?int, night_lock: bool, academy: ?int, choices: list<int>}|null */
     #[Computed]
     public function limits(): ?array
     {
@@ -116,7 +142,30 @@ final class FamilyGames extends Page
         }
         $limit = GameLimit::query()->find($this->learnerId());
 
-        return ['enabled' => $limit?->enabled ?? true, 'daily_minutes' => $limit?->daily_minutes, 'academy' => GameSettings::current()->daily_minutes, 'choices' => SaveGameLimit::MINUTES];
+        return ['enabled' => $limit?->enabled ?? true, 'daily_minutes' => $limit?->daily_minutes, 'night_lock' => (bool) ($limit?->night_lock ?? false),
+            'academy' => GameSettings::current()->daily_minutes, 'choices' => SaveGameLimit::MINUTES];
+    }
+
+    /** What a guardian sees of the child on screen: today's time, the week's practice, a creature hatched today. */
+    #[Computed]
+    public function glance(): ?array
+    {
+        return $this->isGuardian() ? app(GuardianGlance::class)->for((string) $this->learnerId()) : null;
+    }
+
+    /** @return list<array{id: string, name: string}> the children a guardian follows, for the tabs */
+    public function children(): array
+    {
+        return array_map(fn ($l) => ['id' => $l->id, 'name' => explode(' ', trim($l->name))[0]],
+            array_values(array_filter(app(FamilyView::class)->learners((string) auth()->id()), fn ($l) => ! $l->isSelf)));
+    }
+
+    public function chooseChild(string $learnerId): void
+    {
+        app(FamilyView::class)->choose((string) auth()->id(), $learnerId);
+        $this->round = null;
+        $this->result = null;
+        unset($this->world, $this->limits, $this->glance);
     }
 
     public function play(string $gameId, ?string $quest = null): void
@@ -139,6 +188,7 @@ final class FamilyGames extends Page
             'title' => $r['game']->title(),
             'how' => $r['game']->howToPlay(),
             'island' => $r['game']->islandKey,
+            'sky' => collect($this->world['islands'] ?? [])->firstWhere('key', $r['game']->islandKey)['colors']['sky'] ?? null,
             'src' => route('games.play', $r['game']->versionId),
             'items' => $r['round'],
             'stage' => $r['stage'],
@@ -154,6 +204,8 @@ final class FamilyGames extends Page
         $learner = $this->learnerId();
         $play = $this->round === null ? null : GamePlay::query()->where('student_id', $learner)->find($this->round['play']);
         abort_if($play === null, 404);
+        // The quest's best time before this round, for the race (middle school).
+        $before = collect($this->world['quests'] ?? [])->firstWhere('key', $this->round['quest'])['best_seconds'] ?? null;
         try {
             $r = app(FinishPlay::class)->handle($play, (string) auth()->id(), $answers);
         } catch (ValidationException) {
@@ -162,10 +214,14 @@ final class FamilyGames extends Page
         $p = $r['play'];
         $stars = (int) GamePlay::query()->where('student_id', $learner)->whereNotNull('finished_at')->sum('stars');
         $this->result = [
+            'play' => $p->id,
             'stars' => (int) $p->stars,
             'correct' => (int) $p->correct,
             'total' => $p->total,
-            'creature' => $r['creature'] === null ? null : ['name' => $r['creature']->name(), 'emoji' => $r['creature']->emoji, 'rarity' => $r['creature']->rarity],
+            'total_stars' => $stars,
+            'seconds' => $p->seconds,
+            'best_before' => $before,
+            'creature' => $r['creature'] === null ? null : $this->hatched($learner, $r['creature']),
             'egg' => ['have' => $stars % Round::STARS_PER_EGG, 'need' => Round::STARS_PER_EGG],
             'homework' => $r['handed_in'] ? $r['homework'] : null,
             'game' => $this->round['game'],
@@ -173,7 +229,39 @@ final class FamilyGames extends Page
             'title' => $this->round['title'],
         ];
         $this->round = null;
-        unset($this->world);
+        unset($this->world, $this->glance);
+    }
+
+    /**
+     * A creature just hatched, for its egg: how it looks, where it lives, how many the learner has
+     * now, and three names to choose from (its own and two more).
+     *
+     * @return array<string, mixed>
+     */
+    private function hatched(string $learner, CatalogCreature $c): array
+    {
+        $catalog = app(GameCatalog::class);
+        $island = collect($catalog->islands())->firstWhere('key', $c->islandKey);
+        $names = (array) __('games::games.hatch.names');
+        $at = crc32($c->key) % max(1, count($names));
+
+        return [
+            'key' => $c->key, 'name' => $c->name(), 'emoji' => $c->emoji, 'rarity' => $c->rarity, 'look' => $c->look,
+            'island' => $island?->name() ?? '',
+            'found' => CreatureFind::query()->where('student_id', $learner)->count(),
+            'total' => array_sum(array_map(fn ($i) => count($i->creatures), $catalog->islands())),
+            'names' => array_values(array_unique([$c->name(), $names[$at] ?? '', $names[($at + 5) % max(1, count($names))] ?? ''])),
+        ];
+    }
+
+    /** The child names the creature that just hatched, and goes to see it in the album. */
+    public function nameCreature(string $key, string $name): void
+    {
+        $learner = $this->learnerId();
+        abort_if($learner === null || $this->isGuardian(), 403);
+        app(NameCreature::class)->handle($learner, $key, $name);
+        $this->result = null;
+        $this->redirect(FamilyCreatures::getUrl(['new' => $key]), navigate: true);
     }
 
     public function again(): void
@@ -192,11 +280,41 @@ final class FamilyGames extends Page
         unset($this->world);
     }
 
-    public function saveLimits(bool $enabled, ?int $minutes): void
+    public function setMinutes(?int $minutes): void
+    {
+        $this->saveLimit(minutes: $minutes);
+    }
+
+    public function setNight(bool $on): void
+    {
+        $this->saveLimit(night: $on);
+    }
+
+    public function setEnabled(bool $on): void
+    {
+        $this->saveLimit(enabled: $on);
+    }
+
+    /** A guardian's choice for the child on screen; what is not given stays as it was. */
+    private function saveLimit(?bool $enabled = null, int|false|null $minutes = false, ?bool $night = null): void
     {
         abort_unless($this->isGuardian(), 403);
-        app(SaveGameLimit::class)->handle((string) $this->learnerId(), (string) auth()->id(), $enabled, $minutes ?: null);
-        Notification::make()->success()->title(__('games::games.limits.saved'))->send();
-        unset($this->limits, $this->world);
+        $now = $this->limits;
+        app(SaveGameLimit::class)->handle((string) $this->learnerId(), (string) auth()->id(), $enabled ?? $now['enabled'],
+            $minutes === false ? $now['daily_minutes'] : ($minutes ?: null), $night);
+        Notification::make()->success()->title(__('games::games.guardian.saved'))->send();
+        unset($this->limits, $this->world, $this->glance);
+    }
+
+    /** A guardian cheers the child for the creature they hatched (Learning's cheers: a few a day). */
+    public function cheer(): void
+    {
+        abort_unless($this->isGuardian(), 403);
+        try {
+            app(LearningApi::class)->cheer((string) auth()->id(), (string) $this->learnerId(), 'heart');
+            Notification::make()->success()->title(__('games::games.guardian.cheered'))->send();
+        } catch (ValidationException $e) {
+            Notification::make()->warning()->title(collect($e->errors())->flatten()->first())->send();
+        }
     }
 }

@@ -9,6 +9,7 @@ use Modules\Platform\Filament\Console\Pages\Academies;
 use Modules\Platform\Filament\Console\Pages\AcademyOverview;
 use Modules\Platform\Filament\Console\Pages\AuditLog;
 use Modules\Platform\Filament\Console\Pages\GameDraftPage;
+use Modules\Platform\Filament\Console\Pages\GameEditor;
 use Modules\Platform\Filament\Console\Pages\GameStudio;
 use Modules\Platform\Filament\Console\Pages\Health;
 use Modules\Platform\Filament\Console\Pages\Plans;
@@ -29,7 +30,7 @@ final class ConsolePlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([Academies::class, AcademyOverview::class, Plans::class, GameStudio::class, GameDraftPage::class, AuditLog::class, Health::class]);
+        $panel->pages([Academies::class, AcademyOverview::class, Plans::class, GameStudio::class, GameDraftPage::class, GameEditor::class, AuditLog::class, Health::class]);
         // A draft game's page for the studio's preview (sandboxed, never cached).
         $panel->authenticatedRoutes(fn () => Route::get('games/drafts/{draft}/page', GameDraftPageController::class)->name('games.draft-page'));
     }

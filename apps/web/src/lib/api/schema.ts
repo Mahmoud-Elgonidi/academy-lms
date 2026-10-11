@@ -481,7 +481,7 @@ export interface paths {
          * Start a round
          * @description Of a game (id or key) for a quest (its key), for a homework's practice (homework_id), or with all of the learner's
          *     practice. Answers the page to open (page_url, sandboxed; never cached personal data) and the round to hand it
-         *     through the bridge: {lms: 1, type: "start", round}. 403 games-off / games-paused / games-limit, 422
+         *     through the bridge: {lms: 1, type: "start", round}. 403 games-off / games-paused / games-night / games-limit, 422
          *     games-not-enough-items when the learner has too few items for that game.
          */
         post: operations["games.plays.start"];
@@ -523,10 +523,52 @@ export interface paths {
         get?: never;
         /**
          * Set a child's play
-         * @description A guardian turns games on or off for their child and sets the minutes a day (one of the choices; null: the
-         *     academy's, never more).
+         * @description A guardian turns games on or off for their child, sets the minutes a day (one of the choices; null: the academy's,
+         *     never more) and the night lock (no games from 21:00 to 7:00 on the child's clock; left out: unchanged).
          */
         put: operations["games.limits"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/games/creatures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A learner's album of creatures
+         * @description Every creature of the world in its order: hatched ones with when, how (stars or a mastered lesson), the name the
+         *     learner gave and whether it is their buddy; the rest with only how they look (to draw as a shadow) and their island.
+         */
+        get: operations["games.creatures"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/games/creatures/{creature}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Name a creature or make it the buddy
+         * @description The learner's own, hatched creatures only: a name (letters only, at most 24; empty takes its own name back) and/or
+         *     buddy: true (one at a time). A guardian looks but does not change them (403).
+         */
+        put: operations["games.creatures.update"];
         post?: never;
         delete?: never;
         options?: never;
@@ -3771,7 +3813,7 @@ export interface operations {
                         data: {
                             learner_id: string;
                             stage: string;
-                            /** @description Whether the learner may start a round now, and why not: off (the academy), paused (a guardian), limit (today's minutes). */
+                            /** @description Whether the learner may start a round now, and why not: off (the academy), paused (a guardian), night (a guardian's night lock, 21:00 to 7:00 on the learner's clock), limit (today's minutes). */
                             allowance: unknown[];
                             stars: number;
                             /** @description Stars toward the next egg on an island. */
@@ -3781,13 +3823,23 @@ export interface operations {
                                 need: 12;
                             };
                             creatures_found: string;
+                            creatures_total: number;
+                            /** @description The creature that keeps the learner company (their chosen buddy, else the last one hatched; null before the first). */
+                            buddy: unknown[] | null;
                             quests: unknown[];
+                            /**
+                             * @description Days in a row with a finished round, ending today (or yesterday while today is open), on the learner's clock.
+                             *     Days in a row (to today, on the learner's clock) with a finished round.
+                             */
+                            streak: number;
                             islands: unknown[];
                             recent: unknown[];
                             /** @description A guardian's limits for this child (null for the student). */
                             limits: {
                                 enabled: boolean;
                                 daily_minutes: number | null;
+                                /** @description No games from 21:00 to 7:00 on the child's clock. */
+                                night_lock: boolean;
                                 /** @description The academy's own minutes a day (null: no limit); a guardian's choice never goes over it. */
                                 academy_minutes: number | null;
                                 choices: [
@@ -3938,6 +3990,8 @@ export interface operations {
                                 emoji: string;
                                 rarity: string;
                                 island: string;
+                                look: unknown[];
+                                story: string;
                             } | null;
                             egg: {
                                 have: number;
@@ -3985,6 +4039,7 @@ export interface operations {
                     learner_id: string;
                     enabled: boolean;
                     daily_minutes?: number | null;
+                    night_lock?: boolean;
                 };
             };
         };
@@ -3998,6 +4053,8 @@ export interface operations {
                         data: {
                             enabled: boolean;
                             daily_minutes: number | null;
+                            /** @description No games from 21:00 to 7:00 on the child's clock. */
+                            night_lock: boolean;
                             /** @description The academy's own minutes a day (null: no limit); a guardian's choice never goes over it. */
                             academy_minutes: number | null;
                             choices: [
@@ -4011,6 +4068,98 @@ export interface operations {
                                 120
                             ];
                         };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AccessDeniedHttpException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "games.creatures": {
+        parameters: {
+            query?: {
+                learner_id?: string | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: unknown[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "games.creatures.update": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                creature: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    learner_id?: string | null;
+                    name?: string | null;
+                    /** @enum {unknown} */
+                    buddy?: "yes" | "on" | "1" | 1 | "true" | true;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: unknown[];
                     };
                 };
             };

@@ -12,8 +12,9 @@ use Modules\SharedKernel\Tenancy\Database\TenantTable;
  * practice_rounds (never changed); practice_stats sums it up per course and
  * lesson for the teacher and the roadmap. Homework can come with practice:
  * the lessons of its report (practice_nodes), and the best round played for
- * it (practice_result); homework that is practice only ("accepts" practice)
- * is handed in by playing.
+ * it (practice_result), and the game the teacher chose for it
+ * (practice_game, a catalog key; else the one that suits it best); homework
+ * that is practice only ("accepts" practice) is handed in by playing.
  */
 return new class extends Migration
 {
@@ -22,6 +23,7 @@ return new class extends Migration
         Schema::table('homework', function (Blueprint $table) {
             $table->jsonb('practice_nodes')->nullable();            // the report's lessons whose practice the homework asks for
             $table->jsonb('practice_result')->nullable();           // {correct, total, stars, game, played_at}
+            $table->string('practice_game', 41)->nullable();        // the catalog game the teacher chose to play it with
         });
 
         Schema::create('practice_rounds', function (Blueprint $table) {
@@ -80,7 +82,7 @@ return new class extends Migration
         Schema::dropIfExists('practice_rounds');
         DB::statement('drop function if exists lms_practice_round_live()');
         Schema::table('homework', function (Blueprint $table) {
-            $table->dropColumn(['practice_nodes', 'practice_result']);
+            $table->dropColumn(['practice_nodes', 'practice_result', 'practice_game']);
         });
     }
 };

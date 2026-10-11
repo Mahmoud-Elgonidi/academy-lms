@@ -19,6 +19,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Learning\Actions\SubmitSessionReport;
 use Modules\Learning\Domain\MasteryRule;
 use Modules\Learning\Models\Homework;
@@ -226,6 +227,9 @@ final class WriteReport extends Page
         }
 
         Notification::make()->success()->title(__('learning::teacher.write.sent'))->send();
-        $this->redirect(MyReports::getUrl(), navigate: true);
+        // A lesson whose lessons have practice goes on to its homework game (the approved design, Teacher).
+        $nodes = $this->sessionReport->items()->pluck('node_id')->all();
+        $practice = $this->sessionReport->kind === 'lesson' && $nodes !== [] && array_filter(app(CurriculumApi::class)->practiceItems($nodes)) !== [];
+        $this->redirect($practice ? HomeworkGame::getUrl(['report' => $this->sessionReport->id]) : MyReports::getUrl(), navigate: true);
     }
 }

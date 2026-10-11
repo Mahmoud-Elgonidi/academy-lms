@@ -24,6 +24,7 @@ return [
     'suspended_page' => ['title' => 'This academy is paused', 'body' => 'This site is not available right now. If you belong to the academy, please contact its office.'],
     'games-off' => 'Games are off at the academy.',
     'games-paused' => 'A guardian has paused games.',
+    'games-night' => 'Games sleep at night. See you in the morning!',
     'games-limit' => 'Today’s play time is used up.',
     'games-not-enough-items' => 'Not enough practice for this game.',
 ];

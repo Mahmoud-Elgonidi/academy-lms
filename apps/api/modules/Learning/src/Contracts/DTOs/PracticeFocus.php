@@ -21,6 +21,7 @@ final readonly class PracticeFocus
         public ?string $homeworkId = null,
         public ?CarbonImmutable $dueAt = null,
         public bool $done = false,
+        public ?string $game = null,    // the catalog game the teacher chose for this homework (its key)
     ) {}
 
     /** A stable key for this focus (a quest), for the screens and the next round. */

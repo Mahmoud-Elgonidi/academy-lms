@@ -30,6 +30,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?CarbonImmutable $reviewed_at
  * @property ?list<string> $practice_nodes the report's lessons whose practice it asks for
  * @property ?array{correct: int, total: int, stars: int, game: string, played_at: string} $practice_result the best round played for it
+ * @property ?string $practice_game the catalog game the teacher chose for it
  */
 final class Homework extends Model
 {
@@ -44,7 +45,7 @@ final class Homework extends Model
 
     protected $fillable = [
         'enrollment_id', 'session_id', 'report_id', 'teacher_id', 'student_id', 'title', 'instructions', 'accepts', 'due_at',
-        'status', 'grade', 'feedback', 'reviewed_by', 'reviewed_at', 'practice_nodes', 'practice_result',
+        'status', 'grade', 'feedback', 'reviewed_by', 'reviewed_at', 'practice_nodes', 'practice_result', 'practice_game',
     ];
 
     protected $attributes = ['accepts' => 'any', 'status' => 'assigned'];

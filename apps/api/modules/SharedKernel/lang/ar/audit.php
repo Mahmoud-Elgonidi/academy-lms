@@ -124,6 +124,7 @@ return [
             'demo_secrets_reset' => 'حساب لوحة المنصة التجريبي :name خد كلمة السر والمفتاح التجريبيين الجداد',
             'game_draft_started' => 'بداية تصميم لعبة جديدة (:kinds)',
             'game_published' => 'نشر اللعبة :game (نسخة :version)',
+            'game_details_saved' => 'تعديل بيانات اللعبة :game',
             'game_retired' => 'إيقاف اللعبة :game',
             'game_revived' => 'إرجاع اللعبة :game',
         ],

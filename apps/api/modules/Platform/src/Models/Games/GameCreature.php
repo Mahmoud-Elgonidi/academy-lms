@@ -26,4 +26,6 @@ final class GameCreature extends Model
     protected $table = 'game_creatures';
 
     protected $guarded = [];
+
+    protected $casts = ['look' => 'array'];
 }

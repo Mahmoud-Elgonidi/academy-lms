@@ -5,7 +5,9 @@ namespace Modules\Games\Database\Seeders;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Modules\Games\Actions\ChooseBuddy;
 use Modules\Games\Actions\FinishPlay;
+use Modules\Games\Actions\NameCreature;
 use Modules\Games\Actions\SaveGameLimit;
 use Modules\Games\Actions\StartPlay;
 use Modules\Games\Domain\Round;
@@ -18,9 +20,9 @@ use Modules\SharedKernel\Games\CatalogGame;
  * actions (docs/architecture/02, section 18): quests from their last lesson,
  * reviews and where they stand, and free play, each with some first tries
  * wrong, so stars, a hatched egg and the practice on their roadmap are
- * there. Homework rounds are left for the demo to play. Yousef's guardian
- * keeps him to 20 minutes a day. Runs after the reports and the practice
- * items.
+ * there. Homework rounds are left for the demo to play. Yousef named his
+ * first creature and keeps it as his buddy; his guardian keeps him to 20
+ * minutes a day. Runs after the reports and the practice items.
  */
 final class DemoGamesSeeder extends Seeder
 {
@@ -39,7 +41,7 @@ final class DemoGamesSeeder extends Seeder
         ['maryam', 2, 19, null, 0.7, 6],
     ];
 
-    public function run(StartPlay $start, FinishPlay $finish, SaveGameLimit $limits, PracticePool $pool, PeopleApi $people): void
+    public function run(StartPlay $start, FinishPlay $finish, SaveGameLimit $limits, PracticePool $pool, PeopleApi $people, NameCreature $name, ChooseBuddy $buddy): void
     {
         $realNow = CarbonImmutable::now();
         $id = fn (string $key) => (string) DB::table('users')->where('email', "{$key}@demo.test")->value('id');
@@ -76,8 +78,15 @@ final class DemoGamesSeeder extends Seeder
         }
         CarbonImmutable::setTestNow($realNow);
 
-        // Yousef's guardian keeps him to 20 minutes a day.
+        // Yousef named his first creature and keeps it with him.
         $yousef = $id('yousef');
+        $first = $yousef === '' ? null : DB::table('creature_finds')->where('student_id', $yousef)->orderBy('found_at')->value('creature_key');
+        if ($first !== null) {
+            $name->handle($yousef, $first, 'سمسم');
+            $buddy->handle($yousef, $first);
+        }
+
+        // Yousef's guardian keeps him to 20 minutes a day.
         $guardian = $yousef === '' ? null : DB::table('guardian_student')->where('student_id', $yousef)->value('guardian_id');
         if ($guardian !== null) {
             $limits->handle($yousef, (string) $guardian, true, 20);

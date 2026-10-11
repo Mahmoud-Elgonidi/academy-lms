@@ -5,7 +5,7 @@ namespace Modules\Games\Filament\Family;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
-/** The games in the family area (/my): the learner's islands, quests and rounds. */
+/** The games in the family area (/my): the learner's islands, quests and rounds, and their creatures. */
 final class GamesFamilyPlugin implements Plugin
 {
     public static function make(): self
@@ -20,7 +20,7 @@ final class GamesFamilyPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([FamilyGames::class]);
+        $panel->pages([FamilyGames::class, FamilyCreatures::class]);
     }
 
     public function boot(Panel $panel): void {}

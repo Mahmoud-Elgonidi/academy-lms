@@ -17,7 +17,8 @@ use Modules\SharedKernel\Games\GameCatalog;
  * the last lesson, reviews, where the course stands), Curriculum has those
  * lessons' items, and the catalog's live games for the learner's look play
  * them. Each focus with items becomes a quest with the game that suits it
- * (a full round first, then the game played least this week, for variety);
+ * (the teacher's choice for a homework, else a full round first, then the
+ * game played least this week, for variety);
  * "free" play takes every focus's items together.
  */
 final class PracticePool
@@ -89,7 +90,9 @@ final class PracticePool
                 continue;
             }
             $size = fn (CatalogGame $g) => count(Round::pick($g, $items) ?? []);
-            usort($fit, fn (CatalogGame $a, CatalogGame $b) => [$size($a) < self::FULL, (int) ($recent[$a->id] ?? 0), -$size($a), $a->sort] <=> [$size($b) < self::FULL, (int) ($recent[$b->id] ?? 0), -$size($b), $b->sort]);
+            // The teacher's choice for a homework first, when it can play it; then a full round, the game played least.
+            $chosen = fn (CatalogGame $g) => $f->game !== null && $g->key === $f->game ? 0 : 1;
+            usort($fit, fn (CatalogGame $a, CatalogGame $b) => [$chosen($a), $size($a) < self::FULL, (int) ($recent[$a->id] ?? 0), -$size($a), $a->sort] <=> [$chosen($b), $size($b) < self::FULL, (int) ($recent[$b->id] ?? 0), -$size($b), $b->sort]);
             $quests[] = ['focus' => $f, 'game' => $fit[0], 'items' => count($items)];
             if (count($quests) === self::QUESTS) {
                 break;

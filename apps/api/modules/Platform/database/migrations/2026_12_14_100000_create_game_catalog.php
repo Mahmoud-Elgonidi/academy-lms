@@ -45,6 +45,9 @@ return new class extends Migration
             $table->string('name_en', 60);
             $table->string('emoji', 16);
             $table->string('rarity', 12);
+            $table->jsonb('look')->default('{}');               // how it is drawn: {kind, body, wing, belly, tuft, beak, crest, pitch}
+            $table->string('story_ar', 200)->default('');
+            $table->string('story_en', 200)->default('');
             $table->smallInteger('sort')->default(0);
             $table->timestampsTz();
         });

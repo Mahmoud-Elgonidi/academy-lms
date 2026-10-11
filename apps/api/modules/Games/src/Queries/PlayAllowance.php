@@ -21,7 +21,12 @@ final class PlayAllowance
 {
     public function __construct(private readonly TenantContext $tenants) {}
 
-    /** @return array{academy: bool, child: bool, limit: ?int, used: int, left: ?int, may: bool, reason: ?string} */
+    /** Night, when a guardian locks it: from this hour to MORNING on the learner's clock. */
+    public const NIGHT = 21;
+
+    public const MORNING = 7;
+
+    /** @return array{academy: bool, child: bool, limit: ?int, used: int, left: ?int, night_lock: bool, may: bool, reason: ?string} */
     public function for(string $studentId, ?CarbonImmutable $now = null): array
     {
         $now ??= CarbonImmutable::now();
@@ -39,14 +44,19 @@ final class PlayAllowance
         $used = (int) ceil($seconds / 60);
         $left = $minutes === null ? null : max(0, $minutes - $used);
 
+        $hour = (int) $now->setTimezone($zone)->format('G');
+        $night = ($limit?->night_lock ?? false) && ($hour >= self::NIGHT || $hour < self::MORNING);
+
         $reason = match (true) {
             ! $settings->enabled => 'off',
             $limit !== null && ! $limit->enabled => 'paused',
+            $night => 'night',
             $left === 0 => 'limit',
             default => null,
         };
 
-        return ['academy' => $settings->enabled, 'child' => $limit?->enabled ?? true, 'limit' => $minutes, 'used' => $used, 'left' => $left, 'may' => $reason === null, 'reason' => $reason];
+        return ['academy' => $settings->enabled, 'child' => $limit?->enabled ?? true, 'limit' => $minutes, 'used' => $used, 'left' => $left,
+            'night_lock' => $limit?->night_lock ?? false, 'may' => $reason === null, 'reason' => $reason];
     }
 
     /** The learner's own clock: their profile's zone, else the academy's. */

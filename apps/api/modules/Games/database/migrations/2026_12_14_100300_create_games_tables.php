@@ -51,11 +51,14 @@ return new class extends Migration
             $table->string('source', 12);                       // stars | mastery
             $table->uuid('node_id')->nullable();                // the lesson mastered
             $table->uuid('play_id')->nullable();                // the round whose stars hatched it
+            $table->string('nickname', 24)->nullable();         // the name the learner gave it
+            $table->boolean('buddy')->default(false);           // the one that keeps them company (one at most)
             $table->timestampTz('found_at');
             $table->tenantKey();
             $table->unique(['academy_id', 'student_id', 'creature_key']);
         });
         DB::statement("alter table creature_finds add constraint creature_finds_source check (source in ('stars', 'mastery'))");
+        DB::statement('create unique index creature_finds_one_buddy on creature_finds (academy_id, student_id) where buddy');
 
         Schema::create('game_settings', function (Blueprint $table) {
             $table->tenant();
@@ -71,6 +74,7 @@ return new class extends Migration
             $table->uuid('student_id');
             $table->boolean('enabled')->default(true);
             $table->smallInteger('daily_minutes')->nullable();                // null: the academy's
+            $table->boolean('night_lock')->default(false);                    // no play from 21:00 to 07:00 on the learner's clock
             $table->uuid('updated_by');
             $table->timestampsTz();
             $table->primary(['academy_id', 'student_id']);
