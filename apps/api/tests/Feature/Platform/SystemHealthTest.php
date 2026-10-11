@@ -181,10 +181,13 @@ it('notes every message that leaves, and sends the platform team a test', functi
 });
 
 it('says so when mail does not go out, and tries the alert again at the next check', function () {
-    // An SMTP server that is not there: the message cannot leave.
-    config(['mail.default' => 'smtp', 'mail.mailers.smtp.host' => '127.0.0.1', 'mail.mailers.smtp.port' => 1, 'mail.mailers.smtp.timeout' => 2]);
-    $this->artisan('platform:mail-test')->expectsOutputToContain('Not sent:')->assertExitCode(1);
+    // An SMTP server that is not there: the message cannot leave (to a real address; the team's .test ones are never tried).
+    config(['mail.default' => 'smtp', 'mail.mailers.smtp.host' => '127.0.0.1', 'mail.mailers.smtp.port' => 1, 'mail.mailers.smtp.timeout' => 2,
+        'platform.health.alert_to' => ['ops@company.example']]);
+    $this->artisan('platform:mail-test', ['to' => ['ops@company.example']])->expectsOutputToContain('Not sent:')->assertExitCode(1);
     expect(MailHealth::failing())->toBeTrue()->and(app(SystemHealth::class)->checks()['mail']['status'])->toBe('fail');
+    // The demo's addresses (.test) never reach the mail server: the command says so instead of "sent".
+    $this->artisan('platform:mail-test', ['to' => ['admin@platform.test']])->expectsOutputToContain('demo address')->assertExitCode(1);
 
     $this->mock(SystemHealth::class, fn ($m) => $m->shouldReceive('checks')->andReturn([
         'scheduler' => ['status' => 'fail', 'value' => 'never yet', 'hint' => null],

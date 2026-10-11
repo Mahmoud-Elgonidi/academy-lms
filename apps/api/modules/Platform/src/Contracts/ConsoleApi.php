@@ -12,4 +12,7 @@ interface ConsoleApi
 
     /** A console address, e.g. consoleUrl('support') for the support sign-in screen. */
     public function consoleUrl(string $path = ''): string;
+
+    /** Whether this admin may still act (not locked out with platform:admin --deactivate). */
+    public function adminActive(string $adminId): bool;
 }

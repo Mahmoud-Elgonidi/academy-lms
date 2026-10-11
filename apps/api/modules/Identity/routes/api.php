@@ -11,7 +11,8 @@ use Modules\Identity\Http\V1\Controllers\SocialSignInController;
 
 // Mounted at /api/v1 with the api, tenant and locale middleware (IdentityServiceProvider).
 
-Route::post('auth/login', [AuthController::class, 'login'])->name('identity.login');
+// Five tries a minute for each login and address (LoginRequest); and a ceiling for the address, so one place cannot try many accounts.
+Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:30,1')->name('identity.login');
 Route::post('auth/code', [CodeSignInController::class, 'send'])->name('identity.code.send');
 Route::post('auth/code/verify', [CodeSignInController::class, 'verify'])->name('identity.code.verify');
 Route::post('accounts/sign-in', [AccountsController::class, 'signIn'])->name('identity.accounts.sign-in');

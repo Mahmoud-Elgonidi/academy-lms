@@ -17,7 +17,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  *
  * @property string $id
  * @property string $contact_name
- * @property string $phone_e164
+ * @property ?string $phone_e164 null once the person's account was erased
  * @property ?string $email
  * @property ?string $country
  * @property string $timezone

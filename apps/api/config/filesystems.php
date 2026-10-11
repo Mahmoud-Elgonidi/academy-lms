@@ -33,7 +33,9 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Every academy's private files: served only by their own routes, which check who asks
+            // (never Laravel's storage/{path}, whose signature would open any academy's file on any host).
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

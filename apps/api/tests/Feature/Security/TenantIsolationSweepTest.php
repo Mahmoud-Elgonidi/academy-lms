@@ -62,7 +62,17 @@ beforeEach(function () {
         'checkout' => $one('payment_checkouts'),
         'user' => $user('yousef.guardian@demo.test'),
         'program' => $one('programs'),
+        // The newer doors: conversations, the games, privacy requests, a teacher's vetting scans.
+        'conversation' => $one('conversations'),
+        'creature' => (string) $platform->table('creature_finds')->where('academy_id', $this->demo)->orderBy('id')->value('creature_key'),
+        'play' => $one('game_plays'),
+        'id' => $one('data_requests'),
+        'request' => $one('data_requests', fn ($q) => $q->where('kind', 'export')) ?: $one('data_requests'),
+        'subject' => $user('yousef@demo.test'),
+        'check' => $one('teacher_checks', fn ($q) => $q->whereNotNull('file_path')),
+        'node' => $one('curriculum_nodes', fn ($q) => $q->where('kind', 'lesson')),
     ]);
+    $this->game = (string) $platform->table('games')->orderBy('key')->value('key');
     // A message and its own ticket.
     if (isset($this->ids['message'])) {
         $this->ids['ticket'] = (string) $platform->table('ticket_messages')->where('id', $this->ids['message'])->value('ticket_id');
@@ -159,6 +169,38 @@ it('keeps every record of one academy out of reach of another academy\'s people'
         }
     }
 
+    // 1b. The newer doors that take the record in their body (the journey, its chest, station rounds, cheers,
+    // the games, messages, support, safeguarding, privacy), with bodies that get past their checks.
+    $today = now()->toDateString();
+    $bodies = [
+        ['GET', 'api/v1/learning/journey/map', []],
+        ['POST', 'api/v1/learning/journey/chest', ['period' => $today]],
+        ['POST', 'api/v1/learning/cheers', ['kind' => 'clap']],
+        ['POST', 'api/v1/games/plays', ['game' => $this->game, 'station' => $this->ids['node'] ?? null, 'homework_id' => $this->ids['homework'] ?? null]],
+        ['POST', 'api/v1/games/hatch', []],
+        ['PUT', 'api/v1/games/limits', ['enabled' => true, 'daily_minutes' => 30]],
+        ['POST', 'api/v1/messages/conversations', ['with_id' => $this->ids['teacher']]],
+        ['POST', 'api/v1/messages/conversations', ['with_id' => $this->ids['student']]],
+        ['POST', 'api/v1/safeguarding/concerns', ['category' => 'other', 'text' => 'checking', 'session_id' => $this->ids['session']]],
+        ['POST', 'api/v1/support/tickets', ['kind' => 'other', 'subject' => 'checking', 'body' => 'checking', 'session_id' => $this->ids['session']]],
+        ['POST', 'api/v1/me/data-requests', ['kind' => 'export', 'subject_id' => $this->ids['student']]],
+        ['POST', 'api/v1/me/data-requests', ['kind' => 'erasure', 'subject_id' => $this->ids['student']]],
+        ['POST', 'api/v1/me/data-requests', ['kind' => 'correction', 'subject_id' => $this->ids['student'], 'reason' => 'Please correct my birth date.']],
+    ];
+    foreach ($this->people as $role => $person) {
+        $this->actAsTenant($this->noor);
+        $token = $person->createToken('sweep-bodies')->plainTextToken;
+        $this->clearTenant();
+        foreach ($bodies as $i => [$method, $uri, $body]) {
+            app('auth')->forgetGuards();
+            $body = array_filter($body, fn ($v) => $v !== null) + ['learner_id' => $this->ids['student']];
+            $response = $method === 'GET'
+                ? $this->withToken($token)->getJson('http://noor.lms.test/'.$uri.'?'.http_build_query($body))
+                : $this->withToken($token)->withHeaders(['Idempotency-Key' => "sweep-{$role}-{$i}"])->json($method, 'http://noor.lms.test/'.$uri, $body);
+            $note($role, $method.' '.$uri.' (body)', $response, false);
+        }
+    }
+
     // 2. The panels and file routes, signed in on the other academy's host (the browser's session, no token).
     $this->flushHeaders();
     app('auth')->shouldUse('web');
@@ -166,9 +208,11 @@ it('keeps every record of one academy out of reach of another academy\'s people'
         'owner' => ['admin/curricula/{program}/content', 'admin/enrollments/{enrollment}', 'admin/invoices/{invoice}', 'admin/leads/{lead}', 'admin/payroll/{teacher}',
             'admin/shifts/proposals/{proposal}', 'admin/support/{ticket}', 'admin/teachers/{teacher}/performance', 'admin/time-off/{timeOff}',
             'billing/proofs/{proof}/file', 'curriculum/resources/{resource}', 'learning/files/{submission}', 'recordings/{recording}/media', 'support/files/{message}',
-            'class/{session}', 'class/{session}/go'],
+            'class/{session}', 'class/{session}/go', 'people/checks/{check}/file',
+            'admin/people/students/{student}/edit', 'admin/people/teachers/{teacher}/edit', 'admin/people/guardians/{user}/edit'],
         'accountant' => ['admin/invoices/{invoice}', 'admin/payroll/{teacher}', 'billing/proofs/{proof}/file'],
-        'teacher' => ['teach/reports/{report}', 'teach/students/{enrollment}', 'class/{session}', 'class/{session}/go', 'learning/files/{submission}', 'support/files/{message}'],
+        'teacher' => ['teach/reports/{report}', 'teach/reports/{report}/game', 'teach/students/{enrollment}', 'class/{session}', 'class/{session}/go', 'learning/files/{submission}',
+            'support/files/{message}', 'people/checks/{check}/file'],
         'guardian' => ['my', 'class/{session}', 'learning/files/{submission}', 'support/files/{message}', 'billing/proofs/{proof}/file'],
         'student' => ['class/{session}', 'class/{session}/go', 'learning/files/{submission}'],
     ];
@@ -203,6 +247,7 @@ it('keeps every record of one academy out of reach of another academy\'s people'
         ['identity.welcome', ['user' => $this->ids['user']]],
         ['learning.material', ['resource' => $this->ids['resource'] ?? $this->ids['session']]],
         ['billing.pay.return', ['checkout' => $this->ids['checkout'] ?? $this->ids['invoice']]],
+        ['privacy.copy', ['request' => $this->ids['request'] ?? $this->ids['invoice']]],
     ];
     foreach ($signed as [$name, $params]) {
         $url = URL::temporarySignedRoute($name, now()->addHour(), $params, absolute: false);

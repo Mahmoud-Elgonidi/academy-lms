@@ -8,6 +8,8 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Modules\Identity\Actions\Impersonation\EndImpersonation;
 use Modules\Identity\Actions\Impersonation\StartImpersonation;
+use Modules\Identity\Actions\UpdateUserDetails;
+use Modules\Identity\Contracts\DTOs\UserDetails;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Filament\Console\Pages\SupportSignIn;
 use Modules\Identity\Filament\Pages\ActivityLog;
@@ -221,4 +223,22 @@ it('shows the academy\'s activity to its owner and admins, the platform team\'s 
     expect($page->instance()->feed['rows'])->toBe([]);
 
     $this->actingAs($this->accountant)->get('http://noor.lms.test/admin/settings/activity')->assertForbidden();
+});
+
+it('never changes anyone\'s email or number while signed in as a staff member, which would open another account to a code', function () {
+    ['url' => $url, 'impersonation' => $impersonation] = startSignIn($this->owner);
+    $this->get(pathOf($url));
+    $this->actAsTenant($this->noor);
+    AuditActor::use(new AuditActor('platform', $this->admin->id, $this->admin->name, $this->owner->id, $impersonation->id));
+    $before = $this->accountant->only(['email', 'phone_e164']);
+
+    expect(fn () => app(UpdateUserDetails::class)->handle($this->accountant->id, new UserDetails('المحاسب', 'someone-else@company.example', $this->accountant->phone_e164)))
+        ->toThrow(ValidationException::class);
+    expect(fn () => app(UpdateUserDetails::class)->handle($this->accountant->id, new UserDetails('المحاسب', $this->accountant->email, '+966500000077')))
+        ->toThrow(ValidationException::class);
+    expect($this->accountant->fresh()->only(['email', 'phone_e164']))->toBe($before);
+
+    // Other details are still the staff's to put right.
+    app(UpdateUserDetails::class)->handle($this->accountant->id, new UserDetails('المحاسب الأول', $this->accountant->email, $this->accountant->phone_e164));
+    expect($this->accountant->fresh()->name)->toBe('المحاسب الأول');
 });

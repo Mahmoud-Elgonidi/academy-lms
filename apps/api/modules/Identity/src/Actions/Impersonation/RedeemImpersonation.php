@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Identity\Exceptions\ImpersonationUnavailable;
 use Modules\Identity\Models\Impersonation;
+use Modules\Platform\Contracts\ConsoleApi;
 
 /**
  * Uses a one-time sign-in link, on the academy's host: once, within its two
@@ -14,6 +15,8 @@ use Modules\Identity\Models\Impersonation;
  */
 final class RedeemImpersonation
 {
+    public function __construct(private readonly ConsoleApi $console) {}
+
     public function handle(string $token): Impersonation
     {
         return DB::transaction(function () use ($token) {
@@ -22,7 +25,8 @@ final class RedeemImpersonation
             if ($impersonation === null || $impersonation->redeemed_at !== null || $impersonation->ended_at !== null || $impersonation->redeem_by->lessThanOrEqualTo($now)) {
                 throw new ImpersonationUnavailable;
             }
-            if (! $impersonation->user?->isActive()) {
+            // The person must still be active, and so must the platform admin who asked.
+            if (! $impersonation->user?->isActive() || ! $this->console->adminActive($impersonation->admin_id)) {
                 throw new ImpersonationUnavailable;
             }
 

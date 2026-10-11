@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Modules\Identity\Actions\Impersonation\EndImpersonation;
 use Modules\Identity\Models\Impersonation;
+use Modules\Platform\Contracts\ConsoleApi;
 use Modules\SharedKernel\Audit\AuditActor;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,7 +18,10 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class WatchImpersonation
 {
-    public function __construct(private readonly EndImpersonation $end) {}
+    public function __construct(
+        private readonly EndImpersonation $end,
+        private readonly ConsoleApi $console,
+    ) {}
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -33,6 +37,10 @@ final class WatchImpersonation
             return $next($request);
         }
 
+        // A platform admin locked out since (platform:admin --deactivate) keeps no sign-in as anyone.
+        if ($impersonation->isLive() && ! $this->console->adminActive($impersonation->admin_id)) {
+            $impersonation = $this->end->handle($impersonation, 'ended');
+        }
         if (! $impersonation->isLive()) {
             if ($impersonation->ended_at === null) {
                 $this->end->handle($impersonation, 'expired');

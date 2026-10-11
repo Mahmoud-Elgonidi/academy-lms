@@ -24,6 +24,12 @@ it('hides phone numbers however they are written', function (string $typed, stri
     'international' => ['+20 100 123 4567.', '[•••].'],
     'brackets and dashes' => ['(+966) 55-123-4567', '[•••]'],
     'dotted' => ['0100.123.4567', '[•••]'],
+    // Ways around it that look like a number on screen.
+    'invisible marks between digits' => ["رقمي 0\u{200B}1\u{200B}0\u{200B}0\u{200B}1\u{200B}2\u{200B}3\u{200B}4\u{200B}5\u{200B}6\u{200B}7", 'رقمي [•••]'],
+    'right-to-left marks' => ["010\u{200F}0123\u{200F}4567", '[•••]'],
+    'fullwidth digits' => ['رقمي ０１０００１２３４５６７', 'رقمي [•••]'],
+    'wide gaps' => ['010     0123     4567', '[•••]'],
+    'commas and underscores' => ['010,0123,4567 أو 010_0123_4567 أو ٠١٠٠،١٢٣،٤٥٦٧', '[•••] أو [•••] أو [•••]'],
 ]);
 
 it('keeps dates, times, counting and ordinary numbers', function (string $text) {
@@ -33,6 +39,8 @@ it('keeps dates, times, counting and ordinary numbers', function (string $text) 
     'two dates' => ['الامتحان 12/10/2026 و 15/10/2026'],
     'counting' => ['عد معايا: 1 2 3 4 5 6 7 8 9 10'],
     'prices and verses' => ['سعر 1500 جنيه للشهر و 12 حصة، سورة البقرة آية 255'],
+    'a price with commas' => ['المجموع 1,500,000 جنيه'],
+    'a family emoji' => ["عيلتي \u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467} 2 3"],
     'abbreviations' => ['e.g. Mr.Ahmed read 3.5 pages.'],
 ]);
 
@@ -43,6 +51,7 @@ it('hides emails, written plainly or spelled out', function (string $typed) {
     'plain' => ['ابعتلي على ahmed.ali@gmail.com لو سمحت'],
     'brackets' => ['mail: ahmed (at) gmail (dot) com'],
     'words' => ['ahmed at gmail dot com'],
+    'arabic words' => ['ahmed ات gmail دوت com'],
 ]);
 
 it('hides links, but not the academy\'s own', function () {

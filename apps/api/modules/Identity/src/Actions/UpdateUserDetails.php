@@ -11,6 +11,7 @@ use Modules\Identity\Contracts\DTOs\UserDetails;
 use Modules\Identity\Contracts\Events\ContactChanged;
 use Modules\Identity\Enums\UserStatus;
 use Modules\Identity\Models\User;
+use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
@@ -18,7 +19,9 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * Staff change a person's name, email, number, language or time zone. The
  * email and number are ways in (a sign-in code goes there), so a change to
  * either is in the audit log and the person hears of it (ContactChanged); a
- * person still needs one way in.
+ * person still needs one way in. Never while the platform team is signed in
+ * as a staff member: a new email or number of theirs would let them into the
+ * person's account without a sign-in as that person.
  */
 final class UpdateUserDetails
 {
@@ -35,6 +38,10 @@ final class UpdateUserDetails
             throw ValidationException::withMessages(['name' => __('identity::users.erased')]);
         }
         $email = $details->email === null || trim($details->email) === '' ? null : trim($details->email);
+        // The platform team signed in as a staff member gives nobody's account a new way in (a code would then open it to them).
+        if (AuditActor::current()->onBehalfOf !== null && (mb_strtolower((string) $email) !== mb_strtolower((string) $user->email) || $details->phoneE164 !== $user->phone_e164)) {
+            throw ValidationException::withMessages([$email === $user->email ? 'phone_e164' : 'email' => __('identity::impersonation.errors.contact')]);
+        }
 
         Validator::make([
             'name' => trim($details->name),

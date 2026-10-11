@@ -97,5 +97,6 @@ return [
         'test' => 'Send a test email',
         'test_sent' => 'The message went out to :email. Check the inbox (and the spam folder).',
         'test_failed' => 'The message did not go out',
+        'test_demo' => ':email is a demo address (.test): mail to it never goes to the mail server. Send the test to a real address (platform:mail-test you@company.com).',
     ],
 ];

@@ -16,7 +16,8 @@ final class ReopenLead
         if ($lead->stage !== LeadStage::Lost) {
             throw ValidationException::withMessages(['lead' => __('crm::leads.errors.not_lost')]);
         }
-        $open = Lead::query()->where('phone_e164', $lead->phone_e164)->whereKeyNot($lead->id)
+        // A lead with no number (its person erased) has no other lead to clash with.
+        $open = $lead->phone_e164 === null ? null : Lead::query()->where('phone_e164', $lead->phone_e164)->whereKeyNot($lead->id)
             ->whereIn('stage', array_map(fn (LeadStage $s) => $s->value, LeadStage::OPEN))->first();
         if ($open !== null) {
             throw ValidationException::withMessages(['lead' => __('crm::leads.errors.duplicate', ['name' => $open->contact_name])]);

@@ -376,3 +376,11 @@ they set up themselves.
 
 **A real platform team**: `docker compose exec web php artisan platform:admin you@company.com "Your name"`
 adds one (it asks for the password and sets up the authenticator at the first sign-in to `/console`).
+Before real academies arrive, lock the demo console account once a real one can sign in:
+`php artisan platform:admin admin@platform.test --deactivate` (audited; its sessions end, and so does a
+sign-in as someone it started; never the last admin who can sign in). `--reactivate` lets it back in.
+Someone who leaves the team is locked the same way.
+
+**The console on its own host**: set `PLATFORM_CONSOLE_DOMAIN=console.<domain>` and
+`PLATFORM_CONSOLE_URL=https://console.<domain>/console` in `.env`, add the name to the certificate, then
+`docker compose up -d`: the console and its sign-in answer there alone, and 404 on every academy's host.

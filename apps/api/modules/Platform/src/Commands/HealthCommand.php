@@ -11,6 +11,7 @@ use Modules\Platform\Health\HealthAlert;
 use Modules\Platform\Health\SystemHealth;
 use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Health\RecentErrors;
+use Modules\SharedKernel\Health\TestAddresses;
 use Throwable;
 
 /**
@@ -75,7 +76,8 @@ final class HealthCommand extends Command
         foreach ($failing as $name => $check) {
             Log::warning("health: {$name} is failing: {$check['value']}");
         }
-        $to = AlertRecipients::all();
+        // The demo's console accounts (.test) never get mail through the server (TestAddresses).
+        $to = array_values(array_filter(AlertRecipients::all(), fn (string $address) => ! TestAddresses::skips($address)));
         if ($to !== []) {
             try {
                 Mail::to($to)->send(new HealthAlert($failing, $recovered, $remind));

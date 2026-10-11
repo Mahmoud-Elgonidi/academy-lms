@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Mail;
 use Modules\Platform\Health\AlertRecipients;
 use Modules\Platform\Health\TestMail;
 use Modules\SharedKernel\Health\MailHealth;
+use Modules\SharedKernel\Health\TestAddresses;
 use Throwable;
 
 /**
@@ -29,6 +30,13 @@ final class MailTestCommand extends Command
             return self::FAILURE;
         }
         $mailer = (string) config('mail.default');
+        // Demo addresses (.test) are never handed to the mail server (TestAddresses).
+        $demo = array_values(array_filter($to, fn (string $address) => TestAddresses::skips($address)));
+        if ($demo !== [] && count($demo) === count($to)) {
+            $this->error('Not sent: '.__('platform::health.mail.test_demo', ['email' => implode(', ', $demo)]));
+
+            return self::FAILURE;
+        }
         if (in_array($mailer, ['log', 'array'], true)) {
             $this->warn("MAIL_MAILER is {$mailer}: the message goes to the log, not out. Set MAIL_MAILER=smtp and its settings in .env (RUNBOOKS.md, \"Email\").");
         }
@@ -41,7 +49,7 @@ final class MailTestCommand extends Command
 
             return self::FAILURE;
         }
-        $this->info('Sent through '.$mailer.' to '.count($to).' address(es). Check the inbox (and the spam folder).');
+        $this->info('Sent through '.$mailer.' to '.(count($to) - count($demo)).' address(es)'.($demo === [] ? '' : ' (not to the demo addresses '.implode(', ', $demo).')').'. Check the inbox (and the spam folder).');
 
         return self::SUCCESS;
     }

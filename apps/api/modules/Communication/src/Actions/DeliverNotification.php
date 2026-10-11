@@ -39,6 +39,11 @@ final class DeliverNotification
             throw $e;
         }
 
+        if ($sent->skipped !== null) {
+            $delivery->update(['status' => 'skipped', 'provider' => $sent->provider, 'error' => $sent->skipped]);
+
+            return;
+        }
         $delivery->update(['status' => 'sent', 'provider' => $sent->provider, 'provider_message_id' => $sent->messageId, 'sent_at' => CarbonImmutable::now(), 'error' => null]);
     }
 }

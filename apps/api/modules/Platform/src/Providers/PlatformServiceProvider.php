@@ -32,6 +32,7 @@ use Modules\Platform\Games\PlatformGameCatalog;
 use Modules\Platform\Health\WorkerBeat;
 use Modules\Platform\Http\Controllers\GamePageController;
 use Modules\Platform\Http\Controllers\HealthController;
+use Modules\Platform\Http\Middleware\ConsoleHost;
 use Modules\Platform\Listeners\RecordConsoleSignIn;
 use Modules\Platform\Live\GameStudioChanged;
 use Modules\Platform\Models\AcademyBranding;
@@ -115,9 +116,9 @@ final class PlatformServiceProvider extends ServiceProvider
 
         // A live game's page (sandboxed, its own policy: Games\GamePage), and the studio's live screens.
         Route::middleware('throttle:240,1')->get('games/{version}', GamePageController::class)->whereUuid('version')->name('games.play');
-        Route::middleware(['web', 'auth:platform', 'throttle:120,1'])->post('console/broadcasting/auth', fn (Request $request) => Broadcast::auth($request))
+        Route::middleware([ConsoleHost::class, 'web', 'auth:platform', 'throttle:120,1'])->post('console/broadcasting/auth', fn (Request $request) => Broadcast::auth($request))
             ->name('console.broadcasting.auth');
-        Broadcast::channel(GameStudioChanged::CHANNEL, fn ($user) => $user instanceof PlatformAdmin, ['guards' => ['platform']]);
+        Broadcast::channel(GameStudioChanged::CHANNEL, fn ($user) => $user instanceof PlatformAdmin && $user->is_active, ['guards' => ['platform']]);
         $this->app->make(LiveSignals::class)->on('game-studio', fn (string $draftId) => new GameStudioChanged($draftId));
 
         Route::prefix('api/v1')

@@ -110,4 +110,8 @@ return [
     'errors' => [
         'reason' => 'Write the reason (5 characters or more).',
     ],
+    'admins' => [
+        'unknown' => 'Nobody of the platform team has that email.',
+        'last' => 'This is the last console account that can sign in; add someone else first (platform:admin email name).',
+    ],
 ];

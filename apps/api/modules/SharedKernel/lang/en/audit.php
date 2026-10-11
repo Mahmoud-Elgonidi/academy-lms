@@ -122,6 +122,8 @@ return [
         ],
         'platform' => [
             'signed_in' => 'Signed in to the console',
+            'admin_deactivated' => 'Console account :name locked',
+            'admin_reactivated' => 'Console account :name let back in',
             'plan_saved' => 'The :plan plan edited',
             'demo_secrets_reset' => "Demo console account :name took the server's new demo password and key",
             'game_draft_started' => 'Started designing a new game (:kinds)',

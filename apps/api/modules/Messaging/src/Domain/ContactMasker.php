@@ -2,11 +2,14 @@
 
 namespace Modules\Messaging\Domain;
 
+use IntlChar;
+
 /**
  * Hides the ways to reach someone outside the platform from a message
  * before anyone reads it (docs/architecture/02, section 17): phone numbers
- * (Arabic digits too, spaced or dashed, eight digits or more; dates, times
- * and counting stay), emails (also "name (at) mail (dot) com"), links (the
+ * (digits of any script, Arabic and fullwidth too, spaced, dashed, or with
+ * marks nobody sees between them, eight digits or more; dates, times and
+ * counting stay), emails (also "name (at) mail (dot) com"), links (the
  * academy's own stay) and @handles. Each one becomes MARK, and the kinds
  * hidden are listed. Naming an outside app (WhatsApp, Telegram, …) is only
  * flagged for the academy, never hidden. Pure: text in, text out.
@@ -18,7 +21,16 @@ final class ContactMasker
 {
     public const MARK = '[•••]';
 
-    private const DIGIT = '[0-9٠-٩۰-۹]';
+    /** A digit of any script: ASCII, Arabic, Persian, fullwidth, … */
+    private const DIGIT = '\p{Nd}';
+
+    /**
+     * What may sit between two digits of one number: up to three of a dash,
+     * dot, bracket, slash or colon, or a run of spaces and of the marks
+     * nobody sees (zero-width, direction); or a lone comma or underscore
+     * right before the next digit ("010,0123,4567", never a list "85, 90").
+     */
+    private const GAP = '(?:[,،٬_](?=\p{Nd})|(?:[\-.()\/:]|(?>[\s\p{Cf}]{1,8})){0,3})';
 
     private const MAIL_HOSTS = 'gmail|hotmail|yahoo|outlook|icloud|live|proton|protonmail|yandex';
 
@@ -41,9 +53,9 @@ final class ContactMasker
         };
 
         // Emails first: they hold dots and an @ the other patterns would split.
-        $at = '(?:@|＠|[\(\[\{]\s*(?:at|ات)\s*[\)\]\}]|\s+at\s+(?=(?:'.self::MAIL_HOSTS.')\b))';
-        $dot = '(?:\.|[\(\[\{]\s*(?:dot|دوت)\s*[\)\]\}]|\s+dot\s+)';
-        $text = (string) preg_replace_callback('/[\p{L}\p{N}._%+\-]+\s*'.$at.'\s*[\p{L}\p{N}\-]+(?:\s*'.$dot.'\s*[\p{L}\p{N}\-]+)+/iu', fn () => $hide('email'), $text);
+        $at = '(?:@|＠|[\(\[\{]\s*(?:at|ات)\s*[\)\]\}]|\s+(?:at|ات)\s+(?=(?:'.self::MAIL_HOSTS.')\b))';
+        $dot = '(?:\.|[\(\[\{]\s*(?:dot|دوت)\s*[\)\]\}]|\s+(?:dot|دوت)\s+)';
+        $text = (string) preg_replace_callback('/[\p{L}\p{N}._%+\-]+[\s\p{Cf}]*'.$at.'[\s\p{Cf}]*[\p{L}\p{N}\-]+(?:[\s\p{Cf}]*'.$dot.'[\s\p{Cf}]*[\p{L}\p{N}\-]+)+/iu', fn () => $hide('email'), $text);
 
         // Links: with a scheme, www., or a name under a known ending (wa.me, t.me, bit.ly, zoom.us …).
         $link = '/(?:\b(?:https?|ftp):\/\/[^\s<>"\']+|\bwww\.[^\s<>"\']+|(?<![\p{L}\p{N}@.\-])(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+(?:'.self::TLDS.')\b(?:\/[^\s<>"\']*)?)/iu';
@@ -56,9 +68,9 @@ final class ContactMasker
         // Handles: @name (an email is gone by now).
         $text = (string) preg_replace_callback('/(?<![\p{L}\p{N}_.])[@＠][A-Za-z0-9_.]{3,30}/u', fn () => $hide('handle'), $text);
 
-        // Phone numbers: eight digits or more, however they are spaced, Arabic digits too.
+        // Phone numbers: eight digits or more, however they are spaced, digits of any script.
         $d = self::DIGIT;
-        $text = (string) preg_replace_callback('/\(?(?:\+|00)?'.$d.'(?:[\s\-.()\/:]{0,3}'.$d.'){7,}/u', function (array $m) use ($hide) {
+        $text = (string) preg_replace_callback('/\(?(?:\+|00)?'.$d.'(?:'.self::GAP.$d.'){7,}/u', function (array $m) use ($hide) {
             [$run, $tail] = self::trimTail($m[0]);
 
             return (self::isPhone($run) ? $hide('phone') : $run).$tail;
@@ -72,10 +84,9 @@ final class ContactMasker
     /** A run of digits is a phone number unless it is a date, a time, a date and a time, or counting (1 2 3 … 9 10). */
     private static function isPhone(string $run): bool
     {
-        $ascii = strtr($run, [
-            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
-            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
-        ]);
+        // Every digit as ASCII, and the marks nobody sees taken out.
+        $ascii = (string) preg_replace_callback('/\p{Nd}/u', fn (array $m) => (string) IntlChar::charDigitValue((int) mb_ord($m[0])), $run);
+        $ascii = (string) preg_replace('/\p{Cf}/u', '', $ascii);
         // Real dates and times leave the run; what is left must still be eight digits.
         $day = fn (int $a, int $b) => ($a >= 1 && $a <= 31 && $b >= 1 && $b <= 12) || ($a >= 1 && $a <= 12 && $b >= 1 && $b <= 31);
         $year = fn (string $y) => strlen($y) === 2 || ((int) $y >= 1900 && (int) $y <= 2100);

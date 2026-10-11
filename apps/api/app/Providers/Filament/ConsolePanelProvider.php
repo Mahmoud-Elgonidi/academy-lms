@@ -23,6 +23,8 @@ use Modules\Identity\TwoFactor\AuthenticatorApp;
 use Modules\Platform\Filament\Console\ConsolePlugin;
 use Modules\Platform\Http\Middleware\ConsoleContext;
 use Modules\Platform\Http\Middleware\ConsoleEcho;
+use Modules\Platform\Http\Middleware\ConsoleHost;
+use Modules\Platform\Http\Middleware\EndLockedConsoleSession;
 
 /**
  * The platform team's console at /console (or its own host, PLATFORM_CONSOLE_DOMAIN).
@@ -59,9 +61,12 @@ final class ConsolePanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')
             ->middleware([
+                // On its own host only, before a session is started (PLATFORM_CONSOLE_DOMAIN).
+                ConsoleHost::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
+                EndLockedConsoleSession::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,

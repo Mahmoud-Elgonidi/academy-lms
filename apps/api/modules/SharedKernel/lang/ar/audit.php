@@ -122,6 +122,8 @@ return [
         ],
         'platform' => [
             'signed_in' => 'دخول على لوحة المنصة',
+            'admin_deactivated' => 'قفل حساب لوحة المنصة :name',
+            'admin_reactivated' => 'رجوع حساب لوحة المنصة :name',
             'plan_saved' => 'تعديل الباقة :plan',
             'demo_secrets_reset' => 'حساب لوحة المنصة التجريبي :name خد كلمة السر والمفتاح التجريبيين الجداد',
             'game_draft_started' => 'بداية تصميم لعبة جديدة (:kinds)',

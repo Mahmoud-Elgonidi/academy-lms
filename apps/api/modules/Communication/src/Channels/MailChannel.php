@@ -7,6 +7,7 @@ use Modules\Communication\Mail\NotificationMail;
 use Modules\Communication\Models\Notification;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\SharedKernel\Health\MailHealth;
+use Modules\SharedKernel\Health\TestAddresses;
 use Throwable;
 
 final class MailChannel implements Channel
@@ -27,6 +28,11 @@ final class MailChannel implements Channel
         } catch (Throwable $e) {
             MailHealth::failed($e);
             throw $e;
+        }
+
+        // Not sent after all: an address on .test is never handed to a real mail server (TestAddresses).
+        if ($sent === null && TestAddresses::skips($recipient->email)) {
+            return new Sent((string) config('mail.default'), skipped: 'test_address');
         }
 
         return new Sent((string) config('mail.default'), $sent?->getMessageId());

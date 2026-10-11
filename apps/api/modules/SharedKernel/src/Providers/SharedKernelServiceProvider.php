@@ -9,6 +9,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Schema\Grammars\PostgresGrammar;
 use Illuminate\Http\Request;
 use Illuminate\Log\Context\Repository as ContextRepository;
+use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobFailed;
@@ -25,6 +26,7 @@ use Modules\SharedKernel\Files\UploadScanner;
 use Modules\SharedKernel\Games\GameCatalog;
 use Modules\SharedKernel\Games\NoGames;
 use Modules\SharedKernel\Health\MailHealth;
+use Modules\SharedKernel\Health\TestAddresses;
 use Modules\SharedKernel\Http\ContentSecurityPolicy;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\OpenPlan;
@@ -140,6 +142,8 @@ final class SharedKernelServiceProvider extends ServiceProvider
 
         // Mail that left, for the health page (a failure is noted by whoever sent it).
         Event::listen(MessageSent::class, fn () => MailHealth::sent());
+        // Mail to .test (the demo's addresses) never goes out through a real mail server.
+        Event::listen(MessageSending::class, TestAddresses::class);
     }
 
     private function registerBlueprintMacros(): void

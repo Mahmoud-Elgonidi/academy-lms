@@ -30,6 +30,10 @@ final class PrepareLearner
         if ($lead->learner_id !== null) {
             return $lead->learner_id;
         }
+        // Its contact's account was erased (no number left): nobody to make an account for.
+        if ($lead->phone_e164 === null) {
+            throw ValidationException::withMessages(['phone_e164' => __('crm::leads.errors.no_phone')]);
+        }
 
         return DB::transaction(function () use ($lead) {
             $existing = DB::table('users')->where('phone_e164', $lead->phone_e164)->first(['id', 'name']);

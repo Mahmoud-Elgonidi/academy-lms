@@ -5,8 +5,10 @@ return [
     'nav_group' => 'التواصل',
     'categories' => ['lessons' => 'الحصص', 'learning' => 'التقارير والواجبات', 'billing' => 'الفواتير', 'staff' => 'شغل المدرسين والإدارة'],
     'channels' => ['inbox' => 'داخل التطبيق', 'email' => 'إيميل', 'whatsapp' => 'واتساب', 'push' => 'تنبيه على الموبايل'],
+    // Who a message spoke of, once their account was erased.
+    'erased_person' => 'حساب محذوف',
     'statuses' => ['held' => 'مستني الأوقات الهادية', 'queued' => 'في الطريق', 'sent' => 'اتبعت', 'failed' => 'فشل', 'skipped' => 'ما اتبعتش'],
-    'reasons' => ['no_address' => 'مفيش عنوان للقناة دي (إيميل أو رقم أو جهاز)', 'inactive' => 'الحساب موقوف'],
+    'reasons' => ['no_address' => 'مفيش عنوان للقناة دي (إيميل أو رقم أو جهاز)', 'inactive' => 'الحساب موقوف', 'test_address' => 'عنوان تجريبي (.test)، مابيتبعتش لسيرفر الإيميل'],
     'devices' => '{1} جهاز واحد|{2} جهازين|[3,10] :n أجهزة|[11,*] :n جهاز',
     'preferences' => [
         'categories' => [

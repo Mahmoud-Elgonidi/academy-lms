@@ -12,7 +12,12 @@ final class ConsoleService implements ConsoleApi
     {
         $admin = auth()->guard('platform')->user();
 
-        return $admin instanceof PlatformAdmin ? new PlatformAdminRef($admin->id, $admin->name, $admin->email) : null;
+        return $admin instanceof PlatformAdmin && $admin->is_active ? new PlatformAdminRef($admin->id, $admin->name, $admin->email) : null;
+    }
+
+    public function adminActive(string $adminId): bool
+    {
+        return PlatformAdmin::query()->whereKey($adminId)->where('is_active', true)->exists();
     }
 
     public function consoleUrl(string $path = ''): string

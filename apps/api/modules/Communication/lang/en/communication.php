@@ -5,8 +5,10 @@ return [
     'nav_group' => 'Communication',
     'categories' => ['lessons' => 'Lessons', 'learning' => 'Reports and homework', 'billing' => 'Invoices', 'staff' => 'Staff work'],
     'channels' => ['inbox' => 'In the app', 'email' => 'Email', 'whatsapp' => 'WhatsApp', 'push' => 'Phone notification'],
+    // Who a message spoke of, once their account was erased.
+    'erased_person' => 'a deleted account',
     'statuses' => ['held' => 'Waiting for quiet hours', 'queued' => 'On its way', 'sent' => 'Sent', 'failed' => 'Failed', 'skipped' => 'Not sent'],
-    'reasons' => ['no_address' => 'No address for this channel (email, number or device)', 'inactive' => 'Account suspended'],
+    'reasons' => ['no_address' => 'No address for this channel (email, number or device)', 'inactive' => 'Account suspended', 'test_address' => 'A demo address (.test), never sent to a mail server'],
     'devices' => '{1} one device|[2,*] :n devices',
     'preferences' => [
         'categories' => [

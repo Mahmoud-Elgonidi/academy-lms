@@ -4,6 +4,7 @@ namespace Modules\Privacy\Actions;
 
 use Illuminate\Support\Facades\Storage;
 use Modules\Privacy\Models\DataRequest;
+use Throwable;
 
 /**
  * Every quarter of an hour, in each academy (privacy:sweep): approved
@@ -19,7 +20,12 @@ final class SweepDataRequests
     {
         $erased = 0;
         foreach (DataRequest::query()->where('kind', DataRequest::ERASURE)->where('status', 'approved')->where('erase_after', '<=', now())->get() as $request) {
-            $erased += $this->erase->handle($request)->status === 'done' ? 1 : 0;
+            // One that fails (rolled back, tried again next time, reported) stops neither the others nor the copies' expiry.
+            try {
+                $erased += $this->erase->handle($request)->status === 'done' ? 1 : 0;
+            } catch (Throwable $e) {
+                report($e);
+            }
         }
 
         $expired = 0;

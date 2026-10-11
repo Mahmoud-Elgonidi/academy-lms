@@ -98,7 +98,8 @@ final class LeadPage extends Page
             'stageLabel' => __($l.'stages.'.$lead->stage->value),
             'step' => $lead->stage->step(),
             'phone' => $lead->phone_e164,
-            'whatsapp' => 'https://wa.me/'.ltrim($lead->phone_e164, '+'),
+            // No number once the person's account was erased (Privacy).
+            'whatsapp' => $lead->phone_e164 === null ? null : 'https://wa.me/'.ltrim($lead->phone_e164, '+'),
             'email' => $lead->email,
             'country' => $lead->country ? __('crm::countries.'.$lead->country) : null,
             'zone' => Timezones::city($lead->timezone),

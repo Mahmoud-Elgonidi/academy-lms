@@ -17,6 +17,7 @@ use Modules\Platform\Health\TestMail;
 use Modules\Platform\Models\Academy;
 use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Health\RecentErrors;
+use Modules\SharedKernel\Health\TestAddresses;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Throwable;
 
@@ -73,6 +74,12 @@ final class Health extends Page
             Action::make('testMail')->label(__('platform::health.mail.test'))->icon('heroicon-m-envelope')->color('gray')
                 ->action(function () {
                     $email = (string) auth('platform')->user()?->email;
+                    // A demo address is never handed to the mail server (TestAddresses): saying "sent" would mislead.
+                    if (TestAddresses::skips($email)) {
+                        Notification::make()->warning()->title(__('platform::health.mail.test_demo', ['email' => $email]))->send();
+
+                        return;
+                    }
                     try {
                         Mail::to($email)->send(new TestMail);
                         Notification::make()->success()->title(__('platform::health.mail.test_sent', ['email' => $email]))->send();

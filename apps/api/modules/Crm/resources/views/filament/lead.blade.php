@@ -32,6 +32,7 @@
     <div class="crm-lead">
         <aside class="crm-card-base crm-box">
             <div class="crm-facts">
+                @if ($d['phone'])
                 <div>
                     <small>{{ __($l.'fields.phone_e164') }}</small>
                     <span class="crm-phone" dir="ltr">{{ $d['phone'] }}</span>
@@ -40,6 +41,7 @@
                     <x-filament::button tag="a" :href="$d['whatsapp']" target="_blank" rel="noopener" size="sm" icon="heroicon-m-chat-bubble-left-ellipsis">{{ __($l.'page.whatsapp') }}</x-filament::button>
                     <x-filament::button tag="a" :href="'tel:'.$d['phone']" size="sm" color="gray" icon="heroicon-m-phone">{{ __($l.'page.call') }}</x-filament::button>
                 </div>
+                @endif
                 @if ($d['email'])<div><small>{{ __($l.'fields.email') }}</small><span dir="ltr">{{ $d['email'] }}</span></div>@endif
                 <div>
                     <small>{{ collect([$d['country'], $d['zone']])->filter()->implode(' · ') }}</small>

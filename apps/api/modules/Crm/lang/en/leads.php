@@ -165,6 +165,7 @@ return [
     ],
     'errors' => [
         'duplicate' => 'This number is already on ":name", who is still being followed.',
+        'no_phone' => 'This enquiry has no number any more (the account it came with was erased); start a new one.',
         'phone_taken' => 'This number belongs to ":name" in the academy and cannot be used this way. Change the number or carry on from their account.',
         'owner' => 'The owner must be on the sales team.',
         'kind' => 'Choose how you were in touch.',

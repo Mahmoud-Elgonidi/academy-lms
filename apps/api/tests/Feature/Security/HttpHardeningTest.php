@@ -145,6 +145,8 @@ it('lets no other site\'s page call the API unless the server names it', functio
 it('checks a password even when no account has that address, so the time says nothing', function () {
     $this->actAsTenant($this->academy);
     User::factory()->create(['email' => 'known@huda.test', 'password' => 'right-password']);
+    // An account still waiting for its first password (an import, a welcome link not used yet) is checked as long too.
+    User::factory()->create(['email' => 'waiting@huda.test', 'password' => null]);
     DummyPassword::check('warm up');
     $checks = 0;
     Hash::partialMock()->shouldReceive('check')->andReturnUsing(function () use (&$checks) {
@@ -159,11 +161,18 @@ it('checks a password even when no account has that address, so the time says no
         return $checks;
     };
 
-    // The apps' sign-in, and each panel's guard (staff, families, the platform team).
+    // The apps' sign-in, and each panel's guard (staff, families, the platform team), inside the academy as a panel's request is.
     $api = fn (string $login) => $this->postJson('http://huda.lms.test/api/v1/auth/login', ['login' => $login, 'password' => 'guess', 'device_name' => 'phone'])->assertStatus(422);
+    $web = function (string $email) {
+        $this->actAsTenant($this->academy);
+
+        return Auth::guard('web')->attempt(['email' => $email, 'password' => 'guess']);
+    };
     expect($attempts(fn () => $api('nobody@huda.test')))->toBe(1)
         ->and($attempts(fn () => $api('known@huda.test')))->toBe(1)
-        ->and($attempts(fn () => Auth::guard('web')->attempt(['email' => 'nobody@huda.test', 'password' => 'guess'])))->toBe(1)
-        ->and($attempts(fn () => Auth::guard('web')->attempt(['email' => 'known@huda.test', 'password' => 'guess'])))->toBe(1)
+        ->and($attempts(fn () => $api('waiting@huda.test')))->toBe(1)
+        ->and($attempts(fn () => $web('nobody@huda.test')))->toBe(1)
+        ->and($attempts(fn () => $web('known@huda.test')))->toBe(1)
+        ->and($attempts(fn () => $web('waiting@huda.test')))->toBe(1)
         ->and($attempts(fn () => Auth::guard('platform')->attempt(['email' => 'nobody@platform.test', 'password' => 'guess'])))->toBe(1);
 });
