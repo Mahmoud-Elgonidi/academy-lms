@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useRef, useState, useTransition } from 'react';
 import { sendProof } from '@/app/[locale]/family/actions';
 import { Icon } from '@/components/icons';
+import { TransferDetails } from '@/components/family/transfer-details';
 import { Button, Field, Input, Notice, Textarea, join } from '@/components/ui';
 import type { Invoice, ManualPayment } from '@/lib/family/types';
 
@@ -16,13 +17,21 @@ function today(): string {
 }
 
 /**
- * Paid by hand (a bank transfer, InstaPay, a wallet): the academy's own words
- * on how, then the receipt and what it says. It waits for the academy, which
+ * Paid by hand (a bank transfer, InstaPay, a wallet): where to send the money
+ * for this invoice (the academy's words for the payer's region), then the
+ * receipt and what it says. It waits for the academy, which
  * checks the money arrived (one key per submit, so a retry sends it once).
  * It stays on the page while a proof waits (canSend false), so the word that
  * it was sent outlives the refresh that takes the form away.
  */
-export function SendProof({ invoice, manual, primary, canSend }: { invoice: Invoice; manual: ManualPayment; primary: boolean; canSend: boolean }) {
+export function SendProof({ invoice, manual, transfer, primary, canSend }: {
+  invoice: Invoice;
+  manual: ManualPayment;
+  /** Where to send the money for this invoice (transferText): shown again with the form. */
+  transfer: string | null;
+  primary: boolean;
+  canSend: boolean;
+}) {
   const t = useTranslations('family');
   const common = useTranslations('common');
   const [open, setOpen] = useState(false);
@@ -82,12 +91,7 @@ export function SendProof({ invoice, manual, primary, canSend }: { invoice: Invo
         <p className="font-heading font-semibold">{t('proofTitle')}</p>
         <p className="text-sm text-muted">{t('proofHint')}</p>
       </div>
-      {manual.note ? (
-        <div className="rounded-control bg-brand-soft px-4 py-3 text-sm">
-          <p className="mb-1 font-semibold">{t('proofHowTo')}</p>
-          <p className="whitespace-pre-line break-words">{manual.note}</p>
-        </div>
-      ) : null}
+      {transfer ? <TransferDetails text={transfer} compact /> : null}
       <fieldset>
         <legend className="mb-2 text-sm font-semibold">{t('proofMethod')}</legend>
         <div className="flex flex-wrap gap-2">

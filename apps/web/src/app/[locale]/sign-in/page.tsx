@@ -47,6 +47,16 @@ export default async function SignInPage({ searchParams }: Props) {
           </div>
         ) : null}
         <SignInForm next={next ?? ''} providers={providers} twoFactorToken={twoFactorToken} staff={staff === '1'} />
+        {/* The academy's own privacy notice and terms: Laravel's pages on this host (the web part sends them there), in this language. */}
+        <nav aria-label={t('legal')} className="mt-6 flex flex-wrap justify-center gap-x-2 text-sm text-muted">
+          <a href={`/privacy?lang=${locale}`} target="_blank" rel="noopener" className="underline underline-offset-4 hover:text-brand-strong">
+            {t('privacy')}
+          </a>
+          <span aria-hidden="true">·</span>
+          <a href={`/terms?lang=${locale}`} target="_blank" rel="noopener" className="underline underline-offset-4 hover:text-brand-strong">
+            {t('terms')}
+          </a>
+        </nav>
       </div>
     </main>
   );

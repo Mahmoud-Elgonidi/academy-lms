@@ -73,7 +73,9 @@
                 @if ($openInvoice)
                     <strong class="lms-heading">{{ $openInvoice['total'] }}</strong>
                     <small>{{ __('scheduling::enrollments.cards.invoice_open', ['number' => $openInvoice['number']]) }} · {{ __('billing::billing.statuses.'.$openInvoice['status']) }}</small>
-                    <a href="{{ $openInvoice['url'] }}" wire:navigate>{{ __('scheduling::enrollments.cards.open_invoice') }}</a>
+                    @if ($openInvoice['url'])
+                        <a href="{{ $openInvoice['url'] }}" wire:navigate>{{ __('scheduling::enrollments.cards.open_invoice') }}</a>
+                    @endif
                 @elseif ($a['renewAt'] > 0)
                     <strong class="lms-heading">{{ __('scheduling::enrollments.cards.nothing_due') }}</strong>
                     <small>{{ trans_choice('scheduling::enrollments.cards.renews', $a['renewAt'], ['n' => $a['renewAt']]) }}</small>
@@ -193,7 +195,7 @@
                         <tbody>
                             @forelse ($a['invoices'] as $i)
                                 <tr>
-                                    <td><a href="{{ $i['url'] }}" wire:navigate>{{ $i['number'] }}</a>@if ($i['family']) <span class="ac-muted">· {{ __('scheduling::enrollments.invoices.family') }}</span>@endif</td>
+                                    <td>@if ($i['url'])<a href="{{ $i['url'] }}" wire:navigate>{{ $i['number'] }}</a>@else {{ $i['number'] }} @endif @if ($i['family']) <span class="ac-muted">· {{ __('scheduling::enrollments.invoices.family') }}</span>@endif</td>
                                     <td class="ac-muted">{{ $i['issued'] }}</td>
                                     <td class="num">{{ $i['total'] }}</td>
                                     <td class="num"><span class="ac-pill" data-s="{{ $i['status'] }}">{{ __('billing::billing.statuses.'.$i['status']) }}</span></td>

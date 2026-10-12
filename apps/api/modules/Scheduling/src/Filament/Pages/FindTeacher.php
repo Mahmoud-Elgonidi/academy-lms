@@ -391,7 +391,7 @@ final class FindTeacher extends Page
                         ]))
                     ->body($booked->skippedDates !== [] ? __('scheduling::find.booked.skipped', ['dates' => implode('، ', $booked->skippedDates)]) : null)
                     ->actions(array_values(array_filter([
-                        $booked->invoice === null ? null : Action::make('invoice')->label(__('scheduling::find.enroll.open_invoice'))->button()
+                        $booked->invoice === null || ! Gate::allows(Ability::ViewBilling->value) ? null : Action::make('invoice')->label(__('scheduling::find.enroll.open_invoice'))->button()
                             ->url(route('filament.academy.resources.invoices.view', ['record' => $booked->invoice->id])),
                         Action::make('account')->label(__('scheduling::find.enroll.open_account'))->link()
                             ->url(route('filament.academy.resources.enrollments.view', ['record' => $booked->enrollmentId])),

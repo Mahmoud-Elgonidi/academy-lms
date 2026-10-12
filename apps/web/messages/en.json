@@ -65,7 +65,10 @@
       "no_account": "There is no account at this academy with this {provider} email. Sign in the way the academy sent you, then link {provider} in My account, or contact the academy.",
       "held": "This account is waiting for a guardian's consent before its first sign-in.",
       "off": "Signing in with {provider} is not available here."
-    }
+    },
+    "legal": "The academy’s pages",
+    "privacy": "Privacy notice",
+    "terms": "Terms of use"
   },
   "nav": {
     "today": "Today",
@@ -262,6 +265,10 @@
     "proofSent": "Proof sent. You'll hear once the academy confirms it.",
     "proofNeedsReceipt": "Choose the receipt first.",
     "proofTooBig": "The file is larger than 10 MB.",
+    "transferTitle": "Where to transfer",
+    "transferFor": "for invoice {numbers}",
+    "transferCopy": "Copy",
+    "transferCopied": "Copied",
     "going": "Taking you to the payment page…",
     "cheerOn": "Cheer {name} on",
     "cheerSent": "Your cheer reached {name}!",

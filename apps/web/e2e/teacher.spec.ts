@@ -1,12 +1,16 @@
-import { expect, fitsTheScreen, test } from './helpers';
+import { fixtures } from './backend';
+import { expect, fitsTheScreen, noRawKeys, test } from './helpers';
+import { TEACHER_PAGES } from './pages';
 
 test('every teacher page opens, fits a phone, and reads right to left', async ({ page }) => {
-  for (const path of ['/ar/teach', '/ar/teach/week', '/ar/teach/reports', '/ar/teach/marking', '/ar/teach/students', '/ar/teach/messages', '/ar/teach/trials', '/ar/teach/hours', '/ar/teach/time-off', '/ar/teach/earnings', '/ar/teach/performance', '/ar/teach/recordings', '/ar/teach/notifications', '/ar/teach/more']) {
+  test.setTimeout(120_000);
+  for (const path of TEACHER_PAGES.map((p) => `/ar/teach${p}`)) {
     const response = await page.goto(path);
     expect(response?.status(), path).toBe(200);
     await expect(page.locator('h1').first(), path).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
     await fitsTheScreen(page);
+    await noRawKeys(page);
   }
   // The tab bar gets around on a phone.
   await page.goto('/ar/teach');
@@ -27,7 +31,6 @@ test('the week moves back and forth', async ({ page }) => {
 test('a report without the ratings is not sent', async ({ page }) => {
   await page.goto('/ar/teach/reports');
   const open = page.getByRole('region', { name: 'مستنية منك' }).getByRole('link').filter({ hasNotText: 'ملاحظة غياب' });
-  test.skip((await open.count()) === 0, 'no lesson report waiting in this data');
   await open.first().click();
   await page.getByRole('button', { name: 'ابعت التقرير' }).click();
   await expect(page.getByText('اختار التركيز والمستوى العام.')).toBeVisible();
@@ -37,7 +40,6 @@ test('a report without the ratings is not sent', async ({ page }) => {
 test('a lesson report is written and sent', async ({ page }) => {
   await page.goto('/ar/teach/reports');
   const open = page.getByRole('region', { name: 'مستنية منك' }).getByRole('link').filter({ hasNotText: 'ملاحظة غياب' });
-  test.skip((await open.count()) === 0, 'no lesson report waiting in this data');
   await open.first().click();
   await expect(page.getByText('خطة النهارده')).toBeVisible();
 
@@ -63,19 +65,17 @@ test('a lesson report is written and sent', async ({ page }) => {
 });
 
 test('handed-in homework is marked, and its recording plays through the portal', async ({ page }) => {
+  // Ziad's recording, handed in for this run (E2eResetSeeder).
+  const title = fixtures().homework.to_mark;
   await page.goto('/ar/teach/marking');
-  const cards = page.locator('article');
-  test.skip((await cards.count()) === 0, 'no homework waiting in this data');
-  const card = cards.first();
-  const title = await card.locator('p').nth(1).innerText();
+  const card = page.locator('article').filter({ hasText: title });
+  await expect(card).toHaveCount(1);
 
   const audio = card.locator('audio');
-  if ((await audio.count()) > 0) {
-    const src = await audio.first().getAttribute('src');
-    const file = await page.request.get(src!);
-    expect(file.status()).toBe(200);
-    expect(file.headers()['content-type']).toMatch(/^audio\//);
-  }
+  await expect(audio).toHaveCount(1);
+  const file = await page.request.get((await audio.getAttribute('src'))!);
+  expect(file.status()).toBe(200);
+  expect(file.headers()['content-type']).toMatch(/^audio\//);
 
   await card.getByRole('radio', { name: '4' }).click();
   await card.getByLabel('كلمتك للطالب').fill('أحسنت، القراءة واضحة.');
@@ -156,4 +156,83 @@ test('the teacher talks with a student and their family, or reads why not', asyn
   await expect(page).toHaveURL(/\/ar\/teach\/messages\/[0-9a-f-]+$/);
   // Either the teacher may write here, or the page says why not (a minor and a check still waiting, the academy's pause).
   await expect(page.locator('textarea[name="body"]').or(page.getByText(/وقّفت|مابقاش بيدرّس|مقفولة/))).toBeVisible();
+});
+
+test('the class page opens a lesson on the teacher\'s outside link in a new tab', async ({ page, context }) => {
+  // The outside meeting itself is not ours to load here.
+  await context.route('https://meet.google.com/**', (route) => route.fulfill({ contentType: 'text/html', body: '<title>Meet</title>' }));
+  await page.goto(`/ar/teach/lessons/${fixtures().class.teacher_lesson}`);
+  await expect(page.locator('h1')).toHaveText(/^مع /);
+  await fitsTheScreen(page);
+  const tab = page.waitForEvent('popup');
+  await page.getByRole('button', { name: 'ادخل الأوضة' }).click();
+  await (await tab).waitForURL(/^https:\/\/meet\.google\.com\//);
+  await expect(page.getByText('الحصة دي على لينك برّه المنصة. هيفتح في تاب جديد.')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'افتح لينك الحصة' })).toHaveAttribute('href', /^https:\/\/meet\.google\.com\//);
+});
+
+test('a student\'s course opens on its roadmap, without the family\'s contact details', async ({ page }) => {
+  await page.goto('/ar/teach/students');
+  await page.locator('a[href*="/teach/students/"]').filter({ hasText: 'زياد' }).first().click();
+  await expect(page).toHaveURL(/\/ar\/teach\/students\/[0-9a-f-]{36}$/);
+  await expect(page.locator('h1')).toHaveText(/زياد/);
+  // A teacher never sees a family's email or number.
+  await expect(page.getByText(/@demo\.test|\+9655/)).toHaveCount(0);
+  await fitsTheScreen(page);
+  await noRawKeys(page);
+});
+
+test('a lesson that is not the teacher\'s, or no lesson at all, is not found', async ({ page }) => {
+  for (const path of ['/ar/teach/reports/not-a-report', '/ar/teach/students/not-a-course', '/ar/teach/help/not-a-ticket', '/ar/teach/messages/not-a-conversation']) {
+    const response = await page.goto(path);
+    expect(response?.status(), path).toBe(404);
+  }
+});
+
+test('a teacher writes to the academy for help, and reads it back in the ticket', async ({ page }) => {
+  await page.goto('/ar/teach/help');
+  await expect(page.locator('h1')).toHaveText('الدعم');
+  await page.getByRole('button', { name: 'تذكرة جديدة' }).click();
+  const subject = `الصوت بيقطع في الحصة ${Date.now()}`;
+  await page.getByLabel('العنوان').fill(subject);
+  await page.getByLabel('احكيلنا حصل إيه').fill('الصوت بيقطع كل شوية من ساعة ما بدأت الحصة.');
+  await page.getByRole('button', { name: 'ابعت' }).click();
+  await expect(page).toHaveURL(/\/ar\/teach\/help\/[0-9a-f-]{36}$/);
+  await expect(page.getByText(subject)).toBeVisible();
+  await expect(page.getByText('الصوت بيقطع كل شوية من ساعة ما بدأت الحصة.')).toBeVisible();
+  await fitsTheScreen(page);
+  await page.getByRole('link', { name: 'تذاكري' }).first().click();
+  await expect(page.getByText(subject)).toBeVisible();
+});
+
+test('a teacher tells the safeguarding leads about a student, and gets a number back', async ({ page }) => {
+  await page.goto('/ar/teach/concern');
+  await expect(page.locator('h1')).toHaveText('بلّغ عن قلق على أمان طالب');
+  const form = page.locator('form');
+  await form.getByLabel('إيه اللي حصل؟').fill('الطالب قال في الحصة إن حد بيضايقه على التطبيق.');
+  // What it is about is asked for first.
+  await form.getByRole('button', { name: 'ابعت لمسؤولين الحماية' }).click();
+  await expect(form.getByText('اختار الموضوع عن إيه.')).toBeVisible();
+  await form.locator('label:has(input[name="category"])').first().click();
+  await form.getByLabel('أنهي طالب؟').selectOption({ index: 1 });
+  await form.getByRole('button', { name: 'ابعت لمسؤولين الحماية' }).click();
+  await expect(page.getByText(/^رقم #?\d+$/).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'بلّغ عن حاجة تانية' })).toBeVisible();
+});
+
+test('every teacher page reads in English, left to right', async ({ page }) => {
+  test.setTimeout(120_000);
+  for (const path of TEACHER_PAGES.map((p) => `/en/teach${p}`)) {
+    const response = await page.goto(path);
+    expect(response?.status(), path).toBe(200);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
+    await expect(page.locator('h1').first(), path).toBeVisible();
+    await fitsTheScreen(page);
+    await noRawKeys(page);
+  }
+  await page.goto('/en/teach');
+  await page.getByRole('navigation').getByRole('link', { name: 'My week' }).click();
+  await expect(page).toHaveURL(/\/en\/teach\/week$/);
+  await expect(page.getByRole('link', { name: 'Next week' })).toBeVisible();
 });

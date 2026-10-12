@@ -1,17 +1,24 @@
-import { expect, fitsTheScreen, test } from './helpers';
+import { API, approveProof } from './backend';
+import { expect, fitsTheScreen, noRawKeys, test } from './helpers';
+import { familyPages } from './pages';
 
 // Ziad's guardian, in the classic look: lessons, money and cheering on.
 test.use({ storageState: 'e2e/.auth/guardian.json' });
 
+const PAGES = [...familyPages('classic', { money: true, guardian: true }), '/family/lessons?when=past', '/family/progress'];
+
 test('every family page opens, fits a phone, and reads right to left', async ({ page }) => {
-  for (const path of ['/ar/family', '/ar/family/lessons', '/ar/family/lessons?when=past', '/ar/family/progress', '/ar/family/homework', '/ar/family/money', '/ar/family/journey', '/ar/family/recordings', '/ar/family/notifications', '/ar/family/more']) {
+  test.setTimeout(120_000);
+  for (const path of PAGES.map((p) => `/ar${p}`)) {
     const response = await page.goto(path);
     expect(response?.status(), path).toBe(200);
     await expect(page.locator('h1').first(), path).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
     await fitsTheScreen(page);
+    await noRawKeys(page);
   }
   // The classic tab bar has the money and the journey, not the progress.
+  await page.goto('/ar/family');
   const tabs = page.getByRole('navigation', { name: 'القايمة' }).last();
   await expect(tabs.getByRole('link', { name: 'الفلوس' })).toBeVisible();
   await expect(tabs.getByRole('link', { name: 'الرحلة' })).toBeVisible();
@@ -19,11 +26,27 @@ test('every family page opens, fits a phone, and reads right to left', async ({ 
   await expect(page).toHaveURL(/\/ar\/family\/lessons$/);
 });
 
+test('every family page reads in English, left to right', async ({ page }) => {
+  test.setTimeout(120_000);
+  for (const path of PAGES.map((p) => `/en${p}`)) {
+    const response = await page.goto(path);
+    expect(response?.status(), path).toBe(200);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
+    await expect(page.locator('h1').first(), path).toBeVisible();
+    await fitsTheScreen(page);
+    await noRawKeys(page);
+  }
+  await page.goto('/en/family');
+  const tabs = page.getByRole('navigation', { name: 'Menu' }).last();
+  await tabs.getByRole('link', { name: 'Payments' }).click();
+  await expect(page).toHaveURL(/\/en\/family\/money$/);
+  await expect(page.getByText('Invoices', { exact: true })).toBeVisible();
+});
+
 test('a guardian sees what cancelling would do, and may keep the lesson', async ({ page }) => {
   await page.goto('/ar/family/lessons');
-  const cancel = page.getByRole('button', { name: 'إلغاء الحصة' });
-  test.skip((await cancel.count()) === 0, 'no lesson to cancel in this data');
-  await cancel.first().click();
+  await page.getByRole('button', { name: 'إلغاء الحصة' }).first().click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText('حسب سياسة الأكاديمية:')).toBeVisible();
@@ -34,11 +57,28 @@ test('a guardian sees what cancelling would do, and may keep the lesson', async 
   await expect(dialog).toBeHidden();
 });
 
+test('a guardian cancels a lesson after reading what the policy does with it', async ({ page }) => {
+  await page.goto('/ar/family/lessons');
+  // The last lesson ahead: far enough to be in good time.
+  const lesson = page.getByRole('article').filter({ has: page.getByRole('button', { name: 'إلغاء الحصة' }) }).last();
+  const [day, time] = [await lesson.locator('p').nth(0).innerText(), await lesson.locator('p').nth(1).innerText()];
+  const same = page.getByRole('article').filter({ hasText: day }).filter({ hasText: time });
+  await lesson.getByRole('button', { name: 'إلغاء الحصة' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByText('حسب سياسة الأكاديمية:')).toBeVisible();
+  await dialog.getByLabel('السبب').selectOption({ index: 1 });
+  await dialog.getByLabel(/ملاحظة للأكاديمية/).fill('عندنا سفر الأسبوع ده.');
+  await dialog.getByRole('button', { name: 'أيوه، ألغيها' }).click();
+  await expect(dialog).toBeHidden();
+  // It no longer waits ahead: gone from the lessons to come, or there as cancelled.
+  await expect(same.getByRole('button', { name: 'إلغاء الحصة' })).toHaveCount(0);
+  await page.reload();
+  await expect(same.getByRole('button', { name: 'إلغاء الحصة' })).toHaveCount(0);
+});
+
 test('a guardian rates a lesson that took place', async ({ page }) => {
   await page.goto('/ar/family/lessons?when=past');
-  const rate = page.getByRole('button', { name: 'قيّم الحصة' });
-  test.skip((await rate.count()) === 0, 'no lesson to rate in this data');
-  await rate.first().click();
+  await page.getByRole('button', { name: 'قيّم الحصة' }).first().click();
   const dialog = page.getByRole('dialog');
   await dialog.getByRole('radio', { name: '4 من 5' }).click();
   await expect(dialog.getByText('إيه اللي عجبكم؟')).toBeVisible();
@@ -50,18 +90,17 @@ test('a guardian rates a lesson that took place', async ({ page }) => {
 test('what is owed is paid on the academy\'s payment page', async ({ page }) => {
   await page.goto('/ar/family/money');
   await expect(page.getByText('الفواتير', { exact: true })).toBeVisible();
-  const pay = page.getByRole('button', { name: /^ادفع / });
-  test.skip((await pay.count()) === 0, 'nothing owed in this data');
-  await pay.first().click();
+  await page.getByRole('button', { name: /^ادفع / }).first().click();
   // The academy's own gateway page (the demo gateway here); the invoice is paid only when it says so.
   await page.waitForURL(/\/pay\//);
 });
 
-test('a guardian who paid by transfer sends the receipt, and the invoice says it waits for the academy', async ({ page }) => {
+test('a guardian who paid by transfer sends the receipt; the academy approves it, and the invoice is paid', async ({ page }) => {
   await page.goto('/ar/family/money');
-  const paidByHand = page.getByRole('button', { name: 'دفعت بالتحويل' });
-  test.skip((await paidByHand.count()) === 0, 'no invoice takes a proof in this data');
-  await paidByHand.first().click();
+  const owed = page.locator('section[aria-labelledby="owed"] article').filter({ has: page.getByRole('button', { name: 'دفعت بالتحويل' }) }).first();
+  const number = /[A-Z]+-\d+/.exec(await owed.locator('p').first().innerText())?.[0];
+  expect(number).toBeTruthy();
+  await owed.getByRole('button', { name: 'دفعت بالتحويل' }).click();
   const form = page.locator('form').filter({ hasText: 'ابعت إثبات الدفع' });
   await expect(form.getByText('مصرف الراجحي', { exact: false })).toBeVisible();
 
@@ -69,26 +108,92 @@ test('a guardian who paid by transfer sends the receipt, and the invoice says it
   await form.getByRole('button', { name: 'ابعت الإثبات' }).click();
   await expect(form.getByText('اختار الإيصال الأول.')).toBeVisible();
 
+  const reference = `TRF-E2E-${Date.now()}`;
   await form.getByText('تحويل بنكي', { exact: true }).click();
-  await form.getByLabel('رقم التحويل').fill('TRF-E2E-1');
+  await form.getByLabel('رقم التحويل').fill(reference);
   // A tiny picture of our own as the receipt (1×1 PNG).
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
   await form.locator('input[type="file"]').setInputFiles({ name: 'receipt.png', mimeType: 'image/png', buffer: png });
   await form.getByRole('button', { name: 'ابعت الإثبات' }).click();
 
   await expect(page.getByText('الإثبات اتبعت. هنقولك أول ما الأكاديمية تأكّده.')).toBeVisible();
-  await expect(page.getByText(/ومستني الأكاديمية/).first()).toBeVisible();
+  await expect(page.locator('section[aria-labelledby="owed"] article').filter({ hasText: number! }).getByText(/ومستني الأكاديمية/)).toBeVisible();
+
+  // The accountant sees the money arrived and approves it (ApprovePaymentProof, as the back office does).
+  expect(approveProof(reference)).toBe(number);
+  await page.reload();
+  await expect(page.locator('section[aria-labelledby="owed"] article').filter({ hasText: number! })).toHaveCount(0);
+  const line = page.locator('section[aria-labelledby="invoices"] li').filter({ hasText: number! });
+  await expect(line.getByText('مدفوعة', { exact: true })).toBeVisible();
+  await expect(line.getByText(/اتوافق عليه/)).toBeVisible();
+});
+
+test('an invoice opens as its tax document, for its payer', async ({ page }) => {
+  await page.goto('/ar/family/money');
+  const line = page.locator('section[aria-labelledby="invoices"] li').first();
+  const number = await line.locator('span.font-semibold').first().innerText();
+  const href = (await line.getByRole('link', { name: 'افتح الفاتورة' }).getAttribute('href'))!;
+  // A signed address on the academy's host (its own DNS may not be here: the API, as that host).
+  const url = new URL(href);
+  const document = await page.request.get(`${API}${url.pathname}${url.search}`, { headers: { Host: url.host } });
+  expect(document.status()).toBe(200);
+  expect(await document.text()).toContain(number);
+  const tampered = await page.request.get(`${API}${url.pathname}${url.search.replace(/signature=\w/, 'signature=0')}`, { headers: { Host: url.host } });
+  expect(tampered.status()).toBe(403);
+});
+
+test('a guardian reads the teacher\'s reports on the course, without what is for the academy only', async ({ page }) => {
+  await page.goto('/ar/family/journey');
+  await page.getByRole('link', { name: 'المنهج وتقارير المدرس' }).first().click();
+  await expect(page).toHaveURL(/\/ar\/family\/progress\/[0-9a-f-]{36}$/);
+  await expect(page.getByRole('heading', { name: 'التقارير' })).toBeVisible();
+  await expect(page.getByText('بداية ممتازة: زياد بيفرّق بين الاسم والفعل بسهولة.')).toBeVisible();
+  // The teacher's note to the academy and the question it keeps to itself never reach a family.
+  await expect(page.getByText('ولي الأمر قال إن عنده امتحانات في المدرسة الأسبوع ده.')).toHaveCount(0);
+  await expect(page.getByText('ملاحظة للمشرف')).toHaveCount(0);
+  await fitsTheScreen(page);
+  await noRawKeys(page);
 });
 
 test('a guardian cheers their child on', async ({ page }) => {
   await page.goto('/ar/family/journey');
   const cheers = page.getByRole('region', { name: /^شجّع / });
   await expect(cheers).toBeVisible();
-  test.skip(await cheers.getByText('خلّصت تشجيعات النهارده').isVisible(), 'no cheers left today');
+  await expect(cheers.getByText('خلّصت تشجيعات النهارده')).toHaveCount(0);
   await cheers.getByRole('button', { name: 'نجمة' }).click();
   await expect(page.getByText(/^التشجيع وصل لـ /)).toBeVisible();
   // Only the student opens the week's chest.
   await expect(page.getByRole('button', { name: 'افتح الصندوق' })).toHaveCount(0);
+});
+
+test('a guardian writes to the academy about their child, and reads it back in the ticket', async ({ page }) => {
+  await page.goto('/ar/family/help');
+  await expect(page.locator('h1')).toHaveText('المساعدة');
+  await page.getByRole('button', { name: 'تذكرة جديدة' }).click();
+  const subject = `سؤال عن مواعيد الحصص ${Date.now()}`;
+  await page.getByLabel('العنوان').fill(subject);
+  await page.getByLabel('احكيلنا حصل إيه').fill('ممكن نغيّر ميعاد حصة الأربع لبعد المغرب؟');
+  await page.getByRole('button', { name: 'ابعت' }).click();
+  await expect(page).toHaveURL(/\/ar\/family\/help\/[0-9a-f-]{36}$/);
+  await expect(page.getByText(subject)).toBeVisible();
+  await expect(page.getByText('ممكن نغيّر ميعاد حصة الأربع لبعد المغرب؟')).toBeVisible();
+  await fitsTheScreen(page);
+  // A ticket that is not there is not found.
+  expect((await page.goto('/ar/family/help/not-a-ticket'))?.status()).toBe(404);
+});
+
+test('a guardian tells the safeguarding leads that something is wrong, and gets a number back', async ({ page }) => {
+  await page.goto('/ar/family/tell-us');
+  await expect(page.locator('h1')).toHaveText('بلّغ عن قلق على أمان طفل');
+  const form = page.locator('form');
+  await form.getByLabel('إيه اللي حصل؟').fill('حد بعت لابني رسالة غريبة بعد الحصة.');
+  // What it is about is asked for first.
+  await form.getByRole('button', { name: 'ابعت للأكاديمية' }).click();
+  await expect(form.getByText('اختار الموضوع عن إيه.')).toBeVisible();
+  await form.locator('label:has(input[name="category"])').first().click();
+  await form.getByRole('button', { name: 'ابعت للأكاديمية' }).click();
+  await expect(page.getByText(/^رقم #?\d+$/).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'قولّنا حاجة تانية' })).toBeVisible();
 });
 
 test('a guardian agrees to their child\'s lessons being recorded, and takes it back', async ({ page }) => {

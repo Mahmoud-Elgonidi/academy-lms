@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\ResolveTenant;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -68,4 +69,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->map(TenantNotResolved::class, fn (TenantNotResolved $e) => request()->is('api/*')
             ? $e
             : new NotFoundHttpException($e->getMessage(), $e));
+
+        // Something that is not an id where an id goes (a cut link, a typo in an address, a probe) names a record
+        // that is not there: 404, never the database refusing the text as a uuid (docs/architecture/03, section 11).
+        // Only for a request: the same refusal in a job or a command is our own bug, reported as it is.
+        $exceptions->map(QueryException::class, fn (QueryException $e) => $e->getCode() === '22P02' && str_contains($e->getMessage(), 'type uuid')
+            && (! app()->runningInConsole() || app()->runningUnitTests())
+            ? new NotFoundHttpException('Not found.', $e)
+            : $e);
     })->create();

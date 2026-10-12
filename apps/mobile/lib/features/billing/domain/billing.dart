@@ -123,6 +123,7 @@ class Invoice {
     this.canSendProof = false,
     this.lines = const [],
     this.family = false,
+    this.transferDetails,
   });
 
   factory Invoice.fromJson(Map<String, dynamic> json) => Invoice(
@@ -141,6 +142,7 @@ class Invoice {
     proof: json['proof'] == null ? null : ProofState.fromJson(json['proof'] as Map<String, dynamic>),
     canSendProof: json['can_send_proof'] as bool? ?? false,
     family: json['family'] as bool? ?? false,
+    transferDetails: _text(json['transfer_details']),
     lines: [for (final l in json['lines'] as List<dynamic>? ?? const []) InvoiceLine.fromJson(l as Map<String, dynamic>)],
     payWith: [
       for (final g in json['pay_with'] as List<dynamic>? ?? const [])
@@ -174,7 +176,20 @@ class Invoice {
   /// One invoice for several children's renewals that fell due in the same week.
   final bool family;
 
+  /// Where to send the money by hand for this invoice, in the academy's words
+  /// for the payer's region (several lines): only while something is left to pay.
+  final String? transferDetails;
+
   bool get payable => outstandingMinor > 0 && status != 'void';
+
+  /// The transfer details to show: none once nothing is left to pay.
+  String? get transferText => payable ? transferDetails : null;
+}
+
+/// A text from the API with its blank edges gone; none when nothing is left.
+String? _text(Object? value) {
+  final text = value is String ? value.trim() : '';
+  return text.isEmpty ? null : text;
 }
 
 class Invoices {

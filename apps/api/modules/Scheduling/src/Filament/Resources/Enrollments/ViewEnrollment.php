@@ -331,7 +331,8 @@ final class ViewEnrollment extends ViewRecord
                 'status' => $i->status === 'issued' && $i->due_at && CarbonImmutable::parse($i->due_at)->isPast() ? 'overdue' : $i->status,
                 'total' => Money::of((int) $i->total_minor, $i->currency)->format(),
                 'issued' => $fmt($i->issued_at, 'j M Y'),
-                'url' => route('filament.academy.resources.invoices.view', ['record' => $i->id]),
+                // Only for someone who may open it (billing.view): a scheduler reads the number, not a 403.
+                'url' => Gate::allows(Ability::ViewBilling->value) ? route('filament.academy.resources.invoices.view', ['record' => $i->id]) : null,
                 'family' => (int) $i->courses > 1,
             ], $q->invoices($h['subscription_id'])),
             'makeup' => $makeup,

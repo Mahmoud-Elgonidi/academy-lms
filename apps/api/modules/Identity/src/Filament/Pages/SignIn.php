@@ -20,6 +20,7 @@ use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Modules\Identity\Accounts\AccountLookup;
@@ -224,6 +225,7 @@ final class SignIn extends Login
             View::make('identity::social.buttons')
                 ->viewData(['providers' => Provider::forWeb(), 'panel' => Filament::getCurrentOrDefaultPanel()->getId()])
                 ->visible(fn (): bool => Provider::forWeb() !== [] && blank($this->userUndertakingMultiFactorAuthentication) && ! $this->inCodeStep()),
+            View::make('identity::sign-in.legal')->visible(fn (): bool => Route::has('privacy.notice') && Route::has('privacy.terms')),
             RenderHook::make(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER),
         ]);
     }

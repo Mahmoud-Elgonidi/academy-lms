@@ -1,16 +1,18 @@
-import { expect, fitsTheScreen, test } from './helpers';
-
-const PAGES = ['/ar/family', '/ar/family/journey', '/ar/family/lessons', '/ar/family/homework', '/ar/family/progress', '/ar/family/notifications', '/ar/family/more'];
+import { fixtures } from './backend';
+import { expect, fitsTheScreen, noRawKeys, test } from './helpers';
+import { familyPages } from './pages';
 
 test.describe('a kid (Yousef)', () => {
   test.use({ storageState: 'e2e/.auth/kid.json' });
 
   test('has their journey and big tabs, and fits a phone', async ({ page }) => {
-    for (const path of PAGES) {
+    test.setTimeout(120_000);
+    for (const path of familyPages('kids').map((p) => `/ar${p}`)) {
       const response = await page.goto(path);
       expect(response?.status(), path).toBe(200);
       await expect(page.locator('h1').first(), path).toBeVisible();
       await fitsTheScreen(page);
+      await noRawKeys(page);
     }
     await page.goto('/ar/family');
     await expect(page.locator('[data-stage="kids"]')).toBeVisible();
@@ -18,6 +20,18 @@ test.describe('a kid (Yousef)', () => {
     await expect(tabs.getByRole('link', { name: 'رحلتي' })).toBeVisible();
     await expect(tabs.getByRole('link', { name: 'كلّم مدرسك' })).toBeVisible();
     await expect(tabs.getByRole('link', { name: 'مهماتي' })).toHaveCount(0);
+  });
+
+  test('tells a grown-up at the academy with one big button, no words needed', async ({ page }) => {
+    await page.goto('/ar/family/tell-us');
+    await expect(page.locator('h1')).toHaveText('فيه حاجة زعّلتك؟');
+    const form = page.locator('form');
+    // A child's categories, big; no "someone is in danger now" for a child to tick.
+    await expect(form.getByRole('checkbox')).toHaveCount(0);
+    await form.locator('label:has(input[name="category"])').first().click();
+    await form.getByRole('button', { name: 'ابعت' }).click();
+    await expect(page.getByText(/^رقم #?\d+$/).first()).toBeVisible();
+    await fitsTheScreen(page);
   });
 
   test('never sees money, cancelling or rating', async ({ page }) => {
@@ -36,11 +50,13 @@ test.describe('a middle-school student (Ziad)', () => {
   test.use({ storageState: 'e2e/.auth/student.json' });
 
   test('has their journey and levels, and fits a phone', async ({ page }) => {
-    for (const path of PAGES) {
+    test.setTimeout(120_000);
+    for (const path of familyPages('middle').map((p) => `/ar${p}`)) {
       const response = await page.goto(path);
       expect(response?.status(), path).toBe(200);
       await expect(page.locator('h1').first(), path).toBeVisible();
       await fitsTheScreen(page);
+      await noRawKeys(page);
     }
     await expect(page.locator('[data-stage="middle"]')).toBeVisible();
     const tabs = page.getByRole('navigation', { name: 'القايمة' }).last();
@@ -48,11 +64,25 @@ test.describe('a middle-school student (Ziad)', () => {
     await expect(tabs.getByRole('link', { name: 'تحدياتي' })).toHaveCount(0);
   });
 
+  test('goes into the lesson that is on now, on its outside link', async ({ page, context }) => {
+    await context.route('https://meet.google.com/**', (route) => route.fulfill({ contentType: 'text/html', body: '<title>Meet</title>' }));
+    const id = fixtures().class.family_lesson;
+    await page.goto('/ar/family/lessons');
+    await page.locator(`a[href$="/family/lessons/${id}"]`).click();
+    await expect(page).toHaveURL(new RegExp(`/ar/family/lessons/${id}$`));
+    await expect(page.locator('h1')).toHaveText(/^مع /);
+    await fitsTheScreen(page);
+    const tab = page.waitForEvent('popup');
+    await page.getByRole('button', { name: 'ادخل الأوضة' }).click();
+    await (await tab).waitForURL(/^https:\/\/meet\.google\.com\//);
+    await expect(page.getByRole('link', { name: 'افتح لينك الحصة' })).toBeVisible();
+  });
+
   test('hands homework in in words', async ({ page }) => {
     await page.goto('/ar/family/homework');
-    const open = page.getByRole('article').filter({ has: page.getByRole('textbox') });
-    test.skip((await open.count()) === 0, 'no open homework in this data');
-    const card = open.first();
+    // Set by Khaled for this run (E2eResetSeeder), in words.
+    const card = page.getByRole('article').filter({ hasText: fixtures().homework.hand_in });
+    await expect(card).toHaveCount(1);
     await card.getByRole('textbox').fill('حليت التمرين كله وراجعته مرتين.');
     await card.getByRole('button', { name: 'سلّم', exact: true }).click();
     await expect(page.getByText('اتسلّم. المدرّس هيصححه.')).toBeVisible();
@@ -62,10 +92,12 @@ test.describe('a middle-school student (Ziad)', () => {
 
   test('sees the teacher\'s mark arrive without reloading', async ({ page, browser }) => {
     test.skip(!process.env.E2E_LIVE, 'needs Reverb and the live relay (E2E_LIVE=1)');
-    const title = 'حل تمرين ص 20';
+    // What Ziad handed in just before, waiting for the teacher's mark.
+    const title = fixtures().homework.hand_in;
     await page.goto('/ar/family/homework');
     const card = page.getByRole('article').filter({ hasText: title });
-    test.skip((await card.count()) === 0 || (await card.getByText('رأي المدرّس').count()) > 0, 'nothing waiting for a mark in this data');
+    await expect(card.getByText('حليت التمرين كله وراجعته مرتين.')).toBeVisible();
+    await expect(card.getByText('رأي المدرّس')).toHaveCount(0);
     // The page's socket is on Ziad's own channel before the teacher marks.
     await page.waitForFunction(() => performance.getEntriesByType('resource').some((r) => r.name.includes('/bff/realtime/auth')));
     let reloaded = false;

@@ -1,4 +1,5 @@
-import { PASSWORD, TEACHER, expect, signInWithPassword, test } from './helpers';
+import { API, onAcademyHost } from './backend';
+import { PASSWORD, TEACHER, expect, fitsTheScreen, signInWithPassword, test } from './helpers';
 
 test('a page needs a session, and signing in comes back to it', async ({ page }) => {
   await page.goto('/ar/teach/week');
@@ -53,4 +54,35 @@ test('English reads left to right', async ({ page }) => {
   await page.goto('/en/sign-in');
   await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
   await expect(page.getByRole('button', { name: 'Send me a code' })).toBeVisible();
+});
+
+test('the sign-in links to the academy\'s own privacy notice and terms, in its language', async ({ page, request }) => {
+  for (const [locale, pages, privacy, terms] of [
+    ['ar', 'صفحات الأكاديمية', 'سياسة الخصوصية', 'شروط الاستخدام'],
+    ['en', 'The academy’s pages', 'Privacy notice', 'Terms of use'],
+  ] as const) {
+    await page.goto(`/${locale}/sign-in`);
+    const legal = page.getByRole('navigation', { name: pages });
+    // Laravel's pages on the academy's host: the web part sends everything but the portal's paths there.
+    await expect(legal.getByRole('link', { name: privacy })).toHaveAttribute('href', `/privacy?lang=${locale}`);
+    await expect(legal.getByRole('link', { name: terms })).toHaveAttribute('href', `/terms?lang=${locale}`);
+  }
+  // There, they are the academy's own (LegalController, by the host).
+  for (const path of ['/privacy?lang=ar', '/terms?lang=ar']) {
+    const answer = await request.get(...onAcademyHost(path));
+    expect(answer.status(), path).toBe(200);
+    expect(await answer.text(), path).toContain('أكاديمية النور التجريبية');
+  }
+});
+
+test('every panel\'s sign-in links to the academy\'s privacy notice and terms', async ({ page }) => {
+  // The panels are Laravel's: here on the API's own address, the academy named by the header the app sends.
+  await page.setExtraHTTPHeaders({ 'X-Academy': 'demo' });
+  for (const panel of ['admin', 'teach', 'my']) {
+    await page.goto(`${API}/${panel}/login`);
+    const legal = page.getByRole('navigation', { name: 'صفحات الأكاديمية' });
+    await expect(legal.getByRole('link', { name: 'سياسة الخصوصية' }), panel).toHaveAttribute('href', '/privacy?lang=ar');
+    await expect(legal.getByRole('link', { name: 'شروط الاستخدام' }), panel).toHaveAttribute('href', '/terms?lang=ar');
+    await fitsTheScreen(page);
+  }
 });

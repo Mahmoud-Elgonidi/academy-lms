@@ -68,6 +68,8 @@ export type Invoice = {
   /** The latest proof of paying by hand: pending, approved, or rejected with the academy's reason. */
   proof: { id: string; status: 'pending' | 'approved' | 'rejected'; text: string; reason: string | null } | null;
   can_send_proof: boolean;
+  /** Where to send the money by hand for this invoice, in the academy's words (several lines): only while something is left to pay, in the classic look. */
+  transfer_details: string | null;
   lines: InvoiceLine[];
 };
 

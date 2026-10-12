@@ -49,7 +49,7 @@ jobs:
         env:
           NEXT_TELEMETRY_DISABLED: '1'
 
-  # The teacher's portal end to end, against the real API with the demo data.
+  # The portals end to end (phone and desktop), against the real API with the demo data.
   e2e:
     runs-on: ubuntu-latest
     needs: check
@@ -99,7 +99,8 @@ jobs:
           php artisan key:generate
           php artisan migrate --database=pgsql_owner --force
           php artisan db:seed --force
-          nohup php artisan serve --host=127.0.0.1 --port=8000 > ../../api-serve.log 2>&1 &
+          # A few workers: a portal page asks the API for several things at once.
+          PHP_CLI_SERVER_WORKERS=4 nohup php artisan serve --host=127.0.0.1 --port=8000 > ../../api-serve.log 2>&1 &
           # Live pages: Reverb (the browsers' sockets, .env.example's local keys) and the relay
           # that turns the database's signals into broadcasts.
           nohup php artisan reverb:start --host=127.0.0.1 --port=8080 > ../../reverb.log 2>&1 &
@@ -123,6 +124,8 @@ jobs:
           npx playwright install --with-deps chromium
           for i in $(seq 1 30); do curl -fsS -o /dev/null http://127.0.0.1:3000/ar/sign-in && break; sleep 2; done
 
+      # The global setup runs the API's E2eResetSeeder (php artisan in apps/api, with its .env) before the specs,
+      # and the receipt test approves through artisan tinker as the back office would: no test skips for want of data.
       - name: End-to-end tests
         working-directory: apps/web
         env:

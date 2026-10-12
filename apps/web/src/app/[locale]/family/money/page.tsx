@@ -2,12 +2,14 @@ import { getTranslations } from 'next-intl/server';
 import { ExtraLessons } from '@/components/family/extra-lessons';
 import { PayInvoice } from '@/components/family/pay-invoice';
 import { SendProof } from '@/components/family/send-proof';
+import { TransferDetails } from '@/components/family/transfer-details';
 import { Icon } from '@/components/icons';
 import { Badge, Empty, Heading, Notice, SectionTitle, join, type Tone } from '@/components/ui';
 import { redirect } from '@/i18n/navigation';
 import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
 import { seesMoney } from '@/lib/family/rules';
+import { transferGroups, transferText } from '@/lib/family/transfer';
 import type { Balance, Invoice, Invoices } from '@/lib/family/types';
 
 const tone: Record<string, Tone> = { paid: 'brand', overdue: 'danger', partly_paid: 'attention', issued: 'info', void: 'muted', draft: 'muted' };
@@ -37,7 +39,7 @@ function ProofLine({ proof }: { proof: NonNullable<Invoice['proof']> }) {
 /**
  * Money, for whoever pays (the classic look only; a student's own look never
  * shows it): what is owed now with a way to pay it online or by hand with the
- * receipt, the lessons left for the chosen child (and extra lessons to buy on
+ * receipt (and where to transfer, as the academy wrote it for the payer's region), the lessons left for the chosen child (and extra lessons to buy on
  * a course this person pays for), and every invoice with what came off it and
  * its printable tax document.
  */
@@ -51,6 +53,8 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
     learner ? get<Balance>('/v1/family/balance', { query: { learner_id: learner.id } }) : Promise.resolve(null),
   ]);
   const owed = invoices.data.filter((i) => i.outstanding_minor > 0);
+  // Where to transfer, once per text: named by invoice only when the payer's invoices go to different places.
+  const transfers = transferGroups(owed, fam.stage);
   const title = (await getTranslations('nav.classic'))('money');
 
   return (
@@ -60,6 +64,13 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
       {owed.length > 0 ? (
         <section aria-labelledby="owed">
           <SectionTitle id="owed">{t('owedNow')}</SectionTitle>
+          {transfers.length > 0 ? (
+            <div className="mb-3 space-y-2">
+              {transfers.map((g) => (
+                <TransferDetails key={g.text} text={g.text} numbers={transfers.length > 1 ? g.numbers : []} />
+              ))}
+            </div>
+          ) : null}
           <ul className="stagger space-y-3">
             {owed.map((i) => (
               <li key={i.id}>
@@ -78,7 +89,7 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
                   <div className="mt-4 space-y-3 border-t border-line pt-4">
                     {i.proof ? <ProofLine proof={i.proof} /> : null}
                     {i.pay_with.length > 0 || !i.can_send_proof ? <PayInvoice invoice={i} /> : null}
-                    <SendProof invoice={i} manual={invoices.manual} primary={i.pay_with.length === 0} canSend={i.can_send_proof} />
+                    <SendProof invoice={i} manual={invoices.manual} transfer={transferText(i, fam.stage)} primary={i.pay_with.length === 0} canSend={i.can_send_proof} />
                   </div>
                 </article>
               </li>
