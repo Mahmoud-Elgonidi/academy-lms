@@ -138,7 +138,10 @@ test('an invoice opens as its tax document, for its payer', async ({ page }) => 
   const document = await page.request.get(`${API}${url.pathname}${url.search}`, { headers: { Host: url.host } });
   expect(document.status()).toBe(200);
   expect(await document.text()).toContain(number);
-  const tampered = await page.request.get(`${API}${url.pathname}${url.search.replace(/signature=\w/, 'signature=0')}`, { headers: { Host: url.host } });
+  // One character of the signature changed, whatever it was: an address nobody signed.
+  const forged = url.search.replace(/signature=(\w)/, (_, first: string) => `signature=${first === '0' ? '1' : '0'}`);
+  expect(forged).not.toBe(url.search);
+  const tampered = await page.request.get(`${API}${url.pathname}${forged}`, { headers: { Host: url.host } });
   expect(tampered.status()).toBe(403);
 });
 

@@ -1,4 +1,4 @@
-import { fixtures } from './backend';
+import { fixtures, lessonNow } from './backend';
 import { expect, fitsTheScreen, noRawKeys, test } from './helpers';
 import { familyPages } from './pages';
 
@@ -66,7 +66,7 @@ test.describe('a middle-school student (Ziad)', () => {
 
   test('goes into the lesson that is on now, on its outside link', async ({ page, context }) => {
     await context.route('https://meet.google.com/**', (route) => route.fulfill({ contentType: 'text/html', body: '<title>Meet</title>' }));
-    const id = fixtures().class.family_lesson;
+    const id = lessonNow('student');
     await page.goto('/ar/family/lessons');
     await page.locator(`a[href$="/family/lessons/${id}"]`).click();
     await expect(page).toHaveURL(new RegExp(`/ar/family/lessons/${id}$`));

@@ -28,8 +28,6 @@ export const FIXTURES_FILE = 'e2e/.auth/fixtures.json';
 
 /** What E2eResetSeeder set up for this run. */
 export type Fixtures = {
-  /** Lessons open now, in rooms on the teacher's outside link: Khaled's, and Ziad's (the same one when both were free). */
-  class: { teacher_lesson: string; family_lesson: string };
   /** Ziad's homework: one to hand in in words, one handed in as a recording for Khaled to mark. */
   homework: { hand_in: string; to_mark: string };
   /** The demo academy's own host ({slug}.{platform domain}, with the API's port here). */
@@ -46,6 +44,13 @@ export const API = process.env.E2E_API_URL ?? 'http://127.0.0.1:8000';
 /** A request to the API for this path as the academy's own host would make it (its host may have no DNS here). */
 export function onAcademyHost(path: string): [string, { headers: Record<string, string> }] {
   return [`${API}${path}`, { headers: { Host: fixtures().academy_host } }];
+}
+
+/** A lesson whose room is open now (for a quarter of an hour at least), on its teacher's outside link: Khaled's or Ziad's, found or booked as the test goes in. */
+export function lessonNow(who: 'teacher' | 'student'): string {
+  const id = artisan(['tinker', `--execute=echo Database\\Seeders\\E2eResetSeeder::lessonNow('${who}');`]).trim().split('\n').pop() ?? '';
+  if (!/^[0-9a-f-]{36}$/.test(id)) throw new Error(`No lesson open now for the ${who}: ${id}`);
+  return id;
 }
 
 /** Staff approve the receipt Ziad's guardian sent with this reference, as the back office would (ApprovePaymentProof); the invoice's number. */

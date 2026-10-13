@@ -124,8 +124,9 @@ jobs:
           npx playwright install --with-deps chromium
           for i in $(seq 1 30); do curl -fsS -o /dev/null http://127.0.0.1:3000/ar/sign-in && break; sleep 2; done
 
-      # The global setup runs the API's E2eResetSeeder (php artisan in apps/api, with its .env) before the specs,
-      # and the receipt test approves through artisan tinker as the back office would: no test skips for want of data.
+      # The global setup runs the API's E2eResetSeeder (php artisan in apps/api, with its .env) before the specs;
+      # the class page tests get a lesson open now and the receipt test approves through artisan tinker, as the
+      # back office would: no test skips for want of data, at any hour.
       - name: End-to-end tests
         working-directory: apps/web
         env:

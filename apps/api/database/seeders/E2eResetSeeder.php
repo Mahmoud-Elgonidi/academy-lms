@@ -45,8 +45,10 @@ use RuntimeException;
  * lessons happen as the sweepers would have them), and by removing only
  * what earlier runs made where nothing else depends on it (a week's chest
  * opened, cheers, ratings, eggs hatched, rounds left open, their homework).
- * What the tests need (the lessons to go into now, the academy's own
- * host) is printed as one line, `E2E_FIXTURES {json}`.
+ * What the tests need (the homework's titles, the academy's own host) is
+ * printed as one line, `E2E_FIXTURES {json}`. What depends on the moment a
+ * test runs is done when it asks, through artisan tinker: a lesson to go
+ * into now (`lessonNow`) and staff approving a receipt (`approveProof`).
  */
 final class E2eResetSeeder extends Seeder
 {
@@ -54,9 +56,6 @@ final class E2eResetSeeder extends Seeder
     public const HAND_IN = 'اكتب تلات جمل فيها فعل ماضي';
 
     public const TO_MARK = 'سمّع الفقرة بصوتك';
-
-    /** Teachers who may stand in for the lesson "now" when Khaled or Ziad is already busy. */
-    private const STAND_INS = ['mahmoud', 'ahmed', 'mona'];
 
     private CarbonImmutable $now;
 
@@ -71,7 +70,7 @@ final class E2eResetSeeder extends Seeder
         $academy = self::demo($directory);
         $this->now = CarbonImmutable::now();
 
-        $fixtures = $tenants->run($academy, function () use ($academy) {
+        $fixtures = $tenants->run($academy, function () {
             $this->ids = DB::table('users')->where('email', 'like', '%@demo.test')->pluck('id', 'email')
                 ->mapWithKeys(fn ($id, $email) => [str_replace('@demo.test', '', (string) $email) => (string) $id])->all();
             foreach (['owner', 'accountant', 'khaled', 'ziad', 'ziad.guardian', 'yousef', 'yousef.guardian', 'maryam'] as $key) {
@@ -94,14 +93,13 @@ final class E2eResetSeeder extends Seeder
                 $this->cheersAndRatings();
                 $this->money();
                 $this->lessonsAhead();
-                $class = $this->lessonNow($academy);
                 $this->practiceHomework();
             } finally {
                 CarbonImmutable::setTestNow();
                 AuditActor::forget();
             }
 
-            return ['class' => $class, 'homework' => ['hand_in' => self::HAND_IN, 'to_mark' => self::TO_MARK]];
+            return ['homework' => ['hand_in' => self::HAND_IN, 'to_mark' => self::TO_MARK]];
         });
         // Its own host ({slug}.{platform domain}), as a browser reaches it on a server (here perhaps without DNS).
         $port = parse_url((string) config('app.url'), PHP_URL_PORT);
@@ -282,58 +280,69 @@ final class E2eResetSeeder extends Seeder
     }
 
     /**
-     * A lesson open now for Khaled and one for Ziad (the same one when both are free), in rooms on the teacher's outside
-     * link, so the class page opens without a video server. One that stays open for the run is used as it is; else one
-     * is booked for now, or just after a lesson that is ending.
-     *
-     * @return array{teacher_lesson: string, family_lesson: string}
+     * A lesson whose room is open now and for a quarter of an hour at least, for Khaled (`teacher`) or Ziad
+     * (`student`), on its teacher's outside link, so the class page opens without a video server: one already
+     * there (scheduled or under way), else one booked now, Khaled and Ziad together when both are free, else
+     * Ziad with any teacher who is, or Khaled with any of his students who is. It starts today on the browser's
+     * clock (the tests' Africa/Cairo) and the person's own, so it is among the day's lessons on both portals.
+     * The class page tests call it just before they go in (php artisan tinker), so it holds at any hour and
+     * however long the run took. Returns the lesson's id.
      */
-    private function lessonNow(TenantRef $academy): array
+    public static function lessonNow(string $who): string
     {
-        // A room opens 10 minutes before the lesson and closes 10 minutes after it: open now, and for 20 minutes more at least.
-        $open = fn (string $role, string $user) => Session::query()->where('status', 'scheduled')
-            ->where('starts_at', '<=', $this->now->addMinutes(10))->where('ends_at', '>=', $this->now->addMinutes(10))
-            ->whereHas('participants', fn ($q) => $q->where('user_id', $user)->where('role', $role))
-            ->orderBy('starts_at')->first();
-        $subject = (string) DB::table('enrollments')->where('id', $this->course('ziad'))->value('subject_id');
-        $book = function (string $teacher, string $student) use ($subject): ?Session {
-            foreach (range(-5, 10) as $minutes) {
-                try {
-                    return app(ScheduleSession::class)->handle(new NewSession(
-                        teacherId: $teacher, studentId: $student, subjectId: $subject, startsAt: $this->now->addMinutes($minutes)->startOfMinute(),
-                        durationMin: 45, anchorTimezone: 'Africa/Cairo',
-                    ));
-                } catch (ValidationException) {
-                    // One of them has a lesson then: a minute later.
-                }
-            }
-
-            return null;
+        $academy = self::demo(app(TenantDirectory::class));
+        $role = match ($who) {
+            'teacher', 'student' => $who,
+            default => throw new RuntimeException("Not teacher or student: {$who}."),
         };
 
-        $teaching = $open('teacher', $this->ids['khaled']);
-        $learning = $open('student', $this->ids['ziad']);
-        if ($teaching === null && $learning === null) {
-            $teaching = $learning = $book($this->ids['khaled'], $this->ids['ziad']);
-        }
-        foreach (self::STAND_INS as $teacher) {
-            $learning ??= $book($this->ids[$teacher], $this->ids['ziad']);
-        }
-        foreach (['zain', 'adam', 'layan', 'salma'] as $student) {
-            $teaching ??= $book($this->ids['khaled'], $this->ids[$student]);
-        }
-        if ($teaching === null || $learning === null) {
-            throw new RuntimeException('No lesson could be opened now for Khaled and Ziad.');
-        }
+        return app(TenantContext::class)->run($academy, function () use ($academy, $role): string {
+            $ids = DB::table('users')->whereIn('email', ['khaled@demo.test', 'ziad@demo.test'])->pluck('id', 'email');
+            [$khaled, $ziad] = [(string) $ids['khaled@demo.test'], (string) $ids['ziad@demo.test']];
+            $me = $role === 'teacher' ? $khaled : $ziad;
+            $now = CarbonImmutable::now();
+            $today = collect(['Africa/Cairo', (string) (DB::table('users')->where('id', $me)->value('timezone') ?: 'UTC')])
+                ->map(fn (string $zone) => $now->setTimezone($zone)->startOfDay()->utc())->max();
 
-        foreach ([$teaching, $learning] as $lesson) {
+            // A room opens 10 minutes before the lesson and closes 10 minutes after its end.
+            $lesson = Session::query()->whereIn('status', ['scheduled', 'in_progress'])
+                ->where('starts_at', '>=', $today)->where('starts_at', '<=', $now->addMinutes(10))->where('ends_at', '>=', $now->addMinutes(5))
+                ->whereHas('participants', fn ($q) => $q->where('user_id', $me)->where('role', $role))
+                ->orderByDesc('ends_at')->first();
+
+            if ($lesson === null) {
+                $course = DB::table('enrollments')->where('student_id', $ziad)->orderBy('created_at')->first(['subject_id']);
+                $others = $role === 'teacher'
+                    ? DB::table('enrollments')->where('teacher_id', $khaled)->where('student_id', '!=', $ziad)->orderBy('created_at')->pluck('student_id')
+                    : DB::table('user_roles')->where('role', 'teacher')->where('user_id', '!=', $khaled)->orderBy('user_id')->pluck('user_id');
+                $pairs = [[$khaled, $ziad], ...$others->unique()->map(fn ($other) => $role === 'teacher' ? [$khaled, (string) $other] : [(string) $other, $ziad])];
+                // Now, or a few minutes on when one of them is finishing a lesson; a little before when that is today too.
+                $starts = collect([...range(0, 10), ...range(-1, -5)])->map(fn (int $m) => $now->addMinutes($m)->startOfMinute())->filter(fn ($at) => $at >= $today);
+                foreach ($pairs as [$teacher, $student]) {
+                    foreach ($starts as $at) {
+                        try {
+                            $lesson = app(ScheduleSession::class)->handle(new NewSession(
+                                teacherId: $teacher, studentId: $student, subjectId: (string) $course->subject_id, startsAt: $at,
+                                durationMin: 45, anchorTimezone: 'Africa/Cairo',
+                            ));
+                            break 2;
+                        } catch (ValidationException) {
+                            // One of them has a lesson then.
+                        }
+                    }
+                }
+            }
+            if ($lesson === null) {
+                throw new RuntimeException("No lesson could be opened now for the {$role}: everyone they could have it with is busy.");
+            }
+
             if (! DB::table('meeting_links')->where('teacher_id', $lesson->teacher_id)->exists()) {
                 app(SaveMeetingLink::class)->handle($lesson->teacher_id, 'https://meet.google.com/noor-demo-e2e');
             }
             Room::query()->updateOrCreate(['session_id' => $lesson->id], ['provider' => 'external', 'name' => Room::nameFor($academy->id, $lesson->id)]);
-        }
 
-        return ['teacher_lesson' => $teaching->id, 'family_lesson' => $learning->id];
+            return (string) $lesson->id;
+        });
     }
 
     /** Maryam has a game round as homework to play, as her teacher set it in the demo. */

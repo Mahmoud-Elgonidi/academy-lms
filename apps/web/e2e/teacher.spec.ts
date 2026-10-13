@@ -1,4 +1,4 @@
-import { fixtures } from './backend';
+import { fixtures, lessonNow } from './backend';
 import { expect, fitsTheScreen, noRawKeys, test } from './helpers';
 import { TEACHER_PAGES } from './pages';
 
@@ -161,7 +161,7 @@ test('the teacher talks with a student and their family, or reads why not', asyn
 test('the class page opens a lesson on the teacher\'s outside link in a new tab', async ({ page, context }) => {
   // The outside meeting itself is not ours to load here.
   await context.route('https://meet.google.com/**', (route) => route.fulfill({ contentType: 'text/html', body: '<title>Meet</title>' }));
-  await page.goto(`/ar/teach/lessons/${fixtures().class.teacher_lesson}`);
+  await page.goto(`/ar/teach/lessons/${lessonNow('teacher')}`);
   await expect(page.locator('h1')).toHaveText(/^مع /);
   await fitsTheScreen(page);
   const tab = page.waitForEvent('popup');

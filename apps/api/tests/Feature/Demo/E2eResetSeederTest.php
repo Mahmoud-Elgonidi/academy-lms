@@ -14,10 +14,12 @@ it('refuses to run in production', function () {
 
     expect(fn () => app()->call([new E2eResetSeeder, 'run']))->toThrow(RuntimeException::class, 'never in production');
     expect(fn () => E2eResetSeeder::approveProof('TRF-1'))->toThrow(RuntimeException::class, 'never in production');
+    expect(fn () => E2eResetSeeder::lessonNow('teacher'))->toThrow(RuntimeException::class, 'never in production');
 });
 
 it('touches nothing without the demo academy', function () {
     $this->createAcademy(['slug' => 'noor']);
 
     expect(fn () => app()->call([new E2eResetSeeder, 'run']))->toThrow(RuntimeException::class, 'No demo academy here');
+    expect(fn () => E2eResetSeeder::lessonNow('student'))->toThrow(RuntimeException::class, 'No demo academy here');
 });
