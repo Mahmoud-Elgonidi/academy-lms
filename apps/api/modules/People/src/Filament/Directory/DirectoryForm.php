@@ -127,7 +127,7 @@ final class DirectoryForm
             Action::make('resendWelcome')->label(__($a.'resend_welcome'))->icon('heroicon-o-paper-airplane')->color('gray')
                 ->visible(fn () => ($p = $person())->isActive() && ! $p->hasPassword() && ! $p->is_managed_minor && ($p->email !== null || $p->phone_e164 !== null))
                 ->action(function () use ($person, $a) {
-                    app(SendWelcome::class)->handle([$person()->id]);
+                    app(SendWelcome::class)->handle([$person()->id], again: true);
                     Notification::make()->success()->title(__($a.'welcome_sent'))->send();
                 }),
             Action::make('disable')->label(__($a.'disable'))->icon('heroicon-o-lock-closed')->color('danger')

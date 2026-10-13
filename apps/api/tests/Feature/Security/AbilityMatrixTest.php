@@ -66,6 +66,7 @@ function expectedAbilities(): array
         'safeguarding.handle' => [$o, $a],
         'conversations.oversee' => [$o, $a, $su],
         'conversations.manage' => [$o, $a],
+        'staff.manage' => [$o, $a],
     ];
 }
 

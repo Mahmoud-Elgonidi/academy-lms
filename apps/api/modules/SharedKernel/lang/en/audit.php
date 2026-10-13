@@ -56,6 +56,11 @@ return [
             'social_linked' => ':name linked a :provider account (:via)',
             'social_unlinked' => ':name unlinked a :provider account',
             'demo_passwords_reset' => ":count demo accounts took the server's new demo password",
+            'staff_invited' => 'Invited :name to the team as :roles',
+            'staff_roles_changed' => "Changed :name's roles on the team to: :roles",
+            'staff_deactivated' => 'Turned off the account of :name (team: :roles)',
+            'staff_reactivated' => 'Turned the account of :name back on (team: :roles)',
+            'welcome_link_shown' => "Showed :name's welcome link to copy",
         ],
         'safeguarding' => [
             'concern_reported' => 'Safeguarding concern :concern raised',
@@ -149,6 +154,7 @@ return [
         'recording' => ['off' => 'no recording', 'manual' => 'the teacher starts it', 'auto' => 'every lesson by itself'],
         'media' => ['by_age' => 'by age', 'video' => 'video', 'audio' => 'sound only'],
         'side' => ['family' => 'the family', 'teacher' => 'the teacher', 'staff' => 'written down by the office'],
+        'roles' => ['owner' => 'Owner', 'admin' => 'Admin', 'supervisor' => 'Supervisor', 'scheduler' => 'Scheduler', 'accountant' => 'Accountant', 'sales' => 'Sales'],
     ],
     'groups' => [
         'games' => 'Games',

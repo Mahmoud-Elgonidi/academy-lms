@@ -56,6 +56,8 @@ final class AbilityMatrix
             // locking one and switching messages off is the owner's and admins'.
             Ability::OverseeConversations => [Role::Owner, Role::Admin, Role::Supervisor],
             Ability::ManageConversations => [Role::Owner, Role::Admin],
+            // The academy's team and its roles: the owner and admins, each only up to their own rank (Domain\Staff\StaffRules).
+            Ability::ManageStaff => [Role::Owner, Role::Admin],
         };
     }
 

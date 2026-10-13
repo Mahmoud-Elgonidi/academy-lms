@@ -5,6 +5,7 @@ namespace Modules\Identity\Actions;
 use Carbon\CarbonImmutable;
 use Modules\Identity\Contracts\SignInGate;
 use Modules\Identity\Models\User;
+use Modules\Identity\SignIn\LastSignIn;
 use Modules\Identity\TwoFactor\PendingSignIns;
 use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\SharedKernel\Http\ProblemException;
@@ -57,6 +58,7 @@ final class IssueAccessToken
         $expiresAt = $minutes ? now()->toImmutable()->addMinutes((int) $minutes) : null;
 
         $token = $user->createToken($deviceName, ['*'], $expiresAt);
+        LastSignIn::stamp($user->id);
 
         return ['user' => $user->load('roleRecords'), 'token' => $token->plainTextToken, 'expires_at' => $expiresAt];
     }

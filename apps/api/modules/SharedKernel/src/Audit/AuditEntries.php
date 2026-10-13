@@ -36,10 +36,14 @@ final class AuditEntries
     {
         $data = is_string($row->data) ? (json_decode($row->data, true) ?: []) : (array) $row->data;
         $params = [];
+        $word = fn (string $key, mixed $value): string => trans()->has("shared::audit.values.{$key}.{$value}") ? __("shared::audit.values.{$key}.{$value}") : (string) $value;
         foreach ($data as $key => $value) {
+            $key = (string) $key;
             if (is_scalar($value) || $value === null) {
-                $key = (string) $key;
-                $params[$key] = trans()->has("shared::audit.values.{$key}.{$value}") ? __("shared::audit.values.{$key}.{$value}") : (string) $value;
+                $params[$key] = $word($key, $value);
+            } elseif (is_array($value) && array_is_list($value) && array_filter($value, fn ($v) => ! is_scalar($v)) === []) {
+                // A list of words (a person's roles): each in the reader's language, "—" for none.
+                $params[$key] = $value === [] ? '—' : implode(app()->getLocale() === 'ar' ? '، ' : ', ', array_map(fn ($v) => $word($key, $v), $value));
             }
         }
         $title = trans()->has('shared::audit.actions.'.$row->action) ? __('shared::audit.actions.'.$row->action, $params) : $row->action;

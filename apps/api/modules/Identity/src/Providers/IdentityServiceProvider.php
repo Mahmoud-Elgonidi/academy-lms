@@ -2,8 +2,10 @@
 
 namespace Modules\Identity\Providers;
 
+use Illuminate\Auth\Events\Login;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
@@ -23,6 +25,7 @@ use Modules\Identity\Otp\LogOtpSender;
 use Modules\Identity\Preferences\PreferenceStore;
 use Modules\Identity\Privacy\AccountData;
 use Modules\Identity\Queries\ActiveTeachers;
+use Modules\Identity\SignIn\LastSignIn;
 use Modules\Identity\SignIn\OpenSignInGate;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
@@ -55,6 +58,8 @@ final class IdentityServiceProvider extends ServiceProvider
 
         // Each person's own channel: only they listen (their inbox, their lessons, the panels' pop-ups).
         Broadcast::channel(PersonalChannel::PATTERN, fn (User $user, string $id) => (string) $user->getKey() === $id);
+        // When each person last signed in on a panel (the Team screen shows it); app tokens stamp it in IssueAccessToken.
+        Event::listen(Login::class, LastSignIn::class);
 
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'identity');

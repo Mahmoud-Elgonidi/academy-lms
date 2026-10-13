@@ -56,6 +56,11 @@ return [
             'social_linked' => ':name ربط حساب :provider (:via)',
             'social_unlinked' => ':name فصل حساب :provider',
             'demo_passwords_reset' => ':count من الحسابات التجريبية خدوا كلمة السر التجريبية الجديدة بتاعة السيرفر',
+            'staff_invited' => 'دعوة :name للفريق بدور: :roles',
+            'staff_roles_changed' => 'تغيير أدوار :name في الفريق لـ: :roles',
+            'staff_deactivated' => 'قفل حساب :name (في الفريق: :roles)',
+            'staff_reactivated' => 'فتح حساب :name تاني (في الفريق: :roles)',
+            'welcome_link_shown' => 'عرض لينك الترحيب بتاع :name عشان يتنسخ',
         ],
         'safeguarding' => [
             'concern_reported' => 'اتبعت بلاغ الحماية :concern',
@@ -149,6 +154,7 @@ return [
         'recording' => ['off' => 'مفيش تسجيل', 'manual' => 'المدرس يبدأه', 'auto' => 'كل حصة لوحدها'],
         'media' => ['by_age' => 'حسب السن', 'video' => 'فيديو', 'audio' => 'صوت بس'],
         'side' => ['family' => 'الأسرة', 'teacher' => 'المدرس', 'staff' => 'الإدارة سجلته'],
+        'roles' => ['owner' => 'المالك', 'admin' => 'مدير', 'supervisor' => 'مشرف', 'scheduler' => 'منسق مواعيد', 'accountant' => 'محاسب', 'sales' => 'مبيعات'],
     ],
     'groups' => [
         'games' => 'الألعاب',

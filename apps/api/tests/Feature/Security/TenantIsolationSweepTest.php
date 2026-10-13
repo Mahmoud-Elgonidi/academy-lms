@@ -209,7 +209,9 @@ it('keeps every record of one academy out of reach of another academy\'s people'
             'admin/shifts/proposals/{proposal}', 'admin/support/{ticket}', 'admin/teachers/{teacher}/performance', 'admin/time-off/{timeOff}',
             'billing/proofs/{proof}/file', 'curriculum/resources/{resource}', 'learning/files/{submission}', 'recordings/{recording}/media', 'support/files/{message}',
             'class/{session}', 'class/{session}/go', 'people/checks/{check}/file',
-            'admin/people/students/{student}/edit', 'admin/people/teachers/{teacher}/edit', 'admin/people/guardians/{user}/edit'],
+            'admin/people/students/{student}/edit', 'admin/people/teachers/{teacher}/edit', 'admin/people/guardians/{user}/edit',
+            // The team: this academy's staff only, never the demo's names or addresses.
+            'admin/settings/team'],
         'accountant' => ['admin/invoices/{invoice}', 'admin/payroll/{teacher}', 'billing/proofs/{proof}/file'],
         'teacher' => ['teach/reports/{report}', 'teach/reports/{report}/game', 'teach/students/{enrollment}', 'class/{session}', 'class/{session}/go', 'learning/files/{submission}',
             'support/files/{message}', 'people/checks/{check}/file'],

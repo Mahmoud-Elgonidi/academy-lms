@@ -44,6 +44,7 @@ final class AccountData implements PersonalDataSource
             'status' => $user->status->value,
             'two_step_sign_in' => filled($user->getRawOriginal('app_authentication_secret')),
             'created_at' => $user->created_at?->toIso8601String(),
+            'last_sign_in' => $user->last_sign_in_at?->toIso8601String(),
             'signed_in_devices' => PersonalAccessToken::query()->where('tokenable_type', $user->getMorphClass())->where('tokenable_id', $user->id)
                 ->orderBy('created_at')->get(['name', 'created_at', 'last_used_at'])
                 ->map(fn (PersonalAccessToken $t) => ['name' => $t->name, 'since' => $t->created_at?->toIso8601String(), 'last_used' => $t->last_used_at?->toIso8601String()])->all(),
@@ -80,6 +81,7 @@ final class AccountData implements PersonalDataSource
             'status' => UserStatus::Erased->value,
             'app_authentication_secret' => null,
             'app_authentication_recovery_codes' => null,
+            'last_sign_in_at' => null,
             'updated_at' => now(),
         ]);
 

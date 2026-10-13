@@ -14,6 +14,7 @@ use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
+use Modules\Identity\Contracts\Events\UserInvited;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Contracts\SignInGate;
 use Modules\People\Actions\SendWelcome;
@@ -91,6 +92,8 @@ final class PeopleServiceProvider extends ServiceProvider
         Event::listen(TeacherCheckSubmitted::class, [SendCheckNotifications::class, 'submitted']);
         Event::listen(TeacherCheckDecided::class, [SendCheckNotifications::class, 'decided']);
         Event::listen(TeacherCheckExpiring::class, [SendCheckNotifications::class, 'expiring']);
+        // A new member of the academy's team (Identity's Team screen) gets the same welcome, in the staff's words.
+        Event::listen(UserInvited::class, fn (UserInvited $e) => $this->app->make(SendWelcome::class)->handle([$e->userId], $e->again));
 
         $live = $this->app->make(LiveSignals::class);
         $live->on('consents', fn (string $userId) => new ConsentsChanged($userId));

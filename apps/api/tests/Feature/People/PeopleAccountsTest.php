@@ -48,3 +48,20 @@ it('turns an account off and on, never while it would strand lessons, and keeps 
         $this->get('http://noor.lms.test/admin/people/students')->assertStatus($students);
     }
 });
+
+it('keeps people screens off an account that holds a back-office role above the one acting', function () {
+    $this->enrolStudentOnPlan();
+    $teacherAdmin = User::factory()->withRole(Role::Teacher)->create();
+    $teacherAdmin->assignRole(Role::Admin);
+    $plain = User::factory()->withRole(Role::Teacher)->create();
+    $off = app(SetPersonActive::class);
+
+    $this->actingAs(User::factory()->withRole(Role::Scheduler)->create());
+    expect(fn () => $off->handle($teacherAdmin->id, false))->toThrow(ValidationException::class, __('identity::users.above_you'));
+    $off->handle($plain->id, false);   // a teacher with nothing else may go
+
+    $this->actingAs($this->admin);     // someone of that rank may
+    $off->handle($teacherAdmin->id, false);
+    expect(User::query()->find($teacherAdmin->id)->isActive())->toBeFalse()
+        ->and(User::query()->find($plain->id)->isActive())->toBeFalse();
+});

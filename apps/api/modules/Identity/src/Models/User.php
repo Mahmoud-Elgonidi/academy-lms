@@ -2,6 +2,7 @@
 
 namespace Modules\Identity\Models;
 
+use Carbon\CarbonImmutable;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Models\Contracts\FilamentUser;
@@ -38,6 +39,7 @@ use SensitiveParameter;
  * @property array<string, string> $preferences
  * @property ?string $app_authentication_secret the authenticator app's secret, once set up (encrypted)
  * @property ?array<string> $app_authentication_recovery_codes hashed one-time recovery codes (encrypted)
+ * @property ?CarbonImmutable $last_sign_in_at the person's own last sign-in (not the platform team's as them)
  */
 final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasLocalePreference
 {
@@ -72,6 +74,7 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
             'preferences' => 'array',
             'app_authentication_secret' => 'encrypted',
             'app_authentication_recovery_codes' => 'encrypted:array',
+            'last_sign_in_at' => 'immutable_datetime',
         ];
     }
 

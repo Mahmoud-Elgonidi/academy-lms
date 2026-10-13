@@ -25,7 +25,7 @@ final class SendWelcome
 
     public static function templates(NotificationsApi $notifications): void
     {
-        foreach ([['welcome_teacher', 'staff', 'new_teacher'], ['welcome_family', 'lessons', 'new_family']] as [$name, $category, $audience]) {
+        foreach ([['welcome_teacher', 'staff', 'new_teacher'], ['welcome_family', 'lessons', 'new_family'], ['welcome_staff', 'staff', 'new_staff']] as [$name, $category, $audience]) {
             $notifications->define(new TemplateDefinition(
                 key: "people.{$name}", category: $category,
                 title: "people::notifications.{$name}.title", body: "people::notifications.{$name}.body",
@@ -35,21 +35,32 @@ final class SendWelcome
         }
     }
 
-    /** @param  list<string>  $userIds */
-    public function handle(array $userIds): void
+    /**
+     * Back-office staff (the Team screen's invitations, Identity's UserInvited)
+     * get the staff wording; $again sends one that already went out once more
+     * (at most once a minute).
+     *
+     * @param  list<string>  $userIds
+     */
+    public function handle(array $userIds, bool $again = false): void
     {
         if ($userIds === []) {
             return;
         }
-        DB::afterCommit(function () use ($userIds) {
+        DB::afterCommit(function () use ($userIds, $again) {
             $tenant = $this->tenant->require();
             $people = DB::table('users')->whereIn('id', $userIds)->whereNull('password')->where('is_managed_minor', false)->where('status', 'active')->get(['id', 'name']);
             foreach ($people as $person) {
-                $teacher = DB::table('user_roles')->where('user_id', $person->id)->where('role', 'teacher')->exists();
-                $this->notifications->send(new Message($teacher ? 'people.welcome_teacher' : 'people.welcome_family', [$person->id], [
+                $roles = DB::table('user_roles')->where('user_id', $person->id)->pluck('role')->all();
+                $template = match (true) {
+                    array_intersect($roles, ['owner', 'admin', 'supervisor', 'scheduler', 'accountant', 'sales']) !== [] => 'people.welcome_staff',
+                    in_array('teacher', $roles, true) => 'people.welcome_teacher',
+                    default => 'people.welcome_family',
+                };
+                $this->notifications->send(new Message($template, [$person->id], [
                     'name' => $person->name,
                     'academy' => new Localized($tenant->nameAr, $tenant->nameEn),
-                ], ['screen' => 'welcome', 'id' => $person->id], 'welcome:'.$person->id));
+                ], ['screen' => 'welcome', 'id' => $person->id], 'welcome:'.$person->id.($again ? ':'.now()->format('YmdHi') : '')));
             }
         });
     }
