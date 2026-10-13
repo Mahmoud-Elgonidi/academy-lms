@@ -305,6 +305,9 @@ s('proofSend', 'ابعت الإثبات', 'Send proof')
 s('proofSent', 'الإثبات اتبعت. هنقولك أول ما الأكاديمية تأكّده.', "Proof sent. You'll hear once the academy confirms it.")
 s('proofNeedsReceipt', 'اختار الإيصال الأول.', 'Choose the receipt first.')
 s('proofFileTooBig', 'الملف أكبر من 10 ميجا.', 'The file is larger than 10 MB.')
+s('transferTitle', 'بيانات التحويل', 'Where to transfer')
+s('transferCopy', 'انسخ', 'Copy')
+s('transferCopied', 'بيانات التحويل اتنسخت.', 'Transfer details copied.')
 
 # Classroom
 s('joining', 'بندخّلك الحصة…', 'Joining…')

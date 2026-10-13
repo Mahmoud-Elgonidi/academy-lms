@@ -17,6 +17,7 @@ return [
             'extra_lessons' => 'Invoice :number for :lessons extra lessons (:total)',
             'plan_saved' => 'Plan ":name" saved (:prices)',
             'proof_rejected' => 'Proof of :amount on invoice :number turned down: :reason',
+            'transfer_details_saved' => 'Transfer details changed',
         ],
         'policy' => [
             'saved' => 'Cancellation policy version :version',

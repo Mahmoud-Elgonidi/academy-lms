@@ -86,6 +86,12 @@
         .chips input:checked + span { background: var(--brand-soft); border-color: var(--brand); color: var(--ink); font-weight: 700; }
         footer { text-align: center; color: var(--muted); font-size: .78rem; }
         .doc-link { display: inline-block; margin-top: .7rem; font-size: .88rem; font-weight: 600; color: var(--brand); }
+        .transfer { margin: .6rem 0 0; padding: .75rem .9rem; border-radius: .85rem; background: var(--brand-soft); }
+        .transfer-head { display: flex; justify-content: space-between; align-items: center; gap: .6rem; }
+        .transfer-head strong { font-size: .9rem; }
+        .transfer .note { margin: .3rem 0 0; overflow-wrap: anywhere; user-select: text; }
+        .copy { flex: none; font: inherit; font-size: .82rem; font-weight: 600; padding: .25rem .75rem; border-radius: .6rem; border: 1px solid color-mix(in oklab, var(--brand) 30%, white); background: var(--card); color: var(--ink); cursor: pointer; }
+        .copy:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
         @media (prefers-reduced-motion: no-preference) {
             main > * { animation: rise .45s cubic-bezier(.2, .7, .2, 1) backwards; }
             main > :nth-child(2) { animation-delay: 60ms; } main > :nth-child(3) { animation-delay: 120ms; } main > :nth-child(4) { animation-delay: 180ms; } main > :nth-child(5) { animation-delay: 240ms; }
@@ -107,5 +113,16 @@
         </div>
         {{ $slot }}
     </main>
+    <script>
+        // "Copy" next to the academy's transfer details (pay.transfer): the text as written, line breaks and all.
+        document.querySelectorAll('[data-copy]').forEach((button) => {
+            if (!navigator.clipboard) return;
+            button.hidden = false;
+            button.addEventListener('click', () => {
+                const text = button.closest('.transfer')?.querySelector('[data-transfer]')?.textContent ?? '';
+                navigator.clipboard.writeText(text).then(() => { button.textContent = button.dataset.copied; }, () => {});
+            });
+        });
+    </script>
 </body>
 </html>

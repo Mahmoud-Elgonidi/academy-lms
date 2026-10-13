@@ -17,17 +17,21 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Modules\Billing\Actions\Payments\DisconnectStripeAccount;
 use Modules\Billing\Actions\Payments\SaveGatewayAccount;
+use Modules\Billing\Actions\SaveTransferDetails;
 use Modules\Billing\Models\BillingSettings;
 use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Models\PaymentCheckout;
+use Modules\Billing\Models\PriceRegion;
 use Modules\Billing\Payments\GatewayException;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Payments\StripeConnect;
+use Modules\Billing\Queries\TransferDetails;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use UnitEnum;
@@ -35,7 +39,8 @@ use UnitEnum;
 /**
  * The academy's gateway accounts (it is the merchant: money goes straight to
  * its own accounts), the webhook address each one needs, a check that the
- * keys work, how to pay by hand, and the latest payments made online.
+ * keys work, the transfer details for paying by hand (the academy's, and a
+ * price region's own), and the latest payments made online.
  */
 final class PaymentSettings extends Page
 {
@@ -47,8 +52,11 @@ final class PaymentSettings extends Page
 
     protected static ?string $slug = 'settings/payments';
 
-    /** How to pay by hand, shown with every invoice. */
+    /** The academy's transfer details for every payer, shown with every invoice still to pay. */
     public ?string $manualNote = null;
+
+    /** @var array<string, ?string> price region id => its own transfer details (empty: the academy's) */
+    public array $regionNotes = [];
 
     public static function canAccess(): bool
     {
@@ -78,6 +86,7 @@ final class PaymentSettings extends Page
     public function mount(): void
     {
         $this->manualNote = BillingSettings::current()->manual_payment_note;
+        $this->regionNotes = PriceRegion::query()->orderBy('sort')->pluck('transfer_details', 'id')->all();
 
         // Back from Stripe after connecting the academy's own account.
         $stripe = request()->query('stripe');
@@ -176,14 +185,33 @@ final class PaymentSettings extends Page
             });
     }
 
+    /** @return list<PriceRegion> the academy's price regions, each of which may have its own transfer details */
+    #[Computed]
+    public function regions(): array
+    {
+        return PriceRegion::query()->orderBy('sort')->get()->all();
+    }
+
+    /** Saves the transfer details (SaveTransferDetails): the academy's, and each region's own. */
     public function saveManualNote(): void
     {
         abort_unless(self::canAccess(), 403);
-        $this->validate(['manualNote' => ['nullable', 'string', 'max:1000']]);
-        $settings = BillingSettings::current();
-        $settings->manual_payment_note = filled($this->manualNote) ? trim($this->manualNote) : null;
-        $settings->save();
-        Notification::make()->success()->title(__('billing::payments.settings.saved'))->send();
+        $this->validate([
+            'manualNote' => ['nullable', 'string', 'max:'.TransferDetails::MAX],
+            'regionNotes' => ['array'],
+            'regionNotes.*' => ['nullable', 'string', 'max:'.TransferDetails::MAX],
+        ]);
+        try {
+            app(SaveTransferDetails::class)->handle($this->manualNote, array_intersect_key($this->regionNotes, array_flip(array_map(fn (PriceRegion $r) => $r->id, $this->regions))));
+        } catch (ValidationException $e) {
+            // The Action names the academy's text and each region's; the form names its fields.
+            throw ValidationException::withMessages(collect($e->errors())->mapWithKeys(fn (array $messages, string $key) => [
+                (str_starts_with($key, 'regions.') ? 'regionNotes.'.substr($key, 8) : 'manualNote') => $messages,
+            ])->all());
+        }
+        $this->manualNote = BillingSettings::current()->manual_payment_note;
+        $this->regionNotes = PriceRegion::query()->orderBy('sort')->pluck('transfer_details', 'id')->all();
+        Notification::make()->success()->title(__('billing::transfer.settings.saved'))->send();
     }
 
     private function account(array $arguments): GatewayAccount

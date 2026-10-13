@@ -1,4 +1,9 @@
-@php $l = 'billing::family.'; $a = $this->account; $online = app(\Modules\Billing\Payments\OnlinePayments::class); $takesProofs = $online->takesProofs(); @endphp
+@php
+    $l = 'billing::family.'; $a = $this->account; $online = app(\Modules\Billing\Payments\OnlinePayments::class);
+    // Where to transfer, once per text (most payers have one): named by invoice only when their invoices go to different places.
+    $transfers = collect($a['invoices'])->filter(fn (array $i) => $i['transfer'] !== null)->groupBy('transfer')
+        ->map(fn ($rows, $text) => ['text' => (string) $text, 'numbers' => $rows->pluck('number')->all()])->values();
+@endphp
 <x-filament-panels::page>
     @include('billing::filament.family.styles')
     <div data-live-channel="{{ $a['channel'] }}" hidden></div>
@@ -25,6 +30,13 @@
             <div class="bf-card" data-tone="owed"><small>{{ __($l.'owed') }}</small><span class="bf-big">{{ $a['owed'] }}</span></div>
         </div>
     @endif
+    @if ($transfers->isNotEmpty())
+        <div class="bf-transfers">
+            @foreach ($transfers as $t)
+                @include('billing::filament.family.transfer', ['text' => $t['text'], 'numbers' => $transfers->count() > 1 ? $t['numbers'] : []])
+            @endforeach
+        </div>
+    @endif
     <div class="bf-list lms-stagger">
         @forelse ($a['invoices'] as $inv)
             <div class="bf-inv" wire:key="inv-{{ $inv['id'] }}">
@@ -48,9 +60,9 @@
                 @if ($inv['proof'] && ($inv['payable'] || $inv['proof']['status'] !== 'rejected'))
                     <div class="bf-proof" data-s="{{ $inv['proof']['status'] }}">{{ $inv['proof']['text'] }}</div>
                 @endif
-                @if ($inv['payable'] && ($online->offers($inv['currency']) || ($inv['canSendProof'] && $takesProofs)))
+                @if ($inv['payable'] && ($online->offers($inv['currency']) || $inv['canSendProof']))
                     <div class="bf-pay">
-                        @if ($inv['canSendProof'] && $takesProofs) {{ ($this->sendProofAction)(['invoice' => $inv['id']]) }} @endif
+                        @if ($inv['canSendProof']) {{ ($this->sendProofAction)(['invoice' => $inv['id']]) }} @endif
                         @if ($online->offers($inv['currency'])) {{ ($this->payAction)(['invoice' => $inv['id']]) }} @endif
                     </div>
                 @endif
@@ -59,9 +71,7 @@
             <div class="bf-empty">{{ __($l.'no_invoices') }}</div>
         @endforelse
     </div>
-    @if ($a['owed'] && ($note = $online->manualNote()))
-        <p class="bf-note" style="white-space: pre-line"><strong>{{ __('billing::payments.page.manual') }}:</strong> {{ $note }}</p>
-    @elseif ($a['owed'])
+    @if ($a['owed'] && $transfers->isEmpty())
         <p class="bf-note">{{ __($l.'how_to_pay') }}</p>
     @endif
 </x-filament-panels::page>

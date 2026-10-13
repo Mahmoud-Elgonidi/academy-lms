@@ -22,6 +22,7 @@ use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Queries\InvoiceCourses;
 use Modules\Billing\Queries\InvoiceDocument;
+use Modules\Billing\Queries\TransferDetails;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Throwable;
@@ -29,19 +30,22 @@ use Throwable;
 /**
  * An invoice and its ways to pay, for the payer, in the academy's look and
  * without signing in (the signed link in the invoice message): the online
- * gateways that take its currency, or how to pay by hand and sending the
+ * gateways that take its currency, or where to transfer the money by hand
+ * (the academy's transfer details for the payer's region) and sending the
  * receipt for the academy to confirm. Back from a
  * gateway, the checkout is settled by asking the gateway, then the payer
  * sees where it stands.
  */
 final class PayController
 {
-    public function show(Request $request, Invoice $invoice, OnlinePayments $online, BrandingApi $branding, TenantContext $tenants): View
+    public function show(Request $request, Invoice $invoice, OnlinePayments $online, TransferDetails $transfer, BrandingApi $branding, TenantContext $tenants): View
     {
         $payerId = $request->query('u');
         $this->speak($payerId, $tenants);
         $checkout = $request->query('checkout') ? PaymentCheckout::query()->where('invoice_id', $invoice->id)->find($request->query('checkout')) : null;
         $student = InvoiceCourses::students(InvoiceCourses::ofOne($invoice->id)) ?: null;
+        // Where to send the money by hand (the payer's region's words, else the academy's), while something is left to pay.
+        $manual = $transfer->forInvoice($invoice);
 
         return view('billing::pay.show', [
             'invoice' => $invoice,
@@ -52,11 +56,11 @@ final class PayController
                 'account' => $account,
                 'url' => URL::temporarySignedRoute('billing.pay.start', now()->addHours(2), array_filter(['invoice' => $invoice->id, 'account' => $account->id, 'u' => $payerId]), absolute: false),
             ], $online->accountsFor($invoice)) : [],
-            'manual' => $online->manualNote(),
+            'manual' => $manual,
             'tz' => $tenants->require()->defaultTimezone,
             'document' => app(PayLinks::class)->document($invoice, $payerId),
             'proof' => PaymentProof::latestFor([$invoice->id])[$invoice->id] ?? null,
-            'proofUrl' => $invoice->status === 'issued' && $invoice->outstanding()->minor > 0 && $online->takesProofs()
+            'proofUrl' => $manual !== null
                 ? URL::temporarySignedRoute('billing.pay.proof', now()->addHours(6), array_filter(['invoice' => $invoice->id, 'u' => $payerId]), absolute: false)
                 : null,
             'today' => CarbonImmutable::now($tenants->require()->defaultTimezone)->toDateString(),

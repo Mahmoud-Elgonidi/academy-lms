@@ -1003,6 +1003,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proofFileTooBig => 'The file is larger than 10 MB.';
 
   @override
+  String get transferTitle => 'Where to transfer';
+
+  @override
+  String get transferCopy => 'Copy';
+
+  @override
+  String get transferCopied => 'Transfer details copied.';
+
+  @override
   String get joining => 'Joining…';
 
   @override

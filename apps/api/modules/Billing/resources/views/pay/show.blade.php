@@ -80,7 +80,7 @@
         @php $s = 'billing::proofs.send.'; @endphp
         <section class="card">
             <h2>{{ __($p.'manual') }}</h2>
-            <p class="note">{{ $manual }}</p>
+            @include('billing::pay.transfer', ['text' => $manual])
             @if ($proof && ($proof->status !== 'rejected' || $proofUrl))
                 <p class="proof" data-s="{{ $proof->status }}" role="status">{{ __('billing::proofs.state.'.$proof->status, [
                     'amount' => $proof->money()->format(),

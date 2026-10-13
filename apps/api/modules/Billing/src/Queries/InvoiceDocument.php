@@ -15,11 +15,16 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * An invoice as a document, the same for the back office and for the
  * payer: the seller as it was when issued, the payer and the student, the
  * lines and totals, what was paid, and for a Saudi tax invoice its title,
- * time of issue and QR code, with the credit note that cancelled it.
+ * time of issue and QR code, with the credit note that cancelled it; while
+ * something is left to pay, where to transfer it (the academy's words for
+ * the payer's region, as they read today: not part of what was issued).
  */
 final class InvoiceDocument
 {
-    public function __construct(private readonly TenantContext $tenants) {}
+    public function __construct(
+        private readonly TenantContext $tenants,
+        private readonly TransferDetails $transfer,
+    ) {}
 
     /** @return array<string, mixed> */
     public function build(Invoice $invoice, string $tz): array
@@ -66,6 +71,7 @@ final class InvoiceDocument
             ])->all(),
             'qr' => $invoice->zatca_qr ? QrSvg::render($invoice->zatca_qr) : null,
             'creditNote' => $note === null ? null : $this->creditNote($note, $invoice, $time),
+            'transfer' => $this->transfer->forInvoice($invoice),
         ];
     }
 

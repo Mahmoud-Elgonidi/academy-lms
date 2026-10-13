@@ -1748,6 +1748,24 @@ abstract class AppLocalizations {
   /// **'الملف أكبر من 10 ميجا.'**
   String get proofFileTooBig;
 
+  /// No description provided for @transferTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'بيانات التحويل'**
+  String get transferTitle;
+
+  /// No description provided for @transferCopy.
+  ///
+  /// In ar, this message translates to:
+  /// **'انسخ'**
+  String get transferCopy;
+
+  /// No description provided for @transferCopied.
+  ///
+  /// In ar, this message translates to:
+  /// **'بيانات التحويل اتنسخت.'**
+  String get transferCopied;
+
   /// No description provided for @joining.
   ///
   /// In ar, this message translates to:

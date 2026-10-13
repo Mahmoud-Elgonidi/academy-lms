@@ -56,6 +56,7 @@ export interface paths {
         /**
          * My invoices
          * @description The invoices this person pays, the latest first; document_url opens the invoice (with its tax QR) in a browser.
+         *     Each one still to pay says where to send the money by hand (transfer_details, the academy's words for the payer's region).
          *     A child who does not pay for themselves sees no money.
          */
         get: operations["family.invoices"];
@@ -2602,9 +2603,11 @@ export interface operations {
                     "application/json": {
                         /** @description What this person still owes, per currency. */
                         owed: string | null;
-                        /** @description Paying by hand: how (the academy's words: an account number, InstaPay…), and whether a proof can be sent (POST /family/invoices/{id}/proofs). */
+                        /** @description Paying by hand: how, and whether a proof can be sent (POST /family/invoices/{id}/proofs). */
                         manual: {
+                            /** @description For earlier app versions: the one text this person's invoices go by (null when they differ). Show each invoice's transfer_details instead. */
                             note: string | null;
+                            /** @description Whether this person can send proofs at all: the academy wrote its transfer details for them. */
                             takes_proofs: boolean;
                             /** @description The ways a proof can say it was paid. */
                             methods: unknown[];
@@ -2679,7 +2682,12 @@ export interface operations {
                                 /** @description Why the academy turned it down. */
                                 reason: string | null;
                             } | null;
-                            /** @description Whether a proof can be sent now (the academy takes them, something is owed, none is waiting). */
+                            /**
+                             * @description Where to send the money by hand for it, in the academy's words for this payer's price region (else the academy's own):
+                             *     plain text of several lines (keep the line breaks, never read it as HTML). Null once nothing is left to pay, or when the academy wrote none.
+                             */
+                            transfer_details: string | null;
+                            /** @description Whether a proof can be sent now (the academy wrote where to transfer, something is owed, none is waiting). */
                             can_send_proof: string;
                         }[];
                     };

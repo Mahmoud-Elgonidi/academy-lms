@@ -346,7 +346,7 @@
         "/v1/family/invoices": {
             "get": {
                 "operationId": "family.invoices",
-                "description": "The invoices this person pays, the latest first; document_url opens the invoice (with its tax QR) in a browser.\nA child who does not pay for themselves sees no money.",
+                "description": "The invoices this person pays, the latest first; document_url opens the invoice (with its tax QR) in a browser.\nEach one still to pay says where to send the money by hand (transfer_details, the academy's words for the payer's region).\nA child who does not pay for themselves sees no money.",
                 "summary": "My invoices",
                 "tags": [
                     "Billing"
@@ -397,16 +397,18 @@
                                         },
                                         "manual": {
                                             "type": "object",
-                                            "description": "Paying by hand: how (the academy's words: an account number, InstaPay\u2026), and whether a proof can be sent (POST /family/invoices/{id}/proofs).",
+                                            "description": "Paying by hand: how, and whether a proof can be sent (POST /family/invoices/{id}/proofs).",
                                             "properties": {
                                                 "note": {
                                                     "type": [
                                                         "string",
                                                         "null"
-                                                    ]
+                                                    ],
+                                                    "description": "For earlier app versions: the one text this person's invoices go by (null when they differ). Show each invoice's transfer_details instead."
                                                 },
                                                 "takes_proofs": {
-                                                    "type": "boolean"
+                                                    "type": "boolean",
+                                                    "description": "Whether this person can send proofs at all: the academy wrote its transfer details for them."
                                                 },
                                                 "methods": {
                                                     "type": "array",
@@ -676,9 +678,16 @@
                                                             "reason"
                                                         ]
                                                     },
+                                                    "transfer_details": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "description": "Where to send the money by hand for it, in the academy's words for this payer's price region (else the academy's own):\nplain text of several lines (keep the line breaks, never read it as HTML). Null once nothing is left to pay, or when the academy wrote none."
+                                                    },
                                                     "can_send_proof": {
                                                         "type": "string",
-                                                        "description": "Whether a proof can be sent now (the academy takes them, something is owed, none is waiting)."
+                                                        "description": "Whether a proof can be sent now (the academy wrote where to transfer, something is owed, none is waiting)."
                                                     }
                                                 },
                                                 "required": [
@@ -702,6 +711,7 @@
                                                     "lines",
                                                     "pay_with",
                                                     "proof",
+                                                    "transfer_details",
                                                     "can_send_proof"
                                                 ]
                                             }

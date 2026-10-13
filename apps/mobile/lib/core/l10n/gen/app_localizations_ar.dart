@@ -1024,6 +1024,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get proofFileTooBig => 'الملف أكبر من 10 ميجا.';
 
   @override
+  String get transferTitle => 'بيانات التحويل';
+
+  @override
+  String get transferCopy => 'انسخ';
+
+  @override
+  String get transferCopied => 'بيانات التحويل اتنسخت.';
+
+  @override
   String get joining => 'بندخّلك الحصة…';
 
   @override

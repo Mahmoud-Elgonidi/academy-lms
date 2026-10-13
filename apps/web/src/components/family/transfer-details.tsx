@@ -7,9 +7,10 @@ import { join } from '@/components/ui';
 
 /**
  * Where to send the money by hand (an account and its IBAN, an InstaPay or
- * wallet number), in the academy's own words: plain text with its line breaks,
- * selectable, with a button that copies it. `numbers` names the invoices it is
- * for when the payer's invoices go to different places.
+ * wallet number), in the academy's own words: plain text with its line breaks
+ * (React escapes it; it is never read as HTML), selectable, with a button that
+ * copies it. `numbers` names the invoices it is for when the payer's invoices
+ * go to different places.
  */
 export function TransferDetails({ text, numbers = [], compact = false }: { text: string; numbers?: string[]; compact?: boolean }) {
   const t = useTranslations('family');
@@ -32,15 +33,13 @@ export function TransferDetails({ text, numbers = [], compact = false }: { text:
           {t('transferTitle')}
           {numbers.length > 0 ? <span className="font-normal text-muted"> · {t('transferFor', { numbers: numbers.join(locale === 'ar' ? '، ' : ', ') })}</span> : null}
         </p>
-        <button
-          type="button"
-          onClick={copy}
-          className="inline-flex min-h-10 items-center gap-1.5 rounded-control px-2 font-semibold text-brand-strong hover:bg-white/60"
-          aria-live="polite"
-        >
+        <button type="button" onClick={copy} className="inline-flex min-h-10 items-center gap-1.5 rounded-control px-2 font-semibold text-brand-strong hover:bg-white/60">
           <Icon name={copied ? 'check' : 'copy'} size={16} />
           {copied ? t('transferCopied') : t('transferCopy')}
         </button>
+        <span className="sr-only" aria-live="polite">
+          {copied ? t('transferCopied') : ''}
+        </span>
       </div>
       <p dir="auto" className="select-text whitespace-pre-line break-words">
         {text}

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -27,7 +28,8 @@ class _Money {
 }
 
 /// What is owed and paying it on the academy's own gateway page, or by hand
-/// with the receipt for the academy to confirm; the lessons left, and every
+/// (where the academy's transfer details say, to copy) with the receipt for
+/// the academy to confirm; the lessons left, and every
 /// invoice (each opens its printable document with the tax QR). Coming back
 /// to the app reloads it.
 class MoneyPage extends StatefulWidget {
@@ -101,6 +103,7 @@ class _MoneyList extends StatelessWidget {
                   style: context.text.bodySmall?.copyWith(color: c.attentionInk),
                 ),
                 if (due.proof case final proof?) ...[const SizedBox(height: 10), _ProofLine(proof: proof)],
+                if (due.transferText case final transfer?) ...[const SizedBox(height: 10), _TransferDetails(text: transfer)],
                 const SizedBox(height: 12),
                 // No gateway takes it and its proof waits for the academy: nothing to press, the line above says where it stands.
                 if (due.payWith.isNotEmpty || (!due.canSendProof && due.proof?.status != 'pending'))
@@ -377,6 +380,64 @@ class _PayButtonState extends State<_PayButton> {
   );
 }
 
+/// Where to send the money by hand, in the academy's words (an account and
+/// its IBAN, an InstaPay or wallet number): selectable, line breaks kept,
+/// with a button that copies it as written.
+class _TransferDetails extends StatefulWidget {
+  const _TransferDetails({required this.text});
+
+  final String text;
+
+  @override
+  State<_TransferDetails> createState() => _TransferDetailsState();
+}
+
+class _TransferDetailsState extends State<_TransferDetails> {
+  bool _copied = false;
+
+  Future<void> _copy() async {
+    await Clipboard.setData(ClipboardData(text: widget.text));
+    if (!mounted) return;
+    setState(() => _copied = true);
+    showSnack(context, context.l10n.transferCopied);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    return Container(
+      key: const Key('transfer-details'),
+      width: double.infinity,
+      padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 4, 10),
+      decoration: BoxDecoration(color: c.brandSoft, borderRadius: BorderRadius.circular(context.shape.field)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(l.transferTitle, style: context.text.labelLarge?.copyWith(color: c.brandDeep)),
+              ),
+              TextButton.icon(
+                key: const Key('transfer-copy'),
+                onPressed: _copy,
+                style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+                icon: Icon(_copied ? Icons.check_rounded : Icons.copy_rounded, size: 18),
+                label: Text(l.transferCopy),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 8),
+            child: SelectableText(widget.text, style: context.text.bodyMedium),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Where the latest proof stands, in the API's words.
 class _ProofLine extends StatelessWidget {
   const _ProofLine({required this.proof});
@@ -561,7 +622,8 @@ class _ProofSheetState extends State<_ProofSheet> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    final note = widget.manual.note;
+    // This invoice's own (its payer's region's words); an earlier server says one text for all.
+    final note = widget.invoice.transferText ?? widget.manual.note;
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: SafeArea(
@@ -573,20 +635,7 @@ class _ProofSheetState extends State<_ProofSheet> {
               Text(l.proofTitle, style: context.text.titleLarge),
               const SizedBox(height: 4),
               Text(l.proofHint, style: context.text.bodySmall),
-              if (note != null && note.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                LmsCard(
-                  color: c.brandSoft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l.proofHowTo, style: context.text.labelLarge),
-                      const SizedBox(height: 4),
-                      SelectableText(note, style: context.text.bodyMedium),
-                    ],
-                  ),
-                ),
-              ],
+              if (note != null && note.trim().isNotEmpty) ...[const SizedBox(height: 12), _TransferDetails(text: note.trim())],
               const SizedBox(height: 16),
               Text(l.proofMethod, style: context.text.labelLarge),
               const SizedBox(height: 6),

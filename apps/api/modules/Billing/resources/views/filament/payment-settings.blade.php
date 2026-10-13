@@ -26,7 +26,18 @@
         .ps-status[data-s="open"] { color: var(--warning-700); } .ps-status[data-s="expired"] { color: var(--gray-500); }
         .ps-scroll { overflow-x: auto; background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-xl, .75rem); }
         .ps-plan { margin-bottom: 1rem; padding: .75rem .95rem; border-radius: var(--radius-xl, .75rem); font-size: .88rem; background: var(--warning-50); color: var(--warning-800); border: 1px solid var(--warning-200); }
+        .ps-text { width: 100%; border: 1px solid var(--gray-300); border-radius: var(--radius-lg, .5rem); padding: .6rem .7rem; font: inherit; background: transparent; }
+        .ps-text:focus-visible { outline: 2px solid var(--primary-600); outline-offset: 1px; }
+        .ps-error { color: var(--danger-600); font-size: .8rem; }
+        .ps-regions { border-top: 1px solid var(--gray-100); padding-top: .6rem; display: flex; flex-direction: column; gap: .5rem; }
+        .ps-regions summary { cursor: pointer; font-weight: 600; font-size: .9rem; color: var(--primary-700); }
+        .ps-regions[open] summary { margin-bottom: .3rem; }
+        .ps-region { display: flex; flex-direction: column; gap: .3rem; margin-top: .5rem; }
+        .ps-region label { font-weight: 600; font-size: .85rem; }
         .dark .ps-card, .dark .ps-scroll { background: var(--gray-900); border-color: var(--gray-800); }
+        .dark .ps-text { border-color: var(--gray-700); }
+        .dark .ps-regions { border-color: var(--gray-800); }
+        .dark .ps-regions summary { color: var(--primary-400); }
         .dark .ps-hook { background: var(--gray-800); border-color: var(--gray-700); }
     </style>
 
@@ -75,12 +86,27 @@
         </div>
     @endif
 
+    @php $t = 'billing::transfer.settings.'; $max = \Modules\Billing\Queries\TransferDetails::MAX; @endphp
     <h2 class="ps-h2">{{ __($s.'manual_title') }}</h2>
+    {{-- The academy's transfer details, and a price region's own (SaveTransferDetails): plain text, shown escaped with every invoice still to pay. --}}
     <form wire:submit="saveManualNote" class="ps-card" style="max-width: 44rem">
-        <label for="manual-note" style="font-weight: 600; font-size: .9rem">{{ __($s.'manual_note') }}</label>
-        <textarea id="manual-note" wire:model="manualNote" rows="4" maxlength="1000"
-                  class="fi-input" style="width: 100%; border: 1px solid var(--gray-300); border-radius: var(--radius-lg, .5rem); padding: .6rem .7rem; font: inherit; background: transparent"></textarea>
-        <small class="ps-muted">{{ __($s.'manual_hint') }}</small>
+        <label for="manual-note" style="font-weight: 600; font-size: .9rem">{{ __($t.'academy') }}</label>
+        <textarea id="manual-note" wire:model="manualNote" rows="5" maxlength="{{ $max }}" dir="auto" class="fi-input ps-text"></textarea>
+        @error('manualNote') <small class="ps-error">{{ $message }}</small> @enderror
+        <small class="ps-muted">{{ __($t.'academy_hint') }}</small>
+        @if (count($this->regions) > 1 || array_filter($regionNotes))
+            <details class="ps-regions" wire:ignore.self @if (array_filter($regionNotes) || collect($errors->keys())->contains(fn ($k) => str_starts_with($k, 'regionNotes.'))) open @endif>
+                <summary>{{ __($t.'regions') }}</summary>
+                <small class="ps-muted">{{ __($t.'regions_hint') }}</small>
+                @foreach ($this->regions as $region)
+                    <div class="ps-region" wire:key="transfer-{{ $region->id }}">
+                        <label for="transfer-{{ $region->id }}">{{ __($t.'region', ['name' => $region->name(), 'currency' => $region->currency]) }}</label>
+                        <textarea id="transfer-{{ $region->id }}" wire:model="regionNotes.{{ $region->id }}" rows="3" maxlength="{{ $max }}" dir="auto" class="fi-input ps-text"></textarea>
+                        @error('regionNotes.'.$region->id) <small class="ps-error">{{ $message }}</small> @enderror
+                    </div>
+                @endforeach
+            </details>
+        @endif
         <div><x-filament::button type="submit" size="sm">{{ __('filament-panels::resources/pages/edit-record.form.actions.save.label') }}</x-filament::button></div>
     </form>
 

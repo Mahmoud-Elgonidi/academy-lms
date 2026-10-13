@@ -20,6 +20,14 @@
     .bf-status[data-s="issued"], .bf-status[data-s="partly_paid"] { background: var(--warning-50); color: var(--warning-800); }
     .bf-h2 { font-size: 1rem; font-weight: 700; margin: 1.25rem 0 .6rem; }
     .bf-note { color: var(--gray-600); font-size: .9rem; margin: .5rem 0 0; }
+    .bf-transfer { padding: .75rem .9rem; border-radius: var(--radius-xl, .75rem); background: var(--primary-50); color: var(--primary-950, var(--primary-900)); border: 1px solid var(--primary-100); }
+    .bf-transfers { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .6rem; }
+    .bf-transfer-head { display: flex; justify-content: space-between; align-items: center; gap: .6rem; }
+    .bf-transfer-head strong { font-size: .9rem; }
+    .bf-transfer-head small { font-weight: 400; color: var(--gray-600); }
+    .bf-transfer-text { margin: .3rem 0 0; font-size: .9rem; white-space: pre-line; overflow-wrap: anywhere; user-select: text; }
+    .bf-copy { flex: none; font-size: .8rem; font-weight: 600; padding: .2rem .7rem; border-radius: var(--radius-lg, .5rem); border: 1px solid var(--primary-200); background: white; color: var(--primary-700); }
+    .bf-copy:focus-visible { outline: 2px solid var(--primary-600); outline-offset: 1px; }
     .bf-empty { padding: 1.25rem; text-align: center; color: var(--gray-500); border: 1px dashed var(--gray-300); border-radius: var(--radius-xl, .75rem); }
     .bf-pay { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .5rem; justify-content: flex-end; margin-top: .35rem; }
     .bf-proof { grid-column: 1 / -1; font-size: .82rem; padding: .45rem .7rem; border-radius: var(--radius-lg, .5rem); background: var(--info-50, var(--primary-50)); color: var(--info-800, var(--primary-800)); overflow-wrap: anywhere; }
@@ -38,4 +46,7 @@
     .dark .bf-card, .dark .bf-inv { background: var(--gray-900); border-color: var(--gray-800); }
     .dark .bf-extra { border-color: var(--gray-700); }
     .dark .bf-proof { background: var(--gray-800); color: var(--gray-100); }
+    .dark .bf-transfer { background: var(--gray-800); border-color: var(--gray-700); color: var(--gray-100); }
+    .dark .bf-transfer-head small { color: var(--gray-400); }
+    .dark .bf-copy { background: var(--gray-900); border-color: var(--gray-700); color: var(--primary-400); }
 </style>

@@ -14,13 +14,14 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property list<string> $countries
  * @property bool $is_default
  * @property int $sort
+ * @property ?string $transfer_details where its payers send the money by hand, instead of the academy's own text (SaveTransferDetails)
  */
 final class PriceRegion extends Model
 {
     use BelongsToTenant;
     use HasUuids;
 
-    protected $fillable = ['name_ar', 'name_en', 'currency', 'countries', 'is_default', 'sort'];
+    protected $fillable = ['name_ar', 'name_en', 'currency', 'countries', 'is_default', 'sort', 'transfer_details'];
 
     protected function casts(): array
     {

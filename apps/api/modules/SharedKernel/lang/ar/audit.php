@@ -17,6 +17,7 @@ return [
             'sibling_discount_saved' => 'خصم الإخوات: التاني :second%، والتالت وبعده :more%',
             'extra_lessons' => 'فاتورة :number بـ :lessons حصص زيادة (:total)',
             'plan_saved' => 'حفظ الباقة ":name" (:prices)',
+            'transfer_details_saved' => 'تعديل بيانات التحويل',
         ],
         'policy' => [
             'saved' => 'إصدار :version من سياسة الإلغاء والتعويض',

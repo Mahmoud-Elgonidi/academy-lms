@@ -2,7 +2,6 @@
 
 namespace Modules\Billing\Payments;
 
-use Modules\Billing\Models\BillingSettings;
 use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Models\Invoice;
 use Modules\SharedKernel\Plans\AcademyPlan;
@@ -10,9 +9,9 @@ use Modules\SharedKernel\Plans\Feature;
 use Throwable;
 
 /**
- * Which of the academy's gateway accounts can take an invoice, and how to pay
- * by hand otherwise. Paying online is an area of the academy's plan: outside
- * it nothing is offered (paying by hand stays).
+ * Which of the academy's gateway accounts can take an invoice. Paying online
+ * is an area of the academy's plan: outside it nothing is offered (paying by
+ * hand stays, where the academy wrote its transfer details: TransferDetails).
  */
 final class OnlinePayments
 {
@@ -50,16 +49,5 @@ final class OnlinePayments
         return $this->inPlan() && GatewayAccount::query()->where('is_active', true)->get()
             ->contains(fn (GatewayAccount $account) => $account->takes($currency) && ($account->gateway !== 'demo' || $this->gateways->demoAllowed())
                 && ($account->gateway !== 'stripe_connect' || $this->gateways->connectAvailable()));
-    }
-
-    public function manualNote(): ?string
-    {
-        return BillingSettings::current()->manual_payment_note;
-    }
-
-    /** Whether payers can send proof of paying by hand: the academy says how to pay by hand. */
-    public function takesProofs(): bool
-    {
-        return filled($this->manualNote());
     }
 }

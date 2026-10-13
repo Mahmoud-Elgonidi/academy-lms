@@ -77,6 +77,10 @@
             </div>
         </div>
 
+        @if ($d['transfer'])
+            @include('billing::pay.transfer', ['text' => $d['transfer']])
+        @endif
+
         @if ($inv->status === 'void' && $d['creditNote'])
             <div class="doc-note">{{ __($l.'voided_by_note', ['number' => $d['creditNote']['number'], 'reason' => $inv->void_reason]) }}</div>
             @include('billing::invoice.credit-note', ['note' => $d['creditNote']])

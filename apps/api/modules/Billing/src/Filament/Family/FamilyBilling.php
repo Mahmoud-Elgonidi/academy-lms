@@ -30,6 +30,7 @@ use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Queries\CourseBillingQuery;
+use Modules\Billing\Queries\TransferDetails;
 use Modules\Identity\Contracts\PersonalChannel;
 use Modules\People\Contracts\FamilyView;
 use Modules\SharedKernel\Time\ViewerTimezone;
@@ -38,8 +39,10 @@ use Modules\SharedKernel\Time\ViewerTimezone;
  * Lessons left on each course of the learner on screen, and the invoices the
  * person signed in pays, each payable online on the academy's gateways
  * ("pay now": the gateway's page, then back here, which says how it went
- * and updates by itself once the gateway confirms), or paid by hand and
- * shown with the receipt ("I paid by transfer"), for the academy to confirm.
+ * and updates by itself once the gateway confirms), or paid by hand where
+ * the academy's transfer details say (shown above the invoices, with a copy
+ * button) and shown with the receipt ("I paid by transfer"), for the
+ * academy to confirm.
  */
 final class FamilyBilling extends Page
 {
@@ -126,7 +129,8 @@ final class FamilyBilling extends Page
             ->label(__($l.'action'))->icon(Heroicon::OutlinedDocumentArrowUp)->button()->size('sm')->outlined()
             ->modalHeading(__($l.'title'))->modalDescription(__($l.'hint'))->modalWidth('lg')
             ->modalSubmitActionLabel(__($l.'submit'))
-            ->modalContent(fn () => view('billing::filament.family.how-to-pay', ['note' => app(OnlinePayments::class)->manualNote()]))
+            // Where to send the money for this invoice, before the receipt.
+            ->modalContent(fn (array $arguments) => view('billing::filament.family.how-to-pay', ['note' => app(TransferDetails::class)->forInvoice($this->ownInvoice($arguments['invoice'] ?? ''))]))
             ->fillForm(fn (array $arguments) => [
                 'method' => 'bank_transfer',
                 'amount' => $this->ownInvoice($arguments['invoice'] ?? '')->outstanding()->decimal(),

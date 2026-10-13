@@ -12,6 +12,7 @@ use Modules\Billing\Models\Plan;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Queries\CourseBillingQuery;
 use Modules\Billing\Queries\InvoiceCourses;
+use Modules\Billing\Queries\TransferDetails;
 use Modules\Credits\Contracts\CreditsApi;
 use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
 use Modules\Enrollment\Contracts\EnrollmentApi;
@@ -96,6 +97,8 @@ final class FamilyAccount
 
         $proofs = PaymentProof::latestFor($rows->pluck('id')->all());
         $courses = InvoiceCourses::of($rows->pluck('id')->all());
+        // Where to send the money by hand, for each invoice still to pay (its payer's region's words, else the academy's).
+        $transfers = app(TransferDetails::class)->forInvoices($rows);
 
         return $rows->map(fn (Invoice $i) => [
             'id' => $i->id,
@@ -115,7 +118,9 @@ final class FamilyAccount
             'document' => app(PayLinks::class)->document($i, $payerId),
             'discounts' => $i->lines->where('kind', 'discount')->map(fn ($l) => ['label' => $l->description(), 'amount' => Money::of($l->amount_minor, $i->currency)->format()])->values()->all(),
             'proof' => isset($proofs[$i->id]) ? self::proofLine($proofs[$i->id], $tz) : null,
-            'canSendProof' => $i->status === 'issued' && $i->outstanding()->minor > 0 && ($proofs[$i->id]->status ?? null) !== 'pending',
+            'transfer' => $transfers[$i->id] ?? null,
+            // Paying by hand takes the academy's transfer details for this payer, something left to pay, and no proof waiting.
+            'canSendProof' => ($transfers[$i->id] ?? null) !== null && ($proofs[$i->id]->status ?? null) !== 'pending',
         ])->all();
     }
 

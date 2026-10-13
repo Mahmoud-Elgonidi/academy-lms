@@ -13,7 +13,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?string $tax_number
  * @property string $invoice_prefix
  * @property int $due_days
- * @property ?string $manual_payment_note how to pay by hand (bank transfer, InstaPay…), shown with the invoice
+ * @property ?string $manual_payment_note the academy's transfer details for every payer (a region's own win; Queries\TransferDetails, saved through SaveTransferDetails)
  * @property ?string $seller_name the academy's name as registered for tax, on its invoices
  * @property bool $zatca Saudi simplified tax invoices with the QR code (ZATCA, phase 1)
  * @property int $sibling_second_bp the family discount for a payer's second child (1000 = 10%)

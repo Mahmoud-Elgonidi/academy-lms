@@ -21,6 +21,7 @@ use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Queries\CourseBillingQuery;
 use Modules\Billing\Queries\InvoiceCourses;
+use Modules\Billing\Queries\TransferDetails;
 use Modules\People\Contracts\FamilyView;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Time\LocalTimePresenter;
@@ -120,11 +121,12 @@ final class FamilyBillingController
      * My invoices.
      *
      * The invoices this person pays, the latest first; document_url opens the invoice (with its tax QR) in a browser.
+     * Each one still to pay says where to send the money by hand (transfer_details, the academy's words for the payer's region).
      * A child who does not pay for themselves sees no money.
      *
      * @throws AccessDeniedHttpException a child who does not pay
      */
-    public function invoices(Request $request, PayLinks $links, OnlinePayments $online): JsonResponse
+    public function invoices(Request $request, PayLinks $links, OnlinePayments $online, TransferDetails $transfer): JsonResponse
     {
         $me = (string) $request->user()?->getAuthIdentifier();
         if (! FamilyAccount::shown()) {
@@ -136,19 +138,22 @@ final class FamilyBillingController
         $family = $rows->keyBy('id');
         $courses = InvoiceCourses::of($invoices->pluck('id')->all());
         $proofs = PaymentProof::latestFor($invoices->pluck('id')->all());
-        $takesProofs = $online->takesProofs();
+        $note = $transfer->forPayer($me);
+        $transfers = $rows->pluck('transfer', 'id')->all();
 
         return response()->json([
             /** What this person still owes, per currency. */
             'owed' => FamilyAccount::owed($me),
-            /** Paying by hand: how (the academy's words: an account number, InstaPay…), and whether a proof can be sent (POST /family/invoices/{id}/proofs). */
+            /** Paying by hand: how, and whether a proof can be sent (POST /family/invoices/{id}/proofs). */
             'manual' => [
-                'note' => $online->manualNote(),
-                'takes_proofs' => $takesProofs,
+                /** For earlier app versions: the one text this person's invoices go by (null when they differ). Show each invoice's transfer_details instead. */
+                'note' => $note,
+                /** Whether this person can send proofs at all: the academy wrote its transfer details for them. */
+                'takes_proofs' => (bool) ($note !== null || array_filter($transfers) !== []),
                 /** The ways a proof can say it was paid. */
                 'methods' => array_map(fn (string $m) => ['value' => $m, 'label' => __('billing::billing.methods.'.$m)], PaymentProof::METHODS),
             ],
-            'data' => $invoices->map(function (Invoice $i) use ($me, $links, $online, $for, $family, $courses, $proofs, $takesProofs) {
+            'data' => $invoices->map(function (Invoice $i) use ($me, $links, $online, $for, $family, $courses, $proofs, $transfers) {
                 $outstanding = $i->status === 'issued' ? $i->outstanding() : Money::of(0, $i->currency);
                 $status = InvoiceResource::statusKey($i);
                 $studentIds = [];
@@ -202,8 +207,13 @@ final class FamilyBillingController
                     ], $online->accountsFor($i)),
                     /** The latest proof of paying by hand on it, if any: pending, approved or rejected (with the academy's reason). */
                     'proof' => isset($proofs[$i->id]) ? $this->proof($proofs[$i->id]) : null,
-                    /** Whether a proof can be sent now (the academy takes them, something is owed, none is waiting). */
-                    'can_send_proof' => $takesProofs && $outstanding->minor > 0 && ($proofs[$i->id]->status ?? null) !== 'pending',
+                    /**
+                     * Where to send the money by hand for it, in the academy's words for this payer's price region (else the academy's own):
+                     * plain text of several lines (keep the line breaks, never read it as HTML). Null once nothing is left to pay, or when the academy wrote none.
+                     */
+                    'transfer_details' => ($transfers[$i->id] ?? null) === null ? null : (string) $transfers[$i->id],
+                    /** Whether a proof can be sent now (the academy wrote where to transfer, something is owed, none is waiting). */
+                    'can_send_proof' => $transfers[$i->id] !== null && $outstanding->minor > 0 && ($proofs[$i->id]->status ?? null) !== 'pending',
                 ];
             })->values()->all(),
         ]);
