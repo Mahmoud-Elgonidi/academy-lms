@@ -281,3 +281,90 @@ class MissionTile extends StatelessWidget {
     );
   }
 }
+
+/// The reviews waiting as one row (each a short round on its lesson); it
+/// opens them in a sheet.
+class ReviewsRow extends StatelessWidget {
+  const ReviewsRow({
+    super.key,
+    required this.title,
+    required this.hint,
+    required this.reviews,
+    required this.map,
+    required this.place,
+    required this.openStation,
+  });
+
+  final String title;
+  final String hint;
+  final List<Mission> reviews;
+  final JourneyMap map;
+  final JourneyPlace place;
+  final void Function(Mission m) openStation;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final stars = map.rewards ? reviews.fold<int>(0, (n, m) => n + (m.stars ?? 0)) : 0;
+    return LmsCard(
+      onTap: () => _showReviews(context),
+      child: Row(
+        children: [
+          const IconBadge(Icons.replay_rounded, tone: Tone.info, size: 40),
+          const Gap(Space.m),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: context.type.cardTitle),
+                Text([hint, if (stars > 0) '+$stars ★'].join(' · '), style: context.type.caption),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded, color: c.faint),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showReviews(BuildContext context) => showActionSheet<void>(
+    context,
+    builder: (sheet) => SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(Space.xl - 4, 0, Space.xl - 4, Space.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const IconBadge(Icons.replay_rounded, tone: Tone.info, size: 44),
+              const Gap(Space.m),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Semantics(header: true, child: Text(title, style: context.type.title)),
+                    Text(hint, style: context.type.caption),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Gap(Space.l),
+          for (final m in reviews)
+            Padding(
+              padding: const EdgeInsets.only(bottom: Space.s),
+              child: MissionTile(
+                mission: m,
+                map: map,
+                place: place,
+                openStation: () {
+                  Navigator.of(sheet).pop();
+                  openStation(m);
+                },
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
+}

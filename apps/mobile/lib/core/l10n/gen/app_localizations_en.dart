@@ -3388,6 +3388,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allLevels => 'All levels';
 
   @override
+  String get goalTitle => 'Your goal: finish the programme';
+
+  @override
+  String get goalDone => 'of the programme done';
+
+  @override
+  String goalPace(String day) {
+    return 'At this pace you finish on $day';
+  }
+
+  @override
+  String get nowTitle => 'Now';
+
+  @override
+  String stationOf(int i, int n) {
+    return 'Lesson $i of $n';
+  }
+
+  @override
+  String nextIs(String title) {
+    return 'Next: $title';
+  }
+
+  @override
+  String get weekPlan => 'This week\'s plan';
+
+  @override
+  String get notHandedIn => 'Not handed in yet';
+
+  @override
+  String get planNoDay => 'Any day';
+
+  @override
+  String lessonsToReview(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n lessons to review', one: '1 lesson to review');
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewEachRound => 'A short round for each';
+
+  @override
+  String get wholeCurriculum => 'The whole curriculum';
+
+  @override
+  String levelsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n levels', one: '1 level');
+    return '$_temp0';
+  }
+
+  @override
+  String curriculumLessons(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n lessons', one: '1 lesson');
+    return '$_temp0';
+  }
+
+  @override
   String get journeyLate => 'Late';
 
   @override

@@ -241,7 +241,11 @@ GoRouter buildRouter(SessionCubit session) {
             routes: [
               journey(
                 '/family/journey',
-                routes: [page('courses', (_) => const ProgressPage()), page('homework', (_) => const HomeworkPage())],
+                routes: [
+                  page('courses', (_) => const ProgressPage()),
+                  page('homework', (_) => const HomeworkPage()),
+                  page('levels', (_) => const LevelsPage()),
+                ],
               ),
             ],
           ),

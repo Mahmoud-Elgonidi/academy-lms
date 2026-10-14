@@ -9,6 +9,7 @@ import '../../../core/state/load_cubit.dart';
 import '../../../shared/motion/motion.dart';
 import '../../../shared/widgets/lms.dart';
 import '../../../shared/widgets/load_view.dart';
+import '../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../data/journey_repository.dart';
 import '../domain/journey.dart';
 import 'calm/calm_journey.dart';
@@ -26,7 +27,7 @@ class LevelsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (c) => LoadCubit<JourneyMap>(
-      () => c.read<JourneyRepository>().map(),
+      () => c.read<JourneyRepository>().map(learnerId: c.learnerId()),
       refreshOn: c.read<Live>().on({Live.practice, Live.homework, Live.lessons}),
     )..load(),
     child: Scaffold(

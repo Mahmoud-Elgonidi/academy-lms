@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/time/formats.dart';
+import '../../../../core/time/local_time.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../core/time/course_days.dart';
 import '../../../../shared/widgets/course_state.dart';
@@ -17,10 +18,12 @@ import '../widgets/rewards.dart';
 import '../widgets/station_sheet.dart';
 
 /// The calm journey (secondary school, adult students, and everyone when
-/// the academy chose the calm look): the level now and how far, when the
-/// course ends at this pace, the next lesson with the last one's stars, the
-/// missions as a list, the levels as an accordion of their lessons (games
-/// to practise one, if wanted), the stars small and the week's chest.
+/// the academy chose the calm look): the subject and "your journey" above,
+/// the goal as one number (the share of the programme done, when it ends at
+/// this pace), where they are now (the level, its lessons as a bar, the
+/// next one), the week's plan by day (lessons with their join button,
+/// homework, rounds played), the reviews as one row, the whole curriculum a
+/// tap away, then the last lesson and the stars, small.
 class CalmJourney extends StatefulWidget {
   const CalmJourney({super.key, required this.map, required this.place, required this.name, this.header = true, this.courses = false});
 
@@ -28,7 +31,7 @@ class CalmJourney extends StatefulWidget {
   final JourneyPlace place;
   final String name;
 
-  /// Its own head (a student's tab); the family look has an app bar instead.
+  /// Its own head (a student's tab); the family look has its header instead.
   final bool header;
 
   /// A way to the courses' materials and reports (the family look, where the journey took Progress's place).
@@ -54,191 +57,373 @@ class _CalmJourneyState extends State<CalmJourney> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final c = context.colors;
     final course = _m.courses.where((c) => c.enrollmentId == _course).firstOrNull ?? _m.courses.firstOrNull;
-    final lesson = _m.nextLesson;
+    final here = course?.here;
+    final reviews = [
+      for (final m in _m.missions)
+        if (m.kind == 'review' && !m.done) m,
+    ];
+    final plan = [
+      for (final m in _m.missions)
+        if (m.kind != 'review') m,
+    ];
     final children = <Widget>[
-      if (widget.header)
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Text(l.journeyYours(widget.name), style: context.text.headlineSmall)],
-              ),
-            ),
-            const NotificationBell(),
-            GestureDetector(onTap: () => context.push('/account'), child: InitialAvatar(widget.name, size: 40)),
-          ],
-        ),
       if (_m.courses.length > 1)
         CourseChips(courses: _m.courses, selected: course?.enrollmentId, onPick: (id) => setState(() => _course = id)),
       if (course != null && course.days.stand != CourseStand.on)
         Align(alignment: AlignmentDirectional.centerStart, child: CourseStatePill(course.days)),
-      if (course == null) EmptyNote(l.journeyNoCourses, icon: Icons.menu_book_outlined) else LevelCard(course: course),
-      _NextLesson(map: _m, place: widget.place, lesson: lesson),
-      SectionLabel(l.journeyMissions),
-      MissionList(map: _m, place: widget.place, openStation: _openMission, skipLesson: true),
-      if (course != null && course.hasCurriculum && course.islands.isNotEmpty) ...[
-        SectionLabel(l.journeyLevels),
-        LmsCard(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              for (final island in course.islands) CalmLevelTile(course: course, island: island, onStation: (s) => _openStation(island, s)),
-            ],
-          ),
+      if (course == null) EmptyNote(l.journeyNoCourses, icon: Icons.menu_book_outlined) else _GoalCard(course: course),
+      if (course != null && course.hasCurriculum && here != null)
+        _NowCard(course: course, level: here, onOpen: (s) => _openStation(here, s)),
+      SectionHeader(l.weekPlan),
+      if (plan.isEmpty)
+        EmptyNote(l.journeyNoMissions, icon: Icons.event_available_outlined)
+      else
+        _WeekPlan(map: _m, place: widget.place, missions: plan, openStation: _openMission),
+      if (reviews.isNotEmpty)
+        ReviewsRow(
+          key: const Key('calm-reviews'),
+          title: l.lessonsToReview(reviews.length),
+          hint: l.reviewEachRound,
+          reviews: reviews,
+          map: _m,
+          place: widget.place,
+          openStation: _openMission,
         ),
-      ],
-      if (_m.rewards)
-        Row(
+      if (course != null && course.hasCurriculum && course.islands.isNotEmpty)
+        MenuGroup(
           children: [
-            Icon(Icons.star_rounded, color: c.reward, size: 20),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Text(
-                [
-                  l.journeyStarsCount(_m.stars.total),
-                  if (_m.stars.rank.label.isNotEmpty) _m.stars.rank.label,
-                  l.streak(_m.streak),
-                ].join(' · '),
-                style: context.text.bodySmall,
-              ),
+            MenuRow(
+              key: const Key('whole-curriculum'),
+              icon: Icons.menu_book_outlined,
+              label: l.wholeCurriculum,
+              value: [
+                l.levelsCount(course.islands.length),
+                l.curriculumLessons(course.lessons > 0 ? course.lessons : course.islands.fold(0, (n, i) => n + i.lessons)),
+              ].join(' · '),
+              onTap: () => context.go('${widget.place.base}/levels'),
             ),
-            if (_m.games != null)
-              TextButton.icon(
-                onPressed: () => context.go(widget.place.album),
-                icon: const Icon(Icons.pets_rounded, size: 18),
-                label: Text(l.gamesAlbum),
+            if (widget.courses)
+              MenuRow(
+                key: const Key('journey-courses'),
+                icon: Icons.description_outlined,
+                label: l.journeyCourses,
+                onTap: () => context.go('${widget.place.base}/courses'),
               ),
           ],
+        )
+      else if (widget.courses)
+        MenuGroup(
+          children: [
+            MenuRow(
+              key: const Key('journey-courses'),
+              icon: Icons.description_outlined,
+              label: l.journeyCourses,
+              onTap: () => context.go('${widget.place.base}/courses'),
+            ),
+          ],
         ),
-      if (_m.rewards && _m.chest != null) JourneyChestCard(map: _m, place: widget.place),
-      if (widget.courses)
+      if (_m.lastLesson != null)
         LmsCard(
-          padding: EdgeInsets.zero,
-          child: ListTile(
-            key: const Key('journey-courses'),
-            leading: const Icon(Icons.menu_book_outlined),
-            title: Text(l.journeyCourses, style: context.text.titleSmall),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.go('${widget.place.base}/courses'),
-          ),
+          child: LastLessonCard(lesson: _m.lastLesson!, rewards: _m.rewards),
         ),
+      if (_m.rewards) _StarsLine(map: _m, place: widget.place),
+      if (_m.rewards && _m.chest != null) JourneyChestCard(map: _m, place: widget.place),
     ];
-    return ListView(
-      padding: pagePadding,
+    final list = ListView(
+      padding: pagePadding.copyWith(top: widget.header ? Space.m : null),
       physics: const AlwaysScrollableScrollPhysics(),
       children: [for (final (i, w) in children.indexed) Padding(padding: const EdgeInsets.only(bottom: 12), child: w.appear(context, i))],
+    );
+    if (!widget.header) return list;
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(18, Space.m, 18, Space.xs),
+          child: AppHeader(
+            eyebrow: course == null ? null : [course.subject, ?course.program].where((x) => x.isNotEmpty).join(' · '),
+            title: l.journeyYours(widget.name),
+            actions: const [NotificationBell(framed: true)],
+          ),
+        ),
+        Expanded(child: list),
+      ],
     );
   }
 }
 
-/// Where a course stands: the level now (its share), the course's share,
-/// the lesson now, and when it ends at this pace.
-class LevelCard extends StatelessWidget {
-  const LevelCard({super.key, required this.course, this.trailing});
+/// The goal as one number: the share of the programme done, a bar, and when
+/// it ends at this pace (or that it is done).
+class _GoalCard extends StatelessWidget {
+  const _GoalCard({required this.course});
 
   final JourneyCourse course;
-  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    final here = course.here;
+    if (!course.hasCurriculum) return Note(l.journeyNoCurriculum, icon: Icons.map_outlined);
     return LmsCard(
+      key: const Key('calm-goal'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l.goalTitle, style: context.type.caption),
+          const Gap(Space.xs),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: CountUp(
+                  course.percent,
+                  suffix: '%',
+                  style: context.type.number.copyWith(fontSize: 40, color: c.brandDeep, height: 1),
+                ),
+              ),
+              const Gap(Space.s),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(course.finished ? l.programDone : l.goalDone, style: context.type.body),
+                ),
+              ),
+            ],
+          ),
+          const Gap(Space.m),
+          ProgressBar(course.percent / 100, height: 6),
+          if (!course.finished && course.finishOn != null) ...[
+            const Gap(Space.s),
+            Text(l.goalPace(course.finishOn!.date(context.locale)), style: context.type.caption),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Where they are now: the level (its place among the levels), its lessons
+/// as a bar of segments, and which lesson of how many with the next one.
+/// It opens the lesson they are on.
+class _NowCard extends StatelessWidget {
+  const _NowCard({required this.course, required this.level, required this.onOpen});
+
+  final JourneyCourse course;
+  final JourneyIsland level;
+  final ValueChanged<JourneyStation> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final stops = level.stations;
+    final at = stops.indexWhere((s) => s.here);
+    final here = at < 0 ? null : stops[at];
+    final next = at < 0 || at + 1 >= stops.length ? null : stops[at + 1];
+    return LmsCard(
+      key: const Key('calm-now'),
+      onTap: here == null ? null : () => onOpen(here),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(course.name, style: context.text.labelMedium),
-                    Text(here == null ? course.subject : here.title, style: context.text.titleLarge),
-                    if (here != null) Text(l.journeyLevelOf(here.index, course.islands.length), style: context.text.bodySmall),
-                  ],
-                ),
-              ),
-              CountUp(
-                here?.percent ?? course.percent,
-                suffix: '%',
-                style: context.text.headlineMedium?.copyWith(color: c.brand),
-              ),
+              Expanded(child: Text(l.nowTitle, style: context.type.caption)),
+              Text(l.journeyLevelOf(level.index, course.islands.length), style: context.type.caption),
             ],
           ),
-          const SizedBox(height: 10),
-          ProgressBar((here?.percent ?? course.percent) / 100, height: 6),
-          const SizedBox(height: 10),
-          if (!course.hasCurriculum)
-            Text(l.journeyNoCurriculum, style: context.text.bodySmall)
-          else if (course.finished)
-            Text(l.programDone, style: context.text.titleMedium?.copyWith(color: c.brandDeep))
-          else
-            Text(
-              [
-                l.percentDone(course.percent),
-                if (course.currentTitle != null) l.hereNow(course.currentTitle!),
-                if (course.finishOn != null) '${l.finishOn}: ${course.finishOn!.date(context.locale)}',
-              ].join(' · '),
-              style: context.text.bodySmall,
-            ),
-          ?trailing,
+          const Gap(Space.xs),
+          Text(level.title, style: context.type.cardTitle.copyWith(fontSize: 17)),
+          const Gap(Space.m),
+          Row(
+            children: [
+              for (final (i, s) in stops.indexed) ...[
+                if (i > 0) const Gap(4),
+                Expanded(
+                  child: Container(
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: s.here ? c.brand.withValues(alpha: 0.45) : (s.todo ? c.line : c.brand),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          if (here != null) ...[
+            const Gap(Space.s),
+            Text([l.stationOf(at + 1, stops.length), if (next != null) l.nextIs(next.title)].join(' · '), style: context.type.caption),
+          ],
         ],
       ),
     );
   }
 }
 
-/// The next lesson: when, the join button once the room opens, and the last lesson's stars under it.
-class _NextLesson extends StatelessWidget {
-  const _NextLesson({required this.map, required this.place, required this.lesson});
+/// The week ahead by day: each day's lessons (the join button once the room
+/// opens), homework (when it is due, handed in or not) and rounds played.
+class _WeekPlan extends StatelessWidget {
+  const _WeekPlan({required this.map, required this.place, required this.missions, required this.openStation});
 
   final JourneyMap map;
   final JourneyPlace place;
-  final Mission? lesson;
+  final List<Mission> missions;
+  final void Function(Mission m) openStation;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    LocalTime? at(Mission m) => m.kind == 'lesson' ? m.startsAt : m.dueAt;
+    final days = <String, (String, List<Mission>)>{};
+    for (final m in missions) {
+      final t = at(m);
+      final key = t?.localDate ?? '~';
+      days.putIfAbsent(key, () => (t == null ? l.planNoDay : t.shortDay(context), [])).$2.add(m);
+    }
+    final keys = days.keys.toList()..sort();
+    return LmsCard(
+      key: const Key('week-plan'),
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (final (i, key) in keys.indexed) ...[
+            if (i > 0) const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Space.l, vertical: Space.m),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 64,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(days[key]!.$1, style: context.type.label.copyWith(color: context.colors.muted)),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final (j, m) in days[key]!.$2.indexed) ...[
+                          if (j > 0) const Gap(Space.m),
+                          _PlanItem(mission: m, map: map, place: place, openStation: () => openStation(m)),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// One thing in the plan: what and when, then its state; a lesson's join
+/// button under it, a homework opens where it is handed in (or plays).
+class _PlanItem extends StatelessWidget {
+  const _PlanItem({required this.mission, required this.map, required this.place, required this.openStation});
+
+  final Mission mission;
+  final JourneyMap map;
+  final JourneyPlace place;
+  final VoidCallback openStation;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    final m = lesson;
-    final last = map.lastLesson;
-    return LmsCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l.nextLesson, style: context.text.labelMedium),
-          const SizedBox(height: 4),
-          if (m == null)
-            Text(l.noNextLesson, style: context.text.bodyMedium?.copyWith(color: c.muted))
-          else ...[
-            Text(m.startsAt?.when(context) ?? '', style: context.text.titleLarge),
-            Text(
-              [m.title, ?lessonOpens(context, m), if (m.stars != null && map.rewards) l.journeyLessonCanBring(m.stars!)].join(' · '),
-              style: context.text.bodySmall,
-            ),
-            if (!map.guardian) ...[
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: m.joinOpen ? () => JourneyActions(context, map, place).join(m) : null,
-                  icon: const Icon(Icons.videocam_rounded),
-                  label: Text(
-                    m.joinOpen || m.joinOpensAt == null ? l.joinLesson : '${l.joinLesson} · ${m.joinOpensAt!.clock(context.locale)}',
-                  ),
-                ).shimmerIf(context, m.joinOpen, color: c.brandSoft),
+    final m = mission;
+    final action = missionAction(context, map, place, m, openStation: openStation);
+    final station = map.find(m.stationId)?.$3;
+    final lesson = m.kind == 'lesson';
+    final title = lesson
+        ? [m.kindLabel, m.title, if (m.startsAt != null) m.startsAt!.clock(context.locale)].join(' · ')
+        : '${m.kindLabel}: ${m.title}';
+    final (line, tone) = switch (m) {
+      _ when m.done => ([l.doneMark, if (m.result != null) l.gamesScore(m.result!.correct, m.result!.total)].join(' · '), c.muted),
+      _ when m.late => (l.journeyLate, c.dangerInk),
+      _ when lesson => ([?station?.title, ?lessonOpens(context, m)].join(' · '), c.muted),
+      _ => ([l.notHandedIn, if (m.dueAt != null) l.dueBy(m.dueAt!.clock(context.locale))].join(' · '), c.attentionInk),
+    };
+    final opens = !lesson && !m.done && action != null;
+    final body = Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: context.type.cardTitle.copyWith(
+                  decoration: m.done ? TextDecoration.lineThrough : null,
+                  color: m.done ? c.muted : null,
+                ),
               ),
+              if (line.isNotEmpty) Text(line, style: context.type.caption.copyWith(color: tone)),
             ],
-          ],
-          if (last != null) ...[const Divider(height: 20), LastLessonCard(lesson: last, rewards: map.rewards)],
+          ),
+        ),
+        if (m.done) Icon(Icons.check_rounded, color: c.brand, size: 20) else if (opens) Icon(Icons.chevron_right_rounded, color: c.faint),
+      ],
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (opens)
+          InkWell(
+            key: Key('plan-${m.key}'),
+            onTap: PressScale.withPress(context, action.onTap),
+            borderRadius: BorderRadius.circular(8),
+            child: body,
+          )
+        else
+          KeyedSubtree(key: Key('plan-${m.key}'), child: body),
+        if (lesson && action != null) ...[
+          const Gap(Space.s),
+          PrimaryAction(action.label, icon: action.icon, onPressed: action.onTap).shimmerIf(context, m.joinOpen, color: c.brandSoft),
         ],
-      ),
+      ],
+    );
+  }
+}
+
+/// The stars, small: how many, the rank, the lessons in a row, and the album.
+class _StarsLine extends StatelessWidget {
+  const _StarsLine({required this.map, required this.place});
+
+  final JourneyMap map;
+  final JourneyPlace place;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    return Row(
+      children: [
+        Icon(Icons.star_rounded, color: c.reward, size: 20),
+        const Gap(Space.xs),
+        Expanded(
+          child: Text(
+            [
+              l.journeyStarsCount(map.stars.total),
+              if (map.stars.rank.label.isNotEmpty) map.stars.rank.label,
+              l.streak(map.streak),
+            ].join(' · '),
+            style: context.type.caption,
+          ),
+        ),
+        if (map.games != null)
+          TextButton.icon(
+            onPressed: () => context.go(place.album),
+            icon: const Icon(Icons.pets_rounded, size: 18),
+            label: Text(l.gamesAlbum),
+          ),
+      ],
     );
   }
 }

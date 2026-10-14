@@ -45,6 +45,15 @@ extension LocalTimeFormats on LocalTime {
     return day(context.locale);
   }
 
+  /// A plan's day: "Today", "Tomorrow", the weekday in the week ahead, else "7 Oct".
+  String shortDay(BuildContext context) {
+    final now = DateTime.now().toUtc().add(offset);
+    final days = DateTime.utc(wall.year, wall.month, wall.day).difference(DateTime.utc(now.year, now.month, now.day)).inDays;
+    if (days == 0) return context.l10n.today;
+    if (days == 1) return context.l10n.tomorrow;
+    return DateFormat(days > 1 && days < 7 ? 'EEEE' : 'd MMM', context.locale).format(wall);
+  }
+
   /// "Today · 7:00 PM".
   String when(BuildContext context) => '${relativeDay(context)} · ${clock(context.locale)}';
 

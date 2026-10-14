@@ -2570,6 +2570,65 @@
     }
   },
   "allLevels": "كل المستويات",
+  "goalTitle": "هدفك: تخلّص البرنامج",
+  "goalDone": "خلّصتهم من البرنامج",
+  "goalPace": "على السرعة دي هتخلّص يوم {day}",
+  "@goalPace": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "nowTitle": "دلوقتي",
+  "stationOf": "المحطة {i} من {n}",
+  "@stationOf": {
+    "placeholders": {
+      "i": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "nextIs": "الجاية: {title}",
+  "@nextIs": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "weekPlan": "خطة الأسبوع",
+  "notHandedIn": "لسه ماتسلّمش",
+  "planNoDay": "من غير ميعاد",
+  "lessonsToReview": "{n, plural, =1{درس محتاج مراجعة} =2{درسين محتاجين مراجعة} few{{n} دروس محتاجة مراجعة} other{{n} درس محتاجين مراجعة}}",
+  "@lessonsToReview": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewEachRound": "جولة قصيرة لكل درس",
+  "wholeCurriculum": "المنهج كله",
+  "levelsCount": "{n, plural, =1{مستوى واحد} =2{مستويين} few{{n} مستويات} other{{n} مستوى}}",
+  "@levelsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "curriculumLessons": "{n, plural, =1{درس واحد} =2{درسين} few{{n} دروس} other{{n} درس}}",
+  "@curriculumLessons": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "journeyLate": "متأخر",
   "journeyChestTitle": "صندوق الأسبوع",
   "journeyChestProgress": "{done} من {total} مهمات الأسبوع",

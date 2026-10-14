@@ -383,9 +383,11 @@ void main() {
     await _close(tester);
   });
 
-  testWidgets('secondary school gets the calm journey: the level, the next lesson with the last one\'s stars, the levels', (tester) async {
+  testWidgets('secondary school gets the calm journey: the goal, where it is now, the week by day, reviews and the curriculum', (
+    tester,
+  ) async {
     final app = await TestApp.create(accounts: [fxStudent('teen')]);
-    fxStudentRoutes(app.api, 'teen', fxJourney(stage: 'teen', stars: 55, may: false));
+    fxStudentRoutes(app.api, 'teen', fxJourney(stage: 'teen', stars: 55, may: false, twoReviews: true));
     await _open(tester, app, size: const Size(420, 2400));
 
     final nav = find.byType(NavigationBar);
@@ -393,14 +395,38 @@ void main() {
       expect(find.descendant(of: nav, matching: find.text(tab)), findsOneWidget);
     }
     expect(find.descendant(of: nav, matching: find.text('أهدافي')), findsNothing);
+    expect(find.text('قرآن · حفظ · حفظ جزء عمّ'), findsOneWidget);
     expect(find.text('رحلتك يا يوسف'), findsOneWidget);
+    // One number with what it means.
+    expect(find.text('هدفك: تخلّص البرنامج'), findsOneWidget);
+    expect(find.text('خلّصتهم من البرنامج'), findsOneWidget);
+    expect(find.textContaining('على السرعة دي هتخلّص يوم'), findsOneWidget);
+    // Where they are now: the level and the lesson of how many, never "0%".
     expect(find.text('المستوى 2 من 3'), findsOneWidget);
-    expect(find.text('الحصة الجاية'), findsOneWidget);
+    expect(find.text('سور أطول'), findsOneWidget);
+    expect(find.text('المحطة 2 من 3 · الجاية: الهمزة والعصر'), findsOneWidget);
+    expect(find.text('0%'), findsNothing);
+    // The week by day; the room is not open yet, so no join button.
+    expect(find.text('خطة الأسبوع'), findsOneWidget);
+    expect(find.text('واجب: سجّل سورة قريش'), findsOneWidget);
+    expect(find.textContaining('لسه ماتسلّمش · قبل '), findsOneWidget);
+    expect(find.textContaining('حصة · قرآن · حفظ · '), findsOneWidget);
+    expect(find.text('ادخل الحصة'), findsNothing);
+    expect(find.text('درسين محتاجين مراجعة'), findsOneWidget);
+    expect(find.text('3 مستويات · 6 دروس'), findsOneWidget);
     expect(find.textContaining('في الميعاد · فضلت لآخر الحصة'), findsOneWidget);
+
+    // The whole curriculum, the ahead level saying what opens it.
+    await tester.tap(find.byKey(const Key('whole-curriculum')));
+    await frames(tester, 12);
     expect(find.text('المستوى 2 · سور أطول'), findsOneWidget);
-    // Games are optional on a station; a closed day says why and starts nothing.
-    await tester.tap(find.text('قريش والفيل').last);
+    await tester.tap(find.byType(BackButton));
+    await frames(tester, 12);
+
+    // Now opens the lesson they are on.
+    await tester.tap(find.byKey(const Key('calm-now')));
     await frames(tester, 10);
+    // Games are optional on a station; a closed day says why and starts nothing.
     expect(find.text('خلصت دقايق اللعب النهارده. نكمل بكرة! 🌙'), findsOneWidget);
     await tester.tap(find.text('جسر السلاحف'));
     await frames(tester, 8);

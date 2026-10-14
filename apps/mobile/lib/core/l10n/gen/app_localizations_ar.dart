@@ -3488,6 +3488,70 @@ class AppLocalizationsAr extends AppLocalizations {
   String get allLevels => 'كل المستويات';
 
   @override
+  String get goalTitle => 'هدفك: تخلّص البرنامج';
+
+  @override
+  String get goalDone => 'خلّصتهم من البرنامج';
+
+  @override
+  String goalPace(String day) {
+    return 'على السرعة دي هتخلّص يوم $day';
+  }
+
+  @override
+  String get nowTitle => 'دلوقتي';
+
+  @override
+  String stationOf(int i, int n) {
+    return 'المحطة $i من $n';
+  }
+
+  @override
+  String nextIs(String title) {
+    return 'الجاية: $title';
+  }
+
+  @override
+  String get weekPlan => 'خطة الأسبوع';
+
+  @override
+  String get notHandedIn => 'لسه ماتسلّمش';
+
+  @override
+  String get planNoDay => 'من غير ميعاد';
+
+  @override
+  String lessonsToReview(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n درس محتاجين مراجعة',
+      few: '$n دروس محتاجة مراجعة',
+      two: 'درسين محتاجين مراجعة',
+      one: 'درس محتاج مراجعة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewEachRound => 'جولة قصيرة لكل درس';
+
+  @override
+  String get wholeCurriculum => 'المنهج كله';
+
+  @override
+  String levelsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n مستوى', few: '$n مستويات', two: 'مستويين', one: 'مستوى واحد');
+    return '$_temp0';
+  }
+
+  @override
+  String curriculumLessons(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n درس', few: '$n دروس', two: 'درسين', one: 'درس واحد');
+    return '$_temp0';
+  }
+
+  @override
   String get journeyLate => 'متأخر';
 
   @override

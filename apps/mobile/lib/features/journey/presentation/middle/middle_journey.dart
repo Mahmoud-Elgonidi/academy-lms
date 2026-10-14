@@ -70,7 +70,16 @@ class _MiddleJourneyState extends State<MiddleJourney> {
       SectionHeader(l.today),
       if (today.isEmpty && !grouped) EmptyNote(l.journeyNoMissions, icon: Icons.flag_outlined),
       for (final m in today) MissionTile(mission: m, map: _m, place: widget.place, openStation: () => _openMission(m)),
-      if (grouped) _ReviewsRow(reviews: reviews, onOpen: () => _showReviews(reviews)),
+      if (grouped)
+        ReviewsRow(
+          key: const Key('middle-reviews'),
+          title: l.reviewsWaiting(reviews.length),
+          hint: l.reviewsHint,
+          reviews: reviews,
+          map: _m,
+          place: widget.place,
+          openStation: _openMission,
+        ),
       if (_m.lastLesson != null)
         LmsCard(
           child: LastLessonCard(lesson: _m.lastLesson!, rewards: _m.rewards),
@@ -109,51 +118,6 @@ class _MiddleJourneyState extends State<MiddleJourney> {
           ),
         ),
       ],
-    );
-  }
-
-  /// The reviews waiting, each a short game, in one sheet.
-  Future<void> _showReviews(List<Mission> reviews) {
-    final l = context.l10n;
-    return showActionSheet<void>(
-      context,
-      builder: (sheet) => SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(Space.xl - 4, 0, Space.xl - 4, Space.xl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                const IconBadge(Icons.replay_rounded, tone: Tone.info, size: 44),
-                const Gap(Space.m),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Semantics(header: true, child: Text(l.reviewsWaiting(reviews.length), style: context.type.title)),
-                      Text(l.reviewsHint, style: context.type.caption),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const Gap(Space.l),
-            for (final m in reviews)
-              Padding(
-                padding: const EdgeInsets.only(bottom: Space.s),
-                child: MissionTile(
-                  mission: m,
-                  map: _m,
-                  place: widget.place,
-                  openStation: () {
-                    Navigator.of(sheet).pop();
-                    _openMission(m);
-                  },
-                ),
-              ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -293,41 +257,6 @@ class _StarsCard extends StatelessWidget {
               if (map.games != null && map.rewards) chip(Icons.pets_rounded, l.gamesOf(map.games!.found, map.games!.total), c.brandSoft),
             ],
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The reviews waiting, as one row that opens them.
-class _ReviewsRow extends StatelessWidget {
-  const _ReviewsRow({required this.reviews, required this.onOpen});
-
-  final List<Mission> reviews;
-  final VoidCallback onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final stars = reviews.fold<int>(0, (n, m) => n + (m.stars ?? 0));
-    return LmsCard(
-      key: const Key('middle-reviews'),
-      onTap: onOpen,
-      child: Row(
-        children: [
-          const IconBadge(Icons.replay_rounded, tone: Tone.info, size: 40),
-          const Gap(Space.m),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l.reviewsWaiting(reviews.length), style: context.type.cardTitle),
-                Text([l.reviewsHint, if (stars > 0) '+$stars ★'].join(' · '), style: context.type.caption),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right_rounded, color: c.faint),
         ],
       ),
     );

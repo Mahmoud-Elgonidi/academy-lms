@@ -5816,6 +5816,90 @@ abstract class AppLocalizations {
   /// **'كل المستويات'**
   String get allLevels;
 
+  /// No description provided for @goalTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'هدفك: تخلّص البرنامج'**
+  String get goalTitle;
+
+  /// No description provided for @goalDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'خلّصتهم من البرنامج'**
+  String get goalDone;
+
+  /// No description provided for @goalPace.
+  ///
+  /// In ar, this message translates to:
+  /// **'على السرعة دي هتخلّص يوم {day}'**
+  String goalPace(String day);
+
+  /// No description provided for @nowTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'دلوقتي'**
+  String get nowTitle;
+
+  /// No description provided for @stationOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'المحطة {i} من {n}'**
+  String stationOf(int i, int n);
+
+  /// No description provided for @nextIs.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجاية: {title}'**
+  String nextIs(String title);
+
+  /// No description provided for @weekPlan.
+  ///
+  /// In ar, this message translates to:
+  /// **'خطة الأسبوع'**
+  String get weekPlan;
+
+  /// No description provided for @notHandedIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه ماتسلّمش'**
+  String get notHandedIn;
+
+  /// No description provided for @planNoDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'من غير ميعاد'**
+  String get planNoDay;
+
+  /// No description provided for @lessonsToReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{درس محتاج مراجعة} =2{درسين محتاجين مراجعة} few{{n} دروس محتاجة مراجعة} other{{n} درس محتاجين مراجعة}}'**
+  String lessonsToReview(int n);
+
+  /// No description provided for @reviewEachRound.
+  ///
+  /// In ar, this message translates to:
+  /// **'جولة قصيرة لكل درس'**
+  String get reviewEachRound;
+
+  /// No description provided for @wholeCurriculum.
+  ///
+  /// In ar, this message translates to:
+  /// **'المنهج كله'**
+  String get wholeCurriculum;
+
+  /// No description provided for @levelsCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{مستوى واحد} =2{مستويين} few{{n} مستويات} other{{n} مستوى}}'**
+  String levelsCount(int n);
+
+  /// No description provided for @curriculumLessons.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{درس واحد} =2{درسين} few{{n} دروس} other{{n} درس}}'**
+  String curriculumLessons(int n);
+
   /// No description provided for @journeyLate.
   ///
   /// In ar, this message translates to:
