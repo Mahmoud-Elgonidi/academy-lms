@@ -304,9 +304,9 @@ final class E2eResetSeeder extends Seeder
             $today = collect(['Africa/Cairo', (string) (DB::table('users')->where('id', $me)->value('timezone') ?: 'UTC')])
                 ->map(fn (string $zone) => $now->setTimezone($zone)->startOfDay()->utc())->max();
 
-            // A room opens 10 minutes before the lesson and closes 10 minutes after its end.
+            // A room opens 10 minutes before the lesson and closes 10 minutes after its end: one open for 5 minutes more will do.
             $lesson = Session::query()->whereIn('status', ['scheduled', 'in_progress'])
-                ->where('starts_at', '>=', $today)->where('starts_at', '<=', $now->addMinutes(10))->where('ends_at', '>=', $now->addMinutes(5))
+                ->where('starts_at', '>=', $today)->where('starts_at', '<=', $now->addMinutes(10))->where('ends_at', '>=', $now->subMinutes(5))
                 ->whereHas('participants', fn ($q) => $q->where('user_id', $me)->where('role', $role))
                 ->orderByDesc('ends_at')->first();
 
@@ -318,16 +318,19 @@ final class E2eResetSeeder extends Seeder
                 $pairs = [[$khaled, $ziad], ...$others->unique()->map(fn ($other) => $role === 'teacher' ? [$khaled, (string) $other] : [(string) $other, $ziad])];
                 // Now, or a few minutes on when one of them is finishing a lesson; a little before when that is today too.
                 $starts = collect([...range(0, 10), ...range(-1, -5)])->map(fn (int $m) => $now->addMinutes($m)->startOfMinute())->filter(fn ($at) => $at >= $today);
-                foreach ($pairs as [$teacher, $student]) {
-                    foreach ($starts as $at) {
-                        try {
-                            $lesson = app(ScheduleSession::class)->handle(new NewSession(
-                                teacherId: $teacher, studentId: $student, subjectId: (string) $course->subject_id, startsAt: $at,
-                                durationMin: 45, anchorTimezone: 'Africa/Cairo',
-                            ));
-                            break 2;
-                        } catch (ValidationException) {
-                            // One of them has a lesson then.
+                // A short lesson when they are between two of theirs.
+                foreach ([45, 20] as $minutes) {
+                    foreach ($pairs as [$teacher, $student]) {
+                        foreach ($starts as $at) {
+                            try {
+                                $lesson = app(ScheduleSession::class)->handle(new NewSession(
+                                    teacherId: $teacher, studentId: $student, subjectId: (string) $course->subject_id, startsAt: $at,
+                                    durationMin: $minutes, anchorTimezone: 'Africa/Cairo',
+                                ));
+                                break 3;
+                            } catch (ValidationException) {
+                                // One of them has a lesson then.
+                            }
                         }
                     }
                 }
