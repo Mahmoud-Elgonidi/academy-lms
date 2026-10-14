@@ -1479,6 +1479,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreWork => 'My work';
 
   @override
+  String get moreStudy => 'Studying';
+
+  @override
+  String get moreHelp => 'Help';
+
+  @override
+  String get yourAccount => 'Your account and settings';
+
+  @override
   String get moreAccountSettings => 'Account and settings';
 
   @override
@@ -2678,7 +2687,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tellUsNavKids => 'Tell a grown-up';
 
   @override
-  String get tellUsNavMiddle => 'Tell us';
+  String get tellUsNavMiddle => 'Tell us if something bothers you';
 
   @override
   String get tellUsLead =>

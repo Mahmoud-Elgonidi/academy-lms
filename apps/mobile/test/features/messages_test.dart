@@ -70,7 +70,9 @@ void main() {
     // A child's and middle school's own tab.
     expect(targetOf('conversation', 'k1', Area.kids), '/kids/messages/k1');
     expect(targetOf('conversation', null, Area.middle), '/middle/messages');
-    expect(targetOf('conversation', null, Area.teen), '/account/messages');
+    // Secondary school's under their More.
+    expect(targetOf('conversation', null, Area.teen), '/teen/more/messages');
+    expect(targetOf('conversation', 'k1', Area.teen), '/teen/more/messages/k1');
   });
 
   testWidgets('a guardian opens Messages from Me, starts talking with the teacher and hears what was hidden', (tester) async {

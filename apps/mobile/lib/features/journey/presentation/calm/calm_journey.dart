@@ -85,7 +85,7 @@ class _CalmJourneyState extends State<CalmJourney> {
           padding: EdgeInsets.zero,
           child: Column(
             children: [
-              for (final island in course.islands) _LevelTile(course: course, island: island, onStation: (s) => _openStation(island, s)),
+              for (final island in course.islands) CalmLevelTile(course: course, island: island, onStation: (s) => _openStation(island, s)),
             ],
           ),
         ),
@@ -244,8 +244,8 @@ class _NextLesson extends StatelessWidget {
 }
 
 /// A level in the accordion: open where the learner is; its lessons with their state.
-class _LevelTile extends StatelessWidget {
-  const _LevelTile({required this.course, required this.island, required this.onStation});
+class CalmLevelTile extends StatelessWidget {
+  const CalmLevelTile({required this.course, required this.island, required this.onStation, super.key});
 
   final JourneyCourse course;
   final JourneyIsland island;

@@ -49,16 +49,21 @@ Future<Attachment?> pickAttachment(BuildContext context) async {
 /// "Help" (a family) or "Support" (a teacher): writing to the academy, and the
 /// person's own tickets, the active ones first. It follows them live.
 class HelpPage extends StatelessWidget {
-  const HelpPage({required this.scope, super.key});
+  const HelpPage({required this.scope, this.at, super.key});
 
   final HelpScope scope;
 
+  /// Where this page is, when the look keeps it somewhere of its own (secondary school's More).
+  final String? at;
+
   /// Where a ticket of this look opens.
-  String get base => switch (scope) {
-    HelpScope.family => '/family/me/help',
-    HelpScope.self => '/account/help',
-    HelpScope.teacher => '/teach/more/help',
-  };
+  String get base =>
+      at ??
+      switch (scope) {
+        HelpScope.family => '/family/me/help',
+        HelpScope.self => '/account/help',
+        HelpScope.teacher => '/teach/more/help',
+      };
 
   @override
   Widget build(BuildContext context) {

@@ -1494,6 +1494,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get moreWork => 'شغلي';
 
   @override
+  String get moreStudy => 'الدراسة';
+
+  @override
+  String get moreHelp => 'مساعدة';
+
+  @override
+  String get yourAccount => 'حسابك وإعداداتك';
+
+  @override
   String get moreAccountSettings => 'الحساب والإعدادات';
 
   @override
@@ -2758,7 +2767,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tellUsNavKids => 'قول لحد كبير';
 
   @override
-  String get tellUsNavMiddle => 'قولّنا';
+  String get tellUsNavMiddle => 'قولّنا لو فيه حاجة مضايقاك';
 
   @override
   String get tellUsLead =>

@@ -118,7 +118,7 @@ void main() {
     expect(targetOf('my_data', 'r1', Area.teacher), '/teach/more/my-data');
     expect(targetOf('account', 'u1', Area.family), '/family/me');
     expect(targetOf('account', 'u1', Area.teacher), '/account');
-    expect(targetOf('account', 'u1', Area.teen), '/account');
+    expect(targetOf('account', 'u1', Area.teen), '/teen/more');
   });
 
   test('reads what may be put right, the choices and the open correction', () {

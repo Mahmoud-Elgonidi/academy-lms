@@ -26,6 +26,7 @@ import '../../features/challenges/presentation/pages/album_page.dart';
 import '../../features/games/presentation/album_page.dart';
 import '../../features/homework/presentation/pages/homework_page.dart';
 import '../../features/journey/presentation/journey_page.dart';
+import '../../features/journey/presentation/levels_page.dart';
 import '../../features/profile/presentation/pages/student_more_page.dart';
 import '../../features/messages/presentation/conversation_page.dart';
 import '../../features/messages/presentation/messages_page.dart';
@@ -75,16 +76,16 @@ GoRouter buildRouter(SessionCubit session) {
       StatefulShellBranch(routes: [page(path, build, routes: routes)]);
 
   // Writing to the academy, and each ticket, under the look's own place: Me, More, or a student's account.
-  GoRoute help(HelpScope scope) => page(
+  GoRoute help(HelpScope scope, {String? at}) => page(
     'help',
-    (_) => HelpPage(scope: scope),
+    (_) => HelpPage(scope: scope, at: at),
     routes: [page(':id', (s) => TicketPage(ticketId: s.pathParameters['id']!))],
   );
 
   // Conversations with a teacher or a student, and each one, under the look's own place: Me, More, or a student's account.
-  GoRoute messages(MessagesScope scope) => page(
+  GoRoute messages(MessagesScope scope, {String? at}) => page(
     'messages',
-    (_) => MessagesPage(scope: scope),
+    (_) => MessagesPage(scope: scope, at: at),
     routes: [page(':id', (s) => ConversationPage(conversationId: s.pathParameters['id']!))],
   );
 
@@ -294,10 +295,18 @@ GoRouter buildRouter(SessionCubit session) {
           ShellTab(Icons.more_horiz_rounded, Icons.more_horiz_rounded, l.navMore),
         ],
         branches: [
-          StatefulShellBranch(routes: [journey('/middle/journey')]),
+          StatefulShellBranch(
+            routes: [
+              journey('/middle/journey', routes: [page('levels', (_) => const LevelsPage())]),
+            ],
+          ),
           branch('/middle/lessons', (_) => const LessonsPage()),
           StatefulShellBranch(routes: [messagesTab('/middle/messages')]),
-          branch('/middle/more', (_) => const StudentMorePage(), routes: [page('homework', (_) => const HomeworkPage())]),
+          branch(
+            '/middle/more',
+            (_) => const StudentMorePage(),
+            routes: [page('homework', (_) => const HomeworkPage()), page('recordings', (_) => const RecordingsPage(teacher: false))],
+          ),
         ],
       ),
       moved('/middle/home', '/middle/journey'),
@@ -305,18 +314,34 @@ GoRouter buildRouter(SessionCubit session) {
       moved('/middle/quests', '/middle/journey', under: ['badges']),
       moved('/middle/homework', '/middle/more/homework'),
 
+      // Secondary school: the journey, lessons, homework, reports, and More (the account, messages, help).
       _studentShell(
         tabs: (l) => [
           ShellTab(Icons.map_outlined, Icons.map_rounded, l.navJourney),
           ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, l.navMyLessons),
-          ShellTab(Icons.assignment_outlined, Icons.assignment_rounded, l.navHomework),
-          ShellTab(Icons.article_outlined, Icons.article_rounded, l.navReports),
+          ShellTab(Icons.edit_outlined, Icons.edit_rounded, l.navHomework),
+          ShellTab(Icons.description_outlined, Icons.description_rounded, l.navReports),
+          ShellTab(Icons.more_horiz_rounded, Icons.more_horiz_rounded, l.navMore),
         ],
         branches: [
-          StatefulShellBranch(routes: [journey('/teen/journey')]),
+          StatefulShellBranch(
+            routes: [
+              journey('/teen/journey', routes: [page('levels', (_) => const LevelsPage())]),
+            ],
+          ),
           branch('/teen/lessons', (_) => const LessonsPage()),
           branch('/teen/homework', (_) => const HomeworkPage()),
           branch('/teen/reports', (_) => const ReportsPage()),
+          branch(
+            '/teen/more',
+            (_) => const StudentMorePage(),
+            routes: [
+              page('recordings', (_) => const RecordingsPage(teacher: false)),
+              page('tell-us', (_) => const TellUsPage(scope: ConcernScope.self)),
+              help(HelpScope.self, at: '/teen/more/help'),
+              messages(MessagesScope.self, at: '/teen/more/messages'),
+            ],
+          ),
         ],
       ),
       GoRoute(

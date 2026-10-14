@@ -2582,6 +2582,24 @@ abstract class AppLocalizations {
   /// **'شغلي'**
   String get moreWork;
 
+  /// No description provided for @moreStudy.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدراسة'**
+  String get moreStudy;
+
+  /// No description provided for @moreHelp.
+  ///
+  /// In ar, this message translates to:
+  /// **'مساعدة'**
+  String get moreHelp;
+
+  /// No description provided for @yourAccount.
+  ///
+  /// In ar, this message translates to:
+  /// **'حسابك وإعداداتك'**
+  String get yourAccount;
+
   /// No description provided for @moreAccountSettings.
   ///
   /// In ar, this message translates to:
@@ -4679,7 +4697,7 @@ abstract class AppLocalizations {
   /// No description provided for @tellUsNavMiddle.
   ///
   /// In ar, this message translates to:
-  /// **'قولّنا'**
+  /// **'قولّنا لو فيه حاجة مضايقاك'**
   String get tellUsNavMiddle;
 
   /// No description provided for @tellUsLead.

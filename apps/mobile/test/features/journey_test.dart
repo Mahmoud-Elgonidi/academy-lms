@@ -371,7 +371,7 @@ void main() {
     await _open(tester, app, size: const Size(420, 2400));
 
     final nav = find.byType(NavigationBar);
-    for (final tab in ['رحلتي', 'حصصي', 'الواجبات', 'التقارير']) {
+    for (final tab in ['رحلتي', 'حصصي', 'الواجبات', 'التقارير', 'المزيد']) {
       expect(find.descendant(of: nav, matching: find.text(tab)), findsOneWidget);
     }
     expect(find.descendant(of: nav, matching: find.text('أهدافي')), findsNothing);

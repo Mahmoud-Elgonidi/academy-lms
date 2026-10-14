@@ -71,7 +71,7 @@ class _MiddleJourneyState extends State<MiddleJourney> {
         Note(l.journeyNoCurriculum, icon: Icons.map_outlined)
       else ...[
         SectionLabel(l.journeyLevels, trailing: Text('${course.percent}%', style: context.text.titleSmall)),
-        for (final island in course.islands) _Level(course: course, island: island, onStation: (s) => _openStation(island, s)),
+        for (final island in course.islands) MiddleLevel(course: course, island: island, onStation: (s) => _openStation(island, s)),
       ],
     ];
     return ListView(
@@ -168,8 +168,8 @@ class _StarsCard extends StatelessWidget {
 /// A level: its number, title and share done, then its lessons as a path
 /// of stops (done ✓, review ↺, here, ahead locked). A level ahead says what
 /// opens it.
-class _Level extends StatelessWidget {
-  const _Level({required this.course, required this.island, required this.onStation});
+class MiddleLevel extends StatelessWidget {
+  const MiddleLevel({required this.course, required this.island, required this.onStation, super.key});
 
   final JourneyCourse course;
   final JourneyIsland island;
