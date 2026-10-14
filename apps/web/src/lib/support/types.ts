@@ -2,7 +2,7 @@ import type { LocalTime } from '../time';
 
 /**
  * A family's or a teacher's tickets to the academy, as /v1/support answers
- * them (the same as "Help" in /my and "Support" in /teach). Each person sees
+ * them ("Help" in /my and in /teach). Each person sees
  * only their own, never the academy's internal notes or decisions.
  */
 export type TicketKind = 'complaint' | 'billing' | 'technical' | 'other';

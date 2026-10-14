@@ -35,7 +35,7 @@ test.describe('the teacher (Khaled)', () => {
     await tour(page, ['/teach', '/teach/week', '/teach/reports', '/teach/hours'], 'en');
     // The side menu gets around.
     await page.goto('/ar/teach');
-    await page.getByRole('navigation', { name: 'القايمة' }).first().getByRole('link', { name: 'الدعم' }).click();
+    await page.getByRole('navigation', { name: 'القايمة' }).first().getByRole('link', { name: 'المساعدة' }).click();
     await expect(page).toHaveURL(/\/ar\/teach\/help$/);
   });
 });

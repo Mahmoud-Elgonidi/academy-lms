@@ -86,6 +86,7 @@
     "teaching": "Teaching",
     "me": "Me",
     "menu": "Menu",
+    "more": "More",
     "classic": {
       "menu": "Menu",
       "home": "Home",
@@ -147,7 +148,7 @@
       "account": "My account",
       "tellUs": "Report a concern"
     },
-    "help": "Support",
+    "help": "Help",
     "recordings": "My lesson recordings",
     "account": "My account",
     "myData": "My data",
@@ -588,7 +589,7 @@
   "support": {
     "title": "Help",
     "lead": "Write to the academy about a lesson, a payment, a technical problem or anything else. The answers come here and in a message.",
-    "teacherTitle": "Support",
+    "teacherTitle": "Help",
     "teacherLead": "Write to the academy about a technical problem, your pay or anything else. The answers come here and in a message.",
     "new": "New ticket",
     "newHeading": "Write to the academy",

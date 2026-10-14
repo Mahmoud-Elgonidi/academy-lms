@@ -34,7 +34,7 @@ export const ME: Item[] = [
 ];
 
 /** The phone's tab bar: the day's work, and the rest under "more". */
-const TABS: Item[] = [TEACHING[0]!, TEACHING[1]!, TEACHING[2]!, TEACHING[4]!, { href: '/teach/more', key: 'menu', icon: 'menu' }];
+const TABS: Item[] = [TEACHING[0]!, TEACHING[1]!, TEACHING[2]!, TEACHING[4]!, { href: '/teach/more', key: 'more', icon: 'menu' }];
 
 function useActive() {
   const path = usePathname();
@@ -88,7 +88,7 @@ export function TabBar({ unread, chats }: { unread: number; chats: number }) {
     <nav aria-label={t('menu')} className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
       <ul className="mx-auto grid max-w-lg grid-cols-5">
         {TABS.map((tab) => {
-          const on = tab.key === 'menu' ? inMore : active(tab.href);
+          const on = tab.key === 'more' ? inMore : active(tab.href);
           return (
             <li key={tab.href}>
               <Link
@@ -98,7 +98,7 @@ export function TabBar({ unread, chats }: { unread: number; chats: number }) {
               >
                 <Icon name={tab.icon} size={22} className={on ? 'text-brand' : undefined} />
                 {t(tab.key)}
-                {tab.key === 'menu' ? <Unread n={unread + chats} label={common('newMessages', { n: unread + chats })} dot /> : null}
+                {tab.key === 'more' ? <Unread n={unread + chats} label={common('newMessages', { n: unread + chats })} dot /> : null}
               </Link>
             </li>
           );

@@ -147,7 +147,7 @@ test('an invoice opens as its tax document, for its payer', async ({ page }) => 
 
 test('a guardian reads the teacher\'s reports on the course, without what is for the academy only', async ({ page }) => {
   await page.goto('/ar/family/journey');
-  await page.getByRole('link', { name: 'المنهج وتقارير المدرس' }).first().click();
+  await page.getByRole('link', { name: 'المنهج وتقارير المدرّس' }).first().click();
   await expect(page).toHaveURL(/\/ar\/family\/progress\/[0-9a-f-]{36}$/);
   await expect(page.getByRole('heading', { name: 'التقارير' })).toBeVisible();
   await expect(page.getByText('بداية ممتازة: زياد بيفرّق بين الاسم والفعل بسهولة.')).toBeVisible();

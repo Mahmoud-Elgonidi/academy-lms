@@ -220,7 +220,7 @@ test.describe('a guardian (Ziad\'s)', () => {
     await expect(night).not.toBeChecked();
 
     // The roadmap and the teacher's reports stay a click away.
-    await expect(page.getByRole('link', { name: 'المنهج وتقارير المدرس' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'المنهج وتقارير المدرّس' })).toBeVisible();
     // The child's album, to look at only.
     await page.goto('/ar/family/games/album');
     await expect(page.getByRole('button', { name: 'خليه صاحبك' })).toHaveCount(0);

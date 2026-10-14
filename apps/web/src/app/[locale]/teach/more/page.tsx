@@ -28,7 +28,7 @@ export default async function More() {
   const row = 'flex min-h-13 items-center gap-3 px-4 py-3';
   return (
     <div>
-      <Heading title={nav('menu')} hint={person.name} />
+      <Heading title={nav('more')} hint={person.name} />
       <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-white">
         {ITEMS.filter((item) => inPlan(item.href, person.plan_features ?? [])).map((item) => (
           <li key={item.href}>

@@ -145,7 +145,7 @@ test('the language switches, keeping the page', async ({ page }) => {
   await page.getByRole('link', { name: 'English' }).click();
   await expect(page).toHaveURL(/\/en\/teach\/more$/);
   await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
-  await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'More' })).toBeVisible();
 });
 
 test('the teacher talks with a student and their family, or reads why not', async ({ page }) => {
@@ -191,7 +191,7 @@ test('a lesson that is not the teacher\'s, or no lesson at all, is not found', a
 
 test('a teacher writes to the academy for help, and reads it back in the ticket', async ({ page }) => {
   await page.goto('/ar/teach/help');
-  await expect(page.locator('h1')).toHaveText('الدعم');
+  await expect(page.locator('h1')).toHaveText('المساعدة');
   await page.getByRole('button', { name: 'تذكرة جديدة' }).click();
   const subject = `الصوت بيقطع في الحصة ${Date.now()}`;
   await page.getByLabel('العنوان').fill(subject);
