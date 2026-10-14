@@ -1,4 +1,4 @@
-{{-- One lesson card (family area, the teacher's week). $lesson from FamilyLessonView; $cancel, $refuse and $dispute are the page's actions. With $after, other modules add a row under it (the "scheduling::family.lesson-card" hook: the rating). --}}
+{{-- One lesson card (family area, the teacher's week). $lesson from FamilyLessonView; $cancel, $refuse and $dispute are the page's actions, drawn only when visible (a hidden one would come out disabled). With $after, other modules add a row under it (the "scheduling::family.lesson-card" hook: the rating). --}}
 @php $l = 'scheduling::family.'; @endphp
 <article class="fl-card" data-status="{{ $lesson['status'] }}" wire:key="fl-{{ $lesson['id'] }}">
     <div class="fl-when">
@@ -22,17 +22,17 @@
             @endif
         @endif
         @isset($refuse)
-            @if ($lesson['refusable'] ?? false)
+            @if (($lesson['refusable'] ?? false) && ($refuse)(['session' => $lesson['id']])->isVisible())
                 {{ ($refuse)(['session' => $lesson['id']]) }}
             @endif
         @endisset
         @isset($dispute)
-            @if ($lesson['disputable'] ?? false)
+            @if (($lesson['disputable'] ?? false) && ($dispute)(['session' => $lesson['id']])->isVisible())
                 {{ ($dispute)(['session' => $lesson['id']]) }}
             @endif
         @endisset
         @isset($cancel)
-            @if ($lesson['cancellable'])
+            @if ($lesson['cancellable'] && ($cancel)(['session' => $lesson['id']])->isVisible())
                 {{ ($cancel)(['session' => $lesson['id']]) }}
             @endif
         @endisset
