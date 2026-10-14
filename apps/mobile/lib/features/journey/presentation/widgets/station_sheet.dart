@@ -5,6 +5,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../games/presentation/art/art.dart';
+import '../../../games/presentation/game_words.dart';
 import '../../../games/presentation/games_ui.dart';
 import '../../domain/journey.dart';
 import '../journey_ui.dart';
@@ -119,7 +120,11 @@ class _StationSheet extends StatelessWidget {
       for (final m in missions) _MissionRow(mission: m, map: map, kids: kids, self: self),
       if (games.isNotEmpty) ...[
         Text(map.guardian ? l.gamesTogether : l.journeyPlayStation, style: heading()),
-        if (allowance != null && !allowance.may) _Refused(text: allowance.reasonLabel ?? '', kids: kids),
+        if (allowance != null && !allowance.may)
+          _Refused(
+            text: allowance.why(l, kids: kids),
+            kids: kids,
+          ),
         for (final g in games)
           kids
               ? _KidsGameTile(game: g, onTap: () => Navigator.of(context).pop(_Play(g)))

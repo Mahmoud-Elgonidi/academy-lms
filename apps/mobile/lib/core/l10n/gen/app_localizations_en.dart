@@ -3175,6 +3175,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get gamesRefusedOff => 'Games are off at the academy right now.';
+
+  @override
+  String get gamesRefusedPaused => 'A guardian has paused games for now.';
+
+  @override
+  String get gamesRefusedNight => 'The birds are asleep. Games are back at 7 in the morning.';
+
+  @override
+  String get gamesRefusedLimit => 'Today’s play time is used up. See you tomorrow!';
+
+  @override
   String gamesTimeOpen(int used) {
     return '$used minutes played today, no limit.';
   }
@@ -3581,6 +3593,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeworkByPlaying => 'This homework is handed in by playing its round.';
+
+  @override
+  String homeworkPracticeResult(int correct, int total, String stars, String game) {
+    return 'Practice: $correct of $total right · $stars ($game)';
+  }
 
   @override
   String get homeworkNoGame => 'No game for this homework right now.';

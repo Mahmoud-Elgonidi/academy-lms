@@ -986,6 +986,11 @@ s('gamesReviewAgain', 'راجع تاني', 'Review again')
 s('gamesGuardianTitle', 'ألعاب {name}', "{name}'s games", name='String')
 s('gamesPlayTime', 'وقت اللعب النهارده', 'Play time today')
 s('gamesTimeText', '{used} من {limit, plural, =1{دقيقة} =2{دقيقتين} few{{limit} دقايق} other{{limit} دقيقة}} لعب النهارده. فاضل {left, plural, =1{دقيقة} =2{دقيقتين} few{{left} دقايق} other{{left} دقيقة}}.', '{used} of {limit} minutes played today. {left} minutes left.', used='int', limit='int', left='int')
+# Why a round cannot start now, from allowance.reason (the kids' look keeps the academy's own words).
+s('gamesRefusedOff', 'الألعاب مقفولة في الأكاديمية دلوقتي.', 'Games are off at the academy right now.')
+s('gamesRefusedPaused', 'ولي الأمر قفل الألعاب دلوقتي.', 'A guardian has paused games for now.')
+s('gamesRefusedNight', 'الطيور نامت. الألعاب بترجع الساعة 7 الصبح.', 'The birds are asleep. Games are back at 7 in the morning.')
+s('gamesRefusedLimit', 'خلصت دقايق اللعب النهارده. نكمل بكرة!', 'Today’s play time is used up. See you tomorrow!')
 s('gamesTimeOpen', '{used, plural, =1{دقيقة} =2{دقيقتين} few{{used} دقايق} other{{used} دقيقة}} لعب النهارده، من غير حد.', '{used} minutes played today, no limit.', used='int')
 s('gamesMinutesShort', 'دقيقة', 'min')
 s('gamesMaxTime', 'أقصى وقت في اليوم', 'Most time a day')
@@ -1087,6 +1092,7 @@ s('journeyCourses', 'مواد الدروس والتقارير', 'Lesson material
 s('homeworkPracticeTitle', 'التدريب بالألعاب', 'Practice in the games')
 s('homeworkPracticeNotYet', 'لسه ما اتلعبتش جولته.', 'Its round is not played yet.')
 s('homeworkByPlaying', 'الواجب ده بيتسلّم لما تلعب جولته.', 'This homework is handed in by playing its round.')
+s('homeworkPracticeResult', 'التدريب: {correct} من {total} صح · {stars} ({game})', 'Practice: {correct} of {total} right · {stars} ({game})', correct='int', total='int', stars='String', game='String')
 s('homeworkNoGame', 'مفيش لعبة للواجب ده دلوقتي.', 'No game for this homework right now.')
 
 def plurals(text):

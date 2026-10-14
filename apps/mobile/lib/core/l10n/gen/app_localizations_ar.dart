@@ -3317,6 +3317,18 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get gamesRefusedOff => 'الألعاب مقفولة في الأكاديمية دلوقتي.';
+
+  @override
+  String get gamesRefusedPaused => 'ولي الأمر قفل الألعاب دلوقتي.';
+
+  @override
+  String get gamesRefusedNight => 'الطيور نامت. الألعاب بترجع الساعة 7 الصبح.';
+
+  @override
+  String get gamesRefusedLimit => 'خلصت دقايق اللعب النهارده. نكمل بكرة!';
+
+  @override
   String gamesTimeOpen(int used) {
     String _temp0 = intl.Intl.pluralLogic(used, locale: localeName, other: '$used دقيقة', few: '$used دقايق', two: 'دقيقتين', one: 'دقيقة');
     return '$_temp0 لعب النهارده، من غير حد.';
@@ -3792,6 +3804,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeworkByPlaying => 'الواجب ده بيتسلّم لما تلعب جولته.';
+
+  @override
+  String homeworkPracticeResult(int correct, int total, String stars, String game) {
+    return 'التدريب: $correct من $total صح · $stars ($game)';
+  }
 
   @override
   String get homeworkNoGame => 'مفيش لعبة للواجب ده دلوقتي.';

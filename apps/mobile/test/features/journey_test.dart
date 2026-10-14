@@ -426,8 +426,9 @@ void main() {
     // Now opens the lesson they are on.
     await tester.tap(find.byKey(const Key('calm-now')));
     await frames(tester, 10);
-    // Games are optional on a station; a closed day says why and starts nothing.
-    expect(find.text('خلصت دقايق اللعب النهارده. نكمل بكرة! 🌙'), findsOneWidget);
+    // Games are optional on a station; a closed day says why (in the app's words, no emoji) and starts nothing.
+    expect(find.text('خلصت دقايق اللعب النهارده. نكمل بكرة!'), findsOneWidget);
+    expect(find.textContaining('🌙'), findsNothing);
     await tester.tap(find.text('جسر السلاحف'));
     await frames(tester, 8);
     expect(app.api.sent('POST', 'games/plays'), isEmpty);

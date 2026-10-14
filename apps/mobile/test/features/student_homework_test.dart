@@ -23,10 +23,10 @@ Map<String, Object?> _homework() => {
   ],
 };
 
-Future<TestApp> _open(WidgetTester tester, String stage, String at) async {
+Future<TestApp> _open(WidgetTester tester, String stage, String at, {Map<String, Object?>? homework}) async {
   final app = await TestApp.create(accounts: [fxStudent(stage)]);
   fxStudentRoutes(app.api, stage, fxJourney(stage: stage, style: stage == 'teen' ? 'calm' : 'playful'));
-  app.api.on('GET', 'learning/homework', _homework());
+  app.api.on('GET', 'learning/homework', homework ?? _homework());
   await app.session.start();
   await tester.binding.setSurfaceSize(const Size(420, 1600));
   await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
@@ -80,6 +80,36 @@ void main() {
     await frames(tester, 10);
     expect(find.text('سمّع سورة النصر'), findsOneWidget);
     expect(find.text('أمثلة الإخفاء'), findsNothing);
+
+    await _close(tester);
+  });
+
+  testWidgets('a practice round\'s result reads in the app\'s words, without the academy\'s star emoji', (tester) async {
+    await _open(
+      tester,
+      'teen',
+      '/teen/homework',
+      homework: {
+        'data': [
+          {
+            ...homeworkJson('h1', accepts: 'practice', status: 'submitted'),
+            'title': 'جولة على الفاتحة',
+            'practice': {
+              'done': true,
+              'correct': 9,
+              'total': 10,
+              'stars': 3,
+              'game': 'توأم العش',
+              'label': 'التدريب: 9 من 10 صح · 3 ⭐ (توأم العش)',
+            },
+          },
+        ],
+      },
+    );
+    await tester.tap(find.text('اتسلّم · 1'));
+    await frames(tester, 10);
+    expect(find.text('التدريب: 9 من 10 صح · 3 نجوم (توأم العش)'), findsOneWidget);
+    expect(find.textContaining('⭐'), findsNothing);
 
     await _close(tester);
   });

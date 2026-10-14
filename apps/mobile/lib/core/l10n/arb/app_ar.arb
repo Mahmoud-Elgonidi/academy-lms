@@ -2274,6 +2274,10 @@
       }
     }
   },
+  "gamesRefusedOff": "الألعاب مقفولة في الأكاديمية دلوقتي.",
+  "gamesRefusedPaused": "ولي الأمر قفل الألعاب دلوقتي.",
+  "gamesRefusedNight": "الطيور نامت. الألعاب بترجع الساعة 7 الصبح.",
+  "gamesRefusedLimit": "خلصت دقايق اللعب النهارده. نكمل بكرة!",
   "gamesTimeOpen": "{used, plural, =1{دقيقة} =2{دقيقتين} few{{used} دقايق} other{{used} دقيقة}} لعب النهارده، من غير حد.",
   "@gamesTimeOpen": {
     "placeholders": {
@@ -2737,5 +2741,22 @@
   "homeworkPracticeTitle": "التدريب بالألعاب",
   "homeworkPracticeNotYet": "لسه ما اتلعبتش جولته.",
   "homeworkByPlaying": "الواجب ده بيتسلّم لما تلعب جولته.",
+  "homeworkPracticeResult": "التدريب: {correct} من {total} صح · {stars} ({game})",
+  "@homeworkPracticeResult": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "stars": {
+        "type": "String"
+      },
+      "game": {
+        "type": "String"
+      }
+    }
+  },
   "homeworkNoGame": "مفيش لعبة للواجب ده دلوقتي."
 }

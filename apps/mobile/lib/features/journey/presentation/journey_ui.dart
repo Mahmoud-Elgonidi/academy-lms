@@ -19,6 +19,7 @@ import '../../challenges/presentation/widgets/art.dart';
 import '../../classroom/presentation/join.dart';
 import '../../games/data/games_repository.dart';
 import '../../games/presentation/game_sound.dart';
+import '../../games/presentation/game_words.dart';
 import '../../games/presentation/play/hatch_view.dart';
 import '../../games/presentation/play/play_page.dart';
 import '../data/journey_repository.dart';
@@ -150,7 +151,7 @@ class JourneyActions {
     if (games == null || map.plain) return false;
     if (!games.allowance.may) {
       GameSound.play(GameEffect.locked);
-      _tell(games.allowance.reasonLabel ?? '');
+      _tell(games.allowance.why(context.l10n, kids: map.look == JourneyLook.kids));
       return false;
     }
     return true;

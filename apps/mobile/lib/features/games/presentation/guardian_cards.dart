@@ -13,6 +13,7 @@ import '../../challenges/data/challenges_repository.dart';
 import '../data/games_repository.dart';
 import '../domain/games.dart';
 import 'art/art.dart';
+import 'game_words.dart';
 
 /// A guardian's play time and limits for their child, in the academy's own
 /// colours: today's minutes against the limit as a ring, the minutes a day
@@ -85,7 +86,7 @@ class _GuardianLimitsCardState extends State<GuardianLimitsCard> {
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
-                          a.reasonLabel!,
+                          a.why(l, kids: false),
                           style: context.text.bodySmall?.copyWith(color: c.attentionInk, fontWeight: FontWeight.w600),
                         ),
                       ),

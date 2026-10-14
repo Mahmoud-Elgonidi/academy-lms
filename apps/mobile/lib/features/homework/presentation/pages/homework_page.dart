@@ -25,6 +25,7 @@ import '../../../../shared/motion/juice.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../core/realtime/live.dart';
 import '../../../games/presentation/play/play_page.dart';
+import '../../../games/presentation/game_words.dart';
 import '../../../journey/data/journey_repository.dart';
 import '../../../journey/presentation/journey_ui.dart';
 
@@ -320,7 +321,7 @@ class _HomeworkCardState extends State<_HomeworkCard> {
       if (game == null || map.plain) {
         showSnack(context, l.homeworkNoGame);
       } else if (allowance != null && !allowance.may) {
-        showSnack(context, allowance.reasonLabel ?? '');
+        showSnack(context, allowance.why(l, kids: context.shape.stage == Stage.kids));
       } else {
         await openRound(context, PlayRequest(gameId: game, homeworkId: h.id, look: map.roundLook));
         unawaited(list.load());
@@ -377,7 +378,7 @@ class _HomeworkCardState extends State<_HomeworkCard> {
             const Gap(Space.s),
             Text(
               practice != null && practice.done && practice.label.isNotEmpty
-                  ? practice.label
+                  ? practice.result(l, kids: false)
                   : (h.byPlaying ? l.homeworkByPlaying : l.homeworkPracticeNotYet),
               style: context.type.caption.copyWith(color: practice?.done ?? false ? c.brandDeep : null),
             ),

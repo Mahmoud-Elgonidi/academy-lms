@@ -905,6 +905,10 @@
   "gamesGuardianTitle": "{name}'s games",
   "gamesPlayTime": "Play time today",
   "gamesTimeText": "{used} of {limit} minutes played today. {left} minutes left.",
+  "gamesRefusedOff": "Games are off at the academy right now.",
+  "gamesRefusedPaused": "A guardian has paused games for now.",
+  "gamesRefusedNight": "The birds are asleep. Games are back at 7 in the morning.",
+  "gamesRefusedLimit": "Today’s play time is used up. See you tomorrow!",
   "gamesTimeOpen": "{used} minutes played today, no limit.",
   "gamesMinutesShort": "min",
   "gamesMaxTime": "Most time a day",
@@ -1003,5 +1007,6 @@
   "homeworkPracticeTitle": "Practice in the games",
   "homeworkPracticeNotYet": "Its round is not played yet.",
   "homeworkByPlaying": "This homework is handed in by playing its round.",
+  "homeworkPracticeResult": "Practice: {correct} of {total} right · {stars} ({game})",
   "homeworkNoGame": "No game for this homework right now."
 }

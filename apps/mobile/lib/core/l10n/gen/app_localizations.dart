@@ -5522,6 +5522,30 @@ abstract class AppLocalizations {
   /// **'{used} من {limit, plural, =1{دقيقة} =2{دقيقتين} few{{limit} دقايق} other{{limit} دقيقة}} لعب النهارده. فاضل {left, plural, =1{دقيقة} =2{دقيقتين} few{{left} دقايق} other{{left} دقيقة}}.'**
   String gamesTimeText(int used, int limit, int left);
 
+  /// No description provided for @gamesRefusedOff.
+  ///
+  /// In ar, this message translates to:
+  /// **'الألعاب مقفولة في الأكاديمية دلوقتي.'**
+  String get gamesRefusedOff;
+
+  /// No description provided for @gamesRefusedPaused.
+  ///
+  /// In ar, this message translates to:
+  /// **'ولي الأمر قفل الألعاب دلوقتي.'**
+  String get gamesRefusedPaused;
+
+  /// No description provided for @gamesRefusedNight.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطيور نامت. الألعاب بترجع الساعة 7 الصبح.'**
+  String get gamesRefusedNight;
+
+  /// No description provided for @gamesRefusedLimit.
+  ///
+  /// In ar, this message translates to:
+  /// **'خلصت دقايق اللعب النهارده. نكمل بكرة!'**
+  String get gamesRefusedLimit;
+
   /// No description provided for @gamesTimeOpen.
   ///
   /// In ar, this message translates to:
@@ -6109,6 +6133,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الواجب ده بيتسلّم لما تلعب جولته.'**
   String get homeworkByPlaying;
+
+  /// No description provided for @homeworkPracticeResult.
+  ///
+  /// In ar, this message translates to:
+  /// **'التدريب: {correct} من {total} صح · {stars} ({game})'**
+  String homeworkPracticeResult(int correct, int total, String stars, String game);
 
   /// No description provided for @homeworkNoGame.
   ///
