@@ -40,6 +40,7 @@ return [
     'hints' => [
         'credit_scope' => 'A shared package is one balance for a student in any subject (say 12 lessons a month across Quran and Arabic). Each new course of theirs on it draws on the same balance, with no new invoice, and the lessons a week here are for all their subjects together. It stays as it is once someone is on it.',
         'validity' => 'The weeks the block needs plus two weeks\' grace. Minutes left after that expire.',
+        'shape' => 'Lesson length, lessons a week and lessons per block stay as they are once someone is on it. For another shape, make a new plan.',
         'renew' => 'How many sessions are left when the next block\'s invoice goes out.',
     ],
     'regions' => [
@@ -69,6 +70,7 @@ return [
     'errors' => [
         'scope' => 'A plan is either per course or a shared package.',
         'scope_locked' => 'Students are on this plan, so whether it is per course or shared stays as it is. Make a new plan.',
+        'shape_locked' => 'Students are on this plan, so its lesson length, lessons a week and lessons per block stay as they are. Make a new plan.',
         'vat_number' => 'A Saudi VAT number has 15 digits, starting and ending with 3.',
         'positive' => 'Length and number of sessions must be above zero.',
         'region_twice' => 'One price per region.',

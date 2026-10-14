@@ -4,7 +4,9 @@ use Carbon\CarbonImmutable;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Repeater;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Billing\Actions\SavePlan;
 use Modules\Billing\Contracts\BillingApi;
 use Modules\Billing\Contracts\DTOs\NewSubscription;
 use Modules\Billing\Filament\Resources\Coupons\ManageCoupons;
@@ -77,15 +79,41 @@ it('makes and changes plans from their screen, in each region\'s currency, and k
     expect($plan->refresh()->credit_scope)->toBe(Plan::SHARED);
     $page->callTableAction('edit', $plan, screensPlanForm())->assertHasNoTableActionErrors();
 
-    // Once a student is on it, the kind stays: the field is locked, and a changed value is not taken.
+    // Once a student is on it, the kind and the shape stay: the fields are locked, and changed values are not taken.
     screensSubscribe($plan->refresh());
     Livewire::test(ManagePlans::class)
-        ->callTableAction('edit', $plan, screensPlanForm(['name_en' => '8 lessons a month', 'credit_scope' => Plan::SHARED]))->assertHasNoTableActionErrors();
-    expect($plan->refresh()->only(['name_en', 'credit_scope']))->toBe(['name_en' => '8 lessons a month', 'credit_scope' => 'enrollment']);
+        ->callTableAction('edit', $plan, screensPlanForm(['name_en' => '8 lessons a month', 'credit_scope' => Plan::SHARED,
+            'session_minutes' => 60, 'sessions_per_week' => 3, 'sessions_per_block' => 12, 'validity_days' => 50]))->assertHasNoTableActionErrors();
+    expect($plan->refresh()->only(['name_en', 'credit_scope', 'session_minutes', 'sessions_per_week', 'sessions_per_block', 'validity_days']))
+        ->toBe(['name_en' => '8 lessons a month', 'credit_scope' => 'enrollment', 'session_minutes' => 45, 'sessions_per_week' => 2, 'sessions_per_block' => 8, 'validity_days' => 50]);
 
     // Switched off, not deleted: its prices stay.
     Livewire::test(ManagePlans::class)->callTableAction('toggle', $plan);
     expect($plan->refresh()->is_active)->toBeFalse()->and($plan->prices()->count())->toBe(2);
+});
+
+it('keeps a plan\'s shape once someone is on it: another shape is another plan', function () {
+    $terms = ['name_ar' => '8 حصص', 'name_en' => '8 lessons', 'session_minutes' => 45, 'sessions_per_week' => 2, 'sessions_per_block' => 8, 'validity_days' => 42,
+        'prices' => [['price_region_id' => $this->gulf->id, 'amount' => '350']]];
+    $plan = app(SavePlan::class)->handle(null, $terms);
+
+    // Nobody on it yet: its shape still changes.
+    app(SavePlan::class)->handle($plan, ['session_minutes' => 60] + $terms);
+    expect($plan->refresh()->session_minutes)->toBe(60);
+    app(SavePlan::class)->handle($plan, $terms);
+
+    screensSubscribe($plan->refresh());
+    foreach (['session_minutes' => 60, 'sessions_per_week' => 3, 'sessions_per_block' => 12] as $field => $value) {
+        expect(fn () => app(SavePlan::class)->handle($plan->refresh(), [$field => $value] + $terms))
+            ->toThrow(ValidationException::class, __('billing::plans.errors.shape_locked'));
+    }
+
+    // Its name, prices, validity and renewal point still change, and the shape stays.
+    app(SavePlan::class)->handle($plan->refresh(), ['name_en' => 'Eight', 'validity_days' => 49, 'renew_at_sessions' => 3,
+        'prices' => [['price_region_id' => $this->gulf->id, 'amount' => '380']]] + $terms);
+    expect($plan->refresh()->only(['name_en', 'session_minutes', 'sessions_per_week', 'sessions_per_block', 'validity_days', 'renew_at_sessions']))
+        ->toBe(['name_en' => 'Eight', 'session_minutes' => 45, 'sessions_per_week' => 2, 'sessions_per_block' => 8, 'validity_days' => 49, 'renew_at_sessions' => 3])
+        ->and($plan->prices()->value('amount_minor'))->toBe(38000);
 });
 
 it('saves the regions dialog as loaded without losing a region or a price, adds one once payers are billed, and sets the tax', function () {

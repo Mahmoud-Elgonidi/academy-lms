@@ -16,7 +16,9 @@ use Modules\SharedKernel\Money\Money;
  * typed as decimals in the region's currency and stored in minor units.
  * Subscriptions keep the price they were sold at, so a new price applies to
  * new enrolments only. A plan is per course or a shared package ("12
- * lessons in any subject"); which, is fixed once anyone is on it.
+ * lessons in any subject"); which, and its shape (lesson length, lessons a
+ * week and per block, which renewals and lesson prices read from it), are
+ * fixed once anyone is on it: another shape is another plan.
  */
 final class SavePlan
 {
@@ -27,9 +29,10 @@ final class SavePlan
      */
     public function handle(?Plan $plan, array $data): Plan
     {
-        $perBlock = (int) $data['sessions_per_block'];
-        $perWeek = (int) $data['sessions_per_week'];
-        $minutes = (int) $data['session_minutes'];
+        // A locked field is not sent by the plan's form: it keeps what the plan has.
+        $perBlock = (int) ($data['sessions_per_block'] ?? $plan?->sessions_per_block);
+        $perWeek = (int) ($data['sessions_per_week'] ?? $plan?->sessions_per_week);
+        $minutes = (int) ($data['session_minutes'] ?? $plan?->session_minutes);
         if ($perBlock <= 0 || $perWeek <= 0 || $minutes <= 0) {
             throw ValidationException::withMessages(['sessions_per_block' => __('billing::plans.errors.positive')]);
         }
@@ -38,8 +41,13 @@ final class SavePlan
         if (! in_array($scope, ['enrollment', Plan::SHARED], true)) {
             throw ValidationException::withMessages(['credit_scope' => __('billing::plans.errors.scope')]);
         }
-        if ($plan?->exists && $scope !== $plan->credit_scope && Subscription::query()->where('plan_id', $plan->id)->exists()) {
-            throw ValidationException::withMessages(['credit_scope' => __('billing::plans.errors.scope_locked')]);
+        if ($plan?->exists && Subscription::query()->where('plan_id', $plan->id)->exists()) {
+            if ($scope !== $plan->credit_scope) {
+                throw ValidationException::withMessages(['credit_scope' => __('billing::plans.errors.scope_locked')]);
+            }
+            if ([$minutes, $perWeek, $perBlock] !== [(int) $plan->session_minutes, (int) $plan->sessions_per_week, (int) $plan->sessions_per_block]) {
+                throw ValidationException::withMessages(['session_minutes' => __('billing::plans.errors.shape_locked')]);
+            }
         }
 
         $regions = PriceRegion::query()->pluck('currency', 'id');

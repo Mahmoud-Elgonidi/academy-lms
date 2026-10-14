@@ -73,6 +73,8 @@ final class PlanResource extends Resource
     public static function form(Schema $schema): Schema
     {
         $validity = fn (Get $get, Set $set) => $set('validity_days', BlockTerms::defaultValidityDays((int) $get('sessions_per_block'), (int) $get('sessions_per_week')));
+        // Its kind and shape are fixed once a student is on the plan: shown, not sent.
+        $taken = fn (?Plan $record) => $record !== null && Subscription::query()->where('plan_id', $record->id)->exists();
 
         return $schema->columns(1)->components([
             Grid::make(2)->schema([
@@ -83,16 +85,18 @@ final class PlanResource extends Resource
                 ->options(['enrollment' => __('billing::plans.scopes.enrollment'), Plan::SHARED => __('billing::plans.scopes.student_pool')])
                 ->inline()->required()->default('enrollment')
                 ->helperText(__('billing::plans.hints.credit_scope'))
-                // Fixed once a student is on the plan.
-                ->disabled(fn (?Plan $record) => $record !== null && Subscription::query()->where('plan_id', $record->id)->exists())
-                ->dehydrated(fn (?Plan $record) => $record === null || ! Subscription::query()->where('plan_id', $record->id)->exists()),
+                ->disabled($taken)->dehydrated(fn (?Plan $record) => ! $taken($record)),
             ToggleButtons::make('session_minutes')->label(__('billing::plans.fields.session_minutes'))
-                ->options([30 => '30', 45 => '45', 60 => '60', 90 => '90'])->inline()->required()->default(30),
+                ->options([30 => '30', 45 => '45', 60 => '60', 90 => '90'])->inline()->required()->default(30)
+                ->helperText(fn (?Plan $record) => $taken($record) ? __('billing::plans.hints.shape') : null)
+                ->disabled($taken)->dehydrated(fn (?Plan $record) => ! $taken($record)),
             Grid::make(2)->schema([
                 Select::make('sessions_per_week')->label(__('billing::plans.fields.sessions_per_week'))
-                    ->options(array_combine(range(1, 6), range(1, 6)))->required()->default(2)->native(false)->live()->afterStateUpdated($validity),
+                    ->options(array_combine(range(1, 6), range(1, 6)))->required()->default(2)->native(false)->live()->afterStateUpdated($validity)
+                    ->disabled($taken)->dehydrated(fn (?Plan $record) => ! $taken($record)),
                 Select::make('sessions_per_block')->label(__('billing::plans.fields.sessions_per_block'))
-                    ->options(array_combine([4, 8, 12, 16, 20, 24], [4, 8, 12, 16, 20, 24]))->required()->default(8)->native(false)->live()->afterStateUpdated($validity),
+                    ->options(array_combine([4, 8, 12, 16, 20, 24], [4, 8, 12, 16, 20, 24]))->required()->default(8)->native(false)->live()->afterStateUpdated($validity)
+                    ->disabled($taken)->dehydrated(fn (?Plan $record) => ! $taken($record)),
                 TextInput::make('validity_days')->label(__('billing::plans.fields.validity_days'))
                     ->numeric()->minValue(1)->maxValue(365)->default(42)->suffix(__('billing::plans.days'))
                     ->helperText(__('billing::plans.hints.validity')),
