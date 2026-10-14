@@ -148,19 +148,78 @@ class AppLocalizationsAr extends AppLocalizations {
   String get welcomeTitle => 'أهلًا بيك';
 
   @override
-  String get welcomeLead => 'اكتب رقم موبايلك أو إيميلك، وهنبعتلك كود. بعدها هتلاقي حساباتك في كل الأكاديميات اللي انت فيها.';
+  String get welcomeLead => 'اكتب رقم موبايلك أو إيميلك، وهنبعتلك كود تدخل بيه.';
 
   @override
-  String get byPhone => 'رقم الموبايل';
+  String get contactLabel => 'رقم الموبايل أو الإيميل';
 
   @override
-  String get byEmail => 'الإيميل';
+  String get contactPlaceholder => '01xxxxxxxxx أو name@mail.com';
+
+  @override
+  String get contactEmpty => 'اكتب رقم موبايلك أو إيميلك الأول.';
+
+  @override
+  String get contactShortPhone => 'الرقم ده ناقص، اكتبه كامل.';
+
+  @override
+  String get contactBadEmail => 'الإيميل ده ناقص حاجة، زي name@mail.com';
+
+  @override
+  String countryChange(String code) {
+    return 'كود الدولة $code، دوس عشان تغيّره';
+  }
+
+  @override
+  String get countrySearch => 'دوّر على دولة';
+
+  @override
+  String get countryNone => 'مفيش دولة بالاسم ده.';
+
+  @override
+  String get countrySa => 'السعودية';
+
+  @override
+  String get countryEg => 'مصر';
+
+  @override
+  String get countryAe => 'الإمارات';
+
+  @override
+  String get countryKw => 'الكويت';
+
+  @override
+  String get countryQa => 'قطر';
+
+  @override
+  String get countryBh => 'البحرين';
+
+  @override
+  String get countryOm => 'عُمان';
+
+  @override
+  String get countryJo => 'الأردن';
+
+  @override
+  String get countryMa => 'المغرب';
+
+  @override
+  String get countryUs => 'أمريكا وكندا';
+
+  @override
+  String get countryGb => 'بريطانيا';
+
+  @override
+  String get legalAgree => 'لما تكمّل، تبقى موافق على';
+
+  @override
+  String get legalAnd => 'و';
 
   @override
   String get countryCode => 'كود الدولة';
 
   @override
-  String get phoneHint => 'الكود هيوصلك على واتساب. لو ماعندكش واتساب، هتقدر تطلبه رسالة SMS.';
+  String get phoneHint => 'الكود هيوصلك على واتساب.';
 
   @override
   String get emailHint => 'الكود هيوصلك على الإيميل ده.';
@@ -254,6 +313,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get codeValid => 'الكود صالح 10 دقايق.';
 
   @override
+  String get codePaste => 'الصق الكود';
+
+  @override
+  String get codeChecking => 'بنتأكد…';
+
+  @override
+  String get codePasteNone => 'مفيش كود من 6 أرقام منسوخ.';
+
+  @override
+  String get codeRight => 'تمام!';
+
+  @override
+  String get codeResent => 'بعتنالك كود جديد.';
+
+  @override
   String get noCode => 'ماوصلكش؟';
 
   @override
@@ -315,6 +389,34 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get foundYou => 'لقيناك!';
+
+  @override
+  String get foundYouLead => 'لقينا حساب واحد ليك.';
+
+  @override
+  String enterAcademy(String academy) {
+    return 'ادخل $academy';
+  }
+
+  @override
+  String get notYou => 'مش حسابك؟ استخدم رقم أو إيميل تاني';
+
+  @override
+  String get pickOne => 'اختار حساب واحد على الأقل.';
+
+  @override
+  String notAddedTitle(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'دخلت، بس فيه حسابات ماتضافتش:', one: 'دخلت، بس فيه حساب ماتضافش:');
+    return '$_temp0';
+  }
+
+  @override
+  String notAddedLine(String name, String academy, String reason) {
+    return '$name في $academy: $reason';
+  }
+
+  @override
   String get noAccounts => 'مالقيناش حساب بالرقم أو الإيميل ده في أي أكاديمية. اتأكد منه، أو كلّم أكاديميتك.';
 
   @override
@@ -343,6 +445,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get passwordLabel => 'كلمة السر';
+
+  @override
+  String get academyCodeMissing => 'اكتب كود الأكاديمية.';
+
+  @override
+  String get loginMissing => 'اكتب إيميلك أو موبايلك أو اسم المستخدم.';
+
+  @override
+  String get passwordMissing => 'اكتب كلمة السر.';
+
+  @override
+  String get passwordShow => 'إظهار كلمة السر';
+
+  @override
+  String get passwordHide => 'إخفاء كلمة السر';
 
   @override
   String get signIn => 'ادخل';

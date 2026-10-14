@@ -60,12 +60,21 @@ class _TwoFactorPageState extends State<TwoFactorPage> {
         final found = step?.found;
         return SignInFrame(
           title: l.twoFactorTitle,
+          badge: Icons.verified_user_outlined,
           lead: Text(l.twoFactorLead, style: context.text.bodyLarge?.copyWith(color: context.colors.muted)),
           bottom: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (!over) BusyButton(label: l.confirm, busy: state.busy, onPressed: _submit),
-              TextButton(onPressed: _startAgain, child: Text(l.startAgain)),
+              if (!over)
+                SizedBox(
+                  height: 56,
+                  child: BusyButton(label: l.confirm, busy: state.busy, onPressed: _submit),
+                ),
+              TextButton(
+                style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                onPressed: _startAgain,
+                child: Text(l.startAgain),
+              ),
             ],
           ),
           children: [

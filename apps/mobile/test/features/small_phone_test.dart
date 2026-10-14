@@ -150,8 +150,10 @@ void main() {
       await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
       await frames(tester);
       expect(find.byKey(const Key('legal-privacy')), findsOneWidget);
-      await tester.tap(find.text('الإيميل'));
+      await tester.enterText(find.byKey(const Key('contact')), '0501234504');
       await frames(tester, 3);
+      // The country code sits beside the number.
+      expect(find.text('+966'), findsOneWidget);
       await tester.tap(find.text('عندك كلمة سر؟ ادخل بيها'));
       await frames(tester);
       await tester.pumpWidget(const SizedBox());

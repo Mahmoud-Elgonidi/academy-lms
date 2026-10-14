@@ -5,6 +5,7 @@ import 'package:flutter/semantics.dart';
 
 import '../../app/theme/app_theme.dart';
 import 'celebration.dart';
+import 'drawn_check.dart';
 import 'juice.dart';
 import 'motion.dart';
 
@@ -119,7 +120,7 @@ class _CardState extends State<_Card> with SingleTickerProviderStateMixin {
                       SizedBox.square(
                         dimension: calmLook ? 64 : 76,
                         child: CustomPaint(
-                          painter: _Check(progress: draw, colour: c.brand, calm: calmLook),
+                          painter: CheckPainter(progress: draw, colour: c.brand, ring: calmLook),
                         ),
                       ),
                       const SizedBox(height: 14),
@@ -144,45 +145,4 @@ class _CardState extends State<_Card> with SingleTickerProviderStateMixin {
       ),
     );
   }
-}
-
-/// A filled circle with a white check drawn in (the families' and the
-/// teachers'), or a thin ring and check drawn in the brand's colour (teens').
-class _Check extends CustomPainter {
-  _Check({required this.progress, required this.colour, required this.calm});
-
-  final double progress;
-  final Color colour;
-  final bool calm;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final r = size.shortestSide / 2;
-    final centre = size.center(Offset.zero);
-    final tick = Path()
-      ..moveTo(centre.dx - r * 0.42, centre.dy + r * 0.02)
-      ..lineTo(centre.dx - r * 0.12, centre.dy + r * 0.32)
-      ..lineTo(centre.dx + r * 0.45, centre.dy - r * 0.3);
-    final line = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    if (calm) {
-      line
-        ..color = colour
-        ..strokeWidth = 3;
-      canvas.drawArc(Rect.fromCircle(center: centre, radius: r - 2), -math.pi / 2, 2 * math.pi * progress, false, line);
-    } else {
-      canvas.drawCircle(centre, r, Paint()..color = colour);
-      line
-        ..color = Colors.white
-        ..strokeWidth = r * 0.16;
-    }
-    for (final metric in tick.computeMetrics()) {
-      canvas.drawPath(metric.extractPath(0, metric.length * progress), line);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_Check old) => old.progress != progress || old.colour != colour;
 }

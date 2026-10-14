@@ -102,6 +102,10 @@ class _AcademyAppState extends State<AcademyApp> {
           final text = switch (state.notice!) {
             SessionNotice.expired => l.noticeExpired,
             SessionNotice.signedOut => l.noticeSignedOut,
+            SessionNotice.notAdded => [
+              l.notAddedTitle(state.notAdded.length),
+              for (final a in state.notAdded) l.notAddedLine(a.name, state.locale == 'ar' ? a.academyAr : a.academyEn, a.reason),
+            ].join('\n'),
           };
           _messenger.currentState?.showSnackBar(SnackBar(content: Text(text)));
           context.read<SessionCubit>().noticeShown();

@@ -73,9 +73,10 @@ void main() {
     await frames(tester);
 
     expect(find.text('أهلًا بيك'), findsOneWidget);
-    await tester.tap(find.text('الإيميل'));
+    // One field: an email is told from a number as it is typed.
+    await tester.enterText(find.byKey(const Key('contact')), 'rami@demo.test');
     await frames(tester, 3);
-    await tester.enterText(find.byKey(const Key('email')), 'rami@demo.test');
+    expect(find.text('الكود هيوصلك على الإيميل ده.'), findsOneWidget);
     await tester.tap(find.text('ابعتلي كود'));
     await frames(tester);
 
@@ -84,7 +85,7 @@ void main() {
     expect(app.api.sent('POST', 'accounts/code').single.headers['X-Academy'], isNull);
 
     await tester.enterText(find.byKey(const Key('code')), '123456');
-    await frames(tester);
+    await frames(tester, 15);
 
     // Both accounts are listed; the staff-only one is not picked.
     expect(find.text('لقينا حسابين ليك'), findsOneWidget);
@@ -134,7 +135,7 @@ void main() {
     await app.session.start();
     await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
     await frames(tester);
-    await tester.enterText(find.byKey(const Key('phone')), '0501234504');
+    await tester.enterText(find.byKey(const Key('contact')), '0501234504');
     await tester.tap(find.text('ابعتلي كود'));
     await frames(tester);
     expect(app.api.sent('POST', 'accounts/code').single.data, {'contact': '+966501234504'});
@@ -211,13 +212,11 @@ void main() {
     await app.session.start();
     await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
     await frames(tester);
-    await tester.tap(find.text('الإيميل'));
-    await frames(tester, 3);
-    await tester.enterText(find.byKey(const Key('email')), 'rami@demo.test');
+    await tester.enterText(find.byKey(const Key('contact')), 'rami@demo.test');
     await tester.tap(find.text('ابعتلي كود'));
     await frames(tester);
     await tester.enterText(find.byKey(const Key('code')), '123456');
-    await frames(tester);
+    await frames(tester, 15);
     await tester.tap(find.text('أضف الحسابين وادخل'));
     await frames(tester, 20);
 

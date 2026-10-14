@@ -77,11 +77,37 @@
   "introPaid": "الفاتورة اتدفعت",
   "introThanks": "شكرًا ليك",
   "welcomeTitle": "أهلًا بيك",
-  "welcomeLead": "اكتب رقم موبايلك أو إيميلك، وهنبعتلك كود. بعدها هتلاقي حساباتك في كل الأكاديميات اللي انت فيها.",
-  "byPhone": "رقم الموبايل",
-  "byEmail": "الإيميل",
+  "welcomeLead": "اكتب رقم موبايلك أو إيميلك، وهنبعتلك كود تدخل بيه.",
+  "contactLabel": "رقم الموبايل أو الإيميل",
+  "contactPlaceholder": "01xxxxxxxxx أو name@mail.com",
+  "contactEmpty": "اكتب رقم موبايلك أو إيميلك الأول.",
+  "contactShortPhone": "الرقم ده ناقص، اكتبه كامل.",
+  "contactBadEmail": "الإيميل ده ناقص حاجة، زي name@mail.com",
+  "countryChange": "كود الدولة {code}، دوس عشان تغيّره",
+  "@countryChange": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "countrySearch": "دوّر على دولة",
+  "countryNone": "مفيش دولة بالاسم ده.",
+  "countrySa": "السعودية",
+  "countryEg": "مصر",
+  "countryAe": "الإمارات",
+  "countryKw": "الكويت",
+  "countryQa": "قطر",
+  "countryBh": "البحرين",
+  "countryOm": "عُمان",
+  "countryJo": "الأردن",
+  "countryMa": "المغرب",
+  "countryUs": "أمريكا وكندا",
+  "countryGb": "بريطانيا",
+  "legalAgree": "لما تكمّل، تبقى موافق على",
+  "legalAnd": "و",
   "countryCode": "كود الدولة",
-  "phoneHint": "الكود هيوصلك على واتساب. لو ماعندكش واتساب، هتقدر تطلبه رسالة SMS.",
+  "phoneHint": "الكود هيوصلك على واتساب.",
   "emailHint": "الكود هيوصلك على الإيميل ده.",
   "sendCode": "ابعتلي كود",
   "havePassword": "عندك كلمة سر؟ ادخل بيها",
@@ -163,6 +189,11 @@
   },
   "codeLabel": "الكود",
   "codeValid": "الكود صالح 10 دقايق.",
+  "codePaste": "الصق الكود",
+  "codeChecking": "بنتأكد…",
+  "codePasteNone": "مفيش كود من 6 أرقام منسوخ.",
+  "codeRight": "تمام!",
+  "codeResent": "بعتنالك كود جديد.",
   "noCode": "ماوصلكش؟",
   "resendIn": "ابعت كود جديد بعد {time}",
   "@resendIn": {
@@ -196,6 +227,40 @@
       }
     }
   },
+  "foundYou": "لقيناك!",
+  "foundYouLead": "لقينا حساب واحد ليك.",
+  "enterAcademy": "ادخل {academy}",
+  "@enterAcademy": {
+    "placeholders": {
+      "academy": {
+        "type": "String"
+      }
+    }
+  },
+  "notYou": "مش حسابك؟ استخدم رقم أو إيميل تاني",
+  "pickOne": "اختار حساب واحد على الأقل.",
+  "notAddedTitle": "{n, plural, =1{دخلت، بس فيه حساب ماتضافش:} other{دخلت، بس فيه حسابات ماتضافتش:}}",
+  "@notAddedTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "notAddedLine": "{name} في {academy}: {reason}",
+  "@notAddedLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "academy": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "noAccounts": "مالقيناش حساب بالرقم أو الإيميل ده في أي أكاديمية. اتأكد منه، أو كلّم أكاديميتك.",
   "roleStudent": "طالب",
   "roleGuardian": "ولي أمر",
@@ -206,6 +271,11 @@
   "academyCodeHint": "بتلاقيه في رسالة الترحيب، أو اسأل الأكاديمية.",
   "loginLabel": "الإيميل أو الموبايل أو اسم المستخدم",
   "passwordLabel": "كلمة السر",
+  "academyCodeMissing": "اكتب كود الأكاديمية.",
+  "loginMissing": "اكتب إيميلك أو موبايلك أو اسم المستخدم.",
+  "passwordMissing": "اكتب كلمة السر.",
+  "passwordShow": "إظهار كلمة السر",
+  "passwordHide": "إخفاء كلمة السر",
   "signIn": "ادخل",
   "useCodeInstead": "ادخل بكود بدل كلمة السر",
   "twoFactorTitle": "الدخول بخطوتين",

@@ -84,6 +84,9 @@ class Juice {
     play(sound);
   }
 
+  /// Something not right (a wrong code, an empty field): a firm buzz, no sound.
+  static void wrong() => _haptic(HapticFeedback.heavyImpact);
+
   static void _haptic(Future<void> Function() buzz) {
     if (!sounds || (!enabled && player == null)) return;
     buzz().catchError((Object _) {});

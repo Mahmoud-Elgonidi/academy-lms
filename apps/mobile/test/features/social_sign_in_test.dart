@@ -75,9 +75,11 @@ void main() {
     final asked = app.api.sent('POST', 'accounts/social').single;
     expect(asked.data, {'provider': 'google', 'id_token': 'id-token-google'});
     expect(asked.headers['X-Academy'], isNull);
+    // One account: found, with its academy and a button straight in.
+    expect(find.text('لقيناك!'), findsOneWidget);
     expect(find.text('أكاديمية النور'), findsWidgets);
 
-    await tester.tap(find.text('ادخل'));
+    await tester.tap(find.text('ادخل أكاديمية النور'));
     await frames(tester, 20);
     expect(app.api.sent('POST', 'accounts/sign-in').single.data, containsPair('discovery_token', 'disc-g'));
     expect(app.session.state.status, SessionStatus.signedIn);

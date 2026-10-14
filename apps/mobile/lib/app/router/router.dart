@@ -121,15 +121,18 @@ GoRouter buildRouter(SessionCubit session) {
     ],
   );
 
+  // Signing in, a step at a time: each comes in from the reading side.
+  GoRoute step(String path, Widget Function(GoRouterState s) build) => GoRoute(path: path, pageBuilder: (_, s) => stepPage(s, build(s)));
+
   List<RouteBase> signIn(String base) => [
     page(
       base,
       (_) => WelcomePage(base: base),
       routes: [
-        page('code', (_) => CodePage(base: base)),
-        page('accounts', (_) => AccountsPage(base: base)),
-        page('password', (_) => PasswordPage(base: base)),
-        page('two-factor', (_) => TwoFactorPage(base: base)),
+        step('code', (_) => CodePage(base: base)),
+        step('accounts', (_) => AccountsPage(base: base)),
+        step('password', (_) => PasswordPage(base: base)),
+        step('two-factor', (_) => TwoFactorPage(base: base)),
       ],
     ),
   ];

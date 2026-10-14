@@ -84,7 +84,7 @@ void main() {
     await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
     await frames(tester);
 
-    await tester.enterText(find.byKey(const Key('phone')), '٠٥٠١٢٣٤٥٠٤');
+    await tester.enterText(find.byKey(const Key('contact')), '٠٥٠١٢٣٤٥٠٤');
     expect(find.text('0501234504'), findsOneWidget);
     await tester.tap(find.text('ابعتلي كود'));
     await frames(tester);

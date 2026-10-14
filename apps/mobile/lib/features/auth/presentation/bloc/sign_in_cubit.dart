@@ -144,36 +144,61 @@ class SignInCubit extends Cubit<SignInState> {
       final account = await _repo.completeTwoFactor(step, code.trim());
       emit(state.copyWith(twoFactor: () => null));
       final discovery = state.discovery;
-      if (step.queue.isEmpty || discovery == null) return _keep([...step.signed, account]);
-      await _signInFound(discovery, step.queue, [...step.signed, account]);
+      if (step.queue.isEmpty || discovery == null) return _keep([...step.signed, account], step.refused);
+      await _signInFound(discovery, step.queue, [...step.signed, account], step.refused);
     });
   }
 
-  Future<void> _signInFound(Discovery discovery, List<FoundAccount> queue, List<Account> signed) async {
+  /// Signs in to each chosen account in turn. One its academy refuses does
+  /// not stop the others: the person gets in with the rest and hears which
+  /// were not added and why. Only when none opens does the step fail, with
+  /// the first refusal's words.
+  Future<void> _signInFound(
+    Discovery discovery,
+    List<FoundAccount> queue,
+    List<Account> signed, [
+    List<NotAddedAccount> refused = const [],
+  ]) async {
     final done = [...signed];
+    final failed = [...refused];
+    ApiProblem? first;
     for (var i = 0; i < queue.length; i++) {
       try {
         done.add(await _repo.signInFound(discovery, queue[i]));
       } on ApiProblem catch (problem) {
         final token = problem.twoFactorToken;
-        if (token == null) rethrow;
+        if (token == null) {
+          if (problem.isOffline) rethrow;
+          first ??= problem;
+          final a = queue[i];
+          failed.add((name: a.userName, academyAr: a.academyNameAr, academyEn: a.academyNameEn, reason: problem.message ?? ''));
+          continue;
+        }
         emit(
           state.copyWith(
-            twoFactor: () =>
-                TwoFactorStep(token: token, academySlug: queue[i].academySlug, found: queue[i], queue: queue.sublist(i + 1), signed: done),
+            twoFactor: () => TwoFactorStep(
+              token: token,
+              academySlug: queue[i].academySlug,
+              found: queue[i],
+              queue: queue.sublist(i + 1),
+              signed: done,
+              refused: failed,
+            ),
           ),
         );
         return;
       }
     }
-    await _keep(done);
+    if (done.isEmpty) throw first ?? ApiProblem.unreadable();
+    await _keep(done, failed);
   }
 
   /// Keeps the signed accounts on this phone together, so the first one opens.
-  Future<void> _keep(List<Account> accounts) async {
+  Future<void> _keep(List<Account> accounts, [List<NotAddedAccount> refused = const []]) async {
     for (final account in accounts.reversed) {
       await _session.add(account);
     }
+    if (refused.isNotEmpty) _session.notAdded(refused);
     emit(const SignInState());
   }
 

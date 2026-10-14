@@ -116,19 +116,27 @@ class Discovery extends Equatable {
 
 /// A sign-in waiting on the authenticator app's code (two-step sign-in is
 /// on for that account): the token from the API, the academy it is in, and,
-/// when it came from a code, the found account and the chosen ones still to
-/// sign in to after it.
+/// when it came from a code, the found account, the chosen ones still to
+/// sign in to after it, and those the academy refused on the way.
 class TwoFactorStep extends Equatable {
-  const TwoFactorStep({required this.token, required this.academySlug, this.found, this.queue = const [], this.signed = const []});
+  const TwoFactorStep({
+    required this.token,
+    required this.academySlug,
+    this.found,
+    this.queue = const [],
+    this.signed = const [],
+    this.refused = const [],
+  });
 
   final String token;
   final String academySlug;
   final FoundAccount? found;
   final List<FoundAccount> queue;
   final List<Account> signed;
+  final List<NotAddedAccount> refused;
 
   @override
-  List<Object?> get props => [token, academySlug, found, queue, signed.length];
+  List<Object?> get props => [token, academySlug, found, queue, signed.length, refused];
 }
 
 /// The account a token response opens (`{token, expires_at, user}`); a

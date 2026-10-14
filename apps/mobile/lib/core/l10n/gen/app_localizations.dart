@@ -329,20 +329,134 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeLead.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب رقم موبايلك أو إيميلك، وهنبعتلك كود. بعدها هتلاقي حساباتك في كل الأكاديميات اللي انت فيها.'**
+  /// **'اكتب رقم موبايلك أو إيميلك، وهنبعتلك كود تدخل بيه.'**
   String get welcomeLead;
 
-  /// No description provided for @byPhone.
+  /// No description provided for @contactLabel.
   ///
   /// In ar, this message translates to:
-  /// **'رقم الموبايل'**
-  String get byPhone;
+  /// **'رقم الموبايل أو الإيميل'**
+  String get contactLabel;
 
-  /// No description provided for @byEmail.
+  /// No description provided for @contactPlaceholder.
   ///
   /// In ar, this message translates to:
-  /// **'الإيميل'**
-  String get byEmail;
+  /// **'01xxxxxxxxx أو name@mail.com'**
+  String get contactPlaceholder;
+
+  /// No description provided for @contactEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب رقم موبايلك أو إيميلك الأول.'**
+  String get contactEmpty;
+
+  /// No description provided for @contactShortPhone.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرقم ده ناقص، اكتبه كامل.'**
+  String get contactShortPhone;
+
+  /// No description provided for @contactBadEmail.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإيميل ده ناقص حاجة، زي name@mail.com'**
+  String get contactBadEmail;
+
+  /// No description provided for @countryChange.
+  ///
+  /// In ar, this message translates to:
+  /// **'كود الدولة {code}، دوس عشان تغيّره'**
+  String countryChange(String code);
+
+  /// No description provided for @countrySearch.
+  ///
+  /// In ar, this message translates to:
+  /// **'دوّر على دولة'**
+  String get countrySearch;
+
+  /// No description provided for @countryNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش دولة بالاسم ده.'**
+  String get countryNone;
+
+  /// No description provided for @countrySa.
+  ///
+  /// In ar, this message translates to:
+  /// **'السعودية'**
+  String get countrySa;
+
+  /// No description provided for @countryEg.
+  ///
+  /// In ar, this message translates to:
+  /// **'مصر'**
+  String get countryEg;
+
+  /// No description provided for @countryAe.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإمارات'**
+  String get countryAe;
+
+  /// No description provided for @countryKw.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكويت'**
+  String get countryKw;
+
+  /// No description provided for @countryQa.
+  ///
+  /// In ar, this message translates to:
+  /// **'قطر'**
+  String get countryQa;
+
+  /// No description provided for @countryBh.
+  ///
+  /// In ar, this message translates to:
+  /// **'البحرين'**
+  String get countryBh;
+
+  /// No description provided for @countryOm.
+  ///
+  /// In ar, this message translates to:
+  /// **'عُمان'**
+  String get countryOm;
+
+  /// No description provided for @countryJo.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأردن'**
+  String get countryJo;
+
+  /// No description provided for @countryMa.
+  ///
+  /// In ar, this message translates to:
+  /// **'المغرب'**
+  String get countryMa;
+
+  /// No description provided for @countryUs.
+  ///
+  /// In ar, this message translates to:
+  /// **'أمريكا وكندا'**
+  String get countryUs;
+
+  /// No description provided for @countryGb.
+  ///
+  /// In ar, this message translates to:
+  /// **'بريطانيا'**
+  String get countryGb;
+
+  /// No description provided for @legalAgree.
+  ///
+  /// In ar, this message translates to:
+  /// **'لما تكمّل، تبقى موافق على'**
+  String get legalAgree;
+
+  /// No description provided for @legalAnd.
+  ///
+  /// In ar, this message translates to:
+  /// **'و'**
+  String get legalAnd;
 
   /// No description provided for @countryCode.
   ///
@@ -353,7 +467,7 @@ abstract class AppLocalizations {
   /// No description provided for @phoneHint.
   ///
   /// In ar, this message translates to:
-  /// **'الكود هيوصلك على واتساب. لو ماعندكش واتساب، هتقدر تطلبه رسالة SMS.'**
+  /// **'الكود هيوصلك على واتساب.'**
   String get phoneHint;
 
   /// No description provided for @emailHint.
@@ -506,6 +620,36 @@ abstract class AppLocalizations {
   /// **'الكود صالح 10 دقايق.'**
   String get codeValid;
 
+  /// No description provided for @codePaste.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصق الكود'**
+  String get codePaste;
+
+  /// No description provided for @codeChecking.
+  ///
+  /// In ar, this message translates to:
+  /// **'بنتأكد…'**
+  String get codeChecking;
+
+  /// No description provided for @codePasteNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش كود من 6 أرقام منسوخ.'**
+  String get codePasteNone;
+
+  /// No description provided for @codeRight.
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام!'**
+  String get codeRight;
+
+  /// No description provided for @codeResent.
+  ///
+  /// In ar, this message translates to:
+  /// **'بعتنالك كود جديد.'**
+  String get codeResent;
+
   /// No description provided for @noCode.
   ///
   /// In ar, this message translates to:
@@ -578,6 +722,48 @@ abstract class AppLocalizations {
   /// **'{n, plural, =1{ادخل} =2{أضف الحسابين وادخل} few{أضف {n} حسابات وادخل} other{أضف {n} حساب وادخل}}'**
   String addAccounts(int n);
 
+  /// No description provided for @foundYou.
+  ///
+  /// In ar, this message translates to:
+  /// **'لقيناك!'**
+  String get foundYou;
+
+  /// No description provided for @foundYouLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'لقينا حساب واحد ليك.'**
+  String get foundYouLead;
+
+  /// No description provided for @enterAcademy.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادخل {academy}'**
+  String enterAcademy(String academy);
+
+  /// No description provided for @notYou.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش حسابك؟ استخدم رقم أو إيميل تاني'**
+  String get notYou;
+
+  /// No description provided for @pickOne.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار حساب واحد على الأقل.'**
+  String get pickOne;
+
+  /// No description provided for @notAddedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{دخلت، بس فيه حساب ماتضافش:} other{دخلت، بس فيه حسابات ماتضافتش:}}'**
+  String notAddedTitle(int n);
+
+  /// No description provided for @notAddedLine.
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} في {academy}: {reason}'**
+  String notAddedLine(String name, String academy, String reason);
+
   /// No description provided for @noAccounts.
   ///
   /// In ar, this message translates to:
@@ -637,6 +823,36 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'كلمة السر'**
   String get passwordLabel;
+
+  /// No description provided for @academyCodeMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب كود الأكاديمية.'**
+  String get academyCodeMissing;
+
+  /// No description provided for @loginMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب إيميلك أو موبايلك أو اسم المستخدم.'**
+  String get loginMissing;
+
+  /// No description provided for @passwordMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب كلمة السر.'**
+  String get passwordMissing;
+
+  /// No description provided for @passwordShow.
+  ///
+  /// In ar, this message translates to:
+  /// **'إظهار كلمة السر'**
+  String get passwordShow;
+
+  /// No description provided for @passwordHide.
+  ///
+  /// In ar, this message translates to:
+  /// **'إخفاء كلمة السر'**
+  String get passwordHide;
 
   /// No description provided for @signIn.
   ///

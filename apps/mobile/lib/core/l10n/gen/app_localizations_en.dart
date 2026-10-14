@@ -140,20 +140,78 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeTitle => 'Welcome';
 
   @override
-  String get welcomeLead =>
-      'Enter your mobile number or email and we\'ll send you a code. Then you\'ll find your accounts in every academy you belong to.';
+  String get welcomeLead => 'Enter your mobile number or email and we\'ll send you a code to sign in.';
 
   @override
-  String get byPhone => 'Mobile number';
+  String get contactLabel => 'Mobile number or email';
 
   @override
-  String get byEmail => 'Email';
+  String get contactPlaceholder => '01xxxxxxxxx or name@mail.com';
+
+  @override
+  String get contactEmpty => 'Type your mobile number or email first.';
+
+  @override
+  String get contactShortPhone => 'This number looks short. Type all of it.';
+
+  @override
+  String get contactBadEmail => 'This email is missing something, like name@mail.com';
+
+  @override
+  String countryChange(String code) {
+    return 'Country code $code, tap to change it';
+  }
+
+  @override
+  String get countrySearch => 'Search for a country';
+
+  @override
+  String get countryNone => 'No country by that name.';
+
+  @override
+  String get countrySa => 'Saudi Arabia';
+
+  @override
+  String get countryEg => 'Egypt';
+
+  @override
+  String get countryAe => 'United Arab Emirates';
+
+  @override
+  String get countryKw => 'Kuwait';
+
+  @override
+  String get countryQa => 'Qatar';
+
+  @override
+  String get countryBh => 'Bahrain';
+
+  @override
+  String get countryOm => 'Oman';
+
+  @override
+  String get countryJo => 'Jordan';
+
+  @override
+  String get countryMa => 'Morocco';
+
+  @override
+  String get countryUs => 'United States and Canada';
+
+  @override
+  String get countryGb => 'United Kingdom';
+
+  @override
+  String get legalAgree => 'By continuing you agree to the';
+
+  @override
+  String get legalAnd => 'and';
 
   @override
   String get countryCode => 'Country code';
 
   @override
-  String get phoneHint => 'The code comes on WhatsApp. No WhatsApp? You can ask for a text message instead.';
+  String get phoneHint => 'The code comes on WhatsApp.';
 
   @override
   String get emailHint => 'The code comes to this email.';
@@ -247,6 +305,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get codeValid => 'The code is valid for 10 minutes.';
 
   @override
+  String get codePaste => 'Paste the code';
+
+  @override
+  String get codeChecking => 'Checking…';
+
+  @override
+  String get codePasteNone => 'There is no 6-digit code copied.';
+
+  @override
+  String get codeRight => 'All set!';
+
+  @override
+  String get codeResent => 'We sent a new code.';
+
+  @override
   String get noCode => 'Didn\'t get it?';
 
   @override
@@ -299,6 +372,39 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get foundYou => 'Found you!';
+
+  @override
+  String get foundYouLead => 'We found one account for you.';
+
+  @override
+  String enterAcademy(String academy) {
+    return 'Go to $academy';
+  }
+
+  @override
+  String get notYou => 'Not you? Use another number or email';
+
+  @override
+  String get pickOne => 'Pick at least one account.';
+
+  @override
+  String notAddedTitle(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'You are in, but some accounts were not added:',
+      one: 'You are in, but one account was not added:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String notAddedLine(String name, String academy, String reason) {
+    return '$name at $academy: $reason';
+  }
+
+  @override
   String get noAccounts => 'No academy has an account with this contact. Check it, or ask your academy.';
 
   @override
@@ -327,6 +433,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordLabel => 'Password';
+
+  @override
+  String get academyCodeMissing => 'Type the academy code.';
+
+  @override
+  String get loginMissing => 'Type your email, mobile or username.';
+
+  @override
+  String get passwordMissing => 'Type your password.';
+
+  @override
+  String get passwordShow => 'Show password';
+
+  @override
+  String get passwordHide => 'Hide password';
 
   @override
   String get signIn => 'Sign in';

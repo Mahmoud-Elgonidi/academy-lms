@@ -93,3 +93,7 @@ class Account extends Equatable {
   @override
   List<Object?> get props => [id, token, roles, userName, academyColour, logoUrl, stage];
 }
+
+/// A chosen account its academy would not open at sign-in (a guardian's
+/// consent still missing, two-step sign-in to set up…), with its own words.
+typedef NotAddedAccount = ({String name, String academyAr, String academyEn, String reason});

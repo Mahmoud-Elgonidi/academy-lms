@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -8,12 +7,16 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/social/social_sign_in.dart';
+import '../../../../shared/motion/juice.dart';
+import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
+import '../../domain/contact.dart';
 import '../bloc/sign_in_cubit.dart';
+import '../widgets/contact_field.dart';
 import '../widgets/sign_in_frame.dart';
-import '../../../../shared/widgets/latin_digits.dart';
 
-/// Step one: a mobile number (with its country) or an email.
+/// Step one: one field for a mobile number or an email (told apart as it
+/// is typed), then a code to it. Or a password, or Google or Apple.
 class WelcomePage extends StatefulWidget {
   const WelcomePage({this.base = '/welcome', super.key});
 
@@ -25,45 +28,58 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-  static const _codes = ['+966', '+20', '+971', '+965', '+974', '+973', '+968', '+962', '+212', '+1', '+44'];
+  final _contact = TextEditingController();
+  late String _country = Contact.countryFor(context.read<SessionCubit>().state.deviceTimezone);
 
-  final _phone = TextEditingController();
-  final _email = TextEditingController();
-  bool _byEmail = false;
-  late String _country = _guessCountry(context.read<SessionCubit>().state.deviceTimezone);
+  /// What is missing, found here before asking the API.
+  String? _missing;
+  int _shakes = 0;
 
-  static String _guessCountry(String? zone) => switch (zone) {
-    'Africa/Cairo' => '+20',
-    'Asia/Dubai' => '+971',
-    'Asia/Kuwait' => '+965',
-    'Asia/Qatar' => '+974',
-    'Asia/Bahrain' => '+973',
-    'Asia/Muscat' => '+968',
-    'Asia/Amman' => '+962',
-    'Africa/Casablanca' => '+212',
-    'Europe/London' => '+44',
-    final String z when z.startsWith('America/') => '+1',
-    _ => '+966',
-  };
+  @override
+  void initState() {
+    super.initState();
+    // Typing again clears what was wrong.
+    _contact.addListener(() {
+      if (_missing != null) setState(() => _missing = null);
+      final cubit = context.read<SignInCubit>();
+      if (cubit.state.problem != null && !cubit.state.busy) cubit.clearProblem();
+    });
+  }
 
   @override
   void dispose() {
-    _phone.dispose();
-    _email.dispose();
+    _contact.dispose();
     super.dispose();
   }
 
-  String get _contact {
-    if (_byEmail) return _email.text.trim();
-    final digits = _phone.text.replaceAll(RegExp(r'\D'), '').replaceFirst(RegExp('^0+'), '');
-    return '$_country$digits';
+  void _wrong(String why) {
+    Juice.wrong();
+    setState(() {
+      _missing = why;
+      _shakes++;
+    });
   }
 
   Future<void> _send() async {
+    final l = context.l10n;
+    final text = _contact.text;
+    final kind = Contact.kindOf(text);
+    if (kind == ContactKind.none) return _wrong(l.contactEmpty);
+    if (kind == ContactKind.phone && !Contact.phoneComplete(text)) return _wrong(l.contactShortPhone);
+    if (kind == ContactKind.email && !Contact.emailComplete(text)) return _wrong(l.contactBadEmail);
+    final contact = kind == ContactKind.phone ? Contact.phone(text, _country) : text.trim();
     final cubit = context.read<SignInCubit>();
-    if (await cubit.sendCode(_contact) && mounted) {
+    if (await cubit.sendCode(contact) && mounted) {
       await context.push('${widget.base}/code');
+    } else if (mounted && cubit.state.problem != null) {
+      Juice.wrong();
+      setState(() => _shakes++);
     }
+  }
+
+  void _toPassword() {
+    context.read<SignInCubit>().clearProblem();
+    context.push('${widget.base}/password');
   }
 
   /// Google or Apple instead of a code: the same list of accounts comes next.
@@ -84,41 +100,70 @@ class _WelcomePageState extends State<WelcomePage> {
   List<Widget> _socialButtons(BuildContext context, SignInState state) {
     final social = context.read<SocialSignIn>();
     final l = context.l10n;
+    final c = context.colors;
     final providers = [
-      for (final p in const ['apple', 'google'])
+      for (final p in const ['google', 'apple'])
         if (social.available(p)) p,
     ];
     if (providers.isEmpty) return const [];
     return [
-      const SizedBox(height: 4),
-      Row(
-        children: [
-          const Expanded(child: Divider()),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(l.signInOr, style: context.text.bodySmall?.copyWith(color: context.colors.muted)),
-          ),
-          const Expanded(child: Divider()),
-        ],
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: Space.s),
+        child: Row(
+          children: [
+            Expanded(child: Divider(color: c.line)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Space.m),
+              child: Text(l.signInOr, style: TextStyle(fontSize: 13, color: c.muted)),
+            ),
+            Expanded(child: Divider(color: c.line)),
+          ],
+        ),
       ),
-      const SizedBox(height: 8),
       for (final p in providers)
         Padding(
-          padding: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.only(bottom: 10),
           child: p == 'apple'
               // Apple's own button, as its guidelines ask.
               ? SignInWithAppleButton(
                   key: const Key('social-apple'),
                   text: l.signInWithApple,
-                  height: 48,
+                  height: 52,
+                  borderRadius: const BorderRadius.all(Radius.circular(16)),
                   onPressed: () => state.busy ? null : _withProvider('apple'),
                 )
-              : SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    key: const Key('social-google'),
-                    onPressed: state.busy ? null : () => _withProvider('google'),
-                    child: Text(l.signInWithGoogle),
+              : PressScale(
+                  child: SizedBox(
+                    height: 52,
+                    child: OutlinedButton(
+                      key: const Key('social-google'),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        side: BorderSide(color: c.line, width: 1.5),
+                        foregroundColor: c.ink,
+                      ),
+                      onPressed: state.busy ? null : () => _withProvider('google'),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 26,
+                            height: 26,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: c.ink, width: 1.5),
+                            ),
+                            child: Text(
+                              'G',
+                              style: TextStyle(fontFamily: context.shape.headingFont, fontSize: 14, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                          const Gap(10),
+                          Text(l.signInWithGoogle, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
         ),
@@ -128,93 +173,40 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final first = widget.base == '/welcome';
     return BlocBuilder<SignInCubit, SignInState>(
       builder: (context, state) {
-        final error = state.problem == null ? null : context.problemText(state.problem!);
+        final error = _missing ?? (state.problem == null ? null : context.problemText(state.problem!));
         return SignInFrame(
           title: l.welcomeTitle,
-          mark: true,
-          showBack: widget.base != '/welcome',
-          lead: Text(l.welcomeLead, style: context.text.bodyLarge?.copyWith(color: context.colors.muted)),
+          mark: first,
+          showBack: !first,
+          lead: Text(l.welcomeLead, style: TextStyle(fontSize: 16, height: 1.65, color: context.colors.muted)),
           bottom: Column(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              BusyButton(label: l.sendCode, busy: state.busy, onPressed: _send),
-              const SizedBox(height: 6),
+              SizedBox(
+                height: 56,
+                child: BusyButton(label: l.sendCode, busy: state.busy, onPressed: _send),
+              ),
+              const Gap(Space.xs),
               TextButton(
-                onPressed: () {
-                  context.read<SignInCubit>().clearProblem();
-                  context.push('${widget.base}/password');
-                },
-                child: Text(l.havePassword),
+                style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48), foregroundColor: context.colors.brandDeep),
+                onPressed: _toPassword,
+                child: Text(l.havePassword, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
               ),
               ..._socialButtons(context, state),
             ],
           ),
           children: [
-            SegmentedButton<bool>(
-              showSelectedIcon: false,
-              segments: [
-                ButtonSegment(value: false, label: Text(l.byPhone), icon: const Icon(Icons.phone_iphone_rounded)),
-                ButtonSegment(value: true, label: Text(l.byEmail), icon: const Icon(Icons.alternate_email_rounded)),
-              ],
-              selected: {_byEmail},
-              onSelectionChanged: (v) => setState(() {
-                _byEmail = v.first;
-                context.read<SignInCubit>().clearProblem();
-              }),
+            ContactField(
+              controller: _contact,
+              country: _country,
+              onCountry: (code) => setState(() => _country = code),
+              onSubmit: _send,
+              error: error,
+              shakes: _shakes,
             ),
-            const SizedBox(height: 18),
-            if (_byEmail)
-              TextField(
-                key: const Key('email'),
-                controller: _email,
-                keyboardType: TextInputType.emailAddress,
-                autofillHints: const [AutofillHints.email],
-                textDirection: TextDirection.ltr,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _send(),
-                decoration: InputDecoration(labelText: l.byEmail, errorText: error),
-              )
-            else
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                textDirection: TextDirection.ltr,
-                children: [
-                  SizedBox(
-                    width: 112,
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _country,
-                      isExpanded: true,
-                      decoration: InputDecoration(labelText: l.countryCode),
-                      items: [
-                        for (final c in _codes)
-                          DropdownMenuItem(
-                            value: c,
-                            child: Text(c, textDirection: TextDirection.ltr),
-                          ),
-                      ],
-                      onChanged: (v) => setState(() => _country = v ?? _country),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      key: const Key('phone'),
-                      controller: _phone,
-                      keyboardType: TextInputType.phone,
-                      autofillHints: const [AutofillHints.telephoneNumberNational],
-                      inputFormatters: [const LatinDigits(), FilteringTextInputFormatter.allow(RegExp(r'[0-9 ]'))],
-                      textDirection: TextDirection.ltr,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _send(),
-                      decoration: InputDecoration(labelText: l.byPhone, errorText: error, errorMaxLines: 3),
-                    ),
-                  ),
-                ],
-              ),
-            const SizedBox(height: 12),
-            Text(_byEmail ? l.emailHint : l.phoneHint, style: context.text.bodySmall),
           ],
         );
       },

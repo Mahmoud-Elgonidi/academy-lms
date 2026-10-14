@@ -16,7 +16,7 @@ import 'session_repository.dart';
 enum SessionStatus { starting, signedOut, signedIn }
 
 /// Something to tell the person once (a snack bar), then forget.
-enum SessionNotice { expired, signedOut }
+enum SessionNotice { expired, signedOut, notAdded }
 
 class SessionState extends Equatable {
   const SessionState({
@@ -31,6 +31,7 @@ class SessionState extends Equatable {
     this.clock,
     this.me,
     this.notice,
+    this.notAdded = const [],
     this.policy,
     this.appVersion,
   });
@@ -52,6 +53,9 @@ class SessionState extends Equatable {
   final String? clock;
   final Me? me;
   final SessionNotice? notice;
+
+  /// The accounts the last sign-in could not add (with [SessionNotice.notAdded]).
+  final List<NotAddedAccount> notAdded;
 
   /// The platform's word on app versions (with the academy's look).
   final AppPolicy? policy;
@@ -87,6 +91,7 @@ class SessionState extends Equatable {
     String? Function()? clock,
     Me? Function()? me,
     SessionNotice? Function()? notice,
+    List<NotAddedAccount>? notAdded,
     AppPolicy? policy,
   }) => SessionState(
     status: status ?? this.status,
@@ -100,6 +105,7 @@ class SessionState extends Equatable {
     clock: clock != null ? clock() : this.clock,
     me: me != null ? me() : this.me,
     notice: notice != null ? notice() : this.notice,
+    notAdded: notAdded ?? this.notAdded,
     policy: policy ?? this.policy,
     appVersion: appVersion,
   );
@@ -118,6 +124,7 @@ class SessionState extends Equatable {
     me?.mismatch,
     me?.timezone,
     notice,
+    notAdded,
     policy?.minVersion,
   ];
 }
@@ -208,7 +215,10 @@ class SessionCubit extends Cubit<SessionState> {
     if (current != null) unawaited(_drop(current, SessionNotice.expired));
   }
 
-  void noticeShown() => _set(state.copyWith(notice: () => null));
+  void noticeShown() => _set(state.copyWith(notice: () => null, notAdded: const []));
+
+  /// The sign-in added some accounts but not [refused]: say which, and why.
+  void notAdded(List<NotAddedAccount> refused) => _set(state.copyWith(notice: () => SessionNotice.notAdded, notAdded: refused));
 
   Future<void> setLocale(String locale) async {
     if (locale == state.locale) return;

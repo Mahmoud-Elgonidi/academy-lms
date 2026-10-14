@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../shared/motion/juice.dart';
 import '../bloc/sign_in_cubit.dart';
 import '../widgets/sign_in_frame.dart';
 
@@ -24,6 +25,9 @@ class _PasswordPageState extends State<PasswordPage> {
   final _password = TextEditingController();
   bool _hidden = true;
 
+  /// The fields left empty, each saying what it wants.
+  Set<String> _missing = const {};
+
   @override
   void dispose() {
     _academy.dispose();
@@ -33,7 +37,13 @@ class _PasswordPageState extends State<PasswordPage> {
   }
 
   Future<void> _submit() async {
-    if (_academy.text.trim().isEmpty || _login.text.trim().isEmpty || _password.text.isEmpty) return;
+    final missing = {
+      if (_academy.text.trim().isEmpty) 'academy',
+      if (_login.text.trim().isEmpty) 'login',
+      if (_password.text.isEmpty) 'password',
+    };
+    setState(() => _missing = missing);
+    if (missing.isNotEmpty) return Juice.wrong();
     final cubit = context.read<SignInCubit>();
     final ok = await cubit.signInWithPassword(academy: _academy.text, login: _login.text, password: _password.text);
     if (!ok || !mounted) return;
@@ -48,13 +58,20 @@ class _PasswordPageState extends State<PasswordPage> {
       builder: (context, state) {
         final p = state.problem;
         final general = p != null && p.field('login') == null && p.field('password') == null ? context.problemText(p) : null;
+        String? wants(String field, String words) => _missing.contains(field) ? words : null;
         return SignInFrame(
           title: l.passwordTitle,
+          badge: Icons.key_rounded,
+          pinBottom: true,
           bottom: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              BusyButton(label: l.signIn, busy: state.busy, onPressed: _submit),
+              SizedBox(
+                height: 56,
+                child: BusyButton(label: l.signIn, busy: state.busy, onPressed: _submit),
+              ),
               TextButton(
+                style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48)),
                 onPressed: () {
                   context.read<SignInCubit>().clearProblem();
                   context.go(widget.base);
@@ -76,7 +93,7 @@ class _PasswordPageState extends State<PasswordPage> {
                     decoration: InputDecoration(
                       labelText: l.academyCode,
                       helperText: l.academyCodeHint,
-                      errorText: general,
+                      errorText: wants('academy', l.academyCodeMissing) ?? general,
                       errorMaxLines: 3,
                     ),
                   ),
@@ -89,7 +106,11 @@ class _PasswordPageState extends State<PasswordPage> {
                     keyboardType: TextInputType.emailAddress,
                     autofillHints: const [AutofillHints.username],
                     textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(labelText: l.loginLabel, errorText: p?.field('login'), errorMaxLines: 3),
+                    decoration: InputDecoration(
+                      labelText: l.loginLabel,
+                      errorText: wants('login', l.loginMissing) ?? p?.field('login'),
+                      errorMaxLines: 3,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   TextField(
@@ -101,8 +122,9 @@ class _PasswordPageState extends State<PasswordPage> {
                     onSubmitted: (_) => _submit(),
                     decoration: InputDecoration(
                       labelText: l.passwordLabel,
-                      errorText: p?.field('password'),
+                      errorText: wants('password', l.passwordMissing) ?? p?.field('password'),
                       suffixIcon: IconButton(
+                        tooltip: _hidden ? l.passwordShow : l.passwordHide,
                         onPressed: () => setState(() => _hidden = !_hidden),
                         icon: Icon(_hidden ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: context.colors.muted),
                       ),
