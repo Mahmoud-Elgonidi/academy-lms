@@ -8,6 +8,7 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/network/api_problem.dart';
 import '../../../core/realtime/live.dart';
 import '../../../core/state/load_cubit.dart';
+import '../../../shared/widgets/chat.dart';
 import '../../../shared/widgets/lms.dart';
 import '../../../shared/widgets/load_view.dart';
 import '../data/support_repository.dart';
@@ -29,7 +30,7 @@ class TicketPage extends StatelessWidget {
         LoadCubit<Ticket>(() => c.read<SupportRepository>().ticket(ticketId), refreshOn: c.read<Live>().on({Live.tickets}))..load(),
     child: Scaffold(
       appBar: AppBar(title: BlocBuilder<LoadCubit<Ticket>, LoadState<Ticket>>(builder: (_, s) => Text(s.data?.summary.reference ?? ''))),
-      body: LoadView<Ticket>(builder: (context, ticket) => _Conversation(ticket: ticket)),
+      body: LoadView<Ticket>(refreshable: false, builder: (context, ticket) => _Conversation(ticket: ticket)),
     ),
   );
 }
@@ -97,76 +98,85 @@ class _ConversationState extends State<_Conversation> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final c = context.colors;
     final t = widget.ticket;
     final s = t.summary;
-    return ListView(
-      padding: pagePadding,
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        Text([s.kindLabel, if (s.learnerName != null) l.ticketAbout(s.learnerName!)].join(' · '), style: context.text.bodySmall),
-        const SizedBox(height: 2),
-        Text(s.subject, style: context.text.titleLarge),
-        if (t.lesson != null)
-          Text(
-            [t.lesson!.subject, t.lesson!.startsAt?.label, t.lesson!.withName].whereType<String>().where((x) => x.isNotEmpty).join(' · '),
-            style: context.text.bodySmall,
-          ),
-        const SizedBox(height: 8),
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: Pill(s.statusLabel, tone: statusTone(s.status)),
-        ),
-        const SizedBox(height: 14),
-        for (final line in t.lines) _Line(ticketId: s.id, line: line),
-        if (t.canReopen) ...[
-          const SizedBox(height: 8),
-          Note(
-            l.ticketReopenHint(t.reopenUntil?.label ?? ''),
-            action: OutlinedButton(onPressed: _busy ? null : () => _run((repo) => repo.reopen(s.id)), child: Text(l.ticketReopen)),
-          ),
-        ],
-        const SizedBox(height: 12),
-        if (t.canReply) ...[
-          TextField(
-            key: const Key('ticket-reply'),
-            controller: _body,
-            minLines: 2,
-            maxLines: 6,
-            maxLength: 5000,
-            decoration: InputDecoration(hintText: l.ticketReplyHint),
-          ),
+    return ChatThread(
+      // What the ticket is about, where it stands, and what may still be done with it.
+      top: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text([s.kindLabel, if (s.learnerName != null) l.ticketAbout(s.learnerName!)].join(' · '), style: context.type.caption),
+          Text(s.subject, style: context.type.title),
+          if (t.lesson != null)
+            Text(
+              [t.lesson!.subject, t.lesson!.startsAt?.label, t.lesson!.withName].whereType<String>().where((x) => x.isNotEmpty).join(' · '),
+              style: context.type.caption,
+            ),
+          const Gap(Space.s),
           Row(
             children: [
-              Expanded(
-                child: TextButton.icon(
-                  onPressed: _busy
-                      ? null
-                      : () async {
-                          final picked = await pickAttachment(context);
-                          if (picked != null && mounted) setState(() => _file = picked);
-                        },
-                  icon: const Icon(Icons.attach_file_rounded),
-                  label: Text(_file?.name ?? l.ticketAttach, overflow: TextOverflow.ellipsis),
+              StatusChip(s.statusLabel, tone: statusTone(s.status)),
+              const Spacer(),
+              if (t.canClose)
+                TextButton(
+                  style: TextButton.styleFrom(foregroundColor: c.brandDeep, visualDensity: VisualDensity.compact),
+                  onPressed: _busy ? null : _close,
+                  child: Text(l.ticketClose),
                 ),
-              ),
-              FilledButton.icon(
-                key: const Key('ticket-reply-send'),
-                onPressed: _busy ? null : _reply,
-                icon: const Icon(Icons.send_rounded),
-                label: Text(l.send),
-              ),
             ],
           ),
-        ] else
-          Text(l.ticketClosed, style: context.text.bodySmall),
-        if (t.canClose) ...[
-          const SizedBox(height: 8),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: TextButton(onPressed: _busy ? null : _close, child: Text(l.ticketClose)),
-          ),
+          if (t.canReopen) ...[
+            const Gap(Space.s),
+            Note(
+              l.ticketReopenHint(t.reopenUntil?.label ?? ''),
+              action: OutlinedButton(onPressed: _busy ? null : () => _run((repo) => repo.reopen(s.id)), child: Text(l.ticketReopen)),
+            ),
+          ],
         ],
-      ],
+      ),
+      lines: [for (final line in t.lines) _Line(ticketId: s.id, line: line)],
+      bottom: t.canReply
+          ? ChatComposer(
+              controller: _body,
+              fieldKey: const Key('ticket-reply'),
+              sendKey: const Key('ticket-reply-send'),
+              hint: l.ticketReplyHint,
+              maxLength: 5000,
+              busy: _busy,
+              onSend: _reply,
+              leading: IconButton(
+                tooltip: l.ticketAttach,
+                onPressed: _busy
+                    ? null
+                    : () async {
+                        final picked = await pickAttachment(context);
+                        if (picked != null && mounted) setState(() => _file = picked);
+                      },
+                icon: const Icon(Icons.attach_file_rounded),
+              ),
+              above: _file == null
+                  ? null
+                  : Padding(
+                      padding: const EdgeInsets.only(bottom: Space.s),
+                      child: Row(
+                        children: [
+                          Icon(Icons.insert_drive_file_outlined, size: 18, color: c.muted),
+                          const Gap(Space.xs),
+                          Expanded(
+                            child: Text(_file!.name, style: context.type.caption, overflow: TextOverflow.ellipsis),
+                          ),
+                          IconButton(
+                            tooltip: l.close,
+                            visualDensity: VisualDensity.compact,
+                            onPressed: () => setState(() => _file = null),
+                            icon: const Icon(Icons.close_rounded, size: 18),
+                          ),
+                        ],
+                      ),
+                    ),
+            )
+          : ChatClosed(l.ticketClosed),
     );
   }
 }
@@ -187,79 +197,43 @@ class _LineState extends State<_Line> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final c = context.colors;
     final line = widget.line;
-    if (line.isEvent) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Center(
-          child: Text(
-            [line.event, line.at?.label].whereType<String>().join(' · '),
-            style: context.text.bodySmall,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    }
+    if (line.isEvent) return ChatEvent([line.event, line.at?.label].whereType<String>().join(' · '));
     final file = line.file;
     final who = line.author ?? (line.mine ? l.ticketYou : l.ticketAcademy);
-    return Align(
-      alignment: line.mine ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * .82),
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Column(
-            crossAxisAlignment: line.mine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+    Widget? extra;
+    if (file != null && file.mime.startsWith('image/') && file.mime != 'image/heic') {
+      extra = _picture == null
+          ? OutlinedButton.icon(
+              onPressed: () => setState(() => _picture = context.read<SupportRepository>().file(widget.ticketId, line.id)),
+              icon: const Icon(Icons.image_outlined),
+              label: Text(l.showPicture),
+            )
+          : FutureBuilder<Uint8List>(
+              future: _picture,
+              builder: (context, snap) => snap.hasData
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.memory(snap.data!, height: 220, fit: BoxFit.contain),
+                    )
+                  : const Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator.adaptive()),
+            );
+    } else if (file != null) {
+      extra = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: line.mine ? c.brandSoft : c.chip,
-                  borderRadius: BorderRadius.circular(context.shape.card - 4),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if ((line.body ?? '').isNotEmpty) Text(line.body!, style: context.text.bodyMedium),
-                    if (file != null && file.mime.startsWith('image/') && file.mime != 'image/heic') ...[
-                      const SizedBox(height: 6),
-                      _picture == null
-                          ? OutlinedButton.icon(
-                              onPressed: () => setState(() => _picture = context.read<SupportRepository>().file(widget.ticketId, line.id)),
-                              icon: const Icon(Icons.image_outlined),
-                              label: Text(l.showPicture),
-                            )
-                          : FutureBuilder<Uint8List>(
-                              future: _picture,
-                              builder: (context, snap) => snap.hasData
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: Image.memory(snap.data!, height: 220, fit: BoxFit.contain),
-                                    )
-                                  : const Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator.adaptive()),
-                            ),
-                    ] else if (file != null) ...[
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.attach_file_rounded, size: 18),
-                          const SizedBox(width: 4),
-                          Flexible(child: Text(file.name, style: context.text.bodyMedium)),
-                        ],
-                      ),
-                      Text(l.fileOnWeb, style: context.text.bodySmall),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text([who, line.at?.label].whereType<String>().join(' · '), style: context.text.bodySmall),
+              const Icon(Icons.attach_file_rounded, size: 18),
+              const Gap(Space.xs),
+              Flexible(child: Text(file.name, style: context.type.body)),
             ],
           ),
-        ),
-      ),
-    );
+          Text(l.fileOnWeb, style: context.type.caption),
+        ],
+      );
+    }
+    return ChatBubble(mine: line.mine, body: line.body, extra: extra, meta: [who, line.at?.label].whereType<String>().join(' · '));
   }
 }

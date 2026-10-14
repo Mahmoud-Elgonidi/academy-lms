@@ -99,103 +99,152 @@ class _MoneyList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final c = context.colors;
     final due = money.invoices.payable.firstOrNull;
     return ListView(
-      padding: pagePadding,
+      padding: pagePadding.copyWith(top: Space.m),
       physics: const AlwaysScrollableScrollPhysics(),
       children: staggered(context, [
-        if (due != null) ...[
-          LmsCard(
-            color: c.attentionSoft,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l.owedNow, style: context.text.labelMedium?.copyWith(color: c.attentionInk, fontSize: 13)),
-                const SizedBox(height: 4),
-                Text(money.invoices.owed ?? due.outstanding, style: context.text.headlineMedium),
-                Text(
-                  l.invoiceDue(due.number, due.dueAt?.day(context.locale) ?? ''),
-                  style: context.text.bodySmall?.copyWith(color: c.attentionInk),
-                ),
-                if (due.proof case final proof?) ...[const SizedBox(height: 10), _ProofLine(proof: proof)],
-                if (due.transferText case final transfer?) ...[const SizedBox(height: 10), _TransferDetails(text: transfer)],
-                const SizedBox(height: 12),
-                // No gateway takes it and its proof waits for the academy: nothing to press, the line above says where it stands.
-                if (due.payWith.isNotEmpty || (!due.canSendProof && due.proof?.status != 'pending'))
-                  SizedBox(
-                    width: double.infinity,
-                    child: _PayButton(invoice: due),
-                  ),
-                if (due.canSendProof) ...[
-                  if (due.payWith.isNotEmpty) const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: _ProofButton(invoice: due, manual: money.invoices.manual, primary: due.payWith.isEmpty),
-                  ),
-                ],
-                if (due.payWith.isNotEmpty) ...[const SizedBox(height: 6), Text(l.payNote, style: context.text.bodySmall)],
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
+        if (due != null) _OwedCard(invoice: due, owed: money.invoices.owed ?? due.outstanding, manual: money.invoices.manual),
+        if (due?.transferText case final transfer?) ...[SectionHeader(l.transferTitle), _TransferDetails(text: transfer, titled: false)],
         if (money.balance.isNotEmpty) ...[
-          SectionLabel(l.lessonsLeftTitle),
-          LmsCard(
-            child: Column(
-              children: [
-                for (final b in money.balance)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(child: Text(b.shared ? l.sharedPackage(b.subject) : b.subject, style: context.text.titleSmall)),
-                            Pill(l.lessonsCount(b.sessions), tone: b.days.isOn && b.sessions <= 1 ? Tone.attention : Tone.brand),
-                          ],
-                        ),
-                        if (b.days.stand != CourseStand.on) ...[const SizedBox(height: 4), CourseStatePill(b.days)],
-                        if (b.extra case final extra?)
-                          extra.waitingNumber != null
-                              ? Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Text(l.extraWaiting(extra.waitingNumber!), style: context.text.bodySmall),
-                                )
-                              : Align(
-                                  alignment: AlignmentDirectional.centerStart,
-                                  child: TextButton.icon(
-                                    key: Key('extra-${b.enrollmentId}'),
-                                    style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
-                                    onPressed: () => _buyExtra(context, b, extra),
-                                    icon: const Icon(Icons.add_circle_outline, size: 18),
-                                    label: Text('${l.extraAction} · ${l.extraHint(extra.price, extra.minutes)}'),
-                                  ),
-                                ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
+          SectionHeader(l.lessonsLeftTitle),
+          MenuGroup(children: [for (final b in money.balance) _BalanceRow(balance: b)]),
         ],
-        SectionLabel(l.invoices),
-        if (money.invoices.list.isEmpty) EmptyNote(l.noInvoices, icon: Icons.receipt_long_outlined),
+        SectionHeader(l.invoices),
+        if (money.invoices.list.isEmpty) EmptyState(icon: Icons.receipt_long_outlined, title: l.noInvoices),
         if (money.invoices.list.isNotEmpty)
           LmsCard(
             padding: EdgeInsets.zero,
             child: Column(
               children: [
-                for (final (i, inv) in money.invoices.list.indexed) ...[if (i > 0) const Divider(height: 1), _InvoiceRow(invoice: inv)],
+                for (final (i, inv) in money.invoices.list.indexed) ...[
+                  if (i > 0) const Divider(height: 1, indent: Space.l, endIndent: Space.l),
+                  _InvoiceRow(invoice: inv),
+                ],
               ],
             ),
           ),
-        const SizedBox(height: 10),
-        Text(l.invoiceNote, style: context.text.bodySmall),
+        const Gap(Space.m),
+        Text(l.invoiceNote, style: context.type.caption),
       ]),
+    );
+  }
+}
+
+/// What is owed now, the one surface in the academy's colour: how much, which
+/// invoice and by when, where its receipt stands, and the ways to pay it.
+class _OwedCard extends StatelessWidget {
+  const _OwedCard({required this.invoice, required this.owed, required this.manual});
+
+  final Invoice invoice;
+  final String owed;
+  final ManualPayment manual;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    const ink = Colors.white;
+    final due = invoice;
+    return Container(
+      key: const Key('money-owed'),
+      padding: const EdgeInsets.fromLTRB(Space.l + 4, Space.l + 2, Space.l + 4, Space.l + 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(context.shape.card + 6),
+        gradient: LinearGradient(
+          colors: [c.brand, Color.lerp(c.brand, Colors.black, 0.18)!],
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.owedNow,
+            style: TextStyle(color: ink.withValues(alpha: 0.88), fontWeight: FontWeight.w700, fontSize: 14),
+          ),
+          const Gap(Space.s),
+          Text(owed, style: context.type.number.copyWith(color: ink, fontSize: 34)),
+          const Gap(Space.xs),
+          Text(
+            l.invoiceDue(due.number, due.dueAt?.day(context.locale) ?? ''),
+            style: TextStyle(color: ink.withValues(alpha: 0.9), fontSize: 14),
+          ),
+          if (due.proof case final proof?) ...[const Gap(Space.m), _ProofLine(proof: proof)],
+          const Gap(Space.l),
+          // No gateway takes it and its proof waits for the academy: nothing to press, the line above says where it stands.
+          if (due.payWith.isNotEmpty || (!due.canSendProof && due.proof?.status != 'pending'))
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: _PayButton(invoice: due),
+            ),
+          if (due.canSendProof) ...[
+            if (due.payWith.isNotEmpty) const Gap(Space.s),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: _ProofButton(invoice: due, manual: manual, primary: due.payWith.isEmpty),
+            ),
+          ],
+          if (due.payWith.isNotEmpty) ...[
+            const Gap(Space.s),
+            Text(l.payNote, style: TextStyle(color: ink.withValues(alpha: 0.85), fontSize: 12.5, height: 1.5)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A course's lessons left (or a shared package's), whether it is paused or
+/// ended, and extra lessons to add while it runs.
+class _BalanceRow extends StatelessWidget {
+  const _BalanceRow({required this.balance});
+
+  final Balance balance;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final b = balance;
+    final low = b.days.isOn && b.sessions <= 1;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.l, Space.m, Space.l, Space.m),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(b.shared ? l.sharedPackage(b.subject) : b.subject, style: context.type.cardTitle)),
+              StatusChip(l.lessonsCount(b.sessions), tone: low ? Tone.attention : Tone.brand),
+            ],
+          ),
+          if (b.days.stand != CourseStand.on) ...[const Gap(Space.xs), CourseStatePill(b.days)],
+          if (b.extra case final extra?)
+            extra.waitingNumber != null
+                ? Padding(
+                    padding: const EdgeInsets.only(top: Space.xs),
+                    child: Text(l.extraWaiting(extra.waitingNumber!), style: context.type.caption),
+                  )
+                : Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      key: Key('extra-${b.enrollmentId}'),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        foregroundColor: c.brandDeep,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: () => _buyExtra(context, b, extra),
+                      icon: const Icon(Icons.add_circle_outline, size: 18),
+                      label: Text('${l.extraAction} · ${l.extraHint(extra.price, extra.minutes)}'),
+                    ),
+                  ),
+        ],
+      ),
     );
   }
 }
@@ -288,48 +337,60 @@ class _InvoiceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tone = switch (invoice.status) {
-      'paid' => Tone.brand,
-      'void' || 'cancelled' => Tone.neutral,
-      'overdue' => Tone.danger,
-      _ => Tone.attention,
+    final (tone, icon) = switch (invoice.status) {
+      'paid' => (Tone.brand, Icons.check_rounded),
+      'void' || 'cancelled' => (Tone.neutral, Icons.block_rounded),
+      'overdue' => (Tone.danger, Icons.error_outline_rounded),
+      _ when invoice.proof?.status == 'pending' => (Tone.info, Icons.hourglass_top_rounded),
+      _ => (Tone.attention, Icons.receipt_long_outlined),
     };
     final url = invoice.documentUrl;
-    return InkWell(
-      onTap: url == null ? null : () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(invoice.forWhom, style: context.text.titleSmall),
-                  Text(
-                    '${invoice.number}${invoice.family ? ' · ${context.l10n.familyInvoice}' : ''}${invoice.issuedAt == null ? '' : ' · ${invoice.issuedAt!.day(context.locale)}'}',
-                    style: context.text.bodySmall,
-                  ),
-                  for (final off in invoice.lines.where((x) => x.isDiscount))
-                    Text('${off.description}  ${off.amount}', style: context.text.bodySmall?.copyWith(color: context.colors.brand)),
-                  if (invoice.proof case final proof? when proof.status != 'rejected' || invoice.payable) ...[
-                    const SizedBox(height: 6),
-                    _ProofLine(proof: proof),
-                  ],
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+    final row = Padding(
+      padding: const EdgeInsets.fromLTRB(Space.l, Space.m, Space.m, Space.m),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          IconBadge(icon, tone: tone, size: 40),
+          const Gap(Space.m),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(invoice.total, style: context.text.titleSmall),
-                const SizedBox(height: 2),
-                Pill(invoice.statusLabel, tone: tone),
+                Text(invoice.forWhom, style: context.type.cardTitle),
+                Text(
+                  [
+                    invoice.number,
+                    if (invoice.family) context.l10n.familyInvoice,
+                    if (invoice.issuedAt != null) invoice.issuedAt!.day(context.locale),
+                  ].join(' · '),
+                  style: context.type.caption,
+                ),
+                for (final off in invoice.lines.where((x) => x.isDiscount))
+                  Text('${off.description}  ${off.amount}', style: context.type.caption.copyWith(color: context.colors.brandDeep)),
+                if (invoice.proof case final proof? when proof.status != 'rejected' || invoice.payable) ...[
+                  const Gap(Space.s),
+                  _ProofLine(proof: proof),
+                ],
               ],
             ),
-          ],
-        ),
+          ),
+          const Gap(Space.s),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(invoice.total, style: context.type.cardTitle.copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
+              const Gap(Space.xs),
+              StatusChip(invoice.statusLabel, tone: tone),
+            ],
+          ),
+          if (url != null) ...[const Gap(Space.xs), Icon(Icons.chevron_right_rounded, color: context.colors.faint)],
+        ],
       ),
+    );
+    if (url == null) return row;
+    return InkWell(
+      onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+      child: row,
     );
   }
 }
@@ -389,9 +450,10 @@ class _PayButtonState extends State<_PayButton> {
 
   @override
   Widget build(BuildContext context) => FilledButton.icon(
+    style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: context.colors.brandDeep),
     onPressed: _busy ? null : _pay,
     icon: const Icon(Icons.lock_outline_rounded),
-    label: Text(context.l10n.payAmount(widget.invoice.outstanding)),
+    label: Text(context.l10n.payAmount(widget.invoice.outstanding), style: const TextStyle(fontWeight: FontWeight.w800)),
   );
 }
 
@@ -399,9 +461,12 @@ class _PayButtonState extends State<_PayButton> {
 /// its IBAN, an InstaPay or wallet number): selectable, line breaks kept,
 /// with a button that copies it as written.
 class _TransferDetails extends StatefulWidget {
-  const _TransferDetails({required this.text});
+  const _TransferDetails({required this.text, this.titled = true});
 
   final String text;
+
+  /// Its own title (in the receipt's sheet); the page gives it a heading instead.
+  final bool titled;
 
   @override
   State<_TransferDetails> createState() => _TransferDetailsState();
@@ -421,32 +486,39 @@ class _TransferDetailsState extends State<_TransferDetails> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
+    final copy = TextButton.icon(
+      key: const Key('transfer-copy'),
+      onPressed: _copy,
+      style: TextButton.styleFrom(visualDensity: VisualDensity.compact, foregroundColor: c.brandDeep),
+      icon: Icon(_copied ? Icons.check_rounded : Icons.copy_rounded, size: 18),
+      label: Text(l.transferCopy, style: const TextStyle(fontWeight: FontWeight.w700)),
+    );
     return Container(
       key: const Key('transfer-details'),
       width: double.infinity,
-      padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 4, 10),
-      decoration: BoxDecoration(color: c.brandSoft, borderRadius: BorderRadius.circular(context.shape.field)),
+      padding: EdgeInsetsDirectional.fromSTEB(Space.l, widget.titled ? Space.xs : Space.m, Space.s, Space.m),
+      decoration: BoxDecoration(
+        color: widget.titled ? c.brandSoft : c.card,
+        borderRadius: BorderRadius.circular(widget.titled ? context.shape.field : context.shape.card),
+        border: widget.titled ? null : Border.all(color: c.line),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(l.transferTitle, style: context.text.labelLarge?.copyWith(color: c.brandDeep)),
-              ),
-              TextButton.icon(
-                key: const Key('transfer-copy'),
-                onPressed: _copy,
-                style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
-                icon: Icon(_copied ? Icons.check_rounded : Icons.copy_rounded, size: 18),
-                label: Text(l.transferCopy),
-              ),
-            ],
-          ),
+          if (widget.titled)
+            Row(
+              children: [
+                Expanded(
+                  child: Text(l.transferTitle, style: context.text.labelLarge?.copyWith(color: c.brandDeep)),
+                ),
+                copy,
+              ],
+            ),
           Padding(
-            padding: const EdgeInsetsDirectional.only(end: 8),
-            child: SelectableText(widget.text, style: context.text.bodyMedium),
+            padding: const EdgeInsetsDirectional.only(end: Space.s),
+            child: SelectableText(widget.text, style: context.type.body.copyWith(height: 1.7)),
           ),
+          if (!widget.titled) Align(alignment: AlignmentDirectional.centerEnd, child: copy),
         ],
       ),
     );
@@ -510,11 +582,25 @@ class _ProofButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = Text(context.l10n.paidByTransfer);
-    const icon = Icon(Icons.receipt_long_outlined);
+    final label = Text(context.l10n.paidByTransfer, style: const TextStyle(fontWeight: FontWeight.w700));
+    const icon = Icon(Icons.upload_rounded);
+    // On the brand's surface: white when it is the way to pay, outlined in white beside Pay.
     return primary
-        ? FilledButton.icon(onPressed: () => _open(context), icon: icon, label: label)
-        : OutlinedButton.icon(onPressed: () => _open(context), icon: icon, label: label);
+        ? FilledButton.icon(
+            style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: context.colors.brandDeep),
+            onPressed: () => _open(context),
+            icon: icon,
+            label: label,
+          )
+        : OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white,
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.6)),
+            ),
+            onPressed: () => _open(context),
+            icon: icon,
+            label: label,
+          );
   }
 }
 

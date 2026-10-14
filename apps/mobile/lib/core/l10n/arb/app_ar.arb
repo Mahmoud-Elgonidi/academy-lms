@@ -2284,6 +2284,14 @@
       }
     }
   },
+  "journeyNextStation": "الجاية: {title}",
+  "@journeyNextStation": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "journeyLevels": "المستويات",
   "journeyLessonsDone": "{done} من {total} دروس",
   "@journeyLessonsDone": {

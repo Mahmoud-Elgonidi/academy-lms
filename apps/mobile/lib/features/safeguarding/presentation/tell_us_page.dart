@@ -10,6 +10,7 @@ import '../../../shared/motion/motion.dart';
 import '../../../shared/widgets/lms.dart';
 import '../../../shared/widgets/load_view.dart';
 import '../../dashboard/presentation/bloc/learner_cubit.dart';
+import '../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../data/safeguarding_repository.dart';
 import '../domain/safeguarding.dart';
 
@@ -58,6 +59,8 @@ class TellUsPage extends StatelessWidget {
               _ => l.tellUsTitle,
             }),
           ),
+          // A guardian tells about one child: which, and another a tap away.
+          actions: [if (scope == ConcernScope.family) const LearnerChip()],
         ),
         body: LoadView<_Concerns>(
           builder: (context, data) => ListView(

@@ -438,7 +438,11 @@ void main() {
     await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('الرحلة')));
     await frames(tester, 14);
     expect(find.text('رحلة سلمى'), findsWidgets);
-    expect(find.text('نجوم سلمى · بطل · 7 حصص ورا بعض'), findsOneWidget);
+    expect(find.byKey(const Key('journey-hero')), findsOneWidget);
+    expect(
+      find.descendant(of: find.byKey(const Key('journey-hero')), matching: find.text('نجوم سلمى · بطل · 7 حصص ورا بعض')),
+      findsOneWidget,
+    );
     expect(find.text('آخر حصة لـ سلمى · الخميس 8 أكتوبر · 17:00 · في الميعاد · فضلت لآخر الحصة'), findsOneWidget);
     expect(find.text('مهمات سلمى'), findsOneWidget);
     // Only the child opens the chest; no join or hand-in for a guardian.

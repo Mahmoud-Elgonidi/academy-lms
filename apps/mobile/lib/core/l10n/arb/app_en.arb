@@ -875,6 +875,7 @@
   "journeyLevelOf": "Level {i} of {n}",
   "journeyStationOf": "Station {i} of {n}",
   "journeyHow": "How {name} is doing",
+  "journeyNextStation": "Next: {title}",
   "journeyLevels": "Levels",
   "journeyLessonsDone": "{done} of {total} lessons",
   "journeyAheadLocked": "Opens once you finish {title}",

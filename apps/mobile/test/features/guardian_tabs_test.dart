@@ -2,6 +2,7 @@ import 'package:academy_app/app/app.dart';
 import 'package:academy_app/app/router/areas.dart';
 import 'package:academy_app/app/router/targets.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers.dart';
@@ -212,6 +213,65 @@ void main() {
     await tester.tap(find.text('رجوع'));
     await frames(tester, 6);
     expect(app.session.state.current, isNotNull);
+    await _close(tester);
+  });
+
+  testWidgets('messages are about one child: the chip says whom, and another is a tap away', (tester) async {
+    final app = await _open(
+      tester,
+      more: (api) {
+        _twoChildren(api);
+        api.onWith(
+          'GET',
+          'messages/conversations',
+          (r) => (
+            200,
+            {
+              'data': <Object>[],
+              'meta': {'learner': null, 'notice': ''},
+            },
+          ),
+        );
+      },
+    );
+    GoRouter.of(tester.element(find.byType(Scaffold).first)).go('/family/me/messages');
+    await frames(tester, 12);
+    expect(find.text('عن سلمى'), findsOneWidget);
+    expect(app.api.sent('GET', 'messages/conversations').last.queryParameters['learner_id'], 'c1');
+
+    await tester.tap(find.byKey(const Key('learner-chip')));
+    await frames(tester, 8);
+    await tester.tap(find.byKey(const Key('pick-c2')));
+    await frames(tester, 10);
+    expect(find.text('عن عمر'), findsOneWidget);
+    expect(app.api.sent('GET', 'messages/conversations').last.queryParameters['learner_id'], 'c2');
+    await _close(tester);
+  });
+
+  testWidgets('what is owed leads the money tab, in the academy\'s colour, with where to transfer under its heading', (tester) async {
+    await _open(
+      tester,
+      more: (api) => api.on('GET', 'family/invoices', {
+        'owed': '400 ر.س.',
+        'manual': {
+          'note': null,
+          'takes_proofs': true,
+          'methods': [
+            {'value': 'bank_transfer', 'label': 'تحويل بنكي'},
+          ],
+        },
+        'data': [
+          {..._invoice(), 'can_send_proof': true, 'transfer_details': 'بنك الراجحي\nSA00 0000'},
+        ],
+      }),
+    );
+    await tester.tap(_tab('الفلوس'));
+    await frames(tester, 10);
+    expect(find.descendant(of: find.byKey(const Key('money-owed')), matching: find.text('400 ر.س.')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('money-owed')), matching: find.text('دفعت بالتحويل')), findsOneWidget);
+    // The transfer details sit under their own heading, said once.
+    expect(find.text('بيانات التحويل'), findsOneWidget);
+    expect(find.byKey(const Key('transfer-copy')), findsOneWidget);
     await _close(tester);
   });
 

@@ -3144,6 +3144,11 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String journeyNextStation(String title) {
+    return 'الجاية: $title';
+  }
+
+  @override
   String get journeyLevels => 'المستويات';
 
   @override

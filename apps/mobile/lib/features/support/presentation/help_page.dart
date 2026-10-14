@@ -13,6 +13,7 @@ import '../../../shared/motion/done_moment.dart';
 import '../../../shared/widgets/lms.dart';
 import '../../../shared/widgets/load_view.dart';
 import '../../dashboard/presentation/bloc/learner_cubit.dart';
+import '../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../data/support_repository.dart';
 import '../domain/support.dart';
 
@@ -65,7 +66,11 @@ class HelpPage extends StatelessWidget {
     final repo = context.read<SupportRepository>();
     final l = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: Text(scope == HelpScope.teacher ? l.supportTitle : l.helpTitle)),
+      appBar: AppBar(
+        title: Text(scope == HelpScope.teacher ? l.supportTitle : l.helpTitle),
+        // A guardian writes about one child: which, and another a tap away.
+        actions: [if (scope == HelpScope.family) const LearnerChip()],
+      ),
       body: BlocProvider(
         key: ValueKey(learnerId),
         create: (c) => LoadCubit<_Help>(

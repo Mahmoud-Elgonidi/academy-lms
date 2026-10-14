@@ -3090,6 +3090,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String journeyNextStation(String title) {
+    return 'Next: $title';
+  }
+
+  @override
   String get journeyLevels => 'Levels';
 
   @override

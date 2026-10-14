@@ -5342,6 +5342,12 @@ abstract class AppLocalizations {
   /// **'إزاي {name} ماشي'**
   String journeyHow(String name);
 
+  /// No description provided for @journeyNextStation.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجاية: {title}'**
+  String journeyNextStation(String title);
+
   /// No description provided for @journeyLevels.
   ///
   /// In ar, this message translates to:
