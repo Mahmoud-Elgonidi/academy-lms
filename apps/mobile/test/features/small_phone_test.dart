@@ -172,7 +172,20 @@ void main() {
 
       await _go(tester, '/family/lessons');
       await _scrollDown(tester);
-      expect(find.text('اعترض'), findsOneWidget);
+      // The fullest lesson's sheet (a cover, unpaid, a makeup, the room's time, cancelling), then the one to dispute.
+      for (final id in ['l1', 'l2']) {
+        await tester.ensureVisible(find.byKey(Key('lesson-$id')));
+        await tester.tap(find.byKey(Key('lesson-$id')));
+        await frames(tester, 8);
+        final sheet = find.descendant(of: find.byType(BottomSheet), matching: find.byType(Scrollable));
+        for (var i = 0; i < 4; i++) {
+          await tester.drag(sheet.first, const Offset(0, -400), warnIfMissed: false);
+          await frames(tester, 2);
+        }
+        if (id == 'l2') expect(find.text('اعترض'), findsOneWidget);
+        Navigator.of(tester.element(find.byType(BottomSheet))).pop();
+        await frames(tester, 8);
+      }
 
       await _go(tester, '/family/money');
       await tester.tap(find.text('دفعت بالتحويل'));

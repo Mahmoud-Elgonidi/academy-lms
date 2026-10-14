@@ -9,15 +9,12 @@ import '../../../../shared/widgets/lms.dart';
 import '../../data/lessons_repository.dart';
 import '../../domain/lesson.dart';
 
-Future<T?> _sheet<T>(BuildContext context, Widget child) => showModalBottomSheet<T>(
-  context: context,
-  isScrollControlled: true,
-  useSafeArea: true,
-  useRootNavigator: true,
-  builder: (_) => RepositoryProvider.value(
+Future<T?> _sheet<T>(BuildContext context, Widget child) => showActionSheet<T>(
+  context,
+  builder: (ctx) => RepositoryProvider.value(
     value: context.read<LessonsRepository>(),
     child: Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
       child: child,
     ),
   ),
@@ -25,7 +22,8 @@ Future<T?> _sheet<T>(BuildContext context, Widget child) => showModalBottomSheet
 
 /// Asks first, telling what the academy's policy does with this
 /// cancellation; returns true once cancelled.
-Future<bool> showCancelSheet(BuildContext context, Lesson lesson) async => await _sheet<bool>(context, _CancelSheet(lesson)) ?? false;
+Future<bool> showCancelSheet(BuildContext context, Lesson lesson, {String? learner}) async =>
+    await _sheet<bool>(context, _CancelSheet(lesson, learner: learner)) ?? false;
 
 /// Returns true once rated.
 Future<bool> showRateSheet(BuildContext context, Lesson lesson) async => await _sheet<bool>(context, _RateSheet(lesson)) ?? false;
@@ -39,11 +37,8 @@ Future<bool> showDisputeSheet(
   required bool teacher,
   required Future<void> Function(String reason, String note) send,
 }) async =>
-    await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
+    await showActionSheet<bool>(
+      context,
       builder: (c) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(c).bottom),
         child: _DisputeSheet(lesson: lesson, teacher: teacher, send: send),
@@ -54,22 +49,14 @@ Future<bool> showDisputeSheet(
 /// Turns down a substitute after asking; returns true once done.
 Future<bool> refuseSubstitute(BuildContext context, Lesson lesson) async {
   final l = context.l10n;
-  final sure = await showDialog<bool>(
-    context: context,
-    builder: (c) => AlertDialog(
-      title: Text(l.refuseSubstituteTitle),
-      content: Text(l.refuseSubstituteBody),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l.keepIt)),
-        FilledButton(
-          style: FilledButton.styleFrom(minimumSize: const Size(64, 44)),
-          onPressed: () => Navigator.pop(c, true),
-          child: Text(l.refuseSubstituteYes),
-        ),
-      ],
-    ),
+  final sure = await confirmDestructive(
+    context,
+    title: l.refuseSubstituteTitle,
+    body: l.refuseSubstituteBody,
+    confirm: l.refuseSubstituteYes,
+    keep: l.keepIt,
   );
-  if (sure != true || !context.mounted) return false;
+  if (!sure || !context.mounted) return false;
   try {
     final days = await context.read<LessonsRepository>().refuseSubstitute(lesson.id);
     if (context.mounted) showSnack(context, l.refusedSubstitute(days));
@@ -87,15 +74,39 @@ class _SheetBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
-    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+    padding: const EdgeInsets.fromLTRB(Space.xl - 4, 0, Space.xl - 4, Space.xl),
     child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: children),
   );
 }
 
+/// A sheet's top: what it is about in a quiet line, then its question.
+class _SheetTitle extends StatelessWidget {
+  const _SheetTitle({required this.line, required this.title, this.center = false});
+
+  final String line;
+  final String title;
+  final bool center;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: center ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+    children: [
+      Text(line, style: context.type.caption, textAlign: center ? TextAlign.center : null),
+      Semantics(
+        header: true,
+        child: Text(title, style: context.type.title, textAlign: center ? TextAlign.center : null),
+      ),
+    ],
+  );
+}
+
 class _CancelSheet extends StatefulWidget {
-  const _CancelSheet(this.lesson);
+  const _CancelSheet(this.lesson, {this.learner});
 
   final Lesson lesson;
+
+  /// The child it is for (a guardian's sheet), said under the question.
+  final String? learner;
 
   @override
   State<_CancelSheet> createState() => _CancelSheetState();
@@ -155,19 +166,38 @@ class _CancelSheetState extends State<_CancelSheet> {
         }
         final preview = snap.data;
         if (preview == null) return const SizedBox(height: 200, child: Center(child: CircularProgressIndicator.adaptive()));
+        final c = context.colors;
         return _SheetBody(
           children: [
-            Text(l.cancelTitle(lesson.startsAt.relativeDay(context)), style: context.text.headlineSmall),
-            const SizedBox(height: 6),
-            Text(
-              '${lesson.startsAt.day(locale)} · ${lesson.startsAt.clock(locale)}–${lesson.endsAt.clock(locale)} · ${lesson.subject}',
-              style: context.text.bodyMedium?.copyWith(color: context.colors.muted),
+            _SheetTitle(
+              line: [lesson.withName.isEmpty ? lesson.subject : l.lessonWith(lesson.subject, lesson.withName), ?widget.learner].join(' · '),
+              title: l.cancelTitle(lesson.startsAt.relativeDay(context)),
             ),
-            const SizedBox(height: 14),
-            Note(preview.outcome, tone: Tone.brand, icon: Icons.policy_outlined),
-            const SizedBox(height: 18),
-            Text(l.reason, style: context.text.titleSmall),
-            const SizedBox(height: 8),
+            const Gap(Space.xs),
+            Text(
+              '${lesson.startsAt.day(locale)} · ${lesson.startsAt.clock(locale)}–${lesson.endsAt.clock(locale)}',
+              style: context.type.caption,
+            ),
+            const Gap(Space.l),
+            // What the academy's policy does with this cancellation, before anything is sent.
+            Container(
+              key: const Key('cancel-outcome'),
+              padding: const EdgeInsets.all(Space.m + 2),
+              decoration: BoxDecoration(color: c.brandSoft, borderRadius: BorderRadius.circular(context.shape.card - 2)),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const IconBadge(Icons.policy_outlined, size: 36),
+                  const Gap(Space.m),
+                  Expanded(
+                    child: Text(preview.outcome, style: context.type.body.copyWith(color: c.brandDeep, height: 1.6)),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(Space.l),
+            Text(l.reason, style: context.type.cardTitle),
+            const Gap(Space.s),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -183,29 +213,17 @@ class _CancelSheetState extends State<_CancelSheet> {
                   ),
               ],
             ),
-            const SizedBox(height: 16),
+            const Gap(Space.l),
             TextField(
               controller: _note,
               maxLines: 2,
               maxLength: 500,
               decoration: InputDecoration(labelText: '${l.noteForAcademy} ${l.optional}'),
             ),
-            if (_error != null) ...[Note(_error!, tone: Tone.danger, icon: Icons.error_outline_rounded), const SizedBox(height: 12)],
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(onPressed: _busy ? null : () => Navigator.pop(context, false), child: Text(l.keepIt)),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(backgroundColor: context.colors.danger),
-                    onPressed: _busy ? null : _cancel,
-                    child: Text(l.yesCancel),
-                  ),
-                ),
-              ],
-            ),
+            if (_error != null) ...[Note(_error!, tone: Tone.danger, icon: Icons.error_outline_rounded), const Gap(Space.m)],
+            PrimaryAction(l.yesCancel, danger: true, busy: _busy, onPressed: _cancel),
+            const Gap(Space.s),
+            SecondaryAction(l.keepIt, onPressed: _busy ? null : () => Navigator.pop(context, false)),
           ],
         );
       },
@@ -279,16 +297,18 @@ class _RateSheetState extends State<_RateSheet> {
           );
         }
         final choices = _stars >= 4 ? rating.good : (_stars > 0 ? rating.bad : const <({String value, String label})>[]);
+        final lesson = widget.lesson;
         return _SheetBody(
           children: [
-            Text(l.rateTitle, style: context.text.headlineSmall, textAlign: TextAlign.center),
-            const SizedBox(height: 4),
-            Text(
-              '${widget.lesson.withName} · ${widget.lesson.subject} · ${widget.lesson.startsAt.relativeDay(context)}',
-              textAlign: TextAlign.center,
-              style: context.text.bodySmall,
+            _SheetTitle(
+              center: true,
+              line: [
+                lesson.withName.isEmpty ? lesson.subject : l.lessonWith(lesson.subject, lesson.withName),
+                lesson.startsAt.relativeDay(context),
+              ].join(' · '),
+              title: l.rateTitle,
             ),
-            const SizedBox(height: 14),
+            const Gap(Space.m),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -304,10 +324,20 @@ class _RateSheetState extends State<_RateSheet> {
                   ),
               ],
             ),
+            SizedBox(
+              height: 22,
+              child: _stars == 0
+                  ? null
+                  : Text(
+                      [l.stars1, l.stars2, l.stars3, l.stars4, l.stars5][_stars - 1],
+                      textAlign: TextAlign.center,
+                      style: context.type.body.copyWith(fontWeight: FontWeight.w700),
+                    ),
+            ),
             if (choices.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Text('${_stars >= 4 ? l.rateGood : l.rateBad} ${l.optional}', style: context.text.titleSmall),
-              const SizedBox(height: 8),
+              const Gap(Space.m),
+              Text('${_stars >= 4 ? l.rateGood : l.rateBad} ${l.optional}', style: context.type.cardTitle),
+              const Gap(Space.s),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -322,17 +352,23 @@ class _RateSheetState extends State<_RateSheet> {
                 ],
               ),
             ],
-            const SizedBox(height: 16),
+            const Gap(Space.l),
             TextField(
               controller: _comment,
               maxLines: 2,
               maxLength: 500,
               decoration: InputDecoration(labelText: '${l.rateComment} ${l.optional}'),
             ),
-            Text(l.rateAnonymous, style: context.text.bodySmall),
-            if (_error != null) ...[const SizedBox(height: 10), Note(_error!, tone: Tone.danger)],
-            const SizedBox(height: 14),
-            FilledButton(onPressed: _stars == 0 || _busy ? null : _send, child: Text(l.sendRating)),
+            Row(
+              children: [
+                Icon(Icons.lock_outline_rounded, size: 16, color: c.muted),
+                const Gap(Space.xs + 2),
+                Expanded(child: Text(l.rateAnonymous, style: context.type.caption)),
+              ],
+            ),
+            if (_error != null) ...[const Gap(Space.m), Note(_error!, tone: Tone.danger)],
+            const Gap(Space.l),
+            PrimaryAction(l.sendRating, busy: _busy, onPressed: _stars == 0 ? null : _send),
             TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l.notNow)),
           ],
         );
@@ -393,21 +429,19 @@ class _DisputeSheetState extends State<_DisputeSheet> {
     final locale = context.locale;
     return _SheetBody(
       children: [
-        Text(l.disputeTitle, style: context.text.headlineSmall),
-        const SizedBox(height: 6),
-        Text(
-          '${lesson.startsAt.day(locale)} · ${lesson.startsAt.clock(locale)}–${lesson.endsAt.clock(locale)} · ${lesson.subject}',
-          style: context.text.bodyMedium?.copyWith(color: context.colors.muted),
+        _SheetTitle(
+          line: '${lesson.startsAt.day(locale)} · ${lesson.startsAt.clock(locale)}–${lesson.endsAt.clock(locale)} · ${lesson.subject}',
+          title: l.disputeTitle,
         ),
-        const SizedBox(height: 14),
+        const Gap(Space.l),
         Note(
           widget.teacher ? l.disputeIntroTeacher(lesson.statusLabel) : l.disputeIntroFamily(lesson.statusLabel),
           tone: Tone.brand,
           icon: Icons.gavel_rounded,
         ),
-        const SizedBox(height: 18),
-        Text(l.disputeWhat, style: context.text.titleSmall),
-        const SizedBox(height: 8),
+        const Gap(Space.l),
+        Text(l.disputeWhat, style: context.type.cardTitle),
+        const Gap(Space.s),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -423,25 +457,17 @@ class _DisputeSheetState extends State<_DisputeSheet> {
               ),
           ],
         ),
-        const SizedBox(height: 16),
+        const Gap(Space.l),
         TextField(
           controller: _note,
           maxLines: 3,
           maxLength: 1000,
           decoration: InputDecoration(labelText: l.disputeNote, helperText: l.disputeNoteHint),
         ),
-        if (_error != null) ...[Note(_error!, tone: Tone.danger, icon: Icons.error_outline_rounded), const SizedBox(height: 12)],
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(onPressed: _busy ? null : () => Navigator.pop(context, false), child: Text(l.close)),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: FilledButton(onPressed: _busy ? null : _send, child: Text(l.disputeSend)),
-            ),
-          ],
-        ),
+        if (_error != null) ...[Note(_error!, tone: Tone.danger, icon: Icons.error_outline_rounded), const Gap(Space.m)],
+        PrimaryAction(l.disputeSend, busy: _busy, onPressed: _send),
+        const Gap(Space.s),
+        SecondaryAction(l.close, onPressed: _busy ? null : () => Navigator.pop(context, false)),
       ],
     );
   }

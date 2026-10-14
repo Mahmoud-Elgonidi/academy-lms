@@ -22,6 +22,12 @@ extension LocalTimeFormats on LocalTime {
   /// "7:00 م" / "7:00 PM".
   String clock(String locale) => DateFormat.jm(locale).format(wall);
 
+  /// "7:00" without the time of day, for a list's time column.
+  String hourMinute(String locale) => DateFormat('h:mm', locale).format(wall);
+
+  /// "م" / "PM": the time of day that goes with [hourMinute].
+  String dayPeriod(String locale) => DateFormat('a', locale).format(wall);
+
   /// "الأربعاء 7 أكتوبر" / "Wednesday 7 October".
   String day(String locale) => DateFormat('EEEE d MMMM', locale).format(wall);
 

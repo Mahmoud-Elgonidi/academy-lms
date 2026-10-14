@@ -39,6 +39,8 @@ void main() {
 
     await tester.tap(find.text('الحصص').last);
     await frames(tester, 10);
+    await tester.tap(find.byKey(const Key('lesson-l1')));
+    await frames(tester, 8);
     await tester.tap(find.text('اعترض'));
     await frames(tester, 10);
     expect(find.text('اعتراض على نتيجة الحصة'), findsOneWidget);

@@ -27,6 +27,9 @@ void main() {
     await frames(tester, 10);
     expect(find.text('حصص سلمى'), findsOneWidget);
 
+    // Cancelling is in the lesson's own sheet, in red, last.
+    await tester.tap(find.byKey(const Key('lesson-l1')));
+    await frames(tester, 8);
     await tester.tap(find.text('إلغاء الحصة'));
     await frames(tester, 10);
     expect(find.text('الإلغاء قبل الحصة بأكتر من 12 ساعة: الحصة هترجع لرصيدك.'), findsOneWidget);

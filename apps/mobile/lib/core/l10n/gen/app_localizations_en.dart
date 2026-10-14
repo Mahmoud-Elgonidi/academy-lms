@@ -1001,6 +1001,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refuseSubstituteYes => 'Yes, cancel it for a makeup';
 
   @override
+  String substituteChip(String name) {
+    return 'Covering for $name';
+  }
+
+  @override
+  String minutesShort(int n) {
+    return '$n min';
+  }
+
+  @override
+  String get lessonTime => 'Time';
+
+  @override
+  String get lessonWho => 'With';
+
+  @override
+  String get lessonState => 'Status';
+
+  @override
+  String timeRange(String from, String to, String clock) {
+    return '$from – $to $clock';
+  }
+
+  @override
+  String roomOpensOn(String when) {
+    return 'The room opens $when';
+  }
+
+  @override
+  String get lessonDetails => 'Lesson details';
+
+  @override
   String refusedSubstitute(int days) {
     return 'Cancelled. You have $days days to book the makeup.';
   }
@@ -1106,6 +1138,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String starsOf(int n) {
     return '$n of 5';
   }
+
+  @override
+  String get stars1 => 'Poor';
+
+  @override
+  String get stars2 => 'Not great';
+
+  @override
+  String get stars3 => 'Good';
+
+  @override
+  String get stars4 => 'Very good';
+
+  @override
+  String get stars5 => 'Excellent';
 
   @override
   String get yourRating => 'Your rating';

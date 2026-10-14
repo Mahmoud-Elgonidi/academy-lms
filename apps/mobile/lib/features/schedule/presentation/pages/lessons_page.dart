@@ -16,6 +16,7 @@ import '../../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../../data/lessons_repository.dart';
 import '../../domain/lesson.dart';
 import '../widgets/lesson_card.dart';
+import '../widgets/lesson_row.dart';
 import '../widgets/lesson_sheets.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../core/realtime/live.dart';
@@ -54,7 +55,8 @@ class _LessonsPageState extends State<LessonsPage> {
               )..load(),
               child: LoadView<LessonList>(
                 skeleton: skeleton,
-                builder: (context, data) => _LessonDays(data: data, past: _past),
+                builder: (context, data) =>
+                    family ? _FamilyLessonDays(data: data, past: _past, zone: zone) : _LessonDays(data: data, past: _past),
               ),
             ),
     );
@@ -176,6 +178,87 @@ class _LessonDays extends StatelessWidget {
                   : null,
             ),
             const SizedBox(height: 10),
+          ],
+        ],
+      ]),
+    );
+  }
+}
+
+/// A guardian's lessons by day: a row each (its time in a column, whom
+/// with, its state); the row opens the lesson's sheet, where cancelling,
+/// turning down a substitute, disputing and rating are.
+class _FamilyLessonDays extends StatelessWidget {
+  const _FamilyLessonDays({required this.data, required this.past, this.zone});
+
+  final LessonList data;
+  final bool past;
+  final String? zone;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final days = <String, List<Lesson>>{};
+    for (final lesson in data.lessons) {
+      days.putIfAbsent(lesson.startsAt.localDate, () => []).add(lesson);
+    }
+    Future<void> reload() => context.read<LoadCubit<LessonList>>().load();
+    final nextId = past ? null : data.lessons.where((x) => x.upcoming).firstOrNull?.id;
+    final learner = context.read<LearnerCubit>().state.selected;
+    final who = learner == null || learner.isSelf ? null : learner.firstName;
+
+    LessonActions actionsFor(Lesson lesson) => LessonActions(
+      cancel: lesson.canCancel
+          ? () async {
+              if (await showCancelSheet(context, lesson, learner: who) && context.mounted) {
+                DoneMoment.show(context, title: l.cancelled);
+                await reload();
+              }
+            }
+          : null,
+      refuse: lesson.canRefuseSubstitute
+          ? () async {
+              if (await refuseSubstitute(context, lesson) && context.mounted) await reload();
+            }
+          : null,
+      dispute: lesson.canDispute
+          ? () async {
+              final repo = context.read<LessonsRepository>();
+              final sent = await showDisputeSheet(
+                context,
+                lesson,
+                teacher: false,
+                send: (reason, note) => repo.dispute(lesson.id, reason: reason, note: note),
+              );
+              if (sent && context.mounted) {
+                showSnack(context, l.disputeSent);
+                await reload();
+              }
+            }
+          : null,
+      rate: past && lesson.tookPlace
+          ? () async {
+              if (await showRateSheet(context, lesson) && context.mounted) DoneMoment.show(context, title: l.rated);
+            }
+          : null,
+    );
+
+    return ListView(
+      padding: pagePadding,
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: staggered(context, [
+        for (final n in data.notices) ...[Note(n, tone: Tone.info, icon: Icons.event_note_rounded), const Gap(Space.m)],
+        if (data.lessons.isEmpty) EmptyState(icon: Icons.event_available_outlined, title: past ? l.noPast : l.noUpcoming),
+        for (final entry in days.entries) ...[
+          SectionHeader(entry.value.first.startsAt.relativeDay(context)),
+          for (final lesson in entry.value) ...[
+            LessonRow(
+              key: Key('lesson-${lesson.id}'),
+              lesson: lesson,
+              highlight: lesson.id == nextId,
+              onTap: () => showLessonSheet(context, lesson, actions: actionsFor(lesson), learner: who, zone: zone),
+            ),
+            const Gap(Space.m),
           ],
         ],
       ]),

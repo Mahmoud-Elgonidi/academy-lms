@@ -1772,6 +1772,54 @@ abstract class AppLocalizations {
   /// **'أيوه، ألغيها وعوّضوني'**
   String get refuseSubstituteYes;
 
+  /// No description provided for @substituteChip.
+  ///
+  /// In ar, this message translates to:
+  /// **'بديل بدل {name}'**
+  String substituteChip(String name);
+
+  /// No description provided for @minutesShort.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n} د'**
+  String minutesShort(int n);
+
+  /// No description provided for @lessonTime.
+  ///
+  /// In ar, this message translates to:
+  /// **'الوقت'**
+  String get lessonTime;
+
+  /// No description provided for @lessonWho.
+  ///
+  /// In ar, this message translates to:
+  /// **'مع'**
+  String get lessonWho;
+
+  /// No description provided for @lessonState.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحالة'**
+  String get lessonState;
+
+  /// No description provided for @timeRange.
+  ///
+  /// In ar, this message translates to:
+  /// **'{from} – {to} {clock}'**
+  String timeRange(String from, String to, String clock);
+
+  /// No description provided for @roomOpensOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفصل بيفتح {when}'**
+  String roomOpensOn(String when);
+
+  /// No description provided for @lessonDetails.
+  ///
+  /// In ar, this message translates to:
+  /// **'تفاصيل الحصة'**
+  String get lessonDetails;
+
   /// No description provided for @refusedSubstitute.
   ///
   /// In ar, this message translates to:
@@ -1957,6 +2005,36 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{n} من 5'**
   String starsOf(int n);
+
+  /// No description provided for @stars1.
+  ///
+  /// In ar, this message translates to:
+  /// **'وحشة'**
+  String get stars1;
+
+  /// No description provided for @stars2.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش أحسن حاجة'**
+  String get stars2;
+
+  /// No description provided for @stars3.
+  ///
+  /// In ar, this message translates to:
+  /// **'كويسة'**
+  String get stars3;
+
+  /// No description provided for @stars4.
+  ///
+  /// In ar, this message translates to:
+  /// **'حلوة'**
+  String get stars4;
+
+  /// No description provided for @stars5.
+  ///
+  /// In ar, this message translates to:
+  /// **'ممتازة'**
+  String get stars5;
 
   /// No description provided for @yourRating.
   ///

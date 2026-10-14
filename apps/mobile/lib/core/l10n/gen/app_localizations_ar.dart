@@ -1008,6 +1008,38 @@ class AppLocalizationsAr extends AppLocalizations {
   String get refuseSubstituteYes => 'أيوه، ألغيها وعوّضوني';
 
   @override
+  String substituteChip(String name) {
+    return 'بديل بدل $name';
+  }
+
+  @override
+  String minutesShort(int n) {
+    return '$n د';
+  }
+
+  @override
+  String get lessonTime => 'الوقت';
+
+  @override
+  String get lessonWho => 'مع';
+
+  @override
+  String get lessonState => 'الحالة';
+
+  @override
+  String timeRange(String from, String to, String clock) {
+    return '$from – $to $clock';
+  }
+
+  @override
+  String roomOpensOn(String when) {
+    return 'الفصل بيفتح $when';
+  }
+
+  @override
+  String get lessonDetails => 'تفاصيل الحصة';
+
+  @override
   String refusedSubstitute(int days) {
     return 'اتلغت. عندك $days يوم تحجز فيهم حصة التعويض.';
   }
@@ -1113,6 +1145,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String starsOf(int n) {
     return '$n من 5';
   }
+
+  @override
+  String get stars1 => 'وحشة';
+
+  @override
+  String get stars2 => 'مش أحسن حاجة';
+
+  @override
+  String get stars3 => 'كويسة';
+
+  @override
+  String get stars4 => 'حلوة';
+
+  @override
+  String get stars5 => 'ممتازة';
 
   @override
   String get yourRating => 'تقييمك';

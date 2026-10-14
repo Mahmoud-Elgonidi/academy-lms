@@ -106,7 +106,7 @@ void main() {
     expect(find.text('الحصص'), findsWidgets);
     expect(find.byKey(const Key('bell')), findsOneWidget);
     expect(find.byKey(const Key('learner-c2')), findsOneWidget);
-    expect(find.text('رياضيات'), findsOneWidget);
+    expect(find.text('رياضيات مع أ. منى إبراهيم'), findsOneWidget);
 
     await tester.tap(_tab('الفلوس'));
     await frames(tester, 10);

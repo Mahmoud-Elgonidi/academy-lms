@@ -41,6 +41,12 @@ Future<void> _open(WidgetTester tester, TestApp app) async {
   await frames(tester, 15);
 }
 
+/// Opens a lesson's own sheet from its row.
+Future<void> _sheet(WidgetTester tester, String id) async {
+  await tester.tap(find.byKey(Key('lesson-$id')));
+  await frames(tester, 8);
+}
+
 Future<void> _close(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox());
   await frames(tester, 2);
@@ -66,6 +72,9 @@ void main() {
     await tester.tap(find.text('الحصص').last);
     await frames(tester, 10);
 
+    // The row says who covers; its sheet says why and offers to turn it down.
+    expect(find.text('بديل بدل أ. منى إبراهيم'), findsOneWidget);
+    await _sheet(tester, 'l1');
     expect(find.text('مدرّس بديل: أ. منى إبراهيم في إجازة'), findsOneWidget);
     await tester.tap(find.text('مش موافقين على البديل'));
     await frames(tester, 6);
@@ -76,6 +85,7 @@ void main() {
     await frames(tester, 6);
     expect(app.api.sent('POST', 'lessons/l1/refuse-substitute'), isEmpty);
 
+    await _sheet(tester, 'l1');
     await tester.tap(find.text('مش موافقين على البديل'));
     await frames(tester, 6);
     await tester.tap(find.text('أيوه، ألغيها وعوّضوني'));
@@ -84,6 +94,8 @@ void main() {
     expect(sent.headers['Idempotency-Key'], isNotNull);
     expect(find.text('اتلغت. عندك 30 يوم تحجز فيهم حصة التعويض.'), findsOneWidget);
     // The list comes back without the choice.
+    expect(find.text('بديل بدل أ. منى إبراهيم'), findsNothing);
+    await _sheet(tester, 'l1');
     expect(find.text('مش موافقين على البديل'), findsNothing);
     await _close(tester);
   });
@@ -98,11 +110,13 @@ void main() {
     await tester.tap(find.text('الحصص').last);
     await frames(tester, 10);
 
+    await _sheet(tester, 'l1');
     await tester.tap(find.text('مش موافقين على البديل'));
     await frames(tester, 6);
     await tester.tap(find.text('أيوه، ألغيها وعوّضوني'));
     await frames(tester, 10);
     expect(find.text('الحصة دي مبقاش ينفع تتغير.'), findsOneWidget);
+    await _sheet(tester, 'l1');
     expect(find.text('مش موافقين على البديل'), findsOneWidget);
     await _close(tester);
   });
@@ -129,6 +143,7 @@ void main() {
     await tester.tap(find.text('الحصص').last);
     await frames(tester, 10);
 
+    await _sheet(tester, 'l1');
     await tester.tap(find.text('إلغاء الحصة'));
     await frames(tester, 10);
     expect(find.text('الإلغاء قبل الحصة بأقل من 12 ساعة: الحصة هتتحسب.'), findsOneWidget);
@@ -185,6 +200,7 @@ void main() {
     await tester.tap(find.text('اللي فاتت'));
     await frames(tester, 10);
 
+    await _sheet(tester, 'l9');
     await tester.tap(find.text('قيّم الحصة'));
     await frames(tester, 10);
     expect(find.text('الحصة كانت إزاي؟'), findsOneWidget);
@@ -218,6 +234,7 @@ void main() {
     await frames(tester, 10);
     await tester.tap(find.text('اللي فاتت'));
     await frames(tester, 10);
+    await _sheet(tester, 'l9');
     await tester.tap(find.text('قيّم الحصة'));
     await frames(tester, 10);
     expect(find.text('التقييم بيبقى خلال 14 يوم من الحصة.'), findsOneWidget);

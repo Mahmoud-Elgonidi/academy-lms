@@ -721,6 +721,48 @@
   "refuseSubstituteTitle": "مش موافقين على البديل؟",
   "refuseSubstituteBody": "الحصة هتتلغي على حساب الأكاديمية، ودقايقها هترجعلك حصة تعويض تحجزها بعدين.",
   "refuseSubstituteYes": "أيوه، ألغيها وعوّضوني",
+  "substituteChip": "بديل بدل {name}",
+  "@substituteChip": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "minutesShort": "{n} د",
+  "@minutesShort": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTime": "الوقت",
+  "lessonWho": "مع",
+  "lessonState": "الحالة",
+  "timeRange": "{from} – {to} {clock}",
+  "@timeRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "clock": {
+        "type": "String"
+      }
+    }
+  },
+  "roomOpensOn": "الفصل بيفتح {when}",
+  "@roomOpensOn": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonDetails": "تفاصيل الحصة",
   "refusedSubstitute": "اتلغت. عندك {days} يوم تحجز فيهم حصة التعويض.",
   "@refusedSubstitute": {
     "placeholders": {
@@ -801,6 +843,11 @@
       }
     }
   },
+  "stars1": "وحشة",
+  "stars2": "مش أحسن حاجة",
+  "stars3": "كويسة",
+  "stars4": "حلوة",
+  "stars5": "ممتازة",
   "yourRating": "تقييمك",
   "percentDone": "{p}% من البرنامج",
   "@percentDone": {
