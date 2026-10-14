@@ -127,6 +127,12 @@ class InitialAvatar extends StatelessWidget {
   }
 }
 
+/// The name a person is called by: the first word past a title ("أ. خالد يوسف" → خالد).
+String givenName(String name) {
+  final words = name.trim().split(RegExp(r'\s+'));
+  return words.firstWhere((w) => !w.endsWith('.'), orElse: () => words.first);
+}
+
 /// A person's initial on the brand's soft colour, past a title ("أ. خالد" → خ).
 class SoftAvatar extends StatelessWidget {
   const SoftAvatar(this.name, {this.size = 48, super.key});
@@ -137,8 +143,7 @@ class SoftAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final words = name.trim().split(RegExp(r'\s+'));
-    final word = words.firstWhere((w) => !w.endsWith('.'), orElse: () => words.first);
+    final word = givenName(name);
     return Container(
       width: size,
       height: size,

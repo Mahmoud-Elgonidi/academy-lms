@@ -73,7 +73,7 @@ class _WelcomeMomentState extends State<WelcomeMoment> with SingleTickerProvider
     });
   }
 
-  String get _firstName => widget.account.userName.trim().split(RegExp(r'\s+')).first;
+  String get _firstName => givenName(widget.account.userName);
 
   void _finish() {
     if (_done) return;

@@ -29,6 +29,13 @@ Widget _screen(Widget child, {Stage stage = Stage.classic}) => MaterialApp(
 );
 
 void main() {
+  test('a person is called by the first word past a title', () {
+    expect(givenName('أ. خالد يوسف'), 'خالد');
+    expect(givenName('رامي فؤاد'), 'رامي');
+    expect(givenName('Dr. Sara Ali'), 'Sara');
+    expect(givenName('د.'), 'د.');
+  });
+
   testWidgets('a menu row shows its arrow only when it opens something, and the arrow turns with Arabic', (tester) async {
     await tester.pumpWidget(
       _screen(
