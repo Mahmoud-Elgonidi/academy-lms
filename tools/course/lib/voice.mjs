@@ -11,8 +11,10 @@ import { fileURLToPath } from 'node:url';
  *
  * Settings come from the environment only: ELEVENLABS_API_KEY (the key; never
  * in a file or a log), ELEVENLABS_VOICE_ID (the voice), ELEVENLABS_MODEL
- * (eleven_v4 by default: the voice is verified Egyptian there, and reads Modern
- * Standard Arabic on eleven_multilingual_v2), ELEVENLABS_SPEED and ELEVENLABS_API_BASE
+ * (eleven_v4 by default: listened back with listen.mjs, both Gamal and Seham
+ * speak Egyptian there with no word added, while eleven_multilingual_v2 reads
+ * Gamal as Modern Standard Arabic and adds words to Seham's lines),
+ * ELEVENLABS_SPEED and ELEVENLABS_API_BASE
  * (https://api.eu.residency.elevenlabs.io for an account kept in the EU). Without a voice the
  * course is captions only. Spoken lines are kept in .voice/ by what was said and
  * how, so filming a lesson again costs nothing for the lines that did not change.
@@ -21,14 +23,15 @@ const here = dirname(fileURLToPath(import.meta.url));
 const cacheDir = join(here, '../.voice');
 const API = `${(process.env.ELEVENLABS_API_BASE || 'https://api.elevenlabs.io').replace(/\/+$/, '')}/v1`;
 
+let settings;
 export function voiceSettings() {
   const voice = process.env.ELEVENLABS_VOICE_ID;
   if (!voice || process.env.COURSE_VOICE === 'off') return null;
-  return {
+  return (settings ??= {
     voice,
     model: process.env.ELEVENLABS_MODEL || 'eleven_v4',
     settings: { stability: 0.45, similarity_boost: 0.8, style: 0.2, use_speaker_boost: true, speed: Number(process.env.ELEVENLABS_SPEED || 1) },
-  };
+  });
 }
 
 /**
@@ -80,7 +83,16 @@ export const secondsOf = (file) =>
   Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', file]).toString().trim());
 
 /** One spoken line as an MP3 (from the cache when it was said the same way before), with its length. */
+/**
+ * What is sent to be spoken: the line without its «quote marks», which some
+ * models fill with a word of their own («اللي حصل» came out "إزاي اللي حصل").
+ */
+export const spokenText = (text) => text.replace(/[«»]/g, '').replace(/\s{2,}/g, ' ').trim();
+
 export function speak(text, { previous, next } = {}, cfg = voiceSettings()) {
+  text = spokenText(text);
+  previous &&= spokenText(previous);
+  next &&= spokenText(next);
   const key = createHash('sha256').update(JSON.stringify([cfg.voice, cfg.model, cfg.settings, text])).digest('hex').slice(0, 24);
   const file = join(cacheDir, `${key}.mp3`);
   if (!existsSync(file)) {
@@ -121,7 +133,7 @@ export async function linesOf(lesson) {
 }
 
 /** A lesson's number as the narrator says it: «الدرس التالت», «الدرس رقم اتناشر». */
-const ORDINALS = ['', 'الأوّل', 'التاني', 'التالت', 'الرابع', 'الخامس', 'السادس', 'السابع', 'التامن', 'التاسع', 'العاشر'];
+const ORDINALS = ['', 'الأوّل', 'التّاني', 'التّالِت', 'الرّابِع', 'الخامِس', 'السّادِس', 'السّابِع', 'التّامِن', 'التّاسِع', 'العاشِر'];
 const TEENS = { 11: 'حداشر', 12: 'اتناشر', 13: 'تلاتاشر', 14: 'أربعتاشر', 15: 'خمستاشر', 16: 'ستّاشر', 17: 'سبعتاشر', 18: 'تمنتاشر', 19: 'تسعتاشر', 20: 'عشرين' };
 export const spokenLesson = (n) => (ORDINALS[n] ? `الدرس ${ORDINALS[n]}` : `الدرس رقم ${TEENS[n] ?? n}`);
 
