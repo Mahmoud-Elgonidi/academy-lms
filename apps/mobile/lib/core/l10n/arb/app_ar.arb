@@ -50,6 +50,32 @@
       }
     }
   },
+  "introSkip": "تخطّي",
+  "introNext": "التالي",
+  "introStart": "يلا نبدأ",
+  "introSlide": "شريحة {n} من {total}",
+  "@introSlide": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "introLive": "لايف",
+  "intro1Title": "حصص لايف مع مدرّسك",
+  "intro1Body": "حصة واحد لواحد بالصوت والصورة، من البيت.",
+  "intro2Title": "تابع التقدّم خطوة بخطوة",
+  "intro2Body": "كل حصة بتقرّب من الهدف، والطريق كله قدامك.",
+  "intro3Title": "المواعيد والواجبات والفلوس في مكان واحد",
+  "intro3Body": "والتنبيه بيوصلك في وقته، فمفيش حاجة بتفوتك.",
+  "introLessonWhen": "السبت · 7:00 م",
+  "introHomework": "واجب جديد",
+  "introHomeworkWhen": "قبل الثلاثاء",
+  "introPaid": "الفاتورة اتدفعت",
+  "introThanks": "شكرًا ليك",
   "welcomeTitle": "أهلًا بيك",
   "welcomeLead": "اكتب رقم موبايلك أو إيميلك، وهنبعتلك كود. بعدها هتلاقي حساباتك في كل الأكاديميات اللي انت فيها.",
   "byPhone": "رقم الموبايل",

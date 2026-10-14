@@ -32,6 +32,8 @@ import '../../features/messages/presentation/messages_page.dart';
 import '../../features/notifications/presentation/pages/choices_page.dart';
 import '../../features/notifications/presentation/pages/inbox_page.dart';
 import '../../features/notifications/presentation/pages/update_page.dart';
+import '../../features/onboarding/presentation/intro_page.dart';
+import '../../features/onboarding/presentation/splash_page.dart';
 import '../../features/profile/presentation/pages/account_page.dart';
 import '../../features/roadmap/presentation/pages/progress_page.dart';
 import '../../features/roadmap/presentation/pages/reports_page.dart';
@@ -59,8 +61,9 @@ import 'transitions.dart';
 
 /// Every screen and who may see it. The open account decides the look: a
 /// location outside its area goes to the area's home, and signing out goes
-/// to the welcome screen. Screens come in fading and growing; tabs fade
-/// into place and keep their own stacks.
+/// to the welcome screen (the first time the app opens, after three slides
+/// about it). Screens come in fading and growing; tabs fade into place and
+/// keep their own stacks.
 GoRouter buildRouter(SessionCubit session) {
   GoRoute page(String path, Widget Function(GoRouterState s) build, {List<RouteBase> routes = const []}) =>
       GoRoute(path: path, pageBuilder: (_, s) => fadeScalePage(s, build(s)), routes: routes);
@@ -142,6 +145,7 @@ GoRouter buildRouter(SessionCubit session) {
         case SessionStatus.starting:
           return loc == '/splash' ? null : '/splash';
         case SessionStatus.signedOut:
+          if (!s.seenIntro) return loc == '/intro' ? null : '/intro';
           return welcome ? null : '/welcome';
         case SessionStatus.signedIn:
           // Too old for the platform: nothing else until it is updated.
@@ -150,14 +154,15 @@ GoRouter buildRouter(SessionCubit session) {
           final area = Area.of(s);
           // A link into the app (academyapp://app/open/{screen}/{id}) or a tapped push.
           if (loc.startsWith('/open/')) return targetOf(state.pathParameters['screen'], state.pathParameters['id'], area);
-          if (loc == '/' || loc == '/splash' || welcome) return area.home;
+          if (loc == '/' || loc == '/splash' || loc == '/intro' || welcome) return area.home;
           final elsewhere = Area.values.any((a) => a != area && loc.startsWith(a.prefix));
           return elsewhere ? area.home : null;
       }
     },
     routes: [
-      page('/', (_) => const _Splash()),
-      page('/splash', (_) => const _Splash()),
+      page('/', (_) => const SplashPage()),
+      page('/splash', (_) => const SplashPage()),
+      page('/intro', (_) => const IntroPage()),
       ...signIn('/welcome'),
       ...signIn('/add'),
       page('/web-only', (_) => const WebOnlyPage()),
@@ -173,7 +178,7 @@ GoRouter buildRouter(SessionCubit session) {
       ),
       page('/update', (_) => const UpdatePage()),
       page('/inbox', (_) => const InboxPage(), routes: [page('choices', (_) => const ChoicesPage())]),
-      page('/open/:screen', (_) => const _Splash(), routes: [page(':id', (_) => const _Splash())]),
+      page('/open/:screen', (_) => const SplashPage(), routes: [page(':id', (_) => const SplashPage())]),
       page('/classroom/:id', (s) => ClassroomPage(lessonId: s.pathParameters['id']!, ticket: s.extra)),
       // The teacher's focused tasks open over the tabs.
       page(
@@ -377,13 +382,6 @@ StatefulShellRoute _studentShell({
   ),
   branches: branches,
 );
-
-class _Splash extends StatelessWidget {
-  const _Splash();
-
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: CircularProgressIndicator.adaptive()));
-}
 
 /// Re-runs the router's redirect whenever the session changes.
 class _StreamListenable extends ChangeNotifier {

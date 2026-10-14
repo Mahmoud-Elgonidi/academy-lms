@@ -224,6 +224,102 @@ abstract class AppLocalizations {
   /// **'{n, plural, =0{مفيش حصص} =1{حصة واحدة} =2{حصتين} few{{n} حصص} other{{n} حصة}}'**
   String lessonsCount(int n);
 
+  /// No description provided for @introSkip.
+  ///
+  /// In ar, this message translates to:
+  /// **'تخطّي'**
+  String get introSkip;
+
+  /// No description provided for @introNext.
+  ///
+  /// In ar, this message translates to:
+  /// **'التالي'**
+  String get introNext;
+
+  /// No description provided for @introStart.
+  ///
+  /// In ar, this message translates to:
+  /// **'يلا نبدأ'**
+  String get introStart;
+
+  /// No description provided for @introSlide.
+  ///
+  /// In ar, this message translates to:
+  /// **'شريحة {n} من {total}'**
+  String introSlide(int n, int total);
+
+  /// No description provided for @introLive.
+  ///
+  /// In ar, this message translates to:
+  /// **'لايف'**
+  String get introLive;
+
+  /// No description provided for @intro1Title.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصص لايف مع مدرّسك'**
+  String get intro1Title;
+
+  /// No description provided for @intro1Body.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصة واحد لواحد بالصوت والصورة، من البيت.'**
+  String get intro1Body;
+
+  /// No description provided for @intro2Title.
+  ///
+  /// In ar, this message translates to:
+  /// **'تابع التقدّم خطوة بخطوة'**
+  String get intro2Title;
+
+  /// No description provided for @intro2Body.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل حصة بتقرّب من الهدف، والطريق كله قدامك.'**
+  String get intro2Body;
+
+  /// No description provided for @intro3Title.
+  ///
+  /// In ar, this message translates to:
+  /// **'المواعيد والواجبات والفلوس في مكان واحد'**
+  String get intro3Title;
+
+  /// No description provided for @intro3Body.
+  ///
+  /// In ar, this message translates to:
+  /// **'والتنبيه بيوصلك في وقته، فمفيش حاجة بتفوتك.'**
+  String get intro3Body;
+
+  /// No description provided for @introLessonWhen.
+  ///
+  /// In ar, this message translates to:
+  /// **'السبت · 7:00 م'**
+  String get introLessonWhen;
+
+  /// No description provided for @introHomework.
+  ///
+  /// In ar, this message translates to:
+  /// **'واجب جديد'**
+  String get introHomework;
+
+  /// No description provided for @introHomeworkWhen.
+  ///
+  /// In ar, this message translates to:
+  /// **'قبل الثلاثاء'**
+  String get introHomeworkWhen;
+
+  /// No description provided for @introPaid.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفاتورة اتدفعت'**
+  String get introPaid;
+
+  /// No description provided for @introThanks.
+  ///
+  /// In ar, this message translates to:
+  /// **'شكرًا ليك'**
+  String get introThanks;
+
   /// No description provided for @welcomeTitle.
   ///
   /// In ar, this message translates to:

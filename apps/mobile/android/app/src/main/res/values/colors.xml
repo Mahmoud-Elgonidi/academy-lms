@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The product's green (Branding.fallback, tool/icon/background.svg): the launch screen in light and dark alike,
+         so it never flashes white or black before the app's first screen, which starts on the same green. -->
+    <color name="splash">#0D735E</color>
+</resources>

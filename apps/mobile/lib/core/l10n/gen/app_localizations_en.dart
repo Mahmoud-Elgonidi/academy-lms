@@ -87,6 +87,56 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get introSkip => 'Skip';
+
+  @override
+  String get introNext => 'Next';
+
+  @override
+  String get introStart => 'Let\'s start';
+
+  @override
+  String introSlide(int n, int total) {
+    return 'Slide $n of $total';
+  }
+
+  @override
+  String get introLive => 'LIVE';
+
+  @override
+  String get intro1Title => 'Live lessons with your teacher';
+
+  @override
+  String get intro1Body => 'One-to-one lessons with sound and video, from home.';
+
+  @override
+  String get intro2Title => 'Follow progress step by step';
+
+  @override
+  String get intro2Body => 'Every lesson brings the goal closer, and the whole road is in front of you.';
+
+  @override
+  String get intro3Title => 'Times, homework and payments in one place';
+
+  @override
+  String get intro3Body => 'Reminders arrive on time, so nothing slips by.';
+
+  @override
+  String get introLessonWhen => 'Sat · 7:00 PM';
+
+  @override
+  String get introHomework => 'New homework';
+
+  @override
+  String get introHomeworkWhen => 'Due Tuesday';
+
+  @override
+  String get introPaid => 'Invoice paid';
+
+  @override
+  String get introThanks => 'Thank you';
+
+  @override
   String get welcomeTitle => 'Welcome';
 
   @override

@@ -34,6 +34,24 @@ s('inMinutes', '{n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق
 s('inHours', '{n, plural, =1{ساعة} =2{ساعتين} few{{n} ساعات} other{{n} ساعة}}', '{n, plural, =1{1 hour} other{{n} hours}}', n='int')
 s('lessonsCount', '{n, plural, =0{مفيش حصص} =1{حصة واحدة} =2{حصتين} few{{n} حصص} other{{n} حصة}}', '{n, plural, =0{No lessons} =1{1 lesson} other{{n} lessons}}', n='int')
 
+# Start: three slides about the app, the first time it opens
+s('introSkip', 'تخطّي', 'Skip')
+s('introNext', 'التالي', 'Next')
+s('introStart', 'يلا نبدأ', "Let's start")
+s('introSlide', 'شريحة {n} من {total}', 'Slide {n} of {total}', n='int', total='int')
+s('introLive', 'لايف', 'LIVE')
+s('intro1Title', 'حصص لايف مع مدرّسك', 'Live lessons with your teacher')
+s('intro1Body', 'حصة واحد لواحد بالصوت والصورة، من البيت.', 'One-to-one lessons with sound and video, from home.')
+s('intro2Title', 'تابع التقدّم خطوة بخطوة', 'Follow progress step by step')
+s('intro2Body', 'كل حصة بتقرّب من الهدف، والطريق كله قدامك.', 'Every lesson brings the goal closer, and the whole road is in front of you.')
+s('intro3Title', 'المواعيد والواجبات والفلوس في مكان واحد', 'Times, homework and payments in one place')
+s('intro3Body', 'والتنبيه بيوصلك في وقته، فمفيش حاجة بتفوتك.', 'Reminders arrive on time, so nothing slips by.')
+s('introLessonWhen', 'السبت · 7:00 م', 'Sat · 7:00 PM')
+s('introHomework', 'واجب جديد', 'New homework')
+s('introHomeworkWhen', 'قبل الثلاثاء', 'Due Tuesday')
+s('introPaid', 'الفاتورة اتدفعت', 'Invoice paid')
+s('introThanks', 'شكرًا ليك', 'Thank you')
+
 # Sign-in
 s('welcomeTitle', 'أهلًا بيك', 'Welcome')
 s('welcomeLead', 'اكتب رقم موبايلك أو إيميلك، وهنبعتلك كود. بعدها هتلاقي حساباتك في كل الأكاديميات اللي انت فيها.', "Enter your mobile number or email and we'll send you a code. Then you'll find your accounts in every academy you belong to.")

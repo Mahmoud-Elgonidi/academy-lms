@@ -4,7 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Small choices that are not secrets: the app's language, each academy's
 /// last known look (so the app opens in its colours), the clock the person
-/// chose to see times on, and whether the app plays sounds.
+/// chose to see times on, whether the app plays sounds, and whether the
+/// three slides about the app were seen (they come once, before signing in).
 class AppPrefs {
   AppPrefs(this._prefs);
 
@@ -12,6 +13,7 @@ class AppPrefs {
   static const _brandingKey = 'lms.branding.';
   static const _clockKey = 'lms.clock.';
   static const _soundsKey = 'lms.sounds';
+  static const _introKey = 'lms.intro';
 
   final SharedPreferencesAsync _prefs;
 
@@ -23,6 +25,10 @@ class AppPrefs {
   Future<bool> sounds() async => await _prefs.getBool(_soundsKey) ?? true;
 
   Future<void> setSounds(bool on) => _prefs.setBool(_soundsKey, on);
+
+  Future<bool> seenIntro() async => await _prefs.getBool(_introKey) ?? false;
+
+  Future<void> setSeenIntro() => _prefs.setBool(_introKey, true);
 
   Future<Map<String, dynamic>?> branding(String academy) async {
     final raw = await _prefs.getString('$_brandingKey$academy');

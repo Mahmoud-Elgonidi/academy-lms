@@ -150,8 +150,11 @@ class TestApp {
     String? appVersion,
     PushTokens? push,
     SocialSignIn? social,
+    bool seenIntro = true,
   }) async {
     SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
+    // The slides about the app come on a phone's first opening; tests start past them unless they are what is tested.
+    if (seenIntro) await AppPrefs(SharedPreferencesAsync()).setSeenIntro();
     // No audio or haptics plugins in widget tests.
     Juice.enabled = false;
     final api = FakeApi();

@@ -10,7 +10,12 @@ Chrome (headless) draws each picture at its own size from the vectors, so small 
            (iOS rounds the corners; the App Store refuses an icon with an alpha channel);
   web      icons/Icon-{192,512}.png, the maskable ones (the mark in the middle 80%), the
            apple-touch-icon and favicon.png;
-  stores   tool/icon/store/play-512.png for Google Play (Play rounds it).
+  stores   tool/icon/store/play-512.png for Google Play (Play rounds it);
+  launch   the mark alone for the phone's own launch screen, on the product's green (#0D735E):
+           Android drawable-*/splash_mark.png (144 dp, centred by launch_background.xml) and
+           splash_icon.png (Android 12's 288 dp icon, the mark in its middle half, inside the
+           192 dp circle it keeps), iOS LaunchImage.imageset (144 pt). The app's first screen
+           (SplashPage) draws the same mark at the same size, so the hand-over does not blink.
 """
 import glob, json, os, shutil, struct, subprocess, sys, tempfile, zlib
 from concurrent.futures import ThreadPoolExecutor
@@ -20,7 +25,9 @@ app = os.path.normpath(os.path.join(here, '..'))
 layers = os.path.join(here, 'icon')
 res = os.path.join(app, 'android', 'app', 'src', 'main', 'res')
 ios = os.path.join(app, 'ios', 'Runner', 'Assets.xcassets', 'AppIcon.appiconset')
+launch = os.path.join(app, 'ios', 'Runner', 'Assets.xcassets', 'LaunchImage.imageset')
 web = os.path.join(app, 'web')
+SPLASH = 144  # the launch screen's mark, in dp/pt (SplashPage's AppMark size)
 
 DENSITIES = {'mdpi': 1, 'hdpi': 1.5, 'xhdpi': 2, 'xxhdpi': 3, 'xxxhdpi': 4}
 # The adaptive icon shows the middle 72 of its 108 dp: at this scale the foreground looks as the
@@ -151,6 +158,12 @@ def jobs():
     yield page('full'), 180, os.path.join(web, 'icons', 'apple-touch-icon.png'), True
     yield page('full', radius='22%'), 32, os.path.join(web, 'favicon.png'), False
     yield page('full'), 512, os.path.join(layers, 'store', 'play-512.png'), False
+    for name, k in DENSITIES.items():
+        folder = os.path.join(res, f'drawable-{name}')
+        yield page('foreground'), round(SPLASH * k), os.path.join(folder, 'splash_mark.png'), False
+        yield page('foreground', scale=0.5), round(SPLASH * 2 * k), os.path.join(folder, 'splash_icon.png'), False
+    for suffix, k in (('', 1), ('@2x', 2), ('@3x', 3)):
+        yield page('foreground'), SPLASH * k, os.path.join(launch, f'LaunchImage{suffix}.png'), False
 
 
 if __name__ == '__main__':

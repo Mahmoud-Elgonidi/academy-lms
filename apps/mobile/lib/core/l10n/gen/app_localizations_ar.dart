@@ -95,6 +95,56 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get introSkip => 'تخطّي';
+
+  @override
+  String get introNext => 'التالي';
+
+  @override
+  String get introStart => 'يلا نبدأ';
+
+  @override
+  String introSlide(int n, int total) {
+    return 'شريحة $n من $total';
+  }
+
+  @override
+  String get introLive => 'لايف';
+
+  @override
+  String get intro1Title => 'حصص لايف مع مدرّسك';
+
+  @override
+  String get intro1Body => 'حصة واحد لواحد بالصوت والصورة، من البيت.';
+
+  @override
+  String get intro2Title => 'تابع التقدّم خطوة بخطوة';
+
+  @override
+  String get intro2Body => 'كل حصة بتقرّب من الهدف، والطريق كله قدامك.';
+
+  @override
+  String get intro3Title => 'المواعيد والواجبات والفلوس في مكان واحد';
+
+  @override
+  String get intro3Body => 'والتنبيه بيوصلك في وقته، فمفيش حاجة بتفوتك.';
+
+  @override
+  String get introLessonWhen => 'السبت · 7:00 م';
+
+  @override
+  String get introHomework => 'واجب جديد';
+
+  @override
+  String get introHomeworkWhen => 'قبل الثلاثاء';
+
+  @override
+  String get introPaid => 'الفاتورة اتدفعت';
+
+  @override
+  String get introThanks => 'شكرًا ليك';
+
+  @override
   String get welcomeTitle => 'أهلًا بيك';
 
   @override

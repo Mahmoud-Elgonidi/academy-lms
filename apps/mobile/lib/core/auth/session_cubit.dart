@@ -26,6 +26,7 @@ class SessionState extends Equatable {
     this.branding = Branding.fallback,
     this.locale = 'ar',
     this.sounds = true,
+    this.seenIntro = true,
     this.deviceTimezone,
     this.clock,
     this.me,
@@ -42,6 +43,9 @@ class SessionState extends Equatable {
 
   /// Little sounds on taps and rewards.
   final bool sounds;
+
+  /// The slides about the app were seen (or the person signed in before they came).
+  final bool seenIntro;
   final String? deviceTimezone;
 
   /// The zone this account chose to keep instead of the phone's (null: the phone's).
@@ -79,6 +83,7 @@ class SessionState extends Equatable {
     Branding? branding,
     String? locale,
     bool? sounds,
+    bool? seenIntro,
     String? Function()? clock,
     Me? Function()? me,
     SessionNotice? Function()? notice,
@@ -90,6 +95,7 @@ class SessionState extends Equatable {
     branding: branding ?? this.branding,
     locale: locale ?? this.locale,
     sounds: sounds ?? this.sounds,
+    seenIntro: seenIntro ?? this.seenIntro,
     deviceTimezone: deviceTimezone,
     clock: clock != null ? clock() : this.clock,
     me: me != null ? me() : this.me,
@@ -106,6 +112,7 @@ class SessionState extends Equatable {
     branding,
     locale,
     sounds,
+    seenIntro,
     deviceTimezone,
     clock,
     me?.mismatch,
@@ -146,14 +153,26 @@ class SessionCubit extends Cubit<SessionState> {
     final locale = await _prefs.locale() ?? (_deviceLocale == 'en' ? 'en' : 'ar');
     final sounds = await _prefs.sounds();
     final (saved, currentId) = await _store.load();
+    // Someone who signed in on this phone before the slides came has no need of them.
+    var seenIntro = await _prefs.seenIntro();
+    if (!seenIntro && saved.isNotEmpty) {
+      await _prefs.setSeenIntro();
+      seenIntro = true;
+    }
     final now = DateTime.now();
     final accounts = saved.where((a) => !a.expired(now)).toList();
     final current = accounts.where((a) => a.id == currentId).firstOrNull ?? accounts.firstOrNull;
     if (accounts.length != saved.length) {
       await _store.save(accounts, current?.id);
     }
-    _set(state.copyWith(locale: locale, sounds: sounds, accounts: accounts));
+    _set(state.copyWith(locale: locale, sounds: sounds, seenIntro: seenIntro, accounts: accounts));
     await _open(current);
+  }
+
+  /// The slides about the app were seen (or skipped): they do not come again.
+  Future<void> introSeen() async {
+    await _prefs.setSeenIntro();
+    _set(state.copyWith(seenIntro: true));
   }
 
   /// A new sign-in: add it (or replace the same account's old token) and open it.
