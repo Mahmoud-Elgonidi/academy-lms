@@ -11,7 +11,8 @@ import { fileURLToPath } from 'node:url';
  *
  * Settings come from the environment only: ELEVENLABS_API_KEY (the key; never
  * in a file or a log), ELEVENLABS_VOICE_ID (the voice), ELEVENLABS_MODEL
- * (eleven_multilingual_v2 by default), ELEVENLABS_SPEED and ELEVENLABS_API_BASE
+ * (eleven_v4 by default: the voice is verified Egyptian there, and reads Modern
+ * Standard Arabic on eleven_multilingual_v2), ELEVENLABS_SPEED and ELEVENLABS_API_BASE
  * (https://api.eu.residency.elevenlabs.io for an account kept in the EU). Without a voice the
  * course is captions only. Spoken lines are kept in .voice/ by what was said and
  * how, so filming a lesson again costs nothing for the lines that did not change.
@@ -25,7 +26,7 @@ export function voiceSettings() {
   if (!voice || process.env.COURSE_VOICE === 'off') return null;
   return {
     voice,
-    model: process.env.ELEVENLABS_MODEL || 'eleven_multilingual_v2',
+    model: process.env.ELEVENLABS_MODEL || 'eleven_v4',
     settings: { stability: 0.45, similarity_boost: 0.8, style: 0.2, use_speaker_boost: true, speed: Number(process.env.ELEVENLABS_SPEED || 1) },
   };
 }
@@ -34,7 +35,7 @@ export function voiceSettings() {
  * Calls the API through curl (it goes through the environment's proxy and its
  * certificates). The key goes in a config read from stdin, never on the command line.
  */
-function call(path, { body, out } = {}) {
+function call(path, { body, form, out } = {}) {
   mkdirSync(cacheDir, { recursive: true });
   const bodyFile = body ? join(cacheDir, `.body-${process.pid}.json`) : null;
   const target = out ?? join(cacheDir, `.answer-${process.pid}`);
@@ -44,6 +45,7 @@ function call(path, { body, out } = {}) {
     ...(process.env.ELEVENLABS_API_KEY ? [`header = "xi-api-key: ${process.env.ELEVENLABS_API_KEY}"`] : []),
     'header = "Accept: */*"',
     ...(bodyFile ? ['request = "POST"', 'header = "Content-Type: application/json"', `data-binary = "@${bodyFile}"`] : []),
+    ...Object.entries(form ?? {}).map(([k, v]) => `form = "${k}=${v}"`),
     `output = "${target}"`,
     'silent',
     'show-error',
@@ -63,6 +65,15 @@ function call(path, { body, out } = {}) {
     return JSON.parse(text);
   }
   return out;
+}
+
+/** What a listener hears in a spoken line (ElevenLabs' speech to text, held to Arabic), kept next to the clip. */
+export function transcribe(file) {
+  const kept = file.replace(/\.mp3$/, '.heard.txt');
+  if (existsSync(kept)) return readFileSync(kept, 'utf8');
+  const { text } = call('/speech-to-text', { form: { model_id: 'scribe_v2', language_code: 'ara', file: `@${file}` } });
+  writeFileSync(kept, text);
+  return text;
 }
 
 export const secondsOf = (file) =>
@@ -109,12 +120,17 @@ export async function linesOf(lesson) {
   return lines;
 }
 
+/** A lesson's number as the narrator says it: «الدرس التالت», «الدرس رقم اتناشر». */
+const ORDINALS = ['', 'الأوّل', 'التاني', 'التالت', 'الرابع', 'الخامس', 'السادس', 'السابع', 'التامن', 'التاسع', 'العاشر'];
+const TEENS = { 11: 'حداشر', 12: 'اتناشر', 13: 'تلاتاشر', 14: 'أربعتاشر', 15: 'خمستاشر', 16: 'ستّاشر', 17: 'سبعتاشر', 18: 'تمنتاشر', 19: 'تسعتاشر', 20: 'عشرين' };
+export const spokenLesson = (n) => (ORDINALS[n] ? `الدرس ${ORDINALS[n]}` : `الدرس رقم ${TEENS[n] ?? n}`);
+
 /** The lesson's whole narration: a welcome over the title card, one line per caption, a goodbye over the end card. */
 export async function narrate(series, lesson, next, cfg = voiceSettings()) {
   if (!cfg || !lesson.steps) return null;
   const steps = await linesOf(lesson);
-  const intro = lesson.intro ?? `أهلًا بيك في ${series.title}، الدرس ${lesson.n}: ${lesson.title}. ${lesson.goal ?? ''}`.trim();
-  const outro = lesson.outro ?? `وبكده خلّصنا درس «${lesson.title}». ${next ? `في الدرس الجاي: ${next.title}.` : `وده كان آخر درس في ${series.title}.`}`;
+  const intro = lesson.intro ?? `أهلًا بيك في ${series.title}، ${spokenLesson(lesson.n)}: ${lesson.title}. ${lesson.goal ?? ''}`.trim();
+  const outro = lesson.outro ?? `وبِكِدَه خَلَّصنا درس «${lesson.title}». ${next ? `في الدرس الجاي: ${next.title}.` : `وده كان آخر درس في ${series.title}.`}`;
   const all = [intro, ...steps.map((l) => l.spoken), outro];
   const clips = all.map((text, i) => speak(text, { previous: all[i - 1], next: all[i + 1] }, cfg));
   return { intro: clips[0], lines: clips.slice(1, -1).map((c, i) => ({ ...c, caption: steps[i].caption })), outro: clips[clips.length - 1] };
