@@ -30,9 +30,8 @@ class SectionHeader extends StatelessWidget {
               onPressed: onAction,
               style: TextButton.styleFrom(
                 foregroundColor: c.brandDeep,
-                minimumSize: const Size(48, 40),
+                minimumSize: const Size(48, 48),
                 padding: const EdgeInsets.symmetric(horizontal: Space.s),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(
                 action!,

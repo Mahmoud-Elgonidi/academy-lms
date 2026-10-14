@@ -71,14 +71,9 @@ class StudentMorePage extends StatelessWidget {
     return [
       _MiddleWho(map: map),
       const Gap(Space.m),
-      GridView.count(
-        crossAxisCount: 2,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: Space.m,
-        crossAxisSpacing: Space.m,
-        childAspectRatio: 1.25,
-        children: [
+      // Two by two, each row as tall as its tallest tile, so large text grows them.
+      for (final row in [
+        [
           _Tile(
             key: const Key('more-homework'),
             icon: Icons.edit_outlined,
@@ -94,6 +89,8 @@ class StudentMorePage extends StatelessWidget {
             label: l.journeyLevels,
             onTap: () => context.go('/middle/journey/levels'),
           ),
+        ],
+        [
           _Tile(
             key: const Key('more-creatures'),
             icon: Icons.pets_outlined,
@@ -109,8 +106,19 @@ class StudentMorePage extends StatelessWidget {
             onTap: () => context.go('/middle/more/recordings'),
           ),
         ],
-      ),
-      const Gap(Space.m),
+      ]) ...[
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: row[0]),
+              const Gap(Space.m),
+              Expanded(child: row[1]),
+            ],
+          ),
+        ),
+        const Gap(Space.m),
+      ],
       MenuGroup(
         children: [
           MenuRow(
@@ -275,19 +283,23 @@ class _Tile extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: PressScale.withPress(context, onTap),
-          child: Padding(
-            padding: const EdgeInsets.all(Space.l),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Badge(
-                  isLabelVisible: count > 0,
-                  label: Text('$count'),
-                  child: IconBadge(icon, tone: tone, size: 48),
-                ),
-                const Spacer(),
-                Text(label, style: context.type.cardTitle),
-              ],
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 132),
+            child: Padding(
+              padding: const EdgeInsets.all(Space.l),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Badge(
+                    isLabelVisible: count > 0,
+                    label: Text('$count'),
+                    child: IconBadge(icon, tone: tone, size: 48),
+                  ),
+                  const Gap(Space.m),
+                  Text(label, style: context.type.cardTitle),
+                ],
+              ),
             ),
           ),
         ),

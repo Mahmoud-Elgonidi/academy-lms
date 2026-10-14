@@ -205,20 +205,26 @@ class _StarsCard extends StatelessWidget {
                     ),
                     const Gap(Space.xs),
                     if (map.rewards)
-                      Row(
-                        children: [
-                          Icon(Icons.star_rounded, color: c.reward, size: 30),
-                          const Gap(Space.xs),
-                          Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: CountUp(stars.total, style: context.type.number.copyWith(color: ink, fontSize: 34)),
-                          ),
-                          if (rank.next != null)
-                            Text(
-                              ' / ${rank.next}',
-                              style: TextStyle(color: ink.withValues(alpha: 0.7), fontSize: 18, fontWeight: FontWeight.w700),
+                      // The count shrinks rather than overflow with large text.
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.star_rounded, color: c.reward, size: 30),
+                            const Gap(Space.xs),
+                            Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: CountUp(stars.total, style: context.type.number.copyWith(color: ink, fontSize: 34)),
                             ),
-                        ],
+                            if (rank.next != null)
+                              Text(
+                                ' / ${rank.next}',
+                                style: TextStyle(color: ink.withValues(alpha: 0.7), fontSize: 18, fontWeight: FontWeight.w700),
+                              ),
+                          ],
+                        ),
                       ),
                   ],
                 ),

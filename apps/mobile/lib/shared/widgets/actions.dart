@@ -21,7 +21,11 @@ class PrimaryAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = danger ? FilledButton.styleFrom(backgroundColor: context.colors.danger, foregroundColor: Colors.white) : null;
     final child = busy
-        ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+        ? SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(strokeWidth: 2.5, color: danger ? Colors.white : Theme.of(context).colorScheme.onPrimary),
+          )
         : Text(label);
     final pressed = busy ? null : PressScale.withPress(context, onPressed);
     return PressScale(

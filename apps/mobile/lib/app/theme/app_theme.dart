@@ -42,7 +42,7 @@ class LmsColors extends ThemeExtension<LmsColors> {
     return LmsColors(
       brand: b.primary,
       brandSoft: mix(b.primary, Colors.white, 0.88),
-      brandDeep: mix(b.primary, Colors.black, 0.35),
+      brandDeep: stage == Stage.kids ? mix(b.primary, Colors.black, 0.35) : readableOnWhite(mix(b.primary, Colors.black, 0.35)),
       attention: b.attention,
       attentionSoft: mix(b.attention, Colors.white, 0.88),
       attentionInk: mix(b.attention, Colors.black, 0.5),
@@ -89,6 +89,22 @@ class LmsColors extends ThemeExtension<LmsColors> {
   final Color rewardSoft;
 
   static Color mix(Color a, Color b, double t) => Color.lerp(a, b, t)!;
+
+  /// [colour], darkened only as far as it takes to read as text on white (4.5:1).
+  static Color readableOnWhite(Color colour) {
+    var c = colour;
+    for (var t = 0.1; contrast(c, Colors.white) < 4.5 && t <= 1; t += 0.1) {
+      c = mix(colour, Colors.black, t);
+    }
+    return c;
+  }
+
+  /// The academy's colour where words are written in it: itself when it reads
+  /// on white, else its deep shade.
+  Color get brandText => contrast(brand, Colors.white) >= 4.5 ? brand : brandDeep;
+
+  /// What is written on the academy's colour: white, unless the colour is too light for it.
+  Color get onBrand => contrast(brand, Colors.white) >= 4.5 ? Colors.white : ink;
 
   @override
   LmsColors copyWith() => this;
@@ -182,7 +198,7 @@ ThemeData buildTheme(Branding branding, Stage stage) {
 
   final scheme = ColorScheme.fromSeed(seedColor: branding.primary).copyWith(
     primary: branding.primary,
-    onPrimary: Colors.white,
+    onPrimary: kids ? Colors.white : c.onBrand,
     primaryContainer: c.brandSoft,
     onPrimaryContainer: c.brandDeep,
     error: branding.danger,
@@ -248,7 +264,7 @@ ThemeData buildTheme(Branding branding, Stage stage) {
       ),
     ),
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(minimumSize: const Size(44, 44), textStyle: text.titleSmall),
+      style: TextButton.styleFrom(minimumSize: const Size(44, 44), textStyle: text.titleSmall, foregroundColor: kids ? null : c.brandText),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -350,4 +366,10 @@ ThemeData buildTheme(Branding branding, Stage stage) {
           ),
     iconButtonTheme: kids ? null : IconButtonThemeData(style: IconButton.styleFrom(minimumSize: const Size(48, 48))),
   );
+}
+
+/// The WCAG contrast ratio of two colours (1 to 21).
+double contrast(Color a, Color b) {
+  final (x, y) = (a.computeLuminance(), b.computeLuminance());
+  return (x > y ? x + 0.05 : y + 0.05) / (x > y ? y + 0.05 : x + 0.05);
 }

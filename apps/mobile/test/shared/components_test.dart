@@ -195,6 +195,32 @@ void main() {
     expect(classic.badgeTheme.largeSize, 17);
   });
 
+  test('an academy with a light colour still reads: deep shade for words, dark words on its buttons; kids as they were', () {
+    const sunny = Branding(
+      primary: Color(0xFFF2C94C),
+      attention: Color(0xFFB7791F),
+      danger: Color(0xFFB42318),
+      info: Color(0xFF1D5FB8),
+      radius: 'soft',
+    );
+    for (final stage in [Stage.classic, Stage.middle, Stage.teen]) {
+      final theme = buildTheme(sunny, stage);
+      final c = theme.extension<LmsColors>()!;
+      expect(contrast(c.brandDeep, Colors.white), greaterThanOrEqualTo(4.5), reason: '$stage');
+      expect(c.brandText, c.brandDeep);
+      expect(theme.colorScheme.onPrimary, c.ink);
+      expect(contrast(theme.colorScheme.onPrimary, c.brand), greaterThanOrEqualTo(4.5));
+    }
+    // A colour that reads keeps itself and white on its buttons.
+    final classic = buildTheme(Branding.fallback, Stage.classic);
+    expect(classic.extension<LmsColors>()!.brandText, Branding.fallback.primary);
+    expect(classic.colorScheme.onPrimary, Colors.white);
+    // The kids' look is untouched.
+    final kids = buildTheme(sunny, Stage.kids);
+    expect(kids.colorScheme.onPrimary, Colors.white);
+    expect(kids.extension<LmsColors>()!.brandDeep, LmsColors.mix(sunny.primary, Colors.black, 0.35));
+  });
+
   testWidgets('on an iPhone a pushed screen slides in the platform\'s way, so a swipe goes back', (tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final router = GoRouter(

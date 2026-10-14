@@ -156,7 +156,7 @@ class _TicketTile extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Pill(ticket.statusLabel, tone: statusTone(ticket.status)),
-              if (ticket.yourTurn) Text(l.ticketYourTurn, style: context.text.labelMedium?.copyWith(color: context.colors.brand)),
+              if (ticket.yourTurn) Text(l.ticketYourTurn, style: context.text.labelMedium?.copyWith(color: context.colors.brandText)),
               if (ticket.lastMessageAt != null) Text(ticket.lastMessageAt!.label, style: context.text.bodySmall),
             ],
           ),

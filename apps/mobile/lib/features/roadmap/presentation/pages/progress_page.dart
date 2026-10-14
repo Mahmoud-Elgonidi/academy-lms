@@ -83,7 +83,7 @@ class _CourseCard extends StatelessWidget {
                   ],
                 ),
               ),
-              if (course.percent != null) Text('${course.percent}%', style: context.text.titleLarge?.copyWith(color: c.brand)),
+              if (course.percent != null) Text('${course.percent}%', style: context.text.titleLarge?.copyWith(color: c.brandText)),
             ],
           ),
           if (course.percent != null) ...[const SizedBox(height: 10), ProgressBar(course.percent! / 100)],
