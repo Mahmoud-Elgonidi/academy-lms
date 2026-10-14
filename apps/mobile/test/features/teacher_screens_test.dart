@@ -199,13 +199,30 @@ void main() {
     await tester.tap(find.text('الطلاب').last);
     await frames(tester, 12);
 
+    expect(find.text('طالبين في مادتين'), findsOneWidget);
     expect(find.text('يوسف خالد'), findsOneWidget);
-    expect(find.text('40%'), findsOneWidget);
-    expect(find.text('دلوقتي: سورة النصر'), findsOneWidget);
+    expect(find.text('قرآن · سورة النصر'), findsOneWidget);
     expect(find.text('2 للتصحيح'), findsOneWidget);
     expect(find.text('متوقف مؤقتًا'), findsOneWidget);
     expect(find.textContaining('@'), findsNothing);
     expect(find.textContaining('+966'), findsNothing);
+
+    // A subject narrows the list, and so does a name.
+    await tester.tap(find.byKey(const Key('subject-لغة عربية')));
+    await frames(tester, 4);
+    expect(find.text('يوسف خالد'), findsNothing);
+    expect(find.text('سلمى رامي'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('subject-all')));
+    await tester.enterText(find.byKey(const Key('student-search')), 'يوسف');
+    await frames(tester, 4);
+    expect(find.text('سلمى رامي'), findsNothing);
+
+    // The row opens the student's sheet: how far, where now, and what to do.
+    await tester.tap(find.byKey(const Key('student-e1')));
+    await frames(tester, 8);
+    expect(find.text('40% من البرنامج'), findsOneWidget);
+    expect(find.text('دلوقتي: سورة النصر'), findsOneWidget);
+    expect(find.text('صحّح الواجبات (2)'), findsOneWidget);
     await _close(tester);
   });
 

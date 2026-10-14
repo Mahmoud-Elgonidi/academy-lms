@@ -32,6 +32,7 @@ class TeacherStudent {
     required this.subject,
     required this.paused,
     required this.toMark,
+    this.studentId,
     this.percent,
     this.here,
     this.lastReportAt,
@@ -40,6 +41,7 @@ class TeacherStudent {
 
   factory TeacherStudent.fromJson(Map<String, dynamic> json) => TeacherStudent(
     enrollmentId: json['enrollment_id'] as String,
+    studentId: json['student_id'] as String?,
     student: json['student'] as String? ?? '',
     subject: json['subject'] as String? ?? '',
     paused: json['paused'] == true,
@@ -51,6 +53,9 @@ class TeacherStudent {
   );
 
   final String enrollmentId;
+
+  /// Whom a conversation opens with.
+  final String? studentId;
   final String student;
   final String subject;
   final bool paused;
@@ -199,13 +204,22 @@ class TimeOffList {
 
 /// What waits on the teacher besides lessons: reports to write, homework to mark.
 class TeacherTodo {
-  const TeacherTodo({required this.reports, required this.homework, this.firstReport, this.openReports = const {}});
+  const TeacherTodo({
+    required this.reports,
+    required this.homework,
+    this.firstReport,
+    this.openReports = const {},
+    this.reportsByCourse = const {},
+  });
 
   final int reports;
   final int homework;
 
   /// The report still to write for a lesson, by the lesson's id.
   final Map<String, String> openReports;
+
+  /// The first report still to write in each course, by enrollment.
+  final Map<String, String> reportsByCourse;
 
   /// The report due first: whose, and by when.
   final ({String student, LocalTime? dueAt})? firstReport;

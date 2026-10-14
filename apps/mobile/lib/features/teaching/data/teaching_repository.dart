@@ -44,6 +44,10 @@ class TeachingRepository {
         for (final r in open)
           if (r['session_id'] case final String session) session: r['id'] as String,
       },
+      reportsByCourse: {
+        for (final r in open.reversed)
+          if (r['enrollment_id'] case final String course) course: r['id'] as String,
+      },
       firstReport: first == null
           ? null
           : (student: (first['student'] as Map<String, dynamic>?)?['name'] as String? ?? '', dueAt: LocalTime.fromJson(first['due_at'])),

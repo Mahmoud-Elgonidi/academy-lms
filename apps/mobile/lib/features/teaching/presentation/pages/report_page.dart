@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/theme/app_theme.dart';
+import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
 import '../../../../core/state/load_cubit.dart';
@@ -14,14 +15,16 @@ import '../../../../shared/widgets/load_view.dart';
 import '../../../../shared/widgets/star_picker.dart';
 import '../../../homework/presentation/widgets/submission_view.dart';
 import '../../../roadmap/domain/report_answers.dart';
+import '../../data/report_drafts.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/reports.dart';
 import '../../../../shared/widgets/latin_digits.dart';
 
-/// Writing a report from the phone: today's plan (what happened with each
-/// lesson, a score, a note), focus and overall, words for the family and
-/// for the academy, the subject's own questions, and homework. An absence
-/// asks only for the note.
+/// Writing a report from the phone, one card at a time: what was worked on
+/// (what happened with each lesson of today's plan, a score, a note), how
+/// it went (focus and overall), the subject's own questions, the words for
+/// the family and for the academy, and homework. An absence asks only for
+/// the note. Sending and keeping a draft on this phone stay at the foot.
 /// Pops with true once sent.
 class TeacherReportPage extends StatelessWidget {
   const TeacherReportPage({required this.reportId, super.key});
@@ -29,21 +32,58 @@ class TeacherReportPage extends StatelessWidget {
   final String reportId;
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
-    create: (c) => LoadCubit<ReportForm>(() => c.read<TeachingRepository>().report(reportId))..load(),
-    child: BlocBuilder<LoadCubit<ReportForm>, LoadState<ReportForm>>(
-      builder: (context, state) => Scaffold(
-        appBar: AppBar(title: Text(state.data?.summary.student ?? context.l10n.navReports)),
-        body: LoadView<ReportForm>(refreshable: false, builder: (context, form) => _Editor(form: form)),
+  Widget build(BuildContext context) {
+    final account = context.read<SessionCubit>().state.current?.id ?? '';
+    return BlocProvider(
+      create: (c) => LoadCubit<(ReportForm, ReportDraft?)>(() async {
+        final form = await c.read<TeachingRepository>().report(reportId);
+        final draft = form.summary.open ? await ReportDrafts().of(account, reportId) : null;
+        return (form, draft);
+      })..load(),
+      child: BlocBuilder<LoadCubit<(ReportForm, ReportDraft?)>, LoadState<(ReportForm, ReportDraft?)>>(
+        builder: (context, state) {
+          final l = context.l10n;
+          final s = state.data?.$1.summary;
+          return Scaffold(
+            appBar: AppBar(
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(s?.absence ?? false ? l.reportAbsence : l.reportTitle),
+                  if (s != null)
+                    Text([s.student, if (s.lessonAt != null) s.lessonAt!.when(context)].join(' · '), style: context.type.caption),
+                ],
+              ),
+            ),
+            body: LoadView<(ReportForm, ReportDraft?)>(
+              refreshable: false,
+              builder: (context, x) => _Editor(
+                key: ValueKey(x.$2?.savedAt),
+                form: x.$1,
+                draft: x.$2,
+                account: account,
+                onDiscard: () async {
+                  await ReportDrafts().remove(account, reportId);
+                  if (context.mounted) await context.read<LoadCubit<(ReportForm, ReportDraft?)>>().load();
+                },
+              ),
+            ),
+          );
+        },
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _Editor extends StatefulWidget {
-  const _Editor({required this.form});
+  const _Editor({required this.form, required this.account, required this.onDiscard, this.draft, super.key});
 
   final ReportForm form;
+
+  /// What was kept on this phone; it stands in for the form's own values.
+  final ReportDraft? draft;
+  final String account;
+  final VoidCallback onDiscard;
 
   @override
   State<_Editor> createState() => _EditorState();
@@ -51,24 +91,28 @@ class _Editor extends StatefulWidget {
 
 class _EditorState extends State<_Editor> {
   late final ReportForm f = widget.form;
-  late final List<ReportItem> _items = [...f.items];
-  late int? _engagement = f.engagement;
-  late int? _overall = f.overall;
-  late final _forFamily = TextEditingController(text: f.notesForStudent);
-  late final _internal = TextEditingController(text: f.notesInternal);
-  late final _absence = TextEditingController(text: f.absenceNote);
-  late bool _give = f.homework != null;
-  late final _hwTitle = TextEditingController(text: f.homework?.title);
-  late final _hwDetails = TextEditingController(text: f.homework?.instructions);
-  late String _accepts = f.homework?.accepts ?? 'any';
-  int _dueDays = 3;
-  late final Map<String, Object?> _answers = {for (final a in f.answers) a.key: a.value};
+  late final Map<String, dynamic>? d = widget.draft?.form;
+  late final List<ReportItem> _items = d == null
+      ? [...f.items]
+      : [for (final i in d!['items'] as List<dynamic>? ?? const []) ReportItem.fromJson(i as Map<String, dynamic>)];
+  late int? _engagement = d == null ? f.engagement : (d!['engagement'] as num?)?.toInt();
+  late int? _overall = d == null ? f.overall : (d!['overall'] as num?)?.toInt();
+  late final _forFamily = TextEditingController(text: d == null ? f.notesForStudent : d!['notes_for_student'] as String?);
+  late final _internal = TextEditingController(text: d == null ? f.notesInternal : d!['notes_internal'] as String?);
+  late final _absence = TextEditingController(text: d == null ? f.absenceNote : d!['absence_note'] as String?);
+  late bool _give = d == null ? f.homework != null : d!['give'] == true;
+  late final _hwTitle = TextEditingController(text: d == null ? f.homework?.title : d!['hw_title'] as String?);
+  late final _hwDetails = TextEditingController(text: d == null ? f.homework?.instructions : d!['hw_details'] as String?);
+  late String _accepts = (d == null ? f.homework?.accepts : d!['accepts'] as String?) ?? 'any';
+  late int _dueDays = (d?['due_days'] as num?)?.toInt() ?? 3;
+  late final Map<String, Object?> _answers = d == null
+      ? {for (final a in f.answers) a.key: a.value}
+      : {...?(d!['answers'] as Map<String, dynamic>?)};
   late final Map<String, TextEditingController> _typed = {
     for (final q in f.template?.questions ?? const <ReportQuestion>[])
       if (q.type == 'number' || q.type == 'text') q.key: TextEditingController(text: _answers[q.key]?.toString()),
   };
   final _notes = <String>{};
-  final _sendKey = GlobalKey();
   bool _busy = false;
   String? _error;
   Map<String, List<String>> _fieldErrors = const {};
@@ -153,6 +197,7 @@ class _EditorState extends State<_Editor> {
           };
     try {
       await context.read<TeachingRepository>().submitReport(f.summary.id, payload);
+      await ReportDrafts().remove(widget.account, f.summary.id);
       if (!mounted) return;
       DoneMoment.show(context, title: l.reportSent);
       Navigator.of(context).pop(true);
@@ -167,6 +212,28 @@ class _EditorState extends State<_Editor> {
     }
   }
 
+  /// Keeps the form as it stands on this phone, and goes back to the list.
+  Future<void> _keep() async {
+    final l = context.l10n;
+    await ReportDrafts().save(widget.account, f.summary.id, {
+      'items': [for (final i in _items) i.toDraft()],
+      'engagement': _engagement,
+      'overall': _overall,
+      'notes_for_student': _forFamily.text,
+      'notes_internal': _internal.text,
+      'absence_note': _absence.text,
+      'give': _give,
+      'hw_title': _hwTitle.text,
+      'hw_details': _hwDetails.text,
+      'accepts': _accepts,
+      'due_days': _dueDays,
+      'answers': {..._answers, for (final e in _typed.entries) e.key: e.value.text},
+    });
+    if (!mounted) return;
+    showSnack(context, l.reportDraftSaved);
+    Navigator.of(context).pop(false);
+  }
+
   String? _err(String field) => _fieldErrors[field]?.first;
 
   @override
@@ -175,7 +242,8 @@ class _EditorState extends State<_Editor> {
     final c = context.colors;
     final s = f.summary;
     final locked = f.locked;
-    return ListView(
+    final draft = widget.draft;
+    final list = ListView(
       padding: pagePadding,
       children: staggered(context, [
         Wrap(
@@ -183,105 +251,134 @@ class _EditorState extends State<_Editor> {
           runSpacing: 6,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Pill(s.absence ? l.reportAbsence : l.reportLesson, tone: Tone.info),
-            Pill(s.statusLabel, tone: s.status == 'overdue' ? Tone.danger : (s.open ? Tone.attention : Tone.brand)),
-            if (s.lessonAt != null) Text(s.lessonAt!.when(context), style: context.text.bodySmall),
+            StatusChip(s.statusLabel, tone: s.status == 'overdue' ? Tone.danger : (s.open ? Tone.attention : Tone.brand)),
+            if (s.open && s.dueAt != null) Text(l.reportDueBy(s.dueAt!.when(context)), style: context.type.caption),
           ],
         ),
-        if (s.open && s.dueAt != null) ...[
-          const SizedBox(height: 4),
-          Text(l.reportDueBy(s.dueAt!.when(context)), style: context.text.bodySmall),
+        if (draft != null) ...[
+          const Gap(Space.m),
+          Note(
+            l.draftFrom(waitText(context, DateTime.now().toUtc().difference(draft.savedAt))),
+            icon: Icons.edit_note_rounded,
+            action: TextButton(onPressed: widget.onDiscard, child: Text(l.discardDraft)),
+          ),
         ],
         if (locked) ...[
-          const SizedBox(height: 12),
+          const Gap(Space.m),
           Note(
             [l.reportLocked, if ((f.reviewNote ?? '').isNotEmpty) f.reviewNote!].join('\n'),
             tone: Tone.brand,
             icon: Icons.lock_outline_rounded,
           ),
         ],
-        const SizedBox(height: 14),
         if (_absent) ...[
-          Note(l.absenceHint, icon: Icons.event_busy_outlined),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _absence,
-            enabled: !locked,
-            minLines: 3,
-            maxLines: 8,
-            maxLength: 1000,
-            decoration: InputDecoration(labelText: l.absenceNote, errorText: _err('absence_note')),
+          const Gap(Space.m),
+          _Section(
+            title: l.absenceNote,
+            children: [
+              Text(l.absenceHint, style: context.type.caption),
+              const Gap(Space.m),
+              TextField(
+                controller: _absence,
+                enabled: !locked,
+                minLines: 3,
+                maxLines: 8,
+                maxLength: 1000,
+                decoration: InputDecoration(labelText: l.absenceNote, errorText: _err('absence_note')),
+              ),
+            ],
           ),
         ] else ...[
-          SectionLabel(l.todaysPlan),
-          if (_items.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(l.planHint, style: context.text.bodySmall),
-            ),
-          for (final (i, item) in _items.indexed) ...[_itemCard(item, i, locked), const SizedBox(height: 10)],
-          if (!locked && _items.length < 10 && f.lessonOptions.length > _items.length)
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: TextButton.icon(onPressed: _addLesson, icon: const Icon(Icons.add_rounded), label: Text(l.addLesson)),
-            ),
-          if (_err('items') != null) Text(_err('items')!, style: TextStyle(color: c.dangerInk)),
-          const SizedBox(height: 10),
-          LmsCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l.engagement, style: context.text.titleSmall),
-                IgnorePointer(
-                  ignoring: locked,
-                  child: StarPicker(value: _engagement, label: l.engagement, onChanged: (v) => setState(() => _engagement = v)),
+          const Gap(Space.m),
+          _Section(
+            title: l.workedOn,
+            children: [
+              if (_items.isNotEmpty) Text(l.planHint, style: context.type.caption),
+              for (final (i, item) in _items.indexed) ...[if (i > 0) const Divider(height: Space.xl), _itemCard(item, i, locked)],
+              if (!locked && _items.length < 10 && f.lessonOptions.length > _items.length)
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(onPressed: _addLesson, icon: const Icon(Icons.add_rounded), label: Text(l.addLesson)),
                 ),
-                const SizedBox(height: 10),
-                Text(l.overall, style: context.text.titleSmall),
-                IgnorePointer(
-                  ignoring: locked,
-                  child: StarPicker(value: _overall, label: l.overall, onChanged: (v) => setState(() => _overall = v)),
-                ),
-              ],
-            ),
+              if (_err('items') != null) Text(_err('items')!, style: TextStyle(color: c.dangerInk)),
+            ],
           ),
-          const SizedBox(height: 14),
-          TextField(
-            controller: _forFamily,
-            enabled: !locked,
-            minLines: 2,
-            maxLines: 6,
-            maxLength: 3000,
-            decoration: InputDecoration(labelText: l.notesForFamily, errorText: _err('notes_for_student')),
+          _Section(
+            title: l.howItWent,
+            children: [
+              Text(l.engagement, style: context.type.label),
+              IgnorePointer(
+                ignoring: locked,
+                child: StarPicker(value: _engagement, label: l.engagement, onChanged: (v) => setState(() => _engagement = v)),
+              ),
+              const Gap(Space.s),
+              Text(l.overall, style: context.type.label),
+              IgnorePointer(
+                ignoring: locked,
+                child: StarPicker(value: _overall, label: l.overall, onChanged: (v) => setState(() => _overall = v)),
+              ),
+            ],
           ),
-          if (f.template case final t? when t.questions.isNotEmpty) ...[const SizedBox(height: 6), _questionsCard(t, locked)],
+          if (f.template case final t? when t.questions.isNotEmpty) _questionsCard(t, locked),
         ],
-        const SizedBox(height: 6),
-        TextField(
-          controller: _internal,
-          enabled: !locked,
-          minLines: 2,
-          maxLines: 6,
-          maxLength: 3000,
-          decoration: InputDecoration(labelText: l.notesInternal, helperText: l.notesInternalHint, errorText: _err('notes_internal')),
+        _Section(
+          title: l.talkSection,
+          children: [
+            if (!_absent)
+              TextField(
+                controller: _forFamily,
+                enabled: !locked,
+                minLines: 2,
+                maxLines: 6,
+                maxLength: 3000,
+                decoration: InputDecoration(labelText: l.notesForFamily, errorText: _err('notes_for_student')),
+              ),
+            TextField(
+              controller: _internal,
+              enabled: !locked,
+              minLines: 2,
+              maxLines: 6,
+              maxLength: 3000,
+              decoration: InputDecoration(labelText: l.notesInternal, helperText: l.notesInternalHint, errorText: _err('notes_internal')),
+            ),
+          ],
         ),
-        if (!_absent) ...[const SizedBox(height: 12), _homeworkCard(locked)],
-        if (_error != null) ...[const SizedBox(height: 12), Note(_error!, tone: Tone.danger, icon: Icons.error_outline_rounded)],
-        if (!locked) ...[
-          const SizedBox(height: 16),
-          SizedBox(
-            key: _sendKey,
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: _busy ? null : _send,
-              icon: _busy
-                  ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2.4))
-                  : const Icon(Icons.send_rounded),
-              label: Text(s.open ? l.sendReport : l.updateReport),
+        if (!_absent) _homeworkCard(locked),
+        if (_error != null) ...[const Gap(Space.m), Note(_error!, tone: Tone.danger, icon: Icons.error_outline_rounded)],
+      ]),
+    );
+    if (locked) return list;
+    return Column(
+      children: [
+        Expanded(child: list),
+        // Sending (and keeping a draft, while it is still to write) stays at the foot, above the keyboard.
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: c.card,
+            border: Border(top: BorderSide(color: c.line)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(Space.l, Space.m, Space.l, Space.m),
+              child: Row(
+                children: [
+                  if (s.open) ...[Expanded(child: SecondaryAction(l.keepDraft, onPressed: _busy ? null : _keep)), const Gap(Space.m)],
+                  Expanded(
+                    flex: 2,
+                    child: PrimaryAction(
+                      s.open ? l.sendReport : l.updateReport,
+                      icon: Icons.send_rounded,
+                      busy: _busy,
+                      onPressed: _busy ? null : _send,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ],
-      ]),
+        ),
+      ],
     );
   }
 
@@ -289,8 +386,8 @@ class _EditorState extends State<_Editor> {
     final l = context.l10n;
     final c = context.colors;
     final noteOpen = _notes.contains(item.nodeId) || (item.note ?? '').isNotEmpty;
-    return LmsCard(
-      padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+    return KeyedSubtree(
+      key: ValueKey(item.nodeId),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -400,49 +497,46 @@ class _EditorState extends State<_Editor> {
           ),
       ],
     );
-    return LmsCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l.questionsTitle, style: context.text.titleMedium),
-          Text(l.questionsHint, style: context.text.bodySmall),
-          for (final q in t.questions) ...[
-            const SizedBox(height: 14),
-            if (q.type == 'number' || q.type == 'text')
-              TextField(
-                controller: _typed[q.key],
-                enabled: !locked,
-                keyboardType: q.type == 'number' ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
-                inputFormatters: q.type == 'number' ? const [LatinDigits(decimal: true)] : null,
-                maxLength: q.type == 'text' ? 500 : null,
-                decoration: InputDecoration(
-                  labelText: q.required ? q.label : '${q.label} ${l.optional}',
-                  suffixText: q.unit,
-                  helperText: q.family ? null : l.academyOnly,
-                  errorText: _err('answers.${q.key}'),
+    return _Section(
+      title: l.questionsTitle,
+      children: [
+        Text(l.questionsHint, style: context.text.bodySmall),
+        for (final q in t.questions) ...[
+          const SizedBox(height: 14),
+          if (q.type == 'number' || q.type == 'text')
+            TextField(
+              controller: _typed[q.key],
+              enabled: !locked,
+              keyboardType: q.type == 'number' ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
+              inputFormatters: q.type == 'number' ? const [LatinDigits(decimal: true)] : null,
+              maxLength: q.type == 'text' ? 500 : null,
+              decoration: InputDecoration(
+                labelText: q.required ? q.label : '${q.label} ${l.optional}',
+                suffixText: q.unit,
+                helperText: q.family ? null : l.academyOnly,
+                errorText: _err('answers.${q.key}'),
+              ),
+            )
+          else ...[
+            title(q),
+            const SizedBox(height: 6),
+            switch (q.type) {
+              'rating' => IgnorePointer(
+                ignoring: locked,
+                child: StarPicker(
+                  value: (_answers[q.key] as num?)?.toInt(),
+                  label: q.label,
+                  clearable: !q.required,
+                  onChanged: (v) => setState(() => _answers[q.key] = v),
                 ),
-              )
-            else ...[
-              title(q),
-              const SizedBox(height: 6),
-              switch (q.type) {
-                'rating' => IgnorePointer(
-                  ignoring: locked,
-                  child: StarPicker(
-                    value: (_answers[q.key] as num?)?.toInt(),
-                    label: q.label,
-                    clearable: !q.required,
-                    onChanged: (v) => setState(() => _answers[q.key] = v),
-                  ),
-                ),
-                'yes_no' => chips(q, [(true, l.answerYes), (false, l.answerNo)]),
-                _ => chips(q, [for (final o in q.options) (o.key, o.label)]),
-              },
-              if (_err('answers.${q.key}') case final e?) Text(e, style: TextStyle(color: c.dangerInk)),
-            ],
+              ),
+              'yes_no' => chips(q, [(true, l.answerYes), (false, l.answerNo)]),
+              _ => chips(q, [for (final o in q.options) (o.key, o.label)]),
+            },
+            if (_err('answers.${q.key}') case final e?) Text(e, style: TextStyle(color: c.dangerInk)),
           ],
         ],
-      ),
+      ],
     );
   }
 
@@ -450,93 +544,112 @@ class _EditorState extends State<_Editor> {
     final l = context.l10n;
     final hw = f.homework;
     if (_homeworkLocked) {
-      return LmsCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(child: Text(hw!.title, style: context.text.titleSmall)),
-                Pill(hw.statusLabel, tone: Tone.info),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(l.homeworkLocked, style: context.text.bodySmall),
-            for (final s in hw.submissions) ...[const SizedBox(height: 8), SubmissionView(submission: s, title: hw.student)],
-          ],
-        ),
+      return _Section(
+        title: l.homeworkField,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(hw!.title, style: context.text.titleSmall)),
+              Pill(hw.statusLabel, tone: Tone.info),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(l.homeworkLocked, style: context.text.bodySmall),
+          for (final s in hw.submissions) ...[const SizedBox(height: 8), SubmissionView(submission: s, title: hw.student)],
+        ],
       );
     }
-    return LmsCard(
+    return _Section(
+      title: l.homeworkField,
+      children: [
+        SwitchListTile.adaptive(
+          contentPadding: EdgeInsets.zero,
+          title: Text(l.giveHomework, style: context.text.titleSmall),
+          value: _give,
+          onChanged: locked ? null : (v) => setState(() => _give = v),
+        ),
+        if (_give) ...[
+          TextField(
+            controller: _hwTitle,
+            enabled: !locked,
+            maxLength: 200,
+            decoration: InputDecoration(labelText: l.homeworkField, errorText: _err('homework.title')),
+          ),
+          TextField(
+            controller: _hwDetails,
+            enabled: !locked,
+            minLines: 2,
+            maxLines: 5,
+            maxLength: 3000,
+            decoration: InputDecoration(labelText: '${l.homeworkDetails} ${l.optional}'),
+          ),
+          Text(l.acceptsLabel, style: context.text.labelMedium),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final (value, label) in [
+                ('any', l.acceptsAny),
+                ('text', l.acceptsText),
+                ('audio', l.acceptsAudio),
+                ('file', l.acceptsFile),
+              ])
+                ChoiceChip(
+                  label: Text(label),
+                  selected: _accepts == value,
+                  onSelected: locked ? null : (_) => setState(() => _accepts = value),
+                ),
+            ],
+          ),
+          if (hw == null) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                IconButton.outlined(
+                  onPressed: _dueDays > 1 ? () => setState(() => _dueDays--) : null,
+                  icon: const Icon(Icons.remove_rounded),
+                ),
+                const SizedBox(width: 10),
+                Text(l.dueIn(_dueDays), style: context.text.titleSmall),
+                const SizedBox(width: 10),
+                IconButton.outlined(
+                  onPressed: _dueDays < 30 ? () => setState(() => _dueDays++) : null,
+                  icon: const Icon(Icons.add_rounded),
+                ),
+              ],
+            ),
+          ] else if (hw.dueAt != null) ...[
+            const SizedBox(height: 8),
+            Text(l.dueBy(hw.dueAt!.when(context)), style: context.text.bodySmall),
+          ],
+        ],
+      ],
+    );
+  }
+}
+
+/// One part of the report on its own card, under its title.
+class _Section extends StatelessWidget {
+  const _Section({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: Space.m),
+    child: LmsCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SwitchListTile.adaptive(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l.giveHomework, style: context.text.titleSmall),
-            value: _give,
-            onChanged: locked ? null : (v) => setState(() => _give = v),
-          ),
-          if (_give) ...[
-            TextField(
-              controller: _hwTitle,
-              enabled: !locked,
-              maxLength: 200,
-              decoration: InputDecoration(labelText: l.homeworkField, errorText: _err('homework.title')),
-            ),
-            TextField(
-              controller: _hwDetails,
-              enabled: !locked,
-              minLines: 2,
-              maxLines: 5,
-              maxLength: 3000,
-              decoration: InputDecoration(labelText: '${l.homeworkDetails} ${l.optional}'),
-            ),
-            Text(l.acceptsLabel, style: context.text.labelMedium),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                for (final (value, label) in [
-                  ('any', l.acceptsAny),
-                  ('text', l.acceptsText),
-                  ('audio', l.acceptsAudio),
-                  ('file', l.acceptsFile),
-                ])
-                  ChoiceChip(
-                    label: Text(label),
-                    selected: _accepts == value,
-                    onSelected: locked ? null : (_) => setState(() => _accepts = value),
-                  ),
-              ],
-            ),
-            if (hw == null) ...[
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  IconButton.outlined(
-                    onPressed: _dueDays > 1 ? () => setState(() => _dueDays--) : null,
-                    icon: const Icon(Icons.remove_rounded),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(l.dueIn(_dueDays), style: context.text.titleSmall),
-                  const SizedBox(width: 10),
-                  IconButton.outlined(
-                    onPressed: _dueDays < 30 ? () => setState(() => _dueDays++) : null,
-                    icon: const Icon(Icons.add_rounded),
-                  ),
-                ],
-              ),
-            ] else if (hw.dueAt != null) ...[
-              const SizedBox(height: 8),
-              Text(l.dueBy(hw.dueAt!.when(context)), style: context.text.bodySmall),
-            ],
-          ],
+          Semantics(header: true, child: Text(title, style: context.type.cardTitle)),
+          const Gap(Space.s),
+          ...children,
         ],
       ),
-    );
-  }
+    ),
+  );
 }
 
 /// The lessons of the course to add one more to the report, with a search.

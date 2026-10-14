@@ -2996,6 +2996,66 @@ abstract class AppLocalizations {
   /// **'مفيش طلاب لسه.'**
   String get noStudents;
 
+  /// No description provided for @studentsIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'{students} في {subjects}'**
+  String studentsIn(String students, String subjects);
+
+  /// No description provided for @studentsCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مفيش طلاب} =1{طالب واحد} =2{طالبين} few{{n} طلاب} other{{n} طالب}}'**
+  String studentsCount(int n);
+
+  /// No description provided for @subjectsCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مفيش مواد} =1{مادة واحدة} =2{مادتين} few{{n} مواد} other{{n} مادة}}'**
+  String subjectsCount(int n);
+
+  /// No description provided for @searchByName.
+  ///
+  /// In ar, this message translates to:
+  /// **'دوّر بالاسم'**
+  String get searchByName;
+
+  /// No description provided for @allSubjects.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكل'**
+  String get allSubjects;
+
+  /// No description provided for @noStudentsFound.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش طالب بالاسم ده.'**
+  String get noStudentsFound;
+
+  /// No description provided for @reportWaitingChip.
+  ///
+  /// In ar, this message translates to:
+  /// **'تقرير مستنيك'**
+  String get reportWaitingChip;
+
+  /// No description provided for @messageStudent.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعتله رسالة'**
+  String get messageStudent;
+
+  /// No description provided for @markHomework.
+  ///
+  /// In ar, this message translates to:
+  /// **'صحّح الواجبات'**
+  String get markHomework;
+
+  /// No description provided for @ofCourse.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n}% من البرنامج'**
+  String ofCourse(int n);
+
   /// No description provided for @prevMonth.
   ///
   /// In ar, this message translates to:
@@ -3517,6 +3577,72 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'اختار اللي حصل في كل درس.'**
   String get planHint;
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تقرير الحصة'**
+  String get reportTitle;
+
+  /// No description provided for @workedOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'اشتغلنا على إيه'**
+  String get workedOn;
+
+  /// No description provided for @howItWent.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحصة كانت إزاي'**
+  String get howItWent;
+
+  /// No description provided for @talkSection.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكلام'**
+  String get talkSection;
+
+  /// No description provided for @keepDraft.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسودة'**
+  String get keepDraft;
+
+  /// No description provided for @reportDraftSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتحفظت مسودة على الموبايل ده.'**
+  String get reportDraftSaved;
+
+  /// No description provided for @draftFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'كمّلت من مسودة اتحفظت من {ago}.'**
+  String draftFrom(String ago);
+
+  /// No description provided for @discardDraft.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدأ من الأول'**
+  String get discardDraft;
+
+  /// No description provided for @drafts.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسودات'**
+  String get drafts;
+
+  /// No description provided for @savedAgo.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتحفظت من {ago}'**
+  String savedAgo(String ago);
+
+  /// No description provided for @continueDraft.
+  ///
+  /// In ar, this message translates to:
+  /// **'كمّل'**
+  String get continueDraft;
 
   /// No description provided for @reasonNext.
   ///

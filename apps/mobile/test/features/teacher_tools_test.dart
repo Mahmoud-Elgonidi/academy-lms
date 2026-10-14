@@ -62,7 +62,7 @@ void main() {
     expect(find.text('تقارير مستنياك'), findsOneWidget);
     await tester.tap(find.text('يوسف خالد'));
     await frames(tester, 10);
-    expect(find.text('خطة النهارده'), findsOneWidget);
+    expect(find.text('اشتغلنا على إيه'), findsOneWidget);
     expect(find.text('• يقرأ السورة بالتجويد'), findsOneWidget);
 
     // No ratings yet: nothing is sent.
@@ -80,6 +80,8 @@ void main() {
     await tester.tap(find.text('ادّي واجب'));
     await frames(tester, 3);
     await tester.enterText(find.widgetWithText(TextField, 'الواجب'), 'سمّع سورة النصر');
+    await tester.ensureVisible(find.text('تسجيل صوت'));
+    await frames(tester, 2);
     await tester.tap(find.text('تسجيل صوت'));
     await frames(tester, 2);
     await tester.scrollUntilVisible(find.text('ابعت التقرير'), 300, scrollable: find.byType(Scrollable).first);
@@ -232,6 +234,58 @@ void main() {
     expect(put['submit'], true);
     expect(find.text('المقترح اتبعت للأكاديمية.'), findsOneWidget);
 
+    await _close(tester);
+  });
+
+  testWidgets('a report kept as a draft waits on this phone, comes back as it was, and starts over on request', (tester) async {
+    final app = await TestApp.create(accounts: [teacher]);
+    teacherRoutes(app.api);
+    app.api.on('GET', 'teacher/reports/r1', {
+      'data': {
+        ...report('r1'),
+        'items': [
+          {
+            'node_id': 'n2',
+            'reason': 'next',
+            'outcome': 'introduced',
+            'score': null,
+            'note': null,
+            'title': 'النصر والكافرون',
+            'path': 'قصار السور',
+            'objectives': <String>[],
+          },
+        ],
+        'lesson_options': <Object>[],
+        'homework': null,
+      },
+    });
+    await _open(tester, app);
+    await tester.tap(find.byKey(const Key('today-reports')));
+    await frames(tester, 10);
+    await tester.tap(find.byKey(const Key('report-r1')));
+    await frames(tester, 10);
+
+    await tester.tap(find.text('اتقن'));
+    await tester.enterText(find.widgetWithText(TextField, 'ملاحظات للطالب وولي الأمر'), 'شاطر جدًا');
+    await tester.tap(find.text('مسودة'));
+    await frames(tester, 10);
+    // Nothing went to the academy; the report waits under Drafts.
+    expect(app.api.sent('PUT', 'teacher/reports/r1'), isEmpty);
+    expect(find.text('مسودات'), findsOneWidget);
+    expect(find.byKey(const Key('draft-r1')), findsOneWidget);
+    expect(find.byKey(const Key('report-r1')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('draft-r1')));
+    await frames(tester, 10);
+    expect(find.textContaining('كمّلت من مسودة'), findsOneWidget);
+    expect(find.text('شاطر جدًا'), findsOneWidget);
+    final chip = tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'اتقن'));
+    expect(chip.selected, isTrue);
+
+    await tester.tap(find.text('ابدأ من الأول'));
+    await frames(tester, 10);
+    expect(find.textContaining('كمّلت من مسودة'), findsNothing);
+    expect(find.text('شاطر جدًا'), findsNothing);
     await _close(tester);
   });
 }

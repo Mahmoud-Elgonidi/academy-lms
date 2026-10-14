@@ -1319,6 +1319,47 @@
     }
   },
   "noStudents": "مفيش طلاب لسه.",
+  "studentsIn": "{students} في {subjects}",
+  "@studentsIn": {
+    "placeholders": {
+      "students": {
+        "type": "String"
+      },
+      "subjects": {
+        "type": "String"
+      }
+    }
+  },
+  "studentsCount": "{n, plural, =0{مفيش طلاب} =1{طالب واحد} =2{طالبين} few{{n} طلاب} other{{n} طالب}}",
+  "@studentsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "subjectsCount": "{n, plural, =0{مفيش مواد} =1{مادة واحدة} =2{مادتين} few{{n} مواد} other{{n} مادة}}",
+  "@subjectsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "searchByName": "دوّر بالاسم",
+  "allSubjects": "الكل",
+  "noStudentsFound": "مفيش طالب بالاسم ده.",
+  "reportWaitingChip": "تقرير مستنيك",
+  "messageStudent": "ابعتله رسالة",
+  "markHomework": "صحّح الواجبات",
+  "ofCourse": "{n}% من البرنامج",
+  "@ofCourse": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "prevMonth": "الشهر اللي فات",
   "nextMonth": "الشهر الجاي",
   "soFar": "لحد النهارده",
@@ -1523,6 +1564,31 @@
   "reportAbsence": "ملاحظة غياب",
   "todaysPlan": "خطة النهارده",
   "planHint": "اختار اللي حصل في كل درس.",
+  "reportTitle": "تقرير الحصة",
+  "workedOn": "اشتغلنا على إيه",
+  "howItWent": "الحصة كانت إزاي",
+  "talkSection": "الكلام",
+  "keepDraft": "مسودة",
+  "reportDraftSaved": "اتحفظت مسودة على الموبايل ده.",
+  "draftFrom": "كمّلت من مسودة اتحفظت من {ago}.",
+  "@draftFrom": {
+    "placeholders": {
+      "ago": {
+        "type": "String"
+      }
+    }
+  },
+  "discardDraft": "ابدأ من الأول",
+  "drafts": "مسودات",
+  "savedAgo": "اتحفظت من {ago}",
+  "@savedAgo": {
+    "placeholders": {
+      "ago": {
+        "type": "String"
+      }
+    }
+  },
+  "continueDraft": "كمّل",
   "reasonNext": "الدرس الجاي",
   "reasonReview": "مراجعة",
   "outcomeIntroduced": "اتشرح",

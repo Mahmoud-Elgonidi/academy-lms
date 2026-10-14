@@ -95,6 +95,9 @@ class ReportItem {
     'score': score,
     'note': (note ?? '').trim().isEmpty ? null : note!.trim(),
   };
+
+  /// All of it, for a draft kept on the phone ([ReportItem.fromJson] reads it back).
+  Map<String, dynamic> toDraft() => {...toJson(), 'title': title, 'path': path, 'reason': reason, 'objectives': objectives};
 }
 
 /// `GET teacher/reports/{id}`: the report with today's plan, the lessons

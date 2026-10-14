@@ -1737,6 +1737,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noStudents => 'No students yet.';
 
   @override
+  String studentsIn(String students, String subjects) {
+    return '$students in $subjects';
+  }
+
+  @override
+  String studentsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n students', one: '1 student', zero: 'no students');
+    return '$_temp0';
+  }
+
+  @override
+  String subjectsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n subjects', one: '1 subject', zero: 'no subjects');
+    return '$_temp0';
+  }
+
+  @override
+  String get searchByName => 'Search by name';
+
+  @override
+  String get allSubjects => 'All';
+
+  @override
+  String get noStudentsFound => 'No student by that name.';
+
+  @override
+  String get reportWaitingChip => 'Report to write';
+
+  @override
+  String get messageStudent => 'Send a message';
+
+  @override
+  String get markHomework => 'Mark homework';
+
+  @override
+  String ofCourse(int n) {
+    return '$n% of the course';
+  }
+
+  @override
   String get prevMonth => 'Previous month';
 
   @override
@@ -2043,6 +2083,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planHint => 'Pick what happened with each lesson.';
+
+  @override
+  String get reportTitle => 'Lesson report';
+
+  @override
+  String get workedOn => 'What we worked on';
+
+  @override
+  String get howItWent => 'How it went';
+
+  @override
+  String get talkSection => 'Notes';
+
+  @override
+  String get keepDraft => 'Draft';
+
+  @override
+  String get reportDraftSaved => 'Saved as a draft on this phone.';
+
+  @override
+  String draftFrom(String ago) {
+    return 'Picked up from a draft saved $ago ago.';
+  }
+
+  @override
+  String get discardDraft => 'Start over';
+
+  @override
+  String get drafts => 'Drafts';
+
+  @override
+  String savedAgo(String ago) {
+    return 'saved $ago ago';
+  }
+
+  @override
+  String get continueDraft => 'Continue';
 
   @override
   String get reasonNext => 'Next lesson';

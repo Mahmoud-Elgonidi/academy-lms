@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_theme.dart';
+import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/realtime/live.dart';
 import '../../../../core/state/load_cubit.dart';
@@ -10,6 +13,7 @@ import '../../../../core/time/formats.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
+import '../../data/report_drafts.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/reports.dart';
 import '../../domain/teaching.dart';
@@ -17,10 +21,31 @@ import '../widgets/teacher_header.dart';
 import '../widgets/waiting.dart';
 
 /// The Reports tab: homework waiting to be marked as one row on top, then
-/// the reports still to write (overdue first, each a tap from writing), then
-/// those sent in the last two weeks, which can still be corrected.
-class TeacherReportsPage extends StatelessWidget {
+/// the reports still to write (overdue first, each a tap from writing), the
+/// ones begun and kept as drafts on this phone, then those sent in the last
+/// two weeks, which can still be corrected.
+class TeacherReportsPage extends StatefulWidget {
   const TeacherReportsPage({super.key});
+
+  @override
+  State<TeacherReportsPage> createState() => _TeacherReportsPageState();
+}
+
+class _TeacherReportsPageState extends State<TeacherReportsPage> {
+  Map<String, ReportDraft> _drafts = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_readDrafts());
+  }
+
+  Future<void> _readDrafts() async {
+    final account = context.read<SessionCubit>().state.current?.id;
+    if (account == null) return;
+    final drafts = await ReportDrafts().all(account);
+    if (mounted) setState(() => _drafts = drafts);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +66,7 @@ class TeacherReportsPage extends StatelessWidget {
         header: TeacherHeader(title: l.navReports, eyebrow: waiting),
         body: LoadView<List<ReportSummary>>(
           skeleton: const SkeletonList(count: 4),
-          builder: (context, reports) => _Reports(reports: reports, toMark: todo?.homework),
+          builder: (context, reports) => _Reports(reports: reports, toMark: todo?.homework, drafts: _drafts, onBack: _readDrafts),
         ),
       ),
     );
@@ -49,16 +74,23 @@ class TeacherReportsPage extends StatelessWidget {
 }
 
 class _Reports extends StatelessWidget {
-  const _Reports({required this.reports, required this.toMark});
+  const _Reports({required this.reports, required this.toMark, required this.drafts, required this.onBack});
 
   final List<ReportSummary> reports;
   final int? toMark;
+  final Map<String, ReportDraft> drafts;
+
+  /// Reads the drafts again on coming back from a report.
+  final Future<void> Function() onBack;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final open = reports.where((r) => r.open).toList()..sort((a, b) => (b.status == 'overdue' ? 1 : 0) - (a.status == 'overdue' ? 1 : 0));
+    final begun = open.where((r) => drafts.containsKey(r.id)).toList();
+    final toWrite = open.where((r) => !drafts.containsKey(r.id)).toList();
     final sent = reports.where((r) => !r.open).toList();
+    Future<void> openHere(String id) => _openHere(context, id, onBack);
     return ListView(
       padding: pagePadding.copyWith(top: Space.m),
       physics: const AlwaysScrollableScrollPhysics(),
@@ -67,23 +99,34 @@ class _Reports extends StatelessWidget {
         SectionHeader(l.reportsOpen),
         if (open.isEmpty)
           Note(l.noReportsWaiting, tone: Tone.brand, icon: Icons.task_alt_rounded)
-        else
+        else if (toWrite.isNotEmpty)
           _Card(
-            rows: [for (final (i, r) in open.indexed) _OpenRow(report: r, first: i == 0)],
+            rows: [for (final (i, r) in toWrite.indexed) _OpenRow(report: r, first: i == 0, open: openHere)],
           ),
+        if (begun.isNotEmpty) ...[
+          SectionHeader(l.drafts),
+          _Card(
+            rows: [for (final r in begun) _DraftRow(report: r, draft: drafts[r.id]!, open: openHere)],
+          ),
+        ],
         if (sent.isNotEmpty) ...[
           SectionHeader(l.reportsSent),
-          _Card(rows: [for (final r in sent) _SentRow(report: r)]),
+          _Card(
+            rows: [for (final r in sent) _SentRow(report: r, open: openHere)],
+          ),
         ],
       ]),
     );
   }
 }
 
-/// Opens a report from this list, and reads the list again once it is sent.
-Future<void> _openHere(BuildContext context, String id) async {
+/// Opens a report from this list; once back, the drafts are read again, and
+/// the list too when it was sent.
+Future<void> _openHere(BuildContext context, String id, Future<void> Function() onBack) async {
   final list = context.read<LoadCubit<List<ReportSummary>>>();
-  if (await openReport(context, id)) await list.load();
+  final sent = await openReport(context, id);
+  await onBack();
+  if (sent) await list.load();
 }
 
 class _Card extends StatelessWidget {
@@ -158,10 +201,11 @@ class _MarkingRow extends StatelessWidget {
 /// A report still to write: whose, when the lesson was (and how late, in
 /// red), and Write: filled on the first, outlined on the others.
 class _OpenRow extends StatelessWidget {
-  const _OpenRow({required this.report, required this.first});
+  const _OpenRow({required this.report, required this.first, required this.open});
 
   final ReportSummary report;
   final bool first;
+  final Future<void> Function(String id) open;
 
   @override
   Widget build(BuildContext context) {
@@ -169,12 +213,12 @@ class _OpenRow extends StatelessWidget {
     final c = context.colors;
     final r = report;
     final overdue = r.status == 'overdue';
-    void open() => _openHere(context, r.id);
+    void go() => open(r.id);
     final label = Text(l.writeReport, style: const TextStyle(fontWeight: FontWeight.w700));
     const size = Size(72, 44);
     return InkWell(
       key: Key('report-${r.id}'),
-      onTap: open,
+      onTap: go,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: Space.l, vertical: Space.m),
         child: Row(
@@ -208,12 +252,12 @@ class _OpenRow extends StatelessWidget {
             const Gap(Space.m),
             first
                 ? FilledButton(
-                    onPressed: open,
+                    onPressed: go,
                     style: FilledButton.styleFrom(minimumSize: size),
                     child: label,
                   )
                 : OutlinedButton(
-                    onPressed: open,
+                    onPressed: go,
                     style: OutlinedButton.styleFrom(
                       minimumSize: size,
                       foregroundColor: c.brandDeep,
@@ -230,9 +274,10 @@ class _OpenRow extends StatelessWidget {
 
 /// A report sent: a check, whose, the day, where it stands when the academy read it.
 class _SentRow extends StatelessWidget {
-  const _SentRow({required this.report});
+  const _SentRow({required this.report, required this.open});
 
   final ReportSummary report;
+  final Future<void> Function(String id) open;
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +287,7 @@ class _SentRow extends StatelessWidget {
     final day = (r.submittedAt ?? r.lessonAt)?.day(context.locale);
     return InkWell(
       key: Key('report-${r.id}'),
-      onTap: () => _openHere(context, r.id),
+      onTap: () => open(r.id),
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 64),
         child: Padding(
@@ -265,6 +310,55 @@ class _SentRow extends StatelessWidget {
               Icon(Icons.chevron_right_rounded, color: c.faint, size: 22),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A report begun and kept on this phone: whose, when the lesson was and
+/// how long ago it was kept, and Continue.
+class _DraftRow extends StatelessWidget {
+  const _DraftRow({required this.report, required this.draft, required this.open});
+
+  final ReportSummary report;
+  final ReportDraft draft;
+  final Future<void> Function(String id) open;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final r = report;
+    final ago = l.savedAgo(waitText(context, DateTime.now().toUtc().difference(draft.savedAt)));
+    return InkWell(
+      key: Key('draft-${r.id}'),
+      onTap: () => open(r.id),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: Space.l, vertical: Space.m),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    [if (r.absence) l.reportAbsence, r.student].join(' · '),
+                    style: context.type.cardTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text([if (r.lessonAt != null) r.lessonAt!.when(context), ago].join(' · '), style: context.type.caption),
+                ],
+              ),
+            ),
+            const Gap(Space.s),
+            Text(
+              l.continueDraft,
+              style: context.type.body.copyWith(color: c.brandDeep, fontWeight: FontWeight.w700),
+            ),
+            Icon(Icons.chevron_right_rounded, color: c.faint, size: 22),
+          ],
         ),
       ),
     );

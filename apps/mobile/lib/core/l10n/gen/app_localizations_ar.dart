@@ -1774,6 +1774,62 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noStudents => 'مفيش طلاب لسه.';
 
   @override
+  String studentsIn(String students, String subjects) {
+    return '$students في $subjects';
+  }
+
+  @override
+  String studentsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n طالب',
+      few: '$n طلاب',
+      two: 'طالبين',
+      one: 'طالب واحد',
+      zero: 'مفيش طلاب',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subjectsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n مادة',
+      few: '$n مواد',
+      two: 'مادتين',
+      one: 'مادة واحدة',
+      zero: 'مفيش مواد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get searchByName => 'دوّر بالاسم';
+
+  @override
+  String get allSubjects => 'الكل';
+
+  @override
+  String get noStudentsFound => 'مفيش طالب بالاسم ده.';
+
+  @override
+  String get reportWaitingChip => 'تقرير مستنيك';
+
+  @override
+  String get messageStudent => 'ابعتله رسالة';
+
+  @override
+  String get markHomework => 'صحّح الواجبات';
+
+  @override
+  String ofCourse(int n) {
+    return '$n% من البرنامج';
+  }
+
+  @override
   String get prevMonth => 'الشهر اللي فات';
 
   @override
@@ -2107,6 +2163,43 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get planHint => 'اختار اللي حصل في كل درس.';
+
+  @override
+  String get reportTitle => 'تقرير الحصة';
+
+  @override
+  String get workedOn => 'اشتغلنا على إيه';
+
+  @override
+  String get howItWent => 'الحصة كانت إزاي';
+
+  @override
+  String get talkSection => 'الكلام';
+
+  @override
+  String get keepDraft => 'مسودة';
+
+  @override
+  String get reportDraftSaved => 'اتحفظت مسودة على الموبايل ده.';
+
+  @override
+  String draftFrom(String ago) {
+    return 'كمّلت من مسودة اتحفظت من $ago.';
+  }
+
+  @override
+  String get discardDraft => 'ابدأ من الأول';
+
+  @override
+  String get drafts => 'مسودات';
+
+  @override
+  String savedAgo(String ago) {
+    return 'اتحفظت من $ago';
+  }
+
+  @override
+  String get continueDraft => 'كمّل';
 
   @override
   String get reasonNext => 'الدرس الجاي';
