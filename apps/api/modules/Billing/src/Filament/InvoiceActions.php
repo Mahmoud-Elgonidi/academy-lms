@@ -10,8 +10,10 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
+use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Modules\Billing\Actions\RecordPayment;
 use Modules\Billing\Actions\VoidInvoice;
 use Modules\Billing\Models\Invoice;
@@ -79,7 +81,14 @@ final class InvoiceActions
             ->modalDescription(__('billing::invoices.void.hint'))
             ->schema([Textarea::make('reason')->label(__('billing::invoices.void.reason'))->required()->maxLength(200)])
             ->action(function (Invoice $record, array $data) {
-                app(VoidInvoice::class)->handle($record->id, $data['reason'], (string) auth()->id());
+                try {
+                    app(VoidInvoice::class)->handle($record->id, $data['reason'], (string) auth()->id());
+                } catch (ValidationException $e) {
+                    // Money may be on its way (a receipt waiting, an online payment under way): say so, keep the invoice.
+                    Notification::make()->danger()->title(implode(' ', $e->validator->errors()->all()))->send();
+
+                    throw new Halt;
+                }
                 Notification::make()->success()->title(__('billing::invoices.void.done'))->send();
             });
     }

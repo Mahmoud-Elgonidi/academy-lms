@@ -6,12 +6,16 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Models\Invoice;
+use Modules\Billing\Models\PaymentCheckout;
+use Modules\Billing\Models\PaymentProof;
 use Modules\SharedKernel\Audit\AuditTrail;
 
 /**
  * Cancels an issued invoice nothing has been paid on. Its number stays
  * used. A Saudi tax invoice (ZATCA) is cancelled by a credit note, issued
- * here with it.
+ * here with it. Not while money may be on its way: a transfer receipt
+ * waiting (approve it or turn it down first, so the payer hears) or an
+ * online payment under way (until it finishes or runs out).
  */
 final class VoidInvoice
 {
@@ -23,6 +27,14 @@ final class VoidInvoice
             $invoice = Invoice::lock($invoiceId);
             if ($invoice->status !== 'issued' || $invoice->paid_minor > 0) {
                 throw ValidationException::withMessages(['invoice' => __('billing::billing.errors.not_voidable')]);
+            }
+            $why = match (true) {
+                PaymentProof::query()->where('invoice_id', $invoice->id)->where('status', 'pending')->exists() => 'void_proof',
+                PaymentCheckout::query()->where('invoice_id', $invoice->id)->where('status', 'open')->where('expires_at', '>', CarbonImmutable::now())->exists() => 'void_checkout',
+                default => null,
+            };
+            if ($why !== null) {
+                throw ValidationException::withMessages(['invoice' => __('billing::billing.errors.'.$why)]);
             }
 
             $invoice->status = 'void';

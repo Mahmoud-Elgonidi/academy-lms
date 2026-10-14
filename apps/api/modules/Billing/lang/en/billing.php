@@ -40,5 +40,7 @@ return [
         'currency' => 'The invoice is in :currency.',
         'amount' => 'The amount must be above zero and at most what is left (:max).',
         'not_voidable' => 'Only a due invoice with nothing paid on it can be voided.',
+        'void_proof' => 'A transfer receipt is waiting on this invoice: approve it or turn it down first.',
+        'void_checkout' => 'An online payment is under way on this invoice: wait until it finishes or runs out.',
     ],
 ];

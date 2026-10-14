@@ -192,6 +192,20 @@ it('takes no proof where nothing is owed: a cancelled invoice, or one paid onlin
         ->and(PaymentProof::query()->count())->toBe(0);
 });
 
+it('voids no invoice while a receipt waits on it or an online payment is under way', function () {
+    $proof = transferProof('800');
+    expect(fn () => app(VoidInvoice::class)->handle($this->family->id, 'خطأ', $this->admin->id))->toThrow(ValidationException::class, __('billing::billing.errors.void_proof'));
+    app(RejectPaymentProof::class)->handle($proof->id, 'المبلغ مش واضح', $this->accountant->id);
+
+    $account = app(SaveGatewayAccount::class)->handle(null, ['gateway' => 'demo', 'label' => 'Demo', 'mode' => 'test'], $this->admin->id);
+    $checkout = app(StartCheckout::class)->handle($this->family->refresh(), $account, $this->guardian->id, 'family');
+    expect(fn () => app(VoidInvoice::class)->handle($this->family->id, 'خطأ', $this->admin->id))->toThrow(ValidationException::class, __('billing::billing.errors.void_checkout'));
+
+    // Once the payment page has run out, the office may cancel it.
+    CarbonImmutable::setTestNow($checkout->expires_at->addMinute());
+    expect(app(VoidInvoice::class)->handle($this->family->id, 'خطأ', $this->admin->id)->status)->toBe('void');
+});
+
 it('cannot approve a waiting proof once the invoice was paid another way, and tells the payer why it was turned down', function () {
     $proof = transferProof('800');
 

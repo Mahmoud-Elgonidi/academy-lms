@@ -139,14 +139,17 @@ it('turns a proof down with a reason the payer reads, keeps a line in the activi
     expect(sendProof()->status)->toBe('pending');
 });
 
-it('cannot approve a proof on an invoice that is no longer due; it can still be turned down', function () {
+it('voids no invoice while its proof waits; a proof on an invoice paid another way cannot be approved, only turned down', function () {
     $proof = sendProof();
-    app(VoidInvoice::class)->handle($this->invoice->id, 'خطأ في الباقة', $this->admin->id);
+    expect(fn () => app(VoidInvoice::class)->handle($this->invoice->id, 'خطأ في الباقة', $this->admin->id))
+        ->toThrow(ValidationException::class, __('billing::billing.errors.void_proof'));
+    expect($this->invoice->refresh()->status)->toBe('issued');
 
+    app(RecordPayment::class)->handle($this->invoice->id, 'cash', Money::of(40000, 'SAR'), null, CarbonImmutable::now(), null, $this->admin->id);
     expect(fn () => app(ApprovePaymentProof::class)->handle($proof->id, Money::of(40000, 'SAR'), 'instapay', null, CarbonImmutable::now(), null, $this->admin->id))
         ->toThrow(ValidationException::class);
     expect($proof->refresh()->status)->toBe('pending');
-    app(RejectPaymentProof::class)->handle($proof->id, 'الفاتورة اتلغت، هنرجعلك المبلغ.', $this->admin->id);
+    app(RejectPaymentProof::class)->handle($proof->id, 'اتدفعت كاش في الأكاديمية.', $this->admin->id);
     expect($proof->refresh()->status)->toBe('rejected');
 });
 
