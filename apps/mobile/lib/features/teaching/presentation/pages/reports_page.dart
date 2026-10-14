@@ -80,13 +80,6 @@ class _Reports extends StatelessWidget {
   }
 }
 
-/// Opens a report to write or correct; once sent, what waits is read again.
-Future<bool> openReport(BuildContext context, String id) async {
-  final sent = await context.push<bool>('/teach/reports/$id') == true;
-  if (sent && context.mounted) await reloadWaiting(context);
-  return sent;
-}
-
 /// Opens a report from this list, and reads the list again once it is sent.
 Future<void> _openHere(BuildContext context, String id) async {
   final list = context.read<LoadCubit<List<ReportSummary>>>();

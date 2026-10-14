@@ -199,10 +199,13 @@ class TimeOffList {
 
 /// What waits on the teacher besides lessons: reports to write, homework to mark.
 class TeacherTodo {
-  const TeacherTodo({required this.reports, required this.homework, this.firstReport});
+  const TeacherTodo({required this.reports, required this.homework, this.firstReport, this.openReports = const {}});
 
   final int reports;
   final int homework;
+
+  /// The report still to write for a lesson, by the lesson's id.
+  final Map<String, String> openReports;
 
   /// The report due first: whose, and by when.
   final ({String student, LocalTime? dueAt})? firstReport;

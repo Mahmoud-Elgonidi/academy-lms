@@ -1273,6 +1273,33 @@
   "nextWeek": "الأسبوع الجاي",
   "noLessonsDay": "مفيش حصص",
   "noLessonsWeek": "مفيش حصص الأسبوع ده.",
+  "thisWeek": "الأسبوع ده",
+  "weekdaysShort": "سبت،حد،اتنين،تلات،أربع،خميس،جمعة",
+  "dayToday": "{day} · النهارده",
+  "@dayToday": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "noLessonsLater": "مفيش حصص من اليوم ده لآخر الأسبوع.",
+  "laterToday": "باقي النهارده",
+  "doneToday": "خلصت النهارده",
+  "restDay": "النهارده مفيش حصص. حصصك الجاية في الأسبوع.",
+  "openWeek": "افتح الأسبوع",
+  "writeTheReport": "اكتب التقرير",
+  "markingTile": "واجبات للتصحيح",
+  "allWritten": "كلها اتكتبت",
+  "nothingToMark": "مفيش حاجة",
+  "oldestFor": "أقدمها: {name}",
+  "@oldestFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "studentsTitle": "طلابي",
   "paused": "متوقف مؤقتًا",
   "toMark": "{n} للتصحيح",

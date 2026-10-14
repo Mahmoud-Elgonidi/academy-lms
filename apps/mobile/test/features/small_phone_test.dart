@@ -269,8 +269,8 @@ void main() {
       await app.session.start();
       await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
       await frames(tester, 15);
+      expect(find.byKey(const Key('today-reports')), findsOneWidget);
       await _scrollDown(tester);
-      expect(find.text('تقرير مستنيك'), findsOneWidget);
 
       for (final place in ['/teach/week', '/teach/reports', '/teach/students', '/teach/more', '/teach/more/earnings']) {
         await _go(tester, place);

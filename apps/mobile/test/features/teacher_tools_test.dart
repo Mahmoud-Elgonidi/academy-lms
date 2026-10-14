@@ -56,8 +56,8 @@ void main() {
       ..on('PUT', 'teacher/reports/r1', {'data': report('r1', status: 'submitted')});
     await _open(tester, app);
 
-    // Today's waiting card opens the reports.
-    await tester.tap(find.text('تقرير مستنيك'));
+    // Today's waiting tile opens the reports.
+    await tester.tap(find.byKey(const Key('today-reports')));
     await frames(tester, 10);
     expect(find.text('تقارير مستنياك'), findsOneWidget);
     await tester.tap(find.text('يوسف خالد'));
@@ -110,7 +110,7 @@ void main() {
     app.api.on('POST', 'teacher/homework/h1/review', {'data': homeworkJson('h1', status: 'reviewed')});
     await _open(tester, app);
 
-    await tester.tap(find.text('واجب تصحّحه'));
+    await tester.tap(find.byKey(const Key('today-marking')));
     await frames(tester, 10);
     expect(find.text('تصحيح الواجبات'), findsOneWidget);
     expect(find.text('قريت السورة 3 مرات'), findsOneWidget);

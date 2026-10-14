@@ -40,6 +40,10 @@ class TeachingRepository {
     return TeacherTodo(
       reports: open.length,
       homework: homework.length,
+      openReports: {
+        for (final r in open)
+          if (r['session_id'] case final String session) session: r['id'] as String,
+      },
       firstReport: first == null
           ? null
           : (student: (first['student'] as Map<String, dynamic>?)?['name'] as String? ?? '', dueAt: LocalTime.fromJson(first['due_at'])),

@@ -10,25 +10,34 @@ import '../../domain/lesson.dart';
 
 /// What a lesson's own sheet can do now; each is null when it may not.
 class LessonActions {
-  const LessonActions({this.cancel, this.refuse, this.rate, this.dispute});
+  const LessonActions({this.cancel, this.refuse, this.rate, this.dispute, this.report});
 
   final VoidCallback? cancel;
   final VoidCallback? refuse;
   final VoidCallback? rate;
   final VoidCallback? dispute;
+
+  /// The teacher's report on it, still to write.
+  final VoidCallback? report;
 }
 
-/// One lesson in a guardian's list: the time in its own column, whom it is
-/// with, its state as a chip; a tap opens its sheet. A room open now joins
-/// from the row itself.
+/// One lesson in a list: the time in its own column, whom it is with, its
+/// state as a chip; a tap opens its sheet. A room open now joins from the
+/// row itself.
 class LessonRow extends StatelessWidget {
-  const LessonRow({required this.lesson, required this.onTap, this.highlight = false, super.key});
+  const LessonRow({required this.lesson, required this.onTap, this.highlight = false, this.grouped = false, this.trailing, super.key});
 
   final Lesson lesson;
   final VoidCallback onTap;
 
   /// The next lesson in the list.
   final bool highlight;
+
+  /// One of the rows on a day's card (a teacher's), rather than a card of its own.
+  final bool grouped;
+
+  /// What stands in place of the arrow (a teacher's Write).
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +46,77 @@ class LessonRow extends StatelessWidget {
     final locale = context.locale;
     final x = lesson;
     final struck = x.cancelled;
+    final row = InkWell(
+      onTap: PressScale.withPress(context, onTap),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(Space.l, Space.m + 2, Space.m, Space.m + 2),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            IntrinsicHeight(
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 64,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          x.startsAt.hourMinute(locale),
+                          maxLines: 1,
+                          style: context.type.number.copyWith(
+                            fontSize: 20,
+                            color: struck ? c.muted : c.ink,
+                            decoration: struck ? TextDecoration.lineThrough : null,
+                          ),
+                        ),
+                        Text('${x.startsAt.dayPeriod(locale)} · ${l.minutesShort(x.minutes)}', style: context.type.caption),
+                      ],
+                    ),
+                  ),
+                  VerticalDivider(width: Space.xl, thickness: 1, color: c.line),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          x.withName.isEmpty ? x.subject : l.lessonWith(x.subject, x.withName),
+                          style: context.type.cardTitle.copyWith(color: struck ? c.muted : null),
+                        ),
+                        const Gap(Space.xs + 2),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: [
+                            StatusChip(lessonStateLabel(context, x), tone: lessonTone(x)),
+                            if (x.substituteFor != null) StatusChip(l.substituteChip(x.substituteFor!), tone: Tone.info),
+                            if (x.typeLabel != null) StatusChip(x.typeLabel!, tone: Tone.info),
+                            if (x.dispute case final d?)
+                              StatusChip(l.disputeState(d.statusLabel), tone: d.open ? Tone.attention : Tone.neutral),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Gap(Space.xs),
+                  trailing ?? Icon(Icons.chevron_right_rounded, color: c.faint),
+                ],
+              ),
+            ),
+            if (x.joinOpen) ...[
+              const Gap(Space.m),
+              FilledButton.icon(
+                onPressed: () => joinLesson(context, x.id),
+                icon: const Icon(Icons.videocam_rounded),
+                label: Text(l.joinLesson),
+              ).shimmerIf(context, true, color: c.brandSoft),
+            ],
+          ],
+        ),
+      ),
+    );
+    if (grouped) return row;
     return Material(
       color: c.card,
       shape: RoundedRectangleBorder(
@@ -44,76 +124,7 @@ class LessonRow extends StatelessWidget {
         side: BorderSide(color: highlight ? c.brand.withValues(alpha: 0.6) : c.line, width: highlight ? 1.5 : 1),
       ),
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: PressScale.withPress(context, onTap),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(Space.l, Space.m + 2, Space.m, Space.m + 2),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              IntrinsicHeight(
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 64,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            x.startsAt.hourMinute(locale),
-                            maxLines: 1,
-                            style: context.type.number.copyWith(
-                              fontSize: 20,
-                              color: struck ? c.muted : c.ink,
-                              decoration: struck ? TextDecoration.lineThrough : null,
-                            ),
-                          ),
-                          Text('${x.startsAt.dayPeriod(locale)} · ${l.minutesShort(x.minutes)}', style: context.type.caption),
-                        ],
-                      ),
-                    ),
-                    VerticalDivider(width: Space.xl, thickness: 1, color: c.line),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            x.withName.isEmpty ? x.subject : l.lessonWith(x.subject, x.withName),
-                            style: context.type.cardTitle.copyWith(color: struck ? c.muted : null),
-                          ),
-                          const Gap(Space.xs + 2),
-                          Wrap(
-                            spacing: 6,
-                            runSpacing: 4,
-                            children: [
-                              StatusChip(lessonStateLabel(context, x), tone: lessonTone(x)),
-                              if (x.substituteFor != null) StatusChip(l.substituteChip(x.substituteFor!), tone: Tone.info),
-                              if (x.typeLabel != null) StatusChip(x.typeLabel!, tone: Tone.info),
-                              if (x.dispute case final d?)
-                                StatusChip(l.disputeState(d.statusLabel), tone: d.open ? Tone.attention : Tone.neutral),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Gap(Space.xs),
-                    Icon(Icons.chevron_right_rounded, color: c.faint),
-                  ],
-                ),
-              ),
-              if (x.joinOpen) ...[
-                const Gap(Space.m),
-                FilledButton.icon(
-                  onPressed: () => joinLesson(context, x.id),
-                  icon: const Icon(Icons.videocam_rounded),
-                  label: Text(l.joinLesson),
-                ).shimmerIf(context, true, color: c.brandSoft),
-              ],
-            ],
-          ),
-        ),
-      ),
+      child: row,
     );
   }
 }
@@ -250,6 +261,10 @@ class _LessonSheet extends StatelessWidget {
                 ],
               ),
             ),
+          ],
+          if (actions.report != null) ...[
+            const Gap(Space.l),
+            PrimaryAction(l.writeTheReport, icon: Icons.edit_note_rounded, onPressed: _after(context, actions.report!)),
           ],
           if (actions.rate != null) ...[
             const Gap(Space.l),

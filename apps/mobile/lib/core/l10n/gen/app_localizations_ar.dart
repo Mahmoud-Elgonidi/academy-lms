@@ -1712,6 +1712,49 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noLessonsWeek => 'مفيش حصص الأسبوع ده.';
 
   @override
+  String get thisWeek => 'الأسبوع ده';
+
+  @override
+  String get weekdaysShort => 'سبت،حد،اتنين،تلات،أربع،خميس،جمعة';
+
+  @override
+  String dayToday(String day) {
+    return '$day · النهارده';
+  }
+
+  @override
+  String get noLessonsLater => 'مفيش حصص من اليوم ده لآخر الأسبوع.';
+
+  @override
+  String get laterToday => 'باقي النهارده';
+
+  @override
+  String get doneToday => 'خلصت النهارده';
+
+  @override
+  String get restDay => 'النهارده مفيش حصص. حصصك الجاية في الأسبوع.';
+
+  @override
+  String get openWeek => 'افتح الأسبوع';
+
+  @override
+  String get writeTheReport => 'اكتب التقرير';
+
+  @override
+  String get markingTile => 'واجبات للتصحيح';
+
+  @override
+  String get allWritten => 'كلها اتكتبت';
+
+  @override
+  String get nothingToMark => 'مفيش حاجة';
+
+  @override
+  String oldestFor(String name) {
+    return 'أقدمها: $name';
+  }
+
+  @override
   String get studentsTitle => 'طلابي';
 
   @override

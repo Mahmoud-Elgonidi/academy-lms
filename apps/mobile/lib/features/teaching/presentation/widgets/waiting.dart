@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/realtime/live.dart';
 import '../../../../core/state/load_cubit.dart';
@@ -22,4 +23,11 @@ Future<void> reloadWaiting(BuildContext context) async {
     return;
   }
   await cubit.load();
+}
+
+/// Opens a report to write or correct (over the tabs); once sent, what waits is read again.
+Future<bool> openReport(BuildContext context, String id) async {
+  final sent = await context.push<bool>('/teach/reports/$id') == true;
+  if (sent && context.mounted) await reloadWaiting(context);
+  return sent;
 }

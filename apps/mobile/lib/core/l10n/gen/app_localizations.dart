@@ -2888,6 +2888,84 @@ abstract class AppLocalizations {
   /// **'مفيش حصص الأسبوع ده.'**
   String get noLessonsWeek;
 
+  /// No description provided for @thisWeek.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأسبوع ده'**
+  String get thisWeek;
+
+  /// No description provided for @weekdaysShort.
+  ///
+  /// In ar, this message translates to:
+  /// **'سبت،حد،اتنين،تلات،أربع،خميس،جمعة'**
+  String get weekdaysShort;
+
+  /// No description provided for @dayToday.
+  ///
+  /// In ar, this message translates to:
+  /// **'{day} · النهارده'**
+  String dayToday(String day);
+
+  /// No description provided for @noLessonsLater.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش حصص من اليوم ده لآخر الأسبوع.'**
+  String get noLessonsLater;
+
+  /// No description provided for @laterToday.
+  ///
+  /// In ar, this message translates to:
+  /// **'باقي النهارده'**
+  String get laterToday;
+
+  /// No description provided for @doneToday.
+  ///
+  /// In ar, this message translates to:
+  /// **'خلصت النهارده'**
+  String get doneToday;
+
+  /// No description provided for @restDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'النهارده مفيش حصص. حصصك الجاية في الأسبوع.'**
+  String get restDay;
+
+  /// No description provided for @openWeek.
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح الأسبوع'**
+  String get openWeek;
+
+  /// No description provided for @writeTheReport.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب التقرير'**
+  String get writeTheReport;
+
+  /// No description provided for @markingTile.
+  ///
+  /// In ar, this message translates to:
+  /// **'واجبات للتصحيح'**
+  String get markingTile;
+
+  /// No description provided for @allWritten.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلها اتكتبت'**
+  String get allWritten;
+
+  /// No description provided for @nothingToMark.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش حاجة'**
+  String get nothingToMark;
+
+  /// No description provided for @oldestFor.
+  ///
+  /// In ar, this message translates to:
+  /// **'أقدمها: {name}'**
+  String oldestFor(String name);
+
   /// No description provided for @studentsTitle.
   ///
   /// In ar, this message translates to:

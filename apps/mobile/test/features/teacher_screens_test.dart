@@ -84,10 +84,16 @@ void main() {
 
     expect(find.text('النهارده: حصتين'), findsOneWidget);
     expect(find.text('الحصة الجاية'), findsOneWidget);
+    // What is done today is listed apart, with what it was recorded as.
+    expect(find.text('خلصت النهارده'), findsOneWidget);
     expect(find.text('الطالب غاب'), findsOneWidget);
-    expect(find.text('تقرير مستنيك'), findsOneWidget);
-    expect(find.text('واجب تصحّحه'), findsOneWidget);
+    // What waits: a report to write and a homework to mark, each opening its place.
+    expect(find.descendant(of: find.byKey(const Key('today-reports')), matching: find.text('1')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('today-marking')), matching: find.text('1')), findsOneWidget);
 
+    // The lesson's own sheet offers the dispute.
+    await tester.tap(find.byKey(const Key('lesson-l0')));
+    await frames(tester, 8);
     await tester.tap(find.text('اعترض'));
     await frames(tester, 8);
     expect(find.text('اعتراض على نتيجة الحصة'), findsOneWidget);
@@ -120,45 +126,53 @@ void main() {
 
     expect(find.text('النهارده: حصة واحدة'), findsOneWidget);
     expect(find.text('الحصة الجاية'), findsOneWidget);
-    expect(find.text('تقرير مستنيك'), findsNothing);
+    expect(find.byKey(const Key('today-reports')), findsNothing);
     await _close(tester);
   });
 
-  testWidgets('the week: day by day, and the weeks before and after from the teacher\'s own today', (tester) async {
+  testWidgets('the week: Saturday to Friday around the teacher\'s own today, a day picked, and the weeks before and after', (tester) async {
     final app = await TestApp.create(accounts: [teacher]);
     teacherRoutes(app.api);
+    // Today on the teacher's clock is Sunday 11 October; the week starts on Saturday the 10th.
     app.api.onWith('GET', 'teacher/lessons', (r) {
       final from = r.queryParameters['from'] as String? ?? '2099-10-11';
       final to = DateTime.parse(from).add(const Duration(days: 6)).toIso8601String().substring(0, 10);
+      final week = from == '2099-10-10';
       return (
         200,
         {
           'from': from,
           'to': to,
-          'count': from == '2099-10-11' ? 2 : 0,
-          'minutes': from == '2099-10-11' ? 90 : 0,
-          'data': from == '2099-10-11' ? [_lesson('l1'), _lesson('l2', day: '2099-10-13', start: '14:00')] : <Object>[],
+          'count': week ? 3 : 0,
+          'minutes': week ? 135 : 0,
+          'data': week ? [_lesson('l0', day: '2099-10-10'), _lesson('l1'), _lesson('l2', day: '2099-10-13', start: '14:00')] : <Object>[],
         },
       );
     });
     await _open(tester, app);
     await tester.tap(find.text('الأسبوع').last);
     await frames(tester, 12);
+    expect(app.api.requests.where((r) => r.path == 'teacher/lessons').last.queryParameters['from'], '2099-10-10');
 
-    expect(find.text('يوسف خالد'), findsNWidgets(2));
-    // Seven days, the empty ones said so.
-    expect(find.text('مفيش حصص'), findsNWidgets(5));
+    expect(find.text('الأسبوع ده'), findsOneWidget);
+    // Seven days on the strip, the ones without lessons with a dash.
+    expect(find.text('—'), findsNWidgets(4));
+    // From today on: Sunday and Tuesday; Saturday is a tap away.
+    expect(find.textContaining('يوسف خالد'), findsNWidgets(2));
+    await tester.tap(find.byKey(const Key('day-2099-10-10')));
+    await frames(tester, 6);
+    expect(find.textContaining('يوسف خالد'), findsNWidgets(3));
 
     await tester.tap(find.byTooltip('الأسبوع اللي فات'));
     await frames(tester, 10);
-    expect(app.api.requests.where((r) => r.path == 'teacher/lessons').last.queryParameters['from'], '2099-10-04');
+    expect(app.api.requests.where((r) => r.path == 'teacher/lessons').last.queryParameters['from'], '2099-10-03');
     expect(find.text('مفيش حصص الأسبوع ده.'), findsOneWidget);
 
     await tester.tap(find.byTooltip('الأسبوع الجاي'));
     await tester.pump();
     await tester.tap(find.byTooltip('الأسبوع الجاي'));
     await frames(tester, 10);
-    expect(app.api.requests.where((r) => r.path == 'teacher/lessons').last.queryParameters['from'], '2099-10-18');
+    expect(app.api.requests.where((r) => r.path == 'teacher/lessons').last.queryParameters['from'], '2099-10-17');
     await _close(tester);
   });
 

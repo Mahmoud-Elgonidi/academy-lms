@@ -1675,6 +1675,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noLessonsWeek => 'No lessons this week.';
 
   @override
+  String get thisWeek => 'This week';
+
+  @override
+  String get weekdaysShort => 'Sat,Sun,Mon,Tue,Wed,Thu,Fri';
+
+  @override
+  String dayToday(String day) {
+    return '$day · today';
+  }
+
+  @override
+  String get noLessonsLater => 'No lessons from this day to the end of the week.';
+
+  @override
+  String get laterToday => 'Later today';
+
+  @override
+  String get doneToday => 'Done today';
+
+  @override
+  String get restDay => 'No lessons today. Your next ones are in the week.';
+
+  @override
+  String get openWeek => 'Open the week';
+
+  @override
+  String get writeTheReport => 'Write the report';
+
+  @override
+  String get markingTile => 'Homework to mark';
+
+  @override
+  String get allWritten => 'All written';
+
+  @override
+  String get nothingToMark => 'Nothing yet';
+
+  @override
+  String oldestFor(String name) {
+    return 'Oldest: $name';
+  }
+
+  @override
   String get studentsTitle => 'My students';
 
   @override

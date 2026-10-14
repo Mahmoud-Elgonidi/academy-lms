@@ -100,7 +100,7 @@ void main() {
     await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
     await frames(tester, 20);
 
-    await tester.tap(find.text('تقرير مستنيك'));
+    await tester.tap(find.byKey(const Key('today-reports')));
     await frames(tester, 10);
     await tester.tap(find.text('يوسف خالد'));
     await frames(tester, 10);
