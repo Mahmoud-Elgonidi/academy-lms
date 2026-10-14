@@ -217,6 +217,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountsLead => 'Pick the ones you want on this phone. Then switch between them from \"Me\" without signing in again.';
 
   @override
+  String get accountsLegal =>
+      'Before adding your account, read the academy\'s privacy notice and terms of use: it decides what happens to your data there.';
+
+  @override
   String get accountsNote =>
       'Only accounts with this same contact, in active academies. Missing one? The academy may have you under another number: ask them.';
 

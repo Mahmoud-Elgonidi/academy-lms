@@ -8,6 +8,7 @@ use Modules\Identity\Contracts\OtpSender;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Filament\Pages\SignIn;
 use Modules\Identity\Models\User;
+use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Platform\Models\Academy;
 
 beforeEach(function () {
@@ -57,11 +58,19 @@ it('finds my accounts in every active academy once the code is right, and signs 
     expect(collect($found['accounts'])->pluck('academy.slug')->all())->toBe(['noor', 'rawda'])
         ->and(collect($found['accounts'])->firstWhere('academy.slug', 'rawda')['user']['roles'])->toBe(['guardian', 'teacher']);
 
+    // Each academy's own privacy notice and terms, on its own address, to read before adding the account there.
+    $rawda = collect($found['accounts'])->firstWhere('academy.slug', 'rawda')['academy'];
+    $base = app(TenantDirectory::class)->baseUrl($this->rawda);
+    expect($rawda['privacy_url'])->toStartWith($base.'/privacy?lang=')
+        ->and($rawda['terms_url'])->toStartWith($base.'/terms?lang=');
+
     foreach ([['noor', $this->huda->id], ['rawda', $this->hudaAtRawda->id]] as [$slug, $userId]) {
         $this->withHeaders(['X-Academy' => $slug])->postJson('/api/v1/accounts/sign-in', [
             'discovery_token' => $found['discovery_token'], 'user_id' => $userId, 'device_name' => 'iPhone',
         ])->assertOk()->assertJsonPath('user.id', $userId)->assertJsonPath('user.academy.slug', $slug);
     }
+
+    $this->get($rawda['privacy_url'])->assertOk()->assertSee('Rawda');
 });
 
 it('works with a phone number, which must carry its country', function () {

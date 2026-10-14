@@ -6,6 +6,7 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../app/theme/branding.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/widgets/lms.dart';
+import '../../../../shared/widgets/open_link.dart';
 import '../../domain/sign_in_models.dart';
 import '../bloc/sign_in_cubit.dart';
 import '../widgets/sign_in_frame.dart';
@@ -47,7 +48,12 @@ class AccountsPage extends StatelessWidget {
               const SizedBox(height: 10),
             ],
             if (error != null) ...[const SizedBox(height: 4), Note(error, tone: Tone.danger, icon: Icons.error_outline_rounded)],
-            if (found.isNotEmpty) ...[const SizedBox(height: 10), Text(l.accountsNote, style: context.text.bodySmall)],
+            if (found.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              _AcademyPages(found: found),
+              const SizedBox(height: 10),
+              Text(l.accountsNote, style: context.text.bodySmall),
+            ],
           ],
         );
       },
@@ -61,6 +67,47 @@ String roleLabel(BuildContext context, String role) => switch (role) {
   'teacher' => context.l10n.roleTeacher,
   _ => context.l10n.roleStaff,
 };
+
+/// Each academy's own privacy notice and terms (it decides what happens to the person's data there),
+/// to read before adding the account.
+class _AcademyPages extends StatelessWidget {
+  const _AcademyPages({required this.found});
+
+  final List<FoundAccount> found;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final academies = {
+      for (final a in found)
+        if (a.privacyUrl != null || a.termsUrl != null) a.academySlug: a,
+    }.values.toList();
+    if (academies.isEmpty) return const SizedBox.shrink();
+    Widget link(String key, String? url, String label) => url == null
+        ? const SizedBox.shrink()
+        : TextButton(
+            key: Key(key),
+            style: TextButton.styleFrom(visualDensity: VisualDensity.compact, textStyle: context.text.bodySmall),
+            onPressed: () => openLink(context, Uri.parse(url)),
+            child: Text(label),
+          );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l.accountsLegal, style: context.text.bodySmall),
+        for (final a in academies)
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(a.academyName(context.locale), style: context.text.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+              link('academy-privacy-${a.academySlug}', a.privacyUrl, l.myDataPrivacy),
+              link('academy-terms-${a.academySlug}', a.termsUrl, l.myDataTerms),
+            ],
+          ),
+      ],
+    );
+  }
+}
 
 class _AccountTile extends StatelessWidget {
   const _AccountTile({required this.account, required this.selected});

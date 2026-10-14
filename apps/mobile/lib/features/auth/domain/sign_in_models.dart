@@ -53,6 +53,8 @@ class FoundAccount extends Equatable {
     required this.roles,
     this.colour,
     this.logoUrl,
+    this.privacyUrl,
+    this.termsUrl,
   });
 
   factory FoundAccount.fromJson(Map<String, dynamic> json) {
@@ -64,6 +66,8 @@ class FoundAccount extends Equatable {
       academyNameEn: academy['name_en'] as String,
       colour: academy['colour'] as String?,
       logoUrl: academy['logo_url'] as String?,
+      privacyUrl: academy['privacy_url'] as String?,
+      termsUrl: academy['terms_url'] as String?,
       userId: user['id'] as String,
       userName: user['name'] as String,
       roles: (user['roles'] as List<dynamic>).cast<String>(),
@@ -75,6 +79,10 @@ class FoundAccount extends Equatable {
   final String academyNameEn;
   final String? colour;
   final String? logoUrl;
+
+  /// The academy's own privacy notice and terms, to read before adding the account there.
+  final String? privacyUrl;
+  final String? termsUrl;
   final String userId;
   final String userName;
   final List<String> roles;

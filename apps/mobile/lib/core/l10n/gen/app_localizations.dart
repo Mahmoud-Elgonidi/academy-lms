@@ -428,6 +428,12 @@ abstract class AppLocalizations {
   /// **'اختار اللي عايزه على الموبايل ده. بعد كده بتتنقل بينهم من \"حسابي\" من غير ما تدخل تاني.'**
   String get accountsLead;
 
+  /// No description provided for @accountsLegal.
+  ///
+  /// In ar, this message translates to:
+  /// **'قبل ما تضيف حسابك، اقرا سياسة الخصوصية وشروط الاستخدام بتاعة الأكاديمية: هي اللي بتقرر إيه اللي بيحصل لبياناتك عندها.'**
+  String get accountsLegal;
+
   /// No description provided for @accountsNote.
   ///
   /// In ar, this message translates to:

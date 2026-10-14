@@ -56,6 +56,7 @@
   "accountsTitle": "Your accounts in every academy",
   "accountsFound": "{n, plural, =0{No accounts found} =1{We found one account} other{We found {n} accounts}}",
   "accountsLead": "Pick the ones you want on this phone. Then switch between them from \"Me\" without signing in again.",
+  "accountsLegal": "Before adding your account, read the academy's privacy notice and terms of use: it decides what happens to your data there.",
   "accountsNote": "Only accounts with this same contact, in active academies. Missing one? The academy may have you under another number: ask them.",
   "addAccounts": "{n, plural, =1{Sign in} other{Add {n} accounts and sign in}}",
   "noAccounts": "No academy has an account with this contact. Check it, or ask your academy.",

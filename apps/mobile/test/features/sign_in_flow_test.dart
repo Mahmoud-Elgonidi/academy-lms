@@ -31,7 +31,16 @@ void main() {
         'expires_at': null,
         'accounts': [
           {
-            'academy': {'id': 'a1', 'slug': 'demo', 'name_ar': 'أكاديمية النور', 'name_en': 'Noor', 'logo_url': null, 'colour': '#1D5FB8'},
+            'academy': {
+              'id': 'a1',
+              'slug': 'demo',
+              'name_ar': 'أكاديمية النور',
+              'name_en': 'Noor',
+              'logo_url': null,
+              'colour': '#1D5FB8',
+              'privacy_url': 'https://demo.example.test/privacy?lang=ar',
+              'terms_url': 'https://demo.example.test/terms?lang=ar',
+            },
             'user': {
               'id': 'u-guardian',
               'name': 'رامي فؤاد',
@@ -80,6 +89,10 @@ void main() {
     // Both accounts are listed; the staff-only one is not picked.
     expect(find.text('لقينا حسابين ليك'), findsOneWidget);
     expect(find.text('الإدارة'), findsOneWidget);
+    // The academy's own privacy notice and terms are there to read first (none for an academy that sent none).
+    expect(find.byKey(const Key('academy-privacy-demo')), findsOneWidget);
+    expect(find.byKey(const Key('academy-terms-demo')), findsOneWidget);
+    expect(find.byKey(const Key('academy-privacy-hq')), findsNothing);
     await tester.tap(find.text('ادخل'));
     await frames(tester, 20);
 

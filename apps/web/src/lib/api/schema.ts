@@ -2232,6 +2232,10 @@ export interface components {
                 name_en: string;
                 logo_url: string | null;
                 colour: string | null;
+                /** @description The academy's privacy notice, on its own address. */
+                privacy_url: string | null;
+                /** @description The academy's terms, on its own address. */
+                terms_url: string | null;
             };
             user: {
                 id: string;

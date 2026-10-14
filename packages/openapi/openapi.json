@@ -21399,6 +21399,20 @@
                                     "string",
                                     "null"
                                 ]
+                            },
+                            "privacy_url": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "description": "The academy's privacy notice, on its own address."
+                            },
+                            "terms_url": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "description": "The academy's terms, on its own address."
                             }
                         },
                         "required": [
@@ -21407,7 +21421,9 @@
                             "name_ar",
                             "name_en",
                             "logo_url",
-                            "colour"
+                            "colour",
+                            "privacy_url",
+                            "terms_url"
                         ]
                     },
                     "user": {

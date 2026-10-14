@@ -69,6 +69,7 @@ s('otherContact', 'استخدم رقم أو إيميل تاني', 'Use another n
 s('accountsTitle', 'حساباتك في كل الأكاديميات', 'Your accounts in every academy')
 s('accountsFound', '{n, plural, =0{مالقيناش حسابات} =1{لقينا حساب واحد ليك} =2{لقينا حسابين ليك} few{لقينا {n} حسابات ليك} other{لقينا {n} حساب ليك}}', '{n, plural, =0{No accounts found} =1{We found one account} other{We found {n} accounts}}', n='int')
 s('accountsLead', 'اختار اللي عايزه على الموبايل ده. بعد كده بتتنقل بينهم من "حسابي" من غير ما تدخل تاني.', 'Pick the ones you want on this phone. Then switch between them from "Me" without signing in again.')
+s('accountsLegal', 'قبل ما تضيف حسابك، اقرا سياسة الخصوصية وشروط الاستخدام بتاعة الأكاديمية: هي اللي بتقرر إيه اللي بيحصل لبياناتك عندها.', "Before adding your account, read the academy's privacy notice and terms of use: it decides what happens to your data there.")
 s('accountsNote', 'بنعرض بس الحسابات اللي على نفس الرقم، في الأكاديميات الشغالة. مش لاقي حساب؟ يمكن الأكاديمية مسجلاك برقم تاني: كلّمها.', 'Only accounts with this same contact, in active academies. Missing one? The academy may have you under another number: ask them.')
 s('addAccounts', '{n, plural, =1{ادخل} =2{أضف الحسابين وادخل} few{أضف {n} حسابات وادخل} other{أضف {n} حساب وادخل}}', '{n, plural, =1{Sign in} other{Add {n} accounts and sign in}}', n='int')
 s('noAccounts', 'مالقيناش حساب بالرقم أو الإيميل ده في أي أكاديمية. اتأكد منه، أو كلّم أكاديميتك.', 'No academy has an account with this contact. Check it, or ask your academy.')
