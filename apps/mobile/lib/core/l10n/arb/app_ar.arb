@@ -207,7 +207,6 @@
   "sendBySms": "ابعته رسالة SMS بدل واتساب",
   "confirm": "تأكيد",
   "otherContact": "استخدم رقم أو إيميل تاني",
-  "accountsTitle": "حساباتك في كل الأكاديميات",
   "accountsFound": "{n, plural, =0{مالقيناش حسابات} =1{لقينا حساب واحد ليك} =2{لقينا حسابين ليك} few{لقينا {n} حسابات ليك} other{لقينا {n} حساب ليك}}",
   "@accountsFound": {
     "placeholders": {
@@ -262,6 +261,59 @@
     }
   },
   "noAccounts": "مالقيناش حساب بالرقم أو الإيميل ده في أي أكاديمية. اتأكد منه، أو كلّم أكاديميتك.",
+  "noAccountTitle": "مالقيناش حساب",
+  "noAccountByPhone": "مالقيناش حساب بالرقم ده",
+  "noAccountByEmail": "مالقيناش حساب بالإيميل ده",
+  "noAccountCheckPhone": "اتأكد إن الرقم مكتوب صح. ويمكن الأكاديمية مسجلاك برقم أو إيميل تاني، فجرّبه أو كلّمها.",
+  "noAccountCheckEmail": "اتأكد إن الإيميل مكتوب صح. ويمكن الأكاديمية مسجلاك برقم أو إيميل تاني، فجرّبه أو كلّمها.",
+  "noAccountTryEmail": "جرّب بالإيميل",
+  "noAccountTryEmailBody": "لو الأكاديمية عندها إيميلك، الكود هيوصلك عليه.",
+  "noAccountOther": "جرّب رقم أو إيميل تاني",
+  "contactChange": "غيّره",
+  "consentNeededTitle": "محتاجين موافقة ولي أمرك",
+  "consentNeededLead": "قبل ما تدخل حسابك، ولي أمرك لازم يوافق مرة واحدة بس. وبعدها تدخل على طول.",
+  "consentNeededStep1": "ولي أمرك يفتح التطبيق بحسابه.",
+  "consentNeededStep2": "من «{me}» ثم «{privacy}» يوافق على حسابك.",
+  "@consentNeededStep2": {
+    "placeholders": {
+      "me": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "consentNeededStep3": "ارجع هنا وادخل تاني.",
+  "signInAgain": "جرّب تدخل تاني",
+  "twoFactorSetupTitle": "فعّل الدخول بخطوتين الأول",
+  "twoFactorSetupLead": "حسابك ده لازم يكون عليه الدخول بخطوتين. فعّله من موقع الأكاديمية على الكمبيوتر، وبعدها ادخل من هنا عادي.",
+  "tooManyTitle": "جرّبت كتير",
+  "tooManyBody": "علشان نحمي حسابك، وقّفنا المحاولات شوية. استنى لحد ما العدّاد يخلص، وبعدها جرّب تاني.",
+  "retryIn": "جرّب تاني بعد {time}",
+  "@retryIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeHello": "أهلًا يا {name}",
+  "@welcomeHello": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeIn": "إنت دلوقتي في {academy}",
+  "@welcomeIn": {
+    "placeholders": {
+      "academy": {
+        "type": "String"
+      }
+    }
+  },
   "roleStudent": "طالب",
   "roleGuardian": "ولي أمر",
   "roleTeacher": "مدرّس",

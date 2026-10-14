@@ -348,9 +348,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get otherContact => 'استخدم رقم أو إيميل تاني';
 
   @override
-  String get accountsTitle => 'حساباتك في كل الأكاديميات';
-
-  @override
   String accountsFound(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
@@ -418,6 +415,81 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noAccounts => 'مالقيناش حساب بالرقم أو الإيميل ده في أي أكاديمية. اتأكد منه، أو كلّم أكاديميتك.';
+
+  @override
+  String get noAccountTitle => 'مالقيناش حساب';
+
+  @override
+  String get noAccountByPhone => 'مالقيناش حساب بالرقم ده';
+
+  @override
+  String get noAccountByEmail => 'مالقيناش حساب بالإيميل ده';
+
+  @override
+  String get noAccountCheckPhone => 'اتأكد إن الرقم مكتوب صح. ويمكن الأكاديمية مسجلاك برقم أو إيميل تاني، فجرّبه أو كلّمها.';
+
+  @override
+  String get noAccountCheckEmail => 'اتأكد إن الإيميل مكتوب صح. ويمكن الأكاديمية مسجلاك برقم أو إيميل تاني، فجرّبه أو كلّمها.';
+
+  @override
+  String get noAccountTryEmail => 'جرّب بالإيميل';
+
+  @override
+  String get noAccountTryEmailBody => 'لو الأكاديمية عندها إيميلك، الكود هيوصلك عليه.';
+
+  @override
+  String get noAccountOther => 'جرّب رقم أو إيميل تاني';
+
+  @override
+  String get contactChange => 'غيّره';
+
+  @override
+  String get consentNeededTitle => 'محتاجين موافقة ولي أمرك';
+
+  @override
+  String get consentNeededLead => 'قبل ما تدخل حسابك، ولي أمرك لازم يوافق مرة واحدة بس. وبعدها تدخل على طول.';
+
+  @override
+  String get consentNeededStep1 => 'ولي أمرك يفتح التطبيق بحسابه.';
+
+  @override
+  String consentNeededStep2(String me, String privacy) {
+    return 'من «$me» ثم «$privacy» يوافق على حسابك.';
+  }
+
+  @override
+  String get consentNeededStep3 => 'ارجع هنا وادخل تاني.';
+
+  @override
+  String get signInAgain => 'جرّب تدخل تاني';
+
+  @override
+  String get twoFactorSetupTitle => 'فعّل الدخول بخطوتين الأول';
+
+  @override
+  String get twoFactorSetupLead =>
+      'حسابك ده لازم يكون عليه الدخول بخطوتين. فعّله من موقع الأكاديمية على الكمبيوتر، وبعدها ادخل من هنا عادي.';
+
+  @override
+  String get tooManyTitle => 'جرّبت كتير';
+
+  @override
+  String get tooManyBody => 'علشان نحمي حسابك، وقّفنا المحاولات شوية. استنى لحد ما العدّاد يخلص، وبعدها جرّب تاني.';
+
+  @override
+  String retryIn(String time) {
+    return 'جرّب تاني بعد $time';
+  }
+
+  @override
+  String welcomeHello(String name) {
+    return 'أهلًا يا $name';
+  }
+
+  @override
+  String welcomeIn(String academy) {
+    return 'إنت دلوقتي في $academy';
+  }
 
   @override
   String get roleStudent => 'طالب';

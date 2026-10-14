@@ -686,12 +686,6 @@ abstract class AppLocalizations {
   /// **'استخدم رقم أو إيميل تاني'**
   String get otherContact;
 
-  /// No description provided for @accountsTitle.
-  ///
-  /// In ar, this message translates to:
-  /// **'حساباتك في كل الأكاديميات'**
-  String get accountsTitle;
-
   /// No description provided for @accountsFound.
   ///
   /// In ar, this message translates to:
@@ -769,6 +763,138 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'مالقيناش حساب بالرقم أو الإيميل ده في أي أكاديمية. اتأكد منه، أو كلّم أكاديميتك.'**
   String get noAccounts;
+
+  /// No description provided for @noAccountTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مالقيناش حساب'**
+  String get noAccountTitle;
+
+  /// No description provided for @noAccountByPhone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مالقيناش حساب بالرقم ده'**
+  String get noAccountByPhone;
+
+  /// No description provided for @noAccountByEmail.
+  ///
+  /// In ar, this message translates to:
+  /// **'مالقيناش حساب بالإيميل ده'**
+  String get noAccountByEmail;
+
+  /// No description provided for @noAccountCheckPhone.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتأكد إن الرقم مكتوب صح. ويمكن الأكاديمية مسجلاك برقم أو إيميل تاني، فجرّبه أو كلّمها.'**
+  String get noAccountCheckPhone;
+
+  /// No description provided for @noAccountCheckEmail.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتأكد إن الإيميل مكتوب صح. ويمكن الأكاديمية مسجلاك برقم أو إيميل تاني، فجرّبه أو كلّمها.'**
+  String get noAccountCheckEmail;
+
+  /// No description provided for @noAccountTryEmail.
+  ///
+  /// In ar, this message translates to:
+  /// **'جرّب بالإيميل'**
+  String get noAccountTryEmail;
+
+  /// No description provided for @noAccountTryEmailBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو الأكاديمية عندها إيميلك، الكود هيوصلك عليه.'**
+  String get noAccountTryEmailBody;
+
+  /// No description provided for @noAccountOther.
+  ///
+  /// In ar, this message translates to:
+  /// **'جرّب رقم أو إيميل تاني'**
+  String get noAccountOther;
+
+  /// No description provided for @contactChange.
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّره'**
+  String get contactChange;
+
+  /// No description provided for @consentNeededTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'محتاجين موافقة ولي أمرك'**
+  String get consentNeededTitle;
+
+  /// No description provided for @consentNeededLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'قبل ما تدخل حسابك، ولي أمرك لازم يوافق مرة واحدة بس. وبعدها تدخل على طول.'**
+  String get consentNeededLead;
+
+  /// No description provided for @consentNeededStep1.
+  ///
+  /// In ar, this message translates to:
+  /// **'ولي أمرك يفتح التطبيق بحسابه.'**
+  String get consentNeededStep1;
+
+  /// No description provided for @consentNeededStep2.
+  ///
+  /// In ar, this message translates to:
+  /// **'من «{me}» ثم «{privacy}» يوافق على حسابك.'**
+  String consentNeededStep2(String me, String privacy);
+
+  /// No description provided for @consentNeededStep3.
+  ///
+  /// In ar, this message translates to:
+  /// **'ارجع هنا وادخل تاني.'**
+  String get consentNeededStep3;
+
+  /// No description provided for @signInAgain.
+  ///
+  /// In ar, this message translates to:
+  /// **'جرّب تدخل تاني'**
+  String get signInAgain;
+
+  /// No description provided for @twoFactorSetupTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'فعّل الدخول بخطوتين الأول'**
+  String get twoFactorSetupTitle;
+
+  /// No description provided for @twoFactorSetupLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'حسابك ده لازم يكون عليه الدخول بخطوتين. فعّله من موقع الأكاديمية على الكمبيوتر، وبعدها ادخل من هنا عادي.'**
+  String get twoFactorSetupLead;
+
+  /// No description provided for @tooManyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'جرّبت كتير'**
+  String get tooManyTitle;
+
+  /// No description provided for @tooManyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'علشان نحمي حسابك، وقّفنا المحاولات شوية. استنى لحد ما العدّاد يخلص، وبعدها جرّب تاني.'**
+  String get tooManyBody;
+
+  /// No description provided for @retryIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'جرّب تاني بعد {time}'**
+  String retryIn(String time);
+
+  /// No description provided for @welcomeHello.
+  ///
+  /// In ar, this message translates to:
+  /// **'أهلًا يا {name}'**
+  String welcomeHello(String name);
+
+  /// No description provided for @welcomeIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'إنت دلوقتي في {academy}'**
+  String welcomeIn(String academy);
 
   /// No description provided for @roleStudent.
   ///

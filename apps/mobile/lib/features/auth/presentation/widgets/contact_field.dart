@@ -91,6 +91,12 @@ class _ContactFieldState extends State<ContactField> {
     };
     final border = wrong ? c.danger : (_focus.hasFocus ? c.brand : c.line);
     final halo = wrong ? c.dangerSoft : (_focus.hasFocus ? c.brandSoft : Colors.transparent);
+    final chip = showCountry
+        ? Padding(
+            padding: const EdgeInsetsDirectional.only(start: Space.s),
+            child: _CountryChip(code: widget.country, onTap: _pickCountry),
+          )
+        : const SizedBox.shrink();
     final field = AnimatedContainer(
       duration: context.calm ? Duration.zero : const Duration(milliseconds: 200),
       height: 58,
@@ -139,16 +145,8 @@ class _ContactFieldState extends State<ContactField> {
               ),
             ),
           ),
-          AnimatedSize(
-            duration: context.calm ? Duration.zero : const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            child: showCountry
-                ? Padding(
-                    padding: const EdgeInsetsDirectional.only(start: Space.s),
-                    child: _CountryChip(code: widget.country, onTap: _pickCountry),
-                  )
-                : const SizedBox.shrink(),
-          ),
+          // The country code slides in beside a number (and simply appears under less motion).
+          if (context.calm) chip else AnimatedSize(duration: const Duration(milliseconds: 220), curve: Curves.easeOutCubic, child: chip),
         ],
       ),
     );

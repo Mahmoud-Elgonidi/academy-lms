@@ -32,6 +32,7 @@ class SessionState extends Equatable {
     this.me,
     this.notice,
     this.notAdded = const [],
+    this.greeting = false,
     this.policy,
     this.appVersion,
   });
@@ -56,6 +57,9 @@ class SessionState extends Equatable {
 
   /// The accounts the last sign-in could not add (with [SessionNotice.notAdded]).
   final List<NotAddedAccount> notAdded;
+
+  /// Signed in just now on this phone: the home greets them once.
+  final bool greeting;
 
   /// The platform's word on app versions (with the academy's look).
   final AppPolicy? policy;
@@ -92,6 +96,7 @@ class SessionState extends Equatable {
     Me? Function()? me,
     SessionNotice? Function()? notice,
     List<NotAddedAccount>? notAdded,
+    bool? greeting,
     AppPolicy? policy,
   }) => SessionState(
     status: status ?? this.status,
@@ -106,6 +111,7 @@ class SessionState extends Equatable {
     me: me != null ? me() : this.me,
     notice: notice != null ? notice() : this.notice,
     notAdded: notAdded ?? this.notAdded,
+    greeting: greeting ?? this.greeting,
     policy: policy ?? this.policy,
     appVersion: appVersion,
   );
@@ -125,6 +131,7 @@ class SessionState extends Equatable {
     me?.timezone,
     notice,
     notAdded,
+    greeting,
     policy?.minVersion,
   ];
 }
@@ -216,6 +223,12 @@ class SessionCubit extends Cubit<SessionState> {
   }
 
   void noticeShown() => _set(state.copyWith(notice: () => null, notAdded: const []));
+
+  /// A sign-in is opening accounts: the home they land on greets them.
+  void greet() => _set(state.copyWith(greeting: true));
+
+  /// The greeting was shown (or cut short).
+  void greeted() => _set(state.copyWith(greeting: false));
 
   /// The sign-in added some accounts but not [refused]: say which, and why.
   void notAdded(List<NotAddedAccount> refused) => _set(state.copyWith(notice: () => SessionNotice.notAdded, notAdded: refused));

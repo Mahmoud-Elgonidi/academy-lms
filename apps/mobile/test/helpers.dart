@@ -28,14 +28,16 @@ typedef Reply = (int, Object?);
 /// "*" matches one segment), records every request, and can drop the
 /// connection.
 class FakeApi implements HttpClientAdapter {
-  final _routes = <(String, RegExp, Reply Function(RequestOptions))>[];
+  final _routes = <(String, RegExp, Reply Function(RequestOptions), Map<String, String>)>[];
   final requests = <RequestOptions>[];
 
-  void on(String method, String path, Object? json, {int status = 200}) => onWith(method, path, (_) => (status, json));
+  /// Answers [method] [path] with [json]; [headers] go with it (Retry-After…).
+  void on(String method, String path, Object? json, {int status = 200, Map<String, String> headers = const {}}) =>
+      onWith(method, path, (_) => (status, json), headers: headers);
 
-  void onWith(String method, String path, Reply Function(RequestOptions r) reply) {
+  void onWith(String method, String path, Reply Function(RequestOptions r) reply, {Map<String, String> headers = const {}}) {
     final pattern = RegExp('^${path.split('/').map((s) => s == '*' ? '[^/]+' : RegExp.escape(s)).join('/')}\$');
-    _routes.insert(0, (method, pattern, reply));
+    _routes.insert(0, (method, pattern, reply, headers));
   }
 
   List<RequestOptions> sent(String method, String path) => requests.where((r) => r.method == method && r.path == path).toList();
@@ -43,7 +45,7 @@ class FakeApi implements HttpClientAdapter {
   @override
   Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
     requests.add(options);
-    for (final (method, pattern, reply) in _routes) {
+    for (final (method, pattern, reply, extra) in _routes) {
       if (method == options.method && pattern.hasMatch(options.path)) {
         final (status, json) = reply(options);
         return ResponseBody.fromString(
@@ -51,6 +53,7 @@ class FakeApi implements HttpClientAdapter {
           status,
           headers: {
             Headers.contentTypeHeader: ['application/json'],
+            for (final MapEntry(:key, :value) in extra.entries) key: [value],
           },
         );
       }

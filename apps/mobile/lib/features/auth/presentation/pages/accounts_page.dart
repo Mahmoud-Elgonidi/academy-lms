@@ -10,6 +10,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/open_link.dart';
 import '../../domain/sign_in_models.dart';
 import '../bloc/sign_in_cubit.dart';
+import '../widgets/refusals.dart';
 import '../widgets/sign_in_frame.dart';
 
 /// Step three: the accounts the code found, in every academy. One account:
@@ -41,15 +42,17 @@ class AccountsPage extends StatelessWidget {
     return BlocBuilder<SignInCubit, SignInState>(
       builder: (context, state) {
         final found = state.discovery?.accounts ?? const <FoundAccount>[];
+        final refusal = refusalStep(
+          context,
+          state.problem,
+          busy: state.busy,
+          onRetry: () => _add(context),
+          onRestart: () => _another(context),
+        );
+        if (refusal != null) return refusal;
         final error = state.problem == null ? null : context.problemText(state.problem!);
         final lead = TextStyle(fontSize: 16, height: 1.65, color: c.muted);
-        if (found.isEmpty) {
-          return SignInFrame(
-            title: l.accountsTitle,
-            lead: Text(l.noAccounts, style: lead),
-            children: const [],
-          );
-        }
+        if (found.isEmpty) return _NoAccount(contact: state.contact, base: base);
         final problem = error == null ? null : Note(error, tone: Tone.danger, icon: Icons.error_outline_rounded);
         if (found.length == 1 && found.single.hasAppArea) {
           final account = found.single;
@@ -121,6 +124,111 @@ class AccountsPage extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Nobody with this number or email in any academy: what to check, the
+/// email as another way (for a number), another try, or a password.
+class _NoAccount extends StatelessWidget {
+  const _NoAccount({required this.contact, required this.base});
+
+  final String contact;
+  final String base;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    final byEmail = contact.contains('@');
+    void again() {
+      context.read<SignInCubit>().restart();
+      context.go(base);
+    }
+
+    return SignInFrame(
+      title: contact.isEmpty ? l.noAccountTitle : (byEmail ? l.noAccountByEmail : l.noAccountByPhone),
+      badge: Icons.person_search_rounded,
+      pinBottom: true,
+      lead: Text(
+        contact.isEmpty ? l.noAccounts : (byEmail ? l.noAccountCheckEmail : l.noAccountCheckPhone),
+        style: TextStyle(fontSize: 16, height: 1.65, color: c.muted),
+      ),
+      bottom: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: 56, child: PrimaryAction(l.noAccountOther, onPressed: again)),
+          TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48), foregroundColor: c.brandDeep),
+            onPressed: () {
+              context.read<SignInCubit>().restart();
+              context.go('$base/password');
+            },
+            child: Text(l.havePassword, style: const TextStyle(fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+      children: [
+        if (contact.isNotEmpty)
+          Container(
+            padding: const EdgeInsetsDirectional.only(start: 14, end: 4),
+            decoration: BoxDecoration(
+              color: c.card,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: c.line),
+            ),
+            child: Row(
+              children: [
+                Icon(byEmail ? Icons.mail_outline_rounded : Icons.phone_iphone_rounded, size: 20, color: c.muted),
+                const Gap(10),
+                Expanded(
+                  child: Text(
+                    contact,
+                    textDirection: TextDirection.ltr,
+                    textAlign: TextAlign.start,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: c.ink),
+                  ),
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(minimumSize: const Size(48, 48), foregroundColor: c.brandDeep),
+                  onPressed: again,
+                  child: Text(l.contactChange, style: const TextStyle(fontWeight: FontWeight.w700)),
+                ),
+              ],
+            ),
+          ),
+        if (contact.isNotEmpty && !byEmail) ...[
+          const Gap(Space.m),
+          LmsCard(
+            onTap: again,
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(color: c.brandSoft, borderRadius: BorderRadius.circular(12)),
+                  child: Icon(Icons.alternate_email_rounded, color: c.brandDeep),
+                ),
+                const Gap(Space.m),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.noAccountTryEmail,
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c.ink),
+                      ),
+                      const Gap(2),
+                      Text(l.noAccountTryEmailBody, style: TextStyle(fontSize: 13.5, height: 1.5, color: c.muted)),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: c.muted),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

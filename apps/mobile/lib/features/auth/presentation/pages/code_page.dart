@@ -15,6 +15,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../domain/sign_in_models.dart';
 import '../bloc/sign_in_cubit.dart';
 import '../widgets/code_boxes.dart';
+import '../widgets/retry_wait.dart';
 import '../widgets/sign_in_frame.dart';
 
 /// Step two: the six digits, in six boxes that fill as they are typed or
@@ -69,12 +70,14 @@ class _CodePageState extends State<CodePage> with SingleTickerProviderStateMixin
       if (!context.calm) await _right.forward(from: 0);
       if (mounted) await _accounts();
     } else if (mounted && cubit.state.problem != null) {
+      _code.clear();
+      // Too many tries: the wait says so; the code itself was not judged.
+      if (cubit.state.problem!.status == 429) return;
       Juice.wrong();
       setState(() {
         _look = CodeLook.wrong;
         _shakes++;
       });
-      _code.clear();
     }
   }
 
@@ -119,8 +122,9 @@ class _CodePageState extends State<CodePage> with SingleTickerProviderStateMixin
         final sent = state.sent;
         if (sent == null) {
           // Opened again with nothing sent (the phone closed the app meanwhile): back to the start.
+          // (Only when it is the step on screen: a step after it that started again goes where it chose.)
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) context.go(widget.base);
+            if (mounted && (ModalRoute.of(context)?.isCurrent ?? true)) context.go(widget.base);
           });
           return const Scaffold();
         }
@@ -131,7 +135,13 @@ class _CodePageState extends State<CodePage> with SingleTickerProviderStateMixin
           _ => l.codeSentWhatsapp(to),
         };
         final right = _look == CodeLook.right;
+        final waiting = state.problem?.status == 429;
         final status = switch (state) {
+          _ when waiting => RetryWait(
+            key: ValueKey(state.problem),
+            seconds: state.problem!.retryAfter ?? 60,
+            onDone: context.read<SignInCubit>().clearProblem,
+          ),
           _ when right => _Status.right(_right),
           SignInState(busy: true) => _Status.checking(l.codeChecking),
           SignInState(problem: final p?) => _Status.text(context.problemText(p), colour: c.danger, icon: Icons.error_outline_rounded),
@@ -161,7 +171,7 @@ class _CodePageState extends State<CodePage> with SingleTickerProviderStateMixin
           ),
           children: [
             Center(
-              child: CodeBoxes(controller: _code, onComplete: _verify, look: _look, shakes: _shakes, enabled: !right),
+              child: CodeBoxes(controller: _code, onComplete: _verify, look: _look, shakes: _shakes, enabled: !right && !waiting),
             ),
             ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 56),
@@ -172,7 +182,7 @@ class _CodePageState extends State<CodePage> with SingleTickerProviderStateMixin
                 ),
               ),
             ),
-            if (!right && !state.busy)
+            if (!right && !state.busy && !waiting)
               Center(
                 child: PressScale(
                   child: OutlinedButton.icon(
@@ -283,6 +293,8 @@ class _ResendState extends State<_Resend> with SingleTickerProviderStateMixin {
   late final Duration _wait = Duration(seconds: widget.sent.resendAfter);
   late final AnimationController _c = AnimationController(
     vsync: this,
+    // A real wait: it keeps its length when the phone asks for less motion.
+    animationBehavior: AnimationBehavior.preserve,
     duration: _wait.inMilliseconds > 0 ? _wait : const Duration(milliseconds: 1),
   );
 

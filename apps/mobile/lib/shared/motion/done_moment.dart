@@ -74,7 +74,12 @@ class _Card extends StatefulWidget {
 }
 
 class _CardState extends State<_Card> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: DoneMoment.lengthFor(widget.flavour));
+  // Its length is how long the card stays, also when the phone asks for less motion.
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: DoneMoment.lengthFor(widget.flavour),
+    animationBehavior: AnimationBehavior.preserve,
+  );
 
   @override
   void initState() {

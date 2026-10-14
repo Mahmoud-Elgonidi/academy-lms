@@ -340,9 +340,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otherContact => 'Use another number or email';
 
   @override
-  String get accountsTitle => 'Your accounts in every academy';
-
-  @override
   String accountsFound(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
@@ -406,6 +403,83 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noAccounts => 'No academy has an account with this contact. Check it, or ask your academy.';
+
+  @override
+  String get noAccountTitle => 'No account found';
+
+  @override
+  String get noAccountByPhone => 'No account with this number';
+
+  @override
+  String get noAccountByEmail => 'No account with this email';
+
+  @override
+  String get noAccountCheckPhone =>
+      'Check the number is right. The academy may have you under another number or email: try it, or ask them.';
+
+  @override
+  String get noAccountCheckEmail =>
+      'Check the email is right. The academy may have you under another number or email: try it, or ask them.';
+
+  @override
+  String get noAccountTryEmail => 'Try your email';
+
+  @override
+  String get noAccountTryEmailBody => 'If the academy has your email, the code will come to it.';
+
+  @override
+  String get noAccountOther => 'Try another number or email';
+
+  @override
+  String get contactChange => 'Change';
+
+  @override
+  String get consentNeededTitle => 'We need your guardian\'s consent';
+
+  @override
+  String get consentNeededLead => 'Before you can sign in, your guardian needs to agree, just once. Then you are straight in.';
+
+  @override
+  String get consentNeededStep1 => 'Your guardian opens the app with their own account.';
+
+  @override
+  String consentNeededStep2(String me, String privacy) {
+    return 'In \"$me\", then \"$privacy\", they agree to your account.';
+  }
+
+  @override
+  String get consentNeededStep3 => 'Come back here and sign in again.';
+
+  @override
+  String get signInAgain => 'Try signing in again';
+
+  @override
+  String get twoFactorSetupTitle => 'Turn on two-step sign-in first';
+
+  @override
+  String get twoFactorSetupLead =>
+      'This account needs two-step sign-in. Turn it on from the academy\'s website on a computer, then sign in here as usual.';
+
+  @override
+  String get tooManyTitle => 'Too many tries';
+
+  @override
+  String get tooManyBody => 'To keep your account safe we paused tries for a little while. Wait for the countdown, then try again.';
+
+  @override
+  String retryIn(String time) {
+    return 'Try again in $time';
+  }
+
+  @override
+  String welcomeHello(String name) {
+    return 'Hi, $name';
+  }
+
+  @override
+  String welcomeIn(String academy) {
+    return 'You\'re in $academy';
+  }
 
   @override
   String get roleStudent => 'Student';

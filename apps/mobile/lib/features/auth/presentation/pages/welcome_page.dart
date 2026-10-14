@@ -13,6 +13,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../domain/contact.dart';
 import '../bloc/sign_in_cubit.dart';
 import '../widgets/contact_field.dart';
+import '../widgets/retry_wait.dart';
 import '../widgets/sign_in_frame.dart';
 
 /// Step one: one field for a mobile number or an email (told apart as it
@@ -71,7 +72,7 @@ class _WelcomePageState extends State<WelcomePage> {
     final cubit = context.read<SignInCubit>();
     if (await cubit.sendCode(contact) && mounted) {
       await context.push('${widget.base}/code');
-    } else if (mounted && cubit.state.problem != null) {
+    } else if (mounted && cubit.state.problem != null && cubit.state.problem!.status != 429) {
       Juice.wrong();
       setState(() => _shakes++);
     }
@@ -176,7 +177,9 @@ class _WelcomePageState extends State<WelcomePage> {
     final first = widget.base == '/welcome';
     return BlocBuilder<SignInCubit, SignInState>(
       builder: (context, state) {
-        final error = _missing ?? (state.problem == null ? null : context.problemText(state.problem!));
+        final p = state.problem;
+        final waiting = p?.status == 429;
+        final error = _missing ?? (p == null || waiting ? null : context.problemText(p));
         return SignInFrame(
           title: l.welcomeTitle,
           mark: first,
@@ -185,9 +188,13 @@ class _WelcomePageState extends State<WelcomePage> {
           bottom: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (waiting) ...[
+                RetryWait(key: ValueKey(p), seconds: p!.retryAfter ?? 60, onDone: context.read<SignInCubit>().clearProblem),
+                const Gap(Space.m),
+              ],
               SizedBox(
                 height: 56,
-                child: BusyButton(label: l.sendCode, busy: state.busy, onPressed: _send),
+                child: BusyButton(label: l.sendCode, busy: state.busy, onPressed: waiting ? null : _send),
               ),
               const Gap(Space.xs),
               TextButton(

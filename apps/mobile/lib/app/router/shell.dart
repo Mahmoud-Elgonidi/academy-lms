@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/auth/session_cubit.dart';
+import '../../features/onboarding/presentation/welcome_moment.dart';
 import '../../shared/motion/juice.dart';
 import '../../shared/motion/motion.dart';
 import '../../shared/motion/tab_pop.dart';
@@ -16,7 +19,8 @@ class ShellTab {
 }
 
 /// The frame of a signed-in look: its tabs at the bottom, each keeping its
-/// own stack. The tab picked pops its icon, with a tap sound.
+/// own stack. The tab picked pops its icon, with a tap sound. Just after
+/// signing in, the academy's greeting plays over it once.
 class AppShell extends StatelessWidget {
   const AppShell({required this.shell, required this.tabs, super.key});
 
@@ -24,7 +28,22 @@ class AppShell extends StatelessWidget {
   final List<ShellTab> tabs;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    final session = context.watch<SessionCubit>();
+    final account = session.state.current;
+    final frame = _frame(context);
+    if (!session.state.greeting || account == null) return frame;
+    return Stack(
+      children: [
+        frame,
+        Positioned.fill(
+          child: WelcomeMoment(account: account, onDone: session.greeted),
+        ),
+      ],
+    );
+  }
+
+  Widget _frame(BuildContext context) => Scaffold(
     body: shell,
     bottomNavigationBar: NavigationBar(
       selectedIndex: shell.currentIndex,

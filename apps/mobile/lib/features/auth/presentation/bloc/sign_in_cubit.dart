@@ -195,6 +195,7 @@ class SignInCubit extends Cubit<SignInState> {
 
   /// Keeps the signed accounts on this phone together, so the first one opens.
   Future<void> _keep(List<Account> accounts, [List<NotAddedAccount> refused = const []]) async {
+    _session.greet();
     for (final account in accounts.reversed) {
       await _session.add(account);
     }

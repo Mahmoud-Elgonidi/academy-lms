@@ -301,8 +301,8 @@ void main() {
         ]),
       )
       ..on('POST', 'accounts/sign-in', {
-        'type': 'guardian-consent-required',
-        'title': 'محتاجين موافقة ولي أمرك الأول.',
+        'type': 'account-inactive',
+        'title': 'الحساب ده موقوف. كلّم الأكاديمية.',
         'status': 403,
       }, status: 403);
     await _toCode(tester, 'rami@demo.test');
@@ -312,12 +312,12 @@ void main() {
     await frames(tester, 6);
 
     expect(app.session.state.status, SessionStatus.signedOut);
-    expect(find.text('محتاجين موافقة ولي أمرك الأول.'), findsOneWidget);
+    expect(find.text('الحساب ده موقوف. كلّم الأكاديمية.'), findsOneWidget);
     // "Not you?" goes back to the start, the problem left behind.
     await tester.tap(find.text('مش حسابك؟ استخدم رقم أو إيميل تاني'));
     await frames(tester, 6);
     expect(find.text('أهلًا بيك'), findsOneWidget);
-    expect(find.text('محتاجين موافقة ولي أمرك الأول.'), findsNothing);
+    expect(find.text('الحساب ده موقوف. كلّم الأكاديمية.'), findsNothing);
     await _close(tester);
   });
 }

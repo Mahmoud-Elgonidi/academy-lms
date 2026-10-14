@@ -6,6 +6,8 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/motion/juice.dart';
 import '../bloc/sign_in_cubit.dart';
+import '../widgets/refusals.dart';
+import '../widgets/retry_wait.dart';
 import '../widgets/sign_in_frame.dart';
 
 /// The other way in: an academy's code, then email, mobile or username with
@@ -57,7 +59,20 @@ class _PasswordPageState extends State<PasswordPage> {
     return BlocBuilder<SignInCubit, SignInState>(
       builder: (context, state) {
         final p = state.problem;
-        final general = p != null && p.field('login') == null && p.field('password') == null ? context.problemText(p) : null;
+        final cubit = context.read<SignInCubit>();
+        final refusal = refusalStep(
+          context,
+          p,
+          busy: state.busy,
+          onRetry: _submit,
+          onRestart: () {
+            cubit.restart();
+            context.go(widget.base);
+          },
+        );
+        if (refusal != null) return refusal;
+        final waiting = p?.status == 429;
+        final general = p != null && !waiting && p.field('login') == null && p.field('password') == null ? context.problemText(p) : null;
         String? wants(String field, String words) => _missing.contains(field) ? words : null;
         return SignInFrame(
           title: l.passwordTitle,
@@ -66,9 +81,13 @@ class _PasswordPageState extends State<PasswordPage> {
           bottom: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (waiting) ...[
+                RetryWait(key: ValueKey(p), seconds: p!.retryAfter ?? 60, onDone: cubit.clearProblem),
+                const SizedBox(height: 12),
+              ],
               SizedBox(
                 height: 56,
-                child: BusyButton(label: l.signIn, busy: state.busy, onPressed: _submit),
+                child: BusyButton(label: l.signIn, busy: state.busy, onPressed: waiting ? null : _submit),
               ),
               TextButton(
                 style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48)),
