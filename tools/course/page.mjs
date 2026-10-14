@@ -2,7 +2,8 @@
 // Builds the course page (out/site/index.html) from the series files and what
 // has been filmed (out/<series>/index.json, the .srt files), with the videos and
 // posters next to it under videos/. `node page.mjs` prints the files to publish.
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadSeries } from './syllabus.mjs';
@@ -20,6 +21,22 @@ const cuesOf = (srt) => srt.trim().split(/\n\s*\n/).map((block) => {
   return { t: Math.round(seconds(time.split(' --> ')[0]) * 10) / 10, text: text.join(' ') };
 });
 
+/**
+ * A published file holds at most 15 MB, and a voiced lesson of a few minutes
+ * comes out a little over: those are encoded again for the page (the same
+ * picture and sound, a lighter H.264), kept until the lesson is filmed again.
+ */
+const LIMIT = 14 * 1024 * 1024;
+function putVideo(from, to) {
+  if (existsSync(to) && statSync(to).mtimeMs >= statSync(from).mtimeMs) return;
+  if (statSync(from).size <= LIMIT) return copyFileSync(from, to);
+  for (const crf of [26, 29, 32]) {
+    execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', from, '-c:v', 'libx264', '-preset', 'slow', '-crf', String(crf), '-pix_fmt', 'yuv420p', '-c:a', 'copy', '-movflags', '+faststart', to]);
+    if (statSync(to).size <= LIMIT) return;
+  }
+  throw new Error(`${from} is still over ${LIMIT} bytes for the page.`);
+}
+
 const files = {};
 const data = (await loadSeries()).map((s) => {
   const indexFile = join(here, 'out', s.key, 'index.json');
@@ -33,7 +50,7 @@ const data = (await loadSeries()).map((s) => {
       const base = m.file.replace(/\.mp4$/, '');
       const video = `videos/${s.key}-${base}.mp4`;
       const poster = `videos/${s.key}-${base}.jpg`;
-      copyFileSync(join(here, 'out', s.key, m.file), join(site, video));
+      putVideo(join(here, 'out', s.key, m.file), join(site, video));
       copyFileSync(join(here, 'out', s.key, `${base}.jpg`), join(site, poster));
       files[video] = `tools/course/out/site/${video}`;
       files[poster] = `tools/course/out/site/${poster}`;
