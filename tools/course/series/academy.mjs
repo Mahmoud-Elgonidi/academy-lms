@@ -204,6 +204,83 @@ export default {
       n: 9, slug: 'plans-prices-coupons', title: 'الباقات والأسعار والكوبونات',
       goal: 'تسعّر خدمتك بمرونة لكل منطقة وتعمل عروض.',
       learn: ['باقة بعدد حصص وأسعار لكل منطقة وعملة', 'الباقة المشتركة بين أكتر من مادة', 'الكوبونات وخصم الإخوات'],
+      start: '/admin',
+      async steps(s) {
+        const head = (name) => s.page.locator('.fi-header-actions-ctn').locator('button, a').filter({ hasText: name }).first();
+        // A field in the open dialog by its name (toggle buttons' inputs are named name-option).
+        const inModal = (name) => s.modal().locator(`.fi-fo-field:has([id$=".${name}"], [id*=".${name}-"])`).first();
+        const pick = async (name, option, exact = true) => {
+          await s.click(inModal(name).locator('.fi-select-input-btn'), { settle: 400 });
+          await s.click(inModal(name).getByRole('option', { name: option, exact }).first(), { settle: 500 });
+        };
+        // A dialog by its title: waiting for it is what lets it open on film before it is shown.
+        const dialog = (title) => s.page.locator('.fi-modal-window:visible', { has: s.page.locator('.fi-modal-heading', { hasText: title }) }).last();
+        // Closed once the narrator has said what it shows.
+        const close = async () => { await s.hush(); await s.key('Escape'); await s.wait(700); };
+
+        await s.say("من القائمة افتح «الباقات والأسعار»: كل باقة عدد حصص بمدة ثابتة، وسعرها في كل منطقة.", { voice: "من القايمة، هنفتح «الباقات والأسعار». كل باقة هنا عبارة عن عدد حصص بمدّة ثابتة، زي أربع حصص في الشهر، كل حصة نص ساعة، ولها سعر في كل منطقة." });
+        await s.click(s.nav('الباقات والأسعار'), { settle: 1400 });
+
+        await s.say("في كل صف: الأسعار لكل منطقة، والصلاحية، وإمتى فاتورة التجديد بتطلع.", { voice: "في كل صف بنشوف أسعار الباقة في كل منطقة بعُملتها، وصلاحيتها كام يوم، وإمتى فاتورة التجديد بتطلع لوحدها، يعني لما يفضل للطالب حصّتين مثلًا." });
+        await s.show(s.page.locator('.fi-ta-row').first(), { hold: 2000 });
+
+        await s.say("«المناطق السعرية»: كل منطقة ليها عملتها، والأسرة بتدفع بعملة منطقتها.", { voice: "من «المناطق السعرية» بنحدّد المناطق اللي بنبيع فيها، وكل منطقة ليها عُملتها: السعودية والخليج بالريال، والإمارات بالدرهم، وبريطانيا بالجنيه الإسترليني. وكل أسرة بتدفع بعُملة منطقتها." });
+        await s.click(head('المناطق السعرية'), { settle: 1000 });
+        await s.show(dialog('المناطق السعرية'), { hold: 2000 });
+        await close();
+
+        await s.say("دوس «باقة جديدة»، واكتب اسمها بالعربي والإنجليزي.", { voice: "نعمل باقة جديدة. ندوس «باقة جديدة»، ونكتب اسمها بالعربي وبالإنجليزي، عشان الأسرة تشوفها بلغتها." });
+        await s.click(head('باقة جديدة'), { settle: 1000 });
+        await s.type(inModal('name_ar').locator('input'), 'باقة الساعة ونص');
+        await s.type(inModal('name_en').locator('input'), 'Long lessons plan');
+
+        await s.say("«لكل كورس» رصيد لمادة واحدة. «باقة مشتركة» رصيد واحد الطالب يوزّعه على كذا مادة.", { voice: "بعدها نختار نوع الرصيد. «لكل كورس» يعني الرصيد لمادّة واحدة بس. و«باقة مشتركة» يعني رصيد واحد، الطالب يصرف منه على أكتَر من مادّة، زي القرآن والعربي مع بعض. ونوع الباقة ده مابيتغيّرش بعد ما حد يشترك فيها." });
+        await s.point(inModal('credit_scope'), { hold: 1800 });
+
+        await s.say("اختار مدة الحصة، وعدد الحصص في الأسبوع وفي البلوك.", { voice: "نختار مدّة الحصة، هنا ساعة ونص. وعدد الحصص في الأسبوع، حصّة واحدة. وعدد الحصص في البلوك، يعني في كل فاتورة، أربع حصص." });
+        await s.click(inModal('session_minutes').locator('label', { hasText: '90' }), { settle: 400 });
+        await pick('sessions_per_week', '1');
+        await pick('sessions_per_block', '4');
+
+        await s.say("والصلاحية بتتحسب لوحدها، و«فاتورة التجديد» بتطلع لما يفضل عدد الحصص ده.", { voice: "والصلاحية بتتحسب لوحدها من عدد الحصص، وفيها أسبوعين سماح. و«فاتورة التجديد» معناها إن الفاتورة اللي بعدها بتطلع لوحدها لمّا يفضل للطالب العدد ده من الحصص، عشان يدفع قبل ما رصيده يخلص." });
+        await s.point(inModal('validity_days'), { hold: 1000 });
+        await s.point(inModal('renew_at_sessions'), { hold: 1200 });
+
+        await s.say("ضيف سعر لكل منطقة: اختار المنطقة واكتب السعر بعملتها.", { voice: "ونضيف سعر لكل منطقة: ندوس «ضيف سعر لمنطقة»، ونختار المنطقة، ونكتب السعر بعُملتها. هنا السعودية والخليج، بأربعميّة وخمسين ريال." });
+        await s.click(s.modal().getByRole('button', { name: 'ضيف سعر لمنطقة' }), { settle: 900 });
+        await pick('price_region_id', 'السعودية والخليج', false);
+        await s.type(inModal('amount').locator('input'), '450');
+
+        await s.say("دوس «إضافة»: الباقة بقت متاحة في التسجيل.", { voice: "وندوس «إضافة». الباقة اتحفظت، وبقت متاحة في شبّاك التسجيل، اللي شُفناه في درس «ابحث عن مدرس»." });
+        await s.click(s.modal().locator('.fi-modal-footer').getByRole('button', { name: 'إضافة', exact: true }), { settle: 1400 });
+
+        await s.say("«العيلة»: خصم الابن التاني والتالت، وفاتورة واحدة للأسرة.", { voice: "وزرار «العيلة»: هنا خصم الإخوات. الابن الأول بيدفع كامل، والابن التّاني بياخُد الخصم ده، والتّالِت واللي بعده بياخدوا ده. وتحت، لو تجديد ابن طلع، تجديدات إخواته اللي جاية خلال الأيام دي بتنزل معاه في نفس الفاتورة، فالأسرة تدفع مرّة واحدة." });
+        await s.click(head('العيلة'), { settle: 1000 });
+        await s.show(dialog('الفاتورة الواحدة'), { hold: 2600 });
+        await close();
+
+        await s.say("ومن القائمة افتح «الكوبونات»: أكواد خصم بنسبة أو بمبلغ.", { voice: "ونروح للكوبونات من القايمة. الكوبون كود بتوزّعه، بيخصم نسبة أو مبلغ من فواتير الكورس. وفي الجدول بنشوف كل كوبون: بيخصم كام، على كام فاتورة، صالح لحد إمتى، واستخدموه كام مرّة." });
+        await s.click(s.nav('الكوبونات'), { settle: 1400 });
+        await s.show(s.page.locator('.fi-ta-table'), { hold: 1800 });
+
+        await s.say("دوس «كوبون جديد»: اكتب الكود، والنسبة، وعلى كام فاتورة.", { voice: "نعمل كوبون جديد لعرض العيد: ندوس «كوبون جديد»، ونكتب الكود، واسم لينا إحنا، ونسبة الخصم خمسة وعشرين في الميّة، على أول فاتورة بس." });
+        await s.click(head('كوبون جديد'), { settle: 1000 });
+        await s.type(inModal('code').locator('input'), 'EID25');
+        await s.type(inModal('name').locator('input'), 'عرض العيد');
+        await s.type(inModal('percent').locator('input'), '25');
+        await s.type(inModal('blocks').locator('input'), '1');
+
+        await s.say("وحدد أقصى عدد مرات، والتواريخ، والباقات اللي يشتغل عليها.", { voice: "ونقدر نحدّد أقصى عدد مرات الناس يستخدموه فيها، هنا خمسين مرّة. والتواريخ اللي شغّال فيها، والباقات اللي ينفع عليها. وكل أسرة بتستخدم الكوبون مرّة واحدة بس." });
+        await s.type(inModal('max_uses').locator('input'), '50');
+        await s.point(inModal('plan_ids'), { hold: 1000 });
+
+        await s.say("«فوق خصم الإخوات»: لو مقفول، الأسرة بتاخد الخصم الأكبر بس.", { voice: "و«فوق خصم الإخوات»: لو شغّلناه، الكوبون بيتجمع مع خصم الإخوات. ولو سبناه مقفول، الأسرة بتاخد الخصم الأكبر فيهم بس." });
+        await s.point(inModal('with_sibling'), { hold: 1600 });
+
+        await s.say("دوس «إضافة». الكود بيتكتب في شباك التسجيل، والخصم بيظهر في الإجمالي على طول.", { voice: "وندوس «إضافة». الكوبون جاهز: لمّا الأسرة تقولّنا الكود، بنكتبه في خانة الكوبون في شبّاك التسجيل، والخصم بيظهر في الإجمالي قدّامنا على طول." });
+        await s.click(s.modal().locator('.fi-modal-footer').getByRole('button', { name: 'إضافة', exact: true }), { settle: 1400 });
+        await s.show(s.page.locator('.fi-ta-row', { hasText: 'EID25' }), { hold: 1800 });
+      },
     },
     {
       n: 10, slug: 'invoices-and-payments', title: 'الفواتير والمدفوعات',

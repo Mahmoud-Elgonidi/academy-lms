@@ -142,7 +142,7 @@ export async function narrate(series, lesson, next, cfg = voiceSettings()) {
   if (!cfg || !lesson.steps) return null;
   const steps = await linesOf(lesson);
   const intro = lesson.intro ?? `أهلًا بيك في ${series.title}، ${spokenLesson(lesson.n)}: ${lesson.title}. ${lesson.goal ?? ''}`.trim();
-  const outro = lesson.outro ?? `وبِكِدَه خَلَّصنا درس «${lesson.title}». ${next ? `في الدرس الجاي: ${next.title}.` : `وده كان آخر درس في ${series.title}.`}`;
+  const outro = lesson.outro ?? `وكده خلّصنا درس «${lesson.title}». ${next ? `في الدرس الجاي: ${next.title}.` : `وده كان آخر درس في ${series.title}.`}`;
   const all = [intro, ...steps.map((l) => l.spoken), outro];
   const clips = all.map((text, i) => speak(text, { previous: all[i - 1], next: all[i + 1] }, cfg));
   return { intro: clips[0], lines: clips.slice(1, -1).map((c, i) => ({ ...c, caption: steps[i].caption })), outro: clips[clips.length - 1] };
