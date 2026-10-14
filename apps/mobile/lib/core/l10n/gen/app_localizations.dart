@@ -5780,6 +5780,42 @@ abstract class AppLocalizations {
   /// **'راجع'**
   String get journeyReview;
 
+  /// No description provided for @reviewsWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{مراجعة مستنياك} =2{مراجعتين مستنينك} few{{n} مراجعات مستنياك} other{{n} مراجعة مستنياك}}'**
+  String reviewsWaiting(int n);
+
+  /// No description provided for @reviewsHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل مراجعة لعبة قصيرة'**
+  String get reviewsHint;
+
+  /// No description provided for @hereAndNext.
+  ///
+  /// In ar, this message translates to:
+  /// **'انت هنا: {here} · بعدها: {next}'**
+  String hereAndNext(String here, String next);
+
+  /// No description provided for @hereOnly.
+  ///
+  /// In ar, this message translates to:
+  /// **'انت هنا: {here}'**
+  String hereOnly(String here);
+
+  /// No description provided for @levelNamed.
+  ///
+  /// In ar, this message translates to:
+  /// **'المستوى {n}: {title}'**
+  String levelNamed(int n, String title);
+
+  /// No description provided for @allLevels.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل المستويات'**
+  String get allLevels;
+
   /// No description provided for @journeyLate.
   ///
   /// In ar, this message translates to:

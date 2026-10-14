@@ -329,9 +329,9 @@ void main() {
     await _close(tester);
   });
 
-  testWidgets('middle school sees its stars toward the next rank and its levels, and races itself on a lesson', (tester) async {
+  testWidgets('middle school sees its stars toward the next rank, today, the level it is in, and races itself on a lesson', (tester) async {
     final app = await TestApp.create(accounts: [fxStudent('middle')]);
-    fxStudentRoutes(app.api, 'middle', fxJourney(stage: 'middle', stars: 74, lessonOpen: true));
+    fxStudentRoutes(app.api, 'middle', fxJourney(stage: 'middle', stars: 74, lessonOpen: true, twoReviews: true));
     app.api
       ..on('POST', 'games/plays', _started(), status: 201)
       ..on('POST', 'games/plays/*/finish', _finished(seconds: 39));
@@ -341,15 +341,33 @@ void main() {
     for (final tab in ['رحلتي', 'حصصي', 'الرسايل', 'المزيد']) {
       expect(find.descendant(of: nav, matching: find.text(tab)), findsOneWidget);
     }
+    expect(find.text('بطل'), findsOneWidget);
     expect(find.text('رحلة يوسف'), findsOneWidget);
     expect(find.text('نجومك'), findsOneWidget);
     expect(find.text('باقيلك 226 نجمة لـ أسطورة'), findsOneWidget);
     expect(find.text('7 حصص ورا بعض'), findsOneWidget);
-    expect(find.text('مهماتك'), findsOneWidget);
+    expect(find.text('النهارده'), findsOneWidget);
     // The room is open: join from the mission.
     expect(find.widgetWithText(FilledButton, 'ادخل الحصة'), findsOneWidget);
-    expect(find.text('المستويات'), findsOneWidget);
+
+    // The reviews are one row that opens them all.
+    expect(find.text('مراجعة · الفاتحة'), findsNothing);
+    await tester.tap(find.text('مراجعتين مستنينك'));
+    await frames(tester, 10);
+    expect(find.text('مراجعة · الفاتحة'), findsOneWidget);
+    expect(find.text('مراجعة · الناس والفلق'), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10));
+    await frames(tester, 10);
+    expect(find.text('مراجعة · الفاتحة'), findsNothing);
+
+    // The level they are in, as a path; every level a tap away.
+    expect(find.text('المستوى 2: سور أطول'), findsOneWidget);
+    expect(find.text('انت هنا: قريش والفيل · بعدها: الهمزة والعصر'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('all-levels')));
+    await frames(tester, 12);
     expect(find.text('بتتفتح لما تخلّص سور أطول'), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await frames(tester, 12);
 
     await tester.tap(find.bySemanticsLabel(RegExp('^قريش والفيل. انت هنا')));
     await frames(tester, 10);

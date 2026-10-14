@@ -3361,6 +3361,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journeyReview => 'Review';
 
   @override
+  String reviewsWaiting(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n reviews waiting', one: '1 review waiting');
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewsHint => 'Each is a short game';
+
+  @override
+  String hereAndNext(String here, String next) {
+    return 'You\'re at: $here · next: $next';
+  }
+
+  @override
+  String hereOnly(String here) {
+    return 'You\'re at: $here';
+  }
+
+  @override
+  String levelNamed(int n, String title) {
+    return 'Level $n: $title';
+  }
+
+  @override
+  String get allLevels => 'All levels';
+
+  @override
   String get journeyLate => 'Late';
 
   @override

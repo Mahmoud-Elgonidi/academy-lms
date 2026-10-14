@@ -2530,6 +2530,46 @@
   },
   "journeyNoMissions": "مفيش مهمات دلوقتي. استمتع بيومك!",
   "journeyReview": "راجع",
+  "reviewsWaiting": "{n, plural, =1{مراجعة مستنياك} =2{مراجعتين مستنينك} few{{n} مراجعات مستنياك} other{{n} مراجعة مستنياك}}",
+  "@reviewsWaiting": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewsHint": "كل مراجعة لعبة قصيرة",
+  "hereAndNext": "انت هنا: {here} · بعدها: {next}",
+  "@hereAndNext": {
+    "placeholders": {
+      "here": {
+        "type": "String"
+      },
+      "next": {
+        "type": "String"
+      }
+    }
+  },
+  "hereOnly": "انت هنا: {here}",
+  "@hereOnly": {
+    "placeholders": {
+      "here": {
+        "type": "String"
+      }
+    }
+  },
+  "levelNamed": "المستوى {n}: {title}",
+  "@levelNamed": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "allLevels": "كل المستويات",
   "journeyLate": "متأخر",
   "journeyChestTitle": "صندوق الأسبوع",
   "journeyChestProgress": "{done} من {total} مهمات الأسبوع",

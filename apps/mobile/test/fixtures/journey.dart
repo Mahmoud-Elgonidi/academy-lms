@@ -82,7 +82,7 @@ Map<String, Object?> fxArt(String key, String name) => {
   'music': 'major',
 };
 
-/// A learner's journey: three levels (done, here, ahead), a homework and a lesson on the lesson they are on, a review.
+/// A learner's journey: three levels (done, here, ahead), a homework and a lesson on the lesson they are on, a review (or two).
 Map<String, Object?> fxJourney({
   String stage = 'kids',
   String viewer = 'self',
@@ -93,6 +93,7 @@ Map<String, Object?> fxJourney({
   bool may = true,
   bool lessonOpen = false,
   bool practiceHomework = false,
+  bool twoReviews = false,
   List<Object> cheers = const [],
   Map<String, Object?>? limits,
   Map<String, Object?>? glance,
@@ -248,6 +249,17 @@ Map<String, Object?> fxJourney({
         'station_id': 's1',
         'title': 'الفاتحة',
       },
+      if (twoReviews)
+        {
+          'key': 'review:s2',
+          'kind': 'review',
+          'kind_label': 'مراجعة',
+          'state': 'open',
+          'enrollment_id': 'e1',
+          'island_id': 'i1',
+          'station_id': 's2',
+          'title': 'الناس والفلق',
+        },
     ],
     'chest': {
       'period': '2099-10-03',

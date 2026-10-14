@@ -3454,6 +3454,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String get journeyReview => 'راجع';
 
   @override
+  String reviewsWaiting(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n مراجعة مستنياك',
+      few: '$n مراجعات مستنياك',
+      two: 'مراجعتين مستنينك',
+      one: 'مراجعة مستنياك',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewsHint => 'كل مراجعة لعبة قصيرة';
+
+  @override
+  String hereAndNext(String here, String next) {
+    return 'انت هنا: $here · بعدها: $next';
+  }
+
+  @override
+  String hereOnly(String here) {
+    return 'انت هنا: $here';
+  }
+
+  @override
+  String levelNamed(int n, String title) {
+    return 'المستوى $n: $title';
+  }
+
+  @override
+  String get allLevels => 'كل المستويات';
+
+  @override
   String get journeyLate => 'متأخر';
 
   @override
