@@ -22,7 +22,9 @@ use Modules\Privacy\Http\Controllers\LegalController;
 use Modules\Privacy\Listeners\SendPrivacyNotifications;
 use Modules\Privacy\Live\MyDataChanged;
 use Modules\Privacy\PrivacyRules;
+use Modules\Privacy\Setup\PrivacyDetailsStep;
 use Modules\SharedKernel\Realtime\LiveSignals;
+use Modules\SharedKernel\Setup\SetupChecklist;
 
 /**
  * Privacy (docs/architecture/03, section 11): people's rights over their
@@ -46,6 +48,8 @@ final class PrivacyServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'privacy');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'privacy');
+        // The new academy's checklist: who it is on its privacy notice and terms.
+        $this->app->make(SetupChecklist::class)->add(PrivacyDetailsStep::class);
 
         // The public pages: on an academy's host its own, on the platform's the platform's (no sign-in).
         Route::middleware(['web', 'throttle:links'])->group(function () {

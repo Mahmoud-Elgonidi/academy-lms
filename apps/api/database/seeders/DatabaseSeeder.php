@@ -32,6 +32,7 @@ use Modules\People\Database\Seeders\DemoTeacherChecksSeeder;
 use Modules\Platform\Contracts\DTOs\NewAcademy;
 use Modules\Platform\Contracts\PlatformApi;
 use Modules\Platform\Contracts\TenantDirectory;
+use Modules\Platform\Database\Seeders\DemoBrandingSeeder;
 use Modules\Platform\Database\Seeders\DemoPlansSeeder;
 use Modules\Platform\Database\Seeders\DemoPlatformSeeder;
 use Modules\Platform\Models\PlatformAdmin;
@@ -42,6 +43,7 @@ use Modules\Scheduling\Database\Seeders\DemoDstSeeder;
 use Modules\Scheduling\Database\Seeders\DemoEnrollmentsSeeder;
 use Modules\Scheduling\Database\Seeders\DemoFamilyBillingSeeder;
 use Modules\Scheduling\Database\Seeders\DemoLiveBoardSeeder;
+use Modules\Scheduling\Database\Seeders\DemoPolicySeeder;
 use Modules\Scheduling\Database\Seeders\DemoShiftProposalsSeeder;
 use Modules\Scheduling\Database\Seeders\DemoShiftsSeeder;
 use Modules\Scheduling\Database\Seeders\DemoTimeOffSeeder;
@@ -51,7 +53,7 @@ use Modules\Support\Database\Seeders\DemoTicketsSeeder;
 
 /**
  * Local demo data: academy "demo" (demo.<platform domain>, or header X-Academy: demo)
- * with one user per main role, an evening of sessions around now for the
+ * with one user per main role, its logo and its reviewed policy (so "Start here" has nothing essential left), an evening of sessions around now for the
  * live board, guardians' consent to their children's accounts (one still waiting), teacher shifts and proposals, plans and prices, and enrolled
  * students with invoices in every state (payable online on the demo gateway) and five months of
  * paid renewals behind them (the revenue screen),
@@ -101,7 +103,7 @@ class DatabaseSeeder extends Seeder
             // What the demo does in the back office (prices, policy, voided invoices, ...) is in the activity log as the owner's.
             AuditActor::use(new AuditActor('user', $ownerId, 'هالة منصور'));
 
-            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoRevenueSeeder::class, DemoEnrollmentsSeeder::class, DemoShiftProposalsSeeder::class, DemoCurriculumSeeder::class, DemoMaterialsSeeder::class, DemoPracticeSeeder::class, DemoLearningSeeder::class, DemoChallengesSeeder::class, DemoGamesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoTicketsSeeder::class, DemoRecordingsSeeder::class, DemoDiscountsSeeder::class, DemoFamilyBillingSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class, DemoCatalogSeeder::class, DemoPeopleSeeder::class, DemoDisputesSeeder::class, DemoPrivacySeeder::class, DemoTeacherChecksSeeder::class, DemoSafeguardingSeeder::class, DemoMessagingSeeder::class, DemoAnnouncementsSeeder::class]);
+            $this->call([DemoBrandingSeeder::class, DemoPolicySeeder::class, DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoRevenueSeeder::class, DemoEnrollmentsSeeder::class, DemoShiftProposalsSeeder::class, DemoCurriculumSeeder::class, DemoMaterialsSeeder::class, DemoPracticeSeeder::class, DemoLearningSeeder::class, DemoChallengesSeeder::class, DemoGamesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoTicketsSeeder::class, DemoRecordingsSeeder::class, DemoDiscountsSeeder::class, DemoFamilyBillingSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class, DemoCatalogSeeder::class, DemoPeopleSeeder::class, DemoDisputesSeeder::class, DemoPrivacySeeder::class, DemoTeacherChecksSeeder::class, DemoSafeguardingSeeder::class, DemoMessagingSeeder::class, DemoAnnouncementsSeeder::class]);
             AuditActor::forget();
         });
 

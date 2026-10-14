@@ -25,11 +25,13 @@ use Modules\Identity\Otp\LogOtpSender;
 use Modules\Identity\Preferences\PreferenceStore;
 use Modules\Identity\Privacy\AccountData;
 use Modules\Identity\Queries\ActiveTeachers;
+use Modules\Identity\Setup\TeamStep;
 use Modules\Identity\SignIn\LastSignIn;
 use Modules\Identity\SignIn\OpenSignInGate;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Privacy\PersonalData;
+use Modules\SharedKernel\Setup\SetupChecklist;
 
 final class IdentityServiceProvider extends ServiceProvider
 {
@@ -55,6 +57,8 @@ final class IdentityServiceProvider extends ServiceProvider
         $this->app->make(UsageMeters::class)->add(Limit::Teachers, fn () => $this->app->make(ActiveTeachers::class)->count());
         // The account's own part of a person's copy, and the last thing an erasure anonymises.
         $this->app->make(PersonalData::class)->add(AccountData::class);
+        // The new academy's checklist (optional): someone else on the team.
+        $this->app->make(SetupChecklist::class)->add(TeamStep::class);
 
         // Each person's own channel: only they listen (their inbox, their lessons, the panels' pop-ups).
         Broadcast::channel(PersonalChannel::PATTERN, fn (User $user, string $id) => (string) $user->getKey() === $id);

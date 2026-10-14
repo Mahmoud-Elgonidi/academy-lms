@@ -34,6 +34,7 @@ use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\Console\LiveRelayCommand;
 use Modules\SharedKernel\Realtime\LiveSignals;
+use Modules\SharedKernel\Setup\SetupChecklist;
 use Modules\SharedKernel\Tenancy\PgTenantSession;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantResolver;
@@ -64,6 +65,8 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->singletonIf(GameCatalog::class, NoGames::class);
         // What each module holds about a person, for the Privacy module's copies and erasures.
         $this->app->singleton(PersonalData::class);
+        // What a new academy gets ready before its first families come, each module's steps, for the "Start here" page.
+        $this->app->singleton(SetupChecklist::class);
     }
 
     public function boot(): void

@@ -7,7 +7,9 @@ use Illuminate\Support\ServiceProvider;
 use Modules\Import\Contracts\Events\PeopleImported;
 use Modules\Import\Listeners\SendWelcomes;
 use Modules\Import\Privacy\ImportsData;
+use Modules\Import\Setup\ImportStep;
 use Modules\SharedKernel\Privacy\PersonalData;
+use Modules\SharedKernel\Setup\SetupChecklist;
 
 /**
  * Import (docs/architecture/01: "استيراد من CSV/Excel"): teachers, families
@@ -20,6 +22,8 @@ final class ImportServiceProvider extends ServiceProvider
     {
         // The spreadsheet rows a person came from, emptied when they are erased (Privacy).
         $this->app->make(PersonalData::class)->add(ImportsData::class);
+        // The new academy's checklist (optional): its people brought in from a sheet.
+        $this->app->make(SetupChecklist::class)->add(ImportStep::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'import');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'import');

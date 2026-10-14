@@ -6,16 +6,19 @@ use Illuminate\Database\Seeder;
 use Modules\Billing\Actions\SaveBillingSettings;
 use Modules\Billing\Actions\SavePlan;
 use Modules\Billing\Actions\SavePriceRegions;
+use Modules\Billing\Actions\SaveTransferDetails;
 use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PriceRegion;
 
 /**
  * Demo prices: VAT 15% included (a Saudi academy), six regions, and the
- * block plans most academies sell: 4, 8 or 12 sessions of 30, 45 or 60 minutes.
+ * block plans most academies sell: 4, 8 or 12 sessions of 30, 45 or 60 minutes;
+ * and where families transfer the money by hand (on every server, the demo
+ * gateway or not: a way to pay is one of "Start here"'s essentials).
  */
 class DemoBillingSeeder extends Seeder
 {
-    public function run(SaveBillingSettings $settings, SavePriceRegions $regions, SavePlan $plans): void
+    public function run(SaveBillingSettings $settings, SavePriceRegions $regions, SavePlan $plans, SaveTransferDetails $transfer): void
     {
         // A Saudi academy registered for VAT: its invoices are simplified tax invoices with the ZATCA QR code.
         $settings->handle(15, true, '310123456700003', 'NR-', 3, 'مؤسسة النور التعليمية', true);
@@ -53,5 +56,7 @@ class DemoBillingSeeder extends Seeder
             ]);
             $plan->forceFill(['sort' => $i])->save();
         }
+
+        $transfer->handle("تحويل بنكي: مصرف الراجحي · SA44 2000 0001 2345 6789 1234 · أكاديمية النور\nأو STC Pay على 0500000000، وبعدين اضغطوا «دفعت بالتحويل» وابعتوا صورة الإيصال.");
     }
 }

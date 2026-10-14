@@ -60,6 +60,8 @@ final class AbilityMatrix
             Ability::ManageStaff => [Role::Owner, Role::Admin],
             // Announcements to families or teachers: the academy speaking to everyone at once, so its owner and admins.
             Ability::SendAnnouncements => [Role::Owner, Role::Admin],
+            // The new academy's setup checklist ("Start here"): who gets the academy ready for its first families.
+            Ability::SetUpAcademy => [Role::Owner, Role::Admin],
         };
     }
 

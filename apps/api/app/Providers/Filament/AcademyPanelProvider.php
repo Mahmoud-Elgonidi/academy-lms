@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Academy\StartHere;
 use App\Http\Middleware\OpenFirstAllowedScreen;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SetPanelLocale;
@@ -68,6 +69,8 @@ final class AcademyPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::chrome.script'))
             ->renderHook(PanelsRenderHook::SIDEBAR_NAV_START, fn () => view('shared::chrome.greeting'))
             ->path('admin')
+            // "Start here": the new academy's setup checklist, from the steps each module registers (SharedKernel\Setup).
+            ->pages([StartHere::class])
             ->login(SignIn::class)
             // Two-step sign-in (an authenticator app): asked of whoever has it on; the owner, admins and accountants must set it up first.
             ->multiFactorAuthentication(fn () => [TwoFactor::provider()], isRequired: true)

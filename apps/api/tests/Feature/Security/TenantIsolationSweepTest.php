@@ -214,7 +214,9 @@ it('keeps every record of one academy out of reach of another academy\'s people'
             // The team: this academy's staff only, never the demo's names or addresses.
             'admin/settings/team',
             // Announcements: this academy's only; the demo's, asked for by id, is not found.
-            'admin/announcements', 'admin/announcements?announcement={announcement}'],
+            'admin/announcements', 'admin/announcements?announcement={announcement}',
+            // "Start here": this academy's own setup, read from its own rows.
+            'admin/start-here'],
         'accountant' => ['admin/invoices/{invoice}', 'admin/payroll/{teacher}', 'billing/proofs/{proof}/file'],
         'teacher' => ['teach/reports/{report}', 'teach/reports/{report}/game', 'teach/students/{enrollment}', 'class/{session}', 'class/{session}/go', 'learning/files/{submission}',
             'support/files/{message}', 'people/checks/{check}/file'],

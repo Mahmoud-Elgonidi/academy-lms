@@ -40,6 +40,7 @@ use Modules\Platform\Models\PlatformAdmin;
 use Modules\Platform\Plans\PlanUsage;
 use Modules\Platform\Plans\PlatformAcademyPlan;
 use Modules\Platform\PlatformService;
+use Modules\Platform\Setup\BrandingStep;
 use Modules\SharedKernel\Games\GameCatalog;
 use Modules\SharedKernel\Health\Heartbeats;
 use Modules\SharedKernel\Plans\AcademyPlan;
@@ -48,6 +49,7 @@ use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\PlanLimitReached;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Realtime\LiveSignals;
+use Modules\SharedKernel\Setup\SetupChecklist;
 use Modules\SharedKernel\Tenancy\TenantResolver;
 
 final class PlatformServiceProvider extends ServiceProvider
@@ -83,6 +85,8 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'platform');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'platform');
+        // The new academy's checklist: its name and logo.
+        $this->app->make(SetupChecklist::class)->add(BrandingStep::class);
         Event::listen(Login::class, RecordConsoleSignIn::class);
         if ($this->app->runningInConsole()) {
             $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class, HealthCommand::class, MailTestCommand::class]);

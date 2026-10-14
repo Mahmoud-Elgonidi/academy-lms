@@ -25,7 +25,9 @@ final class SavePolicySettings
         return DB::transaction(function () use ($settings, $actorId) {
             DB::select('select pg_advisory_xact_lock(hashtext(?))', ['policy:'.app(TenantContext::class)->require()->id]);
             $current = PolicyVersion::query()->orderByDesc('version')->first();
-            if ($current !== null && $current->settings == $settings->toArray()) {
+            // The same numbers make no new version, unless the ones in force are only the defaults nobody saved
+            // (made when first needed): someone at the academy keeping them is its own policy ("Start here" counts it).
+            if ($current !== null && $current->settings == $settings->toArray() && ($current->created_by !== null || $actorId === null)) {
                 return $current;
             }
 

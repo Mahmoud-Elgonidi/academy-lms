@@ -58,6 +58,7 @@ enum Ability: string
     case ManageConversations = 'conversations.manage';
     case ManageStaff = 'staff.manage';
     case SendAnnouncements = 'announcements.send';
+    case SetUpAcademy = 'academy.setup';
 
     /** The plan area this ability belongs to, if a plan may leave it out. */
     public function feature(): ?Feature

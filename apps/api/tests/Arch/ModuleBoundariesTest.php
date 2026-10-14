@@ -294,6 +294,11 @@ arch('each module says what it holds about a person through the shared kernel\'s
     ->expect(['Modules\Identity\Privacy', 'Modules\People\Privacy', 'Modules\Communication\Privacy', 'Modules\Learning\Privacy', 'Modules\Scheduling\Privacy', 'Modules\Enrollment\Privacy', 'Modules\Billing\Privacy', 'Modules\Evaluation\Privacy', 'Modules\Classroom\Privacy', 'Modules\Support\Privacy', 'Modules\Crm\Privacy', 'Modules\Payroll\Privacy', 'Modules\Import\Privacy', 'Modules\Safeguarding\Privacy', 'Modules\Messaging\Privacy', 'Modules\Games\Privacy', 'Modules\Announcements\Privacy'])
     ->toImplement('Modules\SharedKernel\Privacy\PersonalDataSource');
 
+arch('each module tells "Start here" what a new academy sets up through the shared kernel\'s SetupStep')
+    ->expect(['Modules\Platform\Setup', 'Modules\Identity\Setup', 'Modules\Catalog\Setup', 'Modules\People\Setup', 'Modules\Curriculum\Setup', 'Modules\Scheduling\Setup', 'Modules\Billing\Setup', 'Modules\Privacy\Setup', 'Modules\Import\Setup'])
+    ->toImplement('Modules\SharedKernel\Setup\SetupStep')
+    ->toBeFinal();
+
 arch('the video adapters only talk to the provider: no queries, no attendance, no tenancy')
     ->expect('Modules\Classroom\Video')
     ->not->toUse(['Illuminate\Support\Facades\DB', 'Illuminate\Database', 'Modules\Scheduling\Contracts\AttendanceApi', 'Modules\SharedKernel\Tenancy']);

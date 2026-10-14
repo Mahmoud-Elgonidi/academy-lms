@@ -8,8 +8,10 @@ use Illuminate\Support\ServiceProvider;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\CurriculumService;
 use Modules\Curriculum\Http\ResourcePreviewController;
+use Modules\Curriculum\Setup\ProgramStep;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
+use Modules\SharedKernel\Setup\SetupChecklist;
 
 final class CurriculumServiceProvider extends ServiceProvider
 {
@@ -23,6 +25,8 @@ final class CurriculumServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'curriculum');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'curriculum');
+        // The new academy's checklist (optional): a published curriculum.
+        $this->app->make(SetupChecklist::class)->add(ProgramStep::class);
 
         // The plan's storage counts the files on lessons.
         $this->app->make(UsageMeters::class)->add(Limit::StorageMb, fn () => (int) DB::table('node_resources')->sum('size'));

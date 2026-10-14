@@ -37,12 +37,14 @@ use Modules\People\Live\MyChecksChanged;
 use Modules\People\Live\TeacherChecksChanged;
 use Modules\People\PeopleService;
 use Modules\People\Privacy\ProfileData;
+use Modules\People\Setup\TeacherStep;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\LiveSignals;
+use Modules\SharedKernel\Setup\SetupChecklist;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 final class PeopleServiceProvider extends ServiceProvider
@@ -59,6 +61,8 @@ final class PeopleServiceProvider extends ServiceProvider
     {
         // A person's profile and guardian links, for their copy and erasure (Privacy).
         $this->app->make(PersonalData::class)->add(ProfileData::class);
+        // The new academy's checklist: a first teacher.
+        $this->app->make(SetupChecklist::class)->add(TeacherStep::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'people');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'people');
