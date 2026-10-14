@@ -29,6 +29,77 @@ final class AuditTrail
     }
 
     /**
+     * An erased account's name out of the academy's log (the account's erasure calls it, inside
+     * its transaction): where the person acted, their name becomes $as and their address and
+     * browser go; any value that was their name becomes $as, in entries about them (as actor,
+     * subject or the one signed in as) and, unless another account goes by the same name
+     * ($shared), in any other entry. What was done, when and by which account stays.
+     *
+     * @return int the entries changed
+     */
+    public function forget(string $userId, string $name, string $as, bool $shared = false): int
+    {
+        $name = trim($name);
+        $rows = DB::table('audit_logs')
+            ->where('academy_id', $this->tenant->require()->id)
+            ->where(function ($q) use ($userId, $name, $shared) {
+                $q->where(fn ($q) => $q->where('actor_type', 'user')->where('actor_id', $userId))
+                    ->orWhere('on_behalf_of', $userId)
+                    ->orWhere('subject_id', $userId);
+                if (! $shared && $name !== '') {
+                    $q->orWhereRaw("jsonb_path_exists(data, '$.** ? (@ == \$n)', jsonb_build_object('n', ?::text))", [$name]);
+                }
+            })
+            ->get(['id', 'actor_type', 'actor_id', 'actor_name', 'ip', 'user_agent', 'data']);
+        if ($rows->isEmpty()) {
+            return 0;
+        }
+
+        // The log lets this through only while the erasure says so, for its own transaction.
+        return DB::transaction(function () use ($rows, $userId, $name, $as): int {
+            DB::statement("select set_config('lms.audit_forget', 'on', true)");
+            $changed = 0;
+            foreach ($rows as $row) {
+                $data = json_decode((string) $row->data, true) ?: [];
+                $update = [];
+                if ($name !== '') {
+                    $clean = self::replace($data, $name, $as);
+                    if ($clean !== $data) {
+                        $update['data'] = json_encode($clean, JSON_UNESCAPED_UNICODE);
+                    }
+                }
+                $actor = ['actor_name' => mb_substr($as, 0, 120), 'ip' => null, 'user_agent' => null];
+                if ($row->actor_type === 'user' && $row->actor_id === $userId && [$row->actor_name, $row->ip, $row->user_agent] !== array_values($actor)) {
+                    $update += $actor;
+                }
+                if ($update !== []) {
+                    $changed += DB::table('audit_logs')->where('id', $row->id)->update($update);
+                }
+            }
+            DB::statement("select set_config('lms.audit_forget', 'off', true)");
+
+            return $changed;
+        });
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $data
+     * @return array<array-key, mixed>
+     */
+    private static function replace(array $data, string $name, string $as): array
+    {
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $data[$key] = self::replace($value, $name, $as);
+            } elseif ($value === $name) {
+                $data[$key] = $as;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */

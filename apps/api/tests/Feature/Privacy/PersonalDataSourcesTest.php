@@ -297,11 +297,11 @@ it('holds an erasure back for each source\'s own reasons, and erases once they a
     $lead->forceFill(['learner_id' => null])->save();
     expect(fn () => app(PrepareLearner::class)->handle($lead->refresh(), $this->owner->id))->toThrow(ValidationException::class);
 
-    // No table anywhere still carries their addresses or numbers, and their names are left only where
-    // an audit entry was written by them (audit_logs never change; see the review's open points).
+    // No table anywhere still carries their names, addresses or numbers: the audit log's entries stay,
+    // under the erased account's name.
     expect(pdsWhereFound(['zubaida.qasr@noor.example', 'marwan.qasr@noor.example', 'fadwa.lutfi@noor.example', 'zubaida.qasr@gmail.example',
-        '+966511122233', '+966511122244', '+201011122255', '0511122233']))->toBe([]);
-    expect(array_values(array_filter(pdsWhereFound(['Zubaida Qasr', 'Marwan Qasr', 'Fadwa Lutfi']), fn (string $at) => ! str_starts_with($at, 'audit_logs.actor_name:'))))->toBe([]);
+        '+966511122233', '+966511122244', '+201011122255', '0511122233', 'Zubaida Qasr', 'Marwan Qasr', 'Fadwa Lutfi']))->toBe([])
+        ->and(DB::table('audit_logs')->whereIn('actor_id', collect($this->people)->pluck('id'))->exists())->toBeTrue();
 });
 
 /** What each source holds of the three, to compare before and after. */

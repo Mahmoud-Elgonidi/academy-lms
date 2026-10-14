@@ -65,6 +65,40 @@ it('cannot be changed or removed, even through the platform connection', functio
         ->and(DB::connection('pgsql_platform')->table('audit_logs')->count())->toBe(1);
 });
 
+it('lets an erased account\'s name go from its entries, and nothing else', function () {
+    $this->actingAs($this->owner);
+    DB::table('audit_logs')->insert([...AuditTrail::row($this->noor->id, AuditActor::current(), 'identity.password_changed', 'user', $this->owner->id, ['name' => 'هالة']),
+        'ip' => '203.0.113.5', 'user_agent' => 'Phone']);
+    $this->app['auth']->forgetGuards();
+    app(AuditTrail::class)->record('people.consent_recorded', 'student', 'st-1', ['student' => 'هالة', 'note' => 'ورق']);
+    app(AuditTrail::class)->record('policy.saved', data: ['by' => 'سلمى', 'version' => 3]);
+    $data = fn (string $action) => json_decode(DB::table('audit_logs')->where('action', $action)->value('data'), true);
+
+    // Someone else goes by the same name: only the entries about her own account change.
+    expect(app(AuditTrail::class)->forget($this->owner->id, 'هالة', 'حساب ممسوح', shared: true))->toBe(1)
+        ->and((array) DB::table('audit_logs')->where('action', 'identity.password_changed')->first(['actor_id', 'actor_name', 'ip', 'user_agent', 'subject_id']))
+        ->toBe(['actor_id' => $this->owner->id, 'actor_name' => 'حساب ممسوح', 'ip' => null, 'user_agent' => null, 'subject_id' => $this->owner->id])
+        ->and($data('identity.password_changed'))->toBe(['name' => 'حساب ممسوح'])
+        ->and($data('people.consent_recorded'))->toEqual(['student' => 'هالة', 'note' => 'ورق']);
+
+    // Nobody else does: her name leaves every entry; other names and what was done stay.
+    expect(app(AuditTrail::class)->forget($this->owner->id, 'هالة', 'حساب ممسوح'))->toBe(1)
+        ->and($data('people.consent_recorded'))->toEqual(['student' => 'حساب ممسوح', 'note' => 'ورق'])
+        ->and($data('policy.saved'))->toEqual(['by' => 'سلمى', 'version' => 3])
+        ->and(DB::table('audit_logs')->count())->toBe(3);
+
+    // The way through lets nothing else by: not what was done, not an address, not a removal.
+    $saying = fn (Closure $change) => fn () => DB::transaction(function () use ($change) {
+        DB::statement("select set_config('lms.audit_forget', 'on', true)");
+        $change();
+    });
+    expect($saying(fn () => DB::table('audit_logs')->update(['action' => 'nothing'])))->toThrow(QueryException::class, 'append-only')
+        ->and($saying(fn () => DB::table('audit_logs')->update(['ip' => '10.0.0.9'])))->toThrow(QueryException::class, 'append-only')
+        ->and($saying(fn () => DB::table('audit_logs')->delete()))->toThrow(QueryException::class, 'append-only')
+        ->and(fn () => DB::transaction(fn () => DB::table('audit_logs')->update(['actor_name' => 'x'])))->toThrow(QueryException::class, 'append-only')
+        ->and(DB::table('audit_logs')->where('actor_name', 'x')->exists())->toBeFalse();
+});
+
 it('shows an academy its own entries only, and never the platform\'s', function () {
     app(AuditTrail::class)->record('policy.saved', data: ['version' => 2]);
     $huda = $this->actAsTenant($this->createAcademy(['slug' => 'huda']));

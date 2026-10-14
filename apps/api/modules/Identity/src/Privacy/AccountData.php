@@ -9,6 +9,7 @@ use Modules\Identity\Enums\UserStatus;
 use Modules\Identity\Models\PersonalAccessToken;
 use Modules\Identity\Models\SocialIdentity;
 use Modules\Identity\Models\User;
+use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Privacy\PersonalDataPart;
 use Modules\SharedKernel\Privacy\PersonalDataSource;
@@ -22,7 +23,7 @@ use Modules\SharedKernel\Privacy\PersonalDataSource;
  */
 final class AccountData implements PersonalDataSource
 {
-    public function __construct(private readonly IdentityApi $identity) {}
+    public function __construct(private readonly IdentityApi $identity, private readonly AuditTrail $audit) {}
 
     public function key(): string
     {
@@ -69,8 +70,13 @@ final class AccountData implements PersonalDataSource
     {
         $this->identity->endSessions($userId);
         $linked = SocialIdentity::query()->where('user_id', $userId)->delete();
+        // The name they had leaves the academy's audit log too (what was done stays, by "Deleted account").
+        $name = (string) User::query()->whereKey($userId)->value('name');
+        $erased = __('identity::privacy.erased_name');
+        $shared = User::query()->whereKeyNot($userId)->where('name', $name)->exists();
+        $audit = $this->audit->forget($userId, $name, $erased, $shared);
         User::query()->whereKey($userId)->update([
-            'name' => __('identity::privacy.erased_name'),
+            'name' => $erased,
             'email' => null,
             'phone_e164' => null,
             // A way in is required of every row; this one says nothing and leads nowhere (no password, never active).
@@ -85,6 +91,6 @@ final class AccountData implements PersonalDataSource
             'updated_at' => now(),
         ]);
 
-        return ['account' => 1, 'sign_in_with' => $linked];
+        return ['account' => 1, 'sign_in_with' => $linked, 'audit_names' => $audit];
     }
 }
