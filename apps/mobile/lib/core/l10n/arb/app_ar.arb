@@ -896,6 +896,23 @@
   "engagement": "التركيز",
   "overall": "المستوى العام",
   "homeworkTitle": "الواجبات",
+  "homeworkWaiting": "مستني",
+  "homeworkSent": "اتسلّم",
+  "homeworkMarked": "اتصحّح",
+  "homeworkWaitingOnYou": "{n, plural, =1{واجب مستني منك} =2{واجبين مستنيين منك} few{{n} واجبات مستنية منك} other{{n} واجب مستني منك}}",
+  "@homeworkWaitingOnYou": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeworkNoneWaiting": "مفيش واجبات مستنياك دلوقتي.",
+  "homeworkNoneSent": "مفيش واجبات مستنية تصحيح.",
+  "homeworkNoneMarked": "لسه مفيش واجبات اتصحّحت.",
+  "homeworkLastMarked": "آخر تصحيح",
+  "homeworkHandIn": "سلّم الواجب",
+  "homeworkStartRound": "ابدأ الجولة",
   "noHomework": "مفيش واجبات دلوقتي.",
   "dueBy": "قبل {when}",
   "@dueBy": {

@@ -1212,6 +1212,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeworkTitle => 'Homework';
 
   @override
+  String get homeworkWaiting => 'Waiting';
+
+  @override
+  String get homeworkSent => 'Handed in';
+
+  @override
+  String get homeworkMarked => 'Marked';
+
+  @override
+  String homeworkWaitingOnYou(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n waiting on you', one: '1 waiting on you');
+    return '$_temp0';
+  }
+
+  @override
+  String get homeworkNoneWaiting => 'Nothing is waiting on you.';
+
+  @override
+  String get homeworkNoneSent => 'Nothing is waiting to be marked.';
+
+  @override
+  String get homeworkNoneMarked => 'Nothing marked yet.';
+
+  @override
+  String get homeworkLastMarked => 'Last marked';
+
+  @override
+  String get homeworkHandIn => 'Hand it in';
+
+  @override
+  String get homeworkStartRound => 'Start the round';
+
+  @override
   String get noHomework => 'No homework right now.';
 
   @override

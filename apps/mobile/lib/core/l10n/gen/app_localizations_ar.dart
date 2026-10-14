@@ -1228,6 +1228,46 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeworkTitle => 'الواجبات';
 
   @override
+  String get homeworkWaiting => 'مستني';
+
+  @override
+  String get homeworkSent => 'اتسلّم';
+
+  @override
+  String get homeworkMarked => 'اتصحّح';
+
+  @override
+  String homeworkWaitingOnYou(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n واجب مستني منك',
+      few: '$n واجبات مستنية منك',
+      two: 'واجبين مستنيين منك',
+      one: 'واجب مستني منك',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeworkNoneWaiting => 'مفيش واجبات مستنياك دلوقتي.';
+
+  @override
+  String get homeworkNoneSent => 'مفيش واجبات مستنية تصحيح.';
+
+  @override
+  String get homeworkNoneMarked => 'لسه مفيش واجبات اتصحّحت.';
+
+  @override
+  String get homeworkLastMarked => 'آخر تصحيح';
+
+  @override
+  String get homeworkHandIn => 'سلّم الواجب';
+
+  @override
+  String get homeworkStartRound => 'ابدأ الجولة';
+
+  @override
   String get noHomework => 'مفيش واجبات دلوقتي.';
 
   @override

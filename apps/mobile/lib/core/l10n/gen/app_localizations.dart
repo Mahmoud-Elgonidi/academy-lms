@@ -2114,6 +2114,66 @@ abstract class AppLocalizations {
   /// **'الواجبات'**
   String get homeworkTitle;
 
+  /// No description provided for @homeworkWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'مستني'**
+  String get homeworkWaiting;
+
+  /// No description provided for @homeworkSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتسلّم'**
+  String get homeworkSent;
+
+  /// No description provided for @homeworkMarked.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتصحّح'**
+  String get homeworkMarked;
+
+  /// No description provided for @homeworkWaitingOnYou.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{واجب مستني منك} =2{واجبين مستنيين منك} few{{n} واجبات مستنية منك} other{{n} واجب مستني منك}}'**
+  String homeworkWaitingOnYou(int n);
+
+  /// No description provided for @homeworkNoneWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش واجبات مستنياك دلوقتي.'**
+  String get homeworkNoneWaiting;
+
+  /// No description provided for @homeworkNoneSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش واجبات مستنية تصحيح.'**
+  String get homeworkNoneSent;
+
+  /// No description provided for @homeworkNoneMarked.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش واجبات اتصحّحت.'**
+  String get homeworkNoneMarked;
+
+  /// No description provided for @homeworkLastMarked.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر تصحيح'**
+  String get homeworkLastMarked;
+
+  /// No description provided for @homeworkHandIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'سلّم الواجب'**
+  String get homeworkHandIn;
+
+  /// No description provided for @homeworkStartRound.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدأ الجولة'**
+  String get homeworkStartRound;
+
   /// No description provided for @noHomework.
   ///
   /// In ar, this message translates to:
