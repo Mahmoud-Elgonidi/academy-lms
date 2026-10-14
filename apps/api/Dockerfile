@@ -1,6 +1,6 @@
 # Development image for the API and the back office (docker compose up).
 # Production images (Octane on FrankenPHP) come with the first deployment.
-FROM php:8.3-cli-bookworm
+FROM php:8.5-cli-bookworm
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git unzip libpq-dev libicu-dev libzip-dev \
