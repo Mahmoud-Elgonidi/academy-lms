@@ -28,6 +28,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get close => 'قفل';
 
   @override
+  String get errorOfflineTitle => 'مفيش نت';
+
+  @override
+  String get errorServerTitle => 'حصلت مشكلة عندنا';
+
+  @override
+  String get errorServerBody => 'بنصلّحها. جرّب كمان شوية.';
+
+  @override
+  String get errorForbiddenTitle => 'مش مسموح تشوف ده';
+
+  @override
+  String get errorForbiddenBody => 'لو شايف إن ده غلط، كلّم الأكاديمية.';
+
+  @override
+  String get reloadFailed => 'ماقدرناش نحدّث، واللي قدامك ممكن يكون قديم.';
+
+  @override
   String get send => 'ابعت';
 
   @override
@@ -601,6 +619,11 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String greetingEvening(String name) {
     return 'مساء الخير يا $name';
+  }
+
+  @override
+  String greetingHello(String name) {
+    return 'أهلًا يا $name';
   }
 
   @override
@@ -2703,7 +2726,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gamesCheer => 'هنّيه';
 
   @override
-  String get gamesCheered => 'وصلته تهنئتك 💛';
+  String get gamesCheered => 'وصلته تهنئتك';
 
   @override
   String get gamesSafety => 'مفيش شراء جوه الألعاب ولا إعلانات ولا كلام مع حد غريب. كل كائن وكل نجمة بتتكسب بالمذاكرة.';

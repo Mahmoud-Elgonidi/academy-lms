@@ -28,6 +28,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get close => 'Close';
 
   @override
+  String get errorOfflineTitle => 'You\'re offline';
+
+  @override
+  String get errorServerTitle => 'Something broke on our side';
+
+  @override
+  String get errorServerBody => 'We\'re on it. Try again in a little while.';
+
+  @override
+  String get errorForbiddenTitle => 'You can\'t see this';
+
+  @override
+  String get errorForbiddenBody => 'If that looks wrong, ask the academy.';
+
+  @override
+  String get reloadFailed => 'Couldn\'t refresh; what you see may be out of date.';
+
+  @override
   String get send => 'Send';
 
   @override
@@ -587,6 +605,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String greetingEvening(String name) {
     return 'Good evening, $name';
+  }
+
+  @override
+  String greetingHello(String name) {
+    return 'Hi, $name';
   }
 
   @override
@@ -2649,7 +2672,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gamesCheer => 'Cheer';
 
   @override
-  String get gamesCheered => 'Your cheer is on its way 💛';
+  String get gamesCheered => 'Your cheer is on its way';
 
   @override
   String get gamesSafety =>

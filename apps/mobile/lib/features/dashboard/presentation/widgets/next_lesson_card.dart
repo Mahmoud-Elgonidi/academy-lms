@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_theme.dart';
@@ -8,47 +6,26 @@ import '../../../../core/time/formats.dart';
 import '../../../classroom/presentation/join.dart';
 import '../../../schedule/domain/lesson.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../shared/widgets/lms.dart';
+import '../../../../shared/widgets/minute_tick.dart';
 
 /// The next lesson in the brand's colour: when, with whom, how long until
-/// the room opens, and the join button once it does. Ticks every half
-/// minute so the countdown and the button stay true.
-class NextLessonCard extends StatefulWidget {
-  const NextLessonCard({required this.lesson, this.onOpened, super.key});
+/// the room opens, and the join button once it does. The countdown is
+/// drawn again each minute; the join state comes from the screen's reload
+/// at the room's opening (`Lesson.clockMoments`).
+class NextLessonCard extends StatelessWidget {
+  const NextLessonCard({required this.lesson, super.key});
 
   final Lesson? lesson;
 
-  /// The room just opened: reload to get the join state from the API.
-  final VoidCallback? onOpened;
-
   @override
-  State<NextLessonCard> createState() => _NextLessonCardState();
-}
+  Widget build(BuildContext context) => MinuteTick(builder: _card);
 
-class _NextLessonCardState extends State<NextLessonCard> {
-  Timer? _tick;
-
-  @override
-  void initState() {
-    super.initState();
-    _tick = Timer.periodic(const Duration(seconds: 30), (_) {
-      final opens = widget.lesson?.joinOpensAt;
-      if (opens != null && opens.fromNow().isNegative && !(widget.lesson?.joinOpen ?? true)) widget.onOpened?.call();
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _tick?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _card(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    final lesson = widget.lesson;
-    final kids = context.shape.stage.name == 'kids';
+    final lesson = this.lesson;
+    final kids = context.isKids;
     final radius = BorderRadius.circular(context.shape.card + 4);
     if (lesson == null) {
       return Container(

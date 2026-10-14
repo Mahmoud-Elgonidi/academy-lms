@@ -6,6 +6,12 @@
   "problem": "حصلت مشكلة. جرّب تاني.",
   "back": "رجوع",
   "close": "قفل",
+  "errorOfflineTitle": "مفيش نت",
+  "errorServerTitle": "حصلت مشكلة عندنا",
+  "errorServerBody": "بنصلّحها. جرّب كمان شوية.",
+  "errorForbiddenTitle": "مش مسموح تشوف ده",
+  "errorForbiddenBody": "لو شايف إن ده غلط، كلّم الأكاديمية.",
+  "reloadFailed": "ماقدرناش نحدّث، واللي قدامك ممكن يكون قديم.",
   "send": "ابعت",
   "optional": "(اختياري)",
   "noticeSignedOut": "خرجت من الحساب.",
@@ -433,6 +439,14 @@
   },
   "greetingEvening": "مساء الخير يا {name}",
   "@greetingEvening": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingHello": "أهلًا يا {name}",
+  "@greetingHello": {
     "placeholders": {
       "name": {
         "type": "String"
@@ -1939,7 +1953,7 @@
     }
   },
   "gamesCheer": "هنّيه",
-  "gamesCheered": "وصلته تهنئتك 💛",
+  "gamesCheered": "وصلته تهنئتك",
   "gamesSafety": "مفيش شراء جوه الألعاب ولا إعلانات ولا كلام مع حد غريب. كل كائن وكل نجمة بتتكسب بالمذاكرة.",
   "gamesTogether": "العبوا سوا",
   "gamesSaved": "اتحفظ.",

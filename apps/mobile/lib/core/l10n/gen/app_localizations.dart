@@ -128,6 +128,42 @@ abstract class AppLocalizations {
   /// **'قفل'**
   String get close;
 
+  /// No description provided for @errorOfflineTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش نت'**
+  String get errorOfflineTitle;
+
+  /// No description provided for @errorServerTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصلت مشكلة عندنا'**
+  String get errorServerTitle;
+
+  /// No description provided for @errorServerBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'بنصلّحها. جرّب كمان شوية.'**
+  String get errorServerBody;
+
+  /// No description provided for @errorForbiddenTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش مسموح تشوف ده'**
+  String get errorForbiddenTitle;
+
+  /// No description provided for @errorForbiddenBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو شايف إن ده غلط، كلّم الأكاديمية.'**
+  String get errorForbiddenBody;
+
+  /// No description provided for @reloadFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'ماقدرناش نحدّث، واللي قدامك ممكن يكون قديم.'**
+  String get reloadFailed;
+
   /// No description provided for @send.
   ///
   /// In ar, this message translates to:
@@ -1051,6 +1087,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'مساء الخير يا {name}'**
   String greetingEvening(String name);
+
+  /// No description provided for @greetingHello.
+  ///
+  /// In ar, this message translates to:
+  /// **'أهلًا يا {name}'**
+  String greetingHello(String name);
 
   /// No description provided for @nextLesson.
   ///
@@ -4595,7 +4637,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesCheered.
   ///
   /// In ar, this message translates to:
-  /// **'وصلته تهنئتك 💛'**
+  /// **'وصلته تهنئتك'**
   String get gamesCheered;
 
   /// No description provided for @gamesSafety.

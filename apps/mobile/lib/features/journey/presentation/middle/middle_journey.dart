@@ -323,10 +323,7 @@ class _StationNode extends StatelessWidget {
                   ),
                 ),
               ),
-              Icon(
-                Directionality.of(context) == TextDirection.rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
-                color: c.faint,
-              ),
+              Icon(Icons.chevron_right_rounded, color: c.faint),
             ],
           ),
         ),

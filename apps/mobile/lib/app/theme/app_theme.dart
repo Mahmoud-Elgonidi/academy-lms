@@ -178,6 +178,7 @@ ThemeData buildTheme(Branding branding, Stage stage) {
   final s = LmsShape.of(branding, stage);
   final body = stage == Stage.kids ? 'BalooBhaijaan2' : (stage == Stage.middle ? 'Rubik' : 'IBMPlexSansArabic');
   final heavy = stage == Stage.kids ? FontWeight.w800 : FontWeight.w700;
+  final kids = stage == Stage.kids;
 
   final scheme = ColorScheme.fromSeed(seedColor: branding.primary).copyWith(
     primary: branding.primary,
@@ -307,5 +308,46 @@ ThemeData buildTheme(Branding branding, Stage stage) {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       contentTextStyle: TextStyle(fontFamily: body, color: Colors.white),
     ),
+    // The kids' look keeps Material's own for these; the others share one finish.
+    listTileTheme: kids
+        ? null
+        : ListTileThemeData(
+            iconColor: c.muted,
+            minVerticalPadding: 10,
+            titleTextStyle: text.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+            subtitleTextStyle: text.bodySmall,
+          ),
+    dialogTheme: kids
+        ? null
+        : DialogThemeData(
+            backgroundColor: c.card,
+            surfaceTintColor: Colors.transparent,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(s.card)),
+            titleTextStyle: h(20),
+            contentTextStyle: text.bodyMedium?.copyWith(color: c.muted),
+          ),
+    segmentedButtonTheme: kids
+        ? null
+        : SegmentedButtonThemeData(
+            style: SegmentedButton.styleFrom(
+              selectedBackgroundColor: c.brandSoft,
+              selectedForegroundColor: c.brandDeep,
+              foregroundColor: c.muted,
+              side: BorderSide(color: c.line),
+              minimumSize: const Size(0, 44),
+              textStyle: text.titleSmall,
+            ),
+          ),
+    badgeTheme: kids
+        ? null
+        : BadgeThemeData(
+            backgroundColor: c.danger,
+            textColor: Colors.white,
+            smallSize: 8,
+            largeSize: 17,
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            textStyle: TextStyle(fontFamily: body, fontSize: 10.5, fontWeight: FontWeight.w700),
+          ),
+    iconButtonTheme: kids ? null : IconButtonThemeData(style: IconButton.styleFrom(minimumSize: const Size(48, 48))),
   );
 }

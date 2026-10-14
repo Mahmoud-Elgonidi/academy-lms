@@ -188,10 +188,8 @@ class _MoneyList extends StatelessWidget {
 
 /// Extra lessons on a course: how many, then the invoice, which waits with the others to be paid.
 Future<void> _buyExtra(BuildContext context, Balance course, ExtraOffer offer) async {
-  final made = await showModalBottomSheet<({String number, String total})>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
+  final made = await showActionSheet<({String number, String total})>(
+    context,
     builder: (_) => RepositoryProvider.value(
       value: context.read<BillingRepository>(),
       child: _ExtraSheet(course: course, offer: offer, learnerId: context.learnerId()),

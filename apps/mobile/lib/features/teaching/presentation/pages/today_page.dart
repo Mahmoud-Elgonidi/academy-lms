@@ -93,10 +93,7 @@ class _TodayList extends StatelessWidget {
         if (today.lessons.minutes > 0)
           Text(hoursAmount(context, today.lessons.minutes / 60), style: context.text.bodyMedium?.copyWith(color: c.muted)),
         const SizedBox(height: 14),
-        if (next != null) ...[
-          NextLessonCard(lesson: next, onOpened: () => context.read<LoadCubit<_Today>>().load()),
-          const SizedBox(height: 16),
-        ],
+        if (next != null) ...[NextLessonCard(lesson: next), const SizedBox(height: 16)],
         for (final lesson in lessons.where((x) => x.id != next?.id)) ...[
           LessonCard(lesson: lesson, onDispute: teacherDispute(context, lesson, () => context.read<LoadCubit<_Today>>().load())),
           const SizedBox(height: 10),

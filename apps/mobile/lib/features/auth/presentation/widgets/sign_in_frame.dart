@@ -7,6 +7,8 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/widgets/open_link.dart';
 import '../../data/auth_repository.dart';
 
+export '../../../../shared/widgets/actions.dart' show BusyButton;
+
 /// The frame of every sign-in step: a back button (after the first), the
 /// title and lead, the step's content, its main button at the bottom, and
 /// the privacy notice and terms under it (the stores ask for them before
@@ -118,25 +120,5 @@ class _Mark extends StatelessWidget {
       const SizedBox(width: 12),
       Text(context.l10n.appName, style: context.text.titleLarge),
     ],
-  );
-}
-
-/// The main button of a step, with a spinner while it works.
-class BusyButton extends StatelessWidget {
-  const BusyButton({required this.label, required this.busy, required this.onPressed, super.key});
-
-  final String label;
-  final bool busy;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    width: double.infinity,
-    child: FilledButton(
-      onPressed: busy ? null : onPressed,
-      child: busy
-          ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-          : Text(label),
-    ),
   );
 }

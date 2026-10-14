@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -65,10 +64,7 @@ class _CalmJourneyState extends State<CalmJourney> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(DateFormat('EEEE d MMMM', context.locale).format(DateTime.now()), style: context.text.bodySmall),
-                  Text(l.journeyYours(widget.name), style: context.text.headlineSmall),
-                ],
+                children: [Text(l.journeyYours(widget.name), style: context.text.headlineSmall)],
               ),
             ),
             const NotificationBell(),

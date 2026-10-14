@@ -60,7 +60,8 @@ String targetOf(String? screen, String? id, Area area) {
 
 /// The teacher's tasks and the inbox open over the tabs (pushed, with a way
 /// back); any other place is a tab of the look, which is switched to.
-bool opensOverTabs(String location) => const ['/teach/reports', '/teach/marking', '/teach/hours', '/inbox'].any(location.startsWith);
+bool opensOverTabs(String location) =>
+    const ['/teach/reports', '/teach/marking', '/teach/hours', '/inbox', '/account'].any(location.startsWith);
 
 /// A message read where it is, in full, in the inbox: it opens nowhere else.
 bool readsInPlace(String? screen) => screen == 'announcement';

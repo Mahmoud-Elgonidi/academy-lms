@@ -69,10 +69,8 @@ class DocumentsPage extends StatelessWidget {
   }
 
   Future<void> _send(BuildContext context, MyDocuments d) async {
-    final sent = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
+    final sent = await showActionSheet<bool>(
+      context,
       builder: (_) => RepositoryProvider.value(
         value: context.read<SafeguardingRepository>(),
         child: _SendSheet(kinds: d.kinds),

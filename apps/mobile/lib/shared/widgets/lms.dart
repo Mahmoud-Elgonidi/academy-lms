@@ -1,6 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/app_theme.dart';
+import '../../app/theme/tokens.dart';
+
+export '../../app/theme/tokens.dart';
+export 'actions.dart';
+export 'app_header.dart';
+export 'chips.dart';
+export 'icon_badge.dart';
+export 'menu.dart';
+export 'section_header.dart';
+export 'sheets.dart';
+export 'skeleton.dart';
+export 'stat_tile.dart';
+export 'states.dart';
 
 /// A white card with the stage's corners and a hairline border.
 class LmsCard extends StatelessWidget {
@@ -42,37 +55,6 @@ extension ToneColors on Tone {
       Tone.neutral => (c.chip, c.muted),
       Tone.reward => (c.rewardSoft, const Color(0xFF7A4B00)),
     };
-  }
-}
-
-/// A small rounded label: a status, a count.
-class Pill extends StatelessWidget {
-  const Pill(this.label, {this.tone = Tone.neutral, this.icon, super.key});
-
-  final String label;
-  final Tone tone;
-  final IconData? icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final (bg, ink) = tone.colours(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[Icon(icon, size: 14, color: ink), const SizedBox(width: 4)],
-          Flexible(
-            child: Text(
-              label,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: ink),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
@@ -131,7 +113,7 @@ class InitialAvatar extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: colour ?? context.colors.brand,
-        borderRadius: BorderRadius.circular(context.shape.stage.name == 'kids' ? size / 2 : size * 0.32),
+        borderRadius: BorderRadius.circular(context.isKids ? size / 2 : size * 0.32),
       ),
       child: Text(
         letter,

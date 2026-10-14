@@ -104,10 +104,8 @@ class HelpPage extends StatelessWidget {
   }
 
   Future<void> _write(BuildContext context, TicketOptions options, String? learnerId) async {
-    final ticket = await showModalBottomSheet<Ticket>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
+    final ticket = await showActionSheet<Ticket>(
+      context,
       builder: (_) => RepositoryProvider.value(
         value: context.read<SupportRepository>(),
         child: _NewTicketSheet(options: options, learnerId: learnerId, teacher: scope == HelpScope.teacher),

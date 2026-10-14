@@ -1,23 +1,28 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../shared/motion/motion.dart';
 
 /// A pushed screen comes in fading and growing a little; going back reverses it.
-Page<void> fadeScalePage(GoRouterState state, Widget child) => CustomTransitionPage<void>(
-  key: state.pageKey,
-  child: child,
-  transitionDuration: const Duration(milliseconds: 320),
-  reverseTransitionDuration: const Duration(milliseconds: 240),
-  transitionsBuilder: (context, animation, secondary, child) {
-    if (context.calm) return child;
-    final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
-    return FadeTransition(
-      opacity: curved,
-      child: ScaleTransition(scale: Tween(begin: 0.94, end: 1.0).animate(curved), child: child),
-    );
-  },
-);
+/// On iPhones it slides in the platform's way instead, so a swipe from the
+/// edge goes back.
+Page<void> fadeScalePage(GoRouterState state, Widget child) => defaultTargetPlatform == TargetPlatform.iOS
+    ? CupertinoPage<void>(key: state.pageKey, child: child)
+    : CustomTransitionPage<void>(
+        key: state.pageKey,
+        child: child,
+        transitionDuration: const Duration(milliseconds: 320),
+        reverseTransitionDuration: const Duration(milliseconds: 240),
+        transitionsBuilder: (context, animation, secondary, child) {
+          if (context.calm) return child;
+          final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+          return FadeTransition(
+            opacity: curved,
+            child: ScaleTransition(scale: Tween(begin: 0.94, end: 1.0).animate(curved), child: child),
+          );
+        },
+      );
 
 /// The tabs of a look: each keeps its place (only the shown one is laid
 /// out and ticks), and the one switched to fades in, settling from a

@@ -32,7 +32,6 @@ class FamilyHomePage extends StatelessWidget {
     final learners = context.watch<LearnerCubit>().state;
     final learnerId = context.learnerId();
     final first = (account?.userName ?? '').split(' ').first;
-    final evening = DateTime.now().hour >= 12;
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -48,10 +47,7 @@ class FamilyHomePage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(account?.academyName(context.locale) ?? '', style: context.text.bodySmall),
-                        Text(
-                          evening ? context.l10n.greetingEvening(first) : context.l10n.greetingMorning(first),
-                          style: context.text.titleLarge,
-                        ),
+                        Text(context.l10n.greetingHello(first), style: context.text.titleLarge),
                       ],
                     ),
                   ),
@@ -102,7 +98,7 @@ class _Home extends StatelessWidget {
       children: staggered(context, [
         // A guardian's child waiting for their consent to sign in.
         if (context.read<SessionCubit>().state.current?.isGuardian ?? false) const ConsentNudge(),
-        NextLessonCard(lesson: home.next, onOpened: () => context.read<LoadCubit<FamilyHome>>().load()),
+        NextLessonCard(lesson: home.next),
         Align(
           alignment: AlignmentDirectional.centerEnd,
           child: TextButton(onPressed: () => context.go('/family/lessons'), child: Text(l.allLessons)),
