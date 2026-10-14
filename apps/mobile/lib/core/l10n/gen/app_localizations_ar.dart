@@ -842,10 +842,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navToday => 'النهارده';
 
   @override
-  String get navWeek => 'أسبوعي';
+  String get navWeek => 'الأسبوع';
 
   @override
-  String get navStudents => 'طلابي';
+  String get navStudents => 'الطلاب';
 
   @override
   String get navEarnings => 'أرباحي';
@@ -1488,6 +1488,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get moreSecurity => 'الدخول والأمان';
 
   @override
+  String get moreTeaching => 'التدريس';
+
+  @override
+  String get moreWork => 'شغلي';
+
+  @override
+  String get moreAccountSettings => 'الحساب والإعدادات';
+
+  @override
+  String get meetingLinkMissing => 'مش متحط';
+
+  @override
   String moreAcademies(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
@@ -1983,10 +1995,60 @@ class AppLocalizationsAr extends AppLocalizations {
   String get soundsHint => 'أصوات خفيفة لما تدوس أو تستلم جايزة';
 
   @override
-  String get reportsOpen => 'مستنية منك';
+  String get reportsOpen => 'تقارير مستنياك';
 
   @override
   String get reportsSent => 'اتبعتت';
+
+  @override
+  String get writeReport => 'اكتب';
+
+  @override
+  String waitingFor(String what) {
+    return 'مستنيك: $what';
+  }
+
+  @override
+  String get waitingNothing => 'مفيش حاجة مستنياك';
+
+  @override
+  String bothWaiting(String a, String b) {
+    return '$a و$b';
+  }
+
+  @override
+  String reportsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n تقرير',
+      few: '$n تقارير',
+      two: 'تقريرين',
+      one: 'تقرير واحد',
+      zero: 'مفيش تقارير',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeworkCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n واجب',
+      few: '$n واجبات',
+      two: 'واجبين',
+      one: 'واجب واحد',
+      zero: 'مفيش واجبات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get markingRow => 'واجبات مستنية تصحيح';
+
+  @override
+  String get markingNone => 'مفيش واجبات مستنية دلوقتي';
 
   @override
   String get noReportsWaiting => 'مفيش تقارير مستنياك. برافو!';

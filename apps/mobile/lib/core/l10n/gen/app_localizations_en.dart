@@ -1473,6 +1473,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreSecurity => 'Sign-in and security';
 
   @override
+  String get moreTeaching => 'Teaching';
+
+  @override
+  String get moreWork => 'My work';
+
+  @override
+  String get moreAccountSettings => 'Account and settings';
+
+  @override
+  String get meetingLinkMissing => 'Not set';
+
+  @override
   String moreAcademies(int n) {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n academies', one: '1 academy');
     return '$_temp0';
@@ -1935,10 +1947,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get soundsHint => 'Little sounds on taps and rewards';
 
   @override
-  String get reportsOpen => 'Waiting for you';
+  String get reportsOpen => 'Reports to write';
 
   @override
   String get reportsSent => 'Sent';
+
+  @override
+  String get writeReport => 'Write';
+
+  @override
+  String waitingFor(String what) {
+    return 'Waiting: $what';
+  }
+
+  @override
+  String get waitingNothing => 'Nothing waiting for you';
+
+  @override
+  String bothWaiting(String a, String b) {
+    return '$a and $b';
+  }
+
+  @override
+  String reportsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n reports', one: '1 report', zero: 'no reports');
+    return '$_temp0';
+  }
+
+  @override
+  String homeworkCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n homework', one: '1 homework', zero: 'no homework');
+    return '$_temp0';
+  }
+
+  @override
+  String get markingRow => 'Homework to mark';
+
+  @override
+  String get markingNone => 'Nothing to mark now';
 
   @override
   String get noReportsWaiting => 'No reports waiting. Well done!';

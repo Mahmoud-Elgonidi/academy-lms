@@ -55,6 +55,8 @@ import '../../features/teaching/presentation/pages/time_off_page.dart';
 import '../../features/teaching/presentation/pages/meeting_link_page.dart';
 import '../../features/teaching/presentation/pages/today_page.dart';
 import '../../features/teaching/presentation/pages/week_page.dart';
+import '../../features/teaching/domain/teaching.dart';
+import '../../features/teaching/presentation/widgets/waiting.dart';
 import 'areas.dart';
 import 'shell.dart';
 import 'targets.dart';
@@ -184,12 +186,9 @@ GoRouter buildRouter(SessionCubit session) {
       page('/inbox', (_) => const InboxPage(), routes: [page('choices', (_) => const ChoicesPage())]),
       page('/open/:screen', (_) => const SplashPage(), routes: [page(':id', (_) => const SplashPage())]),
       page('/classroom/:id', (s) => ClassroomPage(lessonId: s.pathParameters['id']!, ticket: s.extra)),
-      // The teacher's focused tasks open over the tabs.
-      page(
-        '/teach/reports',
-        (_) => const TeacherReportsPage(),
-        routes: [page(':id', (s) => TeacherReportPage(reportId: s.pathParameters['id']!))],
-      ),
+      // The teacher's focused tasks open over the tabs: writing a report (the
+      // Reports tab lists them), marking homework, the hours.
+      page('/teach/reports/:id', (s) => TeacherReportPage(reportId: s.pathParameters['id']!)),
       page('/teach/marking', (_) => const MarkingPage()),
       page(
         '/teach/hours',
@@ -334,28 +333,37 @@ GoRouter buildRouter(SessionCubit session) {
       moved('/teen/goals', '/teen/journey'),
       moved('/family/progress', '/family/journey'),
 
-      // Teachers.
+      // Teachers: the day, the week, reports to write (with what waits on the tab), students, and the rest.
       StatefulShellRoute(
         navigatorContainerBuilder: _branches,
-        builder: (context, state, shell) => AppShell(
-          shell: shell,
-          tabs: [
-            ShellTab(Icons.schedule_outlined, Icons.schedule_rounded, context.l10n.navToday),
-            ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, context.l10n.navWeek),
-            ShellTab(Icons.groups_outlined, Icons.groups_rounded, context.l10n.navStudents),
-            ShellTab(Icons.account_balance_wallet_outlined, Icons.account_balance_wallet_rounded, context.l10n.navEarnings),
-            ShellTab(Icons.more_horiz_rounded, Icons.more_horiz_rounded, context.l10n.navMore),
-          ],
+        builder: (context, state, shell) => BlocProvider(
+          create: (c) => waitingOnTeacher(c)..load(),
+          child: Builder(
+            builder: (context) {
+              final waiting = context.select<LoadCubit<TeacherTodo>, int>((c) => c.state.data?.total ?? 0);
+              return AppShell(
+                shell: shell,
+                tabs: [
+                  ShellTab(Icons.wb_sunny_outlined, Icons.wb_sunny_rounded, context.l10n.navToday),
+                  ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, context.l10n.navWeek),
+                  ShellTab(Icons.description_outlined, Icons.description_rounded, context.l10n.navReports, count: waiting, beat: false),
+                  ShellTab(Icons.groups_outlined, Icons.groups_rounded, context.l10n.navStudents),
+                  ShellTab(Icons.more_horiz_rounded, Icons.more_horiz_rounded, context.l10n.navMore),
+                ],
+              );
+            },
+          ),
         ),
         branches: [
           branch('/teach/today', (_) => const TodayPage()),
           branch('/teach/week', (_) => const WeekPage()),
+          branch('/teach/reports', (_) => const TeacherReportsPage()),
           branch('/teach/students', (_) => const StudentsPage()),
-          branch('/teach/earnings', (_) => const EarningsPage()),
           branch(
             '/teach/more',
             (_) => const MorePage(),
             routes: [
+              page('earnings', (_) => const EarningsPage()),
               page('time-off', (_) => const TimeOffPage()),
               page('meeting-link', (_) => const MeetingLinkPage()),
               page('recordings', (_) => const RecordingsPage(teacher: true)),
@@ -368,6 +376,8 @@ GoRouter buildRouter(SessionCubit session) {
           ),
         ],
       ),
+      // Earnings were a tab before Reports took its place.
+      moved('/teach/earnings', '/teach/more/earnings'),
     ],
   );
 }

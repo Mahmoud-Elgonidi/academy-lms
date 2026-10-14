@@ -127,6 +127,31 @@ class InitialAvatar extends StatelessWidget {
   }
 }
 
+/// A person's initial on the brand's soft colour, past a title ("أ. خالد" → خ).
+class SoftAvatar extends StatelessWidget {
+  const SoftAvatar(this.name, {this.size = 48, super.key});
+
+  final String name;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final words = name.trim().split(RegExp(r'\s+'));
+    final word = words.firstWhere((w) => !w.endsWith('.'), orElse: () => words.first);
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: c.brandSoft, shape: BoxShape.circle),
+      child: Text(
+        word.isEmpty ? '?' : word.characters.first,
+        style: TextStyle(fontFamily: context.shape.headingFont, color: c.brandDeep, fontWeight: FontWeight.w700, fontSize: size * 0.42),
+      ),
+    );
+  }
+}
+
 /// A small heading over a group of cards.
 class SectionLabel extends StatelessWidget {
   const SectionLabel(this.text, {this.trailing, super.key});

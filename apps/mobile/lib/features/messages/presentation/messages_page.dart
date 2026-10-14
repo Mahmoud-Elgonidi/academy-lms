@@ -126,7 +126,7 @@ class _Row extends StatelessWidget {
     final last = row.lastBody;
     final body = Row(
       children: [
-        grouped ? _SoftAvatar(row.withName) : InitialAvatar(row.withName),
+        grouped ? SoftAvatar(row.withName) : InitialAvatar(row.withName),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -171,30 +171,6 @@ class _Row extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: Space.l, vertical: Space.m + 2),
         child: body,
-      ),
-    );
-  }
-}
-
-/// A person's initial on the brand's soft colour, past a title ("أ. خالد" → خ).
-class _SoftAvatar extends StatelessWidget {
-  const _SoftAvatar(this.name);
-
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final words = name.trim().split(RegExp(r'\s+'));
-    final word = words.firstWhere((w) => !w.endsWith('.'), orElse: () => words.first);
-    return Container(
-      width: 48,
-      height: 48,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: c.brandSoft, shape: BoxShape.circle),
-      child: Text(
-        word.isEmpty ? '?' : word.characters.first,
-        style: TextStyle(fontFamily: context.shape.headingFont, color: c.brandDeep, fontWeight: FontWeight.w700, fontSize: 20),
       ),
     );
   }

@@ -44,6 +44,13 @@ void main() {
     expect(targetOf('write_report', 'r9', Area.teacher), '/teach/reports/r9');
     expect(targetOf('shift_proposal', null, Area.teacher), '/teach/hours');
     expect(targetOf('homework_to_mark', 'h1', Area.teacher), '/teach/marking');
+    expect(targetOf('write_report', null, Area.teacher), '/teach/reports');
+    expect(targetOf('payroll_month', '2099-10', Area.teacher), '/teach/more/earnings');
+    expect(targetOf('account', null, Area.teacher), '/account');
+    // A report to write opens over the tabs; the list of them is a tab.
+    expect(opensOverTabs('/teach/reports/r9'), isTrue);
+    expect(opensOverTabs('/teach/reports'), isFalse);
+    expect(opensOverTabs('/teach/more/earnings'), isFalse);
     expect(targetOf('invoice', 'i1', Area.family), '/family/money');
     expect(targetOf('session', 's1', Area.kids), '/kids/lessons');
     expect(targetOf('challenges', null, Area.middle), '/middle/journey');

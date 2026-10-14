@@ -105,7 +105,7 @@ class _TodayList extends StatelessWidget {
               if (todo.reports > 0)
                 Expanded(
                   child: _Waiting(
-                    onTap: () => _open(context, '/teach/reports'),
+                    onTap: () => context.go('/teach/reports'),
                     count: todo.reports,
                     label: l.reportsWaiting(todo.reports),
                     caption: todo.firstReport == null

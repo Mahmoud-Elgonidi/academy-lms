@@ -15,7 +15,7 @@ String targetOf(String? screen, String? id, Area area) {
       'homework_to_mark' => '/teach/marking',
       'shift_proposal' => '/teach/hours',
       'time_off' => '/teach/more/time-off',
-      'payroll_month' => '/teach/earnings',
+      'payroll_month' => '/teach/more/earnings',
       'ticket' when id != null => '/teach/more/help/$id',
       'my_data' => '/teach/more/my-data',
       'account' => '/account',
@@ -58,10 +58,11 @@ String targetOf(String? screen, String? id, Area area) {
   };
 }
 
-/// The teacher's tasks and the inbox open over the tabs (pushed, with a way
-/// back); any other place is a tab of the look, which is switched to.
+/// The teacher's tasks (a report to write, marking, hours) and the inbox open
+/// over the tabs (pushed, with a way back); any other place is a tab of the
+/// look, which is switched to (the list of reports is one).
 bool opensOverTabs(String location) =>
-    const ['/teach/reports', '/teach/marking', '/teach/hours', '/inbox', '/account'].any(location.startsWith);
+    const ['/teach/reports/', '/teach/marking', '/teach/hours', '/inbox', '/account'].any(location.startsWith);
 
 /// A message read where it is, in full, in the inbox: it opens nowhere else.
 bool readsInPlace(String? screen) => screen == 'announcement';

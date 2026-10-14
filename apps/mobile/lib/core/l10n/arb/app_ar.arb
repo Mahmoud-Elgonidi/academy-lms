@@ -574,8 +574,8 @@
   "navHomework": "الواجبات",
   "navReports": "التقارير",
   "navToday": "النهارده",
-  "navWeek": "أسبوعي",
-  "navStudents": "طلابي",
+  "navWeek": "الأسبوع",
+  "navStudents": "الطلاب",
   "navEarnings": "أرباحي",
   "navMore": "المزيد",
   "greetingMorning": "صباح الخير يا {name}",
@@ -1099,6 +1099,10 @@
   "moreAccounts": "الحسابات",
   "moreLanguage": "اللغة والتوقيت",
   "moreSecurity": "الدخول والأمان",
+  "moreTeaching": "التدريس",
+  "moreWork": "شغلي",
+  "moreAccountSettings": "الحساب والإعدادات",
+  "meetingLinkMissing": "مش متحط",
   "moreAcademies": "{n, plural, =1{أكاديمية واحدة} =2{أكاديميتين} few{{n} أكاديميات} other{{n} أكاديمية}}",
   "@moreAcademies": {
     "placeholders": {
@@ -1446,8 +1450,47 @@
   },
   "sounds": "الأصوات",
   "soundsHint": "أصوات خفيفة لما تدوس أو تستلم جايزة",
-  "reportsOpen": "مستنية منك",
+  "reportsOpen": "تقارير مستنياك",
   "reportsSent": "اتبعتت",
+  "writeReport": "اكتب",
+  "waitingFor": "مستنيك: {what}",
+  "@waitingFor": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "waitingNothing": "مفيش حاجة مستنياك",
+  "bothWaiting": "{a} و{b}",
+  "@bothWaiting": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsCount": "{n, plural, =0{مفيش تقارير} =1{تقرير واحد} =2{تقريرين} few{{n} تقارير} other{{n} تقرير}}",
+  "@reportsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeworkCount": "{n, plural, =0{مفيش واجبات} =1{واجب واحد} =2{واجبين} few{{n} واجبات} other{{n} واجب}}",
+  "@homeworkCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "markingRow": "واجبات مستنية تصحيح",
+  "markingNone": "مفيش واجبات مستنية دلوقتي",
   "noReportsWaiting": "مفيش تقارير مستنياك. برافو!",
   "reportLesson": "تقرير حصة",
   "reportAbsence": "ملاحظة غياب",

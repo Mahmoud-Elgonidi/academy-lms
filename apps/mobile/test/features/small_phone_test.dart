@@ -272,7 +272,7 @@ void main() {
       await _scrollDown(tester);
       expect(find.text('تقرير مستنيك'), findsOneWidget);
 
-      for (final place in ['/teach/week', '/teach/earnings']) {
+      for (final place in ['/teach/week', '/teach/reports', '/teach/students', '/teach/more', '/teach/more/earnings']) {
         await _go(tester, place);
         await _scrollDown(tester);
       }

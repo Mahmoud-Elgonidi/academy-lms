@@ -1,120 +1,180 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/widgets/lms.dart';
+import '../../../profile/presentation/pages/account_page.dart';
+import '../../../profile/presentation/widgets/more_rows.dart';
+import '../../data/teaching_repository.dart';
+import '../../domain/teaching.dart';
+import '../widgets/teacher_header.dart';
 
-/// The teacher's other screens: reports, marking, hours, the lesson link, time off, support and the account.
+/// A teacher's More: who is signed in, then three groups: teaching
+/// (messages with their count, the lesson link, recordings), work (hours,
+/// time off, earnings, documents) and the account (settings, support,
+/// raising a concern, my data), and signing out.
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    return Scaffold(
-      appBar: AppBar(title: Text(l.navMore)),
+    final account = context.watch<SessionCubit>().state.current;
+    return TeacherTab(
+      header: TeacherHeader(title: l.navMore),
       body: ListView(
-        padding: pagePadding,
+        padding: pagePadding.copyWith(top: Space.m),
         children: [
-          LmsCard(
-            padding: EdgeInsets.zero,
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.article_outlined),
-                  title: Text(l.navReports),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.push('/teach/reports'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.rate_review_outlined),
-                  title: Text(l.markTitle),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.push('/teach/marking'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.schedule_rounded),
-                  title: Text(l.myHours),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.push('/teach/hours'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  key: const Key('open-meeting-link'),
-                  leading: const Icon(Icons.link_rounded),
-                  title: Text(l.meetingLinkTitle),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.go('/teach/more/meeting-link'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.beach_access_outlined),
-                  title: Text(l.timeOff),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.push('/teach/more/time-off'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  key: const Key('open-recordings'),
-                  leading: const Icon(Icons.video_library_outlined),
-                  title: Text(l.recordingsMine),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.go('/teach/more/recordings'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  key: const Key('open-messages'),
-                  leading: const Icon(Icons.forum_outlined),
-                  title: Text(l.messagesTitle),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.go('/teach/more/messages'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  key: const Key('open-support'),
-                  leading: const Icon(Icons.support_agent_outlined),
-                  title: Text(l.supportTitle),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.go('/teach/more/help'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  key: const Key('open-concern'),
-                  leading: const Icon(Icons.shield_outlined),
-                  title: Text(l.concernTeacherNav),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.go('/teach/more/concern'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  key: const Key('open-documents'),
-                  leading: const Icon(Icons.badge_outlined),
-                  title: Text(l.documentsTitle),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.go('/teach/more/documents'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  key: const Key('open-my-data'),
-                  leading: const Icon(Icons.fingerprint_rounded),
-                  title: Text(l.myDataTitle),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.go('/teach/more/my-data'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.person_outline_rounded),
-                  title: Text(l.meTitle),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.push('/account'),
-                ),
-              ],
-            ),
-          ),
+          const ClockPrompt(),
+          if (account != null)
+            MoreWho(line: [l.roleTeacher, account.academyName(context.locale)].join(' · '), onTap: () => context.push('/account')),
+          const _Groups(),
+          const Gap(Space.xl),
+          const SignOutButton(),
+          const AppVersionLine(),
         ],
       ),
     );
   }
+}
+
+/// The rows, with what is worth knowing before opening them: the link's
+/// service, where a change to the hours stands.
+class _Groups extends StatefulWidget {
+  const _Groups();
+
+  @override
+  State<_Groups> createState() => _GroupsState();
+}
+
+class _GroupsState extends State<_Groups> {
+  String? _link;
+  bool _linkMissing = false;
+  String? _hours;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_read());
+  }
+
+  Future<void> _read() async {
+    final repo = context.read<TeachingRepository>();
+    final link = repo.meetingLink().then<MeetingLinkInfo?>((m) => m).catchError((_) => null);
+    final hours = repo.shifts().then<String?>((s) => s.proposal?.statusLabel).catchError((_) => null);
+    final (m, h) = (await link, await hours);
+    if (!mounted) return;
+    setState(() {
+      _link = m?.url == null ? null : linkService(m!.url!);
+      _linkMissing = m != null && m.url == null && m.used;
+      _hours = h;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        MenuGroup(
+          title: l.moreTeaching,
+          children: [
+            MessagesRow(at: '/teach/more/messages', label: l.messagesTitle),
+            MenuRow(
+              key: const Key('open-meeting-link'),
+              icon: Icons.link_rounded,
+              label: l.meetingLinkTitle,
+              value: _link ?? (_linkMissing ? l.meetingLinkMissing : null),
+              onTap: () async {
+                await context.push('/teach/more/meeting-link');
+                if (mounted) await _read();
+              },
+            ),
+            MenuRow(
+              key: const Key('open-recordings'),
+              icon: Icons.videocam_outlined,
+              label: l.recordingsMine,
+              onTap: () => context.go('/teach/more/recordings'),
+            ),
+          ],
+        ),
+        MenuGroup(
+          title: l.moreWork,
+          children: [
+            MenuRow(
+              key: const Key('open-hours'),
+              icon: Icons.schedule_rounded,
+              label: l.myHours,
+              value: _hours,
+              onTap: () async {
+                await context.push('/teach/hours');
+                if (mounted) await _read();
+              },
+            ),
+            MenuRow(
+              key: const Key('open-time-off'),
+              icon: Icons.beach_access_outlined,
+              label: l.timeOff,
+              onTap: () => context.go('/teach/more/time-off'),
+            ),
+            MenuRow(
+              key: const Key('open-earnings'),
+              icon: Icons.account_balance_wallet_outlined,
+              label: l.navEarnings,
+              onTap: () => context.go('/teach/more/earnings'),
+            ),
+            MenuRow(
+              key: const Key('open-documents'),
+              icon: Icons.fact_check_outlined,
+              label: l.documentsTitle,
+              onTap: () => context.go('/teach/more/documents'),
+            ),
+          ],
+        ),
+        MenuGroup(
+          title: l.moreMine,
+          children: [
+            MenuRow(
+              key: const Key('open-account'),
+              icon: Icons.settings_outlined,
+              label: l.moreAccountSettings,
+              onTap: () => context.push('/account'),
+            ),
+            MenuRow(
+              key: const Key('open-support'),
+              icon: Icons.help_outline_rounded,
+              label: l.supportTitle,
+              onTap: () => context.go('/teach/more/help'),
+            ),
+            MenuRow(
+              key: const Key('open-concern'),
+              icon: Icons.flag_outlined,
+              label: l.concernTeacherNav,
+              onTap: () => context.go('/teach/more/concern'),
+            ),
+            MenuRow(
+              key: const Key('open-my-data'),
+              icon: Icons.description_outlined,
+              label: l.myDataTitle,
+              onTap: () => context.go('/teach/more/my-data'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// The service a lesson link is on, by its address ("Google Meet", "Zoom"), else its host.
+String linkService(String url) {
+  final host = Uri.tryParse(url.trim())?.host.toLowerCase() ?? '';
+  if (host.endsWith('meet.google.com')) return 'Google Meet';
+  if (host.endsWith('zoom.us') || host.endsWith('zoom.com')) return 'Zoom';
+  if (host.endsWith('teams.microsoft.com') || host.endsWith('teams.live.com')) return 'Teams';
+  return host.startsWith('www.') ? host.substring(4) : host;
 }

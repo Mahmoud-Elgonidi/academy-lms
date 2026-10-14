@@ -59,7 +59,7 @@ void main() {
     // Today's waiting card opens the reports.
     await tester.tap(find.text('تقرير مستنيك'));
     await frames(tester, 10);
-    expect(find.text('مستنية منك'), findsOneWidget);
+    expect(find.text('تقارير مستنياك'), findsOneWidget);
     await tester.tap(find.text('يوسف خالد'));
     await frames(tester, 10);
     expect(find.text('خطة النهارده'), findsOneWidget);

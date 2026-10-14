@@ -1499,13 +1499,13 @@ abstract class AppLocalizations {
   /// No description provided for @navWeek.
   ///
   /// In ar, this message translates to:
-  /// **'أسبوعي'**
+  /// **'الأسبوع'**
   String get navWeek;
 
   /// No description provided for @navStudents.
   ///
   /// In ar, this message translates to:
-  /// **'طلابي'**
+  /// **'الطلاب'**
   String get navStudents;
 
   /// No description provided for @navEarnings.
@@ -2570,6 +2570,30 @@ abstract class AppLocalizations {
   /// **'الدخول والأمان'**
   String get moreSecurity;
 
+  /// No description provided for @moreTeaching.
+  ///
+  /// In ar, this message translates to:
+  /// **'التدريس'**
+  String get moreTeaching;
+
+  /// No description provided for @moreWork.
+  ///
+  /// In ar, this message translates to:
+  /// **'شغلي'**
+  String get moreWork;
+
+  /// No description provided for @moreAccountSettings.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحساب والإعدادات'**
+  String get moreAccountSettings;
+
+  /// No description provided for @meetingLinkMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش متحط'**
+  String get meetingLinkMissing;
+
   /// No description provided for @moreAcademies.
   ///
   /// In ar, this message translates to:
@@ -3329,7 +3353,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportsOpen.
   ///
   /// In ar, this message translates to:
-  /// **'مستنية منك'**
+  /// **'تقارير مستنياك'**
   String get reportsOpen;
 
   /// No description provided for @reportsSent.
@@ -3337,6 +3361,54 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'اتبعتت'**
   String get reportsSent;
+
+  /// No description provided for @writeReport.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب'**
+  String get writeReport;
+
+  /// No description provided for @waitingFor.
+  ///
+  /// In ar, this message translates to:
+  /// **'مستنيك: {what}'**
+  String waitingFor(String what);
+
+  /// No description provided for @waitingNothing.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش حاجة مستنياك'**
+  String get waitingNothing;
+
+  /// No description provided for @bothWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'{a} و{b}'**
+  String bothWaiting(String a, String b);
+
+  /// No description provided for @reportsCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مفيش تقارير} =1{تقرير واحد} =2{تقريرين} few{{n} تقارير} other{{n} تقرير}}'**
+  String reportsCount(int n);
+
+  /// No description provided for @homeworkCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مفيش واجبات} =1{واجب واحد} =2{واجبين} few{{n} واجبات} other{{n} واجب}}'**
+  String homeworkCount(int n);
+
+  /// No description provided for @markingRow.
+  ///
+  /// In ar, this message translates to:
+  /// **'واجبات مستنية تصحيح'**
+  String get markingRow;
+
+  /// No description provided for @markingNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش واجبات مستنية دلوقتي'**
+  String get markingNone;
 
   /// No description provided for @noReportsWaiting.
   ///

@@ -142,7 +142,7 @@ void main() {
       );
     });
     await _open(tester, app);
-    await tester.tap(find.text('أسبوعي').last);
+    await tester.tap(find.text('الأسبوع').last);
     await frames(tester, 12);
 
     expect(find.text('يوسف خالد'), findsNWidgets(2));
@@ -182,7 +182,7 @@ void main() {
       ],
     });
     await _open(tester, app);
-    await tester.tap(find.text('طلابي').last);
+    await tester.tap(find.text('الطلاب').last);
     await frames(tester, 12);
 
     expect(find.text('يوسف خالد'), findsOneWidget);
@@ -249,9 +249,9 @@ void main() {
         },
       );
     });
-    await _open(tester, app);
-    await tester.tap(find.text('أرباحي').last);
-    await frames(tester, 12);
+    // Earnings sit under More now; their old place leads there.
+    await _open(tester, app, '/teach/earnings');
+    expect(GoRouter.of(tester.element(find.byType(Scaffold).first)).state.matchedLocation, '/teach/more/earnings');
 
     expect(find.text('أكتوبر 2099'), findsOneWidget);
     expect(find.text('500 ج.م.'), findsOneWidget);
@@ -404,6 +404,74 @@ void main() {
     expect(app.api.sent('PUT', 'teacher/meeting-link').single.data, {'url': 'https://meet.google.com/abc-defg-hij'});
     expect(find.text('اللينك اتحفظ.'), findsOneWidget);
     expect(find.text('الأكاديمية شغالة على لينكات خارجية، ومفيش حصة هتفتح من غير لينكك.'), findsNothing);
+    await _close(tester);
+  });
+
+  testWidgets('the Reports tab: what waits counted on the tab, marking on top, then the reports to write and the ones sent', (
+    tester,
+  ) async {
+    final app = await TestApp.create(accounts: [teacher]);
+    teacherRoutes(app.api);
+    app.api
+      ..on('GET', 'teacher/reports', {
+        'data': [
+          report('r1'),
+          {
+            ...report('r2', status: 'overdue'),
+            'status_label': 'متأخر يوم',
+            'student': {'id': 's2', 'name': 'ليلى عمرو'},
+          },
+          {
+            ...report('r3', status: 'submitted'),
+            'student': {'id': 's3', 'name': 'مريم خالد'},
+          },
+        ],
+      })
+      ..on('GET', 'teacher/homework', {
+        'data': [homeworkJson('h1', status: 'submitted'), homeworkJson('h2', status: 'submitted')],
+      });
+    await _open(tester, app, '/teach/reports');
+
+    // Two reports and two homework wait: the tab says 4, the line above says what.
+    expect(find.descendant(of: find.byType(NavigationBar), matching: find.text('4')), findsOneWidget);
+    expect(find.text('مستنيك: تقريرين وواجبين'), findsOneWidget);
+    expect(find.text('واجبات مستنية تصحيح'), findsOneWidget);
+    // The overdue one comes first, with how late in its line.
+    final rows = tester.widgetList<InkWell>(find.byWidgetPredicate((w) => w is InkWell && '${w.key}'.contains('report-r'))).toList();
+    expect(rows.first.key, const Key('report-r2'));
+    expect(find.textContaining('متأخر يوم'), findsOneWidget);
+    expect(find.text('اكتب'), findsNWidgets(2));
+    expect(find.text('اتبعتت'), findsOneWidget);
+    expect(find.text('مريم خالد'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('open-marking')));
+    await frames(tester, 12);
+    expect(find.text('تصحيح الواجبات'), findsWidgets);
+    await _close(tester);
+  });
+
+  testWidgets('More: teaching, work and the account, with the link\'s service, unread messages and earnings', (tester) async {
+    final app = await TestApp.create(accounts: [teacher]);
+    teacherRoutes(app.api);
+    app.api
+      ..on('GET', 'messages/unread', {
+        'data': {'count': 3},
+      })
+      ..on('GET', 'teacher/meeting-link', {'url': 'https://zoom.us/j/123', 'used': true, 'label': '', 'hint': ''});
+    await _open(tester, app, '/teach/more');
+
+    expect(find.text('التدريس'), findsOneWidget);
+    expect(find.text('شغلي'), findsOneWidget);
+    expect(find.text('حسابي'), findsOneWidget);
+    expect(find.text('Zoom'), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('open-messages')), matching: find.text('3')), findsOneWidget);
+    expect(find.byKey(const Key('more-who')), findsOneWidget);
+    expect(find.text('مدرّس · أكاديمية النور'), findsOneWidget);
+    // Earnings left the tabs for More.
+    expect(find.descendant(of: find.byType(NavigationBar), matching: find.text('أرباحي')), findsNothing);
+    await tester.tap(find.byKey(const Key('open-earnings')));
+    await frames(tester, 12);
+    expect(GoRouter.of(tester.element(find.byType(Scaffold).first)).state.matchedLocation, '/teach/more/earnings');
     await _close(tester);
   });
 }

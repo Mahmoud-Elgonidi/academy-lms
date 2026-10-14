@@ -206,6 +206,9 @@ class TeacherTodo {
 
   /// The report due first: whose, and by when.
   final ({String student, LocalTime? dueAt})? firstReport;
+
+  /// Everything waiting, as the Reports tab counts it.
+  int get total => reports + homework;
 }
 
 /// The teacher's own Zoom or Meet link, and whether the academy's lessons run on outside links now

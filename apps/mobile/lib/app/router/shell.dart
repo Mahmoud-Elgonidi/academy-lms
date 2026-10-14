@@ -8,14 +8,16 @@ import '../../shared/motion/juice.dart';
 import '../../shared/motion/motion.dart';
 import '../../shared/motion/tab_pop.dart';
 
-/// One tab of a look's bar; [count] puts a dot with a number on it (rewards waiting).
+/// One tab of a look's bar; [count] puts a dot with a number on it
+/// (rewards waiting, which beat; work waiting, which keeps still).
 class ShellTab {
-  const ShellTab(this.icon, this.selectedIcon, this.label, {this.count = 0});
+  const ShellTab(this.icon, this.selectedIcon, this.label, {this.count = 0, this.beat = true});
 
   final IconData icon;
   final IconData selectedIcon;
   final String label;
   final int count;
+  final bool beat;
 }
 
 /// The frame of a signed-in look: its tabs at the bottom, each keeping its
@@ -66,6 +68,6 @@ class AppShell extends StatelessWidget {
       ? icon
       : Badge(
           label: Text('${t.count}'),
-          child: Builder(builder: (context) => icon.pulse(context)),
+          child: t.beat ? Builder(builder: (context) => icon.pulse(context)) : icon,
         );
 }
