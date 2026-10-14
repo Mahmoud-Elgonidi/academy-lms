@@ -134,6 +134,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/teacher/meeting-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The teacher's lesson link
+         * @description Their own Zoom or Meet link, and whether the academy's lessons run on outside links now (then their families
+         *     join through it, and a lesson cannot open without it).
+         */
+        get: operations["teacher.meeting-link"];
+        /**
+         * Save the teacher's lesson link
+         * @description An https link (Zoom, Meet, ...), 500 characters at most; an empty one removes it.
+         */
+        put: operations["teacher.meeting-link.save"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/recordings/consents": {
         parameters: {
             query?: never;
@@ -2935,6 +2960,105 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "teacher.meeting-link": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description The teacher's link, or null when they have none. */
+                        url: unknown;
+                        /** @description Whether the academy's lessons run on each teacher's outside link now. */
+                        used: boolean;
+                        /** @constant */
+                        label: "Your Zoom or Meet link";
+                        /** @constant */
+                        hint: "Used when the academy runs lessons on outside links instead of its classroom.";
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+        };
+    };
+    "teacher.meeting-link.save": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    url: string | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description The teacher's link, or null when they have none. */
+                        url: unknown;
+                        /** @description Whether the academy's lessons run on each teacher's outside link now. */
+                        used: boolean;
+                        /** @constant */
+                        label: "Your Zoom or Meet link";
+                        /** @constant */
+                        hint: "Used when the academy runs lessons on outside links instead of its classroom.";
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
         };
     };
     "recordings.consents": {

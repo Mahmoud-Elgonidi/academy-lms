@@ -2288,6 +2288,36 @@ abstract class AppLocalizations {
   /// **'اتصحّح'**
   String get corrected;
 
+  /// No description provided for @meetingLinkTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لينك الحصة بتاعك'**
+  String get meetingLinkTitle;
+
+  /// No description provided for @meetingLinkNeeded.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكاديمية شغالة على لينكات خارجية، ومفيش حصة هتفتح من غير لينكك.'**
+  String get meetingLinkNeeded;
+
+  /// No description provided for @meetingLinkSave.
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ اللينك'**
+  String get meetingLinkSave;
+
+  /// No description provided for @meetingLinkSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللينك اتحفظ.'**
+  String get meetingLinkSaved;
+
+  /// No description provided for @meetingLinkRemoved.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللينك اتشال.'**
+  String get meetingLinkRemoved;
+
   /// No description provided for @timeOff.
   ///
   /// In ar, this message translates to:

@@ -107,3 +107,8 @@ export async function sendDocument(form: FormData, key: string): Promise<Result>
   if (file instanceof File && file.size > 0) sent.set('file', file, file.name || 'document');
   return result(await send('post', '/v1/teacher/checks', { form: sent, idempotencyKey: key }));
 }
+
+/** Saves the teacher's own Zoom or Meet link (empty removes it); families join outside-link lessons through it. */
+export async function saveMeetingLink(url: string): Promise<Result> {
+  return result(await send('put', '/v1/teacher/meeting-link', { body: { url: url.trim() } }));
+}

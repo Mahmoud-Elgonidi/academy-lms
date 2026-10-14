@@ -154,3 +154,21 @@ it('shows my own numbers and ratings without names, and my trial lessons', funct
     $this->clearTenant();
     $this->withToken(teacherApp($parent))->getJson('/api/v1/teacher/performance')->assertForbidden();
 });
+
+it('lets a teacher set, read and remove their own Zoom or Meet link, and nobody else', function () {
+    $token = teacherApp($this->teacher);
+
+    $this->withToken($token)->getJson('/api/v1/teacher/meeting-link')->assertOk()->assertJsonPath('url', null)->assertJsonStructure(['url', 'used', 'label', 'hint']);
+    $this->withToken($token)->putJson('/api/v1/teacher/meeting-link', ['url' => 'http://meet.google.com/abc-defg-hij'])->assertUnprocessable();
+    $this->withToken($token)->putJson('/api/v1/teacher/meeting-link', ['url' => 'https://meet.google.com/abc-defg-hij'])->assertOk()
+        ->assertJsonPath('url', 'https://meet.google.com/abc-defg-hij');
+    $this->withToken($token)->getJson('/api/v1/teacher/meeting-link')->assertJsonPath('url', 'https://meet.google.com/abc-defg-hij');
+    $this->withToken($token)->putJson('/api/v1/teacher/meeting-link', ['url' => ''])->assertOk()->assertJsonPath('url', null);
+    $this->withToken($token)->putJson('/api/v1/teacher/meeting-link', [])->assertUnprocessable();
+
+    $this->actAsTenant($this->academy);
+    $parent = User::factory()->withRole(Role::Guardian)->create();
+    $this->clearTenant();
+    $this->withToken(teacherApp($parent))->getJson('/api/v1/teacher/meeting-link')->assertForbidden();
+    $this->withToken(teacherApp($parent))->putJson('/api/v1/teacher/meeting-link', ['url' => 'https://zoom.us/j/1'])->assertForbidden();
+});

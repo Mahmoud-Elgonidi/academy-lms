@@ -1375,6 +1375,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get corrected => 'اتصحّح';
 
   @override
+  String get meetingLinkTitle => 'لينك الحصة بتاعك';
+
+  @override
+  String get meetingLinkNeeded => 'الأكاديمية شغالة على لينكات خارجية، ومفيش حصة هتفتح من غير لينكك.';
+
+  @override
+  String get meetingLinkSave => 'احفظ اللينك';
+
+  @override
+  String get meetingLinkSaved => 'اللينك اتحفظ.';
+
+  @override
+  String get meetingLinkRemoved => 'اللينك اتشال.';
+
+  @override
   String get timeOff => 'الإجازات';
 
   @override

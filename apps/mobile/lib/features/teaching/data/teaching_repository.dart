@@ -128,4 +128,11 @@ class TeachingRepository {
   }
 
   Future<void> withdrawTimeOff(String id) => _api.delete('teacher/time-off/$id');
+
+  /// The teacher's own Zoom or Meet link (lessons on outside links).
+  Future<MeetingLinkInfo> meetingLink() async => MeetingLinkInfo.fromJson(await _api.get('teacher/meeting-link'));
+
+  /// Saves the teacher's link; an empty one removes it.
+  Future<MeetingLinkInfo> saveMeetingLink(String url) async =>
+      MeetingLinkInfo.fromJson(await _api.put('teacher/meeting-link', body: {'url': url.trim()}));
 }

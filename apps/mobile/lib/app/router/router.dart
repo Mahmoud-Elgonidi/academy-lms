@@ -49,6 +49,7 @@ import '../../features/teaching/presentation/pages/shifts_page.dart';
 import '../../features/teaching/presentation/pages/reports_page.dart';
 import '../../features/teaching/presentation/pages/students_page.dart';
 import '../../features/teaching/presentation/pages/time_off_page.dart';
+import '../../features/teaching/presentation/pages/meeting_link_page.dart';
 import '../../features/teaching/presentation/pages/today_page.dart';
 import '../../features/teaching/presentation/pages/week_page.dart';
 import 'areas.dart';
@@ -344,6 +345,7 @@ GoRouter buildRouter(SessionCubit session) {
             (_) => const MorePage(),
             routes: [
               page('time-off', (_) => const TimeOffPage()),
+              page('meeting-link', (_) => const MeetingLinkPage()),
               page('recordings', (_) => const RecordingsPage(teacher: true)),
               page('my-data', (_) => const MyDataPage(teacher: true)),
               page('concern', (_) => const TellUsPage(scope: ConcernScope.teacher)),

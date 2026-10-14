@@ -207,3 +207,21 @@ class TeacherTodo {
   /// The report due first: whose, and by when.
   final ({String student, LocalTime? dueAt})? firstReport;
 }
+
+/// The teacher's own Zoom or Meet link, and whether the academy's lessons run on outside links now
+/// (then families join through it, and a lesson cannot open without it).
+class MeetingLinkInfo {
+  const MeetingLinkInfo({required this.url, required this.used, required this.label, required this.hint});
+
+  factory MeetingLinkInfo.fromJson(Map<String, dynamic> json) => MeetingLinkInfo(
+    url: json['url'] as String?,
+    used: json['used'] as bool? ?? false,
+    label: json['label'] as String? ?? '',
+    hint: json['hint'] as String? ?? '',
+  );
+
+  final String? url;
+  final bool used;
+  final String label;
+  final String hint;
+}

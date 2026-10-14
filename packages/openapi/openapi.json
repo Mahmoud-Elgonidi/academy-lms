@@ -1358,6 +1358,189 @@
                 }
             }
         },
+        "/v1/teacher/meeting-link": {
+            "get": {
+                "operationId": "teacher.meeting-link",
+                "description": "Their own Zoom or Meet link, and whether the academy's lessons run on outside links now (then their families\njoin through it, and a lesson cannot open without it).",
+                "summary": "The teacher's lesson link",
+                "tags": [
+                    "Classroom"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "url": {
+                                            "description": "The teacher's link, or null when they have none."
+                                        },
+                                        "used": {
+                                            "type": "boolean",
+                                            "description": "Whether the academy's lessons run on each teacher's outside link now."
+                                        },
+                                        "label": {
+                                            "type": "string",
+                                            "const": "Your Zoom or Meet link"
+                                        },
+                                        "hint": {
+                                            "type": "string",
+                                            "const": "Used when the academy runs lessons on outside links instead of its classroom."
+                                        }
+                                    },
+                                    "required": [
+                                        "url",
+                                        "used",
+                                        "label",
+                                        "hint"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "teacher.meeting-link.save",
+                "description": "An https link (Zoom, Meet, ...), 500 characters at most; an empty one removes it.",
+                "summary": "Save the teacher's lesson link",
+                "tags": [
+                    "Classroom"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "url": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 500
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "url": {
+                                            "description": "The teacher's link, or null when they have none."
+                                        },
+                                        "used": {
+                                            "type": "boolean",
+                                            "description": "Whether the academy's lessons run on each teacher's outside link now."
+                                        },
+                                        "label": {
+                                            "type": "string",
+                                            "const": "Your Zoom or Meet link"
+                                        },
+                                        "hint": {
+                                            "type": "string",
+                                            "const": "Used when the academy runs lessons on outside links instead of its classroom."
+                                        }
+                                    },
+                                    "required": [
+                                        "url",
+                                        "used",
+                                        "label",
+                                        "hint"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/recordings/consents": {
             "get": {
                 "operationId": "recordings.consents",

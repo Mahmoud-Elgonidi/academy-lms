@@ -1332,6 +1332,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get corrected => 'Corrected';
 
   @override
+  String get meetingLinkTitle => 'Your lesson link';
+
+  @override
+  String get meetingLinkNeeded => 'The academy runs lessons on outside links, and no lesson can open without yours.';
+
+  @override
+  String get meetingLinkSave => 'Save the link';
+
+  @override
+  String get meetingLinkSaved => 'Link saved.';
+
+  @override
+  String get meetingLinkRemoved => 'Link removed.';
+
+  @override
   String get timeOff => 'Time off';
 
   @override

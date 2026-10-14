@@ -693,6 +693,14 @@
       "done_phone": "Your number changed. From now on you sign in and get messages there.",
       "managed": "The academy or your guardian changes your email and number.",
       "failed": "That did not go through. Try again."
+    },
+    "meetingLink": {
+      "title": "Your lesson link",
+      "needed": "The academy runs lessons on outside links, and no lesson can open without yours.",
+      "save": "Save the link",
+      "saved": "Link saved.",
+      "removed": "Link removed.",
+      "failed": "The link could not be saved."
     }
   },
   "dispute": {

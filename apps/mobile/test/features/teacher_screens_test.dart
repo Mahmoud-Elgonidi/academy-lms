@@ -374,4 +374,36 @@ void main() {
     expect(find.text('اسحبه'), findsNothing);
     await _close(tester);
   });
+
+  testWidgets('a teacher sets their own Zoom or Meet link from the phone, and is told when lessons need it', (tester) async {
+    final app = await TestApp.create(accounts: [teacher]);
+    teacherRoutes(app.api);
+    String? saved;
+    Map<String, Object?> link() => {
+      'url': saved,
+      'used': true,
+      'label': 'لينك Zoom أو Meet بتاعك',
+      'hint': 'بيستخدم لو الأكاديمية شغالة على لينكات خارجية بدل الفصل.',
+    };
+    app.api
+      ..onWith('GET', 'teacher/meeting-link', (_) => (200, link()))
+      ..onWith('PUT', 'teacher/meeting-link', (r) {
+        final url = ((r.data as Map)['url'] as String).trim();
+        saved = url.isEmpty ? null : url;
+        return (200, link());
+      });
+    await _open(tester, app, '/teach/more');
+    await tester.tap(find.byKey(const Key('open-meeting-link')));
+    await frames(tester, 12);
+    expect(find.text('لينك الحصة بتاعك'), findsWidgets);
+    expect(find.text('الأكاديمية شغالة على لينكات خارجية، ومفيش حصة هتفتح من غير لينكك.'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('meeting-link')), ' https://meet.google.com/abc-defg-hij ');
+    await tester.tap(find.text('احفظ اللينك'));
+    await frames(tester, 10);
+    expect(app.api.sent('PUT', 'teacher/meeting-link').single.data, {'url': 'https://meet.google.com/abc-defg-hij'});
+    expect(find.text('اللينك اتحفظ.'), findsOneWidget);
+    expect(find.text('الأكاديمية شغالة على لينكات خارجية، ومفيش حصة هتفتح من غير لينكك.'), findsNothing);
+    await _close(tester);
+  });
 }

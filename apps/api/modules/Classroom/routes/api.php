@@ -2,10 +2,17 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Classroom\Http\Controllers\LessonJoinController;
+use Modules\Classroom\Http\V1\MeetingLinkController;
 use Modules\Classroom\Http\V1\RecordingsController;
 
 // The apps: a ticket into a lesson's room.
 Route::middleware('auth:sanctum')->post('lessons/{session}/join', LessonJoinController::class)->name('lessons.join');
+
+// The teacher's own Zoom or Meet link (lessons on outside links).
+Route::middleware(['auth:sanctum', 'can:reports.write'])->prefix('teacher/meeting-link')->group(function () {
+    Route::get('/', [MeetingLinkController::class, 'show'])->name('teacher.meeting-link');
+    Route::put('/', [MeetingLinkController::class, 'update'])->middleware('throttle:20,1')->name('teacher.meeting-link.save');
+});
 
 // Lesson recordings: consent, the recordings to watch, and starting and stopping one in a lesson.
 Route::middleware('auth:sanctum')->group(function () {
