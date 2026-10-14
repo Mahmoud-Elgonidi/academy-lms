@@ -23,10 +23,11 @@ use Modules\Scheduling\Domain\Models\ShiftSchedule;
 /*
  * The DST planner across the zones academies teach in, on tzdata's real
  * dates (docs/architecture/02, section 1): Morocco goes back to UTC+0 for
- * Ramadan (Sunday 7 February 2027, 03:00 → 02:00) and forward again
- * (Sunday 14 March 2027, 02:00 → 03:00), the same day New York goes
- * forward; New York goes back on 1 November 2026, two days after Cairo;
- * Dubai and Riyadh never change. Weekly times stay on the teacher's clock.
+ * good (Sunday 20 September 2026, 02:00 → 01:00; tzdata 2026c, no more
+ * Ramadan hour); London and Beirut go forward the same night, four hours
+ * apart (27–28 March 2027); New York goes back on 1 November 2026, two days
+ * after Cairo, and forward on 14 March 2027; Dubai and Riyadh never change.
+ * Weekly times stay on the teacher's clock.
  */
 
 afterEach(fn () => CarbonImmutable::setTestNow());
@@ -79,49 +80,59 @@ function studentHourOn(string $teacherDate): ?string
         ?->starts_at->setTimezone($t->student->timezone)->format('H:i');
 }
 
-it('moves a Casablanca student\'s hour for Ramadan and back, with a Cairo teacher', function () {
-    zonedCourse('Africa/Cairo', 'Africa/Casablanca', ['2027-01-18'], '19:00', '2027-01-15 08:00');
+it('moves a Casablanca student\'s hour when Morocco stays on UTC+0 for good, and again when Cairo goes back', function () {
+    zonedCourse('Africa/Cairo', 'Africa/Casablanca', ['2026-09-07'], '19:00', '2026-09-04 08:00');
 
     expect(app(PlanDstChanges::class)->handle())->toBe(1)
         ->and(zoneNotices())->toBe([
-            // Morocco goes back an hour: 17:00 instead of 18:00, until it goes forward on 14 March.
-            ['2027-02-08T17:00:00Z', '18:00', '17:00', -60, 'Africa/Casablanca', '2027-03-14T02:00:00Z'],
+            // Morocco goes back an hour and stays there: 16:00 instead of 17:00, until Cairo goes back too.
+            ['2026-09-21T16:00:00Z', '17:00', '16:00', -60, 'Africa/Casablanca', '2026-10-29T21:00:00Z'],
         ]);
 
     // Fourteen days before, the family hears it.
-    CarbonImmutable::setTestNow('2027-01-26 09:00 UTC');
+    CarbonImmutable::setTestNow('2026-09-08 09:00 UTC');
     expect(app(SendDstNotices::class)->handle())->toBe(1)
         ->and(Notification::query()->where('user_id', $this->student->id)->where('template_key', 'scheduling.dst_family')->count())->toBe(1);
 
-    // A month on, the weeks ahead reach Morocco's return to UTC+1, and then Cairo's summer time.
-    CarbonImmutable::setTestNow('2027-02-20 08:00 UTC');
+    // A month on, the weeks ahead reach Cairo's winter time: 17:00 again, until Cairo goes forward in April.
+    CarbonImmutable::setTestNow('2026-10-10 08:00 UTC');
     app(MaterializeSessions::class)->handle();
     app(PlanDstChanges::class)->handle();
-    expect(zoneNotices()[1])->toBe(['2027-03-15T17:00:00Z', '17:00', '18:00', 60, 'Africa/Casablanca', '2027-04-29T22:00:00Z']);
+    expect(zoneNotices()[1])->toBe(['2026-11-02T17:00:00Z', '16:00', '17:00', 60, 'Africa/Cairo', '2027-04-29T22:00:00Z']);
 });
 
-it('sees no change for a New York student on the day both clocks go forward, and keeps their hour for as long as it lasts', function () {
-    // A Casablanca teacher at 20:00 on Wednesdays: 14:00 in New York, 15:00 once Morocco goes back.
-    zonedCourse('Africa/Casablanca', 'America/New_York', ['2027-01-20'], '20:00', '2027-01-15 08:00');
+it('sees no change for a Beirut student when both clocks go forward the same night, hours apart', function () {
+    // A London teacher at 16:00 on Wednesdays: 18:00 in Beirut before and after the last weekend of March.
+    zonedCourse('Europe/London', 'Asia/Beirut', ['2027-03-03'], '16:00', '2027-02-26 08:00');
+
+    expect(app(PlanDstChanges::class)->handle())->toBe(0)
+        ->and(studentHourOn('2027-03-24'))->toBe('18:00')
+        ->and(studentHourOn('2027-03-31'))->toBe('18:00')
+        // Nor do the hours between the two changes count as a change, in October or in March.
+        ->and(PlanDstChanges::revertsAt('Europe/London', 'Asia/Beirut', CarbonImmutable::parse('2026-10-01 00:00', 'UTC')))->toBeNull();
+});
+
+it('keeps a New York student\'s hour for as long as it lasts, with a Casablanca teacher on UTC+0 all year', function () {
+    // A Casablanca teacher at 20:00 on Wednesdays: 15:00 in New York, 16:00 once New York goes forward on 14 March.
+    zonedCourse('Africa/Casablanca', 'America/New_York', ['2027-02-10'], '20:00', '2027-02-05 08:00');
 
     app(PlanDstChanges::class)->handle();
-    // On 14 March Morocco and New York both go forward (five hours apart): 15:00 stays 15:00, until November.
     expect(zoneNotices())->toBe([
-        ['2027-02-10T20:00:00Z', '14:00', '15:00', 60, 'Africa/Casablanca', '2027-11-07T06:00:00Z'],
+        ['2027-03-17T20:00:00Z', '15:00', '16:00', 60, 'America/New_York', '2027-11-07T06:00:00Z'],
     ]);
 
-    // The academy keeps the student's 14:00: the teacher's time moves to 19:00 through March and beyond.
+    // The academy keeps the student's 15:00: the teacher's time moves to 19:00 until November.
     app(DecideDstChange::class)->handle(ShiftNotice::query()->sole(), 'keep_student', $this->admin->id);
-    expect(studentHourOn('2027-02-03'))->toBe('14:00')
-        ->and(studentHourOn('2027-02-10'))->toBe('14:00')
-        ->and(studentHourOn('2027-03-10'))->toBe('14:00');
+    expect(studentHourOn('2027-03-10'))->toBe('15:00')
+        ->and(studentHourOn('2027-03-17'))->toBe('15:00')
+        ->and(studentHourOn('2027-03-31'))->toBe('15:00');
 
-    // The weeks after both clocks went forward are made from the moved weekly time: still 14:00, nothing to tell.
-    CarbonImmutable::setTestNow('2027-03-01 08:00 UTC');
+    // The weeks after are made from the moved weekly time: still 15:00, nothing to tell.
+    CarbonImmutable::setTestNow('2027-03-20 08:00 UTC');
     app(MaterializeSessions::class)->handle();
     expect(app(PlanDstChanges::class)->handle())->toBe(0)
-        ->and(studentHourOn('2027-03-17'))->toBe('14:00')
-        ->and(studentHourOn('2027-04-21'))->toBe('14:00');
+        ->and(studentHourOn('2027-04-14'))->toBe('15:00')
+        ->and(studentHourOn('2027-04-21'))->toBe('15:00');
 });
 
 it('follows a New York student through Cairo going back and New York two days later', function () {

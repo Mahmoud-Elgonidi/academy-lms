@@ -315,8 +315,11 @@ health page shows their date, and the files refused this week.
 
 ## A government changed its clock rules (tzdata)
 
-The rules come with the image (PHP's and Postgres' time zone data). Rebuild and deploy the image
-(Dependabot proposes base image updates monthly), then re-plan the clock-change notices:
+The rules come with the images. PHP's are the `timezonedb` extension, the latest at the image's
+build: rebuild and deploy the image (the deploy's rehearsal refuses one whose PHP still has Morocco's
+old Ramadan hour). Postgres reads Debian's data in `postgres:17`, which a deploy does not pull: in a
+quiet hour, `docker compose pull postgres && docker compose up -d postgres`. Then re-plan the
+clock-change notices:
 
 ```bash
 docker compose exec web php artisan scheduling:dst

@@ -212,6 +212,11 @@ jobs:
           check 200 demo.lms.example /ar/teach -H "Cookie: lms_session=$teacher"
           grep -q 'خالد' /tmp/body || { echo "the portal does not show the teacher's day"; exit 1; }
 
+          # Clock rules: the image's PHP reads current tzdata (Morocco on UTC+0 for good from 20 September
+          # 2026, tzdata 2026c), or every lesson there would sit an hour off.
+          morocco="$(docker run --rm --entrypoint php "$IMAGE" -r 'echo (new DateTimeImmutable("2026-12-01 12:00 UTC"))->setTimezone(new DateTimeZone("Africa/Casablanca"))->format("H");')"
+          [ "$morocco" = 12 ] || { echo "the image's PHP has old time zone data (Casablanca at 12:00 UTC: $morocco)"; exit 1; }
+
           # Backups: the WAL archive, a backup, a restore drill to the latest moment and to one
           # before a change, then the live database put back to that moment and switched back again.
           sql() { docker compose -p academy-lms -f "$dir/compose.yml" exec -T postgres psql -X -q -U postgres -d lms -Atc "$1"; }
