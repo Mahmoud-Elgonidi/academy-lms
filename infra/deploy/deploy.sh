@@ -147,6 +147,10 @@ REVERB_PORT=8080
 REVERB_SCHEME=http
 REVERB_PUBLIC_PORT=443
 REVERB_PUBLIC_SCHEME=https
+# Pages whose browsers may open a live connection (host patterns, comma-separated). Any: the
+# apps send no origin, academies may have their own domains, and every private channel needs
+# a signature only the API gives, to its own signed-in pages.
+REVERB_ALLOWED_ORIGINS=*
 
 # Email (alerts to the platform team, welcome links, codes by email): in the log until an
 # SMTP account is set here (the domain's own mail, Amazon SES, Postmark, Brevo, ...), then
@@ -159,6 +163,8 @@ MAIL_USERNAME=
 MAIL_PASSWORD=
 MAIL_FROM_ADDRESS=no-reply@$DOMAIN
 MAIL_FROM_NAME="Academy LMS"
+# Seconds before a mail server that stops answering lets go of the worker.
+MAIL_TIMEOUT=15
 
 # WhatsApp, texts and push: in the log until the platform's accounts are set here
 # (README.md, "Settings"), then docker compose up -d. WhatsApp: Meta's Cloud API
@@ -349,7 +355,7 @@ done
 [ "$(dk inspect -f '{{.State.Health.Status}}' "$(compose ps -q postgres)")" = healthy ] \
     || { compose logs --tail=60 postgres; fail "Postgres did not become ready."; }
 
-say "Migrations (as lms_owner)"
+say "Migrations (as lms_owner), then fresh table statistics"
 compose run --rm --no-deps -T web migrate
 
 if [ "$DEMO_DATA" = 1 ]; then

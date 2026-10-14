@@ -3,6 +3,7 @@
 use App\Providers\AppServiceProvider;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Modules\Platform\Database\Seeders\DemoPlatformSeeder;
@@ -45,4 +46,22 @@ it('gives the demo platform team the server\'s own password and authenticator se
     expect(Hash::check('kV8-not-password', $admin->password))->toBeTrue()
         ->and(Hash::check('password', $admin->password))->toBeFalse()
         ->and($admin->getAppAuthenticationSecret())->toBe('JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP');
+});
+
+it('gives every table fresh statistics after the migrations, small ones too', function () {
+    $this->artisan('db:analyze')->assertSuccessful();
+
+    // A table never analysed reads -1; ANALYZE writes what it found, an empty table's 0 included.
+    $never = DB::connection('pgsql_owner')->table('pg_class')
+        ->join('pg_namespace', 'pg_namespace.oid', '=', 'pg_class.relnamespace')
+        ->where('pg_namespace.nspname', 'public')->where('pg_class.relkind', 'r')->where('pg_class.reltuples', '<', 0)
+        ->pluck('relname');
+
+    expect($never->all())->toBe([])
+        ->and((string) file_get_contents(dirname(__DIR__, 5).'/infra/deploy/entrypoint.sh'))
+        ->toContain('migrate --database=pgsql_owner --force && exec php artisan db:analyze');
+});
+
+it('lets go of a worker when the mail server stops answering', function () {
+    expect(config('mail.mailers.smtp.timeout'))->toBe(15);
 });

@@ -35,6 +35,7 @@ use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\Console\LiveRelayCommand;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Setup\SetupChecklist;
+use Modules\SharedKernel\Tenancy\Console\AnalyzeTablesCommand;
 use Modules\SharedKernel\Tenancy\PgTenantSession;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantResolver;
@@ -79,7 +80,7 @@ final class SharedKernelServiceProvider extends ServiceProvider
         // Every <script> a template writes carries the request's nonce (the page's script-src).
         Blade::precompiler(fn (string $template): string => ContentSecurityPolicy::nonceScripts($template));
         if ($this->app->runningInConsole()) {
-            $this->commands([LiveRelayCommand::class]);
+            $this->commands([LiveRelayCommand::class, AnalyzeTablesCommand::class]);
         }
 
         Event::listen(ConnectionEstablished::class, function (ConnectionEstablished $event): void {

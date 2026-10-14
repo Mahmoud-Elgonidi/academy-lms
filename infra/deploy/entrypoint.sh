@@ -8,7 +8,7 @@
 #   worker     the queue (notifications first), and beside it the games designer's (rounds take minutes)
 #   scheduler  the scheduler (attendance, reminders, sweeps, the night's sessions)
 #   relay      live:relay, database changes to Reverb
-#   migrate    migrations, as lms_owner
+#   migrate    migrations, as lms_owner, then fresh table statistics (db:analyze)
 #   seed-demo  the demo academies (does nothing once "demo" exists)
 #
 # Anything else runs as given, e.g. `academy php artisan platform:code admin@platform.test`.
@@ -57,7 +57,7 @@ case "${1:-web}" in
         exit 0 ;;
     scheduler) exec php artisan schedule:work ;;
     relay) exec php artisan live:relay ;;
-    migrate) exec php artisan migrate --database=pgsql_owner --force ;;
+    migrate) php artisan migrate --database=pgsql_owner --force && exec php artisan db:analyze ;;
     seed-demo) exec php artisan db:seed --force ;;
     *) exec "$@" ;;
 esac
