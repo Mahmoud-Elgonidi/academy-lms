@@ -25,7 +25,8 @@ Sign in with a code to `salma.guardian@demo.test` (the code is in Mailpit, http:
 | `lib/core/realtime` | Live screens, as the portal and the panels have: `pusher_socket.dart` (the little of the Pusher protocol Reverb speaks, over `web_socket_channel`: connect, subscribe with the API's signature, ping/pong, come back after the network drops) and `live.dart` (`Live`: one socket on the open account's own channel (`GET realtime`, signed by `POST realtime/auth`, `features/live`), only while the app is in front; a screen reloads on the signals it shows, and every screen catches up when the app comes back or the socket does; without a socket, a reload a minute). A screen's `LoadCubit` takes `refreshOn: context.read<Live>().on({Live.lessons, ...})`, and `refreshAt` for what the clock alone changes (a lesson's room opening and closing) |
 | `lib/shared/motion` | How the app moves: `motion.dart` (`appear`/`staggered` entrances, `bob`, `wiggle`, `pulse`, `shimmerIf`, `CountUp`, `Pressable`, each look's spring), `celebration.dart` (confetti, stars or gems over the screen), `juice.dart` (sounds and haptics). Everything stands still when the phone asks for less motion |
 | `tool/sounds.py` | Writes the app's sounds (`assets/sounds/*.wav`): five short ones (pop, coin, chest, levelup, cheer), the islands' effects (zoom, back, locked, egg knock and hatch, cheep, star, win) and a music loop for the map and each island's scale; we make them ourselves, nothing third-party |
-| `tool/strings.py` | Every word of the app in Arabic (Egyptian, as on the web) and English; it writes `lib/core/l10n/arb/*.arb`, then `flutter gen-l10n` |
+| `tool/strings.py` | Every word of the app in Arabic (Egyptian, as on the web) and English; it writes `lib/core/l10n/arb/*.arb`, then `flutter gen-l10n`. It opens with the glossary (one word for one thing: المزيد, الفلوس, المساعدة, مدرّس…) and refuses, on every run, the words it replaces, a count outside an Arabic plural, and emoji outside the kids' strings |
+| `tool/screens` | Pictures of every look from the web build, for review: `data_test.dart` walks each look's tabs with the tests' fixtures and records what the screens asked for; `shoot.mjs` serves `build/web`, answers the API from that record, signs in by code and taps by what things are called (Flutter's semantics), then pictures each place at phone size into `build/screens/` (never in git), with a side-by-side sheet when ffmpeg is there. Playwright comes from `apps/web` |
 
 The API client is written by hand per feature, not generated: a **contract test** (`test/contract`) reads every `_api.get('…')` call in `lib/` and fails if `openapi.json` has no such method and path.
 
@@ -37,6 +38,14 @@ flutter test            # unit, widget (sign-in with the privacy notice and term
 dart format --set-exit-if-changed lib test
 python3 tool/strings.py && flutter gen-l10n   # after changing any wording
 python3 tool/sounds.py                          # after changing a sound
+```
+
+Pictures for a review (nothing to install beyond `apps/web`'s packages):
+
+```bash
+flutter build web --no-web-resources-cdn
+flutter test tool/screens/data_test.dart          # what each look's screens ask for, from the fixtures
+node tool/screens/shoot.mjs --all --lang ar       # or --look teen --look middle; --lang en
 ```
 
 CI runs the same (`.github/workflows/mobile.yml`) plus a web build.

@@ -8,6 +8,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/formats.dart';
 import '../../../../shared/widgets/lms.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../../../shared/motion/done_moment.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../../dashboard/presentation/bloc/learner_cubit.dart';
@@ -87,6 +88,24 @@ class _LessonsPageState extends State<LessonsPage> {
               FamilyHeader(
                 eyebrow: clock,
                 title: learner == null || learner.isSelf ? l.navMyLessons : (many ? l.navLessons : l.lessonsOf(learner.firstName)),
+              ),
+              when,
+              list,
+            ],
+          ),
+        ),
+      );
+    }
+    if (!context.isKids) {
+      // Middle and secondary school's tab: the header every tab has, with the bell.
+      return Scaffold(
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, Space.m, 18, Space.xs),
+                child: AppHeader(eyebrow: clock, title: l.navMyLessons, actions: const [NotificationBell(framed: true)]),
               ),
               when,
               list,

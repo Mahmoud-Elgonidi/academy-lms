@@ -7,6 +7,7 @@ import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/formats.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../data/learning_repository.dart';
 import '../../domain/learning.dart';
 import '../../../../shared/motion/motion.dart';
@@ -32,18 +33,45 @@ class ReportsPage extends StatelessWidget {
           refreshOn: c.read<Live>().on({Live.lessons, Live.inbox}),
         )..load();
       },
-      child: Scaffold(
-        appBar: AppBar(title: Text(title == null ? l.reports : '${l.reports} · $title')),
-        body: LoadView<List<Report>>(
-          builder: (context, reports) => ListView(
-            padding: pagePadding,
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: staggered(context, [
-              if (reports.isEmpty) EmptyNote(l.noReports, icon: Icons.article_outlined),
-              for (final r in reports) ...[ReportCard(report: r), const SizedBox(height: 12)],
-            ]),
-          ),
-        ),
+      child: Builder(
+        builder: (context) {
+          final body = LoadView<List<Report>>(
+            builder: (context, reports) => ListView(
+              padding: enrollmentId == null ? pagePadding.copyWith(top: Space.m) : pagePadding,
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: staggered(context, [
+                if (reports.isEmpty) EmptyNote(l.noReports, icon: Icons.article_outlined),
+                for (final r in reports) ...[ReportCard(report: r), const SizedBox(height: 12)],
+              ]),
+            ),
+          );
+          if (enrollmentId != null) {
+            return Scaffold(
+              appBar: AppBar(title: Text(title == null ? l.reports : '${l.reports} · $title')),
+              body: body,
+            );
+          }
+          // A tab (secondary school's Reports): the header every tab has, with how many and the bell.
+          final count = context.select<LoadCubit<List<Report>>, int?>((c) => c.state.data?.length);
+          return Scaffold(
+            body: SafeArea(
+              bottom: false,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(18, Space.m, 18, Space.xs),
+                    child: AppHeader(
+                      title: l.reports,
+                      eyebrow: count == null || count == 0 ? null : l.reportsCount(count),
+                      actions: const [NotificationBell(framed: true)],
+                    ),
+                  ),
+                  Expanded(child: body),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
