@@ -21,7 +21,8 @@ use Modules\Communication\Templates\TemplateRegistry;
  * For each recipient: the message written in their language and time zone,
  * an inbox entry, and a delivery per outside channel that the academy has on
  * and the person wants. WhatsApp and push wait out the person's quiet hours
- * unless the message is urgent; email and the inbox never wait. Deliveries
+ * unless the message is urgent; email and the inbox never wait. A message
+ * may keep to some of its template's channels (an announcement). Deliveries
  * are queued after the commit. A dedupe key sends at most once per person.
  * A template with :link gets each person's own link (NotificationLinks).
  */
@@ -45,8 +46,10 @@ final class SendMessage
         }
         $settings = CommunicationSettings::current();
         $now = CarbonImmutable::now();
+        // A message may narrow the template's channels (never add to them).
+        $offered = $message->channels === null ? $template->channels : array_values(array_intersect($template->channels, $message->channels));
 
-        return DB::transaction(function () use ($message, $template, $people, $settings, $now) {
+        return DB::transaction(function () use ($message, $template, $people, $settings, $now, $offered) {
             $sent = 0;
             foreach ($people as $person) {
                 if ($message->dedupeKey !== null && Notification::query()->where('user_id', $person->id)->where('dedupe_key', $message->dedupeKey)->exists()) {
@@ -74,7 +77,7 @@ final class SendMessage
                 }
                 $sent++;
 
-                $wanted = ChannelChoice::channels($this->preferences->choice($person->id, $template->category), $template->channels);
+                $wanted = ChannelChoice::channels($this->preferences->choice($person->id, $template->category), $offered);
                 foreach ($wanted as $channel) {
                     if (! $settings->allows($channel)) {
                         continue;

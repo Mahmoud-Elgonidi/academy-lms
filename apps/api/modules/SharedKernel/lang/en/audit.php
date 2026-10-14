@@ -71,6 +71,9 @@ return [
             'concern_closed' => 'Safeguarding concern :concern closed: :concern_outcome',
             'concern_reopened' => 'Safeguarding concern :concern opened again',
         ],
+        'announcements' => [
+            'sent' => 'Sent an announcement to :audience (recipients: :count)',
+        ],
         'messaging' => [
             'conversation_viewed' => 'Opened the conversation of :teacher with :student',
             'original_revealed' => 'Read what was hidden from a message in the conversation of :teacher with :student',
@@ -159,8 +162,10 @@ return [
         'media' => ['by_age' => 'by age', 'video' => 'video', 'audio' => 'sound only'],
         'side' => ['family' => 'the family', 'teacher' => 'the teacher', 'staff' => 'written down by the office'],
         'roles' => ['owner' => 'Owner', 'admin' => 'Admin', 'supervisor' => 'Supervisor', 'scheduler' => 'Scheduler', 'accountant' => 'Accountant', 'sales' => 'Sales'],
+        'audience' => ['families' => 'all families', 'guardians' => 'guardians', 'students' => 'students', 'subject' => 'a subject\'s families', 'teachers' => 'teachers'],
     ],
     'groups' => [
+        'announcements' => 'Announcements',
         'games' => 'Games',
         'messaging' => 'Conversations',
         'safeguarding' => 'Safeguarding',

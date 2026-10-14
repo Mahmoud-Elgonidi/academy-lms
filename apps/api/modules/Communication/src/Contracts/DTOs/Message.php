@@ -19,6 +19,8 @@ final readonly class Message
      * @param  array<string, string>  $action  where the apps open it: ['screen' => 'report', 'id' => '…']
      * @param  ?string  $dedupeKey  sent at most once per recipient with this key ("reminder-1h:{session}")
      * @param  bool  $urgent  goes out even in the person's quiet hours ("join now")
+     * @param  ?list<string>  $channels  the outside channels for this message alone, among the template's
+     *                                   (an announcement: push and email when the academy chose them); null: all of the template's
      */
     public function __construct(
         public string $template,
@@ -27,5 +29,6 @@ final readonly class Message
         public array $action = [],
         public ?string $dedupeKey = null,
         public bool $urgent = false,
+        public ?array $channels = null,
     ) {}
 }

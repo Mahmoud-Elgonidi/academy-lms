@@ -79,6 +79,20 @@ final class PeopleService implements PeopleApi
         return new StudentProfileData($studentId, $profile?->birth_date, $chosen, $chosen ?? LearnerStage::forAge($age), $age);
     }
 
+    public function stages(array $studentIds, ?CarbonImmutable $today = null): array
+    {
+        $ids = array_values(array_unique($studentIds));
+        $profiles = StudentProfile::query()->whereIn('user_id', $ids)->get()->keyBy('user_id');
+        $stages = [];
+        foreach ($ids as $id) {
+            $profile = $profiles->get($id);
+            $age = $profile?->birth_date ? (int) $profile->birth_date->diffInYears($today ?? CarbonImmutable::now()) : null;
+            $stages[$id] = $profile?->stage ? LearnerStage::from($profile->stage) : LearnerStage::forAge($age);
+        }
+
+        return $stages;
+    }
+
     public function studentDetails(string $studentId): StudentDetails
     {
         $profile = StudentProfile::query()->find($studentId);
@@ -142,5 +156,10 @@ final class PeopleService implements PeopleApi
     public function consentState(string $studentId): ConsentState
     {
         return $this->consents->state($studentId);
+    }
+
+    public function consentStates(array $studentIds): array
+    {
+        return $this->consents->states(array_values(array_unique($studentIds)));
     }
 }

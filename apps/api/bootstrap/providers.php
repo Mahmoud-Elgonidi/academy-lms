@@ -5,6 +5,7 @@ use App\Providers\Filament\AcademyPanelProvider;
 use App\Providers\Filament\ConsolePanelProvider;
 use App\Providers\Filament\FamilyPanelProvider;
 use App\Providers\Filament\TeacherPanelProvider;
+use Modules\Announcements\Providers\AnnouncementsServiceProvider;
 use Modules\Billing\Providers\BillingServiceProvider;
 use Modules\Catalog\Providers\CatalogServiceProvider;
 use Modules\Classroom\Providers\ClassroomServiceProvider;
@@ -52,6 +53,7 @@ return [
     SafeguardingServiceProvider::class,
     MessagingServiceProvider::class,
     GamesServiceProvider::class,
+    AnnouncementsServiceProvider::class,
     AppServiceProvider::class,
     AcademyPanelProvider::class,
     TeacherPanelProvider::class,

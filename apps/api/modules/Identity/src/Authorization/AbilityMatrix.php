@@ -58,6 +58,8 @@ final class AbilityMatrix
             Ability::ManageConversations => [Role::Owner, Role::Admin],
             // The academy's team and its roles: the owner and admins, each only up to their own rank (Domain\Staff\StaffRules).
             Ability::ManageStaff => [Role::Owner, Role::Admin],
+            // Announcements to families or teachers: the academy speaking to everyone at once, so its owner and admins.
+            Ability::SendAnnouncements => [Role::Owner, Role::Admin],
         };
     }
 

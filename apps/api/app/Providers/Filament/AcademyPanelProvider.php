@@ -18,6 +18,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Modules\Announcements\Filament\AnnouncementsPlugin;
 use Modules\Billing\Filament\BillingPlugin;
 use Modules\Catalog\Filament\CatalogPlugin;
 use Modules\Classroom\Filament\ClassroomPlugin;
@@ -105,6 +106,7 @@ final class AcademyPanelProvider extends PanelProvider
                 SafeguardingPlugin::make(),
                 MessagingPlugin::make(),
                 GamesPlugin::make(),
+                AnnouncementsPlugin::make(),
                 CommunicationPlugin::make(),
                 ClassroomPlugin::make(),
                 PlatformPlugin::make(),

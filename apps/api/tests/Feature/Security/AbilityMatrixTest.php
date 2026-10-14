@@ -67,6 +67,7 @@ function expectedAbilities(): array
         'conversations.oversee' => [$o, $a, $su],
         'conversations.manage' => [$o, $a],
         'staff.manage' => [$o, $a],
+        'announcements.send' => [$o, $a],
     ];
 }
 

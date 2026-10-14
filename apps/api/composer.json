@@ -78,6 +78,8 @@
             "Modules\\Messaging\\Database\\Seeders\\": "modules/Messaging/database/seeders/",
             "Modules\\Games\\": "modules/Games/src/",
             "Modules\\Games\\Database\\Seeders\\": "modules/Games/database/seeders/",
+            "Modules\\Announcements\\": "modules/Announcements/src/",
+            "Modules\\Announcements\\Database\\Seeders\\": "modules/Announcements/database/seeders/",
             "Modules\\Safeguarding\\Database\\Seeders\\": "modules/Safeguarding/database/seeders/",
             "Modules\\Learning\\Database\\Seeders\\": "modules/Learning/database/seeders/",
             "Modules\\Scheduling\\Database\\Factories\\": "modules/Scheduling/database/factories/",

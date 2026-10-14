@@ -71,6 +71,9 @@ return [
             'concern_closed' => 'بلاغ الحماية :concern اتقفل: :concern_outcome',
             'concern_reopened' => 'بلاغ الحماية :concern اتفتح تاني',
         ],
+        'announcements' => [
+            'sent' => 'بعت إعلان لـ :audience (عدد اللي وصلهم: :count)',
+        ],
         'messaging' => [
             'conversation_viewed' => 'فتح محادثة :teacher مع :student',
             'original_revealed' => 'شاف الكلام اللي اتخفى من رسالة في محادثة :teacher مع :student',
@@ -159,8 +162,10 @@ return [
         'media' => ['by_age' => 'حسب السن', 'video' => 'فيديو', 'audio' => 'صوت بس'],
         'side' => ['family' => 'الأسرة', 'teacher' => 'المدرس', 'staff' => 'الإدارة سجلته'],
         'roles' => ['owner' => 'المالك', 'admin' => 'مدير', 'supervisor' => 'مشرف', 'scheduler' => 'منسق مواعيد', 'accountant' => 'محاسب', 'sales' => 'مبيعات'],
+        'audience' => ['families' => 'كل الأسر', 'guardians' => 'أولياء الأمور', 'students' => 'الطلاب', 'subject' => 'أسر مادة', 'teachers' => 'المدرسين'],
     ],
     'groups' => [
+        'announcements' => 'الإعلانات',
         'games' => 'الألعاب',
         'messaging' => 'المحادثات',
         'safeguarding' => 'حماية الأطفال',

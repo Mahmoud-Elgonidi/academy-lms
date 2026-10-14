@@ -113,6 +113,20 @@ it('follows each person\'s choice per category, and the academy\'s channel switc
     expect(Notification::query()->where('dedupe_key', 'third')->sole()->deliveries()->pluck('channel')->all())->toBe(['push']);
 });
 
+it('keeps to the channels a message names, among its template\'s', function () {
+    $send = fn (?array $channels) => app(NotificationsApi::class)->send(new Message('test.lesson_moved', [$this->sara->id], [
+        'subject' => 'Quran', 'when' => CarbonImmutable::parse('2026-10-06 15:00', 'UTC'), 'status' => 'moved',
+    ], channels: $channels));
+
+    $send(['email', 'sms']);   // a channel the template does not have is never added
+    $send([]);                 // the inbox alone
+    $send(null);               // every channel of the template
+
+    $sent = Notification::query()->where('user_id', $this->sara->id)->orderBy('created_at')->orderBy('id')->get()
+        ->map(fn (Notification $n) => $n->deliveries()->orderBy('channel')->pluck('channel')->all())->all();
+    expect($sent)->toContain(['email'], [], ['email', 'push', 'whatsapp'])->toHaveCount(3);
+});
+
 it('uses the academy\'s own wording, and refuses placeholders the template does not have', function () {
     app(SaveTemplateWording::class)->handle('test.lesson_moved', 'ar', 'موعد جديد', 'حصة :subject بقت :when.', null);
     moved([$this->sara->id]);

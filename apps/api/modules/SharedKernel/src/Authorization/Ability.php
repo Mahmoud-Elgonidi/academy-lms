@@ -57,6 +57,7 @@ enum Ability: string
     case OverseeConversations = 'conversations.oversee';
     case ManageConversations = 'conversations.manage';
     case ManageStaff = 'staff.manage';
+    case SendAnnouncements = 'announcements.send';
 
     /** The plan area this ability belongs to, if a plan may leave it out. */
     public function feature(): ?Feature

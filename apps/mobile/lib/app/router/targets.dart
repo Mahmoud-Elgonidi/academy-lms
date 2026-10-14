@@ -24,12 +24,15 @@ String targetOf(String? screen, String? id, Area area) {
       'conversation' when id != null => '/teach/more/messages/$id',
       'conversation' => '/teach/more/messages',
       'session' || 'trial' || 'lesson_rating' => '/teach/today',
+      'announcement' => '/inbox',
       _ => home,
     };
   }
   final base = area.prefix;
   return switch ((area, screen)) {
     (_, 'session' || 'holiday' || 'lesson_rating') => '$base/lessons',
+    // An academy's announcement has no screen of its own: it is read in full in the inbox.
+    (_, 'announcement') => '/inbox',
     // The journey: games, the old challenges and the journey itself (a lesson's stars, an egg).
     (Area.kids || Area.middle || Area.teen || Area.family, 'journey' || 'games' || 'challenges') => '$base/journey',
     (Area.family, 'invoice') => '/family/money',
@@ -55,9 +58,12 @@ String targetOf(String? screen, String? id, Area area) {
   };
 }
 
-/// The teacher's tasks open over the tabs (pushed, with a way back); any
-/// other place is a tab of the look, which is switched to.
-bool opensOverTabs(String location) => const ['/teach/reports', '/teach/marking', '/teach/hours'].any(location.startsWith);
+/// The teacher's tasks and the inbox open over the tabs (pushed, with a way
+/// back); any other place is a tab of the look, which is switched to.
+bool opensOverTabs(String location) => const ['/teach/reports', '/teach/marking', '/teach/hours', '/inbox'].any(location.startsWith);
+
+/// A message read where it is, in full, in the inbox: it opens nowhere else.
+bool readsInPlace(String? screen) => screen == 'announcement';
 
 void openTarget(GoRouter router, String location) {
   if (opensOverTabs(location)) {

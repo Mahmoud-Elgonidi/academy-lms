@@ -15,6 +15,7 @@ describe('where a notification opens', () => {
     expect(targetOf('my_checks', 'c1')).toBe('/teach/documents');
     expect(targetOf('conversation', 'c1')).toBe('/teach/messages/c1');
     expect(targetOf('conversation', null)).toBe('/teach/messages');
+    expect(targetOf('announcement', 'a1')).toBe('/teach/notifications');
     expect(targetOf('session', 's1')).toBe('/teach');
     expect(targetOf(undefined, undefined)).toBe('/teach');
   });

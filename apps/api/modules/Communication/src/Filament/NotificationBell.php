@@ -14,12 +14,16 @@ use Modules\Identity\Contracts\PersonalChannel;
 
 /**
  * The bell in both panels' top bar: unread count, the latest messages, and
- * where each one opens. It refreshes when the inbox changes (a signal on the
- * person's own channel), not on a timer.
+ * where each one opens. A message with nowhere to open in this panel (an
+ * academy's announcement) opens in place, in full. It refreshes when the
+ * inbox changes (a signal on the person's own channel), not on a timer.
  */
 final class NotificationBell extends Component
 {
     public string $panel = 'academy';
+
+    /** The message read in full in the list, when it opens nowhere else. */
+    public ?string $expanded = null;
 
     public function mount(): void
     {
@@ -51,7 +55,10 @@ final class NotificationBell extends Component
         $url = app(NotificationLinks::class)->resolve($notification->action, $this->panel);
         if ($url !== null) {
             $this->redirect($url, navigate: true);
+
+            return;
         }
+        $this->expanded = $this->expanded === $notification->id ? null : $notification->id;
     }
 
     public function markAllRead(): void

@@ -27,6 +27,15 @@ interface PeopleApi
 
     public function studentProfile(string $studentId, ?CarbonImmutable $today = null): StudentProfileData;
 
+    /**
+     * The look of each of these students' areas (the one chosen, or the one
+     * their age gives), in one read: studentProfile()'s stage for many.
+     *
+     * @param  list<string>  $studentIds
+     * @return array<string, LearnerStage>
+     */
+    public function stages(array $studentIds, ?CarbonImmutable $today = null): array;
+
     /** A student's gender, country, school grade, and who should teach them ("Find a teacher" starts from it). */
     public function studentDetails(string $studentId): StudentDetails;
 
@@ -55,6 +64,15 @@ interface PeopleApi
 
     /** Whether a student's account needs a guardian's consent, and whether one stands (the child's own links and sign-in wait for it). */
     public function consentState(string $studentId): ConsentState;
+
+    /**
+     * consentState() for many students in one read (who is still waiting for
+     * a guardian, to leave them out of what reaches the child themselves).
+     *
+     * @param  list<string>  $studentIds
+     * @return array<string, ConsentState>
+     */
+    public function consentStates(array $studentIds): array;
 
     /**
      * Which of these students are under 18: by birth date on the academy's

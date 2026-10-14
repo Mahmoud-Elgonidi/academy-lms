@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Modules\Announcements\Database\Seeders\DemoAnnouncementsSeeder;
 use Modules\Billing\Database\Seeders\DemoBillingSeeder;
 use Modules\Billing\Database\Seeders\DemoDiscountsSeeder;
 use Modules\Billing\Database\Seeders\DemoPaymentsSeeder;
@@ -100,7 +101,7 @@ class DatabaseSeeder extends Seeder
             // What the demo does in the back office (prices, policy, voided invoices, ...) is in the activity log as the owner's.
             AuditActor::use(new AuditActor('user', $ownerId, 'هالة منصور'));
 
-            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoRevenueSeeder::class, DemoEnrollmentsSeeder::class, DemoShiftProposalsSeeder::class, DemoCurriculumSeeder::class, DemoMaterialsSeeder::class, DemoPracticeSeeder::class, DemoLearningSeeder::class, DemoChallengesSeeder::class, DemoGamesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoTicketsSeeder::class, DemoRecordingsSeeder::class, DemoDiscountsSeeder::class, DemoFamilyBillingSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class, DemoCatalogSeeder::class, DemoPeopleSeeder::class, DemoDisputesSeeder::class, DemoPrivacySeeder::class, DemoTeacherChecksSeeder::class, DemoSafeguardingSeeder::class, DemoMessagingSeeder::class]);
+            $this->call([DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoRevenueSeeder::class, DemoEnrollmentsSeeder::class, DemoShiftProposalsSeeder::class, DemoCurriculumSeeder::class, DemoMaterialsSeeder::class, DemoPracticeSeeder::class, DemoLearningSeeder::class, DemoChallengesSeeder::class, DemoGamesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoTicketsSeeder::class, DemoRecordingsSeeder::class, DemoDiscountsSeeder::class, DemoFamilyBillingSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class, DemoCatalogSeeder::class, DemoPeopleSeeder::class, DemoDisputesSeeder::class, DemoPrivacySeeder::class, DemoTeacherChecksSeeder::class, DemoSafeguardingSeeder::class, DemoMessagingSeeder::class, DemoAnnouncementsSeeder::class]);
             AuditActor::forget();
         });
 

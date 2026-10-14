@@ -28,6 +28,9 @@ export function familyTargetOf(screen: string | null | undefined, money: boolean
       return '/family/tell-us';
     case 'conversation':
       return id ? `/family/messages/${id}` : '/family/messages';
+    case 'announcement':
+      // The academy's announcement is read in full where it is: the notifications.
+      return '/family/notifications';
     default:
       return '/family';
   }

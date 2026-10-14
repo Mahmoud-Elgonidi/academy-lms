@@ -19,7 +19,9 @@ import '../../data/notifications_repository.dart';
 import '../../domain/notifications.dart';
 
 /// The inbox: newest first, unread marked; a tap marks it read and opens
-/// where it belongs in this look. More on demand, all read in one tap.
+/// where it belongs in this look, or, for a message read where it is (an
+/// academy's announcement), shows it in full. More on demand, all read in
+/// one tap.
 class InboxPage extends StatefulWidget {
   const InboxPage({super.key});
 
@@ -29,6 +31,7 @@ class InboxPage extends StatefulWidget {
 
 class _InboxPageState extends State<InboxPage> {
   final _items = <InboxItem>[];
+  final _expanded = <String>{};
   String? _cursor;
   bool _loading = true;
   bool _more = false;
@@ -94,6 +97,10 @@ class _InboxPageState extends State<InboxPage> {
       }
     }
     if (!mounted) return;
+    if (readsInPlace(item.screen)) {
+      setState(() => _expanded.contains(item.id) ? _expanded.remove(item.id) : _expanded.add(item.id));
+      return;
+    }
     final area = Area.of(context.read<SessionCubit>().state);
     openTarget(GoRouter.of(context), targetOf(item.screen, item.targetId, area));
   }
@@ -147,12 +154,20 @@ class _InboxPageState extends State<InboxPage> {
                               children: [
                                 Text(n.title, style: context.text.titleSmall),
                                 if (n.body.isNotEmpty)
-                                  Text(n.body, style: context.text.bodyMedium, maxLines: 3, overflow: TextOverflow.ellipsis),
+                                  _expanded.contains(n.id)
+                                      ? Text(n.body, style: context.text.bodyMedium)
+                                      : Text(n.body, style: context.text.bodyMedium, maxLines: 3, overflow: TextOverflow.ellipsis),
                                 if (n.at != null) ...[const SizedBox(height: 2), Text(n.at!.when(context), style: context.text.bodySmall)],
                               ],
                             ),
                           ),
-                          const Icon(Icons.chevron_right_rounded),
+                          Icon(
+                            !readsInPlace(n.screen)
+                                ? Icons.chevron_right_rounded
+                                : _expanded.contains(n.id)
+                                ? Icons.expand_less_rounded
+                                : Icons.expand_more_rounded,
+                          ),
                         ],
                       ),
                     ),

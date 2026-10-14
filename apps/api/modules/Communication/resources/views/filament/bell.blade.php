@@ -5,6 +5,7 @@
         .cm-item:hover { background: var(--gray-50); }
         .cm-item strong { display: block; font-size: .85rem; color: var(--gray-900); }
         .cm-item p { margin: .15rem 0 0; font-size: .8rem; color: var(--gray-600); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .cm-item[data-open] p { display: block; -webkit-line-clamp: unset; overflow: visible; white-space: pre-line; overflow-wrap: anywhere; }
         .cm-item small { color: var(--gray-400); font-size: .72rem; }
         .cm-dot { flex: none; width: .5rem; height: .5rem; border-radius: 999px; margin-top: .4rem; background: transparent; }
         .cm-item[data-unread] .cm-dot { background: var(--primary-500); }
@@ -35,7 +36,7 @@
         <div class="cm-list">
             @forelse ($this->latest as $n)
                 <button type="button" class="cm-item" wire:key="cm-{{ $n->id }}" wire:click="open('{{ $n->id }}')"
-                    @if (! $n->read_at) data-unread @endif @if ($n->urgent && ! $n->read_at) data-urgent @endif>
+                    @if (! $n->read_at) data-unread @endif @if ($n->urgent && ! $n->read_at) data-urgent @endif @if ($expanded === $n->id) data-open aria-expanded="true" @endif>
                     <span class="cm-dot"></span>
                     <span>
                         <strong>{{ $n->title }}</strong>

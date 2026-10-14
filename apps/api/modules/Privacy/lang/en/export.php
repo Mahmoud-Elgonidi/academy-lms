@@ -19,5 +19,6 @@ return [
         'support' => 'Support tickets',
         'enquiries' => 'The enquiry you came through',
         'earnings' => 'Pay',
+        'announcements' => 'Announcements you sent to families or teachers',
     ],
 ];

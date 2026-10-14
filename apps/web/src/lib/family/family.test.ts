@@ -161,3 +161,10 @@ describe('messages with the teachers', () => {
     expect(familyTargetOf('conversation', true)).toBe('/family/messages');
   });
 });
+
+describe('the academy\'s announcements', () => {
+  it('are read in full in the notifications, in every look', () => {
+    expect(familyTargetOf('announcement', false, 'a1')).toBe('/family/notifications');
+    expect(familyTargetOf('announcement', true, 'a1')).toBe('/family/notifications');
+  });
+});

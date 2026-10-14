@@ -69,6 +69,8 @@ const PRIVACY_COVERAGE = [
     'safeguarding' => ['copy' => ['student'], 'erases' => false],
     'lessons' => ['copy' => ['student', 'teacher'], 'erases' => true],
     'support' => ['copy' => ['student'], 'erases' => false],
+    // What the office sent: in the sender's copy (AnnouncementsTest), none of these three's; kept on erasure.
+    'announcements' => ['copy' => [], 'erases' => false],
 ];
 
 beforeEach(function () {
@@ -180,6 +182,10 @@ function pdsSeedEverySource(object $t): void
 
     // support: the student's ticket.
     app(OpenTicket::class)->handle($s->id, 'family', 'other', 'A question', 'How do I see my homework?', $s->id);
+
+    // announcements: the owner told the families (each one's copy of it is in their messages).
+    DB::table('announcements')->insert(['id' => $id(), 'title' => 'Eid holiday', 'body' => 'Closed on Tuesday.', 'audience' => 'families', 'channels' => '["push"]',
+        'recipients_count' => 2, 'sent_by' => $t->owner->id, 'sent_at' => $now]);
 }
 
 /** @return array<string, PersonalDataSource> */
@@ -279,7 +285,7 @@ it('holds an erasure back for each source\'s own reasons, and erases once they a
         ->and($after['lessons'])->toBe(['', null, 0])
         ->and(Storage::disk('local')->exists($this->handedIn))->toBeFalse()
         ->and(Storage::disk('local')->exists($this->checkScan))->toBeFalse();
-    foreach (['billing', 'recordings', 'courses', 'messaging', 'earnings', 'safeguarding', 'support'] as $kept) {
+    foreach (['billing', 'recordings', 'courses', 'messaging', 'earnings', 'safeguarding', 'support', 'announcements'] as $kept) {
         expect($after[$kept])->toBe($before[$kept], "{$kept} keeps its records");
     }
     expect(Storage::disk('local')->exists($this->receipt))->toBeTrue();
@@ -328,6 +334,7 @@ function pdsSnapshot(array $people): array
         'lessons' => [DB::table('session_disputes')->where('raised_by', $s)->value('note'), DB::table('teacher_time_off')->where('teacher_id', $t)->value('note'),
             DB::table('booking_holds')->where('student_id', $s)->count()],
         'support' => DB::table('ticket_messages')->count(),
+        'announcements' => DB::table('announcements')->count(),
     ];
 }
 

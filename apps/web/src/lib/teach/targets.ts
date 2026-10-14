@@ -22,6 +22,9 @@ export function targetOf(screen: string | null | undefined, id: string | null | 
       return '/teach/documents';
     case 'conversation':
       return id ? `/teach/messages/${id}` : '/teach/messages';
+    case 'announcement':
+      // The academy's announcement is read in full where it is: the notifications.
+      return '/teach/notifications';
     default:
       return '/teach';
   }

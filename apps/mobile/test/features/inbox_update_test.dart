@@ -51,6 +51,13 @@ void main() {
     // Something a look has no screen for opens its home.
     expect(targetOf('invoice', 'i1', Area.kids), '/kids/journey');
     expect(targetOf('live_board', null, Area.teacher), '/teach/today');
+    // An academy's announcement is read in full in the inbox, over the tabs, in every look.
+    expect(targetOf('announcement', 'a1', Area.family), '/inbox');
+    expect(targetOf('announcement', 'a1', Area.kids), '/inbox');
+    expect(targetOf('announcement', 'a1', Area.teacher), '/inbox');
+    expect(opensOverTabs('/inbox'), isTrue);
+    expect(readsInPlace('announcement'), isTrue);
+    expect(readsInPlace('invoice'), isFalse);
   });
 
   test('versions compare number by number', () {
@@ -179,6 +186,55 @@ void main() {
     });
     // The invoice opens the money tab.
     expect(app.api.sent('GET', 'family/invoices').length, greaterThanOrEqualTo(1));
+
+    await _close(tester);
+  });
+
+  testWidgets('an announcement opens in full where it is, and is marked read', (tester) async {
+    const body =
+        'الأكاديمية في إجازة من الثلاثاء للخميس.\nالحصص بترجع يوم الجمعة.\nدقايق الحصص اللي في الإجازة بترجع لرصيدكم.\nكل سنة وانتم طيبين!';
+    final app = await TestApp.create(accounts: [guardian]);
+    familyRoutes(app.api);
+    app.api
+      ..onWith(
+        'GET',
+        'notifications',
+        (r) => (
+          200,
+          {
+            'data': r.queryParameters['unread'] == 1
+                ? <Object>[]
+                : [
+                    {
+                      ..._notification('n3', 'إعلان: إجازة العيد', 'announcement'),
+                      'body': body,
+                      'category': 'lessons',
+                      'template': 'announcements.families',
+                    },
+                  ],
+            'meta': {'unread': 1, 'next_cursor': null},
+          },
+        ),
+      )
+      ..on('POST', 'notifications/read', {
+        'data': {'marked': 1},
+      });
+    await _open(tester, app);
+
+    await tester.tap(find.byIcon(Icons.notifications_active_rounded));
+    await frames(tester, 10);
+    expect(find.byIcon(Icons.expand_more_rounded), findsOneWidget);
+    expect(tester.widget<Text>(find.text(body)).maxLines, 3);
+
+    await tester.tap(find.text('إعلان: إجازة العيد'));
+    await frames(tester, 6);
+    expect(app.api.sent('POST', 'notifications/read').single.data, {
+      'ids': ['n3'],
+    });
+    // Still the inbox, the whole announcement shown.
+    expect(find.text('الإشعارات'), findsOneWidget);
+    expect(find.byIcon(Icons.expand_less_rounded), findsOneWidget);
+    expect(tester.widget<Text>(find.text(body)).maxLines, isNull);
 
     await _close(tester);
   });
