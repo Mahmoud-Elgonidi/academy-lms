@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/l10n/l10n.dart';
 import '../../core/state/load_cubit.dart';
+import '../motion/motion.dart';
 import 'lms.dart';
 
 /// Shows a [LoadCubit]'s data, a quiet loader the first time ([skeleton]
@@ -28,9 +29,11 @@ class LoadView<T> extends StatelessWidget {
         }
         return skeleton ?? const Center(child: CircularProgressIndicator.adaptive());
       }
-      final child = builder(context, data);
-      if (!refreshable) return child;
-      return RefreshIndicator.adaptive(onRefresh: () => context.read<LoadCubit<T>>().load(), child: child);
+      Widget child = builder(context, data);
+      if (refreshable) child = RefreshIndicator.adaptive(onRefresh: () => context.read<LoadCubit<T>>().load(), child: child);
+      // From the skeleton, the content fades in where it stood.
+      if (skeleton != null && !context.calm) child = child.animate().fadeIn(duration: const Duration(milliseconds: 260));
+      return child;
     },
   );
 }

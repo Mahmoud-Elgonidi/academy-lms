@@ -8,6 +8,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/formats.dart';
 import '../../../../shared/widgets/lms.dart';
+import '../../../../shared/motion/done_moment.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../../dashboard/presentation/bloc/learner_cubit.dart';
 import '../../../dashboard/presentation/widgets/learner_switcher.dart';
@@ -123,7 +124,7 @@ class _LessonDays extends StatelessWidget {
               onCancel: lesson.canCancel && !kids
                   ? () async {
                       if (await showCancelSheet(context, lesson) && context.mounted) {
-                        showSnack(context, l.cancelled);
+                        DoneMoment.show(context, title: l.cancelled);
                         await reload();
                       }
                     }
@@ -150,7 +151,7 @@ class _LessonDays extends StatelessWidget {
                   : null,
               onRate: past && lesson.tookPlace && !kids
                   ? () async {
-                      if (await showRateSheet(context, lesson) && context.mounted) showSnack(context, l.rated);
+                      if (await showRateSheet(context, lesson) && context.mounted) DoneMoment.show(context, title: l.rated);
                     }
                   : null,
             ),

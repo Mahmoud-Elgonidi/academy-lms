@@ -9,6 +9,7 @@ import '../../../core/network/api_problem.dart';
 import '../../../core/realtime/live.dart';
 import '../../../core/state/load_cubit.dart';
 import '../../../shared/motion/motion.dart';
+import '../../../shared/motion/done_moment.dart';
 import '../../../shared/widgets/lms.dart';
 import '../../../shared/widgets/load_view.dart';
 import '../../dashboard/presentation/bloc/learner_cubit.dart';
@@ -112,7 +113,7 @@ class HelpPage extends StatelessWidget {
       ),
     );
     if (ticket == null || !context.mounted) return;
-    showSnack(context, context.l10n.ticketSent);
+    DoneMoment.show(context, title: context.l10n.ticketSent);
     context.go('$base/${ticket.summary.id}');
   }
 }

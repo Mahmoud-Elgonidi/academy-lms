@@ -11,6 +11,7 @@ import '../../../../core/network/api_problem.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/formats.dart';
 import '../../../../shared/widgets/lms.dart';
+import '../../../../shared/motion/done_moment.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../data/homework_repository.dart';
 import '../widgets/submission_view.dart';
@@ -121,9 +122,13 @@ class _HomeworkCardState extends State<_HomeworkCard> {
       final text = _answer.text.trim();
       await context.read<HomeworkRepository>().handIn(widget.homework.id, body: text.isEmpty ? null : text, file: _recording ?? _picked);
       if (!mounted) return;
-      Juice.reward();
-      Celebration.show(context, burst: kids ? Burst.stars : Burst.confetti, from: Celebration.centreOf(_sendKey.currentContext ?? context));
-      showSnack(context, l.handedIn);
+      if (kids) {
+        Juice.reward();
+        Celebration.show(context, burst: Burst.stars, from: Celebration.centreOf(_sendKey.currentContext ?? context));
+        showSnack(context, l.handedIn);
+      } else {
+        DoneMoment.show(context, title: l.handedIn);
+      }
       await context.read<LoadCubit<List<Homework>>>().load();
     } on ApiProblem catch (p) {
       if (mounted) {

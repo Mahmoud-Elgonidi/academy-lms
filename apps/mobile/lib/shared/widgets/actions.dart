@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/app_theme.dart';
 import '../../core/l10n/l10n.dart';
+import '../motion/motion.dart';
 
 /// A screen's one main action: full width, the brand's colour, a spinner
 /// while it works (and no second tap meanwhile).
@@ -22,11 +23,14 @@ class PrimaryAction extends StatelessWidget {
     final child = busy
         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
         : Text(label);
-    return SizedBox(
-      width: double.infinity,
-      child: icon == null || busy
-          ? FilledButton(style: style, onPressed: busy ? null : onPressed, child: child)
-          : FilledButton.icon(style: style, onPressed: onPressed, icon: Icon(icon), label: child),
+    final pressed = busy ? null : PressScale.withPress(context, onPressed);
+    return PressScale(
+      child: SizedBox(
+        width: double.infinity,
+        child: icon == null || busy
+            ? FilledButton(style: style, onPressed: pressed, child: child)
+            : FilledButton.icon(style: style, onPressed: pressed, icon: Icon(icon), label: child),
+      ),
     );
   }
 }

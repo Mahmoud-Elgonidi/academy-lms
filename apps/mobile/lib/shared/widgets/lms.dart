@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
+import '../motion/motion.dart';
 
 export '../../app/theme/tokens.dart';
 export 'actions.dart';
@@ -27,7 +28,9 @@ class LmsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = context.shape.cardRadius;
-    return Material(
+    // The kids' cards stay as they are; the others give under the finger.
+    final pressable = onTap != null && !context.isKids;
+    final card = Material(
       color: color ?? context.colors.card,
       shape: RoundedRectangleBorder(
         borderRadius: radius,
@@ -35,10 +38,11 @@ class LmsCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
+        onTap: pressable ? PressScale.withPress(context, onTap) : onTap,
         child: Padding(padding: padding, child: child),
       ),
     );
+    return pressable ? PressScale(child: card) : card;
   }
 }
 

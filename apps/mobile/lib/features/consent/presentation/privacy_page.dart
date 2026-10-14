@@ -8,6 +8,7 @@ import '../../../core/network/api_problem.dart';
 import '../../../core/realtime/live.dart';
 import '../../../core/state/load_cubit.dart';
 import '../../../shared/motion/motion.dart';
+import '../../../shared/motion/done_moment.dart';
 import '../../../shared/widgets/lms.dart';
 import '../../../shared/widgets/load_view.dart';
 import '../data/consent_repository.dart';
@@ -53,12 +54,12 @@ class _ChildCardState extends State<_ChildCard> {
   bool _ticked = false;
   bool _busy = false;
 
-  Future<void> _run(Future<void> Function() step, String done) async {
+  Future<void> _run(Future<void> Function() step, String done, {bool celebrate = false}) async {
     setState(() => _busy = true);
     try {
       await step();
       if (!mounted) return;
-      showSnack(context, done);
+      celebrate ? DoneMoment.show(context, title: done) : showSnack(context, done);
       await context.read<LoadCubit<Consents>>().load();
     } on ApiProblem catch (p) {
       if (mounted) showSnack(context, context.problemText(p));
@@ -113,7 +114,7 @@ class _ChildCardState extends State<_ChildCard> {
               child: FilledButton(
                 onPressed: !_ticked || _busy
                     ? null
-                    : () => _run(() => repo.grant(child.studentId, child.text.version), l.consentAgreed(child.name)),
+                    : () => _run(() => repo.grant(child.studentId, child.text.version), l.consentAgreed(child.name), celebrate: true),
                 child: Text(l.consentAgree),
               ),
             ),

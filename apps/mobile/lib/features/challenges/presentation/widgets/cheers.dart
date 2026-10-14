@@ -173,6 +173,7 @@ class _CheerBarState extends State<CheerBar> {
                 label: cheerName(l, kind),
                 child: Pressable(
                   key: _keys[kind],
+                  sound: false,
                   onTap: left == 0 || _busy ? null : () => _send(kind),
                   child: AnimatedOpacity(
                     opacity: left == 0 ? 0.4 : 1,

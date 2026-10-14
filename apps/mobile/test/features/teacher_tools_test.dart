@@ -84,7 +84,11 @@ void main() {
     await frames(tester, 2);
     await tester.scrollUntilVisible(find.text('ابعت التقرير'), 300, scrollable: find.byType(Scrollable).first);
     await tester.tap(find.text('ابعت التقرير'));
+    await frames(tester, 5);
+    // A quick moment says it went, then gets out of the way.
+    expect(find.text('التقرير اتبعت.'), findsOneWidget);
     await frames(tester, 12);
+    expect(find.text('التقرير اتبعت.'), findsNothing);
 
     final sent = app.api.sent('PUT', 'teacher/reports/r1').single.data as Map<String, dynamic>;
     expect(sent['engagement'], 5);
@@ -94,7 +98,6 @@ void main() {
       {'node_id': 'n2', 'outcome': 'mastered', 'score': 4, 'note': null},
     ]);
     expect(sent['homework'], {'title': 'سمّع سورة النصر', 'instructions': '', 'accepts': 'audio', 'due_days': 3});
-    expect(find.text('التقرير اتبعت.'), findsOneWidget);
     // Back on the list, which loads again.
     expect(app.api.sent('GET', 'teacher/reports').length, greaterThanOrEqualTo(2));
 

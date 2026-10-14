@@ -6,7 +6,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/formats.dart';
-import '../../../../shared/motion/juice.dart';
+import '../../../../shared/motion/done_moment.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
@@ -105,8 +105,7 @@ class _MarkCardState extends State<_MarkCard> {
     try {
       await context.read<TeachingRepository>().mark(widget.homework.id, grade: _grade, feedback: _feedback.text.trim());
       if (!mounted) return;
-      Juice.reward();
-      showSnack(context, l.marked);
+      DoneMoment.show(context, title: l.marked);
       await context.read<LoadCubit<List<Homework>>>().load();
     } on ApiProblem catch (p) {
       if (mounted) {

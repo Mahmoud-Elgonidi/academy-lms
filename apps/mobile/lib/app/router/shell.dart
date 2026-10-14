@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../shared/motion/juice.dart';
 import '../../shared/motion/motion.dart';
+import '../../shared/motion/tab_pop.dart';
 
 /// One tab of a look's bar; [count] puts a dot with a number on it (rewards waiting).
 class ShellTab {
@@ -28,14 +29,14 @@ class AppShell extends StatelessWidget {
     bottomNavigationBar: NavigationBar(
       selectedIndex: shell.currentIndex,
       onDestinationSelected: (i) {
-        if (i != shell.currentIndex) Juice.tap();
+        if (i != shell.currentIndex) context.flavour == MotionFlavour.kids ? Juice.tap() : Juice.press();
         shell.goBranch(i, initialLocation: i == shell.currentIndex);
       },
       destinations: [
         for (final t in tabs)
           NavigationDestination(
             icon: _counted(t, Icon(t.icon)),
-            selectedIcon: _counted(t, _Pop(child: Icon(t.selectedIcon))),
+            selectedIcon: _counted(t, TabPop(child: Icon(t.selectedIcon))),
             label: t.label,
           ),
       ],
@@ -48,17 +49,4 @@ class AppShell extends StatelessWidget {
           label: Text('${t.count}'),
           child: Builder(builder: (context) => icon.pulse(context)),
         );
-}
-
-/// The icon of the tab just picked springs up from small.
-class _Pop extends StatelessWidget {
-  const _Pop({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    if (context.calm) return child;
-    return child.animate().scaleXY(begin: 0.55, end: 1, duration: context.springDuration, curve: context.springCurve);
-  }
 }

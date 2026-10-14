@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/app_theme.dart';
+import '../motion/motion.dart';
 import 'lms.dart';
 
 /// Rows that belong together on one card, under an optional heading.
@@ -100,6 +101,8 @@ class MenuRow extends StatelessWidget {
       ),
     );
     if (onTap == null) return row;
-    return InkWell(onTap: onTap, child: row);
+    return PressScale(
+      child: InkWell(onTap: PressScale.withPress(context, onTap), child: row),
+    );
   }
 }

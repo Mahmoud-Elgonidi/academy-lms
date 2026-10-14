@@ -85,3 +85,32 @@ class _EntranceState extends State<_Entrance> with SingleTickerProviderStateMixi
     child: SlideTransition(position: _slide, child: widget.child),
   );
 }
+
+/// A step of a flow (signing in, writing a report, cancelling): the next
+/// step comes in from the side the reading goes, the one before goes back
+/// out that way. iPhones slide in their own way, with the swipe back.
+Page<void> stepPage(GoRouterState state, Widget child) => defaultTargetPlatform == TargetPlatform.iOS
+    ? CupertinoPage<void>(key: state.pageKey, child: child)
+    : CustomTransitionPage<void>(
+        key: state.pageKey,
+        child: child,
+        transitionDuration: const Duration(milliseconds: 300),
+        reverseTransitionDuration: const Duration(milliseconds: 260),
+        transitionsBuilder: (context, animation, secondary, child) {
+          if (context.calm) return child;
+          final forward = Directionality.of(context) == TextDirection.rtl ? -1.0 : 1.0;
+          final inCurve = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+          final outCurve = CurvedAnimation(parent: secondary, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+          // In from the reading side; the step underneath moves a little the other way and fades.
+          return SlideTransition(
+            position: Tween(begin: Offset(0.18 * forward, 0), end: Offset.zero).animate(inCurve),
+            child: FadeTransition(
+              opacity: inCurve,
+              child: SlideTransition(
+                position: Tween(begin: Offset.zero, end: Offset(-0.12 * forward, 0)).animate(outCurve),
+                child: FadeTransition(opacity: Tween(begin: 1.0, end: 0.0).animate(outCurve), child: child),
+              ),
+            ),
+          );
+        },
+      );

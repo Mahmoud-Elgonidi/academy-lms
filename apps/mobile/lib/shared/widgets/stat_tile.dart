@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/app_theme.dart';
+import '../motion/motion.dart';
 import 'lms.dart';
 
 /// A number and what it means ("2 · حصص في الرصيد"). It looks pressable,
@@ -45,11 +46,12 @@ class StatTile extends StatelessWidget {
       borderRadius: context.shape.cardRadius,
       side: BorderSide(color: c.line),
     );
-    return Material(
+    final tile = Material(
       color: c.card,
       shape: shape,
       clipBehavior: Clip.antiAlias,
-      child: onTap == null ? body : InkWell(onTap: onTap, child: body),
+      child: onTap == null ? body : InkWell(onTap: PressScale.withPress(context, onTap), child: body),
     );
+    return onTap == null ? tile : PressScale(child: tile);
   }
 }

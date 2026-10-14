@@ -132,6 +132,15 @@ effect('creature_cheep', [note(2200, 3000, 0, 0.07, 'sine', 0.16), note(2400, 32
 effect('round_star', [note(880, 1760, 0, 0.12, 'triangle', 0.16), note(1320, 0, 0.08, 0.25, 'sine', 0.1)], 0.4)
 effect('round_win', [note(f, 0, i * 0.11, 0.4, 'triangle', 0.14) for i, f in enumerate([523, 659, 784, 1047])], 0.85)
 
+# The everyday app (not the kids' look): quieter and shorter, so a tap or a
+# moment of success feels alive without getting in the way.
+write('tap_soft', mix([tone(1250, 0.04, decay=90, vol=0.3, harmonics=(1.0, 0.1))], 0.05))
+write('success', mix([tone(784, 0.12, decay=12, vol=0.45), tone(1174.7, 0.45, start=0.1, decay=6, vol=0.45)]
+                     + [tone(2349, 0.08, start=0.22 + i * 0.05, decay=30, vol=0.1, harmonics=(1.0,)) for i in range(3)], 0.65, echo=0.15))
+effect('swoosh', [whoosh(0, 0.28, 600, 2400, 0.16, seed=6)], 0.32)
+effect('send', [whoosh(0, 0.2, 800, 3200, 0.14, seed=7), note(1320, 1760, 0.12, 0.14, 'sine', 0.12)], 0.32)
+write('coin_soft', mix([tone(1318.5, 0.07, decay=25, vol=0.3), tone(1760, 0.22, start=0.06, decay=14, vol=0.26)], 0.3))
+
 # Each island's music: notes walking on its own scale over a quiet sea, a loop
 # of 24 steps (6.72 s) at the web's pace (280 ms), at a lower rate to stay small.
 SCALES = {

@@ -9,6 +9,7 @@ import '../../../core/network/api_problem.dart';
 import '../../../core/realtime/live.dart';
 import '../../../core/state/load_cubit.dart';
 import '../../../shared/motion/motion.dart';
+import '../../../shared/motion/done_moment.dart';
 import '../../../shared/widgets/lms.dart';
 import '../../../shared/widgets/load_view.dart';
 import '../data/safeguarding_repository.dart';
@@ -77,7 +78,7 @@ class DocumentsPage extends StatelessWidget {
       ),
     );
     if (sent != true || !context.mounted) return;
-    showSnack(context, context.l10n.documentSent);
+    DoneMoment.show(context, title: context.l10n.documentSent);
     await context.read<LoadCubit<MyDocuments>>().load();
   }
 }

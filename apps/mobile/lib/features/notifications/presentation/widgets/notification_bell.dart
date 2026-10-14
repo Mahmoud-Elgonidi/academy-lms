@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/realtime/live.dart';
+import '../../../../shared/motion/bell_ring.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../data/notifications_repository.dart';
 
@@ -48,7 +49,9 @@ class _NotificationBellState extends State<NotificationBell> {
   @override
   Widget build(BuildContext context) {
     Widget icon = Icon(_unread > 0 ? Icons.notifications_active_rounded : Icons.notifications_none_rounded);
-    if (_unread > 0) icon = icon.wiggle(context);
+    // The kids' bell wiggles while something waits; the others ring once
+    // when something new comes in.
+    icon = context.flavour == MotionFlavour.kids ? (_unread > 0 ? icon.wiggle(context) : icon) : BellRing(count: _unread, child: icon);
     return IconButton(
       tooltip: '${context.l10n.inboxTitle} · ${context.l10n.unreadCount(_unread)}',
       onPressed: () async {

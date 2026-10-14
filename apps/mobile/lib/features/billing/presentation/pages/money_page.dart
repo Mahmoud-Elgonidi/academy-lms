@@ -13,6 +13,7 @@ import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/course_days.dart';
 import '../../../../core/time/formats.dart';
 import '../../../../shared/widgets/course_state.dart';
+import '../../../../shared/motion/done_moment.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../../dashboard/presentation/widgets/learner_switcher.dart';
@@ -196,7 +197,7 @@ Future<void> _buyExtra(BuildContext context, Balance course, ExtraOffer offer) a
     ),
   );
   if (made == null || !context.mounted) return;
-  showSnack(context, context.l10n.extraDone(made.number, made.total));
+  DoneMoment.show(context, title: context.l10n.extraDone(made.number, made.total));
   await context.read<LoadCubit<_Money>>().load();
 }
 
@@ -489,7 +490,7 @@ class _ProofButton extends StatelessWidget {
       builder: (c) => _ProofSheet(invoice: invoice, manual: manual, repo: repo),
     );
     if (sent == true && context.mounted) {
-      showSnack(context, context.l10n.proofSent);
+      DoneMoment.show(context, title: context.l10n.proofSent);
       unawaited(cubit.load());
     }
   }

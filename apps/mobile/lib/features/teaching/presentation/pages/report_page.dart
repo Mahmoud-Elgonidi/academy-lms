@@ -6,7 +6,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/formats.dart';
-import '../../../../shared/motion/celebration.dart';
+import '../../../../shared/motion/done_moment.dart';
 import '../../../../shared/motion/juice.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
@@ -154,9 +154,7 @@ class _EditorState extends State<_Editor> {
     try {
       await context.read<TeachingRepository>().submitReport(f.summary.id, payload);
       if (!mounted) return;
-      Juice.reward();
-      Celebration.show(context, from: Celebration.centreOf(_sendKey.currentContext ?? context), count: 50);
-      showSnack(context, l.reportSent);
+      DoneMoment.show(context, title: l.reportSent);
       Navigator.of(context).pop(true);
     } on ApiProblem catch (p) {
       if (mounted) {

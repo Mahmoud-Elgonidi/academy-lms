@@ -38,23 +38,29 @@ class Celebration {
   }
 }
 
+/// One piece, flying from where it starts: its path is worked out from the
+/// time alone, so nothing is stepped or rebuilt frame by frame.
 class _Particle {
-  _Particle(math.Random r, Offset origin, this.colour, {required bool fromTop})
-    : position = origin,
-      velocity = fromTop
+  _Particle(math.Random r, this.origin, this.colour, {required bool fromTop})
+    : velocity = fromTop
           ? Offset((r.nextDouble() - 0.5) * 300, r.nextDouble() * 120 + 40)
           : Offset.fromDirection(-math.pi / 2 + (r.nextDouble() - 0.5) * math.pi * 1.3, r.nextDouble() * 520 + 260),
       spin = (r.nextDouble() - 0.5) * 12,
       size = r.nextDouble() * 7 + 6,
       wobble = r.nextDouble() * math.pi * 2;
 
-  Offset position;
-  Offset velocity;
+  final Offset origin;
+  final Offset velocity;
   final Color colour;
   final double spin;
   final double size;
   final double wobble;
-  double angle = 0;
+
+  /// Where it is [t] seconds in: thrown, slowed by the air, pulled down.
+  Offset at(double t) {
+    final drag = (1 - math.exp(-1.5 * t)) / 1.5;
+    return origin + Offset(velocity.dx * drag + math.sin(t * 6 + wobble) * 6, velocity.dy * drag + 450 * t * t);
+  }
 }
 
 class _Particles extends StatefulWidget {
@@ -71,15 +77,15 @@ class _Particles extends StatefulWidget {
 }
 
 class _ParticlesState extends State<_Particles> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 2200));
+  late final AnimationController _c = AnimationController(vsync: this, duration: _length);
   final _r = math.Random();
   List<_Particle>? _particles;
-  Duration _last = Duration.zero;
+
+  static const _length = Duration(milliseconds: 2200);
 
   @override
   void initState() {
     super.initState();
-    _c.addListener(_step);
     _c.forward().whenComplete(widget.onDone);
   }
 
@@ -87,18 +93,6 @@ class _ParticlesState extends State<_Particles> with SingleTickerProviderStateMi
   void dispose() {
     _c.dispose();
     super.dispose();
-  }
-
-  void _step() {
-    final now = _c.lastElapsedDuration ?? Duration.zero;
-    final dt = (now - _last).inMicroseconds / 1e6;
-    _last = now;
-    for (final p in _particles ?? const <_Particle>[]) {
-      p.velocity = Offset(p.velocity.dx * 0.985, p.velocity.dy + 900 * dt);
-      p.position += p.velocity * dt + Offset(math.sin(now.inMilliseconds / 160 + p.wobble) * 0.6, 0);
-      p.angle += p.spin * dt;
-    }
-    setState(() {});
   }
 
   @override
@@ -109,46 +103,62 @@ class _ParticlesState extends State<_Particles> with SingleTickerProviderStateMi
       final origin = widget.from ?? Offset(_r.nextDouble() * size.width, -20);
       return _Particle(_r, origin, widget.colours[i % widget.colours.length], fromTop: fromTop);
     });
-    final fade = ((_c.value - 0.65) / 0.35).clamp(0.0, 1.0);
-    return CustomPaint(size: size, painter: _Painter(_particles!, widget.burst, 1 - fade));
+    return RepaintBoundary(
+      child: CustomPaint(size: size, painter: _Painter(_particles!, widget.burst, _c)),
+    );
   }
 }
 
 class _Painter extends CustomPainter {
-  _Painter(this.particles, this.burst, this.opacity);
+  _Painter(this.particles, this.burst, this.progress) : super(repaint: progress);
 
   final List<_Particle> particles;
   final Burst burst;
-  final double opacity;
+  final Animation<double> progress;
+
+  static final _star = _starPath();
+  static final _gem = Path()
+    ..moveTo(0, -1)
+    ..lineTo(0.8, -0.2)
+    ..lineTo(0, 1)
+    ..lineTo(-0.8, -0.2)
+    ..close();
+  static final _paper = RRect.fromRectAndRadius(Rect.fromCenter(center: Offset.zero, width: 1, height: 0.55), const Radius.circular(0.15));
 
   @override
   void paint(Canvas canvas, Size size) {
+    final t = progress.value * _ParticlesState._length.inMilliseconds / 1000;
+    final opacity = 1 - ((progress.value - 0.65) / 0.35).clamp(0.0, 1.0);
     final paint = Paint();
     for (final p in particles) {
-      paint.color = p.colour.withValues(alpha: opacity.clamp(0, 1));
+      final at = p.at(t);
+      paint.color = p.colour.withValues(alpha: opacity);
       canvas
         ..save()
-        ..translate(p.position.dx, p.position.dy)
-        ..rotate(p.angle);
+        ..translate(at.dx, at.dy)
+        ..rotate(p.spin * t);
       switch (burst) {
         case Burst.confetti:
-          canvas.drawRRect(
-            RRect.fromRectAndRadius(Rect.fromCenter(center: Offset.zero, width: p.size, height: p.size * 0.55), const Radius.circular(1.5)),
-            paint,
-          );
+          canvas
+            ..scale(p.size)
+            ..drawRRect(_paper, paint);
         case Burst.stars:
-          canvas.drawPath(_star(p.size * 0.75), paint);
+          canvas
+            ..scale(p.size * 0.75)
+            ..drawPath(_star, paint);
         case Burst.gems:
-          canvas.drawPath(_gem(p.size * 0.8), paint);
+          canvas
+            ..scale(p.size * 0.8)
+            ..drawPath(_gem, paint);
       }
       canvas.restore();
     }
   }
 
-  static Path _star(double r) {
+  static Path _starPath() {
     final path = Path();
     for (var i = 0; i < 10; i++) {
-      final radius = i.isEven ? r : r * 0.45;
+      final radius = i.isEven ? 1.0 : 0.45;
       final a = -math.pi / 2 + i * math.pi / 5;
       final pt = Offset(math.cos(a) * radius, math.sin(a) * radius);
       i == 0 ? path.moveTo(pt.dx, pt.dy) : path.lineTo(pt.dx, pt.dy);
@@ -156,13 +166,6 @@ class _Painter extends CustomPainter {
     return path..close();
   }
 
-  static Path _gem(double r) => Path()
-    ..moveTo(0, -r)
-    ..lineTo(r * 0.8, -r * 0.2)
-    ..lineTo(0, r)
-    ..lineTo(-r * 0.8, -r * 0.2)
-    ..close();
-
   @override
-  bool shouldRepaint(_Painter old) => true;
+  bool shouldRepaint(_Painter old) => old.particles != particles || old.burst != burst;
 }

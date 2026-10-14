@@ -88,6 +88,7 @@ class _SlotState extends State<_Slot> {
     return Semantics(
       label: s.earned ? s.name : null,
       child: Pressable(
+        sound: false,
         onTap: s.earned
             ? () {
                 Juice.tap();
