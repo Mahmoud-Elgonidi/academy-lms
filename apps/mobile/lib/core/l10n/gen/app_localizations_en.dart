@@ -1964,7 +1964,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String streak(int n) {
-    return '$n in a row';
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n in a row', one: '1 lesson', zero: 'None in a row yet');
+    return '$_temp0';
   }
 
   @override
@@ -2609,7 +2610,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpTitle => 'Help';
 
   @override
-  String get supportTitle => 'Support';
+  String get supportTitle => 'Help';
 
   @override
   String get helpLead =>
@@ -2922,7 +2923,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String gamesEggCard(int have, int need) {
+  String gamesEggCardKids(int have, int need) {
     return 'Next egg: $have of $need ⭐';
   }
 
@@ -3088,7 +3089,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gamesMakeBuddy => 'Make it your buddy';
 
   @override
-  String get gamesIsBuddy => 'Your buddy 💛';
+  String get gamesIsBuddyKids => 'Your buddy 💛';
+
+  @override
+  String get gamesIsBuddy => 'Your buddy';
 
   @override
   String gamesBuddyDone(String name) {
@@ -3141,7 +3145,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get gamesBeat => 'New record! 🔥';
+  String get gamesBeat => 'New record!';
 
   @override
   String get gamesSoClose => 'So close!';
@@ -3433,11 +3437,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nowTitle => 'Now';
-
-  @override
-  String stationOf(int i, int n) {
-    return 'Lesson $i of $n';
-  }
 
   @override
   String nextIs(String title) {

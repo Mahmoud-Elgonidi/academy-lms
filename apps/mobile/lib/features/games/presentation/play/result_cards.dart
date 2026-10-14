@@ -108,7 +108,7 @@ class KidsResultCard extends StatelessWidget {
                     children: [
                       SvgArt(eggSvg(), width: 22, height: 27),
                       const SizedBox(width: 8),
-                      Flexible(flex: 3, child: Text(l.gamesEggCard(result.eggHave, result.eggNeed), style: gwText(context, 14))),
+                      Flexible(flex: 3, child: Text(l.gamesEggCardKids(result.eggHave, result.eggNeed), style: gwText(context, 14))),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Semantics(
@@ -239,11 +239,8 @@ class HubResultCard extends StatelessWidget {
     final l = context.l10n;
     final p = HubPalette.of(look);
     final race = look == 'middle';
-    final kicker = bestBefore == null
-        ? l.gamesFirst
-        : (result.seconds ?? 1 << 30) < bestBefore!
-        ? l.gamesBeat
-        : l.gamesSoClose;
+    final beat = bestBefore != null && (result.seconds ?? 1 << 30) < bestBefore!;
+    final kicker = bestBefore == null ? l.gamesFirst : (beat ? l.gamesBeat : l.gamesSoClose);
     final calm = context.calm;
     Widget star(int i) {
       final Widget s = Icon(Icons.star_rounded, size: 42, color: i < result.stars ? const Color(0xFFFCC419) : const Color(0xFFDEE2E6));
@@ -265,9 +262,18 @@ class HubResultCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (race)
-            Text(
-              kicker,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: sub, fontFamily: context.shape.headingFont),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (beat) ...[
+                  const Icon(Icons.local_fire_department_rounded, size: 18, color: Color(0xFFF76707)),
+                  const SizedBox(width: 4),
+                ],
+                Text(
+                  kicker,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: sub, fontFamily: context.shape.headingFont),
+                ),
+              ],
             ),
           const SizedBox(height: 2),
           Text(

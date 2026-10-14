@@ -188,7 +188,7 @@ void main() {
     await frames(tester, 12);
     await tester.tap(find.byKey(const Key('open-support')));
     await frames(tester, 12);
-    expect(find.text('الدعم'), findsWidgets);
+    expect(find.text('المساعدة'), findsWidgets);
     await tester.tap(find.byKey(const Key('new-ticket')));
     await frames(tester, 12);
     // A teacher's "payments" is their pay.

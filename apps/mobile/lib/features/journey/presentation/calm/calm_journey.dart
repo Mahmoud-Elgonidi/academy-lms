@@ -254,7 +254,10 @@ class _NowCard extends StatelessWidget {
           ),
           if (here != null) ...[
             const Gap(Space.s),
-            Text([l.stationOf(at + 1, stops.length), if (next != null) l.nextIs(next.title)].join(' · '), style: context.type.caption),
+            Text(
+              [l.journeyStationOf(at + 1, stops.length), if (next != null) l.nextIs(next.title)].join(' · '),
+              style: context.type.caption,
+            ),
           ],
         ],
       ),

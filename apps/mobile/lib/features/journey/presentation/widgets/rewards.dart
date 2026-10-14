@@ -250,7 +250,7 @@ class _EggCardState extends State<EggCard> {
             children: [
               SvgArt(egg, width: 54, height: 66).bob(context, by: 2),
               const SizedBox(height: 6),
-              Text(l.gamesEggCard(games.eggHave, games.eggNeed), textAlign: TextAlign.center, style: gwText(context, 13.5)),
+              Text(l.gamesEggCardKids(games.eggHave, games.eggNeed), textAlign: TextAlign.center, style: gwText(context, 13.5)),
               const SizedBox(height: 6),
               _EggBar(share: share),
             ],
@@ -297,7 +297,7 @@ class _EggCardState extends State<EggCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(ready ? l.journeyEggReady : l.gamesEggCard(games.eggHave, games.eggNeed), style: context.text.titleSmall),
+                Text(ready ? l.journeyEggReady : l.gamesEgg(games.eggHave, games.eggNeed), style: context.text.titleSmall),
                 const SizedBox(height: 6),
                 if (!ready) ProgressBar(share, colour: c.reward, height: 8) else Text(l.journeyEggHint, style: context.text.bodySmall),
               ],

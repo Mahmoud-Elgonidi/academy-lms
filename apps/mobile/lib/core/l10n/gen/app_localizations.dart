@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// No description provided for @minutes.
   ///
   /// In ar, this message translates to:
-  /// **'{n} دقيقة'**
+  /// **'{n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}'**
   String minutes(int n);
 
   /// No description provided for @today.
@@ -1043,7 +1043,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyLead.
   ///
   /// In ar, this message translates to:
-  /// **'الأولاد اللي تحت {age} سنة محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.'**
+  /// **'الأولاد اللي تحت {age, plural, =1{سنة} =2{سنتين} few{{age} سنين} other{{age} سنة}} محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.'**
   String privacyLead(int age);
 
   /// No description provided for @privacyNone.
@@ -1139,7 +1139,7 @@ abstract class AppLocalizations {
   /// No description provided for @myDataCopyBody.
   ///
   /// In ar, this message translates to:
-  /// **'ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل {days} أيام.'**
+  /// **'ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}.'**
   String myDataCopyBody(int days);
 
   /// No description provided for @myDataCopyAction.
@@ -1175,7 +1175,7 @@ abstract class AppLocalizations {
   /// No description provided for @myDataEraseBody.
   ///
   /// In ar, this message translates to:
-  /// **'الأكاديمية بترد في خلال {days} يوم، ولما توافق الحساب بيتمسح بعدها بيوم.'**
+  /// **'الأكاديمية بترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}، ولما توافق الحساب بيتمسح بعدها بيوم.'**
   String myDataEraseBody(int days);
 
   /// No description provided for @myDataEraseAction.
@@ -1319,7 +1319,7 @@ abstract class AppLocalizations {
   /// No description provided for @myDataFixBody.
   ///
   /// In ar, this message translates to:
-  /// **'حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال {days} يوم.'**
+  /// **'حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}.'**
   String myDataFixBody(int days);
 
   /// No description provided for @myDataFixAsk.
@@ -1337,7 +1337,7 @@ abstract class AppLocalizations {
   /// No description provided for @myDataFixAskBody.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال {days} يوم، وبيوصلك ردها.'**
+  /// **'اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}، وبيوصلك ردها.'**
   String myDataFixAskBody(int days);
 
   /// No description provided for @myDataFixSays.
@@ -1355,7 +1355,7 @@ abstract class AppLocalizations {
   /// No description provided for @myDataFixTooShort.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب {min} حروف على الأقل.'**
+  /// **'اكتب {min, plural, =1{حرف} =2{حرفين} few{{min} حروف} other{{min} حرف}} على الأقل.'**
   String myDataFixTooShort(int min);
 
   /// No description provided for @myDataFixSend.
@@ -1823,7 +1823,7 @@ abstract class AppLocalizations {
   /// No description provided for @refusedSubstitute.
   ///
   /// In ar, this message translates to:
-  /// **'اتلغت. عندك {days} يوم تحجز فيهم حصة التعويض.'**
+  /// **'اتلغت. عندك {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}} تحجز فيهم حصة التعويض.'**
   String refusedSubstitute(int days);
 
   /// No description provided for @cancelLesson.
@@ -2285,7 +2285,7 @@ abstract class AppLocalizations {
   /// No description provided for @extraHint.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة الزيادة بـ {price} ({minutes} دقيقة).'**
+  /// **'الحصة الزيادة بـ {price} ({minutes, plural, =1{دقيقة} =2{دقيقتين} few{{minutes} دقايق} other{{minutes} دقيقة}}).'**
   String extraHint(String price, int minutes);
 
   /// No description provided for @extraTitle.
@@ -2537,7 +2537,7 @@ abstract class AppLocalizations {
   /// No description provided for @minutesLeft.
   ///
   /// In ar, this message translates to:
-  /// **'فاضل {n} دقيقة'**
+  /// **'فاضل {n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}'**
   String minutesLeft(int n);
 
   /// No description provided for @sharedPackage.
@@ -3377,7 +3377,7 @@ abstract class AppLocalizations {
   /// No description provided for @coverState.
   ///
   /// In ar, this message translates to:
-  /// **'{covered} من {total} حصص ليها بديل'**
+  /// **'{covered} من {total, plural, =1{حصة واحدة} =2{حصتين} few{{total} حصص} other{{total} حصة}} ليها بديل'**
   String coverState(int covered, int total);
 
   /// No description provided for @fillTimeOff.
@@ -3407,7 +3407,7 @@ abstract class AppLocalizations {
   /// No description provided for @streak.
   ///
   /// In ar, this message translates to:
-  /// **'{n} حصص ورا بعض'**
+  /// **'{n, plural, =0{لسه مفيش حصص ورا بعض} =1{حصة واحدة} =2{حصتين ورا بعض} few{{n} حصص ورا بعض} other{{n} حصة ورا بعض}}'**
   String streak(int n);
 
   /// No description provided for @badgesCount.
@@ -3863,7 +3863,7 @@ abstract class AppLocalizations {
   /// No description provided for @teachersOnly.
   ///
   /// In ar, this message translates to:
-  /// **'للمدرس بس'**
+  /// **'للمدرّس بس'**
   String get teachersOnly;
 
   /// No description provided for @recordingsTitle.
@@ -4253,7 +4253,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingLimit.
   ///
   /// In ar, this message translates to:
-  /// **'التسجيل وقف عند {n} دقايق.'**
+  /// **'التسجيل وقف عند {n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}.'**
   String recordingLimit(int n);
 
   /// No description provided for @fileTooBig.
@@ -4547,7 +4547,7 @@ abstract class AppLocalizations {
   /// No description provided for @supportTitle.
   ///
   /// In ar, this message translates to:
-  /// **'الدعم'**
+  /// **'المساعدة'**
   String get supportTitle;
 
   /// No description provided for @helpLead.
@@ -4583,7 +4583,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketHintComplaint.
   ///
   /// In ar, this message translates to:
-  /// **'على مدرس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.'**
+  /// **'على مدرّس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.'**
   String get ticketHintComplaint;
 
   /// No description provided for @ticketHintBilling.
@@ -4763,7 +4763,7 @@ abstract class AppLocalizations {
   /// No description provided for @tellUsLead.
   ///
   /// In ar, this message translates to:
-  /// **'لو أي حاجة في حصة، أو من مدرس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.'**
+  /// **'لو أي حاجة في حصة، أو من مدرّس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.'**
   String get tellUsLead;
 
   /// No description provided for @tellUsLeadStudent.
@@ -5009,13 +5009,13 @@ abstract class AppLocalizations {
   /// No description provided for @messagesFamilyTitle.
   ///
   /// In ar, this message translates to:
-  /// **'الرسايل مع المدرسين'**
+  /// **'الرسايل مع المدرّسين'**
   String get messagesFamilyTitle;
 
   /// No description provided for @messagesStudentTitle.
   ///
   /// In ar, this message translates to:
-  /// **'الرسايل مع مدرسينك'**
+  /// **'الرسايل مع مدرّسينك'**
   String get messagesStudentTitle;
 
   /// No description provided for @messagesKidsTitle.
@@ -5033,7 +5033,7 @@ abstract class AppLocalizations {
   /// No description provided for @messagesEmptyFamily.
   ///
   /// In ar, this message translates to:
-  /// **'لما يبقى للطالب مدرس، هتلاقيه هنا.'**
+  /// **'لما يبقى للطالب مدرّس، هتلاقيه هنا.'**
   String get messagesEmptyFamily;
 
   /// No description provided for @messagesStart.
@@ -5120,11 +5120,11 @@ abstract class AppLocalizations {
   /// **'كائنات الجزيرة · {found} من {total}'**
   String gamesCreaturesCard(int found, int total);
 
-  /// No description provided for @gamesEggCard.
+  /// No description provided for @gamesEggCardKids.
   ///
   /// In ar, this message translates to:
   /// **'البيضة الجاية: {have} من {need} ⭐'**
-  String gamesEggCard(int have, int need);
+  String gamesEggCardKids(int have, int need);
 
   /// No description provided for @gamesIslandDone.
   ///
@@ -5207,7 +5207,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesEgg.
   ///
   /// In ar, this message translates to:
-  /// **'البيضة الجاية: {have} من {need} نجمة'**
+  /// **'البيضة الجاية: {have} من {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}'**
   String gamesEgg(int have, int need);
 
   /// No description provided for @gamesAgain.
@@ -5249,7 +5249,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesHatchReadySub.
   ///
   /// In ar, this message translates to:
-  /// **'جمعت {need} نجمة في رحلتك'**
+  /// **'جمعت {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} في رحلتك'**
   String gamesHatchReadySub(int need);
 
   /// No description provided for @gamesHatchDone.
@@ -5261,7 +5261,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesHatchDoneSub.
   ///
   /// In ar, this message translates to:
-  /// **'كل ما تجمع {need} نجمة، تفقسلك بيضة جديدة'**
+  /// **'كل ما تجمع {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}، تفقسلك بيضة جديدة'**
   String gamesHatchDoneSub(int need);
 
   /// No description provided for @gamesHatchTap0.
@@ -5321,7 +5321,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesAlbumHint.
   ///
   /// In ar, this message translates to:
-  /// **'كل {need} نجمة في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.'**
+  /// **'كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.'**
   String gamesAlbumHint(int need);
 
   /// No description provided for @gamesAlbumGuardian.
@@ -5390,10 +5390,16 @@ abstract class AppLocalizations {
   /// **'خليه صاحبك'**
   String get gamesMakeBuddy;
 
-  /// No description provided for @gamesIsBuddy.
+  /// No description provided for @gamesIsBuddyKids.
   ///
   /// In ar, this message translates to:
   /// **'ده صاحبك 💛'**
+  String get gamesIsBuddyKids;
+
+  /// No description provided for @gamesIsBuddy.
+  ///
+  /// In ar, this message translates to:
+  /// **'ده صاحبك'**
   String get gamesIsBuddy;
 
   /// No description provided for @gamesBuddyDone.
@@ -5411,7 +5417,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesHowCommon.
   ///
   /// In ar, this message translates to:
-  /// **'إزاي تفقسه: اجمع نجوم وانت على {island}: كل {need} نجمة بيضة.'**
+  /// **'إزاي تفقسه: اجمع نجوم وانت على {island}: كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} بيضة.'**
   String gamesHowCommon(String island, int need);
 
   /// No description provided for @gamesHowRare.
@@ -5471,7 +5477,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesBeat.
   ///
   /// In ar, this message translates to:
-  /// **'كسرت رقمك! 🔥'**
+  /// **'كسرت رقمك!'**
   String get gamesBeat;
 
   /// No description provided for @gamesSoClose.
@@ -5513,13 +5519,13 @@ abstract class AppLocalizations {
   /// No description provided for @gamesTimeText.
   ///
   /// In ar, this message translates to:
-  /// **'{used} من {limit} دقيقة لعب النهارده. فاضل {left} دقيقة.'**
+  /// **'{used} من {limit, plural, =1{دقيقة} =2{دقيقتين} few{{limit} دقايق} other{{limit} دقيقة}} لعب النهارده. فاضل {left, plural, =1{دقيقة} =2{دقيقتين} few{{left} دقايق} other{{left} دقيقة}}.'**
   String gamesTimeText(int used, int limit, int left);
 
   /// No description provided for @gamesTimeOpen.
   ///
   /// In ar, this message translates to:
-  /// **'{used} دقيقة لعب النهارده، من غير حد.'**
+  /// **'{used, plural, =1{دقيقة} =2{دقيقتين} few{{used} دقايق} other{{used} دقيقة}} لعب النهارده، من غير حد.'**
   String gamesTimeOpen(int used);
 
   /// No description provided for @gamesMinutesShort.
@@ -5597,7 +5603,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesQuiet.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش لعب الأسبوع ده. الألعاب بتتمرن على دروسه بس، والمدرس بيحط التدريبات على الدرس.'**
+  /// **'مفيش لعب الأسبوع ده. الألعاب بتتمرن على دروسه بس، والمدرّس بيحط التدريبات على الدرس.'**
   String get gamesQuiet;
 
   /// No description provided for @gamesHatchedToday.
@@ -5711,7 +5717,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeyLessonsDone.
   ///
   /// In ar, this message translates to:
-  /// **'{done} من {total} دروس'**
+  /// **'{done} من {total, plural, =1{درس واحد} =2{درسين} few{{total} دروس} other{{total} درس}}'**
   String journeyLessonsDone(int done, int total);
 
   /// No description provided for @journeyAheadLocked.
@@ -5900,12 +5906,6 @@ abstract class AppLocalizations {
   /// **'دلوقتي'**
   String get nowTitle;
 
-  /// No description provided for @stationOf.
-  ///
-  /// In ar, this message translates to:
-  /// **'المحطة {i} من {n}'**
-  String stationOf(int i, int n);
-
   /// No description provided for @nextIs.
   ///
   /// In ar, this message translates to:
@@ -5975,13 +5975,13 @@ abstract class AppLocalizations {
   /// No description provided for @journeyChestProgress.
   ///
   /// In ar, this message translates to:
-  /// **'{done} من {total} مهمات الأسبوع'**
+  /// **'{done} من {total, plural, =1{مهمة واحدة} =2{مهمتين} few{{total} مهمات} other{{total} مهمة}} الأسبوع'**
   String journeyChestProgress(int done, int total);
 
   /// No description provided for @journeyChestHint.
   ///
   /// In ar, this message translates to:
-  /// **'احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ {n} نجوم'**
+  /// **'احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ {n, plural, =1{نجمة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}'**
   String journeyChestHint(int n);
 
   /// No description provided for @journeyChestMissed.

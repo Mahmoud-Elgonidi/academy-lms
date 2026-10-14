@@ -59,7 +59,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String minutes(int n) {
-    return '$n دقيقة';
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n دقيقة', few: '$n دقايق', two: 'دقيقتين', one: 'دقيقة');
+    return '$_temp0';
   }
 
   @override
@@ -567,7 +568,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String privacyLead(int age) {
-    return 'الأولاد اللي تحت $age سنة محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.';
+    String _temp0 = intl.Intl.pluralLogic(age, locale: localeName, other: '$age سنة', few: '$age سنين', two: 'سنتين', one: 'سنة');
+    return 'الأولاد اللي تحت $_temp0 محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.';
   }
 
   @override
@@ -631,7 +633,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String myDataCopyBody(int days) {
-    return 'ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل $days أيام.';
+    String _temp0 = intl.Intl.pluralLogic(days, locale: localeName, other: '$days يوم', few: '$days أيام', two: 'يومين', one: 'يوم');
+    return 'ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل $_temp0.';
   }
 
   @override
@@ -653,7 +656,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String myDataEraseBody(int days) {
-    return 'الأكاديمية بترد في خلال $days يوم، ولما توافق الحساب بيتمسح بعدها بيوم.';
+    String _temp0 = intl.Intl.pluralLogic(days, locale: localeName, other: '$days يوم', few: '$days أيام', two: 'يومين', one: 'يوم');
+    return 'الأكاديمية بترد في خلال $_temp0، ولما توافق الحساب بيتمسح بعدها بيوم.';
   }
 
   @override
@@ -739,7 +743,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String myDataFixBody(int days) {
-    return 'حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال $days يوم.';
+    String _temp0 = intl.Intl.pluralLogic(days, locale: localeName, other: '$days يوم', few: '$days أيام', two: 'يومين', one: 'يوم');
+    return 'حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال $_temp0.';
   }
 
   @override
@@ -752,7 +757,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String myDataFixAskBody(int days) {
-    return 'اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال $days يوم، وبيوصلك ردها.';
+    String _temp0 = intl.Intl.pluralLogic(days, locale: localeName, other: '$days يوم', few: '$days أيام', two: 'يومين', one: 'يوم');
+    return 'اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال $_temp0، وبيوصلك ردها.';
   }
 
   @override
@@ -763,7 +769,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String myDataFixTooShort(int min) {
-    return 'اكتب $min حروف على الأقل.';
+    String _temp0 = intl.Intl.pluralLogic(min, locale: localeName, other: '$min حرف', few: '$min حروف', two: 'حرفين', one: 'حرف');
+    return 'اكتب $_temp0 على الأقل.';
   }
 
   @override
@@ -1041,7 +1048,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String refusedSubstitute(int days) {
-    return 'اتلغت. عندك $days يوم تحجز فيهم حصة التعويض.';
+    String _temp0 = intl.Intl.pluralLogic(days, locale: localeName, other: '$days يوم', few: '$days أيام', two: 'يومين', one: 'يوم');
+    return 'اتلغت. عندك $_temp0 تحجز فيهم حصة التعويض.';
   }
 
   @override
@@ -1331,7 +1339,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String extraHint(String price, int minutes) {
-    return 'الحصة الزيادة بـ $price ($minutes دقيقة).';
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes دقيقة',
+      few: '$minutes دقايق',
+      two: 'دقيقتين',
+      one: 'دقيقة',
+    );
+    return 'الحصة الزيادة بـ $price ($_temp0).';
   }
 
   @override
@@ -1467,7 +1483,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String minutesLeft(int n) {
-    return 'فاضل $n دقيقة';
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n دقيقة', few: '$n دقايق', two: 'دقيقتين', one: 'دقيقة');
+    return 'فاضل $_temp0';
   }
 
   @override
@@ -2014,7 +2031,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String coverState(int covered, int total) {
-    return '$covered من $total حصص ليها بديل';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total حصة',
+      few: '$total حصص',
+      two: 'حصتين',
+      one: 'حصة واحدة',
+    );
+    return '$covered من $_temp0 ليها بديل';
   }
 
   @override
@@ -2031,7 +2056,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String streak(int n) {
-    return '$n حصص ورا بعض';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n حصة ورا بعض',
+      few: '$n حصص ورا بعض',
+      two: 'حصتين ورا بعض',
+      one: 'حصة واحدة',
+      zero: 'لسه مفيش حصص ورا بعض',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -2322,7 +2356,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lessonMaterials => 'مواد الدرس';
 
   @override
-  String get teachersOnly => 'للمدرس بس';
+  String get teachersOnly => 'للمدرّس بس';
 
   @override
   String get recordingsTitle => 'تسجيلات الحصص';
@@ -2531,7 +2565,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String recordingLimit(int n) {
-    return 'التسجيل وقف عند $n دقايق.';
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n دقيقة', few: '$n دقايق', two: 'دقيقتين', one: 'دقيقة');
+    return 'التسجيل وقف عند $_temp0.';
   }
 
   @override
@@ -2698,7 +2733,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get helpTitle => 'المساعدة';
 
   @override
-  String get supportTitle => 'الدعم';
+  String get supportTitle => 'المساعدة';
 
   @override
   String get helpLead => 'اكتب للأكاديمية عن حصة، أو دفع، أو مشكلة تقنية، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.';
@@ -2716,7 +2751,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ticketKind => 'عن إيه؟';
 
   @override
-  String get ticketHintComplaint => 'على مدرس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.';
+  String get ticketHintComplaint => 'على مدرّس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.';
 
   @override
   String get ticketHintBilling => 'فاتورة، أو دفعة، أو فلوس راجعة، أو باقتك.';
@@ -2811,7 +2846,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tellUsLead =>
-      'لو أي حاجة في حصة، أو من مدرس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.';
+      'لو أي حاجة في حصة، أو من مدرّس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.';
 
   @override
   String get tellUsLeadStudent =>
@@ -2942,10 +2977,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get messagesTitle => 'الرسايل';
 
   @override
-  String get messagesFamilyTitle => 'الرسايل مع المدرسين';
+  String get messagesFamilyTitle => 'الرسايل مع المدرّسين';
 
   @override
-  String get messagesStudentTitle => 'الرسايل مع مدرسينك';
+  String get messagesStudentTitle => 'الرسايل مع مدرّسينك';
 
   @override
   String get messagesKidsTitle => 'كلّم مدرسك';
@@ -2954,7 +2989,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get messagesEmptyTeacher => 'لما يبقى عندك طلاب، هتلاقيهم هنا وتقدر تكلّمهم وتكلّم أهلهم.';
 
   @override
-  String get messagesEmptyFamily => 'لما يبقى للطالب مدرس، هتلاقيه هنا.';
+  String get messagesEmptyFamily => 'لما يبقى للطالب مدرّس، هتلاقيه هنا.';
 
   @override
   String get messagesStart => 'لسه ماحدش كتب';
@@ -3016,7 +3051,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String gamesEggCard(int have, int need) {
+  String gamesEggCardKids(int have, int need) {
     return 'البيضة الجاية: $have من $need ⭐';
   }
 
@@ -3072,7 +3107,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String gamesEgg(int have, int need) {
-    return 'البيضة الجاية: $have من $need نجمة';
+    String _temp0 = intl.Intl.pluralLogic(need, locale: localeName, other: '$need نجمة', few: '$need نجوم', two: 'نجمتين', one: 'نجمة');
+    return 'البيضة الجاية: $have من $_temp0';
   }
 
   @override
@@ -3095,7 +3131,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String gamesHatchReadySub(int need) {
-    return 'جمعت $need نجمة في رحلتك';
+    String _temp0 = intl.Intl.pluralLogic(need, locale: localeName, other: '$need نجمة', few: '$need نجوم', two: 'نجمتين', one: 'نجمة');
+    return 'جمعت $_temp0 في رحلتك';
   }
 
   @override
@@ -3103,7 +3140,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String gamesHatchDoneSub(int need) {
-    return 'كل ما تجمع $need نجمة، تفقسلك بيضة جديدة';
+    String _temp0 = intl.Intl.pluralLogic(need, locale: localeName, other: '$need نجمة', few: '$need نجوم', two: 'نجمتين', one: 'نجمة');
+    return 'كل ما تجمع $_temp0، تفقسلك بيضة جديدة';
   }
 
   @override
@@ -3139,7 +3177,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String gamesAlbumHint(int need) {
-    return 'كل $need نجمة في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.';
+    String _temp0 = intl.Intl.pluralLogic(need, locale: localeName, other: '$need نجمة', few: '$need نجوم', two: 'نجمتين', one: 'نجمة');
+    return 'كل $_temp0 في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.';
   }
 
   @override
@@ -3182,7 +3221,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gamesMakeBuddy => 'خليه صاحبك';
 
   @override
-  String get gamesIsBuddy => 'ده صاحبك 💛';
+  String get gamesIsBuddyKids => 'ده صاحبك 💛';
+
+  @override
+  String get gamesIsBuddy => 'ده صاحبك';
 
   @override
   String gamesBuddyDone(String name) {
@@ -3194,7 +3236,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String gamesHowCommon(String island, int need) {
-    return 'إزاي تفقسه: اجمع نجوم وانت على $island: كل $need نجمة بيضة.';
+    String _temp0 = intl.Intl.pluralLogic(need, locale: localeName, other: '$need نجمة', few: '$need نجوم', two: 'نجمتين', one: 'نجمة');
+    return 'إزاي تفقسه: اجمع نجوم وانت على $island: كل $_temp0 بيضة.';
   }
 
   @override
@@ -3235,7 +3278,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get gamesBeat => 'كسرت رقمك! 🔥';
+  String get gamesBeat => 'كسرت رقمك!';
 
   @override
   String get gamesSoClose => 'قربت!';
@@ -3261,12 +3304,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String gamesTimeText(int used, int limit, int left) {
-    return '$used من $limit دقيقة لعب النهارده. فاضل $left دقيقة.';
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other: '$limit دقيقة',
+      few: '$limit دقايق',
+      two: 'دقيقتين',
+      one: 'دقيقة',
+    );
+    String _temp1 = intl.Intl.pluralLogic(left, locale: localeName, other: '$left دقيقة', few: '$left دقايق', two: 'دقيقتين', one: 'دقيقة');
+    return '$used من $_temp0 لعب النهارده. فاضل $_temp1.';
   }
 
   @override
   String gamesTimeOpen(int used) {
-    return '$used دقيقة لعب النهارده، من غير حد.';
+    String _temp0 = intl.Intl.pluralLogic(used, locale: localeName, other: '$used دقيقة', few: '$used دقايق', two: 'دقيقتين', one: 'دقيقة');
+    return '$_temp0 لعب النهارده، من غير حد.';
   }
 
   @override
@@ -3320,7 +3373,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get gamesQuiet => 'مفيش لعب الأسبوع ده. الألعاب بتتمرن على دروسه بس، والمدرس بيحط التدريبات على الدرس.';
+  String get gamesQuiet => 'مفيش لعب الأسبوع ده. الألعاب بتتمرن على دروسه بس، والمدرّس بيحط التدريبات على الدرس.';
 
   @override
   String gamesHatchedToday(String name) {
@@ -3400,7 +3453,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String journeyLessonsDone(int done, int total) {
-    return '$done من $total دروس';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total درس',
+      few: '$total دروس',
+      two: 'درسين',
+      one: 'درس واحد',
+    );
+    return '$done من $_temp0';
   }
 
   @override
@@ -3542,11 +3603,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get nowTitle => 'دلوقتي';
 
   @override
-  String stationOf(int i, int n) {
-    return 'المحطة $i من $n';
-  }
-
-  @override
   String nextIs(String title) {
     return 'الجاية: $title';
   }
@@ -3599,12 +3655,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String journeyChestProgress(int done, int total) {
-    return '$done من $total مهمات الأسبوع';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total مهمة',
+      few: '$total مهمات',
+      two: 'مهمتين',
+      one: 'مهمة واحدة',
+    );
+    return '$done من $_temp0 الأسبوع';
   }
 
   @override
   String journeyChestHint(int n) {
-    return 'احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ $n نجوم';
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n نجمة', few: '$n نجوم', two: 'نجمتين', one: 'نجمة');
+    return 'احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ $_temp0';
   }
 
   @override

@@ -378,7 +378,7 @@ void main() {
     expect(app.api.sent('POST', 'games/plays').single.data, {'game': 'g-bridge', 'station': 's4'});
     await tester.tap(find.text('play the stand-in'));
     await frames(tester, 14);
-    expect(find.text('كسرت رقمك! 🔥'), findsOneWidget);
+    expect(find.text('كسرت رقمك!'), findsOneWidget);
 
     await _close(tester);
   });

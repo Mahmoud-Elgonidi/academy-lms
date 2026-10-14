@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/theme/tokens.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/network/api_problem.dart';
 import '../../../core/realtime/live.dart';
@@ -604,7 +605,16 @@ class _CreatureSheetState extends State<_CreatureSheet> {
                           GameSound.play(GameEffect.win);
                           _save((r) => r.chooseBuddy(c.key), l.gamesBuddyDone(c.shownName));
                         },
-                        child: Text(c.buddy ? l.gamesIsBuddy : l.gamesMakeBuddy, style: gwText(context, 17, color: _ink)),
+                        child: c.buddy && !context.isKids
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.favorite_rounded, color: _ink, size: 18),
+                                  const SizedBox(width: 6),
+                                  Text(l.gamesIsBuddy, style: gwText(context, 17, color: _ink)),
+                                ],
+                              )
+                            : Text(c.buddy ? l.gamesIsBuddyKids : l.gamesMakeBuddy, style: gwText(context, 17, color: _ink)),
                       ),
                     ),
                   ],

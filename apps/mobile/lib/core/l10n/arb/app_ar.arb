@@ -16,7 +16,7 @@
   "optional": "(اختياري)",
   "noticeSignedOut": "خرجت من الحساب.",
   "noticeExpired": "الدخول انتهى على الحساب ده. ادخل تاني.",
-  "minutes": "{n} دقيقة",
+  "minutes": "{n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}",
   "@minutes": {
     "placeholders": {
       "n": {
@@ -348,7 +348,7 @@
   "webOnlyTitle": "الحساب ده للإدارة",
   "webOnlyBody": "حسابات الإدارة بتشتغل من الموقع. افتح لوحة الأكاديمية من الكمبيوتر.",
   "privacyTitle": "خصوصية الأولاد",
-  "privacyLead": "الأولاد اللي تحت {age} سنة محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.",
+  "privacyLead": "الأولاد اللي تحت {age, plural, =1{سنة} =2{سنتين} few{{age} سنين} other{{age} سنة}} محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.",
   "@privacyLead": {
     "placeholders": {
       "age": {
@@ -402,7 +402,7 @@
   "myDataLeadTeacher": "كل اللي الأكاديمية محتفظة بيه عنك: صحّح اسمك، أو نزّل نسخة، أو اطلب مسح حسابك.",
   "myDataYoung": "ولي أمرك هو اللي بيطلب بخصوص بياناتك من حسابه.",
   "myDataCopyTitle": "نسخة من البيانات",
-  "myDataCopyBody": "ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل {days} أيام.",
+  "myDataCopyBody": "ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}.",
   "@myDataCopyBody": {
     "placeholders": {
       "days": {
@@ -422,7 +422,7 @@
     }
   },
   "myDataEraseTitle": "مسح الحساب",
-  "myDataEraseBody": "الأكاديمية بترد في خلال {days} يوم، ولما توافق الحساب بيتمسح بعدها بيوم.",
+  "myDataEraseBody": "الأكاديمية بترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}، ولما توافق الحساب بيتمسح بعدها بيوم.",
   "@myDataEraseBody": {
     "placeholders": {
       "days": {
@@ -495,7 +495,7 @@
   "myDataFixUnchanged": "مفيش حاجة اتغيرت.",
   "myDataFixUnset": "مش متسجل",
   "myDataFixContact": "الإيميل ورقم الموبايل بتغيّرهم من «حسابي».",
-  "myDataFixBody": "حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال {days} يوم.",
+  "myDataFixBody": "حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}.",
   "@myDataFixBody": {
     "placeholders": {
       "days": {
@@ -512,7 +512,7 @@
       }
     }
   },
-  "myDataFixAskBody": "اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال {days} يوم، وبيوصلك ردها.",
+  "myDataFixAskBody": "اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}، وبيوصلك ردها.",
   "@myDataFixAskBody": {
     "placeholders": {
       "days": {
@@ -522,7 +522,7 @@
   },
   "myDataFixSays": "إيه اللي محتاج يتصلح",
   "myDataFixPlaceholder": "مثلًا: تاريخ الميلاد المتسجل 2016 والصح 2017.",
-  "myDataFixTooShort": "اكتب {min} حروف على الأقل.",
+  "myDataFixTooShort": "اكتب {min, plural, =1{حرف} =2{حرفين} few{{min} حروف} other{{min} حرف}} على الأقل.",
   "@myDataFixTooShort": {
     "placeholders": {
       "min": {
@@ -763,7 +763,7 @@
     }
   },
   "lessonDetails": "تفاصيل الحصة",
-  "refusedSubstitute": "اتلغت. عندك {days} يوم تحجز فيهم حصة التعويض.",
+  "refusedSubstitute": "اتلغت. عندك {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}} تحجز فيهم حصة التعويض.",
   "@refusedSubstitute": {
     "placeholders": {
       "days": {
@@ -962,7 +962,7 @@
   "noInvoices": "مفيش فواتير.",
   "openInvoice": "افتح الفاتورة",
   "extraAction": "حصص زيادة",
-  "extraHint": "الحصة الزيادة بـ {price} ({minutes} دقيقة).",
+  "extraHint": "الحصة الزيادة بـ {price} ({minutes, plural, =1{دقيقة} =2{دقيقتين} few{{minutes} دقايق} other{{minutes} دقيقة}}).",
   "@extraHint": {
     "placeholders": {
       "price": {
@@ -1048,7 +1048,7 @@
   "weakNetwork": "النت ضعيف. جرّب \"الصوت بس\" لو الصورة بتقطّع.",
   "waitingOther": "مستنيين الطرف التاني يدخل…",
   "you": "انت",
-  "minutesLeft": "فاضل {n} دقيقة",
+  "minutesLeft": "فاضل {n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}",
   "@minutesLeft": {
     "placeholders": {
       "n": {
@@ -1444,7 +1444,7 @@
   "requestSent": "الطلب اتبعت. هيوصلك الرد.",
   "withdrawn": "الطلب اتسحب.",
   "academyHolidays": "إجازات الأكاديمية",
-  "coverState": "{covered} من {total} حصص ليها بديل",
+  "coverState": "{covered} من {total, plural, =1{حصة واحدة} =2{حصتين} few{{total} حصص} other{{total} حصة}} ليها بديل",
   "@coverState": {
     "placeholders": {
       "covered": {
@@ -1459,7 +1459,7 @@
   "noTimeOff": "مفيش طلبات.",
   "youAreHere": "انت هنا!",
   "topRank": "وصلت لأعلى رتبة!",
-  "streak": "{n} حصص ورا بعض",
+  "streak": "{n, plural, =0{لسه مفيش حصص ورا بعض} =1{حصة واحدة} =2{حصتين ورا بعض} few{{n} حصص ورا بعض} other{{n} حصة ورا بعض}}",
   "@streak": {
     "placeholders": {
       "n": {
@@ -1639,7 +1639,7 @@
   "answerNo": "لأ",
   "academyOnly": "للأكاديمية بس",
   "lessonMaterials": "مواد الدرس",
-  "teachersOnly": "للمدرس بس",
+  "teachersOnly": "للمدرّس بس",
   "recordingsTitle": "تسجيلات الحصص",
   "recordingsMine": "تسجيلات حصصي",
   "recordingsOff": "الأكاديمية مش بتسجل الحصص دلوقتي.",
@@ -1746,7 +1746,7 @@
   "attachFile": "ضيف ملف",
   "attachPicture": "ضيف صورة أو PDF",
   "micDenied": "محتاجين إذن المايك عشان تسجّل. فعّله من إعدادات الموبايل.",
-  "recordingLimit": "التسجيل وقف عند {n} دقايق.",
+  "recordingLimit": "التسجيل وقف عند {n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}.",
   "@recordingLimit": {
     "placeholders": {
       "n": {
@@ -1837,13 +1837,13 @@
   "updateNow": "حدّث التطبيق",
   "updateFromStore": "حدّثه من متجر التطبيقات على موبايلك.",
   "helpTitle": "المساعدة",
-  "supportTitle": "الدعم",
+  "supportTitle": "المساعدة",
   "helpLead": "اكتب للأكاديمية عن حصة، أو دفع، أو مشكلة تقنية، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.",
   "supportLead": "اكتب للأكاديمية عن مشكلة تقنية، أو مرتبك، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.",
   "ticketNew": "تذكرة جديدة",
   "ticketNewTitle": "اكتب للأكاديمية",
   "ticketKind": "عن إيه؟",
-  "ticketHintComplaint": "على مدرس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.",
+  "ticketHintComplaint": "على مدرّس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.",
   "ticketHintBilling": "فاتورة، أو دفعة، أو فلوس راجعة، أو باقتك.",
   "ticketHintPay": "مرتبك أو كشف حسابك.",
   "ticketHintTechnical": "الفصل، أو التطبيق، أو الدخول مش شغال.",
@@ -1887,7 +1887,7 @@
   "tellUsTitleKids": "فيه حاجة زعّلتك؟",
   "tellUsNavKids": "قول لحد كبير",
   "tellUsNavMiddle": "قولّنا لو فيه حاجة مضايقاك",
-  "tellUsLead": "لو أي حاجة في حصة، أو من مدرس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.",
+  "tellUsLead": "لو أي حاجة في حصة، أو من مدرّس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.",
   "tellUsLeadStudent": "لو حد خلّاك تحس إنك مش مرتاح، أو خايف، أو مش في أمان، قولّنا. اللي بيقراها بس المسؤولين عن حماية الطلاب في الأكاديمية، ومش هتتعاقب.",
   "tellUsLeadKids": "لو حد زعّلك أو خوّفك، دوس على زرار. حد كبير في الأكاديمية هيساعدك.",
   "concernTeacherNav": "بلّغ عن قلق",
@@ -1949,11 +1949,11 @@
   "documentsList": "اللي بعته",
   "documentsNone": "لسه ما بعتش أي مستندات.",
   "messagesTitle": "الرسايل",
-  "messagesFamilyTitle": "الرسايل مع المدرسين",
-  "messagesStudentTitle": "الرسايل مع مدرسينك",
+  "messagesFamilyTitle": "الرسايل مع المدرّسين",
+  "messagesStudentTitle": "الرسايل مع مدرّسينك",
   "messagesKidsTitle": "كلّم مدرسك",
   "messagesEmptyTeacher": "لما يبقى عندك طلاب، هتلاقيهم هنا وتقدر تكلّمهم وتكلّم أهلهم.",
-  "messagesEmptyFamily": "لما يبقى للطالب مدرس، هتلاقيه هنا.",
+  "messagesEmptyFamily": "لما يبقى للطالب مدرّس، هتلاقيه هنا.",
   "messagesStart": "لسه ماحدش كتب",
   "messagesYou": "إنت",
   "messagesAlsoHere": "معاكم: {names}",
@@ -2002,8 +2002,8 @@
       }
     }
   },
-  "gamesEggCard": "البيضة الجاية: {have} من {need} ⭐",
-  "@gamesEggCard": {
+  "gamesEggCardKids": "البيضة الجاية: {have} من {need} ⭐",
+  "@gamesEggCardKids": {
     "placeholders": {
       "have": {
         "type": "int"
@@ -2064,7 +2064,7 @@
       }
     }
   },
-  "gamesEgg": "البيضة الجاية: {have} من {need} نجمة",
+  "gamesEgg": "البيضة الجاية: {have} من {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}",
   "@gamesEgg": {
     "placeholders": {
       "have": {
@@ -2081,7 +2081,7 @@
   "gamesSending": "بنحسب النجوم…",
   "gamesPageProblem": "اللعبة ما اشتغلتش. جرّب تاني.",
   "gamesHatchReady": "البيضة جاهزة!",
-  "gamesHatchReadySub": "جمعت {need} نجمة في رحلتك",
+  "gamesHatchReadySub": "جمعت {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} في رحلتك",
   "@gamesHatchReadySub": {
     "placeholders": {
       "need": {
@@ -2090,7 +2090,7 @@
     }
   },
   "gamesHatchDone": "فقست!",
-  "gamesHatchDoneSub": "كل ما تجمع {need} نجمة، تفقسلك بيضة جديدة",
+  "gamesHatchDoneSub": "كل ما تجمع {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}، تفقسلك بيضة جديدة",
   "@gamesHatchDoneSub": {
     "placeholders": {
       "need": {
@@ -2124,7 +2124,7 @@
   "gamesHatchAsk": "تحب تسميه إيه؟",
   "gamesHatchKeep": "حطّه في الألبوم",
   "gamesAlbumTitle": "ألبوم كائناتي",
-  "gamesAlbumHint": "كل {need} نجمة في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.",
+  "gamesAlbumHint": "كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.",
   "@gamesAlbumHint": {
     "placeholders": {
       "need": {
@@ -2167,7 +2167,8 @@
   },
   "gamesVoice": "اسمع صوته",
   "gamesMakeBuddy": "خليه صاحبك",
-  "gamesIsBuddy": "ده صاحبك 💛",
+  "gamesIsBuddyKids": "ده صاحبك 💛",
+  "gamesIsBuddy": "ده صاحبك",
   "gamesBuddyDone": "{name} هيطير معاك في الألعاب من دلوقتي",
   "@gamesBuddyDone": {
     "placeholders": {
@@ -2177,7 +2178,7 @@
     }
   },
   "gamesShadowStory": "لسه ما فقسش.",
-  "gamesHowCommon": "إزاي تفقسه: اجمع نجوم وانت على {island}: كل {need} نجمة بيضة.",
+  "gamesHowCommon": "إزاي تفقسه: اجمع نجوم وانت على {island}: كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} بيضة.",
   "@gamesHowCommon": {
     "placeholders": {
       "island": {
@@ -2232,7 +2233,7 @@
       }
     }
   },
-  "gamesBeat": "كسرت رقمك! 🔥",
+  "gamesBeat": "كسرت رقمك!",
   "gamesSoClose": "قربت!",
   "gamesFirst": "أول رقم ليك!",
   "gamesOver": "{correct} من {total} صح في {s}",
@@ -2259,7 +2260,7 @@
     }
   },
   "gamesPlayTime": "وقت اللعب النهارده",
-  "gamesTimeText": "{used} من {limit} دقيقة لعب النهارده. فاضل {left} دقيقة.",
+  "gamesTimeText": "{used} من {limit, plural, =1{دقيقة} =2{دقيقتين} few{{limit} دقايق} other{{limit} دقيقة}} لعب النهارده. فاضل {left, plural, =1{دقيقة} =2{دقيقتين} few{{left} دقايق} other{{left} دقيقة}}.",
   "@gamesTimeText": {
     "placeholders": {
       "used": {
@@ -2273,7 +2274,7 @@
       }
     }
   },
-  "gamesTimeOpen": "{used} دقيقة لعب النهارده، من غير حد.",
+  "gamesTimeOpen": "{used, plural, =1{دقيقة} =2{دقيقتين} few{{used} دقايق} other{{used} دقيقة}} لعب النهارده، من غير حد.",
   "@gamesTimeOpen": {
     "placeholders": {
       "used": {
@@ -2347,7 +2348,7 @@
       }
     }
   },
-  "gamesQuiet": "مفيش لعب الأسبوع ده. الألعاب بتتمرن على دروسه بس، والمدرس بيحط التدريبات على الدرس.",
+  "gamesQuiet": "مفيش لعب الأسبوع ده. الألعاب بتتمرن على دروسه بس، والمدرّس بيحط التدريبات على الدرس.",
   "gamesHatchedToday": "فقس «{name}» النهارده",
   "@gamesHatchedToday": {
     "placeholders": {
@@ -2449,7 +2450,7 @@
     }
   },
   "journeyLevels": "المستويات",
-  "journeyLessonsDone": "{done} من {total} دروس",
+  "journeyLessonsDone": "{done} من {total, plural, =1{درس واحد} =2{درسين} few{{total} دروس} other{{total} درس}}",
   "@journeyLessonsDone": {
     "placeholders": {
       "done": {
@@ -2598,17 +2599,6 @@
     }
   },
   "nowTitle": "دلوقتي",
-  "stationOf": "المحطة {i} من {n}",
-  "@stationOf": {
-    "placeholders": {
-      "i": {
-        "type": "int"
-      },
-      "n": {
-        "type": "int"
-      }
-    }
-  },
   "nextIs": "الجاية: {title}",
   "@nextIs": {
     "placeholders": {
@@ -2648,7 +2638,7 @@
   },
   "journeyLate": "متأخر",
   "journeyChestTitle": "صندوق الأسبوع",
-  "journeyChestProgress": "{done} من {total} مهمات الأسبوع",
+  "journeyChestProgress": "{done} من {total, plural, =1{مهمة واحدة} =2{مهمتين} few{{total} مهمات} other{{total} مهمة}} الأسبوع",
   "@journeyChestProgress": {
     "placeholders": {
       "done": {
@@ -2659,7 +2649,7 @@
       }
     }
   },
-  "journeyChestHint": "احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ {n} نجوم",
+  "journeyChestHint": "احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ {n, plural, =1{نجمة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}",
   "@journeyChestHint": {
     "placeholders": {
       "n": {

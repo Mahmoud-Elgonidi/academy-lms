@@ -227,7 +227,10 @@ class _Sheet extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 6),
                                   Expanded(
-                                    child: Text(l.gamesEggCard(games.eggHave, games.eggNeed), style: gwText(context, 12.5, height: 1.2)),
+                                    child: Text(
+                                      l.gamesEggCardKids(games.eggHave, games.eggNeed),
+                                      style: gwText(context, 12.5, height: 1.2),
+                                    ),
                                   ),
                                 ],
                               )

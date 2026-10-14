@@ -5,10 +5,31 @@ import json, os, re
 
 S = []  # (key, ar, en, {placeholder: type})
 
+# One word for one thing, everywhere in the app. The checks at
+# the end refuse the other words outside the kids' strings; a key with "Kids"
+# in its name keeps a child's own wording, emoji included, and nothing else has any.
+# - المزيد is the last tab (never "القايمة"); الفلوس is money (never "المدفوعات").
+# - المساعدة is help and support alike (never "الدعم").
+# - مدرّس, with its shadda (never "مدرس" or "معلم"); مدرسة alone is a school.
+# - حصة is a live lesson, درس a lesson of the curriculum, محطة that lesson on the journey.
+# - كائناتي is the creatures' album, ألبوم الستيكرز the stickers' (never "ملصقات").
+# Counts are Arabic plurals, =1, =2, few (3 to 10) and other (11 and up):
+# "حصة واحدة، حصتين، 3 حصص، 11 حصة". A number before a counted noun goes in
+# a plural, never "{n} حصص".
+GLOSSARY = [
+    (r'القايمة', 'المزيد'),
+    (r'المدفوعات', 'الفلوس'),
+    (r'الدعم', 'المساعدة'),
+    (r'مدر(?!ّ)س(?!ة(?!\w))', 'مدرّس'),
+    (r'معلم', 'مدرّس'),
+    (r'ملصق', 'ستيكر'),
+]
+COUNTED = r'حصة|حصص|حصتين|دقيقة|دقايق|دقيقتين|يوم|أيام|يومين|سنة|سنين|نجمة|نجوم|درس|دروس|مهمة|مهمات|حرف|حروف|واجب|واجبات|مرة|مرات'
+EMOJI = re.compile('[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B50\u2B55\u23F0-\u23FF]')
+
 
 def s(key, ar, en, **ph):
     S.append((key, ar, en, ph))
-
 
 # Common
 s('appName', 'الأكاديمية', 'Academy')
@@ -27,7 +48,7 @@ s('send', 'ابعت', 'Send')
 s('optional', '(اختياري)', '(optional)')
 s('noticeSignedOut', 'خرجت من الحساب.', 'Signed out.')
 s('noticeExpired', 'الدخول انتهى على الحساب ده. ادخل تاني.', "That account's sign-in ended. Please sign in again.")
-s('minutes', '{n} دقيقة', '{n} min', n='int')
+s('minutes', '{n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}', '{n} min', n='int')
 s('today', 'النهارده', 'Today')
 s('tomorrow', 'بكرة', 'Tomorrow')
 s('inMinutes', '{n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}', '{n, plural, =1{1 minute} other{{n} minutes}}', n='int')
@@ -175,7 +196,7 @@ s('webOnlyBody', 'حسابات الإدارة بتشتغل من الموقع. ا
 
 # Children's privacy (a guardian's consent to each child's account)
 s('privacyTitle', 'خصوصية الأولاد', "Children's privacy")
-s('privacyLead', 'الأولاد اللي تحت {age} سنة محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.', 'Children under {age} need your consent to sign in and join on their own.', age='int')
+s('privacyLead', 'الأولاد اللي تحت {age, plural, =1{سنة} =2{سنتين} few{{age} سنين} other{{age} سنة}} محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.', 'Children under {age} need your consent to sign in and join on their own.', age='int')
 s('privacyNone', 'مفيش ولاد محتاجين موافقة.', 'No child needs your consent.')
 s('consentWaiting', 'مستني موافقتك', 'Waiting for your consent')
 s('consentGranted', 'موافق عليه', 'Agreed')
@@ -193,13 +214,13 @@ s('myDataLead', 'كل اللي الأكاديمية محتفظة بيه عنك �
 s('myDataLeadTeacher', 'كل اللي الأكاديمية محتفظة بيه عنك: صحّح اسمك، أو نزّل نسخة، أو اطلب مسح حسابك.', 'Everything the academy keeps about you: correct your name, download a copy, or ask for your account to be erased.')
 s('myDataYoung', 'ولي أمرك هو اللي بيطلب بخصوص بياناتك من حسابه.', 'Your guardian asks about your data from their account.')
 s('myDataCopyTitle', 'نسخة من البيانات', 'A copy of the data')
-s('myDataCopyBody', 'ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل {days} أيام.', 'One ZIP file: the data in a readable file, with the files handed in. Ready in a few minutes and kept {days} days.', days='int')
+s('myDataCopyBody', 'ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}.', 'One ZIP file: the data in a readable file, with the files handed in. Ready in a few minutes and kept {days} days.', days='int')
 s('myDataCopyAction', 'جهّز نسخة', 'Get a copy')
 s('myDataCopyPreparing', 'بتتجهز: هنقولك أول ما تخلص.', 'Being prepared: you will hear when it is ready.')
 s('myDataCopyDownload', 'نزّل', 'Download')
 s('myDataCopyUntil', 'النسخة جاهزة لحد {when}', 'Your copy is ready until {when}', when='String')
 s('myDataEraseTitle', 'مسح الحساب', 'Delete the account')
-s('myDataEraseBody', 'الأكاديمية بترد في خلال {days} يوم، ولما توافق الحساب بيتمسح بعدها بيوم.', 'The academy answers within {days} days; once it approves, the account is erased a day later.', days='int')
+s('myDataEraseBody', 'الأكاديمية بترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}، ولما توافق الحساب بيتمسح بعدها بيوم.', 'The academy answers within {days} days; once it approves, the account is erased a day later.', days='int')
 s('myDataEraseAction', 'امسح الحساب ده', 'Delete this account')
 s('myDataEraseConfirm', 'تطلب مسح حساب {name}؟', "Ask to erase {name}'s account?", name='String')
 s('myDataEraseCopyFirst', 'تقدر تنزّل نسخة الأول.', 'You can download a copy first.')
@@ -223,13 +244,13 @@ s('myDataFixSaved', 'اتحفظ.', 'Saved.')
 s('myDataFixUnchanged', 'مفيش حاجة اتغيرت.', 'Nothing changed.')
 s('myDataFixUnset', 'مش متسجل', 'Not set')
 s('myDataFixContact', 'الإيميل ورقم الموبايل بتغيّرهم من «حسابي».', 'The email and mobile number change on Me.')
-s('myDataFixBody', 'حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال {days} يوم.', 'Something else wrong (a birth date, a name on an invoice, words in a report)? Write it to the academy; it answers within {days} days.', days='int')
+s('myDataFixBody', 'حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}.', 'Something else wrong (a birth date, a name on an invoice, words in a report)? Write it to the academy; it answers within {days} days.', days='int')
 s('myDataFixAsk', 'اطلب تصحيح', 'Ask for a correction')
 s('myDataFixAskTitle', 'اطلب تصحيح بيانات {name}', "Ask to correct {name}'s data", name='String')
-s('myDataFixAskBody', 'اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال {days} يوم، وبيوصلك ردها.', 'Write what is wrong and what is right. The academy answers within {days} days, and you get its answer.', days='int')
+s('myDataFixAskBody', 'اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}، وبيوصلك ردها.', 'Write what is wrong and what is right. The academy answers within {days} days, and you get its answer.', days='int')
 s('myDataFixSays', 'إيه اللي محتاج يتصلح', 'What needs correcting')
 s('myDataFixPlaceholder', 'مثلًا: تاريخ الميلاد المتسجل 2016 والصح 2017.', 'For example: the birth year on file is 2016; it is 2017.')
-s('myDataFixTooShort', 'اكتب {min} حروف على الأقل.', 'Write at least {min} characters.', min='int')
+s('myDataFixTooShort', 'اكتب {min, plural, =1{حرف} =2{حرفين} few{{min} حروف} other{{min} حرف}} على الأقل.', 'Write at least {min} characters.', min='int')
 s('myDataFixSend', 'ابعت الطلب', 'Send the request')
 s('myDataFixAsked', 'الطلب وصل للأكاديمية.', 'The request reached the academy.')
 s('myDataFixWaiting', 'اتطلب: الأكاديمية هترد قبل {when}.', 'Asked: the academy answers by {when}.', when='String')
@@ -313,7 +334,7 @@ s('lessonState', 'الحالة', 'Status')
 s('timeRange', '{from} – {to} {clock}', '{from} – {to} {clock}', **{'from': 'String', 'to': 'String', 'clock': 'String'})
 s('roomOpensOn', 'الفصل بيفتح {when}', 'The room opens {when}', when='String')
 s('lessonDetails', 'تفاصيل الحصة', 'Lesson details')
-s('refusedSubstitute', 'اتلغت. عندك {days} يوم تحجز فيهم حصة التعويض.', 'Cancelled. You have {days} days to book the makeup.', days='int')
+s('refusedSubstitute', 'اتلغت. عندك {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}} تحجز فيهم حصة التعويض.', 'Cancelled. You have {days} days to book the makeup.', days='int')
 s('cancelLesson', 'إلغاء الحصة', 'Cancel the lesson')
 s('disputeLesson', 'اعترض', 'Dispute')
 s('disputeTitle', 'اعتراض على نتيجة الحصة', "Dispute this lesson's outcome")
@@ -396,7 +417,7 @@ s('invoices', 'الفواتير', 'Invoices')
 s('noInvoices', 'مفيش فواتير.', 'No invoices.')
 s('openInvoice', 'افتح الفاتورة', 'Open the invoice')
 s('extraAction', 'حصص زيادة', 'Extra lessons')
-s('extraHint', 'الحصة الزيادة بـ {price} ({minutes} دقيقة).', 'An extra lesson is {price} ({minutes} min).', price='String', minutes='int')
+s('extraHint', 'الحصة الزيادة بـ {price} ({minutes, plural, =1{دقيقة} =2{دقيقتين} few{{minutes} دقايق} other{{minutes} دقيقة}}).', 'An extra lesson is {price} ({minutes} min).', price='String', minutes='int')
 s('extraTitle', 'حصص زيادة في {subject}', 'Extra lessons in {subject}', subject='String')
 s('extraBody', 'اختار العدد، وهتطلعلك فاتورة تدفعها زي أي فاتورة. بعد ما تدفع، الأكاديمية بتحجز الحصص معاك.', 'Choose how many; you get an invoice to pay like any other. Once it is paid, the academy books the lessons with you.')
 s('extraEach', '{n} × {price}', '{n} × {price}', n='int', price='String')
@@ -440,7 +461,7 @@ s('rejoinHint', 'لو خرجت بالغلط، ادخل تاني من نفس ال
 s('weakNetwork', 'النت ضعيف. جرّب "الصوت بس" لو الصورة بتقطّع.', 'Weak connection. Try "Audio only" if the video stutters.')
 s('waitingOther', 'مستنيين الطرف التاني يدخل…', 'Waiting for the other side to join…')
 s('you', 'انت', 'You')
-s('minutesLeft', 'فاضل {n} دقيقة', '{n} min left', n='int')
+s('minutesLeft', 'فاضل {n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}', '{n} min left', n='int')
 s('sharedPackage', '{subjects} · باقة مشتركة', '{subjects} · shared package', subjects='String')
 s('familyInvoice', 'فاتورة العيلة', 'family invoice')
 # A course paused (until a day on the academy's calendar), to be paused, ending, or ended.
@@ -585,14 +606,14 @@ s('withdraw', 'اسحبه', 'Withdraw')
 s('requestSent', 'الطلب اتبعت. هيوصلك الرد.', "Request sent. You'll hear back.")
 s('withdrawn', 'الطلب اتسحب.', 'Request withdrawn.')
 s('academyHolidays', 'إجازات الأكاديمية', 'Academy holidays')
-s('coverState', '{covered} من {total} حصص ليها بديل', '{covered} of {total} lessons covered', covered='int', total='int')
+s('coverState', '{covered} من {total, plural, =1{حصة واحدة} =2{حصتين} few{{total} حصص} other{{total} حصة}} ليها بديل', '{covered} of {total} lessons covered', covered='int', total='int')
 s('fillTimeOff', 'اختار الأيام والسبب الأول.', 'Pick the days and a reason first.')
 s('noTimeOff', 'مفيش طلبات.', 'No requests.')
 
 # Student stages
 s('youAreHere', 'انت هنا!', "You're here!")
 s('topRank', 'وصلت لأعلى رتبة!', 'You reached the top rank!')
-s('streak', '{n} حصص ورا بعض', '{n} in a row', n='int')
+s('streak', '{n, plural, =0{لسه مفيش حصص ورا بعض} =1{حصة واحدة} =2{حصتين ورا بعض} few{{n} حصص ورا بعض} other{{n} حصة ورا بعض}}', '{n, plural, =0{None in a row yet} =1{1 lesson} other{{n} in a row}}', n='int')
 s('badgesCount', '{earned} من {total}', '{earned} of {total}', earned='int', total='int')
 s('finishOn', 'هتخلّص على كده', 'At this pace you finish')
 s('programDone', 'خلّصت البرنامج!', 'You finished the program!')
@@ -672,7 +693,7 @@ s('answerYes', 'أيوه', 'Yes')
 s('answerNo', 'لأ', 'No')
 s('academyOnly', 'للأكاديمية بس', 'Academy only')
 s('lessonMaterials', 'مواد الدرس', 'Lesson materials')
-s('teachersOnly', 'للمدرس بس', 'Teachers only')
+s('teachersOnly', 'للمدرّس بس', 'Teachers only')
 
 # Lesson recordings
 s('recordingsTitle', 'تسجيلات الحصص', 'Lesson recordings')
@@ -741,7 +762,7 @@ s('recordAgain', 'سجّل تاني', 'Record again')
 s('attachFile', 'ضيف ملف', 'Attach a file')
 s('attachPicture', 'ضيف صورة أو PDF', 'Attach a picture or PDF')
 s('micDenied', 'محتاجين إذن المايك عشان تسجّل. فعّله من إعدادات الموبايل.', 'We need the microphone to record. Allow it in your phone settings.')
-s('recordingLimit', 'التسجيل وقف عند {n} دقايق.', 'Recording stopped at {n} minutes.', n='int')
+s('recordingLimit', 'التسجيل وقف عند {n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}.', 'Recording stopped at {n} minutes.', n='int')
 s('fileTooBig', 'الملف أكبر من 25 ميجا.', 'The file is larger than 25 MB.')
 s('answerOptional', 'اكتب حاجة كمان (اختياري)', 'Add a few words (optional)')
 
@@ -796,13 +817,13 @@ s('updateFromStore', 'حدّثه من متجر التطبيقات على موب�
 
 # Support: writing to the academy (help for families, support for teachers)
 s('helpTitle', 'المساعدة', 'Help')
-s('supportTitle', 'الدعم', 'Support')
+s('supportTitle', 'المساعدة', 'Help')
 s('helpLead', 'اكتب للأكاديمية عن حصة، أو دفع، أو مشكلة تقنية، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.', 'Write to the academy about a lesson, a payment, a technical problem or anything else. The answers come here and in a message.')
 s('supportLead', 'اكتب للأكاديمية عن مشكلة تقنية، أو مرتبك، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.', 'Write to the academy about a technical problem, your pay or anything else. The answers come here and in a message.')
 s('ticketNew', 'تذكرة جديدة', 'New ticket')
 s('ticketNewTitle', 'اكتب للأكاديمية', 'Write to the academy')
 s('ticketKind', 'عن إيه؟', 'What is it about?')
-s('ticketHintComplaint', 'على مدرس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.', 'About a teacher or a lesson. The academy looks into it and tells you what it did.')
+s('ticketHintComplaint', 'على مدرّس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.', 'About a teacher or a lesson. The academy looks into it and tells you what it did.')
 s('ticketHintBilling', 'فاتورة، أو دفعة، أو فلوس راجعة، أو باقتك.', 'An invoice, a payment, a refund or your package.')
 s('ticketHintPay', 'مرتبك أو كشف حسابك.', 'Your pay or your statement.')
 s('ticketHintTechnical', 'الفصل، أو التطبيق، أو الدخول مش شغال.', 'The class, the app or signing in not working.')
@@ -834,7 +855,7 @@ s('tellUsTitleStudent', 'فيه حاجة مش مظبوطة؟ قولّنا', 'Som
 s('tellUsTitleKids', 'فيه حاجة زعّلتك؟', 'Is something wrong?')
 s('tellUsNavKids', 'قول لحد كبير', 'Tell a grown-up')
 s('tellUsNavMiddle', 'قولّنا لو فيه حاجة مضايقاك', 'Tell us if something bothers you')
-s('tellUsLead', 'لو أي حاجة في حصة، أو من مدرس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.', 'If anything about a lesson, a teacher or anyone on the platform worries you, tell us here. Only the people who keep children safe at the academy read it.')
+s('tellUsLead', 'لو أي حاجة في حصة، أو من مدرّس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.', 'If anything about a lesson, a teacher or anyone on the platform worries you, tell us here. Only the people who keep children safe at the academy read it.')
 s('tellUsLeadStudent', 'لو حد خلّاك تحس إنك مش مرتاح، أو خايف، أو مش في أمان، قولّنا. اللي بيقراها بس المسؤولين عن حماية الطلاب في الأكاديمية، ومش هتتعاقب.', 'If someone made you feel uncomfortable, scared or unsafe, tell us. Only the people who keep students safe at the academy read it, and you will not get in trouble.')
 s('tellUsLeadKids', 'لو حد زعّلك أو خوّفك، دوس على زرار. حد كبير في الأكاديمية هيساعدك.', 'If someone made you sad or scared, press a button. A grown-up at the academy will help.')
 s('concernTeacherNav', 'بلّغ عن قلق', 'Raise a concern')
@@ -877,11 +898,11 @@ s('documentsNone', 'لسه ما بعتش أي مستندات.', 'You have not se
 
 # Messages between a teacher and a student (guardians always in them)
 s('messagesTitle', 'الرسايل', 'Messages')
-s('messagesFamilyTitle', 'الرسايل مع المدرسين', 'Messages with teachers')
-s('messagesStudentTitle', 'الرسايل مع مدرسينك', 'Messages with your teachers')
+s('messagesFamilyTitle', 'الرسايل مع المدرّسين', 'Messages with teachers')
+s('messagesStudentTitle', 'الرسايل مع مدرّسينك', 'Messages with your teachers')
 s('messagesKidsTitle', 'كلّم مدرسك', 'Talk to your teacher')
 s('messagesEmptyTeacher', 'لما يبقى عندك طلاب، هتلاقيهم هنا وتقدر تكلّمهم وتكلّم أهلهم.', 'When you have students, you will find them here to talk to them and their families.')
-s('messagesEmptyFamily', 'لما يبقى للطالب مدرس، هتلاقيه هنا.', 'When the student has a teacher, you will find them here.')
+s('messagesEmptyFamily', 'لما يبقى للطالب مدرّس، هتلاقيه هنا.', 'When the student has a teacher, you will find them here.')
 s('messagesStart', 'لسه ماحدش كتب', 'Nobody has written yet')
 s('messagesYou', 'إنت', 'You')
 s('messagesAlsoHere', 'معاكم: {names}', 'Also here: {names}', names='String')
@@ -898,7 +919,7 @@ s('gamesToMap', 'الخريطة', 'Map')
 s('gamesIslandGames', 'ألعاب الجزيرة', "The island's games")
 s('gamesBadgeHomework', 'واجب', 'Homework')
 s('gamesCreaturesCard', 'كائنات الجزيرة · {found} من {total}', 'Island creatures · {found} of {total}', found='int', total='int')
-s('gamesEggCard', 'البيضة الجاية: {have} من {need} ⭐', 'Next egg: {have} of {need} ⭐', have='int', need='int')
+s('gamesEggCardKids', 'البيضة الجاية: {have} من {need} ⭐', 'Next egg: {have} of {need} ⭐', have='int', need='int')
 s('gamesIslandDone', 'لمّيت كل كائنات الجزيرة!', 'You found every creature here!')
 s('gamesClose', 'اقفل اللعبة وارجع', 'Close the game')
 s('gamesToIsland', 'ارجع للجزيرة', 'Back to the island')
@@ -912,16 +933,16 @@ s('gamesResult3', 'رائع! كله صح تقريبًا', 'Brilliant! Almost all
 s('gamesScore', '{correct} من {total} صح من أول مرة', '{correct} of {total} right first time', correct='int', total='int')
 s('gamesHatched', 'فقس {name}!', '{name} hatched!', name='String')
 s('gamesHomeworkDone', 'الواجب «{title}» اتسلّم بالتدريب ده.', 'The homework “{title}” is handed in with this practice.', title='String')
-s('gamesEgg', 'البيضة الجاية: {have} من {need} نجمة', 'Next egg: {have} of {need} stars', have='int', need='int')
+s('gamesEgg', 'البيضة الجاية: {have} من {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}', 'Next egg: {have} of {need} stars', have='int', need='int')
 s('gamesAgain', 'العب تاني', 'Play again')
 s('gamesPlay', 'العب', 'Play')
 s('gamesLoading', 'بنجهّز الجولة…', 'Getting the round ready…')
 s('gamesSending', 'بنحسب النجوم…', 'Counting the stars…')
 s('gamesPageProblem', 'اللعبة ما اشتغلتش. جرّب تاني.', "The game didn't start. Try again.")
 s('gamesHatchReady', 'البيضة جاهزة!', 'The egg is ready!')
-s('gamesHatchReadySub', 'جمعت {need} نجمة في رحلتك', 'You collected {need} stars on your journey', need='int')
+s('gamesHatchReadySub', 'جمعت {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} في رحلتك', 'You collected {need} stars on your journey', need='int')
 s('gamesHatchDone', 'فقست!', 'It hatched!')
-s('gamesHatchDoneSub', 'كل ما تجمع {need} نجمة، تفقسلك بيضة جديدة', 'Every {need} stars hatch a new egg', need='int')
+s('gamesHatchDoneSub', 'كل ما تجمع {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}، تفقسلك بيضة جديدة', 'Every {need} stars hatch a new egg', need='int')
 s('gamesHatchTap0', 'دوس على البيضة 3 مرات', 'Tap the egg 3 times')
 s('gamesHatchTap1', 'كمان مرتين!', 'Two more!')
 s('gamesHatchTap2', 'مرة كمان!', 'One more!')
@@ -931,7 +952,7 @@ s('gamesHatchNew', 'كائن جديد في ألبومك · {found} من {total}'
 s('gamesHatchAsk', 'تحب تسميه إيه؟', 'What will you call it?')
 s('gamesHatchKeep', 'حطّه في الألبوم', 'Put it in the album')
 s('gamesAlbumTitle', 'ألبوم كائناتي', 'My creatures')
-s('gamesAlbumHint', 'كل {need} نجمة في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.', 'Every {need} stars on your journey hatch an egg, and every lesson you master hatches a creature.', need='int')
+s('gamesAlbumHint', 'كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.', 'Every {need} stars on your journey hatch an egg, and every lesson you master hatches a creature.', need='int')
 s('gamesAlbumGuardian', 'ده ألبوم {name}. هو بس اللي يختار صاحبه ويسمّي كائناته.', "This is {name}'s album. Only they choose their buddy and name their creatures.", name='String')
 s('gamesAlbumAll', 'الكل', 'All')
 s('gamesRarityCommon', 'عادي', 'Common')
@@ -943,10 +964,11 @@ s('gamesAriaFound', '{name}، من {island}', '{name}, from {island}', name='Str
 s('gamesAriaShadow', 'كائن لسه ما فقسش، من {island}', 'A creature not hatched yet, from {island}', island='String')
 s('gamesVoice', 'اسمع صوته', 'Hear it')
 s('gamesMakeBuddy', 'خليه صاحبك', 'Make it your buddy')
-s('gamesIsBuddy', 'ده صاحبك 💛', 'Your buddy 💛')
+s('gamesIsBuddyKids', 'ده صاحبك 💛', 'Your buddy 💛')
+s('gamesIsBuddy', 'ده صاحبك', 'Your buddy')
 s('gamesBuddyDone', '{name} هيطير معاك في الألعاب من دلوقتي', '{name} flies with you in the games now', name='String')
 s('gamesShadowStory', 'لسه ما فقسش.', 'Not hatched yet.')
-s('gamesHowCommon', 'إزاي تفقسه: اجمع نجوم وانت على {island}: كل {need} نجمة بيضة.', 'How to hatch it: collect stars while you are on {island}: every {need} stars hatch an egg.', island='String', need='int')
+s('gamesHowCommon', 'إزاي تفقسه: اجمع نجوم وانت على {island}: كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} بيضة.', 'How to hatch it: collect stars while you are on {island}: every {need} stars hatch an egg.', island='String', need='int')
 s('gamesHowRare', 'إزاي تفقسه: كائن نادر في {island}: بيفقس بعد الكائنات العادية بتاعتها.', 'How to hatch it: a rare creature of {island}: it hatches after its common ones.', island='String')
 s('gamesHowLegendary', 'إزاي تفقسه: أسطوري! آخر كائن في {island}. اجمع اللي قبله كلهم.', 'How to hatch it: legendary! The last creature of {island}. Collect all the others first.', island='String')
 s('gamesNameIt', 'سمّيه:', 'Name it:')
@@ -956,15 +978,15 @@ s('gamesFromMastery', 'فقس لما اتقنت درس', 'Hatched when you maste
 s('gamesRace', 'سباق مع نفسك', 'Race yourself')
 s('gamesBest', 'أحسن وقت: {s}', 'Best time: {s}', s='String')
 s('gamesSeconds', '{s}ث', '{s}s', s='int')
-s('gamesBeat', 'كسرت رقمك! 🔥', 'New record! 🔥')
+s('gamesBeat', 'كسرت رقمك!', 'New record!')
 s('gamesSoClose', 'قربت!', 'So close!')
 s('gamesFirst', 'أول رقم ليك!', 'Your first time!')
 s('gamesOver', '{correct} من {total} صح في {s}', '{correct} of {total} right in {s}', correct='int', total='int', s='String')
 s('gamesReviewAgain', 'راجع تاني', 'Review again')
 s('gamesGuardianTitle', 'ألعاب {name}', "{name}'s games", name='String')
 s('gamesPlayTime', 'وقت اللعب النهارده', 'Play time today')
-s('gamesTimeText', '{used} من {limit} دقيقة لعب النهارده. فاضل {left} دقيقة.', '{used} of {limit} minutes played today. {left} minutes left.', used='int', limit='int', left='int')
-s('gamesTimeOpen', '{used} دقيقة لعب النهارده، من غير حد.', '{used} minutes played today, no limit.', used='int')
+s('gamesTimeText', '{used} من {limit, plural, =1{دقيقة} =2{دقيقتين} few{{limit} دقايق} other{{limit} دقيقة}} لعب النهارده. فاضل {left, plural, =1{دقيقة} =2{دقيقتين} few{{left} دقايق} other{{left} دقيقة}}.', '{used} of {limit} minutes played today. {left} minutes left.', used='int', limit='int', left='int')
+s('gamesTimeOpen', '{used, plural, =1{دقيقة} =2{دقيقتين} few{{used} دقايق} other{{used} دقيقة}} لعب النهارده، من غير حد.', '{used} minutes played today, no limit.', used='int')
 s('gamesMinutesShort', 'دقيقة', 'min')
 s('gamesMaxTime', 'أقصى وقت في اليوم', 'Most time a day')
 s('gamesChoice', '{n} د', '{n} m', n='int')
@@ -977,7 +999,7 @@ s('gamesGamesCount', '{n, plural, =1{لعبة واحدة} =2{لعبتين} few{{
 s('gamesPractised', 'اتراجع «{title}» {rounds} في {games}', 'Practised “{title}” {rounds} in {games}', title='String', rounds='String', games='String')
 s('gamesHardest', 'أصعب سؤال: «{text}». ممكن تراجعوه سوا.', 'Hardest question: “{text}”. Worth going over together.', text='String')
 s('gamesBestRound', 'أحسن جولة: {correct} من {total} صح من أول مرة في «{game}»', 'Best round: {correct} of {total} right first time in “{game}”', correct='int', total='int', game='String')
-s('gamesQuiet', 'مفيش لعب الأسبوع ده. الألعاب بتتمرن على دروسه بس، والمدرس بيحط التدريبات على الدرس.', 'No play this week. The games only practise their lessons, from the practice the teacher adds.')
+s('gamesQuiet', 'مفيش لعب الأسبوع ده. الألعاب بتتمرن على دروسه بس، والمدرّس بيحط التدريبات على الدرس.', 'No play this week. The games only practise their lessons, from the practice the teacher adds.')
 s('gamesHatchedToday', 'فقس «{name}» النهارده', '“{name}” hatched today', name='String')
 s('gamesHatchedStars', 'من نجوم الرحلة · {found} في الألبوم', 'From the journey’s stars · {found} in the album', found='int')
 s('gamesHatchedMastery', 'من درس اتقنه · {found} في الألبوم', 'From a mastered lesson · {found} in the album', found='int')
@@ -998,7 +1020,7 @@ s('journeyStationOf', 'المحطة {i} من {n}', 'Station {i} of {n}', i='int'
 s('journeyHow', 'إزاي {name} ماشي', 'How {name} is doing', name='String')
 s('journeyNextStation', 'الجاية: {title}', 'Next: {title}', title='String')
 s('journeyLevels', 'المستويات', 'Levels')
-s('journeyLessonsDone', '{done} من {total} دروس', '{done} of {total} lessons', done='int', total='int')
+s('journeyLessonsDone', '{done} من {total, plural, =1{درس واحد} =2{درسين} few{{total} دروس} other{{total} درس}}', '{done} of {total} lessons', done='int', total='int')
 s('journeyAheadLocked', 'بتتفتح لما تخلّص {title}', 'Opens once you finish {title}', title='String')
 s('journeyAheadFirst', 'بتتفتح لما توصلها', 'Opens when you get there')
 s('journeyAriaDone', '{title}، خلّصتها', '{title}, done', title='String')
@@ -1030,7 +1052,7 @@ s('goalTitle', 'هدفك: تخلّص البرنامج', 'Your goal: finish the p
 s('goalDone', 'خلّصتهم من البرنامج', 'of the programme done')
 s('goalPace', 'على السرعة دي هتخلّص يوم {day}', 'At this pace you finish on {day}', day='String')
 s('nowTitle', 'دلوقتي', 'Now')
-s('stationOf', 'المحطة {i} من {n}', 'Lesson {i} of {n}', i='int', n='int')
+
 s('nextIs', 'الجاية: {title}', 'Next: {title}', title='String')
 s('weekPlan', 'خطة الأسبوع', "This week's plan")
 s('notHandedIn', 'لسه ماتسلّمش', 'Not handed in yet')
@@ -1042,8 +1064,8 @@ s('levelsCount', '{n, plural, =1{مستوى واحد} =2{مستويين} few{{n}
 s('curriculumLessons', '{n, plural, =1{درس واحد} =2{درسين} few{{n} دروس} other{{n} درس}}', '{n, plural, =1{1 lesson} other{{n} lessons}}', n='int')
 s('journeyLate', 'متأخر', 'Late')
 s('journeyChestTitle', 'صندوق الأسبوع', "This week's chest")
-s('journeyChestProgress', '{done} من {total} مهمات الأسبوع', "{done} of {total} of the week's missions", done='int', total='int')
-s('journeyChestHint', 'احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ {n} نجوم', 'Attend every lesson of the week and hand in its homework: the chest opens with {n} stars', n='int')
+s('journeyChestProgress', '{done} من {total, plural, =1{مهمة واحدة} =2{مهمتين} few{{total} مهمات} other{{total} مهمة}} الأسبوع', "{done} of {total} of the week's missions", done='int', total='int')
+s('journeyChestHint', 'احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ {n, plural, =1{نجمة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}', 'Attend every lesson of the week and hand in its homework: the chest opens with {n} stars', n='int')
 s('journeyChestMissed', 'الصندوق ده فاتك. فيه صندوق جديد الأسبوع ده!', 'You missed this one. A new chest is waiting this week!')
 s('journeyChestWaiting', 'الصندوق جاهز يتفتح من حساب {name}', "The chest is ready to open on {name}'s account", name='String')
 s('journeyChestGot', '{n, plural, =1{+نجمة في رحلتك!} =2{+نجمتين في رحلتك!} few{+{n} نجوم في رحلتك!} other{+{n} نجمة في رحلتك!}}', '{n, plural, =1{+1 star on your journey!} other{+{n} stars on your journey!}}', n='int')
@@ -1066,6 +1088,33 @@ s('homeworkPracticeTitle', 'التدريب بالألعاب', 'Practice in the g
 s('homeworkPracticeNotYet', 'لسه ما اتلعبتش جولته.', 'Its round is not played yet.')
 s('homeworkByPlaying', 'الواجب ده بيتسلّم لما تلعب جولته.', 'This homework is handed in by playing its round.')
 s('homeworkNoGame', 'مفيش لعبة للواجب ده دلوقتي.', 'No game for this homework right now.')
+
+def plurals(text):
+    """Each `{x, plural, ...}` in [text]: the name and its branches as one string."""
+    for m in re.finditer(r'\{(\w+), plural,', text):
+        depth, i = 1, m.end()
+        while depth and i < len(text):
+            depth += {'{': 1, '}': -1}.get(text[i], 0)
+            i += 1
+        yield m.group(1), text[m.end():i - 1]
+
+
+for key, ar, en, ph in S:
+    kids = 'kids' in key.lower()
+    assert kids or not (EMOJI.search(ar) or EMOJI.search(en)), (key, 'emoji are for the kids\' strings')
+    if kids:
+        continue
+    for wrong, right in GLOSSARY:
+        assert not re.search(wrong, ar), (key, f'say {right}', ar)
+    bare = ar
+    for name, body in plurals(ar):
+        bare = bare.replace(body, '')
+        if '{' + name + '}' in body:
+            assert ('=2{' in body or 'two{' in body) and 'few{' in body, (key, 'a counted plural needs =2 and few', ar)
+    for name, kind in ph.items():
+        if kind in ('int', 'num'):
+            assert not re.search(r'\{' + name + r'\} (' + COUNTED + r')(?!\w)', bare), (key, 'a count goes in a plural', ar)
+
 
 here = os.path.dirname(os.path.abspath(__file__))
 out = os.path.join(here, '..', 'lib', 'core', 'l10n', 'arb')
