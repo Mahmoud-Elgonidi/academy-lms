@@ -89,13 +89,16 @@ final class AddNodeResource
         }
     }
 
-    /** The file's type from its bytes; a WAV some browsers send as x-wav, an M4A as mp4 audio. */
+    /**
+     * The file's type from its bytes alone (a WAV some browsers send as x-wav, an M4A as mp4 audio): one PHP cannot
+     * tell comes back empty and is refused, whatever the browser said it was.
+     */
     private static function mimeOf(?UploadedFile $file): string
     {
         if ($file === null) {
             throw ValidationException::withMessages(['file' => __('curriculum::curriculum.resources.errors.file_missing')]);
         }
 
-        return (string) ($file->getMimeType() ?: $file->getClientMimeType());
+        return (string) $file->getMimeType();
     }
 }

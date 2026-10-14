@@ -86,12 +86,29 @@ it('keeps files and links on a lesson, in order, each for everyone or for teache
     expect(NodeResource::query()->find($pdf->id))->toBeNull()->and(Storage::disk('local')->exists($pdf->file_path))->toBeFalse();
 });
 
+/** A real upload whose bytes PHP cannot name: only the browser's word says what it is. */
+function lrUntold(string $name, string $claimed): UploadedFile
+{
+    $path = tempnam(sys_get_temp_dir(), 'lr');
+    file_put_contents($path, '%PDF-1.4 fake');
+
+    return new class($path, $name, $claimed, null, true) extends UploadedFile
+    {
+        public function getMimeType(): ?string
+        {
+            return null;
+        }
+    };
+}
+
 it('refuses what a lesson cannot take', function () {
     $level = Node::query()->where('kind', 'level')->firstOrFail();
 
     expect(lrRefusal(fn () => lrAdd($level, ['kind' => 'link', 'title_en' => 'x', 'url' => 'https://a.test'])))->toBe('node')
         ->and(lrRefusal(fn () => lrAdd($this->first, ['kind' => 'file'], UploadedFile::fake()->create('run.exe', 10, 'application/x-msdownload'))))->toBe('file')
         ->and(lrRefusal(fn () => lrAdd($this->first, ['kind' => 'file'], lrPdf('big.pdf', 21 * 1024))))->toBe('file')
+        // A file whose type its bytes do not tell is refused, whatever the browser said it was.
+        ->and(lrRefusal(fn () => lrAdd($this->first, ['kind' => 'file'], lrUntold('notes.pdf', 'application/pdf'))))->toBe('file')
         ->and(lrRefusal(fn () => lrAdd($this->first, ['kind' => 'link', 'title_en' => 'x', 'url' => 'javascript:alert(1)'])))->toBe('url')
         ->and(lrRefusal(fn () => lrAdd($this->first, ['kind' => 'link', 'title_en' => 'x', 'url' => 'ftp://files.test/a'])))->toBe('url')
         ->and(lrRefusal(fn () => lrAdd($this->first, ['kind' => 'link', 'url' => 'https://a.test'])))->toBe('title_ar')
