@@ -35,7 +35,7 @@ class _ConsentNeeded extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    final steps = [l.consentNeededStep1, l.consentNeededStep2(l.navMe, l.privacyTitle), l.consentNeededStep3];
+    final steps = [l.consentNeededStep1, l.consentNeededStep2(l.navMore, l.privacyTitle), l.consentNeededStep3];
     return SignInFrame(
       title: l.consentNeededTitle,
       badge: Icons.family_restroom_rounded,

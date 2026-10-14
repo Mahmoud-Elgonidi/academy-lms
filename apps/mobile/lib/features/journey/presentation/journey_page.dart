@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../app/router/areas.dart';
 import '../../../core/auth/session_cubit.dart';
@@ -12,6 +11,7 @@ import '../../../shared/widgets/load_view.dart';
 import '../../challenges/data/challenges_repository.dart';
 import '../../challenges/presentation/widgets/cheers.dart';
 import '../../dashboard/presentation/bloc/learner_cubit.dart';
+import '../../dashboard/presentation/widgets/family_header.dart';
 import '../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../../games/presentation/art/art.dart';
 import '../data/journey_repository.dart';
@@ -53,24 +53,20 @@ class JourneyPage extends StatelessWidget {
             child: _Journey(place: place, name: name, family: family),
           );
     if (!family) return body;
+    final many = learners.learners.length > 1;
+    final self = learner == null || learner.isSelf;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(learner == null || learner.isSelf ? l.navJourney : l.journeyTitle(learner.firstName)),
-        actions: [
-          // The courses' materials and reports (where Progress was).
-          IconButton(
-            key: const Key('journey-courses-action'),
-            tooltip: l.journeyCourses,
-            icon: const Icon(Icons.menu_book_outlined),
-            onPressed: () => context.go('${place.base}/courses'),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          const LearnerSwitcher(),
-          Expanded(child: body),
-        ],
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            FamilyHeader(
+              eyebrow: self ? null : l.journeyHow(learner.firstName),
+              title: self ? l.navJourney : (many ? l.navJourneyTab : l.journeyTitle(learner.firstName)),
+            ),
+            Expanded(child: body),
+          ],
+        ),
       ),
     );
   }

@@ -89,7 +89,7 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
-  testWidgets('"Me" links Apple with the phone\'s own sign-in, and unlinks Google after asking', (tester) async {
+  testWidgets('sign-in and security links Apple with the phone\'s own sign-in, and unlinks Google after asking', (tester) async {
     final social = FakeSocialSignIn();
     final app = await TestApp.create(accounts: [guardian], social: social);
     familyRoutes(app.api);
@@ -112,6 +112,9 @@ void main() {
     await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
     await frames(tester, 20);
     GoRouter.of(tester.element(find.byType(Scaffold).first)).go('/family/me');
+    await frames(tester, 20);
+    // More › Sign-in and security.
+    await tester.tap(find.byKey(const Key('open-security')));
     await frames(tester, 20);
 
     expect(find.text('الدخول بجوجل وأبل'), findsOneWidget);

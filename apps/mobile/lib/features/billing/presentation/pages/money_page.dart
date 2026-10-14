@@ -16,6 +16,7 @@ import '../../../../shared/widgets/course_state.dart';
 import '../../../../shared/motion/done_moment.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
+import '../../../dashboard/presentation/widgets/family_header.dart';
 import '../../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../../data/billing_repository.dart';
 import '../../domain/billing.dart';
@@ -62,20 +63,32 @@ class _MoneyPageState extends State<MoneyPage> {
   Widget build(BuildContext context) {
     final learnerId = context.learnerId();
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.navMoney)),
-      body: BlocProvider(
-        key: ValueKey(learnerId),
-        create: (c) {
-          final repo = c.read<BillingRepository>();
-          return _cubit = LoadCubit<_Money>(() async {
-            final results = await Future.wait<Object>([repo.invoices(), repo.balance(learnerId: learnerId)]);
-            return _Money(results[0] as Invoices, results[1] as List<Balance>);
-          }, refreshOn: c.read<Live>().on({Live.payments, Live.lessons}))..load();
-        },
-        child: LoadView<_Money>(builder: (context, m) => _MoneyList(money: m)),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            FamilyHeader(eyebrow: context.l10n.moneyEyebrow, title: context.l10n.navMoney),
+            Expanded(child: _body(learnerId)),
+          ],
+        ),
       ),
     );
   }
+
+  Widget _body(String? learnerId) => BlocProvider(
+    key: ValueKey(learnerId),
+    create: (c) {
+      final repo = c.read<BillingRepository>();
+      return _cubit = LoadCubit<_Money>(() async {
+        final results = await Future.wait<Object>([repo.invoices(), repo.balance(learnerId: learnerId)]);
+        return _Money(results[0] as Invoices, results[1] as List<Balance>);
+      }, refreshOn: c.read<Live>().on({Live.payments, Live.lessons}))..load();
+    },
+    child: LoadView<_Money>(
+      skeleton: const SkeletonList(),
+      builder: (context, m) => _MoneyList(money: m),
+    ),
+  );
 }
 
 class _MoneyList extends StatelessWidget {

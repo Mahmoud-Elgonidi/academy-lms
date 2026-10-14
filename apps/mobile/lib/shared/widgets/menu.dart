@@ -15,7 +15,11 @@ class MenuGroup extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      if (title != null) SectionHeader(title!),
+      if (title != null)
+        Padding(
+          padding: const EdgeInsetsDirectional.only(start: Space.xs, top: Space.l, bottom: Space.s),
+          child: Semantics(header: true, child: Text(title!, style: context.type.section)),
+        ),
       LmsCard(
         padding: EdgeInsets.zero,
         child: Column(

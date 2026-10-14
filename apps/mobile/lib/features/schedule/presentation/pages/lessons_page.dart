@@ -11,6 +11,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/motion/done_moment.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../../dashboard/presentation/bloc/learner_cubit.dart';
+import '../../../dashboard/presentation/widgets/family_header.dart';
 import '../../../dashboard/presentation/widgets/learner_switcher.dart';
 import '../../data/lessons_repository.dart';
 import '../../domain/lesson.dart';
@@ -39,51 +40,70 @@ class _LessonsPageState extends State<LessonsPage> {
     final family = learners.scope == LearnerScope.family;
     final zone = context.select<SessionCubit, String?>((s) => s.state.me?.displayTimezone ?? s.state.timezone);
     final learnerId = context.learnerId();
+    // The kids' look keeps its own quiet loader.
+    final skeleton = context.isKids ? null : const SkeletonList();
+    final list = Expanded(
+      child: !learners.state.loaded
+          ? skeleton ?? const Center(child: CircularProgressIndicator.adaptive())
+          : BlocProvider(
+              key: ValueKey('$learnerId:$_past'),
+              create: (c) => LoadCubit<LessonList>(
+                () => c.read<LessonsRepository>().family(learnerId: learnerId, past: _past),
+                refreshOn: c.read<Live>().on({Live.lessons}),
+                refreshAt: (d) => d.clockMoments,
+              )..load(),
+              child: LoadView<LessonList>(
+                skeleton: skeleton,
+                builder: (context, data) => _LessonDays(data: data, past: _past),
+              ),
+            ),
+    );
+    final when = Padding(
+      padding: const EdgeInsets.fromLTRB(18, 8, 18, 8),
+      child: SizedBox(
+        width: double.infinity,
+        child: SegmentedButton<bool>(
+          showSelectedIcon: false,
+          segments: [
+            ButtonSegment(value: false, label: Text(l.upcoming)),
+            ButtonSegment(value: true, label: Text(l.past)),
+          ],
+          selected: {_past},
+          onSelectionChanged: (v) => setState(() => _past = v.first),
+        ),
+      ),
+    );
+    final clock = zone == null ? null : l.onClock(zoneName(zone, context.locale));
+    if (family) {
+      // A guardian's tab: the shared header with the bell, the children to switch between.
+      final many = learners.state.learners.length > 1;
+      return Scaffold(
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              FamilyHeader(
+                eyebrow: clock,
+                title: learner == null || learner.isSelf ? l.navMyLessons : (many ? l.navLessons : l.lessonsOf(learner.firstName)),
+              ),
+              when,
+              list,
+            ],
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(family && learner != null ? l.lessonsOf(learner.firstName) : l.navMyLessons),
-            if (zone != null) Text(l.onClock(zoneName(zone, context.locale)), style: context.text.bodySmall),
+            Text(l.navMyLessons),
+            if (clock != null) Text(clock, style: context.text.bodySmall),
           ],
         ),
       ),
-      body: Column(
-        children: [
-          if (family) const LearnerSwitcher(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 8, 18, 8),
-            child: SizedBox(
-              width: double.infinity,
-              child: SegmentedButton<bool>(
-                showSelectedIcon: false,
-                segments: [
-                  ButtonSegment(value: false, label: Text(l.upcoming)),
-                  ButtonSegment(value: true, label: Text(l.past)),
-                ],
-                selected: {_past},
-                onSelectionChanged: (v) => setState(() => _past = v.first),
-              ),
-            ),
-          ),
-          Expanded(
-            child: !learners.state.loaded
-                ? const Center(child: CircularProgressIndicator.adaptive())
-                : BlocProvider(
-                    key: ValueKey('$learnerId:$_past'),
-                    create: (c) => LoadCubit<LessonList>(
-                      () => c.read<LessonsRepository>().family(learnerId: learnerId, past: _past),
-                      refreshOn: c.read<Live>().on({Live.lessons}),
-                      refreshAt: (d) => d.clockMoments,
-                    )..load(),
-                    child: LoadView<LessonList>(
-                      builder: (context, data) => _LessonDays(data: data, past: _past),
-                    ),
-                  ),
-          ),
-        ],
-      ),
+      body: Column(children: [when, list]),
     );
   }
 }

@@ -73,7 +73,7 @@ void main() {
 
     expect(find.text('محتاجين موافقة ولي أمرك'), findsOneWidget);
     expect(find.text('ولي أمرك يفتح التطبيق بحسابه.'), findsOneWidget);
-    expect(find.text('من «حسابي» ثم «خصوصية الأولاد» يوافق على حسابك.'), findsOneWidget);
+    expect(find.text('من «المزيد» ثم «خصوصية الأولاد» يوافق على حسابك.'), findsOneWidget);
 
     await tester.tap(find.text('جرّب تدخل تاني'));
     await frames(tester, 6);

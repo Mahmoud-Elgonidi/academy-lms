@@ -4,13 +4,15 @@ import '../../app/theme/app_theme.dart';
 import 'lms.dart';
 
 /// The top of a main tab: an optional line above, the title, and the
-/// buttons that are always there (the bell, the account). [bottom] sits
-/// under it (the children switcher).
+/// buttons that are always there (the bell, the account). [leading] stands
+/// before them (the academy's logo, on a home only); [bottom] sits under it
+/// (the children switcher).
 class AppHeader extends StatelessWidget {
-  const AppHeader({required this.title, this.eyebrow, this.actions = const [], this.bottom, super.key});
+  const AppHeader({required this.title, this.eyebrow, this.leading, this.actions = const [], this.bottom, super.key});
 
   final String title;
   final String? eyebrow;
+  final Widget? leading;
   final List<Widget> actions;
   final Widget? bottom;
 
@@ -22,13 +24,17 @@ class AppHeader extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 56),
         child: Row(
           children: [
+            if (leading != null) ...[leading!, const Gap(Space.m)],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (eyebrow != null) Text(eyebrow!, style: context.type.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  Semantics(header: true, child: Text(title, style: context.type.display)),
+                  Semantics(
+                    header: true,
+                    child: Text(title, style: context.type.display, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  ),
                 ],
               ),
             ),
@@ -44,12 +50,15 @@ class AppHeader extends StatelessWidget {
 /// A square button in a header: an icon, an optional count on it, and a
 /// spoken name ("الإشعارات، 2 جديد").
 class HeaderButton extends StatelessWidget {
-  const HeaderButton({required this.icon, required this.label, required this.onPressed, this.count = 0, super.key});
+  const HeaderButton({required this.icon, required this.label, required this.onPressed, this.count = 0, this.wrap, super.key});
 
   final IconData icon;
   final String label;
   final VoidCallback? onPressed;
   final int count;
+
+  /// Moves the icon (the bell rings when something new comes in).
+  final Widget Function(Widget icon)? wrap;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +82,7 @@ class HeaderButton extends StatelessWidget {
               child: Badge(
                 isLabelVisible: count > 0,
                 label: Text('$count'),
-                child: Icon(icon, size: 22, color: c.ink),
+                child: (wrap ?? (i) => i)(Icon(icon, size: 22, color: c.ink)),
               ),
             ),
           ),

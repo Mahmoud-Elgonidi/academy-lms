@@ -566,6 +566,7 @@
   "navLessons": "الحصص",
   "navJourneyTab": "الرحلة",
   "navMoney": "الفلوس",
+  "moneyEyebrow": "الفواتير والرصيد",
   "navMe": "حسابي",
   "navJourney": "رحلتي",
   "navMyLessons": "حصصي",
@@ -634,6 +635,44 @@
     }
   },
   "allLessons": "كل الحصص",
+  "startsIn": "بعد {time}",
+  "@startsIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "roomOpensAt": "الفصل بيفتح {time}",
+  "@roomOpensAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceOf": "رصيد {name}",
+  "@balanceOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "payShort": "ادفع",
+  "openJourney": "افتح الرحلة",
+  "allReports": "كل التقارير",
+  "allHomework": "كل الواجبات",
+  "aboutLearner": "عن {name}",
+  "@aboutLearner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pickLearner": "عن مين؟",
+  "pickedNow": "دلوقتي",
   "balance": "الرصيد",
   "owed": "عليك",
   "payNow": "ادفع دلوقتي",
@@ -1007,6 +1046,36 @@
     }
   },
   "meTitle": "حسابي",
+  "moreChildren": "الأولاد",
+  "moreTalk": "التواصل",
+  "moreMine": "حسابي",
+  "moreAccounts": "الحسابات",
+  "moreLanguage": "اللغة والتوقيت",
+  "moreSecurity": "الدخول والأمان",
+  "moreAcademies": "{n, plural, =1{أكاديمية واحدة} =2{أكاديميتين} few{{n} أكاديميات} other{{n} أكاديمية}}",
+  "@moreAcademies": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "guardianOf": "ولي أمر {names}",
+  "@guardianOf": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "appVersion": "النسخة {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "contactTitle": "الإيميل والموبايل",
   "contactHint": "دول طرق دخولك، والأكواد والرسايل بتوصلك عليهم. لما تغيّر واحد، بنبعت كود على الجديد عشان نتأكد إنه بتاعك.",
   "contactEmail": "الإيميل",
@@ -2146,6 +2215,25 @@
       },
       "n": {
         "type": "int"
+      }
+    }
+  },
+  "journeyStationOf": "المحطة {i} من {n}",
+  "@journeyStationOf": {
+    "placeholders": {
+      "i": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "journeyHow": "إزاي {name} ماشي",
+  "@journeyHow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
     }
   },

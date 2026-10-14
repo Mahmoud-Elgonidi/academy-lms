@@ -818,6 +818,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navMoney => 'الفلوس';
 
   @override
+  String get moneyEyebrow => 'الفواتير والرصيد';
+
+  @override
   String get navMe => 'حسابي';
 
   @override
@@ -897,6 +900,44 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get allLessons => 'كل الحصص';
+
+  @override
+  String startsIn(String time) {
+    return 'بعد $time';
+  }
+
+  @override
+  String roomOpensAt(String time) {
+    return 'الفصل بيفتح $time';
+  }
+
+  @override
+  String balanceOf(String name) {
+    return 'رصيد $name';
+  }
+
+  @override
+  String get payShort => 'ادفع';
+
+  @override
+  String get openJourney => 'افتح الرحلة';
+
+  @override
+  String get allReports => 'كل التقارير';
+
+  @override
+  String get allHomework => 'كل الواجبات';
+
+  @override
+  String aboutLearner(String name) {
+    return 'عن $name';
+  }
+
+  @override
+  String get pickLearner => 'عن مين؟';
+
+  @override
+  String get pickedNow => 'دلوقتي';
 
   @override
   String get balance => 'الرصيد';
@@ -1380,6 +1421,47 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get meTitle => 'حسابي';
+
+  @override
+  String get moreChildren => 'الأولاد';
+
+  @override
+  String get moreTalk => 'التواصل';
+
+  @override
+  String get moreMine => 'حسابي';
+
+  @override
+  String get moreAccounts => 'الحسابات';
+
+  @override
+  String get moreLanguage => 'اللغة والتوقيت';
+
+  @override
+  String get moreSecurity => 'الدخول والأمان';
+
+  @override
+  String moreAcademies(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n أكاديمية',
+      few: '$n أكاديميات',
+      two: 'أكاديميتين',
+      one: 'أكاديمية واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String guardianOf(String names) {
+    return 'ولي أمر $names';
+  }
+
+  @override
+  String appVersion(String version) {
+    return 'النسخة $version';
+  }
 
   @override
   String get contactTitle => 'الإيميل والموبايل';
@@ -3002,6 +3084,16 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String journeyLevelOf(int i, int n) {
     return 'المستوى $i من $n';
+  }
+
+  @override
+  String journeyStationOf(int i, int n) {
+    return 'المحطة $i من $n';
+  }
+
+  @override
+  String journeyHow(String name) {
+    return 'إزاي $name ماشي';
   }
 
   @override

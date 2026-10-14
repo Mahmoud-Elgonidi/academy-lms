@@ -16,47 +16,69 @@ import '../../data/profile_repository.dart';
 import '../widgets/accounts_card.dart';
 import '../../../../shared/widgets/latin_digits.dart';
 
+/// What a part of "Me" holds when it opens on its own from a family's More:
+/// the accounts on this phone; the language, sounds and clock; the email,
+/// mobile, Google and Apple, and the devices signed in.
+enum AccountPart { accounts, settings, security }
+
 /// "Me": the accounts on this phone, the clock, language and sounds, the
 /// email and mobile number (a new one by code), Google and Apple sign-in, the
-/// devices signed in to this account, and signing out.
+/// devices signed in to this account, and signing out. A family's More opens
+/// one [part] at a time.
 class AccountPage extends StatelessWidget {
-  const AccountPage({this.standalone = false, super.key});
+  const AccountPage({this.standalone = false, this.part, super.key});
 
   /// Opened on its own (a student's avatar, the teacher's More) rather than as a tab.
   final bool standalone;
+  final AccountPart? part;
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
-    create: (c) => LoadCubit<List<DeviceSession>>(c.read<ProfileRepository>().devices)..load(),
-    child: Scaffold(
-      appBar: AppBar(title: Text(context.l10n.meTitle), automaticallyImplyLeading: standalone),
-      body: BlocListener<SessionCubit, SessionState>(
-        listenWhen: (a, b) => a.current?.id != b.current?.id,
-        listener: (context, _) => context.read<LoadCubit<List<DeviceSession>>>().load(),
-        child: ListView(
-          padding: pagePadding,
-          children: [
-            const AccountsCard(),
-            const SizedBox(height: 14),
-            if (!standalone) const _Privacy(),
-            if (!standalone) const _Recordings(),
-            const _Messages(),
-            const _Help(),
-            const _TellUs(),
-            const _MyData(),
-            const _ClockPrompt(),
-            const _Settings(),
-            const _Contact(),
-            const _SignInMethods(),
-            const SizedBox(height: 18),
-            const _Devices(),
-            const SizedBox(height: 18),
-            const _SignOut(),
-          ],
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final part = this.part;
+    final children = switch (part) {
+      AccountPart.accounts => const [AccountsCard()],
+      AccountPart.settings => const [ClockPrompt(), _Settings()],
+      AccountPart.security => const [_Contact(), _SignInMethods(), SizedBox(height: 18), _Devices()],
+      null => [
+        const AccountsCard(),
+        const SizedBox(height: 14),
+        if (!standalone) const _Privacy(),
+        if (!standalone) const _Recordings(),
+        const _Messages(),
+        const _Help(),
+        const _TellUs(),
+        const _MyData(),
+        const ClockPrompt(),
+        const _Settings(),
+        const _Contact(),
+        const _SignInMethods(),
+        const SizedBox(height: 18),
+        const _Devices(),
+        const SizedBox(height: 18),
+        const _SignOut(),
+      ],
+    };
+    return BlocProvider(
+      create: (c) => LoadCubit<List<DeviceSession>>(c.read<ProfileRepository>().devices)..load(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(switch (part) {
+            AccountPart.accounts => l.moreAccounts,
+            AccountPart.settings => l.moreLanguage,
+            AccountPart.security => l.moreSecurity,
+            null => l.meTitle,
+          }),
+          automaticallyImplyLeading: standalone || part != null,
+        ),
+        body: BlocListener<SessionCubit, SessionState>(
+          listenWhen: (a, b) => a.current?.id != b.current?.id,
+          listener: (context, _) => context.read<LoadCubit<List<DeviceSession>>>().load(),
+          child: ListView(padding: pagePadding, children: children),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// A guardian's way to their children's privacy (their consent to each child's account).
@@ -238,8 +260,9 @@ class _MyData extends StatelessWidget {
   }
 }
 
-class _ClockPrompt extends StatelessWidget {
-  const _ClockPrompt();
+/// The phone's clock is not the profile's: use the phone's, or keep the profile's.
+class ClockPrompt extends StatelessWidget {
+  const ClockPrompt({super.key});
 
   @override
   Widget build(BuildContext context) {

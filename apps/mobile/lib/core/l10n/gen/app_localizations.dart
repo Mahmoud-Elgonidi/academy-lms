@@ -1448,6 +1448,12 @@ abstract class AppLocalizations {
   /// **'الفلوس'**
   String get navMoney;
 
+  /// No description provided for @moneyEyebrow.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفواتير والرصيد'**
+  String get moneyEyebrow;
+
   /// No description provided for @navMe.
   ///
   /// In ar, this message translates to:
@@ -1585,6 +1591,66 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'كل الحصص'**
   String get allLessons;
+
+  /// No description provided for @startsIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'بعد {time}'**
+  String startsIn(String time);
+
+  /// No description provided for @roomOpensAt.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفصل بيفتح {time}'**
+  String roomOpensAt(String time);
+
+  /// No description provided for @balanceOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'رصيد {name}'**
+  String balanceOf(String name);
+
+  /// No description provided for @payShort.
+  ///
+  /// In ar, this message translates to:
+  /// **'ادفع'**
+  String get payShort;
+
+  /// No description provided for @openJourney.
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح الرحلة'**
+  String get openJourney;
+
+  /// No description provided for @allReports.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل التقارير'**
+  String get allReports;
+
+  /// No description provided for @allHomework.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل الواجبات'**
+  String get allHomework;
+
+  /// No description provided for @aboutLearner.
+  ///
+  /// In ar, this message translates to:
+  /// **'عن {name}'**
+  String aboutLearner(String name);
+
+  /// No description provided for @pickLearner.
+  ///
+  /// In ar, this message translates to:
+  /// **'عن مين؟'**
+  String get pickLearner;
+
+  /// No description provided for @pickedNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'دلوقتي'**
+  String get pickedNow;
 
   /// No description provided for @balance.
   ///
@@ -2389,6 +2455,60 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'حسابي'**
   String get meTitle;
+
+  /// No description provided for @moreChildren.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأولاد'**
+  String get moreChildren;
+
+  /// No description provided for @moreTalk.
+  ///
+  /// In ar, this message translates to:
+  /// **'التواصل'**
+  String get moreTalk;
+
+  /// No description provided for @moreMine.
+  ///
+  /// In ar, this message translates to:
+  /// **'حسابي'**
+  String get moreMine;
+
+  /// No description provided for @moreAccounts.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحسابات'**
+  String get moreAccounts;
+
+  /// No description provided for @moreLanguage.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللغة والتوقيت'**
+  String get moreLanguage;
+
+  /// No description provided for @moreSecurity.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدخول والأمان'**
+  String get moreSecurity;
+
+  /// No description provided for @moreAcademies.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{أكاديمية واحدة} =2{أكاديميتين} few{{n} أكاديميات} other{{n} أكاديمية}}'**
+  String moreAcademies(int n);
+
+  /// No description provided for @guardianOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'ولي أمر {names}'**
+  String guardianOf(String names);
+
+  /// No description provided for @appVersion.
+  ///
+  /// In ar, this message translates to:
+  /// **'النسخة {version}'**
+  String appVersion(String version);
 
   /// No description provided for @contactTitle.
   ///
@@ -5131,6 +5251,18 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المستوى {i} من {n}'**
   String journeyLevelOf(int i, int n);
+
+  /// No description provided for @journeyStationOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'المحطة {i} من {n}'**
+  String journeyStationOf(int i, int n);
+
+  /// No description provided for @journeyHow.
+  ///
+  /// In ar, this message translates to:
+  /// **'إزاي {name} ماشي'**
+  String journeyHow(String name);
 
   /// No description provided for @journeyLevels.
   ///

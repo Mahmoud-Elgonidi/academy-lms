@@ -17,7 +17,7 @@ class FamilyHome {
     this.invoices,
     this.report,
     this.reportCourse,
-    this.homework,
+    this.homework = const [],
     this.journey,
   });
 
@@ -26,7 +26,9 @@ class FamilyHome {
   final Invoices? invoices;
   final Report? report;
   final Course? reportCourse;
-  final Homework? homework;
+
+  /// What is due first, then what was handed in last (three at most).
+  final List<Homework> homework;
 
   /// The learner's journey, for its card ("Salma's journey").
   final JourneyMap? journey;
@@ -74,7 +76,8 @@ class HomeLoader {
         reportCourse = course;
       }
     }
-    final work = (results[4] as List<Homework>?)?.where((h) => h.open).firstOrNull;
+    final all = results[4] as List<Homework>? ?? const <Homework>[];
+    final work = [...all.where((h) => h.open), ...all.where((h) => !h.open)].take(3).toList();
     return FamilyHome(
       lessons: results[0]! as LessonList,
       balance: results[1] as List<Balance>? ?? const [],

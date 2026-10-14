@@ -78,7 +78,8 @@ void main() {
 
     await tester.tap(find.text('الرحلة').last);
     await frames(tester, 12);
-    await tester.tap(find.byKey(const Key('journey-courses-action')));
+    await tester.ensureVisible(find.byKey(const Key('journey-courses')));
+    await tester.tap(find.byKey(const Key('journey-courses')));
     await frames(tester, 12);
     expect(find.text('مواد الدروس والتقارير'), findsOneWidget);
     expect(find.text('مواد الدرس'), findsOneWidget);

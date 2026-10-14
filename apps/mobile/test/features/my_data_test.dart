@@ -202,7 +202,7 @@ void main() {
     await tester.binding.setSurfaceSize(null);
   });
 
-  testWidgets('a new email waits for the code sent to it, then shows on Me', (tester) async {
+  testWidgets('a new email waits for the code sent to it, then shows under sign-in and security', (tester) async {
     final app = await TestApp.create(accounts: [guardian]);
     familyRoutes(app.api);
     var email = 'rami@demo.test';
@@ -239,6 +239,8 @@ void main() {
     await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
     await frames(tester, 15);
     GoRouter.of(tester.element(find.byType(Scaffold).first)).go('/family/me');
+    await frames(tester, 12);
+    await tester.tap(find.byKey(const Key('open-security')));
     await frames(tester, 12);
     expect(find.text('rami@demo.test'), findsOneWidget);
 

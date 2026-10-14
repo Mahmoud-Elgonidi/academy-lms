@@ -35,6 +35,7 @@ import '../../features/notifications/presentation/pages/update_page.dart';
 import '../../features/onboarding/presentation/intro_page.dart';
 import '../../features/onboarding/presentation/splash_page.dart';
 import '../../features/profile/presentation/pages/account_page.dart';
+import '../../features/profile/presentation/pages/family_more_page.dart';
 import '../../features/roadmap/presentation/pages/progress_page.dart';
 import '../../features/roadmap/presentation/pages/reports_page.dart';
 import '../../features/schedule/presentation/pages/lessons_page.dart';
@@ -217,7 +218,7 @@ GoRouter buildRouter(SessionCubit session) {
                 ShellTab(Icons.calendar_month_outlined, Icons.calendar_month_rounded, context.l10n.navLessons),
                 ShellTab(Icons.map_outlined, Icons.map_rounded, context.l10n.navJourneyTab),
                 ShellTab(Icons.account_balance_wallet_outlined, Icons.account_balance_wallet_rounded, context.l10n.navMoney),
-                ShellTab(Icons.person_outline_rounded, Icons.person_rounded, context.l10n.navMe),
+                ShellTab(Icons.more_horiz_rounded, Icons.more_horiz_rounded, context.l10n.navMore),
               ],
             ),
           ),
@@ -247,8 +248,11 @@ GoRouter buildRouter(SessionCubit session) {
           branch('/family/money', (_) => const MoneyPage()),
           branch(
             '/family/me',
-            (_) => const AccountPage(),
+            (_) => const FamilyMorePage(),
             routes: [
+              page('accounts', (_) => const AccountPage(part: AccountPart.accounts)),
+              page('settings', (_) => const AccountPage(part: AccountPart.settings)),
+              page('security', (_) => const AccountPage(part: AccountPart.security)),
               page('privacy', (_) => const PrivacyPage()),
               page('my-data', (_) => const MyDataPage()),
               page('recordings', (_) => const RecordingsPage(teacher: false)),

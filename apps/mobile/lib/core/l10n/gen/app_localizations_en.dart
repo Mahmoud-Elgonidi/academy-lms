@@ -810,6 +810,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMoney => 'Payments';
 
   @override
+  String get moneyEyebrow => 'Invoices and balance';
+
+  @override
   String get navMe => 'Me';
 
   @override
@@ -889,6 +892,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allLessons => 'All lessons';
+
+  @override
+  String startsIn(String time) {
+    return 'In $time';
+  }
+
+  @override
+  String roomOpensAt(String time) {
+    return 'The room opens at $time';
+  }
+
+  @override
+  String balanceOf(String name) {
+    return '$name\'s balance';
+  }
+
+  @override
+  String get payShort => 'Pay';
+
+  @override
+  String get openJourney => 'Open the journey';
+
+  @override
+  String get allReports => 'All reports';
+
+  @override
+  String get allHomework => 'All homework';
+
+  @override
+  String aboutLearner(String name) {
+    return 'About $name';
+  }
+
+  @override
+  String get pickLearner => 'About whom?';
+
+  @override
+  String get pickedNow => 'Now';
 
   @override
   String get balance => 'Balance';
@@ -1365,6 +1406,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get meTitle => 'Me';
+
+  @override
+  String get moreChildren => 'Children';
+
+  @override
+  String get moreTalk => 'Getting in touch';
+
+  @override
+  String get moreMine => 'My account';
+
+  @override
+  String get moreAccounts => 'Accounts';
+
+  @override
+  String get moreLanguage => 'Language and time';
+
+  @override
+  String get moreSecurity => 'Sign-in and security';
+
+  @override
+  String moreAcademies(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n academies', one: '1 academy');
+    return '$_temp0';
+  }
+
+  @override
+  String guardianOf(String names) {
+    return 'Guardian of $names';
+  }
+
+  @override
+  String appVersion(String version) {
+    return 'Version $version';
+  }
 
   @override
   String get contactTitle => 'Email and mobile';
@@ -2955,6 +3030,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String journeyLevelOf(int i, int n) {
     return 'Level $i of $n';
+  }
+
+  @override
+  String journeyStationOf(int i, int n) {
+    return 'Station $i of $n';
+  }
+
+  @override
+  String journeyHow(String name) {
+    return 'How $name is doing';
   }
 
   @override

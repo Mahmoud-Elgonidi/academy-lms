@@ -8,13 +8,17 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/realtime/live.dart';
 import '../../../../shared/motion/bell_ring.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../shared/widgets/lms.dart';
 import '../../data/notifications_repository.dart';
 
 /// The bell on a home: how many unread, a swing when there are some; opens
 /// the inbox, and counts again on the way back, or when a message arrives
-/// or is read on another device (the live signal).
+/// or is read on another device (the live signal). [framed] gives it the
+/// header's square button (a guardian's tabs).
 class NotificationBell extends StatefulWidget {
-  const NotificationBell({super.key});
+  const NotificationBell({this.framed = false, super.key});
+
+  final bool framed;
 
   @override
   State<NotificationBell> createState() => _NotificationBellState();
@@ -46,18 +50,30 @@ class _NotificationBellState extends State<NotificationBell> {
     }
   }
 
+  Future<void> _open() async {
+    await context.push('/inbox');
+    if (mounted) await _count();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.framed) {
+      return HeaderButton(
+        key: const Key('bell'),
+        icon: _unread > 0 ? Icons.notifications_active_rounded : Icons.notifications_none_rounded,
+        label: '${context.l10n.inboxTitle}، ${context.l10n.unreadCount(_unread)}',
+        count: _unread,
+        wrap: (icon) => BellRing(count: _unread, child: icon),
+        onPressed: _open,
+      );
+    }
     Widget icon = Icon(_unread > 0 ? Icons.notifications_active_rounded : Icons.notifications_none_rounded);
     // The kids' bell wiggles while something waits; the others ring once
     // when something new comes in.
     icon = context.flavour == MotionFlavour.kids ? (_unread > 0 ? icon.wiggle(context) : icon) : BellRing(count: _unread, child: icon);
     return IconButton(
       tooltip: '${context.l10n.inboxTitle} · ${context.l10n.unreadCount(_unread)}',
-      onPressed: () async {
-        await context.push('/inbox');
-        if (mounted) await _count();
-      },
+      onPressed: _open,
       icon: Badge(isLabelVisible: _unread > 0, label: Text('$_unread'), child: icon),
     );
   }
