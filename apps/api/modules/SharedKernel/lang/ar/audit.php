@@ -32,6 +32,9 @@ return [
         ],
         'enrollment' => [
             'teacher_changed' => 'تغيير مدرس طالب من :starting',
+            'paused' => 'إيقاف كورس من :from لحد :until (اتلغت :lessons حصة): :reason',
+            'resumed' => 'رجوع كورس موقوف (:early، اتعملت :lessons حصة)',
+            'ended' => 'إنهاء كورس من :on (اتلغت :lessons حصة): :reason',
         ],
         'payroll' => [
             'month_closed' => 'قفل مرتبات :month',
@@ -140,6 +143,7 @@ return [
         ],
     ],
     'values' => [
+        'early' => ['early' => 'بدري، من الإدارة', 'on_time' => 'في ميعاده، لوحده'],
         'style' => ['playful' => 'مرح (جزر وألعاب)', 'calm' => 'هادي (مستويات ومهمات)', 'plain' => 'من غير نجوم'],
         'concern_outcome' => ['no_concern' => 'مفيش حاجة تتعمل', 'resolved' => 'اتحل', 'teacher_action' => 'إجراء مع مدرس', 'referred' => 'اتحول لجهة برّه', 'duplicate' => 'مكرر'],
         'document' => ['criminal_record' => 'الفيش الجنائي', 'identity' => 'البطاقة', 'qualification' => 'المؤهل', 'other' => 'المستند'],

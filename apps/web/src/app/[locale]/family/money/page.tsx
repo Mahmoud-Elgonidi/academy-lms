@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { CourseState } from '@/components/family/course-state';
 import { ExtraLessons } from '@/components/family/extra-lessons';
 import { PayInvoice } from '@/components/family/pay-invoice';
 import { SendProof } from '@/components/family/send-proof';
@@ -111,6 +112,7 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
                     {b.subject}
                     {b.shared ? ` · ${t('sharedPackage')}` : ''}
                   </p>
+                  <CourseState course={b} />
                   <p className="mt-1 font-heading text-2xl font-bold">{t('lessonsLeft', { n: b.sessions ?? 0 })}</p>
                   <p className="text-sm tabular-nums text-muted">{t('minutesLeft', { n: b.minutes })}</p>
                   {b.extra ? <ExtraLessons enrollment={b.enrollment_id} learnerId={learner.id} subject={b.subject ?? ''} offer={b.extra} /> : null}

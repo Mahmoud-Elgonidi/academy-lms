@@ -1,3 +1,4 @@
+import '../../../core/time/course_days.dart';
 import '../../../core/time/local_time.dart';
 
 /// What is left of a learner's balance for one subject (or a shared
@@ -11,6 +12,7 @@ class Balance {
     this.enrollmentId = '',
     this.extra,
     this.shared = false,
+    this.days = const CourseDays(),
   });
 
   factory Balance.fromJson(Map<String, dynamic> json) => Balance(
@@ -20,7 +22,11 @@ class Balance {
     minutes: (json['minutes'] as num?)?.toInt() ?? 0,
     extra: json['extra'] == null ? null : ExtraOffer.fromJson(json['extra'] as Map<String, dynamic>),
     shared: json['shared'] as bool? ?? false,
+    days: CourseDays.fromJson(json),
   );
+
+  /// The course paused (until when), to be paused, ending, or ended (listed while minutes are left on it).
+  final CourseDays days;
 
   final String enrollmentId;
 

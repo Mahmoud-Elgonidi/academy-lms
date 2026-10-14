@@ -25,7 +25,7 @@ final class FamilyLearning
         return app(FamilyView::class)->stage((string) auth()->id());
     }
 
-    /** @return list<array{id: string, subject: ?string, teacher: ?string, map: ?array<string, mixed>}> */
+    /** @return list<array{id: string, subject: ?string, teacher: ?string, map: ?array<string, mixed>, state: ?string}> */
     public static function courses(string $learnerId): array
     {
         $enrollments = array_values(array_filter(app(EnrollmentApi::class)->forStudent($learnerId), fn (EnrollmentData $e) => $e->status->value !== 'ended'));
@@ -37,7 +37,22 @@ final class FamilyLearning
             'subject' => $subjects[$e->subjectId] ?? null,
             'teacher' => $teachers[$e->teacherId] ?? null,
             'map' => app(RoadmapQuery::class)->for($e->id, RoadmapQuery::MATERIALS_FAMILY),
+            'state' => self::state($e),
         ], $enrollments);
+    }
+
+    /** A course paused (or to be), or ending, in a few words with its days on the academy's calendar; null when it simply goes on. */
+    public static function state(EnrollmentData $e): ?string
+    {
+        $l = 'learning::family.progress.';
+        $day = fn (CarbonImmutable $d) => $d->locale(app()->getLocale())->translatedFormat('l j F');
+
+        return match (true) {
+            $e->endsOn !== null => __($l.'ending', ['on' => $day($e->endsOn)]),
+            $e->status->value === 'paused' && $e->pausedUntil !== null => __($l.'paused', ['until' => $day($e->pausedUntil)]),
+            $e->pausedFrom !== null && $e->pausedUntil !== null => __($l.'pause_ahead', ['from' => $day($e->pausedFrom), 'until' => $day($e->pausedUntil)]),
+            default => null,
+        };
     }
 
     public static function date(CarbonImmutable $at, string $tz, string $format = 'l j F'): string

@@ -169,6 +169,8 @@ return [
             'holiday' => 'Academy holiday; the minutes are back in the balance',
             'teacher_leave' => 'The teacher is on leave; a makeup is owed',
             'substitute_refused' => 'You declined the substitute; a makeup is owed',
+            'enrollment_paused' => 'The course is paused; the minutes are back in the balance',
+            'enrollment_ended' => 'The course ended; the minutes are back in the balance',
         ],
     ],
     'teacher' => [

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import { useCourseStateText } from '@/components/family/course-state';
 import { openChest } from '@/app/[locale]/family/actions';
 import { CreatureArt, EggIcon, IslandArt, LockIcon, SceneArt, StarIcon } from '@/components/games/art';
 import { Done, Hatch } from '@/components/games/results';
@@ -73,6 +74,8 @@ export function KidsJourney({ map, learnerName, autoplay, openIsland }: {
   const layer = stars ? map.games : null;
   const [chosen, setChosen] = useState<string | null>(null);
   const course = courseOf(map.courses, chosen);
+  // The course on a break (paused until a day), or ending: said on the sea, in a child's words.
+  const courseNote = useCourseStateText(course, 'kids');
   const islands = useMemo(() => course?.islands ?? [], [course]);
   const arriving = openIsland ? (islands.find((i) => i.art?.key === openIsland && i.state !== 'ahead') ?? null) : null;
   const [view, setView] = useState<View>(arriving ? 'island' : 'map');
@@ -350,6 +353,11 @@ export function KidsJourney({ map, learnerName, autoplay, openIsland }: {
           {layer && !may && refusal ? (
             <div className="gw-note-sea" role="status">
               {refusal}
+            </div>
+          ) : null}
+          {courseNote ? (
+            <div className="gw-note-sea" role="status" style={layer && !may && refusal ? { bottom: 64 } : undefined}>
+              {courseNote}
             </div>
           ) : null}
         </div>

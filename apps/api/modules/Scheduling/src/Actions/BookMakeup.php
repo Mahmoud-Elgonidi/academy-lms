@@ -11,12 +11,14 @@ use Modules\Scheduling\Contracts\DTOs\NewSession;
 use Modules\Scheduling\Domain\Enums\FundingStatus;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Queries\AvailabilityQuery;
+use Modules\Scheduling\Support\CourseDays;
 use Modules\Scheduling\Support\MinorsGuard;
 
 /**
  * Books a makeup session on a free time of the enrollment's teacher, paid
  * from makeup credit only (docs/architecture/01, "رصيد تعويض"): it must be
  * valid on that day, and a makeup that is then cancelled is not made up again.
+ * Not on a paused day of the course, nor once it has ended (CourseDays).
  */
 final class BookMakeup
 {
@@ -26,6 +28,7 @@ final class BookMakeup
         private readonly EnrollmentApi $enrollments,
         private readonly AvailabilityQuery $availability,
         private readonly MinorsGuard $minors,
+        private readonly CourseDays $days,
     ) {}
 
     public function handle(string $enrollmentId, CarbonImmutable $startsAt, ?string $actorId, ?string $makeupFor = null): Session
@@ -42,6 +45,7 @@ final class BookMakeup
         if ($startsAt->isPast()) {
             throw ValidationException::withMessages(['starts_at' => __('scheduling::policy.errors.in_the_past')]);
         }
+        $this->days->assertOpen($enrollment, $startsAt);
 
         $teacher = $this->availability->forTeachers([$enrollment->teacherId], $startsAt->subHour(), $endsAt->addHour())[$enrollment->teacherId] ?? null;
         if ($teacher === null || ! $teacher->free->contains($startsAt->getTimestamp(), $endsAt->getTimestamp())) {

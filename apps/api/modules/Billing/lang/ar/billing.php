@@ -31,6 +31,8 @@ return [
         'paused' => 'متوقف مؤقتًا',
         'cancelled' => 'ملغي',
     ],
+    // Why a block invoice waiting to be paid was voided when its course ended (on the invoice and its credit note).
+    'void_course_ended' => 'الكورس انتهى',
     'errors' => [
         'no_price' => 'الباقة دي مالهاش سعر في المنطقة دي. حط لها سعر من "الباقات والأسعار".',
         'method' => 'اختار طريقة الدفع.',

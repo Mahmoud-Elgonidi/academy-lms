@@ -1,3 +1,4 @@
+import '../../../core/time/course_days.dart';
 import '../../../core/time/local_time.dart';
 import '../../games/domain/games.dart';
 
@@ -214,6 +215,7 @@ class JourneyCourse {
     this.finishOn,
     this.currentId,
     this.currentTitle,
+    this.days = const CourseDays(),
   });
 
   factory JourneyCourse.fromJson(Map<String, dynamic> json) {
@@ -234,8 +236,12 @@ class JourneyCourse {
       currentId: current?['id'] as String?,
       currentTitle: current?['title'] as String?,
       islands: [for (final i in _list(json['islands'])) JourneyIsland.fromJson(i)],
+      days: CourseDays.fromJson(json),
     );
   }
+
+  /// The course paused (until when), to be paused, or ending (an ended course is not on the journey).
+  final CourseDays days;
 
   final String enrollmentId;
   final String subject;

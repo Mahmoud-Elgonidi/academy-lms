@@ -5,6 +5,8 @@
     .lf-head h3 { margin: 0; font-size: 1.05rem; font-weight: 700; }
     .lf-head small, .lf-muted { color: var(--gray-500); font-size: .85rem; }
     .lf-pct { font-size: 1.75rem; font-weight: 800; color: var(--primary-700); line-height: 1; font-variant-numeric: tabular-nums; }
+    .lf-state { display: inline-block; margin-top: .3rem; padding: .1rem .55rem; border-radius: 999px; font-size: .75rem; font-weight: 700; background: var(--info-50); color: var(--info-700); }
+    .dark .lf-state { background: color-mix(in oklab, var(--info-500) 18%, transparent); color: var(--info-300); }
     .lf-bar { height: .55rem; border-radius: 999px; background: var(--gray-100); overflow: hidden; }
     .lf-bar i { display: block; height: 100%; background: var(--primary-500); border-radius: inherit; }
     .lf-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .6rem; }

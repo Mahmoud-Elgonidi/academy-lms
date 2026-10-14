@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../shared/widgets/course_state.dart';
 import '../../../games/domain/games.dart';
 import '../../../games/presentation/art/art.dart';
 import '../../../games/presentation/art/island_art.dart';
@@ -210,6 +211,9 @@ class _KidsJourneyState extends State<KidsJourney> with SingleTickerProviderStat
       ),
       if (_m.courses.length > 1)
         _CourseChips(courses: _m.courses, selected: course?.enrollmentId, onPick: (id) => setState(() => _course = id)),
+      // The course on a break (paused until a day), or ending: said on the sea, in a child's words.
+      if (course != null)
+        if (courseStateText(context, course.days, kids: true) case final note?) _SeaNote(text: note),
       if (_m.lastLesson != null) LastLessonBanner(learnerId: _m.learnerId, lesson: _m.lastLesson!, rewards: rewards),
       if (course == null)
         _SeaNote(text: l.journeyNoCourses)

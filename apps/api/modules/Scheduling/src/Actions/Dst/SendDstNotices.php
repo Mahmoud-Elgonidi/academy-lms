@@ -10,7 +10,8 @@ use Modules\Scheduling\Domain\Models\ShiftNotice;
 /**
  * Tells the family their new hour 14 days and 2 days before a clock change
  * (docs/architecture/02, section 1), unless the academy kept their time. A
- * change found later than 14 days ahead is told once.
+ * change found later than 14 days ahead is told once. A paused or ended
+ * course's family is not told (its notices go when the planner runs again).
  */
 final class SendDstNotices
 {
@@ -23,6 +24,7 @@ final class SendDstNotices
     {
         $now = ($now ?? CarbonImmutable::now())->utc();
         $due = ShiftNotice::query()->where('decision', '!=', 'keep_student')->where('changes_at', '>', $now)
+            ->whereNotIn('enrollment_id', DB::table('enrollments')->whereIn('status', ['paused', 'ended'])->select('id'))
             ->where(fn ($q) => $q->where(fn ($q) => $q->whereNull('notified_early_at')->where('changes_at', '<=', $now->addDays(self::EARLY_DAYS)))
                 ->orWhere(fn ($q) => $q->whereNull('notified_late_at')->where('changes_at', '<=', $now->addDays(self::LATE_DAYS))))
             ->get();

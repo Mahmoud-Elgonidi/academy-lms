@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
@@ -19,14 +20,22 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Contracts\BillingApi;
 use Modules\Billing\Contracts\DTOs\CourseBilling;
+use Modules\Billing\Contracts\DTOs\EndedCourseBilling;
+use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
+use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\Enrollment\Contracts\EnrollmentStatus;
 use Modules\People\Contracts\LearnerStage;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Actions\BookExtraLesson;
 use Modules\Scheduling\Actions\BookMakeup;
 use Modules\Scheduling\Actions\CancelSession;
+use Modules\Scheduling\Actions\Courses\EndEnrollment;
+use Modules\Scheduling\Actions\Courses\PauseEnrollment;
+use Modules\Scheduling\Actions\Courses\ResumeEnrollment;
 use Modules\Scheduling\Actions\ReassignTeacher;
 use Modules\Scheduling\Actions\RescheduleSession;
 use Modules\Scheduling\Domain\Availability\IntervalSet;
@@ -37,6 +46,7 @@ use Modules\Scheduling\Filament\PolicyPreview;
 use Modules\Scheduling\Queries\AvailabilityQuery;
 use Modules\Scheduling\Queries\EnrollmentAccountQuery;
 use Modules\Scheduling\Queries\Models\EnrolledStudent;
+use Modules\Scheduling\Support\CourseDays;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Time\Timezones;
@@ -46,7 +56,8 @@ use Modules\SharedKernel\Time\ViewerTimezone;
  * The student account for one enrollment: credit left in sessions and
  * minutes, what is booked, the ledger line by line, and the invoices. From
  * here a coordinator cancels or moves a lesson (under the policy), books a
- * makeup or an extra lesson, or moves the student to another teacher; and
+ * makeup or an extra lesson, or moves the student to another teacher, and
+ * pauses, resumes or ends the course (each with what it will do first); and
  * whoever records payments puts a coupon on the course or sells extra lessons.
  *
  * @property EnrolledStudent $record
@@ -59,6 +70,9 @@ final class ViewEnrollment extends ViewRecord
 
     /** The course's money side: extra lessons' price, its coupon, invoices waiting (kept for this request). */
     private ?CourseBilling $billing = null;
+
+    /** The course itself: its status, pause and end (kept for this request). */
+    private ?EnrollmentData $course = null;
 
     public function mount(int|string $record): void
     {
@@ -77,7 +91,7 @@ final class ViewEnrollment extends ViewRecord
             Action::make('bookMakeup')
                 ->label(__('scheduling::enrollments.makeup.action'))
                 ->icon(Heroicon::OutlinedArrowPath)
-                ->visible(fn () => Gate::allows(Ability::ManageSessions->value) && $this->account()['makeup']['minutes'] > 0)
+                ->visible(fn () => Gate::allows(Ability::ManageSessions->value) && ! $this->ended() && $this->account()['makeup']['minutes'] > 0)
                 ->modalHeading(__('scheduling::enrollments.makeup.title'))
                 ->modalDescription(fn () => __('scheduling::enrollments.makeup.hint', [
                     'minutes' => $this->account()['makeup']['minutes'],
@@ -96,7 +110,8 @@ final class ViewEnrollment extends ViewRecord
                 ->label(__('scheduling::enrollments.extra.action'))
                 ->icon(Heroicon::OutlinedPlusCircle)
                 ->color('gray')
-                ->visible(fn () => Gate::allows(Ability::ManageSessions->value) && $this->freeMinutes() >= (int) ($this->account()['header']['session_minutes'] ?? PHP_INT_MAX))
+                ->visible(fn () => Gate::allows(Ability::ManageSessions->value) && $this->course()->status === EnrollmentStatus::Active
+                    && $this->freeMinutes() >= (int) ($this->account()['header']['session_minutes'] ?? PHP_INT_MAX))
                 ->modalHeading(__('scheduling::enrollments.extra.title'))
                 ->modalDescription(fn () => __('scheduling::enrollments.extra.hint', ['minutes' => $this->freeMinutes(), 'length' => (int) $this->account()['header']['session_minutes']]))
                 ->schema(fn () => $this->timePicker())
@@ -136,7 +151,7 @@ final class ViewEnrollment extends ViewRecord
                 ->label(fn () => $this->billing()?->couponCode !== null ? $this->billing()->couponCode : __('billing::discounts.course.coupon_action'))
                 ->icon(Heroicon::OutlinedTicket)
                 ->color(fn () => $this->billing()?->couponCode !== null ? 'success' : 'gray')
-                ->visible(fn () => Gate::allows(Ability::RecordPayments->value) && $this->billing() !== null)   // a course waiting for its first payment takes one too
+                ->visible(fn () => Gate::allows(Ability::RecordPayments->value) && ! $this->ended() && $this->billing() !== null)   // a course waiting for its first payment takes one too
                 ->modalHeading(__('billing::discounts.course.coupon_title'))
                 ->modalDescription(fn () => $this->billing()->couponCode === null
                     ? __('billing::discounts.course.coupon_hint')
@@ -171,7 +186,7 @@ final class ViewEnrollment extends ViewRecord
                 ->label(__('scheduling::enrollments.reassign.action'))
                 ->icon(Heroicon::OutlinedArrowsRightLeft)
                 ->color('gray')
-                ->visible(fn () => Gate::allows(Ability::ManageSessions->value))
+                ->visible(fn () => Gate::allows(Ability::ManageSessions->value) && ! $this->ended())
                 ->modalHeading(__('scheduling::enrollments.reassign.title'))
                 ->modalDescription(__('scheduling::enrollments.reassign.hint'))
                 ->fillForm(fn (array $arguments) => ['from' => $arguments['from'] ?? CarbonImmutable::now()->addDay()->toDateString()])
@@ -188,6 +203,9 @@ final class ViewEnrollment extends ViewRecord
                     return __('scheduling::enrollments.reassign.done', ['moved' => $result['moved']])
                         .($result['retimed'] > 0 ? ' '.__('scheduling::enrollments.reassign.retimed', ['n' => $result['retimed']]) : '');
                 })),
+            $this->pauseCourseAction(),
+            $this->resumeCourseAction(),
+            $this->endCourseAction(),
             // The student's age, which picks the look of their own area (/my): kids, middle school, teens.
             Action::make('studentLook')
                 ->label(__('scheduling::enrollments.look.action'))
@@ -269,6 +287,191 @@ final class ViewEnrollment extends ViewRecord
             }));
     }
 
+    /**
+     * Pausing the course (or making its pause longer), with what it will do
+     * before anyone confirms: the lessons cancelled and their minutes back,
+     * the days the credit lasts longer, when it comes back.
+     */
+    public function pauseCourseAction(): Action
+    {
+        $l = 'scheduling::courses.pause.';
+
+        return Action::make('pauseCourse')
+            ->label(fn () => $this->course()->pausedFrom !== null ? __($l.'longer') : __($l.'action'))
+            ->icon(Heroicon::OutlinedPauseCircle)
+            ->color('gray')
+            ->visible(fn () => Gate::allows(Ability::ManageSessions->value) && in_array($this->course()->status, [EnrollmentStatus::Active, EnrollmentStatus::Paused], true) && $this->course()->endsOn === null)
+            ->modalHeading(fn () => $this->course()->pausedFrom !== null ? __($l.'title_longer') : __($l.'title'))
+            ->modalDescription(fn () => $this->course()->pausedFrom !== null
+                ? __($l.'hint_longer', ['from' => $this->day($this->course()->pausedFrom), 'until' => $this->day($this->course()->pausedUntil)])
+                : __($l.'hint'))
+            ->fillForm(fn () => [
+                'from' => ($this->course()->pausedFrom ?? $this->today())->toDateString(),
+                'until' => ($this->course()->pausedUntil ?? $this->today()->addDays(6))->addDays($this->course()->pausedUntil !== null ? 7 : 0)->toDateString(),
+                'reason' => $this->course()->pausedFrom !== null ? app(EnrollmentApi::class)->stopReasons($this->record->id)['pause'] : null,
+            ])
+            ->schema([
+                DatePicker::make('from')->label(__($l.'from'))->required()->native(false)->live()
+                    ->minDate(fn () => $this->today()->toDateString())->disabled(fn () => $this->course()->pausedFrom !== null),
+                DatePicker::make('until')->label(__($l.'until'))->required()->native(false)->live()
+                    ->minDate(fn (Get $get) => $this->course()->pausedUntil?->addDay()->toDateString() ?? $get('from') ?? $this->today()->toDateString()),
+                Textarea::make('reason')->label(__($l.'reason'))->required()->rows(2)->maxLength(500),
+                Callout::make(__('scheduling::courses.preview.title'))->color('info')
+                    ->description(fn (Get $get) => $this->pausePreview($get('from'), $get('until'))),
+            ])
+            ->modalSubmitActionLabel(__($l.'submit'))
+            ->action(fn (array $data, Action $action) => $this->attempt($action, function () use ($data, $l) {
+                $from = $this->course()->pausedFrom?->toDateString() ?? (string) ($data['from'] ?? '');
+                $done = app(PauseEnrollment::class)->handle($this->record->id, $from, (string) $data['until'], (string) $data['reason'], (string) auth()->id());
+                $this->forget();
+
+                return __($l.'done', ['until' => $this->day(PauseEnrollment::day((string) $data['until'], 'until')), 'lessons' => $done['cancelled'], 'minutes' => $done['minutes']]);
+            }));
+    }
+
+    /** Back on now (or the pause ahead called off): its lessons are made again from now. */
+    public function resumeCourseAction(): Action
+    {
+        $l = 'scheduling::courses.resume.';
+        $begun = fn () => $this->course()->status === EnrollmentStatus::Paused;
+
+        return Action::make('resumeCourse')
+            ->label(fn () => $begun() ? __($l.'action') : __($l.'call_off'))
+            ->icon(Heroicon::OutlinedPlayCircle)
+            ->color(fn () => $begun() ? 'primary' : 'gray')
+            ->visible(fn () => Gate::allows(Ability::ManageSessions->value) && ! $this->ended() && ($this->course()->pausedFrom !== null || $begun()))
+            ->requiresConfirmation()
+            ->modalIcon(Heroicon::OutlinedPlayCircle)
+            ->modalHeading(fn () => $begun() ? __($l.'title') : __($l.'title_call_off'))
+            ->modalDescription(fn () => $begun()
+                ? __($l.'hint', ['until' => $this->course()->pausedUntil ? $this->day($this->course()->pausedUntil) : '—'])
+                : __($l.'hint_call_off', ['from' => $this->day($this->course()->pausedFrom), 'until' => $this->day($this->course()->pausedUntil)]))
+            ->modalSubmitActionLabel(__($l.'submit'))
+            ->action(fn (Action $action) => $this->attempt($action, function () use ($l) {
+                $made = app(ResumeEnrollment::class)->handle($this->record->id, (string) auth()->id());
+                $this->forget();
+
+                return __($l.'done', ['lessons' => $made]);
+            }));
+    }
+
+    /**
+     * Ending the course from a day, with what it will do first: the lessons
+     * cancelled, the balance left, and the block invoice waiting to be paid.
+     */
+    public function endCourseAction(): Action
+    {
+        $l = 'scheduling::courses.end.';
+
+        return Action::make('endCourse')
+            ->label(__($l.'action'))
+            ->icon(Heroicon::OutlinedStopCircle)
+            ->color('danger')
+            ->visible(fn () => Gate::allows(Ability::ManageSessions->value) && ! $this->ended() && $this->course()->endsOn === null)
+            ->modalHeading(__($l.'title'))
+            ->modalDescription(__($l.'hint'))
+            ->modalIcon(Heroicon::OutlinedStopCircle)
+            ->fillForm(fn () => ['on' => $this->today()->toDateString()])
+            ->schema([
+                DatePicker::make('on')->label(__($l.'on'))->required()->native(false)->live()->minDate(fn () => $this->today()->toDateString()),
+                Textarea::make('reason')->label(__($l.'reason'))->required()->rows(2)->maxLength(500),
+                Callout::make(__('scheduling::courses.preview.title'))->color('warning')
+                    ->description(fn (Get $get) => $this->endPreview($get('on'))),
+            ])
+            ->modalSubmitActionLabel(__($l.'submit'))
+            ->action(fn (array $data, Action $action) => $this->attempt($action, function () use ($data, $l) {
+                $done = app(EndEnrollment::class)->handle($this->record->id, (string) $data['on'], (string) $data['reason'], (string) auth()->id());
+                $this->forget();
+
+                return trim(__($l.'done', ['on' => $this->day(PauseEnrollment::day((string) $data['on'], 'on')), 'lessons' => $done['cancelled']])
+                    .' '.($done['billing'] !== null ? $this->invoiceLine($done['billing']) : ''));
+            }));
+    }
+
+    private function pausePreview(?string $from, ?string $until): HtmlString
+    {
+        $from = $this->course()->pausedFrom?->toDateString() ?? $from;
+        if (! filled($from) || ! filled($until)) {
+            return new HtmlString('');
+        }
+        try {
+            $p = app(PauseEnrollment::class)->preview($this->record->id, (string) $from, (string) $until);
+        } catch (ValidationException) {
+            return new HtmlString('');
+        }
+        $l = 'scheduling::courses.preview.';
+        $lines = array_filter([
+            trans_choice($l.'lessons', $p['lessons']->count(), ['minutes' => $p['minutes']]),
+            $p['days'] > 0 ? __($l.'extends', ['days' => $p['days']]) : ($p['sharing'] ? __($l.'shared') : null),
+            __($l.'back', ['day' => $this->day(PauseEnrollment::day((string) $until, 'until')->addDay())]),
+        ]);
+
+        return new HtmlString(implode('<br>', array_map('e', $lines)));
+    }
+
+    private function endPreview(?string $on): HtmlString
+    {
+        if (! filled($on)) {
+            return new HtmlString('');
+        }
+        try {
+            $p = app(EndEnrollment::class)->preview($this->record->id, (string) $on);
+            $later = PauseEnrollment::day((string) $on, 'on')->greaterThan($this->today());
+        } catch (ValidationException) {
+            return new HtmlString('');
+        }
+        $l = 'scheduling::courses.preview.';
+        $lines = array_filter([
+            trans_choice($l.'lessons', $p['lessons']->count(), ['minutes' => $p['minutes']]),
+            $p['balance'] !== null ? __($l.'balance', ['minutes' => $p['balance']]) : null,
+            $later ? __($l.'invoice.later') : $this->invoiceLine($p['billing']),
+        ]);
+
+        return new HtmlString(implode('<br>', array_map('e', $lines)));
+    }
+
+    /** What ending does to the waiting invoices (the block's, and extra lessons'), in words. */
+    private function invoiceLine(EndedCourseBilling $billing): string
+    {
+        $l = 'scheduling::courses.preview.invoice.';
+
+        $line = __($l.$billing->outcome, [
+            'number' => $billing->invoiceNumber,
+            'why' => $billing->why !== null ? __($l.'why.'.$billing->why) : '',
+        ]);
+
+        return $billing->extraNumber === null ? $line : $line.' '.__($l.'extra', ['number' => $billing->extraNumber]);
+    }
+
+    /** The course as Enrollment has it: its status, pause and end. */
+    private function course(): EnrollmentData
+    {
+        return $this->course ??= app(EnrollmentApi::class)->find($this->record->id) ?? throw ValidationException::withMessages(['enrollment' => __('scheduling::policy.errors.no_enrollment')]);
+    }
+
+    private function ended(): bool
+    {
+        return $this->course()->status === EnrollmentStatus::Ended;
+    }
+
+    /** After a change: the course, its money side and its row read again. */
+    private function forget(): void
+    {
+        $this->course = null;
+        $this->billing = null;
+        $this->record->refresh();
+    }
+
+    private function today(): CarbonImmutable
+    {
+        return app(CourseDays::class)->today();
+    }
+
+    private function day(?CarbonImmutable $day): string
+    {
+        return $day?->locale(app()->getLocale())->translatedFormat('l j F') ?? '—';
+    }
+
     public function getTitle(): string|Htmlable
     {
         return $this->account()['header']['student'] ?? __('scheduling::enrollments.model');
@@ -337,8 +540,26 @@ final class ViewEnrollment extends ViewRecord
             ], $q->invoices($h['subscription_id'])),
             'makeup' => $makeup,
             'expiry' => $q->nextExpiry($h['credit_account_id']),
+            'stop' => $this->stopLine(),
             'fmt' => $fmt,
         ];
+    }
+
+    /** The course's pause or end in a line, with the office's reason: for the office only. */
+    private function stopLine(): ?string
+    {
+        $c = $this->course();
+        $l = 'scheduling::courses.state.';
+        $reasons = app(EnrollmentApi::class)->stopReasons($c->id);
+        [$line, $reason] = match (true) {
+            $c->status === EnrollmentStatus::Ended => [$c->endsOn ? __($l.'ended', ['on' => $this->day($c->endsOn)]) : null, $reasons['end']],
+            $c->endsOn !== null => [__($l.'ending', ['on' => $this->day($c->endsOn)]), $reasons['end']],
+            $c->status === EnrollmentStatus::Paused && $c->pausedUntil !== null => [__($l.'paused', ['from' => $this->day($c->pausedFrom), 'until' => $this->day($c->pausedUntil)]), $reasons['pause']],
+            $c->pausedFrom !== null => [__($l.'pause_ahead', ['from' => $this->day($c->pausedFrom), 'until' => $this->day($c->pausedUntil)]), $reasons['pause']],
+            default => [null, null],
+        };
+
+        return $line === null ? null : $line.($reason ? ' — '.$reason : '');
     }
 
     /**
@@ -384,9 +605,11 @@ final class ViewEnrollment extends ViewRecord
             : new IntervalSet(array_merge($availability->free->intervals, [[$own->starts_at->getTimestamp(), $own->ends_at->getTimestamp()]]));
 
         $options = [];
+        $days = app(CourseDays::class);
         for ($t = max($from->getTimestamp(), CarbonImmutable::now()->addMinutes(15)->getTimestamp()); $t + $duration * 60 <= $to->getTimestamp(); $t += 900) {
             $t -= $t % 900;
-            if ($availability->shifts->contains($t, $t + $duration * 60) && $free->contains($t, $t + $duration * 60)) {
+            if ($availability->shifts->contains($t, $t + $duration * 60) && $free->contains($t, $t + $duration * 60)
+                && $days->barredFor($this->course(), CarbonImmutable::createFromTimestamp($t, 'UTC')) === null) {
                 $at = CarbonImmutable::createFromTimestamp($t, 'UTC');
                 $options[$at->toIso8601String()] = $at->setTimezone($tz)->format('H:i').' · '.Timezones::city($teacherTz).' '.$at->setTimezone($teacherTz)->format('H:i');
             }

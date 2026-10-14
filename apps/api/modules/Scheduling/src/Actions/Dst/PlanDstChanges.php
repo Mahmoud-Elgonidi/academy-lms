@@ -7,9 +7,11 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Modules\Enrollment\Contracts\EnrollmentStatus;
 use Modules\Scheduling\Domain\Models\RecurringSlot;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\ShiftNotice;
+use Modules\Scheduling\Support\CourseDays;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
@@ -21,13 +23,15 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * zones' transitions). Lessons are paired by time, not by weekly time, so a
  * weekly time split by a move or a new teacher is still followed. Run again,
  * it refreshes what it finds and drops what no longer happens (unless the
- * academy kept the student's time there: that one is a record).
+ * academy kept the student's time there: that one is a record). A paused or
+ * ended course has no notice, nor a lesson on its paused days or after its
+ * end (its lessons there are cancelled: nothing moves for the family).
  */
 final class PlanDstChanges
 {
     public const DAYS_AHEAD = 45;
 
-    public function __construct(private readonly TenantContext $tenants) {}
+    public function __construct(private readonly TenantContext $tenants, private readonly CourseDays $days) {}
 
     /**
      * @param  list<string>|null  $enrollmentIds  null: every enrollment with a live weekly time
@@ -41,7 +45,10 @@ final class PlanDstChanges
 
         $slots = RecurringSlot::query()->where('status', 'active')
             ->when($enrollmentIds !== null, fn ($q) => $q->whereIn('enrollment_id', $enrollmentIds))
+            ->whereIn('enrollment_id', DB::table('enrollments')->whereIn('status', EnrollmentStatus::making())->select('id'))
             ->get()->keyBy('id');
+        $courses = DB::table('enrollments')->whereIn('id', $slots->pluck('enrollment_id')->unique())
+            ->get(['id', 'paused_from', 'paused_until', 'ends_on'])->keyBy('id');
         $zones = DB::table('users')->whereIn('id', $slots->pluck('student_id')->unique())->pluck('timezone', 'id');
         $lessons = Session::query()->whereIn('enrollment_id', $slots->pluck('enrollment_id')->unique())
             ->whereNotNull('slot_id')->where('is_detached', false)
@@ -57,6 +64,10 @@ final class PlanDstChanges
                 $other = $slot !== null ? ($zones[$slot->student_id] ?? $fallback) : null;
                 if ($slot === null || $other === $slot->anchor_tz || $lesson->starts_at->lessThanOrEqualTo($now)) {
                     continue;
+                }
+                $course = $courses[$lesson->enrollment_id] ?? null;
+                if ($course !== null && $this->days->barred($course->paused_from, $course->paused_until, $course->ends_on, $lesson->starts_at) !== null) {
+                    continue;   // a paused day, or after the course's end: no lesson there to move
                 }
                 $previous = self::weekBefore($ofEnrollment, $lesson);
                 if ($previous === null) {

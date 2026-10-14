@@ -76,12 +76,12 @@ final class Subscription extends Model
 
     /**
      * Those with a course on (one of a shared package's will do): not waiting
-     * for its first payment, paused or ended. Only these renew.
+     * for its first payment, paused, ended or set to end. Only these renew.
      */
     public function scopeTaught(Builder $query): void
     {
         $query->whereExists(fn ($q) => $q->from('enrollments as e')->whereColumn('e.academy_id', 'subscriptions.academy_id')
-            ->whereColumn('e.credit_account_id', 'subscriptions.credit_account_id')->where('e.status', 'active'));
+            ->whereColumn('e.credit_account_id', 'subscriptions.credit_account_id')->where('e.status', 'active')->whereNull('e.ends_on'));
     }
 
     /** A block of its waiting to be paid (on its own invoice, or with the family's). */

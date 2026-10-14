@@ -242,6 +242,11 @@ final class JourneyMap
                 'eta_weeks' => $map['eta_weeks'] ?? null,
                 'finish_on' => $map && $map['eta_weeks'] !== null && ! $map['finished'] ? $now->addDays((int) ceil($map['eta_weeks'] * 7)) : null,
                 'current' => $map['current'] ?? null,
+                // A course paused (or to be), or ending: days on the academy's calendar.
+                'status' => $e->status->value,
+                'paused_from' => $e->pausedFrom,
+                'paused_until' => $e->pausedUntil,
+                'ends_on' => $e->endsOn,
                 'islands' => $islands,
             ];
         }, $enrollments);

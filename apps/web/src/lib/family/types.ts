@@ -1,4 +1,5 @@
 import type { LocalTime } from '../time';
+import type { CourseDays } from './course-state';
 import type { ReportAnswer } from '../report-answers';
 import type { Homework, Lesson as TeacherLesson, Roadmap } from '../teach/types';
 
@@ -40,7 +41,7 @@ export type ExtraOffer = { price: string; price_minor: number; currency: string;
 export type Balance = {
   learner: { id: string; name: string };
   /** One per balance: a course's own, or a shared package's (shared: all its subjects in subject). */
-  data: { enrollment_id: string; subject: string | null; shared: boolean; minutes: number; session_minutes: number | null; sessions: number | null; extra: ExtraOffer | null }[];
+  data: ({ enrollment_id: string; subject: string | null; shared: boolean; minutes: number; session_minutes: number | null; sessions: number | null; extra: ExtraOffer | null } & CourseDays)[];
 };
 
 /** A line of an invoice: what it is for, and what came off it (a discount is negative). */

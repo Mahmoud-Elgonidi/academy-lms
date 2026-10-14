@@ -59,8 +59,8 @@ final class LessonPresenter
             'substitute_for' => $substitute,
             'can_cancel' => $mayAct && $counterpart === 'teacher' && $ahead,
             'can_refuse_substitute' => $mayAct && $counterpart === 'teacher' && $substitute !== null && $ahead,
-            /** Why the academy cancelled it (a holiday, the teacher's leave), when it did. */
-            'cancelled_because' => $r->status === 'cancelled' && in_array($r->cancel_reason ?? null, ['holiday', 'teacher_leave', 'substitute_refused'], true)
+            /** Why the academy cancelled it (a holiday, the teacher's leave, the course paused or ended), when it did. */
+            'cancelled_because' => $r->status === 'cancelled' && in_array($r->cancel_reason ?? null, ['holiday', 'teacher_leave', 'substitute_refused', 'enrollment_paused', 'enrollment_ended'], true)
                 ? __('scheduling::timeoff.family.why.'.$r->cancel_reason) : null,
             /** The viewer's own dispute of this lesson's outcome, and the academy's answer once decided. */
             'dispute' => $dispute === null ? null : [

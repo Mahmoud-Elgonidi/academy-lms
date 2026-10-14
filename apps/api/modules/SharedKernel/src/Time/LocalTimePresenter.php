@@ -35,4 +35,26 @@ final class LocalTimePresenter
             'label' => $local->translatedFormat((string) __('shared::time.label')),
         ];
     }
+
+    /**
+     * A day on the academy's calendar (a course's last paused day, its end):
+     * the moment it begins there, on the academy's clock, so `local` holds
+     * that very date wherever the viewer is, and `label` names the day alone.
+     *
+     * @return array{utc: string, local: string, timezone: string, label: string}|null
+     */
+    public function academyDay(CarbonInterface|string|null $day): ?array
+    {
+        if ($day === null) {
+            return null;
+        }
+        $timezone = $this->viewer->academy() ?? 'UTC';
+        $date = $day instanceof CarbonInterface ? $day->toDateString() : substr($day, 0, 10);
+        $start = (new LocalTimeResolver)->resolve($date, '00:00', $timezone)->utc;
+
+        $at = (array) $this->present($start, $timezone);
+        $at['label'] = CarbonImmutable::parse($date)->locale(app()->getLocale())->translatedFormat((string) __('shared::time.day'));
+
+        return $at;
+    }
 }

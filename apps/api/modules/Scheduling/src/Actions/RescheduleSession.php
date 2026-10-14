@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Scheduling\Actions\Policy\PolicyDecider;
 use Modules\Scheduling\Actions\Policy\RecordPolicyDecision;
 use Modules\Scheduling\Contracts\Events\SessionRescheduled;
@@ -18,13 +19,15 @@ use Modules\Scheduling\Domain\Models\SessionEvent;
 use Modules\Scheduling\Domain\Models\SessionParticipant;
 use Modules\Scheduling\Domain\Policy\PolicyEvent;
 use Modules\Scheduling\Queries\AvailabilityQuery;
+use Modules\Scheduling\Support\CourseDays;
 
 /**
  * Moves one session to another time with the same teacher (rule 1): the
  * student may, with notice and within the block's quota; the academy may
  * always. The teacher must be on shift and free; the database refuses a
  * time either person is already booked. The credit stays reserved, and the
- * session no longer follows its weekly time.
+ * session no longer follows its weekly time. A course's lesson does not move
+ * onto one of its paused days, nor past its end (CourseDays).
  */
 final class RescheduleSession
 {
@@ -32,6 +35,8 @@ final class RescheduleSession
         private readonly PolicyDecider $decider,
         private readonly RecordPolicyDecision $record,
         private readonly AvailabilityQuery $availability,
+        private readonly EnrollmentApi $enrollments,
+        private readonly CourseDays $days,
     ) {}
 
     public function handle(Session $session, CarbonImmutable $newStart, string $askedBy, ?string $actorId, bool $waive = false, ?CarbonImmutable $at = null): Session
@@ -44,6 +49,9 @@ final class RescheduleSession
         $newEnd = $newStart->addMinutes($session->durationMinutes());
         if ($newStart->lessThanOrEqualTo($at)) {
             throw ValidationException::withMessages(['starts_at' => __('scheduling::policy.errors.in_the_past')]);
+        }
+        if ($session->enrollment_id !== null && ($course = $this->enrollments->find($session->enrollment_id)) !== null) {
+            $this->days->assertOpen($course, $newStart);
         }
 
         [$decision, $input, $version] = $this->decider->decide($session, $askedBy === 'student' ? PolicyEvent::StudentReschedule : PolicyEvent::AcademyReschedule, $at);

@@ -23,6 +23,11 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?string $curriculum_version_id the published version the student follows
  * @property ?string $created_by
  * @property ?CarbonImmutable $ended_at
+ * @property ?CarbonImmutable $paused_from the pause's first day (on the academy's calendar)
+ * @property ?CarbonImmutable $paused_until the pause's last day, included
+ * @property ?string $pause_reason the office's words, never the family's to read
+ * @property ?CarbonImmutable $ends_on the first day without lessons
+ * @property ?string $end_reason
  */
 final class Enrollment extends Model
 {
@@ -39,6 +44,9 @@ final class Enrollment extends Model
             'status' => EnrollmentStatus::class,
             'start_date' => 'immutable_date',
             'ended_at' => 'immutable_datetime',
+            'paused_from' => 'immutable_date',
+            'paused_until' => 'immutable_date',
+            'ends_on' => 'immutable_date',
         ];
     }
 
@@ -48,9 +56,19 @@ final class Enrollment extends Model
         $from = $this->status;
         $this->status = $to;
         $this->ended_at = $to === EnrollmentStatus::Ended ? CarbonImmutable::now() : null;
+        if ($to === EnrollmentStatus::Ended) {
+            $this->clearPause();     // an ended course has no pause left to come back from
+        }
         $this->save();
 
         $this->logStatus($from, $to, $reason, $actorId);
+    }
+
+    public function clearPause(): void
+    {
+        $this->paused_from = null;
+        $this->paused_until = null;
+        $this->pause_reason = null;
     }
 
     /** One line of the append-only status history. */
@@ -69,6 +87,9 @@ final class Enrollment extends Model
 
     public function toData(): EnrollmentData
     {
-        return new EnrollmentData($this->id, $this->student_id, $this->subject_id, $this->teacher_id, $this->status, $this->start_date, $this->credit_account_id, $this->program_id, $this->curriculum_version_id);
+        return new EnrollmentData(
+            $this->id, $this->student_id, $this->subject_id, $this->teacher_id, $this->status, $this->start_date, $this->credit_account_id, $this->program_id, $this->curriculum_version_id,
+            $this->paused_from, $this->paused_until, $this->ends_on,
+        );
     }
 }

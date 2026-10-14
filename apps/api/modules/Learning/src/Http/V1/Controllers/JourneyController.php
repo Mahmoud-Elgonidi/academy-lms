@@ -82,6 +82,14 @@ final class JourneyController
                 'eta_weeks' => $c['eta_weeks'],
                 'finish_on' => $this->time->present($c['finish_on']),
                 'current' => $c['current'],
+                /** pending_payment, active or paused (an ended course is not on the journey). */
+                'status' => $c['status'],
+                /** The pause's first day (it may lie ahead while the course is still active), on the academy's calendar. */
+                'paused_from' => $this->time->academyDay($c['paused_from']),
+                /** The pause's last day (included): lessons start again the day after. */
+                'paused_until' => $this->time->academyDay($c['paused_until']),
+                /** The first day without lessons, when the course is set to end. */
+                'ends_on' => $this->time->academyDay($c['ends_on']),
                 'islands' => array_map(fn (array $i) => [
                     'id' => $i['id'],
                     'index' => $i['index'],

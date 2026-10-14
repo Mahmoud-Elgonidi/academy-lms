@@ -6,6 +6,8 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/state/load_cubit.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../core/time/course_days.dart';
+import '../../../../shared/widgets/course_state.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../challenges/presentation/widgets/cheers.dart';
 import '../../../games/presentation/guardian_cards.dart';
@@ -94,6 +96,8 @@ class _GuardianJourneyState extends State<GuardianJourney> {
         ),
       if (_m.courses.length > 1)
         CourseChips(courses: _m.courses, selected: course?.enrollmentId, onPick: (id) => setState(() => _course = id)),
+      if (course != null && course.days.stand != CourseStand.on)
+        Align(alignment: AlignmentDirectional.centerStart, child: CourseStatePill(course.days)),
       if (course == null)
         EmptyNote(l.journeyNoCourses, icon: Icons.menu_book_outlined)
       else

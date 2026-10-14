@@ -86,6 +86,11 @@ export type JourneyCourse = {
   eta_weeks: number | null;
   finish_on: LocalTime | null;
   current: { id: string; title: string; path: string[] } | null;
+  /** pending_payment, active or paused; with the pause's days, or the day it ends from (the academy's calendar). */
+  status?: string;
+  paused_from?: LocalTime | null;
+  paused_until?: LocalTime | null;
+  ends_on?: LocalTime | null;
   islands: JourneyIsland[];
 };
 

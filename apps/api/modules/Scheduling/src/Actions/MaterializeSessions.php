@@ -6,11 +6,13 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Enrollment\Contracts\EnrollmentStatus;
 use Modules\Scheduling\Contracts\DTOs\NewSession;
 use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Domain\Models\RecurringSlot;
 use Modules\Scheduling\Domain\Models\SchedulingSettings;
 use Modules\Scheduling\Domain\Models\Session;
+use Modules\Scheduling\Support\CourseDays;
 use Modules\SharedKernel\Time\LocalTimeResolver;
 
 /**
@@ -18,7 +20,9 @@ use Modules\SharedKernel\Time\LocalTimeResolver;
  * "توليد الحصص تلقائيًا"). Each date once: the occurrence key (slot + local
  * date) makes a second run a no-op. A date the teacher or the student is
  * already booked on is skipped and reported, never double-booked; a date on
- * an academy holiday is left out. Times are resolved on the teacher's clock,
+ * an academy holiday is left out, and so is one of a course's paused days
+ * or after its end (CourseDays). A paused or ended course makes none at all.
+ * Times are resolved on the teacher's clock,
  * so DST moves the student's side only. Two runs at once (the nightly one
  * and a teacher change) make each date once: the unique occurrence key
  * holds it, and the run that comes second leaves the date alone.
@@ -28,6 +32,7 @@ final class MaterializeSessions
     public function __construct(
         private readonly ScheduleSession $schedule,
         private readonly LocalTimeResolver $resolver,
+        private readonly CourseDays $days,
     ) {}
 
     /**
@@ -40,10 +45,10 @@ final class MaterializeSessions
         $horizon = SchedulingSettings::current()->horizon_weeks;
 
         $slots = RecurringSlot::query()
-            ->select('recurring_slots.*', 'e.subject_id')
+            ->select('recurring_slots.*', 'e.subject_id', 'e.paused_from', 'e.paused_until', 'e.ends_on')
             ->join('enrollments as e', fn ($j) => $j->on('e.academy_id', '=', 'recurring_slots.academy_id')->on('e.id', '=', 'recurring_slots.enrollment_id'))
             ->where('recurring_slots.status', 'active')
-            ->whereIn('e.status', ['pending_payment', 'active'])
+            ->whereIn('e.status', EnrollmentStatus::making())
             ->when($enrollmentIds !== null, fn ($q) => $q->whereIn('recurring_slots.enrollment_id', $enrollmentIds))
             ->get();
 
@@ -68,7 +73,8 @@ final class MaterializeSessions
                     continue;
                 }
                 $startsAt = $this->resolver->resolve($date, $slot->weeklyTime()->clock(), $slot->anchor_tz)->utc;
-                if ($startsAt->lessThanOrEqualTo($now) || $holidays->contains(fn (AcademyHoliday $h) => $h->contains($startsAt))) {
+                if ($startsAt->lessThanOrEqualTo($now) || $holidays->contains(fn (AcademyHoliday $h) => $h->contains($startsAt))
+                    || $this->days->barred($slot->getAttribute('paused_from'), $slot->getAttribute('paused_until'), $slot->getAttribute('ends_on'), $startsAt) !== null) {
                     continue;
                 }
 

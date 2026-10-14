@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CreatureArt } from '@/components/games/art';
 import type { PlayTarget } from '@/lib/games/types';
+import { CourseState } from '@/components/family/course-state';
 import { Icon } from '@/components/icons';
 import { Progress, join } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
@@ -79,6 +80,7 @@ export function MiddleJourney({ map, learnerName, autoplay }: { map: JourneyMap;
       <CheersCard cheers={map.cheers} />
       <Note text={note} onClose={() => setNote('')} />
       <CourseChips courses={map.courses} chosen={course?.enrollment_id ?? null} onChoose={setChosen} />
+      {course ? <CourseState course={course} stage="middle" block /> : null}
 
       <MissionList missions={missions} map={map} player={player} stars={stars} onStation={setSheet} />
 

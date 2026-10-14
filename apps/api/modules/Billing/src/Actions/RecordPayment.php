@@ -11,9 +11,12 @@ use Modules\Billing\Models\Payment;
 use Modules\Billing\Models\Subscription;
 use Modules\Credits\Contracts\CreditsApi;
 use Modules\Credits\Contracts\LotSource;
+use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\Enrollment\Contracts\EnrollmentStatus;
 use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Money\Money;
+use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
  * Money received for an invoice: a bank transfer, InstaPay, a wallet, cash
@@ -30,6 +33,7 @@ final class RecordPayment
     public function __construct(
         private readonly CreditsApi $credits,
         private readonly EnrollmentApi $enrollments,
+        private readonly TenantContext $tenant,
     ) {}
 
     /** @param  ?string  $paymentId  the new payment's id, when the caller keeps it (an approved proof points to its payment) */
@@ -100,7 +104,12 @@ final class RecordPayment
         });
     }
 
-    /** What a paid invoice delivers, to each course on it: its blocks' and extra lessons' minutes, valid from today. */
+    /**
+     * What a paid invoice delivers, to each course on it: its blocks' and
+     * extra lessons' minutes, valid from today (and as many days longer as
+     * the course's pause still has to run, as the pause gave the minutes
+     * already there).
+     */
     private function fulfil(Invoice $invoice, ?string $actorId): void
     {
         $lines = $invoice->lines()->whereIn('kind', ['block', 'extra'])->whereNotNull('subscription_id')->get()->groupBy('subscription_id');
@@ -110,6 +119,8 @@ final class RecordPayment
             if ($subscription === null) {
                 continue;
             }
+            $courses = $this->enrollments->forCreditAccount($subscription->credit_account_id);
+            $paused = $this->pauseDaysLeft($subscription->enrollment_id, $courses);
 
             foreach ($lines[$subscriptionId] as $line) {
                 $this->credits->grant(
@@ -117,7 +128,7 @@ final class RecordPayment
                     LotSource::Purchase,
                     $invoice->id,
                     (int) $line->meta['minutes'],
-                    CarbonImmutable::now()->addDays((int) $line->meta['validity_days'])->endOfDay(),
+                    CarbonImmutable::now()->addDays((int) $line->meta['validity_days'] + $paused)->endOfDay(),
                     "invoice:{$invoice->id}:line:{$line->id}",
                     $actorId,
                     'invoice '.$invoice->number,
@@ -130,10 +141,34 @@ final class RecordPayment
             $subscription->status = 'active';
             $subscription->save();
             // Every course on its balance: one, or each of a shared package's (its own course at least).
-            $courses = array_map(fn ($e) => $e->id, $this->enrollments->forCreditAccount($subscription->credit_account_id));
-            foreach (array_unique([$subscription->enrollment_id, ...$courses]) as $enrollmentId) {
+            foreach (array_unique([$subscription->enrollment_id, ...array_map(fn (EnrollmentData $e) => $e->id, $courses)]) as $enrollmentId) {
                 $this->enrollments->activate($enrollmentId, $actorId);
             }
         }
+    }
+
+    /**
+     * The days still to run of a pause set on the course (from today, or
+     * from its first day when it lies ahead, to its last one, on the
+     * academy's calendar); none while another course still draws on a
+     * shared balance, as when the pause was set (PauseEnrollment).
+     *
+     * @param  list<EnrollmentData>  $courses  the courses on the balance
+     */
+    private function pauseDaysLeft(string $enrollmentId, array $courses): int
+    {
+        $course = collect($courses)->firstWhere('id', $enrollmentId) ?? $this->enrollments->find($enrollmentId);
+        if ($course === null || $course->pausedFrom === null || $course->pausedUntil === null || $course->status === EnrollmentStatus::Ended) {
+            return 0;
+        }
+        $sharing = collect($courses)->contains(fn (EnrollmentData $other) => $other->id !== $enrollmentId
+            && in_array($other->status, [EnrollmentStatus::PendingPayment, EnrollmentStatus::Active], true));
+        $today = CarbonImmutable::parse(CarbonImmutable::now($this->tenant->require()->defaultTimezone)->toDateString());
+        $from = $course->pausedFrom->max($today);
+        if ($sharing || $course->pausedUntil->lessThan($from)) {
+            return 0;
+        }
+
+        return (int) $from->diffInDays($course->pausedUntil) + 1;
     }
 }

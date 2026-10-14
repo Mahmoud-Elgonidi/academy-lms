@@ -32,6 +32,9 @@ return [
         ],
         'enrollment' => [
             'teacher_changed' => 'A student\'s teacher changed from :starting',
+            'paused' => 'A course paused from :from until :until (:lessons lessons cancelled): :reason',
+            'resumed' => 'A paused course resumed (:early, :lessons lessons made)',
+            'ended' => 'A course ends from :on (:lessons lessons cancelled): :reason',
         ],
         'payroll' => [
             'month_closed' => 'Payroll for :month closed',
@@ -140,6 +143,7 @@ return [
         ],
     ],
     'values' => [
+        'early' => ['early' => 'early, by the office', 'on_time' => 'on time, by itself'],
         'style' => ['playful' => 'playful (islands and games)', 'calm' => 'calm (levels and missions)', 'plain' => 'plain (no stars)'],
         'concern_outcome' => ['no_concern' => 'nothing to act on', 'resolved' => 'dealt with', 'teacher_action' => 'action with a teacher', 'referred' => 'referred outside', 'duplicate' => 'duplicate'],
         'document' => ['criminal_record' => 'criminal record check', 'identity' => 'ID', 'qualification' => 'qualification', 'other' => 'document'],

@@ -58,7 +58,7 @@ final class FamilyLessonView
                 'label' => __('scheduling::disputes.form.state', ['status' => __('scheduling::disputes.statuses.'.$dispute->dispute_status)]),
                 'answer' => $dispute->dispute_status === 'open' ? null : $dispute->dispute_answer,
             ],
-            'why' => $r->status === 'cancelled' && in_array($r->cancel_reason ?? null, ['holiday', 'teacher_leave', 'substitute_refused'], true)
+            'why' => $r->status === 'cancelled' && in_array($r->cancel_reason ?? null, ['holiday', 'teacher_leave', 'substitute_refused', 'enrollment_paused', 'enrollment_ended'], true)
                 ? __('scheduling::timeoff.family.why.'.$r->cancel_reason) : null,
         ];
     }

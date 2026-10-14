@@ -53,6 +53,7 @@ return [
         'unpaid' => 'Unpaid session',
         'student_absent' => 'Student absent',
         'teacher_absent' => 'Teacher absent',
+        'course_stopped' => 'Course paused or ended',
     ],
     'conditions' => [
         'notice_at_least' => ':hours hours or more before',
@@ -99,6 +100,8 @@ return [
         'teacher_leave' => 'Teacher on leave',
         'holiday' => 'Academy holiday',
         'substitute_refused' => 'Declined the substitute',
+        'enrollment_paused' => 'Course paused',
+        'enrollment_ended' => 'Course ended',
         'other' => 'Other',
     ],
     'preview' => [

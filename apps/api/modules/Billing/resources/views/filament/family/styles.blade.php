@@ -9,6 +9,11 @@
     .bf-card[data-tone="owed"] { border-color: var(--warning-300); background: var(--warning-50); }
     .bf-card[data-tone="owed"] .bf-big { color: var(--warning-800); }
     .bf-card[data-low] .bf-big { color: var(--danger-600); }
+    .bf-state { align-self: flex-start; padding: .1rem .55rem; border-radius: 999px; font-size: .75rem; font-weight: 700; background: var(--info-50); color: var(--info-700); }
+    .bf-card[data-status="ended"] .bf-state { background: var(--gray-100); color: var(--gray-700); }
+    .bf-card[data-status="paused"], .bf-card[data-status="ended"] { background: var(--gray-50); }
+    .dark .bf-state { background: color-mix(in oklab, var(--info-500) 18%, transparent); color: var(--info-300); }
+    .dark .bf-card[data-status="paused"], .dark .bf-card[data-status="ended"] { background: var(--gray-900); }
     .bf-list { display: flex; flex-direction: column; gap: .5rem; }
     .bf-inv { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1rem; align-items: center; background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-xl, .75rem); padding: .75rem 1rem; }
     .bf-inv strong { font-variant-numeric: tabular-nums; }

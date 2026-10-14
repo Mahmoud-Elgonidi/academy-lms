@@ -10,7 +10,9 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
 import '../../../../core/state/load_cubit.dart';
+import '../../../../core/time/course_days.dart';
 import '../../../../core/time/formats.dart';
+import '../../../../shared/widgets/course_state.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../../dashboard/presentation/widgets/learner_switcher.dart';
@@ -138,9 +140,10 @@ class _MoneyList extends StatelessWidget {
                         Row(
                           children: [
                             Expanded(child: Text(b.shared ? l.sharedPackage(b.subject) : b.subject, style: context.text.titleSmall)),
-                            Pill(l.lessonsCount(b.sessions), tone: b.sessions <= 1 ? Tone.attention : Tone.brand),
+                            Pill(l.lessonsCount(b.sessions), tone: b.days.isOn && b.sessions <= 1 ? Tone.attention : Tone.brand),
                           ],
                         ),
+                        if (b.days.stand != CourseStand.on) ...[const SizedBox(height: 4), CourseStatePill(b.days)],
                         if (b.extra case final extra?)
                           extra.waitingNumber != null
                               ? Padding(

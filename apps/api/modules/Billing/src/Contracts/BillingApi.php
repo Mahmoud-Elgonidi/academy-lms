@@ -4,6 +4,7 @@ namespace Modules\Billing\Contracts;
 
 use Carbon\CarbonImmutable;
 use Modules\Billing\Contracts\DTOs\CourseBilling;
+use Modules\Billing\Contracts\DTOs\EndedCourseBilling;
 use Modules\Billing\Contracts\DTOs\IssuedInvoice;
 use Modules\Billing\Contracts\DTOs\NewSubscription;
 use Modules\Billing\Contracts\DTOs\PlanOption;
@@ -69,4 +70,17 @@ interface BillingApi
 
     /** Issues an invoice for N extra lessons on a course; paying it adds their minutes. */
     public function sellExtraLessons(string $enrollmentId, int $lessons, ?string $actorId): IssuedInvoice;
+
+    /**
+     * What ending this course would do to its block invoice waiting to be paid (nothing waiting, voided, issued again
+     * for the family's other courses, kept and why, or a shared package's that stays), without doing it.
+     */
+    public function endingCourse(string $enrollmentId): EndedCourseBilling;
+
+    /**
+     * The course has ended (it never renews again): its block invoice waiting to be paid is voided when nothing may
+     * be on its way (nothing paid, no proof waiting, no online payment under way); a family invoice comes out again
+     * with the other courses' blocks. A shared package's stays for its other courses. The balance left stays.
+     */
+    public function closeEndedCourse(string $enrollmentId, ?string $actorId): EndedCourseBilling;
 }

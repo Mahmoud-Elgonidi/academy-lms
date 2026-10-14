@@ -6,6 +6,9 @@
     @include('scheduling::filament.family.styles')
     @include('scheduling::filament.time-off.styles')
 
+    @foreach ($this->courseNotices as $notice)
+        <div class="to-banner" style="margin-bottom: .5rem"><x-filament::icon icon="heroicon-o-pause-circle" />{{ $notice }}</div>
+    @endforeach
     @foreach ($this->holidays as $h)
         <div class="to-banner" style="margin-bottom: .5rem"><x-filament::icon icon="heroicon-o-sparkles" />{{ __('scheduling::timeoff.family.holiday', ['name' => $h['name'], 'period' => $h['period']]) }}</div>
     @endforeach

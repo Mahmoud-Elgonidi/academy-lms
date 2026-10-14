@@ -13,7 +13,9 @@ export interface paths {
         };
         /**
          * A learner's balance
-         * @description Per active course: the minutes left, and as lessons when the plan has a lesson length.
+         * @description Per course still on (running or paused): the minutes left, and as lessons when the plan has a lesson length.
+         *     A paused course says until when (paused_until, a day on the academy's calendar); an ended one is listed while
+         *     minutes are left on it.
          */
         get: operations["family.balance"];
         put?: never;
@@ -1946,7 +1948,7 @@ export interface paths {
         /**
          * A learner's lessons
          * @description upcoming (default): from the start of today, four weeks ahead; past: the last four weeks, latest first.
-         *     notices: coming holidays and clock changes that move the learner's hour.
+         *     notices: coming holidays, the learner's courses paused, ending or just ended, and clock changes that move the learner's hour.
          */
         get: operations["family.lessons"];
         put?: never;
@@ -2500,6 +2502,29 @@ export interface operations {
                                     id: string;
                                     number: string;
                                 } | null;
+                            } | null;
+                            /** @description pending_payment, active, paused or ended (a course over, listed while minutes are left on it). */
+                            status: string;
+                            /** @description The pause's first day (it may lie ahead while the course is still active), on the academy's calendar. */
+                            paused_from: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            /** @description The pause's last day (included): lessons start again the day after. */
+                            paused_until: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            /** @description The first day without lessons of a course ending (or ended). */
+                            ends_on: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
                             } | null;
                         }[];
                     };
@@ -9192,7 +9217,7 @@ export interface operations {
                             substitute_for: string | null;
                             can_cancel: string;
                             can_refuse_substitute: string;
-                            /** @description Why the academy cancelled it (a holiday, the teacher's leave), when it did. */
+                            /** @description Why the academy cancelled it (a holiday, the teacher's leave, the course paused or ended), when it did. */
                             cancelled_because: string | null;
                             /** @description The viewer's own dispute of this lesson's outcome, and the academy's answer once decided. */
                             dispute: {
@@ -9467,7 +9492,7 @@ export interface operations {
                             name: string;
                         };
                         data: unknown[];
-                        /** @description Coming holidays and clock changes that move the learner's hour. */
+                        /** @description Coming holidays; the learner's courses paused, ending or just ended; clock changes that move the learner's hour. */
                         notices: [
                             unknown[],
                             string[]

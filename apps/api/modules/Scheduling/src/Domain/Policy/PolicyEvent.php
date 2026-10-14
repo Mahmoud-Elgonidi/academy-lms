@@ -15,6 +15,8 @@ enum PolicyEvent: string
     case Unpaid = 'unpaid';
     case StudentAbsent = 'student_absent';
     case TeacherAbsent = 'teacher_absent';
+    /** The course was paused or ended: its lessons in those days do not take place (rule 22). */
+    case CourseStopped = 'course_stopped';
 
     public function isReschedule(): bool
     {

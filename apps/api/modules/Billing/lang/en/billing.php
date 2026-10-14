@@ -31,6 +31,8 @@ return [
         'paused' => 'Paused',
         'cancelled' => 'Cancelled',
     ],
+    // Why a block invoice waiting to be paid was voided when its course ended (on the invoice and its credit note).
+    'void_course_ended' => 'The course ended',
     'errors' => [
         'no_price' => 'This plan has no price in this region. Add one under "Plans and prices".',
         'method' => 'Choose how it was paid.',

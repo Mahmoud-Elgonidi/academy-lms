@@ -10,7 +10,7 @@ use Modules\SharedKernel\Tenancy\TenantContext;
 const SCHEDULED = [
     'billing:sweep', 'classroom:reconcile', 'classroom:recordings', 'communication:sweep', 'credits:expire',
     'learning:sweep', 'model:prune', 'people:checks', 'platform:health', 'platform:usage', 'privacy:sweep',
-    'safeguarding:follow-up', 'scheduling:dst', 'scheduling:materialize', 'scheduling:sweep', 'support:follow-up',
+    'safeguarding:follow-up', 'scheduling:courses', 'scheduling:dst', 'scheduling:materialize', 'scheduling:sweep', 'support:follow-up',
 ];
 
 beforeEach(function () {

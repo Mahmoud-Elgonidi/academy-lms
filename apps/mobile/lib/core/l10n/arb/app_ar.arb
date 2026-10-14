@@ -799,6 +799,42 @@
     }
   },
   "familyInvoice": "فاتورة العيلة",
+  "coursePaused": "موقوف لحد {day}",
+  "@coursePaused": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "coursePausedKids": "في إجازة لحد {day}",
+  "@coursePausedKids": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "coursePauseAhead": "هيتوقف من {from} لحد {until}",
+  "@coursePauseAhead": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "until": {
+        "type": "String"
+      }
+    }
+  },
+  "courseEnding": "بينتهي من {day}",
+  "@courseEnding": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "courseEnded": "انتهى، والدقايق اللي فاضلة لسه في الرصيد",
   "lessonUntil": "الحصة لحد {time}",
   "@lessonUntil": {
     "placeholders": {

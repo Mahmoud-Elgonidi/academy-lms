@@ -294,7 +294,14 @@
     "discounts": "Discounts",
     "practiceTitle": "Practice in a game",
     "practiceWaiting": "Not played yet.",
-    "practicePlay": "Play"
+    "practicePlay": "Play",
+    "course": {
+      "paused": "Paused until {day}",
+      "pausedKids": "On a break until {day}",
+      "pauseAhead": "Paused from {from} until {until}",
+      "ending": "Ends from {day}",
+      "ended": "Ended: the minutes left stay in the balance"
+    }
   },
   "teach": {
     "todayHeader": "{date} · {zone} time",

@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { CourseState } from '@/components/family/course-state';
 import { Icon } from '@/components/icons';
 import { Empty, Heading, Progress } from '@/components/ui';
 import { get } from '@/lib/api/server';
@@ -29,6 +30,9 @@ export default async function ProgressPage() {
                     <span className="block text-sm text-muted">
                       {c.subject}
                       {c.teacher ? ` · ${c.teacher}` : ''}
+                    </span>
+                    <span className="mt-1 block">
+                      <CourseState course={c} stage={fam.stage} />
                     </span>
                   </span>
                   <Icon name="chevron" size={18} className="mt-1 shrink-0 text-muted rtl:-scale-x-100" />

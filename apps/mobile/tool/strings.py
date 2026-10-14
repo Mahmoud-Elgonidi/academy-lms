@@ -326,6 +326,12 @@ s('you', 'انت', 'You')
 s('minutesLeft', 'فاضل {n} دقيقة', '{n} min left', n='int')
 s('sharedPackage', '{subjects} · باقة مشتركة', '{subjects} · shared package', subjects='String')
 s('familyInvoice', 'فاتورة العيلة', 'family invoice')
+# A course paused (until a day on the academy's calendar), to be paused, ending, or ended.
+s('coursePaused', 'موقوف لحد {day}', 'Paused until {day}', day='String')
+s('coursePausedKids', 'في إجازة لحد {day}', 'On a break until {day}', day='String')
+s('coursePauseAhead', 'هيتوقف من {from} لحد {until}', 'Paused from {from} until {until}', **{'from': 'String', 'until': 'String'})
+s('courseEnding', 'بينتهي من {day}', 'Ends from {day}', day='String')
+s('courseEnded', 'انتهى، والدقايق اللي فاضلة لسه في الرصيد', 'Ended: the minutes left stay in the balance')
 s('lessonUntil', 'الحصة لحد {time}', 'Until {time}', time='String')
 
 # Me

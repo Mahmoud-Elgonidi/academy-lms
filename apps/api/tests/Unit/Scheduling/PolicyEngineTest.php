@@ -73,3 +73,10 @@ it('refuses numbers out of range', function () {
         ->and(PolicySettings::fromArray(['student_notice_hours' => '6'])->get('student_notice_hours'))->toBe(6)
         ->and(PolicySettings::fromArray([])->attendance()->completionShare)->toBe(0.75);
 });
+
+it('gives back the minutes of a paused or ended course\'s lessons, whatever their notice or type, and pays nobody (rule 22)', function () {
+    foreach ([[48, 'regular'], [0.5, 'regular'], [2, 'makeup'], [30, 'extra']] as [$notice, $type]) {
+        $d = decideFor(PolicyEvent::CourseStopped, notice: $notice, type: $type, quotaUsed: 9);
+        expect([$d->rule, $d->allowed, $d->credit, $d->teacherPayPct, $d->kpi, $d->countsQuota])->toBe([22, true, 'refund', 0, null, false]);
+    }
+});

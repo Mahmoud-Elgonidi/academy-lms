@@ -9,6 +9,9 @@
                     <div>
                         <h3>{{ $course['subject'] }}</h3>
                         <small>{{ __($l.'with', ['teacher' => $course['teacher']]) }}@if ($map) · {{ $map['program']['name'] }}@endif</small>
+                        @if ($course['state'] ?? null)
+                            <span class="lf-state">{{ $course['state'] }}</span>
+                        @endif
                     </div>
                     @if ($map)
                         <span class="lf-pct">{{ $map['percent'] }}%</span>

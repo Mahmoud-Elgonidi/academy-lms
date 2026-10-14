@@ -16,6 +16,7 @@ use Modules\Billing\Queries\TransferDetails;
 use Modules\Credits\Contracts\CreditsApi;
 use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\Enrollment\Contracts\EnrollmentStatus;
 use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\LearnerStage;
 use Modules\SharedKernel\Money\Money;
@@ -25,27 +26,38 @@ final class FamilyAccount
 {
     /**
      * Lessons left on each balance: each course's own, or once for a shared
-     * package with all its subjects named (shared: true).
+     * package with all its subjects named (shared: true). A course paused
+     * says until when; an ended one stays while minutes are left on it (a
+     * refund is the academy's to make), and a shared package goes on with
+     * the courses still on it.
      *
-     * @return list<array{enrollment_id: string, subject: ?string, shared: bool, sessions: ?int, minutes: int, session_minutes: ?int, extra: ?array<string, mixed>}>
+     * @return list<array{enrollment_id: string, subject: ?string, shared: bool, sessions: ?int, minutes: int, session_minutes: ?int, extra: ?array<string, mixed>, status: string, paused_from: ?CarbonImmutable, paused_until: ?CarbonImmutable, ends_on: ?CarbonImmutable}>
      */
     public static function balances(string $learnerId, ?string $payerId = null): array
     {
-        $enrollments = array_values(array_filter(app(EnrollmentApi::class)->forStudent($learnerId),
-            fn (EnrollmentData $e) => in_array($e->status->value, ['active', 'pending_payment'], true) && $e->creditAccountId !== null));
+        $enrollments = array_values(array_filter(app(EnrollmentApi::class)->forStudent($learnerId), fn (EnrollmentData $e) => $e->creditAccountId !== null));
         $subjects = DB::table('subjects')->pluck(app()->getLocale() === 'ar' ? 'name_ar' : 'name_en', 'id');
         $plans = DB::table('subscriptions as s')->join('plans as p', fn ($j) => $j->on('p.academy_id', '=', 's.academy_id')->on('p.id', '=', 's.plan_id'))
             ->whereIn('s.credit_account_id', array_map(fn (EnrollmentData $e) => $e->creditAccountId, $enrollments))->where('s.status', '<>', 'cancelled')
             ->get(['s.credit_account_id', 'p.session_minutes', 'p.credit_scope'])->keyBy('credit_account_id');
 
         $rows = [];
-        foreach (collect($enrollments)->groupBy(fn (EnrollmentData $e) => $e->creditAccountId) as $accountId => $courses) {
+        foreach (collect($enrollments)->groupBy(fn (EnrollmentData $e) => $e->creditAccountId) as $accountId => $all) {
+            // The courses still on it (running or paused); an account whose courses all ended is shown while minutes are left.
+            $running = $all->filter(fn (EnrollmentData $e) => $e->status !== EnrollmentStatus::Ended)->values();
+            $courses = $running->isNotEmpty() ? $running : $all;
+            $minutes = app(CreditsApi::class)->balance((string) $accountId)->remainingMin();
+            if ($running->isEmpty() && $minutes <= 0) {
+                continue;
+            }
             /** @var EnrollmentData $first */
             $first = $courses->first();
-            $minutes = app(CreditsApi::class)->balance((string) $accountId)->remainingMin();
             $plan = $plans[$accountId] ?? null;
             $per = $plan ? (int) $plan->session_minutes : null;
-            $active = $courses->contains(fn (EnrollmentData $e) => $e->status->value === 'active');
+            $status = collect([EnrollmentStatus::Active, EnrollmentStatus::PendingPayment, EnrollmentStatus::Paused, EnrollmentStatus::Ended])
+                ->first(fn (EnrollmentStatus $s) => $courses->contains(fn (EnrollmentData $e) => $e->status === $s));
+            // Its days: the one course's, or a shared package's when all its courses are paused (the first back).
+            $paused = $courses->count() === 1 ? $first : ($status === EnrollmentStatus::Paused ? $courses->sortBy(fn (EnrollmentData $e) => $e->pausedUntil?->getTimestamp() ?? PHP_INT_MAX)->first() : null);
 
             $rows[] = [
                 'enrollment_id' => $first->id,
@@ -54,7 +66,11 @@ final class FamilyAccount
                 'minutes' => $minutes,
                 'session_minutes' => $per,
                 'sessions' => $per ? intdiv($minutes, $per) : null,
-                'extra' => $payerId === null ? null : self::extraOffer($first->id, $active, $payerId),
+                'extra' => $payerId === null ? null : self::extraOffer($first->id, $status === EnrollmentStatus::Active, $payerId),
+                'status' => $status->value,
+                'paused_from' => $paused?->pausedFrom,
+                'paused_until' => $paused?->pausedUntil,
+                'ends_on' => $courses->count() === 1 ? $first->endsOn : null,
             ];
         }
 

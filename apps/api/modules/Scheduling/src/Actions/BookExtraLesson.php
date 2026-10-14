@@ -11,6 +11,7 @@ use Modules\Scheduling\Contracts\DTOs\NewSession;
 use Modules\Scheduling\Domain\Enums\FundingStatus;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Queries\AvailabilityQuery;
+use Modules\Scheduling\Support\CourseDays;
 use Modules\Scheduling\Support\MinorsGuard;
 
 /**
@@ -18,7 +19,8 @@ use Modules\Scheduling\Support\MinorsGuard;
  * bought, or one the course's balance has room for) at a free time of the
  * course's teacher, paid from the course's own minutes (not makeup credit),
  * valid on that day. It is a lesson like the others for cancelling and
- * attendance.
+ * attendance. Only for a course that is on, and not on a day it will be
+ * paused or after it ends (CourseDays).
  */
 final class BookExtraLesson
 {
@@ -28,6 +30,7 @@ final class BookExtraLesson
         private readonly EnrollmentApi $enrollments,
         private readonly AvailabilityQuery $availability,
         private readonly MinorsGuard $minors,
+        private readonly CourseDays $days,
     ) {}
 
     public function handle(string $enrollmentId, CarbonImmutable $startsAt, ?string $actorId): Session
@@ -44,6 +47,7 @@ final class BookExtraLesson
         if ($startsAt->isPast()) {
             throw ValidationException::withMessages(['starts_at' => __('scheduling::policy.errors.in_the_past')]);
         }
+        $this->days->assertOpen($enrollment, $startsAt);
 
         $teacher = $this->availability->forTeachers([$enrollment->teacherId], $startsAt->subHour(), $endsAt->addHour())[$enrollment->teacherId] ?? null;
         if ($teacher === null || ! $teacher->free->contains($startsAt->getTimestamp(), $endsAt->getTimestamp())) {

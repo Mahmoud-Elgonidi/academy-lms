@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import type { Stage } from '@/lib/family/types';
 import type { PlayTarget } from '@/lib/games/types';
+import { CourseState } from '@/components/family/course-state';
 import { Icon } from '@/components/icons';
 import { Progress, join } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
@@ -47,6 +49,7 @@ export function CalmJourney({ map, title, autoplay, look }: { map: JourneyMap; t
       <CheersCard cheers={map.cheers} />
       <Note text={note} onClose={() => setNote('')} />
       <CourseChips courses={map.courses} chosen={course?.enrollment_id ?? null} onChoose={setChosen} />
+      {course ? <CourseState course={course} stage={map.stage as Stage} block /> : null}
 
       {course ? <LevelCard course={course} /> : null}
       <NextLessonCard lesson={lesson} last={map.last_lesson} stars={stars} />

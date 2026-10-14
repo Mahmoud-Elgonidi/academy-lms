@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\DB;
 /**
  * Which child a student is for their payer (docs/architecture/02, section 3,
  * "خصم الإخوات"): the students on the payer's account with a course that
- * is still on, in the order their first course there began. The first pays
- * in full; a student not on the account yet would come after the others.
+ * is still on (a paused one is; an ended one is not), in the order their
+ * first course there began. The first pays in full; a student not on the
+ * account yet would come after the others. A shared package counts while
+ * any of its courses is on, the one it was opened for or a later one.
  */
 final class SiblingRank
 {
@@ -58,7 +60,8 @@ final class SiblingRank
     {
         $out = [];
         DB::table('subscriptions as s')
-            ->join('enrollments as e', fn ($j) => $j->on('e.academy_id', '=', 's.academy_id')->on('e.id', '=', 's.enrollment_id'))
+            ->join('enrollments as e', fn ($j) => $j->on('e.academy_id', '=', 's.academy_id')
+                ->on(fn ($o) => $o->on('e.id', '=', 's.enrollment_id')->orOn('e.credit_account_id', '=', 's.credit_account_id')))
             ->whereIn('s.billing_account_id', $billingAccountIds)
             ->where('s.status', '<>', 'cancelled')
             ->where('e.status', '<>', 'ended')

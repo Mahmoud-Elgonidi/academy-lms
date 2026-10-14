@@ -12,10 +12,14 @@ use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Credits\Contracts\Events\CreditsGranted;
+use Modules\Enrollment\Contracts\Events\EnrollmentEnded;
+use Modules\Enrollment\Contracts\Events\EnrollmentPaused;
+use Modules\Enrollment\Contracts\Events\EnrollmentResumed;
 use Modules\Identity\Contracts\Preferences\PreferenceDefinition;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Scheduling\Actions\BringExistingSchedule;
 use Modules\Scheduling\AttendanceService;
+use Modules\Scheduling\Console\FollowCourseDaysCommand;
 use Modules\Scheduling\Console\MaterializeSessionsCommand;
 use Modules\Scheduling\Console\PlanDstCommand;
 use Modules\Scheduling\Console\SweepSessionsCommand;
@@ -144,18 +148,24 @@ final class SchedulingServiceProvider extends ServiceProvider
         Event::listen(TrialLessonBooked::class, [SendSchedulingNotifications::class, 'trialBooked']);
         Event::listen(LessonDisputed::class, [SendSchedulingNotifications::class, 'disputed']);
         Event::listen(LessonDisputeDecided::class, [SendSchedulingNotifications::class, 'disputeDecided']);
+        // A course paused, back on, or ended: the family and the teacher hear it once, not once a lesson.
+        Event::listen(EnrollmentPaused::class, [SendSchedulingNotifications::class, 'coursePaused']);
+        Event::listen(EnrollmentResumed::class, [SendSchedulingNotifications::class, 'courseResumed']);
+        Event::listen(EnrollmentEnded::class, [SendSchedulingNotifications::class, 'courseEnded']);
         foreach ([ShiftProposalApproved::class, ShiftProposalRejected::class, ShiftProposalChangesRequested::class, ShiftProposalCountered::class] as $answer) {
             Event::listen($answer, [SendSchedulingNotifications::class, 'proposalAnswered']);
         }
 
         if ($this->app->runningInConsole()) {
-            $this->commands([SweepSessionsCommand::class, MaterializeSessionsCommand::class, PlanDstCommand::class]);
+            $this->commands([SweepSessionsCommand::class, MaterializeSessionsCommand::class, PlanDstCommand::class, FollowCourseDaysCommand::class]);
         }
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('scheduling:sweep')->everyMinute()->withoutOverlapping()->onOneServer();
             $schedule->command('scheduling:materialize')->dailyAt('01:10')->withoutOverlapping()->onOneServer();
             $schedule->command('scheduling:dst')->dailyAt('01:40')->withoutOverlapping()->onOneServer();
+            // Hourly, so a course's day (a pause beginning or over, an end) begins within the hour of the academy's midnight.
+            $schedule->command('scheduling:courses')->hourlyAt(3)->withoutOverlapping()->onOneServer();
         });
     }
 }

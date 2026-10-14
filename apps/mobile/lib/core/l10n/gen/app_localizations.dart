@@ -1862,6 +1862,36 @@ abstract class AppLocalizations {
   /// **'فاتورة العيلة'**
   String get familyInvoice;
 
+  /// No description provided for @coursePaused.
+  ///
+  /// In ar, this message translates to:
+  /// **'موقوف لحد {day}'**
+  String coursePaused(String day);
+
+  /// No description provided for @coursePausedKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'في إجازة لحد {day}'**
+  String coursePausedKids(String day);
+
+  /// No description provided for @coursePauseAhead.
+  ///
+  /// In ar, this message translates to:
+  /// **'هيتوقف من {from} لحد {until}'**
+  String coursePauseAhead(String from, String until);
+
+  /// No description provided for @courseEnding.
+  ///
+  /// In ar, this message translates to:
+  /// **'بينتهي من {day}'**
+  String courseEnding(String day);
+
+  /// No description provided for @courseEnded.
+  ///
+  /// In ar, this message translates to:
+  /// **'انتهى، والدقايق اللي فاضلة لسه في الرصيد'**
+  String get courseEnded;
+
   /// No description provided for @lessonUntil.
   ///
   /// In ar, this message translates to:

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { CheerOn } from '@/components/family/cheers';
 import { GuardianGames } from '@/components/games/guardian';
 import type { PlayTarget } from '@/lib/games/types';
+import { CourseState } from '@/components/family/course-state';
 import { Icon } from '@/components/icons';
 import { Button } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
@@ -39,6 +40,7 @@ export function GuardianJourney({ map, learnerName, autoplay }: { map: JourneyMa
       <h1 className="text-2xl font-bold">{t('journeyOf', { name: learnerName })}</h1>
       <Note text={note} onClose={() => setNote('')} />
       <CourseChips courses={map.courses} chosen={course?.enrollment_id ?? null} onChoose={setChosen} />
+      {course ? <CourseState course={course} stage="classic" block /> : null}
 
       {course ? <LevelCard course={course} /> : null}
       {stars ? (

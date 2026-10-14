@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/motion/motion.dart';
+import '../../../../core/time/course_days.dart';
+import '../../../../shared/widgets/course_state.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../games/presentation/art/art.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
@@ -52,6 +54,8 @@ class _MiddleJourneyState extends State<MiddleJourney> {
       _StarsCard(map: _m, name: widget.name, place: widget.place),
       if (_m.courses.length > 1)
         CourseChips(courses: _m.courses, selected: course?.enrollmentId, onPick: (id) => setState(() => _course = id)),
+      if (course != null && course.days.stand != CourseStand.on)
+        Align(alignment: AlignmentDirectional.centerStart, child: CourseStatePill(course.days)),
       if (_m.lastLesson != null)
         LmsCard(
           child: LastLessonCard(lesson: _m.lastLesson!, rewards: _m.rewards),

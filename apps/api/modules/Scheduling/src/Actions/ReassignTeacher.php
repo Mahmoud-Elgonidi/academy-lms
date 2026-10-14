@@ -7,6 +7,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\Enrollment\Contracts\EnrollmentStatus;
 use Modules\Scheduling\Domain\Enums\ParticipantRole;
 use Modules\Scheduling\Domain\Enums\SessionEventKind;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
@@ -16,6 +17,7 @@ use Modules\Scheduling\Domain\Models\SessionEvent;
 use Modules\Scheduling\Domain\Models\SessionParticipant;
 use Modules\Scheduling\Domain\Slots\WeeklyTime;
 use Modules\Scheduling\Queries\AvailabilityQuery;
+use Modules\Scheduling\Support\CourseDays;
 use Modules\Scheduling\Support\MinorsGuard;
 use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Time\LocalTimeResolver;
@@ -27,7 +29,8 @@ use Modules\SharedKernel\Time\LocalTimeResolver;
  * weekly times move to the new teacher's clock, and the booked sessions move
  * with their credit, re-timed on that clock (so a lesson after one country's
  * summer-time change can shift by an hour, and the result says how many).
- * The old weekly times end the day before.
+ * The old weekly times end the day before. An ended course keeps its last
+ * teacher; one set to end has its new weekly times end on that day too.
  */
 final class ReassignTeacher
 {
@@ -39,6 +42,7 @@ final class ReassignTeacher
         private readonly FundSessions $fund,
         private readonly LocalTimeResolver $resolver,
         private readonly MinorsGuard $minors,
+        private readonly CourseDays $days,
     ) {}
 
     /**
@@ -48,6 +52,9 @@ final class ReassignTeacher
     public function handle(string $enrollmentId, string $teacherId, CarbonImmutable $from, ?string $actorId): array
     {
         $enrollment = $this->enrollments->find($enrollmentId) ?? throw ValidationException::withMessages(['enrollment' => __('scheduling::policy.errors.no_enrollment')]);
+        if ($enrollment->status === EnrollmentStatus::Ended) {
+            throw ValidationException::withMessages(['enrollment' => __('scheduling::courses.errors.ended')]);
+        }
         if ($enrollment->teacherId === $teacherId) {
             throw ValidationException::withMessages(['teacher' => __('scheduling::policy.errors.same_teacher')]);
         }
@@ -65,7 +72,10 @@ final class ReassignTeacher
             $first = $sessions->first(fn (Session $s) => $s->slot_id === $slot->id && ! $s->is_detached)?->starts_at
                 ?? $this->nextOccurrence($slot, $fromUtc);
             $local = $first->setTimezone($newTz);
-            $times[$slot->id] = ['time' => WeeklyTime::at($local->dayOfWeekIso, $local->format('H:i'), $slot->duration_min), 'from' => $local->startOfDay()];
+            $time = WeeklyTime::at($local->dayOfWeekIso, $local->format('H:i'), $slot->duration_min);
+            $times[$slot->id] = ['time' => $time, 'from' => $local->startOfDay()]
+                // A course set to end: the new weekly times end with it.
+                + ($enrollment->endsOn === null ? [] : ['until' => CarbonImmutable::parse($this->days->slotUntil($this->days->startOf($enrollment->endsOn), $time->clock(), $newTz))]);
         }
 
         // Lessons keep their date and follow the new teacher's clock (docs/architecture/02, section 1).

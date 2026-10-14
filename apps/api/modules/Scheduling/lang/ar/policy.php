@@ -53,6 +53,7 @@ return [
         'unpaid' => 'حصة مش مدفوعة',
         'student_absent' => 'الطالب غاب',
         'teacher_absent' => 'المدرس غاب',
+        'course_stopped' => 'الكورس اتوقف أو انتهى',
     ],
     'conditions' => [
         'notice_at_least' => 'قبلها بـ :hours ساعة أو أكتر',
@@ -99,6 +100,8 @@ return [
         'teacher_leave' => 'إجازة المدرس',
         'holiday' => 'إجازة الأكاديمية',
         'substitute_refused' => 'رفض المدرس البديل',
+        'enrollment_paused' => 'الكورس اتوقف',
+        'enrollment_ended' => 'الكورس انتهى',
         'other' => 'سبب تاني',
     ],
     'preview' => [

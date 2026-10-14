@@ -11,7 +11,8 @@ use Modules\Scheduling\Domain\Policy\Conditions\SessionTypeIs;
 /**
  * The default rule table (docs/architecture/02, section 4, "جدول القواعد
  * الافتراضي"), in order: the first rule that matches decides. Numbers follow
- * the document; 20 and 21 are the academy's own reschedules and cancellations.
+ * the document; 20 and 21 are the academy's own reschedules and cancellations,
+ * 22 a course paused or ended (its lessons then come back to the balance).
  * Lateness and technical problems (rules 6, 10–14) are decided when a
  * session under review is resolved.
  */
@@ -67,6 +68,7 @@ final class PolicyEngine
             new Rule(16, PolicyEvent::Unpaid, [], fn () => new Decision(16, credit: 'none')),
             new Rule(19, PolicyEvent::Emergency, [], fn () => new Decision(19, credit: 'refund')),
             new Rule(21, PolicyEvent::AcademyCancel, [], fn () => new Decision(21, credit: 'makeup')),
+            new Rule(22, PolicyEvent::CourseStopped, [], fn () => new Decision(22, credit: 'refund')),
         ];
     }
 }

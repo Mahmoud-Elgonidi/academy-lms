@@ -1064,6 +1064,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyInvoice => 'family invoice';
 
   @override
+  String coursePaused(String day) {
+    return 'Paused until $day';
+  }
+
+  @override
+  String coursePausedKids(String day) {
+    return 'On a break until $day';
+  }
+
+  @override
+  String coursePauseAhead(String from, String until) {
+    return 'Paused from $from until $until';
+  }
+
+  @override
+  String courseEnding(String day) {
+    return 'Ends from $day';
+  }
+
+  @override
+  String get courseEnded => 'Ended: the minutes left stay in the balance';
+
+  @override
   String lessonUntil(String time) {
     return 'Until $time';
   }

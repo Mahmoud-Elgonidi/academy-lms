@@ -1085,6 +1085,29 @@ class AppLocalizationsAr extends AppLocalizations {
   String get familyInvoice => 'فاتورة العيلة';
 
   @override
+  String coursePaused(String day) {
+    return 'موقوف لحد $day';
+  }
+
+  @override
+  String coursePausedKids(String day) {
+    return 'في إجازة لحد $day';
+  }
+
+  @override
+  String coursePauseAhead(String from, String until) {
+    return 'هيتوقف من $from لحد $until';
+  }
+
+  @override
+  String courseEnding(String day) {
+    return 'بينتهي من $day';
+  }
+
+  @override
+  String get courseEnded => 'انتهى، والدقايق اللي فاضلة لسه في الرصيد';
+
+  @override
   String lessonUntil(String time) {
     return 'الحصة لحد $time';
   }

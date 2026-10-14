@@ -91,8 +91,10 @@ final class EnrollmentResource extends Resource
                 TextColumn::make('status')->label(__('scheduling::enrollments.fields.status'))->badge()
                     ->formatStateUsing(fn (EnrollmentStatus $state) => __('scheduling::enrollments.statuses.'.$state->value))
                     ->color(fn (EnrollmentStatus $state) => match ($state) {
-                        EnrollmentStatus::Active => 'success', EnrollmentStatus::PendingPayment => 'warning', default => 'gray',
-                    }),
+                        EnrollmentStatus::Active => 'success', EnrollmentStatus::PendingPayment => 'warning', EnrollmentStatus::Paused => 'info', default => 'gray',
+                    })
+                    // A pause's last day, or the end coming.
+                    ->description(fn (EnrolledStudent $e) => self::daysLine($e)),
                 TextColumn::make('next')->label(__('scheduling::enrollments.fields.next'))
                     ->state(function (EnrolledStudent $e) use ($tz) {
                         $next = DB::table('sessions')->where('enrollment_id', $e->id)->where('status', 'scheduled')->where('starts_at', '>', CarbonImmutable::now())->orderBy('starts_at')->first(['starts_at', 'funding_status']);
@@ -108,6 +110,19 @@ final class EnrollmentResource extends Resource
             ->recordActions([ViewAction::make()->label(__('scheduling::enrollments.open'))])
             ->emptyStateHeading(__('scheduling::enrollments.empty.title'))
             ->emptyStateDescription(__('scheduling::enrollments.empty.hint'));
+    }
+
+    /** "until 3 Nov" for a paused course, "from 1 Nov" for one ending (or ended), on the academy's calendar. */
+    public static function daysLine(EnrolledStudent $e): ?string
+    {
+        $day = fn ($d) => CarbonImmutable::parse($d)->locale(app()->getLocale())->translatedFormat('j M');
+        $l = 'scheduling::courses.state.';
+
+        return match (true) {
+            $e->getAttribute('ends_on') !== null => __($l.'from', ['on' => $day($e->getAttribute('ends_on'))]),
+            $e->status === EnrollmentStatus::Paused && $e->getAttribute('paused_until') !== null => __($l.'until', ['until' => $day($e->getAttribute('paused_until'))]),
+            default => null,
+        };
     }
 
     public static function sessionsLeft(EnrolledStudent $e): int

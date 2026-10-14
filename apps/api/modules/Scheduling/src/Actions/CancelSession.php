@@ -30,8 +30,11 @@ final class CancelSession
         'teacher' => ['illness', 'emergency', 'technical', 'other'],
         'academy' => ['closure', 'emergency', 'unpaid', 'teacher_leave', 'other'],
         'family' => ['substitute_refused'],             // turned down the substitute for their teacher on leave
-        'system' => ['unpaid', 'holiday', 'teacher_leave'],
+        'system' => ['unpaid', 'holiday', 'teacher_leave', 'enrollment_paused', 'enrollment_ended'],
     ];
+
+    /** Lessons a paused or ended course does not have. */
+    public const COURSE_STOPPED = ['enrollment_paused', 'enrollment_ended'];
 
     public function __construct(
         private readonly PolicyDecider $decider,
@@ -89,6 +92,10 @@ final class CancelSession
         }
         if (in_array($reason, ['teacher_leave', 'substitute_refused'], true)) {
             return PolicyEvent::AcademyCancel;
+        }
+        // The course paused or ended (rule 22): the minutes come back, as they were.
+        if (in_array($reason, self::COURSE_STOPPED, true)) {
+            return PolicyEvent::CourseStopped;
         }
 
         return match ($askedBy) {

@@ -14,6 +14,9 @@
         .ac-pill[data-s="active"], .ac-pill[data-s="paid"], .ac-pill[data-s="funded"] { background: var(--success-50); color: var(--success-700); }
         .ac-pill[data-s="pending_payment"], .ac-pill[data-s="issued"], .ac-pill[data-s="unfunded"] { background: var(--warning-50); color: var(--warning-800); }
         .ac-pill[data-s="overdue"], .ac-pill[data-s="teacher_absent"] { background: var(--danger-50); color: var(--danger-700); }
+        .ac-pill[data-s="paused"] { background: var(--info-50); color: var(--info-700); }
+        .ac-stop { font-weight: 600; color: var(--gray-700); }
+        .dark .ac-stop { color: var(--gray-300); }
         .ac-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .75rem; }
         .ac-card { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-xl); padding: .9rem 1rem; display: flex; flex-direction: column; gap: .2rem; }
         .ac-card small { color: var(--gray-500); font-size: .8rem; }
@@ -50,6 +53,7 @@
         <div class="ac-sub">
             <span>{{ $a['subject'] }} · {{ __('scheduling::enrollments.with', ['teacher' => $h['teacher']]) }}</span>
             <span class="ac-pill" data-s="{{ $h['status'] }}">{{ __('scheduling::enrollments.statuses.'.$h['status']) }}</span>
+            @if ($a['stop']) <span class="ac-stop">{{ $a['stop'] }}</span> @endif
             @if ($a['plan']) <span>· {{ $a['plan'] }} · {{ $a['price'] }}</span> @endif
             @if ($a['sharedWith'] !== null)
                 <span>· @if ($a['sharedWith'] === []){{ __('scheduling::enrollments.shared.alone') }}@else{{ __('scheduling::enrollments.shared.label') }}

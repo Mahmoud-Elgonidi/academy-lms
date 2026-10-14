@@ -294,7 +294,14 @@
     "discounts": "الخصومات",
     "practiceTitle": "تدريب في اللعبة",
     "practiceWaiting": "لسه ما اتلعبش.",
-    "practicePlay": "العب"
+    "practicePlay": "العب",
+    "course": {
+      "paused": "موقوف لحد {day}",
+      "pausedKids": "في إجازة لحد {day}",
+      "pauseAhead": "هيتوقف من {from} لحد {until}",
+      "ending": "بينتهي من {day}",
+      "ended": "انتهى، والدقايق اللي فاضلة لسه في الرصيد"
+    }
   },
   "teach": {
     "todayHeader": "{date} · بتوقيت {zone}",

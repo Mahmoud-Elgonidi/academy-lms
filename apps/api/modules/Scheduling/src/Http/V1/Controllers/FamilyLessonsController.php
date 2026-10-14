@@ -43,7 +43,7 @@ final class FamilyLessonsController
      * A learner's lessons.
      *
      * upcoming (default): from the start of today, four weeks ahead; past: the last four weeks, latest first.
-     * notices: coming holidays and clock changes that move the learner's hour.
+     * notices: coming holidays, the learner's courses paused, ending or just ended, and clock changes that move the learner's hour.
      */
     public function index(Request $request, ViewerTimezone $viewer, FamilyNotices $notices): JsonResponse
     {
@@ -60,10 +60,10 @@ final class FamilyLessonsController
         return response()->json([
             'learner' => ['id' => $learner->id, 'name' => $learner->name],
             'data' => array_map(fn (object $r) => $this->present->lesson($r, $now, 'teacher', $mayAct), $rows),
-            /** Coming holidays and clock changes that move the learner's hour. */
+            /** Coming holidays; the learner's courses paused, ending or just ended; clock changes that move the learner's hour. */
             'notices' => [
                 ...array_map(fn (array $h) => $h['name'].' · '.$h['period'], $notices->holidays()),
-                ...$notices->clockChanges($learner->id, $viewer->effective()),
+                ...$notices->aboutLearner($learner->id, $viewer->effective()),
             ],
         ]);
     }

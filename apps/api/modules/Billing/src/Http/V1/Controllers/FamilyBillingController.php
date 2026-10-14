@@ -42,7 +42,9 @@ final class FamilyBillingController
     /**
      * A learner's balance.
      *
-     * Per active course: the minutes left, and as lessons when the plan has a lesson length.
+     * Per course still on (running or paused): the minutes left, and as lessons when the plan has a lesson length.
+     * A paused course says until when (paused_until, a day on the academy's calendar); an ended one is listed while
+     * minutes are left on it.
      */
     public function balance(Request $request, FamilyView $family): JsonResponse
     {
@@ -73,6 +75,14 @@ final class FamilyBillingController
                     /** The invoice for extra lessons waiting to be paid; another cannot be made until it is. */
                     'waiting_invoice' => $extra['waiting'] === null ? null : ['id' => (string) $extra['waiting']['id'], 'number' => (string) $extra['waiting']['number']],
                 ],
+                /** pending_payment, active, paused or ended (a course over, listed while minutes are left on it). */
+                'status' => (string) $b['status'],
+                /** The pause's first day (it may lie ahead while the course is still active), on the academy's calendar. */
+                'paused_from' => $this->time->academyDay($b['paused_from']),
+                /** The pause's last day (included): lessons start again the day after. */
+                'paused_until' => $this->time->academyDay($b['paused_until']),
+                /** The first day without lessons of a course ending (or ended). */
+                'ends_on' => $this->time->academyDay($b['ends_on']),
             ];
         }
 

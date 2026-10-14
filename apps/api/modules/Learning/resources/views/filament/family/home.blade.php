@@ -11,6 +11,9 @@
                     <div>
                         <h3>{{ $course['subject'] }}</h3>
                         <small>{{ $course['map'] ? __($l.'here', ['lesson' => $course['map']['finished'] ? __('learning::progress.finished') : ($course['map']['current']['title'] ?? '—')]) : __('learning::family.progress.no_program') }}</small>
+                        @if ($course['state'] ?? null)
+                            <span class="lf-state">{{ $course['state'] }}</span>
+                        @endif
                     </div>
                     @if ($course['map'])
                         <span class="lf-pct">{{ $course['map']['percent'] }}%</span>

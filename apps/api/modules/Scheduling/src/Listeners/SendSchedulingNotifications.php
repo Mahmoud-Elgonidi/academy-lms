@@ -10,8 +10,13 @@ use Modules\Communication\Contracts\DTOs\Message;
 use Modules\Communication\Contracts\DTOs\TemplateDefinition;
 use Modules\Communication\Contracts\DTOs\Translatable;
 use Modules\Communication\Contracts\NotificationsApi;
+use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\Enrollment\Contracts\Events\EnrollmentEnded;
+use Modules\Enrollment\Contracts\Events\EnrollmentPaused;
+use Modules\Enrollment\Contracts\Events\EnrollmentResumed;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\People\Contracts\PeopleApi;
+use Modules\Scheduling\Actions\CancelSession;
 use Modules\Scheduling\Contracts\Events\DstShiftDecided;
 use Modules\Scheduling\Contracts\Events\DstShiftUpcoming;
 use Modules\Scheduling\Contracts\Events\HolidayDeclared;
@@ -95,6 +100,12 @@ final class SendSchedulingNotifications
             ['lesson_corrected', 'lessons', $a.'family', ['push'], $lesson + ['after' => 'اتعملت']],
             ['lesson_corrected_teacher', 'staff', $a.'teacher', ['push'], $lesson + ['after' => 'غياب المدرس']],
             ['teacher_lessons_shifted', 'staff', $a.'teacher', ['push', 'whatsapp', 'email'], ['from' => 'الأحد 1 نوفمبر', 'until' => 'السبت 28 نوفمبر', 'shift' => 'ساعة متأخر', 'count' => '12']],
+            ['course_paused_family', 'lessons', $a.'family', ['whatsapp', 'push', 'email'], ['student' => 'زياد', 'subject' => 'النحو', 'from' => 'الثلاثاء 20 أكتوبر', 'until' => 'الثلاثاء 3 نوفمبر']],
+            ['course_paused_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], ['student' => 'زياد', 'subject' => 'النحو', 'from' => 'الثلاثاء 20 أكتوبر', 'until' => 'الثلاثاء 3 نوفمبر']],
+            ['course_resumed_family', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'النحو']],
+            ['course_resumed_teacher', 'staff', $a.'teacher', ['push'], ['student' => 'زياد', 'subject' => 'النحو']],
+            ['course_ended_family', 'lessons', $a.'family', ['whatsapp', 'push', 'email'], ['student' => 'زياد', 'subject' => 'النحو', 'on' => 'الأحد 1 نوفمبر']],
+            ['course_ended_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], ['student' => 'زياد', 'subject' => 'النحو', 'on' => 'الأحد 1 نوفمبر']],
         ] as [$name, $category, $audience, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
                 key: "scheduling.{$name}", category: $category,
@@ -106,8 +117,8 @@ final class SendSchedulingNotifications
 
     public function cancelled(SessionCancelled $event): void
     {
-        if ($event->reason === 'holiday') {
-            return;     // the holiday's own message says it once (holidayDeclared)
+        if ($event->reason === 'holiday' || in_array($event->reason, CancelSession::COURSE_STOPPED, true)) {
+            return;     // the holiday's, or the course's pause or end, says it once (holidayDeclared, coursePaused, courseEnded)
         }
         $s = $this->sessions->of($event->sessionId);
         if ($s === null) {
@@ -373,6 +384,66 @@ final class SendSchedulingNotifications
             'shift' => new Translatable('scheduling::dst.shift.by.'.$event->minutes),
             'count' => (string) $event->lessons,
         ], ['screen' => 'session', 'id' => null], "shifted:{$event->teacherId}:{$event->firstDay}:{$event->minutes}"));
+    }
+
+    /** A course was paused (or its pause made longer): the family and its teacher hear the days once. */
+    public function coursePaused(EnrollmentPaused $event): void
+    {
+        $course = $this->course($event->enrollmentId);
+        if ($course === null) {
+            return;
+        }
+        $data = $course['data'] + ['from' => new Day($event->from), 'until' => new Day($event->until)];
+        $key = "course:{$event->enrollmentId}:paused:{$event->from}:{$event->until}";
+
+        $this->notifications->send(new Message('scheduling.course_paused_family', $this->without($course['family'], $event->actorId), $data, ['screen' => 'session', 'id' => null], $key));
+        $this->notifications->send(new Message('scheduling.course_paused_teacher', $this->without([$course['teacher_id']], $event->actorId), $data, ['screen' => 'session', 'id' => null], $key));
+    }
+
+    /** A paused course is on again (or its pause called off): the family and its teacher hear it once. */
+    public function courseResumed(EnrollmentResumed $event): void
+    {
+        $course = $this->course($event->enrollmentId);
+        if ($course === null) {
+            return;
+        }
+        $key = "course:{$event->enrollmentId}:resumed:".CarbonImmutable::now()->toDateString();
+
+        $this->notifications->send(new Message('scheduling.course_resumed_family', $this->without($course['family'], $event->actorId), $course['data'], ['screen' => 'session', 'id' => null], $key));
+        $this->notifications->send(new Message('scheduling.course_resumed_teacher', $this->without([$course['teacher_id']], $event->actorId), $course['data'], ['screen' => 'session', 'id' => null], $key));
+    }
+
+    /** A course ends: the family (the minutes left stay in the balance) and its teacher (the times are free) hear it once. */
+    public function courseEnded(EnrollmentEnded $event): void
+    {
+        $course = $this->course($event->enrollmentId);
+        if ($course === null) {
+            return;
+        }
+        $data = $course['data'] + ['on' => new Day($event->on)];
+        $key = "course:{$event->enrollmentId}:ended";
+
+        $this->notifications->send(new Message('scheduling.course_ended_family', $this->without($course['family'], $event->actorId), $data, ['screen' => 'session', 'id' => null], $key));
+        $this->notifications->send(new Message('scheduling.course_ended_teacher', $this->without([$course['teacher_id']], $event->actorId), $data, ['screen' => 'session', 'id' => null], $key));
+    }
+
+    /** @return array{family: list<string>, teacher_id: string, data: array<string, mixed>}|null the student and their guardians, the teacher, and the names */
+    private function course(string $enrollmentId): ?array
+    {
+        $course = app(EnrollmentApi::class)->find($enrollmentId);
+        if ($course === null) {
+            return null;
+        }
+        $subject = DB::table('subjects')->where('id', $course->subjectId)->first(['name_ar', 'name_en']);
+
+        return [
+            'family' => [$course->studentId, ...$this->people->guardiansOf($course->studentId)],
+            'teacher_id' => $course->teacherId,
+            'data' => [
+                'student' => (string) DB::table('users')->where('id', $course->studentId)->value('name'),
+                'subject' => new Localized((string) ($subject->name_ar ?? ''), (string) ($subject->name_en ?? $subject->name_ar ?? '')),
+            ],
+        ];
     }
 
     private static function weekdayTime(CarbonImmutable $local): Localized

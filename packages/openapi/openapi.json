@@ -20,7 +20,7 @@
         "/v1/family/balance": {
             "get": {
                 "operationId": "family.balance",
-                "description": "Per active course: the minutes left, and as lessons when the plan has a lesson length.",
+                "description": "Per course still on (running or paused): the minutes left, and as lessons when the plan has a lesson length.\nA paused course says until when (paused_until, a day on the academy's calendar); an ended one is listed while\nminutes are left on it.",
                 "summary": "A learner's balance",
                 "tags": [
                     "Billing"
@@ -174,6 +174,91 @@
                                                             "max",
                                                             "waiting_invoice"
                                                         ]
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "description": "pending_payment, active, paused or ended (a course over, listed while minutes are left on it)."
+                                                    },
+                                                    "paused_from": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "The pause's first day (it may lie ahead while the course is still active), on the academy's calendar.",
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "string"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "paused_until": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "The pause's last day (included): lessons start again the day after.",
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "string"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "ends_on": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "The first day without lessons of a course ending (or ended).",
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "string"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
                                                     }
                                                 },
                                                 "required": [
@@ -183,7 +268,11 @@
                                                     "minutes",
                                                     "session_minutes",
                                                     "sessions",
-                                                    "extra"
+                                                    "extra",
+                                                    "status",
+                                                    "paused_from",
+                                                    "paused_until",
+                                                    "ends_on"
                                                 ]
                                             }
                                         }
@@ -17367,7 +17456,7 @@
                                                         "string",
                                                         "null"
                                                     ],
-                                                    "description": "Why the academy cancelled it (a holiday, the teacher's leave), when it did."
+                                                    "description": "Why the academy cancelled it (a holiday, the teacher's leave, the course paused or ended), when it did."
                                                 },
                                                 "dispute": {
                                                     "type": [
@@ -18025,7 +18114,7 @@
         "/v1/family/lessons": {
             "get": {
                 "operationId": "family.lessons",
-                "description": "upcoming (default): from the start of today, four weeks ahead; past: the last four weeks, latest first.\nnotices: coming holidays and clock changes that move the learner's hour.",
+                "description": "upcoming (default): from the start of today, four weeks ahead; past: the last four weeks, latest first.\nnotices: coming holidays, the learner's courses paused, ending or just ended, and clock changes that move the learner's hour.",
                 "summary": "A learner's lessons",
                 "tags": [
                     "Scheduling"
@@ -18114,7 +18203,7 @@
                                         },
                                         "notices": {
                                             "type": "array",
-                                            "description": "Coming holidays and clock changes that move the learner's hour.",
+                                            "description": "Coming holidays; the learner's courses paused, ending or just ended; clock changes that move the learner's hour.",
                                             "prefixItems": [
                                                 {
                                                     "type": "array",

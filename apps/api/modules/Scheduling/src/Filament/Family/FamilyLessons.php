@@ -113,6 +113,20 @@ final class FamilyLessons extends Page
             ->visible(fn () => app(FamilyView::class)->stage((string) auth()->id()) !== LearnerStage::Kids);
     }
 
+    /**
+     * The learner's courses paused, ending or just ended, said above the
+     * lessons (their lessons on those days are cancelled).
+     *
+     * @return list<string>
+     */
+    #[Computed]
+    public function courseNotices(): array
+    {
+        $learner = app(FamilyView::class)->current((string) auth()->id());
+
+        return $learner === null ? [] : app(FamilyNotices::class)->courses($learner->id);
+    }
+
     /** Coming academy holidays (the next six weeks), said above the lessons. */
     #[Computed]
     public function holidays(): array

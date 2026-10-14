@@ -6,12 +6,14 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Actions\BuyExtraLessons;
+use Modules\Billing\Actions\CloseEndedCourse;
 use Modules\Billing\Actions\Discounts\ApplyCoupon;
 use Modules\Billing\Actions\Discounts\RemoveCoupon;
 use Modules\Billing\Actions\RecordPayment;
 use Modules\Billing\Actions\SubscribeEnrollment;
 use Modules\Billing\Contracts\BillingApi;
 use Modules\Billing\Contracts\DTOs\CourseBilling;
+use Modules\Billing\Contracts\DTOs\EndedCourseBilling;
 use Modules\Billing\Contracts\DTOs\IssuedInvoice;
 use Modules\Billing\Contracts\DTOs\NewSubscription;
 use Modules\Billing\Contracts\DTOs\PlanOption;
@@ -127,6 +129,16 @@ final class BillingService implements BillingApi
         $invoice = app(BuyExtraLessons::class)->handle($this->subscriptionId($enrollmentId), $lessons, $actorId);
 
         return new IssuedInvoice($invoice->id, (string) $invoice->number, $invoice->total());
+    }
+
+    public function endingCourse(string $enrollmentId): EndedCourseBilling
+    {
+        return app(CloseEndedCourse::class)->preview($enrollmentId);
+    }
+
+    public function closeEndedCourse(string $enrollmentId, ?string $actorId): EndedCourseBilling
+    {
+        return app(CloseEndedCourse::class)->handle($enrollmentId, $actorId);
     }
 
     private function subscriptionId(string $enrollmentId): string
