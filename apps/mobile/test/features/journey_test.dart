@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:academy_app/app/app.dart';
 import 'package:academy_app/app/router/areas.dart';
 import 'package:academy_app/app/router/targets.dart';
-import 'package:academy_app/core/auth/account.dart';
 import 'package:academy_app/features/games/domain/games.dart';
 import 'package:academy_app/features/games/presentation/player/game_frame.dart';
 import 'package:academy_app/features/games/presentation/player/game_session.dart';
@@ -12,283 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import '../fixtures/journey.dart';
 import '../helpers.dart';
 import 'sign_in_flow_test.dart' show frames;
-
-Account _student(String stage) => Account(
-  academySlug: 'demo',
-  academyNameAr: 'أكاديمية النور',
-  academyNameEn: 'Noor Academy',
-  userId: 'u-$stage',
-  userName: 'يوسف خالد',
-  roles: const ['student'],
-  token: 'token-$stage',
-  stage: stage,
-);
-
-const _bird = {'kind': 'bird', 'body': '#74C0FC', 'wing': '#4DABF7', 'belly': '#E7F5FF'};
-const _turtle = {'kind': 'turtle', 'body': '#8CE99A', 'wing': '#2F9E44', 'belly': '#40C057'};
-
-Map<String, Object?> _creature(String key, String name, {bool found = true, String island = 'birds', Map<String, Object?> look = _bird}) =>
-    {
-      'key': key,
-      'name': name,
-      'emoji': '🐦',
-      'rarity': 'common',
-      'look': look,
-      'story': 'قصة $name',
-      'found': found,
-      'found_at': found ? time('2099-10-01T10:00:00Z', '2099-10-01T13:00:00+03:00') : null,
-      'source': found ? 'stars' : null,
-      'nickname': null,
-      'buddy': key == 'birds.risha',
-      'island': island,
-      'island_name': island == 'birds' ? 'جزيرة الطيور' : 'جزيرة السلاحف',
-    };
-
-Map<String, Object?> _game(String id, String key, String title, {bool chosen = false, String island = 'turtles'}) => {
-  'id': id,
-  'key': key,
-  'island': island,
-  'title': title,
-  'summary': 'ملخص $title',
-  'how_to_play': 'إزاي تلعب $title',
-  'kinds': ['order'],
-  'chosen': chosen,
-  'items': 4,
-};
-
-Map<String, Object?> _station(
-  String id,
-  String title,
-  String state, {
-  bool playable = true,
-  bool due = false,
-  List<String> missions = const [],
-  List<Object> games = const [],
-  Map<String, Object?>? race,
-}) => {
-  'id': id,
-  'title': title,
-  'unit': null,
-  'state': state,
-  'due_review': due,
-  'playable': playable,
-  'practice': state == 'here' ? {'rounds': 3, 'answered': 12, 'correct': 10, 'percent': 83} : null,
-  'missions': missions,
-  'games': games,
-  'race': race,
-};
-
-Map<String, Object?> _art(String key, String name) => {
-  'key': key,
-  'name': name,
-  'emoji': key == 'birds' ? '🐦' : '🐢',
-  'colors': {'sky': '#9be7ff', 'sea': '#1a8fb0', 'land': '#f7d07a'},
-  'music': 'major',
-};
-
-/// A learner's journey: three levels (done, here, ahead), a homework and a lesson on the lesson they are on, a review.
-Map<String, Object?> _journey({
-  String stage = 'kids',
-  String viewer = 'self',
-  String style = 'playful',
-  int stars = 151,
-  bool eggReady = false,
-  bool chestReady = false,
-  bool may = true,
-  bool lessonOpen = false,
-  bool practiceHomework = false,
-  List<Object> cheers = const [],
-  Map<String, Object?>? limits,
-  Map<String, Object?>? glance,
-}) => {
-  'data': {
-    'learner_id': viewer == 'guardian' ? 'c1' : 'u-$stage',
-    'stage': stage,
-    'style': style,
-    'viewer': viewer,
-    'stars': {
-      'total': stars,
-      'rank': {'key': 'hero', 'label': 'بطل', 'next': 300, 'next_label': 'أسطورة', 'progress': 0, 'stars': stars},
-      'from': {'lessons': 28, 'practice': 74, 'homework': 4, 'mastered': 25, 'chest': 20},
-      'per_egg': 12,
-    },
-    'streak': 7,
-    'last_lesson': {
-      'id': 'l0',
-      'starts_at': time('2099-10-08T14:00:00Z', '2099-10-08T17:00:00+03:00', label: 'الخميس 8 أكتوبر · 17:00'),
-      'stars': 4,
-      'late_min': 1,
-      'on_time': true,
-      'stayed': true,
-      'labels': ['في الميعاد', 'فضلت لآخر الحصة'],
-    },
-    'courses': [
-      {
-        'enrollment_id': 'e1',
-        'subject': 'قرآن · حفظ',
-        'teacher': 'أ. نور الهدى',
-        'program': 'حفظ جزء عمّ',
-        'has_curriculum': true,
-        'percent': 55,
-        'finished': false,
-        'lessons': {'mastered': 3, 'total': 6},
-        'eta_weeks': 2.4,
-        'finish_on': time('2099-10-28T12:00:00Z', '2099-10-28T15:00:00+03:00', label: 'الأربعاء 28 أكتوبر'),
-        'current': {
-          'id': 's4',
-          'title': 'قريش والفيل',
-          'path': ['سور أطول'],
-        },
-        'islands': [
-          {
-            'id': 'i1',
-            'index': 1,
-            'title': 'قصار السور',
-            'percent': 100,
-            'state': 'done',
-            'lessons': 2,
-            'done': 2,
-            'art': _art('birds', 'جزيرة الطيور'),
-            'creatures': [_creature('birds.risha', 'ريشة')],
-            'next_creature': null,
-            'stations': [
-              _station(
-                's1',
-                'الفاتحة',
-                'review',
-                due: true,
-                missions: ['review:s1'],
-                games: [_game('g-twins', 'bird-twins', 'توأم العش', island: 'birds')],
-              ),
-              _station('s2', 'الناس والفلق', 'done'),
-            ],
-          },
-          {
-            'id': 'i2',
-            'index': 2,
-            'title': 'سور أطول',
-            'percent': 33,
-            'state': 'here',
-            'lessons': 3,
-            'done': 1,
-            'art': _art('turtles', 'جزيرة السلاحف'),
-            'creatures': [
-              _creature('turtles.shell', 'صدفة', island: 'turtles', look: _turtle),
-              _creature('turtles.crab', 'كابوريا', found: false, island: 'turtles', look: _turtle),
-            ],
-            'next_creature': {'key': 'turtles.crab', 'look': _turtle, 'rarity': 'common'},
-            'stations': [
-              _station('s3', 'الكوثر والماعون', 'done'),
-              _station(
-                's4',
-                'قريش والفيل',
-                'here',
-                missions: ['homework:h1', 'lesson:l1'],
-                games: [_game('g-bridge', 'turtle-bridge', 'جسر السلاحف'), _game('g-balloons', 'bird-balloons', 'بالونات الحكمة')],
-                race: {'rounds': 8, 'best_seconds': 42, 'last_seconds': 48, 'best_stars': 3},
-              ),
-              _station('s5', 'الهمزة والعصر', 'todo', playable: false),
-            ],
-          },
-          {
-            'id': 'i3',
-            'index': 3,
-            'title': 'جزء تبارك',
-            'percent': 0,
-            'state': 'ahead',
-            'lessons': 1,
-            'done': 0,
-            'art': _art('monkeys', 'جزيرة القرود'),
-            'creatures': <Object>[],
-            'next_creature': null,
-            'stations': [_station('s6', 'سورة الملك', 'todo', playable: false)],
-          },
-        ],
-      },
-    ],
-    'missions': [
-      {
-        'key': 'homework:h1',
-        'kind': 'homework',
-        'kind_label': 'واجب',
-        'state': 'open',
-        'enrollment_id': 'e1',
-        'island_id': 'i2',
-        'station_id': 's4',
-        'title': 'سجّل سورة قريش',
-        'homework_id': 'h1',
-        'due_at': time('2099-10-13T16:00:00Z', '2099-10-13T19:00:00+03:00', label: 'الثلاثاء 13 أكتوبر · 19:00'),
-        'accepts': practiceHomework ? 'practice' : 'audio',
-        'practice': practiceHomework,
-        'game': practiceHomework ? 'turtle-bridge' : null,
-        'result': null,
-        'stars': 2,
-      },
-      {
-        'key': 'lesson:l1',
-        'kind': 'lesson',
-        'kind_label': 'حصة',
-        'state': 'open',
-        'enrollment_id': 'e1',
-        'island_id': 'i2',
-        'station_id': 's4',
-        'title': 'قرآن · حفظ',
-        'lesson_id': 'l1',
-        'starts_at': time('2099-10-15T14:00:00Z', '2099-10-15T17:00:00+03:00', label: 'الخميس 15 أكتوبر · 17:00'),
-        'ends_at': time('2099-10-15T14:30:00Z', '2099-10-15T17:30:00+03:00', label: 'الخميس 15 أكتوبر · 17:30'),
-        'join': {
-          'open': lessonOpen,
-          'opens_at': time('2099-10-15T13:50:00Z', '2099-10-15T16:50:00+03:00', label: 'الخميس 15 أكتوبر · 16:50'),
-        },
-        'stars': 4,
-      },
-      {
-        'key': 'review:s1',
-        'kind': 'review',
-        'kind_label': 'مراجعة',
-        'state': 'open',
-        'enrollment_id': 'e1',
-        'island_id': 'i1',
-        'station_id': 's1',
-        'title': 'الفاتحة',
-      },
-    ],
-    'chest': {
-      'period': '2099-10-03',
-      'target': 3,
-      'progress': chestReady ? 3 : 1,
-      'state': chestReady ? 'done' : 'active',
-      'stars': 10,
-      'sticker': {'key': 'sun', 'name': 'شمس'},
-      'ends_at': time('2099-10-09T21:00:00Z', '2099-10-10T00:00:00+03:00', label: 'السبت 10 أكتوبر · 00:00'),
-      'can_open': chestReady && viewer == 'self',
-    },
-    'games': {
-      'allowance': {
-        'academy': true,
-        'child': true,
-        'limit': 30,
-        'used': 12,
-        'left': 18,
-        'night_lock': false,
-        'may': may,
-        'reason': may ? null : 'limit',
-        'reason_label': may ? null : 'خلصت دقايق اللعب النهارده. نكمل بكرة! 🌙',
-      },
-      'egg': {'have': eggReady ? 12 : 7, 'need': 12, 'ready': eggReady},
-      'buddy': _creature('birds.risha', 'ريشة'),
-      'creatures_found': 2,
-      'creatures_total': 20,
-      'recent': <Object>[],
-      'limits': limits,
-      'glance': glance,
-    },
-    'cheers': cheers,
-    'cheers_left': viewer == 'guardian' ? 3 : 0,
-  },
-};
 
 Map<String, Object?> _started() => {
   'data': {
@@ -348,19 +73,6 @@ Widget _stand(GameFrame frame) => Center(
   ),
 );
 
-void _studentRoutes(FakeApi api, String stage, Map<String, Object?> journey) {
-  familyRoutes(api);
-  api
-    ..on('GET', 'family/learners', {
-      'data': [
-        {'id': 'u-$stage', 'name': 'يوسف خالد', 'is_self': true, 'stage': stage},
-      ],
-      'viewer_stage': stage,
-    })
-    ..on('GET', 'learning/journey/map', journey)
-    ..on('POST', 'learning/cheers/seen', null, status: 204);
-}
-
 Future<void> _open(WidgetTester tester, TestApp app, {Size size = const Size(420, 1000)}) async {
   await app.session.start();
   await tester.binding.setSurfaceSize(size);
@@ -385,7 +97,7 @@ void main() {
   tearDown(() => GameFrame.stand = null);
 
   test('reads a journey: levels as islands, stations, missions, stars, the chest and the egg', () {
-    final map = JourneyMap.fromJson(_journey(eggReady: true, chestReady: true)['data']! as Map<String, dynamic>);
+    final map = JourneyMap.fromJson(fxJourney(eggReady: true, chestReady: true)['data']! as Map<String, dynamic>);
     expect(map.courses.single.islands.map((i) => i.state), ['done', 'here', 'ahead']);
     expect(map.courses.single.here?.title, 'سور أطول');
     expect(map.courses.single.islands[1].here?.id, 's4');
@@ -397,11 +109,11 @@ void main() {
     // The lesson's room opening, starting and ending, and the chest's week closing, reload the screen.
     expect(map.clockMoments.length, 4);
     // A practice homework plays the teacher's game, else the best one on its station.
-    final practice = JourneyMap.fromJson(_journey(practiceHomework: true)['data']! as Map<String, dynamic>);
+    final practice = JourneyMap.fromJson(fxJourney(practiceHomework: true)['data']! as Map<String, dynamic>);
     expect(practice.gameFor(practice.mission('homework:h1')!), 'turtle-bridge');
     expect(map.gameFor(map.mission('homework:h1')!), 'g-bridge');
     // Plain: no stars, chest, egg or games.
-    final plain = JourneyMap.fromJson(_journey(style: 'plain')['data']! as Map<String, dynamic>);
+    final plain = JourneyMap.fromJson(fxJourney(style: 'plain')['data']! as Map<String, dynamic>);
     expect(plain.rewards, isFalse);
     expect(plain.playable, isFalse);
   });
@@ -437,11 +149,11 @@ void main() {
   testWidgets('a child sees a cheer and their last lesson\'s stars once, opens the island they are on, and plays a station', (
     tester,
   ) async {
-    final app = await TestApp.create(accounts: [_student('kids')]);
-    _studentRoutes(
+    final app = await TestApp.create(accounts: [fxStudent('kids')]);
+    fxStudentRoutes(
       app.api,
       'kids',
-      _journey(
+      fxJourney(
         cheers: [
           {'id': 'ch1', 'kind': 'heart', 'at': time('2099-10-08T10:00:00Z', '2099-10-08T13:00:00+03:00')},
         ],
@@ -515,8 +227,8 @@ void main() {
   });
 
   testWidgets('a child opens the week\'s chest once, and gets its stars and sticker', (tester) async {
-    final app = await TestApp.create(accounts: [_student('kids')]);
-    _studentRoutes(app.api, 'kids', _journey(chestReady: true));
+    final app = await TestApp.create(accounts: [fxStudent('kids')]);
+    fxStudentRoutes(app.api, 'kids', fxJourney(chestReady: true));
     app.api.on('POST', 'learning/journey/chest', {
       'data': {
         'stars': 10,
@@ -548,8 +260,8 @@ void main() {
   });
 
   testWidgets('a child knocks the ready egg three times; it hatches, they name it and see it in the album', (tester) async {
-    final app = await TestApp.create(accounts: [_student('kids')]);
-    _studentRoutes(app.api, 'kids', _journey(eggReady: true));
+    final app = await TestApp.create(accounts: [fxStudent('kids')]);
+    fxStudentRoutes(app.api, 'kids', fxJourney(eggReady: true));
     var named = false;
     app.api
       ..on('POST', 'games/hatch', {
@@ -560,7 +272,7 @@ void main() {
             'emoji': '🦀',
             'rarity': 'common',
             'island': 'turtles',
-            'look': _turtle,
+            'look': fxTurtle,
             'story': 'بتمشي بالعرض',
             'names': ['كابوريا', 'بندق', 'كوكي'],
             'found': 3,
@@ -571,7 +283,7 @@ void main() {
       }, status: 201)
       ..onWith('PUT', 'games/creatures/turtles.crab', (_) {
         named = true;
-        return (200, {'data': _creature('turtles.crab', 'كابوريا', island: 'turtles', look: _turtle)});
+        return (200, {'data': fxCreature('turtles.crab', 'كابوريا', island: 'turtles', look: fxTurtle)});
       })
       ..onWith(
         'GET',
@@ -580,9 +292,9 @@ void main() {
           200,
           {
             'data': [
-              {..._creature('birds.risha', 'ريشة'), 'names': <String>[]},
+              {...fxCreature('birds.risha', 'ريشة'), 'names': <String>[]},
               {
-                ..._creature('turtles.crab', 'كابوريا', found: named, island: 'turtles', look: _turtle),
+                ...fxCreature('turtles.crab', 'كابوريا', found: named, island: 'turtles', look: fxTurtle),
                 if (named) 'nickname': 'بندق',
                 'names': named ? ['كابوريا', 'بندق', 'كوكي'] : <String>[],
               },
@@ -618,8 +330,8 @@ void main() {
   });
 
   testWidgets('middle school sees its stars toward the next rank and its levels, and races itself on a lesson', (tester) async {
-    final app = await TestApp.create(accounts: [_student('middle')]);
-    _studentRoutes(app.api, 'middle', _journey(stage: 'middle', stars: 74, lessonOpen: true));
+    final app = await TestApp.create(accounts: [fxStudent('middle')]);
+    fxStudentRoutes(app.api, 'middle', fxJourney(stage: 'middle', stars: 74, lessonOpen: true));
     app.api
       ..on('POST', 'games/plays', _started(), status: 201)
       ..on('POST', 'games/plays/*/finish', _finished(seconds: 39));
@@ -654,8 +366,8 @@ void main() {
   });
 
   testWidgets('secondary school gets the calm journey: the level, the next lesson with the last one\'s stars, the levels', (tester) async {
-    final app = await TestApp.create(accounts: [_student('teen')]);
-    _studentRoutes(app.api, 'teen', _journey(stage: 'teen', stars: 55, may: false));
+    final app = await TestApp.create(accounts: [fxStudent('teen')]);
+    fxStudentRoutes(app.api, 'teen', fxJourney(stage: 'teen', stars: 55, may: false));
     await _open(tester, app, size: const Size(420, 2400));
 
     final nav = find.byType(NavigationBar);
@@ -686,7 +398,7 @@ void main() {
       ..on(
         'GET',
         'learning/journey/map',
-        _journey(
+        fxJourney(
           stage: 'kids',
           viewer: 'guardian',
           chestReady: true,
@@ -754,8 +466,8 @@ void main() {
   });
 
   testWidgets('a practice homework is played, never handed in by a form, and shows how it went', (tester) async {
-    final app = await TestApp.create(accounts: [_student('kids')]);
-    _studentRoutes(app.api, 'kids', _journey(practiceHomework: true));
+    final app = await TestApp.create(accounts: [fxStudent('kids')]);
+    fxStudentRoutes(app.api, 'kids', fxJourney(practiceHomework: true));
     app.api
       ..on('GET', 'learning/homework', {
         'data': [
@@ -799,8 +511,8 @@ void main() {
   });
 
   testWidgets('the kids\' sticker album reads the stickers of their journey', (tester) async {
-    final app = await TestApp.create(accounts: [_student('kids')]);
-    final journey = _journey();
+    final app = await TestApp.create(accounts: [fxStudent('kids')]);
+    final journey = fxJourney();
     (journey['data']! as Map<String, Object?>)['stickers'] = {
       'earned': 1,
       'items': [
@@ -808,7 +520,7 @@ void main() {
         {'key': 'rocket', 'name': 'صاروخ', 'earned': false},
       ],
     };
-    _studentRoutes(app.api, 'kids', journey);
+    fxStudentRoutes(app.api, 'kids', journey);
     await _open(tester, app);
     _router(tester).go('/kids/more/stickers');
     await frames(tester, 12);
@@ -819,8 +531,8 @@ void main() {
   });
 
   testWidgets('the old places lead to the journey', (tester) async {
-    final app = await TestApp.create(accounts: [_student('kids')]);
-    _studentRoutes(app.api, 'kids', _journey());
+    final app = await TestApp.create(accounts: [fxStudent('kids')]);
+    fxStudentRoutes(app.api, 'kids', fxJourney());
     app.api.on('GET', 'games/creatures', {'data': <Object>[]});
     await _open(tester, app);
     final router = _router(tester);
@@ -838,8 +550,8 @@ void main() {
   });
 
   testWidgets('the old places lead to the journey in the older looks and the family', (tester) async {
-    final app = await TestApp.create(accounts: [_student('teen'), guardian]);
-    _studentRoutes(app.api, 'teen', _journey(stage: 'teen'));
+    final app = await TestApp.create(accounts: [fxStudent('teen'), guardian]);
+    fxStudentRoutes(app.api, 'teen', fxJourney(stage: 'teen'));
     await _open(tester, app);
     var router = _router(tester);
     for (final (from, to) in [('/teen/plan', '/teen/journey'), ('/teen/plan/games', '/teen/journey'), ('/teen/goals', '/teen/journey')]) {

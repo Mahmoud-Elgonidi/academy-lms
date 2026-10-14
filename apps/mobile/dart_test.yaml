@@ -1,0 +1,5 @@
+tags:
+  golden:
+    description: >-
+      Pictures of the kids' look, which no redesign may change. Make them again only on
+      purpose: `flutter test --update-goldens test/goldens` on Linux with CI's Flutter.
