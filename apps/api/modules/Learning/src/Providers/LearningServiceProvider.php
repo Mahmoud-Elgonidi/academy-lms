@@ -11,6 +11,7 @@ use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Enrollment\Contracts\Events\CurriculumAttached;
 use Modules\Learning\Console\SweepLearningCommand;
+use Modules\Learning\Console\TryRecitationCommand;
 use Modules\Learning\Contracts\Events\CheerSent;
 use Modules\Learning\Contracts\Events\HomeworkAssigned;
 use Modules\Learning\Contracts\Events\HomeworkReviewed;
@@ -29,6 +30,7 @@ use Modules\Learning\Http\Web\MaterialController;
 use Modules\Learning\Http\Web\SubmissionFileController;
 use Modules\Learning\LearningService;
 use Modules\Learning\Listeners\OpenReportWhenSessionCloses;
+use Modules\Learning\Listeners\QueueRecitationCheck;
 use Modules\Learning\Listeners\RebuildProgressOnProgramChange;
 use Modules\Learning\Listeners\SendLearningNotifications;
 use Modules\Learning\Live\HomeworkChanged;
@@ -87,6 +89,7 @@ final class LearningServiceProvider extends ServiceProvider
         Event::listen(HomeworkReviewed::class, [SendLearningNotifications::class, 'homeworkReviewed']);
         Event::listen(NodeMastered::class, [SendLearningNotifications::class, 'nodeMastered']);
         Event::listen(HomeworkSubmitted::class, [SendLearningNotifications::class, 'homeworkSubmitted']);
+        Event::listen(HomeworkSubmitted::class, QueueRecitationCheck::class);
         Event::listen(SessionReportOverdue::class, [SendLearningNotifications::class, 'reportOverdue']);
         Event::listen(CheerSent::class, [SendLearningNotifications::class, 'cheerSent']);
         Event::listen(SessionFinalized::class, [SendLearningNotifications::class, 'lessonStars']);
@@ -97,7 +100,7 @@ final class LearningServiceProvider extends ServiceProvider
         $this->app->make(LiveSignals::class)->on('practice', fn (string $userId) => new PracticeChanged($userId));
 
         if ($this->app->runningInConsole()) {
-            $this->commands([SweepLearningCommand::class]);
+            $this->commands([SweepLearningCommand::class, TryRecitationCommand::class]);
         }
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {

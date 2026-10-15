@@ -69,6 +69,21 @@ final class CurriculumService implements CurriculumApi
             ->all();
     }
 
+    public function textSources(array $nodeIds): array
+    {
+        if ($nodeIds === []) {
+            return [];
+        }
+        $out = [];
+        foreach (Node::query()->whereIn('id', $nodeIds)->whereNotNull('text_source')->get(['id', 'text_source']) as $node) {
+            if ($source = TextSource::fromArray($node->text_source)) {
+                $out[$node->id] = $source;
+            }
+        }
+
+        return $out;
+    }
+
     public function passage(TextSource $source): ?Passage
     {
         if ($source->isQuran()) {

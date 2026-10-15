@@ -76,7 +76,8 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->scopedIf(AcademyAi::class, NoAi::class);
         $this->app->singletonIf(LanguageModel::class, NoAi::class);
         $this->app->singletonIf(SpeechToText::class, NoAi::class);
-        $this->app->singletonIf(RecitationEngine::class, SpeechRecitation::class);
+        // Made each time, so it hears through whatever speech to text is bound then.
+        $this->app->bindIf(RecitationEngine::class, SpeechRecitation::class);
         // The Quran's text: none until Curriculum binds its copy.
         $this->app->singletonIf(QuranSource::class, NoQuranSource::class);
         // What each module holds about a person, for the Privacy module's copies and erasures.
@@ -151,7 +152,7 @@ final class SharedKernelServiceProvider extends ServiceProvider
         // A sync job runs inside the request (or command) that dispatched it,
         // which still needs its academy afterwards: only workers clear it.
         $clear = function (JobProcessed|JobFailed|JobExceptionOccurred $event): void {
-            if ($event->connectionName !== 'sync') {
+            if (config("queue.connections.{$event->connectionName}.driver", $event->connectionName) !== 'sync') {
                 $this->app->make(TenantContext::class)->clear();
             }
         };

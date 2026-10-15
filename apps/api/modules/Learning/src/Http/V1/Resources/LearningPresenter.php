@@ -109,15 +109,21 @@ final class LearningPresenter
                 'label' => $h->practice_result === null ? __('learning::homework.practice.waiting')
                     : __('learning::homework.practice.result', ['correct' => $h->practice_result['correct'], 'total' => $h->practice_result['total'], 'stars' => $h->practice_result['stars'], 'game' => $h->practice_result['game']]),
             ] : null,
-            'submissions' => $h->submissions->map(fn (HomeworkSubmission $s) => [
-                'id' => $s->id,
-                'body' => $s->body,
-                'file' => $s->file_path === null ? null : [
-                    'name' => $s->file_name, 'mime' => $s->mime, 'size' => $s->size, 'is_audio' => $s->isAudio(),
-                    'url' => route('learning.submissions.file', ['submission' => $s->id]),
-                ],
-                'submitted_at' => $this->time->present($s->submitted_at),
-            ])->values()->all(),
+            'submissions' => $h->submissions->map(fn (HomeworkSubmission $s) => $this->submission($s))->values()->all(),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public function submission(HomeworkSubmission $s): array
+    {
+        return [
+            'id' => $s->id,
+            'body' => $s->body,
+            'file' => $s->file_path === null ? null : [
+                'name' => $s->file_name, 'mime' => $s->mime, 'size' => $s->size, 'is_audio' => $s->isAudio(),
+                'url' => route('learning.submissions.file', ['submission' => $s->id]),
+            ],
+            'submitted_at' => $this->time->present($s->submitted_at),
         ];
     }
 

@@ -40,6 +40,14 @@ interface CurriculumApi
      */
     public function practiceItems(array $nodeIds): array;
 
+    /**
+     * These lessons' texts, for those that have one.
+     *
+     * @param  list<string>  $nodeIds
+     * @return array<string, TextSource> by lesson
+     */
+    public function textSources(array $nodeIds): array;
+
     /** A lesson's text as it is read (the Quran's words from the platform's copy); null when it is not there. */
     public function passage(TextSource $source): ?Passage;
 

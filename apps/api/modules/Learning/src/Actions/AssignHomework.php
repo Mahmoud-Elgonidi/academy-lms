@@ -10,7 +10,7 @@ use Modules\Learning\Models\Homework;
 /** Sets homework for a student, usually from the lesson report. */
 final class AssignHomework
 {
-    /** @param  array{teacher_id: string, student_id: string, enrollment_id?: ?string, session_id?: ?string, report_id?: ?string, title: string, instructions?: ?string, accepts?: ?string, due_at: CarbonImmutable, practice_nodes?: ?list<string>, practice_game?: ?string}  $data */
+    /** @param  array{teacher_id: string, student_id: string, enrollment_id?: ?string, session_id?: ?string, report_id?: ?string, title: string, instructions?: ?string, accepts?: ?string, due_at: CarbonImmutable, practice_nodes?: ?list<string>, practice_game?: ?string, expected?: ?array<string, mixed>}  $data */
     public function handle(array $data): Homework
     {
         return DB::transaction(function () use ($data) {
@@ -26,6 +26,7 @@ final class AssignHomework
                 'due_at' => $data['due_at'],
                 'practice_nodes' => ($data['practice_nodes'] ?? null) ?: null,
                 'practice_game' => ($data['practice_game'] ?? null) ?: null,
+                'expected' => ($data['expected'] ?? null) ?: null,
             ]);
             DB::afterCommit(fn () => event(new HomeworkAssigned($homework->academy_id, $homework->id, $homework->student_id, $homework->teacher_id, $homework->due_at->utc()->toIso8601ZuluString())));
 

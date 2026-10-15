@@ -7613,7 +7613,7 @@
         "/v1/teacher/reports/{report}": {
             "get": {
                 "operationId": "teacher.reports.show",
-                "description": "The report with today's plan, the lessons to choose from, the homework set from it, the roadmap, and the\nsubject's own questions (`template`, null when it has none); send their answers as `answers` by key.",
+                "description": "The report with today's plan, the lessons to choose from, the homework set from it, the roadmap, and the\nsubject's own questions (`template`, null when it has none); send their answers as `answers` by key.\nHomework handed in by voice may say what to recite (`homework.expected`: surah, from, to) when\n`assist.recitation_check`; `expected_suggestion` is the passage of the report's lessons' text.",
                 "summary": "A report to write or correct",
                 "tags": [
                     "Learning"
@@ -8444,15 +8444,130 @@
                                                                         "timezone",
                                                                         "label"
                                                                     ]
+                                                                },
+                                                                "check": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "description": "The recording's check against what it asks to recite (null: none).",
+                                                                    "properties": {
+                                                                        "status": {
+                                                                            "type": "string",
+                                                                            "description": "pending, ready, failed"
+                                                                        },
+                                                                        "status_label": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "failure": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ],
+                                                                            "description": "Why it could not be checked, in the reader's words."
+                                                                        },
+                                                                        "summary": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "summary_label": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "verses": {
+                                                                            "description": "Each verse's words: state ok, missing or wrong, and what was said instead.",
+                                                                            "anyOf": [
+                                                                                {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                {
+                                                                                    "type": "array",
+                                                                                    "items": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "minItems": 0,
+                                                                                    "maxItems": 0
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "extra": {
+                                                                            "description": "Words said that are not in the text, after the word they followed (counted from 1 through the passage).",
+                                                                            "anyOf": [
+                                                                                {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                {
+                                                                                    "type": "array",
+                                                                                    "items": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "minItems": 0,
+                                                                                    "maxItems": 0
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "heard": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "note": {
+                                                                            "type": "string",
+                                                                            "const": "A help while marking, not a mark: the words are heard automatically and can be wrong, so listen to the recording yourself."
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "status",
+                                                                        "status_label",
+                                                                        "failure",
+                                                                        "summary",
+                                                                        "summary_label",
+                                                                        "verses",
+                                                                        "extra",
+                                                                        "heard",
+                                                                        "note"
+                                                                    ]
                                                                 }
                                                             },
                                                             "required": [
                                                                 "id",
                                                                 "body",
                                                                 "file",
-                                                                "submitted_at"
+                                                                "submitted_at",
+                                                                "check"
                                                             ]
                                                         }
+                                                    },
+                                                    "expected": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "from": {
+                                                                "type": "integer"
+                                                            },
+                                                            "to": {
+                                                                "type": "integer"
+                                                            },
+                                                            "title": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "from",
+                                                            "to",
+                                                            "title"
+                                                        ]
                                                     }
                                                 },
                                                 "required": [
@@ -8471,7 +8586,8 @@
                                                     "feedback",
                                                     "reviewed_at",
                                                     "practice",
-                                                    "submissions"
+                                                    "submissions",
+                                                    "expected"
                                                 ]
                                             }
                                         }
@@ -8812,15 +8928,130 @@
                                                                     "timezone",
                                                                     "label"
                                                                 ]
+                                                            },
+                                                            "check": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "description": "The recording's check against what it asks to recite (null: none).",
+                                                                "properties": {
+                                                                    "status": {
+                                                                        "type": "string",
+                                                                        "description": "pending, ready, failed"
+                                                                    },
+                                                                    "status_label": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "failure": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "Why it could not be checked, in the reader's words."
+                                                                    },
+                                                                    "summary": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ]
+                                                                    },
+                                                                    "summary_label": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ]
+                                                                    },
+                                                                    "verses": {
+                                                                        "description": "Each verse's words: state ok, missing or wrong, and what was said instead.",
+                                                                        "anyOf": [
+                                                                            {
+                                                                                "type": "string"
+                                                                            },
+                                                                            {
+                                                                                "type": "array",
+                                                                                "items": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "minItems": 0,
+                                                                                "maxItems": 0
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    "extra": {
+                                                                        "description": "Words said that are not in the text, after the word they followed (counted from 1 through the passage).",
+                                                                        "anyOf": [
+                                                                            {
+                                                                                "type": "string"
+                                                                            },
+                                                                            {
+                                                                                "type": "array",
+                                                                                "items": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "minItems": 0,
+                                                                                "maxItems": 0
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    "heard": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ]
+                                                                    },
+                                                                    "note": {
+                                                                        "type": "string",
+                                                                        "const": "A help while marking, not a mark: the words are heard automatically and can be wrong, so listen to the recording yourself."
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "status",
+                                                                    "status_label",
+                                                                    "failure",
+                                                                    "summary",
+                                                                    "summary_label",
+                                                                    "verses",
+                                                                    "extra",
+                                                                    "heard",
+                                                                    "note"
+                                                                ]
                                                             }
                                                         },
                                                         "required": [
                                                             "id",
                                                             "body",
                                                             "file",
-                                                            "submitted_at"
+                                                            "submitted_at",
+                                                            "check"
                                                         ]
                                                     }
+                                                },
+                                                "expected": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "surah": {
+                                                            "type": "integer"
+                                                        },
+                                                        "from": {
+                                                            "type": "integer"
+                                                        },
+                                                        "to": {
+                                                            "type": "integer"
+                                                        },
+                                                        "title": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "surah",
+                                                        "from",
+                                                        "to",
+                                                        "title"
+                                                    ]
                                                 }
                                             },
                                             "required": [
@@ -8839,7 +9070,8 @@
                                                 "feedback",
                                                 "reviewed_at",
                                                 "practice",
-                                                "submissions"
+                                                "submissions",
+                                                "expected"
                                             ]
                                         }
                                     },
@@ -8855,6 +9087,101 @@
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/teacher/texts/quran": {
+            "get": {
+                "operationId": "teacher.texts.quran",
+                "description": "To choose what homework asks to recite: each surah's number, names and verses, and the attribution its text\nasks to be shown with (empty until the platform has its copy).",
+                "summary": "The Quran's surahs",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "number": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name_ar": {
+                                                        "type": "string"
+                                                    },
+                                                    "name_en": {
+                                                        "type": "string"
+                                                    },
+                                                    "verses": {
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "number",
+                                                    "name_ar",
+                                                    "name_en",
+                                                    "verses"
+                                                ]
+                                            }
+                                        },
+                                        "attribution": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "attribution"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"

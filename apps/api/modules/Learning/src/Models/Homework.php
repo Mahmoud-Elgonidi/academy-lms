@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Curriculum\Contracts\DTOs\TextSource;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
@@ -31,6 +32,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?list<string> $practice_nodes the report's lessons whose practice it asks for
  * @property ?array{correct: int, total: int, stars: int, game: string, played_at: string} $practice_result the best round played for it
  * @property ?string $practice_game the catalog game the teacher chose for it
+ * @property ?array<string, mixed> $expected what is to be recited (a Curriculum TextSource: a passage of the Quran), checked word by word for the teacher
  */
 final class Homework extends Model
 {
@@ -45,20 +47,26 @@ final class Homework extends Model
 
     protected $fillable = [
         'enrollment_id', 'session_id', 'report_id', 'teacher_id', 'student_id', 'title', 'instructions', 'accepts', 'due_at',
-        'status', 'grade', 'feedback', 'reviewed_by', 'reviewed_at', 'practice_nodes', 'practice_result', 'practice_game',
+        'status', 'grade', 'feedback', 'reviewed_by', 'reviewed_at', 'practice_nodes', 'practice_result', 'practice_game', 'expected',
     ];
 
     protected $attributes = ['accepts' => 'any', 'status' => 'assigned'];
 
     protected function casts(): array
     {
-        return ['due_at' => 'immutable_datetime', 'reviewed_at' => 'immutable_datetime', 'grade' => 'integer', 'practice_nodes' => 'array', 'practice_result' => 'array'];
+        return ['due_at' => 'immutable_datetime', 'reviewed_at' => 'immutable_datetime', 'grade' => 'integer', 'practice_nodes' => 'array', 'practice_result' => 'array', 'expected' => 'array'];
     }
 
     /** Whether it comes with practice in the games. */
     public function hasPractice(): bool
     {
         return $this->practice_nodes !== null && $this->practice_nodes !== [];
+    }
+
+    /** What is to be recited, when it says. */
+    public function expectedSource(): ?TextSource
+    {
+        return TextSource::fromArray($this->expected);
     }
 
     /** @return HasMany<HomeworkSubmission, $this> */

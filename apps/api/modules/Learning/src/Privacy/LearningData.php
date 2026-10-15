@@ -24,7 +24,10 @@ final class LearningData implements PersonalDataSource
 
     public function export(string $userId): PersonalDataPart
     {
-        $submissions = $this->submissions($userId)->get(['s.homework_id', 's.body', 's.file_path', 's.file_name', 's.submitted_at']);
+        $submissions = $this->submissions($userId)->get(['s.id', 's.homework_id', 's.body', 's.file_path', 's.file_name', 's.submitted_at']);
+        // A recording's check (for the teacher) is about the learner too: what was heard and how it went.
+        $checks = DB::table('submission_checks')->whereIn('submission_id', $submissions->pluck('id'))->where('status', 'ready')
+            ->get(['submission_id', 'heard', 'result', 'checked_at'])->keyBy('submission_id');
         $files = [];
         foreach ($submissions as $i => $s) {
             if ($s->file_path !== null) {
@@ -36,7 +39,12 @@ final class LearningData implements PersonalDataSource
             'homework' => DB::table('homework')->where('student_id', $userId)->orderBy('created_at')
                 ->get(['id', 'title', 'instructions', 'due_at', 'status', 'grade', 'feedback', 'created_at'])
                 ->map(fn (object $h) => (array) $h + ['handed_in' => $submissions->where('homework_id', $h->id)
-                    ->map(fn (object $s) => ['text' => $s->body, 'file' => $s->file_path === null ? null : ($files[$s->file_path] ?? null), 'at' => $s->submitted_at])->values()->all()])
+                    ->map(fn (object $s) => ['text' => $s->body, 'file' => $s->file_path === null ? null : ($files[$s->file_path] ?? null), 'at' => $s->submitted_at]
+                        + (isset($checks[$s->id]) ? ['recitation_check' => [
+                            'heard' => $checks[$s->id]->heard,
+                            'summary' => json_decode((string) $checks[$s->id]->result, true)['summary'] ?? null,
+                            'at' => $checks[$s->id]->checked_at,
+                        ]] : []))->values()->all()])
                 ->all(),
             'lesson_reports' => DB::table('session_reports')->where('student_id', $userId)->where('status', 'submitted')->orderBy('session_starts_at')
                 ->get(['session_starts_at as lesson_at', 'kind', 'engagement', 'overall', 'notes_for_student', 'absence_note', 'submitted_at'])->map(fn (object $r) => (array) $r)->all(),

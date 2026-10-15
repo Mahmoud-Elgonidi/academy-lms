@@ -309,6 +309,18 @@ docker compose exec web php artisan queue:failed           # a helper's job that
   providers' keys and that the models named exist.
   Each call's model, tokens, seconds of audio and outcome are kept in `ai_usage` (never what was said or
   sent, never who), which the academy's settings page counts for the month.
+- **Before an academy turns on the recitation check**: measure it on real recordings whose mistakes a
+  teacher marked by ear. Put the recordings in a folder with a `cases.json`
+  (`[{"file": "01.webm", "surah": 78, "from": 1, "to": 5, "mistakes": [{"verse": 3, "word": 2, "kind": "missing"}]}]`,
+  a word counted from 1 in its verse), copy it into the container, and run it; it keeps nothing and
+  involves no academy, but the recordings go to the speech provider like any check. `--heard` also prints
+  what was heard (on the screen only).
+
+  ```bash
+  docker compose cp ./recitations web:/tmp/recitations
+  docker compose exec web php artisan learning:try-recitation /tmp/recitations
+  docker compose exec web rm -r /tmp/recitations
+  ```
 
 ## The Quran's text
 

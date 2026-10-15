@@ -16,6 +16,8 @@ Route::middleware(['auth:sanctum', 'can:reports.write'])->prefix('teacher')->gro
     Route::post('reports/{report}/draft', [TeacherReportsController::class, 'draft'])->middleware(['plan.feature:ai', 'throttle:20,60'])->name('teacher.reports.draft');
     Route::get('homework', [TeacherReportsController::class, 'homework'])->name('teacher.homework.index');
     Route::post('homework/{homework}/review', [TeacherReportsController::class, 'mark'])->name('teacher.homework.review');
+    // The Quran's surahs, to choose what homework asks to recite.
+    Route::get('texts/quran', [TeacherReportsController::class, 'surahs'])->name('teacher.texts.quran');
 });
 
 // Students and guardians: the roadmap, the reports and the homework of each child.
