@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { CreatureArt } from '@/components/games/art';
 import type { PlayTarget } from '@/lib/games/types';
@@ -19,7 +19,7 @@ import { ChestCard, ChestOpened, CheersCard, CourseChips, EggCard, EggHatch, isl
  * lessons; a lesson opens with its missions, the race against yourself and
  * the games that play its items.
  */
-export function MiddleJourney({ map, learnerName, autoplay }: { map: JourneyMap; learnerName: string; autoplay: PlayTarget | null }) {
+export function MiddleJourney({ map, learnerName, autoplay, hifz }: { map: JourneyMap; learnerName: string; autoplay: PlayTarget | null; hifz?: ReactNode }) {
   const t = useTranslations('journey');
   const stars = hasStars(map);
   const layer = stars ? map.games : null;
@@ -83,6 +83,7 @@ export function MiddleJourney({ map, learnerName, autoplay }: { map: JourneyMap;
       {course ? <CourseState course={course} stage="middle" block /> : null}
 
       <MissionList missions={missions} map={map} player={player} stars={stars} onStation={setSheet} />
+      {hifz}
 
       {stars && (layer || map.chest) ? (
         <div className="grid gap-3 sm:grid-cols-2">

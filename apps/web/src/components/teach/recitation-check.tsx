@@ -1,12 +1,7 @@
 import { useTranslations } from 'next-intl';
-import { Badge, join } from '@/components/ui';
-import { tokensOf, type RecitationCheck as Check } from '@/lib/teach/recitation';
-
-const wordClass = {
-  ok: '',
-  missing: 'bg-attention-soft text-attention line-through decoration-dotted',
-  wrong: 'bg-danger-soft text-danger',
-} as const;
+import { RecitedWords } from '@/components/recited-words';
+import { Badge } from '@/components/ui';
+import type { RecitationCheck as Check } from '@/lib/teach/recitation';
 
 /**
  * One recording's check, word by word, on the teacher's marking page alone:
@@ -15,6 +10,7 @@ const wordClass = {
  */
 export function RecitationCheck({ check }: { check: Check }) {
   const t = useTranslations('teach');
+  const words = useTranslations('recited');
   const tone = check.status === 'ready' ? 'brand' : check.status === 'failed' ? 'danger' : 'muted';
 
   return (
@@ -27,36 +23,10 @@ export function RecitationCheck({ check }: { check: Check }) {
       {check.status === 'ready' ? (
         <>
           {check.summary_label ? <p className="text-sm font-semibold">{check.summary_label}</p> : null}
-          <p dir="rtl" lang="ar" className="text-lg leading-[2.3]">
-            {tokensOf(check).map((token, i) =>
-              token.kind === 'verse' ? (
-                <span key={i} className="mx-1 text-xs text-muted">
-                  ({token.number})
-                </span>
-              ) : token.kind === 'extra' ? (
-                <span key={i}>
-                  <span className="rounded-sm bg-info-soft px-0.5 italic text-info" title={t('reciteExtra')}>
-                    {token.text}
-                  </span>{' '}
-                </span>
-              ) : (
-                <span key={i}>
-                  <span className={join('rounded-sm px-0.5', wordClass[token.state])} title={token.state === 'wrong' ? t('reciteSaid', { word: token.heard ?? '' }) : token.state === 'missing' ? t('reciteMissing') : undefined}>
-                    {token.text}
-                    {token.state === 'wrong' && token.heard ? <small className="ms-1 text-[0.7em] text-muted">({token.heard})</small> : null}
-                  </span>{' '}
-                </span>
-              ),
-            )}
-          </p>
-          <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-            <span className={join('rounded-sm px-1', wordClass.missing)}>{t('reciteMissing')}</span>
-            <span className={join('rounded-sm px-1', wordClass.wrong)}>{t('reciteWrong')}</span>
-            <span className="rounded-sm bg-info-soft px-1 italic text-info">{t('reciteExtra')}</span>
-          </p>
+          <RecitedWords check={check} />
           {check.heard ? (
             <details className="text-sm">
-              <summary className="cursor-pointer text-muted">{t('reciteHeard')}</summary>
+              <summary className="cursor-pointer text-muted">{words('heard')}</summary>
               <p dir="rtl" lang="ar" className="mt-1">
                 {check.heard}
               </p>

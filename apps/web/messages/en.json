@@ -103,7 +103,8 @@
       "account": "My account",
       "myData": "My data",
       "tellUs": "Report a concern",
-      "journey": "Journey"
+      "journey": "Journey",
+      "hifz": "Hifz map"
     },
     "kids": {
       "menu": "Menu",
@@ -116,7 +117,8 @@
       "notifications": "Messages",
       "more": "More",
       "help": "Help",
-      "tellUs": "Tell a grown-up"
+      "tellUs": "Tell a grown-up",
+      "hifz": "My hifz map"
     },
     "middle": {
       "menu": "Menu",
@@ -131,7 +133,8 @@
       "help": "Ask for help",
       "recordings": "My lesson recordings",
       "account": "My account",
-      "tellUs": "Tell us"
+      "tellUs": "Tell us",
+      "hifz": "My hifz map"
     },
     "teen": {
       "menu": "Menu",
@@ -146,7 +149,8 @@
       "help": "Help",
       "recordings": "My lesson recordings",
       "account": "My account",
-      "tellUs": "Report a concern"
+      "tellUs": "Report a concern",
+      "hifz": "Hifz"
     },
     "help": "Help",
     "recordings": "My lesson recordings",
@@ -547,12 +551,7 @@
     "reciteSurah": "Surah",
     "reciteFrom": "From verse",
     "reciteTo": "To verse",
-    "reciteWhat": "To recite: {title}",
-    "reciteMissing": "Missed",
-    "reciteWrong": "Wrong",
-    "reciteExtra": "Extra",
-    "reciteSaid": "Said: {word}",
-    "reciteHeard": "What was heard"
+    "reciteWhat": "To recite: {title}"
   },
   "errors": {
     "title": "Something went wrong",
@@ -1102,6 +1101,106 @@
       "eggReady": "Your egg is ready!",
       "eggTap": "Tap it 3 times",
       "chest": "This week's chest"
+    }
+  },
+  "recited": {
+    "missing": "Missed",
+    "wrong": "Wrong",
+    "extra": "Extra",
+    "said": "Said: {word}",
+    "heard": "What was heard"
+  },
+  "hifz": {
+    "noLearner": "No learner to show a hifz map for.",
+    "of": "{name}'s hifz map",
+    "none": "The Quran's text is not here yet; the map shows once it is.",
+    "lead": "Each row is a part, each square a page in how well it is held now.",
+    "mapLabel": "Hifz map: {memorized} of {total} pages memorized",
+    "pageOf": "Page {page} · {strength}",
+    "page": "Page {page}",
+    "pagesN": "{n, plural, =0 {No pages} =1 {1 page} other {# pages}}",
+    "juz": "Part {n}",
+    "counts": {
+      "memorized": "pages memorized",
+      "learning": "being learned",
+      "due": "due today"
+    },
+    "wird": "Today's review",
+    "wirdLeft": "{n, plural, =1 {1 page left today} other {# pages left today}}",
+    "wirdProgress": "{done} of {daily} done",
+    "wirdDone": "Today's review is done. Well done!",
+    "wirdNone": "No pages to review today.",
+    "overdue": "{n, plural, =1 {1 day late} other {# days late}}",
+    "card": "Hifz review",
+    "latest": "Last recitation: page {page}",
+    "back": "Hifz map",
+    "dueAt": "Next review {when}",
+    "text": "The page's text",
+    "surah": "Surah {name}",
+    "reveal": "Show the page",
+    "hide": "Hide the page",
+    "reciteFirst": "Recite the page from memory first, then show it and check.",
+    "howWent": "How did it go?",
+    "grades": {
+      "1": "Forgot it",
+      "2": "Hard",
+      "3": "Good",
+      "4": "Easy"
+    },
+    "graded": "Saved: {grade}",
+    "next": "Next page",
+    "toMap": "Back to the map",
+    "record": "Recite the page",
+    "recordLead": "Record the page from memory, and it is checked word by word.",
+    "stop": "Done",
+    "send": "Send the recitation",
+    "recordAgain": "Record again",
+    "noRecorder": "This browser does not record sound. Grade the page yourself instead.",
+    "listening": "Listening to the recitation…",
+    "listeningHint": "The result shows here by itself.",
+    "result": "The recitation's check",
+    "counted": "Counted as the page's review:",
+    "again": "Recite again",
+    "selfInstead": "Grade the page yourself",
+    "selfFallback": "You can recite it from memory and grade it yourself below.",
+    "kids": {
+      "left": "{n, plural, =1 {1 page left to recite} other {# pages left to recite}}",
+      "wirdDone": "You finished today's review! 🎉",
+      "record": "Recite a page",
+      "reveal": "Show me the page",
+      "reciteFirst": "Recite the page from memory first, then look at it.",
+      "listening": "Listening to you… wait a little",
+      "grades": {
+        "1": "Forgot it 😅",
+        "2": "A bit hard",
+        "3": "Good 👍",
+        "4": "Super easy ⭐"
+      }
+    },
+    "teacher": {
+      "title": "Hifz map",
+      "emptyLead": "No pages on the map yet. Say what the student already knows.",
+      "tell": "Say what they know",
+      "tellLead": "Choose parts, surahs or pages, and how well. Each page starts as memorized, and comes up for review as that says.",
+      "parts": "Parts",
+      "surahs": "Surahs",
+      "surahSearch": "Type a surah's name or number",
+      "noSurah": "No surah by that name.",
+      "pages": "Pages",
+      "pagesHint": "For example: 582, 583 or 590-592",
+      "badPages": "These pages could not be read: {pages}",
+      "howWell": "How well?",
+      "chosen": "{n, plural, =0 {No pages chosen yet} =1 {1 page} other {# pages}}",
+      "chooseFirst": "Choose a part, a surah or a page.",
+      "save": "Save",
+      "marked": "{n, plural, =0 {No pages saved} =1 {1 page saved} other {# pages saved}}",
+      "recent": "Recent reviews",
+      "noRecent": "No reviews in the last two weeks.",
+      "clear": "Take pages off",
+      "clearLead": "The pages you take off are new on the map again; their past reviews stay.",
+      "clearButton": "Take them off",
+      "clearConfirm": "Take these pages off the map?",
+      "cleared": "{n, plural, =0 {No pages taken off} =1 {1 page taken off} other {# pages taken off}}"
     }
   }
 }

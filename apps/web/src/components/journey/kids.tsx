@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { useCourseStateText } from '@/components/family/course-state';
@@ -54,13 +54,15 @@ const still = () => typeof window !== 'undefined' && window.matchMedia('(prefers
  * own items, then the missions strip, the egg and the week's chest. A round
  * plays over it; its stars, a creature hatching and the egg come after.
  */
-export function KidsJourney({ map, learnerName, autoplay, openIsland }: {
+export function KidsJourney({ map, learnerName, autoplay, openIsland, hifz }: {
   map: JourneyMap;
   learnerName: string;
   /** A homework's practice to start on arrival (?homework=). */
   autoplay: PlayTarget | null;
   /** An island to open on arrival (back from the album: its art's key). */
   openIsland: string | null;
+  /** Today's hifz review, when the learner has a hifz map. */
+  hifz?: ReactNode;
 }) {
   const t = useTranslations('journey');
   const games = useTranslations('games');
@@ -383,6 +385,8 @@ export function KidsJourney({ map, learnerName, autoplay, openIsland }: {
             </ul>
           )}
         </section>
+
+        {hifz}
 
         {stars ? (
           <div className="jr-row">

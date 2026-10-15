@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { HifzCard } from '@/components/hifz/card';
 import { Icon } from '@/components/icons';
 import { Card, Empty, Progress, SectionTitle, buttonLook, join } from '@/components/ui';
 import type { FamilyLesson, Homework, Invoices, Learner } from '@/lib/family/types';
@@ -96,7 +97,7 @@ function openHomework(list: Homework[]): Homework | undefined {
   return list.find((h) => h.status === 'assigned' || h.status === 'missed');
 }
 
-/** A guardian's (or an adult student's) home: the next lesson, lessons left and what is owed, the journey's card, homework, and notices. */
+/** A guardian's (or an adult student's) home: the next lesson, lessons left and what is owed, the journey's card (and today's hifz review), homework, and notices. */
 export async function ClassicHome({ name, learner, lessons, notices, balanceLessons, invoices, homework, journey }: {
   name: string;
   learner: Learner;
@@ -137,6 +138,7 @@ export async function ClassicHome({ name, learner, lessons, notices, balanceLess
         ) : null}
       </div>
       <JourneyCard journey={journey} learner={learner} />
+      {journey.hifz ? <HifzCard hifz={journey.hifz} /> : null}
       <HomeworkDue homework={openHomework(homework)} />
       {notices.length > 0 ? (
         <section>

@@ -12,9 +12,10 @@ export type Realtime = { enabled: boolean; key: string | null; host: string | nu
  * The person's own signals (no data): the page asks the API again for what it
  * shows. The journey follows lessons (a lesson's stars, the next one),
  * homework (missions, the week's chest) and practice (rounds, the egg,
- * creatures, a guardian's limits).
+ * creatures, a guardian's limits); the hifz map and its daily review follow
+ * hifz (a page reviewed, marked, or recited and then heard).
  */
-export const SIGNALS = ['lessons.changed', 'homework.changed', 'inbox.changed', 'payments.changed', 'consents.changed', 'tickets.changed', 'privacy.changed', 'concerns.changed', 'checks.changed', 'messages.changed', 'practice.changed'] as const;
+export const SIGNALS = ['lessons.changed', 'homework.changed', 'inbox.changed', 'payments.changed', 'consents.changed', 'tickets.changed', 'privacy.changed', 'concerns.changed', 'checks.changed', 'messages.changed', 'practice.changed', 'hifz.changed'] as const;
 
 /** The relay's public channel: "alive" every minute, "resync" when it starts (every open screen catches up). */
 export const RELAY = { channel: 'lms.live', alive: 'alive', resync: 'resync' } as const;

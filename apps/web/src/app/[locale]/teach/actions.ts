@@ -131,3 +131,21 @@ export async function sendDocument(form: FormData, key: string): Promise<Result>
 export async function saveMeetingLink(url: string): Promise<Result> {
   return result(await send('put', '/v1/teacher/meeting-link', { body: { url: url.trim() } }));
 }
+
+export type HifzChoice = { juz?: number[]; surahs?: number[]; pages?: number[] };
+
+/**
+ * Says what a student already knows by heart (whole parts, surahs or pages)
+ * and how well: each page starts again as memorized, due for review as that
+ * says. Back comes how many pages it marked.
+ */
+export async function markHifz(enrollment: string, choice: HifzChoice, strength: 'strong' | 'good' | 'weak'): Promise<Result & { count?: number }> {
+  const done = await send<{ data: { marked: number } }>('post', '/v1/teacher/students/{enrollment}/hifz/memorized', { params: { enrollment }, body: { ...choice, strength } });
+  return done.ok ? { ...result(done), count: done.data.data.marked } : result(done);
+}
+
+/** Takes pages off a student's map (marked by mistake): they are new again. */
+export async function clearHifz(enrollment: string, choice: HifzChoice): Promise<Result & { count?: number }> {
+  const done = await send<{ data: { cleared: number } }>('post', '/v1/teacher/students/{enrollment}/hifz/clear', { params: { enrollment }, body: choice });
+  return done.ok ? { ...result(done), count: done.data.data.cleared } : result(done);
+}

@@ -63,4 +63,8 @@ describe('the signals a page follows', () => {
   it('include what the journey shows: lessons, homework and practice (rounds, creatures, limits)', () => {
     expect(SIGNALS).toEqual(expect.arrayContaining(['lessons.changed', 'homework.changed', 'practice.changed']));
   });
+
+  it('include the hifz map’s: a page reviewed, marked, or recited and then heard', () => {
+    expect(SIGNALS).toContain('hifz.changed');
+  });
 });

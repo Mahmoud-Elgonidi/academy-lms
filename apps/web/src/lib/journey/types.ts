@@ -1,5 +1,6 @@
 import type { Look } from '../games/art';
 import type { Allowance, Creature, GameLimits, Glance } from '../games/types';
+import type { JourneyHifz } from '../hifz/types';
 import type { LocalTime } from '../time';
 
 /**
@@ -187,6 +188,8 @@ export type JourneyMap = {
   missions: Mission[];
   chest: Chest | null;
   games: JourneyGames | null;
+  /** Today's hifz review (pages left, done today, a day's pages); null until the learner has pages on their hifz map. */
+  hifz?: JourneyHifz | null;
   /** The guardians' cheers the student has not seen yet. */
   cheers: { id: string; kind: string; at: LocalTime | null }[];
   /** For a guardian: cheers they may still send today. */
