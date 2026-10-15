@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-// Guardians in /my on the phone, in the classic look: Ziad's and Laila's father (ziad.guardian).
+// Guardians in the phone app, in the classic look: Ziad's and Laila's father (ziad.guardian).
 // Each lesson has its own Egyptian narrator from the ElevenLabs library (all spoken on eleven_v4).
 const VOICES = {
   hany: '1hEuyycI7VQwusZo3Qbe',      // Hany - Calm & Friendly
@@ -13,25 +13,19 @@ const VOICES = {
   maged: 'amSNjVC0vWYiE8iGimVb',     // Maged Magdy - Calm, Natural and Balanced
   hoda: 'meAbY2VpJkt1q46qk56T',      // Hoda - Expressive and Distinctive
 };
-/** A page from the side menu, opened from the phone's menu button. */
-async function menu(s, label) {
-  await s.click(s.page.locator('.fi-topbar-open-sidebar-btn').first(), { settle: 700 });
-  await s.click(s.page.locator('.fi-sidebar-item').filter({ hasText: label }).locator('a').first(), { settle: 1500 });
-}
 /** A transfer receipt to upload (made once, off camera, into .media/). */
 async function receiptImage(s) {
   const file = join(dirname(fileURLToPath(import.meta.url)), '../.media/receipt.png');
   if (existsSync(file)) return file;
   const page = await s.page.context().browser().newPage({ viewport: { width: 420, height: 560 } });
   await page.setContent(`<body style="margin:0;font:18px system-ui;direction:rtl;background:#fff"><div style="padding:28px">
-    <div style="font-size:22px;font-weight:700;color:#5b2d8e">InstaPay</div><div style="margin:18px 0;font-size:40px;font-weight:700">758 ر.س.</div>
+    <div style="font-size:22px;font-weight:700;color:#5b2d8e">InstaPay</div><div style="margin:18px 0;font-size:40px;font-weight:700">198 ر.س.</div>
     <div>تم التحويل بنجاح</div><div style="color:#555;margin-top:10px">إلى: أكاديمية النور التجريبية</div><div style="color:#555">رقم العملية: 3058 2271 994</div>
     <div style="color:#555">الخميس 15 أكتوبر · 7:12 م</div></div></body>`);
   await page.screenshot({ path: file });
   await page.close();
   return file;
 }
-const widget = (s, n) => s.page.locator('.fi-wi-widget').nth(n);
 
 export default {
   key: 'guardian',
@@ -159,8 +153,8 @@ export default {
         await s.say("و«مواد الدرس»: ملفات المدرّس، يذاكر منها مع ابنه.", { voice: "وتحت «مواد الدرس»: الملفات اللي المدرّس رفعها للدرس اللي زياد فيه، زي جداول وتمارين، يفتحها ويذاكر منها معاه في البيت." });
         await s.point(s.page.getByRole('checkbox').first(), { hold: 1800 });
 
-        await s.say("وبعد كل حصة، تقرير المدرّس: من كارت «آخر تقرير».", { voice: "وبعد كل حصة، المدرّس بيكتب تقرير. نرجع للرئيسية، ونفتح كارت «آخر تقرير»." });
-        await s.click(s.button('رجوع'), { settle: 1400 });
+        await s.say("وبعد كل حصة، تقرير المدرّس: من كارت «آخر تقرير».", { voice: "وبعد كل حصة، المدرّس بيكتب تقرير. من الرئيسية، يفتح كارت «آخر تقرير»." });
+        await s.click(s.tab('الرئيسية'), { settle: 1600 });
         await s.scroll(s.button(/^الأربعاء 7 أكتوبر/));
         await s.click(s.button(/^الأربعاء 7 أكتوبر/), { settle: 1800 });
 
@@ -180,7 +174,7 @@ export default {
         await s.say("زياد يقدر يسلّم كتابة، أو بصوته، أو بصورة.", { voice: "وزياد يقدر يسلّم الواجب من هنا: يكتبه، أو يسجّل صوته، أو يصوّر الكرّاسة ويرفعها." });
         await s.point(s.button('سجّل صوتك'), { hold: 1600 });
 
-        await s.say("وآخر تصحيح: الدرجة، وتعليق المدرّس.", { voice: "وتحت آخر واجب اتصحّح: درجته، وتعليق المدرّس عليه، زي «ممتاز، انتبه للتنوين»." });
+        await s.say("وآخر تصحيح: الدرجة، وتعليق المدرّس.", { voice: "وتحت آخر واجب المدرّس صحّحه: درجته، وتعليق المدرّس عليه، زي «ممتاز، انتبه للتنوين»." });
         await s.show(s.button(/^4\/5/), { hold: 2200 });
       },
     },
@@ -206,11 +200,10 @@ export default {
         await s.scroll(s.button('انسخ'));
         await s.click(s.button('انسخ'), { settle: 1200 });
 
-        await s.say("وبعد ما يحوّل: «دفعت بالتحويل»، ويرفع الإيصال.", { voice: "وبعد ما يحوّل، يدوس «دَفَعْت بالتحويل»، ويختار دفع إزاي، ويكتب المبلغ، ويرفع صورة الإيصال." });
+        await s.say("وبعد ما يحوّل: «دفعت بالتحويل»، ويرفع الإيصال.", { voice: "وبعد ما يحوّل، يدوس «دَفَعْت بالتحويل»، ويختار دفع إزاي. المبلغ بيتكتب لوحده، ويرفع صورة الإيصال." });
         await s.scroll(s.button('دفعت بالتحويل'));
         await s.click(s.button('دفعت بالتحويل'), { settle: 1500 });
         await s.click(s.page.getByRole('checkbox', { name: 'InstaPay' }).first(), { settle: 500 });
-        await s.type(s.field('المبلغ اللي دفعته'), '758');
         const [chooser] = await Promise.all([s.page.waitForEvent('filechooser'), s.click(s.button('اختار صورة أو PDF'), { settle: 300 })]);
         await chooser.setFiles(receipt);
         await s.wait(1500);
@@ -259,6 +252,7 @@ export default {
         await s.point(s.button('العب'), { hold: 1600 });
 
         await s.say("«اتراجع إيه في اللعب»: الدرس، وكام مرّة، وأصعب سؤال.", { voice: "وجنبها، «اتراجع إيه في اللعب»: الدرس اللي زياد راجعه، وكام مرّة، وأصعب سؤال وقف قدامه. كده ولي الأمر عارف يراجع معاه إيه بالظبط." });
+        await s.scroll(s.says('أصعب سؤال'));
         await s.show(s.says('أصعب سؤال'), { hold: 2000 });
 
         await s.say("ووقت اللعب: أقصى وقت في اليوم، يختاره ولي الأمر.", { voice: "[warmly] وتحت، وقت اللعب: زياد لعب النهارده كام دقيقة، من أقصى وقت مسموح. ولي الأمر يقدر يغيّره: عشر دقايق، أو ربع ساعة، أو تلت ساعة، أو نص ساعة، أو يسيبه على اختيار الأكاديمية." });
@@ -275,36 +269,39 @@ export default {
       who: 'لولي الأمر',
       goal: 'ولي الأمر يتحكم في دخول ولاده وتسجيل حصصهم وبياناتهم.',
       learn: ['موافقتك على دخول ابنك لحسابه، وسحبها', 'الموافقة على تسجيل الحصص: إيه بيتسجل ومين يشوفه', 'بياناتي: تصحيح، ونسخة، وطلب مسح'],
-      start: '/my',
+      start: '/family/home',
       async steps(s) {
-        await s.say("من القايمة ← «خصوصية الأولاد»: موافقتك على دخول كل ابن لحسابه.", { voice: "[warmly] الولاد اللي أقل من تمنتاشر سنة، محتاجين موافقة ولي الأمر عشان يدخلوا حساباتهم ويحضروا بنفسهم. ده كله في القايمة، في «خصوصية الأولاد»." });
-        await menu(s, 'خصوصية الأولاد');
+        await s.say("«المزيد» ← «خصوصية الأولاد»: موافقة ولي الأمر على دخول ولاده.", { voice: "[warmly] الولاد اللي أقل من تمنتاشر سنة، محتاجين موافقة ولي الأمر عشان يدخلوا حساباتهم ويحضروا بنفسهم. ده كله في «المزيد»، في «خصوصية الأولاد»." });
+        await s.click(s.tab('المزيد'), { settle: 1400 });
+        await s.click(s.button('خصوصية الأولاد'), { settle: 1800 });
 
-        await s.say("كل ابن: وافقت إمتى، ولو حابب «اسحب الموافقة» في أي وقت.", { voice: "لكل ابن مكتوب إن ولي الأمر وافق، ويوم الموافقة. ولو في أي وقت حب يوقّف دخوله، يدوس «اسحب الموافقة»، فحسابه بيقفل لحد ما يوافق تاني." });
-        await s.show(s.page.locator('.pp-card').first(), { hold: 2000 });
+        await s.say("لكل ابن: موافق عليه، ويوم الموافقة، و«اسحب الموافقة».", { voice: "لكل ابن مكتوب إن ولي الأمر وافق، ويوم الموافقة. ولو في أي وقت حب يوقّف دخوله، يدوس «اسحب الموافقة»، فحسابه بيقفل لحد ما يوافق تاني." });
+        await s.show(s.page.getByRole('group', { name: /^زياد عمرو/ }).first(), { hold: 1600 });
+        await s.point(s.button('اسحب الموافقة'), { hold: 1600 });
 
-        await s.say("ومن القايمة ← «تسجيلات الحصص»: موافقتك على تسجيل حصص ابنك.", { voice: "وبعض الأكاديميات بتسجّل الحصص عشان المتابعة والجودة، بس عمرها ما تسجّل حصة طفل من غير موافقة ولي أمره. ده في «تسجيلات الحصص»." });
-        await menu(s, 'تسجيلات الحصص');
+        await s.say("وتسجيل الحصص: مفيش تسجيل لحصة طفل من غير موافقة ولي أمره.", { voice: "وبعض الأكاديميات بتسجّل الحصص عشان المتابعة والجودة، بس عمرها ما تسجّل حصة طفل من غير موافقة ولي أمره. ده في «تسجيلات الحصص»." });
+        await s.click(s.button('رجوع'), { settle: 1400 });
+        await s.click(s.button('تسجيلات الحصص'), { settle: 1800 });
 
-        await s.say("الصفحة بتشرح: إيه اللي بيتسجل، ومين يشوفه، وبيفضل قد إيه.", { voice: "الصفحة بتشرح كل حاجة بوضوح: إيه اللي بيتسجّل، ومين يقدر يشوفه، وبيفضل قد إيه قبل ما يتمسح لوحده، وإن ولي الأمر يقدر يرجع في كلامه في أي وقت." });
-        await s.show(s.page.locator('.rc-card').first(), { hold: 2400 });
+        await s.say("إيه اللي بيتسجّل، ومين يشوفه، وبيفضل قد إيه.", { voice: "الكارت بيشرح كل حاجة بوضوح: إيه اللي بيتسجّل، ومين يقدر يشوفه، وبيفضل قد إيه قبل ما يتمسح لوحده، وإن ولي الأمر يقدر يرجع في كلامه في أي وقت." });
+        await s.show(s.page.getByRole('group', { name: /^الموافقة على تسجيل الحصص/ }).first(), { hold: 2200 });
 
-        await s.say("ولو موافق، يدوس «موافق».", { voice: "ولو موافق، يدوس «موافق». ومن هنا، لما حصة زياد تتسجّل، الكل بيشوف علامة «بيسجّل» طول ما التسجيل شغّال." });
-        await s.scroll(s.page.getByRole('button', { name: 'موافق' }).first());
-        await s.click(s.page.getByRole('button', { name: 'موافق' }).first(), { settle: 1600 });
+        await s.say("ولو موافق: يعلّم «موافق على تسجيل الحصص»، ويدوس «موافق».", { voice: "ولو موافق، يعلّم على «موافق على تسجيل الحصص»، ويدوس «موافق». ومن هنا، لما حصة زياد تتسجّل، الكل بيشوف علامة «بيسجّل» طول ما التسجيل شغّال، والتسجيلات بتظهر له هنا." });
+        await s.click(s.page.getByRole('checkbox', { name: 'موافق على تسجيل الحصص' }).first(), { settle: 600 });
+        await s.click(s.button(/^موافق$/), { settle: 2200 });
 
-        await s.say("ومن القايمة ← «بياناتي»: كل اللي الأكاديمية محتفظة بيه عنك وعن ولادك.", { voice: "وفي الآخر «بياناتي»: هنا كل اللي الأكاديمية محتفظة بيه عن ولي الأمر وعن ولاده." });
-        await menu(s, 'بياناتي');
+        await s.say("وفي الآخر «بياناتي»: كل اللي الأكاديمية محتفظة بيه.", { voice: "وفي الآخر «بياناتي»: هنا كل اللي الأكاديمية محتفظة بيه عن ولي الأمر وعن ولاده." });
+        await s.click(s.button('رجوع'), { settle: 1400 });
+        await s.click(s.button('بياناتي'), { settle: 1800 });
 
-        await s.say("يصحّح الاسم على طول، وأي حاجة تانية غلط يكتبها للأكاديمية.", { voice: "يقدر يصحّح الاسم على طول، ولو فيه حاجة تانية غلط، زي تاريخ ميلاد أو اسم في فاتورة، يدوس «اطلب تصحيح» ويكتبها، والأكاديمية بترد في خلال تلاتين يوم." });
-        await s.show(s.page.locator('.md-card').first().locator('.md-part').first(), { hold: 2000 });
+        await s.say("يصحّح الاسم على طول، أو «اطلب تصحيح» لأي حاجة تانية.", { voice: "يقدر يصحّح الاسم على طول، ولو فيه حاجة تانية غلط، زي تاريخ الميلاد، أو اسم مكتوب غلط في فاتورة، يدوس «اطلب تصحيح» ويكتبها، والأكاديمية بترد في خلال تلاتين يوم." });
+        await s.point(s.button('اطلب تصحيح'), { hold: 1600 });
 
-        await s.say("«جهّز نسخة»: ملف واحد فيه كل بياناته، بيجهز في دقايق ويفضل 7 أيام.", { voice: "و«جهّز نسخة»: الأكاديمية بتجهّز له ملف واحد فيه كل بياناته، والملفات اللي اتسلّمت، في دقايق، ويفضل متاح أسبوع." });
-        await s.scroll(s.page.getByRole('button', { name: 'جهّز نسخة' }).first());
-        await s.click(s.page.getByRole('button', { name: 'جهّز نسخة' }).first(), { settle: 1800 });
+        await s.say("«جهّز نسخة»: ملف واحد فيه كل بياناته، متاح أسبوع.", { voice: "و«جهّز نسخة»: الأكاديمية بتجهّز له ملف واحد فيه كل بياناته، والملفات اللي اتسلّمت، في دقايق، ويفضل متاح أسبوع." });
+        await s.click(s.button('جهّز نسخة'), { settle: 2000 });
 
-        await s.say("و«امسح الحساب ده»: الأكاديمية بترد في 30 يوم، وبيوضّح قبلها إيه اللي بيتمسح.", { voice: "ولو حابب يمسح حساب، يدوس «امسح الحساب ده». الأكاديمية بترد في خلال تلاتين يوم، وقبل ما يطلب، بيشوف بالظبط إيه اللي هيتمسح، وإيه اللي بيفضل من غير اسم، زي الفواتير." });
-        await s.point(s.page.getByRole('button', { name: 'امسح الحساب ده' }).first(), { hold: 2000 });
+        await s.say("و«امسح الحساب ده»: الأكاديمية بترد في 30 يوم.", { voice: "ولو حابب يمسح حساب، يدوس «امسح الحساب ده». الأكاديمية بترد في خلال تلاتين يوم، وقبل ما يطلب، بيشوف بالظبط إيه اللي هيتمسح، وإيه اللي بيفضل من غير اسم، زي الفواتير." });
+        await s.point(s.button('امسح الحساب ده'), { hold: 2000 });
       },
     },
     {
@@ -312,38 +309,43 @@ export default {
       who: 'لولي الأمر',
       goal: 'ولي الأمر يكلّم مدرّس ابنه، ويوصل للأكاديمية بسرعة لو فيه مشكلة أو شكوى.',
       learn: ['الرسايل مع المدرّسين: انت في كل محادثة، والأرقام بتتخفي', 'تذكرة مساعدة: شكوى، أو فلوس، أو مشكلة تقنية', 'متابعة الرد', '«بلّغ عن قلق» لو فيه قلق على ابنك'],
-      start: '/my',
+      start: '/family/home',
       async steps(s) {
-        await s.say("من القايمة ← «الرسايل»: محادثات ولادك مع مدرّسينهم، وانت موجود في كل واحدة.", { voice: "[warmly] من القايمة نفتح «الرسايل». هنا كل محادثة بين مدرّس وابنك، وولي الأمر موجود فيها دايمًا، والأكاديمية بتراجعها." });
-        await menu(s, 'الرسايل');
+        await s.say("«المزيد» ← «الرسايل مع المدرّسين»: ولي الأمر موجود في كل محادثة.", { voice: "[warmly] من «المزيد» نفتح «الرسايل مع المدرّسين». هنا كل محادثة بين مدرّس وابنك، وولي الأمر موجود فيها دايمًا، والأكاديمية بتراجعها." });
+        await s.click(s.tab('المزيد'), { settle: 1400 });
+        await s.click(s.button('الرسايل مع المدرّسين'), { settle: 1800 });
 
-        await s.say("بنختار ليلى، ونفتح محادثتها مع الأستاذة نور.", { voice: "نغيّر لليلى، ونفتح الشات بتاعها مع الأستاذة نور الهدى." });
-        await s.click(s.page.locator('.pf-switch').getByText('ليلى عمرو'), { settle: 1400 });
-        await s.click(s.page.locator('.ms-item').first(), { settle: 1400 });
+        await s.say("بنختار ليلى، ونفتح محادثتها مع الأستاذة نور.", { voice: "نغيّر لليلى من فوق، ونفتح الشات بتاعها مع الأستاذة نور الهدى." });
+        await s.click(s.button('عن زياد'), { settle: 1000 });
+        await s.click(s.button('ليلى عمرو'), { settle: 1600 });
+        await s.click(s.button(/نور الهدى/), { settle: 1800 });
 
         await s.say("يكتب رسالته ويبعتها. ولو كتب رقم تليفون أو لينك، بيتخفي لوحده.", { voice: "يكتب رسالته ويبعتها. ولاحظ: لو كتب رقم تليفون أو لينك، المنصّة بتخفيه لوحدها، عشان التواصل يفضل هنا، وده بيحمي الولاد." });
-        await s.type(s.page.locator('.ms-compose textarea'), 'شكرًا يا أستاذة نور، ليلى مبسوطة جدًا. ولو حبيتي كلميني على 0100 123 4567');
-        await s.click(s.page.locator('.ms-compose').getByRole('button').last(), { settle: 1800 });
-        await s.show(s.page.locator('.ms-thread'), { hold: 2000 });
+        await s.type(s.field('اكتب رسالة'), 'شكرًا يا أستاذة نور، ليلى مبسوطة جدًا. ولو حبيتي كلميني على 0100 123 4567');
+        await s.click(s.button('ابعت'), { settle: 2200 });
+        await s.wait(1200);
 
-        await s.say("ولو فيه مشكلة: من القايمة ← «المساعدة» ← «تذكرة جديدة».", { voice: "ولو فيه مشكلة محتاجة الأكاديمية نفسها، يفتح من القايمة «المساعدة»، ويدوس «تَذْكَرة جديدة»." });
-        await menu(s, 'المساعدة');
-        await s.click(s.page.getByRole('button', { name: 'تذكرة جديدة' }).first(), { settle: 1000 });
+        await s.say("ولو فيه مشكلة: «المساعدة» ← «تذكرة جديدة».", { voice: "ولو فيه مشكلة محتاجة الأكاديمية نفسها، يفتح من «المزيد» «المساعدة»، ويدوس «تَذْكَرة جديدة»." });
+        await s.click(s.button('رجوع'), { settle: 1200 });
+        await s.click(s.button('رجوع'), { settle: 1200 });
+        await s.click(s.button('المساعدة'), { settle: 1800 });
+        await s.click(s.button('تذكرة جديدة'), { settle: 1400 });
 
         await s.say("يختار الموضوع: شكوى على مدرّس أو حصة، أو الدفع والفواتير، أو مشكلة تقنية.", { voice: "يختار الموضوع: شكوى على مدرّس أو حصّة، والأكاديمية بتحقّق فيها وتقوله عملت إيه. أو الدفع والفواتير. أو مشكلة تقنية. أو أي حاجة تانية." });
-        await s.show(s.modal(), { hold: 1800 });
-        await s.click(s.modal().locator('label', { hasText: 'الدفع والفواتير' }).first(), { settle: 500 });
+        await s.show(s.page.getByRole('radio').first(), { hold: 1400 });
+        await s.click(s.page.getByRole('radio', { name: /^الدفع والفواتير/ }).first(), { settle: 600 });
 
         await s.say("يكتب عنوان، ويحكي حصل إيه، ويدوس «ابعت».", { voice: "ويكتب عنوان قصير، ويحكي حصل إيه، ولو معاه صورة يرفعها، ويدوس «ابعت»." });
-        await s.type(s.modal().locator('input[type=text]').first(), 'دفعت الفاتورة ولسه مكتوب متأخرة');
-        await s.type(s.modal().locator('textarea').first(), 'حوّلت المبلغ امبارح، ورفعت الإيصال، بس الفاتورة لسه مكتوب عليها متأخرة.');
-        await s.click(s.modal().locator('.fi-modal-footer').getByRole('button', { name: 'ابعت' }), { settle: 1800 });
+        await s.type(s.field('العنوان'), 'دفعت الفاتورة ولسه مكتوب متأخرة');
+        await s.type(s.field('احكيلنا حصل إيه'), 'حوّلت المبلغ امبارح، ورفعت الإيصال، بس الفاتورة لسه مكتوب عليها متأخرة.');
+        await s.click(s.button(/^ابعت$/), { settle: 2400 });
 
         await s.say("التذكرة اتفتحت، وحالتها ظاهرة، والرد بيوصله هنا وفي رسالة.", { voice: "التذكرة اتفتحت، وحالتها ظاهرة. ولما حد من الأكاديمية يرد، الرد بيوصله هنا، وكمان في رسالة، ويقدر يرد عليه، لحد ما المشكلة تتحل." });
         await s.wait(1800);
 
-        await s.say("و«بلّغ عن قلق»: لو قلقان على ابنك من حاجة حصلت، المسؤولين عن حماية الطلاب بس اللي بيقروها.", { voice: "وفي القايمة كمان «بلّغ عن قلق». ده لحاجة مختلفة: لو ولي الأمر قلقان على ابنه من حاجة حصلت، يكتبها هنا، واللي بيقراها المسؤولين عن حماية الطلاب في الأكاديمية بس، وبيتابعوها على طول." });
-        await menu(s, 'بلّغ عن قلق');
+        await s.say("و«بلّغ عن قلق»: لو قلقان على ابنه، المسؤولين عن حماية الطلاب بس اللي بيقروها.", { voice: "وفي «المزيد» كمان «بلّغ عن قلق». ده لحاجة مختلفة: لو ولي الأمر قلقان على ابنه من حاجة حصلت، يختار الموضوع ويكتبها هنا، واللي بيقراها المسؤولين عن حماية الطلاب في الأكاديمية بس، وبيتابعوها على طول." });
+        await s.click(s.tab('المزيد'), { settle: 1400 });
+        await s.click(s.button('بلّغ عن قلق'), { settle: 1800 });
         await s.wait(2000);
       },
     },
@@ -351,41 +353,44 @@ export default {
       n: 8, slug: 'settings-app', title: 'الإعدادات والإشعارات والتطبيق', voice: VOICES.hoda,
       who: 'لولي الأمر',
       goal: 'ولي الأمر يختار إزاي توصله الأخبار، ويظبط حسابه.',
-      learn: ['اللغة والتوقيت', 'تغيير الإيميل أو الموبايل بكود', 'الإشعارات: القنوات والأوقات الهادية', 'التحقق بخطوتين', 'تطبيق الموبايل وبوابة الويب'],
-      start: '/my',
+      learn: ['الإشعارات: الصندوق، والقنوات، والأوقات الهادية', 'اللغة والتوقيت', 'تغيير الإيميل أو الموبايل بكود، والأجهزة', 'أكتر من حساب على نفس الموبايل', 'نفس الحساب على بوابة الويب'],
+      start: '/family/home',
       async steps(s) {
-        await s.say("من الصورة اللي فوق ← «إعداداتي».", { voice: "[warmly] كل إعدادات الحساب في مكان واحد: ندوس على الصورة اللي فوق، ونختار «إعداداتي»." });
-        await s.click(s.page.locator('.fi-topbar .fi-avatar').first(), { settle: 600 });
-        await s.click(s.page.locator('.fi-dropdown-list-item').filter({ hasText: 'إعداداتي' }).first(), { settle: 1500 });
+        await s.say("الجرس فوق: كل الإشعارات اللي وصلته، ودوسة بتفتح مكانها.", { voice: "[warmly] الجرس اللي فوق فيه كل الإشعارات اللي وصلت لولي الأمر: حصص، وتقارير، وفواتير، وإعلانات الأكاديمية. ودوسة على أي إشعار بتفتح مكانه على طول." });
+        await s.click(s.button(/^الإشعارات/), { settle: 1800 });
 
-        await s.say("اللغة، والتوقيت: كل المواعيد بتظهر بتوقيت مدينته.", { voice: "أول حاجة اللغة، عربي أو إنجليزي. وبعدها التوقيت: كل مواعيد الحصص بتظهر له بتوقيت مدينته هو، حتى لو المدرّس في بلد تانية." });
-        await s.show(s.page.locator('.fi-section').filter({ hasText: 'اللغة والتوقيت' }).first(), { hold: 2600 });
-
-        await s.say("تغيير الإيميل أو الموبايل: بيوصل كود على الجديد الأول.", { voice: "ولو غيّر الإيميل أو رقم الموبايل، يدوس «غيّر الإيميل»، ويكتب الجديد. المنصّة بتبعت كود على العنوان الجديد، ومش بيتغيّر غير لما الكود يرجع، عشان نتأكد إنه بتاعه." });
-        await s.click(s.page.getByRole('button', { name: 'غيّر الإيميل' }), { settle: 900 });
-        await s.type(s.modal().locator('input:visible').first(), 'amr.salem@demo.test');
-        await s.click(s.modal().getByRole('button', { name: 'ابعت كود' }), { settle: 1500 });
-        await s.show(s.modal(), { hold: 2200 });
-        await s.hush();
-        await s.key('Escape');
-        await s.wait(700);
-
-        await s.say("الإشعارات: لكل نوع يختار يوصله إزاي.", { voice: "[cheerful] ودي أهم حتة: الإشعارات. لكل نوع، الحصص، والتقارير والواجبات، والفواتير، يختار يوصله إزاي: على كل القنوات، أو من غير واتساب، أو جوّه التطبيق بس." });
-        await s.scroll(s.page.locator('.fi-section').filter({ hasText: 'الشاشات والإشعارات' }).first());
-        await s.click(s.page.locator('label').filter({ hasText: 'تنبيه وإيميل، من غير واتساب' }).nth(2), { settle: 500 });
+        await s.say("«اختيارات الإشعارات»: لكل نوع يختار يوصله إزاي.", { voice: "[cheerful] ودي أهم حتة: «اختيارات الإشعارات». لكل نوع، الحصص، والتقارير والواجبات، والفواتير، يختار يوصله إزاي: على كل القنوات، أو من غير واتساب، أو جوّه التطبيق بس." });
+        await s.click(s.button('اختيارات الإشعارات'), { settle: 1600 });
+        await s.click(s.page.getByRole('checkbox', { name: 'تنبيه وإيميل، من غير واتساب' }).nth(2), { settle: 1200 });
 
         await s.say("والأوقات الهادية: الرسايل بتستنى لحد الصبح.", { voice: "وكمان الأوقات الهادية: في الوقت ده الرسايل والتنبيهات بتستنى لحد الصبح، عشان محدّش يصحى على رسالة. بس تنبيه «ادخل دلوقتي» بتاع الحصّة بيوصل في أي وقت." });
-        await s.click(s.page.locator('label').filter({ hasText: 'من 11 بالليل لـ 8 الصبح' }).first(), { settle: 500 });
+        await s.scroll(s.page.getByRole('checkbox', { name: 'من 11 بالليل لـ 8 الصبح' }).first());
+        await s.click(s.page.getByRole('checkbox', { name: 'من 11 بالليل لـ 8 الصبح' }).first(), { settle: 1400 });
 
-        await s.say("ويدوس «حفظ التغييرات».", { voice: "وبعدين يدوس «حفظ التغييرات»، عشان يتسجّل اللي اختاره." });
-        await s.click(s.page.getByRole('button', { name: 'حفظ التغييرات' }), { settle: 1500 });
+        await s.say("«المزيد» ← «اللغة والتوقيت»: عربي أو إنجليزي، والمواعيد بتوقيت مدينته.", { voice: "وفي «المزيد»، «اللغة والتوقيت»: التطبيق عربي أو إنجليزي، وكل مواعيد الحصص بتظهر له بتوقيت مدينته هو، حتى لو المدرّس في بلد تانية." });
+        await s.click(s.tab('المزيد'), { settle: 1400 });
+        await s.click(s.button(/^اللغة والتوقيت/), { settle: 1600 });
+        await s.wait(1600);
 
-        await s.say("والتحقق بخطوتين: كود من تطبيق على الموبايل مع كلمة السر.", { voice: "وتحت خالص فيه التحقق بخطوتين. لو شغّله، الدخول بيطلب كمان كود من تطبيق على موبايله، فحتى لو حد عرف كلمة السر، مش هيقدر يدخل." });
-        await s.scroll(s.page.getByRole('button', { name: 'إعداد' }));
-        await s.point(s.page.getByRole('button', { name: 'إعداد' }), { hold: 1800 });
+        await s.say("«الدخول والأمان»: تغيير الإيميل أو الموبايل بكود على الجديد.", { voice: "و«الدخول والأمان»: لو غيّر الإيميل أو رقم الموبايل، يدوس «غيّر الإيميل»، ويكتب الجديد. التطبيق بيبعت كود على العنوان الجديد، ومش بيتغيّر غير لما الكود يرجع، عشان نتأكد إنه بتاعه." });
+        await s.click(s.button('رجوع'), { settle: 1200 });
+        await s.click(s.button('الدخول والأمان'), { settle: 1600 });
+        await s.click(s.button('غيّر الإيميل'), { settle: 1000 });
+        await s.type(s.field('الإيميل الجديد'), 'amr.salem@demo.test');
+        await s.wait(800);
+        await s.click(s.button('رجوع'), { settle: 900 });
 
-        await s.say("ونفس الحساب على تطبيق الموبايل وبوابة الويب.", { voice: "[warmly] وآخر حاجة: نفس الحساب ده بيفتح على تطبيق الأكاديمية على الموبايل، وعلى بوابة الويب، بنفس الإعدادات، والإشعارات بتوصله على التطبيق على طول." });
-        await s.wait(2000);
+        await s.say("و«أجهزتي»: كل جهاز داخل بحسابه، ويقدر يخرّج أي واحد.", { voice: "وتحت «أجهزتي»: كل موبايل أو جهاز داخل بحسابه، وآخر مرة اتفتح. ولو فيه جهاز مش بتاعه، يدوس «خرّجه»." });
+        await s.point(s.button('خرّجه'), { hold: 1800 });
+
+        await s.say("و«الحسابات»: أكتر من حساب على نفس الموبايل، ويتنقّل بينهم.", { voice: "و«الحسابات»: لو ولي الأمر عنده حساب تاني، في أكاديمية تانية مثلًا، يضيفه هنا، ويتنقّل بينهم من غير ما يدخل كل مرة." });
+        await s.click(s.button('رجوع'), { settle: 1200 });
+        await s.click(s.button(/^الحسابات/), { settle: 1600 });
+        await s.point(s.button(/ضيف حساب تاني/), { hold: 1600 });
+
+        await s.say("ونفس الحساب بيفتح على بوابة الويب، بنفس الإعدادات.", { voice: "[warmly] وآخر حاجة: نفس الحساب ده بيفتح كمان على بوابة الويب من الكمبيوتر، بنفس الإعدادات، والإشعارات بتوصله على التطبيق على طول." });
+        await s.click(s.tab('الرئيسية'), { settle: 1600 });
+        await s.wait(1600);
       },
     },
   ],

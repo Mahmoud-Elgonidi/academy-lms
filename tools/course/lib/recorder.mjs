@@ -327,7 +327,13 @@ function stepsApi(page, series, rec, voice, others = []) {
             await sleep(70);
           }
         } else {
+          // Flutter puts a part in its tree only once it comes near the screen: scroll down until it does.
           const loc = resolve(target);
+          for (let i = 0; i < 20 && !(await loc.count()); i++) {
+            await page.mouse.move(vp.width / 2, vp.height / 2);
+            await page.mouse.wheel(0, 300);
+            await sleep(300);
+          }
           await loc.waitFor({ state: 'attached', timeout: 15000 });
           await appInView(loc);
         }
