@@ -63,6 +63,63 @@ async function localCdn(context) {
   });
 }
 
+/**
+ * The phone app (apps/mobile), for a series with `app: true`: its web build
+ * (`flutter build web --no-web-resources-cdn --base-href /app/
+ * --dart-define=API_BASE_URL=<base>/api/v1`, or COURSE_APP_BUILD) is served
+ * under <base>/app/, on the API's own origin, so it talks to the real API.
+ */
+const appBuild = process.env.COURSE_APP_BUILD ?? join(here, '../../../apps/mobile/build/web');
+async function serveApp(context, base) {
+  if (!existsSync(join(appBuild, 'index.html'))) throw new Error(`No app build in ${appBuild}: run \`flutter build web --no-web-resources-cdn --base-href /app/ --dart-define=API_BASE_URL=${base}/api/v1\` in apps/mobile.`);
+  await context.route(`${base}/app/**`, (route) => {
+    let file = join(appBuild, new URL(route.request().url()).pathname.replace(/^\/app\/?/, ''));
+    if (!file.startsWith(appBuild) || !existsSync(file) || statSync(file).isDirectory()) file = join(appBuild, 'index.html');
+    return route.fulfill({ path: file });
+  });
+}
+
+/** Turns on Flutter's semantics tree, so the app's parts can be found by what they are called. */
+async function appSemantics(page) {
+  await page.evaluate(() => document.querySelector('flt-semantics-placeholder')?.click()).catch(() => {});
+  await sleep(500);
+}
+
+/** Signs a demo account into the app (off camera) with the academy's code and the password; its storage is kept for an hour. */
+async function ensureAppSession(browser, series, user, base) {
+  mkdirSync(authDir, { recursive: true });
+  const file = join(authDir, `${user.email}-app.json`);
+  if (existsSync(file) && Date.now() - statSync(file).mtimeMs < 3600_000) return file;
+  const password = process.env.COURSE_PASSWORD;
+  if (!password) throw new Error('Set COURSE_PASSWORD to the demo accounts\' password.');
+  const context = await browser.newContext(contextOptions(series));
+  await serveApp(context, base);
+  const page = await context.newPage();
+  await page.goto(`${base}/app/`);
+  await sleep(4000);
+  await appSemantics(page);
+  await page.getByRole('button', { name: 'تخطّي' }).first().click();
+  await sleep(1200);
+  await page.getByRole('button', { name: 'عندك كلمة سر؟ ادخل بيها' }).click();
+  await sleep(1200);
+  await appSemantics(page);
+  const fields = page.locator('flt-semantics input');
+  for (const [i, value] of [series.academy ?? 'demo', user.email, password].entries()) {
+    await fields.nth(i).click();
+    await sleep(250);
+    await page.keyboard.type(value);
+    await sleep(250);
+  }
+  await page.getByRole('button', { name: /^ادخل$/ }).first().click();
+  await page.getByRole('tab').first().waitFor({ timeout: 20000 }).catch(async () => {
+    await appSemantics(page);
+    await page.getByRole('tab').first().waitFor({ timeout: 10000 });
+  });
+  await context.storageState({ path: file });
+  await context.close();
+  return file;
+}
+
 /** The second step of a sign-in: an authenticator secret from the environment, or a command that prints the code. */
 function secondFactor(user) {
   if (user.totpEnv) {
@@ -115,8 +172,32 @@ function stepsApi(page, series, rec, voice, others = []) {
     await page.waitForLoadState('networkidle', { timeout: 6000 }).catch(() => {});
     await sleep(ms);
   };
+  // In the app everything is drawn on a canvas: scrolling is the wheel over it, until the part is in view
+  // (between the top and the tab bar).
+  const appInView = async (loc) => {
+    // The tab bar stays put at the bottom.
+    if ((await loc.getAttribute('role').catch(() => null)) === 'tab') return;
+    for (let i = 0; i < 30; i++) {
+      const b = await loc.boundingBox();
+      if (!b) return;
+      const top = 70;
+      const bottom = vp.height - 96;
+      if (b.y >= top && b.y + Math.min(b.height, bottom - top) <= bottom) return;
+      const dy = b.y < top ? Math.max(-320, b.y - top - 40) : Math.min(320, b.y + Math.min(b.height, bottom - top) - bottom + 40);
+      await page.mouse.move(vp.width / 2, vp.height / 2);
+      await page.mouse.wheel(0, dy);
+      await sleep(260);
+    }
+  };
   const box = async (loc) => {
-    await loc.waitFor({ state: 'visible', timeout: 15000 });
+    await loc.waitFor({ state: series.app ? 'attached' : 'visible', timeout: 15000 });
+    if (series.app) {
+      await appInView(loc);
+      await sleep(250);
+      const b = await loc.boundingBox();
+      if (!b) throw new Error(`Nothing to point at: ${loc}`);
+      return b;
+    }
     await loc.evaluate((el) => el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }));
     await sleep(350);
     const b = await loc.boundingBox();
@@ -212,6 +293,11 @@ function stepsApi(page, series, rec, voice, others = []) {
     async type(target, text, { delay = 55 } = {}) {
       const loc = resolve(target);
       await s.click(loc, { settle: 150 });
+      if (series.app) {
+        await page.keyboard.type(text, { delay });
+        await sleep(400);
+        return;
+      }
       await loc.pressSequentially(text, { delay });
       await sleep(400);
     },
@@ -233,6 +319,21 @@ function stepsApi(page, series, rec, voice, others = []) {
     },
     /** Scrolls smoothly: to an element (centred), or by a number of pixels. */
     async scroll(target, { within } = {}) {
+      if (series.app) {
+        if (typeof target === 'number') {
+          await page.mouse.move(vp.width / 2, vp.height / 2);
+          for (let left = target; Math.abs(left) > 1; left -= Math.sign(left) * Math.min(Math.abs(left), 120)) {
+            await page.mouse.wheel(0, Math.sign(left) * Math.min(Math.abs(left), 120));
+            await sleep(70);
+          }
+        } else {
+          const loc = resolve(target);
+          await loc.waitFor({ state: 'attached', timeout: 15000 });
+          await appInView(loc);
+        }
+        await sleep(700);
+        return;
+      }
       if (typeof target === 'number') {
         if (within) await resolve(within).evaluate((el, dy) => el.scrollBy({ top: dy, behavior: 'smooth' }), target);
         else await page.evaluate((dy) => window.scrollBy({ top: dy, behavior: 'smooth' }), target);
@@ -254,6 +355,10 @@ function stepsApi(page, series, rec, voice, others = []) {
     link: (name) => page.getByRole('link', { name }).first(),
     text: (t) => page.getByText(t, { exact: false }).first(),
     modal: () => page.locator('.fi-modal-window:visible').last(),
+    /** The app's tab with this label, its text field with this hint, and a fresh look at its semantics after a new screen. */
+    tab: (name) => page.getByRole('tab', { name }).first(),
+    field: (hint) => page.locator(`flt-semantics input[aria-label*="${hint}"], flt-semantics textarea[aria-label*="${hint}"]`).first(),
+    semantics: () => appSemantics(page),
     finishCaption,
   };
   return s;
@@ -265,19 +370,26 @@ function stepsApi(page, series, rec, voice, others = []) {
  * encoder. With a narration (lib/voice.mjs) each step waits for its line.
  */
 export async function recordLesson({ browser, series, lesson, user, base, dir, voice = null }) {
-  const storageState = await ensureSession(browser, series, user, base);
+  const storageState = series.app ? await ensureAppSession(browser, series, user, base) : await ensureSession(browser, series, user, base);
   const framesDir = join(dir, 'frames');
   mkdirSync(framesDir, { recursive: true });
   const context = await browser.newContext({ ...contextOptions(series), storageState });
   await localCdn(context);
+  if (series.app) await serveApp(context, base);
   await context.addInitScript({ content: `window.__courseMode=${JSON.stringify(series.device === 'phone' ? 'touch' : 'mouse')};\n${overlay}` });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('response', (r) => { if (r.status() >= 500) errors.push(`${r.status()} ${r.url()}`); });
 
-  await page.goto(base + lesson.start);
+  await page.goto(base + (series.app ? `/app/#${lesson.start}` : lesson.start));
   await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+  if (series.app) {
+    await sleep(3500);
+    await appSemantics(page);
+    await page.getByRole('tab').first().waitFor({ timeout: 15000 });
+    await sleep(1500);
+  }
   if (lesson.before) await lesson.before(page);
   await sleep(900);
 
