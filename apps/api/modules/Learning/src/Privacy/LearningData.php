@@ -59,7 +59,27 @@ final class LearningData implements PersonalDataSource
             // The weekly notes to their guardians: what each said (the child as {child}) and when it went out.
             'weekly_notes' => DB::table('weekly_digests')->where('student_id', $userId)->where('status', 'sent')->orderBy('week_start')
                 ->get(['week_start', 'source', 'text_ar', 'text_en', 'sent_at'])->map(fn (object $d) => (array) $d)->all(),
+            // The hifz map: each page's state and next review, every review and where it came from, and the pages recited (how each went).
+            'hifz_pages' => DB::table('hifz_pages')->where('student_id', $userId)->orderBy('page')
+                ->get(['page', 'state', 'due_at', 'last_reviewed_at', 'reviews', 'lapses'])->map(fn (object $p) => (array) $p)->all(),
+            'hifz_reviews' => DB::table('hifz_reviews')->where('student_id', $userId)->orderBy('reviewed_at')
+                ->get(['page', 'grade', 'source', 'reviewed_at'])->map(fn (object $r) => (array) $r)->all(),
+            'hifz_recited' => DB::table('hifz_recitations')->where('student_id', $userId)->orderBy('created_at')
+                ->get(['page', 'status', 'grade', 'created_at'])->map(fn (object $r) => (array) $r)->all(),
         ], $files);
+    }
+
+    /** The hifz map, its reviews and the pages recited (a recording still waiting to be heard with them). */
+    private function eraseHifz(string $userId): int
+    {
+        $waiting = DB::table('hifz_recitations')->where('student_id', $userId)->whereNotNull('file_path')->pluck('file_path')->all();
+        if ($waiting !== []) {
+            DB::afterCommit(fn () => Storage::disk(SubmitHomework::DISK)->delete($waiting));
+        }
+
+        return DB::table('hifz_recitations')->where('student_id', $userId)->delete()
+            + DB::table('hifz_reviews')->where('student_id', $userId)->delete()
+            + DB::table('hifz_pages')->where('student_id', $userId)->delete();
     }
 
     public function blockers(string $userId): array
@@ -80,6 +100,7 @@ final class LearningData implements PersonalDataSource
             'challenges' => DB::table('challenge_claims')->where('student_id', $userId)->delete(),
             'cheers' => DB::table('cheers')->where(fn ($q) => $q->where('student_id', $userId)->orWhere('from_id', $userId))->delete(),
             'weekly_notes' => DB::table('weekly_digests')->where('student_id', $userId)->delete(),
+            'hifz' => $this->eraseHifz($userId),
         ];
     }
 

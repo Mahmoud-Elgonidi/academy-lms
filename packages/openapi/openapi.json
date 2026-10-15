@@ -9189,6 +9189,467 @@
                 }
             }
         },
+        "/v1/teacher/students/{enrollment}/hifz": {
+            "get": {
+                "operationId": "teacher.hifz.show",
+                "description": "Every page by part with its strength, the counts, the last two weeks' reviews (grade and where each came from),\nand the parts and surahs with their pages, to say what the student already knows.",
+                "summary": "A student's hifz map",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "enrollment_id": {
+                                                    "type": "string"
+                                                },
+                                                "student": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "pages_total": {
+                                                    "type": "integer",
+                                                    "description": "604 once the platform has the Quran's text; 0 until then (nothing to show)"
+                                                },
+                                                "counts": {
+                                                    "type": "object",
+                                                    "description": "memorized and learning pages; of the memorized: strong, fading and weak now; due by the end of the learner's day",
+                                                    "properties": {
+                                                        "memorized": {
+                                                            "type": "integer"
+                                                        },
+                                                        "learning": {
+                                                            "type": "integer"
+                                                        },
+                                                        "strong": {
+                                                            "type": "integer"
+                                                        },
+                                                        "fading": {
+                                                            "type": "integer"
+                                                        },
+                                                        "weak": {
+                                                            "type": "integer"
+                                                        },
+                                                        "due": {
+                                                            "type": "integer"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "memorized",
+                                                        "learning",
+                                                        "strong",
+                                                        "fading",
+                                                        "weak",
+                                                        "due"
+                                                    ]
+                                                },
+                                                "juzs": {
+                                                    "type": "array",
+                                                    "description": "Each part's pages: strength new, learning, strong, fading or weak.",
+                                                    "items": {}
+                                                },
+                                                "strengths": {
+                                                    "type": "string"
+                                                },
+                                                "recent": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "page": {
+                                                                "type": "integer"
+                                                            },
+                                                            "grade": {
+                                                                "type": "integer"
+                                                            },
+                                                            "grade_label": {
+                                                                "type": "string"
+                                                            },
+                                                            "source": {
+                                                                "type": "string",
+                                                                "description": "teacher, report, check (homework), wird (a page recited for the daily review) or self (their own grade)"
+                                                            },
+                                                            "source_label": {
+                                                                "type": "string"
+                                                            },
+                                                            "at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "page",
+                                                            "grade",
+                                                            "grade_label",
+                                                            "source",
+                                                            "source_label",
+                                                            "at"
+                                                        ]
+                                                    }
+                                                },
+                                                "surahs": {
+                                                    "type": "array",
+                                                    "description": "What a teacher may mark: whole parts, whole surahs, or pages.",
+                                                    "items": {}
+                                                },
+                                                "marks": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "enrollment_id",
+                                                "student",
+                                                "pages_total",
+                                                "counts",
+                                                "juzs",
+                                                "strengths",
+                                                "recent",
+                                                "surahs",
+                                                "marks"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/teacher/students/{enrollment}/hifz/memorized": {
+            "post": {
+                "operationId": "teacher.hifz.mark",
+                "description": "Whole parts (juz), surahs or pages, and how well: strong, good or weak. Each page starts again as memorized,\ndue for review as that says.",
+                "summary": "Say what the student already knows by heart",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "juz": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "maxItems": 30
+                                    },
+                                    "surahs": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "maxItems": 114
+                                    },
+                                    "pages": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "maxItems": 604
+                                    },
+                                    "strength": {
+                                        "type": "string",
+                                        "enum": [
+                                            "strong",
+                                            "good",
+                                            "weak"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "strength"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/teacher/students/{enrollment}/hifz/clear": {
+            "post": {
+                "operationId": "teacher.hifz.clear",
+                "summary": "Take pages off the student's map (marked by mistake): they are new again",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "juz": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "maxItems": 30
+                                    },
+                                    "surahs": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "maxItems": 114
+                                    },
+                                    "pages": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "maxItems": 604
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/learning/students": {
             "get": {
                 "operationId": "learning.students",
@@ -9752,6 +10213,29 @@
                                                         "glance"
                                                     ]
                                                 },
+                                                "hifz": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The hifz review today (GET learning/hifz has it in full): pages left today, done today and a day's pages; null until the learner has pages on their hifz map.",
+                                                    "properties": {
+                                                        "due": {
+                                                            "type": "integer"
+                                                        },
+                                                        "done_today": {
+                                                            "type": "string"
+                                                        },
+                                                        "daily": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "due",
+                                                        "done_today",
+                                                        "daily"
+                                                    ]
+                                                },
                                                 "cheers": {
                                                     "type": "array",
                                                     "items": {
@@ -9814,6 +10298,7 @@
                                                 "chest",
                                                 "stickers",
                                                 "games",
+                                                "hifz",
                                                 "cheers",
                                                 "cheers_left"
                                             ]
@@ -11546,6 +12031,988 @@
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/learning/hifz": {
+            "get": {
+                "operationId": "learning.hifz",
+                "description": "Every page of the mushaf by part (new, learning, or memorized and strong, fading or weak now), how many of\neach, and today's review on the learner's clock. mode: check (recite a page; it is heard and checked) or self\n(say how it went). The latest page recited in the last day comes with its check.",
+                "summary": "A learner's hifz map",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "learner_id": {
+                                                    "type": "string"
+                                                },
+                                                "mode": {
+                                                    "type": "string",
+                                                    "description": "check: recite a page and it is checked word by word; self: say how it went",
+                                                    "enum": [
+                                                        "check",
+                                                        "self"
+                                                    ]
+                                                },
+                                                "pages_total": {
+                                                    "type": "integer",
+                                                    "description": "604 once the platform has the Quran's text; 0 until then (nothing to show)"
+                                                },
+                                                "counts": {
+                                                    "type": "object",
+                                                    "description": "memorized and learning pages; of the memorized: strong, fading and weak now; due by the end of the learner's day",
+                                                    "properties": {
+                                                        "memorized": {
+                                                            "type": "integer"
+                                                        },
+                                                        "learning": {
+                                                            "type": "integer"
+                                                        },
+                                                        "strong": {
+                                                            "type": "integer"
+                                                        },
+                                                        "fading": {
+                                                            "type": "integer"
+                                                        },
+                                                        "weak": {
+                                                            "type": "integer"
+                                                        },
+                                                        "due": {
+                                                            "type": "integer"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "memorized",
+                                                        "learning",
+                                                        "strong",
+                                                        "fading",
+                                                        "weak",
+                                                        "due"
+                                                    ]
+                                                },
+                                                "juzs": {
+                                                    "type": "array",
+                                                    "description": "Each part's pages: strength new, learning, strong, fading or weak.",
+                                                    "items": {}
+                                                },
+                                                "strengths": {
+                                                    "type": "string"
+                                                },
+                                                "wird": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "daily": {
+                                                            "type": "integer",
+                                                            "description": "pages a day at most (the academy's)"
+                                                        },
+                                                        "done_today": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                        },
+                                                        "pages": {
+                                                            "type": "array",
+                                                            "description": "Today's pages, most overdue first: what is left of today's review.",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "page": {
+                                                                        "type": "integer"
+                                                                    },
+                                                                    "juz": {
+                                                                        "type": "integer"
+                                                                    },
+                                                                    "title": {
+                                                                        "anyOf": [
+                                                                            {
+                                                                                "type": "string"
+                                                                            },
+                                                                            {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                    ""
+                                                                                ]
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    "surahs": {
+                                                                        "type": "array",
+                                                                        "items": {
+                                                                            "type": "object",
+                                                                            "properties": {
+                                                                                "number": {
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "name_ar": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "name_en": {
+                                                                                    "type": "string"
+                                                                                }
+                                                                            },
+                                                                            "required": [
+                                                                                "number",
+                                                                                "name_ar",
+                                                                                "name_en"
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "strength": {
+                                                                        "type": "string",
+                                                                        "enum": [
+                                                                            "strong",
+                                                                            "fading",
+                                                                            "weak",
+                                                                            "learning",
+                                                                            "new"
+                                                                        ]
+                                                                    },
+                                                                    "overdue_days": {}
+                                                                },
+                                                                "required": [
+                                                                    "page",
+                                                                    "juz",
+                                                                    "title",
+                                                                    "surahs",
+                                                                    "strength",
+                                                                    "overdue_days"
+                                                                ]
+                                                            }
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "daily",
+                                                        "done_today",
+                                                        "pages"
+                                                    ]
+                                                },
+                                                "latest_recitation": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "page": {
+                                                            "type": "integer"
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "description": "pending, ready, failed"
+                                                        },
+                                                        "status_label": {
+                                                            "type": "string"
+                                                        },
+                                                        "failure": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ],
+                                                            "description": "Why it could not be heard, in the reader's words."
+                                                        },
+                                                        "summary_label": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "grade": {
+                                                            "type": [
+                                                                "integer",
+                                                                "null"
+                                                            ],
+                                                            "description": "1 forgot, 2 hard, 3 good, 4 easy: the review it counted as"
+                                                        },
+                                                        "grade_label": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "verses": {
+                                                            "description": "Each verse's words: state ok, missing or wrong, and what was said instead."
+                                                        },
+                                                        "extra": {
+                                                            "description": "Words said that are not in the text, after the word they followed (counted from 1 through the page)."
+                                                        },
+                                                        "recited_at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "null"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "note": {
+                                                            "type": "string",
+                                                            "const": "Checked automatically and can be wrong; the teacher has the last word."
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "page",
+                                                        "status",
+                                                        "status_label",
+                                                        "failure",
+                                                        "summary_label",
+                                                        "grade",
+                                                        "grade_label",
+                                                        "verses",
+                                                        "extra",
+                                                        "recited_at",
+                                                        "note"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "learner_id",
+                                                "mode",
+                                                "pages_total",
+                                                "counts",
+                                                "juzs",
+                                                "strengths",
+                                                "wird",
+                                                "latest_recitation"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/learning/hifz/pages/{page}": {
+            "get": {
+                "operationId": "learning.hifz.page",
+                "description": "Its verses as Tanzil writes them (perhaps the end of one surah and the start of the next), with where it\nstands on the learner's map.",
+                "summary": "A page's text",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "page": {
+                                                    "type": "integer"
+                                                },
+                                                "juz": {
+                                                    "type": "integer"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "surahs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "number": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name_ar": {
+                                                                "type": "string"
+                                                            },
+                                                            "name_en": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "number",
+                                                            "name_ar",
+                                                            "name_en"
+                                                        ]
+                                                    }
+                                                },
+                                                "verses": {
+                                                    "type": "array",
+                                                    "description": "The page's verses as Tanzil writes them.",
+                                                    "items": {}
+                                                },
+                                                "attribution": {
+                                                    "type": "string",
+                                                    "description": "The attribution the text is shown with."
+                                                },
+                                                "strength": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "strong",
+                                                        "fading",
+                                                        "weak",
+                                                        "learning",
+                                                        "new"
+                                                    ]
+                                                },
+                                                "due_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "page",
+                                                "juz",
+                                                "title",
+                                                "surahs",
+                                                "verses",
+                                                "attribution",
+                                                "strength",
+                                                "due_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/learning/hifz/pages/{page}/recitations": {
+            "post": {
+                "operationId": "learning.hifz.recite",
+                "description": "The recording (audio) is heard and checked against the page in the background; GET learning/hifz/recitations/{id}\n(or the hifz signal) gives the result, which counts as the page's review. Only while the academy has the\nrecitation check on (else ai-off); the recording is deleted once heard.",
+                "summary": "Recite a page",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "page": {
+                                                    "type": "integer"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "description": "pending, ready, failed"
+                                                },
+                                                "status_label": {
+                                                    "type": "string"
+                                                },
+                                                "failure": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Why it could not be heard, in the reader's words."
+                                                },
+                                                "summary_label": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "grade": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "1 forgot, 2 hard, 3 good, 4 easy: the review it counted as"
+                                                },
+                                                "grade_label": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "verses": {
+                                                    "description": "Each verse's words: state ok, missing or wrong, and what was said instead."
+                                                },
+                                                "extra": {
+                                                    "description": "Words said that are not in the text, after the word they followed (counted from 1 through the page)."
+                                                },
+                                                "recited_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "note": {
+                                                    "type": "string",
+                                                    "const": "Checked automatically and can be wrong; the teacher has the last word."
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "page",
+                                                "status",
+                                                "status_label",
+                                                "failure",
+                                                "summary_label",
+                                                "grade",
+                                                "grade_label",
+                                                "verses",
+                                                "extra",
+                                                "recited_at",
+                                                "note"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/learning/hifz/recitations/{recitation}": {
+            "get": {
+                "operationId": "learning.hifz.recitation",
+                "summary": "A recited page's check",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "recitation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "page": {
+                                                    "type": "integer"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "description": "pending, ready, failed"
+                                                },
+                                                "status_label": {
+                                                    "type": "string"
+                                                },
+                                                "failure": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Why it could not be heard, in the reader's words."
+                                                },
+                                                "summary_label": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "grade": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "1 forgot, 2 hard, 3 good, 4 easy: the review it counted as"
+                                                },
+                                                "grade_label": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "verses": {
+                                                    "description": "Each verse's words: state ok, missing or wrong, and what was said instead."
+                                                },
+                                                "extra": {
+                                                    "description": "Words said that are not in the text, after the word they followed (counted from 1 through the page)."
+                                                },
+                                                "recited_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "note": {
+                                                    "type": "string",
+                                                    "const": "Checked automatically and can be wrong; the teacher has the last word."
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "page",
+                                                "status",
+                                                "status_label",
+                                                "failure",
+                                                "summary_label",
+                                                "grade",
+                                                "grade_label",
+                                                "verses",
+                                                "extra",
+                                                "recited_at",
+                                                "note"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/learning/hifz/pages/{page}/grade": {
+            "post": {
+                "operationId": "learning.hifz.grade",
+                "description": "grade 1 forgot, 2 hard, 3 good, 4 easy: the page's review for today (once a day; the first word counts).",
+                "summary": "Say how a page went",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "grade": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 4
+                                    }
+                                },
+                                "required": [
+                                    "grade"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "page": {
+                                                    "type": "integer"
+                                                },
+                                                "juz": {
+                                                    "type": "integer"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "surahs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "number": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name_ar": {
+                                                                "type": "string"
+                                                            },
+                                                            "name_en": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "number",
+                                                            "name_ar",
+                                                            "name_en"
+                                                        ]
+                                                    }
+                                                },
+                                                "verses": {
+                                                    "type": "array",
+                                                    "description": "The page's verses as Tanzil writes them.",
+                                                    "items": {}
+                                                },
+                                                "attribution": {
+                                                    "type": "string",
+                                                    "description": "The attribution the text is shown with."
+                                                },
+                                                "strength": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "strong",
+                                                        "fading",
+                                                        "weak",
+                                                        "learning",
+                                                        "new"
+                                                    ]
+                                                },
+                                                "due_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "page",
+                                                "juz",
+                                                "title",
+                                                "surahs",
+                                                "verses",
+                                                "attribution",
+                                                "strength",
+                                                "due_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"

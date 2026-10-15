@@ -5,6 +5,7 @@ namespace Modules\Learning\Actions\Assist;
 use Carbon\CarbonImmutable;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Learning\Actions\SubmitHomework;
+use Modules\Learning\Hifz\HifzFromLessons;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\HomeworkSubmission;
 use Modules\Learning\Models\SubmissionCheck;
@@ -19,9 +20,10 @@ use Modules\SharedKernel\Ai\RecitationEngine;
  * Checks a recording handed in against what the homework asked to recite,
  * word by word, for the teacher alone (docs/architecture/02, section 22). The
  * recording is only read, never changed or deleted; the engine is never told
- * who recited it. Nothing else changes: no grade, status, stars or KPI reads
- * the check. Busy or a provider down is tried again by the queue; any other
- * failure is kept with its reason, for the teacher to see.
+ * who recited it. Nothing else of the homework changes: no grade, status,
+ * stars or KPI reads the check. Busy or a provider down is tried again by the
+ * queue; any other failure is kept with its reason, for the teacher to see.
+ * The pages it covers are reviewed on the learner's hifz map (HifzFromLessons).
  */
 final class CheckRecitation
 {
@@ -32,6 +34,7 @@ final class CheckRecitation
         private readonly AcademyAi $ai,
         private readonly RecitationEngine $engine,
         private readonly CurriculumApi $curriculum,
+        private readonly HifzFromLessons $hifz,
     ) {}
 
     public function handle(SubmissionCheck $check): SubmissionCheck
@@ -40,7 +43,8 @@ final class CheckRecitation
             return $check;
         }
         $submission = HomeworkSubmission::query()->find($check->submission_id);
-        $source = Homework::query()->find($check->homework_id)?->expectedSource();
+        $homework = Homework::query()->find($check->homework_id);
+        $source = $homework?->expectedSource();
         if ($submission?->file_path === null || $source === null) {
             return self::failed($check, 'unreadable');
         }
@@ -73,6 +77,8 @@ final class CheckRecitation
             'seconds' => $result->seconds,
             'checked_at' => CarbonImmutable::now(),
         ]);
+        // The pages it covers are reviewed on the learner's hifz map, by how each went.
+        $this->hifz->recited($check, $result, $homework->student_id, CarbonImmutable::parse($submission->submitted_at));
 
         return $check;
     }

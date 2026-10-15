@@ -28,6 +28,7 @@ use Modules\Learning\Filament\LearningPlugin;
 use Modules\Learning\Filament\Pages\ReportsOversight;
 use Modules\Learning\Filament\Teacher\HomeworkToMark;
 use Modules\Learning\Filament\Teacher\WriteReport;
+use Modules\Learning\Hifz\HifzFromLessons;
 use Modules\Learning\Http\Web\MaterialController;
 use Modules\Learning\Http\Web\SubmissionFileController;
 use Modules\Learning\Http\Web\WeeklyVoiceController;
@@ -36,6 +37,7 @@ use Modules\Learning\Listeners\OpenReportWhenSessionCloses;
 use Modules\Learning\Listeners\QueueRecitationCheck;
 use Modules\Learning\Listeners\RebuildProgressOnProgramChange;
 use Modules\Learning\Listeners\SendLearningNotifications;
+use Modules\Learning\Live\HifzChanged;
 use Modules\Learning\Live\HomeworkChanged;
 use Modules\Learning\Live\PracticeChanged;
 use Modules\Learning\Privacy\LearningData;
@@ -109,6 +111,8 @@ final class LearningServiceProvider extends ServiceProvider
         Event::listen(NodeMastered::class, [SendLearningNotifications::class, 'nodeMastered']);
         Event::listen(HomeworkSubmitted::class, [SendLearningNotifications::class, 'homeworkSubmitted']);
         Event::listen(HomeworkSubmitted::class, QueueRecitationCheck::class);
+        // A report on a lesson of the Quran reviews its pages on the learner's hifz map.
+        Event::listen(SessionReportSubmitted::class, [HifzFromLessons::class, 'reportSubmitted']);
         Event::listen(SessionReportOverdue::class, [SendLearningNotifications::class, 'reportOverdue']);
         Event::listen(CheerSent::class, [SendLearningNotifications::class, 'cheerSent']);
         Event::listen(SessionFinalized::class, [SendLearningNotifications::class, 'lessonStars']);
@@ -117,6 +121,8 @@ final class LearningServiceProvider extends ServiceProvider
         // Homework pages refresh when homework changes (the homework triggers raise "homework:{person}").
         $this->app->make(LiveSignals::class)->on('homework', fn (string $userId) => new HomeworkChanged($userId));
         $this->app->make(LiveSignals::class)->on('practice', fn (string $userId) => new PracticeChanged($userId));
+        // The hifz map refreshes when a page is reviewed, marked or recited (the hifz triggers raise "hifz:{person}").
+        $this->app->make(LiveSignals::class)->on('hifz', fn (string $userId) => new HifzChanged($userId));
 
         if ($this->app->runningInConsole()) {
             $this->commands([SweepLearningCommand::class, TryRecitationCommand::class, SendWeeklyDigestsCommand::class]);

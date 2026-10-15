@@ -164,6 +164,11 @@ function pdsSeedEverySource(object $t): void
     DB::table('weekly_digests')->insert(['id' => $id(), 'student_id' => $s->id, 'week_start' => $now->toDateString(), 'status' => 'sent', 'source' => 'facts',
         'text_ar' => 'أسبوع {child} في الأكاديمية: الحصص: 2 حضور.', 'text_en' => "{child}'s week at the academy: Lessons: 2 attended.",
         'facts' => json_encode(['notes' => ['{child} read it twice']]), 'sent_to' => 1, 'created_at' => $now, 'sent_at' => $now]);
+    DB::table('hifz_pages')->insert(['id' => $id(), 'student_id' => $s->id, 'page' => 582, 'state' => 'memorized', 'stability' => 10, 'difficulty' => 5,
+        'due_at' => $now->addDays(10), 'last_reviewed_at' => $now, 'reviews' => 1, 'lapses' => 0, 'created_at' => $now, 'updated_at' => $now]);
+    DB::table('hifz_reviews')->insert(['id' => $id(), 'student_id' => $s->id, 'page' => 582, 'grade' => 3, 'source' => 'teacher', 'source_id' => $id(), 'reviewed_at' => $now, 'created_at' => $now]);
+    DB::table('hifz_recitations')->insert(['id' => $id(), 'student_id' => $s->id, 'page' => 582, 'status' => 'ready', 'grade' => 3, 'recited_by' => $g->id,
+        'result' => json_encode(['summary' => ['words' => 10, 'ok' => 9, 'missing' => 1, 'wrong' => 0, 'extra' => 0]]), 'created_at' => $now]);
 
     // messaging: the student, the guardian and the teacher talk; the student typed a number.
     test()->actingAs($s);
@@ -284,7 +289,7 @@ it('holds an erasure back for each source\'s own reasons, and erases once they a
         ->and($after['ratings'])->toBe([null, '[]', 4])
         ->and($after['games'])->toBe([0, 0, 0])
         ->and($after['imports'])->toBe('{}')
-        ->and($after['learning'])->toBe([0, 0, 0, 1, 1, 0])
+        ->and($after['learning'])->toBe([0, 0, 0, 1, 1, 0, 0])
         ->and($after['lessons'])->toBe(['', null, 0])
         ->and(Storage::disk('local')->exists($this->handedIn))->toBeFalse()
         ->and(Storage::disk('local')->exists($this->checkScan))->toBeFalse();
@@ -331,7 +336,8 @@ function pdsSnapshot(array $people): array
         'imports' => (string) DB::table('import_rows')->value(DB::raw('cells::text')),
         'learning' => [DB::table('homework_submissions')->where('submitted_by', $s)->count(), DB::table('challenge_claims')->where('student_id', $s)->count(),
             DB::table('cheers')->where('student_id', $s)->orWhere('from_id', $g)->count(), DB::table('homework')->where('student_id', $s)->count(), DB::table('practice_rounds')->where('student_id', $s)->count(),
-            DB::table('weekly_digests')->where('student_id', $s)->count()],
+            DB::table('weekly_digests')->where('student_id', $s)->count(),
+            DB::table('hifz_pages')->where('student_id', $s)->count() + DB::table('hifz_reviews')->where('student_id', $s)->count() + DB::table('hifz_recitations')->where('student_id', $s)->count()],
         'messaging' => DB::table('conversation_messages')->count(),
         'earnings' => DB::table('teacher_earnings')->where('teacher_id', $t)->count(),
         'safeguarding' => DB::table('safeguarding_concerns')->where('reporter_id', $s)->count(),
