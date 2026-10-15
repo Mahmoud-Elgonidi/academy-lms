@@ -19358,6 +19358,311 @@
                 }
             }
         },
+        "/v1/teacher/lessons/{session}": {
+            "get": {
+                "operationId": "teacher.lessons.show",
+                "description": "As the list of my lessons has it, on whatever day it is: the lesson page opens it by its id, a lesson\nstill on since before midnight or another day's alike.",
+                "summary": "One of my lessons",
+                "tags": [
+                    "Scheduling"
+                ],
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "starts_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "ends_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "minutes": {
+                                                    "type": "integer"
+                                                },
+                                                "subject": {
+                                                    "type": "string"
+                                                },
+                                                "with": {
+                                                    "type": "string",
+                                                    "description": "The teacher's name (family) or the student's (teacher)."
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "description": "scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled"
+                                                },
+                                                "status_label": {
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "description": "regular, trial, makeup, extra, assessment"
+                                                },
+                                                "type_label": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "unfunded": {
+                                                    "type": "string",
+                                                    "description": "Booked but not yet paid for."
+                                                },
+                                                "join": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "open": {
+                                                            "type": "string",
+                                                            "description": "The room is open: POST /lessons/{id}/join for a ticket."
+                                                        },
+                                                        "opens_at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "null"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "open",
+                                                        "opens_at"
+                                                    ]
+                                                },
+                                                "substitute_for": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "A substitute has the lesson: the family's own teacher (family), or whom the teacher covers (teacher)."
+                                                },
+                                                "can_cancel": {
+                                                    "type": "string"
+                                                },
+                                                "can_refuse_substitute": {
+                                                    "type": "string"
+                                                },
+                                                "cancelled_because": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Why the academy cancelled it (a holiday, the teacher's leave, the course paused or ended), when it did."
+                                                },
+                                                "dispute": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The viewer's own dispute of this lesson's outcome, and the academy's answer once decided.",
+                                                    "properties": {
+                                                        "status": {
+                                                            "type": "string",
+                                                            "description": "open, upheld, rejected"
+                                                        },
+                                                        "status_label": {
+                                                            "type": "string"
+                                                        },
+                                                        "reason": {
+                                                            "type": "string"
+                                                        },
+                                                        "answer": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "status",
+                                                        "status_label",
+                                                        "reason",
+                                                        "answer"
+                                                    ]
+                                                },
+                                                "can_dispute": {
+                                                    "type": "string",
+                                                    "description": "Decided and within 48 hours of its end: POST \u2026/lessons/{id}/dispute with one of dispute_reasons and a note."
+                                                },
+                                                "dispute_until": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "dispute_reasons": {
+                                                    "type": "array",
+                                                    "description": "The reasons that fit what the lesson was, each with its label.",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "starts_at",
+                                                "ends_at",
+                                                "minutes",
+                                                "subject",
+                                                "with",
+                                                "status",
+                                                "status_label",
+                                                "type",
+                                                "type_label",
+                                                "unfunded",
+                                                "join",
+                                                "substitute_for",
+                                                "can_cancel",
+                                                "can_refuse_substitute",
+                                                "cancelled_because",
+                                                "dispute",
+                                                "can_dispute",
+                                                "dispute_until",
+                                                "dispute_reasons"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/teacher/lessons/{session}/dispute": {
             "post": {
                 "operationId": "teacher.lessons.dispute",

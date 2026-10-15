@@ -2111,6 +2111,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/teacher/lessons/{session}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One of my lessons
+         * @description As the list of my lessons has it, on whatever day it is: the lesson page opens it by its id, a lesson
+         *     still on since before midnight or another day's alike.
+         */
+        get: operations["teacher.lessons.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/teacher/lessons/{session}/dispute": {
         parameters: {
             query?: never;
@@ -10173,6 +10194,106 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "teacher.lessons.show": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                session: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            starts_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            ends_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            minutes: number;
+                            subject: string;
+                            /** @description The teacher's name (family) or the student's (teacher). */
+                            with: string;
+                            /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
+                            status: string;
+                            status_label: string;
+                            /** @description regular, trial, makeup, extra, assessment */
+                            type: string;
+                            type_label: string | null;
+                            /** @description Booked but not yet paid for. */
+                            unfunded: string;
+                            join: {
+                                /** @description The room is open: POST /lessons/{id}/join for a ticket. */
+                                open: string;
+                                opens_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            };
+                            /** @description A substitute has the lesson: the family's own teacher (family), or whom the teacher covers (teacher). */
+                            substitute_for: string | null;
+                            can_cancel: string;
+                            can_refuse_substitute: string;
+                            /** @description Why the academy cancelled it (a holiday, the teacher's leave, the course paused or ended), when it did. */
+                            cancelled_because: string | null;
+                            /** @description The viewer's own dispute of this lesson's outcome, and the academy's answer once decided. */
+                            dispute: {
+                                /** @description open, upheld, rejected */
+                                status: string;
+                                status_label: string;
+                                reason: string;
+                                answer: string | null;
+                            } | null;
+                            /** @description Decided and within 48 hours of its end: POST …/lessons/{id}/dispute with one of dispute_reasons and a note. */
+                            can_dispute: string;
+                            dispute_until: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description The reasons that fit what the lesson was, each with its label. */
+                            dispute_reasons: unknown[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
         };
     };
     "teacher.lessons.dispute": {

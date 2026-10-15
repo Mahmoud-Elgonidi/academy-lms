@@ -54,6 +54,26 @@ final class TeacherLessonsController
     }
 
     /**
+     * One of my lessons.
+     *
+     * As the list of my lessons has it, on whatever day it is: the lesson page opens it by its id, a lesson
+     * still on since before midnight or another day's alike.
+     *
+     * @throws NotFoundHttpException not my lesson
+     */
+    public function show(Request $request, string $session, LessonList $lessons, LessonPresenter $present): JsonResponse
+    {
+        $me = (string) $request->user()?->getAuthIdentifier();
+        $lesson = Str::isUuid($session) ? Session::query()->where('teacher_id', $me)->find($session) : null;
+        $row = $lesson === null ? null : collect($lessons->forTeacher($me, $lesson->starts_at, $lesson->starts_at->addSecond()))->firstWhere('id', $lesson->id);
+        if ($row === null) {
+            throw new NotFoundHttpException;
+        }
+
+        return response()->json(['data' => $present->lesson($row, CarbonImmutable::now(), 'student')]);
+    }
+
+    /**
      * Dispute a lesson's outcome.
      *
      * Within 48 hours of the end of my lesson recorded as held or missed (can_dispute), once per lesson: it goes back

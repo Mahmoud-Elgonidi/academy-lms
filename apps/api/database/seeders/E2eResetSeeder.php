@@ -301,7 +301,10 @@ final class E2eResetSeeder extends Seeder
             [$khaled, $ziad] = [(string) $ids['khaled@demo.test'], (string) $ids['ziad@demo.test']];
             $me = $role === 'teacher' ? $khaled : $ziad;
             $now = CarbonImmutable::now();
-            $today = collect(['Africa/Cairo', (string) (DB::table('users')->where('id', $me)->value('timezone') ?: 'UTC')])
+            // The student finds the lesson on their list, which starts at the start of today; the teacher opens it
+            // by its id, so for them a lesson running since before midnight will do (one that started at 23:45 is
+            // still on at 00:10, and keeps everyone in it busy).
+            $today = $role === 'teacher' ? $now->subDay() : collect(['Africa/Cairo', (string) (DB::table('users')->where('id', $me)->value('timezone') ?: 'UTC')])
                 ->map(fn (string $zone) => $now->setTimezone($zone)->startOfDay()->utc())->max();
 
             // A room opens 10 minutes before the lesson and closes 10 minutes after its end: one open for 5 minutes more will do.
