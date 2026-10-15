@@ -132,10 +132,13 @@ export async function linesOf(lesson) {
   return lines;
 }
 
-/** A lesson's number as the narrator says it: «الدرس التالت», «الدرس رقم اتناشر». */
-const ORDINALS = ['', 'الأوّل', 'التّاني', 'التّالِت', 'الرّابِع', 'الخامِس', 'السّادِس', 'السّابِع', 'التّامِن', 'التّاسِع', 'العاشِر'];
-const TEENS = { 11: 'حداشر', 12: 'اتناشر', 13: 'تلاتاشر', 14: 'أربعتاشر', 15: 'خمستاشر', 16: 'ستّاشر', 17: 'سبعتاشر', 18: 'تمنتاشر', 19: 'تسعتاشر', 20: 'عشرين' };
-export const spokenLesson = (n) => (ORDINALS[n] ? `الدرس ${ORDINALS[n]}` : `الدرس رقم ${TEENS[n] ?? n}`);
+/**
+ * A lesson's number as the narrator says it: «الدرس الأوّل», then «الدرس رقم
+ * اتنين», «رقم تمانية»... (listened back, an ordinal like التاني can come out
+ * as the formal الثاني; a number after رقم stays Egyptian).
+ */
+const NUMBERS = ['', 'واحد', 'اتنين', 'تلاتة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'تمانية', 'تسعة', 'عشرة', 'حداشر', 'اتناشر', 'تلاتاشر', 'أربعتاشر', 'خمستاشر', 'ستّاشر', 'سبعتاشر', 'تمنتاشر', 'تسعتاشر', 'عشرين'];
+export const spokenLesson = (n) => (n === 1 ? 'الدرس الأوّل' : `الدرس رقم ${NUMBERS[n] ?? n}`);
 
 /** The lesson's whole narration: a welcome over the title card, one line per caption, a goodbye over the end card. */
 export async function narrate(series, lesson, next, cfg = voiceSettings()) {

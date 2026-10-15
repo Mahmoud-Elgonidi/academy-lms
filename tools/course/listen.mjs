@@ -20,7 +20,7 @@ if (!key || !voiceSettings()) {
 const series = (await import(pathToFileURL(join(here, 'series', `${key}.mjs`)).href)).default;
 
 // Numbers the narrator says in words and speech to text writes in digits.
-const NUMBERS = { واحد: 1, اتنين: 2, تلاته: 3, تلات: 3, اربعه: 4, اربع: 4, خمسه: 5, خمس: 5, سته: 6, ست: 6, سبعه: 7, سبع: 7, تمنيه: 8, تمن: 8, تسعه: 9, تسع: 9, عشره: 10, عشر: 10, حداشر: 11, اتناشر: 12, عشرين: 20, تلاتين: 30 };
+const NUMBERS = { واحد: 1, اتنين: 2, تلاته: 3, تمانيه: 8, عشره: 10, ستاشر: 16, تلات: 3, اربعه: 4, اربع: 4, خمسه: 5, خمس: 5, سته: 6, ست: 6, سبعه: 7, سبع: 7, تمنيه: 8, تمن: 8, تسعه: 9, تسع: 9, عشره: 10, عشر: 10, حداشر: 11, اتناشر: 12, عشرين: 20, تلاتين: 30 };
 
 // Letters only: no vowels, punctuation or quotes, and the letters people write either way made one.
 const words = (t) => t
