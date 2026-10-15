@@ -150,3 +150,23 @@ it('makes the first admin of a team with no owner one, and others only when aske
 
     expect(PlatformAdmin::query()->where('is_owner', true)->orderBy('email')->pluck('email')->all())->toBe(['first@company.example', 'third@company.example']);
 });
+
+it('makes the earliest admin who can sign in the first owner when the column comes', function () {
+    $old = PlatformAdmin::query()->create(['name' => 'Gone', 'email' => 'gone@company.example', 'password' => 'a-long-password', 'is_active' => false]);
+    DB::connection('pgsql_platform')->table('platform_admins')->where('id', $old->id)->update(['created_at' => now()->subYear()]);
+    DB::connection('pgsql_platform')->table('platform_admins')->where('id', $this->demo->id)->update(['created_at' => now()->subMonth()]);
+
+    // As the deploy runs it: on the owner's connection, the table's row-level security forced with no policy.
+    $migration = require base_path('modules/Platform/database/migrations/2027_03_03_100000_add_owner_to_platform_admins.php');
+    $default = DB::getDefaultConnection();
+    DB::setDefaultConnection('pgsql_owner');
+    try {
+        $migration->down();
+        $migration->up();
+    } finally {
+        DB::setDefaultConnection($default);
+    }
+
+    expect(PlatformAdmin::query()->where('is_owner', true)->pluck('email')->all())->toBe(['admin@platform.test'])
+        ->and(DB::connection('pgsql_owner')->selectOne("select relforcerowsecurity as forced from pg_class where relname = 'platform_admins'")->forced)->toBeTrue();
+});

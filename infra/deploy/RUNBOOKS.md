@@ -305,9 +305,27 @@ docker compose exec web php artisan queue:failed           # a helper's job that
   each holds a web thread while it waits, so keep it well under `WEB_PHP_THREADS`).
 - **An academy hit its day's cap** (`AI_DAILY_CAP`, calls a day): it comes back at midnight UTC; raise the
   cap for all if it is too low.
-- **A new key**: change it in `.env`, then `docker compose up -d web worker` (see **Changing a secret**).
+- **A new key**: in the console's Platform settings (see **Changing a secret**); "Try it" checks both
+  providers' keys and that the models named exist.
   Each call's model, tokens, seconds of audio and outcome are kept in `ai_usage` (never what was said or
   sent, never who), which the academy's settings page counts for the month.
+
+## The Quran's text
+
+The Quran's words (lesson passages, practice suggestions) come only from Tanzil's Simple text and its
+metadata, kept in the storage volume (`storage/app/platform/quran`, with `manifest.json`: their SHA-256 and
+when they came; in the daily backup with the rest of the files). The deploy fetches them the first time
+(`curriculum:quran --fetch --if-missing`); a deploy that could not reach Tanzil says so and goes on.
+
+```bash
+docker compose exec web php artisan curriculum:quran            # which copy, its version and checksums
+docker compose exec web php artisan curriculum:quran --fetch    # fetch again (or the console: Platform settings › "Fetch again")
+```
+
+A fetch is kept only once both files pass every check (114 surahs, 6,236 verses in order, Arabic lines,
+no rub-el-hizb or sajdah signs, Tanzil's notice); otherwise it says what failed and the copy in use stays.
+Tanzil's addresses are `QURAN_TEXT_URL` and `QURAN_DATA_URL` in `.env` should they move. Until a copy is
+there, lessons cannot name a passage of the Quran and everything else works.
 
 ## Scanning uploads
 
@@ -386,7 +404,13 @@ invoice), it goes back to the academy's "Data requests" page with the reason, an
 
 ## Changing a secret
 
-Edit the value in `.env` (never in the repository, never in a log), then `docker compose up -d`.
+**An outside service's key** (Anthropic, ElevenLabs, SMTP, WhatsApp, Twilio, Firebase's file, LiveKit,
+Stripe Connect, Google and Apple): in the console, **Platform settings** (an owner of the platform team).
+Type the new one over the hidden one and save: it is in use from the next request, job or command, with no
+restart, and the audit log names the setting, never the value. "Try it" on its section shows the service
+took it. To go back to the server's own value, tick "Remove the saved …" (a key) or empty the field.
+
+Anything else: edit the value in `.env` (never in the repository, never in a log), then `docker compose up -d`.
 Do not change `APP_KEY` on a live server: it decrypts the gateways' keys, the authenticator secrets and
 the sessions. `HEALTH_TOKEN` can change any time (and the uptime monitor with it).
 
@@ -409,7 +433,10 @@ console admin's authenticator app needs the new key (`grep DEMO_PLATFORM_2FA_SEC
 they set up themselves.
 
 **A real platform team**: `docker compose exec web php artisan platform:admin you@company.com "Your name"`
-adds one (it asks for the password and sets up the authenticator at the first sign-in to `/console`).
+adds one (it asks for the password and sets up the authenticator at the first sign-in to `/console`). Only
+owners see Platform settings: the team's first admin is one, `platform:admin you@company.com --owner`
+makes another and `--no-owner` takes it back (audited; never the last owner who can sign in, so make the
+real one an owner before locking the demo account).
 Before real academies arrive, lock the demo console account once a real one can sign in:
 `php artisan platform:admin admin@platform.test --deactivate` (audited; its sessions end, and so does a
 sign-in as someone it started; never the last admin who can sign in). `--reactivate` lets it back in.

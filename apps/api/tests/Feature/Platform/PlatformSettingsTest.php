@@ -205,11 +205,12 @@ it('saves from the screen, shows where each value comes from, and never shows a 
         ->assertHasNoFormErrors()
         ->assertNotified('3 settings saved; they are in use from the next request.')
         ->assertDontSee('sk-ant-typed-on-the-screen')
-        ->assertSee('From this screen · سلمى')
+        ->assertSee('From this screen')->assertSee('Saved by', false)
         ->assertFormSet(['anthropic_key' => null, 'mail_port' => '587'])
         ->fillForm(['mail_port' => 'abc'])->call('save')->assertHasFormErrors(['mail_port']);
 
-    expect(app(PlatformSettings::class)->values())->toMatchArray(['anthropic_key' => 'sk-ant-typed-on-the-screen', 'mail_port' => '587', 'mail_mailer' => 'smtp']);
+    expect(app(PlatformSettings::class)->values())->toMatchArray(['anthropic_key' => 'sk-ant-typed-on-the-screen', 'mail_port' => '587', 'mail_mailer' => 'smtp'])
+        ->and(app(PlatformSettings::class)->saved()['anthropic_key']['by'])->toBe($this->owner->id);
 
     Livewire::test(PlatformSettingsPage::class)
         ->assertSee('Remove the saved Anthropic API key')

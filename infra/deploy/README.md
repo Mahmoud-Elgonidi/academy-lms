@@ -149,6 +149,14 @@ first deploy writes it with random secrets and safe defaults; each later deploy 
 setting this version reads that the file lacks, and says which. Change a value by hand, then
 `docker compose up -d` (the parts read it when they start). Secrets live only here, never in the repository.
 
+The outside services' keys and addresses (AI, email, WhatsApp, texts, push and its Firebase file, LiveKit,
+Stripe Connect, Google and Apple, the legal name, alert addresses, the app's links) are set best in the
+console: **Platform settings** (owners of the platform team only; `platform:admin you@company.com --owner`).
+A value there wins over its line here at once, with no restart, and is kept encrypted with `APP_KEY` in the
+database (in its backups too); emptied there, the line here holds again. Each setting shows where its value
+comes from now, and each section has a "Try it". The Quran's text is fetched from Tanzil by the deploy
+(`QURAN_TEXT_URL`, `QURAN_DATA_URL`, not written: Tanzil's own addresses) or from the same page.
+
 | Settings | What they do | Where the value comes from |
 |---|---|---|
 | `IMAGE`, `HTTP_PORT` | the version running, and the one port on 127.0.0.1 | `deploy.sh` |

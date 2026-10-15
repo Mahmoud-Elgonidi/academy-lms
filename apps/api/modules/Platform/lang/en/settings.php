@@ -15,7 +15,8 @@ return [
     'on' => 'On',
     'off' => 'Off',
     'source' => [
-        'screen' => 'From this screen · :who, :when',
+        'screen' => 'From this screen',
+        'saved_by' => 'Saved by :who, :when',
         'server' => "From the server's .env",
         'none' => 'Not set',
     ],

@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -112,7 +113,7 @@ final class PlatformSettingsPage extends Page
             ->schema(collect(SettingCatalog::inGroup($group))->flatMap(fn (SettingDefinition $s) => $this->fields($s))->all()), SettingCatalog::GROUPS));
     }
 
-    /** @return list<Field> */
+    /** @return list<Field|Group> */
     private function fields(SettingDefinition $setting): array
     {
         $key = $setting->key;
@@ -130,15 +131,19 @@ final class PlatformSettingsPage extends Page
         };
         $field->label(__("platform::settings.keys.{$key}.label"))
             ->helperText(new HtmlString(e(__("platform::settings.keys.{$key}.help")).($setting->env ? ' <code dir="ltr" style="font-size:.75rem">'.e($setting->env).'</code>' : '')))
-            ->hint(fn () => $this->source($setting)[0])->hintColor(fn () => $this->source($setting)[1])->hintIcon(fn () => $this->source($setting)[2]);
+            ->hint(fn () => $this->source($setting)[0])->hintColor(fn () => $this->source($setting)[1])
+            ->hintIcon(fn () => $this->source($setting)[2])->hintIconTooltip(fn () => $this->source($setting)[3]);
 
-        $fields = [$field];
-        if ($setting->secret()) {
-            $fields[] = Checkbox::make('clear.'.$key)->label(__('platform::settings.clear', ['name' => __("platform::settings.keys.{$key}.label")]))
-                ->visible(fn () => isset($this->saved[$key]));
+        if (! $setting->secret()) {
+            return [$field];
         }
 
-        return $fields;
+        // A key and its "Remove" share one place on the grid.
+        return [Group::make([
+            $field,
+            Checkbox::make('clear.'.$key)->label(__('platform::settings.clear', ['name' => __("platform::settings.keys.{$key}.label")]))
+                ->visible(fn () => isset($this->saved[$key])),
+        ])];
     }
 
     /** What the server's own value is, shown faintly in an empty field (never a key). */
@@ -160,12 +165,12 @@ final class PlatformSettingsPage extends Page
         return __('platform::settings.from_server', ['value' => (string) $value]);
     }
 
-    /** @return array{0: string, 1: string, 2: string} where the value in force comes from: the hint, its colour and icon */
+    /** @return array{0: string, 1: string, 2: string, 3: ?string} where the value in force comes from: the hint, its colour, icon and the icon's tooltip */
     private function source(SettingDefinition $setting): array
     {
         $saved = $this->saved[$setting->key] ?? null;
         if ($saved !== null) {
-            return [__('platform::settings.source.screen', ['who' => $saved['by'] ?? '—', 'when' => $saved['at']]), 'success', 'heroicon-m-check-circle'];
+            return [__('platform::settings.source.screen'), 'success', 'heroicon-m-check-circle', __('platform::settings.source.saved_by', ['who' => $saved['by'] ?? '—', 'when' => $saved['at']])];
         }
         $server = app(PlatformSettings::class)->serverValue($setting);
         if ($setting->type === 'json_file' && blank($server)) {
@@ -173,8 +178,8 @@ final class PlatformSettingsPage extends Page
         }
 
         return filled($server)
-            ? [__('platform::settings.source.server'), 'gray', 'heroicon-m-server']
-            : [__('platform::settings.source.none'), 'warning', 'heroicon-m-exclamation-triangle'];
+            ? [__('platform::settings.source.server'), 'gray', 'heroicon-m-server', null]
+            : [__('platform::settings.source.none'), 'warning', 'heroicon-m-exclamation-triangle', null];
     }
 
     public function save(): void
