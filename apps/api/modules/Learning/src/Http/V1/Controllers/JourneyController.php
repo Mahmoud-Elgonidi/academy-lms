@@ -273,6 +273,7 @@ final class JourneyController
 
     /** @return array{0: string, 1: string} the viewer and the learner on their screen */
     /** @return ?array{due: int, done_today: int, daily: int} */
+    /** @return ?array{due: int, done_today: int, daily: int} */
     private function hifzToday(string $learner): ?array
     {
         if (! HifzPage::query()->where('student_id', $learner)->exists()) {
@@ -280,7 +281,7 @@ final class JourneyController
         }
         $wird = app(HifzMap::class)->wird($learner, CarbonImmutable::now());
 
-        return ['due' => count($wird['pages']), 'done_today' => $wird['done_today'], 'daily' => $wird['daily']];
+        return ['due' => count($wird['pages']), 'done_today' => (int) $wird['done_today'], 'daily' => (int) $wird['daily']];
     }
 
     private function learner(Request $request): array

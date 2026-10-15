@@ -10224,10 +10224,10 @@
                                                             "type": "integer"
                                                         },
                                                         "done_today": {
-                                                            "type": "string"
+                                                            "type": "integer"
                                                         },
                                                         "daily": {
-                                                            "type": "string"
+                                                            "type": "integer"
                                                         }
                                                     },
                                                     "required": [

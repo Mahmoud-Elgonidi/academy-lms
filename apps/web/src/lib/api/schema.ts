@@ -6938,8 +6938,8 @@ export interface operations {
                             /** @description The hifz review today (GET learning/hifz has it in full): pages left today, done today and a day's pages; null until the learner has pages on their hifz map. */
                             hifz: {
                                 due: number;
-                                done_today: string;
-                                daily: string;
+                                done_today: number;
+                                daily: number;
                             } | null;
                             cheers: {
                                 id: string;
