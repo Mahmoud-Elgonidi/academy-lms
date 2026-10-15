@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Learning\Actions\Assist\DraftReportFromVoice;
 use Modules\Learning\Domain\Journey\LessonStars;
+use Modules\Learning\Models\HomeworkSubmission;
 use Modules\Learning\Models\LearningSettings;
 use Modules\Learning\Models\ReportTemplate;
 use Modules\Learning\Models\SessionReport;
@@ -163,7 +164,7 @@ final class WeekFacts
         $best = DB::table('homework_submissions as s')
             ->join('homework as h', fn ($j) => $j->on('h.academy_id', '=', 's.academy_id')->on('h.id', '=', 's.homework_id'))
             ->leftJoin('submission_checks as c', fn ($j) => $j->on('c.academy_id', '=', 's.academy_id')->on('c.submission_id', '=', 's.id')->where('c.status', 'ready'))
-            ->where('h.student_id', $studentId)->whereNotNull('s.file_path')->where('s.mime', 'like', 'audio/%')
+            ->where('h.student_id', $studentId)->whereNotNull('s.file_path')->where(fn ($q) => HomeworkSubmission::whereRecording($q, 's.mime'))
             ->where('s.submitted_at', '>=', $from)->where('s.submitted_at', '<', $to)
             ->get(['s.id', 's.submitted_at', 'h.grade', 'c.result'])
             ->map(function ($row) {

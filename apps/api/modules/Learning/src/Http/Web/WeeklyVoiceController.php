@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Modules\Learning\Actions\SubmitHomework;
+use Modules\Learning\Models\HomeworkSubmission;
 use Modules\Learning\Models\WeeklyDigest;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Platform\Contracts\BrandingApi;
@@ -72,7 +73,7 @@ final class WeeklyVoiceController
 
         $row = DB::table('homework_submissions as s')
             ->join('homework as h', fn ($j) => $j->on('h.academy_id', '=', 's.academy_id')->on('h.id', '=', 's.homework_id'))
-            ->where('s.id', $submission)->whereNotNull('s.file_path')->where('s.mime', 'like', 'audio/%')
+            ->where('s.id', $submission)->whereNotNull('s.file_path')->where(fn ($q) => HomeworkSubmission::whereRecording($q, 's.mime'))
             ->first(['s.file_path', 's.mime', 's.submitted_at', 'h.student_id', 'h.title']);
         abort_if($row === null || ! WeeklyDigest::query()->where('student_id', $row->student_id)->where('voice_submission_id', $submission)->exists(), 404);
         abort_unless(in_array($guardianId, $people->guardiansOf($row->student_id, reportsOnly: true), true), 403);

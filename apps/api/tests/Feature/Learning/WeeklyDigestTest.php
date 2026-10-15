@@ -221,8 +221,8 @@ it('reads to each guardian in their language', function () {
 it('lets the guardian hear the recording of the week from their own link, and no one else', function () {
     $this->actAsTenant($this->academy);
     $homework = Homework::query()->sole();
-    $samples = str_repeat(pack('v', 0), 800);
-    $recording = UploadedFile::fake()->createWithContent('recording.wav', 'RIFF'.pack('V', 36 + strlen($samples)).'WAVEfmt '.pack('VvvVVvv', 16, 1, 1, 8000, 16000, 2, 16).'data'.pack('V', strlen($samples)).$samples);
+    // As a browser records it: a webm container (stored as video/webm).
+    $recording = UploadedFile::fake()->createWithContent('recording.webm', str_repeat("\x1A\x45\xDF\xA3", 64));
     $submission = app(SubmitHomework::class)->handle($homework, $this->student->id, null, $recording);
     app(ReviewHomework::class)->handle($homework->fresh(), $this->teacher->id, 5, 'Beautiful');
     app(SendWeeklyDigest::class)->handle(WeeklyDigest::query()->create(['student_id' => $this->student->id, 'week_start' => '2099-01-03']), $this->friday);
