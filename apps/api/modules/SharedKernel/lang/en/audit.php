@@ -140,6 +140,7 @@ return [
             'admin_made_owner' => 'Console account :name made an owner',
             'admin_owner_removed' => 'Console account :name no longer an owner',
             'settings_saved' => 'Platform settings changed: :sections',
+            'quran_fetched' => "Fetched the Quran's text from Tanzil (:verses verses)",
             'plan_saved' => 'The :plan plan edited',
             'demo_secrets_reset' => "Demo console account :name took the server's new demo password and key",
             'game_draft_started' => 'Started designing a new game (:kinds)',

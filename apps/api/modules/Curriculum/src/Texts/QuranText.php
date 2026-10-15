@@ -9,14 +9,17 @@ use SimpleXMLElement;
 
 /**
  * The Quran as the platform keeps it: Tanzil's simple text, verbatim, with
- * its notice (resources/quran/quran-simple.txt, "surah|verse|text" lines),
- * and its metadata (quran-data.xml: each surah's names and verses). Never
- * typed, never generated, never changed: every word a screen or a helper
- * shows of the Quran comes from here. Until the files are in place, the
- * Quran is not offered (available() is false).
+ * its notice (quran-simple.txt, "surah|verse|text" lines), and its metadata
+ * (quran-data.xml: each surah's names and verses), fetched to the server's
+ * storage and checked there (QuranFiles), else shipped in resources/quran.
+ * Never typed, never generated, never changed: every word a screen or a
+ * helper shows of the Quran comes from here. Until the files are in place,
+ * the Quran is not offered (available() is false).
  *
  * Tanzil writes the basmala at the head of each surah's first verse (not
  * al-Fatiha's, where it is the verse, nor at-Tawba's); here it is apart.
+ * A pause mark Tanzil writes on its own (ۛ ۖ ۗ) is no word: it goes with
+ * the word before it, so a quote keeps it and the count of words does not.
  */
 final class QuranText
 {
@@ -35,32 +38,44 @@ final class QuranText
     /** @var ?array<string, true> each run of three words, as compared */
     private ?array $runs = null;
 
-    public function __construct(private readonly string $dir) {}
+    /** @param  ?string  $fallback  read when $dir has no copy (the code's own, under resources) */
+    public function __construct(private readonly string $dir, private readonly ?string $fallback = null) {}
 
     public function available(): bool
     {
-        return is_file($this->dir.'/'.self::TEXT_FILE) && is_file($this->dir.'/'.self::DATA_FILE);
+        return $this->dir() !== null;
+    }
+
+    /** The folder the copy in use is read from: the server's, else the code's; null when neither has one. */
+    public function dir(): ?string
+    {
+        foreach (array_filter([$this->dir, $this->fallback]) as $dir) {
+            if (is_file($dir.'/'.self::TEXT_FILE) && is_file($dir.'/'.self::DATA_FILE)) {
+                return $dir;
+            }
+        }
+
+        return null;
     }
 
     /** @return list<array{number: int, name_ar: string, name_en: string, verses: int}> */
     public function surahs(): array
     {
-        if ($this->surahs === null) {
+        // Read once there is a copy (one fetched while this process runs is read from then on).
+        if ($this->surahs === null && ($dir = $this->dir()) !== null) {
             $this->surahs = [];
-            if ($this->available()) {
-                $xml = new SimpleXMLElement((string) file_get_contents($this->dir.'/'.self::DATA_FILE), LIBXML_NONET);
-                foreach ($xml->suras->sura ?? [] as $sura) {
-                    $this->surahs[] = [
-                        'number' => (int) $sura['index'],
-                        'name_ar' => (string) $sura['name'],
-                        'name_en' => (string) $sura['tname'],
-                        'verses' => (int) $sura['ayas'],
-                    ];
-                }
+            $xml = new SimpleXMLElement((string) file_get_contents($dir.'/'.self::DATA_FILE), LIBXML_NONET);
+            foreach ($xml->suras->sura ?? [] as $sura) {
+                $this->surahs[] = [
+                    'number' => (int) $sura['index'],
+                    'name_ar' => (string) $sura['name'],
+                    'name_en' => (string) $sura['tname'],
+                    'verses' => (int) $sura['ayas'],
+                ];
             }
         }
 
-        return $this->surahs;
+        return $this->surahs ?? [];
     }
 
     /** @return ?array{number: int, name_ar: string, name_en: string, verses: int} */
@@ -95,7 +110,7 @@ final class QuranText
         $words = [];
         $list = [];
         foreach ($verses as $number => $text) {
-            $own = preg_split('/\s+/u', trim($text), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            $own = self::words($text);
             $list[] = ['surah' => $surah['number'], 'verse' => $number, 'text' => $text, 'first' => count($words) + 1, 'last' => count($words) + count($own)];
             array_push($words, ...$own);
         }
@@ -104,6 +119,26 @@ final class QuranText
             : Passage::arabicNumber((int) $source->from).'–'.Passage::arabicNumber((int) $source->to);
 
         return new Passage($source, $surah['name_ar'].' '.$range, $words, $list, $this->notice());
+    }
+
+    /**
+     * A verse's words as written, a pause mark on its own going with the word before it.
+     *
+     * @return list<string>
+     */
+    public static function words(string $verse): array
+    {
+        $words = [];
+        foreach (preg_split('/\s+/u', trim($verse), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $token) {
+            if (preg_match('/\p{L}/u', $token) !== 1 && $words !== []) {
+                $words[count($words) - 1] .= ' '.$token;
+
+                continue;
+            }
+            $words[] = $token;
+        }
+
+        return $words;
     }
 
     /** Tanzil's notice, kept with every passage shown (its terms ask for it). */
@@ -139,6 +174,9 @@ final class QuranText
     private function runs(): array
     {
         if ($this->runs === null) {
+            if ($this->load() === []) {
+                return [];
+            }
             $this->runs = [];
             foreach ($this->load() as $verses) {
                 $words = ArabicText::words(implode(' ', $verses));
@@ -157,14 +195,14 @@ final class QuranText
         if ($this->verses !== null) {
             return $this->verses;
         }
-        $this->verses = [];
-        if (! $this->available()) {
-            return $this->verses;
+        if (($dir = $this->dir()) === null) {
+            return [];
         }
+        $this->verses = [];
 
         $basmala = ArabicText::words('بسم الله الرحمن الرحيم');
         $notice = [];
-        foreach (file($this->dir.'/'.self::TEXT_FILE, FILE_IGNORE_NEW_LINES) ?: [] as $line) {
+        foreach (file($dir.'/'.self::TEXT_FILE, FILE_IGNORE_NEW_LINES) ?: [] as $line) {
             if (str_starts_with($line, '#')) {
                 $notice[] = trim(ltrim($line, '# '));
 

@@ -140,6 +140,7 @@ return [
             'admin_made_owner' => 'حساب لوحة المنصة :name بقى أدمن رئيسي',
             'admin_owner_removed' => 'حساب لوحة المنصة :name مابقاش أدمن رئيسي',
             'settings_saved' => 'تعديل إعدادات المنصة: :sections',
+            'quran_fetched' => 'تنزيل نص القرآن من Tanzil (:verses آية)',
             'plan_saved' => 'تعديل الباقة :plan',
             'demo_secrets_reset' => 'حساب لوحة المنصة التجريبي :name خد كلمة السر والمفتاح التجريبيين الجداد',
             'game_draft_started' => 'بداية تصميم لعبة جديدة (:kinds)',

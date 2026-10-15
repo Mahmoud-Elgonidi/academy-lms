@@ -98,6 +98,21 @@ return [
         'app_android_url' => ['label' => 'Google Play link', 'help' => 'Where the update button goes on Android.'],
         'app_ios_url' => ['label' => 'App Store link', 'help' => 'Where the update button goes on iPhone.'],
     ],
+    'quran' => [
+        'title' => "The Quran's text",
+        'about' => "Tanzil's Simple text and its metadata, fetched to the server and checked whole (114 surahs, 6,236 verses) before they are kept. Every word of the Quran a screen or a helper shows comes from this copy.",
+        'fetch' => 'Fetch from Tanzil',
+        'fetch_again' => 'Fetch again',
+        'confirm' => "The server fetches Tanzil's two files and replaces the copy in use only once both pass every check.",
+        'fetched' => "The Quran's text is on the server, checked: 114 surahs, 6,236 verses.",
+        'failed' => "The Quran's text was not fetched; the copy in use stays.",
+        'missing' => 'Not on the server yet: lessons cannot name a passage of the Quran until it is.',
+        'where' => 'Copy in use',
+        'where_server' => "Fetched to the server's storage",
+        'where_code' => 'Shipped with the code',
+        'copy' => 'Version',
+        'verses' => 'Verses',
+    ],
     'checks' => [
         'try' => 'Try it',
         'ok' => [

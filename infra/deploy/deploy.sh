@@ -373,6 +373,12 @@ done
 say "Migrations (as lms_owner), then fresh table statistics"
 compose run --rm --no-deps -T web migrate
 
+# The Quran's text: fetched from Tanzil once and checked whole, then kept in the storage volume (and its backups).
+# Not fetched now (no network, Tanzil down): the deploy goes on, and the console's Platform settings fetches it later.
+say "The Quran's text (only if the server has no copy yet)"
+compose run --rm --no-deps -T web php artisan curriculum:quran --fetch --if-missing \
+    || say "The Quran's text was not fetched this time; fetch it from the console (Platform settings) or: php artisan curriculum:quran --fetch"
+
 if [ "$DEMO_DATA" = 1 ]; then
     say "Demo academies (only if they are not there yet)"
     compose run --rm --no-deps -T web seed-demo
