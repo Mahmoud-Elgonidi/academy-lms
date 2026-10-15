@@ -282,6 +282,33 @@ An academy can switch its lessons to an outside link (Zoom, Meet) at once: back 
 Settings → Live classroom → "An outside link per teacher" (each teacher's own meeting link). New lesson rooms use
 the new provider; a room already open keeps the one it was made with. Switch back the same way.
 
+## AI helpers
+
+The academies' helpers (practice items, report drafts from a teacher's voice note, recitation checks,
+the weekly message's wording) call Claude with the platform's `ANTHROPIC_API_KEY`, and the ones that
+listen send the audio to ElevenLabs (`ELEVENLABS_API_KEY`) for its words. Each academy turns each helper
+on in Settings › AI helpers (all off at first, only on a plan with the AI area); what each sends is written
+on that page. A helper's result is always a draft or a suggestion a person checks: when one is off or
+down, the work goes on by hand and the weekly message goes out with the facts alone.
+
+System health's **AI helpers** check: *off* with no key, a warning when calls to one provider failed
+three times in a row (the hint names it), and a fault when the `assist` queue's beat stops.
+
+```bash
+docker compose logs --tail=100 worker | grep -i assist     # the assist queue's worker
+docker compose exec web php artisan queue:failed           # a helper's job that gave up, and why
+```
+
+- **Turn them all off at once** (a provider's outage, a bill to stop): `AI_DRIVER=off` in `.env`, then
+  `docker compose up -d web worker`. Every helper says it is off; nothing else changes. Back with `claude`.
+- **People are told to try again** ("busy"): more of them answer at once with `AI_CONCURRENT` (default 3;
+  each holds a web thread while it waits, so keep it well under `WEB_PHP_THREADS`).
+- **An academy hit its day's cap** (`AI_DAILY_CAP`, calls a day): it comes back at midnight UTC; raise the
+  cap for all if it is too low.
+- **A new key**: change it in `.env`, then `docker compose up -d web worker` (see **Changing a secret**).
+  Each call's model, tokens, seconds of audio and outcome are kept in `ai_usage` (never what was said or
+  sent, never who), which the academy's settings page counts for the month.
+
 ## Scanning uploads
 
 Every file people upload (homework, payment receipts, ticket attachments, lesson materials, import

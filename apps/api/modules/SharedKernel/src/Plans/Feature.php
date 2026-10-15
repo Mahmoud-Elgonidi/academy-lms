@@ -15,6 +15,7 @@ enum Feature: string
     case Import = 'import';
     case CustomBranding = 'custom_branding';
     case Payroll = 'payroll';
+    case Ai = 'ai';
 
     public function label(): string
     {

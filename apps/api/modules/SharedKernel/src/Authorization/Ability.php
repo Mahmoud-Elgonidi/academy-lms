@@ -59,6 +59,7 @@ enum Ability: string
     case ManageStaff = 'staff.manage';
     case SendAnnouncements = 'announcements.send';
     case SetUpAcademy = 'academy.setup';
+    case ManageAi = 'ai.manage';
 
     /** The plan area this ability belongs to, if a plan may leave it out. */
     public function feature(): ?Feature
@@ -67,6 +68,7 @@ enum Ability: string
             self::ManageLeads, self::BookTrials, self::AssessTrials => Feature::Crm,
             self::ManagePayroll, self::ViewOwnEarnings => Feature::Payroll,
             self::ImportData => Feature::Import,
+            self::ManageAi => Feature::Ai,
             default => null,
         };
     }

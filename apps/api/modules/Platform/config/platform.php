@@ -56,6 +56,42 @@ return [
         ],
     ],
 
+    // The academies' AI helpers (docs/architecture/02, "المساعد الآلي"): drafts
+    // and aids a person reads first. Words come from Claude with the
+    // platform's key (ANTHROPIC_API_KEY, as the studio); recordings are heard
+    // by ElevenLabs (ELEVENLABS_API_KEY). Each academy turns each helper on
+    // for itself (Settings › AI); a helper whose key is missing stays off.
+    'ai' => [
+        // claude, demo (fixed answers, no key; never in production), or off (every helper off)
+        'driver' => env('AI_DRIVER', 'claude'),
+        'key' => env('ANTHROPIC_API_KEY'),
+        'base_url' => env('ANTHROPIC_BASE_URL'),
+        // best: drafts that take judgement; fast: short wording at volume.
+        'models' => [
+            'best' => env('AI_MODEL', 'claude-opus-5-5'),
+            'fast' => env('AI_FAST_MODEL', 'claude-haiku-5-5'),
+        ],
+        // The server's own fallback when a model declines (not every model has one).
+        'fallbacks' => ['claude-opus-5-5', 'claude-sonnet-5-5'],
+        // Seconds a request waits while someone waits on the screen, and in the background.
+        'timeout' => (int) env('AI_TIMEOUT', 40),
+        'job_timeout' => (int) env('AI_JOB_TIMEOUT', 180),
+        // Requests to the providers at once from the web (the rest are told to try again).
+        'concurrent' => (int) env('AI_CONCURRENT', 3),
+        // Uses an academy may make in a day (on the server's clock).
+        'daily_cap' => (int) env('AI_DAILY_CAP', 500),
+        'speech' => [
+            'key' => env('ELEVENLABS_API_KEY'),
+            'base_url' => env('ELEVENLABS_API_BASE', 'https://api.elevenlabs.io'),
+            'model' => env('ELEVENLABS_STT_MODEL', 'scribe_v2'),
+            // Ask ElevenLabs to keep nothing (their zero-retention option, on contracts that include it).
+            'zero_retention' => (bool) env('ELEVENLABS_ZERO_RETENTION', false),
+            'timeout' => (int) env('ELEVENLABS_TIMEOUT', 25),
+            // The longest recording sent, in seconds.
+            'max_seconds' => (int) env('AI_MAX_AUDIO_SECONDS', 600),
+        ],
+    ],
+
     // Subdomains an academy may not take.
     'reserved_slugs' => ['www', 'api', 'app', 'admin', 'console', 'static', 'cdn', 'mail', 'status', 'docs'],
 ];

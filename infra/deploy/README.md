@@ -110,6 +110,10 @@ docker compose exec web php artisan platform:mail-test   # does the server's mai
   and `GAME_DESIGNER_MODEL` (the Claude model it designs with) in `.env`, then `docker compose up -d worker`.
   It works on its own queue beside the worker (a design takes a few minutes). Without them the studio says the
   designer is not set up; the games, their islands and publishing still work.
+- **AI helpers** (each academy's Settings › AI helpers; `RUNBOOKS.md`, "AI helpers"): the same
+  `ANTHROPIC_API_KEY`, and `ELEVENLABS_API_KEY` for the ones that listen (speech to text). Each academy turns
+  each helper on itself (all off at first, and only on a plan with the AI area); `AI_DRIVER=off` turns them off
+  everywhere. They work on their own queue, `assist`, beside the worker.
 
 - **Malware scanning of uploads**: off on a new server (`UPLOAD_SCANNER=none`). Once the server can spare
   about 1.5 GB of memory, set `COMPOSE_PROFILES=scan` and `UPLOAD_SCANNER=clamav` in `.env` (`RUNBOOKS.md`,
@@ -165,7 +169,9 @@ setting this version reads that the file lacks, and says which. Change a value b
 | `SOCIAL_REDIRECT_BASE`, `GOOGLE_*`, `APPLE_*` | signing in with Google and Apple | the platform's own OAuth clients (see "Not on yet" above) |
 | `UPLOAD_SCANNER`, `UPLOAD_SCAN_REQUIRED`, `CLAMAV_HOST`, `COMPOSE_PROFILES` | malware scanning of uploads | `COMPOSE_PROFILES=scan` and `UPLOAD_SCANNER=clamav` once the server can spare 1.5 GB |
 | `HEALTH_ALERT_TO`, `BACKUPS_EXPECTED`, `BACKUP_AT`, `BACKUP_KEEP_DAYS`, `OFFSITE_*` | alerts' extra addresses; the daily backup's time and retention; the off-site copy | you; the bucket and the platform team's age public key (`RUNBOOKS.md`) |
-| `ANTHROPIC_API_KEY`, `GAME_DESIGNER_MODEL`, `PLATFORM_LEGAL_NAME`, `PRIVACY_CONTACT_EMAIL` | the games designer; the platform's privacy pages | the platform's Claude key and model; the legal name and the data contact |
+| `ANTHROPIC_API_KEY`, `GAME_DESIGNER_MODEL`, `PLATFORM_LEGAL_NAME`, `PRIVACY_CONTACT_EMAIL` | the games designer and the AI helpers; the platform's privacy pages | the platform's Claude key and the designer's model; the legal name and the data contact |
+| `AI_DRIVER`, `AI_MODEL`, `AI_FAST_MODEL`, `AI_DAILY_CAP` (not written: `AI_TIMEOUT`, `AI_JOB_TIMEOUT`, `AI_CONCURRENT`, `AI_MAX_AUDIO_SECONDS`) | the academies' AI helpers: on (`claude`) or `off` for all; the Claude models that write and that answer quickly; each academy's calls a day | the defaults; `AI_CONCURRENT` (default 3) is how many helpers answer people at once on this server, the rest are told to try again |
+| `ELEVENLABS_API_KEY`, `ELEVENLABS_API_BASE`, `ELEVENLABS_ZERO_RETENTION` (not written: `ELEVENLABS_STT_MODEL`, `ELEVENLABS_TIMEOUT`) | speech to text for the helpers that listen | the platform's ElevenLabs key (its data-processing terms signed first); the EU address keeps audio in the EU; `ELEVENLABS_ZERO_RETENTION=true` once the account allows it. Blank, those helpers stay off |
 | `WEB_MEMORY`, `WORKER_MEMORY`, ... `*_CPUS`, `REDIS_MAXMEMORY` (not written: compose.yml's defaults) | each part's memory and CPU limits | add to raise one |
 
 ## The files

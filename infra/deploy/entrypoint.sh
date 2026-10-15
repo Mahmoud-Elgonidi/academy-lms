@@ -31,7 +31,8 @@ case "${1:-web}" in
     reverb) exec php artisan reverb:start --host=0.0.0.0 --port=8080 ;;
     worker)
         # QUEUE_WORKERS workers (default 2: one slow outside call, WhatsApp, SMS, push or mail,
-        # does not hold up the lesson reminders behind it) and the games designer's. queue:work
+        # does not hold up the lesson reminders behind it), the games designer's and the AI
+        # helpers' (assist: calls of a minute or two that never wait behind messages). queue:work
         # ends itself every hour, after a job that ran too long or past its memory: each is
         # started again on its own, so that never stops the container and the others with it.
         # A stop is passed on, and each worker finishes the job in hand.
@@ -46,6 +47,7 @@ case "${1:-web}" in
             done
         }
         keep designer --queue=designer --tries=1 --timeout=1000 --max-time=3600 & pids=$!
+        keep assist --queue=assist --tries=3 --timeout=240 --max-time=3600 & pids="$pids $!"
         n="${QUEUE_WORKERS:-2}"
         while [ "$n" -gt 0 ]; do
             keep --queue=notifications,default --tries=3 --max-time=3600 & pids="$pids $!"

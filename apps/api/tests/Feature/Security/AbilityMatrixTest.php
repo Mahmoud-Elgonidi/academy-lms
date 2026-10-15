@@ -69,6 +69,7 @@ function expectedAbilities(): array
         'staff.manage' => [$o, $a],
         'announcements.send' => [$o, $a],
         'academy.setup' => [$o, $a],
+        'ai.manage' => [$o, $a],
     ];
 }
 
@@ -77,6 +78,7 @@ const ABILITY_PLAN_AREAS = [
     'leads.manage' => 'crm', 'trials.book' => 'crm', 'trials.assess' => 'crm',
     'payroll.manage' => 'payroll', 'payroll.view-own' => 'payroll',
     'data.import' => 'import',
+    'ai.manage' => 'ai',
 ];
 
 beforeEach(function () {

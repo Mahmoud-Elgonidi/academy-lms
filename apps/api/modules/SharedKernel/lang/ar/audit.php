@@ -127,6 +127,7 @@ return [
             'suspended' => 'إيقاف الأكاديمية: :reason',
             'reactivated' => 'تشغيل الأكاديمية تاني',
             'plan_changed' => 'باقة الأكاديمية بقت :plan: :reason',
+            'ai_settings_saved' => 'تعديل المساعد الآلي (الشغّال: :helpers)',
         ],
         'games' => [
             'settings_saved' => 'تعديل ألعاب الأكاديمية (:state، :minutes دقيقة في اليوم)',
@@ -146,6 +147,7 @@ return [
         ],
     ],
     'values' => [
+        'helpers' => ['practice_items' => 'اقتراح التدريبات', 'report_draft' => 'تقرير من رسالة صوتية', 'recitation_check' => 'تصحيح التسميع', 'digest_wording' => 'صياغة الرسالة الأسبوعية'],
         'early' => ['early' => 'بدري، من الإدارة', 'on_time' => 'في ميعاده، لوحده'],
         'style' => ['playful' => 'مرح (جزر وألعاب)', 'calm' => 'هادي (مستويات ومهمات)', 'plain' => 'من غير نجوم'],
         'concern_outcome' => ['no_concern' => 'مفيش حاجة تتعمل', 'resolved' => 'اتحل', 'teacher_action' => 'إجراء مع مدرس', 'referred' => 'اتحول لجهة برّه', 'duplicate' => 'مكرر'],

@@ -6,6 +6,8 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
+use Modules\Platform\Ai\AiHealth;
+use Modules\Platform\Ai\PlatformAcademyAi;
 use Modules\SharedKernel\Files\ScannerHealth;
 use Modules\SharedKernel\Files\UploadScanner;
 use Modules\SharedKernel\Health\Heartbeats;
@@ -31,7 +33,7 @@ class SystemHealth
     public function checks(): array
     {
         $checks = [];
-        foreach (['database', 'cache', 'scheduler', 'worker', 'queue', 'relay', 'reverb', 'backups', 'archive', 'offsite', 'drill', 'disk', 'mail', 'scanning', 'errors'] as $name) {
+        foreach (['database', 'cache', 'scheduler', 'worker', 'assist', 'queue', 'relay', 'reverb', 'backups', 'archive', 'offsite', 'drill', 'disk', 'mail', 'scanning', 'errors'] as $name) {
             try {
                 $checks[$name] = $this->{$name}();
             } catch (Throwable $e) {
@@ -102,11 +104,41 @@ class SystemHealth
         return $check;
     }
 
+    /**
+     * The AI helpers' worker (its own queue, for checks that take minutes), and
+     * whether the providers answer. Off while no helper's key is set.
+     */
+    private function assist(): array
+    {
+        if (! PlatformAcademyAi::demo() && (string) config('platform.ai.key') === '' && (string) config('platform.ai.speech.key') === '') {
+            return $this->off();
+        }
+        $check = $this->beat('assist', 3, 10);
+        if ($check['status'] !== 'ok') {
+            return $check;
+        }
+        foreach (AiHealth::last() as $provider => $state) {
+            if ((int) ($state['in_a_row'] ?? 0) >= 3) {
+                return $this->check('warn', __('platform::health.values.ai_failing', [
+                    'provider' => $provider,
+                    'count' => (int) $state['in_a_row'],
+                    'when' => CarbonImmutable::createFromTimestamp((int) ($state['failed'] ?? 0))->diffForHumans(),
+                    'error' => (string) ($state['error'] ?? ''),
+                ]), __('platform::health.hints.ai_failing'));
+            }
+        }
+
+        return $check;
+    }
+
     private function queue(): array
     {
         $waiting = 0;
         foreach (['notifications', 'default'] as $queue) {
             $waiting += (int) Queue::size($queue);
+        }
+        if (config('queue.default') !== 'sync') {
+            $waiting += (int) Queue::connection('assist')->size('assist');
         }
         $failed = (int) DB::connection('pgsql_platform')->table('failed_jobs')->where('failed_at', '>=', now()->subDay())->count();
         $status = match (true) {

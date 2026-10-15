@@ -17,6 +17,7 @@ return [
         'cache' => 'الكاش (Redis)',
         'scheduler' => 'المهام المجدولة',
         'worker' => 'منفّذ المهام (الطابور)',
+        'assist' => 'المساعد الآلي',
         'queue' => 'الطابور',
         'relay' => 'ناقل التحديثات اللحظية',
         'reverb' => 'الاتصال اللحظي (Reverb)',
@@ -30,6 +31,7 @@ return [
         'errors' => 'الأخطاء',
     ],
     'values' => [
+        'ai_failing' => ':provider فشل :count مرات ورا بعض (آخر مرة :when): :error',
         'database' => 'بيرد، والحجم :size (:ms مللي ثانية)',
         'answers' => 'بيرد',
         'silent' => 'مابيردش',
@@ -52,6 +54,8 @@ return [
         'mail_ready' => 'متظبط (:mailer)، ولسه مفيش رسالة طلعت',
     ],
     'hints' => [
+        'assist' => 'منفّذ مهام المساعد الآلي واقف أو متأخر: تصحيح التسميع والرسايل الأسبوعية مستنية. docker compose logs worker.',
+        'ai_failing' => 'المزوّد بيرفض أو مش بيرد: راجع المفتاح والحساب (ANTHROPIC_API_KEY، ELEVENLABS_API_KEY)، أو اقفل المساعدات بـ AI_DRIVER=off (RUNBOOKS.md، "AI helpers").',
         'scheduler' => 'جزء scheduler واقف: docker compose ps، وبعدين docker compose logs scheduler.',
         'worker' => 'جزء worker واقف أو متأخر: الرسايل والتذكيرات مش بتطلع. docker compose logs worker.',
         'queue' => 'فيه مهام مستنية كتير أو فشلت: docker compose exec web php artisan queue:failed.',

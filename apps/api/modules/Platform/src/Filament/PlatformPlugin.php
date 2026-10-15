@@ -11,6 +11,7 @@ use Illuminate\Support\HtmlString;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\Platform\Contracts\DTOs\Branding;
 use Modules\Platform\Filament\Pages\AcademyPlanPage;
+use Modules\Platform\Filament\Pages\AiSettingsPage;
 use Modules\Platform\Filament\Pages\BrandingSettings;
 use Modules\Platform\Plans\PlanWarning;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -34,7 +35,7 @@ final class PlatformPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel
-            ->pages([BrandingSettings::class, AcademyPlanPage::class])
+            ->pages([BrandingSettings::class, AcademyPlanPage::class, AiSettingsPage::class])
             ->brandName(fn (): string => self::branding()?->name() ?? config('app.name'))
             ->brandLogo(fn () => self::branding()?->logoUrl)
             ->brandLogoHeight('2.25rem')

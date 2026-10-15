@@ -27,4 +27,9 @@ return [
     'games-night' => 'Games sleep at night. See you in the morning!',
     'games-limit' => 'Today’s play time is used up.',
     'games-not-enough-items' => 'Not enough practice for this game.',
+    'ai-off' => 'This helper is off at the academy.',
+    'ai-limit' => 'The helper has been used up for today.',
+    'ai-unavailable' => 'The helper is not available right now.',
+    'ai-unheard' => 'We could not make out the recording.',
+    'ai-no-answer' => 'The helper could not answer this.',
 ];

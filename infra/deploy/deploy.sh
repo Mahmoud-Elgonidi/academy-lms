@@ -238,11 +238,26 @@ UPLOAD_SCANNER=none
 UPLOAD_SCAN_REQUIRED=true
 CLAMAV_HOST=clamav
 
-# The games studio's designer (console › Game studio): Claude, with the platform's own
-# key and the model it designs with (a Claude model id; the most capable one designs best).
-# Empty: the studio says the designer is not set up, and the games themselves still work.
+# Claude, with the platform's own key: the games studio's designer (console › Game studio,
+# GAME_DESIGNER_MODEL: a Claude model id; the most capable one designs best) and the
+# academies' helpers (Settings › AI helpers; each academy turns each one on, all off at
+# first). Empty: the studio says the designer is not set up, the helpers stay off, and
+# everything else still works.
 ANTHROPIC_API_KEY=
 GAME_DESIGNER_MODEL=
+# The helpers (RUNBOOKS.md, "AI helpers"): claude, or off for all of them. AI_MODEL writes
+# and AI_FAST_MODEL handles the quick, short ones; AI_DAILY_CAP is each academy's calls a day.
+AI_DRIVER=claude
+AI_MODEL=claude-opus-5-5
+AI_FAST_MODEL=claude-haiku-5-5
+AI_DAILY_CAP=500
+# Speech to text for the helpers that listen (a teacher's voice note, a recitation):
+# ElevenLabs, with the platform's key (ELEVENLABS_API_BASE=https://api.eu.residency.elevenlabs.io
+# keeps the audio in the EU; ELEVENLABS_ZERO_RETENTION=true once the account allows it).
+# Empty: those helpers stay off.
+ELEVENLABS_API_KEY=
+ELEVENLABS_API_BASE=https://api.elevenlabs.io
+ELEVENLABS_ZERO_RETENTION=false
 
 # The platform's own privacy notice, terms and account-deletion page (/privacy, /terms,
 # /account-deletion on the platform's address; the app stores link to them): the name it goes

@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
+use Modules\Platform\Ai\AiSlots;
+use Modules\Platform\Ai\ClaudeLanguageModel;
+use Modules\Platform\Ai\DemoLanguageModel;
+use Modules\Platform\Ai\DemoSpeechToText;
+use Modules\Platform\Ai\ElevenLabsSpeechToText;
+use Modules\Platform\Ai\PlatformAcademyAi;
 use Modules\Platform\Branding\BrandingService;
 use Modules\Platform\Commands\CreatePlatformAdmin;
 use Modules\Platform\Commands\HealthCommand;
@@ -29,6 +35,7 @@ use Modules\Platform\Games\Designer\ClaudeGameDesigner;
 use Modules\Platform\Games\Designer\DemoGameDesigner;
 use Modules\Platform\Games\Designer\GameDesigner;
 use Modules\Platform\Games\PlatformGameCatalog;
+use Modules\Platform\Health\AssistBeat;
 use Modules\Platform\Health\WorkerBeat;
 use Modules\Platform\Http\Controllers\GamePageController;
 use Modules\Platform\Http\Controllers\HealthController;
@@ -41,6 +48,9 @@ use Modules\Platform\Plans\PlanUsage;
 use Modules\Platform\Plans\PlatformAcademyPlan;
 use Modules\Platform\PlatformService;
 use Modules\Platform\Setup\BrandingStep;
+use Modules\SharedKernel\Ai\AcademyAi;
+use Modules\SharedKernel\Ai\LanguageModel;
+use Modules\SharedKernel\Ai\SpeechToText;
 use Modules\SharedKernel\Games\GameCatalog;
 use Modules\SharedKernel\Health\Heartbeats;
 use Modules\SharedKernel\Plans\AcademyPlan;
@@ -78,6 +88,13 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->alias(PlatformGameCatalog::class, GameCatalog::class);
         $this->app->bind(GameDesigner::class, fn () => config('platform.games.designer.driver') === 'demo' && ! $this->app->isProduction()
             ? new DemoGameDesigner : new ClaudeGameDesigner);
+
+        // The academies' AI helpers (Settings › AI): Claude for words, ElevenLabs for recordings, fixed answers for the demo.
+        $this->app->singleton(AiSlots::class);
+        $this->app->scoped(PlatformAcademyAi::class);
+        $this->app->alias(PlatformAcademyAi::class, AcademyAi::class);
+        $this->app->bind(LanguageModel::class, fn ($app) => PlatformAcademyAi::demo() ? new DemoLanguageModel : $app->make(ClaudeLanguageModel::class));
+        $this->app->bind(SpeechToText::class, fn ($app) => PlatformAcademyAi::demo() ? new DemoSpeechToText : $app->make(ElevenLabsSpeechToText::class));
     }
 
     public function boot(): void
@@ -96,6 +113,7 @@ final class PlatformServiceProvider extends ServiceProvider
             // The stack's heartbeats (the scheduler's own, and one through the queue to the worker) and the alerts.
             $schedule->call(fn () => Heartbeats::beat('scheduler'))->everyMinute()->name('health:scheduler');
             $schedule->call(fn () => WorkerBeat::dispatch(now()->getTimestamp())->onQueue('default'))->everyMinute()->name('health:worker');
+            $schedule->call(fn () => AssistBeat::dispatch(now()->getTimestamp()))->everyMinute()->name('health:assist');
             $schedule->command('platform:health --alert')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
         });
 

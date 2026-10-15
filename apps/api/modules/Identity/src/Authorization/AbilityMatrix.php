@@ -62,6 +62,7 @@ final class AbilityMatrix
             Ability::SendAnnouncements => [Role::Owner, Role::Admin],
             // The new academy's setup checklist ("Start here"): who gets the academy ready for its first families.
             Ability::SetUpAcademy => [Role::Owner, Role::Admin],
+            Ability::ManageAi => [Role::Owner, Role::Admin],
         };
     }
 

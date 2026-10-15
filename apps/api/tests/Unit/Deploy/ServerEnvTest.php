@@ -6,8 +6,8 @@
 
 /** Settings the modules read whose defaults suit a server: outside services' addresses, tuning. */
 const SERVER_DEFAULTS = [
-    'ANTHROPIC_BASE_URL', 'APPLE_AUTHORIZE_URL', 'APPLE_ISSUERS', 'APPLE_JWKS_URL', 'BILLING_CHECKOUT_MINUTES',
-    'BILLING_PAY_LINK_DAYS', 'CLAMAV_PORT', 'CLAMAV_TIMEOUT', 'GAME_DESIGNER', 'GAME_DESIGNER_EFFORT',
+    'AI_CONCURRENT', 'AI_JOB_TIMEOUT', 'AI_MAX_AUDIO_SECONDS', 'AI_TIMEOUT', 'ANTHROPIC_BASE_URL', 'APPLE_AUTHORIZE_URL', 'APPLE_ISSUERS', 'APPLE_JWKS_URL', 'BILLING_CHECKOUT_MINUTES',
+    'BILLING_PAY_LINK_DAYS', 'CLAMAV_PORT', 'CLAMAV_TIMEOUT', 'ELEVENLABS_STT_MODEL', 'ELEVENLABS_TIMEOUT', 'GAME_DESIGNER', 'GAME_DESIGNER_EFFORT',
     'GAME_DESIGNER_MAX_TOKENS', 'GAME_DESIGNER_TIMEOUT', 'GOOGLE_AUTHORIZE_URL', 'GOOGLE_ISSUERS', 'GOOGLE_JWKS_URL',
     'GOOGLE_TOKEN_URL', 'MOYASAR_API_BASE', 'PAYMOB_API_BASE', 'STRIPE_API_BASE', 'STRIPE_CONNECT_BASE',
     'STRIPE_CONNECT_REDIRECT', 'TAP_API_BASE', 'WHATSAPP_META_API_VERSION',
@@ -46,5 +46,7 @@ it('keeps what a server has not set up off, and never takes a laptop default', f
         ->and([$s['WHATSAPP_DRIVER'], $s['SMS_DRIVER'], $s['PUSH_DRIVER'], $s['MAIL_MAILER']])->toBe(['log', 'log', 'log', 'log'])
         ->and($s['FCM_CREDENTIALS_FILE'])->toBe('./secrets/fcm.json')
         ->and($s['CORS_ALLOWED_ORIGINS'])->toBe('')
-        ->and($s['UPLOAD_SCANNER'])->toBe('none');
+        ->and($s['UPLOAD_SCANNER'])->toBe('none')
+        // The helpers need the platform's keys; each academy still turns each one on itself.
+        ->and([$s['ANTHROPIC_API_KEY'], $s['ELEVENLABS_API_KEY'], $s['ELEVENLABS_ZERO_RETENTION']])->toBe(['', '', 'false']);
 });

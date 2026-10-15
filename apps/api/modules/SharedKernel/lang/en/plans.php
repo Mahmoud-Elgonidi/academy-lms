@@ -8,6 +8,7 @@ return [
         'import' => 'Data import',
         'custom_branding' => 'Your own colour templates',
         'payroll' => "Teachers' pay",
+        'ai' => 'AI helpers',
     ],
     'limits' => [
         'teachers' => 'Teachers',

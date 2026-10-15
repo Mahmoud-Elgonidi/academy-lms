@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Plans\FeatureNotInPlan;
 use Modules\SharedKernel\Plans\PlanLimitReached;
 use Modules\SharedKernel\Tenancy\Exceptions\TenantNotResolved;
@@ -31,6 +32,7 @@ final class ProblemDetails
         [$status, $type, $extra] = match (true) {
             $e instanceof PlanLimitReached => [403, 'plan-limit-reached', ['limit' => $e->limit->value, 'max' => $e->max]],
             $e instanceof FeatureNotInPlan => [403, 'feature-not-in-plan', ['feature' => $e->feature->value]],
+            $e instanceof AiFailed => [$e->status(), $e->type(), ['reason' => $e->reason]],
             $e instanceof ValidationException => [422, 'validation', ['errors' => $e->errors()]],
             $e instanceof ProblemException => [$e->getStatusCode(), $e->type, $e->extra],
             $e instanceof AuthenticationException => [401, 'unauthenticated', []],
@@ -78,6 +80,10 @@ final class ProblemDetails
 
     private static function detail(Throwable $e, int $status): ?string
     {
+        // A helper that cannot run says so in the reader's words, never the provider's (busy is a 503 too).
+        if ($e instanceof AiFailed) {
+            return $e->sayable();
+        }
         // Server errors never leak internals outside debug mode.
         if ($status >= 500) {
             return config('app.debug') ? $e->getMessage() : null;

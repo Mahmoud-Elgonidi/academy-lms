@@ -19,6 +19,10 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Modules\SharedKernel\Ai\AcademyAi;
+use Modules\SharedKernel\Ai\LanguageModel;
+use Modules\SharedKernel\Ai\NoAi;
+use Modules\SharedKernel\Ai\SpeechToText;
 use Modules\SharedKernel\Auth\TimingSafeUserProvider;
 use Modules\SharedKernel\Files\ClamAvScanner;
 use Modules\SharedKernel\Files\NullUploadScanner;
@@ -64,6 +68,10 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->singleton(UsageMeters::class);
         // The platform's games: none until Platform binds its catalog.
         $this->app->singletonIf(GameCatalog::class, NoGames::class);
+        // The AI helpers: all off until Platform binds them.
+        $this->app->scopedIf(AcademyAi::class, NoAi::class);
+        $this->app->singletonIf(LanguageModel::class, NoAi::class);
+        $this->app->singletonIf(SpeechToText::class, NoAi::class);
         // What each module holds about a person, for the Privacy module's copies and erasures.
         $this->app->singleton(PersonalData::class);
         // What a new academy gets ready before its first families come, each module's steps, for the "Start here" page.

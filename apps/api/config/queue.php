@@ -62,6 +62,25 @@ return [
             'after_commit' => false,
         ],
 
+        // The AI helpers' background work (a recitation check, a weekly note):
+        // requests that can take minutes, on their own queue and worker, with a
+        // reservation that outlasts one.
+        'assist' => env('QUEUE_CONNECTION', 'database') === 'redis' ? [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => 'assist',
+            'retry_after' => 300,
+            'block_for' => null,
+            'after_commit' => false,
+        ] : [
+            'driver' => 'database',
+            'connection' => env('DB_QUEUE_CONNECTION'),
+            'table' => env('DB_QUEUE_TABLE', 'jobs'),
+            'queue' => 'assist',
+            'retry_after' => 300,
+            'after_commit' => false,
+        ],
+
         'beanstalkd' => [
             'driver' => 'beanstalkd',
             'host' => env('BEANSTALKD_QUEUE_HOST', 'localhost'),

@@ -22,7 +22,7 @@ use Modules\SharedKernel\Tenancy\TenantRef;
 final class LegalController
 {
     /** The date of the current wording: raise it when the meaning changes. */
-    public const VERSION = '2026-10-09';
+    public const VERSION = '2026-10-15';
 
     public const PAGES = ['privacy' => 'privacy.notice', 'terms' => 'privacy.terms', 'deletion' => 'privacy.deletion'];
 

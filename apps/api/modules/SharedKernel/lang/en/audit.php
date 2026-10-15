@@ -127,6 +127,7 @@ return [
             'suspended' => 'Academy suspended: :reason',
             'reactivated' => 'Academy back on',
             'plan_changed' => 'The academy moved to the :plan plan: :reason',
+            'ai_settings_saved' => 'AI helpers changed (on: :helpers)',
         ],
         'games' => [
             'settings_saved' => "Changed the academy's games (:state, :minutes minutes a day)",
@@ -146,6 +147,7 @@ return [
         ],
     ],
     'values' => [
+        'helpers' => ['practice_items' => 'practice suggestions', 'report_draft' => 'reports from voice notes', 'recitation_check' => 'recitation check', 'digest_wording' => 'weekly note wording'],
         'early' => ['early' => 'early, by the office', 'on_time' => 'on time, by itself'],
         'style' => ['playful' => 'playful (islands and games)', 'calm' => 'calm (levels and missions)', 'plain' => 'plain (no stars)'],
         'concern_outcome' => ['no_concern' => 'nothing to act on', 'resolved' => 'dealt with', 'teacher_action' => 'action with a teacher', 'referred' => 'referred outside', 'duplicate' => 'duplicate'],
