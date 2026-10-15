@@ -5,7 +5,9 @@ namespace Modules\Learning\Http\V1\Controllers;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Modules\Learning\Actions\Assist\DraftReportFromVoice;
 use Modules\Learning\Actions\ReviewHomework;
+use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Actions\SubmitSessionReport;
 use Modules\Learning\Authorization\LearningAccess;
 use Modules\Learning\Http\V1\Resources\LearningPresenter;
@@ -15,11 +17,18 @@ use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\ReportFormQuery;
 use Modules\Learning\Queries\RoadmapQuery;
 use Modules\Learning\Queries\TeacherStudents;
+use Modules\SharedKernel\Ai\AcademyAi;
+use Modules\SharedKernel\Ai\AiFeature;
+use Modules\SharedKernel\Ai\AudioClip;
+use Modules\SharedKernel\Files\CleanFile;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 
 /** The teacher's reports and the homework to mark (mobile app). Every change goes through the same Actions as the screens. */
 final class TeacherReportsController
 {
+    /** A voice note for a draft: two minutes, as browsers and phones record them. */
+    public const VOICE_MAX_KB = 6 * 1024;
+
     public function __construct(
         private readonly LearningAccess $access,
         private readonly LearningPresenter $present,
@@ -57,7 +66,7 @@ final class TeacherReportsController
      * The report with today's plan, the lessons to choose from, the homework set from it, the roadmap, and the
      * subject's own questions (`template`, null when it has none); send their answers as `answers` by key.
      */
-    public function show(Request $request, string $report, RoadmapQuery $roadmap): JsonResponse
+    public function show(Request $request, string $report, RoadmapQuery $roadmap, AcademyAi $ai): JsonResponse
     {
         $report = $this->mine($request, $report);
 
@@ -66,7 +75,34 @@ final class TeacherReportsController
             'lesson_options' => collect($this->form->lessonOptions($report))->map(fn ($label, $id) => ['id' => $id, 'label' => $label])->values()->all(),
             'homework' => ($h = $report->homework()->with('submissions')->first()) ? $this->present->homework($h) : null,
             'roadmap' => $report->enrollment_id ? $roadmap->for($report->enrollment_id, RoadmapQuery::MATERIALS_TEACHERS) : null,
+            // Helpers the academy turned on for this report: a draft from a voice note (POST teacher/reports/{report}/draft).
+            'assist' => ['voice_draft' => $report->status !== 'reviewed' && $ai->on(AiFeature::ReportDraft)],
         ]]);
+    }
+
+    /**
+     * Draft the report from a voice note.
+     *
+     * The teacher's own note (`audio`, up to two minutes) is heard and deleted at once; what was said fills the
+     * fields the open form (`current`, as PUT takes it, JSON) leaves empty. Nothing is saved: `report` is the form
+     * with the draft in it, `filled` the fields it filled (lessons as `items.{node_id}`, questions as
+     * `answers.{key}`), `unsure` those to check first, `left` what the report still needs, `heard` the words heard.
+     */
+    public function draft(Request $request, string $report, DraftReportFromVoice $draft): JsonResponse
+    {
+        $report = $this->mine($request, $report);
+        $request->validate([
+            'audio' => ['required', 'file', 'max:'.self::VOICE_MAX_KB, 'mimetypes:'.implode(',', SubmitHomework::AUDIO), new CleanFile],
+            'current' => ['nullable', 'json', 'max:60000'],
+        ]);
+        $current = json_decode((string) $request->input('current', '{}'), true);
+
+        return response()->json(['data' => $draft->handle(
+            $report,
+            (string) $request->user()->getAuthIdentifier(),
+            AudioClip::fromUpload($request->file('audio')),
+            is_array($current) ? $current : [],
+        )]);
     }
 
     /**

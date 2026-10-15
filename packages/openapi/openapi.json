@@ -7999,6 +7999,144 @@
                 }
             }
         },
+        "/v1/teacher/reports/{report}/draft": {
+            "post": {
+                "operationId": "teacher.reports.draft",
+                "description": "The teacher's own note (`audio`, up to two minutes) is heard and deleted at once; what was said fills the\nfields the open form (`current`, as PUT takes it, JSON) leaves empty. Nothing is saved: `report` is the form\nwith the draft in it, `filled` the fields it filled (lessons as `items.{node_id}`, questions as\n`answers.{key}`), `unsure` those to check first, `left` what the report still needs, `heard` the words heard.",
+                "summary": "Draft the report from a voice note",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "report",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "audio": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "contentMediaType": "application/octet-stream",
+                                        "description": "Maximum file size: 6144 kilobytes."
+                                    },
+                                    "current": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 60000
+                                    }
+                                },
+                                "required": [
+                                    "audio"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "heard": {
+                                                    "type": "string"
+                                                },
+                                                "report": {
+                                                    "type": "object",
+                                                    "additionalProperties": {}
+                                                },
+                                                "filled": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "unsure": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "left": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "heard",
+                                                "report",
+                                                "filled",
+                                                "unsure",
+                                                "left"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/teacher/homework": {
             "get": {
                 "operationId": "teacher.homework.index",

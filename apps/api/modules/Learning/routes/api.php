@@ -12,6 +12,8 @@ Route::middleware(['auth:sanctum', 'can:reports.write'])->prefix('teacher')->gro
     Route::get('reports', [TeacherReportsController::class, 'index'])->name('teacher.reports.index');
     Route::get('reports/{report}', [TeacherReportsController::class, 'show'])->name('teacher.reports.show');
     Route::put('reports/{report}', [TeacherReportsController::class, 'submit'])->name('teacher.reports.submit');
+    // A draft from the teacher's voice note (the academy's AI helper): heard, deleted, nothing saved.
+    Route::post('reports/{report}/draft', [TeacherReportsController::class, 'draft'])->middleware(['plan.feature:ai', 'throttle:20,60'])->name('teacher.reports.draft');
     Route::get('homework', [TeacherReportsController::class, 'homework'])->name('teacher.homework.index');
     Route::post('homework/{homework}/review', [TeacherReportsController::class, 'mark'])->name('teacher.homework.review');
 });

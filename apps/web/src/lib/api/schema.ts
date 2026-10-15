@@ -1135,6 +1135,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/teacher/reports/{report}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Draft the report from a voice note
+         * @description The teacher's own note (`audio`, up to two minutes) is heard and deleted at once; what was said fills the
+         *     fields the open form (`current`, as PUT takes it, JSON) leaves empty. Nothing is saved: `report` is the form
+         *     with the draft in it, `filled` the fields it filled (lessons as `items.{node_id}`, questions as
+         *     `answers.{key}`), `unsure` those to check first, `left` what the report still needs, `heard` the words heard.
+         */
+        post: operations["teacher.reports.draft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/teacher/homework": {
         parameters: {
             query?: never;
@@ -5981,6 +6004,67 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
+        };
+    };
+    "teacher.reports.draft": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                report: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Maximum file size: 6144 kilobytes.
+                     */
+                    audio: string;
+                    current?: string | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            heard: string;
+                            report: {
+                                [key: string]: unknown;
+                            };
+                            filled: string[];
+                            unsure: string[];
+                            left: string[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
         };
     };
     "teacher.homework.index": {
