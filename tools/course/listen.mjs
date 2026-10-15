@@ -13,7 +13,7 @@ import { narrate, transcribe, voiceSettings } from './lib/voice.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const [key, ...only] = process.argv.slice(2);
-if (!key || !voiceSettings()) {
+if (!key) {
   console.error('ELEVENLABS_VOICE_ID=… node listen.mjs <series> [lesson numbers…]');
   process.exit(1);
 }

@@ -23,11 +23,12 @@ const here = dirname(fileURLToPath(import.meta.url));
 const cacheDir = join(here, '../.voice');
 const API = `${(process.env.ELEVENLABS_API_BASE || 'https://api.elevenlabs.io').replace(/\/+$/, '')}/v1`;
 
-let settings;
-export function voiceSettings() {
-  const voice = process.env.ELEVENLABS_VOICE_ID;
+const settings = {};
+/** The narrator: a lesson's (or series') own voice when it names one, else ELEVENLABS_VOICE_ID. */
+export function voiceSettings(chosen = null) {
+  const voice = chosen ?? process.env.ELEVENLABS_VOICE_ID;
   if (!voice || process.env.COURSE_VOICE === 'off') return null;
-  return (settings ??= {
+  return (settings[voice] ??= {
     voice,
     model: process.env.ELEVENLABS_MODEL || 'eleven_v4',
     settings: { stability: 0.45, similarity_boost: 0.8, style: 0.2, use_speaker_boost: true, speed: Number(process.env.ELEVENLABS_SPEED || 1) },
@@ -89,7 +90,15 @@ export const secondsOf = (file) =>
  */
 export const spokenText = (text) => text.replace(/[«»]/g, '').replace(/\s{2,}/g, ' ').trim();
 
+/**
+ * A line as written for people (subtitles, the narration script): without the
+ * feeling cues a voice: line may carry for the narrator ([warmly], [cheerful],
+ * [excited]: eleven_v4 follows them and does not say them).
+ */
+export const plainText = (text) => text.replace(/\[[a-z ]+\]\s*/gi, '').replace(/\s{2,}/g, ' ').trim();
+
 export function speak(text, { previous, next } = {}, cfg = voiceSettings()) {
+  const written = plainText(text);
   text = spokenText(text);
   previous &&= spokenText(previous);
   next &&= spokenText(next);
@@ -110,7 +119,7 @@ export function speak(text, { previous, next } = {}, cfg = voiceSettings()) {
     });
     renameSync(part, file);
   }
-  return { file, seconds: secondsOf(file), text };
+  return { file, seconds: secondsOf(file), text: written };
 }
 
 /**
@@ -142,7 +151,7 @@ const NUMBERS = ['', 'واحد', 'اتنين', 'تلاتة', 'أربعة', 'خم
 export const spokenLesson = (n) => (n === 1 ? 'الدرس الأوّل' : `الدرس رقم ${NUMBERS[n] ?? n}`);
 
 /** The lesson's whole narration: a welcome over the title card, one line per caption, a goodbye over the end card. */
-export async function narrate(series, lesson, next, cfg = voiceSettings()) {
+export async function narrate(series, lesson, next, cfg = voiceSettings(lesson.voice ?? series.voice)) {
   if (!cfg || !lesson.steps) return null;
   const steps = await linesOf(lesson);
   const intro = lesson.intro ?? `أهلًا بيك في ${series.title}، ${spokenLesson(lesson.n)}: ${lesson.title}. ${lesson.goal ?? ''}`.trim();

@@ -10,7 +10,7 @@ export const USERS = {
   teacher: { email: 'nour@demo.test', panel: 'teach' },
   teacher2: { email: 'khaled@demo.test', panel: 'teach' },
   teacher3: { email: 'sara@demo.test', panel: 'teach' },   // Maryam's teacher, in her live class
-  guardian: { email: 'salma.guardian@demo.test', panel: 'my' },
+  guardian: { email: 'ziad.guardian@demo.test', panel: 'my' },   // Ziad's and Laila's father: two children, real lessons and bills
   kid: { email: 'yousef@demo.test', panel: 'my' },
   middle: { email: 'ziad@demo.test', panel: 'my' },
   teen: { email: 'maryam@demo.test', panel: 'my' },

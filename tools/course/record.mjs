@@ -38,8 +38,9 @@ mkdirSync(outDir, { recursive: true });
 const indexFile = join(outDir, 'index.json');
 const index = existsSync(indexFile) ? JSON.parse(readFileSync(indexFile, 'utf8')) : {};
 
-const voiceCfg = voiceSettings();
-console.log(voiceCfg ? `narrator: ElevenLabs voice ${voiceCfg.voice} (${voiceCfg.model})` : 'narrator: none (set ELEVENLABS_VOICE_ID and ELEVENLABS_API_KEY for a voice); captions only');
+const voiceCfg = voiceSettings(series.voice);
+console.log(voiceCfg ? `narrator: ElevenLabs voice ${voiceCfg.voice} (${voiceCfg.model})${lessons.some((l) => l.voice) ? ', or the lesson\'s own' : ''}`
+  : lessons.some((l) => l.voice) && process.env.COURSE_VOICE !== 'off' ? 'narrator: each lesson\'s own voice' : 'narrator: none (set ELEVENLABS_VOICE_ID for a voice); captions only');
 // A fake camera and microphone, allowed without asking: the live class films with them. The camera
 // shows a calm moving gradient (made once into .media/) rather than Chrome's green test pattern.
 const camera = join(here, '.media', 'camera.y4m');
@@ -67,7 +68,7 @@ for (const lesson of lessons) {
     // The voice is made first, so filming can wait for each line.
     const recording = reencode
       ? JSON.parse(readFileSync(join(dir, 'recording.json'), 'utf8'))
-      : await recordLesson({ browser, series: look, lesson, user, base, dir, voice: await narrate(series, lesson, next, voiceCfg) });
+      : await recordLesson({ browser, series: look, lesson, user, base, dir, voice: await narrate(series, lesson, next) });
     const made = await encodeLesson({ renderer, series: look, lesson, next, dir, out: join(outDir, name), recording });
     index[lesson.n] = { n: lesson.n, slug: lesson.slug, title: lesson.title, file: `${name}.mp4`, seconds: Math.round(made.seconds), captions: made.captions, voiced: made.voiced };
     writeFileSync(indexFile, JSON.stringify(index, null, 2));
