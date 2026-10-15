@@ -7,6 +7,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/time/local_time.dart';
 import '../../homework/data/homework_repository.dart';
 import '../../homework/domain/homework.dart';
+import '../../homework/domain/recitation.dart';
 import '../../schedule/domain/lesson.dart';
 import '../domain/reports.dart';
 import '../domain/shifts.dart';
@@ -85,6 +86,11 @@ class TeachingRepository {
         ))['data']
         as Map<String, dynamic>,
   );
+
+  /// The Quran's surahs, to choose what homework asks to recite (empty until the platform has its copy).
+  Future<List<Surah>> surahs() async => [
+    for (final s in (await _api.get('teacher/texts/quran'))['data'] as List<dynamic>) Surah.fromJson(s as Map<String, dynamic>),
+  ];
 
   /// [status] submitted (waiting for a mark) or reviewed (marked).
   Future<List<Homework>> homeworkToMark({String status = 'submitted'}) async => [

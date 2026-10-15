@@ -2323,6 +2323,57 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkThis => 'راجعه';
 
   @override
+  String get reciteTitle => 'تصحيح التسميع';
+
+  @override
+  String get reciteToggle => 'تصحيح التسميع آلي';
+
+  @override
+  String get reciteHint => 'لما الطالب يسلّم تسجيل، بنعلّم لك على الكلمات اللي ناقصة أو غلط. ليك إنت بس، والأسرة مابتشوفوش.';
+
+  @override
+  String reciteSuggestion(String title) {
+    return 'من نص الدرس: $title';
+  }
+
+  @override
+  String get reciteSurah => 'السورة';
+
+  @override
+  String get reciteChooseSurah => 'اختار السورة';
+
+  @override
+  String get reciteSearch => 'دوّر على سورة';
+
+  @override
+  String get reciteFrom => 'من آية';
+
+  @override
+  String get reciteTo => 'لحد آية';
+
+  @override
+  String reciteWhat(String title) {
+    return 'التسميع: $title';
+  }
+
+  @override
+  String get reciteMissing => 'ناقصة';
+
+  @override
+  String get reciteWrong => 'غلط';
+
+  @override
+  String get reciteExtra => 'زيادة';
+
+  @override
+  String reciteSaid(String word) {
+    return 'اتقال: $word';
+  }
+
+  @override
+  String get reciteHeard => 'اللي اتسمع';
+
+  @override
   String get drafts => 'مسودات';
 
   @override

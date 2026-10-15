@@ -1625,6 +1625,42 @@
   "voiceKept": "التسجيل بيتمسح أول ما يتسمع، وعمره ما بيتحفظ.",
   "suggested": "مقترح",
   "checkThis": "راجعه",
+  "reciteTitle": "تصحيح التسميع",
+  "reciteToggle": "تصحيح التسميع آلي",
+  "reciteHint": "لما الطالب يسلّم تسجيل، بنعلّم لك على الكلمات اللي ناقصة أو غلط. ليك إنت بس، والأسرة مابتشوفوش.",
+  "reciteSuggestion": "من نص الدرس: {title}",
+  "@reciteSuggestion": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reciteSurah": "السورة",
+  "reciteChooseSurah": "اختار السورة",
+  "reciteSearch": "دوّر على سورة",
+  "reciteFrom": "من آية",
+  "reciteTo": "لحد آية",
+  "reciteWhat": "التسميع: {title}",
+  "@reciteWhat": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reciteMissing": "ناقصة",
+  "reciteWrong": "غلط",
+  "reciteExtra": "زيادة",
+  "reciteSaid": "اتقال: {word}",
+  "@reciteSaid": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "reciteHeard": "اللي اتسمع",
   "drafts": "مسودات",
   "savedAgo": "اتحفظت من {ago}",
   "@savedAgo": {

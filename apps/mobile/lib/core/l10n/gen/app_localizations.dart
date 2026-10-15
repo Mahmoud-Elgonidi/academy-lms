@@ -3776,6 +3776,96 @@ abstract class AppLocalizations {
   /// **'راجعه'**
   String get checkThis;
 
+  /// No description provided for @reciteTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصحيح التسميع'**
+  String get reciteTitle;
+
+  /// No description provided for @reciteToggle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصحيح التسميع آلي'**
+  String get reciteToggle;
+
+  /// No description provided for @reciteHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'لما الطالب يسلّم تسجيل، بنعلّم لك على الكلمات اللي ناقصة أو غلط. ليك إنت بس، والأسرة مابتشوفوش.'**
+  String get reciteHint;
+
+  /// No description provided for @reciteSuggestion.
+  ///
+  /// In ar, this message translates to:
+  /// **'من نص الدرس: {title}'**
+  String reciteSuggestion(String title);
+
+  /// No description provided for @reciteSurah.
+  ///
+  /// In ar, this message translates to:
+  /// **'السورة'**
+  String get reciteSurah;
+
+  /// No description provided for @reciteChooseSurah.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار السورة'**
+  String get reciteChooseSurah;
+
+  /// No description provided for @reciteSearch.
+  ///
+  /// In ar, this message translates to:
+  /// **'دوّر على سورة'**
+  String get reciteSearch;
+
+  /// No description provided for @reciteFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'من آية'**
+  String get reciteFrom;
+
+  /// No description provided for @reciteTo.
+  ///
+  /// In ar, this message translates to:
+  /// **'لحد آية'**
+  String get reciteTo;
+
+  /// No description provided for @reciteWhat.
+  ///
+  /// In ar, this message translates to:
+  /// **'التسميع: {title}'**
+  String reciteWhat(String title);
+
+  /// No description provided for @reciteMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'ناقصة'**
+  String get reciteMissing;
+
+  /// No description provided for @reciteWrong.
+  ///
+  /// In ar, this message translates to:
+  /// **'غلط'**
+  String get reciteWrong;
+
+  /// No description provided for @reciteExtra.
+  ///
+  /// In ar, this message translates to:
+  /// **'زيادة'**
+  String get reciteExtra;
+
+  /// No description provided for @reciteSaid.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتقال: {word}'**
+  String reciteSaid(String word);
+
+  /// No description provided for @reciteHeard.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي اتسمع'**
+  String get reciteHeard;
+
   /// No description provided for @drafts.
   ///
   /// In ar, this message translates to:

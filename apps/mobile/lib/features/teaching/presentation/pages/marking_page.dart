@@ -14,10 +14,12 @@ import '../../../../shared/widgets/star_picker.dart';
 import '../../../homework/domain/homework.dart';
 import '../../../homework/presentation/widgets/submission_view.dart';
 import '../../data/teaching_repository.dart';
+import '../widgets/recitation_check_view.dart';
 import '../../../../core/realtime/live.dart';
 
 /// Homework handed in, to mark: read the words, play the recording, see the
-/// picture; give a grade and a word. The marked ones stay one tap away.
+/// picture (a recording's check word by word when the homework says what to
+/// recite); give a grade and a word. The marked ones stay one tap away.
 class MarkingPage extends StatefulWidget {
   const MarkingPage({super.key});
 
@@ -136,7 +138,12 @@ class _MarkCardState extends State<_MarkCard> {
           Text(h.title, style: context.text.titleMedium),
           if (h.dueAt != null) Text(l.dueBy(h.dueAt!.when(context)), style: context.text.bodySmall),
           if ((h.instructions ?? '').isNotEmpty) ...[const SizedBox(height: 6), Text(h.instructions!, style: context.text.bodyMedium)],
-          for (final s in h.submissions) ...[const SizedBox(height: 10), SubmissionView(submission: s, title: h.student)],
+          if (h.expected?.title case final title?) Text(l.reciteWhat(title), style: context.text.bodySmall),
+          for (final s in h.submissions) ...[
+            const SizedBox(height: 10),
+            SubmissionView(submission: s, title: h.student),
+            if (s.check case final check?) RecitationCheckView(check: check),
+          ],
           const SizedBox(height: 12),
           if (marked)
             Note(

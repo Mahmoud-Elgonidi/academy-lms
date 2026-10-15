@@ -2202,6 +2202,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkThis => 'Check this';
 
   @override
+  String get reciteTitle => 'Recitation check';
+
+  @override
+  String get reciteToggle => 'Check the recitation automatically';
+
+  @override
+  String get reciteHint =>
+      'When the student hands in a recording, the words missed or said wrong are marked for you. For you alone; the family never sees it.';
+
+  @override
+  String reciteSuggestion(String title) {
+    return 'From the lesson\'s text: $title';
+  }
+
+  @override
+  String get reciteSurah => 'Surah';
+
+  @override
+  String get reciteChooseSurah => 'Choose the surah';
+
+  @override
+  String get reciteSearch => 'Search for a surah';
+
+  @override
+  String get reciteFrom => 'From verse';
+
+  @override
+  String get reciteTo => 'To verse';
+
+  @override
+  String reciteWhat(String title) {
+    return 'To recite: $title';
+  }
+
+  @override
+  String get reciteMissing => 'Missed';
+
+  @override
+  String get reciteWrong => 'Wrong';
+
+  @override
+  String get reciteExtra => 'Extra';
+
+  @override
+  String reciteSaid(String word) {
+    return 'Said: $word';
+  }
+
+  @override
+  String get reciteHeard => 'What was heard';
+
+  @override
   String get drafts => 'Drafts';
 
   @override
