@@ -100,8 +100,14 @@ function hifzIn(TestCase $test, callable $read): mixed
 
 it('lets the teacher say what the student already knows, and take pages off', function () {
     $hifz = "/api/v1/teacher/students/{$this->booked->enrollmentId}/hifz";
+    // A course whose curriculum reads no Quran, with no pages yet: the map is not its.
+    $source = hifzIn($this, fn () => DB::table('curriculum_nodes')->where('id', $this->lessons[0])->value('text_source'));
+    hifzIn($this, fn () => DB::table('curriculum_nodes')->update(['text_source' => null]));
+    expect(hifzApiAs($this->teacher)->getJson($hifz)->assertOk()->json('data.follows'))->toBeFalse();
+    hifzIn($this, fn () => DB::table('curriculum_nodes')->where('id', $this->lessons[0])->update(['text_source' => $source]));
+
     $map = hifzApiAs($this->teacher)->getJson($hifz)->assertOk()->json('data');
-    expect($map)->toMatchArray(['pages_total' => 3])
+    expect($map)->toMatchArray(['pages_total' => 3, 'follows' => true])
         ->and(array_column($map['juzs'], 'juz'))->toBe([1, 2])
         ->and($map['juzs'][0]['pages'])->toBe([['page' => 1, 'strength' => 'new'], ['page' => 2, 'strength' => 'new']])
         ->and(collect($map['surahs'])->firstWhere('number', 2)['pages'])->toBe([3]);
@@ -233,6 +239,12 @@ it('lets the teacher say what the student knows from their page in /teach', func
         ->callAction('hifzClear', data: ['pages' => ['2']])->assertHasNoActionErrors()
         ->assertNotified(trans_choice('learning::hifz.clear.done', 1, ['count' => 1]));
     expect(HifzPage::query()->pluck('state', 'page')->all())->toBe([1 => 'memorized']);
+
+    // Another subject's course (no Quran in its curriculum, no pages) has no map.
+    DB::table('hifz_pages')->delete();
+    DB::table('curriculum_nodes')->update(['text_source' => null]);
+    Livewire::test(StudentProgress::class, ['enrollment' => $this->booked->enrollmentId])
+        ->assertDontSee(__('learning::hifz.title'))->assertActionHidden('hifzMark');
 
     // Without the Quran's text there is no map to show or mark.
     app()->instance(QuranText::class, new QuranText(base_path('tests/Fixtures/none')));

@@ -9248,6 +9248,10 @@
                                                 "enrollment_id": {
                                                     "type": "string"
                                                 },
+                                                "follows": {
+                                                    "type": "boolean",
+                                                    "description": "Whether the map belongs to this course: its curriculum reads the Quran, or the student already has pages. Screens show it only then."
+                                                },
                                                 "student": {
                                                     "type": "object",
                                                     "properties": {
@@ -9376,6 +9380,7 @@
                                             },
                                             "required": [
                                                 "enrollment_id",
+                                                "follows",
                                                 "student",
                                                 "pages_total",
                                                 "counts",

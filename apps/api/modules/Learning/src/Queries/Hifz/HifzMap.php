@@ -5,6 +5,8 @@ namespace Modules\Learning\Queries\Hifz;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Curriculum\Contracts\CurriculumApi;
+use Modules\Curriculum\Contracts\DTOs\TextSource;
+use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
 use Modules\Learning\Domain\Hifz\Scheduler;
 use Modules\Learning\Hifz\HifzPages;
 use Modules\Learning\Models\HifzPage;
@@ -83,6 +85,26 @@ final class HifzMap
                 'overdue_days' => max(0, (int) floor($card->due_at->diffInDays($now, false))),
             ];
         })->values()->all()];
+    }
+
+    /**
+     * Whether a course is one a hifz map belongs to: the platform has the Quran's text, and the
+     * student already has pages on their map or the course's curriculum reads the Quran somewhere.
+     */
+    public function follows(EnrollmentData $course): bool
+    {
+        if ($this->pages->count() === 0) {
+            return false;
+        }
+        if (HifzPage::query()->where('student_id', $course->studentId)->exists()) {
+            return true;
+        }
+        if ($course->curriculumVersionId === null) {
+            return false;
+        }
+        $sources = $this->curriculum->textSources(array_keys($this->curriculum->tree($course->curriculumVersionId)->nodes));
+
+        return array_filter($sources, fn (TextSource $s) => $s->isQuran()) !== [];
     }
 
     /**

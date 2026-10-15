@@ -42,7 +42,7 @@ final class FamilyHifz extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 
-    protected static ?int $navigationSort = 14;
+    protected static ?int $navigationSort = 16;
 
     protected static ?string $slug = 'hifz';
 

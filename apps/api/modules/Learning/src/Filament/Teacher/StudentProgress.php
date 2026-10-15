@@ -60,17 +60,18 @@ final class StudentProgress extends Page
     }
 
     /**
-     * The student's hifz map and the last two weeks' reviews; null while the platform has no Quran text.
+     * The student's hifz map and the last two weeks' reviews; null for a course the map does not follow (HifzMap::follows).
      *
      * @return ?array{map: array<string, mixed>, recent: list<array{page: int, grade: string, source: string, at: string}>}
      */
     #[Computed]
     public function hifz(): ?array
     {
-        $student = app(EnrollmentApi::class)->find($this->enrollment)?->studentId;
-        if ($student === null || app(HifzPages::class)->count() === 0) {
+        $course = app(EnrollmentApi::class)->find($this->enrollment);
+        if ($course === null || ! app(HifzMap::class)->follows($course)) {
             return null;
         }
+        $student = $course->studentId;
         $tz = app(ViewerTimezone::class)->effective();
         $now = CarbonImmutable::now();
         $map = app(HifzMap::class);

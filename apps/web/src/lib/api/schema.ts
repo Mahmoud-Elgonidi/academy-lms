@@ -6580,6 +6580,8 @@ export interface operations {
                     "application/json": {
                         data: {
                             enrollment_id: string;
+                            /** @description Whether the map belongs to this course: its curriculum reads the Quran, or the student already has pages. Screens show it only then. */
+                            follows: boolean;
                             student: {
                                 id: string;
                                 name: string;

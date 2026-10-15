@@ -81,6 +81,8 @@ export type HifzReview = { page: number; grade: Grade; grade_label: string; sour
 /** GET teacher/students/{enrollment}/hifz. */
 export type TeacherHifz = HifzMapData & {
   enrollment_id: string;
+  /** Whether the map belongs to this course: its curriculum reads the Quran, or the student already has pages. */
+  follows: boolean;
   student: { id: string; name: string };
   /** The last two weeks' reviews, newest first. */
   recent: HifzReview[];

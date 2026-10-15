@@ -8,14 +8,14 @@ import type { TeacherHifz } from '@/lib/hifz/types';
 import type { Roadmap, Student } from '@/lib/teach/types';
 
 /**
- * The student's hifz map, while the platform has the Quran's text (pages_total 0: none). An extra on the
+ * The student's hifz map, on a course it follows (the curriculum reads the Quran, or pages are on the map already). An extra on the
  * roadmap's page, so a map that cannot be read leaves the page as it was.
  */
 async function hifzOf(enrollment: string): Promise<TeacherHifz | null> {
   const response = await call('get', '/v1/teacher/students/{enrollment}/hifz', { params: { enrollment } }).catch(() => null);
   if (!response?.ok) return null;
   const { data } = (await response.json()) as { data: TeacherHifz };
-  return data.pages_total > 0 ? data : null;
+  return data.pages_total > 0 && data.follows ? data : null;
 }
 
 /** A student's roadmap: the program's levels and units, each lesson done, here, or still to come; then their hifz map. */

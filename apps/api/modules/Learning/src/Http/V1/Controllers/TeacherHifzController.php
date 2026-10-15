@@ -49,6 +49,8 @@ final class TeacherHifzController
 
         return response()->json(['data' => [
             'enrollment_id' => $course->id,
+            /** Whether the map belongs to this course: its curriculum reads the Quran, or the student already has pages. Screens show it only then. */
+            'follows' => $map->follows($course),
             'student' => ['id' => $course->studentId, 'name' => (string) DB::table('users')->where('id', $course->studentId)->value('name')],
             ...$this->present->map($course->studentId, $now),
             'recent' => collect($map->recent($course->studentId, $now, 100))->map(fn (array $r) => [
