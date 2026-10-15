@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DESKTOP, PHONE } from './layout.mjs';
 import { totp } from './totp.mjs';
+import { USERS } from '../users.mjs';
 
 /**
  * Plays a lesson's steps on the real screens and films them: Chrome's own
@@ -33,8 +34,33 @@ function contextOptions(series) {
     locale: 'ar-EG',
     timezoneId: series.timezone ?? 'Asia/Riyadh',
     colorScheme: 'light',
+    // The live class asks for them; the browser is launched with a fake camera and mic (record.mjs).
+    permissions: ['camera', 'microphone'],
     ...(series.device === 'phone' ? { isMobile: true, hasTouch: true } : {}),
   };
+}
+
+/**
+ * Scripts a page loads from cdn.jsdelivr.net/npm (the live class's
+ * livekit-client) are served from the same package on the npm registry,
+ * kept in .cdn/, for environments that reach npm and not the CDN.
+ */
+const cdnDir = join(here, '../.cdn');
+async function localCdn(context) {
+  await context.route('https://cdn.jsdelivr.net/npm/**', async (route) => {
+    const path = decodeURIComponent(new URL(route.request().url()).pathname).replace(/^\/npm\//, '');
+    const [, pkg, file] = path.match(/^((?:@[^/]+\/)?[^/@]+@[^/]+)\/(.+)$/) ?? [];
+    if (!pkg) return route.continue();
+    const dir = join(cdnDir, pkg);
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+      const tgz = execFileSync('npm', ['pack', '-q', pkg], { cwd: cdnDir }).toString().trim().split('\n').pop();
+      execFileSync('tar', ['-xzf', join(cdnDir, tgz), '-C', dir, '--strip-components=1']);
+    }
+    const target = join(dir, file);
+    if (!existsSync(target)) return route.continue();
+    await route.fulfill({ path: target, contentType: file.endsWith('.css') ? 'text/css' : 'application/javascript' });
+  });
 }
 
 /** The second step of a sign-in: an authenticator secret from the environment, or a command that prints the code. */
@@ -75,7 +101,7 @@ export async function ensureSession(browser, series, user, base) {
   return file;
 }
 
-function stepsApi(page, series, rec, voice) {
+function stepsApi(page, series, rec, voice, others = []) {
   const touch = series.device === 'phone';
   const vp = deviceOf(series).viewport;
   let pointer = { x: vp.width * 0.62, y: vp.height * 0.72 };
@@ -133,8 +159,23 @@ function stepsApi(page, series, rec, voice) {
     async hush() {
       await finishCaption();
     },
+    /**
+     * Someone else on the same page, off camera (the teacher in the live
+     * class): signed in as USERS[key] on a desktop, at path; their page.
+     */
+    async joinAs(key, path) {
+      const user = USERS[key];
+      const state = await ensureSession(page.context().browser(), { device: 'desktop' }, user, rec.base);
+      const other = await page.context().browser().newContext({ ...contextOptions({ device: 'desktop' }), storageState: state });
+      await localCdn(other);
+      others.push(other);
+      const p = await other.newPage();
+      await p.goto(path.startsWith('http') ? path : rec.base + path);
+      await p.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+      return p;
+    },
     async go(path) {
-      await page.goto(rec.base + path);
+      await page.goto(path.startsWith('http') ? path : rec.base + path);
       await settle(600);
       await page.evaluate(([x, y]) => window.__course.move(x, y, 0), [pointer.x, pointer.y]);
     },
@@ -228,6 +269,7 @@ export async function recordLesson({ browser, series, lesson, user, base, dir, v
   const framesDir = join(dir, 'frames');
   mkdirSync(framesDir, { recursive: true });
   const context = await browser.newContext({ ...contextOptions(series), storageState });
+  await localCdn(context);
   await context.addInitScript({ content: `window.__courseMode=${JSON.stringify(series.device === 'phone' ? 'touch' : 'mouse')};\n${overlay}` });
   const page = await context.newPage();
   const errors = [];
@@ -253,7 +295,8 @@ export async function recordLesson({ browser, series, lesson, user, base, dir, v
   await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 92, maxWidth: series.device === 'phone' ? 780 : app.width, maxHeight: series.device === 'phone' ? 1688 : app.height, everyNthFrame: 1 });
   await sleep(600);
 
-  const s = stepsApi(page, series, rec, voice);
+  const others = [];
+  const s = stepsApi(page, series, rec, voice, others);
   try {
     await lesson.steps(s);
     await s.finishCaption();
@@ -265,6 +308,7 @@ export async function recordLesson({ browser, series, lesson, user, base, dir, v
     await cdp.send('Page.stopScreencast').catch(() => {});
     await sleep(200);
     await context.close();
+    for (const other of others) await other.close().catch(() => {});
   }
   const ended = now();
   const t0 = rec.frames.length ? rec.frames[0].t : started;

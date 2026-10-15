@@ -4,6 +4,7 @@
 // ElevenLabs voice (lib/voice.mjs) each lesson is narrated and paced to it. Each
 // lesson ends up in out/<series>/ as NN-slug.mp4 with .srt, .md (narration
 // script) and .jpg (poster); out/<series>/index.json lists what was made.
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -39,7 +40,14 @@ const index = existsSync(indexFile) ? JSON.parse(readFileSync(indexFile, 'utf8')
 
 const voiceCfg = voiceSettings();
 console.log(voiceCfg ? `narrator: ElevenLabs voice ${voiceCfg.voice} (${voiceCfg.model})` : 'narrator: none (set ELEVENLABS_VOICE_ID and ELEVENLABS_API_KEY for a voice); captions only');
-const browser = await chromium.launch();
+// A fake camera and microphone, allowed without asking: the live class films with them. The camera
+// shows a calm moving gradient (made once into .media/) rather than Chrome's green test pattern.
+const camera = join(here, '.media', 'camera.y4m');
+if (!existsSync(camera)) {
+  mkdirSync(dirname(camera), { recursive: true });
+  execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 'lavfi', '-i', 'gradients=s=320x240:c0=0x2f6f8f:c1=0x9fd6c8:speed=0.03:duration=6:rate=15', '-pix_fmt', 'yuv420p', camera]);
+}
+const browser = await chromium.launch({ args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-video-capture=${camera}`] });
 const renderer = await makeRenderer(browser);
 let failed = 0;
 for (const lesson of lessons) {

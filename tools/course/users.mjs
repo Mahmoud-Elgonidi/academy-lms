@@ -9,6 +9,7 @@ export const USERS = {
   accountant: { email: 'accountant@demo.test', panel: 'admin', totpEnv: 'COURSE_TOTP_ACCOUNTANT' },
   teacher: { email: 'nour@demo.test', panel: 'teach' },
   teacher2: { email: 'khaled@demo.test', panel: 'teach' },
+  teacher3: { email: 'sara@demo.test', panel: 'teach' },   // Maryam's teacher, in her live class
   guardian: { email: 'salma.guardian@demo.test', panel: 'my' },
   kid: { email: 'yousef@demo.test', panel: 'my' },
   middle: { email: 'ziad@demo.test', panel: 'my' },
