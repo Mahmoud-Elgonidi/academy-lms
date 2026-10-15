@@ -252,6 +252,7 @@ it('asks for the check on the teacher area\'s report, and colours each recording
         ->set('data.homework.title', 'سمّع المقطع')
         ->set('data.homework.accepts', 'text')->assertDontSee('Check the recitation automatically')
         ->set('data.homework.accepts', 'audio')->set('data.homework.recite', true)
+        ->assertSee("From the lesson's text:")
         ->set('data.homework.expected.to', 9)->call('submit')->assertHasErrors(['data.homework.expected.to']);
     expect(Homework::query()->count())->toBe(0);
     $page->set('data.homework.expected.to', 3)->call('submit')->assertHasNoErrors();

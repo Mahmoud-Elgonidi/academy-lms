@@ -79,6 +79,9 @@ final class WriteReport extends Page
 
     private bool $templateRead = false;
 
+    /** The passage of the report's lessons the form starts from, as it reads (null: none, or the homework has its own). */
+    public ?string $reciteSuggestion = null;
+
     public static function canAccess(): bool
     {
         return Gate::allows(Ability::WriteReports->value);
@@ -92,8 +95,11 @@ final class WriteReport extends Page
         $homework = $this->sessionReport->homework()->first();
         $target = app(RecitationTarget::class);
         // What to recite: the homework's own, else the passage of the report's lessons, ready for when the teacher turns it on.
-        $recite = $target->present($homework?->expectedSource())
-            ?? ($this->sessionReport->kind === 'lesson' ? $target->suggestion(array_column(app(ReportFormQuery::class)->items($this->sessionReport), 'node_id')) : null);
+        $recite = $target->present($homework?->expectedSource());
+        if ($recite === null && $this->sessionReport->kind === 'lesson') {
+            $recite = $target->suggestion(array_column(app(ReportFormQuery::class)->items($this->sessionReport), 'node_id'));
+            $this->reciteSuggestion = $recite['title'] ?? null;
+        }
         $this->form->fill([
             'items' => app(ReportFormQuery::class)->items($this->sessionReport),
             'engagement' => $this->sessionReport->engagement,
@@ -228,6 +234,7 @@ final class WriteReport extends Page
             Toggle::make('homework.recite')->label(__($r.'toggle'))->helperText(__($r.'hint'))->live()->visible($voice),
             Grid::make(3)->schema([
                 Select::make('homework.expected.surah')->label(__($r.'fields.surah'))->native(false)->searchable()->live()
+                    ->helperText($this->reciteSuggestion === null ? null : __($r.'suggestion', ['title' => $this->reciteSuggestion]))
                     ->options(collect($surahs)->mapWithKeys(fn (array $s) => [$s['number'] => $s['number'].'. '.$s['name_ar'].' · '.$s['name_en']])->all())
                     ->required($on),
                 TextInput::make('homework.expected.from')->label(__($r.'fields.from'))->numeric()->minValue(1)->required($on),
