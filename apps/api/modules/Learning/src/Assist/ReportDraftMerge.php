@@ -1,7 +1,8 @@
 <?php
 
-namespace Modules\Learning\Domain;
+namespace Modules\Learning\Assist;
 
+use Modules\Learning\Domain\MasteryRule;
 use Modules\Learning\Templates\TemplateAnswers;
 use Modules\Learning\Templates\TemplateField;
 

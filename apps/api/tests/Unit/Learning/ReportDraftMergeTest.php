@@ -1,6 +1,6 @@
 <?php
 
-use Modules\Learning\Domain\ReportDraftMerge;
+use Modules\Learning\Assist\ReportDraftMerge;
 use Modules\Learning\Templates\TemplateField;
 
 /*
