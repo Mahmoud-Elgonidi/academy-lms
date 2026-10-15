@@ -120,7 +120,8 @@ export function speak(text, { previous, next } = {}, cfg = voiceSettings()) {
  */
 export async function linesOf(lesson) {
   const lines = [];
-  const sink = new Proxy(function () {}, { get: (_, k) => (k === 'then' ? undefined : sink), apply: () => sink });
+  // Read as a number it is 0 (a lesson may count what is on screen: none in the dry run).
+  const sink = new Proxy(function () {}, { get: (_, k) => (k === 'then' ? undefined : k === Symbol.toPrimitive ? () => 0 : sink), apply: () => sink });
   const s = new Proxy({}, {
     get: (_, k) => {
       if (k === 'say') return async (text, o = {}) => { lines.push({ caption: text, spoken: o.voice ?? text }); };
@@ -145,7 +146,7 @@ export async function narrate(series, lesson, next, cfg = voiceSettings()) {
   if (!cfg || !lesson.steps) return null;
   const steps = await linesOf(lesson);
   const intro = lesson.intro ?? `أهلًا بيك في ${series.title}، ${spokenLesson(lesson.n)}: ${lesson.title}. ${lesson.goal ?? ''}`.trim();
-  const outro = lesson.outro ?? `وكده خلّصنا درس «${lesson.title}». ${next ? `في الدرس الجاي: ${next.title}.` : `وده كان آخر درس في ${series.title}.`}`;
+  const outro = lesson.outro ?? `كده خلّصنا درس «${lesson.title}». ${next ? `في الدرس الجاي: ${next.title}.` : `وده كان آخر درس في ${series.title}.`}`;
   const all = [intro, ...steps.map((l) => l.spoken), outro];
   const clips = all.map((text, i) => speak(text, { previous: all[i - 1], next: all[i + 1] }, cfg));
   return { intro: clips[0], lines: clips.slice(1, -1).map((c, i) => ({ ...c, caption: steps[i].caption })), outro: clips[clips.length - 1] };
