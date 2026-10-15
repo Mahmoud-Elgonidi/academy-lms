@@ -2274,6 +2274,55 @@ class AppLocalizationsAr extends AppLocalizations {
   String get discardDraft => 'ابدأ من الأول';
 
   @override
+  String get voiceTitle => 'مسودة من رسالة صوتية';
+
+  @override
+  String get voiceHint => 'قول عملتوا إيه، والطالب كان عامل إزاي، والواجب. المسودة بتملا الخانات الفاضية بس، وإنت بتراجعها قبل ما تبعت.';
+
+  @override
+  String get voiceRecord => 'سجّل رسالة';
+
+  @override
+  String get voiceWorking => 'بنسمع ونكتب المسودة…';
+
+  @override
+  String voiceDone(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'المسودة ملت $n خانة. راجعهم قبل ما تبعت.',
+      few: 'المسودة ملت $n خانات. راجعهم قبل ما تبعت.',
+      two: 'المسودة ملت خانتين. راجعهم قبل ما تبعت.',
+      one: 'المسودة ملت خانة واحدة. راجعها قبل ما تبعت.',
+      zero: 'الرسالة مازوّدتش حاجة جديدة: الفورم كان فيه كل ده.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get voiceHeard => 'اللي اتسمع';
+
+  @override
+  String get voiceUnsure => 'راجع دول: المسودة مكانتش متأكدة';
+
+  @override
+  String voiceLeft(String fields) {
+    return 'لسه محتاج: $fields';
+  }
+
+  @override
+  String get voiceLimit => 'لحد دقيقتين';
+
+  @override
+  String get voiceKept => 'التسجيل بيتمسح أول ما يتسمع، وعمره ما بيتحفظ.';
+
+  @override
+  String get suggested => 'مقترح';
+
+  @override
+  String get checkThis => 'راجعه';
+
+  @override
   String get drafts => 'مسودات';
 
   @override

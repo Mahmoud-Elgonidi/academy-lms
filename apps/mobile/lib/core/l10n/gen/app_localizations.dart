@@ -3704,6 +3704,78 @@ abstract class AppLocalizations {
   /// **'ابدأ من الأول'**
   String get discardDraft;
 
+  /// No description provided for @voiceTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسودة من رسالة صوتية'**
+  String get voiceTitle;
+
+  /// No description provided for @voiceHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'قول عملتوا إيه، والطالب كان عامل إزاي، والواجب. المسودة بتملا الخانات الفاضية بس، وإنت بتراجعها قبل ما تبعت.'**
+  String get voiceHint;
+
+  /// No description provided for @voiceRecord.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل رسالة'**
+  String get voiceRecord;
+
+  /// No description provided for @voiceWorking.
+  ///
+  /// In ar, this message translates to:
+  /// **'بنسمع ونكتب المسودة…'**
+  String get voiceWorking;
+
+  /// No description provided for @voiceDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{الرسالة مازوّدتش حاجة جديدة: الفورم كان فيه كل ده.} =1{المسودة ملت خانة واحدة. راجعها قبل ما تبعت.} =2{المسودة ملت خانتين. راجعهم قبل ما تبعت.} few{المسودة ملت {n} خانات. راجعهم قبل ما تبعت.} other{المسودة ملت {n} خانة. راجعهم قبل ما تبعت.}}'**
+  String voiceDone(int n);
+
+  /// No description provided for @voiceHeard.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي اتسمع'**
+  String get voiceHeard;
+
+  /// No description provided for @voiceUnsure.
+  ///
+  /// In ar, this message translates to:
+  /// **'راجع دول: المسودة مكانتش متأكدة'**
+  String get voiceUnsure;
+
+  /// No description provided for @voiceLeft.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه محتاج: {fields}'**
+  String voiceLeft(String fields);
+
+  /// No description provided for @voiceLimit.
+  ///
+  /// In ar, this message translates to:
+  /// **'لحد دقيقتين'**
+  String get voiceLimit;
+
+  /// No description provided for @voiceKept.
+  ///
+  /// In ar, this message translates to:
+  /// **'التسجيل بيتمسح أول ما يتسمع، وعمره ما بيتحفظ.'**
+  String get voiceKept;
+
+  /// No description provided for @suggested.
+  ///
+  /// In ar, this message translates to:
+  /// **'مقترح'**
+  String get suggested;
+
+  /// No description provided for @checkThis.
+  ///
+  /// In ar, this message translates to:
+  /// **'راجعه'**
+  String get checkThis;
+
   /// No description provided for @drafts.
   ///
   /// In ar, this message translates to:

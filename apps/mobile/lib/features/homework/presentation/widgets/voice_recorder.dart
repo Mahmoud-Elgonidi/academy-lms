@@ -14,9 +14,10 @@ import '../../data/homework_repository.dart';
 
 /// Records a voice answer in the app: the microphone's sound, made into a
 /// WAV file here (the same on phones and the web), listened to before it
-/// is sent, recorded again if wanted. Stops by itself at ten minutes.
+/// is sent, recorded again if wanted. Stops by itself at [limit] (ten
+/// minutes unless said).
 class VoiceRecorder extends StatefulWidget {
-  const VoiceRecorder({required this.onRecorded, this.big = false, super.key});
+  const VoiceRecorder({required this.onRecorded, this.big = false, this.limit = const Duration(minutes: 10), this.label, super.key});
 
   /// The recording, or null when it was cleared.
   final ValueChanged<HandInFile?> onRecorded;
@@ -24,13 +25,17 @@ class VoiceRecorder extends StatefulWidget {
   /// The kids' look: a bigger button.
   final bool big;
 
+  final Duration limit;
+
+  /// What the button says before recording (else "record your voice").
+  final String? label;
+
   @override
   State<VoiceRecorder> createState() => _VoiceRecorderState();
 }
 
 class _VoiceRecorderState extends State<VoiceRecorder> {
   static const _rate = 16000;
-  static const _limit = Duration(minutes: 10);
 
   AudioRecorder? _recorder;
   StreamSubscription<Uint8List>? _sub;
@@ -77,9 +82,9 @@ class _VoiceRecorderState extends State<VoiceRecorder> {
         ..start();
       _tick = Timer.periodic(const Duration(milliseconds: 250), (_) {
         if (!mounted) return;
-        if (_clock.elapsed >= _limit) {
+        if (_clock.elapsed >= widget.limit) {
           unawaited(_stop());
-          showSnack(context, l.recordingLimit(_limit.inMinutes));
+          showSnack(context, l.recordingLimit(widget.limit.inMinutes));
         } else {
           setState(() {});
         }
@@ -167,7 +172,7 @@ class _VoiceRecorderState extends State<VoiceRecorder> {
     final time = '${elapsed.inMinutes}:${(elapsed.inSeconds % 60).toString().padLeft(2, '0')}';
     Widget button = Semantics(
       button: true,
-      label: _recording ? l.stopRecording : (widget.big ? l.recordKids : l.recordVoice),
+      label: _recording ? l.stopRecording : (widget.big ? l.recordKids : widget.label ?? l.recordVoice),
       child: GestureDetector(
         onTap: _recording ? _stop : _start,
         child: AnimatedContainer(
@@ -196,7 +201,7 @@ class _VoiceRecorderState extends State<VoiceRecorder> {
           button,
           const SizedBox(height: 8),
           Text(
-            _recording ? l.recordingNow(time) : (widget.big ? l.recordKids : l.recordVoice),
+            _recording ? l.recordingNow(time) : (widget.big ? l.recordKids : widget.label ?? l.recordVoice),
             style: context.text.titleSmall?.copyWith(color: _recording ? c.dangerInk : null),
           ),
           if (_recording) TextButton(onPressed: _stop, child: Text(l.stopRecording)),

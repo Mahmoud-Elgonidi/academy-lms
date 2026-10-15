@@ -13,19 +13,23 @@ import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
 import '../../../../shared/widgets/star_picker.dart';
+import '../../../homework/data/homework_repository.dart';
 import '../../../homework/presentation/widgets/submission_view.dart';
+import '../../../homework/presentation/widgets/voice_recorder.dart';
 import '../../../roadmap/domain/report_answers.dart';
 import '../../data/report_drafts.dart';
 import '../../data/teaching_repository.dart';
 import '../../domain/reports.dart';
+import '../../domain/voice_draft.dart';
 import '../../../../shared/widgets/latin_digits.dart';
 
 /// Writing a report from the phone, one card at a time: what was worked on
 /// (what happened with each lesson of today's plan, a score, a note), how
 /// it went (focus and overall), the subject's own questions, the words for
 /// the family and for the academy, and homework. An absence asks only for
-/// the note. Sending and keeping a draft on this phone stay at the foot.
-/// Pops with true once sent.
+/// the note. When the academy turned it on, a voice note fills what is still
+/// empty (marked suggested until sent). Sending and keeping a draft on this
+/// phone stay at the foot. Pops with true once sent.
 class TeacherReportPage extends StatelessWidget {
   const TeacherReportPage({required this.reportId, super.key});
 
@@ -114,6 +118,15 @@ class _EditorState extends State<_Editor> {
   };
   final _notes = <String>{};
   bool _busy = false;
+
+  /// The voice note's draft: what it filled shows as suggested (or check this) until sent.
+  VoiceDraft? _heard;
+  Map<String, DraftMark> _marks = const {};
+  bool _drafting = false;
+  String? _draftError;
+
+  /// Bumped when a draft comes in, so the lessons' note fields show what it wrote.
+  int _round = 0;
   String? _error;
   Map<String, List<String>> _fieldErrors = const {};
 
@@ -212,6 +225,155 @@ class _EditorState extends State<_Editor> {
     }
   }
 
+  /// The form as it stands, as the draft endpoint reads it (a homework already handed in counts as set).
+  Map<String, dynamic> _current() {
+    final template = f.template;
+    final answers = {..._answers, for (final e in _typed.entries) e.key: e.value.text};
+    if (_absent) return {'absence_note': _absence.text, 'notes_internal': _internal.text};
+    return {
+      'engagement': _engagement,
+      'overall': _overall,
+      'notes_for_student': _forFamily.text,
+      'notes_internal': _internal.text,
+      'items': [for (final i in _items) i.toJson()],
+      if (template != null) 'answers': template.payload(answers),
+      'homework': _homeworkLocked
+          ? {'title': f.homework!.title}
+          : (_give && _hwTitle.text.trim().isNotEmpty
+                ? {'title': _hwTitle.text, 'instructions': _hwDetails.text, 'accepts': _accepts, 'due_days': _dueDays}
+                : null),
+    };
+  }
+
+  Future<void> _draftFrom(HandInFile? note) async {
+    if (note == null) return;
+    final repository = context.read<TeachingRepository>();
+    setState(() {
+      _drafting = true;
+      _draftError = null;
+    });
+    try {
+      final draft = await repository.draftReport(f.summary.id, note: note, current: _current());
+      if (mounted) setState(() => _take(draft));
+    } on ApiProblem catch (p) {
+      if (mounted) setState(() => _draftError = context.problemText(p));
+    } finally {
+      if (mounted) setState(() => _drafting = false);
+    }
+  }
+
+  /// The draft into the form: only what it filled, so whatever the teacher set stays.
+  void _take(VoiceDraft d) {
+    _engagement = d.stars('engagement') ?? _engagement;
+    _overall = d.stars('overall') ?? _overall;
+    if (d.text('notes_for_student') case final t?) _forFamily.text = t;
+    if (d.text('notes_internal') case final t?) _internal.text = t;
+    if (d.text('absence_note') case final t?) _absence.text = t;
+    final items = d.items(_items);
+    _items
+      ..clear()
+      ..addAll(items);
+    for (final MapEntry(:key, :value) in d.answers.entries) {
+      if (_typed[key] case final typed?) {
+        typed.text = '$value';
+      } else {
+        _answers[key] = value;
+      }
+    }
+    if (d.homework case final h? when !_homeworkLocked) {
+      _give = true;
+      _hwTitle.text = h.title;
+      _hwDetails.text = h.instructions ?? '';
+      _accepts = h.accepts;
+      _dueDays = h.dueDays;
+    }
+    _heard = d;
+    _marks = d.marks;
+    _error = null;
+    _round++;
+  }
+
+  /// The fields as the teacher reads them: the form's own labels, a lesson by its title, a question by its words.
+  List<String> _names(List<String> fields) {
+    final l = context.l10n;
+    final questions = {for (final q in f.template?.questions ?? const <ReportQuestion>[]) q.key: q.label};
+    final lessons = {for (final o in f.lessonOptions) o.id: o.label.split(' › ').last, for (final i in _items) i.nodeId: i.title};
+    return {
+      for (final field in fields)
+        switch (field.split('.')) {
+          ['items', final id, ...] => lessons[id] ?? l.workedOn,
+          ['answers', final key, ...] => questions[key] ?? l.questionsTitle,
+          ['items'] => l.workedOn,
+          ['engagement'] => l.engagement,
+          ['overall'] => l.overall,
+          ['notes_for_student'] => l.notesForFamily,
+          ['notes_internal'] => l.notesInternal,
+          ['absence_note'] => l.absenceNote,
+          ['homework', ...] => l.homeworkField,
+          _ => field,
+        },
+    }.toList();
+  }
+
+  Widget _voiceCard() {
+    final l = context.l10n;
+    final d = _heard;
+    final and = Localizations.localeOf(context).languageCode == 'ar' ? '، ' : ', ';
+    return _Section(
+      title: l.voiceTitle,
+      children: [
+        Text(l.voiceHint, style: context.type.caption),
+        const Gap(Space.m),
+        if (_drafting)
+          Row(
+            children: [
+              const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+              const Gap(Space.m),
+              Expanded(child: Text(l.voiceWorking, style: context.type.body)),
+            ],
+          )
+        else
+          VoiceRecorder(
+            key: ValueKey(_round),
+            limit: const Duration(minutes: 2),
+            label: d == null ? l.voiceRecord : l.recordAgain,
+            onRecorded: _draftFrom,
+          ),
+        const Gap(Space.s),
+        Text('${l.voiceLimit} · ${l.voiceKept}', style: context.type.caption),
+        if (_draftError != null) ...[const Gap(Space.s), Note(_draftError!, tone: Tone.danger, icon: Icons.error_outline_rounded)],
+        if (d != null) ...[
+          const Gap(Space.s),
+          Note(
+            l.voiceDone(d.filled.length),
+            tone: d.filled.isEmpty ? Tone.attention : Tone.brand,
+            icon: d.filled.isEmpty ? Icons.info_outline_rounded : Icons.check_circle_outline_rounded,
+          ),
+          if (d.unsure.isNotEmpty) ...[
+            const Gap(Space.m),
+            Text(l.voiceUnsure, style: context.type.label),
+            const Gap(Space.xs),
+            Wrap(spacing: 6, runSpacing: 6, children: [for (final n in _names(d.unsure)) Pill(n, tone: Tone.attention)]),
+          ],
+          if (d.left.isNotEmpty) ...[const Gap(Space.s), Text(l.voiceLeft(_names(d.left).join(and)), style: context.type.caption)],
+          ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(bottom: Space.s),
+            expandedAlignment: AlignmentDirectional.centerStart,
+            title: Text(l.voiceHeard, style: context.type.label),
+            children: [Text(d.heard, style: context.type.body)],
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// A field the draft filled, marked above it.
+  Widget _markOf(String field) => switch (_marks[field]) {
+    final m? => Align(alignment: AlignmentDirectional.centerEnd, child: _Mark(m)),
+    null => const SizedBox.shrink(),
+  };
+
   /// Keeps the form as it stands on this phone, and goes back to the list.
   Future<void> _keep() async {
     final l = context.l10n;
@@ -271,6 +433,7 @@ class _EditorState extends State<_Editor> {
             icon: Icons.lock_outline_rounded,
           ),
         ],
+        if (f.voiceDraft && !locked) _voiceCard(),
         if (_absent) ...[
           const Gap(Space.m),
           _Section(
@@ -278,6 +441,7 @@ class _EditorState extends State<_Editor> {
             children: [
               Text(l.absenceHint, style: context.type.caption),
               const Gap(Space.m),
+              _markOf('absence_note'),
               TextField(
                 controller: _absence,
                 enabled: !locked,
@@ -306,13 +470,23 @@ class _EditorState extends State<_Editor> {
           _Section(
             title: l.howItWent,
             children: [
-              Text(l.engagement, style: context.type.label),
+              Row(
+                children: [
+                  Text(l.engagement, style: context.type.label),
+                  if (_marks['engagement'] case final m?) ...[const Gap(Space.s), _Mark(m)],
+                ],
+              ),
               IgnorePointer(
                 ignoring: locked,
                 child: StarPicker(value: _engagement, label: l.engagement, onChanged: (v) => setState(() => _engagement = v)),
               ),
               const Gap(Space.s),
-              Text(l.overall, style: context.type.label),
+              Row(
+                children: [
+                  Text(l.overall, style: context.type.label),
+                  if (_marks['overall'] case final m?) ...[const Gap(Space.s), _Mark(m)],
+                ],
+              ),
               IgnorePointer(
                 ignoring: locked,
                 child: StarPicker(value: _overall, label: l.overall, onChanged: (v) => setState(() => _overall = v)),
@@ -324,6 +498,7 @@ class _EditorState extends State<_Editor> {
         _Section(
           title: l.talkSection,
           children: [
+            if (!_absent) _markOf('notes_for_student'),
             if (!_absent)
               TextField(
                 controller: _forFamily,
@@ -333,6 +508,7 @@ class _EditorState extends State<_Editor> {
                 maxLength: 3000,
                 decoration: InputDecoration(labelText: l.notesForFamily, errorText: _err('notes_for_student')),
               ),
+            _markOf('notes_internal'),
             TextField(
               controller: _internal,
               enabled: !locked,
@@ -387,7 +563,7 @@ class _EditorState extends State<_Editor> {
     final c = context.colors;
     final noteOpen = _notes.contains(item.nodeId) || (item.note ?? '').isNotEmpty;
     return KeyedSubtree(
-      key: ValueKey(item.nodeId),
+      key: ValueKey('${item.nodeId}#$_round'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -405,6 +581,7 @@ class _EditorState extends State<_Editor> {
               ),
               if (item.reason != null)
                 Pill(item.reason == 'review' ? l.reasonReview : l.reasonNext, tone: item.reason == 'review' ? Tone.attention : Tone.info),
+              if (_marks['items.${item.nodeId}'] case final m?) ...[const Gap(Space.xs), _Mark(m)],
               if (!locked)
                 IconButton(
                   tooltip: l.remove,
@@ -478,6 +655,7 @@ class _EditorState extends State<_Editor> {
         Text(q.label, style: context.text.titleSmall),
         if (!q.required) Text(l.optional, style: context.text.bodySmall),
         if (!q.family) Pill(l.academyOnly, tone: Tone.neutral),
+        if (_marks['answers.${q.key}'] case final m?) _Mark(m),
       ],
     );
     Widget chips(ReportQuestion q, List<(Object, String)> options) => Wrap(
@@ -503,7 +681,8 @@ class _EditorState extends State<_Editor> {
         Text(l.questionsHint, style: context.text.bodySmall),
         for (final q in t.questions) ...[
           const SizedBox(height: 14),
-          if (q.type == 'number' || q.type == 'text')
+          if (q.type == 'number' || q.type == 'text') ...[
+            _markOf('answers.${q.key}'),
             TextField(
               controller: _typed[q.key],
               enabled: !locked,
@@ -516,8 +695,8 @@ class _EditorState extends State<_Editor> {
                 helperText: q.family ? null : l.academyOnly,
                 errorText: _err('answers.${q.key}'),
               ),
-            )
-          else ...[
+            ),
+          ] else ...[
             title(q),
             const SizedBox(height: 6),
             switch (q.type) {
@@ -562,6 +741,7 @@ class _EditorState extends State<_Editor> {
     return _Section(
       title: l.homeworkField,
       children: [
+        _markOf('homework'),
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
           title: Text(l.giveHomework, style: context.text.titleSmall),
@@ -626,6 +806,20 @@ class _EditorState extends State<_Editor> {
         ],
       ],
     );
+  }
+}
+
+/// Filled by the voice note's draft: suggested, or worth a second look.
+class _Mark extends StatelessWidget {
+  const _Mark(this.mark);
+
+  final DraftMark mark;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final check = mark == DraftMark.check;
+    return Pill(check ? l.checkThis : l.suggested, tone: check ? Tone.attention : Tone.brand, icon: Icons.mic_rounded);
   }
 }
 

@@ -50,7 +50,8 @@ class ApiClient {
       _send('GET', path, query: query, academy: academy, anonymous: anonymous, retry: true);
 
   /// [academy] and [token] act as another account on this device (signing
-  /// it out while a different one is open).
+  /// it out while a different one is open). [timeout] waits longer for an
+  /// answer that takes a while to make (a draft from a voice note).
   Future<Map<String, dynamic>> post(
     String path, {
     Object? body,
@@ -58,7 +59,18 @@ class ApiClient {
     String? token,
     bool anonymous = false,
     bool idempotent = false,
-  }) => _send('POST', path, body: body, academy: academy, token: token, anonymous: anonymous, idempotent: idempotent, retry: idempotent);
+    Duration? timeout,
+  }) => _send(
+    'POST',
+    path,
+    body: body,
+    academy: academy,
+    token: token,
+    anonymous: anonymous,
+    idempotent: idempotent,
+    retry: idempotent,
+    timeout: timeout,
+  );
 
   Future<Map<String, dynamic>> put(String path, {Object? body}) => _send('PUT', path, body: body, retry: true);
 
@@ -96,9 +108,11 @@ class ApiClient {
     bool anonymous = false,
     bool idempotent = false,
     bool retry = false,
+    Duration? timeout,
   }) async {
     final options = Options(
       method: method,
+      receiveTimeout: timeout,
       extra: {_academy: ?academy, _token: ?token, _anonymous: anonymous, if (idempotent) _idempotent: _uuid.v4()},
     );
     for (var attempt = 1; ; attempt++) {

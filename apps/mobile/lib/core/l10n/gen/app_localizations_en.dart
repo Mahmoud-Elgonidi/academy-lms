@@ -2154,6 +2154,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discardDraft => 'Start over';
 
   @override
+  String get voiceTitle => 'Draft from a voice note';
+
+  @override
+  String get voiceHint =>
+      'Say what you did, how the student did, and the homework. The draft fills only the empty fields; you check it before sending.';
+
+  @override
+  String get voiceRecord => 'Record a note';
+
+  @override
+  String get voiceWorking => 'Listening and writing the draft…';
+
+  @override
+  String voiceDone(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'The draft filled $n fields. Check them before sending.',
+      one: 'The draft filled one field. Check it before sending.',
+      zero: 'The note filled nothing new: the form already had it.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get voiceHeard => 'What was heard';
+
+  @override
+  String get voiceUnsure => 'Check these: the draft was not sure';
+
+  @override
+  String voiceLeft(String fields) {
+    return 'Still to fill: $fields';
+  }
+
+  @override
+  String get voiceLimit => 'Up to two minutes';
+
+  @override
+  String get voiceKept => 'The recording is deleted as soon as it is heard; it is never kept.';
+
+  @override
+  String get suggested => 'Suggested';
+
+  @override
+  String get checkThis => 'Check this';
+
+  @override
   String get drafts => 'Drafts';
 
   @override

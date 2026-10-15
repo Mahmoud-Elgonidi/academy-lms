@@ -116,6 +116,7 @@ class ReportForm {
     this.homework,
     this.template,
     this.answers = const [],
+    this.voiceDraft = false,
   });
 
   factory ReportForm.fromJson(Map<String, dynamic> json) => ReportForm(
@@ -134,6 +135,7 @@ class ReportForm {
     homework: json['homework'] == null ? null : Homework.fromJson(json['homework'] as Map<String, dynamic>),
     template: ReportTemplate.fromJson(json['template']),
     answers: ReportAnswer.listOf(json['answers']),
+    voiceDraft: (json['assist'] as Map<String, dynamic>?)?['voice_draft'] == true,
   );
 
   final ReportSummary summary;
@@ -152,6 +154,9 @@ class ReportForm {
   /// The subject's own questions; null when it has none.
   final ReportTemplate? template;
   final List<ReportAnswer> answers;
+
+  /// The academy turned on drafts from a voice note for this report.
+  final bool voiceDraft;
 
   /// Reviewed by the academy: it no longer changes.
   bool get locked => summary.status == 'reviewed';
