@@ -153,7 +153,7 @@ function pdsSeedEverySource(object $t): void
     DB::table('import_runs')->insert(['id' => $run, 'kind' => 'students', 'file_name' => 'students.csv', 'headers' => '["name","email"]', 'created_by' => $t->admin->id, 'created_at' => $now, 'updated_at' => $now]);
     DB::table('import_rows')->insert(['id' => $id(), 'run_id' => $run, 'line' => 2, 'cells' => '["Zubaida Qasr","zubaida.qasr@noor.example"]', 'refs' => json_encode(['student' => $s->id]), 'created_at' => $now, 'updated_at' => $now]);
 
-    // learning: homework handed in with a file, a challenge, practice, and the guardian's cheer.
+    // learning: homework handed in with a file, a challenge, practice, the guardian's cheer, and a weekly note.
     $homework = $id();
     DB::table('homework')->insert(['id' => $homework, 'teacher_id' => $tr->id, 'student_id' => $s->id, 'enrollment_id' => $t->booked->enrollmentId, 'title' => 'Read Al-Fatiha', 'due_at' => $now->addDays(3), 'created_at' => $now, 'updated_at' => $now]);
     $t->handedIn = $file("homework/{$homework}", 'reading.m4a');
@@ -161,6 +161,9 @@ function pdsSeedEverySource(object $t): void
     DB::table('challenge_claims')->insert(['id' => $id(), 'student_id' => $s->id, 'challenge' => 'chest', 'period' => $now->toDateString(), 'points' => 5, 'claimed_at' => $now]);
     DB::table('practice_rounds')->insert(['id' => $id(), 'student_id' => $s->id, 'game' => 'shell-sort', 'focus' => 'free', 'correct' => 2, 'total' => 3, 'stars' => 2, 'seconds' => 40, 'played_by' => $s->id, 'played_at' => $now]);
     DB::table('cheers')->insert(['id' => $id(), 'student_id' => $s->id, 'from_id' => $g->id, 'kind' => 'clap', 'created_at' => $now]);
+    DB::table('weekly_digests')->insert(['id' => $id(), 'student_id' => $s->id, 'week_start' => $now->toDateString(), 'status' => 'sent', 'source' => 'facts',
+        'text_ar' => 'أسبوع {child} في الأكاديمية: الحصص: 2 حضور.', 'text_en' => "{child}'s week at the academy: Lessons: 2 attended.",
+        'facts' => json_encode(['notes' => ['{child} read it twice']]), 'sent_to' => 1, 'created_at' => $now, 'sent_at' => $now]);
 
     // messaging: the student, the guardian and the teacher talk; the student typed a number.
     test()->actingAs($s);
@@ -281,7 +284,7 @@ it('holds an erasure back for each source\'s own reasons, and erases once they a
         ->and($after['ratings'])->toBe([null, '[]', 4])
         ->and($after['games'])->toBe([0, 0, 0])
         ->and($after['imports'])->toBe('{}')
-        ->and($after['learning'])->toBe([0, 0, 0, 1, 1])
+        ->and($after['learning'])->toBe([0, 0, 0, 1, 1, 0])
         ->and($after['lessons'])->toBe(['', null, 0])
         ->and(Storage::disk('local')->exists($this->handedIn))->toBeFalse()
         ->and(Storage::disk('local')->exists($this->checkScan))->toBeFalse();
@@ -327,7 +330,8 @@ function pdsSnapshot(array $people): array
         'games' => [DB::table('game_plays')->where('student_id', $s)->count(), DB::table('creature_finds')->where('student_id', $s)->count(), DB::table('game_limits')->where('student_id', $s)->count()],
         'imports' => (string) DB::table('import_rows')->value(DB::raw('cells::text')),
         'learning' => [DB::table('homework_submissions')->where('submitted_by', $s)->count(), DB::table('challenge_claims')->where('student_id', $s)->count(),
-            DB::table('cheers')->where('student_id', $s)->orWhere('from_id', $g)->count(), DB::table('homework')->where('student_id', $s)->count(), DB::table('practice_rounds')->where('student_id', $s)->count()],
+            DB::table('cheers')->where('student_id', $s)->orWhere('from_id', $g)->count(), DB::table('homework')->where('student_id', $s)->count(), DB::table('practice_rounds')->where('student_id', $s)->count(),
+            DB::table('weekly_digests')->where('student_id', $s)->count()],
         'messaging' => DB::table('conversation_messages')->count(),
         'earnings' => DB::table('teacher_earnings')->where('teacher_id', $t)->count(),
         'safeguarding' => DB::table('safeguarding_concerns')->where('reporter_id', $s)->count(),

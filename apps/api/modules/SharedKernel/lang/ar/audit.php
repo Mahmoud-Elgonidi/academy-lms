@@ -129,6 +129,9 @@ return [
             'plan_changed' => 'باقة الأكاديمية بقت :plan: :reason',
             'ai_settings_saved' => 'تعديل المساعد الآلي (الشغّال: :helpers)',
         ],
+        'learning' => [
+            'weekly_digest_saved' => 'الرسالة الأسبوعية لأولياء الأمور: :state',
+        ],
         'games' => [
             'settings_saved' => 'تعديل ألعاب الأكاديمية (:state، :minutes دقيقة في اليوم)',
             'journey_style_saved' => 'غيّر شكل رحلة الطلاب: :style',
@@ -173,6 +176,7 @@ return [
     ],
     'groups' => [
         'announcements' => 'الإعلانات',
+        'learning' => 'التقارير والواجبات',
         'games' => 'الألعاب',
         'messaging' => 'المحادثات',
         'safeguarding' => 'حماية الأطفال',

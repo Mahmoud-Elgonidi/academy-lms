@@ -5,6 +5,7 @@ return [
         'family' => 'The student and their guardians',
         'student' => 'The student',
         'teacher' => 'The teacher',
+        'guardian' => 'The student\'s guardians who receive reports',
     ],
     'report_submitted' => [
         'title' => 'Lesson report for :student',
@@ -39,4 +40,7 @@ return [
         'title' => ':stars from your :subject lesson',
         'body' => ':how. Your stars are on your journey!',
     ],
+    // The weekly note to guardians (Actions\Digest\SendWeeklyDigest): :body is the week, written already.
+    'weekly_digest' => ['title' => ":student's week", 'body' => ':body'],
+    'weekly_digest_voice' => ['title' => ":student's week", 'body' => ':body Hear :student recite from this week: :link'],
 ];

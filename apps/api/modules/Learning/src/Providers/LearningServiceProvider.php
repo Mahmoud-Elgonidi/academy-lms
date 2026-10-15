@@ -6,10 +6,12 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Enrollment\Contracts\Events\CurriculumAttached;
+use Modules\Learning\Console\SendWeeklyDigestsCommand;
 use Modules\Learning\Console\SweepLearningCommand;
 use Modules\Learning\Console\TryRecitationCommand;
 use Modules\Learning\Contracts\Events\CheerSent;
@@ -28,6 +30,7 @@ use Modules\Learning\Filament\Teacher\HomeworkToMark;
 use Modules\Learning\Filament\Teacher\WriteReport;
 use Modules\Learning\Http\Web\MaterialController;
 use Modules\Learning\Http\Web\SubmissionFileController;
+use Modules\Learning\Http\Web\WeeklyVoiceController;
 use Modules\Learning\LearningService;
 use Modules\Learning\Listeners\OpenReportWhenSessionCloses;
 use Modules\Learning\Listeners\QueueRecitationCheck;
@@ -37,11 +40,13 @@ use Modules\Learning\Live\HomeworkChanged;
 use Modules\Learning\Live\PracticeChanged;
 use Modules\Learning\Privacy\LearningData;
 use Modules\Learning\Queries\Journey\NoJourneyGames;
+use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\LiveSignals;
+use Modules\SharedKernel\Tenancy\TenantContext;
 
 /** Reports, homework and progress on the roadmap (docs/architecture/01, "التقارير والواجبات"; 02, section 6). */
 final class LearningServiceProvider extends ServiceProvider
@@ -70,6 +75,11 @@ final class LearningServiceProvider extends ServiceProvider
         Route::middleware(['web', 'tenant'])->get('learning/files/{submission}', SubmissionFileController::class)->name('learning.files');
         // A lesson's file behind a signed address (MaterialLinks), for whoever was shown the lesson: no sign-in needed.
         Route::middleware(['web', 'tenant', 'signed:relative', 'throttle:links'])->get('materials/{resource}', MaterialController::class)->name('learning.material');
+        // The recording of the week a guardian hears from their weekly note: their own signed link, no sign-in.
+        Route::middleware(['web', 'tenant', 'signed:relative', 'throttle:links', 'throttle:20,1'])->group(function (): void {
+            Route::get('voice/{submission}', [WeeklyVoiceController::class, 'show'])->name('learning.voice');
+            Route::get('voice/{submission}/file', [WeeklyVoiceController::class, 'file'])->name('learning.voice.file');
+        });
 
         LearningPlugin::registerAccountSection();
         LearningPlugin::registerJourneyStyle();
@@ -84,6 +94,15 @@ final class LearningServiceProvider extends ServiceProvider
         foreach (['journey', 'games', 'challenges'] as $screen) {
             $links->register($screen, fn (array $a, string $panel) => $panel === 'family' ? FamilyJourney::getUrl(panel: 'family') : null);
         }
+        // The weekly note's link to hear the recording of the week: each guardian's own, for two weeks.
+        $links->registerPersonal('journey', function (array $action, string $userId): ?string {
+            if (! is_string($action['voice'] ?? null)) {
+                return null;
+            }
+            $path = URL::temporarySignedRoute('learning.voice', now()->addDays(WeeklyVoiceController::LINK_DAYS), ['submission' => $action['voice'], 'u' => $userId], absolute: false);
+
+            return $this->app->make(TenantDirectory::class)->baseUrl($this->app->make(TenantContext::class)->require()).$path;
+        });
         Event::listen(SessionReportSubmitted::class, [SendLearningNotifications::class, 'reportSubmitted']);
         Event::listen(HomeworkAssigned::class, [SendLearningNotifications::class, 'homeworkAssigned']);
         Event::listen(HomeworkReviewed::class, [SendLearningNotifications::class, 'homeworkReviewed']);
@@ -100,11 +119,12 @@ final class LearningServiceProvider extends ServiceProvider
         $this->app->make(LiveSignals::class)->on('practice', fn (string $userId) => new PracticeChanged($userId));
 
         if ($this->app->runningInConsole()) {
-            $this->commands([SweepLearningCommand::class, TryRecitationCommand::class]);
+            $this->commands([SweepLearningCommand::class, TryRecitationCommand::class, SendWeeklyDigestsCommand::class]);
         }
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('learning:sweep')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
+            $schedule->command('learning:digests')->hourlyAt(11)->withoutOverlapping()->onOneServer();
         });
     }
 }

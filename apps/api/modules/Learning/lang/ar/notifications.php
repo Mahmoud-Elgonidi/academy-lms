@@ -5,6 +5,7 @@ return [
         'family' => 'الطالب وأولياء أمره',
         'student' => 'الطالب',
         'teacher' => 'المدرس',
+        'guardian' => 'أولياء أمور الطالب اللي بيستلموا التقارير',
     ],
     'report_submitted' => [
         'title' => 'تقرير حصة :student',
@@ -39,4 +40,7 @@ return [
         'title' => ':stars من حصة :subject',
         'body' => ':how. نجومك اتضافت لرحلتك!',
     ],
+    // The weekly note to guardians (Actions\Digest\SendWeeklyDigest): :body is the week, written already.
+    'weekly_digest' => ['title' => 'أسبوع :student', 'body' => ':body'],
+    'weekly_digest_voice' => ['title' => 'أسبوع :student', 'body' => ':body واسمع تسميع :student من الأسبوع ده: :link'],
 ];

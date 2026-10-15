@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
 use Modules\Learning\Filament\Pages\ReportsOversight;
 use Modules\Learning\Filament\Pages\ReportTemplates;
+use Modules\Learning\Filament\Pages\WeeklyNoteSettings;
 
 /**
  * Learning in the academy back office: report follow-up, the curriculum and
@@ -32,7 +33,7 @@ final class LearningPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([ReportsOversight::class, ReportTemplates::class]);
+        $panel->pages([ReportsOversight::class, ReportTemplates::class, WeeklyNoteSettings::class]);
     }
 
     public function boot(Panel $panel): void {}

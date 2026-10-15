@@ -129,6 +129,9 @@ return [
             'plan_changed' => 'The academy moved to the :plan plan: :reason',
             'ai_settings_saved' => 'AI helpers changed (on: :helpers)',
         ],
+        'learning' => [
+            'weekly_digest_saved' => 'Turned the weekly note to guardians :state',
+        ],
         'games' => [
             'settings_saved' => "Changed the academy's games (:state, :minutes minutes a day)",
             'journey_style_saved' => 'Changed how students see their journey: :style',
@@ -173,6 +176,7 @@ return [
     ],
     'groups' => [
         'announcements' => 'Announcements',
+        'learning' => 'Reports and homework',
         'games' => 'Games',
         'messaging' => 'Conversations',
         'safeguarding' => 'Safeguarding',

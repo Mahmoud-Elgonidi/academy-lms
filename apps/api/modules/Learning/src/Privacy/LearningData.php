@@ -56,6 +56,9 @@ final class LearningData implements PersonalDataSource
             'cheers' => DB::table('cheers')->where(fn ($q) => $q->where('student_id', $userId)->orWhere('from_id', $userId))->orderBy('created_at')
                 ->select(['kind', 'created_at'])->selectRaw("case when from_id = ? then 'sent' else 'received' end as direction", [$userId])
                 ->get()->map(fn (object $c) => (array) $c)->all(),
+            // The weekly notes to their guardians: what each said (the child as {child}) and when it went out.
+            'weekly_notes' => DB::table('weekly_digests')->where('student_id', $userId)->where('status', 'sent')->orderBy('week_start')
+                ->get(['week_start', 'source', 'text_ar', 'text_en', 'sent_at'])->map(fn (object $d) => (array) $d)->all(),
         ], $files);
     }
 
@@ -76,6 +79,7 @@ final class LearningData implements PersonalDataSource
             'homework_handed_in' => $handedIn,
             'challenges' => DB::table('challenge_claims')->where('student_id', $userId)->delete(),
             'cheers' => DB::table('cheers')->where(fn ($q) => $q->where('student_id', $userId)->orWhere('from_id', $userId))->delete(),
+            'weekly_notes' => DB::table('weekly_digests')->where('student_id', $userId)->delete(),
         ];
     }
 
