@@ -5,6 +5,7 @@ namespace Modules\Learning\Models;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
@@ -47,7 +48,7 @@ final class HomeworkSubmission extends Model
     /**
      * Narrows a query on handed-in files (as $column) to recordings, as isAudio() tells them.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  Builder  $query
      */
     public static function whereRecording($query, string $column = 'mime'): void
     {
