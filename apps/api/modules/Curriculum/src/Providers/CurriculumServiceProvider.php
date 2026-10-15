@@ -9,6 +9,7 @@ use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\CurriculumService;
 use Modules\Curriculum\Http\ResourcePreviewController;
 use Modules\Curriculum\Setup\ProgramStep;
+use Modules\Curriculum\Texts\QuranText;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Setup\SetupChecklist;
@@ -18,6 +19,8 @@ final class CurriculumServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(CurriculumApi::class, CurriculumService::class);
+        // The platform's copy of the Quran (Tanzil's simple text and metadata, resources/quran/README.md).
+        $this->app->singleton(QuranText::class, fn () => new QuranText(dirname(__DIR__, 2).'/resources/quran'));
     }
 
     public function boot(): void
