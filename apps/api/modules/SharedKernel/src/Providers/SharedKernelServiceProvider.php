@@ -22,6 +22,8 @@ use Illuminate\Support\ServiceProvider;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\LanguageModel;
 use Modules\SharedKernel\Ai\NoAi;
+use Modules\SharedKernel\Ai\RecitationEngine;
+use Modules\SharedKernel\Ai\SpeechRecitation;
 use Modules\SharedKernel\Ai\SpeechToText;
 use Modules\SharedKernel\Auth\TimingSafeUserProvider;
 use Modules\SharedKernel\Files\ClamAvScanner;
@@ -74,6 +76,7 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->scopedIf(AcademyAi::class, NoAi::class);
         $this->app->singletonIf(LanguageModel::class, NoAi::class);
         $this->app->singletonIf(SpeechToText::class, NoAi::class);
+        $this->app->singletonIf(RecitationEngine::class, SpeechRecitation::class);
         // The Quran's text: none until Curriculum binds its copy.
         $this->app->singletonIf(QuranSource::class, NoQuranSource::class);
         // What each module holds about a person, for the Privacy module's copies and erasures.
