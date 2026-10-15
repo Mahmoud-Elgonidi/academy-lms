@@ -2,17 +2,36 @@
 
 namespace Modules\Learning\Filament\Teacher;
 
+use Carbon\CarbonImmutable;
+use Closure;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\Learning\Actions\Hifz\ClearHifzPages;
+use Modules\Learning\Actions\Hifz\MarkMemorized;
 use Modules\Learning\Authorization\LearningAccess;
+use Modules\Learning\Hifz\HifzPages;
 use Modules\Learning\Models\SessionReport;
+use Modules\Learning\Queries\Hifz\HifzMap;
 use Modules\Learning\Queries\RoadmapQuery;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
-/** One student of the teacher: the roadmap, and the reports written so far (with the internal notes). */
+/**
+ * One student of the teacher: the roadmap, the reports written so far (with
+ * the internal notes), and the hifz map (once the platform has the Quran's
+ * text): where each page stands, the last reviews, and saying which pages
+ * the student already knows or taking pages off.
+ */
 final class StudentProgress extends Page
 {
     protected string $view = 'learning::filament.teacher.student';
@@ -38,6 +57,88 @@ final class StudentProgress extends Page
     public function getSubheading(): string|Htmlable|null
     {
         return $this->summary['subject'] ?? null;
+    }
+
+    /**
+     * The student's hifz map and the last two weeks' reviews; null while the platform has no Quran text.
+     *
+     * @return ?array{map: array<string, mixed>, recent: list<array{page: int, grade: string, source: string, at: string}>}
+     */
+    #[Computed]
+    public function hifz(): ?array
+    {
+        $student = app(EnrollmentApi::class)->find($this->enrollment)?->studentId;
+        if ($student === null || app(HifzPages::class)->count() === 0) {
+            return null;
+        }
+        $tz = app(ViewerTimezone::class)->effective();
+        $now = CarbonImmutable::now();
+        $map = app(HifzMap::class);
+
+        return [
+            'map' => $map->for($student, $now),
+            'recent' => array_map(fn (array $r) => [
+                'page' => $r['page'],
+                'grade' => __('learning::hifz.grades.'.$r['grade']),
+                'source' => __('learning::hifz.sources.'.$r['source']),
+                'at' => $r['reviewed_at']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i'),
+            ], $map->recent($student, $now, 12)),
+        ];
+    }
+
+    /** @return list<Action> */
+    protected function getHeaderActions(): array
+    {
+        $h = 'learning::hifz.';
+        $choice = fn () => [
+            Select::make('juz')->label(__($h.'attributes.juz'))->multiple()->native(false)
+                ->options(collect(range(1, 30))->mapWithKeys(fn (int $j) => [$j => __($h.'juz', ['juz' => $j])])->all()),
+            Select::make('surahs')->label(__($h.'attributes.surahs'))->multiple()->searchable()->native(false)
+                ->options(collect(app(CurriculumApi::class)->surahs())->mapWithKeys(fn (array $s) => [$s['number'] => $s['number'].'. '.$s['name_ar'].' · '.$s['name_en']])->all()),
+            TagsInput::make('pages')->label(__($h.'attributes.pages'))->placeholder('582'),
+        ];
+        $pages = fn (array $data) => app(HifzPages::class)->chosen(
+            array_map('intval', $data['juz'] ?? []), array_map('intval', $data['surahs'] ?? []), array_map('intval', array_filter($data['pages'] ?? [], 'is_numeric')),
+        );
+
+        return [
+            Action::make('hifzMark')->label(__($h.'mark.action'))->icon(Heroicon::OutlinedBookOpen)
+                ->visible(fn () => $this->hifz !== null)
+                ->modalHeading(__($h.'mark.heading'))->modalDescription(__($h.'mark.hint'))
+                ->schema([...$choice(), Radio::make('strength')->label(__($h.'attributes.strength'))->options(trans($h.'marks'))->default('good')->required()])
+                ->action(function (array $data) use ($pages, $h): void {
+                    $student = app(EnrollmentApi::class)->find($this->enrollment)->studentId;
+                    $count = app(MarkMemorized::class)->handle($student, $this->picked($pages, $data), (string) $data['strength']);
+                    unset($this->hifz);
+                    Notification::make()->success()->title(trans_choice($h.'mark.done', $count, ['count' => $count]))->send();
+                }),
+            Action::make('hifzClear')->label(__($h.'clear.action'))->icon(Heroicon::OutlinedMinusCircle)->color('gray')
+                ->visible(fn () => ($this->hifz['map']['counts']['memorized'] ?? 0) + ($this->hifz['map']['counts']['learning'] ?? 0) > 0)
+                ->modalHeading(__($h.'clear.heading'))->modalDescription(__($h.'clear.hint'))
+                ->schema($choice())
+                ->action(function (array $data) use ($pages, $h): void {
+                    $student = app(EnrollmentApi::class)->find($this->enrollment)->studentId;
+                    $count = app(ClearHifzPages::class)->handle($student, $this->picked($pages, $data));
+                    unset($this->hifz);
+                    Notification::make()->success()->title(trans_choice($h.'clear.done', $count, ['count' => $count]))->send();
+                }),
+        ];
+    }
+
+    /**
+     * The pages chosen in a form, or why not (under its fields).
+     *
+     * @return list<int>
+     */
+    private function picked(Closure $pages, array $data): array
+    {
+        try {
+            $chosen = $pages($data);
+        } catch (ValidationException $e) {
+            throw ValidationException::withMessages(collect($e->errors())->mapWithKeys(fn ($m, $k) => ["mountedActions.0.data.{$k}" => $m])->all());
+        }
+
+        return $chosen !== [] ? $chosen : throw ValidationException::withMessages(['mountedActions.0.data.juz' => __('learning::hifz.errors.none')]);
     }
 
     /** @return array<string, mixed> */

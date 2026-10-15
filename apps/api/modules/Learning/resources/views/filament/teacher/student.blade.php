@@ -15,6 +15,19 @@
             @endif
         </section>
 
+        @if ($hifz = $this->hifz)
+            <section class="lf-card">
+                <div class="lf-head"><h3>{{ __('learning::hifz.title') }}</h3></div>
+                @include('learning::filament.hifz.map', ['map' => $hifz['map']])
+                <h4 style="font-size: .85rem; font-weight: 700; margin: .4rem 0 0">{{ __('learning::hifz.recent') }}</h4>
+                @forelse ($hifz['recent'] as $r)
+                    <small class="lf-muted" style="display: block">{{ __('learning::hifz.page', ['page' => $r['page']]) }} · {{ $r['grade'] }} · {{ $r['source'] }} · {{ $r['at'] }}</small>
+                @empty
+                    <small class="lf-muted">{{ __('learning::hifz.no_recent') }}</small>
+                @endforelse
+            </section>
+        @endif
+
         <h2 style="font-size: 1rem; font-weight: 700; margin: .5rem 0 0">{{ __($l.'reports') }}</h2>
         @forelse ($d['reports'] as $r)
             <a class="lf-card lms-lift" href="{{ $r['url'] }}" style="text-decoration: none; color: inherit">

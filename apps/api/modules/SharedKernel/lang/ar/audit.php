@@ -131,6 +131,7 @@ return [
         ],
         'learning' => [
             'weekly_digest_saved' => 'الرسالة الأسبوعية لأولياء الأمور: :state',
+            'hifz_daily_saved' => 'ورد المراجعة بقى :pages صفحة في اليوم بالكتير',
         ],
         'games' => [
             'settings_saved' => 'تعديل ألعاب الأكاديمية (:state، :minutes دقيقة في اليوم)',

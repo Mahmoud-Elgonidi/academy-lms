@@ -20,6 +20,9 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  */
 final class HifzMap
 {
+    /** The reviews a teacher sees: the last two weeks'. */
+    public const RECENT_DAYS = 14;
+
     public function __construct(
         private readonly HifzPages $pages,
         private readonly CurriculumApi $curriculum,
@@ -80,6 +83,19 @@ final class HifzMap
                 'overdue_days' => max(0, (int) floor($card->due_at->diffInDays($now, false))),
             ];
         })->values()->all()];
+    }
+
+    /**
+     * The last two weeks' reviews, newest first: the page, its grade, where it came from and when.
+     *
+     * @return list<array{page: int, grade: int, source: string, reviewed_at: CarbonImmutable}>
+     */
+    public function recent(string $studentId, CarbonImmutable $now, int $limit): array
+    {
+        return DB::table('hifz_reviews')->where('student_id', $studentId)->where('reviewed_at', '>=', $now->subDays(self::RECENT_DAYS))
+            ->orderByDesc('reviewed_at')->limit($limit)->get(['page', 'grade', 'source', 'reviewed_at'])
+            ->map(fn ($r) => ['page' => (int) $r->page, 'grade' => (int) $r->grade, 'source' => (string) $r->source, 'reviewed_at' => CarbonImmutable::parse($r->reviewed_at)])
+            ->all();
     }
 
     /** The end of the learner's day, on their own clock. */

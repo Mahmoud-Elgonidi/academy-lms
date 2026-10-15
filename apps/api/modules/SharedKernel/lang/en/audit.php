@@ -131,6 +131,7 @@ return [
         ],
         'learning' => [
             'weekly_digest_saved' => 'Turned the weekly note to guardians :state',
+            'hifz_daily_saved' => 'The daily hifz review is now :pages pages at most',
         ],
         'games' => [
             'settings_saved' => "Changed the academy's games (:state, :minutes minutes a day)",

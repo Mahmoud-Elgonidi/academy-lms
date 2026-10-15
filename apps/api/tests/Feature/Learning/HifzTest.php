@@ -1,19 +1,26 @@
 <?php
 
 use Carbon\CarbonImmutable;
+use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 use Modules\Curriculum\Models\Program;
 use Modules\Curriculum\Texts\QuranText;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
+use Modules\Learning\Actions\Hifz\MarkMemorized;
 use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Actions\SubmitSessionReport;
+use Modules\Learning\Filament\Family\FamilyHifz;
+use Modules\Learning\Filament\JourneyStyleSettings;
+use Modules\Learning\Filament\Teacher\StudentProgress;
 use Modules\Learning\Models\HifzPage;
 use Modules\Learning\Models\HifzRecitation;
 use Modules\Learning\Models\Homework;
+use Modules\Learning\Models\LearningSettings;
 use Modules\Learning\Models\SessionReport;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Platform\Actions\SaveAiSettings;
@@ -208,4 +215,69 @@ it('hears a page recited for the daily review, grades it, and deletes the record
             ->and(DB::table('hifz_reviews')->where('source', 'wird')->sole()->grade)->toBe(4);
     });
     expect(hifzApiAs($this->student)->getJson('/api/v1/learning/hifz')->json('data.latest_recitation.id'))->toBe($id);
+});
+
+it('lets the teacher say what the student knows from their page in /teach', function () {
+    $this->actAsTenant($this->academy);
+    Filament::setCurrentPanel('teach');
+    $this->actingAs($this->teacher);
+
+    Livewire::test(StudentProgress::class, ['enrollment' => $this->booked->enrollmentId])
+        ->assertSee(__('learning::hifz.title'))->assertSee(__('learning::hifz.no_recent'))
+        ->assertActionVisible('hifzMark')->assertActionHidden('hifzClear')
+        ->callAction('hifzMark', data: ['juz' => [], 'strength' => 'good'])->assertHasActionErrors(['juz'])
+        ->fillForm(['juz' => [9]])->callMountedAction()->assertHasActionErrors(['juz'])
+        ->fillForm(['juz' => [1]])->callMountedAction()->assertHasNoActionErrors()
+        ->assertNotified(trans_choice('learning::hifz.mark.done', 2, ['count' => 2]))
+        ->assertSee(__('learning::hifz.sources.teacher'))->assertActionVisible('hifzClear')
+        ->callAction('hifzClear', data: ['pages' => ['2']])->assertHasNoActionErrors()
+        ->assertNotified(trans_choice('learning::hifz.clear.done', 1, ['count' => 1]));
+    expect(HifzPage::query()->pluck('state', 'page')->all())->toBe([1 => 'memorized']);
+
+    // Without the Quran's text there is no map to show or mark.
+    app()->instance(QuranText::class, new QuranText(base_path('tests/Fixtures/none')));
+    Livewire::test(StudentProgress::class, ['enrollment' => $this->booked->enrollmentId])
+        ->assertDontSee(__('learning::hifz.title'))->assertActionHidden('hifzMark');
+});
+
+it('opens the learner\'s map in /my: a page to recite from memory, its text on asking, and their word on it', function () {
+    $this->actAsTenant($this->academy);
+    Filament::setCurrentPanel('family');
+    $this->actingAs($this->student);
+    expect(FamilyHifz::canAccess())->toBeTrue()->and(FamilyHifz::shouldRegisterNavigation())->toBeFalse();
+
+    app(MarkMemorized::class)->handle($this->student->id, [1, 2], 'weak');
+    $this->travel(3)->days();
+    expect(FamilyHifz::shouldRegisterNavigation())->toBeTrue();
+
+    Livewire::test(FamilyHifz::class)
+        ->assertSee(__('learning::hifz.wird_done', ['done' => 0, 'daily' => 3]))->assertDontSee(__('learning::hifz.recite'))
+        ->call('openPage', 1)->assertSet('open', 1)->assertSee(__('learning::hifz.reveal'))->assertDontSee('Tanzil')
+        ->call('reveal')->assertSee('Tanzil')
+        ->call('grade', 3)->assertSet('open', null)->assertNotified(__('learning::hifz.graded', ['grade' => __('learning::hifz.grades.3')]))
+        ->assertSee(__('learning::hifz.wird_done', ['done' => 1, 'daily' => 3]))
+        ->call('openPage', 9)->assertSet('open', null);
+    expect(DB::table('hifz_reviews')->where('source', 'self')->sole()->page)->toBe(1);
+
+    // Their guardian sees the child's map by the child's first name.
+    $this->actingAs($this->guardian);
+    Livewire::test(FamilyHifz::class)->assertSee(__('learning::hifz.title_of', ['name' => explode(' ', $this->student->name)[0]]))
+        ->assertSee(__('learning::hifz.wird_done', ['done' => 1, 'daily' => 3]));
+});
+
+it('lets the academy choose how many pages the daily review holds', function () {
+    $this->actAsTenant($this->academy);
+    Filament::setCurrentPanel('academy');
+    $this->actingAs($this->admin);
+
+    Livewire::test(JourneyStyleSettings::class)->assertSee(__('learning::hifz.settings.title'))->assertSet('hifzPages', 3)
+        ->set('hifzPages', 0)->call('saveHifz')->assertHasErrors('hifzPages')
+        ->set('hifzPages', 5)->call('saveHifz')->assertHasNoErrors()->assertNotified(__('learning::hifz.settings.saved'));
+    expect(LearningSettings::current()->hifz_daily_pages)->toBe(5)
+        ->and(DB::table('audit_logs')->where('action', 'learning.hifz_daily_saved')->sole()->data)->toContain('"pages": 5');
+
+    $this->actingAs($this->teacher);
+    Livewire::test(JourneyStyleSettings::class)->assertDontSee(__('learning::hifz.settings.title'))
+        ->set('hifzPages', 9)->call('saveHifz')->assertForbidden();
+    expect(LearningSettings::current()->hifz_daily_pages)->toBe(5);
 });

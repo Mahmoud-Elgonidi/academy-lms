@@ -20,7 +20,7 @@ final class LearningFamilyPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([FamilyJourney::class, FamilyProgress::class, FamilyReports::class, FamilyHomework::class])->widgets([JourneyWidget::class, LearningHomeWidget::class]);
+        $panel->pages([FamilyJourney::class, FamilyProgress::class, FamilyReports::class, FamilyHomework::class, FamilyHifz::class])->widgets([JourneyWidget::class, LearningHomeWidget::class]);
     }
 
     public function boot(Panel $panel): void {}

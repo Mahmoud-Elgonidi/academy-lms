@@ -18,6 +18,7 @@ use Modules\Learning\Authorization\LearningAccess;
 use Modules\Learning\Domain\Hifz\Scheduler;
 use Modules\Learning\Hifz\HifzPages;
 use Modules\Learning\Http\V1\Resources\HifzPresenter;
+use Modules\Learning\Queries\Hifz\HifzMap;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -28,9 +29,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class TeacherHifzController
 {
-    /** The reviews shown: the last two weeks'. */
-    public const RECENT_DAYS = 14;
-
     public function __construct(
         private readonly EnrollmentApi $enrollments,
         private readonly LearningAccess $access,
@@ -44,25 +42,23 @@ final class TeacherHifzController
      * Every page by part with its strength, the counts, the last two weeks' reviews (grade and where each came from),
      * and the parts and surahs with their pages, to say what the student already knows.
      */
-    public function show(Request $request, string $enrollment, CurriculumApi $curriculum, LocalTimePresenter $time): JsonResponse
+    public function show(Request $request, string $enrollment, CurriculumApi $curriculum, HifzMap $map, LocalTimePresenter $time): JsonResponse
     {
         $course = $this->course($request, $enrollment);
         $now = CarbonImmutable::now();
-        $recent = DB::table('hifz_reviews')->where('student_id', $course->studentId)->where('reviewed_at', '>=', $now->subDays(self::RECENT_DAYS))
-            ->orderByDesc('reviewed_at')->limit(100)->get(['page', 'grade', 'source', 'reviewed_at']);
 
         return response()->json(['data' => [
             'enrollment_id' => $course->id,
             'student' => ['id' => $course->studentId, 'name' => (string) DB::table('users')->where('id', $course->studentId)->value('name')],
             ...$this->present->map($course->studentId, $now),
-            'recent' => $recent->map(fn ($r) => [
-                'page' => (int) $r->page,
-                'grade' => (int) $r->grade,
-                'grade_label' => __('learning::hifz.grades.'.$r->grade),
+            'recent' => collect($map->recent($course->studentId, $now, 100))->map(fn (array $r) => [
+                'page' => (int) $r['page'],
+                'grade' => (int) $r['grade'],
+                'grade_label' => __('learning::hifz.grades.'.$r['grade']),
                 /** teacher, report, check (homework), wird (a page recited for the daily review) or self (their own grade) */
-                'source' => $r->source,
-                'source_label' => __('learning::hifz.sources.'.$r->source),
-                'at' => $time->present(CarbonImmutable::parse($r->reviewed_at)),
+                'source' => (string) $r['source'],
+                'source_label' => __('learning::hifz.sources.'.$r['source']),
+                'at' => $time->present($r['reviewed_at']),
             ])->all(),
             /** What a teacher may mark: whole parts, whole surahs, or pages. */
             'surahs' => array_map(fn (array $s) => $s + ['pages' => $curriculum->quranPagesOf(TextSource::quran($s['number'], 1, $s['verses']))], $curriculum->surahs()),
