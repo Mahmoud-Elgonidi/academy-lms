@@ -2820,5 +2820,174 @@
       }
     }
   },
-  "homeworkNoGame": "مفيش لعبة للواجب ده دلوقتي."
+  "homeworkNoGame": "مفيش لعبة للواجب ده دلوقتي.",
+  "hifzTitle": "خريطة الحفظ",
+  "hifzTitleKids": "خريطة حفظي",
+  "hifzTitleOf": "خريطة حفظ {name}",
+  "@hifzTitleOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "hifzNoText": "نص القرآن لسه مش موجود، والخريطة هتظهر أول ما يوصل.",
+  "hifzMemorized": "{n, plural, =0{لسه مفيش صفحات محفوظة من {total}} =1{صفحة واحدة محفوظة من {total}} =2{صفحتين محفوظين من {total}} few{{n} صفحات محفوظة من {total}} other{{n} صفحة محفوظة من {total}}}",
+  "@hifzMemorized": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzMemorizedKids": "{n, plural, =0{لسه ماحفظتش صفحات. يلا نبدأ!} =1{حفظت صفحة واحدة! ⭐} =2{حفظت صفحتين! ⭐} few{حفظت {n} صفحات! ⭐} other{حفظت {n} صفحة! ⭐}}",
+  "@hifzMemorizedKids": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzJuz": "الجزء {n}",
+  "@hifzJuz": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzJuzSummary": "الجزء {n}: {summary}",
+  "@hifzJuzSummary": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "hifzPageNumber": "صفحة {page}",
+  "@hifzPageNumber": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzPageOf": "صفحة {page} · الجزء {juz}",
+  "@hifzPageOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "juz": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzToday": "ورد النهارده",
+  "hifzTodayProgress": "خلص {done} من {daily, plural, =1{صفحة واحدة} =2{صفحتين} few{{daily} صفحات} other{{daily} صفحة}}",
+  "@hifzTodayProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "daily": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzTodayDone": "ورد النهارده خلص. برافو!",
+  "hifzTodayNone": "مفيش صفحات عليها مراجعة النهارده.",
+  "hifzWirdDone": "ورد النهارده خلص!",
+  "hifzWirdDoneKids": "خلّصت وردك! 🎉",
+  "hifzOverdue": "{n, plural, =1{متأخرة يوم} =2{متأخرة يومين} few{متأخرة {n} أيام} other{متأخرة {n} يوم}}",
+  "@hifzOverdue": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzReveal": "اكشف الصفحة",
+  "hifzRevealHint": "سمّع الصفحة من حفظك الأول، وبعدين اكشفها واتأكد.",
+  "hifzHowWent": "الحفظ كان عامل إزاي؟",
+  "hifzGrade1": "نسيتها",
+  "hifzGrade2": "بصعوبة",
+  "hifzGrade3": "كويس",
+  "hifzGrade4": "سهلة",
+  "hifzNextReview": "اتسجّلت. الصفحة دي هترجعلك {day}.",
+  "@hifzNextReview": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "hifzRecite": "سمّع الصفحة",
+  "hifzReciteKids": "سمّع صفحة",
+  "hifzReciteHint": "سجّل الصفحة من حفظك، وهنصحّحها كلمة كلمة.",
+  "hifzSendRecitation": "ابعت التسميع",
+  "hifzListening": "بنسمع التسميع…",
+  "hifzListeningHint": "النتيجة هتظهر هنا لوحدها.",
+  "hifzSelfGrade": "قيّم الصفحة بنفسك",
+  "hifzLatest": "آخر تسميع",
+  "hifzWird": "ورد الحفظ",
+  "hifzCardLeft": "{n, plural, =1{فاضل صفحة واحدة النهارده} =2{فاضل صفحتين النهارده} few{فاضل {n} صفحات النهارده} other{فاضل {n} صفحة النهارده}}",
+  "@hifzCardLeft": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzCardDone": "خلص النهارده",
+  "hifzCardNone": "مفيش صفحات النهارده",
+  "hifzCardKids": "{n, plural, =0{خلّصت وردك النهارده! ⭐} =1{فاضلك صفحة واحدة تسمّعها} =2{فاضلك صفحتين تسمّعهم} few{فاضلك {n} صفحات تسمّعها} other{فاضلك {n} صفحة تسمّعها}}",
+  "@hifzCardKids": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzTell": "قول اللي حافظه",
+  "hifzClear": "شيل صفحات",
+  "hifzClearHint": "الصفحات اللي هتشيلها هترجع جديدة على الخريطة، ومراجعاتها القديمة هتفضل.",
+  "hifzClearConfirm": "تشيل الصفحات دي من الخريطة؟",
+  "hifzParts": "الأجزاء",
+  "hifzSurahs": "السور",
+  "hifzSurahHint": "اكتب اسم السورة أو رقمها",
+  "hifzHowWell": "حافظها إزاي؟",
+  "hifzChosen": "{n, plural, =0{مااخترتش صفحات لسه} =1{صفحة واحدة} =2{صفحتين} few{{n} صفحات} other{{n} صفحة}}",
+  "@hifzChosen": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzSave": "سجّل",
+  "hifzMarked": "{n, plural, =0{مااتسجّلش صفحات} =1{اتسجّلت صفحة واحدة} =2{اتسجّلت صفحتين} few{اتسجّلت {n} صفحات} other{اتسجّلت {n} صفحة}}",
+  "@hifzMarked": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzCleared": "{n, plural, =0{مفيش صفحات اتشالت} =1{اتشالت صفحة واحدة} =2{اتشالت صفحتين} few{اتشالت {n} صفحات} other{اتشالت {n} صفحة}}",
+  "@hifzCleared": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzRecent": "آخر المراجعات",
+  "hifzRecentNone": "مفيش مراجعات في آخر أسبوعين."
 }

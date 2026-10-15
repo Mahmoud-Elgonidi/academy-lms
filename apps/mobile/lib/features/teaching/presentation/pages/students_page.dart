@@ -11,6 +11,8 @@ import '../../../../core/time/formats.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/load_view.dart';
+import '../../../hifz/data/hifz_repository.dart';
+import '../../../hifz/domain/hifz.dart';
 import '../../../messages/data/messages_repository.dart';
 import '../../../roadmap/presentation/widgets/material_chips.dart';
 import '../../data/teaching_repository.dart';
@@ -185,7 +187,8 @@ class _StudentRow extends StatelessWidget {
 
 /// A student's sheet: how far through the course, where they are now, the
 /// last report, the lesson's materials, and what the teacher can do from
-/// here (write the report waiting, mark their homework, send a message).
+/// here (write the report waiting, mark their homework, send a message,
+/// open their hifz map).
 Future<void> _showStudent(BuildContext context, TeacherStudent s, String? report) => showActionSheet<void>(
   context,
   builder: (sheet) {
@@ -254,11 +257,46 @@ Future<void> _showStudent(BuildContext context, TeacherStudent s, String? report
               onPressed: after(() => _message(context, s.studentId!)),
             ),
           ],
+          _HifzEntry(enrollmentId: s.enrollmentId, onOpen: after(() => context.push('/teach/students/${s.enrollmentId}/hifz'))),
         ],
       ),
     );
   },
 );
+
+/// The way to the student's hifz map, shown once there is a map to show
+/// (the platform has the Quran's text).
+class _HifzEntry extends StatefulWidget {
+  const _HifzEntry({required this.enrollmentId, required this.onOpen});
+
+  final String enrollmentId;
+  final VoidCallback onOpen;
+
+  @override
+  State<_HifzEntry> createState() => _HifzEntryState();
+}
+
+class _HifzEntryState extends State<_HifzEntry> {
+  late final Future<StudentHifz> _hifz = context.read<HifzRepository>().student(widget.enrollmentId);
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<StudentHifz>(
+    future: _hifz,
+    builder: (context, snap) {
+      final hifz = snap.data;
+      if (hifz == null || !hifz.map.available || !hifz.follows) return const SizedBox.shrink();
+      return Padding(
+        padding: const EdgeInsets.only(top: Space.s),
+        child: SecondaryAction(
+          context.l10n.hifzTitle,
+          key: const Key('student-hifz'),
+          icon: Icons.auto_stories_outlined,
+          onPressed: widget.onOpen,
+        ).appear(context, 0),
+      );
+    },
+  );
+}
 
 /// Opens (or starts) the conversation with the student and their guardians.
 Future<void> _message(BuildContext context, String studentId) async {

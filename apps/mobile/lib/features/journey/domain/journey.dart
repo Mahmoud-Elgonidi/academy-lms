@@ -29,6 +29,7 @@ class JourneyMap {
     this.lastLesson,
     this.chest,
     this.games,
+    this.hifz,
   });
 
   factory JourneyMap.fromJson(Map<String, dynamic> json) => JourneyMap(
@@ -43,6 +44,7 @@ class JourneyMap {
     missions: [for (final m in _list(json['missions'])) Mission.fromJson(m)],
     chest: _map(json['chest']) == null ? null : Chest.fromJson(_map(json['chest'])!),
     games: _map(json['games']) == null ? null : JourneyGames.fromJson(_map(json['games'])!),
+    hifz: _map(json['hifz']) == null ? null : JourneyHifz.fromJson(_map(json['hifz'])!),
     cheers: [for (final c in _list(json['cheers'])) JourneyCheer.fromJson(c)],
     cheersLeft: _int(json['cheers_left']),
   );
@@ -68,6 +70,9 @@ class JourneyMap {
 
   /// The games layer (null: the academy has no games).
   final JourneyGames? games;
+
+  /// Today's hifz review (null until the learner has pages on their hifz map).
+  final JourneyHifz? hifz;
 
   /// Cheers from a guardian the student has not seen yet.
   final List<JourneyCheer> cheers;
@@ -122,6 +127,19 @@ class JourneyMap {
     if (station == null || station.games.isEmpty) return null;
     return (station.games.where((g) => g.chosen).firstOrNull ?? station.games.first).id;
   }
+}
+
+/// Today's hifz review in short (`GET learning/hifz` has it in full): the pages left today, those done today, and a
+/// day's pages.
+class JourneyHifz {
+  const JourneyHifz({required this.due, required this.doneToday, required this.daily});
+
+  factory JourneyHifz.fromJson(Map<String, dynamic> json) =>
+      JourneyHifz(due: _int(json['due']), doneToday: _int(json['done_today']), daily: _int(json['daily']));
+
+  final int due;
+  final int doneToday;
+  final int daily;
 }
 
 /// The stars: the total, the rank they reach, and where they came from.

@@ -13,6 +13,7 @@ import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../domain/journey.dart';
 import '../journey_ui.dart';
 import '../widgets/course_chips.dart';
+import '../widgets/hifz_card.dart';
 import '../widgets/missions.dart';
 import '../widgets/rewards.dart';
 import '../widgets/station_sheet.dart';
@@ -90,6 +91,7 @@ class _CalmJourneyState extends State<CalmJourney> {
           place: widget.place,
           openStation: _openMission,
         ),
+      if (_m.hifz case final hifz?) HifzJourneyCard(hifz: hifz, place: widget.place),
       if (course != null && course.hasCurriculum && course.islands.isNotEmpty)
         MenuGroup(
           children: [

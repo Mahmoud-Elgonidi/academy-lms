@@ -47,7 +47,7 @@ class JourneyPage extends StatelessWidget {
             key: ValueKey(learnerId),
             create: (c) => LoadCubit<JourneyMap>(
               () => c.read<JourneyRepository>().map(learnerId: learnerId),
-              refreshOn: c.read<Live>().on({Live.practice, Live.homework, Live.lessons}),
+              refreshOn: c.read<Live>().on({Live.practice, Live.homework, Live.lessons, Live.hifz}),
               refreshAt: (m) => m.clockMoments,
             )..load(),
             child: _Journey(place: place, name: name, family: family),

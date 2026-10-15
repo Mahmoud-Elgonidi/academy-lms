@@ -3701,4 +3701,223 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeworkNoGame => 'No game for this homework right now.';
+
+  @override
+  String get hifzTitle => 'Hifz map';
+
+  @override
+  String get hifzTitleKids => 'My hifz map';
+
+  @override
+  String hifzTitleOf(String name) {
+    return '$name\'s hifz map';
+  }
+
+  @override
+  String get hifzNoText => 'The Quran\'s text is not here yet; the map shows once it is.';
+
+  @override
+  String hifzMemorized(int n, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n pages memorized of $total',
+      one: '1 page memorized of $total',
+      zero: 'No pages memorized yet of $total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hifzMemorizedKids(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'You know $n pages! ⭐',
+      one: 'You know 1 page! ⭐',
+      zero: 'No pages yet. Let\'s start!',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hifzJuz(int n) {
+    return 'Part $n';
+  }
+
+  @override
+  String hifzJuzSummary(int n, String summary) {
+    return 'Part $n: $summary';
+  }
+
+  @override
+  String hifzPageNumber(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String hifzPageOf(int page, int juz) {
+    return 'Page $page · Part $juz';
+  }
+
+  @override
+  String get hifzToday => 'Today\'s review';
+
+  @override
+  String hifzTodayProgress(int done, int daily) {
+    String _temp0 = intl.Intl.pluralLogic(daily, locale: localeName, other: '$daily pages', one: '1 page');
+    return '$done of $_temp0 done';
+  }
+
+  @override
+  String get hifzTodayDone => 'Today\'s review is done. Well done!';
+
+  @override
+  String get hifzTodayNone => 'No pages to review today.';
+
+  @override
+  String get hifzWirdDone => 'Today\'s review is done!';
+
+  @override
+  String get hifzWirdDoneKids => 'You finished your review! 🎉';
+
+  @override
+  String hifzOverdue(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n days late', one: '1 day late');
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzReveal => 'Show the page';
+
+  @override
+  String get hifzRevealHint => 'Recite the page from memory first, then show it and check.';
+
+  @override
+  String get hifzHowWent => 'How did it go?';
+
+  @override
+  String get hifzGrade1 => 'Forgot it';
+
+  @override
+  String get hifzGrade2 => 'Hard';
+
+  @override
+  String get hifzGrade3 => 'Good';
+
+  @override
+  String get hifzGrade4 => 'Easy';
+
+  @override
+  String hifzNextReview(String day) {
+    return 'Saved. This page comes back on $day.';
+  }
+
+  @override
+  String get hifzRecite => 'Recite the page';
+
+  @override
+  String get hifzReciteKids => 'Recite a page';
+
+  @override
+  String get hifzReciteHint => 'Record the page from memory, and it is checked word by word.';
+
+  @override
+  String get hifzSendRecitation => 'Send the recitation';
+
+  @override
+  String get hifzListening => 'Listening to the recitation…';
+
+  @override
+  String get hifzListeningHint => 'The result shows here by itself.';
+
+  @override
+  String get hifzSelfGrade => 'Grade the page yourself';
+
+  @override
+  String get hifzLatest => 'Last recitation';
+
+  @override
+  String get hifzWird => 'Hifz review';
+
+  @override
+  String hifzCardLeft(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n pages left today', one: '1 page left today');
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzCardDone => 'Done today';
+
+  @override
+  String get hifzCardNone => 'No pages today';
+
+  @override
+  String hifzCardKids(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n pages left to recite',
+      one: '1 page left to recite',
+      zero: 'You finished today\'s review! ⭐',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzTell => 'Say what they know';
+
+  @override
+  String get hifzClear => 'Take pages off';
+
+  @override
+  String get hifzClearHint => 'The pages you take off are new on the map again; their past reviews stay.';
+
+  @override
+  String get hifzClearConfirm => 'Take these pages off the map?';
+
+  @override
+  String get hifzParts => 'Parts';
+
+  @override
+  String get hifzSurahs => 'Surahs';
+
+  @override
+  String get hifzSurahHint => 'Type a surah\'s name or number';
+
+  @override
+  String get hifzHowWell => 'How well?';
+
+  @override
+  String hifzChosen(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n pages', one: '1 page', zero: 'No pages chosen yet');
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzSave => 'Save';
+
+  @override
+  String hifzMarked(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n pages saved', one: '1 page saved', zero: 'No pages saved');
+    return '$_temp0';
+  }
+
+  @override
+  String hifzCleared(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n pages taken off',
+      one: '1 page taken off',
+      zero: 'No pages taken off',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzRecent => 'Recent reviews';
+
+  @override
+  String get hifzRecentNone => 'No reviews in the last two weeks.';
 }

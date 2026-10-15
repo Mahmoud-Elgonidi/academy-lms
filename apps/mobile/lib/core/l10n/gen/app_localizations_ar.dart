@@ -3912,4 +3912,268 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeworkNoGame => 'مفيش لعبة للواجب ده دلوقتي.';
+
+  @override
+  String get hifzTitle => 'خريطة الحفظ';
+
+  @override
+  String get hifzTitleKids => 'خريطة حفظي';
+
+  @override
+  String hifzTitleOf(String name) {
+    return 'خريطة حفظ $name';
+  }
+
+  @override
+  String get hifzNoText => 'نص القرآن لسه مش موجود، والخريطة هتظهر أول ما يوصل.';
+
+  @override
+  String hifzMemorized(int n, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n صفحة محفوظة من $total',
+      few: '$n صفحات محفوظة من $total',
+      two: 'صفحتين محفوظين من $total',
+      one: 'صفحة واحدة محفوظة من $total',
+      zero: 'لسه مفيش صفحات محفوظة من $total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hifzMemorizedKids(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'حفظت $n صفحة! ⭐',
+      few: 'حفظت $n صفحات! ⭐',
+      two: 'حفظت صفحتين! ⭐',
+      one: 'حفظت صفحة واحدة! ⭐',
+      zero: 'لسه ماحفظتش صفحات. يلا نبدأ!',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hifzJuz(int n) {
+    return 'الجزء $n';
+  }
+
+  @override
+  String hifzJuzSummary(int n, String summary) {
+    return 'الجزء $n: $summary';
+  }
+
+  @override
+  String hifzPageNumber(int page) {
+    return 'صفحة $page';
+  }
+
+  @override
+  String hifzPageOf(int page, int juz) {
+    return 'صفحة $page · الجزء $juz';
+  }
+
+  @override
+  String get hifzToday => 'ورد النهارده';
+
+  @override
+  String hifzTodayProgress(int done, int daily) {
+    String _temp0 = intl.Intl.pluralLogic(
+      daily,
+      locale: localeName,
+      other: '$daily صفحة',
+      few: '$daily صفحات',
+      two: 'صفحتين',
+      one: 'صفحة واحدة',
+    );
+    return 'خلص $done من $_temp0';
+  }
+
+  @override
+  String get hifzTodayDone => 'ورد النهارده خلص. برافو!';
+
+  @override
+  String get hifzTodayNone => 'مفيش صفحات عليها مراجعة النهارده.';
+
+  @override
+  String get hifzWirdDone => 'ورد النهارده خلص!';
+
+  @override
+  String get hifzWirdDoneKids => 'خلّصت وردك! 🎉';
+
+  @override
+  String hifzOverdue(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'متأخرة $n يوم',
+      few: 'متأخرة $n أيام',
+      two: 'متأخرة يومين',
+      one: 'متأخرة يوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzReveal => 'اكشف الصفحة';
+
+  @override
+  String get hifzRevealHint => 'سمّع الصفحة من حفظك الأول، وبعدين اكشفها واتأكد.';
+
+  @override
+  String get hifzHowWent => 'الحفظ كان عامل إزاي؟';
+
+  @override
+  String get hifzGrade1 => 'نسيتها';
+
+  @override
+  String get hifzGrade2 => 'بصعوبة';
+
+  @override
+  String get hifzGrade3 => 'كويس';
+
+  @override
+  String get hifzGrade4 => 'سهلة';
+
+  @override
+  String hifzNextReview(String day) {
+    return 'اتسجّلت. الصفحة دي هترجعلك $day.';
+  }
+
+  @override
+  String get hifzRecite => 'سمّع الصفحة';
+
+  @override
+  String get hifzReciteKids => 'سمّع صفحة';
+
+  @override
+  String get hifzReciteHint => 'سجّل الصفحة من حفظك، وهنصحّحها كلمة كلمة.';
+
+  @override
+  String get hifzSendRecitation => 'ابعت التسميع';
+
+  @override
+  String get hifzListening => 'بنسمع التسميع…';
+
+  @override
+  String get hifzListeningHint => 'النتيجة هتظهر هنا لوحدها.';
+
+  @override
+  String get hifzSelfGrade => 'قيّم الصفحة بنفسك';
+
+  @override
+  String get hifzLatest => 'آخر تسميع';
+
+  @override
+  String get hifzWird => 'ورد الحفظ';
+
+  @override
+  String hifzCardLeft(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'فاضل $n صفحة النهارده',
+      few: 'فاضل $n صفحات النهارده',
+      two: 'فاضل صفحتين النهارده',
+      one: 'فاضل صفحة واحدة النهارده',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzCardDone => 'خلص النهارده';
+
+  @override
+  String get hifzCardNone => 'مفيش صفحات النهارده';
+
+  @override
+  String hifzCardKids(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'فاضلك $n صفحة تسمّعها',
+      few: 'فاضلك $n صفحات تسمّعها',
+      two: 'فاضلك صفحتين تسمّعهم',
+      one: 'فاضلك صفحة واحدة تسمّعها',
+      zero: 'خلّصت وردك النهارده! ⭐',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzTell => 'قول اللي حافظه';
+
+  @override
+  String get hifzClear => 'شيل صفحات';
+
+  @override
+  String get hifzClearHint => 'الصفحات اللي هتشيلها هترجع جديدة على الخريطة، ومراجعاتها القديمة هتفضل.';
+
+  @override
+  String get hifzClearConfirm => 'تشيل الصفحات دي من الخريطة؟';
+
+  @override
+  String get hifzParts => 'الأجزاء';
+
+  @override
+  String get hifzSurahs => 'السور';
+
+  @override
+  String get hifzSurahHint => 'اكتب اسم السورة أو رقمها';
+
+  @override
+  String get hifzHowWell => 'حافظها إزاي؟';
+
+  @override
+  String hifzChosen(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n صفحة',
+      few: '$n صفحات',
+      two: 'صفحتين',
+      one: 'صفحة واحدة',
+      zero: 'مااخترتش صفحات لسه',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzSave => 'سجّل';
+
+  @override
+  String hifzMarked(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'اتسجّلت $n صفحة',
+      few: 'اتسجّلت $n صفحات',
+      two: 'اتسجّلت صفحتين',
+      one: 'اتسجّلت صفحة واحدة',
+      zero: 'مااتسجّلش صفحات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hifzCleared(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'اتشالت $n صفحة',
+      few: 'اتشالت $n صفحات',
+      two: 'اتشالت صفحتين',
+      one: 'اتشالت صفحة واحدة',
+      zero: 'مفيش صفحات اتشالت',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzRecent => 'آخر المراجعات';
+
+  @override
+  String get hifzRecentNone => 'مفيش مراجعات في آخر أسبوعين.';
 }

@@ -11,6 +11,7 @@ import '../../features/classroom/data/classroom_repository.dart';
 import '../../features/dashboard/data/family_repository.dart';
 import '../../features/dashboard/data/home_loader.dart';
 import '../../features/games/data/games_repository.dart';
+import '../../features/hifz/data/hifz_repository.dart';
 import '../../features/homework/data/homework_repository.dart';
 import '../../features/journey/data/journey_repository.dart';
 import '../../features/live/data/live_repository.dart';
@@ -42,6 +43,7 @@ class Services {
       challenges = ChallengesRepository(api),
       games = GamesRepository(api),
       journey = JourneyRepository(api),
+      hifz = HifzRepository(api),
       notifications = NotificationsRepository(api),
       consent = ConsentRepository(api),
       privacy = PrivacyRepository(api),
@@ -69,6 +71,7 @@ class Services {
   final ChallengesRepository challenges;
   final GamesRepository games;
   final JourneyRepository journey;
+  final HifzRepository hifz;
   final NotificationsRepository notifications;
   final ConsentRepository consent;
   final PrivacyRepository privacy;
@@ -103,6 +106,7 @@ class Services {
       RepositoryProvider.value(value: challenges),
       RepositoryProvider.value(value: games),
       RepositoryProvider.value(value: journey),
+      RepositoryProvider.value(value: hifz),
       RepositoryProvider.value(value: notifications),
       RepositoryProvider.value(value: home),
       RepositoryProvider.value(value: live),

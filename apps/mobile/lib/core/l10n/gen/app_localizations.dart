@@ -6307,6 +6307,318 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'مفيش لعبة للواجب ده دلوقتي.'**
   String get homeworkNoGame;
+
+  /// No description provided for @hifzTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'خريطة الحفظ'**
+  String get hifzTitle;
+
+  /// No description provided for @hifzTitleKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'خريطة حفظي'**
+  String get hifzTitleKids;
+
+  /// No description provided for @hifzTitleOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'خريطة حفظ {name}'**
+  String hifzTitleOf(String name);
+
+  /// No description provided for @hifzNoText.
+  ///
+  /// In ar, this message translates to:
+  /// **'نص القرآن لسه مش موجود، والخريطة هتظهر أول ما يوصل.'**
+  String get hifzNoText;
+
+  /// No description provided for @hifzMemorized.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{لسه مفيش صفحات محفوظة من {total}} =1{صفحة واحدة محفوظة من {total}} =2{صفحتين محفوظين من {total}} few{{n} صفحات محفوظة من {total}} other{{n} صفحة محفوظة من {total}}}'**
+  String hifzMemorized(int n, int total);
+
+  /// No description provided for @hifzMemorizedKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{لسه ماحفظتش صفحات. يلا نبدأ!} =1{حفظت صفحة واحدة! ⭐} =2{حفظت صفحتين! ⭐} few{حفظت {n} صفحات! ⭐} other{حفظت {n} صفحة! ⭐}}'**
+  String hifzMemorizedKids(int n);
+
+  /// No description provided for @hifzJuz.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجزء {n}'**
+  String hifzJuz(int n);
+
+  /// No description provided for @hifzJuzSummary.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجزء {n}: {summary}'**
+  String hifzJuzSummary(int n, String summary);
+
+  /// No description provided for @hifzPageNumber.
+  ///
+  /// In ar, this message translates to:
+  /// **'صفحة {page}'**
+  String hifzPageNumber(int page);
+
+  /// No description provided for @hifzPageOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'صفحة {page} · الجزء {juz}'**
+  String hifzPageOf(int page, int juz);
+
+  /// No description provided for @hifzToday.
+  ///
+  /// In ar, this message translates to:
+  /// **'ورد النهارده'**
+  String get hifzToday;
+
+  /// No description provided for @hifzTodayProgress.
+  ///
+  /// In ar, this message translates to:
+  /// **'خلص {done} من {daily, plural, =1{صفحة واحدة} =2{صفحتين} few{{daily} صفحات} other{{daily} صفحة}}'**
+  String hifzTodayProgress(int done, int daily);
+
+  /// No description provided for @hifzTodayDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'ورد النهارده خلص. برافو!'**
+  String get hifzTodayDone;
+
+  /// No description provided for @hifzTodayNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش صفحات عليها مراجعة النهارده.'**
+  String get hifzTodayNone;
+
+  /// No description provided for @hifzWirdDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'ورد النهارده خلص!'**
+  String get hifzWirdDone;
+
+  /// No description provided for @hifzWirdDoneKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'خلّصت وردك! 🎉'**
+  String get hifzWirdDoneKids;
+
+  /// No description provided for @hifzOverdue.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{متأخرة يوم} =2{متأخرة يومين} few{متأخرة {n} أيام} other{متأخرة {n} يوم}}'**
+  String hifzOverdue(int n);
+
+  /// No description provided for @hifzReveal.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكشف الصفحة'**
+  String get hifzReveal;
+
+  /// No description provided for @hifzRevealHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'سمّع الصفحة من حفظك الأول، وبعدين اكشفها واتأكد.'**
+  String get hifzRevealHint;
+
+  /// No description provided for @hifzHowWent.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحفظ كان عامل إزاي؟'**
+  String get hifzHowWent;
+
+  /// No description provided for @hifzGrade1.
+  ///
+  /// In ar, this message translates to:
+  /// **'نسيتها'**
+  String get hifzGrade1;
+
+  /// No description provided for @hifzGrade2.
+  ///
+  /// In ar, this message translates to:
+  /// **'بصعوبة'**
+  String get hifzGrade2;
+
+  /// No description provided for @hifzGrade3.
+  ///
+  /// In ar, this message translates to:
+  /// **'كويس'**
+  String get hifzGrade3;
+
+  /// No description provided for @hifzGrade4.
+  ///
+  /// In ar, this message translates to:
+  /// **'سهلة'**
+  String get hifzGrade4;
+
+  /// No description provided for @hifzNextReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتسجّلت. الصفحة دي هترجعلك {day}.'**
+  String hifzNextReview(String day);
+
+  /// No description provided for @hifzRecite.
+  ///
+  /// In ar, this message translates to:
+  /// **'سمّع الصفحة'**
+  String get hifzRecite;
+
+  /// No description provided for @hifzReciteKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'سمّع صفحة'**
+  String get hifzReciteKids;
+
+  /// No description provided for @hifzReciteHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل الصفحة من حفظك، وهنصحّحها كلمة كلمة.'**
+  String get hifzReciteHint;
+
+  /// No description provided for @hifzSendRecitation.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت التسميع'**
+  String get hifzSendRecitation;
+
+  /// No description provided for @hifzListening.
+  ///
+  /// In ar, this message translates to:
+  /// **'بنسمع التسميع…'**
+  String get hifzListening;
+
+  /// No description provided for @hifzListeningHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'النتيجة هتظهر هنا لوحدها.'**
+  String get hifzListeningHint;
+
+  /// No description provided for @hifzSelfGrade.
+  ///
+  /// In ar, this message translates to:
+  /// **'قيّم الصفحة بنفسك'**
+  String get hifzSelfGrade;
+
+  /// No description provided for @hifzLatest.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر تسميع'**
+  String get hifzLatest;
+
+  /// No description provided for @hifzWird.
+  ///
+  /// In ar, this message translates to:
+  /// **'ورد الحفظ'**
+  String get hifzWird;
+
+  /// No description provided for @hifzCardLeft.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{فاضل صفحة واحدة النهارده} =2{فاضل صفحتين النهارده} few{فاضل {n} صفحات النهارده} other{فاضل {n} صفحة النهارده}}'**
+  String hifzCardLeft(int n);
+
+  /// No description provided for @hifzCardDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'خلص النهارده'**
+  String get hifzCardDone;
+
+  /// No description provided for @hifzCardNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش صفحات النهارده'**
+  String get hifzCardNone;
+
+  /// No description provided for @hifzCardKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{خلّصت وردك النهارده! ⭐} =1{فاضلك صفحة واحدة تسمّعها} =2{فاضلك صفحتين تسمّعهم} few{فاضلك {n} صفحات تسمّعها} other{فاضلك {n} صفحة تسمّعها}}'**
+  String hifzCardKids(int n);
+
+  /// No description provided for @hifzTell.
+  ///
+  /// In ar, this message translates to:
+  /// **'قول اللي حافظه'**
+  String get hifzTell;
+
+  /// No description provided for @hifzClear.
+  ///
+  /// In ar, this message translates to:
+  /// **'شيل صفحات'**
+  String get hifzClear;
+
+  /// No description provided for @hifzClearHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصفحات اللي هتشيلها هترجع جديدة على الخريطة، ومراجعاتها القديمة هتفضل.'**
+  String get hifzClearHint;
+
+  /// No description provided for @hifzClearConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'تشيل الصفحات دي من الخريطة؟'**
+  String get hifzClearConfirm;
+
+  /// No description provided for @hifzParts.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأجزاء'**
+  String get hifzParts;
+
+  /// No description provided for @hifzSurahs.
+  ///
+  /// In ar, this message translates to:
+  /// **'السور'**
+  String get hifzSurahs;
+
+  /// No description provided for @hifzSurahHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب اسم السورة أو رقمها'**
+  String get hifzSurahHint;
+
+  /// No description provided for @hifzHowWell.
+  ///
+  /// In ar, this message translates to:
+  /// **'حافظها إزاي؟'**
+  String get hifzHowWell;
+
+  /// No description provided for @hifzChosen.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مااخترتش صفحات لسه} =1{صفحة واحدة} =2{صفحتين} few{{n} صفحات} other{{n} صفحة}}'**
+  String hifzChosen(int n);
+
+  /// No description provided for @hifzSave.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل'**
+  String get hifzSave;
+
+  /// No description provided for @hifzMarked.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مااتسجّلش صفحات} =1{اتسجّلت صفحة واحدة} =2{اتسجّلت صفحتين} few{اتسجّلت {n} صفحات} other{اتسجّلت {n} صفحة}}'**
+  String hifzMarked(int n);
+
+  /// No description provided for @hifzCleared.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مفيش صفحات اتشالت} =1{اتشالت صفحة واحدة} =2{اتشالت صفحتين} few{اتشالت {n} صفحات} other{اتشالت {n} صفحة}}'**
+  String hifzCleared(int n);
+
+  /// No description provided for @hifzRecent.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر المراجعات'**
+  String get hifzRecent;
+
+  /// No description provided for @hifzRecentNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش مراجعات في آخر أسبوعين.'**
+  String get hifzRecentNone;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

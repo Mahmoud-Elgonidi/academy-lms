@@ -14,6 +14,7 @@ import '../../../games/presentation/guardian_cards.dart';
 import '../../domain/journey.dart';
 import '../journey_ui.dart';
 import '../widgets/course_chips.dart';
+import '../widgets/hifz_card.dart';
 import '../widgets/missions.dart';
 import '../widgets/rewards.dart';
 import '../widgets/station_sheet.dart';
@@ -79,6 +80,7 @@ class _GuardianJourneyState extends State<GuardianJourney> {
         ),
       SectionHeader(l.journeyMissionsOf(name)),
       MissionList(map: _m, place: widget.place, openStation: _openMission),
+      if (_m.hifz case final hifz?) HifzJourneyCard(hifz: hifz, place: widget.place),
       if (_m.rewards && _m.chest != null) JourneyChestCard(map: _m, place: widget.place, name: name),
       LmsCard(
         child: CheerBar(learnerId: _m.learnerId, left: _m.cheersLeft, name: name, onSent: _reload),
