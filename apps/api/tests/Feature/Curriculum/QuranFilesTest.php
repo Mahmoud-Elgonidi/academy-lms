@@ -58,8 +58,24 @@ function tanzilShaped(?callable $line = null): array
         }
     }
     $text .= "\n#  A file in the shape of Tanzil's text, with made-up words: not the Quran.\n#  Tanzil Quran Text (Simple, Version Test)\n";
+    // Where each page and part begins, spread evenly through the verses (the real ones are the Madinah mushaf's).
+    $place = function (string $tag, string $items, int $count) use ($counts): string {
+        $out = "<{$tag}>\n";
+        foreach (range(1, $count) as $i) {
+            $at = intdiv(($i - 1) * 6236, $count) + 1;
+            foreach ($counts as $surah => $verses) {
+                if ($at <= $verses) {
+                    break;
+                }
+                $at -= $verses;
+            }
+            $out .= "<{$items} index=\"{$i}\" sura=\"{$surah}\" aya=\"{$at}\" />\n";
+        }
 
-    return [$text, $xml."</suras>\n</quran>\n"];
+        return $out."</{$tag}>\n";
+    };
+
+    return [$text, $xml."</suras>\n".$place('juzs', 'juz', 30).$place('pages', 'page', 604)."</quran>\n"];
 }
 
 function fakeTanzil(string $text, string $data, int $status = 200): void
@@ -98,6 +114,16 @@ it('fetches the text, keeps it with its checksums, and reads it from the server 
     $passage = $quran->passage(TextSource::quran(7, 2, 2));
     expect($passage->words)->toBe(['كَلِمَةٌ ۛ', 'أُخْرَى', 'هُنَا'])
         ->and($passage->quote(1, 2))->toBe('كَلِمَةٌ ۛ أُخْرَى');
+
+    // The mushaf's pages: where each begins, the part it is in, and a page that ends one surah and begins the next.
+    $page = $quran->page(6);
+    expect($quran->pageCount())->toBe(604)
+        ->and($quran->pages()[0])->toBe(['page' => 1, 'juz' => 1])->and($quran->pages()[603]['juz'])->toBe(30)
+        ->and($quran->pagesOf(1, 1, 11))->toBe([1, 2])->and($quran->pagesOf(1, 1, 99))->toBe([])
+        ->and(array_map(fn ($v) => $v['surah'].':'.$v['verse'], $page['verses']))->toBe(['1:52', '1:53', '1:54', '1:55', '2:1', '2:2', '2:3', '2:4', '2:5', '2:6'])
+        ->and(array_column($page['surahs'], 'number'))->toBe([1, 2])
+        ->and($page['verses'][1]['first'])->toBe($page['verses'][0]['last'] + 1)
+        ->and($quran->page(605))->toBeNull();
 });
 
 it('keeps nothing when a check fails, and the copy in use stays', function (callable $make, string $why) {
@@ -118,6 +144,8 @@ it('keeps nothing when a check fails, and the copy in use stays', function (call
     'the end cut off' => [fn ($t, $d) => [explode('114|10|', $t)[0], $d], 'stops before the last verse'],
     'metadata of 113 surahs' => [fn ($t, $d) => [$t, preg_replace('/<sura index="114"[^>]*\/>\n/', '', $d)], 'must name 114 surahs'],
     'metadata that is not XML' => [fn ($t, $d) => [$t, '<html>a page</html'], 'must name 114 surahs'],
+    'a page missing' => [fn ($t, $d) => [$t, preg_replace('/<page index="300"[^>]*\/>\n/', '', $d)], '604 pages and 30 parts'],
+    'a page where the one before begins' => [fn ($t, $d) => [$t, preg_replace('/<page index="2" sura="\d+" aya="\d+"/', '<page index="2" sura="1" aya="1"', $d)], '604 pages and 30 parts'],
     'no notice' => [fn ($t, $d) => [str_replace('Tanzil Quran Text (Simple, Version Test)', 'Some text', $t), $d], "Tanzil's notice"],
     'a line not in Arabic' => [fn ($t, $d) => [str_replace('9|9|كَلِمَةٌ تَجْرِيبِيَّةٌ رَقْم 9', '9|9|some words', $t), $d], 'Line '],
     'rub-el-hizb signs' => [fn ($t, $d) => [str_replace('9|9|كَلِمَةٌ', '9|9|۞ كَلِمَةٌ', $t), $d], 'rub-el-hizb or sajdah'],

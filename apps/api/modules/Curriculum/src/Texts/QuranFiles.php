@@ -25,6 +25,11 @@ final class QuranFiles implements QuranSource
 
     public const VERSES = 6236;
 
+    /** The Madinah mushaf's pages and parts, each placed by where it begins. */
+    public const PAGES = 604;
+
+    public const JUZS = 30;
+
     public const MANIFEST = 'manifest.json';
 
     /** No file of these is near this size; a bigger answer is not theirs. */
@@ -91,11 +96,17 @@ final class QuranFiles implements QuranSource
         $fail = fn (string $why, array $with = []) => throw new QuranFetchFailed(__("curriculum::curriculum.quran.errors.{$why}", $with));
 
         $counts = [];
+        $layout = ['pages' => [], 'juzs' => []];
         $previous = libxml_use_internal_errors(true);
         try {
             $xml = new SimpleXMLElement($data, LIBXML_NONET);
             foreach ($xml->suras->sura ?? [] as $sura) {
                 $counts[(int) $sura['index']] = (int) $sura['ayas'];
+            }
+            foreach (['pages' => $xml->pages->page ?? [], 'juzs' => $xml->juzs->juz ?? []] as $kind => $items) {
+                foreach ($items as $item) {
+                    $layout[$kind][(int) $item['index']] = [(int) $item['sura'], (int) $item['aya']];
+                }
             }
         } catch (Throwable) {
             $fail('data');
@@ -105,6 +116,21 @@ final class QuranFiles implements QuranSource
         }
         if (array_keys($counts) !== range(1, self::SURAHS) || array_sum($counts) !== self::VERSES) {
             $fail('data');
+        }
+        // Every page and part begins at a verse there is, each after the one before, the first at the very start.
+        foreach (['pages' => self::PAGES, 'juzs' => self::JUZS] as $kind => $count) {
+            ksort($layout[$kind]);
+            $last = 0;
+            foreach (array_values($layout[$kind]) as $i => [$surah, $verse]) {
+                $at = array_sum(array_slice($counts, 0, $surah - 1)) + $verse;
+                if ($verse < 1 || $verse > ($counts[$surah] ?? 0) || $at <= $last || ($i === 0 && $at !== 1)) {
+                    $fail('layout');
+                }
+                $last = $at;
+            }
+            if (array_keys($layout[$kind]) !== range(1, $count)) {
+                $fail('layout');
+            }
         }
 
         $notice = null;

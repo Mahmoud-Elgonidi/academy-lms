@@ -10,7 +10,8 @@ use SimpleXMLElement;
 /**
  * The Quran as the platform keeps it: Tanzil's simple text, verbatim, with
  * its notice (quran-simple.txt, "surah|verse|text" lines), and its metadata
- * (quran-data.xml: each surah's names and verses), fetched to the server's
+ * (quran-data.xml: each surah's names and verses, and where each of the
+ * Madinah mushaf's 604 pages and 30 parts begins), fetched to the server's
  * storage and checked there (QuranFiles), else shipped in resources/quran.
  * Never typed, never generated, never changed: every word a screen or a
  * helper shows of the Quran comes from here. Until the files are in place,
@@ -37,6 +38,9 @@ final class QuranText
 
     /** @var ?array<string, true> each run of three words, as compared */
     private ?array $runs = null;
+
+    /** @var ?array{pages: list<int>, juzs: list<int>, offsets: array<int, int>, total: int} where pages and parts begin, as verses counted through the Quran from 1 */
+    private ?array $layout = null;
 
     /** @param  ?string  $fallback  read when $dir has no copy (the code's own, under resources) */
     public function __construct(private readonly string $dir, private readonly ?string $fallback = null) {}
@@ -141,6 +145,79 @@ final class QuranText
         return $words;
     }
 
+    /** How many pages the mushaf has (604), 0 without the metadata. */
+    public function pageCount(): int
+    {
+        return count($this->layout()['pages']);
+    }
+
+    /**
+     * Every page with its part (the part the page begins in), in order.
+     *
+     * @return list<array{page: int, juz: int}>
+     */
+    public function pages(): array
+    {
+        $layout = $this->layout();
+        $pages = [];
+        foreach ($layout['pages'] as $i => $start) {
+            $pages[] = ['page' => $i + 1, 'juz' => self::at($layout['juzs'], $start)];
+        }
+
+        return $pages;
+    }
+
+    /**
+     * The pages that hold any of the verses $from to $to of a surah, in order; empty when they are not there.
+     *
+     * @return list<int>
+     */
+    public function pagesOf(int $surah, int $from, int $to): array
+    {
+        $layout = $this->layout();
+        $count = $this->surah($surah)['verses'] ?? 0;
+        if ($layout['pages'] === [] || $from < 1 || $to < $from || $to > $count) {
+            return [];
+        }
+        $first = self::at($layout['pages'], $layout['offsets'][$surah] + $from);
+        $last = self::at($layout['pages'], $layout['offsets'][$surah] + $to);
+
+        return range($first, $last);
+    }
+
+    /**
+     * A page's verses as kept (perhaps of two surahs), its words counted through the page from 1, and the surahs on it.
+     *
+     * @return ?array{page: int, juz: int, verses: list<array{surah: int, verse: int, text: string, first: int, last: int}>, words: list<string>, surahs: list<array{number: int, name_ar: string, name_en: string}>}
+     */
+    public function page(int $page): ?array
+    {
+        $layout = $this->layout();
+        if ($page < 1 || $page > count($layout['pages'])) {
+            return null;
+        }
+        $from = $layout['pages'][$page - 1];
+        $to = ($layout['pages'][$page] ?? $layout['total'] + 1) - 1;
+        $verses = [];
+        $words = [];
+        $surahs = [];
+        foreach ($this->surahs() as $surah) {
+            $offset = $layout['offsets'][$surah['number']];
+            for ($v = max(1, $from - $offset); $v <= $surah['verses'] && $offset + $v <= $to; $v++) {
+                $text = $this->load()[$surah['number']][$v] ?? null;
+                if ($text === null) {
+                    return null;
+                }
+                $own = self::words($text);
+                $verses[] = ['surah' => $surah['number'], 'verse' => $v, 'text' => $text, 'first' => count($words) + 1, 'last' => count($words) + count($own)];
+                array_push($words, ...$own);
+                $surahs[$surah['number']] = ['number' => $surah['number'], 'name_ar' => $surah['name_ar'], 'name_en' => $surah['name_en']];
+            }
+        }
+
+        return $verses === [] ? null : ['page' => $page, 'juz' => self::at($layout['juzs'], $from), 'verses' => $verses, 'words' => $words, 'surahs' => array_values($surahs)];
+    }
+
     /** Tanzil's notice, kept with every passage shown (its terms ask for it). */
     public function notice(): string
     {
@@ -168,6 +245,48 @@ final class QuranText
         }
 
         return false;
+    }
+
+    /**
+     * Where pages and parts begin, as verses counted through the Quran from 1 (empty without the metadata).
+     *
+     * @return array{pages: list<int>, juzs: list<int>, offsets: array<int, int>, total: int}
+     */
+    private function layout(): array
+    {
+        if ($this->layout !== null || ($dir = $this->dir()) === null) {
+            return $this->layout ?? ['pages' => [], 'juzs' => [], 'offsets' => [], 'total' => 0];
+        }
+        $offsets = [];
+        $total = 0;
+        foreach ($this->surahs() as $surah) {
+            $offsets[$surah['number']] = $total;
+            $total += $surah['verses'];
+        }
+        $xml = new SimpleXMLElement((string) file_get_contents($dir.'/'.self::DATA_FILE), LIBXML_NONET);
+        $starts = function ($items) use ($offsets): array {
+            $list = [];
+            foreach ($items ?? [] as $item) {
+                $list[(int) $item['index']] = ($offsets[(int) $item['sura']] ?? 0) + (int) $item['aya'];
+            }
+            ksort($list);
+
+            return array_values($list);
+        };
+
+        return $this->layout = ['pages' => $starts($xml->pages->page ?? null), 'juzs' => $starts($xml->juzs->juz ?? null), 'offsets' => $offsets, 'total' => $total];
+    }
+
+    /** Which of the runs beginning at $starts (in order) the verse $at falls in, from 1. */
+    private static function at(array $starts, int $at): int
+    {
+        [$low, $high] = [0, count($starts) - 1];
+        while ($low < $high) {
+            $mid = intdiv($low + $high + 1, 2);
+            $starts[$mid] <= $at ? $low = $mid : $high = $mid - 1;
+        }
+
+        return $starts === [] ? 0 : $low + 1;
     }
 
     /** @return array<string, true> */

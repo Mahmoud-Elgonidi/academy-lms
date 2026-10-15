@@ -7,6 +7,7 @@ use Modules\Curriculum\Contracts\DTOs\LessonResource;
 use Modules\Curriculum\Contracts\DTOs\Passage;
 use Modules\Curriculum\Contracts\DTOs\PracticeItem;
 use Modules\Curriculum\Contracts\DTOs\ProgramOption;
+use Modules\Curriculum\Contracts\DTOs\QuranPage;
 use Modules\Curriculum\Contracts\DTOs\ResourceFile;
 use Modules\Curriculum\Contracts\DTOs\TextSource;
 
@@ -57,4 +58,21 @@ interface CurriculumApi
      * @return list<array{number: int, name_ar: string, name_en: string, verses: int}>
      */
     public function surahs(): array;
+
+    /**
+     * The mushaf's pages (604) and the part each begins in, in order; empty until the platform's copy is in place.
+     *
+     * @return list<array{page: int, juz: int}>
+     */
+    public function quranPages(): array;
+
+    /**
+     * The pages a passage of the Quran is on, in order; empty for other texts or verses not there.
+     *
+     * @return list<int>
+     */
+    public function quranPagesOf(TextSource $source): array;
+
+    /** A page of the mushaf with its text; null when it is not there. */
+    public function quranPage(int $page): ?QuranPage;
 }
