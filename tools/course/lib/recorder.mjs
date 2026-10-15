@@ -359,6 +359,8 @@ function stepsApi(page, series, rec, voice, others = []) {
     tab: (name) => page.getByRole('tab', { name }).first(),
     field: (hint) => page.locator(`flt-semantics input[aria-label*="${hint}"], flt-semantics textarea[aria-label*="${hint}"]`).first(),
     semantics: () => appSemantics(page),
+    /** The app's smallest part that says this. */
+    says: (text) => page.locator('flt-semantics').filter({ hasText: text }).last(),
     finishCaption,
   };
   return s;
