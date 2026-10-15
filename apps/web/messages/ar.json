@@ -539,7 +539,20 @@
     "voiceKept": "التسجيل بيتمسح أول ما يتسمع، وعمره ما بيتحفظ.",
     "suggested": "مقترح",
     "checkThis": "راجعه",
-    "listJoin": "، "
+    "listJoin": "، ",
+    "reciteTitle": "تصحيح التسميع",
+    "reciteToggle": "تصحيح التسميع آلي",
+    "reciteHint": "لما الطالب يسلّم تسجيل، بنعلّم لك على الكلمات اللي ناقصة أو غلط. ليك إنت بس، والأسرة مابتشوفوش.",
+    "reciteSuggestion": "من نص الدرس: {title}",
+    "reciteSurah": "السورة",
+    "reciteFrom": "من آية",
+    "reciteTo": "لحد آية",
+    "reciteWhat": "التسميع: {title}",
+    "reciteMissing": "ناقصة",
+    "reciteWrong": "غلط",
+    "reciteExtra": "زيادة",
+    "reciteSaid": "اتقال: {word}",
+    "reciteHeard": "اللي اتسمع"
   },
   "errors": {
     "title": "حصلت مشكلة",

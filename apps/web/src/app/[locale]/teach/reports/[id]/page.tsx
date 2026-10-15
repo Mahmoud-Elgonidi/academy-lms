@@ -4,6 +4,7 @@ import { Icon } from '@/components/icons';
 import { Badge, Progress } from '@/components/ui';
 import { ReportEditor } from '@/components/teach/report-editor';
 import { get } from '@/lib/api/server';
+import type { Surah } from '@/lib/teach/recitation';
 import type { ReportForm } from '@/lib/teach/types';
 
 /** One report: today's plan to fill (or the absence note), the family's words, and homework. */
@@ -12,6 +13,8 @@ export default async function Report({ params }: { params: Promise<{ id: string 
   const [t, nav, report] = await Promise.all([getTranslations('teach'), getTranslations('nav'), get<{ data: ReportForm }>('/v1/teacher/reports/{report}', { params: { report: id } })]);
   const form = report.data;
   const roadmap = form.roadmap;
+  // The surahs to choose what homework asks to recite, when the form may ask it.
+  const surahs = form.assist?.recitation_check || form.homework?.expected ? (await get<{ data: Surah[] }>('/v1/teacher/texts/quran')).data : [];
 
   return (
     <div>
@@ -36,7 +39,7 @@ export default async function Report({ params }: { params: Promise<{ id: string 
           </div>
         ) : null}
       </header>
-      <ReportEditor form={form} />
+      <ReportEditor form={form} surahs={surahs} />
     </div>
   );
 }

@@ -1120,6 +1120,8 @@ export interface paths {
          * A report to write or correct
          * @description The report with today's plan, the lessons to choose from, the homework set from it, the roadmap, and the
          *     subject's own questions (`template`, null when it has none); send their answers as `answers` by key.
+         *     Homework handed in by voice may say what to recite (`homework.expected`: surah, from, to) when
+         *     `assist.recitation_check`; `expected_suggestion` is the passage of the report's lessons' text.
          */
         get: operations["teacher.reports.show"];
         /**
@@ -1184,6 +1186,27 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["teacher.homework.review"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/teacher/texts/quran": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The Quran's surahs
+         * @description To choose what homework asks to recite: each surah's number, names and verses, and the attribution its text
+         *     asks to be shown with (empty until the platform has its copy).
+         */
+        get: operations["teacher.texts.quran"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -6156,7 +6179,30 @@ export interface operations {
                                     timezone: null;
                                     label: string;
                                 } | null;
+                                /** @description The recording's check against what it asks to recite (null: none). */
+                                check: {
+                                    /** @description pending, ready, failed */
+                                    status: string;
+                                    status_label: string;
+                                    /** @description Why it could not be checked, in the reader's words. */
+                                    failure: string | null;
+                                    summary: string | null;
+                                    summary_label: string | null;
+                                    /** @description Each verse's words: state ok, missing or wrong, and what was said instead. */
+                                    verses: string | string[];
+                                    /** @description Words said that are not in the text, after the word they followed (counted from 1 through the passage). */
+                                    extra: string | string[];
+                                    heard: string | null;
+                                    /** @constant */
+                                    note: "A help while marking, not a mark: the words are heard automatically and can be wrong, so listen to the recording yourself.";
+                                } | null;
                             }[];
+                            expected: {
+                                surah: number;
+                                from: number;
+                                to: number;
+                                title: string;
+                            } | null;
                         }[];
                     };
                 };
@@ -6260,7 +6306,30 @@ export interface operations {
                                     timezone: null;
                                     label: string;
                                 } | null;
+                                /** @description The recording's check against what it asks to recite (null: none). */
+                                check: {
+                                    /** @description pending, ready, failed */
+                                    status: string;
+                                    status_label: string;
+                                    /** @description Why it could not be checked, in the reader's words. */
+                                    failure: string | null;
+                                    summary: string | null;
+                                    summary_label: string | null;
+                                    /** @description Each verse's words: state ok, missing or wrong, and what was said instead. */
+                                    verses: string | string[];
+                                    /** @description Words said that are not in the text, after the word they followed (counted from 1 through the passage). */
+                                    extra: string | string[];
+                                    heard: string | null;
+                                    /** @constant */
+                                    note: "A help while marking, not a mark: the words are heard automatically and can be wrong, so listen to the recording yourself.";
+                                } | null;
                             }[];
+                            expected: {
+                                surah: number;
+                                from: number;
+                                to: number;
+                                title: string;
+                            } | null;
                         };
                     };
                 };
@@ -6268,6 +6337,51 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
             404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "teacher.texts.quran": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            number: number;
+                            name_ar: string;
+                            name_en: string;
+                            verses: number;
+                        }[];
+                        attribution: string | null;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
         };
     };
     "learning.students": {

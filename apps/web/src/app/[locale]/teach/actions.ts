@@ -27,7 +27,7 @@ export type ReportPayload = {
   notes_internal?: string | null;
   absence_note?: string | null;
   items?: { node_id: string; outcome: string; score: number | null; note: string | null }[];
-  homework?: { title: string; instructions: string | null; accepts: string; due_days: number } | null;
+  homework?: { title: string; instructions: string | null; accepts: string; due_days: number; expected?: { surah: number; from: number; to: number } | null } | null;
   /** Answers to the subject's questions, by key. */
   answers?: Record<string, number | string | boolean>;
 };

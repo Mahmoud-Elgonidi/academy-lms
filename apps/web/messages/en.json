@@ -539,7 +539,20 @@
     "voiceKept": "The recording is deleted as soon as it is heard; it is never kept.",
     "suggested": "Suggested",
     "checkThis": "Check this",
-    "listJoin": ", "
+    "listJoin": ", ",
+    "reciteTitle": "Recitation check",
+    "reciteToggle": "Check the recitation automatically",
+    "reciteHint": "When the student hands in a recording, the words missed or said wrong are marked for you. For you alone; the family never sees it.",
+    "reciteSuggestion": "From the lesson's text: {title}",
+    "reciteSurah": "Surah",
+    "reciteFrom": "From verse",
+    "reciteTo": "To verse",
+    "reciteWhat": "To recite: {title}",
+    "reciteMissing": "Missed",
+    "reciteWrong": "Wrong",
+    "reciteExtra": "Extra",
+    "reciteSaid": "Said: {word}",
+    "reciteHeard": "What was heard"
   },
   "errors": {
     "title": "Something went wrong",
