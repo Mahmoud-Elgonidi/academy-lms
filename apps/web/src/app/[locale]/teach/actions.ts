@@ -3,6 +3,7 @@
 import { refresh } from 'next/cache';
 import { send, type Outcome } from '@/lib/api/server';
 import type { ShiftBlock } from '@/lib/teach/types';
+import type { VoiceDraft } from '@/lib/teach/voice-draft';
 
 /**
  * The teacher's writes. Each calls the same API endpoint (and so the same
@@ -34,6 +35,24 @@ export type ReportPayload = {
 /** Sends (or corrects) a lesson report or absence note. */
 export async function submitReport(id: string, payload: ReportPayload): Promise<Result> {
   return result(await send('put', '/v1/teacher/reports/{report}', { params: { report: id }, body: payload }));
+}
+
+export type DraftResult = { ok: true; draft: VoiceDraft } | { ok: false; message?: string };
+
+/**
+ * A draft of the open report from the teacher's voice note (`audio`) and the
+ * form as it stands (`current`, JSON as PUT takes it). Nothing is saved, so
+ * nothing refreshes: the form takes the draft in and the teacher sends it.
+ */
+export async function draftReport(id: string, form: FormData): Promise<DraftResult> {
+  const audio = form.get('audio');
+  if (!(audio instanceof File) || audio.size === 0) return { ok: false };
+  const sent = new FormData();
+  sent.set('audio', audio, audio.name || 'note.webm');
+  const current = form.get('current');
+  if (typeof current === 'string') sent.set('current', current);
+  const outcome = await send<{ data: VoiceDraft }>('post', '/v1/teacher/reports/{report}/draft', { params: { report: id }, form: sent });
+  return outcome.ok ? { ok: true, draft: outcome.data.data } : { ok: false, message: outcome.problem.title || undefined };
 }
 
 /** Marks handed-in homework: a grade from 1 to 5 (or none) and words for the student. */

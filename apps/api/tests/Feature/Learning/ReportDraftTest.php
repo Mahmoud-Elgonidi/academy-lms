@@ -252,6 +252,16 @@ it('drafts the teacher area\'s form from a note recorded on the page', function 
     // Nothing saved until the teacher sends it.
     expect($this->report->fresh()->status)->toBe('due');
 
+    // A lesson row the note did not speak of stays on the form as the teacher left it.
+    fakeWriter(['lessons' => [['key' => 'L1', 'outcome' => 'practiced']], 'unsure' => []]);
+    $rows = $page->get('data.items');
+    $rows['added'] = ['node_id' => $this->lessons[4], 'reason' => null, 'outcome' => null, 'score' => null, 'note' => null];
+    $page->set('data.items', $rows)->set('voiceNote', voiceNote())->call('draftFromVoice')->assertHasNoErrors();
+    $after = collect($page->get('data.items'))->keyBy('node_id');
+    expect($after)->toHaveCount(count($rows))
+        ->and($after[$this->lessons[0]]['outcome'])->toBe('mastered')
+        ->and($after[$this->lessons[4]]['outcome'])->toBeNull();
+
     // Off for the academy: no recorder, and the call is refused.
     app(SaveAiSettings::class)->handle(['report_draft' => false], $this->admin->id);
     Livewire::test(WriteReport::class, ['report' => $this->report->id])->assertDontSee('Draft from a voice note')

@@ -163,6 +163,8 @@ export type ReportForm = ReportSummary & {
   /** The subject's own questions; null when it has none. */
   template: ReportTemplate | null;
   answers: ReportAnswer[];
+  /** Helpers the academy turned on for this report: a draft from a voice note (POST teacher/reports/{report}/draft). */
+  assist?: { voice_draft: boolean };
 };
 
 export type Student = {

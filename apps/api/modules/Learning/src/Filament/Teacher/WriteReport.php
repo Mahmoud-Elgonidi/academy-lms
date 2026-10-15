@@ -264,9 +264,15 @@ final class WriteReport extends Page
             $this->voiceNote = null;
         }
 
-        // The draft in the form: lessons keep their row (and the plan's reason), homework its practice choice.
-        $reasons = collect($state['items'] ?? [])->mapWithKeys(fn (array $i) => [(string) ($i['node_id'] ?? '') => $i['reason'] ?? null]);
+        // The draft in the form: lessons keep their row (and the plan's reason; one it did not speak of stays as it
+        // is), a lesson the teacher spoke of comes in after them, and homework keeps its practice choice.
         $report = $draft['report'];
+        $fields = array_flip(['node_id', 'outcome', 'score', 'note']);
+        $drafted = collect($report['items'] ?? [])->keyBy('node_id');
+        $rows = collect($state['items'] ?? [])->map(fn (array $i) => $drafted->has($i['node_id'] ?? '')
+            ? array_merge($i, array_intersect_key($drafted[$i['node_id']], $fields))
+            : $i);
+        $rows = $rows->concat($drafted->except($rows->pluck('node_id')->all())->map(fn (array $i) => ['reason' => null] + array_intersect_key($i, $fields)))->values()->all();
         $this->form->fill(array_merge($state, array_filter([
             'engagement' => $report['engagement'] ?? null,
             'overall' => $report['overall'] ?? null,
@@ -274,9 +280,7 @@ final class WriteReport extends Page
             'notes_internal' => $report['notes_internal'] ?? null,
             'absence_note' => $report['absence_note'] ?? null,
             'answers' => $report['answers'] ?? null,
-        ], fn ($v) => $v !== null), array_key_exists('items', $report) ? [
-            'items' => array_map(fn (array $i) => ['reason' => $reasons[$i['node_id']] ?? null] + array_intersect_key($i, array_flip(['node_id', 'outcome', 'score', 'note'])), $report['items']),
-        ] : [], is_array($report['homework'] ?? null) ? [
+        ], fn ($v) => $v !== null), array_key_exists('items', $report) ? ['items' => $rows] : [], is_array($report['homework'] ?? null) ? [
             'homework' => array_merge($state['homework'] ?? [], $report['homework'], ['practice' => (bool) ($state['homework']['practice'] ?? false)]),
         ] : []));
 
