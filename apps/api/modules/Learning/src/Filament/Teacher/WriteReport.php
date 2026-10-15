@@ -19,7 +19,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 use Modules\Curriculum\Contracts\CurriculumApi;
+use Modules\Learning\Actions\Assist\DraftReportFromVoice;
+use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Actions\SubmitSessionReport;
 use Modules\Learning\Domain\MasteryRule;
 use Modules\Learning\Models\Homework;
@@ -29,19 +33,28 @@ use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\ReportFormQuery;
 use Modules\Learning\Queries\RoadmapQuery;
 use Modules\Learning\Templates\TemplateField;
+use Modules\SharedKernel\Ai\AcademyAi;
+use Modules\SharedKernel\Ai\AiFailed;
+use Modules\SharedKernel\Ai\AiFeature;
+use Modules\SharedKernel\Ai\AudioClip;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Files\CleanFile;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
  * The report form, filled in with today's plan (docs/architecture/02,
  * section 6, step 2): what was covered with an outcome and a score per
  * lesson, two ratings, notes, the subject's own questions (its report
- * template), and optional homework. Same Action as the API.
+ * template), and optional homework. Same Action as the API. When the
+ * academy turned the helper on, a voice note drafts what is still empty
+ * (DraftReportFromVoice): the teacher checks it, then sends as usual.
  *
  * @property-read Schema $form
  */
 final class WriteReport extends Page
 {
+    use WithFileUploads;
+
     protected string $view = 'learning::filament.teacher.write-report';
 
     protected static ?string $slug = 'reports/{report}';
@@ -51,6 +64,12 @@ final class WriteReport extends Page
     public SessionReport $sessionReport;
 
     public ?array $data = [];
+
+    /** The teacher's voice note while it is heard (deleted as soon as it is). */
+    public ?TemporaryUploadedFile $voiceNote = null;
+
+    /** @var ?array{heard: string, filled: list<string>, unsure: list<string>, left: list<string>} what the last draft did */
+    public ?array $voiceDraft = null;
 
     private ?ReportTemplate $template = null;
 
@@ -213,6 +232,80 @@ final class WriteReport extends Page
         }
 
         return $this->template;
+    }
+
+    /** Whether this report can be drafted from a voice note (the academy's helper is on, the report not locked). */
+    public function voiceOn(): bool
+    {
+        return $this->sessionReport->status !== 'reviewed' && app(AcademyAi::class)->on(AiFeature::ReportDraft);
+    }
+
+    /** Fills what the form leaves empty from the voice note just uploaded; saves nothing. */
+    public function draftFromVoice(): void
+    {
+        abort_unless($this->sessionReport->teacher_id === auth()->id() && $this->voiceOn(), 403);
+        $this->validate(['voiceNote' => ['required', 'file', 'max:6144', 'mimetypes:'.implode(',', SubmitHomework::AUDIO), new CleanFile]]);
+        $state = $this->data ?? [];
+        $current = $state;
+        $current['items'] = array_values(array_map(fn (array $i) => array_intersect_key($i, array_flip(['node_id', 'outcome', 'score', 'note'])), $state['items'] ?? []));
+
+        try {
+            $draft = app(DraftReportFromVoice::class)->handle($this->sessionReport, (string) auth()->id(), AudioClip::fromUpload($this->voiceNote), $current);
+        } catch (AiFailed $e) {
+            Notification::make()->danger()->title(__('learning::assist.voice.title'))->body($e->sayable())->send();
+
+            return;
+        } catch (ValidationException $e) {
+            Notification::make()->danger()->title(__('learning::assist.voice.title'))->body(collect($e->errors())->flatten()->first())->send();
+
+            return;
+        } finally {
+            $this->voiceNote?->delete();
+            $this->voiceNote = null;
+        }
+
+        // The draft in the form: lessons keep their row (and the plan's reason), homework its practice choice.
+        $reasons = collect($state['items'] ?? [])->mapWithKeys(fn (array $i) => [(string) ($i['node_id'] ?? '') => $i['reason'] ?? null]);
+        $report = $draft['report'];
+        $this->form->fill(array_merge($state, array_filter([
+            'engagement' => $report['engagement'] ?? null,
+            'overall' => $report['overall'] ?? null,
+            'notes_for_student' => $report['notes_for_student'] ?? null,
+            'notes_internal' => $report['notes_internal'] ?? null,
+            'absence_note' => $report['absence_note'] ?? null,
+            'answers' => $report['answers'] ?? null,
+        ], fn ($v) => $v !== null), array_key_exists('items', $report) ? [
+            'items' => array_map(fn (array $i) => ['reason' => $reasons[$i['node_id']] ?? null] + array_intersect_key($i, array_flip(['node_id', 'outcome', 'score', 'note'])), $report['items']),
+        ] : [], is_array($report['homework'] ?? null) ? [
+            'homework' => array_merge($state['homework'] ?? [], $report['homework'], ['practice' => (bool) ($state['homework']['practice'] ?? false)]),
+        ] : []));
+
+        $this->voiceDraft = ['heard' => $draft['heard'], 'filled' => $draft['filled'], 'unsure' => $this->fieldNames($draft['unsure']), 'left' => $this->fieldNames($draft['left'])];
+        Notification::make()->success()->title(trans_choice('learning::assist.voice.done', count($draft['filled']), ['count' => count($draft['filled'])]))->send();
+    }
+
+    /**
+     * The form's fields by the names the teacher reads.
+     *
+     * @param  list<string>  $fields  as the draft names them (engagement, items.{node}, answers.{key}…)
+     * @return list<string>
+     */
+    private function fieldNames(array $fields): array
+    {
+        $w = 'learning::teacher.write.';
+        $lessons = $this->sessionReport->kind === 'lesson' ? app(ReportFormQuery::class)->lessonOptions($this->sessionReport) : [];
+        $questions = collect($this->template()?->fieldList() ?? [])->mapWithKeys(fn (TemplateField $f) => [$f->key => $f->label()]);
+
+        return array_values(array_unique(array_map(function (string $field) use ($w, $lessons, $questions): string {
+            $parts = explode('.', $field);
+
+            return match ($parts[0]) {
+                'items' => isset($parts[1]) ? (string) str($lessons[$parts[1]] ?? __($w.'lesson'))->afterLast(' › ') : __($w.'plan'),
+                'answers' => $questions[$parts[1] ?? ''] ?? __('learning::templates.form.section'),
+                'homework' => __($w.'homework'),
+                default => __($w.$parts[0]),
+            };
+        }, $fields)));
     }
 
     public function submit(): void

@@ -1,14 +1,17 @@
 <?php
 
+use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 use Modules\Curriculum\Models\Program;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Identity\Models\User;
 use Modules\Learning\Actions\Assist\DraftReportFromVoice;
 use Modules\Learning\Actions\SaveReportTemplate;
+use Modules\Learning\Filament\Teacher\WriteReport;
 use Modules\Learning\Models\SessionReport;
 use Modules\Platform\Actions\SaveAiSettings;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
@@ -221,4 +224,36 @@ it('puts the student\'s name as {child} however the teacher joins it', function 
     expect(DraftReportFromVoice::withoutName('يوسف قرأ، وقلت ليوسف يراجع، ويوسف شاطر. يوسفين لأ', 'يوسف أحمد'))
         ->toBe('{child} قرأ، وقلت ل{child} يراجع، و{child} شاطر. يوسفين لأ')
         ->and(DraftReportFromVoice::withoutName('Yousef read well', 'yousef Ali'))->toBe('{child} read well');
+});
+
+it('drafts the teacher area\'s form from a note recorded on the page', function () {
+    $this->actAsTenant($this->academy);
+    $this->actingAs($this->teacher);
+    Filament::setCurrentPanel('teach');
+    app()->setLocale('en');
+
+    $page = Livewire::test(WriteReport::class, ['report' => $this->report->id])
+        ->assertSee('Draft from a voice note')
+        ->set('data.notes_for_student', 'My own words')
+        ->set('voiceNote', voiceNote())
+        ->call('draftFromVoice')
+        ->assertHasNoErrors()
+        ->assertNotified()
+        ->assertSet('data.engagement', 5)
+        ->assertSet('data.notes_for_student', 'My own words')
+        ->assertSet('data.homework.title', 'سمّع السورة')
+        ->assertSet('voiceNote', null)
+        ->assertSee('Check these: the draft was not sure');
+    $items = array_values($page->get('data.items'));
+    expect($items[0])->toMatchArray(['node_id' => $this->lessons[0], 'outcome' => 'mastered', 'reason' => 'next'])
+        ->and($page->get('voiceDraft.unsure'))->toContain('Overall', 'Pages memorised')
+        ->and(is_file($this->heard->clip->path))->toBeFalse();
+
+    // Nothing saved until the teacher sends it.
+    expect($this->report->fresh()->status)->toBe('due');
+
+    // Off for the academy: no recorder, and the call is refused.
+    app(SaveAiSettings::class)->handle(['report_draft' => false], $this->admin->id);
+    Livewire::test(WriteReport::class, ['report' => $this->report->id])->assertDontSee('Draft from a voice note')
+        ->set('voiceNote', voiceNote())->call('draftFromVoice')->assertForbidden();
 });
