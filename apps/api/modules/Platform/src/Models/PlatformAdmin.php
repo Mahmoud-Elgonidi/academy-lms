@@ -22,6 +22,7 @@ use SensitiveParameter;
  * @property string $name
  * @property string $email
  * @property bool $is_active
+ * @property bool $is_owner the platform's settings are theirs to change (SetPlatformAdminOwner)
  * @property string $locale
  * @property string $timezone
  * @property ?CarbonImmutable $last_login_at
@@ -36,7 +37,7 @@ final class PlatformAdmin extends Authenticatable implements FilamentUser, HasAp
 
     protected $hidden = ['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes'];
 
-    protected $attributes = ['is_active' => true, 'locale' => 'ar', 'timezone' => 'UTC'];
+    protected $attributes = ['is_active' => true, 'is_owner' => false, 'locale' => 'ar', 'timezone' => 'UTC'];
 
     protected function casts(): array
     {
@@ -45,6 +46,7 @@ final class PlatformAdmin extends Authenticatable implements FilamentUser, HasAp
             'app_authentication_secret' => 'encrypted',
             'app_authentication_recovery_codes' => 'encrypted:array',
             'is_active' => 'boolean',
+            'is_owner' => 'boolean',
             'last_login_at' => 'immutable_datetime',
         ];
     }

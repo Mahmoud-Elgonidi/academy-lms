@@ -137,6 +137,9 @@ return [
             'signed_in' => 'Signed in to the console',
             'admin_deactivated' => 'Console account :name locked',
             'admin_reactivated' => 'Console account :name let back in',
+            'admin_made_owner' => 'Console account :name made an owner',
+            'admin_owner_removed' => 'Console account :name no longer an owner',
+            'settings_saved' => 'Platform settings changed: :sections',
             'plan_saved' => 'The :plan plan edited',
             'demo_secrets_reset' => "Demo console account :name took the server's new demo password and key",
             'game_draft_started' => 'Started designing a new game (:kinds)',
@@ -147,6 +150,7 @@ return [
         ],
     ],
     'values' => [
+        'sections' => ['ai' => 'AI helpers', 'mail' => 'email', 'whatsapp' => 'WhatsApp', 'sms' => 'texts', 'push' => 'phone notifications', 'classroom' => 'classroom', 'stripe' => 'Stripe Connect', 'social' => 'Google and Apple sign-in', 'platform' => 'the platform'],
         'helpers' => ['practice_items' => 'practice suggestions', 'report_draft' => 'reports from voice notes', 'recitation_check' => 'recitation check', 'digest_wording' => 'weekly note wording'],
         'early' => ['early' => 'early, by the office', 'on_time' => 'on time, by itself'],
         'style' => ['playful' => 'playful (islands and games)', 'calm' => 'calm (levels and missions)', 'plain' => 'plain (no stars)'],

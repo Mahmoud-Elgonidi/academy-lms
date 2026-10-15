@@ -14,8 +14,9 @@ use Modules\Platform\Models\PlatformAdmin;
  * sign in, the console signs out any session they still have on its next
  * request (ConsoleContext), a "remember me" cookie no longer works, and a
  * sign-in as someone of an academy they started ends (WatchImpersonation).
- * Never the last one who can still sign in, so the console always has
- * someone. Audited on the platform's log.
+ * Never the last one who can still sign in, nor the last owner who can, so
+ * the console always has someone and its settings an owner. Audited on the
+ * platform's log.
  */
 final class SetPlatformAdminActive
 {
@@ -33,6 +34,9 @@ final class SetPlatformAdminActive
             }
             if (! $active && ! PlatformAdmin::query()->where('is_active', true)->whereKeyNot($admin->id)->lockForUpdate()->exists()) {
                 throw ValidationException::withMessages(['email' => __('platform::console.admins.last')]);
+            }
+            if (! $active && $admin->is_owner && ! SetPlatformAdminOwner::anotherActiveOwner($admin)) {
+                throw ValidationException::withMessages(['email' => __('platform::console.admins.last_owner')]);
             }
 
             $admin->forceFill(['is_active' => $active, 'remember_token' => Str::random(60)])->save();

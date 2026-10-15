@@ -112,3 +112,41 @@ it('still adds a new admin, who needs a name', function () {
     expect(PlatformAdmin::query()->where('email', 'new@company.example')->value('is_active'))->toBeTrue();
     $this->artisan('platform:admin', ['email' => 'other@company.example', '--password' => 'a-long-password'])->assertFailed();
 });
+
+it('makes an admin an owner and back, audited, and never takes the last owner who can sign in', function () {
+    $this->artisan('platform:admin', ['email' => 'salma@company.example', '--owner' => true])->assertSuccessful();
+    expect($this->real->fresh()->is_owner)->toBeTrue()
+        ->and(DB::connection('pgsql_platform')->table('audit_logs')->where('action', 'platform.admin_made_owner')->value('subject_id'))->toBe($this->real->id);
+
+    // The last owner stays one, and is not locked out.
+    $this->artisan('platform:admin', ['email' => 'salma@company.example', '--no-owner' => true])->assertFailed();
+    $this->artisan('platform:admin', ['email' => 'salma@company.example', '--deactivate' => true])->assertFailed();
+    expect($this->real->fresh())->is_owner->toBeTrue()->is_active->toBeTrue();
+
+    // With a second owner, either may go.
+    $this->artisan('platform:admin', ['email' => 'admin@platform.test', '--owner' => true])->assertSuccessful();
+    $this->artisan('platform:admin', ['email' => 'admin@platform.test', '--deactivate' => true])->assertSuccessful();
+    // A locked owner does not count: Salma is still the last one who can sign in.
+    $this->artisan('platform:admin', ['email' => 'salma@company.example', '--no-owner' => true])->assertFailed();
+    $this->artisan('platform:admin', ['email' => 'admin@platform.test', '--reactivate' => true])->assertSuccessful();
+    $this->artisan('platform:admin', ['email' => 'salma@company.example', '--no-owner' => true])->assertSuccessful();
+    expect($this->real->fresh()->is_owner)->toBeFalse()
+        ->and(DB::connection('pgsql_platform')->table('audit_logs')->where('action', 'platform.admin_owner_removed')->count())->toBe(1);
+
+    $this->artisan('platform:admin', ['email' => 'salma@company.example', '--owner' => true, '--no-owner' => true])->assertFailed();
+    $this->artisan('platform:admin', ['email' => 'nobody@company.example', '--no-owner' => true])->assertFailed();
+});
+
+it('never makes a locked admin an owner', function () {
+    $this->artisan('platform:admin', ['email' => 'admin@platform.test', '--deactivate' => true])->assertSuccessful();
+    $this->artisan('platform:admin', ['email' => 'admin@platform.test', '--owner' => true])->assertFailed();
+    expect($this->demo->fresh()->is_owner)->toBeFalse();
+});
+
+it('makes the first admin of a team with no owner one, and others only when asked', function () {
+    $this->artisan('platform:admin', ['email' => 'first@company.example', 'name' => 'First', '--password' => 'a-long-password'])->assertSuccessful();
+    $this->artisan('platform:admin', ['email' => 'second@company.example', 'name' => 'Second', '--password' => 'a-long-password'])->assertSuccessful();
+    $this->artisan('platform:admin', ['email' => 'third@company.example', 'name' => 'Third', '--password' => 'a-long-password', '--owner' => true])->assertSuccessful();
+
+    expect(PlatformAdmin::query()->where('is_owner', true)->orderBy('email')->pluck('email')->all())->toBe(['first@company.example', 'third@company.example']);
+});

@@ -7,6 +7,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Modules\Platform\Http\Middleware\ApplyPlatformSettings;
 use Modules\SharedKernel\Health\RecentErrors;
 use Modules\SharedKernel\Http\Idempotent;
 use Modules\SharedKernel\Http\ProblemDetails;
@@ -40,6 +41,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // The tenant must be known before authentication, rate limiting and
         // route model binding touch the database.
         $middleware->prependToPriorityList(AuthenticatesRequests::class, ResolveTenant::class);
+
+        // The platform's settings from the console (its owners' keys) over the server's .env, before anything reads them.
+        $middleware->prepend(ApplyPlatformSettings::class);
 
         // Every answer carries the security headers; the apps' API has a ceiling per person.
         $middleware->append(SecurityHeaders::class);

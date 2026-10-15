@@ -4,8 +4,10 @@ namespace Modules\Platform\Providers;
 
 use Filament\Notifications\Notification;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +49,7 @@ use Modules\Platform\Models\PlatformAdmin;
 use Modules\Platform\Plans\PlanUsage;
 use Modules\Platform\Plans\PlatformAcademyPlan;
 use Modules\Platform\PlatformService;
+use Modules\Platform\Settings\PlatformSettings;
 use Modules\Platform\Setup\BrandingStep;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\LanguageModel;
@@ -91,6 +94,7 @@ final class PlatformServiceProvider extends ServiceProvider
 
         // The academies' AI helpers (Settings › AI): Claude for words, ElevenLabs for recordings, fixed answers for the demo.
         $this->app->singleton(AiSlots::class);
+        $this->app->singleton(PlatformSettings::class);
         $this->app->scoped(PlatformAcademyAi::class);
         $this->app->alias(PlatformAcademyAi::class, AcademyAi::class);
         $this->app->bind(LanguageModel::class, fn ($app) => PlatformAcademyAi::demo() ? new DemoLanguageModel : $app->make(ClaudeLanguageModel::class));
@@ -105,6 +109,14 @@ final class PlatformServiceProvider extends ServiceProvider
         // The new academy's checklist: its name and logo.
         $this->app->make(SetupChecklist::class)->add(BrandingStep::class);
         Event::listen(Login::class, RecordConsoleSignIn::class);
+        // The platform's settings from the console over the server's .env: at each job and command too (requests:
+        // ApplyPlatformSettings). Never here in boot, so caching the config never writes them out.
+        Event::listen(JobProcessing::class, fn () => $this->app->make(PlatformSettings::class)->apply());
+        Event::listen(CommandStarting::class, function (CommandStarting $event): void {
+            if (! PlatformSettings::leavesAlone((string) $event->command)) {
+                $this->app->make(PlatformSettings::class)->apply();
+            }
+        });
         if ($this->app->runningInConsole()) {
             $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class, HealthCommand::class, MailTestCommand::class]);
         }

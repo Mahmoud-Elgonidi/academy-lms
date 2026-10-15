@@ -34,6 +34,8 @@ return [
         'fcm' => [
             'project_id' => env('FCM_PROJECT_ID'),
             'credentials' => env('FCM_CREDENTIALS'),        // path to the service account JSON
+            // The same file's contents, as an owner uploads it in the console (Platform settings); wins over the path.
+            'credentials_json' => null,
         ],
     ],
     'retry_after_seconds' => [60, 300, 900],

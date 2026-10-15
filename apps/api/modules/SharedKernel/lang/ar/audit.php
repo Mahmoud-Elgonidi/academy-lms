@@ -137,6 +137,9 @@ return [
             'signed_in' => 'دخول على لوحة المنصة',
             'admin_deactivated' => 'قفل حساب لوحة المنصة :name',
             'admin_reactivated' => 'رجوع حساب لوحة المنصة :name',
+            'admin_made_owner' => 'حساب لوحة المنصة :name بقى أدمن رئيسي',
+            'admin_owner_removed' => 'حساب لوحة المنصة :name مابقاش أدمن رئيسي',
+            'settings_saved' => 'تعديل إعدادات المنصة: :sections',
             'plan_saved' => 'تعديل الباقة :plan',
             'demo_secrets_reset' => 'حساب لوحة المنصة التجريبي :name خد كلمة السر والمفتاح التجريبيين الجداد',
             'game_draft_started' => 'بداية تصميم لعبة جديدة (:kinds)',
@@ -147,6 +150,7 @@ return [
         ],
     ],
     'values' => [
+        'sections' => ['ai' => 'المساعد الآلي', 'mail' => 'الإيميل', 'whatsapp' => 'واتساب', 'sms' => 'الرسايل النصية', 'push' => 'إشعارات الموبايل', 'classroom' => 'الفصل', 'stripe' => 'Stripe Connect', 'social' => 'الدخول بجوجل وأبل', 'platform' => 'المنصة'],
         'helpers' => ['practice_items' => 'اقتراح التدريبات', 'report_draft' => 'تقرير من رسالة صوتية', 'recitation_check' => 'تصحيح التسميع', 'digest_wording' => 'صياغة الرسالة الأسبوعية'],
         'early' => ['early' => 'بدري، من الإدارة', 'on_time' => 'في ميعاده، لوحده'],
         'style' => ['playful' => 'مرح (جزر وألعاب)', 'calm' => 'هادي (مستويات ومهمات)', 'plain' => 'من غير نجوم'],
