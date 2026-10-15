@@ -57,10 +57,14 @@ it('gives the app the inbox, with the unread count, and marks messages read', fu
 it('lets the app read and change the notification choices, and register a push device', function () {
     apiAs($this->guardian)->getJson('/api/v1/notifications/preferences')->assertOk()
         ->assertJsonPath('data.0.key', 'notifications.lessons')->assertJsonPath('data.0.value', 'all')
-        ->assertJsonPath('data.4.key', 'notifications.quiet_hours')->assertJsonPath('data.4.value', '22-07');
+        ->assertJsonPath('data.3.key', 'notifications.quiet_hours')->assertJsonPath('data.3.value', '22-07')
+        ->assertJsonMissing(['key' => 'notifications.staff']);
+    // Work messages are the team's and the teachers' choice alone.
+    apiAs($this->teacher)->getJson('/api/v1/notifications/preferences')->assertOk()->assertJsonPath('data.3.key', 'notifications.staff');
+    apiAs($this->guardian)->putJson('/api/v1/notifications/preferences', ['preferences' => ['notifications.staff' => 'app']])->assertStatus(422);
 
     apiAs($this->guardian)->putJson('/api/v1/notifications/preferences', ['preferences' => ['notifications.learning' => 'app', 'notifications.quiet_hours' => 'off']])
-        ->assertOk()->assertJsonPath('data.1.value', 'app')->assertJsonPath('data.4.value', 'off');
+        ->assertOk()->assertJsonPath('data.1.value', 'app')->assertJsonPath('data.3.value', 'off');
     apiAs($this->guardian)->putJson('/api/v1/notifications/preferences', ['preferences' => ['notifications.learning' => 'loud']])->assertStatus(422);
     apiAs($this->guardian)->putJson('/api/v1/notifications/preferences', ['preferences' => ['live_board.layout' => 'focus']])->assertStatus(422);
 

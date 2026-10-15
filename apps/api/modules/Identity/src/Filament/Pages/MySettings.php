@@ -24,6 +24,7 @@ use Modules\Identity\Actions\Contact\RequestContactChange;
 use Modules\Identity\Actions\Social\UnlinkSocialIdentity;
 use Modules\Identity\Actions\UpdatePreferences;
 use Modules\Identity\Actions\UpdateProfile;
+use Modules\Identity\Contracts\Preferences\PreferenceDefinition;
 use Modules\Identity\Models\Impersonation;
 use Modules\Identity\Models\User;
 use Modules\Identity\Preferences\PreferenceStore;
@@ -104,7 +105,7 @@ final class MySettings extends EditProfile
 
             Section::make(__('identity::settings.sections.screens'))
                 ->schema($this->preferenceComponents())
-                ->visible(fn (): bool => $this->store()->definitions() !== []),
+                ->visible(fn (): bool => $this->offered() !== []),
 
             Section::make(__('identity::settings.sections.password'))
                 ->schema([
@@ -274,7 +275,7 @@ final class MySettings extends EditProfile
         /** @var User $user */
         $user = $this->getUser();
 
-        foreach ($this->store()->definitions() as $key => $definition) {
+        foreach ($this->offered() as $key => $definition) {
             $data[self::field($key)] = $this->store()->valueFor($user, $key);
         }
 
@@ -290,7 +291,7 @@ final class MySettings extends EditProfile
         app(UpdateProfile::class)->handle($record, Arr::only($data, ['name', 'locale', 'timezone']));
 
         $preferences = [];
-        foreach (array_keys($this->store()->definitions()) as $key) {
+        foreach (array_keys($this->offered()) as $key) {
             if (array_key_exists(self::field($key), $data)) {
                 $preferences[$key] = $data[self::field($key)];
             }
@@ -339,7 +340,7 @@ final class MySettings extends EditProfile
     {
         $components = [];
 
-        foreach ($this->store()->definitions() as $key => $definition) {
+        foreach ($this->offered() as $key => $definition) {
             $components[] = ToggleButtons::make(self::field($key))
                 ->label(__($definition->label))
                 ->helperText($definition->hint ? __($definition->hint) : null)
@@ -349,6 +350,12 @@ final class MySettings extends EditProfile
         }
 
         return $components;
+    }
+
+    /** @return array<string, PreferenceDefinition> the choices this person is offered */
+    private function offered(): array
+    {
+        return array_filter($this->store()->definitions(), fn (PreferenceDefinition $d): bool => $d->offered());
     }
 
     /** Form field names cannot hold dots, which Filament reads as nesting. */

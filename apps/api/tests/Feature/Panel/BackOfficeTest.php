@@ -4,6 +4,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Identity\Enums\Role;
+use Modules\Identity\Filament\Pages\MySettings;
 use Modules\Identity\Models\User;
 use Modules\Scheduling\Filament\Pages\LiveBoard;
 
@@ -63,6 +64,27 @@ it('saves the layout switch on the board for the signed-in user', function () {
         ->assertSet('boardLayout', 'focus');
 
     expect($this->owner->refresh()->preferences)->toBe(['live_board.layout' => 'focus']);
+});
+
+it('offers the board\'s layout and work messages on My settings only to whoever has them', function () {
+    $this->actAsTenant($this->academy);
+    $guardian = User::factory()->withRole(Role::Guardian)->create();
+
+    $this->actingAs($this->owner);
+    Filament\Facades\Filament::setCurrentPanel('academy');
+    Livewire::test(MySettings::class)
+        ->assertFormFieldExists('pref__live_board__layout')->assertFormFieldExists('pref__notifications__staff');
+
+    $this->actingAs($this->teacher);
+    Filament\Facades\Filament::setCurrentPanel('teach');
+    Livewire::test(MySettings::class)
+        ->assertFormFieldDoesNotExist('pref__live_board__layout')->assertFormFieldExists('pref__notifications__staff');
+
+    $this->actingAs($guardian);
+    Filament\Facades\Filament::setCurrentPanel('family');
+    Livewire::test(MySettings::class)
+        ->assertFormFieldDoesNotExist('pref__live_board__layout')->assertFormFieldDoesNotExist('pref__notifications__staff')
+        ->assertFormFieldExists('pref__notifications__lessons');
 });
 
 it('answers 404, not a server error, for the back office on a host that is no academy', function () {

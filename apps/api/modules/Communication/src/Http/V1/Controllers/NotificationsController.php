@@ -64,7 +64,7 @@ final class NotificationsController
         $all = $definitions->definitions();
         foreach ((array) $request->input('preferences', []) as $key => $value) {
             $definition = str_starts_with((string) $key, 'notifications.') ? ($all[$key] ?? null) : null;
-            if ($definition === null || ! $definition->allows($value)) {
+            if ($definition === null || ! $definition->offered() || ! $definition->allows($value)) {
                 throw ValidationException::withMessages(["preferences.{$key}" => __('validation.in', ['attribute' => $key])]);
             }
             $preferences->set($userId, $key, $value);
@@ -93,6 +93,9 @@ final class NotificationsController
         $out = [];
         foreach ($preferences->all($userId) as $key => $value) {
             $definition = $definitions->definitions()[$key];
+            if (! $definition->offered()) {
+                continue;
+            }
             $out[] = [
                 'key' => $key,
                 'label' => __($definition->label),

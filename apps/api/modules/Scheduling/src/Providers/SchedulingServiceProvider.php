@@ -106,6 +106,7 @@ final class SchedulingServiceProvider extends ServiceProvider
             options: array_combine(LiveBoard::LAYOUTS, array_map(fn (string $l) => "scheduling::board.layout.{$l}", LiveBoard::LAYOUTS)),
             default: 'table',
             hint: 'scheduling::board.layout.hint',
+            abilities: [Ability::ViewLiveBoard->value],
         ));
 
         Event::listen(CreditsGranted::class, FundSessionsFromNewCredit::class);

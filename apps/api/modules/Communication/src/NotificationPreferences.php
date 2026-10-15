@@ -7,6 +7,7 @@ use Modules\Communication\Domain\ChannelChoice;
 use Modules\Communication\Domain\QuietHours;
 use Modules\Identity\Contracts\Preferences\PreferenceDefinition;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
+use Modules\SharedKernel\Authorization\Ability;
 
 /**
  * Each person's notification choices, kept as Identity preferences so they
@@ -33,6 +34,8 @@ final class NotificationPreferences
                 options: array_combine(ChannelChoice::CHOICES, array_map(fn ($c) => "communication::communication.preferences.choices.{$c}", ChannelChoice::CHOICES)),
                 default: 'all',
                 hint: "communication::communication.preferences.hints.{$category}",
+                // Work messages only reach the academy's team and its teachers.
+                abilities: $category === 'staff' ? [Ability::HandleTickets->value, Ability::WriteReports->value] : [],
             ));
         }
         $this->preferences->define(new PreferenceDefinition(
