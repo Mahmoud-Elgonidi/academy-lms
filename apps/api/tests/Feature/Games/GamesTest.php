@@ -549,7 +549,8 @@ it('makes a lesson\'s homework the game its teacher chose, due before the next l
     $homework = app(ChoosePracticeGame::class)->handle($report, $this->teacher->id, 'bird-twins', practiceOnly: true, beforeNext: true);
     expect($homework)->toMatchArray(['practice_game' => 'bird-twins', 'accepts' => 'practice', 'report_id' => $report->id, 'practice_nodes' => [$this->lessons[0], $this->lessons[1]]])
         ->and($homework->due_at->equalTo($next->starts_at))->toBeTrue()
-        ->and($homework->title)->toContain('Nest Twins');
+        // The learner reads it: written in the academy's language, whatever the teacher's screen is in.
+        ->and($homework->title)->toBe(__('learning::homework.game.title', ['game' => app(GameCatalog::class)->game('bird-twins')->title('ar')], 'ar'));
 
     $quests = app(GamesWorld::class)->for($this->student->id)['quests'];
     expect($quests[0])->toMatchArray(['reason' => 'homework', 'homework_id' => $homework->id])

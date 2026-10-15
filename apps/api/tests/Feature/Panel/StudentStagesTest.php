@@ -151,7 +151,8 @@ it('shows a child their journey as the home: the islands, where they are, and th
         ->assertSee(__('learning::map.island.ahead', ['title' => 'Level 1']), false);
 
     Livewire::test(FamilyLessons::class)->assertActionHidden('cancel')   // their guardian cancels for them
-        ->assertDontSee(__('scheduling::family.cancel.button'));
+        ->assertDontSee(__('scheduling::family.cancel.button'))
+        ->assertDontSee(__('scheduling::family.unfunded'));   // money is for the classic look
 
     expect(FamilyProgress::shouldRegisterNavigation())->toBeFalse()
         ->and(FamilyJourney::shouldRegisterNavigation())->toBeFalse()     // the journey is their home

@@ -62,7 +62,8 @@ final class FamilyLessons extends Page
             return ['upcoming' => [], 'recent' => []];
         }
         $now = CarbonImmutable::now();
-        $view = new FamilyLessonView($now, app(ViewerTimezone::class)->effective(), disputes: app(FamilyView::class)->stage((string) auth()->id()) !== LearnerStage::Kids);
+        $stage = app(FamilyView::class)->stage((string) auth()->id());
+        $view = new FamilyLessonView($now, app(ViewerTimezone::class)->effective(), disputes: $stage !== LearnerStage::Kids, money: $stage === LearnerStage::Classic);
         $query = app(LessonList::class);
         $today = $now->setTimezone(app(ViewerTimezone::class)->effective())->startOfDay()->utc();
 

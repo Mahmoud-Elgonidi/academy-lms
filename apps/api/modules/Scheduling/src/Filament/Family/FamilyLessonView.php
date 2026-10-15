@@ -19,6 +19,8 @@ final class FamilyLessonView
         private readonly string $tz,
         private readonly string $counterpart = 'teacher',
         private readonly bool $disputes = true,
+        // Whether the viewer sees money ("awaiting payment"): the classic look only.
+        private readonly bool $money = true,
     ) {}
 
     /** @return array<string, mixed> */
@@ -44,7 +46,7 @@ final class FamilyLessonView
             'status' => $r->status,
             'statusLabel' => __($l.'statuses.'.$r->status),
             'type' => $r->type === 'regular' ? null : __($l.'types.'.$r->type),
-            'unfunded' => $open && $r->funding_status === 'unfunded',
+            'unfunded' => $this->money && $open && $r->funding_status === 'unfunded',
             'joinUrl' => $joinable && Route::has('classroom.page') ? route('classroom.page', ['session' => $r->id]) : null,
             'opensAt' => $open && ! $joinable && $r->starts_at->greaterThan($this->now)
                 ? $r->starts_at->subMinutes((int) config('classroom.opens_before_min', 10))->setTimezone($this->tz)->format('H:i') : null,

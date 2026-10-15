@@ -13,6 +13,7 @@ use Modules\Learning\Models\SessionReport;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\SharedKernel\Games\GameCatalog;
+use Modules\SharedKernel\Tenancy\TenantContext;
 
 /**
  * A teacher makes a lesson's homework a game (docs/architecture/02, section
@@ -62,6 +63,7 @@ final class ChoosePracticeGame
             throw ValidationException::withMessages(['game' => __('learning::homework.errors.closed')]);
         }
 
+        $locale = app(TenantContext::class)->current()?->defaultLocale ?? app()->getLocale();
         $usual = $report->submitted_at->addDays(LearningSettings::current()->homework_days);
         $next = $beforeNext ? collect($this->attendance->lessonsOfStudent($report->student_id, $now, $now->addDays(30)))
             ->first(fn ($l) => $l->startsAt->greaterThan($now) && $l->enrollmentId === $report->enrollment_id && $l->status === 'scheduled')?->startsAt : null;
@@ -84,7 +86,8 @@ final class ChoosePracticeGame
             'enrollment_id' => $report->enrollment_id,
             'session_id' => $report->session_id,
             'report_id' => $report->id,
-            'title' => __('learning::homework.game.title', ['game' => $game->title()]),
+            // Read by the learner, so in the academy's language rather than the teacher's screen's.
+            'title' => __('learning::homework.game.title', ['game' => $game->title($locale)], $locale),
         ]);
     }
 }
