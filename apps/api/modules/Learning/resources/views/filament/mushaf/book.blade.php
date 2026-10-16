@@ -5,7 +5,7 @@
 @php
     $m = 'learning::mushaf.';
     $kids ??= false;
-    $digits = fn (int $n) => strtr((string) $n, '0123456789', '٠١٢٣٤٥٦٧٨٩');
+    $digits = fn (int $n) => strtr((string) $n, ['0' => '٠', '1' => '١', '2' => '٢', '3' => '٣', '4' => '٤', '5' => '٥', '6' => '٦', '7' => '٧', '8' => '٨', '9' => '٩']);
     $first = fn (array $kinds) => collect(['wrong', 'hesitation', 'tajweed'])->first(fn ($k) => in_array($k, $kinds, true)) ?? 'wrong';
 @endphp
 <style>

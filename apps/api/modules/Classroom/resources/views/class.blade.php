@@ -47,7 +47,7 @@
         main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 12px 16px; min-height: 0; }
         main.with-plan { grid-template-columns: minmax(0, 1fr); }
         @media (min-width: 1000px) { main.with-plan { grid-template-columns: minmax(0, 1fr) 300px; } main.with-mushaf { grid-template-columns: minmax(0, 1fr) 440px; } }
-        @media (max-width: 999px) { main.with-mushaf { overflow-y: auto; } main.with-mushaf aside { overflow: visible; } }
+        @media (max-width: 999px) { main.with-mushaf { overflow-y: auto; grid-auto-rows: max-content; align-content: start; } main.with-mushaf aside { overflow: visible; } }
         aside .mushaf:not(:last-child) { padding-bottom: 12px; border-bottom: 1px solid var(--line); }
         a.button { display: inline-block; text-decoration: none; border-radius: 10px; padding: 10px 16px; background: var(--line); color: var(--text); }
         a.button.primary { background: var(--brand); color: #fff; font-weight: 700; }

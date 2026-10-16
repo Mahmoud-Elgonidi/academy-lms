@@ -235,7 +235,7 @@ it('keeps the notebook on the student\'s page in /teach and on the hifz page in 
     $this->actingAs($this->teacher);
     Livewire::test(StudentProgress::class, ['enrollment' => $this->booked->enrollmentId])
         ->assertSee(__('learning::mushaf.book'))->assertSee(trans_choice('learning::mushaf.book_words', 2, ['count' => 2]))
-        ->assertSee('<mark data-kind="hesitation"', false)->assertSee(__('learning::mushaf.kinds.wrong'));
+        ->assertSee('<mark data-kind="hesitation"', false)->assertSee(__('learning::mushaf.kinds.wrong'))->assertSee('﴿٢﴾')->assertSee('﴿٣﴾');
 
     // The report's recitation offers the verses most marked in the lesson, once the recitation check is on.
     config(['platform.ai.driver' => 'claude', 'platform.ai.key' => 'a-key-for-the-test', 'platform.ai.speech.key' => 'another-key-for-the-test']);
