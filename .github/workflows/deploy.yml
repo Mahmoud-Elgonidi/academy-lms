@@ -79,7 +79,7 @@ jobs:
       image: ${{ steps.name.outputs.image }}
       publish: ${{ steps.name.outputs.publish }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
@@ -94,10 +94,10 @@ jobs:
           echo "image=$repo:${SHA::12}" >> "$GITHUB_OUTPUT"
           echo "publish=$PUBLISH" >> "$GITHUB_OUTPUT"
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
       - name: Build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/api/Dockerfile.prod
@@ -349,7 +349,7 @@ jobs:
             echo "go=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: steps.ready.outputs.go == 'true'
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
