@@ -9721,7 +9721,108 @@
                                                 "surahs": {
                                                     "type": "array",
                                                     "description": "By surah and verse: each verse's words as written, and its marked words (by place, from 1).",
-                                                    "items": {}
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name_ar": {
+                                                                "type": "string"
+                                                            },
+                                                            "name_en": {
+                                                                "type": "string"
+                                                            },
+                                                            "words": {
+                                                                "type": "integer",
+                                                                "description": "Words marked in this surah."
+                                                            },
+                                                            "verses": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "verse": {
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "words": {
+                                                                            "type": "array",
+                                                                            "description": "The verse's words as written, from the first.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "marks": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "object",
+                                                                                "properties": {
+                                                                                    "word": {
+                                                                                        "type": "integer",
+                                                                                        "description": "Its place in the verse, from 1."
+                                                                                    },
+                                                                                    "times": {
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "kinds": {
+                                                                                        "type": "array",
+                                                                                        "description": "wrong, hesitation, tajweed",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    },
+                                                                                    "last_at": {
+                                                                                        "type": [
+                                                                                            "object",
+                                                                                            "null"
+                                                                                        ],
+                                                                                        "properties": {
+                                                                                            "utc": {
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "local": {
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "timezone": {
+                                                                                                "type": "null"
+                                                                                            },
+                                                                                            "label": {
+                                                                                                "type": "string"
+                                                                                            }
+                                                                                        },
+                                                                                        "required": [
+                                                                                            "utc",
+                                                                                            "local",
+                                                                                            "timezone",
+                                                                                            "label"
+                                                                                        ]
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "word",
+                                                                                    "times",
+                                                                                    "kinds",
+                                                                                    "last_at"
+                                                                                ]
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "verse",
+                                                                        "words",
+                                                                        "marks"
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "name_ar",
+                                                            "name_en",
+                                                            "words",
+                                                            "verses"
+                                                        ]
+                                                    }
                                                 },
                                                 "kinds": {
                                                     "type": "object",
@@ -9892,7 +9993,29 @@
                                                 "verses": {
                                                     "type": "array",
                                                     "description": "The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1.",
-                                                    "items": {}
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "verse": {
+                                                                "type": "integer"
+                                                            },
+                                                            "words": {
+                                                                "type": "array",
+                                                                "description": "Each word as written, from the first.",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "verse",
+                                                            "words"
+                                                        ]
+                                                    }
                                                 },
                                                 "marks": {
                                                     "type": "array",
@@ -10143,7 +10266,29 @@
                                                 "verses": {
                                                     "type": "array",
                                                     "description": "The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1.",
-                                                    "items": {}
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "verse": {
+                                                                "type": "integer"
+                                                            },
+                                                            "words": {
+                                                                "type": "array",
+                                                                "description": "Each word as written, from the first.",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "verse",
+                                                            "words"
+                                                        ]
+                                                    }
                                                 },
                                                 "marks": {
                                                     "type": "array",
@@ -10425,7 +10570,29 @@
                                                 "verses": {
                                                     "type": "array",
                                                     "description": "The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1.",
-                                                    "items": {}
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "verse": {
+                                                                "type": "integer"
+                                                            },
+                                                            "words": {
+                                                                "type": "array",
+                                                                "description": "Each word as written, from the first.",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "verse",
+                                                            "words"
+                                                        ]
+                                                    }
                                                 },
                                                 "marks": {
                                                     "type": "array",
@@ -10698,7 +10865,29 @@
                                                 "verses": {
                                                     "type": "array",
                                                     "description": "The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1.",
-                                                    "items": {}
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "verse": {
+                                                                "type": "integer"
+                                                            },
+                                                            "words": {
+                                                                "type": "array",
+                                                                "description": "Each word as written, from the first.",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "verse",
+                                                            "words"
+                                                        ]
+                                                    }
                                                 },
                                                 "marks": {
                                                     "type": "array",
@@ -14244,7 +14433,108 @@
                                                 "surahs": {
                                                     "type": "array",
                                                     "description": "By surah and verse: each verse's words as written, and its marked words (by place, from 1).",
-                                                    "items": {}
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name_ar": {
+                                                                "type": "string"
+                                                            },
+                                                            "name_en": {
+                                                                "type": "string"
+                                                            },
+                                                            "words": {
+                                                                "type": "integer",
+                                                                "description": "Words marked in this surah."
+                                                            },
+                                                            "verses": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "verse": {
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "words": {
+                                                                            "type": "array",
+                                                                            "description": "The verse's words as written, from the first.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "marks": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "object",
+                                                                                "properties": {
+                                                                                    "word": {
+                                                                                        "type": "integer",
+                                                                                        "description": "Its place in the verse, from 1."
+                                                                                    },
+                                                                                    "times": {
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "kinds": {
+                                                                                        "type": "array",
+                                                                                        "description": "wrong, hesitation, tajweed",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    },
+                                                                                    "last_at": {
+                                                                                        "type": [
+                                                                                            "object",
+                                                                                            "null"
+                                                                                        ],
+                                                                                        "properties": {
+                                                                                            "utc": {
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "local": {
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "timezone": {
+                                                                                                "type": "null"
+                                                                                            },
+                                                                                            "label": {
+                                                                                                "type": "string"
+                                                                                            }
+                                                                                        },
+                                                                                        "required": [
+                                                                                            "utc",
+                                                                                            "local",
+                                                                                            "timezone",
+                                                                                            "label"
+                                                                                        ]
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "word",
+                                                                                    "times",
+                                                                                    "kinds",
+                                                                                    "last_at"
+                                                                                ]
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "verse",
+                                                                        "words",
+                                                                        "marks"
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "name_ar",
+                                                            "name_en",
+                                                            "words",
+                                                            "verses"
+                                                        ]
+                                                    }
                                                 },
                                                 "kinds": {
                                                     "type": "object",

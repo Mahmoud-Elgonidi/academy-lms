@@ -35,7 +35,12 @@ final class MushafPresenter
             /** The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here. */
             'basmala' => $page['basmala'],
             /** The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1. */
-            'verses' => $page['verses'],
+            'verses' => collect($page['verses'])->map(fn (array $v) => [
+                'surah' => (int) $v['surah'],
+                'verse' => (int) $v['verse'],
+                /** Each word as written, from the first. */
+                'words' => collect($v['words'])->map(fn ($w) => (string) $w)->values()->all(),
+            ])->values()->all(),
             /** Words marked in this lesson: kind wrong, hesitation or tajweed. */
             'marks' => $page['marks'],
             /** Words on this page marked in the student's earlier lessons (shown faintly): the latest kind and how many times. */
@@ -56,23 +61,26 @@ final class MushafPresenter
             /** Words marked in the last six months. */
             'words' => $book['words'],
             /** By surah and verse: each verse's words as written, and its marked words (by place, from 1). */
-            'surahs' => array_map(fn (array $s) => [
-                'surah' => $s['surah'],
-                'name_ar' => $s['name_ar'],
-                'name_en' => $s['name_en'],
-                'words' => $s['words'],
-                'verses' => array_map(fn (array $v) => [
-                    'verse' => $v['verse'],
-                    'words' => $v['words'],
-                    'marks' => array_map(fn (array $m) => [
-                        'word' => $m['word'],
-                        'times' => $m['times'],
+            'surahs' => collect($book['surahs'])->map(fn (array $s) => [
+                'surah' => (int) $s['surah'],
+                'name_ar' => (string) $s['name_ar'],
+                'name_en' => (string) $s['name_en'],
+                /** Words marked in this surah. */
+                'words' => (int) $s['words'],
+                'verses' => collect($s['verses'])->map(fn (array $v) => [
+                    'verse' => (int) $v['verse'],
+                    /** The verse's words as written, from the first. */
+                    'words' => collect($v['words'])->map(fn ($w) => (string) $w)->values()->all(),
+                    'marks' => collect($v['marks'])->map(fn (array $m) => [
+                        /** Its place in the verse, from 1. */
+                        'word' => (int) $m['word'],
+                        'times' => (int) $m['times'],
                         /** wrong, hesitation, tajweed */
-                        'kinds' => $m['kinds'],
+                        'kinds' => collect($m['kinds'])->map(fn ($k) => (string) $k)->values()->all(),
                         'last_at' => $this->time->present($m['last_at']),
-                    ], $v['marks']),
-                ], $s['verses']),
-            ], $book['surahs']),
+                    ])->values()->all(),
+                ])->values()->all(),
+            ])->values()->all(),
             'kinds' => $this->kinds(),
         ];
     }

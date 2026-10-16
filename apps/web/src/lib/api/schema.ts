@@ -6878,7 +6878,31 @@ export interface operations {
                             /** @description Words marked in the last six months. */
                             words: number;
                             /** @description By surah and verse: each verse's words as written, and its marked words (by place, from 1). */
-                            surahs: unknown[];
+                            surahs: {
+                                surah: number;
+                                name_ar: string;
+                                name_en: string;
+                                /** @description Words marked in this surah. */
+                                words: number;
+                                verses: {
+                                    verse: number;
+                                    /** @description The verse's words as written, from the first. */
+                                    words: string[];
+                                    marks: {
+                                        /** @description Its place in the verse, from 1. */
+                                        word: number;
+                                        times: number;
+                                        /** @description wrong, hesitation, tajweed */
+                                        kinds: string[];
+                                        last_at: {
+                                            utc: string;
+                                            local: string;
+                                            timezone: null;
+                                            label: string;
+                                        } | null;
+                                    }[];
+                                }[];
+                            }[];
                             kinds: {
                                 [key: string]: string;
                             };
@@ -6948,7 +6972,12 @@ export interface operations {
                             /** @description The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here. */
                             basmala: string[] | null;
                             /** @description The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1. */
-                            verses: unknown[];
+                            verses: {
+                                surah: number;
+                                verse: number;
+                                /** @description Each word as written, from the first. */
+                                words: string[];
+                            }[];
                             /** @description Words marked in this lesson: kind wrong, hesitation or tajweed. */
                             marks: {
                                 surah: number;
@@ -7039,7 +7068,12 @@ export interface operations {
                             /** @description The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here. */
                             basmala: string[] | null;
                             /** @description The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1. */
-                            verses: unknown[];
+                            verses: {
+                                surah: number;
+                                verse: number;
+                                /** @description Each word as written, from the first. */
+                                words: string[];
+                            }[];
                             /** @description Words marked in this lesson: kind wrong, hesitation or tajweed. */
                             marks: {
                                 surah: number;
@@ -7135,7 +7169,12 @@ export interface operations {
                             /** @description The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here. */
                             basmala: string[] | null;
                             /** @description The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1. */
-                            verses: unknown[];
+                            verses: {
+                                surah: number;
+                                verse: number;
+                                /** @description Each word as written, from the first. */
+                                words: string[];
+                            }[];
                             /** @description Words marked in this lesson: kind wrong, hesitation or tajweed. */
                             marks: {
                                 surah: number;
@@ -7225,7 +7264,12 @@ export interface operations {
                             /** @description The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here. */
                             basmala: string[] | null;
                             /** @description The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1. */
-                            verses: unknown[];
+                            verses: {
+                                surah: number;
+                                verse: number;
+                                /** @description Each word as written, from the first. */
+                                words: string[];
+                            }[];
                             /** @description Words marked in this lesson: kind wrong, hesitation or tajweed. */
                             marks: {
                                 surah: number;
@@ -8419,7 +8463,31 @@ export interface operations {
                             /** @description Words marked in the last six months. */
                             words: number;
                             /** @description By surah and verse: each verse's words as written, and its marked words (by place, from 1). */
-                            surahs: unknown[];
+                            surahs: {
+                                surah: number;
+                                name_ar: string;
+                                name_en: string;
+                                /** @description Words marked in this surah. */
+                                words: number;
+                                verses: {
+                                    verse: number;
+                                    /** @description The verse's words as written, from the first. */
+                                    words: string[];
+                                    marks: {
+                                        /** @description Its place in the verse, from 1. */
+                                        word: number;
+                                        times: number;
+                                        /** @description wrong, hesitation, tajweed */
+                                        kinds: string[];
+                                        last_at: {
+                                            utc: string;
+                                            local: string;
+                                            timezone: null;
+                                            label: string;
+                                        } | null;
+                                    }[];
+                                }[];
+                            }[];
                             kinds: {
                                 [key: string]: string;
                             };
