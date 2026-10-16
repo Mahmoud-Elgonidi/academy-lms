@@ -99,10 +99,14 @@ final class HifzMap
         if (HifzPage::query()->where('student_id', $course->studentId)->exists()) {
             return true;
         }
-        if ($course->curriculumVersionId === null) {
-            return false;
-        }
-        $sources = $this->curriculum->textSources(array_keys($this->curriculum->tree($course->curriculumVersionId)->nodes));
+
+        return $course->curriculumVersionId !== null && $this->readsQuran($course->curriculumVersionId);
+    }
+
+    /** Whether a curriculum version has a lesson whose text is a passage of the Quran. */
+    public function readsQuran(string $versionId): bool
+    {
+        $sources = $this->curriculum->textSources(array_keys($this->curriculum->tree($versionId)->nodes));
 
         return array_filter($sources, fn (TextSource $s) => $s->isQuran()) !== [];
     }

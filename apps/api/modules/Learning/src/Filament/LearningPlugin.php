@@ -7,12 +7,14 @@ use Filament\Panel;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
+use Modules\Learning\Filament\Pages\HifzOverview;
+use Modules\Learning\Filament\Pages\HifzStudent;
 use Modules\Learning\Filament\Pages\ReportsOversight;
 use Modules\Learning\Filament\Pages\ReportTemplates;
 use Modules\Learning\Filament\Pages\WeeklyNoteSettings;
 
 /**
- * Learning in the academy back office: report follow-up, the curriculum and
+ * Learning in the academy back office: report follow-up, the academy's hifz, the curriculum and
  * progress section of the student account (Scheduling's page renders the
  * "scheduling::enrollment.account" hook), and the journey's style on the
  * games' settings page (its "games::settings" hook).
@@ -33,7 +35,7 @@ final class LearningPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([ReportsOversight::class, ReportTemplates::class, WeeklyNoteSettings::class]);
+        $panel->pages([ReportsOversight::class, ReportTemplates::class, WeeklyNoteSettings::class, HifzOverview::class, HifzStudent::class]);
     }
 
     public function boot(Panel $panel): void {}

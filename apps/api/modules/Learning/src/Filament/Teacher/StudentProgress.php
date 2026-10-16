@@ -23,7 +23,7 @@ use Modules\Learning\Authorization\LearningAccess;
 use Modules\Learning\Hifz\HifzPages;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\Hifz\HifzMap;
-use Modules\Learning\Queries\Mushaf\MistakesBook;
+use Modules\Learning\Queries\Hifz\StudentHifz;
 use Modules\Learning\Queries\RoadmapQuery;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -73,22 +73,8 @@ final class StudentProgress extends Page
         if ($course === null || ! app(HifzMap::class)->follows($course)) {
             return null;
         }
-        $student = $course->studentId;
-        $tz = app(ViewerTimezone::class)->effective();
-        $now = CarbonImmutable::now();
-        $map = app(HifzMap::class);
 
-        return [
-            'map' => $map->for($student, $now),
-            'recent' => array_map(fn (array $r) => [
-                'page' => $r['page'],
-                'grade' => __('learning::hifz.grades.'.$r['grade']),
-                'source' => __('learning::hifz.sources.'.$r['source']),
-                'at' => $r['reviewed_at']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i'),
-            ], $map->recent($student, $now, 12)),
-            'book' => app(MistakesBook::class)->for($student, $now),
-            'tz' => $tz,
-        ];
+        return app(StudentHifz::class)->for($course->studentId, CarbonImmutable::now(), app(ViewerTimezone::class)->effective());
     }
 
     /** @return list<Action> */

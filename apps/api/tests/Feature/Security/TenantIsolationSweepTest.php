@@ -216,7 +216,9 @@ it('keeps every record of one academy out of reach of another academy\'s people'
             // Announcements: this academy's only; the demo's, asked for by id, is not found.
             'admin/announcements', 'admin/announcements?announcement={announcement}',
             // "Start here": this academy's own setup, read from its own rows.
-            'admin/start-here'],
+            'admin/start-here',
+            // The academy's hifz: its own courses only; the demo's student, asked for by course, is not found.
+            'admin/hifz', 'admin/hifz/{enrollment}'],
         'accountant' => ['admin/invoices/{invoice}', 'admin/payroll/{teacher}', 'billing/proofs/{proof}/file'],
         'teacher' => ['teach/reports/{report}', 'teach/reports/{report}/game', 'teach/students/{enrollment}', 'class/{session}', 'class/{session}/go', 'class/{session}/mushaf',
             'learning/files/{submission}', 'support/files/{message}', 'people/checks/{check}/file'],

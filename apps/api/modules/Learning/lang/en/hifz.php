@@ -64,4 +64,14 @@ return [
         'none' => 'Choose a part, a surah or a page.',
         'not_available' => "The Quran's text is not on the platform yet.",
     ],
+    'board' => [
+        'nav' => 'Hifz',
+        'title' => "Students' hifz",
+        'search' => "Search by the student's name",
+        'all_teachers' => 'All teachers',
+        'empty' => 'No students on courses a hifz map follows. Once a lesson in a curriculum reads a passage of the Quran, its students show here.',
+        'no_text' => "The platform does not have the Quran's text yet, so there is no hifz map. It is fetched from the console's platform settings.",
+        'never' => 'Not yet',
+        'columns' => ['student' => 'Student', 'teacher' => 'Teacher', 'subject' => 'Subject', 'memorized' => 'Memorized', 'learning' => 'Learning', 'weak' => 'Weak', 'due' => 'Due', 'last' => 'Last review', 'words' => 'Notebook words'],
+    ],
 ];
