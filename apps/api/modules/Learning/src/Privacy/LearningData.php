@@ -66,10 +66,13 @@ final class LearningData implements PersonalDataSource
                 ->get(['page', 'grade', 'source', 'reviewed_at'])->map(fn (object $r) => (array) $r)->all(),
             'hifz_recited' => DB::table('hifz_recitations')->where('student_id', $userId)->orderBy('created_at')
                 ->get(['page', 'status', 'grade', 'created_at'])->map(fn (object $r) => (array) $r)->all(),
+            // The mistakes notebook: the words their teachers marked in their lessons' shared mushaf.
+            'mistakes' => DB::table('recitation_mistakes')->where('student_id', $userId)->orderBy('created_at')
+                ->get(['surah', 'verse', 'word', 'kind', 'created_at'])->map(fn (object $m) => (array) $m)->all(),
         ], $files);
     }
 
-    /** The hifz map, its reviews and the pages recited (a recording still waiting to be heard with them). */
+    /** The hifz map, its reviews, the pages recited (a recording still waiting to be heard with them) and the mistakes notebook. */
     private function eraseHifz(string $userId): int
     {
         $waiting = DB::table('hifz_recitations')->where('student_id', $userId)->whereNotNull('file_path')->pluck('file_path')->all();
@@ -77,7 +80,8 @@ final class LearningData implements PersonalDataSource
             DB::afterCommit(fn () => Storage::disk(SubmitHomework::DISK)->delete($waiting));
         }
 
-        return DB::table('hifz_recitations')->where('student_id', $userId)->delete()
+        return DB::table('recitation_mistakes')->where('student_id', $userId)->delete()
+            + DB::table('hifz_recitations')->where('student_id', $userId)->delete()
             + DB::table('hifz_reviews')->where('student_id', $userId)->delete()
             + DB::table('hifz_pages')->where('student_id', $userId)->delete();
     }

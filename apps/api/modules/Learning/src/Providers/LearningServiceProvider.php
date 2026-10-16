@@ -39,6 +39,7 @@ use Modules\Learning\Listeners\RebuildProgressOnProgramChange;
 use Modules\Learning\Listeners\SendLearningNotifications;
 use Modules\Learning\Live\HifzChanged;
 use Modules\Learning\Live\HomeworkChanged;
+use Modules\Learning\Live\MushafChanged;
 use Modules\Learning\Live\PracticeChanged;
 use Modules\Learning\Privacy\LearningData;
 use Modules\Learning\Queries\Journey\NoJourneyGames;
@@ -123,6 +124,7 @@ final class LearningServiceProvider extends ServiceProvider
         $this->app->make(LiveSignals::class)->on('practice', fn (string $userId) => new PracticeChanged($userId));
         // The hifz map refreshes when a page is reviewed, marked or recited (the hifz triggers raise "hifz:{person}").
         $this->app->make(LiveSignals::class)->on('hifz', fn (string $userId) => new HifzChanged($userId));
+        $this->app->make(LiveSignals::class)->on('mushaf', fn (string $userId) => new MushafChanged($userId));
 
         if ($this->app->runningInConsole()) {
             $this->commands([SweepLearningCommand::class, TryRecitationCommand::class, SendWeeklyDigestsCommand::class]);

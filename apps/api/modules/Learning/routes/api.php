@@ -5,6 +5,7 @@ use Modules\Learning\Http\V1\Controllers\ChallengesController;
 use Modules\Learning\Http\V1\Controllers\HifzController;
 use Modules\Learning\Http\V1\Controllers\JourneyController;
 use Modules\Learning\Http\V1\Controllers\LearnerController;
+use Modules\Learning\Http\V1\Controllers\MushafController;
 use Modules\Learning\Http\V1\Controllers\TeacherHifzController;
 use Modules\Learning\Http\V1\Controllers\TeacherReportsController;
 
@@ -24,6 +25,16 @@ Route::middleware(['auth:sanctum', 'can:reports.write'])->prefix('teacher')->gro
     Route::get('students/{enrollment}/hifz', [TeacherHifzController::class, 'show'])->name('teacher.hifz.show');
     Route::post('students/{enrollment}/hifz/memorized', [TeacherHifzController::class, 'mark'])->middleware('throttle:30,1')->name('teacher.hifz.mark');
     Route::post('students/{enrollment}/hifz/clear', [TeacherHifzController::class, 'clear'])->middleware('throttle:30,1')->name('teacher.hifz.clear');
+    // A student's mistakes notebook: the words marked in their lessons' shared mushaf.
+    Route::get('students/{enrollment}/mistakes', [TeacherHifzController::class, 'mistakes'])->name('teacher.mistakes');
+});
+
+// A Quran lesson's shared mushaf: its teacher turns the pages and marks words; its student and their guardians follow.
+Route::middleware('auth:sanctum')->prefix('learning/lessons/{session}')->group(function () {
+    Route::get('mushaf', [MushafController::class, 'show'])->middleware('throttle:240,1')->name('learning.mushaf');
+    Route::put('mushaf', [MushafController::class, 'turn'])->middleware('throttle:120,1')->name('learning.mushaf.turn');
+    Route::post('mistakes', [MushafController::class, 'mark'])->middleware('throttle:120,1')->name('learning.mistakes.mark');
+    Route::delete('mistakes', [MushafController::class, 'unmark'])->middleware('throttle:120,1')->name('learning.mistakes.unmark');
 });
 
 // Students and guardians: the roadmap, the reports and the homework of each child.
@@ -45,6 +56,8 @@ Route::middleware('auth:sanctum')->prefix('learning')->group(function () {
     Route::post('hifz/pages/{page}/recitations', [HifzController::class, 'recite'])->whereNumber('page')->middleware('throttle:10,1')->name('learning.hifz.recite');
     Route::get('hifz/recitations/{recitation}', [HifzController::class, 'recitation'])->middleware('throttle:60,1')->name('learning.hifz.recitation');
     Route::post('hifz/pages/{page}/grade', [HifzController::class, 'grade'])->whereNumber('page')->middleware(['idempotent', 'throttle:30,1'])->name('learning.hifz.grade');
+    // The mistakes notebook: the words marked in the learner's lessons, by surah.
+    Route::get('mistakes', [MushafController::class, 'book'])->middleware('throttle:60,1')->name('learning.mistakes');
 
     // The game layer: challenges by stage, collecting rewards, and guardians' cheers.
     Route::get('challenges', [ChallengesController::class, 'index'])->name('learning.challenges');

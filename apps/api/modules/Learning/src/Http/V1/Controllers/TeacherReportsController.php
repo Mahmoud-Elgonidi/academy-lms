@@ -72,7 +72,8 @@ final class TeacherReportsController
      * The report with today's plan, the lessons to choose from, the homework set from it, the roadmap, and the
      * subject's own questions (`template`, null when it has none); send their answers as `answers` by key.
      * Homework handed in by voice may say what to recite (`homework.expected`: surah, from, to) when
-     * `assist.recitation_check`; `expected_suggestion` is the passage of the report's lessons' text.
+     * `assist.recitation_check`; `expected_suggestion` is the passage of the report's lessons' text, and
+     * `mistakes_suggestion` the verses with the words marked in the lesson's shared mushaf.
      */
     public function show(Request $request, string $report, RoadmapQuery $roadmap, AcademyAi $ai): JsonResponse
     {
@@ -93,6 +94,8 @@ final class TeacherReportsController
             ],
             // What the report's lessons ask to recite, to start homework.expected from (null: none).
             'expected_suggestion' => $report->kind === 'lesson' ? $this->recitation->suggestion(array_column($items, 'node_id')) : null,
+            // The verses with the words marked in the lesson's shared mushaf (the surah with the most marks; null: none).
+            'mistakes_suggestion' => $report->kind === 'lesson' ? $this->recitation->fromMistakes($report->session_id) : null,
         ]]);
     }
 

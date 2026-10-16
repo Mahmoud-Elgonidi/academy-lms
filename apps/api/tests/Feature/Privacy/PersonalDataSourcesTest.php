@@ -169,6 +169,8 @@ function pdsSeedEverySource(object $t): void
     DB::table('hifz_reviews')->insert(['id' => $id(), 'student_id' => $s->id, 'page' => 582, 'grade' => 3, 'source' => 'teacher', 'source_id' => $id(), 'reviewed_at' => $now, 'created_at' => $now]);
     DB::table('hifz_recitations')->insert(['id' => $id(), 'student_id' => $s->id, 'page' => 582, 'status' => 'ready', 'grade' => 3, 'recited_by' => $g->id,
         'result' => json_encode(['summary' => ['words' => 10, 'ok' => 9, 'missing' => 1, 'wrong' => 0, 'extra' => 0]]), 'created_at' => $now]);
+    DB::table('recitation_mistakes')->insert(['id' => $id(), 'student_id' => $s->id, 'session_id' => $lesson, 'teacher_id' => $tr->id, 'surah' => 78, 'verse' => 3, 'word' => 2,
+        'kind' => 'hesitation', 'created_at' => $now, 'updated_at' => $now]);
 
     // messaging: the student, the guardian and the teacher talk; the student typed a number.
     test()->actingAs($s);
@@ -337,7 +339,8 @@ function pdsSnapshot(array $people): array
         'learning' => [DB::table('homework_submissions')->where('submitted_by', $s)->count(), DB::table('challenge_claims')->where('student_id', $s)->count(),
             DB::table('cheers')->where('student_id', $s)->orWhere('from_id', $g)->count(), DB::table('homework')->where('student_id', $s)->count(), DB::table('practice_rounds')->where('student_id', $s)->count(),
             DB::table('weekly_digests')->where('student_id', $s)->count(),
-            DB::table('hifz_pages')->where('student_id', $s)->count() + DB::table('hifz_reviews')->where('student_id', $s)->count() + DB::table('hifz_recitations')->where('student_id', $s)->count()],
+            DB::table('hifz_pages')->where('student_id', $s)->count() + DB::table('hifz_reviews')->where('student_id', $s)->count() + DB::table('hifz_recitations')->where('student_id', $s)->count()
+                + DB::table('recitation_mistakes')->where('student_id', $s)->count()],
         'messaging' => DB::table('conversation_messages')->count(),
         'earnings' => DB::table('teacher_earnings')->where('teacher_id', $t)->count(),
         'safeguarding' => DB::table('safeguarding_concerns')->where('reporter_id', $s)->count(),

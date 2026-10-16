@@ -2,6 +2,7 @@
 
 namespace Modules\Learning\Assist;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Modules\Curriculum\Contracts\CurriculumApi;
@@ -99,5 +100,27 @@ final class RecitationTarget
         }
 
         return null;
+    }
+
+    /**
+     * What to suggest from the words marked in the lesson's shared mushaf: the surah with the most marks, from its
+     * first marked verse to its last (as many verses as a check takes).
+     *
+     * @return ?array{surah: int, from: int, to: int, title: string}
+     */
+    public function fromMistakes(string $sessionId): ?array
+    {
+        $top = DB::table('recitation_mistakes')->where('session_id', $sessionId)->groupBy('surah')
+            ->selectRaw('surah, count(*) as marks, min(verse) as first_verse, max(verse) as last_verse')
+            ->orderByDesc('marks')->orderBy('surah')->first();
+        if ($top === null) {
+            return null;
+        }
+        [$surah, $from, $to] = [(int) $top->surah, (int) $top->first_verse, (int) $top->last_verse];
+        while ($to > $from && count($this->curriculum->passage(TextSource::quran($surah, $from, $to))?->words ?? []) > WordAlignment::MAX_EXPECTED) {
+            $to--;
+        }
+
+        return $this->present(TextSource::quran($surah, $from, $to));
     }
 }

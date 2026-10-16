@@ -7613,7 +7613,7 @@
         "/v1/teacher/reports/{report}": {
             "get": {
                 "operationId": "teacher.reports.show",
-                "description": "The report with today's plan, the lessons to choose from, the homework set from it, the roadmap, and the\nsubject's own questions (`template`, null when it has none); send their answers as `answers` by key.\nHomework handed in by voice may say what to recite (`homework.expected`: surah, from, to) when\n`assist.recitation_check`; `expected_suggestion` is the passage of the report's lessons' text.",
+                "description": "The report with today's plan, the lessons to choose from, the homework set from it, the roadmap, and the\nsubject's own questions (`template`, null when it has none); send their answers as `answers` by key.\nHomework handed in by voice may say what to recite (`homework.expected`: surah, from, to) when\n`assist.recitation_check`; `expected_suggestion` is the passage of the report's lessons' text, and\n`mistakes_suggestion` the verses with the words marked in the lesson's shared mushaf.",
                 "summary": "A report to write or correct",
                 "tags": [
                     "Learning"
@@ -9327,7 +9327,7 @@
                                                             },
                                                             "source": {
                                                                 "type": "string",
-                                                                "description": "teacher, report, check (homework), wird (a page recited for the daily review) or self (their own grade)"
+                                                                "description": "teacher, report, check (homework), wird (a page recited for the daily review), self (their own grade) or mistakes (words marked in a lesson's shared mushaf)"
                                                             },
                                                             "source_label": {
                                                                 "type": "string"
@@ -9648,6 +9648,1156 @@
                     },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/teacher/students/{enrollment}/mistakes": {
+            "get": {
+                "operationId": "teacher.mistakes",
+                "description": "The words marked in their lessons in the last six months, by surah and verse.",
+                "summary": "A student's mistakes notebook",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "enrollment_id": {
+                                                    "type": "string"
+                                                },
+                                                "words": {
+                                                    "description": "Words marked in the last six months.",
+                                                    "type": "number"
+                                                },
+                                                "surahs": {
+                                                    "type": "array",
+                                                    "description": "By surah and verse: each verse's words as written, and its marked words (by place, from 1).",
+                                                    "items": {}
+                                                },
+                                                "kinds": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "enrollment_id",
+                                                "words",
+                                                "surahs",
+                                                "kinds"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/learning/lessons/{session}/mushaf": {
+            "get": {
+                "operationId": "learning.mushaf",
+                "description": "The page asked for, else the one the teacher has open, else where the lesson starts; its words, and the words\nmarked on it. For the lesson's teacher, its student and the student's guardians, in a lesson of a course that\nreads the Quran.",
+                "summary": "A lesson's shared mushaf",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 604
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "session_id": {
+                                                    "type": "string"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "description": "teacher (turns the pages and marks words), student or guardian (follow and read)"
+                                                },
+                                                "can_mark": {
+                                                    "type": "boolean",
+                                                    "description": "Whether I may mark words now (the teacher, from the room's opening until the report is handed in)."
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "description": "The page shown (1 to 604)."
+                                                },
+                                                "teacher_page": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "The page the teacher has open: the student's screen follows it; null until the teacher turns one."
+                                                },
+                                                "start_page": {
+                                                    "type": "integer",
+                                                    "description": "Where the lesson starts (its plan's passage of the Quran, else the oldest page due for review)."
+                                                },
+                                                "pages_total": {
+                                                    "type": "integer"
+                                                },
+                                                "juz": {
+                                                    "type": "integer"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "surahs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "number": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name_ar": {
+                                                                "type": "string"
+                                                            },
+                                                            "name_en": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "number",
+                                                            "name_ar",
+                                                            "name_en"
+                                                        ]
+                                                    }
+                                                },
+                                                "basmala": {
+                                                    "type": [
+                                                        "array",
+                                                        "null"
+                                                    ],
+                                                    "description": "The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here.",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "verses": {
+                                                    "type": "array",
+                                                    "description": "The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1.",
+                                                    "items": {}
+                                                },
+                                                "marks": {
+                                                    "type": "array",
+                                                    "description": "Words marked in this lesson: kind wrong, hesitation or tajweed.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "verse": {
+                                                                "type": "integer"
+                                                            },
+                                                            "word": {
+                                                                "type": "integer"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "verse",
+                                                            "word",
+                                                            "kind"
+                                                        ]
+                                                    }
+                                                },
+                                                "earlier": {
+                                                    "type": "array",
+                                                    "description": "Words on this page marked in the student's earlier lessons (shown faintly): the latest kind and how many times.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "verse": {
+                                                                "type": "integer"
+                                                            },
+                                                            "word": {
+                                                                "type": "integer"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string"
+                                                            },
+                                                            "times": {
+                                                                "type": "integer"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "verse",
+                                                            "word",
+                                                            "kind",
+                                                            "times"
+                                                        ]
+                                                    }
+                                                },
+                                                "kinds": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "attribution": {
+                                                    "type": "string",
+                                                    "description": "The attribution the text is shown with."
+                                                }
+                                            },
+                                            "required": [
+                                                "session_id",
+                                                "role",
+                                                "can_mark",
+                                                "page",
+                                                "teacher_page",
+                                                "start_page",
+                                                "pages_total",
+                                                "juz",
+                                                "title",
+                                                "surahs",
+                                                "basmala",
+                                                "verses",
+                                                "marks",
+                                                "earlier",
+                                                "kinds",
+                                                "attribution"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "learning.mushaf.turn",
+                "description": "The teacher only; the student's screen follows (live).",
+                "summary": "Turn the lesson's mushaf to a page",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "page": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 604
+                                    }
+                                },
+                                "required": [
+                                    "page"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "session_id": {
+                                                    "type": "string"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "description": "teacher (turns the pages and marks words), student or guardian (follow and read)"
+                                                },
+                                                "can_mark": {
+                                                    "type": "boolean",
+                                                    "description": "Whether I may mark words now (the teacher, from the room's opening until the report is handed in)."
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "description": "The page shown (1 to 604)."
+                                                },
+                                                "teacher_page": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "The page the teacher has open: the student's screen follows it; null until the teacher turns one."
+                                                },
+                                                "start_page": {
+                                                    "type": "integer",
+                                                    "description": "Where the lesson starts (its plan's passage of the Quran, else the oldest page due for review)."
+                                                },
+                                                "pages_total": {
+                                                    "type": "integer"
+                                                },
+                                                "juz": {
+                                                    "type": "integer"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "surahs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "number": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name_ar": {
+                                                                "type": "string"
+                                                            },
+                                                            "name_en": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "number",
+                                                            "name_ar",
+                                                            "name_en"
+                                                        ]
+                                                    }
+                                                },
+                                                "basmala": {
+                                                    "type": [
+                                                        "array",
+                                                        "null"
+                                                    ],
+                                                    "description": "The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here.",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "verses": {
+                                                    "type": "array",
+                                                    "description": "The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1.",
+                                                    "items": {}
+                                                },
+                                                "marks": {
+                                                    "type": "array",
+                                                    "description": "Words marked in this lesson: kind wrong, hesitation or tajweed.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "verse": {
+                                                                "type": "integer"
+                                                            },
+                                                            "word": {
+                                                                "type": "integer"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "verse",
+                                                            "word",
+                                                            "kind"
+                                                        ]
+                                                    }
+                                                },
+                                                "earlier": {
+                                                    "type": "array",
+                                                    "description": "Words on this page marked in the student's earlier lessons (shown faintly): the latest kind and how many times.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "verse": {
+                                                                "type": "integer"
+                                                            },
+                                                            "word": {
+                                                                "type": "integer"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string"
+                                                            },
+                                                            "times": {
+                                                                "type": "integer"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "verse",
+                                                            "word",
+                                                            "kind",
+                                                            "times"
+                                                        ]
+                                                    }
+                                                },
+                                                "kinds": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "attribution": {
+                                                    "type": "string",
+                                                    "description": "The attribution the text is shown with."
+                                                }
+                                            },
+                                            "required": [
+                                                "session_id",
+                                                "role",
+                                                "can_mark",
+                                                "page",
+                                                "teacher_page",
+                                                "start_page",
+                                                "pages_total",
+                                                "juz",
+                                                "title",
+                                                "surahs",
+                                                "basmala",
+                                                "verses",
+                                                "marks",
+                                                "earlier",
+                                                "kinds",
+                                                "attribution"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/learning/lessons/{session}/mistakes": {
+            "post": {
+                "operationId": "learning.mistakes.mark",
+                "description": "The teacher, from the room's opening until the report is handed in: wrong, hesitation or tajweed; marking it\nagain changes what it was. Answers the page (page, else the word's).",
+                "summary": "Mark a word",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "surah": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 114
+                                    },
+                                    "verse": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 300
+                                    },
+                                    "word": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 200
+                                    },
+                                    "page": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 1,
+                                        "maximum": 604
+                                    },
+                                    "kind": {
+                                        "type": "string",
+                                        "enum": [
+                                            "wrong",
+                                            "hesitation",
+                                            "tajweed"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "surah",
+                                    "verse",
+                                    "word",
+                                    "kind"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "session_id": {
+                                                    "type": "string"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "description": "teacher (turns the pages and marks words), student or guardian (follow and read)"
+                                                },
+                                                "can_mark": {
+                                                    "type": "boolean",
+                                                    "description": "Whether I may mark words now (the teacher, from the room's opening until the report is handed in)."
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "description": "The page shown (1 to 604)."
+                                                },
+                                                "teacher_page": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "The page the teacher has open: the student's screen follows it; null until the teacher turns one."
+                                                },
+                                                "start_page": {
+                                                    "type": "integer",
+                                                    "description": "Where the lesson starts (its plan's passage of the Quran, else the oldest page due for review)."
+                                                },
+                                                "pages_total": {
+                                                    "type": "integer"
+                                                },
+                                                "juz": {
+                                                    "type": "integer"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "surahs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "number": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name_ar": {
+                                                                "type": "string"
+                                                            },
+                                                            "name_en": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "number",
+                                                            "name_ar",
+                                                            "name_en"
+                                                        ]
+                                                    }
+                                                },
+                                                "basmala": {
+                                                    "type": [
+                                                        "array",
+                                                        "null"
+                                                    ],
+                                                    "description": "The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here.",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "verses": {
+                                                    "type": "array",
+                                                    "description": "The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1.",
+                                                    "items": {}
+                                                },
+                                                "marks": {
+                                                    "type": "array",
+                                                    "description": "Words marked in this lesson: kind wrong, hesitation or tajweed.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "verse": {
+                                                                "type": "integer"
+                                                            },
+                                                            "word": {
+                                                                "type": "integer"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "verse",
+                                                            "word",
+                                                            "kind"
+                                                        ]
+                                                    }
+                                                },
+                                                "earlier": {
+                                                    "type": "array",
+                                                    "description": "Words on this page marked in the student's earlier lessons (shown faintly): the latest kind and how many times.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "verse": {
+                                                                "type": "integer"
+                                                            },
+                                                            "word": {
+                                                                "type": "integer"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string"
+                                                            },
+                                                            "times": {
+                                                                "type": "integer"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "verse",
+                                                            "word",
+                                                            "kind",
+                                                            "times"
+                                                        ]
+                                                    }
+                                                },
+                                                "kinds": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "attribution": {
+                                                    "type": "string",
+                                                    "description": "The attribution the text is shown with."
+                                                }
+                                            },
+                                            "required": [
+                                                "session_id",
+                                                "role",
+                                                "can_mark",
+                                                "page",
+                                                "teacher_page",
+                                                "start_page",
+                                                "pages_total",
+                                                "juz",
+                                                "title",
+                                                "surahs",
+                                                "basmala",
+                                                "verses",
+                                                "marks",
+                                                "earlier",
+                                                "kinds",
+                                                "attribution"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "learning.mistakes.unmark",
+                "description": "The teacher, while words may be marked. Answers the page (page, else the word's).",
+                "summary": "Take a mark off a word",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "surah",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 114
+                        }
+                    },
+                    {
+                        "name": "verse",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 300
+                        }
+                    },
+                    {
+                        "name": "word",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 200
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 604
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "session_id": {
+                                                    "type": "string"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "description": "teacher (turns the pages and marks words), student or guardian (follow and read)"
+                                                },
+                                                "can_mark": {
+                                                    "type": "boolean",
+                                                    "description": "Whether I may mark words now (the teacher, from the room's opening until the report is handed in)."
+                                                },
+                                                "page": {
+                                                    "type": "integer",
+                                                    "description": "The page shown (1 to 604)."
+                                                },
+                                                "teacher_page": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "The page the teacher has open: the student's screen follows it; null until the teacher turns one."
+                                                },
+                                                "start_page": {
+                                                    "type": "integer",
+                                                    "description": "Where the lesson starts (its plan's passage of the Quran, else the oldest page due for review)."
+                                                },
+                                                "pages_total": {
+                                                    "type": "integer"
+                                                },
+                                                "juz": {
+                                                    "type": "integer"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "surahs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "number": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name_ar": {
+                                                                "type": "string"
+                                                            },
+                                                            "name_en": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "number",
+                                                            "name_ar",
+                                                            "name_en"
+                                                        ]
+                                                    }
+                                                },
+                                                "basmala": {
+                                                    "type": [
+                                                        "array",
+                                                        "null"
+                                                    ],
+                                                    "description": "The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here.",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "verses": {
+                                                    "type": "array",
+                                                    "description": "The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1.",
+                                                    "items": {}
+                                                },
+                                                "marks": {
+                                                    "type": "array",
+                                                    "description": "Words marked in this lesson: kind wrong, hesitation or tajweed.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "verse": {
+                                                                "type": "integer"
+                                                            },
+                                                            "word": {
+                                                                "type": "integer"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "verse",
+                                                            "word",
+                                                            "kind"
+                                                        ]
+                                                    }
+                                                },
+                                                "earlier": {
+                                                    "type": "array",
+                                                    "description": "Words on this page marked in the student's earlier lessons (shown faintly): the latest kind and how many times.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "surah": {
+                                                                "type": "integer"
+                                                            },
+                                                            "verse": {
+                                                                "type": "integer"
+                                                            },
+                                                            "word": {
+                                                                "type": "integer"
+                                                            },
+                                                            "kind": {
+                                                                "type": "string"
+                                                            },
+                                                            "times": {
+                                                                "type": "integer"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "surah",
+                                                            "verse",
+                                                            "word",
+                                                            "kind",
+                                                            "times"
+                                                        ]
+                                                    }
+                                                },
+                                                "kinds": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "attribution": {
+                                                    "type": "string",
+                                                    "description": "The attribution the text is shown with."
+                                                }
+                                            },
+                                            "required": [
+                                                "session_id",
+                                                "role",
+                                                "can_mark",
+                                                "page",
+                                                "teacher_page",
+                                                "start_page",
+                                                "pages_total",
+                                                "juz",
+                                                "title",
+                                                "surahs",
+                                                "basmala",
+                                                "verses",
+                                                "marks",
+                                                "earlier",
+                                                "kinds",
+                                                "attribution"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -13006,6 +14156,108 @@
                                                 "attribution",
                                                 "strength",
                                                 "due_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/learning/mistakes": {
+            "get": {
+                "operationId": "learning.mistakes",
+                "description": "The words their teachers marked in the last six months, by surah and verse (a guardian passes learner_id).",
+                "summary": "A learner's mistakes notebook",
+                "tags": [
+                    "Learning"
+                ],
+                "parameters": [
+                    {
+                        "name": "learner_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 64
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "learner_id": {
+                                                    "type": "string"
+                                                },
+                                                "words": {
+                                                    "description": "Words marked in the last six months.",
+                                                    "type": "number"
+                                                },
+                                                "surahs": {
+                                                    "type": "array",
+                                                    "description": "By surah and verse: each verse's words as written, and its marked words (by place, from 1).",
+                                                    "items": {}
+                                                },
+                                                "kinds": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "learner_id",
+                                                "words",
+                                                "surahs",
+                                                "kinds"
                                             ]
                                         }
                                     },

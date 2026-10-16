@@ -19,7 +19,7 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  */
 final class RecordHifzReview
 {
-    public const SOURCES = ['teacher', 'report', 'check', 'wird', 'self'];
+    public const SOURCES = ['teacher', 'report', 'check', 'wird', 'self', 'mistakes'];
 
     public function __construct(
         private readonly HifzPages $pages,

@@ -8,6 +8,7 @@ use Modules\Learning\Actions\Hifz\RecordHifzReview;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
 use Modules\Learning\Domain\Hifz\Scheduler;
 use Modules\Learning\Models\HifzPage;
+use Modules\Learning\Models\RecitationMistake;
 use Modules\Learning\Models\ReportItem;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Models\SubmissionCheck;
@@ -18,7 +19,11 @@ use Modules\SharedKernel\Ai\RecitationResult;
  * lesson whose text is a passage of the Quran reviews its pages by the
  * lesson's outcome (mastered: memorized; practised or introduced: learning;
  * needs review: forgotten), and a recited homework's check reviews each
- * page by the share of its words said right.
+ * page by the share of its words said right. Words the teacher marked in
+ * the lesson's shared mushaf say more than its outcome: when the report is
+ * handed in, a page with three wrong words or more is forgotten, one with a
+ * wrong word or two hesitations hard (tajweed alone says nothing of the
+ * memorizing), and its outcome is not counted again for that page.
  */
 final class HifzFromLessons
 {
@@ -34,9 +39,14 @@ final class HifzFromLessons
         if ($report === null) {
             return;
         }
+        $at = CarbonImmutable::parse($report->session_starts_at);
+        $seen = [];
+        foreach ($this->markedPages($report->session_id) as $page => $grade) {
+            $this->review->handle($event->studentId, $page, $grade, 'mistakes', $report->session_id, $at);
+            $seen[$page] = true;
+        }
         $items = ReportItem::query()->where('report_id', $report->id)->get(['node_id', 'outcome']);
         $sources = $this->curriculum->textSources($items->pluck('node_id')->all());
-        $seen = [];
         foreach ($items as $item) {
             $source = $sources[$item->node_id] ?? null;
             if (! $source?->isQuran()) {
@@ -55,10 +65,41 @@ final class HifzFromLessons
                     default => [Scheduler::AGAIN, false],
                 };
                 if ($grade !== null) {
-                    $this->review->handle($event->studentId, $page, $grade, 'report', $report->id, CarbonImmutable::parse($report->session_starts_at), $memorized);
+                    $this->review->handle($event->studentId, $page, $grade, 'report', $report->id, $at, $memorized);
                 }
             }
         }
+    }
+
+    /**
+     * The pages the lesson's marked words say something of, with the grade they give.
+     *
+     * @return array<int, int> page => grade
+     */
+    private function markedPages(string $sessionId): array
+    {
+        $marks = RecitationMistake::query()->where('session_id', $sessionId)->get(['surah', 'verse', 'kind']);
+        $pages = $this->pages->ofVerses($marks->map(fn (RecitationMistake $m) => ['surah' => $m->surah, 'verse' => $m->verse])->all());
+        $count = [];
+        foreach ($marks->values() as $i => $mark) {
+            if (($pages[$i] ?? 0) !== 0) {
+                $count[$pages[$i]][$mark->kind] = ($count[$pages[$i]][$mark->kind] ?? 0) + 1;
+            }
+        }
+        $grades = [];
+        foreach ($count as $page => $kinds) {
+            [$wrong, $hesitation] = [$kinds['wrong'] ?? 0, $kinds['hesitation'] ?? 0];
+            $grade = match (true) {
+                $wrong >= 3 => Scheduler::AGAIN,
+                $wrong >= 1 || $hesitation >= 2 => Scheduler::HARD,
+                default => null,
+            };
+            if ($grade !== null) {
+                $grades[$page] = $grade;
+            }
+        }
+
+        return $grades;
     }
 
     /** A recited homework's check: each page it covers, by the share of that page's words said right. */

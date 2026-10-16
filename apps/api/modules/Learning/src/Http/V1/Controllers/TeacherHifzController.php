@@ -18,7 +18,9 @@ use Modules\Learning\Authorization\LearningAccess;
 use Modules\Learning\Domain\Hifz\Scheduler;
 use Modules\Learning\Hifz\HifzPages;
 use Modules\Learning\Http\V1\Resources\HifzPresenter;
+use Modules\Learning\Http\V1\Resources\MushafPresenter;
 use Modules\Learning\Queries\Hifz\HifzMap;
+use Modules\Learning\Queries\Mushaf\MistakesBook;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -57,7 +59,7 @@ final class TeacherHifzController
                 'page' => (int) $r['page'],
                 'grade' => (int) $r['grade'],
                 'grade_label' => __('learning::hifz.grades.'.$r['grade']),
-                /** teacher, report, check (homework), wird (a page recited for the daily review) or self (their own grade) */
+                /** teacher, report, check (homework), wird (a page recited for the daily review), self (their own grade) or mistakes (words marked in a lesson's shared mushaf) */
                 'source' => (string) $r['source'],
                 'source_label' => __('learning::hifz.sources.'.$r['source']),
                 'at' => $time->present($r['reviewed_at']),
@@ -91,6 +93,18 @@ final class TeacherHifzController
         $count = $clear->handle($course->studentId, $this->chosen($request));
 
         return response()->json(['data' => ['cleared' => $count] + $this->present->map($course->studentId, CarbonImmutable::now())]);
+    }
+
+    /**
+     * A student's mistakes notebook.
+     *
+     * The words marked in their lessons in the last six months, by surah and verse.
+     */
+    public function mistakes(Request $request, string $enrollment, MistakesBook $book, MushafPresenter $present): JsonResponse
+    {
+        $course = $this->course($request, $enrollment);
+
+        return response()->json(['data' => ['enrollment_id' => $course->id, ...$present->book($book->for($course->studentId, CarbonImmutable::now()))]]);
     }
 
     /** @return array<string, list<mixed>> */
