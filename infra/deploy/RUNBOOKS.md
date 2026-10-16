@@ -339,6 +339,11 @@ no rub-el-hizb or sajdah signs, Tanzil's notice); otherwise it says what failed 
 Tanzil's addresses are `QURAN_TEXT_URL` and `QURAN_DATA_URL` in `.env` should they move. Until a copy is
 there, lessons cannot name a passage of the Quran and everything else works.
 
+A server with the demo academy brings it up to date on every deploy, whatever `DEMO_DATA` says
+(`DemoCatchUpSeeder`, its line in the deploy's output gives the counts): once the text is here, the demo's
+Juz' Amma lessons read their surahs, its Quran learners' last lessons have a few marked words, and their
+hifz maps are made from the reports already handed in.
+
 ## Scanning uploads
 
 Every file people upload (homework, payment receipts, ticket attachments, lesson materials, import
@@ -418,6 +423,9 @@ invoice), it goes back to the academy's "Data requests" page with the reason, an
 
 **An outside service's key** (Anthropic, ElevenLabs, SMTP, WhatsApp, Twilio, Firebase's file, LiveKit,
 Stripe Connect, Google and Apple): in the console, **Platform settings** (an owner of the platform team).
+Someone on the console's team who does not see it is not an owner yet: on GitHub, **Actions › console-owner
+› Run workflow** with their email (it runs `platform:admin <email> --owner` on the server, audited), or here,
+as the deploy user in `~/academy-lms`: `printf '%s\n' someone@example.com | bash console.sh owner`.
 Type the new one over the hidden one and save: it is in use from the next request, job or command, with no
 restart, and the audit log names the setting, never the value. "Try it" on its section shows the service
 took it. To go back to the server's own value, tick "Remove the saved …" (a key) or empty the field.
