@@ -25,6 +25,7 @@ use Modules\Identity\Enums\Role;
 use Modules\Import\Database\Seeders\DemoImportSeeder;
 use Modules\Learning\Database\Seeders\DemoChallengesSeeder;
 use Modules\Learning\Database\Seeders\DemoLearningSeeder;
+use Modules\Learning\Database\Seeders\DemoMistakesSeeder;
 use Modules\Messaging\Database\Seeders\DemoMessagingSeeder;
 use Modules\Payroll\Database\Seeders\DemoPayrollSeeder;
 use Modules\People\Database\Seeders\DemoConsentsSeeder;
@@ -66,9 +67,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(PlatformApi $platform, TenantDirectory $directory, IdentityApi $identity, TenantContext $tenants): void
     {
-        if (($demo = $directory->bySlug('demo')) !== null) {
-            // Only what a later version of the demo adds once the server can: the Juz' Amma lessons' surahs, after the Quran's text is fetched.
-            $tenants->run($demo, fn () => $this->call(DemoQuranTextsSeeder::class));
+        if ($directory->bySlug('demo') !== null) {
+            // Only what later versions of the demo add to one already there (DemoCatchUpSeeder, also on every deploy).
+            $this->call(DemoCatchUpSeeder::class);
             $this->command?->info('Academy "demo" already exists; nothing else to seed.');
 
             return;
@@ -106,7 +107,7 @@ class DatabaseSeeder extends Seeder
             // What the demo does in the back office (prices, policy, voided invoices, ...) is in the activity log as the owner's.
             AuditActor::use(new AuditActor('user', $ownerId, 'هالة منصور'));
 
-            $this->call([DemoBrandingSeeder::class, DemoPolicySeeder::class, DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoRevenueSeeder::class, DemoEnrollmentsSeeder::class, DemoShiftProposalsSeeder::class, DemoCurriculumSeeder::class, DemoQuranTextsSeeder::class, DemoMaterialsSeeder::class, DemoPracticeSeeder::class, DemoLearningSeeder::class, DemoChallengesSeeder::class, DemoGamesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoTicketsSeeder::class, DemoRecordingsSeeder::class, DemoDiscountsSeeder::class, DemoFamilyBillingSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class, DemoCatalogSeeder::class, DemoPeopleSeeder::class, DemoDisputesSeeder::class, DemoPrivacySeeder::class, DemoTeacherChecksSeeder::class, DemoSafeguardingSeeder::class, DemoMessagingSeeder::class, DemoAnnouncementsSeeder::class]);
+            $this->call([DemoBrandingSeeder::class, DemoPolicySeeder::class, DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoRevenueSeeder::class, DemoEnrollmentsSeeder::class, DemoShiftProposalsSeeder::class, DemoCurriculumSeeder::class, DemoQuranTextsSeeder::class, DemoMaterialsSeeder::class, DemoPracticeSeeder::class, DemoLearningSeeder::class, DemoMistakesSeeder::class, DemoChallengesSeeder::class, DemoGamesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoTicketsSeeder::class, DemoRecordingsSeeder::class, DemoDiscountsSeeder::class, DemoFamilyBillingSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class, DemoCatalogSeeder::class, DemoPeopleSeeder::class, DemoDisputesSeeder::class, DemoPrivacySeeder::class, DemoTeacherChecksSeeder::class, DemoSafeguardingSeeder::class, DemoMessagingSeeder::class, DemoAnnouncementsSeeder::class]);
             AuditActor::forget();
         });
 

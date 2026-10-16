@@ -41,7 +41,7 @@ fi
 dk compose version >/dev/null 2>&1 || fail "Docker Compose v2 (docker compose) is missing. Nothing was changed."
 compose() { dk compose -p "$PROJECT" -f "$HERE/compose.yml" "$@"; }
 
-for f in compose.yml roles.sql postgres-init.sh postgres-start.sh pg_hba.conf backup.sh offsite.sh; do
+for f in compose.yml roles.sql postgres-init.sh postgres-start.sh pg_hba.conf backup.sh offsite.sh console.sh; do
     [ -f "$f" ] || fail "$f is missing next to deploy.sh."
 done
 
@@ -383,6 +383,12 @@ if [ "$DEMO_DATA" = 1 ]; then
     say "Demo academies (only if they are not there yet)"
     compose run --rm --no-deps -T web seed-demo
 fi
+
+# A demo already there takes what later versions of it add (its Quran lessons' surahs, marked words and hifz maps once
+# the text is here; the AI helpers' area), whatever DEMO_DATA says. Nothing on a server without the demo academy.
+say "The demo academy, brought up to date (when there is one)"
+compose run --rm --no-deps -T web php artisan db:seed --class='Database\Seeders\DemoCatchUpSeeder' --force \
+    || say "The demo was not brought up to date this time; the next deploy tries again."
 
 say "Starting the new version"
 compose up -d --remove-orphans
