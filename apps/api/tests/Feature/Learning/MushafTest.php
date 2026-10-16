@@ -1,8 +1,10 @@
 <?php
 
 use Carbon\CarbonImmutable;
+use Filament\Facades\Filament;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
+use Livewire\Livewire;
 use Modules\Curriculum\Models\Program;
 use Modules\Curriculum\Texts\QuranText;
 use Modules\Enrollment\Contracts\EnrollmentApi;
@@ -10,9 +12,16 @@ use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
 use Modules\Learning\Actions\SubmitSessionReport;
 use Modules\Learning\Contracts\LearningApi;
+use Modules\Learning\Filament\Family\FamilyHifz;
+use Modules\Learning\Filament\Teacher\StudentProgress;
+use Modules\Learning\Filament\Teacher\WriteReport;
 use Modules\Learning\Models\RecitationMistake;
 use Modules\Learning\Models\SessionReport;
+use Modules\People\Actions\Consent\GrantConsent;
+use Modules\People\Contracts\FamilyView;
+use Modules\People\Contracts\LearnerStage;
 use Modules\People\Contracts\PeopleApi;
+use Modules\Platform\Actions\SaveAiSettings;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -206,4 +215,51 @@ it('tells the lesson\'s page, its teacher, its student and their guardians when 
         $raised[] = $note['payload'];
     }
     expect($raised)->toContain("lesson-mushaf:{$this->lesson->id}", "mushaf:{$this->teacher->id}", "mushaf:{$this->student->id}", "mushaf:{$this->guardian->id}");
+});
+
+it('keeps the notebook on the student\'s page in /teach and on the hifz page in /my, and offers the marked verses to recite', function () {
+    mushafIn($this, function () {
+        $this->lesson->update(['status' => 'completed']);
+        event(new SessionFinalized($this->lesson->academy_id, $this->lesson->id, 'completed', []));
+    });
+    $this->travelTo($this->lesson->ends_at->addMinutes(10));
+    $mistakes = "/api/v1/learning/lessons/{$this->lesson->id}/mistakes";
+    foreach ([[2, 1, 'wrong'], [3, 2, 'hesitation']] as [$verse, $word, $kind]) {
+        mushafApiAs($this->teacher)->postJson($mistakes, ['surah' => 1, 'verse' => $verse, 'word' => $word, 'kind' => $kind])->assertOk();
+    }
+    $report = mushafIn($this, fn () => SessionReport::query()->where('session_id', $this->lesson->id)->firstOrFail());
+    $this->actAsTenant($this->academy);
+    app()->forgetInstance(FamilyView::class);
+
+    Filament::setCurrentPanel('teach');
+    $this->actingAs($this->teacher);
+    Livewire::test(StudentProgress::class, ['enrollment' => $this->booked->enrollmentId])
+        ->assertSee(__('learning::mushaf.book'))->assertSee(trans_choice('learning::mushaf.book_words', 2, ['count' => 2]))
+        ->assertSee('<mark data-kind="hesitation"', false)->assertSee(__('learning::mushaf.kinds.wrong'));
+
+    // The report's recitation offers the verses most marked in the lesson, once the recitation check is on.
+    config(['platform.ai.driver' => 'claude', 'platform.ai.key' => 'a-key-for-the-test', 'platform.ai.speech.key' => 'another-key-for-the-test']);
+    app(SaveAiSettings::class)->handle(['recitation_check' => true], $this->admin->id);
+    Livewire::test(WriteReport::class, ['report' => $report->id])
+        ->assertSet('mistakesSuggestion', ['surah' => 1, 'from' => 2, 'to' => 3, 'title' => 'الأولى ٢–٣'])
+        ->set('data.homework.accepts', 'audio')->set('data.homework.expected', ['surah' => null, 'from' => null, 'to' => null])
+        ->assertSee(__('learning::mushaf.from_mistakes', ['title' => 'الأولى ٢–٣']))
+        ->callFormComponentAction('homework.recite', 'fromMistakes')
+        ->assertSet('data.homework.recite', true)->assertSet('data.homework.expected', ['surah' => 1, 'from' => 2, 'to' => 3]);
+
+    Filament::setCurrentPanel('family');
+    $this->actingAs($this->guardian);
+    expect(FamilyHifz::shouldRegisterNavigation())->toBeTrue();
+    Livewire::test(FamilyHifz::class)->assertSee(__('learning::mushaf.book'))->assertSee(__('learning::mushaf.kinds.hesitation'))
+        ->assertSee(__('learning::mushaf.last', ['when' => '']), false);
+
+    // A child in the kids' look: the words to go over, without counts or dates.
+    app(PeopleApi::class)->saveStudentProfile($this->student->id, null, LearnerStage::Kids);
+    if (app(PeopleApi::class)->consentState($this->student->id)->waiting()) {
+        app(GrantConsent::class)->handle($this->student->id, $this->guardian->id, 'family');
+    }
+    app()->forgetInstance(FamilyView::class);
+    $this->actingAs($this->student);
+    Livewire::test(FamilyHifz::class)->assertSee(__('learning::mushaf.kids.book'))->assertSee('<mark data-kind="wrong"', false)
+        ->assertDontSee(trans_choice('learning::mushaf.book_words', 2, ['count' => 2]))->assertDontSee(__('learning::mushaf.kinds.hesitation').' ·');
 });

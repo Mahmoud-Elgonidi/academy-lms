@@ -21,18 +21,22 @@ use Modules\Learning\Hifz\HifzPages;
 use Modules\Learning\Http\V1\Resources\HifzPresenter;
 use Modules\Learning\Models\HifzPage;
 use Modules\Learning\Models\HifzRecitation;
+use Modules\Learning\Models\RecitationMistake;
+use Modules\Learning\Queries\Mushaf\MistakesBook;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
+use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
  * The learner's hifz map and daily review (docs/architecture/02, section 22):
  * every page by part in its strength, and today's pages; a page opens to be
  * recited from memory, its text shown on asking, then either recorded and
  * checked (while the academy has the recitation check on) or graded by the
- * learner (or a guardian beside them). The kids' look says it in a child's
- * words. Follows the learner's hifz signal, so a check's result shows as it
- * comes.
+ * learner (or a guardian beside them). Below, the mistakes notebook: the
+ * words the learner's teachers marked in lessons' mushaf, by surah. The kids'
+ * look says it in a child's words. Follows the learner's hifz and mushaf
+ * signals, so a check's result or a new mark shows as it comes.
  */
 final class FamilyHifz extends Page
 {
@@ -60,12 +64,13 @@ final class FamilyHifz extends Page
         return auth()->check() && FamilyLearning::learner() !== null && app(HifzPages::class)->count() > 0;
     }
 
-    /** In the menu once the learner has pages on their map. */
+    /** In the menu once the learner has pages on their map, or words marked in a lesson's mushaf. */
     public static function shouldRegisterNavigation(): bool
     {
         $learner = FamilyLearning::learner();
 
-        return $learner !== null && HifzPage::query()->where('student_id', $learner->id)->exists();
+        return $learner !== null && (HifzPage::query()->where('student_id', $learner->id)->exists()
+            || RecitationMistake::query()->where('student_id', $learner->id)->exists());
     }
 
     public static function getNavigationLabel(): string
@@ -98,6 +103,8 @@ final class FamilyHifz extends Page
             'wird' => $present->wird($learner->id, $now),
             'page' => $page === null ? null : $present->page($page, HifzPage::query()->where('student_id', $learner->id)->where('page', $page->page)->first(), $now),
             'latest' => $latest === null ? null : ['heard' => null] + $present->recitation($latest),
+            'book' => app(MistakesBook::class)->for($learner->id, $now),
+            'tz' => app(ViewerTimezone::class)->effective(),
             'channel' => PersonalChannel::name((string) auth()->id()),
         ];
     }

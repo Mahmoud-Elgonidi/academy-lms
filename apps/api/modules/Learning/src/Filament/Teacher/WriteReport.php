@@ -2,6 +2,7 @@
 
 namespace Modules\Learning\Filament\Teacher;
 
+use Filament\Actions\Action;
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -15,6 +16,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
@@ -82,6 +84,9 @@ final class WriteReport extends Page
     /** The passage of the report's lessons the form starts from, as it reads (null: none, or the homework has its own). */
     public ?string $reciteSuggestion = null;
 
+    /** The passage most marked in this lesson's mushaf (surah, from, to, title), offered with one tap. */
+    public ?array $mistakesSuggestion = null;
+
     public static function canAccess(): bool
     {
         return Gate::allows(Ability::WriteReports->value);
@@ -99,6 +104,9 @@ final class WriteReport extends Page
         if ($recite === null && $this->sessionReport->kind === 'lesson') {
             $recite = $target->suggestion(array_column(app(ReportFormQuery::class)->items($this->sessionReport), 'node_id'));
             $this->reciteSuggestion = $recite['title'] ?? null;
+        }
+        if ($this->sessionReport->kind === 'lesson') {
+            $this->mistakesSuggestion = $target->fromMistakes($this->sessionReport->session_id);
         }
         $this->form->fill([
             'items' => app(ReportFormQuery::class)->items($this->sessionReport),
@@ -231,7 +239,16 @@ final class WriteReport extends Page
         $on = fn (Get $get) => $voice($get) && (bool) $get('homework.recite');
 
         return [
-            Toggle::make('homework.recite')->label(__($r.'toggle'))->helperText(__($r.'hint'))->live()->visible($voice),
+            Toggle::make('homework.recite')->label(__($r.'toggle'))->helperText(__($r.'hint'))->live()->visible($voice)
+                ->hintAction(Action::make('fromMistakes')->link()
+                    ->label(fn () => __('learning::mushaf.from_mistakes', ['title' => $this->mistakesSuggestion['title'] ?? '']))
+                    ->visible(fn () => $this->mistakesSuggestion !== null)
+                    ->action(function (Set $set): void {
+                        $set('homework.recite', true);
+                        foreach (['surah', 'from', 'to'] as $key) {
+                            $set('homework.expected.'.$key, $this->mistakesSuggestion[$key] ?? null);
+                        }
+                    })),
             Grid::make(3)->schema([
                 Select::make('homework.expected.surah')->label(__($r.'fields.surah'))->native(false)->searchable()->live()
                     ->helperText($this->reciteSuggestion === null ? null : __($r.'suggestion', ['title' => $this->reciteSuggestion]))

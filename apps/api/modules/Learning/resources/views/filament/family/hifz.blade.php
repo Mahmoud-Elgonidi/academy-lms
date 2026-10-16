@@ -102,6 +102,9 @@
             <div class="lf-head"><h3>{{ __($h.'title') }}</h3></div>
             @include('learning::filament.hifz.map', ['map' => $d['map']])
         </section>
+
+        @php $kids = \Modules\Learning\Filament\Family\FamilyLearning::stage()->value === 'kids'; $b = 'learning::mushaf.'.($kids ? 'kids.' : ''); @endphp
+        @include('learning::filament.mushaf.book', ['book' => $d['book'], 'tz' => $d['tz'], 'kids' => $kids, 'title' => __($b.'book'), 'empty' => __($b.'book_empty')])
     </div>
 </x-filament-panels::page>
 
@@ -110,6 +113,7 @@
     const el = $wire.$el.querySelector('[data-live-channel]');
     if (el && window.LmsLive) {
         window.LmsLive.watch({ el, channel: el.dataset.liveChannel, event: '.hifz.changed', refresh: () => $wire.$refresh(), every: 120000 });
+        window.LmsLive.watch({ el, channel: el.dataset.liveChannel, event: '.mushaf.changed', refresh: () => $wire.$refresh(), every: 120000 });
     }
 </script>
 @endscript

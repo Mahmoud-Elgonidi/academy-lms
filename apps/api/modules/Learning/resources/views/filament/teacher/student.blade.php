@@ -26,6 +26,7 @@
                     <small class="lf-muted">{{ __('learning::hifz.no_recent') }}</small>
                 @endforelse
             </section>
+            @include('learning::filament.mushaf.book', ['book' => $hifz['book'], 'tz' => $hifz['tz'], 'title' => __('learning::mushaf.book'), 'empty' => __('learning::mushaf.book_empty')])
         @endif
 
         <h2 style="font-size: 1rem; font-weight: 700; margin: .5rem 0 0">{{ __($l.'reports') }}</h2>

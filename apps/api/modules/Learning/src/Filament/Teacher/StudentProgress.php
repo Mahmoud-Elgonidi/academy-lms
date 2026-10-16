@@ -23,6 +23,7 @@ use Modules\Learning\Authorization\LearningAccess;
 use Modules\Learning\Hifz\HifzPages;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\Hifz\HifzMap;
+use Modules\Learning\Queries\Mushaf\MistakesBook;
 use Modules\Learning\Queries\RoadmapQuery;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -60,9 +61,10 @@ final class StudentProgress extends Page
     }
 
     /**
-     * The student's hifz map and the last two weeks' reviews; null for a course the map does not follow (HifzMap::follows).
+     * The student's hifz map, the last two weeks' reviews and the mistakes notebook (the words their teachers marked in
+     * lessons' mushaf); null for a course the map does not follow (HifzMap::follows).
      *
-     * @return ?array{map: array<string, mixed>, recent: list<array{page: int, grade: string, source: string, at: string}>}
+     * @return ?array{map: array<string, mixed>, recent: list<array{page: int, grade: string, source: string, at: string}>, book: array<string, mixed>, tz: string}
      */
     #[Computed]
     public function hifz(): ?array
@@ -84,6 +86,8 @@ final class StudentProgress extends Page
                 'source' => __('learning::hifz.sources.'.$r['source']),
                 'at' => $r['reviewed_at']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i'),
             ], $map->recent($student, $now, 12)),
+            'book' => app(MistakesBook::class)->for($student, $now),
+            'tz' => $tz,
         ];
     }
 
