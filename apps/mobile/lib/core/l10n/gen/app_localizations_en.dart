@@ -2217,6 +2217,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String reciteFromMistakes(String title) {
+    return 'From the lesson\'s mistakes: $title';
+  }
+
+  @override
   String get reciteSurah => 'Surah';
 
   @override
@@ -3920,4 +3925,128 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hifzRecentNone => 'No reviews in the last two weeks.';
+
+  @override
+  String get mushafTitle => 'Mushaf';
+
+  @override
+  String get mushafOpen => 'Open the mushaf';
+
+  @override
+  String get mushafNone => 'This lesson has no mushaf.';
+
+  @override
+  String get mushafPrevious => 'Previous page';
+
+  @override
+  String get mushafNext => 'Next page';
+
+  @override
+  String get mushafPageField => 'Page';
+
+  @override
+  String mushafPageOfTotal(int total) {
+    return 'of $total';
+  }
+
+  @override
+  String get mushafFollowing => 'The page turns with the teacher.';
+
+  @override
+  String get mushafBackToTeacher => 'Back to the teacher\'s page';
+
+  @override
+  String mushafTeacherOn(int page) {
+    return 'The teacher is on page $page';
+  }
+
+  @override
+  String get mushafHintTeacher => 'Tap a word to mark it; the student sees the page you have open.';
+
+  @override
+  String get mushafMarkingClosed => 'Marking words opens with the lesson\'s room and closes once you hand in the report.';
+
+  @override
+  String get mushafMarkWord => 'Mark the word';
+
+  @override
+  String get mushafClearMark => 'Clear the mark';
+
+  @override
+  String get mushafEarlier => 'Marked in an earlier lesson';
+
+  @override
+  String mushafWordMarked(String word, String kind) {
+    return '$word: $kind';
+  }
+
+  @override
+  String mushafWordEarlier(String word, String kind, String times) {
+    return '$word: $kind, marked in earlier lessons $times';
+  }
+
+  @override
+  String mushafVerseEnd(int n) {
+    return 'End of verse $n';
+  }
+
+  @override
+  String mushafSurah(String name) {
+    return 'Surah $name';
+  }
+
+  @override
+  String get mushafShow => 'Mushaf';
+
+  @override
+  String get mushafShowVideo => 'Video';
+
+  @override
+  String get mushafBackToVideo => 'Back to the video';
+
+  @override
+  String get mushafFailed => 'Couldn\'t save. Try again.';
+
+  @override
+  String get mistakesTitle => 'Mistakes notebook';
+
+  @override
+  String get mistakesTitleKids => 'Words to practise';
+
+  @override
+  String get mistakesLead => 'The words marked in lessons in the last six months, to go over again.';
+
+  @override
+  String get mistakesLeadTeacher => 'The words marked in the student\'s lessons in the last six months.';
+
+  @override
+  String get mistakesLeadKids => 'Words we\'ll say again together until they\'re easy.';
+
+  @override
+  String get mistakesEmpty => 'No words marked in the last six months.';
+
+  @override
+  String get mistakesEmptyKids => 'No words to practise right now. Well done! ⭐';
+
+  @override
+  String mistakesWords(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n words', one: '1 word', zero: 'No words');
+    return '$_temp0';
+  }
+
+  @override
+  String mistakesTimes(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n times', two: 'twice', one: 'once');
+    return '$_temp0';
+  }
+
+  @override
+  String mistakesWord(String word, String kinds, String times, String when) {
+    return '$word: $kinds, $times, last $when';
+  }
+
+  @override
+  String mistakesWordKids(String word) {
+    return '$word: a word to practise';
+  }
 }

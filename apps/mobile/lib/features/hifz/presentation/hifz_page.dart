@@ -12,6 +12,7 @@ import '../../../shared/widgets/lms.dart';
 import '../../../shared/widgets/load_view.dart';
 import '../../dashboard/presentation/bloc/learner_cubit.dart';
 import '../../dashboard/presentation/widgets/learner_switcher.dart';
+import '../../mushaf/presentation/widgets/mistakes_notebook.dart';
 import '../data/hifz_repository.dart';
 import '../domain/hifz.dart';
 import 'widgets/hifz_map_view.dart';
@@ -22,7 +23,8 @@ import 'widgets/page_sheet.dart';
 /// by part in its strength's colour with the key and the counts, then
 /// today's review, each page opening to be recited (checked word by word
 /// where the academy has it on) or shown and graded, and the page recited
-/// last with its check. It follows the hifz signal, so a check that comes
+/// last with its check, and the mistakes notebook (the words marked in the
+/// learner's lessons). It follows the hifz signal, so a check that comes
 /// back shows by itself; finishing the day's review is celebrated in the
 /// look's own way.
 class HifzPage extends StatelessWidget {
@@ -151,6 +153,7 @@ class _BoardView extends StatelessWidget {
           ),
         ),
       ],
+      MistakesNotebook(read: (repo) => repo.book(learnerId: learnerId)),
     ];
     return ListView(
       padding: pagePadding.copyWith(top: Space.m),

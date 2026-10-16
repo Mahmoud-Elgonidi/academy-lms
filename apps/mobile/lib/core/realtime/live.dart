@@ -60,6 +60,9 @@ class Live {
   /// A learner's hifz map: a page reviewed, marked or recited (and a recited page's check done).
   static const hifz = 'hifz.changed';
 
+  /// A lesson's shared mushaf: its teacher turned the page or marked a word (the teacher, the student, the guardians).
+  static const mushaf = 'mushaf.changed';
+
   /// Everything may have changed: after the app comes back, the socket comes back, or the relay restarts.
   static const resync = 'resync';
 

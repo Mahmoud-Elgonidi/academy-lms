@@ -8,7 +8,11 @@ import 'package:livekit_client/livekit_client.dart' as lk;
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
+import '../../../../core/state/load_cubit.dart';
 import '../../../../shared/widgets/lms.dart';
+import '../../../mushaf/data/mushaf_repository.dart';
+import '../../../mushaf/domain/mushaf.dart';
+import '../../../mushaf/presentation/widgets/mushaf_pane.dart';
 import '../../../recordings/data/recordings_repository.dart';
 import '../../../recordings/domain/recordings.dart';
 import '../../data/classroom_repository.dart';
@@ -18,7 +22,11 @@ import '../../domain/join_ticket.dart';
 /// person large, me small, and four big buttons (mic, camera, audio only,
 /// leave). Attendance is the server's (LiveKit tells it who is in the room).
 /// Everyone sees when the lesson is being recorded; its teacher starts and
-/// stops it here, once everyone it records agreed.
+/// stops it here, once everyone it records agreed. A Quran lesson has its
+/// shared mushaf a tap away, the other person small over it: the teacher's
+/// turns and marks reach the room at once (data on the `mushaf` topic, heard
+/// only from the teacher's seat), and the mushaf signal follows for anyone
+/// beside the room.
 class ClassroomPage extends StatefulWidget {
   const ClassroomPage({required this.lessonId, this.ticket, super.key});
 
@@ -45,11 +53,21 @@ class _ClassroomPageState extends State<ClassroomPage> {
   bool _recordBusy = false;
   bool _leaving = false;
 
+  /// The lesson's shared mushaf, once the API says it has one; shown over the video while [_showMushaf].
+  late final _place = MushafPlace(widget.lessonId);
+  LoadCubit<LessonMushaf>? _mushaf;
+  bool _showMushaf = false;
+  late final lk.EventsListener<lk.RoomEvent> _events = _room.createListener();
+
   @override
   void initState() {
     super.initState();
     _room.addListener(_changed);
+    _events.on<lk.DataReceivedEvent>((e) {
+      if (isMushafSignal(topic: e.topic, metadata: e.participant?.metadata)) unawaited(_mushaf?.load());
+    });
     unawaited(_connect());
+    unawaited(_findMushaf());
     _tick = Timer.periodic(const Duration(seconds: 1), (_) => mounted ? setState(() {}) : null);
   }
 
@@ -57,8 +75,24 @@ class _ClassroomPageState extends State<ClassroomPage> {
   void dispose() {
     _tick?.cancel();
     _room.removeListener(_changed);
+    unawaited(_events.dispose());
+    unawaited(_mushaf?.close());
     unawaited(closeRoom(disconnect: _room.disconnect, dispose: _room.dispose));
     super.dispose();
+  }
+
+  Future<void> _findMushaf() async {
+    final has = await context.read<MushafRepository>().has(widget.lessonId);
+    if (has && mounted) setState(() => _mushaf = mushafCubit(context, _place)..load());
+  }
+
+  /// The teacher turned or marked: the room hears at once (the others read the mushaf again).
+  Future<void> _tellRoom() async {
+    try {
+      await _room.localParticipant?.publishData(mushafSignal(), reliable: true, topic: mushafTopic);
+    } on Object {
+      // Not in the room (yet): the mushaf signal still reaches everyone a moment later.
+    }
   }
 
   void _changed() {
@@ -187,6 +221,14 @@ class _ClassroomPageState extends State<ClassroomPage> {
                         style: const TextStyle(color: ink, fontSize: 16, fontWeight: FontWeight.w700),
                       ),
                     ),
+                    if (_mushaf != null) ...[
+                      _MushafToggle(
+                        on: _showMushaf,
+                        label: _showMushaf ? l.mushafShowVideo : l.mushafShow,
+                        onPressed: () => setState(() => _showMushaf = !_showMushaf),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     if (_recordingOn) ...[
                       Semantics(
                         liveRegion: true,
@@ -224,65 +266,97 @@ class _ClassroomPageState extends State<ClassroomPage> {
                   ],
                 ),
               ),
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(color: const Color(0xFF1C1917), borderRadius: BorderRadius.circular(26)),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: otherVideo != null
-                            ? lk.VideoTrackRenderer(otherVideo, fit: lk.VideoViewFit.cover)
-                            : Center(
-                                child: other == null
-                                    ? Icon(Icons.hourglass_empty_rounded, size: 56, color: ink.withValues(alpha: 0.5))
-                                    : _Initial(name: other.name, size: 140, colour: c.brandDeep),
-                              ),
-                      ),
-                      if (other != null) PositionedDirectional(bottom: 14, start: 14, child: _Label(other.name)),
-                      PositionedDirectional(
-                        top: 14,
-                        end: 14,
-                        child: Container(
-                          width: 112,
-                          height: 150,
-                          clipBehavior: Clip.antiAlias,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF44403C),
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 2),
-                          ),
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                child: myVideo != null
-                                    ? lk.VideoTrackRenderer(myVideo, fit: lk.VideoViewFit.cover)
-                                    : Center(
-                                        child: _Initial(name: me?.name ?? '', size: 56, colour: c.attention),
-                                      ),
-                              ),
-                              PositionedDirectional(bottom: 8, start: 8, child: _Label(l.you)),
-                            ],
+              if (_showMushaf && _mushaf != null)
+                Expanded(
+                  child: Container(
+                    key: const Key('classroom-mushaf'),
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(color: c.page, borderRadius: BorderRadius.circular(26)),
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: BlocProvider.value(
+                            value: _mushaf!,
+                            child: MushafPane(place: _place, onChanged: _tellRoom, size: 22),
                           ),
                         ),
-                      ),
-                      if (weak || _problem != null)
+                        // The other person small over the page; a tap goes back to them.
+                        PositionedDirectional(
+                          top: 10,
+                          end: 10,
+                          child: _Pip(
+                            video: otherVideo,
+                            name: other?.name ?? '',
+                            colour: c.brandDeep,
+                            tooltip: l.mushafBackToVideo,
+                            onTap: () => setState(() => _showMushaf = false),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(color: const Color(0xFF1C1917), borderRadius: BorderRadius.circular(26)),
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: otherVideo != null
+                              ? lk.VideoTrackRenderer(otherVideo, fit: lk.VideoViewFit.cover)
+                              : Center(
+                                  child: other == null
+                                      ? Icon(Icons.hourglass_empty_rounded, size: 56, color: ink.withValues(alpha: 0.5))
+                                      : _Initial(name: other.name, size: 140, colour: c.brandDeep),
+                                ),
+                        ),
+                        if (other != null) PositionedDirectional(bottom: 14, start: 14, child: _Label(other.name)),
                         PositionedDirectional(
                           top: 14,
-                          start: 14,
-                          end: 140,
-                          child: Note(
-                            _problem ?? l.weakNetwork,
-                            tone: _problem != null ? Tone.danger : Tone.reward,
-                            icon: Icons.wifi_rounded,
+                          end: 14,
+                          child: Container(
+                            width: 112,
+                            height: 150,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF44403C),
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 2),
+                            ),
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: myVideo != null
+                                      ? lk.VideoTrackRenderer(myVideo, fit: lk.VideoViewFit.cover)
+                                      : Center(
+                                          child: _Initial(name: me?.name ?? '', size: 56, colour: c.attention),
+                                        ),
+                                ),
+                                PositionedDirectional(bottom: 8, start: 8, child: _Label(l.you)),
+                              ],
+                            ),
                           ),
                         ),
-                      if (_connecting) const Center(child: CircularProgressIndicator(color: ink)),
-                    ],
+                        if (weak || _problem != null)
+                          PositionedDirectional(
+                            top: 14,
+                            start: 14,
+                            end: 140,
+                            child: Note(
+                              _problem ?? l.weakNetwork,
+                              tone: _problem != null ? Tone.danger : Tone.reward,
+                              icon: Icons.wifi_rounded,
+                            ),
+                          ),
+                        if (_connecting) const Center(child: CircularProgressIndicator(color: ink)),
+                      ],
+                    ),
                   ),
                 ),
-              ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
                 child: Column(
@@ -401,6 +475,74 @@ class _RoundButton extends StatelessWidget {
         disabledBackgroundColor: Colors.white.withValues(alpha: 0.06),
       ),
       icon: Icon(icon),
+    ),
+  );
+}
+
+/// Between the video and the mushaf, in the top bar.
+class _MushafToggle extends StatelessWidget {
+  const _MushafToggle({required this.on, required this.label, required this.onPressed});
+
+  /// The mushaf is shown (the button goes back to the video).
+  final bool on;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    toggled: on,
+    child: TextButton.icon(
+      key: const Key('mushaf-toggle'),
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        minimumSize: const Size(48, 40),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        backgroundColor: on ? Colors.white : Colors.white.withValues(alpha: 0.14),
+        foregroundColor: on ? const Color(0xFF1C1917) : Colors.white,
+        shape: const StadiumBorder(),
+      ),
+      icon: Icon(on ? Icons.videocam_rounded : Icons.menu_book_rounded, size: 18),
+      label: Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+    ),
+  );
+}
+
+/// The other person small over the mushaf: their video, else their initial.
+class _Pip extends StatelessWidget {
+  const _Pip({required this.video, required this.name, required this.colour, required this.tooltip, required this.onTap});
+
+  final lk.VideoTrack? video;
+  final String name;
+  final Color colour;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: tooltip,
+    child: Semantics(
+      button: true,
+      label: tooltip,
+      child: GestureDetector(
+        key: const Key('mushaf-pip'),
+        onTap: onTap,
+        child: Container(
+          width: 92,
+          height: 122,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: const Color(0xFF44403C),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white, width: 2),
+            boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 12, offset: Offset(0, 4))],
+          ),
+          child: video != null
+              ? lk.VideoTrackRenderer(video!, fit: lk.VideoViewFit.cover)
+              : Center(
+                  child: _Initial(name: name, size: 52, colour: colour),
+                ),
+        ),
+      ),
     ),
   );
 }

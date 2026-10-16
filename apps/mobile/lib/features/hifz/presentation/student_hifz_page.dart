@@ -9,6 +9,7 @@ import '../../../shared/motion/done_moment.dart';
 import '../../../shared/motion/motion.dart';
 import '../../../shared/widgets/lms.dart';
 import '../../../shared/widgets/load_view.dart';
+import '../../mushaf/presentation/widgets/mistakes_notebook.dart';
 import '../data/hifz_repository.dart';
 import '../domain/hifz.dart';
 import 'widgets/hifz_map_view.dart';
@@ -18,7 +19,8 @@ import 'widgets/page_sheet.dart';
 /// the same map (to read), the counts, the last two weeks' reviews and
 /// where each came from, saying what the student already knows (whole
 /// parts or surahs, and how well) and taking pages off that were marked by
-/// mistake. Reports and checked homework move it, so it follows those.
+/// mistake; then the student's mistakes notebook (the words marked in their
+/// lessons). Reports and checked homework move it, so it follows those.
 class StudentHifzPage extends StatelessWidget {
   const StudentHifzPage({required this.enrollmentId, super.key});
 
@@ -119,6 +121,7 @@ class _StudentHifz extends StatelessWidget {
               ],
             ),
           ),
+        MistakesNotebook(read: (repo) => repo.student(h.enrollmentId), teacher: true),
       ],
     ];
     return ListView(

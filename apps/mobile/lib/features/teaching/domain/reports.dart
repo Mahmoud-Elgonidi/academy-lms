@@ -120,6 +120,7 @@ class ReportForm {
     this.voiceDraft = false,
     this.recitationCheck = false,
     this.expectedSuggestion,
+    this.mistakesSuggestion,
   });
 
   factory ReportForm.fromJson(Map<String, dynamic> json) => ReportForm(
@@ -141,6 +142,7 @@ class ReportForm {
     voiceDraft: (json['assist'] as Map<String, dynamic>?)?['voice_draft'] == true,
     recitationCheck: (json['assist'] as Map<String, dynamic>?)?['recitation_check'] == true,
     expectedSuggestion: Expected.fromJson(json['expected_suggestion']),
+    mistakesSuggestion: Expected.fromJson(json['mistakes_suggestion']),
   );
 
   final ReportSummary summary;
@@ -168,6 +170,9 @@ class ReportForm {
 
   /// The passage of the report's lessons' text, to start what to recite from.
   final Expected? expectedSuggestion;
+
+  /// The verses with the words marked in the lesson's shared mushaf (the surah with the most marks), to recite again.
+  final Expected? mistakesSuggestion;
 
   /// Reviewed by the academy: it no longer changes.
   bool get locked => summary.status == 'reviewed';

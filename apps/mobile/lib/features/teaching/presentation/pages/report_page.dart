@@ -30,7 +30,8 @@ import '../../../../shared/widgets/latin_digits.dart';
 /// the family and for the academy, and homework. An absence asks only for
 /// the note. When the academy turned it on, a voice note fills what is still
 /// empty (marked suggested until sent), and homework handed in by voice may
-/// say what to recite, for a check of each recording. Sending and keeping a
+/// say what to recite (the lesson's text, or the verses with the words marked
+/// in its mushaf), for a check of each recording. Sending and keeping a
 /// draft on this phone stay at the foot. Pops with true once sent.
 typedef _Loaded = (ReportForm, ReportDraft?, List<Surah>);
 
@@ -758,11 +759,20 @@ class _EditorState extends State<_Editor> {
     );
   }
 
+  /// Asks to recite the verses with the words marked in the lesson's mushaf: the check on, the passage filled in.
+  void _reciteMistakes(Expected passage) => setState(() {
+    _reciteOn = true;
+    _reciteSurah = passage.surah;
+    _reciteFrom.text = '${passage.from}';
+    _reciteTo.text = '${passage.to}';
+  });
+
   /// What homework handed in by voice asks to recite, so each recording is checked word by word for the teacher.
   Widget _recitation(bool locked) {
     final l = context.l10n;
     final surah = widget.surahs.where((s) => s.number == _reciteSurah).firstOrNull;
     final suggestion = f.expectedSuggestion?.title;
+    final mistakes = f.mistakesSuggestion;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -775,6 +785,13 @@ class _EditorState extends State<_Editor> {
           value: _reciteOn,
           onChanged: locked ? null : (v) => setState(() => _reciteOn = v),
         ),
+        if (mistakes != null && !locked)
+          ActionChip(
+            key: const Key('recite-mistakes'),
+            avatar: Icon(Icons.menu_book_rounded, size: 18, color: context.colors.dangerInk),
+            label: Text(l.reciteFromMistakes(mistakes.title ?? '${mistakes.surah}: ${mistakes.from}–${mistakes.to}')),
+            onPressed: () => _reciteMistakes(mistakes),
+          ),
         if (_err('homework.expected') case final e?) Text(e, style: TextStyle(color: context.colors.dangerInk)),
         if (_reciteOn) ...[
           if (suggestion != null) Text(l.reciteSuggestion(suggestion), style: context.type.caption),

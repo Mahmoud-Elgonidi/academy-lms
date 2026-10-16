@@ -1636,6 +1636,14 @@
       }
     }
   },
+  "reciteFromMistakes": "من أخطاء الحصة: {title}",
+  "@reciteFromMistakes": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "reciteSurah": "السورة",
   "reciteChooseSurah": "اختار السورة",
   "reciteSearch": "دوّر على سورة",
@@ -2989,5 +2997,127 @@
     }
   },
   "hifzRecent": "آخر المراجعات",
-  "hifzRecentNone": "مفيش مراجعات في آخر أسبوعين."
+  "hifzRecentNone": "مفيش مراجعات في آخر أسبوعين.",
+  "mushafTitle": "المصحف",
+  "mushafOpen": "افتح المصحف",
+  "mushafNone": "الحصة دي مفيهاش مصحف.",
+  "mushafPrevious": "اللي قبلها",
+  "mushafNext": "اللي بعدها",
+  "mushafPageField": "صفحة",
+  "mushafPageOfTotal": "من {total}",
+  "@mushafPageOfTotal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mushafFollowing": "الصفحة بتتقلّب مع المدرّس.",
+  "mushafBackToTeacher": "ارجع لصفحة المدرّس",
+  "mushafTeacherOn": "المدرّس على صفحة {page}",
+  "@mushafTeacherOn": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "mushafHintTeacher": "دوس على أي كلمة عشان تعلّمها، والطالب بيشوف الصفحة اللي إنت فاتحها.",
+  "mushafMarkingClosed": "تعليم الكلمات بيفتح مع أوضة الحصة، وبيقفل لما تسلّم التقرير.",
+  "mushafMarkWord": "علّم الكلمة",
+  "mushafClearMark": "امسح العلامة",
+  "mushafEarlier": "اتعلّمت في حصة قبل كده",
+  "mushafWordMarked": "{word}: {kind}",
+  "@mushafWordMarked": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "mushafWordEarlier": "{word}: {kind}، اتعلّمت في حصة قبل كده {times}",
+  "@mushafWordEarlier": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      },
+      "times": {
+        "type": "String"
+      }
+    }
+  },
+  "mushafVerseEnd": "آخر الآية {n}",
+  "@mushafVerseEnd": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "mushafSurah": "سورة {name}",
+  "@mushafSurah": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mushafShow": "المصحف",
+  "mushafShowVideo": "الفيديو",
+  "mushafBackToVideo": "ارجع للفيديو",
+  "mushafFailed": "ماقدرناش نحفظ. جرّب تاني.",
+  "mistakesTitle": "دفتر الأخطاء",
+  "mistakesTitleKids": "كلمات بنراجعها",
+  "mistakesLead": "الكلمات اللي اتعلّم عليها في الحصص في آخر ست شهور، عشان تراجعها.",
+  "mistakesLeadTeacher": "الكلمات اللي اتعلّم عليها في حصص الطالب في آخر ست شهور.",
+  "mistakesLeadKids": "دي كلمات هنقولها تاني مع بعض لحد ما تبقى سهلة.",
+  "mistakesEmpty": "مفيش كلمات متعلّمة في آخر ست شهور.",
+  "mistakesEmptyKids": "مفيش كلمات نراجعها دلوقتي. شاطر! ⭐",
+  "mistakesWords": "{n, plural, =0{مفيش كلمات} =1{كلمة واحدة} =2{كلمتين} few{{n} كلمات} other{{n} كلمة}}",
+  "@mistakesWords": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "mistakesTimes": "{n, plural, =1{مرة} =2{مرتين} few{{n} مرات} other{{n} مرة}}",
+  "@mistakesTimes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "mistakesWord": "{word}: {kinds}، {times}، آخر مرة {when}",
+  "@mistakesWord": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      },
+      "kinds": {
+        "type": "String"
+      },
+      "times": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "mistakesWordKids": "{word}: كلمة بنراجعها",
+  "@mistakesWordKids": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  }
 }

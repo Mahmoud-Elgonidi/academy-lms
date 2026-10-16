@@ -32,6 +32,7 @@ import '../../features/journey/presentation/levels_page.dart';
 import '../../features/profile/presentation/pages/student_more_page.dart';
 import '../../features/messages/presentation/conversation_page.dart';
 import '../../features/messages/presentation/messages_page.dart';
+import '../../features/mushaf/presentation/mushaf_page.dart';
 import '../../features/notifications/presentation/pages/choices_page.dart';
 import '../../features/notifications/presentation/pages/inbox_page.dart';
 import '../../features/notifications/presentation/pages/update_page.dart';
@@ -190,6 +191,8 @@ GoRouter buildRouter(SessionCubit session) {
       page('/inbox', (_) => const InboxPage(), routes: [page('choices', (_) => const ChoicesPage())]),
       page('/open/:screen', (_) => const SplashPage(), routes: [page(':id', (_) => const SplashPage())]),
       page('/classroom/:id', (s) => ClassroomPage(lessonId: s.pathParameters['id']!, ticket: s.extra)),
+      // A Quran lesson's shared mushaf, over any look's tabs (beside a lesson on Zoom or Meet too).
+      page('/lessons/:id/mushaf', (s) => LessonMushafPage(lessonId: s.pathParameters['id']!)),
       // The teacher's focused tasks open over the tabs: writing a report (the
       // Reports tab lists them), marking homework, the hours.
       page('/teach/reports/:id', (s) => TeacherReportPage(reportId: s.pathParameters['id']!)),

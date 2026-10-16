@@ -87,10 +87,15 @@ flutter:
 
   assets:
     - assets/fonts/OFL.txt
+    - assets/fonts/OFL-AmiriQuran.txt
     - assets/sounds/
 
-  # Bundled (OFL, see assets/fonts/OFL.txt): the same faces as the web's academy and stage looks.
+  # Bundled (OFL, see assets/fonts/OFL.txt): the same faces as the web's academy and stage looks; and the
+  # Quran's own face for its text, the class page's (OFL, see assets/fonts/OFL-AmiriQuran.txt).
   fonts:
+    - family: AmiriQuran
+      fonts:
+        - asset: assets/fonts/AmiriQuran-Regular.ttf
     - family: ReadexPro
       fonts:
         - asset: assets/fonts/ReadexPro-400.ttf

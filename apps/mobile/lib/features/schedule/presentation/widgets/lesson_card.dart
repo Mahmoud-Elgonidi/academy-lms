@@ -5,11 +5,12 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/time/formats.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../classroom/presentation/join.dart';
+import '../../../mushaf/presentation/widgets/mushaf_entry.dart';
 import '../../domain/lesson.dart';
 
 /// One lesson in a list: its time on the viewer's clock, whom it is with,
-/// its state, and what can be done now (join, cancel, turn down a
-/// substitute, rate).
+/// its state, and what can be done now (join, open its mushaf in a Quran
+/// lesson, cancel, turn down a substitute, rate).
 class LessonCard extends StatelessWidget {
   const LessonCard({required this.lesson, this.onCancel, this.onRefuse, this.onRate, this.onDispute, this.highlight = false, super.key});
 
@@ -113,6 +114,17 @@ class LessonCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(l.joinOpensAt(l0.joinOpensAt!.clock(locale)), style: context.text.bodySmall),
           ],
+          if (mushafWorthAsking(l0, next: highlight))
+            MushafEntry(
+              lessonId: l0.id,
+              builder: (context, label, open) => Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(onPressed: open, icon: const Icon(Icons.menu_book_rounded), label: Text(label)),
+                ),
+              ),
+            ),
           if (onCancel != null || onRefuse != null || onRate != null || onDispute != null) ...[
             const SizedBox(height: 6),
             Wrap(

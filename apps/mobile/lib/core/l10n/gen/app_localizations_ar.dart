@@ -2337,6 +2337,11 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String reciteFromMistakes(String title) {
+    return 'من أخطاء الحصة: $title';
+  }
+
+  @override
   String get reciteSurah => 'السورة';
 
   @override
@@ -4176,4 +4181,136 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get hifzRecentNone => 'مفيش مراجعات في آخر أسبوعين.';
+
+  @override
+  String get mushafTitle => 'المصحف';
+
+  @override
+  String get mushafOpen => 'افتح المصحف';
+
+  @override
+  String get mushafNone => 'الحصة دي مفيهاش مصحف.';
+
+  @override
+  String get mushafPrevious => 'اللي قبلها';
+
+  @override
+  String get mushafNext => 'اللي بعدها';
+
+  @override
+  String get mushafPageField => 'صفحة';
+
+  @override
+  String mushafPageOfTotal(int total) {
+    return 'من $total';
+  }
+
+  @override
+  String get mushafFollowing => 'الصفحة بتتقلّب مع المدرّس.';
+
+  @override
+  String get mushafBackToTeacher => 'ارجع لصفحة المدرّس';
+
+  @override
+  String mushafTeacherOn(int page) {
+    return 'المدرّس على صفحة $page';
+  }
+
+  @override
+  String get mushafHintTeacher => 'دوس على أي كلمة عشان تعلّمها، والطالب بيشوف الصفحة اللي إنت فاتحها.';
+
+  @override
+  String get mushafMarkingClosed => 'تعليم الكلمات بيفتح مع أوضة الحصة، وبيقفل لما تسلّم التقرير.';
+
+  @override
+  String get mushafMarkWord => 'علّم الكلمة';
+
+  @override
+  String get mushafClearMark => 'امسح العلامة';
+
+  @override
+  String get mushafEarlier => 'اتعلّمت في حصة قبل كده';
+
+  @override
+  String mushafWordMarked(String word, String kind) {
+    return '$word: $kind';
+  }
+
+  @override
+  String mushafWordEarlier(String word, String kind, String times) {
+    return '$word: $kind، اتعلّمت في حصة قبل كده $times';
+  }
+
+  @override
+  String mushafVerseEnd(int n) {
+    return 'آخر الآية $n';
+  }
+
+  @override
+  String mushafSurah(String name) {
+    return 'سورة $name';
+  }
+
+  @override
+  String get mushafShow => 'المصحف';
+
+  @override
+  String get mushafShowVideo => 'الفيديو';
+
+  @override
+  String get mushafBackToVideo => 'ارجع للفيديو';
+
+  @override
+  String get mushafFailed => 'ماقدرناش نحفظ. جرّب تاني.';
+
+  @override
+  String get mistakesTitle => 'دفتر الأخطاء';
+
+  @override
+  String get mistakesTitleKids => 'كلمات بنراجعها';
+
+  @override
+  String get mistakesLead => 'الكلمات اللي اتعلّم عليها في الحصص في آخر ست شهور، عشان تراجعها.';
+
+  @override
+  String get mistakesLeadTeacher => 'الكلمات اللي اتعلّم عليها في حصص الطالب في آخر ست شهور.';
+
+  @override
+  String get mistakesLeadKids => 'دي كلمات هنقولها تاني مع بعض لحد ما تبقى سهلة.';
+
+  @override
+  String get mistakesEmpty => 'مفيش كلمات متعلّمة في آخر ست شهور.';
+
+  @override
+  String get mistakesEmptyKids => 'مفيش كلمات نراجعها دلوقتي. شاطر! ⭐';
+
+  @override
+  String mistakesWords(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n كلمة',
+      few: '$n كلمات',
+      two: 'كلمتين',
+      one: 'كلمة واحدة',
+      zero: 'مفيش كلمات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String mistakesTimes(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n مرة', few: '$n مرات', two: 'مرتين', one: 'مرة');
+    return '$_temp0';
+  }
+
+  @override
+  String mistakesWord(String word, String kinds, String times, String when) {
+    return '$word: $kinds، $times، آخر مرة $when';
+  }
+
+  @override
+  String mistakesWordKids(String word) {
+    return '$word: كلمة بنراجعها';
+  }
 }

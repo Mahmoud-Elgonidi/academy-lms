@@ -3800,6 +3800,12 @@ abstract class AppLocalizations {
   /// **'من نص الدرس: {title}'**
   String reciteSuggestion(String title);
 
+  /// No description provided for @reciteFromMistakes.
+  ///
+  /// In ar, this message translates to:
+  /// **'من أخطاء الحصة: {title}'**
+  String reciteFromMistakes(String title);
+
   /// No description provided for @reciteSurah.
   ///
   /// In ar, this message translates to:
@@ -6619,6 +6625,210 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'مفيش مراجعات في آخر أسبوعين.'**
   String get hifzRecentNone;
+
+  /// No description provided for @mushafTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'المصحف'**
+  String get mushafTitle;
+
+  /// No description provided for @mushafOpen.
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح المصحف'**
+  String get mushafOpen;
+
+  /// No description provided for @mushafNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحصة دي مفيهاش مصحف.'**
+  String get mushafNone;
+
+  /// No description provided for @mushafPrevious.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي قبلها'**
+  String get mushafPrevious;
+
+  /// No description provided for @mushafNext.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي بعدها'**
+  String get mushafNext;
+
+  /// No description provided for @mushafPageField.
+  ///
+  /// In ar, this message translates to:
+  /// **'صفحة'**
+  String get mushafPageField;
+
+  /// No description provided for @mushafPageOfTotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'من {total}'**
+  String mushafPageOfTotal(int total);
+
+  /// No description provided for @mushafFollowing.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصفحة بتتقلّب مع المدرّس.'**
+  String get mushafFollowing;
+
+  /// No description provided for @mushafBackToTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'ارجع لصفحة المدرّس'**
+  String get mushafBackToTeacher;
+
+  /// No description provided for @mushafTeacherOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'المدرّس على صفحة {page}'**
+  String mushafTeacherOn(int page);
+
+  /// No description provided for @mushafHintTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'دوس على أي كلمة عشان تعلّمها، والطالب بيشوف الصفحة اللي إنت فاتحها.'**
+  String get mushafHintTeacher;
+
+  /// No description provided for @mushafMarkingClosed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعليم الكلمات بيفتح مع أوضة الحصة، وبيقفل لما تسلّم التقرير.'**
+  String get mushafMarkingClosed;
+
+  /// No description provided for @mushafMarkWord.
+  ///
+  /// In ar, this message translates to:
+  /// **'علّم الكلمة'**
+  String get mushafMarkWord;
+
+  /// No description provided for @mushafClearMark.
+  ///
+  /// In ar, this message translates to:
+  /// **'امسح العلامة'**
+  String get mushafClearMark;
+
+  /// No description provided for @mushafEarlier.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتعلّمت في حصة قبل كده'**
+  String get mushafEarlier;
+
+  /// No description provided for @mushafWordMarked.
+  ///
+  /// In ar, this message translates to:
+  /// **'{word}: {kind}'**
+  String mushafWordMarked(String word, String kind);
+
+  /// No description provided for @mushafWordEarlier.
+  ///
+  /// In ar, this message translates to:
+  /// **'{word}: {kind}، اتعلّمت في حصة قبل كده {times}'**
+  String mushafWordEarlier(String word, String kind, String times);
+
+  /// No description provided for @mushafVerseEnd.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر الآية {n}'**
+  String mushafVerseEnd(int n);
+
+  /// No description provided for @mushafSurah.
+  ///
+  /// In ar, this message translates to:
+  /// **'سورة {name}'**
+  String mushafSurah(String name);
+
+  /// No description provided for @mushafShow.
+  ///
+  /// In ar, this message translates to:
+  /// **'المصحف'**
+  String get mushafShow;
+
+  /// No description provided for @mushafShowVideo.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفيديو'**
+  String get mushafShowVideo;
+
+  /// No description provided for @mushafBackToVideo.
+  ///
+  /// In ar, this message translates to:
+  /// **'ارجع للفيديو'**
+  String get mushafBackToVideo;
+
+  /// No description provided for @mushafFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'ماقدرناش نحفظ. جرّب تاني.'**
+  String get mushafFailed;
+
+  /// No description provided for @mistakesTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'دفتر الأخطاء'**
+  String get mistakesTitle;
+
+  /// No description provided for @mistakesTitleKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلمات بنراجعها'**
+  String get mistakesTitleKids;
+
+  /// No description provided for @mistakesLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكلمات اللي اتعلّم عليها في الحصص في آخر ست شهور، عشان تراجعها.'**
+  String get mistakesLead;
+
+  /// No description provided for @mistakesLeadTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكلمات اللي اتعلّم عليها في حصص الطالب في آخر ست شهور.'**
+  String get mistakesLeadTeacher;
+
+  /// No description provided for @mistakesLeadKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'دي كلمات هنقولها تاني مع بعض لحد ما تبقى سهلة.'**
+  String get mistakesLeadKids;
+
+  /// No description provided for @mistakesEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش كلمات متعلّمة في آخر ست شهور.'**
+  String get mistakesEmpty;
+
+  /// No description provided for @mistakesEmptyKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش كلمات نراجعها دلوقتي. شاطر! ⭐'**
+  String get mistakesEmptyKids;
+
+  /// No description provided for @mistakesWords.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مفيش كلمات} =1{كلمة واحدة} =2{كلمتين} few{{n} كلمات} other{{n} كلمة}}'**
+  String mistakesWords(int n);
+
+  /// No description provided for @mistakesTimes.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{مرة} =2{مرتين} few{{n} مرات} other{{n} مرة}}'**
+  String mistakesTimes(int n);
+
+  /// No description provided for @mistakesWord.
+  ///
+  /// In ar, this message translates to:
+  /// **'{word}: {kinds}، {times}، آخر مرة {when}'**
+  String mistakesWord(String word, String kinds, String times, String when);
+
+  /// No description provided for @mistakesWordKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'{word}: كلمة بنراجعها'**
+  String mistakesWordKids(String word);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
