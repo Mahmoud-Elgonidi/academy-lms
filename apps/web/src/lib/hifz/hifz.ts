@@ -90,7 +90,7 @@ export function pageParam(value: string, total = MUSHAF_PAGES): number | null {
 }
 
 /** Arabic-Indic and Persian digits as Latin ones (a teacher may type "٥٨٢"). */
-function latinDigits(text: string): string {
+export function latinDigits(text: string): string {
   return text.replace(/[٠-٩۰-۹]/g, (d) => String((d.charCodeAt(0) & 0xf) % 10));
 }
 

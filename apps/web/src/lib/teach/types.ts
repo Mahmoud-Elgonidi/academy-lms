@@ -173,6 +173,8 @@ export type ReportForm = ReportSummary & {
   assist?: { voice_draft: boolean; recitation_check?: boolean };
   /** The passage of the report's lessons' text, to start what to recite from (null: none). */
   expected_suggestion?: Expected | null;
+  /** The verses with the words marked in the lesson's shared mushaf (null: none marked). */
+  mistakes_suggestion?: Expected | null;
 };
 
 export type Student = {

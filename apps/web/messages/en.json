@@ -104,7 +104,8 @@
       "myData": "My data",
       "tellUs": "Report a concern",
       "journey": "Journey",
-      "hifz": "Hifz map"
+      "hifz": "Hifz map",
+      "mistakes": "Mistakes notebook"
     },
     "kids": {
       "menu": "Menu",
@@ -118,7 +119,8 @@
       "more": "More",
       "help": "Help",
       "tellUs": "Tell a grown-up",
-      "hifz": "My hifz map"
+      "hifz": "My hifz map",
+      "mistakes": "Words to practise"
     },
     "middle": {
       "menu": "Menu",
@@ -134,7 +136,8 @@
       "recordings": "My lesson recordings",
       "account": "My account",
       "tellUs": "Tell us",
-      "hifz": "My hifz map"
+      "hifz": "My hifz map",
+      "mistakes": "My mistakes notebook"
     },
     "teen": {
       "menu": "Menu",
@@ -150,7 +153,8 @@
       "recordings": "My lesson recordings",
       "account": "My account",
       "tellUs": "Report a concern",
-      "hifz": "Hifz"
+      "hifz": "Hifz",
+      "mistakes": "My mistakes notebook"
     },
     "help": "Help",
     "recordings": "My lesson recordings",
@@ -547,6 +551,8 @@
     "reciteToggle": "Check the recitation automatically",
     "reciteHint": "When the student hands in a recording, the words missed or said wrong are marked for you. For you alone; the family never sees it.",
     "reciteSuggestion": "From the lesson's text: {title}",
+    "reciteFromMistakes": "From the lesson's mistakes: {title}",
+    "reciteSuggestions": "Choose in one tap",
     "reciteSurah": "Surah",
     "reciteFrom": "From verse",
     "reciteTo": "To verse",
@@ -1200,6 +1206,40 @@
       "clearButton": "Take them off",
       "clearConfirm": "Take these pages off the map?",
       "cleared": "{n, plural, =0 {No pages taken off} =1 {1 page taken off} other {# pages taken off}}"
+    }
+  },
+  "mushaf": {
+    "title": "Mushaf",
+    "teacherLead": "Tap any word to mark it; your student sees the page with you.",
+    "teacherClosed": "Marking words is closed now: it opens with the room and closes once the lesson's report is handed in.",
+    "followLead": "The page follows the teacher's. You can look at another one too.",
+    "prev": "Previous page",
+    "next": "Next page",
+    "pageField": "Page number",
+    "go": "Open",
+    "pageOf": "Page {page} of {total}",
+    "badPage": "Type a page number from 1 to {total}.",
+    "backToTeacher": "Back to the teacher's page",
+    "teacherOn": "The teacher is on page {page}",
+    "surahHead": "Surah {name}",
+    "wordMenu": "The word “{word}”",
+    "clear": "Clear the mark",
+    "nowMark": "{kind} in this lesson",
+    "earlierMark": "{kind} before · {times, plural, =1 {once} =2 {twice} other {# times}}",
+    "legendNow": "This lesson's marks",
+    "legendEarlier": "Earlier lessons",
+    "views": "Video or mushaf",
+    "video": "Video",
+    "book": "Mistakes notebook",
+    "bookLead": "The words marked in lessons in the last six months, to go over.",
+    "bookTeacherLead": "The words marked in the student's lessons in the last six months.",
+    "bookEmpty": "No words marked in the last six months.",
+    "words": "{n, plural, =0 {No words} =1 {One word} other {# words}}",
+    "markTitle": "{kinds} · {times, plural, =1 {once} =2 {twice} other {# times}} · last {when}",
+    "kids": {
+      "bookLead": "Words we'll say again together until they're easy.",
+      "bookEmpty": "No words to practise right now. Well done!",
+      "markTitle": "Tricky {times, plural, =1 {once} =2 {twice} other {# times}} · last {when}"
     }
   }
 }

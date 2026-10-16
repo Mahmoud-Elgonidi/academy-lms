@@ -38,6 +38,23 @@ export function expectedPayload(offered: boolean, on: boolean, accepts: Homework
   return { expected: { surah: value.surah, from: value.from, to: value.to } };
 }
 
+/** Whether what the form has is this passage (a suggestion already taken). */
+export function samePassage(value: Partial<Expected>, passage: Expected): boolean {
+  return value.surah === passage.surah && value.from === passage.from && value.to === passage.to;
+}
+
+/**
+ * The passages a report suggests to recite, each a tap away: the lesson's
+ * own text first, then the verses with the words marked in the lesson's
+ * shared mushaf; one passage once.
+ */
+export function suggestionsOf(form: { expected_suggestion?: Expected | null; mistakes_suggestion?: Expected | null }): { from: 'text' | 'mistakes'; passage: Expected }[] {
+  const found: { from: 'text' | 'mistakes'; passage: Expected }[] = [];
+  if (form.expected_suggestion) found.push({ from: 'text', passage: form.expected_suggestion });
+  if (form.mistakes_suggestion && !found.some((s) => samePassage(s.passage, form.mistakes_suggestion!))) found.push({ from: 'mistakes', passage: form.mistakes_suggestion });
+  return found;
+}
+
 /** How a surah reads in the picker: its number and both names. */
 export const surahLabel = (s: Surah) => `${s.number}. ${s.name_ar} · ${s.name_en}`;
 

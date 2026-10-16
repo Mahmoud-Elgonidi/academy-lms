@@ -1,17 +1,19 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Field, Input, Select } from '@/components/ui';
-import { surahLabel, type Expected, type Surah } from '@/lib/teach/recitation';
+import { Field, Input, Select, join } from '@/components/ui';
+import { samePassage, surahLabel, type Expected, type Surah } from '@/lib/teach/recitation';
 
 /**
  * What homework handed in by voice asks to recite, so each recording is
  * checked word by word for the teacher: a switch, then the surah and the
- * verses (the lesson's own passage ready when it has one).
+ * verses (the lesson's own passage ready when it has one). The passages the
+ * report suggests (the lesson's text, the verses with the words marked in the
+ * lesson's shared mushaf) are each one tap: on, and filled in.
  */
 export function RecitationField({
   surahs,
-  suggestion,
+  suggestions,
   on,
   onToggle,
   value,
@@ -19,7 +21,7 @@ export function RecitationField({
   error,
 }: {
   surahs: Surah[];
-  suggestion: string | null;
+  suggestions: { from: 'text' | 'mistakes'; passage: Expected }[];
   on: boolean;
   onToggle: (on: boolean) => void;
   value: Partial<Expected>;
@@ -38,9 +40,34 @@ export function RecitationField({
       </label>
       <p className="mt-1 text-sm text-muted">{t('reciteHint')}</p>
       {error('homework.expected') ? <p className="mt-1 text-sm text-danger">{error('homework.expected')}</p> : null}
+      {suggestions.length > 0 ? (
+        <div role="group" aria-label={t('reciteSuggestions')} className="mt-3 flex flex-wrap gap-2">
+          {suggestions.map((s) => {
+            const taken = on && samePassage(value, s.passage);
+            const title = s.passage.title ?? `${s.passage.surah}:${s.passage.from}–${s.passage.to}`;
+            return (
+              <button
+                key={s.from}
+                type="button"
+                aria-pressed={taken}
+                data-suggestion={s.from}
+                onClick={() => {
+                  onToggle(true);
+                  onChange({ surah: s.passage.surah, from: s.passage.from, to: s.passage.to });
+                }}
+                className={join(
+                  'min-h-9 rounded-full border px-3.5 py-1 text-start text-sm font-semibold transition-colors',
+                  taken ? 'border-brand bg-brand-soft text-brand-strong' : 'border-line bg-white text-ink hover:border-brand-line hover:bg-brand-soft',
+                )}
+              >
+                {s.from === 'mistakes' ? t('reciteFromMistakes', { title }) : t('reciteSuggestion', { title })}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
       {on ? (
         <div className="mt-3 space-y-3">
-          {suggestion ? <p className="text-sm text-muted">{t('reciteSuggestion', { title: suggestion })}</p> : null}
           <Field label={t('reciteSurah')} error={error('homework.expected.surah')}>
             <Select value={value.surah ?? ''} onChange={(e) => onChange({ ...value, surah: number(e.target.value) })} required>
               <option value="">—</option>

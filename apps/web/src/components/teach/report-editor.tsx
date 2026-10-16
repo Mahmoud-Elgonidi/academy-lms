@@ -12,7 +12,7 @@ import { VoiceDraft } from '@/components/teach/voice-draft';
 import { formProblem } from '@/lib/problems';
 import { answersOf, answersPayload, missingAnswers, type Answers, type Question } from '@/lib/report-answers';
 import { ACCEPTS, OUTCOMES, type HomeworkAccepts, type Outcome, type ReportForm, type ReportItem } from '@/lib/teach/types';
-import { expectedPayload, recitable, type Expected, type Surah } from '@/lib/teach/recitation';
+import { expectedPayload, recitable, suggestionsOf, type Expected, type Surah } from '@/lib/teach/recitation';
 import { draftAnswers, draftItems, fieldNames, marksOf, nearestDays, type Mark, type VoiceDraft as Draft } from '@/lib/teach/voice-draft';
 
 type Item = ReportItem & { noteOpen: boolean };
@@ -55,7 +55,7 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
   // What to recite: asked while the helper is on, or the homework already says (its passage, else the lesson's).
   const reciteOffered = surahs.length > 0 && (Boolean(form.assist?.recitation_check) || Boolean(hw?.expected));
   const [reciteOn, setReciteOn] = useState(Boolean(hw?.expected));
-  const [recite, setRecite] = useState<Partial<Expected>>(hw?.expected ?? form.expected_suggestion ?? {});
+  const [recite, setRecite] = useState<Partial<Expected>>(hw?.expected ?? form.expected_suggestion ?? form.mistakes_suggestion ?? {});
   const [answers, setAnswers] = useState<Answers>(answersOf(form.answers));
   const [problem, setProblem] = useState<{ message?: string; errors: Record<string, string[]> }>({ errors: {} });
   const [marks, setMarks] = useState<Record<string, Mark>>({});
@@ -364,7 +364,7 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
                 {reciteOffered && recitable(accepts) ? (
                   <RecitationField
                     surahs={surahs}
-                    suggestion={form.expected_suggestion?.title ?? null}
+                    suggestions={suggestionsOf(form)}
                     on={reciteOn}
                     onToggle={setReciteOn}
                     value={recite}

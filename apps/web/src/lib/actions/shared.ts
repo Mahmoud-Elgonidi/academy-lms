@@ -1,7 +1,8 @@
 'use server';
 
 import { refresh } from 'next/cache';
-import { send } from '@/lib/api/server';
+import { read, send } from '@/lib/api/server';
+import type { MushafPage, MushafResult } from '@/lib/mushaf/types';
 import type { LessonRecording } from '@/lib/recordings';
 import type { JoinTicket } from '@/lib/teach/types';
 
@@ -13,7 +14,8 @@ import type { JoinTicket } from '@/lib/teach/types';
  * Google or Apple from one's account, disputing a lesson's outcome, a new
  * email or mobile number (confirmed by a code sent to it), and one's own
  * data (details put right, a copy, a correction, erasure, taking a request
- * back).
+ * back); and a lesson's shared mushaf read again (its teacher's page, or
+ * another a learner looks at).
  */
 export async function joinLesson(id: string): Promise<{ ok: true; ticket: JoinTicket; recording: LessonRecording } | { ok: false; message?: string }> {
   const joined = await send<{ data: JoinTicket; recording?: LessonRecording }>('post', '/v1/lessons/{session}/join', { params: { session: id } });
@@ -236,4 +238,15 @@ export async function sendChatMessage(conversation: string, body: string, key: s
   if (!done.ok) return problemOf(done.problem);
   refresh();
   return { ok: true, hidden: done.data.data.hidden };
+}
+
+/**
+ * A lesson's shared mushaf as it stands: the page asked for, else the one the
+ * teacher has open. Only a read (the teacher's writes are the teacher's
+ * actions); the screen draws what comes back.
+ */
+export async function readMushaf(session: string, page?: number): Promise<MushafResult> {
+  const done = await read<{ data: MushafPage }>('/v1/learning/lessons/{session}/mushaf', { params: { session }, query: { page } });
+  if (!done.ok) return problemOf(done.problem);
+  return { ok: true, mushaf: done.data.data };
 }

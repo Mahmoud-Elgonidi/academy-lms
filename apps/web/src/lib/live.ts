@@ -13,9 +13,38 @@ export type Realtime = { enabled: boolean; key: string | null; host: string | nu
  * shows. The journey follows lessons (a lesson's stars, the next one),
  * homework (missions, the week's chest) and practice (rounds, the egg,
  * creatures, a guardian's limits); the hifz map and its daily review follow
- * hifz (a page reviewed, marked, or recited and then heard).
+ * hifz (a page reviewed, marked, or recited and then heard); a lesson's
+ * shared mushaf follows mushaf (its page turned, a word marked).
  */
-export const SIGNALS = ['lessons.changed', 'homework.changed', 'inbox.changed', 'payments.changed', 'consents.changed', 'tickets.changed', 'privacy.changed', 'concerns.changed', 'checks.changed', 'messages.changed', 'practice.changed', 'hifz.changed'] as const;
+export const SIGNALS = ['lessons.changed', 'homework.changed', 'inbox.changed', 'payments.changed', 'consents.changed', 'tickets.changed', 'privacy.changed', 'concerns.changed', 'checks.changed', 'messages.changed', 'practice.changed', 'hifz.changed', 'mushaf.changed'] as const;
+
+export type Signal = (typeof SIGNALS)[number];
+
+/**
+ * Signals a screen follows by itself, reading its own part again, so the page
+ * is not refreshed for them: the shared mushaf turns its pages many times a
+ * lesson. A page that shows what they change refreshes itself (RefreshOn).
+ */
+export const OWN_SIGNALS: readonly Signal[] = ['mushaf.changed'];
+
+/** Whether a signal refreshes the whole page (LiveRefresh), or only the screens that follow it. */
+export function refreshesPage(signal: string): boolean {
+  return !OWN_SIGNALS.includes(signal as Signal);
+}
+
+/**
+ * Every signal heard is also told to the page's own scripts, as a window
+ * event whose detail is its name, so a client component can read its own
+ * state again (useSignal). `resync` says "catch up on everything": the relay
+ * started again, the socket came back, or the slow timer refreshed the page.
+ */
+export const SIGNAL_EVENT = 'lms:signal';
+export const RESYNC = 'resync';
+
+/** Whether a screen that follows these signals acts on this one (a resync is for every screen). */
+export function concerns(signal: unknown, followed: readonly string[]): boolean {
+  return typeof signal === 'string' && (signal === RESYNC || followed.includes(signal));
+}
 
 /** The relay's public channel: "alive" every minute, "resync" when it starts (every open screen catches up). */
 export const RELAY = { channel: 'lms.live', alive: 'alive', resync: 'resync' } as const;

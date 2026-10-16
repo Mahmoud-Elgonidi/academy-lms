@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { expectedPayload, recitable, surahLabel, tokensOf } from './recitation';
+import { expectedPayload, recitable, samePassage, suggestionsOf, surahLabel, tokensOf } from './recitation';
 
 describe('the recitation check', () => {
   it('sends what to recite only when the form asks it', () => {
@@ -13,6 +13,22 @@ describe('the recitation check', () => {
     expect(expectedPayload(true, true, 'audio', { surah: 1, from: 2 })).toEqual({ expected: null });
     expect(recitable('file')).toBe(false);
     expect(surahLabel({ number: 2, name_ar: 'ب', name_en: 'B', verses: 7 })).toBe('2. ب · B');
+  });
+
+  it('suggests the lesson’s text, then the verses with the words marked in the shared mushaf, each once', () => {
+    const text = { surah: 78, from: 1, to: 16, title: 'النبأ ١–١٦' };
+    const mistakes = { surah: 2, from: 255, to: 257, title: 'البقرة ٢٥٥–٢٥٧' };
+    expect(suggestionsOf({ expected_suggestion: text, mistakes_suggestion: mistakes })).toEqual([
+      { from: 'text', passage: text },
+      { from: 'mistakes', passage: mistakes },
+    ]);
+    expect(suggestionsOf({ expected_suggestion: null, mistakes_suggestion: mistakes })).toEqual([{ from: 'mistakes', passage: mistakes }]);
+    // An API without the mistakes yet: the lesson's text alone.
+    expect(suggestionsOf({ expected_suggestion: text })).toEqual([{ from: 'text', passage: text }]);
+    expect(suggestionsOf({ expected_suggestion: text, mistakes_suggestion: { ...text, title: 'other' } })).toHaveLength(1);
+    expect(suggestionsOf({})).toEqual([]);
+    expect(samePassage({ surah: 2, from: 255, to: 257 }, mistakes)).toBe(true);
+    expect(samePassage({ surah: 2, from: 255 }, mistakes)).toBe(false);
   });
 
   it('reads the words in order, extra words after the one they followed, and verse numbers at their end', () => {

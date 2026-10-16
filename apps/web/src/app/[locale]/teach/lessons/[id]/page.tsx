@@ -3,6 +3,7 @@ import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
 import { Classroom } from '@/components/teach/classroom';
 import { get } from '@/lib/api/server';
+import { lessonMushaf } from '@/lib/mushaf/server';
 import type { Lesson as TeachLesson } from '@/lib/teach/types';
 import { clock } from '@/lib/time';
 
@@ -11,13 +12,15 @@ import { clock } from '@/lib/time';
  * before midnight, or another day's alike; not the teacher's: not found).
  * The seat (LiveKit's address and a token for this person, or an outside
  * link) is asked for only when the teacher chooses to go in, never while the
- * page loads or is prefetched.
+ * page loads or is prefetched. A Quran lesson of a course the hifz map
+ * belongs to brings its shared mushaf, at the page the teacher has open.
  */
 export default async function Lesson({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [t, { data: lesson }] = await Promise.all([
+  const [t, { data: lesson }, mushaf] = await Promise.all([
     getTranslations('teach'),
     get<{ data: TeachLesson }>('/v1/teacher/lessons/{session}', { params: { session: id } }),
+    lessonMushaf(id),
   ]);
   return (
     <div>
@@ -31,7 +34,7 @@ export default async function Lesson({ params }: { params: Promise<{ id: string 
           {lesson.subject} · <span className="tabular-nums">{clock(lesson.starts_at)}–{clock(lesson.ends_at)}</span>
         </p>
       </header>
-      <Classroom id={id} back={{ href: '/teach', label: t('backToToday') }} />
+      <Classroom id={id} back={{ href: '/teach', label: t('backToToday') }} mushaf={mushaf} />
     </div>
   );
 }

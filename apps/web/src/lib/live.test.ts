@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SIGNALS, momentsOf, needsFallback, socketOptions, waitUntilNext, type Realtime } from './live';
+import { RESYNC, SIGNALS, SIGNAL_EVENT, concerns, momentsOf, needsFallback, refreshesPage, socketOptions, waitUntilNext, type Realtime } from './live';
 
 const realtime: Realtime = { enabled: true, key: 'k', host: null, port: 443, tls: true, channel: 'user.1' };
 
@@ -66,5 +66,25 @@ describe('the signals a page follows', () => {
 
   it('include the hifz map’s: a page reviewed, marked, or recited and then heard', () => {
     expect(SIGNALS).toContain('hifz.changed');
+  });
+
+  it('include the shared mushaf’s, which its screen follows by itself instead of refreshing the page', () => {
+    expect(SIGNALS).toContain('mushaf.changed');
+    expect(refreshesPage('mushaf.changed')).toBe(false);
+    expect(refreshesPage('lessons.changed')).toBe(true);
+    expect(refreshesPage('hifz.changed')).toBe(true);
+    expect(SIGNALS.filter(refreshesPage)).not.toContain('mushaf.changed');
+  });
+});
+
+describe('the signals told to the page’s own scripts', () => {
+  it('reach a screen that follows them, and a resync reaches every screen', () => {
+    expect(SIGNAL_EVENT).toBe('lms:signal');
+    expect(concerns('mushaf.changed', ['mushaf.changed'])).toBe(true);
+    expect(concerns('lessons.changed', ['mushaf.changed'])).toBe(false);
+    expect(concerns(RESYNC, ['mushaf.changed'])).toBe(true);
+    expect(concerns(RESYNC, [])).toBe(true);
+    expect(concerns(undefined, ['mushaf.changed'])).toBe(false);
+    expect(concerns({ name: 'mushaf.changed' }, ['mushaf.changed'])).toBe(false);
   });
 });

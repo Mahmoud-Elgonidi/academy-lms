@@ -2,12 +2,15 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { HifzMap } from '@/components/hifz/map';
 import { Icon } from '@/components/icons';
+import { RefreshOn } from '@/components/live-refresh';
+import { MistakesNotebook } from '@/components/mushaf/notebook';
 import { Badge, Card, Empty, Heading, SectionTitle, join } from '@/components/ui';
 import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
 import { firstName } from '@/lib/games/world';
 import { pageTitle, strengthTone, wirdStatus } from '@/lib/hifz/hifz';
 import type { Hifz } from '@/lib/hifz/types';
+import { familyNotebook } from '@/lib/mushaf/server';
 
 /**
  * The hifz map of the learner on screen (GET learning/hifz): every page of
@@ -15,13 +18,20 @@ import type { Hifz } from '@/lib/hifz/types';
  * today's review ("ورد النهارده"), each page opening to be recited or said
  * how it went. A student's own words by their look; a guardian's says whose
  * map it is. It refreshes on the hifz signal (a page reviewed, marked, or
- * recited and then heard). Nothing while the platform has no Quran text.
+ * recited and then heard). Under it the mistakes notebook: the words
+ * teachers marked in the lessons' shared mushaf ("كلمات بنراجعها" in the
+ * kids' look), following the words as they are marked. Nothing while the
+ * platform has no Quran text.
  */
 export default async function HifzMapPage() {
-  const [t, fam, locale] = await Promise.all([getTranslations('hifz'), family(), getLocale()]);
+  const [t, m, fam, locale] = await Promise.all([getTranslations('hifz'), getTranslations('mushaf'), family(), getLocale()]);
   const learner = fam.current;
   if (!learner) return <Empty>{t('noLearner')}</Empty>;
-  const [nav, { data: hifz }] = await Promise.all([getTranslations(`nav.${fam.stage}`), get<{ data: Hifz }>('/v1/learning/hifz', { query: { learner_id: learner.id } })]);
+  const [nav, { data: hifz }, book] = await Promise.all([
+    getTranslations(`nav.${fam.stage}`),
+    get<{ data: Hifz }>('/v1/learning/hifz', { query: { learner_id: learner.id } }),
+    familyNotebook(learner.id),
+  ]);
   const kids = fam.stage === 'kids';
   const title = learner.is_self ? nav('hifz') : t('of', { name: `\u2068${firstName(learner.name)}\u2069` });
   if (hifz.pages_total === 0) {
@@ -95,6 +105,19 @@ export default async function HifzMapPage() {
           </ul>
         )}
       </section>
+
+      {book ? (
+        <>
+          <MistakesNotebook
+            book={book}
+            title={nav('mistakes')}
+            lead={kids ? m('kids.bookLead') : m('bookLead')}
+            empty={kids ? m('kids.bookEmpty') : m('bookEmpty')}
+            kids={kids}
+          />
+          <RefreshOn signals={['mushaf.changed']} />
+        </>
+      ) : null}
     </div>
   );
 }

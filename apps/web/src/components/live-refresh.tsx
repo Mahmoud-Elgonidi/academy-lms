@@ -1,8 +1,13 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { RELAY, SIGNALS, needsFallback, socketOptions, waitUntilNext, type Realtime } from '@/lib/live';
+import { useEffect, useRef } from 'react';
+import { RELAY, RESYNC, SIGNALS, SIGNAL_EVENT, concerns, needsFallback, refreshesPage, socketOptions, waitUntilNext, type Realtime, type Signal } from '@/lib/live';
+
+/** Tells the page's own scripts a signal was heard (useSignal), whether or not the tab is in view. */
+function announce(signal: string) {
+  window.dispatchEvent(new CustomEvent(SIGNAL_EVENT, { detail: signal }));
+}
 
 /**
  * The page stays current by itself: one socket to Reverb (as the panels
@@ -10,7 +15,10 @@ import { RELAY, SIGNALS, needsFallback, socketOptions, waitUntilNext, type Realt
  * (/bff/realtime/auth, the token never reaches the page). A signal refreshes
  * the page from the API, keeping what is being typed; a page in a hidden tab
  * refreshes when it is looked at again. Without a socket, or with the relay
- * quiet, it refreshes every minute instead, as the panels do.
+ * quiet, it refreshes every minute instead, as the panels do. Each signal is
+ * also told to the page's scripts (a window event), so a screen keeping its
+ * own state reads it again; the ones such a screen follows by itself (the
+ * shared mushaf's) leave the page alone.
  */
 export function LiveRefresh({ realtime }: { realtime: Realtime | null }) {
   const router = useRouter();
@@ -52,7 +60,9 @@ export function LiveRefresh({ realtime }: { realtime: Realtime | null }) {
     };
     document.addEventListener('visibilitychange', seen);
     const fallback = setInterval(() => {
-      if (!document.hidden && needsFallback(state, Date.now())) now();
+      if (document.hidden || !needsFallback(state, Date.now())) return;
+      now();
+      announce(RESYNC);
     }, 15_000);
 
     if (key && channel) {
@@ -75,17 +85,34 @@ export function LiveRefresh({ realtime }: { realtime: Realtime | null }) {
         });
         socket = pusher;
         const own = pusher.subscribe(`private-${channel}`);
-        for (const signal of SIGNALS) own.bind(signal, heard(refresh));
+        for (const signal of SIGNALS) {
+          own.bind(
+            signal,
+            heard(() => {
+              announce(signal);
+              if (refreshesPage(signal)) refresh();
+            }),
+          );
+        }
         const relay = pusher.subscribe(RELAY.channel);
         relay.bind(RELAY.alive, heard(() => undefined));
-        relay.bind(RELAY.resync, heard(refresh));
+        relay.bind(
+          RELAY.resync,
+          heard(() => {
+            announce(RESYNC);
+            refresh();
+          }),
+        );
         // Back after the network dropped: whatever changed meanwhile.
         let connectedOnce = false;
         pusher.connection.bind('state_change', ({ current }: { current: string }) => {
           state.connected = current === 'connected';
           if (!state.connected) return;
           state.lastHeard = Date.now();
-          if (connectedOnce) refresh();
+          if (connectedOnce) {
+            announce(RESYNC);
+            refresh();
+          }
           connectedOnce = true;
         });
       });
@@ -117,5 +144,61 @@ export function RefreshAt({ moments }: { moments: string[] }) {
     const timer = setTimeout(() => router.refresh(), wait);
     return () => clearTimeout(timer);
   }, [at, router]);
+  return null;
+}
+
+/**
+ * A client component's own state follows these signals: `then` runs for each
+ * one heard (and for a resync), with the signal's name. The socket is
+ * LiveRefresh's; nothing here polls.
+ */
+export function useSignal(signals: readonly Signal[], then: (signal: string) => void) {
+  const latest = useRef(then);
+  useEffect(() => {
+    latest.current = then;
+  });
+  const followed = signals.join(',');
+  useEffect(() => {
+    const names = followed.split(',');
+    const heard = (event: Event) => {
+      const signal = (event as CustomEvent<unknown>).detail;
+      if (concerns(signal, names)) latest.current(signal as string);
+    };
+    window.addEventListener(SIGNAL_EVENT, heard);
+    return () => window.removeEventListener(SIGNAL_EVENT, heard);
+  }, [followed]);
+}
+
+/**
+ * A page that shows what one of the signals a screen follows by itself
+ * changes (the mistakes notebook: the words marked in the shared mushaf)
+ * refreshes for it, once for a burst; a hidden tab when it is looked at again.
+ */
+export function RefreshOn({ signals }: { signals: Signal[] }) {
+  const router = useRouter();
+  const soon = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const missed = useRef(false);
+  useSignal(signals, (signal) => {
+    // A resync refreshes the page already (LiveRefresh).
+    if (signal === RESYNC) return;
+    if (document.hidden) {
+      missed.current = true;
+      return;
+    }
+    clearTimeout(soon.current);
+    soon.current = setTimeout(() => router.refresh(), 400);
+  });
+  useEffect(() => {
+    const seen = () => {
+      if (document.hidden || !missed.current) return;
+      missed.current = false;
+      router.refresh();
+    };
+    document.addEventListener('visibilitychange', seen);
+    return () => {
+      document.removeEventListener('visibilitychange', seen);
+      clearTimeout(soon.current);
+    };
+  }, [router]);
   return null;
 }

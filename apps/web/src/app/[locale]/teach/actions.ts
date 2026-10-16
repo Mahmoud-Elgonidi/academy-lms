@@ -2,6 +2,7 @@
 
 import { refresh } from 'next/cache';
 import { send, type Outcome } from '@/lib/api/server';
+import type { MushafPage, MushafResult, WordRef } from '@/lib/mushaf/types';
 import type { ShiftBlock } from '@/lib/teach/types';
 import type { VoiceDraft } from '@/lib/teach/voice-draft';
 
@@ -148,4 +149,31 @@ export async function markHifz(enrollment: string, choice: HifzChoice, strength:
 export async function clearHifz(enrollment: string, choice: HifzChoice): Promise<Result & { count?: number }> {
   const done = await send<{ data: { cleared: number } }>('post', '/v1/teacher/students/{enrollment}/hifz/clear', { params: { enrollment }, body: choice });
   return done.ok ? { ...result(done), count: done.data.data.cleared } : result(done);
+}
+
+function mushafOf(outcome: Outcome<{ data: MushafPage }>): MushafResult {
+  if (outcome.ok) return { ok: true, mushaf: outcome.data.data };
+  return { ok: false, message: Object.values(outcome.problem.errors)[0]?.[0] ?? (outcome.problem.title || undefined) };
+}
+
+/*
+ * The lesson's shared mushaf: the teacher turns its pages and marks words
+ * (the student's screen follows, live). Each answers the page as it stands,
+ * which the screen draws; nothing else on the page changes, so nothing
+ * refreshes. Not money nor lessons: no idempotency key.
+ */
+
+/** Turns the lesson's mushaf to a page. */
+export async function turnMushaf(session: string, page: number): Promise<MushafResult> {
+  return mushafOf(await send<{ data: MushafPage }>('put', '/v1/learning/lessons/{session}/mushaf', { params: { session }, body: { page } }));
+}
+
+/** Marks a word (wrong, hesitation, tajweed); marking it again changes what it was. Answers `page`. */
+export async function markWord(session: string, word: WordRef, kind: string, page: number): Promise<MushafResult> {
+  return mushafOf(await send<{ data: MushafPage }>('post', '/v1/learning/lessons/{session}/mistakes', { params: { session }, body: { ...word, kind, page } }));
+}
+
+/** Takes a word's mark off. Answers `page`. */
+export async function unmarkWord(session: string, word: WordRef, page: number): Promise<MushafResult> {
+  return mushafOf(await send<{ data: MushafPage }>('delete', '/v1/learning/lessons/{session}/mistakes', { params: { session }, query: { ...word, page } }));
 }
