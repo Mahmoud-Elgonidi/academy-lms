@@ -4,7 +4,11 @@
 #
 #   bash console.sh owner    the email on stdin: that console admin becomes an owner (the
 #                            platform settings are theirs to change); audited, as
-#                            `php artisan platform:admin <email> --owner` is.
+#                            `php artisan platform:admin <email> --owner` is. With a name
+#                            and a password on the next two lines, someone not on the team
+#                            yet is added as an owner (they set up the authenticator app on
+#                            first sign-in); the password goes to the command on its stdin,
+#                            never on a command line, and is never printed.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -27,10 +31,18 @@ compose() { dk compose -p "$PROJECT" -f "$HERE/compose.yml" "$@"; }
 case "${1:-}" in
     owner)
         IFS= read -r email || true
+        IFS= read -r name || true
+        IFS= read -r password || true
         [[ "$email" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]] || fail "An email on stdin, please."
-        compose run --rm --no-deps -T web php artisan platform:admin "$email" --owner
+        if [ -z "$name" ]; then
+            compose run --rm --no-deps -T web php artisan platform:admin "$email" --owner
+        else
+            [ "${#name}" -le 120 ] && [[ ! "$name" =~ [[:cntrl:]] ]] || fail "A name of 120 characters at most, on one line."
+            [ "${#password}" -ge 12 ] || fail "A password of 12 characters or more on the third line, please."
+            printf '%s\n' "$password" | compose run --rm --no-deps -T web php artisan platform:admin "$email" "$name" --owner --password-stdin
+        fi
         ;;
     *)
-        fail "Usage: bash console.sh owner   (the console admin's email on stdin)"
+        fail "Usage: bash console.sh owner   (the console admin's email on stdin; to add someone, their name and password on the next lines)"
         ;;
 esac

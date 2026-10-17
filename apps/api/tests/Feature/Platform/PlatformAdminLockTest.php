@@ -3,8 +3,10 @@
 use Carbon\CarbonImmutable;
 use Filament\Auth\Pages\Login;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Modules\Identity\Actions\Impersonation\StartImpersonation;
@@ -15,6 +17,7 @@ use Modules\Platform\Contracts\DTOs\PlatformAdminRef;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Platform\Models\PlatformAdmin;
 use Modules\SharedKernel\Audit\AuditActor;
+use Symfony\Component\Console\Tester\CommandTester;
 
 /*
  * Locking someone of the platform team out (platform:admin --deactivate):
@@ -111,6 +114,25 @@ it('still adds a new admin, who needs a name', function () {
     $this->artisan('platform:admin', ['email' => 'new@company.example', 'name' => 'Nada', '--password' => 'a-long-password'])->assertSuccessful();
     expect(PlatformAdmin::query()->where('email', 'new@company.example')->value('is_active'))->toBeTrue();
     $this->artisan('platform:admin', ['email' => 'other@company.example', '--password' => 'a-long-password'])->assertFailed();
+});
+
+it('adds an owner whose password comes on stdin, as infra/deploy/console.sh sends it', function () {
+    $run = function (string $email, array $stdin): int {
+        $tester = new CommandTester(Artisan::all()['platform:admin']);
+        $tester->setInputs($stdin);
+
+        return $tester->execute(['email' => $email, 'name' => 'Mahmoud', '--owner' => true, '--password-stdin' => true], ['interactive' => false]);
+    };
+
+    expect($run('new@company.example', ['a-long-password-from-stdin']))->toBe(0);
+    $admin = PlatformAdmin::query()->where('email', 'new@company.example')->firstOrFail();
+    expect($admin)->is_owner->toBeTrue()->is_active->toBeTrue()->name->toBe('Mahmoud')
+        ->and(Hash::check('a-long-password-from-stdin', $admin->password))->toBeTrue();
+
+    // Nothing on stdin, or too short: nobody is added.
+    expect($run('empty@company.example', []))->toBe(1)
+        ->and($run('short@company.example', ['short']))->toBe(1)
+        ->and(PlatformAdmin::query()->whereIn('email', ['empty@company.example', 'short@company.example'])->exists())->toBeFalse();
 });
 
 it('makes an admin an owner and back, audited, and never takes the last owner who can sign in', function () {

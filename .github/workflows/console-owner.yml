@@ -3,17 +3,24 @@ name: console-owner
 # Makes a console admin an owner on the server (the platform settings, its
 # outside services' keys, are theirs to change): infra/deploy/console.sh runs
 # `php artisan platform:admin <email> --owner` in the deployed version, which
-# refuses an email that is not on the console's team and is audited. By hand
-# only, from the Actions tab; the email goes to the server on stdin, never on
-# a command line.
+# refuses an email that is not on the console's team and is audited. With a
+# name, someone not on the team yet is added as an owner, their password from
+# the repository secret CONSOLE_ADMIN_PASSWORD (they set up the authenticator
+# app on first sign-in). By hand only, from the Actions tab; the email, name
+# and password go to the server on stdin, never on a command line.
 
 on:
   workflow_dispatch:
     inputs:
       email:
-        description: The console admin's email (already on the platform team)
+        description: The console admin's email
         required: true
         type: string
+      name:
+        description: Only to add someone new to the platform team (their password from the CONSOLE_ADMIN_PASSWORD secret)
+        required: false
+        type: string
+        default: ''
 
 concurrency:
   group: console-owner
@@ -36,11 +43,17 @@ jobs:
       SSH_PORT: ${{ vars.DEPLOY_SSH_PORT || '22' }}
       DIR: ${{ vars.DEPLOY_DIR || 'academy-lms' }}
       EMAIL: ${{ inputs.email }}
+      NAME: ${{ inputs.name }}
+      PASSWORD: ${{ secrets.CONSOLE_ADMIN_PASSWORD }}
     steps:
       - name: An email, and the server's settings
         run: |
           set -euo pipefail
           [[ "$EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]] || { echo "::error::Not an email."; exit 1; }
+          if [ -n "$NAME" ]; then
+            [ "${#NAME}" -le 120 ] && [[ ! "$NAME" =~ [[:cntrl:]] ]] || { echo "::error::A name of 120 characters at most, on one line."; exit 1; }
+            [ "${#PASSWORD}" -ge 12 ] || { echo "::error::To add someone, add the repository secret CONSOLE_ADMIN_PASSWORD (12 characters or more)."; exit 1; }
+          fi
           if [ -z "$SSH_KEY" ] && [ -z "$SSH_PASSWORD" ]; then
             echo "::error::Add the repository secret DEPLOY_SSH_KEY (or DEPLOY_PASSWORD), as for the deploy."; exit 1
           fi
@@ -70,4 +83,8 @@ jobs:
           target="$SSH_USER@$HOST"
           # The script as this commit has it, next to the deployed stack's own files.
           "${scp_cmd[@]}" infra/deploy/console.sh "$target:$DIR/"
-          printf '%s\n' "$EMAIL" | "${ssh_cmd[@]}" "$target" "cd '$DIR' && bash console.sh owner"
+          if [ -n "$NAME" ]; then
+            printf '%s\n%s\n%s\n' "$EMAIL" "$NAME" "$PASSWORD" | "${ssh_cmd[@]}" "$target" "cd '$DIR' && bash console.sh owner"
+          else
+            printf '%s\n' "$EMAIL" | "${ssh_cmd[@]}" "$target" "cd '$DIR' && bash console.sh owner"
+          fi

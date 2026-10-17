@@ -426,6 +426,12 @@ Stripe Connect, Google and Apple): in the console, **Platform settings** (an own
 Someone on the console's team who does not see it is not an owner yet: on GitHub, **Actions › console-owner
 › Run workflow** with their email (it runs `platform:admin <email> --owner` on the server, audited), or here,
 as the deploy user in `~/academy-lms`: `printf '%s\n' someone@example.com | bash console.sh owner`.
+Someone not on the team yet ("nobody on the platform team has this email"): put a password of 12
+characters or more in the repository secret `CONSOLE_ADMIN_PASSWORD`, then run **console-owner** with their
+email and their name; they are added as an owner (`platform:admin <email> <name> --owner --password-stdin`:
+the password reaches the command on stdin, never on a command line or in the log), sign in at `/console`
+with it and set up the authenticator app. Change or delete the secret afterwards; the console keeps the
+password it was given.
 Type the new one over the hidden one and save: it is in use from the next request, job or command, with no
 restart, and the audit log names the setting, never the value. "Try it" on its section shows the service
 took it. To go back to the server's own value, tick "Remove the saved …" (a key) or empty the field.

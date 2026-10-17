@@ -145,10 +145,15 @@ jobs:
           check 404 lms.example /admin/login
           check 200 demo.lms.example /api/v1/branding -H 'Accept: application/json'
 
-          # The platform team's script (console-owner.yml): a console admin made an owner; anything not an email refused.
+          # The platform team's script (console-owner.yml): a console admin made an owner; anything not an email refused;
+          # someone new added as an owner with a name and their password on stdin, never printed; a short password refused.
           printf 'admin@platform.test\n' | bash "$dir/console.sh" owner | tee /tmp/owner
           grep -q 'is an owner' /tmp/owner || { echo "console.sh did not make the admin an owner"; exit 1; }
           if printf 'admin; rm -rf /\n' | bash "$dir/console.sh" owner; then echo "console.sh took something not an email"; exit 1; fi
+          printf 'rehearsal@platform.test\nRehearsal Owner\nrehearsal-password-1\n' | bash "$dir/console.sh" owner 2>&1 | tee /tmp/owner
+          grep -q 'Added rehearsal@platform.test as an owner' /tmp/owner || { echo "console.sh did not add the new owner"; exit 1; }
+          if grep -q 'rehearsal-password-1' /tmp/owner; then echo "console.sh printed the password"; exit 1; fi
+          if printf 'short@platform.test\nShort\nshort\n' | bash "$dir/console.sh" owner; then echo "console.sh took a short password"; exit 1; fi
 
           # Behind the server's nginx (X-Forwarded-Proto: https), links stay on https.
           check 200 demo.lms.example /admin/login -H 'X-Forwarded-Proto: https' -H 'X-Forwarded-Port: 443'

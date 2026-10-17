@@ -44,6 +44,7 @@ Repository → Settings → Secrets and variables → Actions:
 | `DEPLOY_PASSWORD` | only if there is no key: the SSH password |
 | `DEPLOY_KNOWN_HOSTS` | the `ssh-keyscan -H` output; without it the server's key is trusted as first seen |
 | `DEPLOY_HOST`, `DEPLOY_USER` | only to deploy somewhere else: the workflow defaults to `145.223.99.175` and `lukas-demo` |
+| `CONSOLE_ADMIN_PASSWORD` | only to add someone to the console's team from GitHub (`console-owner.yml` with a name): their first password, 12 characters or more |
 
 The key or the password lives in GitHub's secrets only, never in a file of the repository.
 
