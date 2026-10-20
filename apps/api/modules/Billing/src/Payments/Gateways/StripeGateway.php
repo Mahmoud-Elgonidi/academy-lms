@@ -13,6 +13,9 @@ use Modules\Billing\Payments\CheckoutState;
 use Modules\Billing\Payments\GatewayEvent;
 use Modules\Billing\Payments\GatewayException;
 use Modules\Billing\Payments\PaymentGateway;
+use Modules\SharedKernel\Health\Faults\StripeFaults;
+use Modules\SharedKernel\Health\ServiceFault;
+use Modules\SharedKernel\Health\ServiceHealth;
 use Modules\SharedKernel\Money\Money;
 
 /**
@@ -21,7 +24,9 @@ use Modules\SharedKernel\Money\Money;
  * the platform's key acting for the academy's connected account: a direct
  * charge on that account (Stripe-Account), with the platform's fee if one
  * is set. Webhooks are signed with the endpoint's secret (Stripe-Signature);
- * for connected accounts that is the platform's Connect endpoint.
+ * for connected accounts that is the platform's Connect endpoint. On the
+ * platform's key, how Stripe answers goes to ServiceHealth ('stripe'); an
+ * academy's own key, or a connected account that left, is the academy's.
  */
 final class StripeGateway implements PaymentGateway
 {
@@ -145,13 +150,23 @@ final class StripeGateway implements PaymentGateway
             $http = $http->withHeaders(['Stripe-Account' => $this->credentials['account_id']]);
         }
 
+        $platform = empty($this->credentials['secret_key']);
         try {
             $response = $call($http);
         } catch (ConnectionException $e) {
+            if ($platform) {
+                ServiceHealth::fault('stripe', ServiceFault::unreachable());
+            }
             throw new GatewayException('Stripe could not be reached: '.$e->getMessage(), previous: $e);
         }
         if ($response->failed()) {
+            if ($platform && ($fault = StripeFaults::of($response->status(), $response->json(), ! empty($this->credentials['account_id']))) !== null) {
+                ServiceHealth::fault('stripe', $fault);
+            }
             throw new GatewayException('Stripe: '.($response->json('error.message') ?? 'HTTP '.$response->status()));
+        }
+        if ($platform) {
+            ServiceHealth::ok('stripe');
         }
 
         return (array) $response->json();

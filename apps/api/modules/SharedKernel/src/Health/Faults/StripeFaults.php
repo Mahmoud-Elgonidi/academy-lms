@@ -16,7 +16,7 @@ final class StripeFaults
     {
         $code = (string) (data_get($body, 'error.code') ?? data_get($body, 'error.type') ?? data_get($body, 'error') ?? '');
         $problem = match (true) {
-            $status === 401 => ServiceProblem::Key,
+            $code === 'invalid_client', $status === 401 => ServiceProblem::Key,
             $status === 403 => $onConnectedAccount ? null : ServiceProblem::Permission,
             $status === 429 => ServiceProblem::Rate,
             $status >= 500 => ServiceProblem::Down,
