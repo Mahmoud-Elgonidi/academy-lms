@@ -51,7 +51,8 @@ jobs:
 
   # The portals end to end (phone and desktop), against the real API with the demo data.
   e2e:
-    runs-on: ubuntu-latest
+    # Playwright 1.56 installs its browser's system packages only up to Ubuntu 24.04 (ubuntu-latest moved on).
+    runs-on: ubuntu-24.04
     needs: check
     services:
       postgres:
