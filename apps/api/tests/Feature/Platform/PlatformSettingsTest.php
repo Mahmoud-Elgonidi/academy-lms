@@ -33,6 +33,8 @@ use Symfony\Component\Console\Output\NullOutput;
  */
 
 beforeEach(function () {
+    // The screen asks the providers for their models: never the real ones from a test.
+    Http::preventStrayRequests();
     $this->owner = PlatformAdmin::query()->create(['name' => 'سلمى', 'email' => 'salma@company.example', 'password' => 'a-long-password', 'timezone' => 'Africa/Cairo']);
     $this->owner->forceFill(['is_owner' => true])->save();
     $this->owner->saveAppAuthenticationSecret('LMSSETTINGSTESTCONSOLE2FASECRET2');

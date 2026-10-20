@@ -2,6 +2,8 @@
 
 namespace Modules\Platform\Settings;
 
+use Modules\Platform\Settings\Rules\OllamaAddress;
+
 /**
  * Every setting the console's Platform settings screen offers: the outside
  * services (AI, email, WhatsApp, texts, push, the classroom, Stripe Connect,
@@ -21,7 +23,10 @@ final class SettingCatalog
 
     private const KEY = ['regex:/^\S+$/', 'max:2000'];
 
-    private const MODEL = ['regex:/^[a-z0-9][a-z0-9.\-]*$/', 'max:80'];
+    private const MODEL = ['regex:/^[A-Za-z0-9][A-Za-z0-9._:\-]*$/', 'max:120'];
+
+    /** Ollama's names may name a repository and a tag (hf.co/user/model:Q4_K_M). */
+    private const LOCAL_MODEL = ['regex:/^[A-Za-z0-9][A-Za-z0-9._:\/\-]*$/', 'max:200'];
 
     /** @var ?array<string, SettingDefinition> */
     private static ?array $all = null;
@@ -30,12 +35,22 @@ final class SettingCatalog
     public static function all(): array
     {
         return self::$all ??= collect([
-            // The AI helpers and the games designer.
-            new SettingDefinition('ai_driver', 'ai', 'select', ['platform.ai.driver'], 'AI_DRIVER', ['claude', 'off']),
+            // The AI helpers and the games designer: who writes the words, then that provider's key and models.
+            new SettingDefinition('ai_driver', 'ai', 'select', ['platform.ai.driver'], 'AI_DRIVER', ['claude', 'openai', 'gemini', 'ollama', 'off']),
             new SettingDefinition('anthropic_key', 'ai', 'secret', ['platform.ai.key', 'platform.games.designer.key'], 'ANTHROPIC_API_KEY', rules: self::KEY),
-            new SettingDefinition('ai_model', 'ai', 'text', ['platform.ai.models.best'], 'AI_MODEL', rules: self::MODEL),
-            new SettingDefinition('ai_fast_model', 'ai', 'text', ['platform.ai.models.fast'], 'AI_FAST_MODEL', rules: self::MODEL),
-            new SettingDefinition('game_designer_model', 'ai', 'text', ['platform.games.designer.model'], 'GAME_DESIGNER_MODEL', rules: self::MODEL),
+            new SettingDefinition('ai_model', 'ai', 'model', ['platform.ai.models.best'], 'AI_MODEL', rules: self::MODEL, driver: 'claude', models: 'claude'),
+            new SettingDefinition('ai_fast_model', 'ai', 'model', ['platform.ai.models.fast'], 'AI_FAST_MODEL', rules: self::MODEL, driver: 'claude', models: 'claude'),
+            new SettingDefinition('openai_key', 'ai', 'secret', ['platform.ai.openai.key'], 'OPENAI_API_KEY', rules: self::KEY, driver: 'openai'),
+            new SettingDefinition('openai_model', 'ai', 'model', ['platform.ai.openai.models.best'], 'OPENAI_MODEL', rules: self::MODEL, driver: 'openai', models: 'openai'),
+            new SettingDefinition('openai_fast_model', 'ai', 'model', ['platform.ai.openai.models.fast'], 'OPENAI_FAST_MODEL', rules: self::MODEL, driver: 'openai', models: 'openai'),
+            new SettingDefinition('gemini_key', 'ai', 'secret', ['platform.ai.gemini.key'], 'GEMINI_API_KEY', rules: self::KEY, driver: 'gemini'),
+            new SettingDefinition('gemini_model', 'ai', 'model', ['platform.ai.gemini.models.best'], 'GEMINI_MODEL', rules: self::MODEL, driver: 'gemini', models: 'gemini'),
+            new SettingDefinition('gemini_fast_model', 'ai', 'model', ['platform.ai.gemini.models.fast'], 'GEMINI_FAST_MODEL', rules: self::MODEL, driver: 'gemini', models: 'gemini'),
+            new SettingDefinition('ollama_url', 'ai', 'url', ['platform.ai.ollama.url'], 'OLLAMA_URL', rules: ['url:https,http', 'max:300', new OllamaAddress], driver: 'ollama'),
+            new SettingDefinition('ollama_key', 'ai', 'secret', ['platform.ai.ollama.key'], 'OLLAMA_API_KEY', rules: self::KEY, driver: 'ollama'),
+            new SettingDefinition('ollama_model', 'ai', 'model', ['platform.ai.ollama.models.best'], 'OLLAMA_MODEL', rules: self::LOCAL_MODEL, driver: 'ollama', models: 'ollama'),
+            new SettingDefinition('ollama_fast_model', 'ai', 'model', ['platform.ai.ollama.models.fast'], 'OLLAMA_FAST_MODEL', rules: self::LOCAL_MODEL, driver: 'ollama', models: 'ollama'),
+            new SettingDefinition('game_designer_model', 'ai', 'model', ['platform.games.designer.model'], 'GAME_DESIGNER_MODEL', rules: self::MODEL, models: 'claude'),
             new SettingDefinition('ai_daily_cap', 'ai', 'int', ['platform.ai.daily_cap'], 'AI_DAILY_CAP', rules: ['integer', 'min:0', 'max:100000'], cast: 'int'),
             new SettingDefinition('elevenlabs_key', 'ai', 'secret', ['platform.ai.speech.key'], 'ELEVENLABS_API_KEY', rules: self::KEY),
             new SettingDefinition('elevenlabs_base', 'ai', 'select', ['platform.ai.speech.base_url'], 'ELEVENLABS_API_BASE', ['world', 'eu'],

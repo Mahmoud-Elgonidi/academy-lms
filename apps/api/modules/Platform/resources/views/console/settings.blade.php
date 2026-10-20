@@ -21,6 +21,9 @@
         <span>{{ __($l.'promise') }}</span>
     </p>
 
+    {{-- The AI section's lists of models, from each provider, once the page is open. --}}
+    <div wire:init="warmModels" hidden></div>
+
     <form wire:submit="save" class="flex flex-col gap-6">
         {{ $this->form }}
         <div class="ps-save">

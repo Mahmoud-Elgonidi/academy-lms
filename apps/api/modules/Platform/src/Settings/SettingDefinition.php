@@ -9,7 +9,9 @@ namespace Modules\Platform\Settings;
  * stands in for, and how a value is checked and read.
  *
  * Types: secret and json_file are never shown again once saved; select and
- * toggle offer fixed values; text, url, email, int and list are typed.
+ * toggle offer fixed values; model offers a provider's own list of models
+ * (or one typed by hand); text, url, email, int and list are typed. A
+ * setting of one AI provider shows only while that provider is chosen.
  */
 final readonly class SettingDefinition
 {
@@ -18,6 +20,8 @@ final readonly class SettingDefinition
      * @param  list<string>  $options  a select's values
      * @param  list<mixed>  $rules  more checks on a value given (a list's: on each of its items)
      * @param  array<string, string>  $map  a select's value => what the config holds for it (when they differ)
+     * @param  ?string  $driver  the AI provider (AI_DRIVER) it belongs to: shown only while that one is chosen
+     * @param  ?string  $models  a model setting's provider, whose list it offers (an AiProvider value)
      */
     public function __construct(
         public string $key,
@@ -29,6 +33,8 @@ final readonly class SettingDefinition
         public array $rules = [],
         public string $cast = 'string',
         public array $map = [],
+        public ?string $driver = null,
+        public ?string $models = null,
     ) {}
 
     public function secret(): bool
