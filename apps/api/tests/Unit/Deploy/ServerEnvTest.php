@@ -9,7 +9,7 @@ const SERVER_DEFAULTS = [
     'AI_CONCURRENT', 'AI_JOB_TIMEOUT', 'AI_MAX_AUDIO_SECONDS', 'AI_TIMEOUT', 'ANTHROPIC_BASE_URL', 'APPLE_AUTHORIZE_URL', 'APPLE_ISSUERS', 'APPLE_JWKS_URL', 'BILLING_CHECKOUT_MINUTES',
     'BILLING_PAY_LINK_DAYS', 'CLAMAV_PORT', 'CLAMAV_TIMEOUT', 'ELEVENLABS_STT_MODEL', 'ELEVENLABS_TIMEOUT', 'GAME_DESIGNER', 'GAME_DESIGNER_EFFORT',
     'GAME_DESIGNER_MAX_TOKENS', 'GAME_DESIGNER_TIMEOUT', 'GOOGLE_AUTHORIZE_URL', 'GOOGLE_ISSUERS', 'GOOGLE_JWKS_URL',
-    'GOOGLE_TOKEN_URL', 'MOYASAR_API_BASE', 'PAYMOB_API_BASE', 'STRIPE_API_BASE', 'STRIPE_CONNECT_BASE',
+    'GOOGLE_TOKEN_URL', 'MOYASAR_API_BASE', 'OPENAI_BASE_URL', 'GEMINI_BASE_URL', 'PAYMOB_API_BASE', 'STRIPE_API_BASE', 'STRIPE_CONNECT_BASE',
     'STRIPE_CONNECT_REDIRECT', 'TAP_API_BASE', 'WHATSAPP_META_API_VERSION', 'QURAN_TEXT_URL', 'QURAN_DATA_URL',
     // A laptop's own academy; and the push key's path, which compose.yml sets inside the worker.
     'PLATFORM_DEV_ACADEMY', 'FCM_CREDENTIALS',
@@ -48,5 +48,6 @@ it('keeps what a server has not set up off, and never takes a laptop default', f
         ->and($s['CORS_ALLOWED_ORIGINS'])->toBe('')
         ->and($s['UPLOAD_SCANNER'])->toBe('none')
         // The helpers need the platform's keys; each academy still turns each one on itself.
-        ->and([$s['ANTHROPIC_API_KEY'], $s['ELEVENLABS_API_KEY'], $s['ELEVENLABS_ZERO_RETENTION']])->toBe(['', '', 'false']);
+        ->and([$s['ANTHROPIC_API_KEY'], $s['ELEVENLABS_API_KEY'], $s['ELEVENLABS_ZERO_RETENTION']])->toBe(['', '', 'false'])
+        ->and([$s['OPENAI_API_KEY'], $s['GEMINI_API_KEY'], $s['OLLAMA_URL'], $s['OLLAMA_API_KEY']])->toBe(['', '', '', '']);
 });

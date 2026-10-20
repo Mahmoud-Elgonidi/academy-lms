@@ -36,7 +36,7 @@ final class ClaudeLanguageModel implements LanguageModel
     {
         $config = config('platform.ai');
         $key = (string) ($config['key'] ?? '');
-        $model = (string) ($config['models'][$prompt->tier] ?? '');
+        $model = AiProvider::Claude->model($prompt->tier);
         if ($key === '' || $model === '') {
             throw new AiFailed('not_configured');
         }

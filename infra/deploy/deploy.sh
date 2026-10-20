@@ -245,12 +245,27 @@ CLAMAV_HOST=clamav
 # everything else still works.
 ANTHROPIC_API_KEY=
 GAME_DESIGNER_MODEL=
-# The helpers (RUNBOOKS.md, "AI helpers"): claude, or off for all of them. AI_MODEL writes
-# and AI_FAST_MODEL handles the quick, short ones; AI_DAILY_CAP is each academy's calls a day.
+# The helpers (RUNBOOKS.md, "AI helpers"): who writes their words (claude, openai, gemini or
+# ollama), or off for all of them; best chosen in the console's Platform settings, from each
+# provider's own list. AI_MODEL writes and AI_FAST_MODEL handles the quick, short ones (Claude);
+# AI_DAILY_CAP is each academy's calls a day.
 AI_DRIVER=claude
 AI_MODEL=claude-opus-5-5
 AI_FAST_MODEL=claude-haiku-5-5
 AI_DAILY_CAP=500
+# The other providers, each with its own key and models (empty: not used). OpenAI's key, or a
+# key from a Google AI Studio project with billing on (on the free tier Google may use what is
+# sent); Ollama: the platform's own server's address (https unless on a private network).
+OPENAI_API_KEY=
+OPENAI_MODEL=
+OPENAI_FAST_MODEL=
+GEMINI_API_KEY=
+GEMINI_MODEL=
+GEMINI_FAST_MODEL=
+OLLAMA_URL=
+OLLAMA_API_KEY=
+OLLAMA_MODEL=
+OLLAMA_FAST_MODEL=
 # Speech to text for the helpers that listen (a teacher's voice note, a recitation):
 # ElevenLabs, with the platform's key (ELEVENLABS_API_BASE=https://api.eu.residency.elevenlabs.io
 # keeps the audio in the EU; ELEVENLABS_ZERO_RETENTION=true once the account allows it).

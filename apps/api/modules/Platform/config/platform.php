@@ -57,12 +57,14 @@ return [
     ],
 
     // The academies' AI helpers (docs/architecture/02, "المساعد الآلي"): drafts
-    // and aids a person reads first. Words come from Claude with the
-    // platform's key (ANTHROPIC_API_KEY, as the studio); recordings are heard
+    // and aids a person reads first. Words come from the provider chosen in
+    // Platform settings (AI_DRIVER: Claude by default, with ANTHROPIC_API_KEY
+    // as the studio; OpenAI, Gemini or Ollama); recordings are heard
     // by ElevenLabs (ELEVENLABS_API_KEY). Each academy turns each helper on
     // for itself (Settings › AI); a helper whose key is missing stays off.
     'ai' => [
-        // claude, demo (fixed answers, no key; never in production), or off (every helper off)
+        // Who writes the words: claude, openai, gemini, ollama (the platform's own
+        // server), demo (fixed answers, no key; never in production), or off (every helper off).
         'driver' => env('AI_DRIVER', 'claude'),
         'key' => env('ANTHROPIC_API_KEY'),
         'base_url' => env('ANTHROPIC_BASE_URL'),
@@ -73,6 +75,23 @@ return [
         ],
         // The server's own fallback when a model declines (not every model has one).
         'fallbacks' => ['claude-opus-5-5', 'claude-sonnet-5-5'],
+        // The other providers, each with its own key and models (chosen from its list in Platform settings).
+        'openai' => [
+            'key' => env('OPENAI_API_KEY'),
+            'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+            'models' => ['best' => env('OPENAI_MODEL'), 'fast' => env('OPENAI_FAST_MODEL')],
+        ],
+        'gemini' => [
+            'key' => env('GEMINI_API_KEY'),
+            'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+            'models' => ['best' => env('GEMINI_MODEL'), 'fast' => env('GEMINI_FAST_MODEL')],
+        ],
+        'ollama' => [
+            // The Ollama server's address (https, unless it is on a private network); a key only behind a proxy.
+            'url' => env('OLLAMA_URL'),
+            'key' => env('OLLAMA_API_KEY'),
+            'models' => ['best' => env('OLLAMA_MODEL'), 'fast' => env('OLLAMA_FAST_MODEL')],
+        ],
         // Seconds a request waits while someone waits on the screen, and in the background.
         'timeout' => (int) env('AI_TIMEOUT', 40),
         'job_timeout' => (int) env('AI_JOB_TIMEOUT', 180),

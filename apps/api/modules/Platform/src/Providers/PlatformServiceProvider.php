@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
+use Modules\Platform\Ai\AiProvider;
 use Modules\Platform\Ai\AiSlots;
 use Modules\Platform\Ai\ClaudeLanguageModel;
 use Modules\Platform\Ai\DemoLanguageModel;
@@ -92,12 +93,13 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->bind(GameDesigner::class, fn () => config('platform.games.designer.driver') === 'demo' && ! $this->app->isProduction()
             ? new DemoGameDesigner : new ClaudeGameDesigner);
 
-        // The academies' AI helpers (Settings › AI): Claude for words, ElevenLabs for recordings, fixed answers for the demo.
+        // The academies' AI helpers (Settings › AI): the chosen provider for words (Claude, GPT, Gemini, Ollama), ElevenLabs for recordings, fixed answers for the demo.
         $this->app->singleton(AiSlots::class);
         $this->app->singleton(PlatformSettings::class);
         $this->app->scoped(PlatformAcademyAi::class);
         $this->app->alias(PlatformAcademyAi::class, AcademyAi::class);
-        $this->app->bind(LanguageModel::class, fn ($app) => PlatformAcademyAi::demo() ? new DemoLanguageModel : $app->make(ClaudeLanguageModel::class));
+        $this->app->bind(LanguageModel::class, fn ($app) => PlatformAcademyAi::demo() ? new DemoLanguageModel
+            : $app->make(AiProvider::current()?->languageModel() ?? ClaudeLanguageModel::class));
         $this->app->bind(SpeechToText::class, fn ($app) => PlatformAcademyAi::demo() ? new DemoSpeechToText : $app->make(ElevenLabsSpeechToText::class));
     }
 
