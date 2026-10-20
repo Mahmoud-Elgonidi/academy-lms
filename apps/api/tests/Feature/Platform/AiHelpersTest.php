@@ -15,7 +15,6 @@ use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
 use Modules\Platform\Actions\Plans\ChangeAcademyPlan;
 use Modules\Platform\Actions\SaveAiSettings;
-use Modules\Platform\Ai\AiHealth;
 use Modules\Platform\Ai\AiSlots;
 use Modules\Platform\Ai\ClaudeLanguageModel;
 use Modules\Platform\Ai\DemoLanguageModel;
@@ -38,6 +37,8 @@ use Modules\SharedKernel\Ai\NoAi;
 use Modules\SharedKernel\Ai\SpeechToText;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Health\Heartbeats;
+use Modules\SharedKernel\Health\ServiceHealth;
+use Modules\SharedKernel\Health\ServiceProblem;
 use Modules\SharedKernel\Plans\FeatureNotInPlan;
 
 /*
@@ -270,7 +271,7 @@ it('hears a recording through ElevenLabs without being told what it should say, 
             && ! $fields->keys()->intersect(['text', 'expected', 'prompt', 'keyterms'])->count();
     });
     expect(DB::table('ai_usage')->sole())->toMatchArray(['provider' => 'elevenlabs', 'feature' => 'recitation_check', 'audio_seconds' => 3, 'outcome' => 'ok'])
-        ->and(AiHealth::last()['elevenlabs'])->toHaveKey('ok');
+        ->and(ServiceHealth::last('elevenlabs'))->toHaveKey('ok');
 
     // Where the account allows it, nothing is kept there.
     config(['platform.ai.speech.zero_retention' => true]);
@@ -294,7 +295,7 @@ it('calls a recording with nothing in it unheard, and a provider that does not a
     expect(aiReason(fn () => $ears->transcribe(AiFeature::ReportDraft, aiClip())))->toBe('unavailable')
         ->and(aiReason(fn () => $ears->transcribe(AiFeature::ReportDraft, aiClip())))->toBe('unavailable');
     Http::assertSentCount(5);
-    expect(AiHealth::last()['elevenlabs']['in_a_row'])->toBe(3)
+    expect(ServiceHealth::last('elevenlabs'))->toMatchArray(['in_a_row' => 3, 'problem' => 'down', 'code' => 'HTTP 502'])
         ->and(DB::table('ai_usage')->pluck('outcome')->sort()->values()->all())->toBe(['unavailable', 'unavailable', 'unavailable', 'unheard', 'unheard']);
 
     config(['platform.ai.speech.key' => '']);
@@ -324,20 +325,30 @@ it('answers a helper that cannot run as a problem in the reader\'s words, never 
 });
 
 it('shows the platform the helpers\' queue and providers on its health page, off while no key is set', function () {
-    config(['platform.ai.key' => '', 'platform.ai.speech.key' => '']);
-    expect(app(SystemHealth::class)->checks()['assist']['status'])->toBe('off');
+    config(['platform.ai.key' => '', 'platform.ai.speech.key' => '', 'platform.games.designer.key' => '']);
+    expect(app(SystemHealth::class)->checks())->not->toHaveKey('service_anthropic')
+        ->and(app(SystemHealth::class)->checks()['assist']['status'])->toBe('off');
 
     config(['platform.ai.key' => 'k']);
     expect(app(SystemHealth::class)->checks()['assist']['status'])->toBe('fail');
     (new AssistBeat(now()->getTimestamp() - 2))->handle();
     expect(app(SystemHealth::class)->checks()['assist']['status'])->toBe('ok')
-        ->and(Heartbeats::last('assist')['lag'])->toBeGreaterThanOrEqual(2);
+        ->and(Heartbeats::last('assist')['lag'])->toBeGreaterThanOrEqual(2)
+        ->and(app(SystemHealth::class)->checks()['service_anthropic'])->toMatchArray(['status' => 'ok', 'value' => __('platform::services.used.never')]);
 
+    // Busy now and then: a word on the page after three in a row, the provider's code only, never anyone's.
     foreach (range(1, 3) as $i) {
-        AiHealth::failed('anthropic', 'overloaded while asked by teacher@noor.test');
+        ServiceHealth::failed('anthropic', ServiceProblem::Down, 'overloaded_error from teacher@noor.test');
     }
-    $check = app(SystemHealth::class)->checks()['assist'];
-    expect($check['status'])->toBe('warn')->and($check['value'])->toContain('anthropic')->toContain('overloaded')->not->toContain('teacher@noor.test');
-    AiHealth::ok('anthropic');
-    expect(app(SystemHealth::class)->checks()['assist']['status'])->toBe('ok');
+    $check = app(SystemHealth::class)->checks()['service_anthropic'];
+    expect($check['status'])->toBe('warn')->and($check['value'])->toContain(__('platform::services.short.down'))->toContain('overloaded_error')
+        ->not->toContain('teacher@noor.test')
+        ->and(app(SystemHealth::class)->checks()['assist']['status'])->toBe('ok');
+    ServiceHealth::ok('anthropic');
+    expect(app(SystemHealth::class)->checks()['service_anthropic']['status'])->toBe('ok');
+
+    // The credit ran out: down at once, and what to do.
+    ServiceHealth::failed('anthropic', ServiceProblem::Quota, 'billing_error');
+    $check = app(SystemHealth::class)->checks()['service_anthropic'];
+    expect($check['status'])->toBe('fail')->and($check['hint'])->toContain(__('platform::services.todo.quota', ['service' => 'Claude (Anthropic)']));
 });

@@ -5,6 +5,7 @@ namespace Modules\Platform\Ai;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Modules\Platform\Ai\Faults\ElevenLabsFaults;
 use Modules\Platform\Models\AiUsage;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
@@ -12,6 +13,8 @@ use Modules\SharedKernel\Ai\AudioClip;
 use Modules\SharedKernel\Ai\HeardWord;
 use Modules\SharedKernel\Ai\SpeechToText;
 use Modules\SharedKernel\Ai\Transcript;
+use Modules\SharedKernel\Health\ServiceFault;
+use Modules\SharedKernel\Health\ServiceHealth;
 
 /**
  * What a recording said, through ElevenLabs' speech to text (as
@@ -54,7 +57,7 @@ final class ElevenLabsSpeechToText implements SpeechToText
                     ]);
             } catch (ConnectionException $e) {
                 AiUsage::note($feature, 'elevenlabs', $model, [], 'unavailable');
-                AiHealth::failed('elevenlabs', 'connection: '.mb_substr($e->getMessage(), 0, 200));
+                ServiceHealth::fault('elevenlabs', ServiceFault::unreachable());
                 throw new AiFailed('unavailable', __('shared::ai.failed.unavailable'));
             } finally {
                 if (is_resource($file)) {
@@ -64,17 +67,18 @@ final class ElevenLabsSpeechToText implements SpeechToText
         });
 
         if (! $response->successful()) {
-            $reason = $response->status() === 422 || $response->status() === 400 ? 'unheard' : 'unavailable';
-            AiUsage::note($feature, 'elevenlabs', $model, [], $reason);
-            if ($reason === 'unavailable') {
-                AiHealth::failed('elevenlabs', 'HTTP '.$response->status());
+            // A recording it could not hear says nothing about ElevenLabs; anything else does.
+            $fault = ElevenLabsFaults::of($response->status(), $response->json());
+            AiUsage::note($feature, 'elevenlabs', $model, [], $fault === null ? 'unheard' : 'unavailable');
+            if ($fault !== null) {
+                ServiceHealth::fault('elevenlabs', $fault);
             }
-            throw new AiFailed($reason);
+            throw new AiFailed($fault === null ? 'unheard' : 'unavailable');
         }
 
         $transcript = self::read((array) $response->json(), $model);
         AiUsage::note($feature, 'elevenlabs', $model, ['audio_seconds' => (int) ceil($transcript->seconds)], $transcript->text === '' ? 'unheard' : 'ok');
-        AiHealth::ok('elevenlabs');
+        ServiceHealth::ok('elevenlabs');
         if (trim($transcript->text) === '') {
             throw new AiFailed('unheard');
         }

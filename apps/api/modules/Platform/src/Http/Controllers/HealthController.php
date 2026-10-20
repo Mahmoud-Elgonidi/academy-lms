@@ -8,7 +8,9 @@ use Modules\Platform\Health\SystemHealth;
 
 /**
  * GET /health for an uptime monitor: each check's status and the worst of
- * them (503 when something fails), with the token from HEALTH_TOKEN as a
+ * the stack's (503 when part of it fails; an outside service's trouble, such
+ * as a credit that ran out, is the platform team's mail, not the site being
+ * down), with the token from HEALTH_TOKEN as a
  * bearer token or ?token=. Without a token configured there is no such page.
  * No values, names or hints: those are on the console's health page.
  */
@@ -21,7 +23,7 @@ final class HealthController
         abort_if($token === '' || ! hash_equals($token, $given), 404);
 
         $checks = $health->checks();
-        $overall = SystemHealth::overall($checks);
+        $overall = SystemHealth::overall(SystemHealth::stack($checks));
 
         return response()->json([
             'status' => $overall,

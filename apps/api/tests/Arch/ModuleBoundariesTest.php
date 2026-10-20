@@ -267,6 +267,10 @@ arch('games sit on top: practice from curriculum and learning, the look from peo
     ->and(['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging'])
     ->not->toUse('Modules\Games');
 
+arch('an outside service\'s faults are read purely: its code in, our words out')
+    ->expect('Modules\SharedKernel\Health\Faults')
+    ->toOnlyUse(['Modules\SharedKernel\Health\ServiceFault', 'Modules\SharedKernel\Health\ServiceProblem', 'data_get']);
+
 arch('a round\'s rules are pure: the catalog\'s game in, picks and scores out')
     ->expect('Modules\Games\Domain')
     ->toOnlyUse(['Modules\Games\Domain', 'Modules\SharedKernel\Games']);

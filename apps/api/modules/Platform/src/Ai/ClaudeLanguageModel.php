@@ -6,6 +6,7 @@ use Anthropic\Beta\Messages\BetaMessage;
 use Anthropic\Client;
 use Anthropic\Lib\Streaming\MessageAccumulator;
 use GuzzleHttp\Client as Guzzle;
+use Modules\Platform\Ai\Faults\AnthropicFaults;
 use Modules\Platform\Games\Designer\ClaudeGameDesigner;
 use Modules\Platform\Models\AiUsage;
 use Modules\SharedKernel\Ai\AiAnswer;
@@ -13,6 +14,8 @@ use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Ai\AiPrompt;
 use Modules\SharedKernel\Ai\LanguageModel;
+use Modules\SharedKernel\Health\ServiceHealth;
+use Modules\SharedKernel\Health\ServiceProblem;
 use Throwable;
 
 /**
@@ -22,7 +25,8 @@ use Throwable;
  * fallback model where the requested model has one. While someone waits on
  * a screen it does not retry and takes one of the few slots; in the
  * background it retries twice. Neither the prompt nor the answer is ever
- * logged: only the tokens it took, in ai_usage.
+ * logged: only the tokens it took, in ai_usage, and how Anthropic answered
+ * (ServiceHealth: why it would not, in our words, never its message).
  */
 final class ClaudeLanguageModel implements LanguageModel
 {
@@ -56,11 +60,13 @@ final class ClaudeLanguageModel implements LanguageModel
                 }
                 $message = $accumulator->message();
             } catch (Throwable $e) {
+                $fault = AnthropicFaults::of($e);
                 AiUsage::note($feature, 'anthropic', $model, [], 'unavailable');
-                AiHealth::failed('anthropic', class_basename($e).': '.mb_substr($e->getMessage(), 0, 200));
+                ServiceHealth::fault('anthropic', $fault, $fault->problem === ServiceProblem::Model ? $model : '');
                 throw new AiFailed('unavailable', __('shared::ai.failed.unavailable'));
             }
             assert($message instanceof BetaMessage);
+            ServiceHealth::ok('anthropic', $model);
 
             try {
                 $answer = self::read($message);
@@ -69,7 +75,6 @@ final class ClaudeLanguageModel implements LanguageModel
                 throw $e;
             }
             AiUsage::note($feature, 'anthropic', $answer->model, $answer->usage, 'ok');
-            AiHealth::ok('anthropic');
 
             return $answer;
         });

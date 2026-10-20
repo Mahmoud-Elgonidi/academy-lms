@@ -4,9 +4,11 @@ namespace Modules\Platform\Games\Designer;
 
 use Anthropic\Beta\Messages\BetaMessage;
 use Anthropic\Client;
-use Anthropic\Core\Exceptions\AnthropicException;
 use Anthropic\Lib\Streaming\MessageAccumulator;
 use GuzzleHttp\Client as Guzzle;
+use Modules\Platform\Ai\Faults\AnthropicFaults;
+use Modules\SharedKernel\Health\ServiceHealth;
+use Modules\SharedKernel\Health\ServiceProblem;
 use Throwable;
 
 /**
@@ -56,13 +58,14 @@ final class ClaudeGameDesigner implements GameDesigner
                 $accumulator->accumulate($event);
             }
             $message = $accumulator->message();
-        } catch (AnthropicException $e) {
-            throw new DesignFailed('unavailable', class_basename($e).': '.mb_substr($e->getMessage(), 0, 300));
         } catch (Throwable $e) {
-            throw new DesignFailed('unavailable', class_basename($e).': '.mb_substr($e->getMessage(), 0, 300));
+            $fault = AnthropicFaults::of($e);
+            ServiceHealth::fault('anthropic', $fault, $fault->problem === ServiceProblem::Model ? (string) $config['model'] : '');
+            throw new DesignFailed('unavailable', $fault->problem->value.' ('.$fault->code.') '.class_basename($e).': '.mb_substr($e->getMessage(), 0, 300));
         }
 
         assert($message instanceof BetaMessage);
+        ServiceHealth::ok('anthropic', (string) $config['model']);
 
         return self::read($message);
     }
