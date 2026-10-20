@@ -111,8 +111,10 @@ docker compose exec web php artisan platform:mail-test   # does the server's mai
   and `GAME_DESIGNER_MODEL` (the Claude model it designs with) in `.env`, then `docker compose up -d worker`.
   It works on its own queue beside the worker (a design takes a few minutes). Without them the studio says the
   designer is not set up; the games, their islands and publishing still work.
-- **AI helpers** (each academy's Settings › AI helpers; `RUNBOOKS.md`, "AI helpers"): the same
-  `ANTHROPIC_API_KEY`, and `ELEVENLABS_API_KEY` for the ones that listen (speech to text). Each academy turns
+- **AI helpers** (each academy's Settings › AI helpers; `RUNBOOKS.md`, "AI helpers"): the words from the
+  provider chosen in the console's Platform settings (Claude with the same `ANTHROPIC_API_KEY`, GPT, Gemini
+  from a paid project, or your own Ollama server), its models picked from its own list, and
+  `ELEVENLABS_API_KEY` for the ones that listen (speech to text). Each academy turns
   each helper on itself (all off at first, and only on a plan with the AI area); `AI_DRIVER=off` turns them off
   everywhere. They work on their own queue, `assist`, beside the worker.
 
@@ -155,7 +157,10 @@ Stripe Connect, Google and Apple, the legal name, alert addresses, the app's lin
 console: **Platform settings** (owners of the platform team only; `platform:admin you@company.com --owner`).
 A value there wins over its line here at once, with no restart, and is kept encrypted with `APP_KEY` in the
 database (in its backups too); emptied there, the line here holds again. Each setting shows where its value
-comes from now, and each section has a "Try it". The Quran's text is fetched from Tanzil by the deploy
+comes from now, and each section has a "Try it" that says why a service would not take its keys (a key
+refused, the credit run out, an account stopped) and what to do, tries what is typed before it is saved,
+and stays under the section; `platform:services` tries them all each morning and the platform team's
+alert mail says when one needs someone (`RUNBOOKS.md`, "An outside service needs you"). The Quran's text is fetched from Tanzil by the deploy
 (`QURAN_TEXT_URL`, `QURAN_DATA_URL`, not written: Tanzil's own addresses) or from the same page.
 
 | Settings | What they do | Where the value comes from |

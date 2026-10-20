@@ -285,14 +285,16 @@ the new provider; a room already open keeps the one it was made with. Switch bac
 ## AI helpers
 
 The academies' helpers (practice items, report drafts from a teacher's voice note, recitation checks,
-the weekly message's wording) call Claude with the platform's `ANTHROPIC_API_KEY`, and the ones that
-listen send the audio to ElevenLabs (`ELEVENLABS_API_KEY`) for its words. Each academy turns each helper
+the weekly message's wording) call the provider chosen in Platform settings (`AI_DRIVER`: Claude with
+`ANTHROPIC_API_KEY`, GPT with `OPENAI_API_KEY`, Gemini with `GEMINI_API_KEY` from a paid project, or the
+platform's own Ollama at `OLLAMA_URL`), and the ones that listen send the audio to ElevenLabs (`ELEVENLABS_API_KEY`) for its words. Each academy turns each helper
 on in Settings › AI helpers (all off at first, only on a plan with the AI area); what each sends is written
 on that page. A helper's result is always a draft or a suggestion a person checks: when one is off or
 down, the work goes on by hand and the weekly message goes out with the facts alone.
 
-System health's **AI helpers** check: *off* with no key, a warning when calls to one provider failed
-three times in a row (the hint names it), and a fault when the `assist` queue's beat stops.
+System health's **AI helpers** check is the `assist` queue's beat (a fault when it stops); each provider in
+use has its own check (`service_anthropic`, `service_openai`, `service_gemini`, `service_ollama`,
+`service_elevenlabs`; see **An outside service needs you**).
 
 ```bash
 docker compose logs --tail=100 worker | grep -i assist     # the assist queue's worker
@@ -300,13 +302,17 @@ docker compose exec web php artisan queue:failed           # a helper's job that
 ```
 
 - **Turn them all off at once** (a provider's outage, a bill to stop): `AI_DRIVER=off` in `.env`, then
-  `docker compose up -d web worker`. Every helper says it is off; nothing else changes. Back with `claude`.
+  `docker compose up -d web worker` (or choose "Off" in Platform settings). Every helper says it is off;
+  nothing else changes. Back with the provider you use.
+- **Another provider**: in Platform settings choose who writes the words, put its key (Ollama: its address),
+  then pick its models from the list it gives for that key ("Another name…" types one), "Try it", and save.
+  The next request uses it; nothing else changes. Another provider's keys stay saved for coming back.
 - **People are told to try again** ("busy"): more of them answer at once with `AI_CONCURRENT` (default 3;
   each holds a web thread while it waits, so keep it well under `WEB_PHP_THREADS`).
 - **An academy hit its day's cap** (`AI_DAILY_CAP`, calls a day): it comes back at midnight UTC; raise the
   cap for all if it is too low.
-- **A new key**: in the console's Platform settings (see **Changing a secret**); "Try it" checks both
-  providers' keys and that the models named exist.
+- **A new key**: in the console's Platform settings (see **Changing a secret**); "Try it" asks each model
+  chosen for a few words (so a credit run out shows, not only a wrong key) and reads ElevenLabs' plan.
   Each call's model, tokens, seconds of audio and outcome are kept in `ai_usage` (never what was said or
   sent, never who), which the academy's settings page counts for the month.
 - **Before an academy turns on the recitation check**: measure it on real recordings whose mistakes a
@@ -321,6 +327,35 @@ docker compose exec web php artisan queue:failed           # a helper's job that
   docker compose exec web php artisan learning:try-recitation /tmp/recitations
   docker compose exec web rm -r /tmp/recitations
   ```
+
+## An outside service needs you
+
+A key refused, a credit or plan run out, an account suspended, a model or template gone: each service in
+use (the AI provider, ElevenLabs, WhatsApp, Twilio, Firebase, LiveKit, Stripe) has its own check on
+System health (`service_*`), and the services that need someone head the console's Platform settings,
+each with its reason, what to do and a link to its section. The platform team gets the alert mail
+(`platform:health --alert`) when one fails twice in a row, and again when it is well. Each gateway writes
+how the service answered as it is used, and `platform:services` tries every one set up here each morning
+at 06:40 UTC, so a quiet day is no blind spot. `GET /health` shows them in its statuses but never answers
+503 for them: a provider's trouble is not the platform down.
+
+```bash
+docker compose exec web php artisan platform:services              # try them all now, as the morning does
+docker compose exec web php artisan platform:services --group=ai   # one section (ai, whatsapp, sms, push, classroom, stripe)
+```
+
+- **Quota / credit** (`insufficient_quota`, `credit_balance`, `131042`, a Twilio balance at 0, ElevenLabs at
+  100% or unpaid): top up or renew at the provider, then "Try it" on the section; the check clears at once.
+  ElevenLabs over 90% warns first, with the day it renews.
+- **Key**: make a new key at the provider, type it over the hidden one in Platform settings, "Try it" (it
+  tries what is typed before you save, and never marks the saved key broken), then save.
+- **Model** (an AI model retired, a WhatsApp template not approved): choose another from the section's list,
+  or approve the template at Meta.
+- **Suspended** (`20005`, `368`, Stripe's `requirements.disabled_reason`): sign in at the provider and see why.
+- **Rate / down / unreachable** warn first and fail only when they last (15 minutes, an hour for a rate
+  limit); see the provider's status page, or the address and the server's network for Ollama or LiveKit.
+- The reason is in our words with the provider's own code in brackets, never its message; to dig further,
+  look at the account on the provider's site.
 
 ## The Quran's text
 
