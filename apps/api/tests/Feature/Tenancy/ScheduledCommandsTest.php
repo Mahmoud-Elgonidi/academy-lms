@@ -9,7 +9,7 @@ use Modules\SharedKernel\Tenancy\TenantContext;
 /** Every command the scheduler runs on a server, by name. */
 const SCHEDULED = [
     'billing:sweep', 'classroom:reconcile', 'classroom:recordings', 'communication:sweep', 'credits:expire',
-    'learning:digests', 'learning:sweep', 'model:prune', 'people:checks', 'platform:health', 'platform:usage', 'privacy:sweep',
+    'learning:digests', 'learning:sweep', 'model:prune', 'people:checks', 'platform:health', 'platform:services', 'platform:usage', 'privacy:sweep',
     'safeguarding:follow-up', 'scheduling:courses', 'scheduling:dst', 'scheduling:materialize', 'scheduling:sweep', 'support:follow-up',
 ];
 
