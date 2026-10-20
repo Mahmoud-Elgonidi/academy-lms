@@ -14,12 +14,40 @@
         .ps-quran dd { font-size: .88rem; overflow-wrap: anywhere; }
         .ps-hash { font-family: ui-monospace, monospace; font-size: .75rem !important; }
         .ps-missing { color: var(--warning-700) !important; }
+        .ps-trouble { padding: .9rem 1.1rem; display: flex; flex-direction: column; gap: .6rem; border-inline-start: 4px solid var(--danger-600); }
+        .ps-trouble.is-warn { border-inline-start-color: var(--warning-500); }
+        .ps-trouble h2 { font-weight: 600; font-size: 1rem; display: flex; gap: .5rem; align-items: center; }
+        .ps-trouble h2 svg { inline-size: 1.2rem; block-size: 1.2rem; color: var(--danger-600); }
+        .ps-trouble.is-warn h2 svg { color: var(--warning-600); }
+        .ps-trouble ul { display: flex; flex-direction: column; gap: .45rem; margin: 0; padding: 0; list-style: none; font-size: .88rem; }
+        .ps-trouble li span { color: var(--gray-600); }
+        .ps-trouble li .fail { color: var(--danger-700); font-weight: 600; }
+        .ps-trouble li .warn { color: var(--warning-700); font-weight: 600; }
+        .ps-trouble a { color: var(--primary-600); font-weight: 600; text-decoration: underline; white-space: nowrap; }
     </style>
 
     <p class="pc-base ps-promise">
         <x-filament::icon icon="heroicon-o-lock-closed" />
         <span>{{ __($l.'promise') }}</span>
     </p>
+
+    @php $trouble = $this->trouble; @endphp
+    @if ($trouble !== [])
+        <section @class(['pc-base', 'ps-trouble', 'is-warn' => collect($trouble)->doesntContain('status', 'fail')]) role="status">
+            <h2><x-filament::icon icon="heroicon-o-exclamation-triangle" />{{ __($l.'checks.banner.heading') }}</h2>
+            <ul>
+                @foreach ($trouble as $t)
+                    <li>
+                        <strong @class([$t['status']])><bdi>{{ $t['name'] }}</bdi></strong>: {{ $t['value'] }}
+                        @if ($t['hint'])
+                            <span>{{ $t['hint'] }}</span>
+                        @endif
+                        <a href="#ps-{{ $t['group'] }}">{{ __($l.'checks.banner.go') }}</a>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
 
     {{-- The AI section's lists of models, from each provider, once the page is open. --}}
     <div wire:init="warmModels" hidden></div>

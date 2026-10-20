@@ -14,7 +14,9 @@ final class StripeFaults
 {
     public static function of(int $status, mixed $body, bool $onConnectedAccount = false): ?ServiceFault
     {
-        $code = (string) (data_get($body, 'error.code') ?? data_get($body, 'error.type') ?? data_get($body, 'error') ?? '');
+        // The API's error.code or type; Connect's OAuth says it as a plain "error".
+        $code = data_get($body, 'error.code') ?? data_get($body, 'error.type') ?? data_get($body, 'error');
+        $code = is_string($code) ? $code : '';
         $problem = match (true) {
             $code === 'invalid_client', $status === 401 => ServiceProblem::Key,
             $status === 403 => $onConnectedAccount ? null : ServiceProblem::Permission,
@@ -23,6 +25,6 @@ final class StripeFaults
             default => null,
         };
 
-        return $problem === null ? null : new ServiceFault($problem, is_string($code) && $code !== '' ? $code : 'HTTP '.$status);
+        return $problem === null ? null : new ServiceFault($problem, $code !== '' ? $code : 'HTTP '.$status);
     }
 }

@@ -55,7 +55,8 @@ return [
     'used' => [
         'ok' => 'رد :when',
         'never' => 'لسه مااتستخدمش ولا اتجرّب',
-        'failing' => ':problem من :since (:count مرات ورا بعض، :code)',
+        'failing' => ':problem: أول مرة :since، :times ورا بعض (:code)',
+        'times' => '{1} مرة|{2} مرتين|[3,10] :count مرات|[11,*] :count مرة',
         'near' => 'اتصرف :pct% من الباقة',
         'stale' => 'مااتفحصش من :when',
     ],

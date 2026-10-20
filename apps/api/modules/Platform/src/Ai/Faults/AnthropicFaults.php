@@ -48,6 +48,7 @@ final class AnthropicFaults
             default => ServiceProblem::Unknown,
         };
 
-        return new ServiceFault($problem, $problem === ServiceProblem::Quota && $type === null ? 'credit_balance' : $code);
+        // A credit run out comes as a plain bad request: its code says which.
+        return new ServiceFault($problem, $problem === ServiceProblem::Quota && $type !== ErrorType::BILLING_ERROR->value ? 'credit_balance' : $code);
     }
 }

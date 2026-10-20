@@ -92,7 +92,7 @@ class SystemHealth
             return $this->check($status, __('platform::services.used.failing', [
                 'problem' => __('platform::services.short.'.$problem->value),
                 'since' => CarbonImmutable::createFromTimestamp((int) ($last['since'] ?? $last['failed'] ?? $now))->diffForHumans(),
-                'count' => $inARow,
+                'times' => trans_choice('platform::services.used.times', $inARow, ['count' => $inARow]),
                 'code' => (string) (($last['code'] ?? '') !== '' ? $last['code'] : '-'),
             ]), __('platform::services.problems.'.$problem->value, ['service' => $name]).' '.__('platform::services.todo.'.$problem->value, ['service' => $name]));
         }

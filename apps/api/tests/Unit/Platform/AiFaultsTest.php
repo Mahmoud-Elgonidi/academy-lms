@@ -28,7 +28,7 @@ function anthropicError(int $status, ?string $type, string $message = 'no'): API
 it('reads Anthropic\'s errors', function (int $status, ?string $type, string $message, string $expected) {
     expect(aiFault(AnthropicFaults::of(anthropicError($status, $type, $message))))->toBe($expected);
 })->with([
-    'credit balance' => [400, 'invalid_request_error', 'Your credit balance is too low to access the Anthropic API.', 'quota|invalid_request_error'],
+    'credit balance' => [400, 'invalid_request_error', 'Your credit balance is too low to access the Anthropic API.', 'quota|credit_balance'],
     'billing' => [402, 'billing_error', 'billing', 'quota|billing_error'],
     'key' => [401, 'authentication_error', 'invalid x-api-key', 'key|authentication_error'],
     'permission' => [403, 'permission_error', 'no', 'permission|permission_error'],

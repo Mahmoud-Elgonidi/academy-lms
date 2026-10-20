@@ -89,6 +89,7 @@ it('reads Stripe\'s answers on the platform\'s key, never an academy\'s account 
         ->and(faultOf(StripeFaults::of(403, ['error' => ['type' => 'invalid_request_error']])))->toBe('permission|invalid_request_error')
         ->and(faultOf(StripeFaults::of(403, ['error' => ['type' => 'invalid_request_error']], onConnectedAccount: true)))->toBeNull()
         ->and(faultOf(StripeFaults::of(402, ['error' => ['code' => 'card_declined']])))->toBeNull()
+        ->and(faultOf(StripeFaults::of(401, ['error' => ['message' => 'Invalid API Key provided']])))->toBe('key|HTTP 401')
         ->and(faultOf(StripeFaults::of(429, [])))->toBe('rate|HTTP 429')
         ->and(faultOf(StripeFaults::of(500, [])))->toBe('down|HTTP 500');
 });

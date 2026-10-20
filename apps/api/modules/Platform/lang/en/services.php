@@ -55,7 +55,8 @@ return [
     'used' => [
         'ok' => 'answered :when',
         'never' => 'not used or tried yet',
-        'failing' => ':problem since :since (:count in a row, :code)',
+        'failing' => ':problem: first :since, :times in a row (:code)',
+        'times' => '{1} once|{2} twice|[3,*] :count times',
         'near' => ':pct% of the plan used',
         'stale' => 'not checked since :when',
     ],

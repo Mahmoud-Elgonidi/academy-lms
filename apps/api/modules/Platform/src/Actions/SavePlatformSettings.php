@@ -5,13 +5,11 @@ namespace Modules\Platform\Actions;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Modules\Platform\Console\PlatformAudit;
 use Modules\Platform\Models\PlatformAdmin;
 use Modules\Platform\Settings\PlatformSettings;
 use Modules\Platform\Settings\SettingCatalog;
-use Modules\Platform\Settings\SettingDefinition;
+use Modules\Platform\Settings\SettingValues;
 
 /**
  * Saves the platform's settings from the console (owners only). A value
@@ -25,7 +23,7 @@ use Modules\Platform\Settings\SettingDefinition;
 final class SavePlatformSettings
 {
     /** The largest Firebase service account file taken, in characters. */
-    public const JSON_MAX = 20000;
+    public const JSON_MAX = SettingValues::JSON_MAX;
 
     public function __construct(private readonly PlatformSettings $settings, private readonly PlatformAudit $audit) {}
 
@@ -40,24 +38,8 @@ final class SavePlatformSettings
             throw new AuthorizationException(__('platform::settings.owners_only'));
         }
 
-        $next = [];
-        foreach (SettingCatalog::all() as $key => $setting) {
-            if ($setting->secret() && in_array($key, $clear, true)) {
-                $next[$key] = null;
-
-                continue;
-            }
-            if (! array_key_exists($key, $values)) {
-                continue;
-            }
-            $value = self::normalize($setting, $values[$key]);
-            if ($value !== '') {
-                $next[$key] = $value;
-            } elseif (! $setting->secret()) {
-                $next[$key] = null;
-            }
-        }
-        $this->validate($next);
+        $next = SettingValues::next($values, $clear);
+        SettingValues::validate($next);
 
         $saved = $this->settings->values();
         // The Firebase project comes with its file when nothing names it.
@@ -91,68 +73,5 @@ final class SavePlatformSettings
         $this->settings->apply();
 
         return $changed;
-    }
-
-    /** A value as it is kept: trimmed text, a list joined by commas, a toggle as 1 or 0. */
-    public static function normalize(SettingDefinition $setting, mixed $value): string
-    {
-        if ($value === null || $value === '') {
-            return '';
-        }
-
-        return match ($setting->type) {
-            'toggle' => filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) === null ? (string) $value : (filter_var($value, FILTER_VALIDATE_BOOL) ? '1' : '0'),
-            'list' => implode(',', SettingDefinition::list(is_array($value) ? implode(',', $value) : (string) $value)),
-            default => trim((string) $value),
-        };
-    }
-
-    /** @param  array<string, ?string>  $next */
-    private function validate(array $next): void
-    {
-        $data = [];
-        $rules = [];
-        $names = [];
-        foreach ($next as $key => $value) {
-            if ($value === null) {
-                continue;
-            }
-            $setting = SettingCatalog::get($key);
-            $names[$key] = __("platform::settings.keys.{$key}.label");
-            if ($setting->type === 'list') {
-                $data[$key] = SettingDefinition::list($value);
-                $rules[$key] = ['array', 'max:20'];
-                $rules[$key.'.*'] = $setting->rules;
-                $names[$key.'.*'] = $names[$key];
-
-                continue;
-            }
-            $data[$key] = $value;
-            $rules[$key] = match ($setting->type) {
-                'select' => [Rule::in($setting->options)],
-                'toggle' => ['in:0,1'],
-                'int' => $setting->rules,
-                'json_file' => ['string', 'max:'.self::JSON_MAX, function (string $attribute, mixed $value, \Closure $fail) {
-                    if (! self::serviceAccount((string) $value)) {
-                        $fail(__('platform::settings.errors.fcm_file'));
-                    }
-                }],
-                default => ['string', ...$setting->rules],
-            };
-        }
-
-        Validator::make($data, $rules, [], $names)->validate();
-    }
-
-    /** Whether a text is a Google service account's key file (what Firebase hands out). */
-    public static function serviceAccount(string $json): bool
-    {
-        $account = json_decode($json, true);
-
-        return is_array($account)
-            && ($account['type'] ?? null) === 'service_account'
-            && is_string($account['project_id'] ?? null) && preg_match('/^[a-z0-9\-]{4,40}$/', $account['project_id']) === 1
-            && filter_var($account['client_email'] ?? null, FILTER_VALIDATE_EMAIL) !== false
-            && is_string($account['private_key'] ?? null) && str_contains($account['private_key'], 'PRIVATE KEY');
     }
 }

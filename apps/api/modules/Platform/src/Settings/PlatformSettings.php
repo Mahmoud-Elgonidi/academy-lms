@@ -68,6 +68,50 @@ final class PlatformSettings
         }
     }
 
+    /**
+     * Runs $try with values typed on the screen and not saved (checked as a
+     * save would check them), in this process only, and puts the config back
+     * after: "Try it" before saving. A value left empty, or a key ticked to
+     * remove, is tried as the server's own.
+     *
+     * @template T
+     *
+     * @param  array<string, mixed>  $values  setting key => value as typed
+     * @param  list<string>  $clear
+     * @param  \Closure(): T  $try
+     * @return T
+     */
+    public function trying(array $values, array $clear, \Closure $try): mixed
+    {
+        $next = SettingValues::next($values, $clear);
+        SettingValues::validate($next);
+
+        $before = [];
+        foreach ($next as $key => $value) {
+            $setting = SettingCatalog::get($key);
+            foreach ($setting->paths as $path) {
+                $before[$path] ??= config($path);
+                config([$path => $value === null ? $this->serverValue($setting) : $setting->toConfig($value)]);
+            }
+        }
+        $this->forgetMailers();
+        try {
+            return $try();
+        } finally {
+            foreach ($before as $path => $value) {
+                config([$path => $value]);
+            }
+            $this->forgetMailers();
+        }
+    }
+
+    private function forgetMailers(): void
+    {
+        if (app()->resolved('mail.manager') && method_exists(app('mail.manager'), 'forgetMailers')) {
+            app('mail.manager')->forgetMailers();
+        }
+    }
+
     /** Commands that write the config, routes or views out, or run before there is a database: never with the screen's values. */
     public static function leavesAlone(string $command): bool
     {

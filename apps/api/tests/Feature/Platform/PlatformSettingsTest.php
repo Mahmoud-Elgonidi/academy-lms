@@ -17,9 +17,12 @@ use Modules\Platform\Actions\SavePlatformSettings;
 use Modules\Platform\Filament\Console\Pages\PlatformSettingsPage;
 use Modules\Platform\Health\TestMail;
 use Modules\Platform\Models\PlatformAdmin;
+use Modules\Platform\Settings\LastChecks;
 use Modules\Platform\Settings\PlatformSettings;
 use Modules\Platform\Settings\SettingCatalog;
 use Modules\Platform\Settings\SettingChecks;
+use Modules\SharedKernel\Health\ServiceHealth;
+use Modules\SharedKernel\Health\ServiceProblem;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 
@@ -229,37 +232,57 @@ it('tries each service with the keys in force, in its own words', function () {
         'livekit_key' => 'APIkey', 'livekit_secret' => str_repeat('s', 40), 'livekit_api_url' => 'https://livekit.company.example',
         'mail_mailer' => 'smtp',
     ]);
-    config(['platform.games.designer.model' => null]);
+    config(['platform.ai.driver' => 'claude', 'platform.games.designer.model' => null]);
     Http::fake([
-        'api.anthropic.com/v1/models/claude-opus-5-5' => Http::response(['id' => 'claude-opus-5-5']),
-        'api.anthropic.com/v1/models/*' => Http::response(['error' => ['type' => 'not_found_error']], 404),
-        'api.elevenlabs.io/v1/user' => Http::response(['detail' => ['status' => 'missing_permissions']], 401),
+        'api.anthropic.com/v1/messages' => fn (Request $r) => $r['model'] === 'claude-opus-5-5'
+            ? Http::response(['content' => [['type' => 'text', 'text' => '{"ok":true}']], 'usage' => ['input_tokens' => 9, 'output_tokens' => 5]])
+            : Http::response(['type' => 'error', 'error' => ['type' => 'not_found_error', 'message' => 'model: '.$r['model']]], 404),
+        'api.elevenlabs.io/v1/user/subscription' => Http::response(['detail' => ['status' => 'missing_permissions']], 401),
         'api.stripe.com/v1/account' => Http::response(['error' => ['message' => 'Invalid API Key provided: sk_test_****form']], 401),
-        'api.twilio.com/*' => Http::response(['status' => 'active']),
-        'graph.facebook.com/*' => Http::response(['display_phone_number' => '+20 100 000 0000']),
+        'api.twilio.com/*/Balance.json' => Http::response(['balance' => '42.10', 'currency' => 'USD']),
+        'api.twilio.com/*' => Http::response(['status' => 'active', 'type' => 'Full']),
+        'graph.facebook.com/*' => Http::response(['display_phone_number' => '+20 100 000 0000', 'quality_rating' => 'GREEN']),
         'livekit.company.example/*' => Http::response(['rooms' => []]),
     ]);
     $checks = app(SettingChecks::class);
 
-    expect($checks->run('ai', 'salma@company.example'))->toBe(['ok' => false, 'says' => 'Claude took the key but has no model named claude-haiku-5-5.']);
+    $ai = $checks->run('ai', 'salma@company.example');
+    expect($ai->level())->toBe('fail')
+        ->and($ai->says())->toContain('Claude (Anthropic) answered with claude-opus-5-5.')
+        ->toContain('Claude (Anthropic) does not offer claude-haiku-5-5: choose another model. (not_found_error)')
+        ->toContain('ElevenLabs took the key; it may not read the plan')
+        ->and(ServiceHealth::problem('anthropic'))->toBe(ServiceProblem::Model)
+        ->and(ServiceHealth::last('anthropic')['scope'])->toBe('claude-haiku-5-5');
     config(['platform.ai.models.fast' => 'claude-opus-5-5']);
-    expect($checks->run('ai', 'salma@company.example')['ok'])->toBeTrue();
-    expect($checks->run('stripe', 'salma@company.example'))->toBe(['ok' => false, 'says' => 'The service refused the key (it may be wrong, revoked, or missing a permission).']);
-    expect($checks->run('sms', 'salma@company.example')['ok'])->toBeTrue()
-        ->and($checks->run('whatsapp', 'salma@company.example')['says'])->toBe('Meta took the token; the number is +20 100 000 0000.')
-        ->and($checks->run('classroom', 'salma@company.example')['ok'])->toBeTrue()
-        ->and($checks->run('push', 'salma@company.example'))->toBe(['ok' => false, 'says' => 'Something it needs is not set yet.'])
-        ->and($checks->run('mail', 'salma@company.example')['says'])->toBe('A test email went to salma@company.example; check that it arrived.');
+    expect($checks->run('ai', 'salma@company.example')->ok())->toBeTrue()
+        ->and(ServiceHealth::failing('anthropic'))->toBeFalse()
+        ->and(ServiceHealth::last('anthropic')['checked'])->toBeInt();
+
+    $stripe = $checks->run('stripe', 'salma@company.example');
+    expect($stripe->level())->toBe('fail')
+        ->and($stripe->lines[0]->text())->toBe('Stripe refused the key: it is wrong, revoked or expired. (HTTP 401)')
+        ->and($stripe->lines[0]->todoText())->toBe('Make a new key at Stripe, put it in Platform settings, then try it.')
+        ->and($stripe->lines[0]->html())->toBe('<bdi>Stripe</bdi> refused the key: it is wrong, revoked or expired. <bdi dir="ltr">(HTTP 401)</bdi>')
+        ->and($stripe->says())->not->toContain('sk_test')->not->toContain('Invalid API Key');
+    expect($checks->run('sms', 'salma@company.example')->says())->toBe('Twilio took the account; 42.10 USD left.')
+        ->and($checks->run('whatsapp', 'salma@company.example')->says())->toBe('WhatsApp (Meta) took the token; the number is +20 100 000 0000.')
+        ->and($checks->run('classroom', 'salma@company.example')->ok())->toBeTrue()
+        ->and($checks->run('push', 'salma@company.example')->says())->toBe('Firebase (push) is not set up yet: its key or address is missing.')
+        ->and($checks->run('mail', 'salma@company.example')->says())->toBe('A test email went to salma@company.example: check that it arrived.');
     Mail::assertSent(TestMail::class);
 
-    Http::assertSent(fn (Request $r) => $r->url() === 'https://api.anthropic.com/v1/models/claude-opus-5-5' && $r->hasHeader('x-api-key', 'sk-ant-try'));
+    Http::assertSent(fn (Request $r) => $r->url() === 'https://api.anthropic.com/v1/messages' && $r->hasHeader('x-api-key', 'sk-ant-try') && $r['max_tokens'] === 16);
     Http::assertSent(fn (Request $r) => str_contains($r->url(), 'twirp/livekit.RoomService/ListRooms') && str_starts_with($r->header('Authorization')[0], 'Bearer ey'));
 
-    // From the screen: a notification per section, never a key in it.
+    // From the screen: a notification per section, never a key in it, and the result kept under the section.
     Filament::setCurrentPanel('console');
     $this->actingAs($this->owner, 'platform');
     Livewire::test(PlatformSettingsPage::class)->call('check', 'stripe')
-        ->assertNotified('Stripe Connect');
+        ->assertNotified('Stripe Connect')
+        ->assertSee('Stripe refused the key: it is wrong, revoked or expired.')
+        ->assertSee('just now by سلمى')
+        ->assertDontSee('sk_test_try_platform');
+    expect(LastChecks::get('stripe')['result']->level())->toBe('fail');
     Livewire::test(PlatformSettingsPage::class)->call('check', 'social')->assertForbidden();
 });
 
