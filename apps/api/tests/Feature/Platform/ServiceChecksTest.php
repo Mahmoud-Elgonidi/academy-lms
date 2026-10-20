@@ -240,7 +240,7 @@ it('tries what is typed before it is saved, never marking the saved key broken, 
         ->fillForm(['stripe_platform_secret' => 'sk_test_typed_one'])
         ->call('check', 'stripe')
         ->assertNotified('Stripe Connect')
-        ->assertSee('Stripe refused the key')
+        ->assertSeeHtml('<bdi>Stripe</bdi> refused the key')
         ->assertSee('with what is typed here and not saved yet')
         ->assertDontSee('sk_test_typed_one');
 
