@@ -28,7 +28,13 @@ FROM dunglas/frankenphp:1-php8.3-bookworm
 # encrypts each backup to the platform team's public key and sends it to a bucket.
 # timezonedb: the latest clock rules at build time, not the copy inside PHP's release
 # (Morocco on UTC+0 for good from 20 September 2026 came in tzdata 2026c).
-RUN install-php-extensions pdo_pgsql pgsql intl zip bcmath pcntl redis opcache timezonedb \
+# redis and timezonedb come from PECL, which now and then answers with no release or a
+# timeout: a few tries, a little apart, before the build gives up.
+RUN for try in 1 2 3 4 5; do \
+        install-php-extensions pdo_pgsql pgsql intl zip bcmath pcntl redis opcache timezonedb && break; \
+        [ "$try" = 5 ] && exit 1; \
+        sleep $((try * 20)); \
+    done \
     && apt-get update \
     && apt-get install -y --no-install-recommends libcap2-bin age postgresql-client \
     && rm -rf /var/lib/apt/lists/* \
