@@ -7,6 +7,7 @@
 export const USERS = {
   owner: { email: 'owner@demo.test', panel: 'admin', totpEnv: 'COURSE_TOTP_OWNER' },
   accountant: { email: 'accountant@demo.test', panel: 'admin', totpEnv: 'COURSE_TOTP_ACCOUNTANT' },
+  scheduler: { email: 'scheduler@demo.test', panel: 'admin' },   // no authenticator needed: the timetable, the board, the families
   teacher: { email: 'nour@demo.test', panel: 'teach' },
   teacher2: { email: 'khaled@demo.test', panel: 'teach' },
   teacher3: { email: 'sara@demo.test', panel: 'teach' },   // Maryam's teacher, in her live class

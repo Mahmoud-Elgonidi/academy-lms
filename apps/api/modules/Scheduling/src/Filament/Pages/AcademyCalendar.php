@@ -116,14 +116,14 @@ final class AcademyCalendar extends Page
 
         return $schema->components([
             Grid::make(['default' => 1, 'sm' => 2, 'xl' => 4])->schema([
-                Select::make('teacher')->hiddenLabel()->placeholder(__($l.'teacher'))->searchable()->native(false)->live()
+                Select::make('teacher')->label(__($l.'teacher'))->hiddenLabel()->placeholder(__($l.'teacher'))->searchable()->native(false)->live()
                     ->options(fn () => $calendar->teachers()),
-                Select::make('student')->hiddenLabel()->placeholder(__($l.'student'))->searchable()->native(false)->live()
+                Select::make('student')->label(__($l.'student'))->hiddenLabel()->placeholder(__($l.'student'))->searchable()->native(false)->live()
                     ->getSearchResultsUsing(fn (string $search) => $calendar->students($search))
                     ->getOptionLabelUsing(fn ($value) => $calendar->name(is_string($value) ? $value : null)),
-                Select::make('subject')->hiddenLabel()->placeholder(__($l.'subject'))->native(false)->live()
+                Select::make('subject')->label(__($l.'subject'))->hiddenLabel()->placeholder(__($l.'subject'))->native(false)->live()
                     ->options(fn () => $calendar->subjects()),
-                Select::make('type')->hiddenLabel()->placeholder(__($l.'type'))->native(false)->live()
+                Select::make('type')->label(__($l.'type'))->hiddenLabel()->placeholder(__($l.'type'))->native(false)->live()
                     ->options(collect(SessionType::cases())->mapWithKeys(fn (SessionType $t) => [$t->value => __('scheduling::calendar.types.'.$t->value)])->all()),
             ]),
         ]);

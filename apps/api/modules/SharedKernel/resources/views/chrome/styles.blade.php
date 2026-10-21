@@ -109,6 +109,9 @@
 
     /* ── Top bar ────────────────────────────────────────────────────── */
     .fi-topbar-ctn::before { content: ''; position: absolute; z-index: 1; inset-inline: 0; top: 0; height: 3px; pointer-events: none; background: linear-gradient(90deg, var(--primary-300), var(--primary-600) 50%, var(--primary-300)); }
+    /* A long top menu (the teachers' panel) wraps; the bell and the avatar keep their room. */
+    .fi-topbar-end { flex-shrink: 0; }
+    .fi-topbar-nav-groups { min-width: 0; }
     .fi-topbar { background-color: color-mix(in oklab, white 80%, transparent); backdrop-filter: saturate(1.6) blur(14px); -webkit-backdrop-filter: saturate(1.6) blur(14px); }
     .dark .fi-topbar { background-color: color-mix(in oklab, var(--gray-900) 78%, transparent); }
     .fi-topbar-ctn::after { content: ''; position: absolute; inset-inline: 0; top: 100%; height: 16px; pointer-events: none; opacity: 0; background: linear-gradient(to bottom, rgb(0 0 0 / .07), transparent); }
