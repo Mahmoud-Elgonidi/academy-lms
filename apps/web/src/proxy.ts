@@ -8,7 +8,8 @@ import { SESSION_COOKIE } from './lib/session';
 const intl = createMiddleware(routing);
 
 /**
- * Every portal page needs a session, except signing in; then next-intl
+ * Every portal page needs a session, except signing in and the public pages
+ * (the locale's root and /platform, whose own page decides); then next-intl
  * keeps the locale in the path. The API still checks the token on each call.
  * Each page gets a fresh nonce: in the request's policy, where Next.js finds
  * it for its own scripts, and in the answer's (lib/csp.ts).
@@ -26,7 +27,8 @@ export default function proxy(incoming: NextRequest) {
   const match = request.nextUrl.pathname.match(/^\/(ar|en)(\/.*)?$/);
   if (match) {
     const [, locale, rest = '/'] = match;
-    const open = rest.startsWith('/sign-in');
+    // The public pages: the academy's (or the platform's) at the locale's root, and the platform's own.
+    const open = rest.startsWith('/sign-in') || rest === '/' || rest === '/platform' || rest.startsWith('/platform/');
     if (!open && !request.cookies.has(SESSION_COOKIE)) {
       const target = outside(request, `/${locale}/sign-in`);
       target.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search);

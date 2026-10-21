@@ -1241,5 +1241,277 @@
       "bookEmpty": "No words to practise right now. Well done!",
       "markTitle": "Tricky {times, plural, =1 {once} =2 {twice} other {# times}} · last {when}"
     }
+  },
+  "sitePhones": {
+    "guardian": {
+      "hello": "Good morning",
+      "child": "Following Yusuf",
+      "next": "Next lesson",
+      "subject": "Quran · with Ms Sara",
+      "when": "Today 5:00 pm",
+      "soon": "in 25 min",
+      "report": "Last lesson's report",
+      "reportLine": "Great memorising, tajweed getting better",
+      "plan": "This month's plan",
+      "balance": "Balance",
+      "lessons": "6 lessons"
+    },
+    "student": {
+      "stars": "42",
+      "streak": "5",
+      "mission": "Today's mission: Surat Al-Mulk"
+    },
+    "teacher": {
+      "today": "Today's lessons",
+      "live": "Live",
+      "lessons": [
+        "Quran · Yusuf",
+        "Arabic · Mariam",
+        "English · Omar"
+      ],
+      "times": [
+        "Now",
+        "6:30 pm",
+        "8:00 pm"
+      ],
+      "voice": "Your report, by voice",
+      "drafted": "The draft is ready in seconds"
+    }
+  },
+  "platformSite": {
+    "title": "The academy platform",
+    "nav": {
+      "features": "Features",
+      "app": "The app",
+      "pricing": "Pricing",
+      "faq": "Questions",
+      "signIn": "Sign in",
+      "language": "العربية"
+    },
+    "kicker": "A complete system for online one-to-one tutoring academies",
+    "trust": [
+      "Not a line of code",
+      "Paid straight to you",
+      "Arabic and English"
+    ],
+    "cta": {
+      "start": "Ask to join",
+      "demo": "Try the demo",
+      "talk": "Talk to us on WhatsApp"
+    },
+    "floating": {
+      "revenue": "This month's revenue",
+      "revenueValue": "48,500",
+      "attendance": "Lessons attended",
+      "attendanceValue": "96%"
+    },
+    "phonesLabel": "Screens from the app: a parent following their child, a student on their journey, and a teacher in their lessons.",
+    "audiences": {
+      "eyebrow": "Who it is for",
+      "title": "Made for your academy, whatever you teach",
+      "lead": "Quran memorisation, languages or school subjects: the system takes the shape of your work.",
+      "items": [
+        {
+          "art": "📖",
+          "title": "Quran academies",
+          "text": "A memorisation map for every student, smart revision, and a shared mushaf in the lesson where the teacher marks the very word.",
+          "points": [
+            "A daily portion on spaced repetition",
+            "A mistakes notebook for each student",
+            "AI recitation checking"
+          ]
+        },
+        {
+          "art": "🗣️",
+          "title": "Language academies",
+          "text": "Live one-to-one lessons, voice homework, games that fix new words, and clear levels from first steps to fluency.",
+          "points": [
+            "Levels and curricula in your order",
+            "Voice and photo homework",
+            "A report after every lesson"
+          ]
+        },
+        {
+          "art": "🎓",
+          "title": "School subjects",
+          "text": "A teacher for each subject, timetables that fit around school, and parents kept in the loop.",
+          "points": [
+            "Several teachers for one student",
+            "Family plans and sibling discounts",
+            "Attendance and progress at a glance"
+          ]
+        }
+      ]
+    },
+    "features": {
+      "eyebrow": "Everything you need",
+      "title": "One system instead of ten tools",
+      "lead": "From a parent's first question to their child finishing the level: every step set up and kept.",
+      "items": [
+        {
+          "title": "Live lessons",
+          "text": "A video classroom inside the platform, or a Meet or Zoom link. Attendance is taken on its own."
+        },
+        {
+          "title": "Smart scheduling",
+          "text": "Weekly times, leave, substitutes and clock changes, without the mess."
+        },
+        {
+          "title": "Paid to your account",
+          "text": "Stripe, Moyasar, Tap, Paymob or a transfer with a receipt, and tax invoices ready."
+        },
+        {
+          "title": "Reports and homework",
+          "text": "A report after every lesson reaches the parent; homework by voice or photo."
+        },
+        {
+          "title": "A fun learning journey",
+          "text": "Islands, stars and creatures that hatch keep a child waiting for their lesson."
+        },
+        {
+          "title": "The memorisation map",
+          "text": "604 pages for every student, smart revision, and a shared mushaf in the lesson."
+        },
+        {
+          "title": "An AI assistant",
+          "text": "A lesson report from a voice note, suggested practice, and recitation checking."
+        },
+        {
+          "title": "Leads and trial lessons",
+          "text": "Every parent who asks is kept, with their trial lesson, until they join."
+        },
+        {
+          "title": "Teachers' pay",
+          "text": "Each lesson counted on its own, and a monthly statement ready, no calculator."
+        },
+        {
+          "title": "Safe and private",
+          "text": "Each academy's data kept apart, a parent's consent for children, daily backups."
+        },
+        {
+          "title": "Your name, your look",
+          "text": "Your logo and colours on every screen, and an address of your own."
+        },
+        {
+          "title": "Messages in their place",
+          "text": "Chat between teacher and family, announcements, and notifications on phone and WhatsApp."
+        }
+      ]
+    },
+    "app": {
+      "eyebrow": "The app",
+      "title": "The whole academy in everyone's pocket",
+      "lead": "One app on Android and iPhone that changes with whoever opens it.",
+      "steps": [
+        {
+          "title": "For parents",
+          "text": "They know the next lesson, read the report, pay and message the teacher, without calling anyone.",
+          "points": [
+            "A reminder before each lesson",
+            "A report and stars after it",
+            "Payments and balance in one place"
+          ]
+        },
+        {
+          "title": "For students",
+          "text": "A look for their age: the young ones get a journey with islands and creatures, older ones a clear plan and tasks.",
+          "points": [
+            "A mission every day",
+            "Games that fix the lesson",
+            "Stars and rewards"
+          ]
+        },
+        {
+          "title": "For teachers",
+          "text": "Their lessons, students, reports and earnings. The report writes itself from a voice note.",
+          "points": [
+            "Into the lesson in one tap",
+            "Marks homework from the phone",
+            "Knows the month's earnings"
+          ]
+        }
+      ],
+      "getOn": "Get it on",
+      "downloadOn": "Download on the",
+      "googlePlay": "Google Play",
+      "appStore": "App Store",
+      "soon": "Coming soon to the stores"
+    },
+    "steps": {
+      "eyebrow": "How to start",
+      "title": "Your academy running in days, not months",
+      "items": [
+        {
+          "title": "Ask to join",
+          "text": "Fill in the form and our team calls you the same day."
+        },
+        {
+          "title": "We set up your academy",
+          "text": "With its name, logo and address, and you are in the back office straight away."
+        },
+        {
+          "title": "Add your teachers",
+          "text": "Subjects, plans and teachers, or upload them once from a spreadsheet."
+        },
+        {
+          "title": "Welcome your students",
+          "text": "Families get the app, lessons begin, and you watch the numbers."
+        }
+      ]
+    },
+    "pricing": {
+      "eyebrow": "Pricing",
+      "title": "A plan your size, that grows with you",
+      "lead": "No long contracts. Change plan whenever you like; your data stays as it is.",
+      "perMonth": "a month",
+      "popular": "Most chosen",
+      "ask": "Ask for this plan",
+      "noPrice": "By agreement",
+      "custom": "A large academy, or something special?",
+      "customCta": "Talk to us"
+    },
+    "testimonials": {
+      "eyebrow": "What they say",
+      "title": "Academies that run on it every day"
+    },
+    "faq": {
+      "eyebrow": "Questions",
+      "title": "Questions people ask"
+    },
+    "join": {
+      "eyebrow": "Let's begin",
+      "title": "Take your academy online this week",
+      "lead": "Leave your details; our team calls you, sets up your academy and shows you around.",
+      "points": [
+        "An answer the same day",
+        "Set up in your name and look",
+        "Training for your team and teachers"
+      ],
+      "fields": {
+        "academy_name": "Academy name",
+        "contact_name": "Your name",
+        "email": "Email",
+        "phone": "Mobile (with country code)",
+        "country": "Country",
+        "students": "Students, roughly",
+        "plan": "Plan",
+        "message": "Anything to tell us? (optional)"
+      },
+      "pickCountry": "Choose the country",
+      "pickStudents": "Choose",
+      "pickPlan": "Not sure yet",
+      "send": "Send the request",
+      "sending": "Sending…",
+      "doneTitle": "We have your request",
+      "doneText": "Our team will be in touch very soon on the email or mobile you gave.",
+      "failed": "We could not send the request just now. Try again in a moment.",
+      "fix": "Check the marked fields.",
+      "privacy": "We use your details only to get in touch with you."
+    },
+    "footer": {
+      "privacy": "Privacy policy",
+      "terms": "Terms",
+      "rights": "All rights reserved"
+    }
   }
 }
