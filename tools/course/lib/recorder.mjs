@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DESKTOP, PHONE } from './layout.mjs';
@@ -440,5 +440,7 @@ export async function recordLesson({ browser, series, lesson, user, base, dir, v
     errors,
   };
   writeFileSync(join(dir, 'recording.json'), JSON.stringify(recording));
+  // A lesson that signs out on camera ends the session kept for the others: sign in again next time.
+  if (lesson.signsOut) rmSync(join(authDir, `${user.email}-${series.app ? 'app' : series.device ?? 'desktop'}.json`), { force: true });
   return recording;
 }

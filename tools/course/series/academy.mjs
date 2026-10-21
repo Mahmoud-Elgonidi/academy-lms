@@ -1,4 +1,26 @@
 // The academy's back office (/admin): owners, admins, schedulers, sales and the accountant.
+import { totp } from '../lib/totp.mjs';
+
+// Each lesson has its own Egyptian narrator from the ElevenLabs library (all spoken on eleven_v4).
+const VOICES = {
+  mostafa: 'FXJhBZJ1DJMO0U4ZPSur',   // Mostafa Mahmoud - Friendly
+  farida: '6aXW46RTUz6Y2lkBGQ1a',    // Farida - Lively and Radiant
+  hanafi: 'DWMVT5WflKt0P8OPpIrY',    // Hanafi
+  yasmine: 'L10lEremDiJfPicq5CPh',   // Yasmine - Human-Like
+  tarek: 'ckGEQg6YnSVooU5uDRsF',     // Tarek - Pleasant and Professional
+  nadia: '80le32Uz2DfWFo4Foz0p',     // Nadia - Sweet and Melodic
+  ramy: 'i2bK1jTwxz2ZhfV2NANO',      // Ramy Ibrahim - Natural and Smooth
+  hazem: 'BEK0cM5ocuhluB2yKvMa',     // Hazem - Confident News Presenter
+  fatima: 'I3u6waC588j43py1kDN2',    // Fatima - Expressive Egyptian
+  momen: 'x6fvBLXv9YxzoVJQ0wp6',     // Mr. Momen - Warm, Mature, Calm
+  ashraf: 'QfMIySsRuJWjZPZCnDQp',    // Ashraf - Warm and Genial
+  masry: 'LXrTqFIgiubkrMkwvOUr',     // Masry - Narrative, Clear and Strong
+  fatimaBook: 'vWDp3PLsTWjIhBxxUKh9', // Fatima - Smooth Audiobook Narrator
+  ghozlanSupport: 'kQ2VDreF7XEea8InkZmA', // Ghozlan - Professional Support Agent
+  marco: 'Ojb0nFbyzZn95u0i5a5p',     // Marco Nady - Confident and Calm
+  mahmoud: '5b1u5jJPwwEj4YaHoUak',   // Mahmoud Hassan - Calm
+  ahmed: 'bHCN6EPPyN5hYpU9UVUz',     // Ahmed - Clear, Natural and Neutral
+};
 const field = (s, name) => s.page.locator(`.fi-fo-field:has(label[for="form.${name}"])`);
 /** A field by its label (toggle buttons have no <label for>). */
 const labelled = (s, label) => s.page.locator('.fi-fo-field').filter({ has: s.page.locator('.fi-fo-field-label-content', { hasText: label }) }).first();
@@ -14,6 +36,15 @@ async function choose(s, name, option, search) {
 
 const STUDENT = 'رنا محمود';
 
+/** The side menu's item with exactly this label (s.nav matches any item that contains it). */
+const menuItem = (s, label) => s.page.locator('.fi-sidebar-item').filter({ has: s.page.locator('.fi-sidebar-item-label', { hasText: new RegExp(`^\\s*${label}\\s*$`) }) }).locator('a, button').first();
+
+/**
+ * The owner's next authenticator code: the next half minute's, since the sign-in off camera may just
+ * have used this one and a code is taken once. Without COURSE_TOTP_OWNER (writing the narration) a stand-in.
+ */
+const ownerCode = () => (process.env.COURSE_TOTP_OWNER ? totp(process.env.COURSE_TOTP_OWNER, Date.now() + 30000) : '000000');
+
 export default {
   key: 'academy',
   title: 'سلسلة الأكاديمية',
@@ -23,34 +54,260 @@ export default {
   user: 'owner',
   lessons: [
     {
-      n: 1, slug: 'first-sign-in', title: 'أول دخول وجولة في لوحة الإدارة',
+      n: 1, slug: 'first-sign-in', title: 'أول دخول وجولة في لوحة الإدارة', voice: VOICES.mostafa, signsOut: true,
       goal: 'تدخل لوحة الأكاديمية بأمان وتعرف كل حاجة فين.',
       learn: ['الدخول بالإيميل أو الموبايل والتحقق بخطوتين', 'القائمة الجانبية ومجموعاتها والعدّادات', 'البحث والإشعارات و«إعداداتي»'],
+      start: '/admin',
+      async steps(s) {
+        await s.say("ده حساب هالة، صاحبة الأكاديمية. نخرج الأول عشان نشوف الدخول من أوّله.", { voice: "[warmly] أهلًا بيك. ده حساب هالة، صاحبة الأكاديمية. هنخرج الأول من الحساب، عشان نشوف الدخول من أوّله." });
+        await s.click(s.page.locator('.fi-topbar .fi-avatar').first(), { settle: 600 });
+        await s.click(s.page.getByRole('button', { name: 'تسجيل الخروج' }).first(), { settle: 1500 });
+
+        await s.say("الدخول بالإيميل أو رقم الموبايل، وكلمة المرور.", { voice: "صفحة الدخول: نكتب الإيميل أو رقم الموبايل، وكلمة المرور، وندوس «تسجيل الدخول». ولو حد نسي كلمة السر، يقدر يدخل بكود يوصله على موبايله." });
+        await s.type(s.page.locator('#form\\.email'), 'owner@demo.test');
+        await s.type(s.page.locator('#form\\.password'), process.env.COURSE_PASSWORD ?? '');
+        await s.click(s.page.getByRole('button', { name: 'تسجيل الدخول' }).first(), { settle: 2000 });
+
+        await s.say("صاحب الأكاديمية والمدير والمحاسب لازم التحقق بخطوتين: كود من تطبيق على الموبايل.", { voice: "وعشان الحساب ده فيه فلوس وبيانات ناس، صاحب الأكاديمية والمدير والمحاسب لازم يدخلوا بخطوتين: بعد كلمة السر، كود من ست أرقام من تطبيق المصادقة على الموبايل، وبيتغيّر كل نص دقيقة." });
+        await s.type(s.page.locator('form input:not([type=hidden]):not([type=checkbox])').first(), ownerCode(), { delay: 120 });
+        await s.click(s.page.getByRole('button', { name: 'تأكيد تسجيل الدخول' }).first(), { settle: 2500 });
+
+        await s.say("أول شاشة: «العمليات اللحظية»، كل حصص النهارده وإيه اللي محتاج تدخّل.", { voice: "وده أول ما ندخل: شاشة «العمليات اللحظية». فيها كل حصص النهارده، ومين دخل ومين اتأخر، وإيه اللي محتاج تدخّل دلوقتي. ودي ليها درس لوحدها في السلسلة." });
+        await s.wait(1500);
+
+        await s.say("القائمة على الجنب: الشغل اليومي فوق، والعدّاد جنب كل حاجة مستنياك.", { voice: "وعلى الجنب القائمة. فوق الشغل اليومي: التقويم، وابحث عن مدرس، ومقترحات الشفتات، وإجازات المدرسين، والاعتراضات. والرقم اللي جنب أي واحدة، هو عدد الحاجات اللي مستنياك فيها." });
+        await s.show(s.nav('مقترحات الشفتات'), { hold: 1400 });
+        await s.show(s.nav('الاعتراضات'), { hold: 1200 });
+
+        await s.say("وتحت مجموعات: المبيعات، والمدرسين والأسر، والتعليم، والتواصل، والإعدادات.", { voice: "وتحت، باقي الحاجات متقسّمة مجموعات: المبيعات، والمدرسين والأسر، والتعليم، والتواصل، وفي الآخر الإعدادات، وفيها «ابدأ هنا»، ودي قايمة بكل اللي لازم يتظبط قبل ما الأسر تيجي." });
+        await s.scroll(s.nav('المدرسين'));
+        await s.wait(900);
+        await s.scroll(s.nav('ابدأ هنا'));
+        await s.show(s.nav('ابدأ هنا'), { hold: 1600 });
+
+        await s.say("البحث فوق: اسم طالب أو مدرس أو رقم فاتورة.", { voice: "وفوق خانة البحث: نكتب اسم طالب، أو مدرس، أو رقم فاتورة، والنتايج بتطلع على طول، ودوسة بتفتح الصفحة بتاعته." });
+        await s.type(s.page.locator('.fi-global-search-field input'), 'رنا');
+        await s.wait(1200);
+        await s.show(s.page.locator('.fi-global-search-results-ctn'), { hold: 1600 });
+        await s.key('Escape');
+
+        await s.say("الجرس: كل الإشعارات، ودوسة على أي واحد بتفتح مكانه.", { voice: "وجنبها الجرس: كل الإشعارات اللي وصلت، زي فاتورة اتدفعت، أو مدرس طلب إجازة. ودوسة على أي إشعار بتفتح مكانه." });
+        await s.click(s.page.locator('.fi-topbar .fi-icon-btn').filter({ has: s.page.locator('.fi-badge') }).first(), { settle: 1200 });
+        await s.wait(1400);
+        await s.key('Escape');
+
+        await s.say("ومن الصورة ← «إعداداتي»: اللغة، والتوقيت، والإشعارات، والتحقق بخطوتين.", { voice: "وآخر حاجة: من الصورة اللي فوق، «إعداداتي». هنا اللغة، والتوقيت، وإزاي توصلك الإشعارات، والتحقق بخطوتين، وكلمة السر." });
+        await s.click(s.page.locator('.fi-topbar .fi-avatar').first(), { settle: 600 });
+        await s.click(s.page.locator('.fi-dropdown-list-item').filter({ hasText: 'إعداداتي' }).first(), { settle: 1800 });
+        await s.wait(1500);
+      },
     },
     {
-      n: 2, slug: 'branding-and-plan', title: 'هوية الأكاديمية وباقتها',
+      n: 2, slug: 'branding-and-plan', title: 'هوية الأكاديمية وباقتها', voice: VOICES.farida,
+      outro: 'كده خلّصنا درس الهوية والباقة. في الدرس الجاي: المواد والمستويات والمناهج.',
       goal: 'تخلّي المنصة شبه أكاديميتك: الاسم والشعار والألوان، وتعرف حدود باقتك.',
       learn: ['الاسم والشعار وقوالب الألوان', 'شكل المنصة عند المدرسين والأسر والتطبيق', 'صفحة «باقة الأكاديمية» والحدود والاستهلاك'],
+      start: '/admin',
+      async steps(s) {
+        await s.say("الإعدادات ← «الهوية والألوان»: شكل الأكاديمية في كل مكان.", { voice: "[cheerful] أول حاجة نخلّي المنصة شبه أكاديميتنا. من الإعدادات، نفتح «الهوية والألوان». اللي بنظبطه هنا بيظهر في لوحة الإدارة، وعند المدرسين، وعند الأسر، وفي التطبيق كمان." });
+        await s.scroll(s.nav('الهوية والألوان'));
+        await s.click(s.nav('الهوية والألوان'), { settle: 1800 });
+
+        await s.say("القوالب: ألوان وخطوط جاهزة، والمعاينة بتتغيّر قدامك.", { voice: "فوق، قوالب جاهزة: كل قالب فيه ألوان وخطوط متناسقة. ولما ندوس على واحد، المعاينة اللي تحت بتتغيّر قدامنا على طول، ومفيش حاجة بتتغيّر عند حد غير لما نحفظ." });
+        await s.click(s.page.getByRole('button', { name: /^البنفسج/ }), { settle: 1200 });
+        await s.scroll(s.page.getByText('معاينة', { exact: true }).first());
+        await s.wait(1600);
+
+        await s.say("الهوية: اسم الأكاديمية بالعربي والإنجليزي، واللوجو، وأيقونة المتصفح.", { voice: "وفي «الهوية»: اسم الأكاديمية بالعربي والإنجليزي، واللوجو اللي بيظهر في كل الشاشات والإيميلات، وأيقونة المتصفح الصغيرة." });
+        await s.show(labelled(s, 'اسم الأكاديمية بالعربي'), { hold: 1400 });
+
+        await s.say("الألوان: الأساسي، والتنبيه، والخطر، والمعلومات، وكل لون ليه استخدام ثابت.", { voice: "وبعدها الألوان: اللون الأساسي للزراير والقايمة، ولون التنبيه للحاجات اللي محتاجة متابعة، ولون الخطر للغياب والإلغاء، ولون المعلومات. كل لون ليه استخدام ثابت في كل الشاشات." });
+        await s.scroll(labelled(s, 'اللون الأساسي'));
+        await s.show(labelled(s, 'اللون الأساسي'), { hold: 1500 });
+
+        await s.say("والخطوط وشكل الحواف: حادة، أو ناعمة، أو دائرية.", { voice: "وفي الآخر الخطوط، خط للعناوين وخط للنصوص، وشكل الحواف: حادة، أو ناعمة، أو دائرية." });
+        await s.scroll(s.page.locator('label').filter({ hasText: 'دائرية' }).first());
+        await s.click(s.page.locator('label').filter({ hasText: 'دائرية' }).first(), { settle: 1200 });
+
+        await s.say("«احفظ وطبّق»، أو «احفظ كقالب جديد» عشان ترجعله بعدين.", { voice: "ولما يعجبنا الشكل، ندوس «احفظ وطبّق»، فيتطبّق على الكل. أو «احفظ كقالب جديد»، عشان نرجعله بعدين." });
+        await s.scroll(-4000);
+        await s.point(s.page.getByRole('button', { name: 'احفظ وطبّق' }), { hold: 1600 });
+
+        await s.say("و«باقة الأكاديمية»: اللي باقتك بتسمح بيه، واستخدمت منه قد إيه.", { voice: "و«باقة الأكاديمية»، آخر حاجة في الإعدادات: هنا اللي باقتنا بتسمح بيه، واستخدمنا منه قد إيه دلوقتي." });
+        await s.click(s.nav('باقة الأكاديمية'), { settle: 1800 });
+
+        await s.say("المدرسين، والطلاب النشطين، ودقايق الفيديو، والمساحة، والمميزات اللي في الباقة.", { voice: "عدد المدرسين، والطلاب النشطين، ودقايق الفيديو في الشهر، ومساحة الملفات. ولما نقرّب من الحد، بيظهر تنبيه فوق في كل الشاشات، زي هنا: تسعة مدرسين من عشرة. وتحت، المميزات اللي في الباقة، واللي مش فيها." });
+        await s.show(s.page.locator('.pp-meters').first(), { hold: 2000 });
+        await s.show(s.page.locator('.pp-features-row, .pp-features').first(), { hold: 1400 });
+
+        await s.say("عايز تكبّر الباقة؟ فريق المنصة بيغيّرها من عنده.", { voice: "ولو عايزين نكبّر الباقة، أو نضيف ميزة، بنكلّم فريق المنصة، وهمّا بيغيّروها من عندهم." });
+        await s.wait(1500);
+      },
     },
     {
-      n: 3, slug: 'subjects-and-curriculum', title: 'المواد والمستويات والمناهج',
+      n: 3, slug: 'subjects-and-curriculum', title: 'المواد والمستويات والمناهج', voice: VOICES.hanafi,
       goal: 'تبني كتالوج المواد ومنهج كل مادة بالدروس والمواد التعليمية.',
       learn: ['مادة بمستويات مرتبة وتصنيفات (مسارات ومناهج)', 'منشئ المنهج: برنامج ← مستوى ← وحدة ← درس', 'ملفات ولينكات الدرس ومين يشوفها، والنشر'],
+      start: '/admin',
+      async steps(s) {
+        await s.say("التعليم ← «المواد»: كل مادة بمستوياتها وتصنيفاتها، وعدد مدرسينها.", { voice: "[warmly] نبدأ بالمواد. من مجموعة التعليم نفتح «المواد». كل مادة قدامها مستوياتها بالترتيب، وتصنيفاتها، وعدد المدرسين اللي بيدرّسوها." });
+        await s.scroll(s.nav('المواد'));
+        await s.click(s.nav('المواد'), { settle: 1800 });
+        await s.show(s.page.locator('.fi-ta-row').first(), { hold: 1600 });
+
+        await s.say("«تعديل»: المستويات بالترتيب، والتصنيفات زي المسارات والمناهج.", { voice: "ولو دوسنا «تعديل» على مادة: المستويات بترتيبها، من الأسهل للأصعب، وزرار «ضيف مستوى». وتحتها التصنيفات، زي محادثة، أو منهج بريطاني. والمستويات والتصنيفات دي هي اللي بنبحث بيها عن المدرس المناسب بعدين." });
+        await s.click(s.page.getByRole('button', { name: 'تعديل' }).first(), { settle: 1500 });
+        await s.show(s.modal(), { hold: 2200 });
+        await s.click(s.modal().getByRole('button', { name: 'إلغاء' }), { settle: 900 });
+
+        await s.say("و«المناهج»: كل برنامج بنسخته، ودروسه، وطلابه.", { voice: "وبعدها «المناهج». كل برنامج هنا منهج لمادة: نسخته، وعدد دروسه، وعدد الطلاب اللي ماشيين فيه. ندوس «المحتوى» عشان نشوفه من جوّه." });
+        await s.click(s.nav('المناهج'), { settle: 1800 });
+        await s.click(s.page.locator('.fi-ta-row').first().getByRole('link', { name: 'المحتوى' }), { settle: 2000 });
+
+        await s.say("المنهج: مستويات، جوّاها وحدات، جوّاها دروس، والأسهم بترتّبهم.", { voice: "وده منشئ المنهج: البرنامج مقسوم مستويات، وكل مستوى فيه وحدات، وكل وحدة فيها دروس. والأسهم اللي جنب كل حاجة بتغيّر ترتيبها، وزراير «درس» و«وحدة» و«مستوى جديد» بتضيف." });
+        await s.show(s.page.locator('.cb-level, [class*=cb-]').first(), { hold: 1800 });
+
+        await s.say("لكل درس: مواده، وتدريباته اللي الطالب بيلعب بيها.", { voice: "ولكل درس: المواد بتاعته، والتدريبات اللي الطالب بيراجع بيها في الألعاب. ندوس «من غير مواد» على درس الألوان، ونضيف لينك." });
+        await s.click(s.page.locator('button.cb-mats').nth(2), { settle: 1200 });
+        await s.click(s.page.getByRole('button', { name: 'ضيف لينك' }).first(), { settle: 1400 });
+
+        await s.say("اللينك واسمه، ومين يشوفه: كل اللي في الحصة، أو المدرسين بس.", { voice: "نكتب اللينك واسمه، ونختار مين يشوفه: كل اللي في الحصة، يعني المدرس والطالب وأسرته، أو المدرسين بس، زي ملف الإجابات. وندوس «إرسال»." });
+        await s.type(s.modal().locator('input').first(), 'https://learnenglish.britishcouncil.org/vocabulary/a1-a2-vocabulary/colours', { delay: 18 });
+        await s.type(s.modal().locator('input').nth(1), 'الألوان بالصور');
+        await s.click(s.modal().locator('label').filter({ hasText: 'كل اللي في الحصة' }).first(), { settle: 400 });
+        await s.click(s.modal().getByRole('button', { name: 'إرسال' }), { settle: 1800 });
+
+        await s.say("والنسخة المنشورة: تعدّل وتزوّد، لكن المسح مقفول عشان تقدّم الطلاب.", { voice: "وفوق مكتوب إن النسخة دي منشورة. يعني نقدر نعدّل العناوين ونزوّد دروس ومواد، لكن المسح مقفول، عشان تقدّم الطلاب اللي ماشيين فيها ما يضيعش." });
+        await s.scroll(-4000);
+        await s.show(s.page.getByText('النسخة دي منشورة', { exact: false }).first(), { hold: 2000 });
+      },
     },
     {
-      n: 4, slug: 'teachers', title: 'المدرسين: الإضافة والملف والفحص',
+      n: 4, slug: 'teachers', title: 'المدرسين: الإضافة والملف والفحص', voice: VOICES.yasmine,
       goal: 'تضيف مدرس وتظبط ملفه عشان يظهر صح في البحث.',
       learn: ['إضافة مدرس ورسالة الترحيب', 'المواد والمستويات والأعمار والحد اليومي', 'فحص المدرسين: المستندات والاعتماد والانتهاء'],
+      start: '/admin',
+      async steps(s) {
+        const subject = s.page.locator('.fi-fo-repeater .fi-fo-field').filter({ has: s.page.locator('.fi-fo-field-label-content', { hasText: 'المادة' }) }).first();
+
+        await s.say("«المدرسين والأسر» ← «المدرسين»: كل مدرس بمواده، والأعمار، وساعاته في الأسبوع.", { voice: "[warmly] من «المدرسين والأسر» نفتح «المدرسين». كل مدرس قدامه مواده، ونوعه، والأعمار اللي بيدرّسها، وأقصى ساعات في الأسبوع. و«ابحث عن مدرس» بيدوّر بالبيانات دي بالظبط." });
+        await s.scroll(menuItem(s, 'المدرسين'));
+        await s.click(menuItem(s, 'المدرسين'), { settle: 1800 });
+
+        await s.say("«مدرس جديد»: الاسم، والإيميل، والموبايل، والتوقيت.", { voice: "نضيف مدرسة جديدة: ندوس «مدرس جديد»، ونكتب الاسم، والإيميل، ورقم الموبايل اللي عليه واتساب. والتوقيت بيتحط لوحده من كود الدولة." });
+        await s.click(s.page.getByRole('link', { name: 'مدرس جديد' }), { settle: 1800 });
+        await s.type(field(s, 'name'), 'أ. ياسمين عادل');
+        await s.type(field(s, 'email'), 'yasmine@demo.test', { delay: 35 });
+        await s.type(field(s, 'phone'), '+201001230011', { delay: 45 });
+
+        await s.say("التدريس: النوع، واللغات، والأعمار، وأقصى ساعات وحصص.", { voice: "وفي «التدريس»: نوعها، ولغات الشرح، والأعمار اللي بتدرّسها، وأقصى ساعات في الأسبوع، وأقصى حصص في اليوم. ولما توصل للحد اليومي، البحث مابيقترحش اليوم ده." });
+        await s.click(labelled(s, 'النوع').locator('label').filter({ hasText: 'ست' }).first(), { settle: 300 });
+        await s.click(labelled(s, 'الأعمار اللي بيدرّسها').locator('label').filter({ hasText: 'أطفال' }).first(), { settle: 300 });
+        await s.click(labelled(s, 'الأعمار اللي بيدرّسها').locator('label').filter({ hasText: 'إعدادي' }).first(), { settle: 300 });
+        await s.type(field(s, 'max_weekly_hours'), '20');
+        await s.type(field(s, 'max_daily_lessons'), '6');
+
+        await s.say("المواد: المادة، ومن مستوى لحد مستوى، والتصنيفات.", { voice: "وبعدها المواد: نختار المادة، وممكن نحدد من أنهي مستوى لحد أنهي مستوى، والتصنيفات اللي بتدرّسها. ولو بتدرّس أكتر من مادة، «ضيف مادة»." });
+        await s.scroll(subject);
+        await s.select(subject.locator('select'), { label: 'قرآن · حفظ' });
+
+        await s.say("ورسالة الترحيب: لينك تختار بيه كلمة السر، ونضغط «إضافة».", { voice: "وفي الآخر رسالة الترحيب: بتوصلها على واتساب والإيميل، وفيها لينك تختار بيه كلمة السر بنفسها. ندوس «إضافة»." });
+        await s.scroll(s.page.getByRole('button', { name: 'إضافة' }).last());
+        await s.click(s.page.getByRole('button', { name: 'إضافة' }).last(), { settle: 2500 });
+
+        await s.say("«فحص المدرسين»: المستندات اللي المدرسين رفعوها، تراجعها وتأكّدها.", { voice: "وأمان الطلاب الصغيرين مهم جدًا. في «فحص المدرسين»: المستندات اللي المدرسين رفعوها، زي الفيش الجنائي والشهادات. نراجع كل مستند على الأصل، ونأكّده أو نرفضه." });
+        await s.click(s.nav('فحص المدرسين'), { settle: 1800 });
+        await s.show(s.page.getByRole('heading', { name: 'مستني المراجعة' }), { hold: 1200 });
+
+        await s.say("«أكّد»، وتحدد صالح لحد إمتى، والمنصّة بتفكّرك قبل ما يخلص بشهر.", { voice: "ندوس «أكّد» على الفيش الجنائي بتاع أستاذ خالد. ولو ليه تاريخ انتهاء نحدده، والمنصّة بتفكّرنا قبل ما يخلص بشهر." });
+        await s.click(s.page.getByRole('button', { name: 'أكّد' }).first(), { settle: 1200 });
+        await s.click(s.modal().getByRole('button', { name: 'إرسال' }), { settle: 2000 });
+
+        await s.say("وقاعدة أقل من 18: من غير فيش متأكّد، مفيش حصص جديدة مع الصغيرين.", { voice: "وتحت، كل المدرسين اللي معاهم طلاب أقل من تمنتاشر سنة. ولما القاعدة دي شغّالة، المدرس اللي مالوش فيش جنائي متأكّد وساري، مايقدرش ياخد حصص جديدة مع طالب صغير. وزرار «وقّف» بيوقّفه عنهم لو فيه سبب." });
+        await s.scroll(s.page.getByRole('heading', { name: /كل المدرسين مع طلاب/ }));
+        await s.wait(2200);
+      },
     },
     {
-      n: 5, slug: 'shifts-and-time-off', title: 'الشفتات والإجازات والمدرس البديل',
-      goal: 'تعتمد أوقات المدرسين وتدير إجازاتهم من غير ما حصة تضيع.',
+      n: 5, slug: 'shifts-and-time-off', title: 'الشفتات والإجازات والمدرس البديل', voice: VOICES.tarek,
+      goal: 'تعتمد أوقات المدرسين وتدير إجازاتهم، وكل حصة تلاقي مدرس.',
       learn: ['مراجعة مقترح شفتات: المقارنة وتحليل الأثر والاعتماد', 'طلبات الإجازة وتعيين مدرس بديل', 'إجازات الأكاديمية والعطلات الرسمية'],
+      start: '/admin',
+      async steps(s) {
+        const visible = (text) => s.page.getByText(text).locator('visible=true').first();
+
+        await s.say("«مقترحات الشفتات»: المدرس بيقترح مواعيد شغله، وانت بتراجع وتعتمد.", { voice: "[warmly] المدرس بيقترح مواعيد شغله من عنده، والإدارة بتراجعها وتعتمدها. من القايمة نفتح «مقترحات الشفتات». فوق اللي مستني ردّنا، وكل واحد قدامه الساعات قبل وبعد، وفيه تعارضات ولا لأ." });
+        await s.click(menuItem(s, 'مقترحات الشفتات'), { settle: 1800 });
+
+        await s.say("نفتح مقترح أستاذة سارة: فيه 3 تعارضات.", { voice: "نفتح مقترح أستاذة سارة، عليه تلات تعارضات." });
+        await s.click(visible('أ. سارة عبد الرحمن'), { settle: 2000 });
+
+        await s.say("الجدول الحالي مقابل المقترح: الأخضر مضاف، والمخطط محذوف، والأحمر حصة محجوزة برّه الشفت.", { voice: "هنا الجدول الحالي جنب المقترح: الرمادي زي ما هو، والأخضر مضاف، والمخطّط بالأحمر محذوف. والنقطة الحمرا معناها حصة محجوزة هتبقى برّه الشفت الجديد." });
+        await s.show(s.page.getByRole('heading', { name: 'الجدول الحالي مقابل المقترح' }).locator('xpath=ancestor::section[1]'), { hold: 2200 });
+
+        await s.say("«الأثر على الطلاب»: كل حصة متأثرة وحلّها: مدرس تاني، أو استثناء، أو تأخير البداية.", { voice: "وتحت «الأثر على الطلاب المحجوزين»: كل طالب حصته هتتأثر، ولكل واحد حل: ننقله لمدرس تاني، أو استثناء متفق عليه مع المدرس، أو نأخّر تاريخ بداية الجدول الجديد. ولازم كله يتحل قبل الاعتماد." });
+        await s.scroll(s.page.getByRole('heading', { name: 'الأثر على الطلاب المحجوزين' }));
+        await s.wait(2200);
+
+        await s.say("والمحادثة مع المدرس على المقترح، ورفض، أو طلب تعديل، أو عرض مضاد.", { voice: "وجنبها محادثة مع المدرس على المقترح نفسه. ومن فوق: نرفض، أو نطلب تعديل، أو نعدّل بنفسنا ونبعت عرض مضاد." });
+        await s.scroll(-3000);
+        await s.show(s.page.getByRole('button', { name: /عدّل وأرسل/ }), { hold: 1600 });
+
+        await s.say("ومقترح أستاذ أحمد مفيش فيه تعارض: «اعتماد الجدول».", { voice: "ونرجع للقايمة. مقترح أستاذ أحمد مفيش فيه أي تعارض، فنفتحه وندوس «اعتماد الجدول»، ونأكّد. الجدول الجديد بيبدأ في ميعاده، والحصص المحجوزة بتفضل زي ما هي." });
+        await s.click(menuItem(s, 'مقترحات الشفتات'), { settle: 1600 });
+        await s.click(visible('أ. أحمد فؤاد'), { settle: 1800 });
+        await s.click(s.page.getByRole('button', { name: 'اعتماد الجدول' }), { settle: 1000 });
+        await s.click(s.modal().getByRole('button', { name: 'تأكيد' }), { settle: 2000 });
+
+        await s.say("«إجازات المدرسين»: الطلبات، واللي محتاجة بديل.", { voice: "وبعدها الإجازات. «إجازات المدرسين»: الطلبات اللي مستنية ردّنا، والإجازات اللي اتوافق عليها ولسه فيها حصص محتاجة بديل." });
+        await s.click(menuItem(s, 'إجازات المدرسين'), { settle: 1800 });
+        await s.click(s.page.getByText('افتح').locator('visible=true').nth(1), { settle: 1800 });
+
+        await s.say("كل حصة في الإجازة: بديل اتعيّن، أو تتلغي بتعويض للطالب.", { voice: "دي إجازة أستاذة نور. كل حصة في أيام الإجازة قدامنا: الأولى أستاذة سارة هتغطيها كبديل. والباقيين مفيش مدرس فاضي للمادة في الوقت ده، فنلغيهم بتعويض، والطالب بياخد حصته في ميعاد تاني. وزرار «غطّي كل الحصص» بيدوّر على بديل للكل مرة واحدة." });
+        await s.show(s.page.getByText('مع أ. سارة عبد الرحمن').first(), { hold: 1400 });
+        await s.click(s.page.getByRole('button', { name: 'ألغِ بتعويض' }).first(), { settle: 2000 });
+
+        await s.say("و«إجازات الأكاديمية»: العطلات الرسمية، وحصصها بتترحّل والأيام بترجع للرصيد.", { voice: "وفي الإعدادات، «إجازات الأكاديمية»: العطلات الرسمية والإجازات العامة. الحصص اللي فيها بتتلغي، ودقايقها بترجع لرصيد الطلاب، والأسر بيوصلها إشعار." });
+        await s.scroll(menuItem(s, 'إجازات الأكاديمية'));
+        await s.click(menuItem(s, 'إجازات الأكاديمية'), { settle: 1800 });
+        await s.wait(1600);
+      },
     },
     {
-      n: 6, slug: 'students-and-guardians', title: 'الطلاب وأولياء الأمور',
+      n: 6, slug: 'students-and-guardians', title: 'الطلاب وأولياء الأمور', voice: VOICES.nadia,
       goal: 'تضيف طالب وولي أمره وتظبط مرحلته وموافقته.',
       learn: ['طالب صغير تحت ولي أمر، وطالب كبير بحسابه', 'المرحلة: أطفال، إعدادي، ثانوي، كبار', 'موافقات أولياء الأمور وسن الموافقة'],
+      start: '/admin',
+      async steps(s) {
+        await s.say("«الطلاب» ← «طالب جديد»: الاسم، وهل بيدخل بنفسه.", { voice: "[warmly] نضيف طالب جديد. من «المدرسين والأسر» نفتح «الطلاب»، وندوس «طالب جديد». نكتب الاسم. ولو الطالب صغير ومالوش إيميل ولا رقم، بنسيب الزرار ده مقفول، فحسابه بيبقى تحت ولي أمره، وولي الأمر هو اللي بيدخل." });
+        await s.scroll(menuItem(s, 'الطلاب'));
+        await s.click(menuItem(s, 'الطلاب'), { settle: 1800 });
+        await s.click(s.page.getByRole('link', { name: 'طالب جديد' }), { settle: 1800 });
+        await s.type(field(s, 'name'), 'مالك حسن');
+        await s.show(labelled(s, 'الطالب بيدخل بنفسه'), { hold: 1400 });
+
+        await s.say("«عن الطالب»: الميلاد، وشكل حسابه، والنوع، والصف، وجنس المدرس.", { voice: "وفي «عن الطالب»: تاريخ الميلاد، و«شكل حسابه»: أطفال، أو إعدادي، أو ثانوي، أو عادي للكبار. ولو سبناه «من سنّه»، المنصّة بتختار لوحدها من تاريخ الميلاد. وبعدها النوع، والصف، ولو الأسرة عايزة مدرس راجل أو ست." });
+        await s.select(field(s, 'stage').locator('select'), 'kids');
+        await s.click(labelled(s, 'النوع').locator('label').filter({ hasText: 'ولد' }).first(), { settle: 300 });
+        await s.select(field(s, 'school_grade').locator('select'), 'g2');
+
+        await s.say("ولي الأمر: موجود عندنا، أو جديد بالاسم والموبايل.", { voice: "وبعدها ولي الأمر: لو موجود عندنا، زي أخ تاني متسجّل، نختاره. ولو جديد، نكتب اسمه، وموبايله، وإيميله، وصلة القرابة." });
+        await s.scroll(field(s, 'guardian_name'));
+        await s.type(field(s, 'guardian_name'), 'حسن إبراهيم');
+        await s.type(field(s, 'guardian_phone'), '+966501112233', { delay: 45 });
+
+        await s.say("ورسالة الترحيب بتروح لولي الأمر، و«إضافة».", { voice: "ورسالة الترحيب بتروح لولي الأمر، فيها لينك يختار بيه كلمة السر، والطفل نفسه مابيوصلوش رسايل. ندوس «إضافة»." });
+        await s.scroll(s.page.getByRole('button', { name: 'إضافة' }).last());
+        await s.click(s.page.getByRole('button', { name: 'إضافة' }).last(), { settle: 2500 });
+
+        await s.say("«موافقات أولياء الأمور»: الصغيرين محتاجين موافقة قبل ما يدخلوا.", { voice: "وأي طالب أصغر من سن الموافقة، محتاج ولي أمره يوافق قبل ما يدخل حسابه أو يحضر بنفسه. ده كله في «موافقات أولياء الأمور»." });
+        await s.scroll(menuItem(s, 'موافقات أولياء الأمور'));
+        await s.click(menuItem(s, 'موافقات أولياء الأمور'), { settle: 1800 });
+
+        await s.say("سن الموافقة، والمستنيين، و«ابعت الطلب تاني» أو «سجّل موافقة عندنا».", { voice: "فوق سن الموافقة اللي الأكاديمية حددته، وده بيتغيّر من الزرار. وتحت الطلاب المستنيين: نبعت لولي الأمر الطلب تاني، أو لو وافق ورقيًا أو في التليفون، نسجّل موافقته عندنا بملاحظة. وكل خطوة متسجّلة في «السجل»." });
+        await s.show(s.page.getByRole('button', { name: /سن الموافقة/ }), { hold: 1400 });
+        await s.show(s.page.locator('.fi-ta-row').first(), { hold: 2000 });
+      },
     },
     {
       n: 7, slug: 'find-teacher-enroll', title: 'ابحث عن مدرس وسجّل طالب',
