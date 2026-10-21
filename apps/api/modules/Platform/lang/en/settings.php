@@ -22,7 +22,10 @@ return [
         'loading' => 'Loading the list of models…',
         'failed' => 'The list could not be had: :why. Choose "Another name…", or press "Try it".',
         'no_key' => 'put the key (or the address) first',
-        'count' => '{1} One model from :provider.|[2,*] :count models from :provider.',
+        'count' => '{0} :provider has no models that write yet.|{1} One model from :provider.|[2,*] :count models from :provider.',
+        'loading_known' => "Loading :provider's full list… Until it comes, these are its main models.",
+        'known' => ":provider's main models. Put the key in to see every model your account has.",
+        'known_meanwhile' => "Until it can be had, these are :provider's main models.",
         'slow_down' => 'The list was asked for many times just now: wait a minute.',
     ],
     'ai_notes' => [

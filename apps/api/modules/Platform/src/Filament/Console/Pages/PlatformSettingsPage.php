@@ -233,7 +233,8 @@ final class PlatformSettingsPage extends Page
     private function modelOptions(SettingDefinition $setting, Get $get): array
     {
         $list = $this->modelList($setting, $get);
-        $options = $list?->options ?? [];
+        // The provider's own list once it can be had; until then the models known here (Claude's).
+        $options = $list !== null && $list->options !== [] ? $list->options : ModelCatalog::known(AiProvider::from((string) $setting->models));
         $current = (string) ($get($setting->key) ?: app(PlatformSettings::class)->serverValue($setting));
         if ($current !== '' && $current !== ModelCatalog::CUSTOM && ! isset($options[$current])) {
             $options = [$current => __('platform::settings.models.current', ['model' => $current])] + $options;
@@ -242,18 +243,23 @@ final class PlatformSettingsPage extends Page
         return $options + [ModelCatalog::CUSTOM => __('platform::settings.models.custom')];
     }
 
-    /** Under a model setting: how many models the list has, that it is loading, or why it could not be had. */
+    /** Under a model setting: how many models the list has, that it is loading, or why it could not be had (and that the known ones show meanwhile). */
     private function modelNote(SettingDefinition $setting, Get $get): string
     {
         $list = $this->modelList($setting, $get);
         $provider = AiProvider::from((string) $setting->models);
+        $known = ModelCatalog::known($provider) !== [];
         if ($list === null) {
-            return __('platform::settings.models.loading');
+            return __($known ? 'platform::settings.models.loading_known' : 'platform::settings.models.loading', ['provider' => $provider->label()]);
+        }
+        if ($list->problem !== null && $list->code === 'missing') {
+            return $known
+                ? __('platform::settings.models.known', ['provider' => $provider->label()])
+                : __('platform::settings.models.failed', ['why' => __('platform::settings.models.no_key')]);
         }
         if ($list->problem !== null) {
-            return __('platform::settings.models.failed', ['why' => $list->code === 'missing'
-                ? __('platform::settings.models.no_key')
-                : __('platform::services.short.'.$list->problem->value)]);
+            return __('platform::settings.models.failed', ['why' => __('platform::services.short.'.$list->problem->value)])
+                .($known ? ' '.__('platform::settings.models.known_meanwhile', ['provider' => $provider->label()]) : '');
         }
 
         return trans_choice('platform::settings.models.count', count($list->options), ['count' => count($list->options), 'provider' => $provider->label()]);

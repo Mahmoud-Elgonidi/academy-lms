@@ -40,10 +40,42 @@ final class ModelCatalog
 
     private const GEMINI_NOT_WRITING = ['embedding', 'aqa', 'imagen', 'veo', 'tts', 'image', 'native-audio', 'live', 'robotics', 'computer-use'];
 
-    /** What is kept: the list, or why there is none. */
+    /**
+     * Claude's models as Anthropic names them (October 2026), shown before a key is
+     * put in or while Anthropic's own list cannot be had; its list replaces them once
+     * the key works. OpenAI and Google list models only for a key, and Ollama only
+     * what its server has, so theirs come with the key or the address.
+     */
+    private const KNOWN = [
+        'claude' => [
+            'claude-fable-5-1' => 'Claude Fable 5.1',
+            'claude-opus-5-5' => 'Claude Opus 5.5',
+            'claude-sonnet-5-5' => 'Claude Sonnet 5.5',
+            'claude-haiku-5-5' => 'Claude Haiku 5.5',
+            'claude-fable-5' => 'Claude Fable 5',
+            'claude-opus-5' => 'Claude Opus 5',
+            'claude-sonnet-5' => 'Claude Sonnet 5',
+            'claude-opus-4-8' => 'Claude Opus 4.8',
+            'claude-opus-4-7' => 'Claude Opus 4.7',
+            'claude-opus-4-6' => 'Claude Opus 4.6',
+            'claude-sonnet-4-6' => 'Claude Sonnet 4.6',
+            'claude-haiku-4-5' => 'Claude Haiku 4.5',
+        ],
+    ];
+
+    /** @return array<string, string> a provider's models known here, as its list shows them (none when it lists its own only for a key) */
+    public static function known(AiProvider $provider): array
+    {
+        return collect(self::KNOWN[$provider->value] ?? [])->mapWithKeys(fn (string $name, string $id) => [$id => "{$name} ({$id})"])->all();
+    }
+
+    /** What is kept: the list, or why there is none (with no key or address, that it cannot be asked). */
     public function cached(AiProvider $provider, ?string $key = null, ?string $base = null): ?ModelList
     {
         [$key, $base] = $this->credentials($provider, $key, $base);
+        if ($provider === AiProvider::Ollama ? $base === '' : $key === '') {
+            return new ModelList([], ServiceProblem::Config, 'missing', now()->getTimestamp());
+        }
         try {
             $kept = Cache::get($this->cacheKey($provider, $key, $base));
         } catch (Throwable) {
@@ -59,9 +91,6 @@ final class ModelCatalog
         [$key, $base] = $this->credentials($provider, $key, $base);
         if (($kept = $this->cached($provider, $key, $base)) !== null) {
             return $kept;
-        }
-        if ($provider === AiProvider::Ollama ? $base === '' : $key === '') {
-            return new ModelList([], ServiceProblem::Config, 'missing', now()->getTimestamp());
         }
 
         $list = $this->ask($provider, $key, $base);

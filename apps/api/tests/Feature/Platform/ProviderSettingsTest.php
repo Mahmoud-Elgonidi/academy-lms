@@ -121,6 +121,30 @@ it('shows the chosen provider\'s key and models only, and its list to choose fro
     expect($page->instance()->form->getFlatFields(withHidden: true)['openai_model']->getOptions())->toHaveKey('ft:gpt-4.1-mini:academy::abc123', 'ft:gpt-4.1-mini:academy::abc123 (in use)');
 });
 
+it('shows Claude\'s models before a key is put in, and Anthropic\'s own list once it works', function () {
+    config(['platform.ai.key' => null, 'platform.ai.models.best' => null, 'platform.ai.models.fast' => null]);
+    Filament::setCurrentPanel('console');
+    $this->actingAs($this->owner, 'platform');
+
+    $page = Livewire::test(PlatformSettingsPage::class)->call('warmModels');
+    $options = fn (string $key) => $page->instance()->form->getFlatFields(withHidden: true)[$key]->getOptions();
+    expect($options('ai_model'))->toHaveKeys(['claude-fable-5-1', 'claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5', ModelCatalog::CUSTOM])
+        ->and($options('ai_model')['claude-sonnet-5-5'])->toBe('Claude Sonnet 5.5 (claude-sonnet-5-5)')
+        ->and(array_key_last($options('ai_model')))->toBe(ModelCatalog::CUSTOM)
+        ->and($options('game_designer_model'))->toHaveKey('claude-opus-5-5');
+    $page->assertSee('Claude (Anthropic)\'s main models. Put the key in to see every model your account has.');
+    Http::assertNothingSent();
+
+    // GPT lists its models only for a key: nothing to guess before it.
+    $page->fillForm(['ai_driver' => 'openai']);
+    expect(array_keys($options('openai_model')))->toBe([ModelCatalog::CUSTOM]);
+
+    // The key typed: Anthropic's own list, and only it.
+    fakeModelLists();
+    $page->fillForm(['ai_driver' => 'claude', 'anthropic_key' => 'sk-ant-typed'])->call('warmModels');
+    expect(array_keys($options('ai_model')))->toBe(['claude-a', 'claude-b', 'claude-c', ModelCatalog::CUSTOM]);
+});
+
 it('keeps another provider\'s choices while it is not the one chosen', function () {
     fakeModelLists();
     app(SavePlatformSettings::class)->handle($this->owner, ['ai_model' => 'claude-c', 'gemini_key' => 'g-saved']);
