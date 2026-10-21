@@ -1979,6 +1979,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/site/platform": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The platform's page
+         * @description In the request's language (Accept-Language). Not on an academy's address (404).
+         */
+        get: operations["platform.site"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/site/platform/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask to join the platform
+         * @description The platform team answers each request. A form sent too soon or with the hidden field filled is answered the same and kept nowhere.
+         */
+        post: operations["platform.site.requests"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/me/data-requests": {
         parameters: {
             query?: never;
@@ -2729,6 +2769,15 @@ export interface components {
         };
     };
     responses: {
+        /** @description Not found */
+        ModelNotFoundException: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["ProblemDetails"];
+            };
+        };
         /** @description Validation error: `errors` names each field */
         ValidationException: {
             headers: {
@@ -2749,15 +2798,6 @@ export interface components {
         };
         /** @description An error */
         ProblemException: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["ProblemDetails"];
-            };
-        };
-        /** @description Not found */
-        ModelNotFoundException: {
             headers: {
                 [name: string]: unknown;
             };
@@ -9606,6 +9646,109 @@ export interface operations {
                     };
                 };
             };
+        };
+    };
+    "platform.site": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The words the console set: hero, stats, testimonials, faqs, sections shown, contact, demo_url, seo. */
+                            content: {
+                                hero: {
+                                    [key: string]: string;
+                                };
+                                stats: unknown[][];
+                                testimonials: unknown[][];
+                                faqs: unknown[][];
+                                sections: unknown[];
+                                contact: {
+                                    whatsapp: string | null | "";
+                                    email: string | null | "";
+                                };
+                                demo_url: string | null | "";
+                                seo: {
+                                    [key: string]: string;
+                                };
+                            };
+                            plans: {
+                                /** @description The plan's code, sent back with the request form. */
+                                code: string;
+                                name: string;
+                                /** @description One line about who it is for, or null. */
+                                tagline: string | null;
+                                /** @description A month, written out ("SAR 299.00"), or null when the plan has no price shown. */
+                                price: string | null;
+                                price_minor: number | null;
+                                currency: string | null;
+                                /** @description The one plan the page sets apart. */
+                                highlight: boolean;
+                                limits: unknown[];
+                                features: unknown[];
+                            }[];
+                            app: {
+                                /** @description The store page on Android, or null. */
+                                android_url: string;
+                                /** @description The App Store page, or null. */
+                                ios_url: string;
+                            };
+                            /** @description The platform's legal name, for the footer. */
+                            legal_name: string;
+                            /** @description Sent back with the request form, unchanged. */
+                            form_token: string;
+                        };
+                    };
+                };
+            };
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "platform.site.requests": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            received: boolean;
+                        };
+                    };
+                };
+            };
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
         };
     };
     "privacy.requests": {

@@ -27,6 +27,7 @@ use Modules\Platform\Commands\MailTestCommand;
 use Modules\Platform\Commands\MeasureUsageCommand;
 use Modules\Platform\Commands\ServicesCommand;
 use Modules\Platform\Commands\ShowPlatformCode;
+use Modules\Platform\Commands\SweepSignupRequests;
 use Modules\Platform\Console\ConsoleService;
 use Modules\Platform\Contracts\AccountDirectory;
 use Modules\Platform\Contracts\BrandingApi;
@@ -121,7 +122,7 @@ final class PlatformServiceProvider extends ServiceProvider
             }
         });
         if ($this->app->runningInConsole()) {
-            $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class, HealthCommand::class, MailTestCommand::class, ServicesCommand::class]);
+            $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class, HealthCommand::class, MailTestCommand::class, ServicesCommand::class, SweepSignupRequests::class]);
         }
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('platform:usage')->dailyAt('02:10')->withoutOverlapping()->onOneServer();
@@ -132,6 +133,7 @@ final class PlatformServiceProvider extends ServiceProvider
             $schedule->command('platform:health --alert')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
             // Each outside service tried once a day, so a credit run out or a key refused is heard on a quiet day too.
             $schedule->command('platform:services')->dailyAt('06:40')->withoutOverlapping()->onOneServer();
+            $schedule->command('platform:site-sweep')->dailyAt('03:20')->onOneServer();
         });
 
         // For an uptime monitor (HEALTH_TOKEN): statuses only, no session, no academy.
@@ -163,5 +165,8 @@ final class PlatformServiceProvider extends ServiceProvider
         Route::prefix('api/v1')
             ->middleware(['api', 'tenant', 'locale'])
             ->group(__DIR__.'/../../routes/api.php');
+        Route::prefix('api/v1')
+            ->middleware(['api', 'locale'])
+            ->group(__DIR__.'/../../routes/api_site.php');
     }
 }

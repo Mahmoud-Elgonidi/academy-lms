@@ -146,6 +146,8 @@ return [
             'settings_saved' => 'تعديل إعدادات المنصة: :sections',
             'quran_fetched' => 'تنزيل نص القرآن من Tanzil (:verses آية)',
             'plan_saved' => 'تعديل الباقة :plan',
+            'site_saved' => 'حفظ صفحة المنصة',
+            'signup_request_handled' => 'الرد على طلب اشتراك (:signup)',
             'demo_secrets_reset' => 'حساب لوحة المنصة التجريبي :name خد كلمة السر والمفتاح التجريبيين الجداد',
             'game_draft_started' => 'بداية تصميم لعبة جديدة (:kinds)',
             'game_published' => 'نشر اللعبة :game (نسخة :version)',
@@ -155,6 +157,7 @@ return [
         ],
     ],
     'values' => [
+        'signup' => ['contacted' => 'اتكلّمنا معاهم', 'declined' => 'اترفض', 'created' => 'الأكاديمية اتعملت'],
         'sections' => ['ai' => 'المساعد الآلي', 'mail' => 'الإيميل', 'whatsapp' => 'واتساب', 'sms' => 'الرسايل النصية', 'push' => 'إشعارات الموبايل', 'classroom' => 'الفصل', 'stripe' => 'Stripe Connect', 'social' => 'الدخول بجوجل وأبل', 'platform' => 'المنصة'],
         'helpers' => ['practice_items' => 'اقتراح التدريبات', 'report_draft' => 'تقرير من رسالة صوتية', 'recitation_check' => 'تصحيح التسميع', 'digest_wording' => 'صياغة الرسالة الأسبوعية'],
         'early' => ['early' => 'بدري، من الإدارة', 'on_time' => 'في ميعاده، لوحده'],

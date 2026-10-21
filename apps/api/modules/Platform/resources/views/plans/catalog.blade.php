@@ -13,6 +13,8 @@
                     <div class="pp-tags">
                         @if ($p['default'])<span class="pp-tag" data-tone="brand">{{ __($l.'default') }}</span>@endif
                         @if ($p['archived'])<span class="pp-tag">{{ __($l.'archived') }}</span>@endif
+                        @if ($p['highlight'] && ! $p['archived'])<span class="pp-tag" data-tone="brand">{{ __($l.'highlighted') }}</span>@endif
+                        @if (! $p['on_site'] && ! $p['archived'])<span class="pp-tag">{{ __($l.'off_site') }}</span>@endif
                     </div>
                 </header>
                 <div class="pp-price">

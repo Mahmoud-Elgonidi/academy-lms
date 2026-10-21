@@ -20,6 +20,7 @@ const TIGHT_DOORS = [
     'support.tickets.open', 'support.tickets.reply', 'support.tickets.close', 'support.tickets.reopen',
     'safeguarding.concerns.report',
     'privacy.requests.store', 'privacy.requests.cancel', 'privacy.details.correct',
+    'platform.site.requests',
 ];
 
 it('gives each newer door a limit of its own', function () {

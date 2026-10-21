@@ -68,6 +68,8 @@ final class Plans extends Page
             'price' => PlanFormat::price($plan),
             'default' => $plan->is_default,
             'archived' => $plan->archived_at !== null,
+            'on_site' => $plan->shown_on_site && $plan->archived_at === null,
+            'highlight' => $plan->highlight,
             'academies' => (int) ($on[$plan->id] ?? 0),
             'limits' => array_map(fn (Limit $l) => ['label' => __('shared::plans.limits.'.$l->value), 'value' => PlanFormat::amount($l, $plan->limit($l))], Limit::cases()),
             'features' => array_map(fn (Feature $f) => ['label' => $f->label(), 'on' => in_array($f->value, $plan->features, true)], Feature::cases()),
@@ -80,7 +82,7 @@ final class Plans extends Page
             Action::make('new')->label(__('platform::plans.catalog.new'))->icon(Heroicon::Plus)
                 ->modalHeading(__('platform::plans.catalog.new'))
                 ->schema($this->form(...))
-                ->fillForm(['features' => [], 'sort' => SaasPlan::query()->max('sort') + 1])
+                ->fillForm(['features' => [], 'sort' => SaasPlan::query()->max('sort') + 1, 'shown_on_site' => true])
                 ->action(fn (array $data) => $this->save(null, $data)),
         ];
     }
@@ -93,7 +95,7 @@ final class Plans extends Page
             ->fillForm(function (array $arguments) {
                 $plan = SaasPlan::query()->findOrFail($arguments['plan']);
 
-                return $plan->only(['code', 'name_ar', 'name_en', 'max_teachers', 'max_active_students', 'video_minutes', 'storage_mb', 'features', 'currency', 'is_default', 'sort']) + [
+                return $plan->only(['code', 'name_ar', 'name_en', 'max_teachers', 'max_active_students', 'video_minutes', 'storage_mb', 'features', 'currency', 'is_default', 'sort', 'shown_on_site', 'highlight', 'tagline_ar', 'tagline_en']) + [
                     'price' => $plan->price_minor === null ? null : Money::of($plan->price_minor, (string) $plan->currency)->decimal(),
                     'archived' => $plan->archived_at !== null,
                 ];
@@ -130,6 +132,14 @@ final class Plans extends Page
             ]),
             Toggle::make('is_default')->label(__($l.'default'))->helperText(__($l.'default_hint')),
             Toggle::make('archived')->label(__($l.'archived'))->helperText(__($l.'archived_hint')),
+            Section::make(__($l.'site'))->description(__($l.'site_hint'))->compact()->schema([
+                Grid::make(2)->schema([
+                    Toggle::make('shown_on_site')->label(__($l.'shown_on_site')),
+                    Toggle::make('highlight')->label(__($l.'highlight'))->helperText(__($l.'highlight_hint')),
+                    TextInput::make('tagline_ar')->label(__($l.'tagline_ar'))->maxLength(120),
+                    TextInput::make('tagline_en')->label(__($l.'tagline_en'))->maxLength(120),
+                ]),
+            ]),
         ];
     }
 
@@ -152,6 +162,10 @@ final class Plans extends Page
             'is_default' => (bool) ($data['is_default'] ?? false),
             'sort' => $num($data['sort'] ?? null),
             'archived' => (bool) ($data['archived'] ?? false),
+            'shown_on_site' => (bool) ($data['shown_on_site'] ?? false),
+            'highlight' => (bool) ($data['highlight'] ?? false),
+            'tagline_ar' => $data['tagline_ar'] ?? null,
+            'tagline_en' => $data['tagline_en'] ?? null,
         ]);
         Notification::make()->success()->title(__('platform::plans.catalog.saved'))->send();
         unset($this->plans);

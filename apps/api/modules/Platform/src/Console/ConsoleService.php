@@ -2,9 +2,13 @@
 
 namespace Modules\Platform\Console;
 
+use Modules\Platform\Actions\Site\HandleSignupRequest;
 use Modules\Platform\Contracts\ConsoleApi;
 use Modules\Platform\Contracts\DTOs\PlatformAdminRef;
+use Modules\Platform\Contracts\DTOs\SignupRequestRef;
 use Modules\Platform\Models\PlatformAdmin;
+use Modules\Platform\Models\SaasPlan;
+use Modules\Platform\Models\Site\SignupRequest;
 
 final class ConsoleService implements ConsoleApi
 {
@@ -25,5 +29,29 @@ final class ConsoleService implements ConsoleApi
         $base = config('platform.console_url') ?: rtrim((string) config('app.url'), '/').'/console';
 
         return rtrim($base, '/').($path === '' ? '' : '/'.ltrim($path, '/'));
+    }
+
+    public function offeredPlans(): array
+    {
+        return SaasPlan::query()->offered()->orderByDesc('is_default')->orderBy('sort')->orderBy('code')->get()
+            ->mapWithKeys(fn (SaasPlan $plan) => [$plan->code => $plan->name()])->all();
+    }
+
+    public function signupRequest(string $id): ?SignupRequestRef
+    {
+        $request = SignupRequest::query()->find($id);
+
+        return $request === null ? null : new SignupRequestRef(
+            $request->id, $request->academy_name, $request->contact_name, $request->email, $request->phone,
+            $request->country, $request->plan_code, $request->locale, $request->status,
+        );
+    }
+
+    public function signupRequestCreated(string $id, string $academyId): void
+    {
+        $admin = auth()->guard('platform')->user();
+        if ($admin instanceof PlatformAdmin && SignupRequest::query()->whereKey($id)->exists()) {
+            app(HandleSignupRequest::class)->handle($admin, $id, 'created', null, $academyId);
+        }
     }
 }

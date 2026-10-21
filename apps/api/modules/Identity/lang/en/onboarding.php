@@ -21,6 +21,8 @@ return [
         'owner_name' => 'Owner\'s name',
         'owner_email' => 'Owner\'s email',
         'owner_phone' => 'Owner\'s mobile (optional)',
+        'plan' => 'Plan',
+        'plan_default' => 'The default plan',
     ],
     'locales' => ['ar' => 'Arabic', 'en' => 'English'],
     'create' => 'Create academy',

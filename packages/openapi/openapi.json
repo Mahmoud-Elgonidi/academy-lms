@@ -17272,6 +17272,315 @@
                 "security": []
             }
         },
+        "/v1/site/platform": {
+            "get": {
+                "operationId": "platform.site",
+                "description": "In the request's language (Accept-Language). Not on an academy's address (404).",
+                "summary": "The platform's page",
+                "tags": [
+                    "Platform"
+                ],
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "content": {
+                                                    "type": "object",
+                                                    "description": "The words the console set: hero, stats, testimonials, faqs, sections shown, contact, demo_url, seo.",
+                                                    "properties": {
+                                                        "hero": {
+                                                            "type": "object",
+                                                            "additionalProperties": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "stats": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "array",
+                                                                "items": {}
+                                                            }
+                                                        },
+                                                        "testimonials": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "array",
+                                                                "items": {}
+                                                            }
+                                                        },
+                                                        "faqs": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "array",
+                                                                "items": {}
+                                                            }
+                                                        },
+                                                        "sections": {
+                                                            "type": "array",
+                                                            "items": {}
+                                                        },
+                                                        "contact": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "whatsapp": {
+                                                                    "anyOf": [
+                                                                        {
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "type": "null"
+                                                                        },
+                                                                        {
+                                                                            "type": "string",
+                                                                            "enum": [
+                                                                                ""
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "email": {
+                                                                    "anyOf": [
+                                                                        {
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "type": "null"
+                                                                        },
+                                                                        {
+                                                                            "type": "string",
+                                                                            "enum": [
+                                                                                ""
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "whatsapp",
+                                                                "email"
+                                                            ]
+                                                        },
+                                                        "demo_url": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        ""
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        "seo": {
+                                                            "type": "object",
+                                                            "additionalProperties": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "hero",
+                                                        "stats",
+                                                        "testimonials",
+                                                        "faqs",
+                                                        "sections",
+                                                        "contact",
+                                                        "demo_url",
+                                                        "seo"
+                                                    ]
+                                                },
+                                                "plans": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "code": {
+                                                                "type": "string",
+                                                                "description": "The plan's code, sent back with the request form."
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "tagline": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "One line about who it is for, or null."
+                                                            },
+                                                            "price": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "A month, written out (\"SAR 299.00\"), or null when the plan has no price shown."
+                                                            },
+                                                            "price_minor": {
+                                                                "type": [
+                                                                    "integer",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "currency": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "highlight": {
+                                                                "type": "boolean",
+                                                                "description": "The one plan the page sets apart."
+                                                            },
+                                                            "limits": {
+                                                                "type": "array",
+                                                                "items": {}
+                                                            },
+                                                            "features": {
+                                                                "type": "array",
+                                                                "items": {}
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "code",
+                                                            "name",
+                                                            "tagline",
+                                                            "price",
+                                                            "price_minor",
+                                                            "currency",
+                                                            "highlight",
+                                                            "limits",
+                                                            "features"
+                                                        ]
+                                                    }
+                                                },
+                                                "app": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "android_url": {
+                                                            "type": "string",
+                                                            "description": "The store page on Android, or null."
+                                                        },
+                                                        "ios_url": {
+                                                            "type": "string",
+                                                            "description": "The App Store page, or null."
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "android_url",
+                                                        "ios_url"
+                                                    ]
+                                                },
+                                                "legal_name": {
+                                                    "type": "string",
+                                                    "description": "The platform's legal name, for the footer."
+                                                },
+                                                "form_token": {
+                                                    "type": "string",
+                                                    "description": "Sent back with the request form, unchanged."
+                                                }
+                                            },
+                                            "required": [
+                                                "content",
+                                                "plans",
+                                                "app",
+                                                "legal_name",
+                                                "form_token"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/site/platform/requests": {
+            "post": {
+                "operationId": "platform.site.requests",
+                "description": "The platform team answers each request. A form sent too soon or with the hidden field filled is answered the same and kept nowhere.",
+                "summary": "Ask to join the platform",
+                "tags": [
+                    "Platform"
+                ],
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "received": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "received"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                },
+                "security": []
+            }
+        },
         "/v1/me/data-requests": {
             "get": {
                 "operationId": "privacy.requests",
@@ -25789,6 +26098,16 @@
             }
         },
         "responses": {
+            "ModelNotFoundException": {
+                "description": "Not found",
+                "content": {
+                    "application/problem+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ProblemDetails"
+                        }
+                    }
+                }
+            },
             "ValidationException": {
                 "description": "Validation error: `errors` names each field",
                 "content": {
@@ -25811,16 +26130,6 @@
             },
             "ProblemException": {
                 "description": "An error",
-                "content": {
-                    "application/problem+json": {
-                        "schema": {
-                            "$ref": "#/components/schemas/ProblemDetails"
-                        }
-                    }
-                }
-            },
-            "ModelNotFoundException": {
-                "description": "Not found",
                 "content": {
                     "application/problem+json": {
                         "schema": {
