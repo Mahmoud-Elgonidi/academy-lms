@@ -284,7 +284,7 @@ final class Team extends Page implements HasTable
                 TextInput::make('link')->label(__($a.'link_field'))->readOnly()->copyable(copyMessage: __($a.'copied'))->extraInputAttributes(['dir' => 'ltr']),
             ])
             ->modalSubmitAction(false)
-            ->modalCancelActionLabel(__('filament-actions::modal.actions.close.label'));
+            ->modalCancelActionLabel(__('shared::chrome.close'));
     }
 
     private function resendAction(): Action

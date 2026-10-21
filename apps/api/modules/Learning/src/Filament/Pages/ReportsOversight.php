@@ -130,7 +130,7 @@ final class ReportsOversight extends Page implements HasTable
                     ->schema(fn (SessionReport $r) => $r->status === 'submitted' ? [Textarea::make('note')->label(__('learning::reports.oversight.review_note'))->rows(2)] : [])
                     ->modalSubmitAction(fn (SessionReport $r, $action) => $r->status === 'submitted' ? $action : false)
                     ->modalSubmitActionLabel(__('learning::reports.oversight.review'))
-                    ->modalCancelActionLabel(__('filament-actions::modal.actions.close.label'))
+                    ->modalCancelActionLabel(__('shared::chrome.close'))
                     ->action(function (SessionReport $r, array $data) {
                         app(ReviewSessionReport::class)->handle(SessionReport::query()->findOrFail($r->id), (string) auth()->id(), $data['note'] ?? null);
                         Notification::make()->success()->title(__('learning::reports.oversight.reviewed'))->send();

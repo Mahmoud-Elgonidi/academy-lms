@@ -175,7 +175,7 @@ final class GuardianConsents extends Page implements HasTable
                 Action::make('history')->label(__($l.'history'))->icon(Heroicon::OutlinedClock)->color('gray')->link()
                     ->modalHeading(fn (ConsentSubject $s) => __($l.'history').' · '.$s->name)
                     ->modalContent(fn (ConsentSubject $s) => view('people::filament.consent-history', ['rows' => $this->history($s->id, $day)]))
-                    ->modalSubmitAction(false)->modalCancelActionLabel(__('filament-actions::modal.actions.close.label')),
+                    ->modalSubmitAction(false)->modalCancelActionLabel(__('shared::chrome.close')),
             ])
             ->emptyStateHeading(__('people::consent.family.none'))
             ->paginated([25, 50]);
