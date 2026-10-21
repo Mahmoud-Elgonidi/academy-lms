@@ -161,7 +161,8 @@
     "account": "My account",
     "myData": "My data",
     "concern": "Raise a concern",
-    "documents": "My documents"
+    "documents": "My documents",
+    "card": "My card on the academy's page"
   },
   "family": {
     "switchLearner": "Choose whose",
@@ -1513,5 +1514,213 @@
       "terms": "Terms",
       "rights": "All rights reserved"
     }
+  },
+  "site": {
+    "nav": {
+      "why": "Why us",
+      "subjects": "Subjects",
+      "teachers": "Teachers",
+      "pricing": "Pricing",
+      "faq": "Questions",
+      "language": "العربية",
+      "signIn": "Sign in"
+    },
+    "kicker": "Live one-to-one lessons online",
+    "trust": [
+      "Your first lesson is free",
+      "One teacher for your child",
+      "A report after every lesson"
+    ],
+    "cta": {
+      "trial": "Book a free trial lesson",
+      "signIn": "Sign in",
+      "talk": "Talk to us on WhatsApp",
+      "teach": "Teach with us",
+      "trialShort": "Free trial"
+    },
+    "floating": {
+      "report": "Last lesson's report",
+      "reportValue": "Excellent recitation",
+      "attendance": "Attendance this month",
+      "attendanceValue": "100%"
+    },
+    "phonesLabel": "The app: parents follow along, students learn and play",
+    "why": {
+      "eyebrow": "Why us",
+      "title": "Teaching that fits your child",
+      "lead": "A live lesson with one teacher who knows your child well, and a plan that moves at their pace."
+    },
+    "subjects": {
+      "eyebrow": "Subjects",
+      "title": "What we teach",
+      "lead": "Every subject has its levels, and your child starts at the one that fits.",
+      "levels": "Levels",
+      "programs": "Programs",
+      "tracks": "Tracks",
+      "ask": "Book a trial in this subject"
+    },
+    "teachers": {
+      "eyebrow": "Teachers",
+      "title": "Who you will learn with",
+      "lead": "Teachers who chose to introduce themselves.",
+      "trials": "Takes trial lessons",
+      "explains": "Teaches in",
+      "ages": {
+        "kids": "Children",
+        "middle": "Middle school",
+        "teen": "High school",
+        "adults": "Adults"
+      },
+      "levels": "{from} → {to}",
+      "fromStart": "the start",
+      "toEnd": "the end"
+    },
+    "steps": {
+      "eyebrow": "How it starts",
+      "title": "From your first message to your first lesson",
+      "items": [
+        {
+          "title": "Book a trial lesson",
+          "text": "Fill in the form and we will call you to find a time on your clock."
+        },
+        {
+          "title": "Meet the teacher",
+          "text": "A free lesson where they learn your child's level and suggest a plan."
+        },
+        {
+          "title": "Pick a plan",
+          "text": "How many lessons a week and how long, as suits you."
+        },
+        {
+          "title": "Lessons and reports",
+          "text": "Live lessons at fixed times, and a report after each one on your phone."
+        }
+      ]
+    },
+    "app": {
+      "eyebrow": "The app",
+      "title": "The academy in your pocket",
+      "lead": "One app for parents and students: times, reports, homework and payments.",
+      "steps": [
+        {
+          "title": "For parents",
+          "text": "See the next lesson, read the report, pay and message the teacher without calling anyone.",
+          "points": [
+            "A reminder before every lesson",
+            "A report after every lesson",
+            "Balance and invoices in one place"
+          ]
+        },
+        {
+          "title": "For students",
+          "text": "A journey of islands and creatures for the young, a clear plan for the older, and homework handed in from the phone.",
+          "points": [
+            "A mission every day",
+            "Games that make lessons stick",
+            "Stars and rewards"
+          ]
+        }
+      ],
+      "code": "Our academy code in the app",
+      "copy": "Copy",
+      "copied": "Copied",
+      "getOn": "Get it on",
+      "googlePlay": "Google Play",
+      "downloadOn": "Download on the",
+      "appStore": "App Store",
+      "soon": "Coming to the stores soon"
+    },
+    "pricing": {
+      "eyebrow": "Pricing",
+      "title": "Clear plans, no surprises",
+      "lead": "You pay for a block of lessons and renew when it runs out. The first lesson is on us.",
+      "region": "Prices in",
+      "perBlock": "a block",
+      "lessons": "{count, plural, one {# lesson} other {# lessons}}",
+      "minutes": "{count} minutes a lesson",
+      "perWeek": "{count, plural, one {once a week} two {twice a week} other {# times a week}}",
+      "validity": "Valid {days} days from payment",
+      "shared": "One balance for all of a student's subjects",
+      "perLesson": "That is {price} a lesson",
+      "start": "Start with a trial lesson",
+      "ask": "Ask us about the price"
+    },
+    "testimonials": {
+      "eyebrow": "What they say",
+      "title": "Parents and students"
+    },
+    "faq": {
+      "eyebrow": "Questions",
+      "title": "Questions we hear often"
+    },
+    "join": {
+      "eyebrow": "Let's start",
+      "title": "The first lesson is on us",
+      "lead": "Leave your number and we will message you on WhatsApp to set a time for the trial lesson with the right teacher.",
+      "points": [
+        "No commitment",
+        "A time on your clock",
+        "A report on your child's level afterwards"
+      ],
+      "tabs": {
+        "trial": "Free trial lesson",
+        "teach": "Teach with us"
+      },
+      "teachLead": "You teach online and would like to join our team? Write to us and we will call you.",
+      "fields": {
+        "name": "Your name",
+        "phone": "Mobile (WhatsApp)",
+        "email": "Email (optional)",
+        "country": "Country",
+        "subject_id": "Subject",
+        "for_child": "The lesson is for my child",
+        "child_name": "Child's name",
+        "child_birth_year": "Year of birth",
+        "subject_ids": "Subjects you teach",
+        "years_teaching": "Years of experience",
+        "message": "Anything you would like to tell us? (optional)"
+      },
+      "pickCountry": "Pick a country",
+      "pickSubject": "Not sure yet",
+      "send": "Send",
+      "sending": "Sending…",
+      "doneTrial": {
+        "title": "We have your request",
+        "text": "We will message you soon on WhatsApp to set a time for the trial lesson."
+      },
+      "doneTeach": {
+        "title": "We have your request",
+        "text": "We will read it and call you if there is a place that fits."
+      },
+      "privacy": "We use your details only to get in touch with you.",
+      "fix": "Look at the fields below.",
+      "failed": "The request did not go through. Try again in a little while."
+    },
+    "footer": {
+      "rights": "All rights reserved",
+      "privacy": "Privacy policy",
+      "terms": "Terms"
+    }
+  },
+  "teachCard": {
+    "title": "My card on the academy's page",
+    "lead": "The card families see about you on the academy's page. You write it, and you decide whether it shows. Your phone number and email never show.",
+    "shown": "Show me on the academy's page",
+    "shownHint": "While it is off, nobody sees your card.",
+    "name": "The name to show",
+    "nameHint": "Such as “Ms Sara”, or just your first name.",
+    "bio": "A few words about you",
+    "bioHint": "Your experience and what you love teaching, up to 280 characters. No numbers or links.",
+    "photo": "Your photo (optional)",
+    "photoHint": "PNG, JPEG or WebP up to 1 MB. Anyone who opens the page sees it.",
+    "removePhoto": "Take the photo off",
+    "tooBig": "The photo is larger than 1 MB.",
+    "preview": "How families will see your card",
+    "subjectsFrom": "Subjects from your profile at the academy",
+    "save": "Save",
+    "saved": "Your card is saved.",
+    "levels": "{from} → {to}",
+    "fromStart": "the start",
+    "toEnd": "the end"
   }
 }

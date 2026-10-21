@@ -67,6 +67,11 @@ export function JoinPlatformForm({ token, plans, countries, utm, chosen }: {
   }
 
   const err = (field: string) => state.errors[field];
+  // What was typed comes back with an answer, and the form starts from it again.
+  const was = (field: string, fallback = '') => {
+    const value = state.values?.[field];
+    return typeof value === 'string' ? value : fallback;
+  };
   const field = (name: string, input: React.ReactNode, full = false) => (
     <label className={`ls-field${full ? ' ls-full' : ''}`}>
       <span>{t(`fields.${name}`)}</span>
@@ -80,29 +85,29 @@ export function JoinPlatformForm({ token, plans, countries, utm, chosen }: {
     <form action={action} className="ls-form" noValidate>
       {state.status === 'failed' ? <p className="ls-error" role="alert">{state.message ?? (Object.keys(state.errors).length ? t('fix') : t('failed'))}</p> : null}
       <div className="ls-form-grid">
-        {field('academy_name', <input name="academy_name" required maxLength={120} autoComplete="organization" {...invalid('academy_name')} />, true)}
-        {field('contact_name', <input name="contact_name" required maxLength={120} autoComplete="name" {...invalid('contact_name')} />)}
-        {field('email', <input name="email" type="email" required maxLength={190} autoComplete="email" dir="ltr" {...invalid('email')} />)}
-        {field('phone', <input name="phone" type="tel" maxLength={20} autoComplete="tel" dir="ltr" placeholder="+20 100 000 0000" {...invalid('phone')} />)}
+        {field('academy_name', <input name="academy_name" defaultValue={was('academy_name')} required maxLength={120} autoComplete="organization" {...invalid('academy_name')} />, true)}
+        {field('contact_name', <input name="contact_name" defaultValue={was('contact_name')} required maxLength={120} autoComplete="name" {...invalid('contact_name')} />)}
+        {field('email', <input name="email" type="email" defaultValue={was('email')} required maxLength={190} autoComplete="email" dir="ltr" {...invalid('email')} />)}
+        {field('phone', <input name="phone" type="tel" defaultValue={was('phone')} maxLength={20} autoComplete="tel" dir="ltr" placeholder="+20 100 000 0000" {...invalid('phone')} />)}
         {field('country', (
-          <select name="country" defaultValue="" {...invalid('country')}>
+          <select key={`${state.status}-${was('country')}`} name="country" defaultValue={was('country')} {...invalid('country')}>
             <option value="">{t('pickCountry')}</option>
             {countries.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
           </select>
         ))}
         {field('students', (
-          <select name="students" defaultValue="" {...invalid('students')}>
+          <select key={`${state.status}-${was('students')}`} name="students" defaultValue={was('students')} {...invalid('students')}>
             <option value="">{t('pickStudents')}</option>
             {STUDENTS.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         ))}
         {field('plan', (
-          <select name="plan" defaultValue={chosen ?? ''} {...invalid('plan')}>
+          <select key={`${state.status}-${was('plan', chosen ?? '')}`} name="plan" defaultValue={was('plan', chosen ?? '')} {...invalid('plan')}>
             <option value="">{t('pickPlan')}</option>
             {plans.map((p) => <option key={p.code} value={p.code}>{p.name}</option>)}
           </select>
         ))}
-        {field('message', <textarea name="message" rows={3} maxLength={1000} {...invalid('message')} />, true)}
+        {field('message', <textarea name="message" rows={3} defaultValue={was('message')} maxLength={1000} {...invalid('message')} />, true)}
       </div>
       <input type="hidden" name="form_token" value={token} />
       <input type="hidden" name="utm_source" value={utm.source ?? ''} />

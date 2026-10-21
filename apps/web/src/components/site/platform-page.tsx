@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react';
 import { getLocale, getTranslations } from 'next-intl/server';
+import { countriesIn } from '@/lib/site/countries';
+import { initialOf } from '@/lib/site/initial';
 import type { PlatformSite } from '@/lib/site/server';
 import { AppShowcase } from './app-showcase';
 import { AppleIcon, GooglePlayIcon, Icon, Mark, WhatsAppIcon, type IconName } from './icons';
@@ -8,15 +10,6 @@ import { CountUp, Reveal, SolidOnScroll, Tilt } from './motion';
 import { GuardianScreen, Phone, StudentScreen, TeacherScreen, type PhoneWords } from './phones';
 import { Starfield } from './starfield';
 import './site.css';
-
-/** The countries academies ask from most, first. */
-const COUNTRIES = ['SA', 'EG', 'AE', 'KW', 'QA', 'BH', 'OM', 'JO', 'MA', 'DZ', 'TN', 'IQ', 'LB', 'LY', 'SD', 'PS', 'YE', 'TR', 'MY', 'ID', 'PK', 'GB', 'US', 'CA', 'DE', 'FR', 'AU'];
-
-/** Countries by name in the page's language (on the server: the browser's own names may differ). */
-export function countriesIn(locale: string): { code: string; name: string }[] {
-  const names = new Intl.DisplayNames([locale], { type: 'region' });
-  return COUNTRIES.map((code) => ({ code, name: names.of(code) ?? code }));
-}
 
 const FEATURE_ICONS: IconName[] = ['video', 'calendar', 'card', 'report', 'map', 'book', 'sparkles', 'users', 'wallet', 'shield', 'globe', 'chat'];
 const ACCENTS = ['', 'gold', 'blue', 'rose', 'violet', ''];
@@ -276,7 +269,7 @@ export async function PlatformPage({ site, utm, chosen, path }: { site: Platform
                     <figure key={i} className="ls-quote" aria-hidden={i >= content.testimonials.length ? true : undefined}>
                       <p>“{q.quote}”</p>
                       <footer>
-                        <i aria-hidden="true">{q.name.trim().charAt(0)}</i>
+                        <i aria-hidden="true">{initialOf(q.name)}</i>
                         <span><strong>{q.name}</strong>{q.role ? <small>{q.role}</small> : null}</span>
                       </footer>
                     </figure>

@@ -17,6 +17,7 @@ const ITEMS: { href: string; key: string; icon: IconName }[] = [
   { href: '/teach/earnings', key: 'earnings', icon: 'wallet' },
   { href: '/teach/performance', key: 'performance', icon: 'chart' },
   { href: '/teach/notifications', key: 'notifications', icon: 'bell' },
+  { href: '/teach/card', key: 'card', icon: 'star' },
   { href: '/teach/help', key: 'help', icon: 'help' },
   { href: '/teach/account', key: 'account', icon: 'lock' },
   { href: '/teach/my-data', key: 'myData', icon: 'file' },

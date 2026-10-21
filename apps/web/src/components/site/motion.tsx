@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 /*
  * The public pages' motion (site.css): what moves only moves when the person
@@ -8,6 +8,11 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
  * page (data-armed) once its script runs, then marks each part as it reaches
  * the screen (data-shown); the rest follow the same watch.
  */
+
+const onScroll = (changed: () => void) => {
+  window.addEventListener('scroll', changed, { passive: true });
+  return () => window.removeEventListener('scroll', changed);
+};
 
 const still = () => typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -122,13 +127,8 @@ export function Tilt({ children, className, max = 8 }: { children: ReactNode; cl
 
 /** The header turns solid once the page has scrolled past its top. */
 export function SolidOnScroll({ children, className }: { children: ReactNode; className?: string }) {
-  const [solid, setSolid] = useState(false);
-  useEffect(() => {
-    const check = () => setSolid(window.scrollY > 40);
-    check();
-    window.addEventListener('scroll', check, { passive: true });
-    return () => window.removeEventListener('scroll', check);
-  }, []);
+  // Solid as the server writes it, so the header reads over the light parts of a page whose script never runs.
+  const solid = useSyncExternalStore(onScroll, () => window.scrollY > 40, () => true);
   return (
     <header className={className} data-solid={solid ? '' : undefined}>
       {children}

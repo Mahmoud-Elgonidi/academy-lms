@@ -177,3 +177,15 @@ export async function markWord(session: string, word: WordRef, kind: string, pag
 export async function unmarkWord(session: string, word: WordRef, page: number): Promise<MushafResult> {
   return mushafOf(await send<{ data: MushafPage }>('delete', '/v1/learning/lessons/{session}/mistakes', { params: { session }, query: { ...word, page } }));
 }
+
+/** Saves the teacher's own card on the academy's page: the name to show, a few words, whether it shows, and a photo (or none). */
+export async function saveCard(form: FormData): Promise<Result> {
+  const sent = new FormData();
+  sent.set('display_name', String(form.get('display_name') ?? ''));
+  sent.set('bio', String(form.get('bio') ?? ''));
+  sent.set('shown', form.get('shown') === 'on' ? '1' : '0');
+  if (form.get('remove_photo') === 'on') sent.set('remove_photo', '1');
+  const photo = form.get('photo');
+  if (photo instanceof File && photo.size > 0) sent.set('photo', photo, photo.name || 'photo');
+  return result(await send('post', '/v1/teacher/card', { form: sent }));
+}

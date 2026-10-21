@@ -44,6 +44,8 @@ export default defineConfig({
     // Each family spec picks its account (test.use storageState).
     { name: 'family', testMatch: /family-.*\.spec\.ts/, dependencies: ['setup'], use: { ...devices['Pixel 7'] } },
     { name: 'desktop', testMatch: /desktop\.spec\.ts/, dependencies: ['setup'], use: desktop },
+    // The pages before signing in (the academy's, the platform's), on a phone.
+    { name: 'site', testMatch: /site\.spec\.ts/, dependencies: ['setup'], use: { ...devices['Pixel 7'] } },
   ],
   webServer: process.env.E2E_SERVE
     ? { command: 'npm run start', url: `${base}/ar/sign-in`, reuseExistingServer: true, timeout: 120_000 }

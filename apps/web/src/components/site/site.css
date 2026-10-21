@@ -306,7 +306,11 @@
 .ls-ribbon { align-self: flex-start; background: linear-gradient(90deg, var(--ls-gold), #ff922b); color: #1d1300; font-size: 0.78rem; font-weight: 800; padding: 0.25rem 0.75rem; border-radius: 999px; }
 .ls-regions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-block-end: 2rem; }
 .ls-regions button { padding: 0.45rem 1rem; border-radius: 999px; border: 1px solid var(--ls-line); background: var(--ls-card); font-weight: 600; cursor: pointer; color: var(--ls-ink); }
-.ls-regions button[aria-pressed='true'] { background: var(--ls-main); color: white; border-color: var(--ls-main); }
+.ls-regions { align-items: center; }
+.ls-regions > span { color: var(--ls-muted); font-weight: 600; }
+.ls-regions > div { display: flex; flex-wrap: wrap; gap: 0.3rem; padding: 0.3rem; border-radius: 999px; background: var(--ls-card); border: 1px solid var(--ls-line); }
+.ls-regions > div button { border: 0; background: transparent; }
+.ls-regions button[aria-checked='true'] { background: var(--ls-main); color: white; box-shadow: 0 8px 20px -10px var(--ls-main); }
 
 /* Testimonials */
 .ls-marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent); }
@@ -334,6 +338,7 @@
 .ls-join h2 { font-size: clamp(1.9rem, 3.8vw, 3rem); font-weight: 800; line-height: 1.25; }
 .ls-join-points { margin-block-start: 1.4rem; display: grid; gap: 0.7rem; color: rgb(255 255 255 / 0.85); }
 .ls-join-points li { display: flex; gap: 0.6rem; }
+.ls-join .ls-cta .ls-btn { white-space: nowrap; }
 .ls-join-points svg { inline-size: 1.3rem; block-size: 1.3rem; color: var(--ls-gold); flex-shrink: 0; }
 .ls-form { position: relative; padding: clamp(1.3rem, 3vw, 2rem); border-radius: 1.6rem; background: rgb(255 255 255 / 0.97); color: var(--ls-ink); box-shadow: 0 40px 90px -40px rgb(0 0 0 / 0.8); }
 .ls-form-grid { display: grid; gap: 0.9rem; }
@@ -362,13 +367,74 @@
 .ls-confetti i { position: absolute; inset-block-start: 40%; inset-inline-start: 50%; inline-size: 8px; block-size: 14px; border-radius: 2px; opacity: 0; }
 
 /* Teachers */
-.ls-teachers { display: grid; gap: 1.1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); }
+.ls-teachers { display: grid; gap: 1.1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 18rem)); justify-content: center; }
 .ls-teacher { text-align: center; padding-block-start: 1.8rem; }
 .ls-teacher-face { inline-size: 6rem; block-size: 6rem; margin-inline: auto; border-radius: 50%; overflow: hidden; display: grid; place-items: center; font-size: 2rem; font-weight: 800; color: white; background: linear-gradient(135deg, var(--ls-bright), var(--ls-main)); box-shadow: 0 0 0 5px color-mix(in oklab, var(--ls-main) 15%, white); }
 .ls-teacher-face img { inline-size: 100%; block-size: 100%; object-fit: cover; }
-.ls-teacher .ls-chips { justify-content: center; }
-.ls-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-block-start: 0.8rem; }
-.ls-chips span { font-size: 0.78rem; padding: 0.2rem 0.6rem; border-radius: 999px; background: color-mix(in oklab, var(--ls-main) 10%, white); color: var(--ls-main); font-weight: 600; }
+.ls-teacher h3 { margin-block: 1rem 0.5rem; font-size: 1.15rem; font-weight: 800; }
+.ls-teacher-subjects { display: grid; gap: 0.25rem; font-size: 0.92rem; }
+.ls-teacher-subjects small { display: block; color: var(--ls-muted); font-size: 0.8rem; }
+.ls-teacher > p:not(.ls-tags) { color: var(--ls-muted); font-size: 0.92rem; line-height: 1.75; margin-block-start: 0.7rem; }
+.ls-teacher .ls-tags { justify-content: center; margin-block-start: 0.9rem; }
+
+/* Little words in pills (a subject's tracks, a teacher's languages and ages) */
+.ls-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.ls-tags span { font-size: 0.78rem; padding: 0.2rem 0.65rem; border-radius: 999px; background: color-mix(in oklab, var(--ls-main) 10%, white); color: var(--ls-main); font-weight: 600; }
+.ls-tags span[data-tone='good'] { background: color-mix(in oklab, var(--ls-gold) 22%, white); color: color-mix(in oklab, var(--ls-gold) 45%, black); }
+
+/* Subjects, each with its levels as a staircase */
+.ls-subjects { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); align-items: start; }
+.ls-subject { display: flex; flex-direction: column; gap: 1rem; }
+.ls-subject-top { display: flex; align-items: center; gap: 0.85rem; }
+.ls-subject-top h3 { margin: 0; font-size: 1.3rem; font-weight: 800; }
+.ls-subject .ls-icon { font-size: 1.35rem; font-weight: 800; }
+.ls-ladder-wrap small, .ls-programs small { display: block; font-size: 0.8rem; font-weight: 700; color: var(--ls-muted); margin-block-end: 0.5rem; }
+.ls-ladder { display: grid; gap: 0.35rem; }
+.ls-ladder li { display: flex; align-items: center; gap: 0.65rem; font-size: 0.92rem; }
+.ls-ladder i { flex-shrink: 0; block-size: 0.55rem; border-radius: 999px; inline-size: calc(0.9rem + (var(--n) + 1) / var(--of) * 3.2rem); background: linear-gradient(90deg, var(--ls-bright), var(--ls-main)); transform-origin: left; }
+[dir='rtl'] .ls-ladder i { background: linear-gradient(270deg, var(--ls-bright), var(--ls-main)); transform-origin: right; }
+.ls-programs ul { display: grid; gap: 0.45rem; }
+.ls-programs li { padding: 0.6rem 0.8rem; border-radius: 0.85rem; background: var(--ls-paper); border: 1px solid var(--ls-line); }
+.ls-programs strong { display: block; font-size: 0.92rem; }
+.ls-programs li span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--ls-muted); font-size: 0.85rem; line-height: 1.65; }
+.ls-more { margin-block-start: auto; align-self: flex-start; font-weight: 700; color: var(--ls-main); text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; }
+.ls-more::after { content: '→'; transition: transform 0.25s var(--ls-spring); }
+[dir='rtl'] .ls-more::after { content: '←'; }
+.ls-more:hover::after { transform: translateX(4px); }
+[dir='rtl'] .ls-more:hover::after { transform: translateX(-4px); }
+
+/* An academy's mark when it has no logo, and the stars on the report card */
+.ls-initial { inline-size: 2.25rem; block-size: 2.25rem; border-radius: 0.7rem; display: grid; place-items: center; font-weight: 800; color: white; background: linear-gradient(135deg, var(--ls-bright), var(--ls-main)); box-shadow: 0 8px 20px -8px var(--ls-main); }
+.ls-wide-only { display: none; }
+@media (min-width: 640px) { .ls-wide-only { display: inline-flex; } }
+.ls-stars-row { display: flex; gap: 0.15rem; color: var(--ls-gold); margin-block-start: 0.35rem; }
+.ls-stars-row svg { inline-size: 1rem; block-size: 1rem; fill: currentColor; }
+
+/* The academy's code for the app */
+.ls-code { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.9rem; margin-block-start: 1.4rem; padding: 0.85rem 1rem; border-radius: 1rem; background: rgb(255 255 255 / 0.07); border: 1px dashed rgb(255 255 255 / 0.32); color: white; }
+.ls-code > span { font-size: 0.88rem; opacity: 0.82; }
+.ls-code b { font-size: 1.25rem; letter-spacing: 0.08em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.ls-code button { margin-inline-start: auto; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.9rem; border-radius: 999px; border: 0; background: var(--ls-gold); color: #1d1300; font-weight: 700; cursor: pointer; }
+.ls-code svg { inline-size: 1rem; block-size: 1rem; }
+
+/* The academy's forms: tabs, a box to tick, subjects to pick */
+.ls-form-wrap { position: relative; }
+.ls-form-wrap > .ls-tabs { background: rgb(255 255 255 / 0.1); border-color: rgb(255 255 255 / 0.2); }
+.ls-form-wrap > .ls-tabs button { color: rgb(255 255 255 / 0.8); }
+.ls-form-wrap > .ls-tabs button[aria-selected='true'] { background: white; color: var(--ls-main); }
+.ls-form-lead { color: var(--ls-muted); margin-block-end: 1rem; font-size: 0.95rem; line-height: 1.7; }
+.ls-check { display: flex; align-items: center; gap: 0.55rem; font-size: 0.92rem; font-weight: 600; cursor: pointer; }
+.ls-check input { inline-size: 1.15rem; block-size: 1.15rem; accent-color: var(--ls-main); }
+fieldset.ls-field { border: 0; padding: 0; margin: 0; min-inline-size: 0; }
+fieldset.ls-field legend { padding: 0; margin-block-end: 0.45rem; }
+.ls-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.ls-chip { position: relative; cursor: pointer; }
+.ls-chip input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.ls-chip span { display: inline-block; padding: 0.45rem 0.95rem; border-radius: 999px; border: 1.5px solid var(--ls-line); background: var(--ls-paper); font-weight: 600; font-size: 0.88rem; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+.ls-chip input:checked + span { background: var(--ls-main); border-color: var(--ls-main); color: white; }
+.ls-chip input:focus-visible + span { outline: 3px solid var(--ls-gold); outline-offset: 2px; }
+.ls section[id] { scroll-margin-block-start: 4.5rem; }
+.ls-anchor { position: absolute; inset-block-start: 0; }
 
 /* Footer */
 .ls-footer { background: #020c0a; color: rgb(255 255 255 / 0.72); padding-block: 3rem 2rem; font-size: 0.92rem; }
@@ -429,6 +495,11 @@
   .ls-confetti i { animation: ls-confetti 1.6s cubic-bezier(0.15, 0.6, 0.3, 1) forwards; animation-delay: calc(var(--d) * 1ms); }
   .ls-whatsapp { animation: ls-pop 0.6s var(--ls-spring) backwards 2s; }
   .ls-teacher-face { transition: transform 0.5s var(--ls-spring); }
+  [data-armed] .ls-subject[data-shown] .ls-ladder i { animation: ls-fill 0.9s var(--ls-ease) backwards; animation-delay: calc(0.35s + var(--n, 0) * 90ms); }
+  .ls-price-value { animation: ls-rise 0.45s var(--ls-ease); }
+  .ls-chip span { transition: transform 0.25s var(--ls-spring), background-color 0.2s, color 0.2s, border-color 0.2s; }
+  .ls-chip input:checked + span { transform: scale(1.04); }
+  .ls-form-wrap [role='tabpanel']:not([hidden]) { animation: ls-rise 0.45s var(--ls-ease); }
   .ls-teacher:hover .ls-teacher-face { transform: scale(1.06) rotate(-3deg); }
 
   /* The steps' line fills as the steps cross the screen (where the browser draws by scroll; else it waits full). */
