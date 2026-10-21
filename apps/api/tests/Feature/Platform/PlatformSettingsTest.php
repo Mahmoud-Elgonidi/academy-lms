@@ -277,7 +277,8 @@ it('tries each service with the keys in force, in its own words', function () {
         ->and($checks->run('mail', 'salma@company.example')->says())->toBe('A test email went to salma@company.example: check that it arrived.');
     Mail::assertSent(TestMail::class);
 
-    Http::assertSent(fn (Request $r) => $r->url() === 'https://api.anthropic.com/v1/messages' && $r->hasHeader('x-api-key', 'sk-ant-try') && $r['max_tokens'] === 16);
+    Http::assertSent(fn (Request $r) => $r->url() === 'https://api.anthropic.com/v1/messages' && $r->hasHeader('x-api-key', 'sk-ant-try') && $r['max_tokens'] === 256
+        && $r['output_config'] === ['effort' => 'low', 'format' => ['type' => 'json_schema', 'schema' => ['type' => 'object', 'properties' => ['ok' => ['type' => 'boolean']], 'required' => ['ok'], 'additionalProperties' => false]]]);
     Http::assertSent(fn (Request $r) => str_contains($r->url(), 'twirp/livekit.RoomService/ListRooms') && str_starts_with($r->header('Authorization')[0], 'Bearer ey'));
 
     // From the screen: a notification per section, never a key in it, and the result kept under the section.

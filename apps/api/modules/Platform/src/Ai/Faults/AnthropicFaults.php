@@ -12,11 +12,21 @@ use Throwable;
 
 /**
  * Anthropic (Claude): what the SDK's error says about the service, from the
- * error's type and the HTTP status. The message is read only to tell an empty
- * credit balance from another bad request; it is never kept.
+ * error's type and the HTTP status. A bad request's message is read only to
+ * tell its kind (BAD_REQUESTS: a credit run out, an organization without the
+ * data retention a model needs, a request the model does not take, a beta not
+ * enabled); it is never kept.
  */
 final class AnthropicFaults
 {
+    /** What a 400's message is about, in order, as our own codes. */
+    private const BAD_REQUESTS = [
+        'data_retention' => '/data retention|zero data retention/i',
+        'beta_not_enabled' => '/anthropic-beta/i',
+        'model_request' => '/not supported for this model|does not support|thinking|effort|output_config|temperature|top_p|top_k|tool_choice|budget_tokens|max_tokens|prefill/i',
+        'organization' => '/organization|workspace/i',
+    ];
+
     public static function of(Throwable $e): ServiceFault
     {
         if ($e instanceof APITimeoutException) {
@@ -49,6 +59,17 @@ final class AnthropicFaults
         };
 
         // A credit run out comes as a plain bad request: its code says which.
-        return new ServiceFault($problem, $problem === ServiceProblem::Quota && $type !== ErrorType::BILLING_ERROR->value ? 'credit_balance' : $code);
+        if ($problem === ServiceProblem::Quota && $type !== ErrorType::BILLING_ERROR->value) {
+            return new ServiceFault($problem, 'credit_balance');
+        }
+        if ($problem === ServiceProblem::Config) {
+            foreach (self::BAD_REQUESTS as $kind => $pattern) {
+                if (preg_match($pattern, $message) === 1) {
+                    return new ServiceFault($problem, $kind);
+                }
+            }
+        }
+
+        return new ServiceFault($problem, $code);
     }
 }

@@ -191,6 +191,10 @@ return [
             'designer_none' => 'لسه مفيش موديل متختار لمصمّم الألعاب: استوديو الألعاب مش هيصمّم حاجة غير لما يتختار.',
             'designer_demo' => 'مصمّم الألعاب بيرجّع لعبة من ألعاب المنصة نفسها (الديمو): مابيسألش حد.',
             'model_missing' => ':service مش بيدّي :model: اختار موديل تاني.',
+            'claude_data_retention' => ':service مش هيرد بـ :model على الحساب ده: الموديل ده محتاج إن حسابك في Anthropic يحتفظ بالبيانات 30 يوم، وحسابك متظبط إنه مايحتفظش بحاجة (zero data retention).',
+            'claude_model_request' => ':service مش بيقبل الطلب اللي المساعدات بتبعته لـ :model (قد إيه يفكّر، أو شكل الإجابة).',
+            'claude_organization' => ':service رفض الطلب بسبب إعدادات المنظمة أو الـ workspace بتاعة حسابك في Anthropic.',
+            'claude_bad_request' => ':service رفض الطلب بـ :model، لسبب لسه منعرفوش.',
             'speech_none' => 'مفيش مفتاح ElevenLabs لسه: الرسايل الصوتية وتصحيح التسميع مقفولين.',
             'speech_ok' => ':service قبل المفتاح، واتصرف :pct% من الباقة.',
             'speech_taken' => ':service قبل المفتاح.',
@@ -217,6 +221,13 @@ return [
             'stripe_due' => ':service عايز بيانات زيادة عن حساب المنصة.',
             'stripe_due_by' => ':service عايز بيانات زيادة عن حساب المنصة قبل :when.',
             'stripe_no_connect' => 'مفيش Stripe Connect client ID لسه: الأكاديميات مش هتقدر تربط حسابات Stripe بتاعتها.',
+        ],
+        // What to do after a line of our own (the services' own todos are in platform::services).
+        'todo' => [
+            'claude_data_retention' => 'اختار موديل تاني (Opus أو Sonnet)، أو شغّل حفظ البيانات 30 يوم للـ workspace بتاع المفتاح في Anthropic.',
+            'claude_model_request' => 'اختار موديل تاني: الموديلات الجديدة (Fable وOpus وSonnet وHaiku 5) بتقبله.',
+            'claude_organization' => 'راجع المنظمة والـ workspace بتاع المفتاح في console.anthropic.com (التحقق، وحدود الـ workspace وموديلاته).',
+            'claude_bad_request' => 'اختار موديل تاني وجرّبه، ولو ردّ خليه.',
         ],
     ],
 ];

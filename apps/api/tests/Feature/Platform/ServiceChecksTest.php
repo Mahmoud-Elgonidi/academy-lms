@@ -97,6 +97,38 @@ function checksService(string $driver): string
     return $driver === 'claude' ? 'anthropic' : $driver;
 }
 
+it('says why Claude refused a request with a model: the organization\'s data retention, a request it does not take, or a reason not known yet', function () {
+    config(['platform.ai.driver' => 'claude', 'platform.ai.key' => 'sk-ant-1', 'platform.ai.models.best' => 'claude-fable-5-1', 'platform.ai.models.fast' => 'claude-opus-5-5']);
+    $refusal = 'In order to access this model, your organization or workspace must have data retention enabled.';
+    checksAnswering(['api.anthropic.com/v1/messages' => function (Request $r) use (&$refusal) {
+        return $r['model'] === 'claude-fable-5-1'
+            ? Http::response(['type' => 'error', 'error' => ['type' => 'invalid_request_error', 'message' => $refusal]], 400)
+            : Http::response(['content' => [['type' => 'text', 'text' => '{"ok":true}']], 'usage' => ['input_tokens' => 9, 'output_tokens' => 5]]);
+    }]);
+
+    // One model's refusal: the next is still tried.
+    $result = app(SettingChecks::class)->run('ai');
+    expect($result->level())->toBe('fail')
+        ->and($result->lines[0]->text())->toBe('Claude (Anthropic) will not answer with claude-fable-5-1 for this account: that model needs your organization at Anthropic to keep data for 30 days, and it is set to keep none (zero data retention). (data_retention)')
+        ->and($result->lines[0]->todoText())->toBe("Choose another model (Opus or Sonnet), or turn on 30-day data retention for the key's workspace at Anthropic.")
+        ->and($result->lines[0]->code)->toBe('data_retention')
+        ->and($result->lines[1]->text())->toBe('Claude (Anthropic) answered with claude-opus-5-5.')
+        ->and(ServiceHealth::last('anthropic')['code'])->toBe('data_retention');
+    // Asked as the helpers ask: low effort, a JSON answer.
+    Http::assertSent(fn (Request $r) => $r['output_config']['effort'] === 'low' && $r['output_config']['format']['type'] === 'json_schema');
+
+    $refusal = 'output_config.effort: Extra inputs are not permitted';
+    expect(app(SettingChecks::class)->run('ai')->lines[0]->text())->toBe('Claude (Anthropic) does not take the request the helpers send to claude-fable-5-1 (how much it thinks, or the answer\'s format). (model_request)');
+
+    // A reason not known yet stops there: the next model would hear the same.
+    $refusal = 'messages: something new';
+    $result = app(SettingChecks::class)->run('ai');
+    expect($result->lines)->toHaveCount(1)
+        ->and($result->lines[0]->text())->toBe('Claude (Anthropic) refused the request with claude-fable-5-1, for a reason we do not know yet. (invalid_request_error)')
+        ->and($result->lines[0]->code)->toBe('invalid_request_error')
+        ->and($result->lines[0]->text())->not->toContain('something new');
+});
+
 it('says the helpers are off, on the demo, or set to the demo where it never answers', function () {
     expect(app(SettingChecks::class)->run('ai')->says())->toBe('The academies\' helpers are switched off for the whole platform.');
 
@@ -331,7 +363,7 @@ it('takes a few tries a minute at most', function () {
 });
 
 it('has every line and reason in both languages', function () {
-    foreach (['platform::settings.checks.lines', 'platform::settings.checks.level', 'platform::services.problems', 'platform::services.todo', 'platform::services.short', 'platform::services.names'] as $group) {
+    foreach (['platform::settings.checks.lines', 'platform::settings.checks.todo', 'platform::settings.checks.level', 'platform::services.problems', 'platform::services.todo', 'platform::services.short', 'platform::services.names'] as $group) {
         $en = array_keys((array) trans()->get($group, [], 'en', false));
         expect($en)->not->toBeEmpty()->and(array_keys((array) trans()->get($group, [], 'ar', false)))->toBe($en, $group);
     }

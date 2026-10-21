@@ -36,7 +36,13 @@ it('reads Anthropic\'s errors', function (int $status, ?string $type, string $me
     'rate' => [429, 'rate_limit_error', 'slow down', 'rate|rate_limit_error'],
     'overloaded' => [529, 'overloaded_error', 'Overloaded', 'down|overloaded_error'],
     'their side' => [500, 'api_error', 'oops', 'down|api_error'],
-    'another bad request' => [400, 'invalid_request_error', 'max_tokens: too many', 'config|invalid_request_error'],
+    // A bad request's kind, from its message (never kept).
+    'data retention' => [400, 'invalid_request_error', 'In order to access this model, your organization or workspace must have data retention enabled.', 'config|data_retention'],
+    'a request the model does not take' => [400, 'invalid_request_error', 'output_config.effort: Extra inputs are not permitted', 'config|model_request'],
+    'thinking it does not take' => [400, 'invalid_request_error', '"thinking.type.disabled" is not supported for this model.', 'config|model_request'],
+    'a beta not enabled' => [400, 'invalid_request_error', 'Unexpected value(s) `x` for the `anthropic-beta` header.', 'config|beta_not_enabled'],
+    'the organization' => [400, 'invalid_request_error', 'Your organization must complete verification first.', 'config|organization'],
+    'another bad request' => [400, 'invalid_request_error', 'messages: roles must alternate', 'config|invalid_request_error'],
     'no body' => [503, null, '', 'down|HTTP 503'],
 ]);
 

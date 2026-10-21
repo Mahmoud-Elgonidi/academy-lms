@@ -53,6 +53,9 @@ final class SettingChecks
     /** A plan this much used warns. */
     private const NEAR = 90;
 
+    /** Claude's bad requests that are one model's (AnthropicFaults): another model may answer. */
+    private const CLAUDE_MODEL_REFUSALS = ['data_retention', 'model_request'];
+
     /** Twilio's balance under this warns (in the account's currency). */
     private const LOW_BALANCE = 5;
 
@@ -156,10 +159,19 @@ final class SettingChecks
     {
         $service = $provider->service();
         $fault = $this->probe->probe($provider, $model, $key, $base);
+        $claude = $provider === AiProvider::Claude && $fault?->problem === ServiceProblem::Config;
         if ($fault === null) {
             $this->ok($service, $ok, ['model' => $model]);
         } elseif ($fault->problem === ServiceProblem::Model) {
             $this->fault($service, $fault, $model, 'model_missing', ['model' => $model]);
+        } elseif ($claude && in_array($fault->code, self::CLAUDE_MODEL_REFUSALS, true)) {
+            // This model's alone (the organization's data retention, a request it does not take): the next may answer.
+            $this->fault($service, $fault, $model, 'claude_'.$fault->code, ['model' => $model], 'platform::settings.checks.todo.claude_'.$fault->code);
+        } elseif ($claude) {
+            $known = in_array($fault->code, ['organization'], true) ? $fault->code : 'bad_request';
+            $this->fault($service, $fault, $model, 'claude_'.$known, ['model' => $model], 'platform::settings.checks.todo.claude_'.$known);
+
+            return false;
         } else {
             $this->fault($service, $fault, $model);
 
@@ -457,7 +469,7 @@ final class SettingChecks
      *
      * @param  array<string, string|int>  $with
      */
-    private function fault(string $service, ServiceFault $fault, string $scope = '', ?string $says = null, array $with = []): void
+    private function fault(string $service, ServiceFault $fault, string $scope = '', ?string $says = null, array $with = [], ?string $todo = null): void
     {
         $this->faults[$service][] = [$fault, $scope];
         $this->lines[$this->part][] = new CheckLine(
@@ -465,7 +477,7 @@ final class SettingChecks
             $fault->problem->transient() ? 'warn' : 'fail',
             $says !== null ? 'platform::settings.checks.lines.'.$says : 'platform::services.problems.'.$fault->problem->value,
             $with,
-            'platform::services.todo.'.$fault->problem->value,
+            $todo ?? 'platform::services.todo.'.$fault->problem->value,
             $fault->code,
         );
     }

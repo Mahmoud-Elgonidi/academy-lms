@@ -191,6 +191,10 @@ return [
             'designer_none' => 'No model is chosen for the games designer yet: the Game studio designs nothing until one is.',
             'designer_demo' => 'The games designer hands back one of the platform\'s own games (the demo): it asks no one.',
             'model_missing' => ':service does not offer :model: choose another model.',
+            'claude_data_retention' => ':service will not answer with :model for this account: that model needs your organization at Anthropic to keep data for 30 days, and it is set to keep none (zero data retention).',
+            'claude_model_request' => ':service does not take the request the helpers send to :model (how much it thinks, or the answer\'s format).',
+            'claude_organization' => ':service refused the request because of your organization or workspace settings at Anthropic.',
+            'claude_bad_request' => ':service refused the request with :model, for a reason we do not know yet.',
             'speech_none' => 'No ElevenLabs key yet: voice notes and recitation checks stay off.',
             'speech_ok' => ':service took the key; :pct% of the plan is used.',
             'speech_taken' => ':service took the key.',
@@ -217,6 +221,13 @@ return [
             'stripe_due' => ':service asks for more details about the platform\'s account.',
             'stripe_due_by' => ':service asks for more details about the platform\'s account by :when.',
             'stripe_no_connect' => 'No Stripe Connect client ID yet: academies cannot connect their Stripe accounts.',
+        ],
+        // What to do after a line of our own (the services' own todos are in platform::services).
+        'todo' => [
+            'claude_data_retention' => 'Choose another model (Opus or Sonnet), or turn on 30-day data retention for the key\'s workspace at Anthropic.',
+            'claude_model_request' => 'Choose another model: the current ones (Fable, Opus, Sonnet and Haiku 5.x) take it.',
+            'claude_organization' => 'Check the organization and the key\'s workspace at console.anthropic.com (verification, the workspace\'s limits and models).',
+            'claude_bad_request' => 'Choose another model and try it again; if it answers, keep it.',
         ],
     ],
 ];

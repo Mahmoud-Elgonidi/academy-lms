@@ -14,12 +14,16 @@ use Modules\SharedKernel\Health\ServiceFault;
  * "Try it" for an AI provider: one tiny request to a model, with the settings
  * in force, asking for a JSON {ok: true} in a few tokens and holding no one's
  * data, so a key the provider refuses, a credit that ran out, a model it does
- * not have, or (for GPT) strict structured outputs it does not take, show
+ * not have, or a request it does not take (GPT's strict structured outputs,
+ * Claude's effort and answer format, sent as the helpers send them) show
  * before an academy meets them. An answer cut short still counts as reached.
  */
 final class AiProbe
 {
     private const TOKENS = 16;
+
+    /** Claude thinks before it answers on the current models: room for a little at low effort. */
+    private const CLAUDE_TOKENS = 256;
 
     private const SCHEMA = ['type' => 'object', 'properties' => ['ok' => ['type' => 'boolean']], 'required' => ['ok'], 'additionalProperties' => false];
 
@@ -35,7 +39,11 @@ final class AiProbe
         try {
             $answer = match ($provider) {
                 AiProvider::Claude => $http->withHeaders(['x-api-key' => $key, 'anthropic-version' => '2023-06-01'])
-                    ->post($base.'/v1/messages', ['model' => $model, 'max_tokens' => self::TOKENS, 'messages' => [['role' => 'user', 'content' => self::ASK]]]),
+                    ->post($base.'/v1/messages', [
+                        'model' => $model, 'max_tokens' => self::CLAUDE_TOKENS, 'messages' => [['role' => 'user', 'content' => self::ASK]],
+                        // As ClaudeLanguageModel asks: a model that takes neither is no use to the helpers.
+                        'output_config' => ['effort' => 'low', 'format' => ['type' => 'json_schema', 'schema' => self::SCHEMA]],
+                    ]),
                 AiProvider::OpenAi => $http->withToken($key)->post($base.'/chat/completions', [
                     'model' => $model, 'messages' => [['role' => 'user', 'content' => self::ASK]], 'max_completion_tokens' => self::TOKENS, 'store' => false,
                     'response_format' => ['type' => 'json_schema', 'json_schema' => ['name' => 'probe', 'strict' => true, 'schema' => self::SCHEMA]],
