@@ -16,7 +16,10 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -79,6 +82,28 @@ final class PlatformSettingsPage extends Page
     /** @var array<string, ?array{heading: string, body: HtmlString, status: string}> each section's found(), read once a request */
     private array $found = [];
 
+    /**
+     * The screen's tabs, one for each thing the platform uses outside services
+     * for, and the cards in each: a card holds the settings that serve one
+     * purpose (its group's, unless CARD_SETTINGS names them).
+     */
+    private const TABS = [
+        'ai' => ['icon' => 'heroicon-o-sparkles', 'cards' => ['ai', 'designer', 'speech']],
+        'messages' => ['icon' => 'heroicon-o-chat-bubble-left-right', 'cards' => ['mail', 'whatsapp', 'sms', 'push']],
+        'classroom' => ['icon' => 'heroicon-o-video-camera', 'cards' => ['classroom']],
+        'payments' => ['icon' => 'heroicon-o-credit-card', 'cards' => ['stripe']],
+        'signin' => ['icon' => 'heroicon-o-finger-print', 'cards' => ['social']],
+        'platform' => ['icon' => 'heroicon-o-building-office-2', 'cards' => ['platform', 'quran']],
+    ];
+
+    /** The AI group, three ways: the academies' helpers, the games designer, and speech to text (Anthropic's key shows in one of the first two). */
+    private const CARD_SETTINGS = [
+        'ai' => ['ai_driver', 'anthropic_key', 'ai_model', 'ai_fast_model', 'openai_key', 'openai_model', 'openai_fast_model',
+            'gemini_key', 'gemini_model', 'gemini_fast_model', 'ollama_url', 'ollama_key', 'ollama_model', 'ollama_fast_model', 'ai_daily_cap'],
+        'designer' => ['anthropic_key', 'game_designer_model'],
+        'speech' => ['elevenlabs_key', 'elevenlabs_base', 'elevenlabs_zero_retention'],
+    ];
+
     public static function canAccess(): bool
     {
         $admin = auth('platform')->user();
@@ -126,38 +151,75 @@ final class PlatformSettingsPage extends Page
 
     public function form(Schema $schema): Schema
     {
-        return $schema->statePath('data')->components(array_map(fn (string $group) => Section::make(__("platform::settings.groups.{$group}.title"))
-            ->id('ps-'.$group)
-            ->description(__("platform::settings.groups.{$group}.about"))
-            ->collapsible()
-            ->afterHeader(in_array($group, SettingChecks::GROUPS, true) ? [
-                Action::make('check_'.$group)->label(__('platform::settings.checks.try'))->icon('heroicon-m-signal')->color('gray')->size('sm')
-                    ->action(fn () => $this->check($group)),
-            ] : [])
-            ->columns(2)
-            ->schema([...$this->notes($group), ...collect(SettingCatalog::inGroup($group))->flatMap(fn (SettingDefinition $s) => $this->fields($s))->all()]), SettingCatalog::GROUPS));
+        return $schema->statePath('data')->components([
+            Tabs::make('settings')->persistTabInQueryString('tab')->tabs(collect(self::TABS)->map(fn (array $tab, string $id) => Tab::make(__("platform::settings.tabs.{$id}"))
+                ->id($id)
+                ->icon($tab['icon'])
+                ->badge(fn () => $this->troubleIn($id) ?: null)->badgeColor('danger')
+                ->schema(array_map(fn (string $card) => $this->card($card), $tab['cards'])))->values()->all()),
+        ]);
     }
 
-    /** @return list<Callout> what a section says before its fields */
-    private function notes(string $group): array
+    /** One card: the settings that serve one purpose, with the section's "Try it" where it has one. */
+    private function card(string $card): Section
     {
-        $found = in_array($group, SettingChecks::GROUPS, true) ? [
-            Callout::make(fn () => $this->found($group)['heading'])
-                ->description(fn () => $this->found($group)['body'])
-                ->status(fn () => $this->found($group)['status'])
-                ->visible(fn () => $this->found($group) !== null)
+        $words = self::words($card);
+        $section = Section::make(__($words.'.title'))->id('ps-'.$card)->description(__($words.'.about'));
+        if ($card === 'quran') {
+            return $section->schema([View::make('platform::console.quran')]);
+        }
+        $keys = self::CARD_SETTINGS[$card] ?? array_map(fn (SettingDefinition $s) => $s->key, SettingCatalog::inGroup($card));
+
+        return $section
+            ->afterHeader(in_array($card, SettingChecks::GROUPS, true) ? [
+                Action::make('check_'.$card)->label(__('platform::settings.checks.try'))->icon('heroicon-m-signal')->color('gray')->size('sm')
+                    ->action(fn () => $this->check($card)),
+            ] : [])
+            ->columns(2)
+            ->schema([...$this->notes($card), ...collect($keys)->flatMap(fn (string $key) => $this->fields(SettingCatalog::get($key), $card))->all()]);
+    }
+
+    /** Where a card's title and about are. */
+    private static function words(string $card): string
+    {
+        return match (true) {
+            $card === 'quran' => 'platform::settings.quran',
+            trans()->has("platform::settings.cards.{$card}") => "platform::settings.cards.{$card}",
+            default => "platform::settings.groups.{$card}",
+        };
+    }
+
+    /** The number of outside services in a tab that need someone (for its badge). */
+    private function troubleIn(string $tab): int
+    {
+        return count(array_filter($this->trouble, fn (array $t) => $t['tab'] === $tab));
+    }
+
+    /** @return list<Callout> what a card says before its fields */
+    private function notes(string $card): array
+    {
+        $found = in_array($card, SettingChecks::GROUPS, true) ? [
+            Callout::make(fn () => $this->found($card)['heading'])
+                ->description(fn () => $this->found($card)['body'])
+                ->status(fn () => $this->found($card)['status'])
+                ->visible(fn () => $this->found($card) !== null)
                 ->columnSpanFull(),
         ] : [];
-        if ($group !== 'ai') {
-            return $found;
-        }
 
-        return [...$found,
-            Callout::make(__('platform::settings.ai_notes.gemini_paid'))->warning()->columnSpanFull()
-                ->visible(fn (Get $get) => $this->driver($get) === 'gemini'),
-            Callout::make(fn (Get $get) => __('platform::settings.ai_notes.'.$this->driver($get)))->color('gray')->columnSpanFull()
-                ->visible(fn (Get $get) => in_array($this->driver($get), ['off', 'demo'], true)),
-        ];
+        return match ($card) {
+            'ai' => [...$found,
+                Callout::make(__('platform::settings.ai_notes.gemini_paid'))->warning()->columnSpanFull()
+                    ->visible(fn (Get $get) => $this->driver($get) === 'gemini'),
+                Callout::make(fn (Get $get) => __('platform::settings.ai_notes.'.$this->driver($get)))->color('gray')->columnSpanFull()
+                    ->visible(fn (Get $get) => in_array($this->driver($get), ['off', 'demo'], true)),
+            ],
+            // The designer is Claude's whatever writes the helpers' words: the same key, kept once.
+            'designer' => [...$found,
+                Callout::make(__('platform::settings.ai_notes.designer_key'))->color('gray')->columnSpanFull()
+                    ->visible(fn (Get $get) => $this->driver($get) === 'claude'),
+            ],
+            default => $found,
+        };
     }
 
     /** Who writes the words: the choice on the screen, else the one in force. */
@@ -167,7 +229,7 @@ final class PlatformSettingsPage extends Page
     }
 
     /** @return list<Field|Group> */
-    private function fields(SettingDefinition $setting): array
+    private function fields(SettingDefinition $setting, string $card): array
     {
         $key = $setting->key;
         $shown = fn () => $this->serverShown($setting);
@@ -187,7 +249,7 @@ final class PlatformSettingsPage extends Page
             'int' => TextInput::make($key)->integer()->placeholder($shown),
             default => TextInput::make($key)->placeholder($shown),
         };
-        $help = e(__("platform::settings.keys.{$key}.help")).($setting->env ? ' <code dir="ltr" style="font-size:.75rem">'.e($setting->env).'</code>' : '');
+        $help = e(__("platform::settings.keys.{$key}.help"));
         $field->label(__("platform::settings.keys.{$key}.label"))
             ->helperText($setting->type === 'model'
                 ? fn (Get $get) => new HtmlString($help.'<br>'.e($this->modelNote($setting, $get)))
@@ -196,7 +258,9 @@ final class PlatformSettingsPage extends Page
             ->hintIcon(fn () => $this->source($setting)[2])->hintIconTooltip(fn () => $this->source($setting)[3]);
 
         // The provider's own settings show only while it is chosen; the list follows its key or address as typed.
-        $mine = fn (Get $get) => $setting->driver === null || $this->driver($get) === $setting->driver;
+        $mine = fn (Get $get) => ($setting->driver === null || $this->driver($get) === $setting->driver)
+            // Anthropic's key: with the helpers while Claude writes their words, else with the games designer.
+            && ($key !== 'anthropic_key' || ($card === 'designer') !== ($this->driver($get) === 'claude'));
         if ($key === 'ai_driver') {
             $field->live()->afterStateUpdated(fn () => $this->warmModels());
         } elseif ($setting->group === 'ai' && ($setting->type === 'secret' || $key === 'ollama_url') && $key !== 'elevenlabs_key') {
@@ -345,9 +409,11 @@ final class PlatformSettingsPage extends Page
             $server = config('communication.push.fcm.credentials');
         }
 
+        $line = $setting->env ? __('platform::settings.source.line', ['env' => $setting->env]) : null;
+
         return filled($server)
-            ? [__('platform::settings.source.server'), 'gray', 'heroicon-m-server', null]
-            : [__('platform::settings.source.none'), 'warning', 'heroicon-m-exclamation-triangle', null];
+            ? [__('platform::settings.source.server'), 'gray', 'heroicon-m-server', $line]
+            : [__('platform::settings.source.none'), 'warning', 'heroicon-m-exclamation-triangle', $line];
     }
 
     public function save(): void
@@ -436,24 +502,30 @@ final class PlatformSettingsPage extends Page
         }
         RateLimiter::hit($limit, 60);
 
-        [$values, $clear] = $this->typed($group);
+        // The AI cards' settings are one section's (and are tried together).
+        [$values, $clear] = $this->typed(in_array($group, SettingChecks::AI, true) ? 'ai' : $group);
         $checks = app(SettingChecks::class);
         try {
-            $result = $values === [] && $clear === []
-                ? $checks->run($group, (string) $admin->email)
+            $results = $values === [] && $clear === []
+                ? $checks->runParts($group, (string) $admin->email)
                 // What is typed is tried as it is, and never written down as the saved settings' health.
-                : new CheckResult(app(PlatformSettings::class)->trying($values, $clear, fn () => $checks->run($group, (string) $admin->email, record: false))->lines, typed: true);
+                : array_map(fn (CheckResult $r) => new CheckResult($r->lines, typed: true),
+                    app(PlatformSettings::class)->trying($values, $clear, fn () => $checks->runParts($group, (string) $admin->email, record: false)));
         } catch (ValidationException $e) {
             throw ValidationException::withMessages(collect($e->errors())->mapWithKeys(fn (array $messages, string $key) => ['data.'.Str::before($key, '.') => $messages])->all());
         }
 
-        LastChecks::put($group, $result, (string) $admin->name);
+        foreach ($results as $part => $result) {
+            LastChecks::put($part, $result, (string) $admin->name);
+        }
+        $result = $results[$group];
         $this->found = [];
         unset($this->trouble);
-        $note = Notification::make()->title(__("platform::settings.groups.{$group}.title"))->body($result->says());
+        $note = Notification::make()->title(__(self::words($group).'.title'))->body($result->says());
         match ($result->level()) {
             'fail' => $note->danger(),
             'warn' => $note->warning(),
+            'info' => $note->info(),
             default => $note->success(),
         };
         $note->send();
@@ -513,7 +585,7 @@ final class PlatformSettingsPage extends Page
     private function readFound(string $group): ?array
     {
         $last = LastChecks::get($group);
-        $services = array_values(array_filter(OutsideServices::configured(), fn (string $s) => OutsideServices::group($s) === $group));
+        $services = array_values(array_filter(OutsideServices::configured(), fn (string $s) => in_array($group, OutsideServices::sections($s), true)));
         if ($last === null && $services === []) {
             return null;
         }
@@ -548,7 +620,8 @@ final class PlatformSettingsPage extends Page
         return ['heading' => $heading, 'body' => new HtmlString($body), 'status' => match ($level) {
             'fail' => 'danger',
             'warn' => 'warning',
-            default => $last !== null ? 'success' : 'info',
+            'ok' => $last !== null ? 'success' : 'info',
+            default => 'info',
         }];
     }
 
@@ -568,7 +641,7 @@ final class PlatformSettingsPage extends Page
      * The outside services that need someone (SystemHealth's warn or fail),
      * for the banner at the top of the page.
      *
-     * @return list<array{service: string, name: string, status: string, value: string, hint: ?string, group: string}>
+     * @return list<array{service: string, name: string, status: string, value: string, hint: ?string, card: string, tab: string}>
      */
     #[Computed]
     public function trouble(): array
@@ -578,11 +651,23 @@ final class PlatformSettingsPage extends Page
         foreach (OutsideServices::configured() as $service) {
             $now = $health->service($service);
             if ($now['status'] !== 'ok') {
-                $trouble[] = ['service' => $service, 'name' => __('platform::services.names.'.$service), 'group' => OutsideServices::group($service)] + $now;
+                $card = OutsideServices::group($service);
+                $trouble[] = ['service' => $service, 'name' => __('platform::services.names.'.$service), 'card' => $card, 'tab' => self::tabOf($card)] + $now;
             }
         }
         usort($trouble, fn (array $a, array $b) => CheckLine::LEVELS[$b['status']] <=> CheckLine::LEVELS[$a['status']]);
 
         return $trouble;
+    }
+
+    private static function tabOf(string $card): string
+    {
+        foreach (self::TABS as $id => $tab) {
+            if (in_array($card, $tab['cards'], true)) {
+                return $id;
+            }
+        }
+
+        return 'ai';
     }
 }

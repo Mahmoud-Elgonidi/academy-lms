@@ -18,14 +18,14 @@ use Modules\Platform\Settings\SettingChecks;
  */
 final class ServicesCommand extends Command
 {
-    protected $signature = 'platform:services {--group=* : only these Platform settings sections (ai, whatsapp, sms, push, classroom, stripe)}';
+    protected $signature = 'platform:services {--group=* : only these Platform settings sections (ai, designer, speech, whatsapp, sms, push, classroom, stripe)}';
 
     protected $description = 'Try each outside service set up here (AI, speech, WhatsApp, texts, push, LiveKit, Stripe) and note how it answered';
 
     public function handle(SettingChecks $checks): int
     {
         $services = OutsideServices::configured();
-        $groups = array_values(array_intersect(SettingChecks::GROUPS, array_map(fn (string $s) => OutsideServices::group($s), $services)));
+        $groups = array_values(array_intersect(SettingChecks::GROUPS, array_merge(...array_map(fn (string $s) => OutsideServices::sections($s), $services))));
         if ($this->option('group') !== []) {
             $groups = array_values(array_intersect($groups, (array) $this->option('group')));
         }
@@ -37,12 +37,19 @@ final class ServicesCommand extends Command
 
         $worst = 'ok';
         $rows = [];
+        $tried = [];
         foreach ($groups as $group) {
-            $result = $checks->run($group);
-            LastChecks::put($group, $result, null);
-            $worst = CheckLine::LEVELS[$result->level()] > CheckLine::LEVELS[$worst] ? $result->level() : $worst;
-            foreach ($result->lines as $line) {
-                $rows[] = [$group, $line->level, $line->text().($line->todoText() !== null ? ' '.$line->todoText() : '')];
+            // The AI cards are tried together: once for all three.
+            if (isset($tried[$group])) {
+                continue;
+            }
+            foreach ($checks->runParts($group) as $part => $result) {
+                $tried[$part] = true;
+                LastChecks::put($part, $result, null);
+                $worst = CheckLine::LEVELS[$result->level()] > CheckLine::LEVELS[$worst] ? $result->level() : $worst;
+                foreach ($result->lines as $line) {
+                    $rows[] = [$part, $line->level, $line->text().($line->todoText() !== null ? ' '.$line->todoText() : '')];
+                }
             }
         }
         $this->table(['section', 'status', 'what it found'], $rows);

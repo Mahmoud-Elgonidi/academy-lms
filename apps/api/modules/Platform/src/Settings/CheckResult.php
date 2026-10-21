@@ -11,12 +11,13 @@ final readonly class CheckResult
         public bool $typed = false,
     ) {}
 
-    /** ok, warn or fail: the worst line. */
+    /** info (only lines that tell, or none), ok, warn or fail: the worst line. */
     public function level(): string
     {
-        $worst = 'ok';
+        // Lines that only tell (a service off, nothing set up) are not "it works".
+        $worst = 'info';
         foreach ($this->lines as $line) {
-            if (CheckLine::LEVELS[$line->level] > CheckLine::LEVELS[$worst]) {
+            if (CheckLine::LEVELS[$line->level] > CheckLine::LEVELS[$worst] || ($worst === 'info' && $line->level === 'ok')) {
                 $worst = $line->level;
             }
         }

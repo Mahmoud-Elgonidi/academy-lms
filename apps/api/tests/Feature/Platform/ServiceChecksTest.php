@@ -116,22 +116,63 @@ it('warns when the speech plan is nearly used, and fails once it is used up or u
         return Http::response($plan);
     }]);
 
-    $result = app(SettingChecks::class)->run('ai');
+    $result = app(SettingChecks::class)->run('speech');
     expect($result->level())->toBe('warn')
         ->and($result->says())->toContain('ElevenLabs: 92% of the plan is used; it renews on 2026-10-29.')
         ->and(ServiceHealth::last('elevenlabs')['near'])->toBe(92)
         ->and(ServiceHealth::failing('elevenlabs'))->toBeFalse();
 
     $plan['character_count'] = 100000;
-    expect(app(SettingChecks::class)->run('ai')->says())->toContain('ElevenLabs says the credit, quota or subscription ran out. (character_limit)')
+    expect(app(SettingChecks::class)->run('speech')->says())->toContain('ElevenLabs says the credit, quota or subscription ran out. (character_limit)')
         ->and(ServiceHealth::problem('elevenlabs'))->toBe(ServiceProblem::Quota);
 
     $plan = ['status' => 'past_due', 'character_count' => 10, 'character_limit' => 100000];
-    expect(app(SettingChecks::class)->run('ai')->says())->toContain('(past_due)');
+    expect(app(SettingChecks::class)->run('speech')->says())->toContain('(past_due)');
 
     $plan = ['status' => 'active', 'character_count' => 1000, 'character_limit' => 100000];
-    expect(app(SettingChecks::class)->run('ai')->says())->toContain('ElevenLabs took the key; 1% of the plan is used.')
+    expect(app(SettingChecks::class)->run('speech')->says())->toContain('ElevenLabs took the key; 1% of the plan is used.')
         ->and(ServiceHealth::failing('elevenlabs'))->toBeFalse();
+});
+
+it('gives each AI card its own try: one attempt for the helpers, the games designer and speech, each card its own lines', function () {
+    config(['platform.ai.driver' => 'claude', 'platform.ai.key' => 'sk-ant-1', 'platform.ai.models.best' => 'claude-opus-5-5', 'platform.ai.models.fast' => 'claude-opus-5-5',
+        'platform.games.designer.driver' => 'claude', 'platform.games.designer.key' => 'sk-ant-1', 'platform.games.designer.model' => 'claude-sonnet-5-5',
+        'platform.ai.speech.key' => 'eleven-1']);
+    checksAnswering([
+        'api.anthropic.com/v1/messages' => fn (Request $r) => $r['model'] === 'claude-opus-5-5'
+            ? Http::response(['content' => [['type' => 'text', 'text' => '{"ok":true}']], 'usage' => ['input_tokens' => 9, 'output_tokens' => 5]])
+            : Http::response(['type' => 'error', 'error' => ['type' => 'not_found_error', 'message' => 'model: '.$r['model']]], 404),
+        '/v1/user/subscription' => Http::response(['status' => 'active', 'character_count' => 10, 'character_limit' => 1000]),
+    ]);
+    Filament::setCurrentPanel('console');
+    $this->actingAs($this->owner, 'platform');
+
+    Livewire::test(PlatformSettingsPage::class)
+        ->call('check', 'speech')
+        ->assertNotified('Speech to text (ElevenLabs)')
+        // Every AI card shows what the one attempt found for it.
+        ->assertSeeHtml('<bdi>ElevenLabs</bdi> took the key; <bdi>1</bdi>% of the plan is used.')
+        ->assertSee(': choose another model.')
+        ->assertSee('answered with');
+
+    // One request a card: the helpers' model (best and fast are one here), the designer's, ElevenLabs' plan.
+    Http::assertSentCount(3);
+    expect(LastChecks::get('speech')['result']->says())->toBe('ElevenLabs took the key; 1% of the plan is used.')
+        ->and(LastChecks::get('designer')['result']->level())->toBe('fail')
+        ->and(LastChecks::get('ai')['result']->says())->toBe('Claude (Anthropic) answered with claude-opus-5-5.')
+        // The designer's model is the one that failed, whichever card was tried.
+        ->and(ServiceHealth::last('anthropic')['scope'])->toBe('claude-sonnet-5-5');
+});
+
+it('says when the games designer has no model yet, or answers from the demo', function () {
+    config(['platform.games.designer.driver' => 'claude', 'platform.games.designer.key' => 'sk-ant-1']);
+    expect(app(SettingChecks::class)->run('designer')->says())->toBe('No model is chosen for the games designer yet: the Game studio designs nothing until one is.');
+
+    config(['platform.games.designer.driver' => 'demo']);
+    expect(app(SettingChecks::class)->run('designer')->says())->toStartWith('The games designer hands back one of the platform');
+
+    config(['platform.games.designer.driver' => 'claude', 'platform.games.designer.key' => null, 'platform.games.designer.model' => 'claude-opus-5-5']);
+    expect(app(SettingChecks::class)->run('designer')->level())->toBe('fail');
 });
 
 it('says why WhatsApp would not send: the payment method, a low quality number', function () {
@@ -267,10 +308,10 @@ it('heads the page with the services that need someone and links to their sectio
 
     Livewire::test(PlatformSettingsPage::class)
         ->assertSee('Outside services that need you')
-        ->assertSeeHtml('href="#ps-stripe"')
+        ->assertSeeHtml('href="?tab=payments#ps-stripe"')
         ->assertSeeHtml('id="ps-stripe"')
         ->assertSee('Make a new key at Stripe, put it in Platform settings, then try it.')
-        ->assertDontSeeHtml('href="#ps-sms"')
+        ->assertDontSeeHtml('#ps-sms"')
         ->assertSee('In use');
 
     ServiceHealth::ok('stripe', '', 'check');

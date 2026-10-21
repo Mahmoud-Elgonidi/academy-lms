@@ -21,6 +21,7 @@ use Modules\Platform\Settings\LastChecks;
 use Modules\Platform\Settings\PlatformSettings;
 use Modules\Platform\Settings\SettingCatalog;
 use Modules\Platform\Settings\SettingChecks;
+use Modules\Platform\Settings\SettingDefinition;
 use Modules\SharedKernel\Health\ServiceHealth;
 use Modules\SharedKernel\Health\ServiceProblem;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -232,7 +233,7 @@ it('tries each service with the keys in force, in its own words', function () {
         'livekit_key' => 'APIkey', 'livekit_secret' => str_repeat('s', 40), 'livekit_api_url' => 'https://livekit.company.example',
         'mail_mailer' => 'smtp',
     ]);
-    config(['platform.ai.driver' => 'claude', 'platform.games.designer.model' => null]);
+    config(['platform.ai.driver' => 'claude', 'platform.games.designer.driver' => 'claude', 'platform.games.designer.model' => null]);
     Http::fake([
         'api.anthropic.com/v1/messages' => fn (Request $r) => $r['model'] === 'claude-opus-5-5'
             ? Http::response(['content' => [['type' => 'text', 'text' => '{"ok":true}']], 'usage' => ['input_tokens' => 9, 'output_tokens' => 5]])
@@ -246,11 +247,16 @@ it('tries each service with the keys in force, in its own words', function () {
     ]);
     $checks = app(SettingChecks::class);
 
-    $ai = $checks->run('ai', 'salma@company.example');
-    expect($ai->level())->toBe('fail')
+    // The AI cards are tried together, each with its own lines.
+    $parts = $checks->runParts('ai', 'salma@company.example');
+    $ai = $parts['ai'];
+    expect(array_keys($parts))->toBe(['ai', 'designer', 'speech'])
+        ->and($ai->level())->toBe('fail')
         ->and($ai->says())->toContain('Claude (Anthropic) answered with claude-opus-5-5.')
         ->toContain('Claude (Anthropic) does not offer claude-haiku-5-5: choose another model. (not_found_error)')
-        ->toContain('ElevenLabs took the key; it may not read the plan')
+        ->not->toContain('ElevenLabs')
+        ->and($parts['speech']->says())->toBe('ElevenLabs took the key; it may not read the plan, so what is left is not shown.')
+        ->and($parts['designer']->says())->toBe('No model is chosen for the games designer yet: the Game studio designs nothing until one is.')
         ->and(ServiceHealth::problem('anthropic'))->toBe(ServiceProblem::Model)
         ->and(ServiceHealth::last('anthropic')['scope'])->toBe('claude-haiku-5-5');
     config(['platform.ai.models.fast' => 'claude-opus-5-5']);
@@ -297,4 +303,14 @@ it('lists every setting with its wording in both languages', function () {
             }
         }
     }
+});
+
+it('shows every setting in one of the tabs\' cards', function () {
+    $page = new ReflectionClass(PlatformSettingsPage::class);
+    $cards = $page->getConstant('CARD_SETTINGS');
+    $shown = collect($page->getConstant('TABS'))->flatMap(fn (array $tab) => $tab['cards'])
+        ->flatMap(fn (string $card) => $cards[$card] ?? array_map(fn (SettingDefinition $s) => $s->key, SettingCatalog::inGroup($card)))
+        ->unique()->sort()->values()->all();
+
+    expect($shown)->toBe(collect(array_keys(SettingCatalog::all()))->sort()->values()->all());
 });

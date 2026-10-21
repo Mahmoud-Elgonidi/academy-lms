@@ -13,13 +13,13 @@ use Modules\Platform\Ai\PlatformAcademyAi;
  */
 final class OutsideServices
 {
-    /** Each service and the Platform settings section that holds its keys. */
+    /** Each service and the Platform settings section that holds its keys (Anthropic's also serves the games designer: sections()). */
     public const GROUPS = [
         'anthropic' => 'ai',
         'openai' => 'ai',
         'gemini' => 'ai',
         'ollama' => 'ai',
-        'elevenlabs' => 'ai',
+        'elevenlabs' => 'speech',
         'whatsapp' => 'whatsapp',
         'twilio' => 'sms',
         'fcm' => 'push',
@@ -59,6 +59,12 @@ final class OutsideServices
     public static function group(string $service): string
     {
         return self::GROUPS[$service] ?? 'ai';
+    }
+
+    /** @return list<string> the Platform settings sections whose try asks this service */
+    public static function sections(string $service): array
+    {
+        return $service === 'anthropic' ? ['ai', 'designer'] : [self::group($service)];
     }
 
     private static function set(string $path): bool

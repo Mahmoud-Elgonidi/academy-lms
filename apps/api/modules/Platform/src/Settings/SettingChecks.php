@@ -38,7 +38,15 @@ use Throwable;
 final class SettingChecks
 {
     /** The sections that have a try. */
-    public const GROUPS = ['ai', 'mail', 'whatsapp', 'sms', 'push', 'classroom', 'stripe'];
+    public const GROUPS = ['ai', 'designer', 'speech', 'mail', 'whatsapp', 'sms', 'push', 'classroom', 'stripe'];
+
+    /**
+     * The AI settings' three cards (the academies' helpers, the games designer,
+     * speech to text): tried together, one attempt for all three, since they
+     * share keys and ServiceHealth hears one answer from each service; each card
+     * shows its own lines.
+     */
+    public const AI = ['ai', 'designer', 'speech'];
 
     private const TIMEOUT = 10;
 
@@ -50,8 +58,11 @@ final class SettingChecks
 
     private const UNPAID = ['past_due', 'unpaid', 'canceled', 'cancelled', 'incomplete_expired'];
 
-    /** @var list<CheckLine> */
+    /** @var array<string, list<CheckLine>> each section's lines */
     private array $lines = [];
+
+    /** The section whose lines are being written. */
+    private string $part = '';
 
     /** @var array<string, list<array{0: ServiceFault, 1: string}>> what each service tried got: its faults and their scopes */
     private array $faults = [];
@@ -61,26 +72,43 @@ final class SettingChecks
 
     public function __construct(private readonly AiProbe $probe) {}
 
+    /** A section's try: for an AI card, that card's lines from the one attempt for all three. */
     public function run(string $group, ?string $ownerEmail = null, bool $record = true): CheckResult
+    {
+        return $this->runParts($group, $ownerEmail, $record)[$group];
+    }
+
+    /**
+     * A section's try, by section: the AI cards come back together (AI).
+     *
+     * @return array<string, CheckResult>
+     */
+    public function runParts(string $group, ?string $ownerEmail = null, bool $record = true): array
     {
         $this->lines = [];
         $this->faults = [];
         $this->near = [];
-        match ($group) {
-            'ai' => $this->ai(),
-            'mail' => $this->mail($ownerEmail),
-            'whatsapp' => $this->whatsapp(),
-            'sms' => $this->sms(),
-            'push' => $this->push(),
-            'classroom' => $this->classroom(),
-            'stripe' => $this->stripe(),
-            default => $this->line(null, 'info', 'none'),
-        };
+        $parts = in_array($group, self::AI, true) ? self::AI : [$group];
+        foreach ($parts as $part) {
+            $this->part = $part;
+            match ($part) {
+                'ai' => $this->ai(),
+                'designer' => $this->designer(),
+                'speech' => $this->speech(),
+                'mail' => $this->mail($ownerEmail),
+                'whatsapp' => $this->whatsapp(),
+                'sms' => $this->sms(),
+                'push' => $this->push(),
+                'classroom' => $this->classroom(),
+                'stripe' => $this->stripe(),
+                default => $this->line(null, 'info', 'none'),
+            };
+        }
         if ($record) {
             $this->record();
         }
 
-        return new CheckResult($this->lines);
+        return collect($parts)->mapWithKeys(fn (string $part) => [$part => new CheckResult($this->lines[$part] ?? [])])->all();
     }
 
     private function ai(): void
@@ -104,16 +132,22 @@ final class SettingChecks
                 }
             }
         }
+    }
 
+    /** The games studio's designer: always Claude, with the platform's Anthropic key. */
+    private function designer(): void
+    {
         $designer = (array) config('platform.games.designer');
         $model = trim((string) ($designer['model'] ?? ''));
-        if (($designer['driver'] ?? null) === 'claude' && $model !== '') {
-            $key = trim((string) ($designer['key'] ?? ''));
-            $key === '' ? $this->missing('anthropic') : $this->model(AiProvider::Claude, $model, 'designer_ok', $key, (string) (($designer['base_url'] ?? null) ?: AiProvider::Claude->baseUrl()));
-        }
-
-        if ($provider !== null || PlatformAcademyAi::demo()) {
-            $this->speech();
+        $key = trim((string) ($designer['key'] ?? ''));
+        if (($designer['driver'] ?? null) !== 'claude') {
+            $this->line(null, 'info', 'designer_demo');
+        } elseif ($key === '') {
+            $this->missing('anthropic');
+        } elseif ($model === '') {
+            $this->line(null, 'info', 'designer_none');
+        } else {
+            $this->model(AiProvider::Claude, $model, 'designer_ok', $key, (string) (($designer['base_url'] ?? null) ?: AiProvider::Claude->baseUrl()));
         }
     }
 
@@ -426,7 +460,7 @@ final class SettingChecks
     private function fault(string $service, ServiceFault $fault, string $scope = '', ?string $says = null, array $with = []): void
     {
         $this->faults[$service][] = [$fault, $scope];
-        $this->lines[] = new CheckLine(
+        $this->lines[$this->part][] = new CheckLine(
             $service,
             $fault->problem->transient() ? 'warn' : 'fail',
             $says !== null ? 'platform::settings.checks.lines.'.$says : 'platform::services.problems.'.$fault->problem->value,
@@ -445,9 +479,8 @@ final class SettingChecks
     private function line(?string $service, string $level, string $says, array $with = [], ?string $todo = null): void
     {
         $line = new CheckLine($service, $level, 'platform::settings.checks.lines.'.$says, $with, $todo);
-        // The helpers and the games designer share Claude's key: one line when it is missing.
-        if (! in_array($line, $this->lines, false)) {
-            $this->lines[] = $line;
+        if (! in_array($line, $this->lines[$this->part] ?? [], false)) {
+            $this->lines[$this->part][] = $line;
         }
     }
 
