@@ -5,6 +5,7 @@ namespace Modules\Learning\Models;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
@@ -36,9 +37,21 @@ final class HomeworkSubmission extends Model
         return ['submitted_at' => 'immutable_datetime', 'size' => 'integer'];
     }
 
+    /** A recording made in the browser comes in a webm or mp4 container (SubmitHomework::AUDIO). */
+    public const RECORDED_AS_VIDEO = ['video/webm', 'video/mp4'];
+
     public function isAudio(): bool
     {
-        // A recording made in the browser comes in a webm or mp4 container (SubmitHomework::AUDIO).
-        return str_starts_with((string) $this->mime, 'audio/') || in_array($this->mime, ['video/webm', 'video/mp4'], true);
+        return str_starts_with((string) $this->mime, 'audio/') || in_array($this->mime, self::RECORDED_AS_VIDEO, true);
+    }
+
+    /**
+     * Narrows a query on handed-in files (as $column) to recordings, as isAudio() tells them.
+     *
+     * @param  Builder  $query
+     */
+    public static function whereRecording($query, string $column = 'mime'): void
+    {
+        $query->where(fn ($q) => $q->where($column, 'like', 'audio/%')->orWhereIn($column, self::RECORDED_AS_VIDEO));
     }
 }

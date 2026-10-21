@@ -7,6 +7,9 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
+use Modules\SharedKernel\Health\Faults\StripeFaults;
+use Modules\SharedKernel\Health\ServiceFault;
+use Modules\SharedKernel\Health\ServiceHealth;
 
 /**
  * Stripe Connect Standard, the platform's side (docs/architecture/03,
@@ -14,7 +17,8 @@ use Illuminate\Support\Facades\Http;
  * to Stripe to connect the academy's own Stripe account, take the account
  * id back, and disconnect it. Stripe returns to one address on the
  * platform; which academy asked travels in an encrypted state that lasts
- * twenty minutes.
+ * twenty minutes. How Stripe answers the platform's key goes to
+ * ServiceHealth ('stripe').
  */
 final class StripeConnect
 {
@@ -85,11 +89,16 @@ final class StripeConnect
                 ->asForm()->acceptJson()->timeout((int) config('billing.payments.timeout'))
                 ->post($path, $form);
         } catch (ConnectionException $e) {
+            ServiceHealth::fault('stripe', ServiceFault::unreachable());
             throw new GatewayException('Stripe could not be reached: '.$e->getMessage(), previous: $e);
         }
         if ($response->failed()) {
+            if (($fault = StripeFaults::of($response->status(), $response->json())) !== null) {
+                ServiceHealth::fault('stripe', $fault);
+            }
             throw new GatewayException('Stripe Connect: '.($response->json('error_description') ?? $response->json('error') ?? 'HTTP '.$response->status()));
         }
+        ServiceHealth::ok('stripe');
 
         return (array) $response->json();
     }

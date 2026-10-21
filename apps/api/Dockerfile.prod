@@ -28,7 +28,27 @@ FROM dunglas/frankenphp:1-php8.3-bookworm
 # encrypts each backup to the platform team's public key and sends it to a bucket.
 # timezonedb: the latest clock rules at build time, not the copy inside PHP's release
 # (Morocco on UTC+0 for good from 20 September 2026 came in tzdata 2026c).
-RUN install-php-extensions pdo_pgsql pgsql intl zip bcmath pcntl redis opcache timezonedb \
+# redis and timezonedb are built from their own sources on GitHub at the versions named
+# here, never from PECL (it was down for hours on 21 October 2026); raise a version by
+# hand. GitHub's archive of phpredis leaves out its liblzf submodule, so that goes back
+# in from the commit phpredis pins. The build stops unless both load with new rules.
+ARG PHPREDIS_VERSION=6.3.0
+ARG LIBLZF_COMMIT=fb25820c3c0aeafd127956ae6c115063b47e459a
+# timezonedb 2026.5 (tzdata 2026e)
+ARG TIMEZONEDB_COMMIT=5f536f472757f9e3e901d52df3d872b2501c9cbc
+RUN install-php-extensions pdo_pgsql pgsql intl zip bcmath pcntl opcache \
+    && mkdir -p /tmp/ext/redis/liblzf /tmp/ext/timezonedb \
+    && curl -fsSL --retry 5 --retry-all-errors "https://codeload.github.com/phpredis/phpredis/tar.gz/refs/tags/$PHPREDIS_VERSION" \
+        | tar -xz -C /tmp/ext/redis --strip-components=1 \
+    && curl -fsSL --retry 5 --retry-all-errors "https://codeload.github.com/nemequ/liblzf/tar.gz/$LIBLZF_COMMIT" \
+        | tar -xz -C /tmp/ext/redis/liblzf --strip-components=1 \
+    && curl -fsSL --retry 5 --retry-all-errors "https://codeload.github.com/php/pecl-datetime-timezonedb/tar.gz/$TIMEZONEDB_COMMIT" \
+        | tar -xz -C /tmp/ext/timezonedb --strip-components=1 \
+    && install-php-extensions /tmp/ext/redis /tmp/ext/timezonedb \
+    && rm -rf /tmp/ext \
+    && php -m | grep -qx redis \
+    && php -m | grep -qx timezonedb \
+    && php -r 'exit(version_compare(timezone_version_get(), "2026.3", ">=") ? 0 : 1);' \
     && apt-get update \
     && apt-get install -y --no-install-recommends libcap2-bin age postgresql-client \
     && rm -rf /var/lib/apt/lists/* \

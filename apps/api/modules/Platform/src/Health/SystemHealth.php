@@ -6,13 +6,14 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
-use Modules\Platform\Ai\AiHealth;
 use Modules\Platform\Ai\PlatformAcademyAi;
 use Modules\SharedKernel\Files\ScannerHealth;
 use Modules\SharedKernel\Files\UploadScanner;
 use Modules\SharedKernel\Health\Heartbeats;
 use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Health\RecentErrors;
+use Modules\SharedKernel\Health\ServiceHealth;
+use Modules\SharedKernel\Health\ServiceProblem;
 use Throwable;
 
 /**
@@ -21,7 +22,8 @@ use Throwable;
  * queue worker and the live relay spoke lately, Reverb takes connections,
  * the last backup is recent, the WAL archive keeps up and both reach the
  * off-site copy, a restore was drilled lately, the disk has room, mail goes
- * out, and errors are few. A check is ok,
+ * out, each outside service set up here answers (ServiceHealth), and errors
+ * are few. A check is ok,
  * warn (look soon) or fail (look now); "off" when this server has no such
  * part. The console page, GET /health and the alerts all read this.
  */
@@ -33,15 +35,88 @@ class SystemHealth
     public function checks(): array
     {
         $checks = [];
-        foreach (['database', 'cache', 'scheduler', 'worker', 'assist', 'queue', 'relay', 'reverb', 'backups', 'archive', 'offsite', 'drill', 'disk', 'mail', 'scanning', 'errors'] as $name) {
-            try {
-                $checks[$name] = $this->{$name}();
-            } catch (Throwable $e) {
-                $checks[$name] = $this->check('fail', '', $e->getMessage());
-            }
+        foreach (['database', 'cache', 'scheduler', 'worker', 'assist', 'queue', 'relay', 'reverb', 'backups', 'archive', 'offsite', 'drill', 'disk', 'mail'] as $name) {
+            $checks[$name] = $this->run(fn () => $this->{$name}());
+        }
+        foreach ($this->serviceChecks() as $name => $check) {
+            $checks[$name] = $check;
+        }
+        foreach (['scanning', 'errors'] as $name) {
+            $checks[$name] = $this->run(fn () => $this->{$name}());
         }
 
         return $checks;
+    }
+
+    /** One check for each outside service set up here, named service_{name}, so each gets its own alert. */
+    public function serviceChecks(): array
+    {
+        $checks = [];
+        foreach (OutsideServices::configured() as $service) {
+            $checks['service_'.$service] = $this->run(fn () => $this->service($service));
+        }
+
+        return $checks;
+    }
+
+    /** The checks without the outside services: what GET /health's 503 is about. */
+    public static function stack(array $checks): array
+    {
+        return array_filter($checks, fn (string $name) => ! str_starts_with($name, 'service_'), ARRAY_FILTER_USE_KEY);
+    }
+
+    /**
+     * How an outside service answered lately (ServiceHealth, from its gateway,
+     * "Try it" and the daily check). A problem a person must act on fails at
+     * once; one that may pass (busy, down, unreachable) warns after three in a
+     * row and fails when it lasts; a plan almost used up or no check for days
+     * warns.
+     */
+    public function service(string $service): array
+    {
+        $last = ServiceHealth::last($service);
+        $name = __('platform::services.names.'.$service);
+        $problem = ServiceHealth::problem($service);
+        $now = now()->getTimestamp();
+
+        if ($problem !== null) {
+            $inARow = (int) ($last['in_a_row'] ?? 1);
+            $for = $now - (int) ($last['since'] ?? $last['failed'] ?? $now);
+            $status = match (true) {
+                $problem->severe() => 'fail',
+                $problem === ServiceProblem::Rate => $inARow >= 3 ? ($for >= 3600 ? 'fail' : 'warn') : 'ok',
+                $problem->transient() => $inARow >= 3 ? ($for >= 900 ? 'fail' : 'warn') : 'ok',
+                default => 'warn',
+            };
+
+            return $this->check($status, __('platform::services.used.failing', [
+                'problem' => __('platform::services.short.'.$problem->value),
+                'since' => CarbonImmutable::createFromTimestamp((int) ($last['since'] ?? $last['failed'] ?? $now))->diffForHumans(),
+                'times' => trans_choice('platform::services.used.times', $inARow, ['count' => $inARow]),
+                'code' => (string) (($last['code'] ?? '') !== '' ? $last['code'] : '-'),
+            ]), __('platform::services.problems.'.$problem->value, ['service' => $name]).' '.__('platform::services.todo.'.$problem->value, ['service' => $name]));
+        }
+        if (isset($last['near']) && (int) $last['near'] >= 90 && $now - (int) ($last['near_at'] ?? 0) <= 2 * 86400) {
+            return $this->check('warn', __('platform::services.used.near', ['pct' => (int) $last['near']]), __('platform::services.todo.quota', ['service' => $name]));
+        }
+        if (isset($last['checked']) && $now - (int) $last['checked'] > 3 * 86400) {
+            return $this->check('warn', __('platform::services.used.stale', ['when' => CarbonImmutable::createFromTimestamp((int) $last['checked'])->diffForHumans()]), __('platform::health.hints.scheduler'));
+        }
+        $seen = (int) ($last['seen'] ?? $last['ok'] ?? 0);
+
+        return $this->check('ok', $seen > 0
+            ? __('platform::services.used.ok', ['when' => CarbonImmutable::createFromTimestamp($seen)->diffForHumans()])
+            : __('platform::services.used.never'));
+    }
+
+    /** @param  callable(): array{status: string, value: string, hint: ?string}  $check */
+    private function run(callable $check): array
+    {
+        try {
+            return $check();
+        } catch (Throwable $e) {
+            return $this->check('fail', '', $e->getMessage());
+        }
     }
 
     /** @param  array<string, array{status: string}>  $checks */
@@ -105,30 +180,17 @@ class SystemHealth
     }
 
     /**
-     * The AI helpers' worker (its own queue, for checks that take minutes), and
-     * whether the providers answer. Off while no helper's key is set.
+     * The AI helpers' worker (its own queue, for checks that take minutes).
+     * Off while no AI provider is set up; how the providers answer is each
+     * one's own check (service_*).
      */
     private function assist(): array
     {
-        if (! PlatformAcademyAi::demo() && (string) config('platform.ai.key') === '' && (string) config('platform.ai.speech.key') === '') {
+        if (! PlatformAcademyAi::demo() && array_intersect(OutsideServices::configured(), ['anthropic', 'openai', 'gemini', 'ollama', 'elevenlabs']) === []) {
             return $this->off();
         }
-        $check = $this->beat('assist', 3, 10);
-        if ($check['status'] !== 'ok') {
-            return $check;
-        }
-        foreach (AiHealth::last() as $provider => $state) {
-            if ((int) ($state['in_a_row'] ?? 0) >= 3) {
-                return $this->check('warn', __('platform::health.values.ai_failing', [
-                    'provider' => $provider,
-                    'count' => (int) $state['in_a_row'],
-                    'when' => CarbonImmutable::createFromTimestamp((int) ($state['failed'] ?? 0))->diffForHumans(),
-                    'error' => (string) ($state['error'] ?? ''),
-                ]), __('platform::health.hints.ai_failing'));
-            }
-        }
 
-        return $check;
+        return $this->beat('assist', 3, 10);
     }
 
     private function queue(): array

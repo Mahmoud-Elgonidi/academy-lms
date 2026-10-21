@@ -49,6 +49,8 @@ final class SendLearningNotifications
             ['report_overdue', 'staff', $teacher, ['push', 'whatsapp'], ['student' => 'زياد', 'when' => 'الأحد 4 أكتوبر · 18:00']],
             ['cheer', 'learning', 'learning::notifications.audience.student', ['push'], ['from' => 'ماما', 'kind' => 'تصفيقة']],
             ['lesson_stars', 'learning', 'learning::notifications.audience.student', ['push'], ['stars' => '⭐⭐⭐⭐', 'how' => 'في الميعاد · فضلت لآخر الحصة', 'subject' => 'القرآن']],
+            ['weekly_digest', 'learning', 'learning::notifications.audience.guardian', ['push', 'email', 'whatsapp'], ['student' => 'زياد', 'body' => 'أسبوع زياد في الأكاديمية: الحصص: 2 حضور. دروس خلصت بإتقان: «سورة الفيل».']],
+            ['weekly_digest_voice', 'learning', 'learning::notifications.audience.guardian', ['push', 'email', 'whatsapp'], ['student' => 'زياد', 'body' => 'أسبوع زياد في الأكاديمية: الحصص: 2 حضور.', 'link' => 'https://demo.lms.test/voice/…']],
         ] as [$name, $category, $audience, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
                 key: "learning.{$name}", category: $category,

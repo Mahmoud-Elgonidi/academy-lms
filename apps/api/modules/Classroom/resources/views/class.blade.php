@@ -11,6 +11,7 @@
         'joining' => __($l.'check.joining'),
         'quality' => trans($l.'room.quality'),
         'providerError' => __($l.'errors.provider'),
+        'mushaf' => $mushaf !== null,
         'recording' => $recording + [
             'labels' => ['start' => __('classroom::recordings.room.start'), 'stop' => __('classroom::recordings.room.stop')],
         ],
@@ -45,7 +46,11 @@
         .quality[data-q="poor"], .quality[data-q="lost"] { color: #fbbf24; }
         main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 12px 16px; min-height: 0; }
         main.with-plan { grid-template-columns: minmax(0, 1fr); }
-        @media (min-width: 1000px) { main.with-plan { grid-template-columns: minmax(0, 1fr) 300px; } }
+        @media (min-width: 1000px) { main.with-plan { grid-template-columns: minmax(0, 1fr) 300px; } main.with-mushaf { grid-template-columns: minmax(0, 1fr) 440px; } }
+        @media (max-width: 999px) { main.with-mushaf { overflow-y: auto; grid-auto-rows: max-content; align-content: start; } main.with-mushaf aside { overflow: visible; } }
+        aside .mushaf:not(:last-child) { padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+        a.button { display: inline-block; text-decoration: none; border-radius: 10px; padding: 10px 16px; background: var(--line); color: var(--text); }
+        a.button.primary { background: var(--brand); color: #fff; font-weight: 700; }
         .stage { position: relative; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
         .prejoin, .notice { margin: auto; width: 100%; max-width: 520px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
         .prejoin h1, .notice h1 { margin: 0; font-size: 18px; }
@@ -129,7 +134,7 @@
             'link' => 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',
         ];
     @endphp
-    <main class="{{ $seat->role !== 'student' || $materials->isNotEmpty() ? 'with-plan' : '' }}">
+    <main class="{{ $mushaf ? 'with-plan with-mushaf' : ($seat->role !== 'student' || $materials->isNotEmpty() ? 'with-plan' : '') }}">
         <div class="stage">
             <section class="prejoin" id="prejoin">
                 <h1>{{ __($l.'check.title') }}</h1>
@@ -173,14 +178,24 @@
             @endif
             <p class="err rec-note" id="rec-error" hidden></p>
 
+            @if ($mushaf)
+                {{-- A lesson on Zoom or Meet opens in a tab of its own, so the mushaf stays open here beside it. --}}
+                <section class="notice" id="outside" hidden>
+                    <h1>{{ __($l.'external.opened') }}</h1>
+                    <div class="row"><a class="button primary" href="{{ $goUrl }}" target="_blank" rel="noopener">{{ __($l.'external.again') }}</a></div>
+                </section>
+            @endif
+
             <section class="notice" id="left" hidden>
                 <h1>{{ __($l.'room.left') }}</h1>
                 <div class="row"><button class="primary" id="rejoin">{{ __($l.'room.rejoin') }}</button></div>
             </section>
         </div>
 
-        @if ($seat->role !== 'student')
+        @if ($mushaf || $seat->role !== 'student' || $materials->isNotEmpty())
             <aside>
+                @if ($mushaf) @include('classroom::mushaf') @endif
+            @if ($seat->role !== 'student')
                 <h2>{{ __($l.'plan.title') }}</h2>
                 @forelse ($plan as $line)
                     <div class="line">
@@ -206,12 +221,11 @@
                 @else
                     <small style="color:var(--muted)">{{ __($l.'homework.none') }}</small>
                 @endif
-            </aside>
-        @elseif ($materials->isNotEmpty())
-            <aside>
+            @elseif ($materials->isNotEmpty())
                 <h2>{{ __($l.'materials.title') }}</h2>
                 <small style="color:var(--muted)">{{ __($l.'materials.hint') }}</small>
                 @include('classroom::materials', ['items' => $materials->all()])
+            @endif
             </aside>
         @endif
     </main>
@@ -228,6 +242,7 @@
             $('prejoin').hidden = s !== 'prejoin' && s !== 'joining';
             $('tiles').hidden = $('controls').hidden = s !== 'live';
             $('left').hidden = s !== 'left';
+            if ($('outside')) $('outside').hidden = s !== 'outside';
             if (s !== 'live') { $('waiting').hidden = true; $('reconnecting').hidden = true; }
         };
 
@@ -298,7 +313,13 @@
                 ticket = body.data;
             } catch (e) { return fail(e.message); }
 
-            if (ticket.provider === 'external') { window.location.href = cfg.goUrl; return; }
+            if (ticket.provider === 'external') {
+                // Beside a Quran lesson's mushaf, Zoom or Meet opens in a tab of its own and this page stays.
+                if (!cfg.mushaf) { window.location.href = cfg.goUrl; return; }
+                stopPreview(); setState('outside'); $('join').disabled = false; $('join').textContent = $('join').dataset.label;
+                window.open(cfg.goUrl, '_blank', 'noopener');
+                return;
+            }
             if (!LK) return fail(cfg.providerError);
 
             stopPreview();
@@ -315,12 +336,14 @@
                 .on(LK.RoomEvent.ConnectionQualityChanged, (q, p) => { if (p === room.localParticipant) { $('quality').dataset.q = q; $('quality').textContent = cfg.quality[q] ?? ''; } })
                 .on(LK.RoomEvent.Reconnecting, () => { $('reconnecting').hidden = false; })
                 .on(LK.RoomEvent.Reconnected, () => { $('reconnecting').hidden = true; })
-                .on(LK.RoomEvent.Disconnected, () => { document.querySelectorAll('.tile').forEach(t => t.remove()); setState('left'); })
+                .on(LK.RoomEvent.Disconnected, () => { document.querySelectorAll('.tile').forEach(t => t.remove()); setState('left'); document.dispatchEvent(new CustomEvent('lms:room', { detail: null })); })
                 .on(LK.RoomEvent.RecordingStatusChanged, () => showRecording())
                 .on(LK.RoomEvent.RoomMetadataChanged, () => { recording = !!roomMeta().recording; showRecording(); });
             try {
                 await room.connect(ticket.url, ticket.token);
             } catch (e) { return fail(cfg.providerError); }
+            // The mushaf beside the room hears the teacher's turns through it (lms:room).
+            document.dispatchEvent(new CustomEvent('lms:room', { detail: room }));
             setState('live');
             if (publishes) tileFor(room.localParticipant);
             room.remoteParticipants.forEach(p => tileFor(p));

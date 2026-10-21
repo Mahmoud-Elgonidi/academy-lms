@@ -17,6 +17,8 @@ use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -27,6 +29,7 @@ use Modules\Catalog\Contracts\CatalogApi;
 use Modules\Curriculum\Actions\DeleteNode;
 use Modules\Curriculum\Actions\MoveNode;
 use Modules\Curriculum\Actions\Practice\SaveNodeItems;
+use Modules\Curriculum\Actions\Practice\SuggestNodeItems;
 use Modules\Curriculum\Actions\PublishVersion;
 use Modules\Curriculum\Actions\Resources\AddNodeResource;
 use Modules\Curriculum\Actions\Resources\MoveNodeResource;
@@ -35,11 +38,15 @@ use Modules\Curriculum\Actions\Resources\UpdateNodeResource;
 use Modules\Curriculum\Actions\SaveNode;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
+use Modules\Curriculum\Contracts\DTOs\TextSource;
 use Modules\Curriculum\Models\CurriculumVersion;
 use Modules\Curriculum\Models\Node;
 use Modules\Curriculum\Models\NodeItem;
 use Modules\Curriculum\Models\NodeResource;
 use Modules\Curriculum\Models\Program;
+use Modules\SharedKernel\Ai\AcademyAi;
+use Modules\SharedKernel\Ai\AiFailed;
+use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Games\CatalogGame;
 use Modules\SharedKernel\Games\GameCatalog;
@@ -53,6 +60,9 @@ use Modules\SharedKernel\Games\ItemKind;
  * time (published or not), and its practice: the questions, orders and
  * pairs the learner's games play after the lesson (SaveNodeItems), with the
  * games those items are enough for, and how much of the program has practice.
+ * A lesson's text (typed, or a passage of the Quran) is set with the lesson;
+ * when the academy turned the helper on, "Suggest practice" puts suggested
+ * items in the practice form, marked, to look over and save.
  *
  * @property Program $record
  */
@@ -214,7 +224,7 @@ final class EditCurriculum extends Page
             ->icon(Heroicon::OutlinedPencilSquare)
             ->iconButton()->color('gray')->size('sm')
             ->modalHeading(fn (array $arguments) => __('curriculum::curriculum.kinds.'.$this->node($arguments['node'])->kind))
-            ->fillForm(fn (array $arguments) => $this->node($arguments['node'])->only(['title_ar', 'title_en', 'objectives', 'weight', 'est_sessions', 'mastery_rule']))
+            ->fillForm(fn (array $arguments) => $this->nodeForm($this->node($arguments['node'])))
             ->schema(fn (array $arguments) => $this->nodeSchema($this->node($arguments['node'])->kind))
             ->action(fn (array $data, array $arguments) => $this->saveNode($this->node($arguments['node']), $data));
     }
@@ -304,8 +314,12 @@ final class EditCurriculum extends Page
             ->modalDescription(__($l.'hint'))
             ->modalWidth('4xl')
             ->modalSubmitActionLabel(__($l.'save'))
-            ->fillForm(fn (array $arguments) => ['items' => NodeItem::query()->where('node_id', $arguments['node'])->orderBy('ordinal')->get()
-                ->map(fn (NodeItem $i) => ['id' => $i->id, 'kind' => $i->kind, 'prompt' => $i->prompt] + $i->data)->all()])
+            ->fillForm(fn (array $arguments) => ['items' => [
+                ...NodeItem::query()->where('node_id', $arguments['node'])->orderBy('ordinal')->get()
+                    ->map(fn (NodeItem $i) => ['id' => $i->id, 'kind' => $i->kind, 'prompt' => $i->prompt] + $i->data)->all(),
+                // What "Suggest practice" brought, marked until it is saved.
+                ...array_map(fn (array $item) => $item + ['suggested' => true], (array) ($arguments['suggested'] ?? [])),
+            ]])
             ->schema([
                 Repeater::make('items')->hiddenLabel()
                     ->addActionLabel(__($l.'add'))
@@ -315,6 +329,7 @@ final class EditCurriculum extends Page
                     ->itemLabel(fn (array $state) => self::itemLabel($state))
                     ->schema([
                         Hidden::make('id'),
+                        Hidden::make('suggested'),
                         Grid::make(3)->schema([
                             Select::make('kind')->label(__($l.'fields.kind'))->required()->native(false)->live()->default('choice')
                                 ->options(collect(ItemKind::cases())->mapWithKeys(fn (ItemKind $k) => [$k->value => $k->label()])->all()),
@@ -360,7 +375,45 @@ final class EditCurriculum extends Page
             default => '',
         };
 
-        return trim(($kind?->label() ?? '').($text !== '' ? ' · '.mb_strimwidth($text, 0, 70, '…') : ''));
+        $label = trim(($kind?->label() ?? '').($text !== '' ? ' · '.mb_strimwidth($text, 0, 70, '…') : ''));
+
+        return ($state['suggested'] ?? false) ? __('curriculum::curriculum.practice.suggest.badge').' · '.$label : $label;
+    }
+
+    /**
+     * Suggests practice for a lesson (SuggestNodeItems) and opens its practice form with the
+     * suggestions under the lesson's items, to look over and save; says why when it cannot.
+     */
+    public function suggestAction(): Action
+    {
+        $l = 'curriculum::curriculum.practice.suggest.';
+
+        return Action::make('suggest')
+            ->label(__($l.'action'))
+            ->icon(Heroicon::OutlinedSparkles)
+            ->link()->size('sm')
+            ->visible(fn () => app(AcademyAi::class)->on(AiFeature::PracticeItems))
+            ->action(function (array $arguments) use ($l) {
+                try {
+                    $result = app(SuggestNodeItems::class)->handle($this->node($arguments['node']), (string) auth()->id());
+                } catch (AiFailed $e) {
+                    Notification::make()->danger()->title($e->getMessage())->send();
+
+                    return;
+                } catch (ValidationException $e) {
+                    Notification::make()->danger()->title(collect($e->errors())->flatten()->first())->send();
+
+                    return;
+                }
+                $count = count($result['items']);
+                Notification::make()->{$count > 0 ? 'success' : 'warning'}()
+                    ->title(trans_choice($l.'done', $count, ['count' => $count]))
+                    ->body($result['dropped'] > 0 ? trans_choice($l.'dropped', $result['dropped'], ['count' => $result['dropped']]) : null)
+                    ->send();
+                if ($count > 0) {
+                    $this->replaceMountedAction('practice', ['node' => $arguments['node'], 'suggested' => $result['items']]);
+                }
+            });
     }
 
     /** @return list<Component|Field> */
@@ -426,11 +479,64 @@ final class EditCurriculum extends Page
                 Select::make('mastery_rule')->label(__('curriculum::curriculum.fields.mastery_rule'))->native(false)->default('mastered_once')
                     ->options(array_combine(Node::MASTERY_RULES, array_map(fn ($r) => __('curriculum::curriculum.mastery_rules.'.$r), Node::MASTERY_RULES))),
             ]),
+            $this->textSection(),
+        ];
+    }
+
+    /** A lesson's text: none, typed, or a passage of the Quran by surah and verses (offered once the platform has its copy). */
+    private function textSection(): Section
+    {
+        $t = 'curriculum::curriculum.text.';
+        $surahs = app(CurriculumApi::class)->surahs();
+        $kinds = collect(['none', 'text', 'quran'])->mapWithKeys(fn ($k) => [$k => __($t.'kinds.'.$k)])->all();
+
+        return Section::make(__($t.'section'))->description(__($t.'hint'))->compact()->schema([
+            Radio::make('text_kind')->label(__($t.'kind'))->inline()->default('none')->live()
+                ->options($kinds)
+                ->disableOptionWhen(fn (string $value) => $value === 'quran' && $surahs === [])
+                ->helperText($surahs === [] ? __($t.'quran_missing') : null),
+            Textarea::make('text')->label(__($t.'text'))->rows(5)->maxLength(TextSource::TEXT_MAX)
+                ->helperText(__($t.'text_hint', ['max' => TextSource::TEXT_MAX]))
+                ->extraInputAttributes(['dir' => 'auto'])
+                ->visible(fn (Get $get) => $get('text_kind') === 'text')->required(fn (Get $get) => $get('text_kind') === 'text'),
+            Grid::make(3)->schema([
+                Select::make('surah')->label(__($t.'surah'))->native(false)->searchable()->live()
+                    ->options(collect($surahs)->mapWithKeys(fn (array $s) => [$s['number'] => $s['number'].'. '.$s['name_ar'].' · '.$s['name_en']])->all())
+                    ->required(fn (Get $get) => $get('text_kind') === 'quran'),
+                TextInput::make('from')->label(__($t.'from'))->numeric()->minValue(1)->default(1)
+                    ->required(fn (Get $get) => $get('text_kind') === 'quran'),
+                TextInput::make('to')->label(__($t.'to'))->numeric()->minValue(1)
+                    ->maxValue(fn (Get $get) => collect($surahs)->firstWhere('number', (int) $get('surah'))['verses'] ?? null)
+                    ->required(fn (Get $get) => $get('text_kind') === 'quran'),
+            ])->visible(fn (Get $get) => $get('text_kind') === 'quran'),
+            Text::make(__($t.'quran_hint'))->visible(fn (Get $get) => $get('text_kind') === 'quran'),
+        ]);
+    }
+
+    /** @return array<string, mixed> a node as its form shows it */
+    private function nodeForm(Node $node): array
+    {
+        $text = TextSource::fromArray($node->text_source);
+
+        return $node->only(['title_ar', 'title_en', 'objectives', 'weight', 'est_sessions', 'mastery_rule']) + [
+            'text_kind' => $text?->kind ?? 'none',
+            'text' => $text?->text,
+            'surah' => $text?->surah,
+            'from' => $text?->from,
+            'to' => $text?->to,
         ];
     }
 
     private function saveNode(?Node $node, array $data): void
     {
+        if (array_key_exists('text_kind', $data)) {
+            $data['text_source'] = match ($data['text_kind']) {
+                'text' => ['kind' => 'text', 'text' => $data['text'] ?? ''],
+                'quran' => ['kind' => 'quran', 'surah' => $data['surah'] ?? null, 'from' => $data['from'] ?? null, 'to' => $data['to'] ?? null],
+                default => null,
+            };
+        }
+        unset($data['text_kind'], $data['text'], $data['surah'], $data['from'], $data['to']);
         app(SaveNode::class)->handle($this->version(), $node, $data);
         unset($this->tree);
     }

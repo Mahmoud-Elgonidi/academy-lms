@@ -2,6 +2,7 @@
 
 namespace Modules\Learning\Http\V1\Controllers;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Learning\Actions\OpenWeeklyChest;
@@ -9,6 +10,8 @@ use Modules\Learning\Contracts\DTOs\JourneyGamesLayer;
 use Modules\Learning\Domain\Journey\Cheers;
 use Modules\Learning\Domain\Journey\Stars;
 use Modules\Learning\Models\Cheer;
+use Modules\Learning\Models\HifzPage;
+use Modules\Learning\Queries\Hifz\HifzMap;
 use Modules\Learning\Queries\Journey\JourneyMap;
 use Modules\People\Contracts\FamilyView;
 use Modules\SharedKernel\Time\LocalTimePresenter;
@@ -141,6 +144,8 @@ final class JourneyController
                 'items' => array_map(fn (array $s) => $s + ['name' => __('learning::challenges.stickers.'.$s['key'])], $j['stickers']['items']),
             ],
             'games' => $j['games'] === null ? null : $this->games($j['games']),
+            /** The hifz review today (GET learning/hifz has it in full): pages left today, done today and a day's pages; null until the learner has pages on their hifz map. */
+            'hifz' => $this->hifzToday($learner),
             'cheers' => ! $self ? [] : Cheer::query()->where('student_id', $learner)->whereNull('seen_at')->orderBy('created_at')->limit(10)->get()
                 ->map(fn (Cheer $c) => ['id' => $c->id, 'kind' => $c->kind, 'at' => $this->time->present($c->created_at)])->all(),
             /** For a guardian: cheers they may still send this learner today. */
@@ -267,6 +272,18 @@ final class JourneyController
     }
 
     /** @return array{0: string, 1: string} the viewer and the learner on their screen */
+    /** @return ?array{due: int, done_today: int, daily: int} */
+    /** @return ?array{due: int, done_today: int, daily: int} */
+    private function hifzToday(string $learner): ?array
+    {
+        if (! HifzPage::query()->where('student_id', $learner)->exists()) {
+            return null;
+        }
+        $wird = app(HifzMap::class)->wird($learner, CarbonImmutable::now());
+
+        return ['due' => count($wird['pages']), 'done_today' => (int) $wird['done_today'], 'daily' => (int) $wird['daily']];
+    }
+
     private function learner(Request $request): array
     {
         $me = (string) $request->user()?->getAuthIdentifier();

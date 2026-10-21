@@ -1,5 +1,6 @@
 import '../../../core/time/local_time.dart';
 import '../../homework/domain/homework.dart';
+import '../../homework/domain/recitation.dart';
 import '../../roadmap/domain/report_answers.dart';
 
 /// A lesson report or absence note in the teacher's list.
@@ -116,6 +117,10 @@ class ReportForm {
     this.homework,
     this.template,
     this.answers = const [],
+    this.voiceDraft = false,
+    this.recitationCheck = false,
+    this.expectedSuggestion,
+    this.mistakesSuggestion,
   });
 
   factory ReportForm.fromJson(Map<String, dynamic> json) => ReportForm(
@@ -134,6 +139,10 @@ class ReportForm {
     homework: json['homework'] == null ? null : Homework.fromJson(json['homework'] as Map<String, dynamic>),
     template: ReportTemplate.fromJson(json['template']),
     answers: ReportAnswer.listOf(json['answers']),
+    voiceDraft: (json['assist'] as Map<String, dynamic>?)?['voice_draft'] == true,
+    recitationCheck: (json['assist'] as Map<String, dynamic>?)?['recitation_check'] == true,
+    expectedSuggestion: Expected.fromJson(json['expected_suggestion']),
+    mistakesSuggestion: Expected.fromJson(json['mistakes_suggestion']),
   );
 
   final ReportSummary summary;
@@ -152,6 +161,18 @@ class ReportForm {
   /// The subject's own questions; null when it has none.
   final ReportTemplate? template;
   final List<ReportAnswer> answers;
+
+  /// The academy turned on drafts from a voice note for this report.
+  final bool voiceDraft;
+
+  /// The academy turned on the recitation check: homework handed in by voice may say what to recite.
+  final bool recitationCheck;
+
+  /// The passage of the report's lessons' text, to start what to recite from.
+  final Expected? expectedSuggestion;
+
+  /// The verses with the words marked in the lesson's shared mushaf (the surah with the most marks), to recite again.
+  final Expected? mistakesSuggestion;
 
   /// Reviewed by the academy: it no longer changes.
   bool get locked => summary.status == 'reviewed';

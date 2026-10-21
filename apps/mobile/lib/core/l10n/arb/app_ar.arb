@@ -1599,6 +1599,76 @@
     }
   },
   "discardDraft": "ابدأ من الأول",
+  "voiceTitle": "مسودة من رسالة صوتية",
+  "voiceHint": "قول عملتوا إيه، والطالب كان عامل إزاي، والواجب. المسودة بتملا الخانات الفاضية بس، وإنت بتراجعها قبل ما تبعت.",
+  "voiceRecord": "سجّل رسالة",
+  "voiceWorking": "بنسمع ونكتب المسودة…",
+  "voiceDone": "{n, plural, =0{الرسالة مازوّدتش حاجة جديدة: الفورم كان فيه كل ده.} =1{المسودة ملت خانة واحدة. راجعها قبل ما تبعت.} =2{المسودة ملت خانتين. راجعهم قبل ما تبعت.} few{المسودة ملت {n} خانات. راجعهم قبل ما تبعت.} other{المسودة ملت {n} خانة. راجعهم قبل ما تبعت.}}",
+  "@voiceDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceHeard": "اللي اتسمع",
+  "voiceUnsure": "راجع دول: المسودة مكانتش متأكدة",
+  "voiceLeft": "لسه محتاج: {fields}",
+  "@voiceLeft": {
+    "placeholders": {
+      "fields": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceLimit": "لحد دقيقتين",
+  "voiceKept": "التسجيل بيتمسح أول ما يتسمع، وعمره ما بيتحفظ.",
+  "suggested": "مقترح",
+  "checkThis": "راجعه",
+  "reciteTitle": "تصحيح التسميع",
+  "reciteToggle": "تصحيح التسميع آلي",
+  "reciteHint": "لما الطالب يسلّم تسجيل، بنعلّم لك على الكلمات اللي ناقصة أو غلط. ليك إنت بس، والأسرة مابتشوفوش.",
+  "reciteSuggestion": "من نص الدرس: {title}",
+  "@reciteSuggestion": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reciteFromMistakes": "من أخطاء الحصة: {title}",
+  "@reciteFromMistakes": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reciteSurah": "السورة",
+  "reciteChooseSurah": "اختار السورة",
+  "reciteSearch": "دوّر على سورة",
+  "reciteFrom": "من آية",
+  "reciteTo": "لحد آية",
+  "reciteWhat": "التسميع: {title}",
+  "@reciteWhat": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reciteMissing": "ناقصة",
+  "reciteWrong": "غلط",
+  "reciteExtra": "زيادة",
+  "reciteSaid": "اتقال: {word}",
+  "@reciteSaid": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "reciteHeard": "اللي اتسمع",
   "drafts": "مسودات",
   "savedAgo": "اتحفظت من {ago}",
   "@savedAgo": {
@@ -2758,5 +2828,296 @@
       }
     }
   },
-  "homeworkNoGame": "مفيش لعبة للواجب ده دلوقتي."
+  "homeworkNoGame": "مفيش لعبة للواجب ده دلوقتي.",
+  "hifzTitle": "خريطة الحفظ",
+  "hifzTitleKids": "خريطة حفظي",
+  "hifzTitleOf": "خريطة حفظ {name}",
+  "@hifzTitleOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "hifzNoText": "نص القرآن لسه مش موجود، والخريطة هتظهر أول ما يوصل.",
+  "hifzMemorized": "{n, plural, =0{لسه مفيش صفحات محفوظة من {total}} =1{صفحة واحدة محفوظة من {total}} =2{صفحتين محفوظين من {total}} few{{n} صفحات محفوظة من {total}} other{{n} صفحة محفوظة من {total}}}",
+  "@hifzMemorized": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzMemorizedKids": "{n, plural, =0{لسه ماحفظتش صفحات. يلا نبدأ!} =1{حفظت صفحة واحدة! ⭐} =2{حفظت صفحتين! ⭐} few{حفظت {n} صفحات! ⭐} other{حفظت {n} صفحة! ⭐}}",
+  "@hifzMemorizedKids": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzJuz": "الجزء {n}",
+  "@hifzJuz": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzJuzSummary": "الجزء {n}: {summary}",
+  "@hifzJuzSummary": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "hifzPageNumber": "صفحة {page}",
+  "@hifzPageNumber": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzPageOf": "صفحة {page} · الجزء {juz}",
+  "@hifzPageOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "juz": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzToday": "ورد النهارده",
+  "hifzTodayProgress": "خلص {done} من {daily, plural, =1{صفحة واحدة} =2{صفحتين} few{{daily} صفحات} other{{daily} صفحة}}",
+  "@hifzTodayProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "daily": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzTodayDone": "ورد النهارده خلص. برافو!",
+  "hifzTodayNone": "مفيش صفحات عليها مراجعة النهارده.",
+  "hifzWirdDone": "ورد النهارده خلص!",
+  "hifzWirdDoneKids": "خلّصت وردك! 🎉",
+  "hifzOverdue": "{n, plural, =1{متأخرة يوم} =2{متأخرة يومين} few{متأخرة {n} أيام} other{متأخرة {n} يوم}}",
+  "@hifzOverdue": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzReveal": "اكشف الصفحة",
+  "hifzRevealHint": "سمّع الصفحة من حفظك الأول، وبعدين اكشفها واتأكد.",
+  "hifzHowWent": "الحفظ كان عامل إزاي؟",
+  "hifzGrade1": "نسيتها",
+  "hifzGrade2": "بصعوبة",
+  "hifzGrade3": "كويس",
+  "hifzGrade4": "سهلة",
+  "hifzNextReview": "اتسجّلت. الصفحة دي هترجعلك {day}.",
+  "@hifzNextReview": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "hifzRecite": "سمّع الصفحة",
+  "hifzReciteKids": "سمّع صفحة",
+  "hifzReciteHint": "سجّل الصفحة من حفظك، وهنصحّحها كلمة كلمة.",
+  "hifzSendRecitation": "ابعت التسميع",
+  "hifzListening": "بنسمع التسميع…",
+  "hifzListeningHint": "النتيجة هتظهر هنا لوحدها.",
+  "hifzSelfGrade": "قيّم الصفحة بنفسك",
+  "hifzLatest": "آخر تسميع",
+  "hifzWird": "ورد الحفظ",
+  "hifzCardLeft": "{n, plural, =1{فاضل صفحة واحدة النهارده} =2{فاضل صفحتين النهارده} few{فاضل {n} صفحات النهارده} other{فاضل {n} صفحة النهارده}}",
+  "@hifzCardLeft": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzCardDone": "خلص النهارده",
+  "hifzCardNone": "مفيش صفحات النهارده",
+  "hifzCardKids": "{n, plural, =0{خلّصت وردك النهارده! ⭐} =1{فاضلك صفحة واحدة تسمّعها} =2{فاضلك صفحتين تسمّعهم} few{فاضلك {n} صفحات تسمّعها} other{فاضلك {n} صفحة تسمّعها}}",
+  "@hifzCardKids": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzTell": "قول اللي حافظه",
+  "hifzClear": "شيل صفحات",
+  "hifzClearHint": "الصفحات اللي هتشيلها هترجع جديدة على الخريطة، ومراجعاتها القديمة هتفضل.",
+  "hifzClearConfirm": "تشيل الصفحات دي من الخريطة؟",
+  "hifzParts": "الأجزاء",
+  "hifzSurahs": "السور",
+  "hifzSurahHint": "اكتب اسم السورة أو رقمها",
+  "hifzHowWell": "حافظها إزاي؟",
+  "hifzChosen": "{n, plural, =0{مااخترتش صفحات لسه} =1{صفحة واحدة} =2{صفحتين} few{{n} صفحات} other{{n} صفحة}}",
+  "@hifzChosen": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzSave": "سجّل",
+  "hifzMarked": "{n, plural, =0{مااتسجّلش صفحات} =1{اتسجّلت صفحة واحدة} =2{اتسجّلت صفحتين} few{اتسجّلت {n} صفحات} other{اتسجّلت {n} صفحة}}",
+  "@hifzMarked": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzCleared": "{n, plural, =0{مفيش صفحات اتشالت} =1{اتشالت صفحة واحدة} =2{اتشالت صفحتين} few{اتشالت {n} صفحات} other{اتشالت {n} صفحة}}",
+  "@hifzCleared": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hifzRecent": "آخر المراجعات",
+  "hifzRecentNone": "مفيش مراجعات في آخر أسبوعين.",
+  "mushafTitle": "المصحف",
+  "mushafOpen": "افتح المصحف",
+  "mushafNone": "الحصة دي مفيهاش مصحف.",
+  "mushafPrevious": "اللي قبلها",
+  "mushafNext": "اللي بعدها",
+  "mushafPageField": "صفحة",
+  "mushafPageOfTotal": "من {total}",
+  "@mushafPageOfTotal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mushafFollowing": "الصفحة بتتقلّب مع المدرّس.",
+  "mushafBackToTeacher": "ارجع لصفحة المدرّس",
+  "mushafTeacherOn": "المدرّس على صفحة {page}",
+  "@mushafTeacherOn": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "mushafHintTeacher": "دوس على أي كلمة عشان تعلّمها، والطالب بيشوف الصفحة اللي إنت فاتحها.",
+  "mushafMarkingClosed": "تعليم الكلمات بيفتح مع أوضة الحصة، وبيقفل لما تسلّم التقرير.",
+  "mushafMarkWord": "علّم الكلمة",
+  "mushafClearMark": "امسح العلامة",
+  "mushafEarlier": "اتعلّمت في حصة قبل كده",
+  "mushafWordMarked": "{word}: {kind}",
+  "@mushafWordMarked": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "mushafWordEarlier": "{word}: {kind}، اتعلّمت في حصة قبل كده {times}",
+  "@mushafWordEarlier": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      },
+      "times": {
+        "type": "String"
+      }
+    }
+  },
+  "mushafVerseEnd": "آخر الآية {n}",
+  "@mushafVerseEnd": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "mushafSurah": "سورة {name}",
+  "@mushafSurah": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mushafShow": "المصحف",
+  "mushafShowVideo": "الفيديو",
+  "mushafBackToVideo": "ارجع للفيديو",
+  "mushafFailed": "ماقدرناش نحفظ. جرّب تاني.",
+  "mistakesTitle": "دفتر الأخطاء",
+  "mistakesTitleKids": "كلمات بنراجعها",
+  "mistakesLead": "الكلمات اللي اتعلّم عليها في الحصص في آخر ست شهور، عشان تراجعها.",
+  "mistakesLeadTeacher": "الكلمات اللي اتعلّم عليها في حصص الطالب في آخر ست شهور.",
+  "mistakesLeadKids": "دي كلمات هنقولها تاني مع بعض لحد ما تبقى سهلة.",
+  "mistakesEmpty": "مفيش كلمات متعلّمة في آخر ست شهور.",
+  "mistakesEmptyKids": "مفيش كلمات نراجعها دلوقتي. شاطر! ⭐",
+  "mistakesWords": "{n, plural, =0{مفيش كلمات} =1{كلمة واحدة} =2{كلمتين} few{{n} كلمات} other{{n} كلمة}}",
+  "@mistakesWords": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "mistakesTimes": "{n, plural, =1{مرة} =2{مرتين} few{{n} مرات} other{{n} مرة}}",
+  "@mistakesTimes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "mistakesWord": "{word}: {kinds}، {times}، آخر مرة {when}",
+  "@mistakesWord": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      },
+      "kinds": {
+        "type": "String"
+      },
+      "times": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "mistakesWordKids": "{word}: كلمة بنراجعها",
+  "@mistakesWordKids": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  }
 }

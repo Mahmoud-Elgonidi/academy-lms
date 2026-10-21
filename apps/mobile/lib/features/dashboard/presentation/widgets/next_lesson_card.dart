@@ -4,6 +4,7 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/time/formats.dart';
 import '../../../classroom/presentation/join.dart';
+import '../../../mushaf/presentation/widgets/mushaf_entry.dart';
 import '../../../schedule/domain/lesson.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
@@ -11,7 +12,8 @@ import '../../../../shared/widgets/minute_tick.dart';
 
 /// The next lesson, the one surface in the brand's colour: when, with
 /// whom, how long until it starts, and its one action: the join button once
-/// the room opens, before that the time it opens. The countdown is drawn
+/// the room opens, before that the time it opens (and, in a Quran lesson,
+/// its shared mushaf under it). The countdown is drawn
 /// again each minute; the join state comes from the screen's reload at the
 /// room's opening (`Lesson.clockMoments`).
 class NextLessonCard extends StatelessWidget {
@@ -146,6 +148,25 @@ class NextLessonCard extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                     ),
                   ),
+          ),
+          MushafEntry(
+            lessonId: lesson.id,
+            builder: (context, label, open) => Padding(
+              padding: const EdgeInsets.only(top: Space.s),
+              child: SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: ink,
+                    side: BorderSide(color: ink.withValues(alpha: 0.55)),
+                  ),
+                  onPressed: open,
+                  icon: const Icon(Icons.menu_book_rounded),
+                  label: Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                ),
+              ),
+            ),
           ),
         ],
       ),

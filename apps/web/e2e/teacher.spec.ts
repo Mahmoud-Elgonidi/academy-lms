@@ -183,7 +183,7 @@ test('a student\'s course opens on its roadmap, without the family\'s contact de
 });
 
 test('a lesson that is not the teacher\'s, or no lesson at all, is not found', async ({ page }) => {
-  for (const path of ['/ar/teach/reports/not-a-report', '/ar/teach/students/not-a-course', '/ar/teach/help/not-a-ticket', '/ar/teach/messages/not-a-conversation']) {
+  for (const path of ['/ar/teach/reports/not-a-report', '/ar/teach/students/not-a-course', '/ar/teach/lessons/not-a-lesson', '/ar/teach/help/not-a-ticket', '/ar/teach/messages/not-a-conversation']) {
     const response = await page.goto(path);
     expect(response?.status(), path).toBe(404);
   }

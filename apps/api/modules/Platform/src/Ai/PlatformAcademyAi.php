@@ -15,7 +15,8 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * Whether the current academy may use a helper now: the platform has not
  * switched the helpers off (AI_DRIVER=off), the academy's plan has the AI
  * area, the academy turned this helper on (Settings › AI, off by default),
- * the keys it needs are set, and today's uses are under AI_DAILY_CAP.
+ * the chosen provider has its key and model (Ollama: its address) and the
+ * speech key is set where it listens, and today's uses are under AI_DAILY_CAP.
  */
 final class PlatformAcademyAi implements AcademyAi
 {
@@ -62,7 +63,7 @@ final class PlatformAcademyAi implements AcademyAi
         if (self::demo()) {
             return true;
         }
-        if ($feature->needsLanguage() && ((string) config('platform.ai.key') === '' || (string) config('platform.ai.models.best') === '')) {
+        if ($feature->needsLanguage() && ! (AiProvider::current()?->configured() ?? false)) {
             return false;
         }
 

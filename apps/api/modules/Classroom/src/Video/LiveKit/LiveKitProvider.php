@@ -3,6 +3,7 @@
 namespace Modules\Classroom\Video\LiveKit;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -13,6 +14,9 @@ use Modules\Classroom\Video\RecordingOutput;
 use Modules\Classroom\Video\Seat;
 use Modules\Classroom\Video\VideoProvider;
 use Modules\Scheduling\Contracts\DTOs\LessonCard;
+use Modules\SharedKernel\Health\Faults\LiveKitFaults;
+use Modules\SharedKernel\Health\ServiceFault;
+use Modules\SharedKernel\Health\ServiceHealth;
 use RuntimeException;
 use Throwable;
 
@@ -22,7 +26,10 @@ use Throwable;
  * is hidden and only watches. The room allows few people (child safety) and
  * the token lasts until half an hour after the lesson. Recordings go through
  * Egress (the room laid out at low quality, or sound only) straight to the
- * academy's storage, and the room's metadata tells everyone in it.
+ * academy's storage, and the room's metadata tells everyone in it. How the
+ * server API answers goes to ServiceHealth ('livekit', the rooms and the
+ * recorder each their own scope): a refused key shows there even where a
+ * call's failure is otherwise only logged.
  */
 final class LiveKitProvider implements Recorder, VideoProvider
 {
@@ -155,8 +162,7 @@ final class LiveKitProvider implements Recorder, VideoProvider
     {
         $jwt = $this->token('academy-lms', 'Academy LMS', CarbonImmutable::now()->addMinutes(5), $grant);
 
-        return Http::withToken($jwt)->acceptJson()->timeout(5)
-            ->post(rtrim($this->config['api_url'], '/')."/twirp/livekit.RoomService/{$method}", $body);
+        return $this->twirp(rtrim($this->config['api_url'], '/')."/twirp/livekit.RoomService/{$method}", $body, $jwt, 5, 'rooms');
     }
 
     /** @param  array<string, mixed>  $body */
@@ -164,7 +170,24 @@ final class LiveKitProvider implements Recorder, VideoProvider
     {
         $jwt = $this->token('academy-lms', 'Academy LMS', CarbonImmutable::now()->addMinutes(5), ['roomRecord' => true]);
 
-        return Http::withToken($jwt)->acceptJson()->timeout(10)
-            ->post(rtrim($this->config['egress_url'] ?? '' ?: $this->config['api_url'], '/')."/twirp/livekit.Egress/{$method}", $body);
+        return $this->twirp(rtrim($this->config['egress_url'] ?? '' ?: $this->config['api_url'], '/')."/twirp/livekit.Egress/{$method}", $body, $jwt, 10, 'egress');
+    }
+
+    /** @param  array<string, mixed>  $body */
+    private function twirp(string $url, array $body, string $jwt, int $timeout, string $scope): Response
+    {
+        try {
+            $response = Http::withToken($jwt)->acceptJson()->timeout($timeout)->post($url, $body);
+        } catch (ConnectionException $e) {
+            ServiceHealth::fault('livekit', ServiceFault::unreachable(), $scope);
+            throw $e;
+        }
+        if ($response->successful()) {
+            ServiceHealth::ok('livekit', $scope);
+        } elseif (($fault = LiveKitFaults::of($response->status(), $response->json())) !== null) {
+            ServiceHealth::fault('livekit', $fault, $scope);
+        }
+
+        return $response;
     }
 }

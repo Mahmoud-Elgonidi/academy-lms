@@ -3,6 +3,7 @@
 namespace Modules\Learning\Contracts;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 use Modules\Learning\Contracts\DTOs\HomeworkLine;
 use Modules\Learning\Contracts\DTOs\JourneyStation;
@@ -57,4 +58,26 @@ interface LearningApi
      * @throws ValidationException not their child, or too many today
      */
     public function cheer(string $fromId, string $studentId, string $kind = 'heart'): void;
+
+    /**
+     * A Quran lesson's shared mushaf, as the apps read it (GET learning/lessons/{session}/mushaf): the page asked
+     * for, else the one the teacher has open, else where the lesson starts; its words and the words marked on it.
+     * Null when the lesson has no mushaf for this person (its teacher, its student, the student's guardians).
+     *
+     * @return ?array<string, mixed>
+     */
+    public function lessonMushaf(string $sessionId, string $viewerId, ?int $page = null): ?array;
+
+    /**
+     * The lesson's teacher changes its shared mushaf: turn ({page}), mark ({surah, verse, word, kind, page?}) or
+     * unmark ({surah, verse, word, page?}). Answers the page as lessonMushaf does; null when the lesson has no
+     * mushaf for this person.
+     *
+     * @param  array<string, mixed>  $input
+     * @return ?array<string, mixed>
+     *
+     * @throws AuthorizationException not the lesson's teacher
+     * @throws ValidationException a page or word not there, or words may not be marked now
+     */
+    public function changeMushaf(string $sessionId, string $viewerId, string $change, array $input): ?array;
 }

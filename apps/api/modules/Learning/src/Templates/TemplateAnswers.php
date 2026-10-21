@@ -105,41 +105,46 @@ final class TemplateAnswers
         };
     }
 
+    /** One answer as it would be stored, or null when the question does not take it (a suggestion is dropped, not refused). */
+    public static function tryOne(TemplateField $field, mixed $value): int|float|string|bool|null
+    {
+        $value = is_string($value) ? trim($value) : $value;
+
+        return $value === null || $value === '' ? null : self::judge($field, $value)[0];
+    }
+
     private static function one(TemplateField $field, mixed $value): int|float|string|bool
+    {
+        [$stored, $rule, $extra] = self::judge($field, $value);
+
+        return $stored ?? self::fail($field, $rule, $extra);
+    }
+
+    /**
+     * The answer as stored, or why the question does not take it.
+     *
+     * @return array{0: int|float|string|bool|null, 1: string, 2: array<string, int>}
+     */
+    private static function judge(TemplateField $field, mixed $value): array
     {
         switch ($field->type) {
             case 'rating':
-                if (! is_numeric($value) || (int) $value != $value || $value < 1 || $value > 5) {
-                    self::fail($field, 'rating');
-                }
-
-                return (int) $value;
+                return ! is_numeric($value) || (int) $value != $value || $value < 1 || $value > 5 ? [null, 'rating', []] : [(int) $value, '', []];
             case 'number':
                 if (! is_numeric($value) || ($field->min !== null && $value < $field->min) || ($field->max !== null && $value > $field->max) || abs((float) $value) > 100000) {
-                    self::fail($field, 'number', ['min' => $field->min ?? 0, 'max' => $field->max ?? 100000]);
+                    return [null, 'number', ['min' => $field->min ?? 0, 'max' => $field->max ?? 100000]];
                 }
                 $number = round((float) $value, 2);
 
-                return $number == (int) $number ? (int) $number : $number;
+                return [$number == (int) $number ? (int) $number : $number, '', []];
             case 'choice':
-                if (! is_string($value) || ! array_key_exists($value, $field->choices())) {
-                    self::fail($field, 'choice');
-                }
-
-                return $value;
+                return ! is_string($value) || ! array_key_exists($value, $field->choices('en')) ? [null, 'choice', []] : [$value, '', []];
             case 'yes_no':
                 $bool = filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
-                if ($bool === null) {
-                    self::fail($field, 'yes_no');
-                }
 
-                return $bool;
+                return $bool === null ? [null, 'yes_no', []] : [$bool, '', []];
             default:
-                if (! is_scalar($value) || mb_strlen((string) $value) > self::TEXT_MAX) {
-                    self::fail($field, 'text', ['max' => self::TEXT_MAX]);
-                }
-
-                return (string) $value;
+                return ! is_scalar($value) || mb_strlen((string) $value) > self::TEXT_MAX ? [null, 'text', ['max' => self::TEXT_MAX]] : [(string) $value, '', []];
         }
     }
 

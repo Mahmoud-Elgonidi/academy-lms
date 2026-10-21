@@ -26,6 +26,7 @@ Future<void> bootstrap({AppConfig? config, Secrets? secrets}) async {
   LicenseRegistry.addLicense(() async* {
     final text = await rootBundle.loadString('assets/fonts/OFL.txt');
     yield LicenseEntryWithLineBreaks(const ['Readex Pro', 'IBM Plex Sans Arabic', 'Baloo Bhaijaan 2', 'Rubik'], text);
+    yield LicenseEntryWithLineBreaks(const ['Amiri Quran'], await rootBundle.loadString('assets/fonts/OFL-AmiriQuran.txt'));
   });
   // Western digits in dates, as the API writes its labels.
   DateFormat.useNativeDigitsByDefaultFor('ar', false);

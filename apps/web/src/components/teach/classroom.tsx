@@ -4,12 +4,14 @@ import '@livekit/components-styles';
 import { ControlBar, GridLayout, LiveKitRoom, ParticipantTile, RoomAudioRenderer, useIsRecording, useRoomInfo, useTracks } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import { useTranslations } from 'next-intl';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, type ReactNode } from 'react';
 import { joinLesson, recordLesson } from '@/lib/actions/shared';
+import type { MushafPage } from '@/lib/mushaf/types';
 import type { LessonRecording } from '@/lib/recordings';
 import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
-import { Button, Card, Notice, buttonLook } from '@/components/ui';
+import { Mushaf } from '@/components/mushaf/mushaf';
+import { Button, Card, Notice, buttonLook, join } from '@/components/ui';
 import type { JoinTicket } from '@/lib/teach/types';
 
 type Stage = { kind: 'ready' } | { kind: 'in'; ticket: JoinTicket; recording: LessonRecording } | { kind: 'left' };
@@ -21,14 +23,22 @@ type Stage = { kind: 'ready' } | { kind: 'in'; ticket: JoinTicket; recording: Le
  * says so; they can switch it on); an outside link opens in a new tab.
  * Attendance comes from the room itself (webhooks), not from this page.
  * Everyone sees when the lesson is being recorded; its teacher starts and
- * stops it here, once everyone it records agreed.
+ * stops it here, once everyone it records agreed. A Quran lesson of a course
+ * the hifz map belongs to has its shared mushaf: beside the room on a wide
+ * screen (a switch between the video and the mushaf on a phone, the sound
+ * going on), and under the card otherwise, so a lesson on an outside link
+ * keeps it open beside the meeting.
  */
-export function Classroom({ id, back }: { id: string; back: { href: string; label: string } }) {
+export function Classroom({ id, back, mushaf: first = null }: { id: string; back: { href: string; label: string }; mushaf?: MushafPage | null }) {
   const t = useTranslations('teach');
+  const m = useTranslations('mushaf');
   const common = useTranslations('common');
   const [stage, setStage] = useState<Stage>({ kind: 'ready' });
   const [message, setMessage] = useState<string>();
   const [pending, start] = useTransition();
+  // The mushaf as last drawn, so it starts from there when the room opens or closes around it.
+  const [mushaf, setMushaf] = useState(first);
+  const [view, setView] = useState<'video' | 'mushaf'>('video');
 
   const enter = () =>
     start(async () => {
@@ -45,8 +55,29 @@ export function Classroom({ id, back }: { id: string; back: { href: string; labe
     });
 
   if (stage.kind === 'in' && stage.ticket.provider === 'livekit' && stage.ticket.token) {
+    const video = (
+      <div data-lk-theme="default" className={join('overflow-hidden rounded-card border border-line bg-black', mushaf && view === 'mushaf' && 'max-lg:hidden')} style={{ height: 'min(78dvh, 720px)' }}>
+        <Room lesson={id} recording={stage.recording} />
+      </div>
+    );
     return (
-      <div className="overflow-hidden rounded-card border border-line bg-black" style={{ height: 'min(78dvh, 720px)' }}>
+      <div className="space-y-3">
+        {mushaf ? (
+          <div role="group" aria-label={m('views')} className="grid grid-cols-2 gap-1 rounded-control border border-line bg-white p-1 lg:hidden">
+            {(['video', 'mushaf'] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                aria-pressed={view === v}
+                onClick={() => setView(v)}
+                className={join('inline-flex min-h-10 items-center justify-center gap-2 rounded-control text-sm font-semibold', view === v ? 'bg-brand text-white' : 'text-ink hover:bg-brand-soft')}
+              >
+                <Icon name={v === 'video' ? 'video' : 'book'} size={16} />
+                {v === 'video' ? m('video') : m('title')}
+              </button>
+            ))}
+          </div>
+        ) : null}
         <LiveKitRoom
           serverUrl={stage.ticket.url}
           token={stage.ticket.token}
@@ -54,29 +85,47 @@ export function Classroom({ id, back }: { id: string; back: { href: string; labe
           video={stage.ticket.can_publish && stage.ticket.camera !== false}
           audio={stage.ticket.can_publish}
           onDisconnected={() => setStage({ kind: 'left' })}
-          data-lk-theme="default"
-          style={{ height: '100%' }}
+          className={mushaf ? 'lg:grid lg:grid-cols-2 lg:gap-4' : undefined}
+          style={{ height: 'auto' }}
         >
-          <Room lesson={id} recording={stage.recording} />
+          {video}
+          {mushaf ? (
+            // Inside the room, so the teacher's changes reach the others over its data channel.
+            <div className={join('lg:h-[min(78dvh,720px)]', view === 'video' && 'max-lg:hidden')}>
+              <Mushaf initial={mushaf} onChange={setMushaf} fill readOnMount />
+            </div>
+          ) : null}
+          {/* The sound goes on whichever of the two a phone shows. */}
+          <RoomAudioRenderer />
         </LiveKitRoom>
       </div>
     );
   }
 
+  const withMushaf = (card: ReactNode) =>
+    mushaf ? (
+      <div className="space-y-4">
+        {card}
+        <Mushaf initial={mushaf} onChange={setMushaf} readOnMount={stage.kind !== 'ready'} />
+      </div>
+    ) : (
+      card
+    );
+
   if (stage.kind === 'in') {
-    return (
+    return withMushaf(
       <Card className="space-y-4">
         <p className="text-muted">{t('externalLead')}</p>
         <a href={stage.ticket.url} target="_blank" rel="noopener noreferrer" className={buttonLook('primary')}>
           <Icon name="video" size={18} />
           {t('openLink')}
         </a>
-      </Card>
+      </Card>,
     );
   }
 
   if (stage.kind === 'left') {
-    return (
+    return withMushaf(
       <Card className="space-y-4 text-center">
         <p>{t('roomEnded')}</p>
         <div className="flex flex-wrap justify-center gap-2">
@@ -87,11 +136,11 @@ export function Classroom({ id, back }: { id: string; back: { href: string; labe
             {back.label}
           </Link>
         </div>
-      </Card>
+      </Card>,
     );
   }
 
-  return (
+  return withMushaf(
     <Card className="space-y-4">
       <p className="text-muted">{t('classLead')}</p>
       {message ? <Notice tone="attention">{message}</Notice> : null}
@@ -99,7 +148,7 @@ export function Classroom({ id, back }: { id: string; back: { href: string; labe
         <Icon name="video" size={18} />
         {pending ? t('connecting') : t('enterRoom')}
       </Button>
-    </Card>
+    </Card>,
   );
 }
 
@@ -122,7 +171,6 @@ function Room({ lesson, recording }: { lesson: string; recording: LessonRecordin
         <ParticipantTile />
       </GridLayout>
       <ControlBar variation="minimal" controls={{ chat: false }} />
-      <RoomAudioRenderer />
     </div>
   );
 }

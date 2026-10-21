@@ -24,7 +24,10 @@ final class LearningData implements PersonalDataSource
 
     public function export(string $userId): PersonalDataPart
     {
-        $submissions = $this->submissions($userId)->get(['s.homework_id', 's.body', 's.file_path', 's.file_name', 's.submitted_at']);
+        $submissions = $this->submissions($userId)->get(['s.id', 's.homework_id', 's.body', 's.file_path', 's.file_name', 's.submitted_at']);
+        // A recording's check (for the teacher) is about the learner too: what was heard and how it went.
+        $checks = DB::table('submission_checks')->whereIn('submission_id', $submissions->pluck('id'))->where('status', 'ready')
+            ->get(['submission_id', 'heard', 'result', 'checked_at'])->keyBy('submission_id');
         $files = [];
         foreach ($submissions as $i => $s) {
             if ($s->file_path !== null) {
@@ -36,7 +39,12 @@ final class LearningData implements PersonalDataSource
             'homework' => DB::table('homework')->where('student_id', $userId)->orderBy('created_at')
                 ->get(['id', 'title', 'instructions', 'due_at', 'status', 'grade', 'feedback', 'created_at'])
                 ->map(fn (object $h) => (array) $h + ['handed_in' => $submissions->where('homework_id', $h->id)
-                    ->map(fn (object $s) => ['text' => $s->body, 'file' => $s->file_path === null ? null : ($files[$s->file_path] ?? null), 'at' => $s->submitted_at])->values()->all()])
+                    ->map(fn (object $s) => ['text' => $s->body, 'file' => $s->file_path === null ? null : ($files[$s->file_path] ?? null), 'at' => $s->submitted_at]
+                        + (isset($checks[$s->id]) ? ['recitation_check' => [
+                            'heard' => $checks[$s->id]->heard,
+                            'summary' => json_decode((string) $checks[$s->id]->result, true)['summary'] ?? null,
+                            'at' => $checks[$s->id]->checked_at,
+                        ]] : []))->values()->all()])
                 ->all(),
             'lesson_reports' => DB::table('session_reports')->where('student_id', $userId)->where('status', 'submitted')->orderBy('session_starts_at')
                 ->get(['session_starts_at as lesson_at', 'kind', 'engagement', 'overall', 'notes_for_student', 'absence_note', 'submitted_at'])->map(fn (object $r) => (array) $r)->all(),
@@ -48,7 +56,34 @@ final class LearningData implements PersonalDataSource
             'cheers' => DB::table('cheers')->where(fn ($q) => $q->where('student_id', $userId)->orWhere('from_id', $userId))->orderBy('created_at')
                 ->select(['kind', 'created_at'])->selectRaw("case when from_id = ? then 'sent' else 'received' end as direction", [$userId])
                 ->get()->map(fn (object $c) => (array) $c)->all(),
+            // The weekly notes to their guardians: what each said (the child as {child}) and when it went out.
+            'weekly_notes' => DB::table('weekly_digests')->where('student_id', $userId)->where('status', 'sent')->orderBy('week_start')
+                ->get(['week_start', 'source', 'text_ar', 'text_en', 'sent_at'])->map(fn (object $d) => (array) $d)->all(),
+            // The hifz map: each page's state and next review, every review and where it came from, and the pages recited (how each went).
+            'hifz_pages' => DB::table('hifz_pages')->where('student_id', $userId)->orderBy('page')
+                ->get(['page', 'state', 'due_at', 'last_reviewed_at', 'reviews', 'lapses'])->map(fn (object $p) => (array) $p)->all(),
+            'hifz_reviews' => DB::table('hifz_reviews')->where('student_id', $userId)->orderBy('reviewed_at')
+                ->get(['page', 'grade', 'source', 'reviewed_at'])->map(fn (object $r) => (array) $r)->all(),
+            'hifz_recited' => DB::table('hifz_recitations')->where('student_id', $userId)->orderBy('created_at')
+                ->get(['page', 'status', 'grade', 'created_at'])->map(fn (object $r) => (array) $r)->all(),
+            // The mistakes notebook: the words their teachers marked in their lessons' shared mushaf.
+            'mistakes' => DB::table('recitation_mistakes')->where('student_id', $userId)->orderBy('created_at')
+                ->get(['surah', 'verse', 'word', 'kind', 'created_at'])->map(fn (object $m) => (array) $m)->all(),
         ], $files);
+    }
+
+    /** The hifz map, its reviews, the pages recited (a recording still waiting to be heard with them) and the mistakes notebook. */
+    private function eraseHifz(string $userId): int
+    {
+        $waiting = DB::table('hifz_recitations')->where('student_id', $userId)->whereNotNull('file_path')->pluck('file_path')->all();
+        if ($waiting !== []) {
+            DB::afterCommit(fn () => Storage::disk(SubmitHomework::DISK)->delete($waiting));
+        }
+
+        return DB::table('recitation_mistakes')->where('student_id', $userId)->delete()
+            + DB::table('hifz_recitations')->where('student_id', $userId)->delete()
+            + DB::table('hifz_reviews')->where('student_id', $userId)->delete()
+            + DB::table('hifz_pages')->where('student_id', $userId)->delete();
     }
 
     public function blockers(string $userId): array
@@ -68,6 +103,8 @@ final class LearningData implements PersonalDataSource
             'homework_handed_in' => $handedIn,
             'challenges' => DB::table('challenge_claims')->where('student_id', $userId)->delete(),
             'cheers' => DB::table('cheers')->where(fn ($q) => $q->where('student_id', $userId)->orWhere('from_id', $userId))->delete(),
+            'weekly_notes' => DB::table('weekly_digests')->where('student_id', $userId)->delete(),
+            'hifz' => $this->eraseHifz($userId),
         ];
     }
 

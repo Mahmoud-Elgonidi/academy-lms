@@ -3704,6 +3704,174 @@ abstract class AppLocalizations {
   /// **'ابدأ من الأول'**
   String get discardDraft;
 
+  /// No description provided for @voiceTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسودة من رسالة صوتية'**
+  String get voiceTitle;
+
+  /// No description provided for @voiceHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'قول عملتوا إيه، والطالب كان عامل إزاي، والواجب. المسودة بتملا الخانات الفاضية بس، وإنت بتراجعها قبل ما تبعت.'**
+  String get voiceHint;
+
+  /// No description provided for @voiceRecord.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل رسالة'**
+  String get voiceRecord;
+
+  /// No description provided for @voiceWorking.
+  ///
+  /// In ar, this message translates to:
+  /// **'بنسمع ونكتب المسودة…'**
+  String get voiceWorking;
+
+  /// No description provided for @voiceDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{الرسالة مازوّدتش حاجة جديدة: الفورم كان فيه كل ده.} =1{المسودة ملت خانة واحدة. راجعها قبل ما تبعت.} =2{المسودة ملت خانتين. راجعهم قبل ما تبعت.} few{المسودة ملت {n} خانات. راجعهم قبل ما تبعت.} other{المسودة ملت {n} خانة. راجعهم قبل ما تبعت.}}'**
+  String voiceDone(int n);
+
+  /// No description provided for @voiceHeard.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي اتسمع'**
+  String get voiceHeard;
+
+  /// No description provided for @voiceUnsure.
+  ///
+  /// In ar, this message translates to:
+  /// **'راجع دول: المسودة مكانتش متأكدة'**
+  String get voiceUnsure;
+
+  /// No description provided for @voiceLeft.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه محتاج: {fields}'**
+  String voiceLeft(String fields);
+
+  /// No description provided for @voiceLimit.
+  ///
+  /// In ar, this message translates to:
+  /// **'لحد دقيقتين'**
+  String get voiceLimit;
+
+  /// No description provided for @voiceKept.
+  ///
+  /// In ar, this message translates to:
+  /// **'التسجيل بيتمسح أول ما يتسمع، وعمره ما بيتحفظ.'**
+  String get voiceKept;
+
+  /// No description provided for @suggested.
+  ///
+  /// In ar, this message translates to:
+  /// **'مقترح'**
+  String get suggested;
+
+  /// No description provided for @checkThis.
+  ///
+  /// In ar, this message translates to:
+  /// **'راجعه'**
+  String get checkThis;
+
+  /// No description provided for @reciteTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصحيح التسميع'**
+  String get reciteTitle;
+
+  /// No description provided for @reciteToggle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصحيح التسميع آلي'**
+  String get reciteToggle;
+
+  /// No description provided for @reciteHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'لما الطالب يسلّم تسجيل، بنعلّم لك على الكلمات اللي ناقصة أو غلط. ليك إنت بس، والأسرة مابتشوفوش.'**
+  String get reciteHint;
+
+  /// No description provided for @reciteSuggestion.
+  ///
+  /// In ar, this message translates to:
+  /// **'من نص الدرس: {title}'**
+  String reciteSuggestion(String title);
+
+  /// No description provided for @reciteFromMistakes.
+  ///
+  /// In ar, this message translates to:
+  /// **'من أخطاء الحصة: {title}'**
+  String reciteFromMistakes(String title);
+
+  /// No description provided for @reciteSurah.
+  ///
+  /// In ar, this message translates to:
+  /// **'السورة'**
+  String get reciteSurah;
+
+  /// No description provided for @reciteChooseSurah.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار السورة'**
+  String get reciteChooseSurah;
+
+  /// No description provided for @reciteSearch.
+  ///
+  /// In ar, this message translates to:
+  /// **'دوّر على سورة'**
+  String get reciteSearch;
+
+  /// No description provided for @reciteFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'من آية'**
+  String get reciteFrom;
+
+  /// No description provided for @reciteTo.
+  ///
+  /// In ar, this message translates to:
+  /// **'لحد آية'**
+  String get reciteTo;
+
+  /// No description provided for @reciteWhat.
+  ///
+  /// In ar, this message translates to:
+  /// **'التسميع: {title}'**
+  String reciteWhat(String title);
+
+  /// No description provided for @reciteMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'ناقصة'**
+  String get reciteMissing;
+
+  /// No description provided for @reciteWrong.
+  ///
+  /// In ar, this message translates to:
+  /// **'غلط'**
+  String get reciteWrong;
+
+  /// No description provided for @reciteExtra.
+  ///
+  /// In ar, this message translates to:
+  /// **'زيادة'**
+  String get reciteExtra;
+
+  /// No description provided for @reciteSaid.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتقال: {word}'**
+  String reciteSaid(String word);
+
+  /// No description provided for @reciteHeard.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي اتسمع'**
+  String get reciteHeard;
+
   /// No description provided for @drafts.
   ///
   /// In ar, this message translates to:
@@ -6145,6 +6313,522 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'مفيش لعبة للواجب ده دلوقتي.'**
   String get homeworkNoGame;
+
+  /// No description provided for @hifzTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'خريطة الحفظ'**
+  String get hifzTitle;
+
+  /// No description provided for @hifzTitleKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'خريطة حفظي'**
+  String get hifzTitleKids;
+
+  /// No description provided for @hifzTitleOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'خريطة حفظ {name}'**
+  String hifzTitleOf(String name);
+
+  /// No description provided for @hifzNoText.
+  ///
+  /// In ar, this message translates to:
+  /// **'نص القرآن لسه مش موجود، والخريطة هتظهر أول ما يوصل.'**
+  String get hifzNoText;
+
+  /// No description provided for @hifzMemorized.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{لسه مفيش صفحات محفوظة من {total}} =1{صفحة واحدة محفوظة من {total}} =2{صفحتين محفوظين من {total}} few{{n} صفحات محفوظة من {total}} other{{n} صفحة محفوظة من {total}}}'**
+  String hifzMemorized(int n, int total);
+
+  /// No description provided for @hifzMemorizedKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{لسه ماحفظتش صفحات. يلا نبدأ!} =1{حفظت صفحة واحدة! ⭐} =2{حفظت صفحتين! ⭐} few{حفظت {n} صفحات! ⭐} other{حفظت {n} صفحة! ⭐}}'**
+  String hifzMemorizedKids(int n);
+
+  /// No description provided for @hifzJuz.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجزء {n}'**
+  String hifzJuz(int n);
+
+  /// No description provided for @hifzJuzSummary.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجزء {n}: {summary}'**
+  String hifzJuzSummary(int n, String summary);
+
+  /// No description provided for @hifzPageNumber.
+  ///
+  /// In ar, this message translates to:
+  /// **'صفحة {page}'**
+  String hifzPageNumber(int page);
+
+  /// No description provided for @hifzPageOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'صفحة {page} · الجزء {juz}'**
+  String hifzPageOf(int page, int juz);
+
+  /// No description provided for @hifzToday.
+  ///
+  /// In ar, this message translates to:
+  /// **'ورد النهارده'**
+  String get hifzToday;
+
+  /// No description provided for @hifzTodayProgress.
+  ///
+  /// In ar, this message translates to:
+  /// **'خلص {done} من {daily, plural, =1{صفحة واحدة} =2{صفحتين} few{{daily} صفحات} other{{daily} صفحة}}'**
+  String hifzTodayProgress(int done, int daily);
+
+  /// No description provided for @hifzTodayDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'ورد النهارده خلص. برافو!'**
+  String get hifzTodayDone;
+
+  /// No description provided for @hifzTodayNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش صفحات عليها مراجعة النهارده.'**
+  String get hifzTodayNone;
+
+  /// No description provided for @hifzWirdDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'ورد النهارده خلص!'**
+  String get hifzWirdDone;
+
+  /// No description provided for @hifzWirdDoneKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'خلّصت وردك! 🎉'**
+  String get hifzWirdDoneKids;
+
+  /// No description provided for @hifzOverdue.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{متأخرة يوم} =2{متأخرة يومين} few{متأخرة {n} أيام} other{متأخرة {n} يوم}}'**
+  String hifzOverdue(int n);
+
+  /// No description provided for @hifzReveal.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكشف الصفحة'**
+  String get hifzReveal;
+
+  /// No description provided for @hifzRevealHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'سمّع الصفحة من حفظك الأول، وبعدين اكشفها واتأكد.'**
+  String get hifzRevealHint;
+
+  /// No description provided for @hifzHowWent.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحفظ كان عامل إزاي؟'**
+  String get hifzHowWent;
+
+  /// No description provided for @hifzGrade1.
+  ///
+  /// In ar, this message translates to:
+  /// **'نسيتها'**
+  String get hifzGrade1;
+
+  /// No description provided for @hifzGrade2.
+  ///
+  /// In ar, this message translates to:
+  /// **'بصعوبة'**
+  String get hifzGrade2;
+
+  /// No description provided for @hifzGrade3.
+  ///
+  /// In ar, this message translates to:
+  /// **'كويس'**
+  String get hifzGrade3;
+
+  /// No description provided for @hifzGrade4.
+  ///
+  /// In ar, this message translates to:
+  /// **'سهلة'**
+  String get hifzGrade4;
+
+  /// No description provided for @hifzNextReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتسجّلت. الصفحة دي هترجعلك {day}.'**
+  String hifzNextReview(String day);
+
+  /// No description provided for @hifzRecite.
+  ///
+  /// In ar, this message translates to:
+  /// **'سمّع الصفحة'**
+  String get hifzRecite;
+
+  /// No description provided for @hifzReciteKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'سمّع صفحة'**
+  String get hifzReciteKids;
+
+  /// No description provided for @hifzReciteHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل الصفحة من حفظك، وهنصحّحها كلمة كلمة.'**
+  String get hifzReciteHint;
+
+  /// No description provided for @hifzSendRecitation.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابعت التسميع'**
+  String get hifzSendRecitation;
+
+  /// No description provided for @hifzListening.
+  ///
+  /// In ar, this message translates to:
+  /// **'بنسمع التسميع…'**
+  String get hifzListening;
+
+  /// No description provided for @hifzListeningHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'النتيجة هتظهر هنا لوحدها.'**
+  String get hifzListeningHint;
+
+  /// No description provided for @hifzSelfGrade.
+  ///
+  /// In ar, this message translates to:
+  /// **'قيّم الصفحة بنفسك'**
+  String get hifzSelfGrade;
+
+  /// No description provided for @hifzLatest.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر تسميع'**
+  String get hifzLatest;
+
+  /// No description provided for @hifzWird.
+  ///
+  /// In ar, this message translates to:
+  /// **'ورد الحفظ'**
+  String get hifzWird;
+
+  /// No description provided for @hifzCardLeft.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{فاضل صفحة واحدة النهارده} =2{فاضل صفحتين النهارده} few{فاضل {n} صفحات النهارده} other{فاضل {n} صفحة النهارده}}'**
+  String hifzCardLeft(int n);
+
+  /// No description provided for @hifzCardDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'خلص النهارده'**
+  String get hifzCardDone;
+
+  /// No description provided for @hifzCardNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش صفحات النهارده'**
+  String get hifzCardNone;
+
+  /// No description provided for @hifzCardKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{خلّصت وردك النهارده! ⭐} =1{فاضلك صفحة واحدة تسمّعها} =2{فاضلك صفحتين تسمّعهم} few{فاضلك {n} صفحات تسمّعها} other{فاضلك {n} صفحة تسمّعها}}'**
+  String hifzCardKids(int n);
+
+  /// No description provided for @hifzTell.
+  ///
+  /// In ar, this message translates to:
+  /// **'قول اللي حافظه'**
+  String get hifzTell;
+
+  /// No description provided for @hifzClear.
+  ///
+  /// In ar, this message translates to:
+  /// **'شيل صفحات'**
+  String get hifzClear;
+
+  /// No description provided for @hifzClearHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصفحات اللي هتشيلها هترجع جديدة على الخريطة، ومراجعاتها القديمة هتفضل.'**
+  String get hifzClearHint;
+
+  /// No description provided for @hifzClearConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'تشيل الصفحات دي من الخريطة؟'**
+  String get hifzClearConfirm;
+
+  /// No description provided for @hifzParts.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأجزاء'**
+  String get hifzParts;
+
+  /// No description provided for @hifzSurahs.
+  ///
+  /// In ar, this message translates to:
+  /// **'السور'**
+  String get hifzSurahs;
+
+  /// No description provided for @hifzSurahHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب اسم السورة أو رقمها'**
+  String get hifzSurahHint;
+
+  /// No description provided for @hifzHowWell.
+  ///
+  /// In ar, this message translates to:
+  /// **'حافظها إزاي؟'**
+  String get hifzHowWell;
+
+  /// No description provided for @hifzChosen.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مااخترتش صفحات لسه} =1{صفحة واحدة} =2{صفحتين} few{{n} صفحات} other{{n} صفحة}}'**
+  String hifzChosen(int n);
+
+  /// No description provided for @hifzSave.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل'**
+  String get hifzSave;
+
+  /// No description provided for @hifzMarked.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مااتسجّلش صفحات} =1{اتسجّلت صفحة واحدة} =2{اتسجّلت صفحتين} few{اتسجّلت {n} صفحات} other{اتسجّلت {n} صفحة}}'**
+  String hifzMarked(int n);
+
+  /// No description provided for @hifzCleared.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مفيش صفحات اتشالت} =1{اتشالت صفحة واحدة} =2{اتشالت صفحتين} few{اتشالت {n} صفحات} other{اتشالت {n} صفحة}}'**
+  String hifzCleared(int n);
+
+  /// No description provided for @hifzRecent.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر المراجعات'**
+  String get hifzRecent;
+
+  /// No description provided for @hifzRecentNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش مراجعات في آخر أسبوعين.'**
+  String get hifzRecentNone;
+
+  /// No description provided for @mushafTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'المصحف'**
+  String get mushafTitle;
+
+  /// No description provided for @mushafOpen.
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح المصحف'**
+  String get mushafOpen;
+
+  /// No description provided for @mushafNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحصة دي مفيهاش مصحف.'**
+  String get mushafNone;
+
+  /// No description provided for @mushafPrevious.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي قبلها'**
+  String get mushafPrevious;
+
+  /// No description provided for @mushafNext.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي بعدها'**
+  String get mushafNext;
+
+  /// No description provided for @mushafPageField.
+  ///
+  /// In ar, this message translates to:
+  /// **'صفحة'**
+  String get mushafPageField;
+
+  /// No description provided for @mushafPageOfTotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'من {total}'**
+  String mushafPageOfTotal(int total);
+
+  /// No description provided for @mushafFollowing.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصفحة بتتقلّب مع المدرّس.'**
+  String get mushafFollowing;
+
+  /// No description provided for @mushafBackToTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'ارجع لصفحة المدرّس'**
+  String get mushafBackToTeacher;
+
+  /// No description provided for @mushafTeacherOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'المدرّس على صفحة {page}'**
+  String mushafTeacherOn(int page);
+
+  /// No description provided for @mushafHintTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'دوس على أي كلمة عشان تعلّمها، والطالب بيشوف الصفحة اللي إنت فاتحها.'**
+  String get mushafHintTeacher;
+
+  /// No description provided for @mushafMarkingClosed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعليم الكلمات بيفتح مع أوضة الحصة، وبيقفل لما تسلّم التقرير.'**
+  String get mushafMarkingClosed;
+
+  /// No description provided for @mushafMarkWord.
+  ///
+  /// In ar, this message translates to:
+  /// **'علّم الكلمة'**
+  String get mushafMarkWord;
+
+  /// No description provided for @mushafClearMark.
+  ///
+  /// In ar, this message translates to:
+  /// **'امسح العلامة'**
+  String get mushafClearMark;
+
+  /// No description provided for @mushafEarlier.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتعلّمت في حصة قبل كده'**
+  String get mushafEarlier;
+
+  /// No description provided for @mushafWordMarked.
+  ///
+  /// In ar, this message translates to:
+  /// **'{word}: {kind}'**
+  String mushafWordMarked(String word, String kind);
+
+  /// No description provided for @mushafWordEarlier.
+  ///
+  /// In ar, this message translates to:
+  /// **'{word}: {kind}، اتعلّمت في حصة قبل كده {times}'**
+  String mushafWordEarlier(String word, String kind, String times);
+
+  /// No description provided for @mushafVerseEnd.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر الآية {n}'**
+  String mushafVerseEnd(int n);
+
+  /// No description provided for @mushafSurah.
+  ///
+  /// In ar, this message translates to:
+  /// **'سورة {name}'**
+  String mushafSurah(String name);
+
+  /// No description provided for @mushafShow.
+  ///
+  /// In ar, this message translates to:
+  /// **'المصحف'**
+  String get mushafShow;
+
+  /// No description provided for @mushafShowVideo.
+  ///
+  /// In ar, this message translates to:
+  /// **'الفيديو'**
+  String get mushafShowVideo;
+
+  /// No description provided for @mushafBackToVideo.
+  ///
+  /// In ar, this message translates to:
+  /// **'ارجع للفيديو'**
+  String get mushafBackToVideo;
+
+  /// No description provided for @mushafFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'ماقدرناش نحفظ. جرّب تاني.'**
+  String get mushafFailed;
+
+  /// No description provided for @mistakesTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'دفتر الأخطاء'**
+  String get mistakesTitle;
+
+  /// No description provided for @mistakesTitleKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلمات بنراجعها'**
+  String get mistakesTitleKids;
+
+  /// No description provided for @mistakesLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكلمات اللي اتعلّم عليها في الحصص في آخر ست شهور، عشان تراجعها.'**
+  String get mistakesLead;
+
+  /// No description provided for @mistakesLeadTeacher.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكلمات اللي اتعلّم عليها في حصص الطالب في آخر ست شهور.'**
+  String get mistakesLeadTeacher;
+
+  /// No description provided for @mistakesLeadKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'دي كلمات هنقولها تاني مع بعض لحد ما تبقى سهلة.'**
+  String get mistakesLeadKids;
+
+  /// No description provided for @mistakesEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش كلمات متعلّمة في آخر ست شهور.'**
+  String get mistakesEmpty;
+
+  /// No description provided for @mistakesEmptyKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش كلمات نراجعها دلوقتي. شاطر! ⭐'**
+  String get mistakesEmptyKids;
+
+  /// No description provided for @mistakesWords.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{مفيش كلمات} =1{كلمة واحدة} =2{كلمتين} few{{n} كلمات} other{{n} كلمة}}'**
+  String mistakesWords(int n);
+
+  /// No description provided for @mistakesTimes.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =1{مرة} =2{مرتين} few{{n} مرات} other{{n} مرة}}'**
+  String mistakesTimes(int n);
+
+  /// No description provided for @mistakesWord.
+  ///
+  /// In ar, this message translates to:
+  /// **'{word}: {kinds}، {times}، آخر مرة {when}'**
+  String mistakesWord(String word, String kinds, String times, String when);
+
+  /// No description provided for @mistakesWordKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'{word}: كلمة بنراجعها'**
+  String mistakesWordKids(String word);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -216,12 +216,14 @@ it('keeps every record of one academy out of reach of another academy\'s people'
             // Announcements: this academy's only; the demo's, asked for by id, is not found.
             'admin/announcements', 'admin/announcements?announcement={announcement}',
             // "Start here": this academy's own setup, read from its own rows.
-            'admin/start-here'],
+            'admin/start-here',
+            // The academy's hifz: its own courses only; the demo's student, asked for by course, is not found.
+            'admin/hifz', 'admin/hifz/{enrollment}'],
         'accountant' => ['admin/invoices/{invoice}', 'admin/payroll/{teacher}', 'billing/proofs/{proof}/file'],
-        'teacher' => ['teach/reports/{report}', 'teach/reports/{report}/game', 'teach/students/{enrollment}', 'class/{session}', 'class/{session}/go', 'learning/files/{submission}',
-            'support/files/{message}', 'people/checks/{check}/file'],
-        'guardian' => ['my', 'class/{session}', 'learning/files/{submission}', 'support/files/{message}', 'billing/proofs/{proof}/file'],
-        'student' => ['class/{session}', 'class/{session}/go', 'learning/files/{submission}'],
+        'teacher' => ['teach/reports/{report}', 'teach/reports/{report}/game', 'teach/students/{enrollment}', 'class/{session}', 'class/{session}/go', 'class/{session}/mushaf',
+            'learning/files/{submission}', 'support/files/{message}', 'people/checks/{check}/file'],
+        'guardian' => ['my', 'class/{session}', 'class/{session}/mushaf', 'learning/files/{submission}', 'support/files/{message}', 'billing/proofs/{proof}/file'],
+        'student' => ['class/{session}', 'class/{session}/go', 'class/{session}/mushaf', 'learning/files/{submission}'],
     ];
     foreach ($pages as $role => $paths) {
         foreach ($paths as $path) {
@@ -236,10 +238,16 @@ it('keeps every record of one academy out of reach of another academy\'s people'
             $note($role, 'GET /'.$url, $response, $m[1] !== []);
         }
     }
-    foreach (['class/{session}/ticket', 'class/{session}/recording', 'class/{session}/recording/stop'] as $path) {
+    $posts = [
+        'class/{session}/ticket' => [], 'class/{session}/recording' => [], 'class/{session}/recording/stop' => [],
+        // The shared mushaf and the lesson's own channel, asked with what would pass on the demo's host.
+        'class/{session}/mushaf' => ['change' => 'turn', 'page' => 1],
+        'class/{session}/live/auth' => ['socket_id' => '1.1', 'channel_name' => 'private-lesson.'.$this->ids['session']],
+    ];
+    foreach ($posts as $path => $body) {
         app('auth')->forgetGuards();
         $this->flushSession();
-        $response = $this->actingAs($this->people['teacher'], 'web')->postJson('http://noor.lms.test/'.str_replace('{session}', $this->ids['session'], $path));
+        $response = $this->actingAs($this->people['teacher'], 'web')->postJson('http://noor.lms.test/'.str_replace('{session}', $this->ids['session'], $path), $body);
         $note('teacher', 'POST /'.$path, $response, true);
     }
 

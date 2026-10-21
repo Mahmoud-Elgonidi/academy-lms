@@ -2,6 +2,7 @@
 
 namespace Modules\Learning\Filament\Teacher;
 
+use Filament\Actions\Action;
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -14,13 +15,20 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 use Modules\Curriculum\Contracts\CurriculumApi;
+use Modules\Learning\Actions\Assist\DraftReportFromVoice;
+use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Actions\SubmitSessionReport;
+use Modules\Learning\Assist\RecitationTarget;
 use Modules\Learning\Domain\MasteryRule;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\LearningSettings;
@@ -29,19 +37,30 @@ use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\ReportFormQuery;
 use Modules\Learning\Queries\RoadmapQuery;
 use Modules\Learning\Templates\TemplateField;
+use Modules\SharedKernel\Ai\AcademyAi;
+use Modules\SharedKernel\Ai\AiFailed;
+use Modules\SharedKernel\Ai\AiFeature;
+use Modules\SharedKernel\Ai\AudioClip;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Files\CleanFile;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
  * The report form, filled in with today's plan (docs/architecture/02,
  * section 6, step 2): what was covered with an outcome and a score per
  * lesson, two ratings, notes, the subject's own questions (its report
- * template), and optional homework. Same Action as the API.
+ * template), and optional homework. Same Action as the API. When the
+ * academy turned the helper on, a voice note drafts what is still empty
+ * (DraftReportFromVoice): the teacher checks it, then sends as usual; and
+ * homework handed in by voice may say what to recite, so each recording is
+ * checked word by word for the teacher (RecitationTarget, CheckRecitation).
  *
  * @property-read Schema $form
  */
 final class WriteReport extends Page
 {
+    use WithFileUploads;
+
     protected string $view = 'learning::filament.teacher.write-report';
 
     protected static ?string $slug = 'reports/{report}';
@@ -52,9 +71,21 @@ final class WriteReport extends Page
 
     public ?array $data = [];
 
+    /** The teacher's voice note while it is heard (deleted as soon as it is). */
+    public ?TemporaryUploadedFile $voiceNote = null;
+
+    /** @var ?array{heard: string, filled: list<string>, unsure: list<string>, left: list<string>} what the last draft did */
+    public ?array $voiceDraft = null;
+
     private ?ReportTemplate $template = null;
 
     private bool $templateRead = false;
+
+    /** The passage of the report's lessons the form starts from, as it reads (null: none, or the homework has its own). */
+    public ?string $reciteSuggestion = null;
+
+    /** The passage most marked in this lesson's mushaf (surah, from, to, title), offered with one tap. */
+    public ?array $mistakesSuggestion = null;
 
     public static function canAccess(): bool
     {
@@ -67,6 +98,16 @@ final class WriteReport extends Page
         abort_unless($this->sessionReport->teacher_id === auth()->id(), 403);
 
         $homework = $this->sessionReport->homework()->first();
+        $target = app(RecitationTarget::class);
+        // What to recite: the homework's own, else the passage of the report's lessons, ready for when the teacher turns it on.
+        $recite = $target->present($homework?->expectedSource());
+        if ($recite === null && $this->sessionReport->kind === 'lesson') {
+            $recite = $target->suggestion(array_column(app(ReportFormQuery::class)->items($this->sessionReport), 'node_id'));
+            $this->reciteSuggestion = $recite['title'] ?? null;
+        }
+        if ($this->sessionReport->kind === 'lesson') {
+            $this->mistakesSuggestion = $target->fromMistakes($this->sessionReport->session_id);
+        }
         $this->form->fill([
             'items' => app(ReportFormQuery::class)->items($this->sessionReport),
             'engagement' => $this->sessionReport->engagement,
@@ -81,6 +122,8 @@ final class WriteReport extends Page
                 'accepts' => $homework->accepts ?? 'any',
                 'practice' => $homework?->hasPractice() ?? false,
                 'due_days' => $homework ? max(1, (int) round($this->sessionReport->submitted_at?->diffInDays($homework->due_at) ?? LearningSettings::current()->homework_days)) : LearningSettings::current()->homework_days,
+                'recite' => $homework?->expected !== null,
+                'expected' => ['surah' => $recite['surah'] ?? null, 'from' => $recite['from'] ?? null, 'to' => $recite['to'] ?? null],
             ],
         ]);
         if ($this->sessionReport->status === 'reviewed') {
@@ -163,14 +206,60 @@ final class WriteReport extends Page
                     TextInput::make('homework.title')->label(__('learning::teacher.write.homework_title'))->maxLength(200),
                     Textarea::make('homework.instructions')->label(__('learning::teacher.write.homework_instructions'))->rows(2)->maxLength(3000),
                     Grid::make(2)->schema([
-                        ToggleButtons::make('homework.accepts')->label(__('learning::teacher.write.accepts'))->inline()
+                        ToggleButtons::make('homework.accepts')->label(__('learning::teacher.write.accepts'))->inline()->live()
                             ->options(array_combine(Homework::ACCEPTS, array_map(fn ($a) => __('learning::homework.accepts.'.$a), Homework::ACCEPTS))),
                         Select::make('homework.due_days')->label(__('learning::teacher.write.due_days'))->native(false)
                             ->options(collect([1, 2, 3, 5, 7, 14])->mapWithKeys(fn ($d) => [$d => trans_choice('learning::teacher.write.days', $d, ['n' => $d])])),
                     ]),
                     Toggle::make('homework.practice')->label(__('learning::homework.practice.with'))->helperText(__('learning::homework.practice.with_hint')),
+                    ...$this->recitation(),
                 ]),
         ])));
+    }
+
+    /** Whether the form asks what the homework is to recite: the helper is on, or the homework already says. */
+    public function reciteOffered(): bool
+    {
+        return app(RecitationTarget::class)->offered() || $this->sessionReport->homework()->whereNotNull('expected')->exists();
+    }
+
+    /**
+     * What a homework handed in by voice asks to recite, for the teacher's check: a passage of the Quran by surah and verses.
+     *
+     * @return list<Field|Grid>
+     */
+    private function recitation(): array
+    {
+        if (! $this->reciteOffered()) {
+            return [];
+        }
+        $r = 'learning::recitation.';
+        $surahs = app(CurriculumApi::class)->surahs();
+        $voice = fn (Get $get) => in_array($get('homework.accepts'), RecitationTarget::ACCEPTS, true);
+        $on = fn (Get $get) => $voice($get) && (bool) $get('homework.recite');
+
+        return [
+            Toggle::make('homework.recite')->label(__($r.'toggle'))->helperText(__($r.'hint'))->live()->visible($voice)
+                ->hintAction(Action::make('fromMistakes')->link()
+                    ->label(fn () => __('learning::mushaf.from_mistakes', ['title' => $this->mistakesSuggestion['title'] ?? '']))
+                    ->visible(fn () => $this->mistakesSuggestion !== null)
+                    ->action(function (Set $set): void {
+                        $set('homework.recite', true);
+                        foreach (['surah', 'from', 'to'] as $key) {
+                            $set('homework.expected.'.$key, $this->mistakesSuggestion[$key] ?? null);
+                        }
+                    })),
+            Grid::make(3)->schema([
+                Select::make('homework.expected.surah')->label(__($r.'fields.surah'))->native(false)->searchable()->live()
+                    ->helperText($this->reciteSuggestion === null ? null : __($r.'suggestion', ['title' => $this->reciteSuggestion]))
+                    ->options(collect($surahs)->mapWithKeys(fn (array $s) => [$s['number'] => $s['number'].'. '.$s['name_ar'].' · '.$s['name_en']])->all())
+                    ->required($on),
+                TextInput::make('homework.expected.from')->label(__($r.'fields.from'))->numeric()->minValue(1)->required($on),
+                TextInput::make('homework.expected.to')->label(__($r.'fields.to'))->numeric()->minValue(1)
+                    ->maxValue(fn (Get $get) => collect($surahs)->firstWhere('number', (int) $get('homework.expected.surah'))['verses'] ?? null)
+                    ->required($on),
+            ])->visible($on),
+        ];
     }
 
     /** The subject's own questions (the version this report was handed in with, else the one now). */
@@ -215,15 +304,102 @@ final class WriteReport extends Page
         return $this->template;
     }
 
+    /** Whether this report can be drafted from a voice note (the academy's helper is on, the report not locked). */
+    public function voiceOn(): bool
+    {
+        return $this->sessionReport->status !== 'reviewed' && app(AcademyAi::class)->on(AiFeature::ReportDraft);
+    }
+
+    /** Fills what the form leaves empty from the voice note just uploaded; saves nothing. */
+    public function draftFromVoice(): void
+    {
+        abort_unless($this->sessionReport->teacher_id === auth()->id() && $this->voiceOn(), 403);
+        $this->validate(['voiceNote' => ['required', 'file', 'max:6144', 'mimetypes:'.implode(',', SubmitHomework::AUDIO), new CleanFile]]);
+        $state = $this->data ?? [];
+        $current = $state;
+        $current['items'] = array_values(array_map(fn (array $i) => array_intersect_key($i, array_flip(['node_id', 'outcome', 'score', 'note'])), $state['items'] ?? []));
+
+        try {
+            $draft = app(DraftReportFromVoice::class)->handle($this->sessionReport, (string) auth()->id(), AudioClip::fromUpload($this->voiceNote), $current);
+        } catch (AiFailed $e) {
+            Notification::make()->danger()->title(__('learning::assist.voice.title'))->body($e->sayable())->send();
+
+            return;
+        } catch (ValidationException $e) {
+            Notification::make()->danger()->title(__('learning::assist.voice.title'))->body(collect($e->errors())->flatten()->first())->send();
+
+            return;
+        } finally {
+            $this->voiceNote?->delete();
+            $this->voiceNote = null;
+        }
+
+        // The draft in the form: lessons keep their row (and the plan's reason; one it did not speak of stays as it
+        // is), a lesson the teacher spoke of comes in after them, and homework keeps its practice choice.
+        $report = $draft['report'];
+        $fields = array_flip(['node_id', 'outcome', 'score', 'note']);
+        $drafted = collect($report['items'] ?? [])->keyBy('node_id');
+        $rows = collect($state['items'] ?? [])->map(fn (array $i) => $drafted->has($i['node_id'] ?? '')
+            ? array_merge($i, array_intersect_key($drafted[$i['node_id']], $fields))
+            : $i);
+        $rows = $rows->concat($drafted->except($rows->pluck('node_id')->all())->map(fn (array $i) => ['reason' => null] + array_intersect_key($i, $fields)))->values()->all();
+        $this->form->fill(array_merge($state, array_filter([
+            'engagement' => $report['engagement'] ?? null,
+            'overall' => $report['overall'] ?? null,
+            'notes_for_student' => $report['notes_for_student'] ?? null,
+            'notes_internal' => $report['notes_internal'] ?? null,
+            'absence_note' => $report['absence_note'] ?? null,
+            'answers' => $report['answers'] ?? null,
+        ], fn ($v) => $v !== null), array_key_exists('items', $report) ? ['items' => $rows] : [], is_array($report['homework'] ?? null) ? [
+            'homework' => array_merge($state['homework'] ?? [], $report['homework'], ['practice' => (bool) ($state['homework']['practice'] ?? false)]),
+        ] : []));
+
+        $this->voiceDraft = ['heard' => $draft['heard'], 'filled' => $draft['filled'], 'unsure' => $this->fieldNames($draft['unsure']), 'left' => $this->fieldNames($draft['left'])];
+        Notification::make()->success()->title(trans_choice('learning::assist.voice.done', count($draft['filled']), ['count' => count($draft['filled'])]))->send();
+    }
+
+    /**
+     * The form's fields by the names the teacher reads.
+     *
+     * @param  list<string>  $fields  as the draft names them (engagement, items.{node}, answers.{key}…)
+     * @return list<string>
+     */
+    private function fieldNames(array $fields): array
+    {
+        $w = 'learning::teacher.write.';
+        $lessons = $this->sessionReport->kind === 'lesson' ? app(ReportFormQuery::class)->lessonOptions($this->sessionReport) : [];
+        $questions = collect($this->template()?->fieldList() ?? [])->mapWithKeys(fn (TemplateField $f) => [$f->key => $f->label()]);
+
+        return array_values(array_unique(array_map(function (string $field) use ($w, $lessons, $questions): string {
+            $parts = explode('.', $field);
+
+            return match ($parts[0]) {
+                'items' => isset($parts[1]) ? (string) str($lessons[$parts[1]] ?? __($w.'lesson'))->afterLast(' › ') : __($w.'plan'),
+                'answers' => $questions[$parts[1] ?? ''] ?? __('learning::templates.form.section'),
+                'homework' => __($w.'homework'),
+                default => __($w.$parts[0]),
+            };
+        }, $fields)));
+    }
+
     public function submit(): void
     {
         $data = $this->form->getState();
         $data['items'] = array_values(array_map(fn (array $i) => array_intersect_key($i, array_flip(['node_id', 'outcome', 'score', 'note'])), $data['items'] ?? []));
+        // What to recite goes only when the form asks it: the passage while the switch is on, else none.
+        $recite = (bool) ($data['homework']['recite'] ?? false) && in_array($data['homework']['accepts'] ?? null, RecitationTarget::ACCEPTS, true);
+        if ($this->reciteOffered()) {
+            $data['homework']['expected'] = $recite ? array_map(fn ($v) => $v === null || $v === '' ? null : (int) $v, $data['homework']['expected'] ?? []) : null;
+        } else {
+            unset($data['homework']['expected']);
+        }
+        unset($data['homework']['recite']);
 
         try {
             app(SubmitSessionReport::class)->handle($this->sessionReport, (string) auth()->id(), $data);
         } catch (ValidationException $e) {
-            throw ValidationException::withMessages(collect($e->errors())->mapWithKeys(fn ($messages, $key) => ["data.{$key}" => $messages])->all());
+            // Why what to recite cannot be checked shows under its switch.
+            throw ValidationException::withMessages(collect($e->errors())->mapWithKeys(fn ($messages, $key) => ['data.'.($key === 'homework.expected' ? 'homework.recite' : $key) => $messages])->all());
         }
 
         Notification::make()->success()->title(__('learning::teacher.write.sent'))->send();

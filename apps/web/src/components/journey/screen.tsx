@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { HifzCard } from '@/components/hifz/card';
 import { RefreshAt } from '@/components/live-refresh';
 import { Empty, Notice } from '@/components/ui';
 import { get } from '@/lib/api/server';
@@ -19,7 +20,8 @@ import { MiddleJourney } from './middle';
  * refreshes on the person's signals (lessons, homework, practice) and at the
  * moments the clock alone changes it (a lesson's room opening, the week's
  * chest closing). ?homework= starts that homework's practice; ?island= opens
- * an island (back from the album).
+ * an island (back from the album). With pages on the learner's hifz map, a
+ * card says what is left of today's review and opens it.
  */
 export async function JourneyScreen({ homework, island }: { homework?: string; island?: string }) {
   const [t, fam] = await Promise.all([getTranslations('journey'), family()]);
@@ -31,6 +33,7 @@ export async function JourneyScreen({ homework, island }: { homework?: string; i
   const autoplay = homeworkTarget(map, homework);
   const look = lookOf(map, fam.stage);
   const clock = <RefreshAt moments={journeyMoments(map)} />;
+  const hifz = map.hifz ? <HifzCard hifz={map.hifz} kids={look === 'kids'} /> : null;
   return (
     <>
       {clock}
@@ -40,13 +43,13 @@ export async function JourneyScreen({ homework, island }: { homework?: string; i
         </div>
       ) : null}
       {look === 'kids' ? (
-        <KidsJourney key={learner.id} map={map} learnerName={name} autoplay={autoplay} openIsland={island ?? null} />
+        <KidsJourney key={learner.id} map={map} learnerName={name} autoplay={autoplay} openIsland={island ?? null} hifz={hifz} />
       ) : look === 'middle' ? (
-        <MiddleJourney key={learner.id} map={map} learnerName={name} autoplay={autoplay} />
+        <MiddleJourney key={learner.id} map={map} learnerName={name} autoplay={autoplay} hifz={hifz} />
       ) : look === 'guardian' ? (
-        <GuardianJourney key={learner.id} map={map} learnerName={name} autoplay={autoplay} />
+        <GuardianJourney key={learner.id} map={map} learnerName={name} autoplay={autoplay} hifz={hifz} />
       ) : (
-        <CalmJourney key={learner.id} map={map} title={t('mine')} autoplay={autoplay} look={fam.stage} />
+        <CalmJourney key={learner.id} map={map} title={t('mine')} autoplay={autoplay} look={fam.stage} hifz={hifz} />
       )}
     </>
   );

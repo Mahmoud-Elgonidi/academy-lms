@@ -2154,6 +2154,111 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discardDraft => 'Start over';
 
   @override
+  String get voiceTitle => 'Draft from a voice note';
+
+  @override
+  String get voiceHint =>
+      'Say what you did, how the student did, and the homework. The draft fills only the empty fields; you check it before sending.';
+
+  @override
+  String get voiceRecord => 'Record a note';
+
+  @override
+  String get voiceWorking => 'Listening and writing the draft…';
+
+  @override
+  String voiceDone(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'The draft filled $n fields. Check them before sending.',
+      one: 'The draft filled one field. Check it before sending.',
+      zero: 'The note filled nothing new: the form already had it.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get voiceHeard => 'What was heard';
+
+  @override
+  String get voiceUnsure => 'Check these: the draft was not sure';
+
+  @override
+  String voiceLeft(String fields) {
+    return 'Still to fill: $fields';
+  }
+
+  @override
+  String get voiceLimit => 'Up to two minutes';
+
+  @override
+  String get voiceKept => 'The recording is deleted as soon as it is heard; it is never kept.';
+
+  @override
+  String get suggested => 'Suggested';
+
+  @override
+  String get checkThis => 'Check this';
+
+  @override
+  String get reciteTitle => 'Recitation check';
+
+  @override
+  String get reciteToggle => 'Check the recitation automatically';
+
+  @override
+  String get reciteHint =>
+      'When the student hands in a recording, the words missed or said wrong are marked for you. For you alone; the family never sees it.';
+
+  @override
+  String reciteSuggestion(String title) {
+    return 'From the lesson\'s text: $title';
+  }
+
+  @override
+  String reciteFromMistakes(String title) {
+    return 'From the lesson\'s mistakes: $title';
+  }
+
+  @override
+  String get reciteSurah => 'Surah';
+
+  @override
+  String get reciteChooseSurah => 'Choose the surah';
+
+  @override
+  String get reciteSearch => 'Search for a surah';
+
+  @override
+  String get reciteFrom => 'From verse';
+
+  @override
+  String get reciteTo => 'To verse';
+
+  @override
+  String reciteWhat(String title) {
+    return 'To recite: $title';
+  }
+
+  @override
+  String get reciteMissing => 'Missed';
+
+  @override
+  String get reciteWrong => 'Wrong';
+
+  @override
+  String get reciteExtra => 'Extra';
+
+  @override
+  String reciteSaid(String word) {
+    return 'Said: $word';
+  }
+
+  @override
+  String get reciteHeard => 'What was heard';
+
+  @override
   String get drafts => 'Drafts';
 
   @override
@@ -3601,4 +3706,347 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeworkNoGame => 'No game for this homework right now.';
+
+  @override
+  String get hifzTitle => 'Hifz map';
+
+  @override
+  String get hifzTitleKids => 'My hifz map';
+
+  @override
+  String hifzTitleOf(String name) {
+    return '$name\'s hifz map';
+  }
+
+  @override
+  String get hifzNoText => 'The Quran\'s text is not here yet; the map shows once it is.';
+
+  @override
+  String hifzMemorized(int n, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n pages memorized of $total',
+      one: '1 page memorized of $total',
+      zero: 'No pages memorized yet of $total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hifzMemorizedKids(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'You know $n pages! ⭐',
+      one: 'You know 1 page! ⭐',
+      zero: 'No pages yet. Let\'s start!',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hifzJuz(int n) {
+    return 'Part $n';
+  }
+
+  @override
+  String hifzJuzSummary(int n, String summary) {
+    return 'Part $n: $summary';
+  }
+
+  @override
+  String hifzPageNumber(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String hifzPageOf(int page, int juz) {
+    return 'Page $page · Part $juz';
+  }
+
+  @override
+  String get hifzToday => 'Today\'s review';
+
+  @override
+  String hifzTodayProgress(int done, int daily) {
+    String _temp0 = intl.Intl.pluralLogic(daily, locale: localeName, other: '$daily pages', one: '1 page');
+    return '$done of $_temp0 done';
+  }
+
+  @override
+  String get hifzTodayDone => 'Today\'s review is done. Well done!';
+
+  @override
+  String get hifzTodayNone => 'No pages to review today.';
+
+  @override
+  String get hifzWirdDone => 'Today\'s review is done!';
+
+  @override
+  String get hifzWirdDoneKids => 'You finished your review! 🎉';
+
+  @override
+  String hifzOverdue(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n days late', one: '1 day late');
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzReveal => 'Show the page';
+
+  @override
+  String get hifzRevealHint => 'Recite the page from memory first, then show it and check.';
+
+  @override
+  String get hifzHowWent => 'How did it go?';
+
+  @override
+  String get hifzGrade1 => 'Forgot it';
+
+  @override
+  String get hifzGrade2 => 'Hard';
+
+  @override
+  String get hifzGrade3 => 'Good';
+
+  @override
+  String get hifzGrade4 => 'Easy';
+
+  @override
+  String hifzNextReview(String day) {
+    return 'Saved. This page comes back on $day.';
+  }
+
+  @override
+  String get hifzRecite => 'Recite the page';
+
+  @override
+  String get hifzReciteKids => 'Recite a page';
+
+  @override
+  String get hifzReciteHint => 'Record the page from memory, and it is checked word by word.';
+
+  @override
+  String get hifzSendRecitation => 'Send the recitation';
+
+  @override
+  String get hifzListening => 'Listening to the recitation…';
+
+  @override
+  String get hifzListeningHint => 'The result shows here by itself.';
+
+  @override
+  String get hifzSelfGrade => 'Grade the page yourself';
+
+  @override
+  String get hifzLatest => 'Last recitation';
+
+  @override
+  String get hifzWird => 'Hifz review';
+
+  @override
+  String hifzCardLeft(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n pages left today', one: '1 page left today');
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzCardDone => 'Done today';
+
+  @override
+  String get hifzCardNone => 'No pages today';
+
+  @override
+  String hifzCardKids(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n pages left to recite',
+      one: '1 page left to recite',
+      zero: 'You finished today\'s review! ⭐',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzTell => 'Say what they know';
+
+  @override
+  String get hifzClear => 'Take pages off';
+
+  @override
+  String get hifzClearHint => 'The pages you take off are new on the map again; their past reviews stay.';
+
+  @override
+  String get hifzClearConfirm => 'Take these pages off the map?';
+
+  @override
+  String get hifzParts => 'Parts';
+
+  @override
+  String get hifzSurahs => 'Surahs';
+
+  @override
+  String get hifzSurahHint => 'Type a surah\'s name or number';
+
+  @override
+  String get hifzHowWell => 'How well?';
+
+  @override
+  String hifzChosen(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n pages', one: '1 page', zero: 'No pages chosen yet');
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzSave => 'Save';
+
+  @override
+  String hifzMarked(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n pages saved', one: '1 page saved', zero: 'No pages saved');
+    return '$_temp0';
+  }
+
+  @override
+  String hifzCleared(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n pages taken off',
+      one: '1 page taken off',
+      zero: 'No pages taken off',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hifzRecent => 'Recent reviews';
+
+  @override
+  String get hifzRecentNone => 'No reviews in the last two weeks.';
+
+  @override
+  String get mushafTitle => 'Mushaf';
+
+  @override
+  String get mushafOpen => 'Open the mushaf';
+
+  @override
+  String get mushafNone => 'This lesson has no mushaf.';
+
+  @override
+  String get mushafPrevious => 'Previous page';
+
+  @override
+  String get mushafNext => 'Next page';
+
+  @override
+  String get mushafPageField => 'Page';
+
+  @override
+  String mushafPageOfTotal(int total) {
+    return 'of $total';
+  }
+
+  @override
+  String get mushafFollowing => 'The page turns with the teacher.';
+
+  @override
+  String get mushafBackToTeacher => 'Back to the teacher\'s page';
+
+  @override
+  String mushafTeacherOn(int page) {
+    return 'The teacher is on page $page';
+  }
+
+  @override
+  String get mushafHintTeacher => 'Tap a word to mark it; the student sees the page you have open.';
+
+  @override
+  String get mushafMarkingClosed => 'Marking words opens with the lesson\'s room and closes once you hand in the report.';
+
+  @override
+  String get mushafMarkWord => 'Mark the word';
+
+  @override
+  String get mushafClearMark => 'Clear the mark';
+
+  @override
+  String get mushafEarlier => 'Marked in an earlier lesson';
+
+  @override
+  String mushafWordMarked(String word, String kind) {
+    return '$word: $kind';
+  }
+
+  @override
+  String mushafWordEarlier(String word, String kind, String times) {
+    return '$word: $kind, marked in earlier lessons $times';
+  }
+
+  @override
+  String mushafVerseEnd(int n) {
+    return 'End of verse $n';
+  }
+
+  @override
+  String mushafSurah(String name) {
+    return 'Surah $name';
+  }
+
+  @override
+  String get mushafShow => 'Mushaf';
+
+  @override
+  String get mushafShowVideo => 'Video';
+
+  @override
+  String get mushafBackToVideo => 'Back to the video';
+
+  @override
+  String get mushafFailed => 'Couldn\'t save. Try again.';
+
+  @override
+  String get mistakesTitle => 'Mistakes notebook';
+
+  @override
+  String get mistakesTitleKids => 'Words to practise';
+
+  @override
+  String get mistakesLead => 'The words marked in lessons in the last six months, to go over again.';
+
+  @override
+  String get mistakesLeadTeacher => 'The words marked in the student\'s lessons in the last six months.';
+
+  @override
+  String get mistakesLeadKids => 'Words we\'ll say again together until they\'re easy.';
+
+  @override
+  String get mistakesEmpty => 'No words marked in the last six months.';
+
+  @override
+  String get mistakesEmptyKids => 'No words to practise right now. Well done! ⭐';
+
+  @override
+  String mistakesWords(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n words', one: '1 word', zero: 'No words');
+    return '$_temp0';
+  }
+
+  @override
+  String mistakesTimes(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n times', two: 'twice', one: 'once');
+    return '$_temp0';
+  }
+
+  @override
+  String mistakesWord(String word, String kinds, String times, String when) {
+    return '$word: $kinds, $times, last $when';
+  }
+
+  @override
+  String mistakesWordKids(String word) {
+    return '$word: a word to practise';
+  }
 }

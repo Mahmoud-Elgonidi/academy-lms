@@ -17,12 +17,19 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Url;
+use Modules\Identity\Contracts\PersonalChannel;
 use Modules\Learning\Actions\ReviewHomework;
+use Modules\Learning\Assist\RecitationTarget;
+use Modules\Learning\Http\V1\Resources\RecitationPresenter;
 use Modules\Learning\Models\Homework;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
-/** Homework the teacher set: handed in and waiting for marking first; recordings play in the page. */
+/**
+ * Homework the teacher set: handed in and waiting for marking first; recordings
+ * play in the page, each with its check word by word when the homework says
+ * what to recite (for the teacher alone). Follows the teacher's `homework` signal.
+ */
 final class HomeworkToMark extends Page implements HasTable
 {
     use InteractsWithTable;
@@ -73,6 +80,12 @@ final class HomeworkToMark extends Page implements HasTable
         return Homework::query()->where('teacher_id', auth()->id())->selectRaw('status, count(*) as n')->groupBy('status')->pluck('n', 'status')->map(fn ($n) => (int) $n)->all();
     }
 
+    /** The teacher's own channel, for the page to follow. */
+    public function liveChannel(): string
+    {
+        return PersonalChannel::name((string) auth()->id());
+    }
+
     public function updatedTab(): void
     {
         $this->resetTable();
@@ -106,7 +119,11 @@ final class HomeworkToMark extends Page implements HasTable
                     ->label(fn (Homework $h) => $h->status === 'submitted' ? __('learning::teacher.homework.mark') : __('learning::teacher.homework.open'))
                     ->button()->size('sm')->color(fn (Homework $h) => $h->status === 'submitted' ? 'primary' : 'gray')
                     ->modalHeading(fn (Homework $h) => $h->title.' · '.$h->getAttribute('student_name'))
-                    ->modalContent(fn (Homework $h) => view('learning::filament.teacher.submissions', ['homework' => $h, 'at' => $at]))
+                    ->modalContent(fn (Homework $h) => view('learning::filament.teacher.submissions', [
+                        'homework' => $h, 'at' => $at,
+                        'expected' => app(RecitationTarget::class)->present($h->expectedSource()),
+                        'checks' => app(RecitationPresenter::class)->checks($h),
+                    ]))
                     ->schema(fn (Homework $h) => $h->status === 'submitted' ? [
                         ToggleButtons::make('grade')->label(__('learning::teacher.homework.grade'))->inline()->options(array_combine(range(1, 5), array_map('strval', range(1, 5)))),
                         Textarea::make('feedback')->label(__('learning::teacher.homework.feedback'))->rows(3),

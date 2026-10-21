@@ -15,5 +15,17 @@
             @error('journey_style')<small style="color: var(--danger-600)">{{ $message }}</small>@enderror
             <div><x-filament::button type="submit">{{ __('learning::map.settings.save') }}</x-filament::button></div>
         </form>
+        @if ($hifz)
+            <form wire:submit="saveHifz" style="display: flex; flex-direction: column; gap: .5rem; margin-top: 1rem">
+                <h3>{{ __('learning::hifz.settings.title') }}</h3>
+                <small>{{ __('learning::hifz.settings.hint') }}</small>
+                <label style="display: flex; align-items: center; gap: .6rem; font-size: .9rem">
+                    <span>{{ __('learning::hifz.settings.daily') }}</span>
+                    <x-filament::input.wrapper style="inline-size: 6rem"><x-filament::input type="number" min="1" :max="$max" wire:model="hifzPages" /></x-filament::input.wrapper>
+                </label>
+                @error('hifzPages')<small style="color: var(--danger-600)">{{ $message }}</small>@enderror
+                <div><x-filament::button type="submit">{{ __('learning::map.settings.save') }}</x-filament::button></div>
+            </form>
+        @endif
     @endif
 </div>

@@ -7,20 +7,28 @@ import { useRouter } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
 import { Badge, Button, Card, Field, Input, Notice, Select, Textarea, join } from '@/components/ui';
 import { ReportAnswers } from '@/components/report-answers';
+import { RecitationField } from '@/components/teach/recitation-field';
+import { VoiceDraft } from '@/components/teach/voice-draft';
 import { formProblem } from '@/lib/problems';
 import { answersOf, answersPayload, missingAnswers, type Answers, type Question } from '@/lib/report-answers';
 import { ACCEPTS, OUTCOMES, type HomeworkAccepts, type Outcome, type ReportForm, type ReportItem } from '@/lib/teach/types';
+import { expectedPayload, recitable, suggestionsOf, type Expected, type Surah } from '@/lib/teach/recitation';
+import { draftAnswers, draftItems, fieldNames, marksOf, nearestDays, type Mark, type VoiceDraft as Draft } from '@/lib/teach/voice-draft';
 
 type Item = ReportItem & { noteOpen: boolean };
+
+const DUE_DAYS = [1, 2, 3, 4, 5, 6, 7, 10, 14] as const;
 
 /**
  * A report as the teacher writes it: what happened with each lesson of
  * today's plan (and any added), focus and overall, words for the family and
  * for the academy, the subject's own questions, and homework. An absence
- * asks only for a note. The API
- * checks it again (SubmitSessionReport) and its words come back here.
+ * asks only for a note. When the academy turned it on, a voice note fills
+ * what is still empty (marked suggested until sent), and homework handed in by
+ * voice may say what to recite, for a check of each recording. The API checks
+ * it again (SubmitSessionReport) and its words come back here.
  */
-export function ReportEditor({ form }: { form: ReportForm }) {
+export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?: Surah[] }) {
   const t = useTranslations('teach');
   const common = useTranslations('common');
   const router = useRouter();
@@ -44,8 +52,13 @@ export function ReportEditor({ form }: { form: ReportForm }) {
   // Homework handed in by playing (chosen in the panel) keeps that way when the report is saved again.
   const acceptsChoices: HomeworkAccepts[] = hw?.accepts === 'practice' ? [...ACCEPTS, 'practice'] : [...ACCEPTS];
   const [dueDays, setDueDays] = useState(3);
+  // What to recite: asked while the helper is on, or the homework already says (its passage, else the lesson's).
+  const reciteOffered = surahs.length > 0 && (Boolean(form.assist?.recitation_check) || Boolean(hw?.expected));
+  const [reciteOn, setReciteOn] = useState(Boolean(hw?.expected));
+  const [recite, setRecite] = useState<Partial<Expected>>(hw?.expected ?? form.expected_suggestion ?? form.mistakes_suggestion ?? {});
   const [answers, setAnswers] = useState<Answers>(answersOf(form.answers));
   const [problem, setProblem] = useState<{ message?: string; errors: Record<string, string[]> }>({ errors: {} });
+  const [marks, setMarks] = useState<Record<string, Mark>>({});
 
   const error = (key: string) => problem.errors[key]?.[0];
   const update = (index: number, change: Partial<Item>) => setItems((all) => all.map((item, i) => (i === index ? { ...item, ...change } : item)));
@@ -60,6 +73,59 @@ export function ReportEditor({ form }: { form: ReportForm }) {
       { node_id: id, title: parts.at(-1) ?? option.label, path: parts.slice(0, -1).join(' › '), reason: null, objectives: null, outcome: null, score: null, note: null, noteOpen: false },
     ]);
   };
+
+  /** The form as it stands, as the draft endpoint reads it (a homework already handed in counts as set). */
+  const current = () => ({
+    notes_internal: internal,
+    ...(absence
+      ? { absence_note: absenceNote }
+      : {
+          engagement,
+          overall,
+          notes_for_student: forFamily,
+          items: items.map((i) => ({ node_id: i.node_id, outcome: i.outcome, score: i.score, note: i.note })),
+          answers: answersPayload(form.template, answers),
+          homework: homeworkLocked && hw ? { title: hw.title } : giving && title.trim() ? { title, instructions, accepts, due_days: dueDays } : null,
+        }),
+  });
+
+  /** The draft into the form: only what it filled, so whatever the teacher set stays. */
+  const takeDraft = (draft: Draft) => {
+    const r = draft.report;
+    const filled = new Set(draft.filled);
+    if (filled.has('engagement') && r.engagement) setEngagement(r.engagement);
+    if (filled.has('overall') && r.overall) setOverall(r.overall);
+    if (filled.has('notes_for_student') && r.notes_for_student) setForFamily(r.notes_for_student);
+    if (filled.has('notes_internal') && r.notes_internal) setInternal(r.notes_internal);
+    if (filled.has('absence_note') && r.absence_note) setAbsenceNote(r.absence_note);
+    setItems((all) => draftItems(all, draft).map((i) => ({ ...i, noteOpen: ('noteOpen' in i && i.noteOpen) || Boolean(i.note) })));
+    setAnswers((all) => ({ ...all, ...draftAnswers(draft) }));
+    if (filled.has('homework') && r.homework && !homeworkLocked) {
+      setGiving(true);
+      setTitle(r.homework.title);
+      setInstructions(r.homework.instructions ?? '');
+      setAccepts(r.homework.accepts);
+      setDueDays(nearestDays(r.homework.due_days, DUE_DAYS));
+    }
+    setMarks(marksOf(draft));
+    setProblem({ errors: {} });
+  };
+
+  const names = (fields: string[]) =>
+    fieldNames(fields, {
+      fixed: {
+        engagement: t('engagement'),
+        overall: t('overall'),
+        notes_for_student: t('notesForFamily'),
+        notes_internal: t('notesInternal'),
+        absence_note: t('absenceNote'),
+        homework: t('homeworkTitle'),
+        items: t('todaysPlan'),
+        answers: t('questionsTitle'),
+      },
+      lessons: form.lesson_options,
+      questions: form.template?.fields ?? [],
+    });
 
   const send = () => {
     if (!absence && (engagement === null || overall === null)) {
@@ -86,7 +152,10 @@ export function ReportEditor({ form }: { form: ReportForm }) {
           answers: answersPayload(form.template, answers),
         };
     if (!homeworkLocked) {
-      payload.homework = giving && title.trim() ? { title: title.trim(), instructions: instructions.trim() || null, accepts, due_days: dueDays } : null;
+      payload.homework =
+        giving && title.trim()
+          ? { title: title.trim(), instructions: instructions.trim() || null, accepts, due_days: dueDays, ...expectedPayload(reciteOffered, reciteOn, accepts, recite) }
+          : null;
     }
     start(async () => {
       const done = await submitReport(form.id, payload);
@@ -97,6 +166,7 @@ export function ReportEditor({ form }: { form: ReportForm }) {
         setProblem({
           message: formProblem({ message: done.message ?? common('problem'), errors }, [
             'engagement', 'overall', 'notes_for_student', 'notes_internal', 'absence_note', 'items', 'homework.title', 'homework.instructions',
+            'homework.expected', 'homework.expected.surah', 'homework.expected.from', 'homework.expected.to',
             ...(form.template?.fields ?? []).map((q) => `answers.${q.key}`),
           ]),
           errors,
@@ -134,9 +204,11 @@ export function ReportEditor({ form }: { form: ReportForm }) {
         </Notice>
       ) : null}
 
+      {form.assist?.voice_draft ? <VoiceDraft reportId={form.id} current={current} onDraft={takeDraft} names={names} /> : null}
+
       {absence ? (
         <Card>
-          <Field label={t('absenceNote')} hint={t('absenceHint')} error={error('absence_note')}>
+          <Field label={<Labelled mark={marks.absence_note}>{t('absenceNote')}</Labelled>} hint={t('absenceHint')} error={error('absence_note')}>
             <Textarea value={absenceNote} onChange={(e) => setAbsenceNote(e.target.value)} rows={4} required maxLength={1000} />
           </Field>
         </Card>
@@ -153,6 +225,7 @@ export function ReportEditor({ form }: { form: ReportForm }) {
                       <p className="flex flex-wrap items-center gap-2 font-semibold">
                         {item.title}
                         {item.reason ? <Badge tone={item.reason === 'review' ? 'info' : 'brand'}>{item.reason === 'review' ? t('reasonReview') : t('reasonNext')}</Badge> : null}
+                        <Suggested mark={marks[`items.${item.node_id}`]} />
                       </p>
                       {item.path ? <p className="text-xs text-muted">{item.path}</p> : null}
                       {objectivesOf(item).map((o) => (
@@ -211,9 +284,9 @@ export function ReportEditor({ form }: { form: ReportForm }) {
           </Card>
 
           <Card className="space-y-4">
-            <Scale label={t('engagement')} value={engagement} onChange={setEngagement} error={error('engagement')} />
-            <Scale label={t('overall')} value={overall} onChange={setOverall} error={error('overall')} />
-            <Field label={t('notesForFamily')} error={error('notes_for_student')}>
+            <Scale label={<Labelled mark={marks.engagement}>{t('engagement')}</Labelled>} name={t('engagement')} value={engagement} onChange={setEngagement} error={error('engagement')} />
+            <Scale label={<Labelled mark={marks.overall}>{t('overall')}</Labelled>} name={t('overall')} value={overall} onChange={setOverall} error={error('overall')} />
+            <Field label={<Labelled mark={marks.notes_for_student}>{t('notesForFamily')}</Labelled>} error={error('notes_for_student')}>
               <Textarea value={forFamily} onChange={(e) => setForFamily(e.target.value)} rows={3} maxLength={3000} />
             </Field>
           </Card>
@@ -228,6 +301,7 @@ export function ReportEditor({ form }: { form: ReportForm }) {
                 <QuestionField
                   key={q.key}
                   question={q}
+                  mark={marks[`answers.${q.key}`]}
                   value={answers[q.key] ?? null}
                   onChange={(value) => setAnswers((all) => ({ ...all, [q.key]: value }))}
                   error={error(`answers.${q.key}`)}
@@ -239,7 +313,7 @@ export function ReportEditor({ form }: { form: ReportForm }) {
       )}
 
       <Card>
-        <Field label={t('notesInternal')} hint={t('notesInternalHint')} error={error('notes_internal')}>
+        <Field label={<Labelled mark={marks.notes_internal}>{t('notesInternal')}</Labelled>} hint={t('notesInternalHint')} error={error('notes_internal')}>
           <Textarea value={internal} onChange={(e) => setInternal(e.target.value)} rows={2} maxLength={3000} />
         </Field>
       </Card>
@@ -249,6 +323,7 @@ export function ReportEditor({ form }: { form: ReportForm }) {
           <>
             <h2 className="font-semibold">{t('homeworkTitle')}</h2>
             <p className="mt-1">{hw.title}</p>
+            {hw.expected?.title ? <p className="mt-1 text-sm text-muted">{t('reciteWhat', { title: hw.expected.title })}</p> : null}
             <p className="mt-2 text-sm text-muted">{t('homeworkLocked')}</p>
           </>
         ) : (
@@ -256,6 +331,7 @@ export function ReportEditor({ form }: { form: ReportForm }) {
             <label className="flex items-center gap-3 font-semibold">
               <input type="checkbox" checked={giving} onChange={(e) => setGiving(e.target.checked)} className="size-5 accent-[var(--color-brand)]" />
               {t('giveHomework')}
+              <Suggested mark={marks.homework} />
             </label>
             {giving ? (
               <div className="mt-4 space-y-4">
@@ -277,7 +353,7 @@ export function ReportEditor({ form }: { form: ReportForm }) {
                   </Field>
                   <Field label={t('dueLabel')}>
                     <Select value={dueDays} onChange={(e) => setDueDays(Number(e.target.value))}>
-                      {[1, 2, 3, 4, 5, 6, 7, 10, 14].map((n) => (
+                      {DUE_DAYS.map((n) => (
                         <option key={n} value={n}>
                           {t('dueIn', { n })}
                         </option>
@@ -285,6 +361,17 @@ export function ReportEditor({ form }: { form: ReportForm }) {
                     </Select>
                   </Field>
                 </div>
+                {reciteOffered && recitable(accepts) ? (
+                  <RecitationField
+                    surahs={surahs}
+                    suggestions={suggestionsOf(form)}
+                    on={reciteOn}
+                    onToggle={setReciteOn}
+                    value={recite}
+                    onChange={setRecite}
+                    error={error}
+                  />
+                ) : null}
               </div>
             ) : null}
           </>
@@ -302,7 +389,7 @@ export function ReportEditor({ form }: { form: ReportForm }) {
 }
 
 /** One of the academy's questions, by the kind of answer it takes. */
-function QuestionField({ question: q, value, onChange, error }: { question: Question; value: Answers[string]; onChange: (v: Answers[string]) => void; error?: string }) {
+function QuestionField({ question: q, value, onChange, error, mark }: { question: Question; value: Answers[string]; onChange: (v: Answers[string]) => void; error?: string; mark?: Mark }) {
   const t = useTranslations('teach');
   const common = useTranslations('common');
   const label = (
@@ -314,6 +401,7 @@ function QuestionField({ question: q, value, onChange, error }: { question: Ques
           <Icon name="lock" size={12} /> {common('academyOnly')}
         </Badge>
       ) : null}
+      <Suggested mark={mark} />
     </span>
   );
   if (q.type === 'rating') {
@@ -358,6 +446,26 @@ function QuestionField({ question: q, value, onChange, error }: { question: Ques
     <Field label={label} error={error}>
       <Input value={typeof value === 'string' ? value : ''} onChange={(e) => onChange(e.target.value)} maxLength={500} />
     </Field>
+  );
+}
+
+/** Filled by the voice note's draft: suggested, or worth a second look. */
+function Suggested({ mark }: { mark?: Mark }) {
+  const t = useTranslations('teach');
+  if (!mark) return null;
+  return (
+    <Badge tone={mark === 'check' ? 'attention' : 'brand'}>
+      <Icon name="mic" size={12} /> {mark === 'check' ? t('checkThis') : t('suggested')}
+    </Badge>
+  );
+}
+
+function Labelled({ mark, children }: { mark?: Mark; children: ReactNode }) {
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      {children}
+      <Suggested mark={mark} />
+    </span>
   );
 }
 

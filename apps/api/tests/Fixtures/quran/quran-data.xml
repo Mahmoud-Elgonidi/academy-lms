@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- A test fixture in the shape of Tanzil's metadata: made-up surahs. -->
+<quran>
+	<suras alias="chapters">
+		<sura index="1" ayas="3" start="0" name="الأولى" tname="Al-Ula" ename="The First" type="Meccan" order="1" rukus="1" />
+		<sura index="2" ayas="2" start="3" name="الثانية" tname="Ath-Thaniya" ename="The Second" type="Medinan" order="2" rukus="1" />
+	</suras>
+	<juzs alias="parts">
+		<juz index="1" sura="1" aya="1" />
+		<juz index="2" sura="2" aya="1" />
+	</juzs>
+	<pages>
+		<page index="1" sura="1" aya="1" />
+		<page index="2" sura="1" aya="3" />
+		<page index="3" sura="2" aya="1" />
+	</pages>
+</quran>

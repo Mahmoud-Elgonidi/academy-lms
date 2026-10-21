@@ -1,0 +1,90 @@
+name: console-owner
+
+# Makes a console admin an owner on the server (the platform settings, its
+# outside services' keys, are theirs to change): infra/deploy/console.sh runs
+# `php artisan platform:admin <email> --owner` in the deployed version, which
+# refuses an email that is not on the console's team and is audited. With a
+# name, someone not on the team yet is added as an owner, their password from
+# the repository secret CONSOLE_ADMIN_PASSWORD (they set up the authenticator
+# app on first sign-in). By hand only, from the Actions tab; the email, name
+# and password go to the server on stdin, never on a command line.
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: The console admin's email
+        required: true
+        type: string
+      name:
+        description: Only to add someone new to the platform team (their password from the CONSOLE_ADMIN_PASSWORD secret)
+        required: false
+        type: string
+        default: ''
+
+concurrency:
+  group: console-owner
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  owner:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      HOST: ${{ secrets.DEPLOY_HOST || vars.DEPLOY_HOST || '145.223.99.175' }}
+      SSH_USER: ${{ secrets.DEPLOY_USER || vars.DEPLOY_USER || 'lukas-demo' }}
+      SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      SSH_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+      KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DEPLOY_SSH_PORT || '22' }}
+      DIR: ${{ vars.DEPLOY_DIR || 'academy-lms' }}
+      EMAIL: ${{ inputs.email }}
+      NAME: ${{ inputs.name }}
+      PASSWORD: ${{ secrets.CONSOLE_ADMIN_PASSWORD }}
+    steps:
+      - name: An email, and the server's settings
+        run: |
+          set -euo pipefail
+          [[ "$EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]] || { echo "::error::Not an email."; exit 1; }
+          if [ -n "$NAME" ]; then
+            [ "${#NAME}" -le 120 ] && [[ ! "$NAME" =~ [[:cntrl:]] ]] || { echo "::error::A name of 120 characters at most, on one line."; exit 1; }
+            [ "${#PASSWORD}" -ge 12 ] || { echo "::error::To add someone, add the repository secret CONSOLE_ADMIN_PASSWORD (12 characters or more)."; exit 1; }
+          fi
+          if [ -z "$SSH_KEY" ] && [ -z "$SSH_PASSWORD" ]; then
+            echo "::error::Add the repository secret DEPLOY_SSH_KEY (or DEPLOY_PASSWORD), as for the deploy."; exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Make them an owner on the server
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          if [ -n "$KNOWN_HOSTS" ]; then
+            printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            echo "::warning::DEPLOY_KNOWN_HOSTS is not set: the server's key is trusted as first seen (infra/deploy/README.md)."
+            ssh-keyscan -p "$SSH_PORT" -H "$HOST" > ~/.ssh/known_hosts 2>/dev/null
+          fi
+          if [ -n "$SSH_KEY" ]; then
+            printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+            ssh_cmd=(ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -p "$SSH_PORT")
+            scp_cmd=(scp -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -P "$SSH_PORT")
+          else
+            sudo apt-get install -y -qq sshpass >/dev/null
+            export SSHPASS="$SSH_PASSWORD"
+            ssh_cmd=(sshpass -e ssh -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -p "$SSH_PORT")
+            scp_cmd=(sshpass -e scp -o PubkeyAuthentication=no -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -P "$SSH_PORT")
+          fi
+          target="$SSH_USER@$HOST"
+          # The script as this commit has it, next to the deployed stack's own files.
+          "${scp_cmd[@]}" infra/deploy/console.sh "$target:$DIR/"
+          if [ -n "$NAME" ]; then
+            printf '%s\n%s\n%s\n' "$EMAIL" "$NAME" "$PASSWORD" | "${ssh_cmd[@]}" "$target" "cd '$DIR' && bash console.sh owner"
+          else
+            printf '%s\n' "$EMAIL" | "${ssh_cmd[@]}" "$target" "cd '$DIR' && bash console.sh owner"
+          fi

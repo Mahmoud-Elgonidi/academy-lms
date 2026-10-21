@@ -22,6 +22,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property int $weight
  * @property int $est_sessions
  * @property string $mastery_rule mastered_once | score_twice
+ * @property ?array<string, mixed> $text_source a lesson's text (Contracts\DTOs\TextSource)
  */
 final class Node extends Model
 {
@@ -34,11 +35,11 @@ final class Node extends Model
 
     protected $table = 'curriculum_nodes';
 
-    protected $fillable = ['version_id', 'parent_id', 'kind', 'ordinal', 'title_ar', 'title_en', 'objectives', 'weight', 'est_sessions', 'mastery_rule'];
+    protected $fillable = ['version_id', 'parent_id', 'kind', 'ordinal', 'title_ar', 'title_en', 'objectives', 'weight', 'est_sessions', 'mastery_rule', 'text_source'];
 
     protected function casts(): array
     {
-        return ['ordinal' => 'integer', 'weight' => 'integer', 'est_sessions' => 'integer'];
+        return ['ordinal' => 'integer', 'weight' => 'integer', 'est_sessions' => 'integer', 'text_source' => 'array'];
     }
 
     /** @return BelongsTo<CurriculumVersion, $this> */

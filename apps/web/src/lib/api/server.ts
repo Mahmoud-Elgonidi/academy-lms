@@ -131,6 +131,24 @@ export async function get<T>(path: PathFor<'get'>, options: Omit<Options, 'body'
 export type Outcome<T> = { ok: true; data: T } | { ok: false; problem: Problem };
 
 /**
+ * A read that may come back without an answer and leave the page as it is:
+ * a part of a page only some records have (a lesson's mushaf), or a Server
+ * Action's read for a client component. A lapsed session goes back to
+ * signing in, as for every read.
+ */
+export async function read<T>(path: PathFor<'get'>, options: Omit<Options, 'body' | 'idempotencyKey' | 'form'> = {}): Promise<Outcome<T>> {
+  let response: Response;
+  try {
+    response = await call('get', path, options);
+  } catch {
+    return { ok: false, problem: { status: 0, title: '', errors: {} } };
+  }
+  if (response.status === 401 && !options.token) return sessionEnded();
+  if (!response.ok) return { ok: false, problem: await problemOf(response) };
+  return { ok: true, data: (await response.json()) as T };
+}
+
+/**
  * A write from a Server Action: the answer, or the API's problem for the form
  * to show next to its fields. A lapsed session goes back to signing in.
  */

@@ -4,13 +4,16 @@ namespace Modules\Platform\Providers;
 
 use Filament\Notifications\Notification;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
+use Modules\Platform\Ai\AiProvider;
 use Modules\Platform\Ai\AiSlots;
 use Modules\Platform\Ai\ClaudeLanguageModel;
 use Modules\Platform\Ai\DemoLanguageModel;
@@ -22,6 +25,7 @@ use Modules\Platform\Commands\CreatePlatformAdmin;
 use Modules\Platform\Commands\HealthCommand;
 use Modules\Platform\Commands\MailTestCommand;
 use Modules\Platform\Commands\MeasureUsageCommand;
+use Modules\Platform\Commands\ServicesCommand;
 use Modules\Platform\Commands\ShowPlatformCode;
 use Modules\Platform\Console\ConsoleService;
 use Modules\Platform\Contracts\AccountDirectory;
@@ -47,6 +51,7 @@ use Modules\Platform\Models\PlatformAdmin;
 use Modules\Platform\Plans\PlanUsage;
 use Modules\Platform\Plans\PlatformAcademyPlan;
 use Modules\Platform\PlatformService;
+use Modules\Platform\Settings\PlatformSettings;
 use Modules\Platform\Setup\BrandingStep;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\LanguageModel;
@@ -89,11 +94,13 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->app->bind(GameDesigner::class, fn () => config('platform.games.designer.driver') === 'demo' && ! $this->app->isProduction()
             ? new DemoGameDesigner : new ClaudeGameDesigner);
 
-        // The academies' AI helpers (Settings › AI): Claude for words, ElevenLabs for recordings, fixed answers for the demo.
+        // The academies' AI helpers (Settings › AI): the chosen provider for words (Claude, GPT, Gemini, Ollama), ElevenLabs for recordings, fixed answers for the demo.
         $this->app->singleton(AiSlots::class);
+        $this->app->singleton(PlatformSettings::class);
         $this->app->scoped(PlatformAcademyAi::class);
         $this->app->alias(PlatformAcademyAi::class, AcademyAi::class);
-        $this->app->bind(LanguageModel::class, fn ($app) => PlatformAcademyAi::demo() ? new DemoLanguageModel : $app->make(ClaudeLanguageModel::class));
+        $this->app->bind(LanguageModel::class, fn ($app) => PlatformAcademyAi::demo() ? new DemoLanguageModel
+            : $app->make(AiProvider::current()?->languageModel() ?? ClaudeLanguageModel::class));
         $this->app->bind(SpeechToText::class, fn ($app) => PlatformAcademyAi::demo() ? new DemoSpeechToText : $app->make(ElevenLabsSpeechToText::class));
     }
 
@@ -105,8 +112,16 @@ final class PlatformServiceProvider extends ServiceProvider
         // The new academy's checklist: its name and logo.
         $this->app->make(SetupChecklist::class)->add(BrandingStep::class);
         Event::listen(Login::class, RecordConsoleSignIn::class);
+        // The platform's settings from the console over the server's .env: at each job and command too (requests:
+        // ApplyPlatformSettings). Never here in boot, so caching the config never writes them out.
+        Event::listen(JobProcessing::class, fn () => $this->app->make(PlatformSettings::class)->apply());
+        Event::listen(CommandStarting::class, function (CommandStarting $event): void {
+            if (! PlatformSettings::leavesAlone((string) $event->command)) {
+                $this->app->make(PlatformSettings::class)->apply();
+            }
+        });
         if ($this->app->runningInConsole()) {
-            $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class, HealthCommand::class, MailTestCommand::class]);
+            $this->commands([CreatePlatformAdmin::class, ShowPlatformCode::class, MeasureUsageCommand::class, HealthCommand::class, MailTestCommand::class, ServicesCommand::class]);
         }
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('platform:usage')->dailyAt('02:10')->withoutOverlapping()->onOneServer();
@@ -115,6 +130,8 @@ final class PlatformServiceProvider extends ServiceProvider
             $schedule->call(fn () => WorkerBeat::dispatch(now()->getTimestamp())->onQueue('default'))->everyMinute()->name('health:worker');
             $schedule->call(fn () => AssistBeat::dispatch(now()->getTimestamp()))->everyMinute()->name('health:assist');
             $schedule->command('platform:health --alert')->everyFiveMinutes()->withoutOverlapping()->onOneServer();
+            // Each outside service tried once a day, so a credit run out or a key refused is heard on a quiet day too.
+            $schedule->command('platform:services')->dailyAt('06:40')->withoutOverlapping()->onOneServer();
         });
 
         // For an uptime monitor (HEALTH_TOKEN): statuses only, no session, no academy.

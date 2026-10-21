@@ -1,20 +1,15 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { handIn } from '@/app/[locale]/family/actions';
 import { Icon } from '@/components/icons';
 import { Button, Field, Notice, Textarea, join } from '@/components/ui';
+import { useRecorder } from '@/lib/recorder';
 import type { Accepts } from '@/lib/teach/types';
 
 const MAX_BYTES = 25 * 1024 * 1024;
 const MAX_SECONDS = 10 * 60;
-
-/** The first recording format this browser makes that the API takes (SubmitHomework::AUDIO). */
-function recordingType(): string | undefined {
-  if (typeof MediaRecorder === 'undefined') return undefined;
-  return ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'].find((t) => MediaRecorder.isTypeSupported(t));
-}
 
 /**
  * Handing homework in, as it asks: words, a voice recording made here (up to
@@ -32,60 +27,28 @@ export function HandIn({ id, accepts, kids }: { id: string; accepts: Accepts; ki
   const [file, setFile] = useState<File | null>(null);
   const [recording, setRecording] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>();
-  const [seconds, setSeconds] = useState(0);
-  const [live, setLive] = useState(false);
   const [message, setMessage] = useState<{ tone: 'danger' | 'brand' | 'attention'; text: string }>();
   const [pending, start] = useTransition();
-  const recorder = useRef<MediaRecorder | null>(null);
-  const chunks = useRef<Blob[]>([]);
-
-  // While recording: a second counter, and a stop at the limit.
-  useEffect(() => {
-    if (!live) return;
-    const tick = setInterval(() => {
-      setSeconds((s) => {
-        if (s + 1 >= MAX_SECONDS) {
-          recorder.current?.stop();
-          setMessage({ tone: 'attention', text: t('recordingLimit', { n: MAX_SECONDS / 60 }) });
-        }
-        return s + 1;
-      });
-    }, 1000);
-    return () => clearInterval(tick);
-  }, [live, t]);
+  const { live, clock, start: startRecording, stop } = useRecorder({
+    limit: MAX_SECONDS,
+    onDone: (made) => {
+      setRecording(made);
+      setPreview(URL.createObjectURL(made));
+    },
+    onLimit: () => setMessage({ tone: 'attention', text: t('recordingLimit', { n: MAX_SECONDS / 60 }) }),
+  });
 
   useEffect(() => () => (preview ? URL.revokeObjectURL(preview) : undefined), [preview]);
 
   const record = async () => {
-    const type = recordingType();
-    if (!type || !navigator.mediaDevices?.getUserMedia) {
-      setMessage({ tone: 'attention', text: t('noRecorder') });
-      return;
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const rec = new MediaRecorder(stream, { mimeType: type });
-      chunks.current = [];
-      rec.ondataavailable = (e) => e.data.size > 0 && chunks.current.push(e.data);
-      rec.onstop = () => {
-        stream.getTracks().forEach((track) => track.stop());
-        const kind = type.split(';')[0]!;
-        const ext = kind.includes('mp4') ? 'm4a' : kind.includes('ogg') ? 'ogg' : 'webm';
-        const made = new File(chunks.current, `recording.${ext}`, { type: kind });
-        setRecording(made);
-        setPreview(URL.createObjectURL(made));
-        setLive(false);
-      };
-      recorder.current = rec;
-      setSeconds(0);
+    setMessage(undefined);
+    const started = await startRecording();
+    if (started === 'recording') {
       setRecording(null);
       setPreview(undefined);
-      setMessage(undefined);
-      rec.start(1000);
-      setLive(true);
-    } catch {
-      setMessage({ tone: 'danger', text: t('micDenied') });
     }
+    if (started === 'unsupported') setMessage({ tone: 'attention', text: t('noRecorder') });
+    if (started === 'denied') setMessage({ tone: 'danger', text: t('micDenied') });
   };
 
   const send = () => {
@@ -113,7 +76,6 @@ export function HandIn({ id, accepts, kids }: { id: string; accepts: Accepts; ki
     });
   };
 
-  const clock = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
   return (
     <div className="space-y-3">
       {takesText ? (
@@ -124,7 +86,7 @@ export function HandIn({ id, accepts, kids }: { id: string; accepts: Accepts; ki
       <div className="flex flex-wrap items-center gap-2">
         {takesAudio ? (
           live ? (
-            <Button type="button" variant="danger" onClick={() => recorder.current?.stop()}>
+            <Button type="button" variant="danger" onClick={stop}>
               <Icon name="stop" size={18} />
               {t('stopRecording')} · <span className="tabular-nums" dir="ltr">{clock}</span>
             </Button>

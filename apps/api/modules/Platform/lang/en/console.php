@@ -113,5 +113,7 @@ return [
     'admins' => [
         'unknown' => 'Nobody of the platform team has that email.',
         'last' => 'This is the last console account that can sign in; add someone else first (platform:admin email name).',
+        'owner_locked' => 'This console account is locked; let it back in first (--reactivate).',
+        'last_owner' => 'This is the last owner who can sign in; make someone else an owner first (platform:admin email --owner).',
     ],
 ];

@@ -129,6 +129,10 @@ return [
             'plan_changed' => 'باقة الأكاديمية بقت :plan: :reason',
             'ai_settings_saved' => 'تعديل المساعد الآلي (الشغّال: :helpers)',
         ],
+        'learning' => [
+            'weekly_digest_saved' => 'الرسالة الأسبوعية لأولياء الأمور: :state',
+            'hifz_daily_saved' => 'ورد المراجعة بقى :pages صفحة في اليوم بالكتير',
+        ],
         'games' => [
             'settings_saved' => 'تعديل ألعاب الأكاديمية (:state، :minutes دقيقة في اليوم)',
             'journey_style_saved' => 'غيّر شكل رحلة الطلاب: :style',
@@ -137,6 +141,10 @@ return [
             'signed_in' => 'دخول على لوحة المنصة',
             'admin_deactivated' => 'قفل حساب لوحة المنصة :name',
             'admin_reactivated' => 'رجوع حساب لوحة المنصة :name',
+            'admin_made_owner' => 'حساب لوحة المنصة :name بقى أدمن رئيسي',
+            'admin_owner_removed' => 'حساب لوحة المنصة :name مابقاش أدمن رئيسي',
+            'settings_saved' => 'تعديل إعدادات المنصة: :sections',
+            'quran_fetched' => 'تنزيل نص القرآن من Tanzil (:verses آية)',
             'plan_saved' => 'تعديل الباقة :plan',
             'demo_secrets_reset' => 'حساب لوحة المنصة التجريبي :name خد كلمة السر والمفتاح التجريبيين الجداد',
             'game_draft_started' => 'بداية تصميم لعبة جديدة (:kinds)',
@@ -147,6 +155,7 @@ return [
         ],
     ],
     'values' => [
+        'sections' => ['ai' => 'المساعد الآلي', 'mail' => 'الإيميل', 'whatsapp' => 'واتساب', 'sms' => 'الرسايل النصية', 'push' => 'إشعارات الموبايل', 'classroom' => 'الفصل', 'stripe' => 'Stripe Connect', 'social' => 'الدخول بجوجل وأبل', 'platform' => 'المنصة'],
         'helpers' => ['practice_items' => 'اقتراح التدريبات', 'report_draft' => 'تقرير من رسالة صوتية', 'recitation_check' => 'تصحيح التسميع', 'digest_wording' => 'صياغة الرسالة الأسبوعية'],
         'early' => ['early' => 'بدري، من الإدارة', 'on_time' => 'في ميعاده، لوحده'],
         'style' => ['playful' => 'مرح (جزر وألعاب)', 'calm' => 'هادي (مستويات ومهمات)', 'plain' => 'من غير نجوم'],
@@ -168,6 +177,7 @@ return [
     ],
     'groups' => [
         'announcements' => 'الإعلانات',
+        'learning' => 'التقارير والواجبات',
         'games' => 'الألعاب',
         'messaging' => 'المحادثات',
         'safeguarding' => 'حماية الأطفال',

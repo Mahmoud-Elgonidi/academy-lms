@@ -285,14 +285,16 @@ the new provider; a room already open keeps the one it was made with. Switch bac
 ## AI helpers
 
 The academies' helpers (practice items, report drafts from a teacher's voice note, recitation checks,
-the weekly message's wording) call Claude with the platform's `ANTHROPIC_API_KEY`, and the ones that
-listen send the audio to ElevenLabs (`ELEVENLABS_API_KEY`) for its words. Each academy turns each helper
+the weekly message's wording) call the provider chosen in Platform settings (`AI_DRIVER`: Claude with
+`ANTHROPIC_API_KEY`, GPT with `OPENAI_API_KEY`, Gemini with `GEMINI_API_KEY` from a paid project, or the
+platform's own Ollama at `OLLAMA_URL`), and the ones that listen send the audio to ElevenLabs (`ELEVENLABS_API_KEY`) for its words. Each academy turns each helper
 on in Settings › AI helpers (all off at first, only on a plan with the AI area); what each sends is written
 on that page. A helper's result is always a draft or a suggestion a person checks: when one is off or
 down, the work goes on by hand and the weekly message goes out with the facts alone.
 
-System health's **AI helpers** check: *off* with no key, a warning when calls to one provider failed
-three times in a row (the hint names it), and a fault when the `assist` queue's beat stops.
+System health's **AI helpers** check is the `assist` queue's beat (a fault when it stops); each provider in
+use has its own check (`service_anthropic`, `service_openai`, `service_gemini`, `service_ollama`,
+`service_elevenlabs`; see **An outside service needs you**).
 
 ```bash
 docker compose logs --tail=100 worker | grep -i assist     # the assist queue's worker
@@ -300,14 +302,82 @@ docker compose exec web php artisan queue:failed           # a helper's job that
 ```
 
 - **Turn them all off at once** (a provider's outage, a bill to stop): `AI_DRIVER=off` in `.env`, then
-  `docker compose up -d web worker`. Every helper says it is off; nothing else changes. Back with `claude`.
+  `docker compose up -d web worker` (or choose "Off" in Platform settings). Every helper says it is off;
+  nothing else changes. Back with the provider you use.
+- **Another provider**: in Platform settings choose who writes the words, put its key (Ollama: its address),
+  then pick its models from the list it gives for that key ("Another name…" types one), "Try it", and save.
+  The next request uses it; nothing else changes. Another provider's keys stay saved for coming back.
 - **People are told to try again** ("busy"): more of them answer at once with `AI_CONCURRENT` (default 3;
   each holds a web thread while it waits, so keep it well under `WEB_PHP_THREADS`).
 - **An academy hit its day's cap** (`AI_DAILY_CAP`, calls a day): it comes back at midnight UTC; raise the
   cap for all if it is too low.
-- **A new key**: change it in `.env`, then `docker compose up -d web worker` (see **Changing a secret**).
+- **A new key**: in the console's Platform settings (see **Changing a secret**); "Try it" asks each model
+  chosen for a few words (so a credit run out shows, not only a wrong key) and reads ElevenLabs' plan.
   Each call's model, tokens, seconds of audio and outcome are kept in `ai_usage` (never what was said or
   sent, never who), which the academy's settings page counts for the month.
+- **Before an academy turns on the recitation check**: measure it on real recordings whose mistakes a
+  teacher marked by ear. Put the recordings in a folder with a `cases.json`
+  (`[{"file": "01.webm", "surah": 78, "from": 1, "to": 5, "mistakes": [{"verse": 3, "word": 2, "kind": "missing"}]}]`,
+  a word counted from 1 in its verse), copy it into the container, and run it; it keeps nothing and
+  involves no academy, but the recordings go to the speech provider like any check. `--heard` also prints
+  what was heard (on the screen only).
+
+  ```bash
+  docker compose cp ./recitations web:/tmp/recitations
+  docker compose exec web php artisan learning:try-recitation /tmp/recitations
+  docker compose exec web rm -r /tmp/recitations
+  ```
+
+## An outside service needs you
+
+A key refused, a credit or plan run out, an account suspended, a model or template gone: each service in
+use (the AI provider, ElevenLabs, WhatsApp, Twilio, Firebase, LiveKit, Stripe) has its own check on
+System health (`service_*`), and the services that need someone head the console's Platform settings,
+each with its reason, what to do and a link to its section. The platform team gets the alert mail
+(`platform:health --alert`) when one fails twice in a row, and again when it is well. Each gateway writes
+how the service answered as it is used, and `platform:services` tries every one set up here each morning
+at 06:40 UTC, so a quiet day is no blind spot. `GET /health` shows them in its statuses but never answers
+503 for them: a provider's trouble is not the platform down.
+
+```bash
+docker compose exec web php artisan platform:services              # try them all now, as the morning does
+docker compose exec web php artisan platform:services --group=ai   # one section (ai, whatsapp, sms, push, classroom, stripe)
+```
+
+- **Quota / credit** (`insufficient_quota`, `credit_balance`, `131042`, a Twilio balance at 0, ElevenLabs at
+  100% or unpaid): top up or renew at the provider, then "Try it" on the section; the check clears at once.
+  ElevenLabs over 90% warns first, with the day it renews.
+- **Key**: make a new key at the provider, type it over the hidden one in Platform settings, "Try it" (it
+  tries what is typed before you save, and never marks the saved key broken), then save.
+- **Model** (an AI model retired, a WhatsApp template not approved): choose another from the section's list,
+  or approve the template at Meta.
+- **Suspended** (`20005`, `368`, Stripe's `requirements.disabled_reason`): sign in at the provider and see why.
+- **Rate / down / unreachable** warn first and fail only when they last (15 minutes, an hour for a rate
+  limit); see the provider's status page, or the address and the server's network for Ollama or LiveKit.
+- The reason is in our words with the provider's own code in brackets, never its message; to dig further,
+  look at the account on the provider's site.
+
+## The Quran's text
+
+The Quran's words (lesson passages, practice suggestions) come only from Tanzil's Simple text and its
+metadata, kept in the storage volume (`storage/app/platform/quran`, with `manifest.json`: their SHA-256 and
+when they came; in the daily backup with the rest of the files). The deploy fetches them the first time
+(`curriculum:quran --fetch --if-missing`); a deploy that could not reach Tanzil says so and goes on.
+
+```bash
+docker compose exec web php artisan curriculum:quran            # which copy, its version and checksums
+docker compose exec web php artisan curriculum:quran --fetch    # fetch again (or the console: Platform settings › "Fetch again")
+```
+
+A fetch is kept only once both files pass every check (114 surahs, 6,236 verses in order, Arabic lines,
+no rub-el-hizb or sajdah signs, Tanzil's notice); otherwise it says what failed and the copy in use stays.
+Tanzil's addresses are `QURAN_TEXT_URL` and `QURAN_DATA_URL` in `.env` should they move. Until a copy is
+there, lessons cannot name a passage of the Quran and everything else works.
+
+A server with the demo academy brings it up to date on every deploy, whatever `DEMO_DATA` says
+(`DemoCatchUpSeeder`, its line in the deploy's output gives the counts): once the text is here, the demo's
+Juz' Amma lessons read their surahs, its Quran learners' last lessons have a few marked words, and their
+hifz maps are made from the reports already handed in.
 
 ## Scanning uploads
 
@@ -386,7 +456,22 @@ invoice), it goes back to the academy's "Data requests" page with the reason, an
 
 ## Changing a secret
 
-Edit the value in `.env` (never in the repository, never in a log), then `docker compose up -d`.
+**An outside service's key** (Anthropic, ElevenLabs, SMTP, WhatsApp, Twilio, Firebase's file, LiveKit,
+Stripe Connect, Google and Apple): in the console, **Platform settings** (an owner of the platform team).
+Someone on the console's team who does not see it is not an owner yet: on GitHub, **Actions › console-owner
+› Run workflow** with their email (it runs `platform:admin <email> --owner` on the server, audited), or here,
+as the deploy user in `~/academy-lms`: `printf '%s\n' someone@example.com | bash console.sh owner`.
+Someone not on the team yet ("nobody on the platform team has this email"): put a password of 12
+characters or more in the repository secret `CONSOLE_ADMIN_PASSWORD`, then run **console-owner** with their
+email and their name; they are added as an owner (`platform:admin <email> <name> --owner --password-stdin`:
+the password reaches the command on stdin, never on a command line or in the log), sign in at `/console`
+with it and set up the authenticator app. Change or delete the secret afterwards; the console keeps the
+password it was given.
+Type the new one over the hidden one and save: it is in use from the next request, job or command, with no
+restart, and the audit log names the setting, never the value. "Try it" on its section shows the service
+took it. To go back to the server's own value, tick "Remove the saved …" (a key) or empty the field.
+
+Anything else: edit the value in `.env` (never in the repository, never in a log), then `docker compose up -d`.
 Do not change `APP_KEY` on a live server: it decrypts the gateways' keys, the authenticator secrets and
 the sessions. `HEALTH_TOKEN` can change any time (and the uptime monitor with it).
 
@@ -409,7 +494,10 @@ console admin's authenticator app needs the new key (`grep DEMO_PLATFORM_2FA_SEC
 they set up themselves.
 
 **A real platform team**: `docker compose exec web php artisan platform:admin you@company.com "Your name"`
-adds one (it asks for the password and sets up the authenticator at the first sign-in to `/console`).
+adds one (it asks for the password and sets up the authenticator at the first sign-in to `/console`). Only
+owners see Platform settings: the team's first admin is one, `platform:admin you@company.com --owner`
+makes another and `--no-owner` takes it back (audited; never the last owner who can sign in, so make the
+real one an owner before locking the demo account).
 Before real academies arrive, lock the demo console account once a real one can sign in:
 `php artisan platform:admin admin@platform.test --deactivate` (audited; its sessions end, and so does a
 sign-in as someone it started; never the last admin who can sign in). `--reactivate` lets it back in.

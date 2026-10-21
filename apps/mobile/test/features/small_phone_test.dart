@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import '../fixtures/hifz.dart';
+import '../fixtures/journey.dart';
 import '../helpers.dart';
 import 'sign_in_flow_test.dart' show frames;
 
@@ -47,6 +49,15 @@ Future<void> _scrollDown(WidgetTester tester) async {
   if (lists.evaluate().isEmpty) return;
   for (var i = 0; i < 8; i++) {
     await tester.drag(lists.first, const Offset(0, -500), warnIfMissed: false);
+    await frames(tester, 2);
+  }
+}
+
+/// Scrolls the open sheet to its end.
+Future<void> _scrollSheet(WidgetTester tester) async {
+  final sheet = find.descendant(of: find.byType(BottomSheet), matching: find.byType(Scrollable));
+  for (var i = 0; i < 4; i++) {
+    await tester.drag(sheet.first, const Offset(0, -400), warnIfMissed: false);
     await frames(tester, 2);
   }
 }
@@ -280,6 +291,76 @@ void main() {
       await tester.tap(find.text('جزء من يوم'));
       await frames(tester, 4);
       await _scrollDown(tester);
+
+      await tester.pumpWidget(const SizedBox());
+      await frames(tester, 2);
+    });
+
+    testWidgets('a hifz map, a page of its review and its check fit a $width dp phone with large text', (tester) async {
+      await _phone(tester, width);
+      final app = await TestApp.create(accounts: [guardian]);
+      _familyData(app.api);
+      app.api
+        ..on('GET', 'learning/journey/map', fxJourney(stage: 'kids', viewer: 'guardian', hifz: fxHifzToday))
+        ..on('GET', 'learning/hifz', fxHifzBoard(latest: fxRecitation(status: 'ready')))
+        ..on('GET', 'learning/hifz/recitations/rc1', {'data': fxRecitation(status: 'ready')})
+        ..onWith('GET', 'learning/hifz/pages/*', (r) => (200, fxQuranPage(int.parse(r.path.split('/').last))));
+      await app.session.start();
+      await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
+      await frames(tester, 15);
+      // The journey with its way to the map, then the map.
+      await _go(tester, '/family/journey');
+      await _scrollDown(tester);
+
+      await _go(tester, '/family/journey/hifz');
+      await _scrollDown(tester);
+      await tester.ensureVisible(find.byKey(const Key('wird-3')));
+      await tester.tap(find.byKey(const Key('wird-3')));
+      await frames(tester, 8);
+      await tester.tap(find.text('اكشف الصفحة'));
+      await frames(tester, 8);
+      expect(find.byKey(const Key('grade-4')), findsOneWidget);
+      await _scrollSheet(tester);
+      Navigator.of(tester.element(find.byType(BottomSheet))).pop();
+      await frames(tester, 8);
+
+      await tester.ensureVisible(find.byKey(const Key('hifz-latest')));
+      await tester.tap(find.byKey(const Key('hifz-latest')));
+      await frames(tester, 8);
+      expect(find.byKey(const Key('recited-words')), findsOneWidget);
+      await _scrollSheet(tester);
+      Navigator.of(tester.element(find.byType(BottomSheet))).pop();
+      await frames(tester, 8);
+
+      await tester.pumpWidget(const SizedBox());
+      await frames(tester, 2);
+    });
+
+    testWidgets('a student\'s hifz map and saying what they know fit a $width dp phone with large text', (tester) async {
+      await _phone(tester, width);
+      final app = await TestApp.create(accounts: [teacher]);
+      teacherRoutes(app.api);
+      app.api.on('GET', 'teacher/students/e1/hifz', fxStudentHifz());
+      await app.session.start();
+      await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
+      await frames(tester, 15);
+      await _go(tester, '/teach/students/e1/hifz');
+      expect(find.byKey(const Key('hifz-map')), findsOneWidget);
+      await _scrollDown(tester);
+
+      await tester.ensureVisible(find.byKey(const Key('hifz-tell')));
+      await tester.tap(find.byKey(const Key('hifz-tell')));
+      await frames(tester, 8);
+      await tester.tap(find.byKey(const Key('juz-30')));
+      await tester.enterText(find.byKey(const Key('surah-search')), 'السورة');
+      await frames(tester, 4);
+      await tester.ensureVisible(find.byKey(const Key('surah-2')));
+      await frames(tester, 2);
+      await tester.tap(find.byKey(const Key('surah-2')));
+      await frames(tester, 4);
+      await _scrollSheet(tester);
+      Navigator.of(tester.element(find.byType(BottomSheet))).pop();
+      await frames(tester, 8);
 
       await tester.pumpWidget(const SizedBox());
       await frames(tester, 2);

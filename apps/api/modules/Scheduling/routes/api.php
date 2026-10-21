@@ -17,6 +17,7 @@ Route::middleware(['auth:sanctum', 'can:shifts.propose-own'])->prefix('teacher/s
 // The teacher's lessons, and their time off.
 Route::middleware('auth:sanctum')->prefix('teacher')->group(function () {
     Route::get('lessons', [TeacherLessonsController::class, 'lessons'])->name('teacher.lessons');
+    Route::get('lessons/{session}', [TeacherLessonsController::class, 'show'])->name('teacher.lessons.show');
     Route::post('lessons/{session}/dispute', [TeacherLessonsController::class, 'dispute'])->middleware('idempotent')->name('teacher.lessons.dispute');
     Route::middleware('can:time-off.request-own')->group(function () {
         Route::get('time-off', [TeacherLessonsController::class, 'timeOff'])->name('teacher.time-off');

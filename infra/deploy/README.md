@@ -44,6 +44,7 @@ Repository → Settings → Secrets and variables → Actions:
 | `DEPLOY_PASSWORD` | only if there is no key: the SSH password |
 | `DEPLOY_KNOWN_HOSTS` | the `ssh-keyscan -H` output; without it the server's key is trusted as first seen |
 | `DEPLOY_HOST`, `DEPLOY_USER` | only to deploy somewhere else: the workflow defaults to `145.223.99.175` and `lukas-demo` |
+| `CONSOLE_ADMIN_PASSWORD` | only to add someone to the console's team from GitHub (`console-owner.yml` with a name): their first password, 12 characters or more |
 
 The key or the password lives in GitHub's secrets only, never in a file of the repository.
 
@@ -110,8 +111,10 @@ docker compose exec web php artisan platform:mail-test   # does the server's mai
   and `GAME_DESIGNER_MODEL` (the Claude model it designs with) in `.env`, then `docker compose up -d worker`.
   It works on its own queue beside the worker (a design takes a few minutes). Without them the studio says the
   designer is not set up; the games, their islands and publishing still work.
-- **AI helpers** (each academy's Settings › AI helpers; `RUNBOOKS.md`, "AI helpers"): the same
-  `ANTHROPIC_API_KEY`, and `ELEVENLABS_API_KEY` for the ones that listen (speech to text). Each academy turns
+- **AI helpers** (each academy's Settings › AI helpers; `RUNBOOKS.md`, "AI helpers"): the words from the
+  provider chosen in the console's Platform settings (Claude with the same `ANTHROPIC_API_KEY`, GPT, Gemini
+  from a paid project, or your own Ollama server), its models picked from its own list, and
+  `ELEVENLABS_API_KEY` for the ones that listen (speech to text). Each academy turns
   each helper on itself (all off at first, and only on a plan with the AI area); `AI_DRIVER=off` turns them off
   everywhere. They work on their own queue, `assist`, beside the worker.
 
@@ -149,6 +152,17 @@ first deploy writes it with random secrets and safe defaults; each later deploy 
 setting this version reads that the file lacks, and says which. Change a value by hand, then
 `docker compose up -d` (the parts read it when they start). Secrets live only here, never in the repository.
 
+The outside services' keys and addresses (AI, email, WhatsApp, texts, push and its Firebase file, LiveKit,
+Stripe Connect, Google and Apple, the legal name, alert addresses, the app's links) are set best in the
+console: **Platform settings** (owners of the platform team only; `platform:admin you@company.com --owner`).
+A value there wins over its line here at once, with no restart, and is kept encrypted with `APP_KEY` in the
+database (in its backups too); emptied there, the line here holds again. Each setting shows where its value
+comes from now, and each section has a "Try it" that says why a service would not take its keys (a key
+refused, the credit run out, an account stopped) and what to do, tries what is typed before it is saved,
+and stays under the section; `platform:services` tries them all each morning and the platform team's
+alert mail says when one needs someone (`RUNBOOKS.md`, "An outside service needs you"). The Quran's text is fetched from Tanzil by the deploy
+(`QURAN_TEXT_URL`, `QURAN_DATA_URL`, not written: Tanzil's own addresses) or from the same page.
+
 | Settings | What they do | Where the value comes from |
 |---|---|---|
 | `IMAGE`, `HTTP_PORT` | the version running, and the one port on 127.0.0.1 | `deploy.sh` |
@@ -170,7 +184,8 @@ setting this version reads that the file lacks, and says which. Change a value b
 | `UPLOAD_SCANNER`, `UPLOAD_SCAN_REQUIRED`, `CLAMAV_HOST`, `COMPOSE_PROFILES` | malware scanning of uploads | `COMPOSE_PROFILES=scan` and `UPLOAD_SCANNER=clamav` once the server can spare 1.5 GB |
 | `HEALTH_ALERT_TO`, `BACKUPS_EXPECTED`, `BACKUP_AT`, `BACKUP_KEEP_DAYS`, `OFFSITE_*` | alerts' extra addresses; the daily backup's time and retention; the off-site copy | you; the bucket and the platform team's age public key (`RUNBOOKS.md`) |
 | `ANTHROPIC_API_KEY`, `GAME_DESIGNER_MODEL`, `PLATFORM_LEGAL_NAME`, `PRIVACY_CONTACT_EMAIL` | the games designer and the AI helpers; the platform's privacy pages | the platform's Claude key and the designer's model; the legal name and the data contact |
-| `AI_DRIVER`, `AI_MODEL`, `AI_FAST_MODEL`, `AI_DAILY_CAP` (not written: `AI_TIMEOUT`, `AI_JOB_TIMEOUT`, `AI_CONCURRENT`, `AI_MAX_AUDIO_SECONDS`) | the academies' AI helpers: on (`claude`) or `off` for all; the Claude models that write and that answer quickly; each academy's calls a day | the defaults; `AI_CONCURRENT` (default 3) is how many helpers answer people at once on this server, the rest are told to try again |
+| `AI_DRIVER`, `AI_MODEL`, `AI_FAST_MODEL`, `AI_DAILY_CAP` (not written: `AI_TIMEOUT`, `AI_JOB_TIMEOUT`, `AI_CONCURRENT`, `AI_MAX_AUDIO_SECONDS`) | the academies' AI helpers: who writes their words (`claude`, `openai`, `gemini`, `ollama`) or `off` for all; the Claude models that write and that answer quickly; each academy's calls a day | the defaults, then the provider and its models chosen in the console's Platform settings from the provider's own list; `AI_CONCURRENT` (default 3) is how many helpers answer people at once on this server, the rest are told to try again |
+| `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_FAST_MODEL`, `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_FAST_MODEL`, `OLLAMA_URL`, `OLLAMA_API_KEY`, `OLLAMA_MODEL`, `OLLAMA_FAST_MODEL` (not written: `OPENAI_BASE_URL`, `GEMINI_BASE_URL`) | the other providers' keys (Ollama: its address) and models, used only while `AI_DRIVER` names them | blank; set in Platform settings. Gemini: a key from a project with billing on; Ollama: https unless on a private network |
 | `ELEVENLABS_API_KEY`, `ELEVENLABS_API_BASE`, `ELEVENLABS_ZERO_RETENTION` (not written: `ELEVENLABS_STT_MODEL`, `ELEVENLABS_TIMEOUT`) | speech to text for the helpers that listen | the platform's ElevenLabs key (its data-processing terms signed first); the EU address keeps audio in the EU; `ELEVENLABS_ZERO_RETENTION=true` once the account allows it. Blank, those helpers stay off |
 | `WEB_MEMORY`, `WORKER_MEMORY`, ... `*_CPUS`, `REDIS_MAXMEMORY` (not written: compose.yml's defaults) | each part's memory and CPU limits | add to raise one |
 

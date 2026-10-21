@@ -35,6 +35,9 @@ class LoadCubit<T> extends Cubit<LoadState<T>> {
   StreamSubscription<void>? _live;
   Timer? _next;
 
+  /// How many times a write's answer was shown: a load asked before the last one would show older data.
+  int _shown = 0;
+
   /// The longest single wait; a screen open for days sets the next one then.
   static const longestWait = Duration(hours: 6);
 
@@ -61,21 +64,31 @@ class LoadCubit<T> extends Cubit<LoadState<T>> {
     if (wait != null) _next = Timer(wait, load);
   }
 
+  /// Shows what a write answered with (the screen's own data, fresh), without asking again.
+  void show(T data) {
+    if (isClosed) return;
+    _shown++;
+    emit(LoadState<T>(data: data, loading: false));
+    _schedule(data);
+  }
+
   Future<void> load() async {
+    final shown = _shown;
     emit(LoadState<T>(data: state.data));
     try {
       final data = await _fetch();
+      if (shown != _shown) return;
       if (!isClosed) {
         emit(LoadState<T>(data: data, loading: false));
         _schedule(data);
       }
     } on ApiProblem catch (problem) {
-      if (!isClosed) emit(LoadState<T>(data: state.data, problem: problem, loading: false));
+      if (!isClosed && shown == _shown) emit(LoadState<T>(data: state.data, problem: problem, loading: false));
     } on Object catch (error) {
       // An answer the app cannot read (a field missing or of another type): the screen says something went
       // wrong and offers to try again, instead of loading for ever.
       debugPrint('LoadCubit<$T>: $error');
-      if (!isClosed) emit(LoadState<T>(data: state.data, problem: ApiProblem.unreadable(), loading: false));
+      if (!isClosed && shown == _shown) emit(LoadState<T>(data: state.data, problem: ApiProblem.unreadable(), loading: false));
     }
   }
 }

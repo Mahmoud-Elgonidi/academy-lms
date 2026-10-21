@@ -2,7 +2,11 @@
 
 namespace Modules\Communication\Channels\WhatsApp;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Modules\SharedKernel\Health\Faults\MetaFaults;
+use Modules\SharedKernel\Health\ServiceFault;
+use Modules\SharedKernel\Health\ServiceHealth;
 use RuntimeException;
 
 /**
@@ -11,7 +15,10 @@ use RuntimeException;
  * as its two body parameters, so one approved template carries every
  * notification in each language it was approved in. Codes go by a second,
  * authentication-category template ("otp_template", with Meta's copy-code
- * button): the code is the body's one parameter and the button's.
+ * button): the code is the body's one parameter and the button's. How Meta
+ * answers goes to ServiceHealth ('whatsapp'): a refused token, a payment
+ * that did not go through, a template missing (scoped to that template);
+ * an answer about one recipient leaves it alone.
  */
 final class MetaCloudWhatsAppGateway implements WhatsAppGateway
 {
@@ -46,17 +53,27 @@ final class MetaCloudWhatsAppGateway implements WhatsAppGateway
             throw new RuntimeException('WhatsApp (Meta) is not configured.');
         }
 
-        $response = Http::withToken($this->config['token'])->acceptJson()->timeout(15)
-            ->post("https://graph.facebook.com/{$this->config['api_version']}/{$this->config['phone_number_id']}/messages", [
-                'messaging_product' => 'whatsapp',
-                'to' => ltrim($phoneE164, '+'),
-                'type' => 'template',
-                'template' => ['name' => $name, 'language' => ['code' => $locale], 'components' => $components],
-            ]);
+        try {
+            $response = Http::withToken($this->config['token'])->acceptJson()->timeout(15)
+                ->post("https://graph.facebook.com/{$this->config['api_version']}/{$this->config['phone_number_id']}/messages", [
+                    'messaging_product' => 'whatsapp',
+                    'to' => ltrim($phoneE164, '+'),
+                    'type' => 'template',
+                    'template' => ['name' => $name, 'language' => ['code' => $locale], 'components' => $components],
+                ]);
+        } catch (ConnectionException $e) {
+            ServiceHealth::fault('whatsapp', ServiceFault::unreachable());
+            throw $e;
+        }
 
         if ($response->failed()) {
+            $fault = MetaFaults::of($response->status(), $response->json());
+            if ($fault !== null) {
+                ServiceHealth::fault('whatsapp', $fault, in_array((int) $fault->code, MetaFaults::TEMPLATE, true) ? $name : '');
+            }
             throw new RuntimeException('WhatsApp (Meta) refused the message: '.($response->json('error.message') ?? $response->status()));
         }
+        ServiceHealth::ok('whatsapp', $name);
 
         return (string) $response->json('messages.0.id');
     }

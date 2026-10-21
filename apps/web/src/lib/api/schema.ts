@@ -1120,6 +1120,9 @@ export interface paths {
          * A report to write or correct
          * @description The report with today's plan, the lessons to choose from, the homework set from it, the roadmap, and the
          *     subject's own questions (`template`, null when it has none); send their answers as `answers` by key.
+         *     Homework handed in by voice may say what to recite (`homework.expected`: surah, from, to) when
+         *     `assist.recitation_check`; `expected_suggestion` is the passage of the report's lessons' text, and
+         *     `mistakes_suggestion` the verses with the words marked in the lesson's shared mushaf.
          */
         get: operations["teacher.reports.show"];
         /**
@@ -1129,6 +1132,29 @@ export interface paths {
          */
         put: operations["teacher.reports.submit"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/teacher/reports/{report}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Draft the report from a voice note
+         * @description The teacher's own note (`audio`, up to two minutes) is heard and deleted at once; what was said fills the
+         *     fields the open form (`current`, as PUT takes it, JSON) leaves empty. Nothing is saved: `report` is the form
+         *     with the draft in it, `filled` the fields it filled (lessons as `items.{node_id}`, questions as
+         *     `answers.{key}`), `unsure` those to check first, `left` what the report still needs, `heard` the words heard.
+         */
+        post: operations["teacher.reports.draft"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1162,6 +1188,157 @@ export interface paths {
         put?: never;
         post: operations["teacher.homework.review"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/teacher/texts/quran": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The Quran's surahs
+         * @description To choose what homework asks to recite: each surah's number, names and verses, and the attribution its text
+         *     asks to be shown with (empty until the platform has its copy).
+         */
+        get: operations["teacher.texts.quran"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/teacher/students/{enrollment}/hifz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A student's hifz map
+         * @description Every page by part with its strength, the counts, the last two weeks' reviews (grade and where each came from),
+         *     and the parts and surahs with their pages, to say what the student already knows.
+         */
+        get: operations["teacher.hifz.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/teacher/students/{enrollment}/hifz/memorized": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Say what the student already knows by heart
+         * @description Whole parts (juz), surahs or pages, and how well: strong, good or weak. Each page starts again as memorized,
+         *     due for review as that says.
+         */
+        post: operations["teacher.hifz.mark"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/teacher/students/{enrollment}/hifz/clear": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Take pages off the student's map (marked by mistake): they are new again */
+        post: operations["teacher.hifz.clear"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/teacher/students/{enrollment}/mistakes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A student's mistakes notebook
+         * @description The words marked in their lessons in the last six months, by surah and verse.
+         */
+        get: operations["teacher.mistakes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/learning/lessons/{session}/mushaf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A lesson's shared mushaf
+         * @description The page asked for, else the one the teacher has open, else where the lesson starts; its words, and the words
+         *     marked on it. For the lesson's teacher, its student and the student's guardians, in a lesson of a course that
+         *     reads the Quran.
+         */
+        get: operations["learning.mushaf"];
+        /**
+         * Turn the lesson's mushaf to a page
+         * @description The teacher only; the student's screen follows (live).
+         */
+        put: operations["learning.mushaf.turn"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/learning/lessons/{session}/mistakes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark a word
+         * @description The teacher, from the room's opening until the report is handed in: wrong, hesitation or tajweed; marking it
+         *     again changes what it was. Answers the page (page, else the word's).
+         */
+        post: operations["learning.mistakes.mark"];
+        /**
+         * Take a mark off a word
+         * @description The teacher, while words may be marked. Answers the page (page, else the word's).
+         */
+        delete: operations["learning.mistakes.unmark"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1332,6 +1509,128 @@ export interface paths {
             cookie?: never;
         };
         get: operations["learning.submissions.file"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/learning/hifz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A learner's hifz map
+         * @description Every page of the mushaf by part (new, learning, or memorized and strong, fading or weak now), how many of
+         *     each, and today's review on the learner's clock. mode: check (recite a page; it is heard and checked) or self
+         *     (say how it went). The latest page recited in the last day comes with its check.
+         */
+        get: operations["learning.hifz"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/learning/hifz/pages/{page}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A page's text
+         * @description Its verses as Tanzil writes them (perhaps the end of one surah and the start of the next), with where it
+         *     stands on the learner's map.
+         */
+        get: operations["learning.hifz.page"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/learning/hifz/pages/{page}/recitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Recite a page
+         * @description The recording (audio) is heard and checked against the page in the background; GET learning/hifz/recitations/{id}
+         *     (or the hifz signal) gives the result, which counts as the page's review. Only while the academy has the
+         *     recitation check on (else ai-off); the recording is deleted once heard.
+         */
+        post: operations["learning.hifz.recite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/learning/hifz/recitations/{recitation}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A recited page's check */
+        get: operations["learning.hifz.recitation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/learning/hifz/pages/{page}/grade": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Say how a page went
+         * @description grade 1 forgot, 2 hard, 3 good, 4 easy: the page's review for today (once a day; the first word counts).
+         */
+        post: operations["learning.hifz.grade"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/learning/mistakes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A learner's mistakes notebook
+         * @description The words their teachers marked in the last six months, by surah and verse (a guardian passes learner_id).
+         */
+        get: operations["learning.mistakes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1896,6 +2195,27 @@ export interface paths {
          * @description From a day (default today, on my clock) for a number of days (default 7, at most 31).
          */
         get: operations["teacher.lessons"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/teacher/lessons/{session}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One of my lessons
+         * @description As the list of my lessons has it, on whatever day it is: the lesson page opens it by its id, a lesson
+         *     still on since before midnight or another day's alike.
+         */
+        get: operations["teacher.lessons.show"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5983,6 +6303,67 @@ export interface operations {
             403: components["responses"]["AuthorizationException"];
         };
     };
+    "teacher.reports.draft": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                report: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Maximum file size: 6144 kilobytes.
+                     */
+                    audio: string;
+                    current?: string | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            heard: string;
+                            report: {
+                                [key: string]: unknown;
+                            };
+                            filled: string[];
+                            unsure: string[];
+                            left: string[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
     "teacher.homework.index": {
         parameters: {
             query?: {
@@ -6072,7 +6453,30 @@ export interface operations {
                                     timezone: null;
                                     label: string;
                                 } | null;
+                                /** @description The recording's check against what it asks to recite (null: none). */
+                                check: {
+                                    /** @description pending, ready, failed */
+                                    status: string;
+                                    status_label: string;
+                                    /** @description Why it could not be checked, in the reader's words. */
+                                    failure: string | null;
+                                    summary: string | null;
+                                    summary_label: string | null;
+                                    /** @description Each verse's words: state ok, missing or wrong, and what was said instead. */
+                                    verses: string | string[];
+                                    /** @description Words said that are not in the text, after the word they followed (counted from 1 through the passage). */
+                                    extra: string | string[];
+                                    heard: string | null;
+                                    /** @constant */
+                                    note: "A help while marking, not a mark: the words are heard automatically and can be wrong, so listen to the recording yourself.";
+                                } | null;
                             }[];
+                            expected: {
+                                surah: number;
+                                from: number;
+                                to: number;
+                                title: string;
+                            } | null;
                         }[];
                     };
                 };
@@ -6176,7 +6580,30 @@ export interface operations {
                                     timezone: null;
                                     label: string;
                                 } | null;
+                                /** @description The recording's check against what it asks to recite (null: none). */
+                                check: {
+                                    /** @description pending, ready, failed */
+                                    status: string;
+                                    status_label: string;
+                                    /** @description Why it could not be checked, in the reader's words. */
+                                    failure: string | null;
+                                    summary: string | null;
+                                    summary_label: string | null;
+                                    /** @description Each verse's words: state ok, missing or wrong, and what was said instead. */
+                                    verses: string | string[];
+                                    /** @description Words said that are not in the text, after the word they followed (counted from 1 through the passage). */
+                                    extra: string | string[];
+                                    heard: string | null;
+                                    /** @constant */
+                                    note: "A help while marking, not a mark: the words are heard automatically and can be wrong, so listen to the recording yourself.";
+                                } | null;
                             }[];
+                            expected: {
+                                surah: number;
+                                from: number;
+                                to: number;
+                                title: string;
+                            } | null;
                         };
                     };
                 };
@@ -6184,6 +6611,691 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
             404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "teacher.texts.quran": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            number: number;
+                            name_ar: string;
+                            name_en: string;
+                            verses: number;
+                        }[];
+                        attribution: string | null;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+        };
+    };
+    "teacher.hifz.show": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                enrollment: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            enrollment_id: string;
+                            /** @description Whether the map belongs to this course: its curriculum reads the Quran, or the student already has pages. Screens show it only then. */
+                            follows: boolean;
+                            student: {
+                                id: string;
+                                name: string;
+                            };
+                            /** @description 604 once the platform has the Quran's text; 0 until then (nothing to show) */
+                            pages_total: number;
+                            /** @description memorized and learning pages; of the memorized: strong, fading and weak now; due by the end of the learner's day */
+                            counts: {
+                                memorized: number;
+                                learning: number;
+                                strong: number;
+                                fading: number;
+                                weak: number;
+                                due: number;
+                            };
+                            /** @description Each part's pages: strength new, learning, strong, fading or weak. */
+                            juzs: unknown[];
+                            strengths: string;
+                            recent: {
+                                page: number;
+                                grade: number;
+                                grade_label: string;
+                                /** @description teacher, report, check (homework), wird (a page recited for the daily review), self (their own grade) or mistakes (words marked in a lesson's shared mushaf) */
+                                source: string;
+                                source_label: string;
+                                at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                            /** @description What a teacher may mark: whole parts, whole surahs, or pages. */
+                            surahs: unknown[];
+                            marks: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+        };
+    };
+    "teacher.hifz.mark": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                enrollment: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    juz?: number[] | null;
+                    surahs?: number[] | null;
+                    pages?: number[] | null;
+                    /** @enum {string} */
+                    strength: "strong" | "good" | "weak";
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: unknown[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "teacher.hifz.clear": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                enrollment: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    juz?: number[] | null;
+                    surahs?: number[] | null;
+                    pages?: number[] | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: unknown[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "teacher.mistakes": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                enrollment: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            enrollment_id: string;
+                            /** @description Words marked in the last six months. */
+                            words: number;
+                            /** @description By surah and verse: each verse's words as written, and its marked words (by place, from 1). */
+                            surahs: {
+                                surah: number;
+                                name_ar: string;
+                                name_en: string;
+                                /** @description Words marked in this surah. */
+                                words: number;
+                                verses: {
+                                    verse: number;
+                                    /** @description The verse's words as written, from the first. */
+                                    words: string[];
+                                    marks: {
+                                        /** @description Its place in the verse, from 1. */
+                                        word: number;
+                                        times: number;
+                                        /** @description wrong, hesitation, tajweed */
+                                        kinds: string[];
+                                        last_at: {
+                                            utc: string;
+                                            local: string;
+                                            timezone: null;
+                                            label: string;
+                                        } | null;
+                                    }[];
+                                }[];
+                            }[];
+                            kinds: {
+                                [key: string]: string;
+                            };
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+        };
+    };
+    "learning.mushaf": {
+        parameters: {
+            query?: {
+                page?: number | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                session: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            session_id: string;
+                            /** @description teacher (turns the pages and marks words), student or guardian (follow and read) */
+                            role: string;
+                            /** @description Whether I may mark words now (the teacher, from the room's opening until the report is handed in). */
+                            can_mark: boolean;
+                            /** @description The page shown (1 to 604). */
+                            page: number;
+                            /** @description The page the teacher has open: the student's screen follows it; null until the teacher turns one. */
+                            teacher_page: number | null;
+                            /** @description Where the lesson starts (its plan's passage of the Quran, else the oldest page due for review). */
+                            start_page: number;
+                            pages_total: number;
+                            juz: number;
+                            title: string;
+                            surahs: {
+                                number: number;
+                                name_ar: string;
+                                name_en: string;
+                            }[];
+                            /** @description The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here. */
+                            basmala: string[] | null;
+                            /** @description The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1. */
+                            verses: {
+                                surah: number;
+                                verse: number;
+                                /** @description Each word as written, from the first. */
+                                words: string[];
+                            }[];
+                            /** @description Words marked in this lesson: kind wrong, hesitation or tajweed. */
+                            marks: {
+                                surah: number;
+                                verse: number;
+                                word: number;
+                                kind: string;
+                            }[];
+                            /** @description Words on this page marked in the student's earlier lessons (shown faintly): the latest kind and how many times. */
+                            earlier: {
+                                surah: number;
+                                verse: number;
+                                word: number;
+                                kind: string;
+                                times: number;
+                            }[];
+                            kinds: {
+                                [key: string]: string;
+                            };
+                            /** @description The attribution the text is shown with. */
+                            attribution: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "learning.mushaf.turn": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                session: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    page: number;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            session_id: string;
+                            /** @description teacher (turns the pages and marks words), student or guardian (follow and read) */
+                            role: string;
+                            /** @description Whether I may mark words now (the teacher, from the room's opening until the report is handed in). */
+                            can_mark: boolean;
+                            /** @description The page shown (1 to 604). */
+                            page: number;
+                            /** @description The page the teacher has open: the student's screen follows it; null until the teacher turns one. */
+                            teacher_page: number | null;
+                            /** @description Where the lesson starts (its plan's passage of the Quran, else the oldest page due for review). */
+                            start_page: number;
+                            pages_total: number;
+                            juz: number;
+                            title: string;
+                            surahs: {
+                                number: number;
+                                name_ar: string;
+                                name_en: string;
+                            }[];
+                            /** @description The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here. */
+                            basmala: string[] | null;
+                            /** @description The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1. */
+                            verses: {
+                                surah: number;
+                                verse: number;
+                                /** @description Each word as written, from the first. */
+                                words: string[];
+                            }[];
+                            /** @description Words marked in this lesson: kind wrong, hesitation or tajweed. */
+                            marks: {
+                                surah: number;
+                                verse: number;
+                                word: number;
+                                kind: string;
+                            }[];
+                            /** @description Words on this page marked in the student's earlier lessons (shown faintly): the latest kind and how many times. */
+                            earlier: {
+                                surah: number;
+                                verse: number;
+                                word: number;
+                                kind: string;
+                                times: number;
+                            }[];
+                            kinds: {
+                                [key: string]: string;
+                            };
+                            /** @description The attribution the text is shown with. */
+                            attribution: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "learning.mistakes.mark": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                session: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    surah: number;
+                    verse: number;
+                    word: number;
+                    page?: number | null;
+                    /** @enum {string} */
+                    kind: "wrong" | "hesitation" | "tajweed";
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            session_id: string;
+                            /** @description teacher (turns the pages and marks words), student or guardian (follow and read) */
+                            role: string;
+                            /** @description Whether I may mark words now (the teacher, from the room's opening until the report is handed in). */
+                            can_mark: boolean;
+                            /** @description The page shown (1 to 604). */
+                            page: number;
+                            /** @description The page the teacher has open: the student's screen follows it; null until the teacher turns one. */
+                            teacher_page: number | null;
+                            /** @description Where the lesson starts (its plan's passage of the Quran, else the oldest page due for review). */
+                            start_page: number;
+                            pages_total: number;
+                            juz: number;
+                            title: string;
+                            surahs: {
+                                number: number;
+                                name_ar: string;
+                                name_en: string;
+                            }[];
+                            /** @description The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here. */
+                            basmala: string[] | null;
+                            /** @description The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1. */
+                            verses: {
+                                surah: number;
+                                verse: number;
+                                /** @description Each word as written, from the first. */
+                                words: string[];
+                            }[];
+                            /** @description Words marked in this lesson: kind wrong, hesitation or tajweed. */
+                            marks: {
+                                surah: number;
+                                verse: number;
+                                word: number;
+                                kind: string;
+                            }[];
+                            /** @description Words on this page marked in the student's earlier lessons (shown faintly): the latest kind and how many times. */
+                            earlier: {
+                                surah: number;
+                                verse: number;
+                                word: number;
+                                kind: string;
+                                times: number;
+                            }[];
+                            kinds: {
+                                [key: string]: string;
+                            };
+                            /** @description The attribution the text is shown with. */
+                            attribution: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "learning.mistakes.unmark": {
+        parameters: {
+            query: {
+                surah: number;
+                verse: number;
+                word: number;
+                page?: number | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                session: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            session_id: string;
+                            /** @description teacher (turns the pages and marks words), student or guardian (follow and read) */
+                            role: string;
+                            /** @description Whether I may mark words now (the teacher, from the room's opening until the report is handed in). */
+                            can_mark: boolean;
+                            /** @description The page shown (1 to 604). */
+                            page: number;
+                            /** @description The page the teacher has open: the student's screen follows it; null until the teacher turns one. */
+                            teacher_page: number | null;
+                            /** @description Where the lesson starts (its plan's passage of the Quran, else the oldest page due for review). */
+                            start_page: number;
+                            pages_total: number;
+                            juz: number;
+                            title: string;
+                            surahs: {
+                                number: number;
+                                name_ar: string;
+                                name_en: string;
+                            }[];
+                            /** @description The basmala's words from the platform's copy, shown at the head of a surah that begins on this page (not al-Fatiha, not at-Tawba); null when none begins here. */
+                            basmala: string[] | null;
+                            /** @description The page's verses, each word as written; a word is its surah, its verse and its place in the verse from 1. */
+                            verses: {
+                                surah: number;
+                                verse: number;
+                                /** @description Each word as written, from the first. */
+                                words: string[];
+                            }[];
+                            /** @description Words marked in this lesson: kind wrong, hesitation or tajweed. */
+                            marks: {
+                                surah: number;
+                                verse: number;
+                                word: number;
+                                kind: string;
+                            }[];
+                            /** @description Words on this page marked in the student's earlier lessons (shown faintly): the latest kind and how many times. */
+                            earlier: {
+                                surah: number;
+                                verse: number;
+                                word: number;
+                                kind: string;
+                                times: number;
+                            }[];
+                            kinds: {
+                                [key: string]: string;
+                            };
+                            /** @description The attribution the text is shown with. */
+                            attribution: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
         };
     };
     "learning.students": {
@@ -6395,6 +7507,12 @@ export interface operations {
                                 glance: {
                                     [key: string]: unknown;
                                 } | null;
+                            } | null;
+                            /** @description The hifz review today (GET learning/hifz has it in full): pages left today, done today and a day's pages; null until the learner has pages on their hifz map. */
+                            hifz: {
+                                due: number;
+                                done_today: number;
+                                daily: number;
                             } | null;
                             cheers: {
                                 id: string;
@@ -6940,6 +8058,445 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "learning.hifz": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            learner_id: string;
+                            /**
+                             * @description check: recite a page and it is checked word by word; self: say how it went
+                             * @enum {string}
+                             */
+                            mode: "check" | "self";
+                            /** @description 604 once the platform has the Quran's text; 0 until then (nothing to show) */
+                            pages_total: number;
+                            /** @description memorized and learning pages; of the memorized: strong, fading and weak now; due by the end of the learner's day */
+                            counts: {
+                                memorized: number;
+                                learning: number;
+                                strong: number;
+                                fading: number;
+                                weak: number;
+                                due: number;
+                            };
+                            /** @description Each part's pages: strength new, learning, strong, fading or weak. */
+                            juzs: unknown[];
+                            strengths: string;
+                            wird: {
+                                /** @description pages a day at most (the academy's) */
+                                daily: number;
+                                done_today: number;
+                                /** @description Today's pages, most overdue first: what is left of today's review. */
+                                pages: {
+                                    page: number;
+                                    juz: number;
+                                    title: string | "";
+                                    surahs: {
+                                        number: number;
+                                        name_ar: string;
+                                        name_en: string;
+                                    }[];
+                                    /** @enum {string} */
+                                    strength: "strong" | "fading" | "weak" | "learning" | "new";
+                                    overdue_days: unknown;
+                                }[];
+                            };
+                            latest_recitation: {
+                                id: string;
+                                page: number;
+                                /** @description pending, ready, failed */
+                                status: string;
+                                status_label: string;
+                                /** @description Why it could not be heard, in the reader's words. */
+                                failure: string | null;
+                                summary_label: string | null;
+                                /** @description 1 forgot, 2 hard, 3 good, 4 easy: the review it counted as */
+                                grade: number | null;
+                                grade_label: string | null;
+                                /** @description Each verse's words: state ok, missing or wrong, and what was said instead. */
+                                verses: unknown;
+                                /** @description Words said that are not in the text, after the word they followed (counted from 1 through the page). */
+                                extra: unknown;
+                                recited_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @constant */
+                                note: "Checked automatically and can be wrong; the teacher has the last word.";
+                            } | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "learning.hifz.page": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                page: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            page: number;
+                            juz: number;
+                            title: string;
+                            surahs: {
+                                number: number;
+                                name_ar: string;
+                                name_en: string;
+                            }[];
+                            /** @description The page's verses as Tanzil writes them. */
+                            verses: unknown[];
+                            /** @description The attribution the text is shown with. */
+                            attribution: string;
+                            /** @enum {string} */
+                            strength: "strong" | "fading" | "weak" | "learning" | "new";
+                            due_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "learning.hifz.recite": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                page: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            page: number;
+                            /** @description pending, ready, failed */
+                            status: string;
+                            status_label: string;
+                            /** @description Why it could not be heard, in the reader's words. */
+                            failure: string | null;
+                            summary_label: string | null;
+                            /** @description 1 forgot, 2 hard, 3 good, 4 easy: the review it counted as */
+                            grade: number | null;
+                            grade_label: string | null;
+                            /** @description Each verse's words: state ok, missing or wrong, and what was said instead. */
+                            verses: unknown;
+                            /** @description Words said that are not in the text, after the word they followed (counted from 1 through the page). */
+                            extra: unknown;
+                            recited_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @constant */
+                            note: "Checked automatically and can be wrong; the teacher has the last word.";
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "learning.hifz.recitation": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                recitation: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            page: number;
+                            /** @description pending, ready, failed */
+                            status: string;
+                            status_label: string;
+                            /** @description Why it could not be heard, in the reader's words. */
+                            failure: string | null;
+                            summary_label: string | null;
+                            /** @description 1 forgot, 2 hard, 3 good, 4 easy: the review it counted as */
+                            grade: number | null;
+                            grade_label: string | null;
+                            /** @description Each verse's words: state ok, missing or wrong, and what was said instead. */
+                            verses: unknown;
+                            /** @description Words said that are not in the text, after the word they followed (counted from 1 through the page). */
+                            extra: unknown;
+                            recited_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @constant */
+                            note: "Checked automatically and can be wrong; the teacher has the last word.";
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "learning.hifz.grade": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                page: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    grade: number;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            page: number;
+                            juz: number;
+                            title: string;
+                            surahs: {
+                                number: number;
+                                name_ar: string;
+                                name_en: string;
+                            }[];
+                            /** @description The page's verses as Tanzil writes them. */
+                            verses: unknown[];
+                            /** @description The attribution the text is shown with. */
+                            attribution: string;
+                            /** @enum {string} */
+                            strength: "strong" | "fading" | "weak" | "learning" | "new";
+                            due_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "learning.mistakes": {
+        parameters: {
+            query?: {
+                learner_id?: string | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            learner_id: string;
+                            /** @description Words marked in the last six months. */
+                            words: number;
+                            /** @description By surah and verse: each verse's words as written, and its marked words (by place, from 1). */
+                            surahs: {
+                                surah: number;
+                                name_ar: string;
+                                name_en: string;
+                                /** @description Words marked in this surah. */
+                                words: number;
+                                verses: {
+                                    verse: number;
+                                    /** @description The verse's words as written, from the first. */
+                                    words: string[];
+                                    marks: {
+                                        /** @description Its place in the verse, from 1. */
+                                        word: number;
+                                        times: number;
+                                        /** @description wrong, hesitation, tajweed */
+                                        kinds: string[];
+                                        last_at: {
+                                            utc: string;
+                                            local: string;
+                                            timezone: null;
+                                            label: string;
+                                        } | null;
+                                    }[];
+                                }[];
+                            }[];
+                            kinds: {
+                                [key: string]: string;
+                            };
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
         };
     };
     "learning.challenges": {
@@ -9261,6 +10818,106 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "teacher.lessons.show": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                session: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            starts_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            ends_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            minutes: number;
+                            subject: string;
+                            /** @description The teacher's name (family) or the student's (teacher). */
+                            with: string;
+                            /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
+                            status: string;
+                            status_label: string;
+                            /** @description regular, trial, makeup, extra, assessment */
+                            type: string;
+                            type_label: string | null;
+                            /** @description Booked but not yet paid for. */
+                            unfunded: string;
+                            join: {
+                                /** @description The room is open: POST /lessons/{id}/join for a ticket. */
+                                open: string;
+                                opens_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            };
+                            /** @description A substitute has the lesson: the family's own teacher (family), or whom the teacher covers (teacher). */
+                            substitute_for: string | null;
+                            can_cancel: string;
+                            can_refuse_substitute: string;
+                            /** @description Why the academy cancelled it (a holiday, the teacher's leave, the course paused or ended), when it did. */
+                            cancelled_because: string | null;
+                            /** @description The viewer's own dispute of this lesson's outcome, and the academy's answer once decided. */
+                            dispute: {
+                                /** @description open, upheld, rejected */
+                                status: string;
+                                status_label: string;
+                                reason: string;
+                                answer: string | null;
+                            } | null;
+                            /** @description Decided and within 48 hours of its end: POST …/lessons/{id}/dispute with one of dispute_reasons and a note. */
+                            can_dispute: string;
+                            dispute_until: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description The reasons that fit what the lesson was, each with its label. */
+                            dispute_reasons: unknown[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
         };
     };
     "teacher.lessons.dispute": {

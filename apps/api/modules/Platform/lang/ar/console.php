@@ -113,5 +113,7 @@ return [
     'admins' => [
         'unknown' => 'مفيش حد في فريق المنصة بالإيميل ده.',
         'last' => 'ده آخر حساب يقدر يدخل لوحة المنصة؛ ضيف حد تاني الأول (platform:admin email name).',
+        'owner_locked' => 'الحساب ده مقفول؛ رجّعه الأول (--reactivate).',
+        'last_owner' => 'ده آخر أدمن رئيسي يقدر يدخل؛ خلّي حد تاني رئيسي الأول (platform:admin email --owner).',
     ],
 ];

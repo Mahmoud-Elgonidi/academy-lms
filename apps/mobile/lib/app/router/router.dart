@@ -24,12 +24,15 @@ import '../../features/challenges/data/challenges_repository.dart';
 import '../../features/challenges/domain/challenges.dart';
 import '../../features/challenges/presentation/pages/album_page.dart';
 import '../../features/games/presentation/album_page.dart';
+import '../../features/hifz/presentation/hifz_page.dart';
+import '../../features/hifz/presentation/student_hifz_page.dart';
 import '../../features/homework/presentation/pages/homework_page.dart';
 import '../../features/journey/presentation/journey_page.dart';
 import '../../features/journey/presentation/levels_page.dart';
 import '../../features/profile/presentation/pages/student_more_page.dart';
 import '../../features/messages/presentation/conversation_page.dart';
 import '../../features/messages/presentation/messages_page.dart';
+import '../../features/mushaf/presentation/mushaf_page.dart';
 import '../../features/notifications/presentation/pages/choices_page.dart';
 import '../../features/notifications/presentation/pages/inbox_page.dart';
 import '../../features/notifications/presentation/pages/update_page.dart';
@@ -89,12 +92,13 @@ GoRouter buildRouter(SessionCubit session) {
     routes: [page(':id', (s) => ConversationPage(conversationId: s.pathParameters['id']!))],
   );
 
-  // A look's journey and the creatures' album under it (an island's creatures, a creature just named).
+  // A look's journey with the creatures' album (an island's creatures, a creature just named) and the hifz map under it.
   GoRoute journey(String path, {List<RouteBase> routes = const []}) => page(
     path,
     (_) => const JourneyPage(),
     routes: [
       page('album', (s) => GamesAlbumPage(base: path, island: s.uri.queryParameters['island'], fresh: s.uri.queryParameters['new'])),
+      page('hifz', (_) => const HifzPage()),
       ...routes,
     ],
   );
@@ -187,6 +191,8 @@ GoRouter buildRouter(SessionCubit session) {
       page('/inbox', (_) => const InboxPage(), routes: [page('choices', (_) => const ChoicesPage())]),
       page('/open/:screen', (_) => const SplashPage(), routes: [page(':id', (_) => const SplashPage())]),
       page('/classroom/:id', (s) => ClassroomPage(lessonId: s.pathParameters['id']!, ticket: s.extra)),
+      // A Quran lesson's shared mushaf, over any look's tabs (beside a lesson on Zoom or Meet too).
+      page('/lessons/:id/mushaf', (s) => LessonMushafPage(lessonId: s.pathParameters['id']!)),
       // The teacher's focused tasks open over the tabs: writing a report (the
       // Reports tab lists them), marking homework, the hours.
       page('/teach/reports/:id', (s) => TeacherReportPage(reportId: s.pathParameters['id']!)),
@@ -387,7 +393,11 @@ GoRouter buildRouter(SessionCubit session) {
           branch('/teach/today', (_) => const TodayPage()),
           branch('/teach/week', (_) => const WeekPage()),
           branch('/teach/reports', (_) => const TeacherReportsPage()),
-          branch('/teach/students', (_) => const StudentsPage()),
+          branch(
+            '/teach/students',
+            (_) => const StudentsPage(),
+            routes: [page(':enrollment/hifz', (s) => StudentHifzPage(enrollmentId: s.pathParameters['enrollment']!))],
+          ),
           branch(
             '/teach/more',
             (_) => const MorePage(),

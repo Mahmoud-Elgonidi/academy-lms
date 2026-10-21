@@ -3,18 +3,25 @@ import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
 import { Classroom } from '@/components/teach/classroom';
 import { get } from '@/lib/api/server';
-import type { LessonDays } from '@/lib/teach/types';
+import { lessonMushaf } from '@/lib/mushaf/server';
+import type { Lesson as TeachLesson } from '@/lib/teach/types';
 import { clock } from '@/lib/time';
 
 /**
- * A lesson's room. The seat (LiveKit's address and a token for this person,
- * or an outside link) is asked for only when the teacher chooses to go in,
- * never while the page loads or is prefetched.
+ * A lesson's room, the lesson read by its id (today's, one still on since
+ * before midnight, or another day's alike; not the teacher's: not found).
+ * The seat (LiveKit's address and a token for this person, or an outside
+ * link) is asked for only when the teacher chooses to go in, never while the
+ * page loads or is prefetched. A Quran lesson of a course the hifz map
+ * belongs to brings its shared mushaf, at the page the teacher has open.
  */
 export default async function Lesson({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [t, today] = await Promise.all([getTranslations('teach'), get<LessonDays>('/v1/teacher/lessons', { query: { days: 1 } })]);
-  const lesson = today.data.find((l) => l.id === id);
+  const [t, { data: lesson }, mushaf] = await Promise.all([
+    getTranslations('teach'),
+    get<{ data: TeachLesson }>('/v1/teacher/lessons/{session}', { params: { session: id } }),
+    lessonMushaf(id),
+  ]);
   return (
     <div>
       <Link href="/teach" className="mb-3 inline-flex items-center gap-1 text-sm text-muted hover:text-ink">
@@ -22,14 +29,12 @@ export default async function Lesson({ params }: { params: Promise<{ id: string 
         {t('backToToday')}
       </Link>
       <header className="mb-5">
-        <h1 className="text-2xl font-bold">{lesson ? t('withStudent', { name: lesson.with }) : t('classTitle')}</h1>
-        {lesson ? (
-          <p className="text-muted">
-            {lesson.subject} · <span className="tabular-nums">{clock(lesson.starts_at)}–{clock(lesson.ends_at)}</span>
-          </p>
-        ) : null}
+        <h1 className="text-2xl font-bold">{t('withStudent', { name: lesson.with })}</h1>
+        <p className="text-muted">
+          {lesson.subject} · <span className="tabular-nums">{clock(lesson.starts_at)}–{clock(lesson.ends_at)}</span>
+        </p>
       </header>
-      <Classroom id={id} back={{ href: '/teach', label: t('backToToday') }} />
+      <Classroom id={id} back={{ href: '/teach', label: t('backToToday') }} mushaf={mushaf} />
     </div>
   );
 }

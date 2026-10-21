@@ -12,6 +12,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
 use Modules\Platform\Actions\SaveAiSettings;
+use Modules\Platform\Ai\AiProvider;
 use Modules\Platform\Ai\PlatformAcademyAi;
 use Modules\Platform\Models\AiSettings;
 use Modules\Platform\Models\AiUsage;
@@ -72,12 +73,13 @@ final class AiSettingsPage extends Page
     public function form(Schema $schema): Schema
     {
         $s = 'platform::ai.settings.';
+        $provider = __('platform::ai.providers.'.(AiProvider::current()?->value ?? 'claude'));
 
         return $schema->statePath('data')->components(array_map(fn (AiFeature $f) => Section::make($f->label())
             ->description(__($s.'helpers.'.$f->value.'.what'))
             ->schema([
                 Toggle::make($f->value)->label(__($s.'on'))
-                    ->helperText(PlatformAcademyAi::configured($f) ? __($s.'helpers.'.$f->value.'.data') : __($s.'not_configured')),
+                    ->helperText(PlatformAcademyAi::configured($f) ? __($s.'helpers.'.$f->value.'.data', ['provider' => $provider]) : __($s.'not_configured')),
             ]), AiFeature::cases()));
     }
 

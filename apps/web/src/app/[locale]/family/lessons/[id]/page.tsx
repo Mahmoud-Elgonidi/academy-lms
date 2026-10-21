@@ -5,12 +5,17 @@ import { Classroom } from '@/components/teach/classroom';
 import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
 import type { FamilyLessons } from '@/lib/family/types';
+import { lessonMushaf } from '@/lib/mushaf/server';
 import { clock } from '@/lib/time';
 
-/** The learner's lesson room: the seat is asked for only when they choose to go in. */
+/**
+ * The learner's lesson room: the seat is asked for only when they choose to
+ * go in. A Quran lesson of a course the hifz map belongs to brings its shared
+ * mushaf, following the teacher's page.
+ */
 export default async function LessonRoom({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [t, fam] = await Promise.all([getTranslations('family'), family()]);
+  const [t, fam, mushaf] = await Promise.all([getTranslations('family'), family(), lessonMushaf(id)]);
   const lessons = fam.current ? await get<FamilyLessons>('/v1/family/lessons', { query: { learner_id: fam.current.id } }) : null;
   const lesson = lessons?.data.find((l) => l.id === id);
   return (
@@ -27,7 +32,7 @@ export default async function LessonRoom({ params }: { params: Promise<{ id: str
           </p>
         ) : null}
       </header>
-      <Classroom id={id} back={{ href: '/family/lessons', label: t('backToLessons') }} />
+      <Classroom id={id} back={{ href: '/family/lessons', label: t('backToLessons') }} mushaf={mushaf} />
     </div>
   );
 }

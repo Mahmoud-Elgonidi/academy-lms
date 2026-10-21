@@ -19,6 +19,9 @@
 
     <div class="wr">
         <form wire:submit="submit" class="flex flex-col gap-6">
+            @if (! $locked && $this->voiceOn())
+                @include('learning::filament.teacher.voice-note')
+            @endif
             {{ $this->form }}
             @unless ($locked)
                 <div class="flex flex-wrap gap-2">

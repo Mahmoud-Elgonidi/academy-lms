@@ -29,4 +29,22 @@ void main() {
     expect(cubit.state.problem?.message, 'ممنوع.');
     await cubit.close();
   });
+
+  test('a write\'s answer is shown at once, and a load asked before it does not bring the old page back', () async {
+    var answer = 'old';
+    final cubit = LoadCubit<String>(() async {
+      final was = answer;
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      return was;
+    });
+    final loading = cubit.load();
+    cubit.show('marked');
+    await loading;
+    expect(cubit.state.data, 'marked');
+    expect(cubit.state.loading, isFalse);
+    answer = 'next';
+    await cubit.load();
+    expect(cubit.state.data, 'next');
+    await cubit.close();
+  });
 }

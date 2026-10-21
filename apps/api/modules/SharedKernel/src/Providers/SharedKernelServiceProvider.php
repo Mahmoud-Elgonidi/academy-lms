@@ -22,6 +22,8 @@ use Illuminate\Support\ServiceProvider;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\LanguageModel;
 use Modules\SharedKernel\Ai\NoAi;
+use Modules\SharedKernel\Ai\RecitationEngine;
+use Modules\SharedKernel\Ai\SpeechRecitation;
 use Modules\SharedKernel\Ai\SpeechToText;
 use Modules\SharedKernel\Auth\TimingSafeUserProvider;
 use Modules\SharedKernel\Files\ClamAvScanner;
@@ -43,6 +45,8 @@ use Modules\SharedKernel\Tenancy\Console\AnalyzeTablesCommand;
 use Modules\SharedKernel\Tenancy\PgTenantSession;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantResolver;
+use Modules\SharedKernel\Text\NoQuranSource;
+use Modules\SharedKernel\Text\QuranSource;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 use Modules\SharedKernel\Time\LocalTimeResolver;
 use Modules\SharedKernel\Time\ViewerTimezone;
@@ -72,6 +76,10 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->scopedIf(AcademyAi::class, NoAi::class);
         $this->app->singletonIf(LanguageModel::class, NoAi::class);
         $this->app->singletonIf(SpeechToText::class, NoAi::class);
+        // Made each time, so it hears through whatever speech to text is bound then.
+        $this->app->bindIf(RecitationEngine::class, SpeechRecitation::class);
+        // The Quran's text: none until Curriculum binds its copy.
+        $this->app->singletonIf(QuranSource::class, NoQuranSource::class);
         // What each module holds about a person, for the Privacy module's copies and erasures.
         $this->app->singleton(PersonalData::class);
         // What a new academy gets ready before its first families come, each module's steps, for the "Start here" page.
@@ -144,7 +152,7 @@ final class SharedKernelServiceProvider extends ServiceProvider
         // A sync job runs inside the request (or command) that dispatched it,
         // which still needs its academy afterwards: only workers clear it.
         $clear = function (JobProcessed|JobFailed|JobExceptionOccurred $event): void {
-            if ($event->connectionName !== 'sync') {
+            if (config("queue.connections.{$event->connectionName}.driver", $event->connectionName) !== 'sync') {
                 $this->app->make(TenantContext::class)->clear();
             }
         };

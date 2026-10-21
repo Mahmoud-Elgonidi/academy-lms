@@ -160,3 +160,35 @@ export async function grantConsent(student: string, version: number, agree: bool
 export async function withdrawConsent(student: string): Promise<Result> {
   return result(await send('post', '/v1/family/consents/{student}/withdraw', { params: { student } }));
 }
+
+/**
+ * Says how a hifz page went (1 forgot, 2 hard, 3 good, 4 easy): the page's
+ * review for today, about the learner on screen. One key per press, so a
+ * retry counts once.
+ */
+export async function gradeHifzPage(learnerId: string, page: number, grade: number, key: string): Promise<Result> {
+  return result(
+    await send('post', '/v1/learning/hifz/pages/{page}/grade', {
+      params: { page: String(page) },
+      query: { learner_id: learnerId },
+      body: { grade },
+      idempotencyKey: key,
+    }),
+  );
+}
+
+/**
+ * Recites a hifz page (`audio`, a recording made in the browser): it is heard
+ * and checked in the background, and the hifz signal brings the result to the
+ * page. `off`: the academy has the check off, so the learner says how it went.
+ */
+export async function reciteHifzPage(learnerId: string, page: number, form: FormData): Promise<Result & { id?: string; off?: boolean }> {
+  const audio = form.get('audio');
+  if (!(audio instanceof File) || audio.size === 0) return { ok: false };
+  const sent = new FormData();
+  sent.set('audio', audio, audio.name || 'recitation.webm');
+  sent.set('learner_id', learnerId);
+  const done = await send<{ data: { id: string } }>('post', '/v1/learning/hifz/pages/{page}/recitations', { params: { page: String(page) }, form: sent });
+  if (!done.ok) return { ...result(done), off: done.problem.extra?.reason === 'off' };
+  return { ok: true, id: done.data.data.id };
+}

@@ -6,6 +6,7 @@ import '../../../../core/time/formats.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../classroom/presentation/join.dart';
+import '../../../mushaf/presentation/widgets/mushaf_entry.dart';
 import '../../domain/lesson.dart';
 
 /// What a lesson's own sheet can do now; each is null when it may not.
@@ -142,7 +143,8 @@ Tone lessonTone(Lesson x) => switch (x.status) {
 
 /// A lesson's own sheet: when and with whom on the viewer's clock, its state,
 /// a substitute's note with turning it down, the room (join, or when it
-/// opens), and what else may be done with it; cancelling last, in red.
+/// opens), its shared mushaf in a Quran lesson, and what else may be done
+/// with it; cancelling last, in red.
 Future<void> showLessonSheet(BuildContext context, Lesson lesson, {required LessonActions actions, String? learner, String? zone}) =>
     showActionSheet<void>(
       context,
@@ -262,6 +264,15 @@ class _LessonSheet extends StatelessWidget {
               ),
             ),
           ],
+          if (!x.cancelled)
+            MushafEntry(
+              lessonId: x.id,
+              onOpen: _after(context, () => openMushaf(host, x.id)),
+              builder: (context, label, open) => Padding(
+                padding: const EdgeInsets.only(top: Space.s),
+                child: SecondaryAction(label, icon: Icons.menu_book_rounded, onPressed: open),
+              ),
+            ),
           if (actions.report != null) ...[
             const Gap(Space.l),
             PrimaryAction(l.writeTheReport, icon: Icons.edit_note_rounded, onPressed: _after(context, actions.report!)),

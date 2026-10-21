@@ -12,7 +12,7 @@ use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Audit\AuditTrail;
 
 /**
- * The demo platform team: admin@platform.test with the demo password and a
+ * The demo platform team: admin@platform.test, an owner, with the demo password and a
  * fixed authenticator secret (both set per server: DEMO_PASSWORD,
  * DEMO_PLATFORM_2FA_SECRET), so `php artisan platform:code admin@platform.test`
  * prints the code, a few past console sign-ins, and the second demo academy
@@ -32,6 +32,7 @@ final class DemoPlatformSeeder extends Seeder
             'locale' => 'ar',
             'timezone' => 'Africa/Cairo',
         ]);
+        $admin->forceFill(['is_owner' => true])->save();
         $admin->saveAppAuthenticationSecret((string) (config('app.demo.platform_2fa_secret') ?: self::SECRET));
         $actor = new AuditActor('platform', $admin->id, $admin->name);
 

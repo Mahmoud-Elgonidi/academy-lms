@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { Stage } from '@/lib/family/types';
 import type { PlayTarget } from '@/lib/games/types';
@@ -20,7 +20,7 @@ import { ChestCard, ChestOpened, CheersCard, CourseChips, EggHatch, islandNames,
  * missions as a list, the week's chest, and the levels as an accordion of
  * their lessons; practising a lesson in a game is there, never in the way.
  */
-export function CalmJourney({ map, title, autoplay, look }: { map: JourneyMap; title: string; autoplay: PlayTarget | null; look: string }) {
+export function CalmJourney({ map, title, autoplay, look, hifz }: { map: JourneyMap; title: string; autoplay: PlayTarget | null; look: string; hifz?: ReactNode }) {
   const t = useTranslations('journey');
   const stars = hasStars(map);
   const layer = stars ? map.games : null;
@@ -53,6 +53,7 @@ export function CalmJourney({ map, title, autoplay, look }: { map: JourneyMap; t
 
       {course ? <LevelCard course={course} /> : null}
       <NextLessonCard lesson={lesson} last={map.last_lesson} stars={stars} />
+      {hifz}
       <MissionList missions={missions.filter((m) => m !== lesson)} map={map} player={player} stars={stars} onStation={setSheet} />
       {stars && map.chest ? <ChestCard chest={map.chest} onOpened={setOpened} /> : null}
       {course ? <LevelsList course={course} onStation={setSheet} /> : null}

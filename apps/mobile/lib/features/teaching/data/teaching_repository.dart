@@ -1,12 +1,18 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/time/local_time.dart';
+import '../../homework/data/homework_repository.dart';
 import '../../homework/domain/homework.dart';
+import '../../homework/domain/recitation.dart';
 import '../../schedule/domain/lesson.dart';
 import '../domain/reports.dart';
 import '../domain/shifts.dart';
 import '../domain/teaching.dart';
+import '../domain/voice_draft.dart';
 
 /// The teacher's side: lessons, students, reports, homework to mark, hours, pay, time off.
 class TeachingRepository {
@@ -64,6 +70,27 @@ class TeachingRepository {
 
   /// Sends (or corrects) a report; the API checks it as the web form does.
   Future<void> submitReport(String id, Map<String, dynamic> payload) => _api.put('teacher/reports/$id', body: payload);
+
+  /// A draft of the open report from the teacher's voice [note]: the API
+  /// hears it, deletes it, and fills only what [current] (the form as it
+  /// stands, as [submitReport] takes it) leaves empty. Nothing is saved.
+  /// Hearing and writing take a while, so it waits up to a minute.
+  Future<VoiceDraft> draftReport(String id, {required HandInFile note, required Map<String, dynamic> current}) async => VoiceDraft.fromJson(
+    (await _api.post(
+          'teacher/reports/$id/draft',
+          body: FormData.fromMap({
+            'audio': MultipartFile.fromBytes(note.bytes, filename: note.name, contentType: DioMediaType.parse(note.mime)),
+            'current': jsonEncode(current),
+          }),
+          timeout: const Duration(seconds: 60),
+        ))['data']
+        as Map<String, dynamic>,
+  );
+
+  /// The Quran's surahs, to choose what homework asks to recite (empty until the platform has its copy).
+  Future<List<Surah>> surahs() async => [
+    for (final s in (await _api.get('teacher/texts/quran'))['data'] as List<dynamic>) Surah.fromJson(s as Map<String, dynamic>),
+  ];
 
   /// [status] submitted (waiting for a mark) or reviewed (marked).
   Future<List<Homework>> homeworkToMark({String status = 'submitted'}) async => [

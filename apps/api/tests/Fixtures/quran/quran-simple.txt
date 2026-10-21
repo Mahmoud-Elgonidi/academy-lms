@@ -1,0 +1,8 @@
+1|1|بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+1|2|كَلِمَةٌ أُولَى وَثَانِيَةٌ ثَالِثَةٌ
+1|3|جُمْلَةٌ تَجْرِيبِيَّةٌ قَصِيرَةٌ هُنَا
+2|1|بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ حَرْفٌ
+2|2|نَصٌّ آخَرُ لِلتَّجْرِبَةِ فَقَطْ
+
+#  A test fixture in the shape of Tanzil's text files: its own made-up words, not the Quran.
+#  Tanzil Quran Text (Test Fixture, Version 0)

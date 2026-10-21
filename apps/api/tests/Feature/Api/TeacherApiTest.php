@@ -78,6 +78,22 @@ it('lists my lessons day by day on my clock, with the student', function () {
     $this->withToken($token)->getJson('/api/v1/teacher/lessons?days=90')->assertUnprocessable();
 });
 
+it('opens one of my lessons by its id, on whatever day it is, and nobody else\'s', function () {
+    $token = teacherApp($this->teacher);
+    $later = $this->withToken($token)->getJson('/api/v1/teacher/lessons?from=2026-10-12&days=14')->json('data.0');
+
+    // A lesson of another week opens as the list has it.
+    $this->withToken($token)->getJson("/api/v1/teacher/lessons/{$later['id']}")->assertOk()
+        ->assertJsonPath('data.id', $later['id'])->assertJsonPath('data.with', $this->student->name)
+        ->assertJsonPath('data.starts_at', $later['starts_at']);
+
+    $this->withToken($token)->getJson('/api/v1/teacher/lessons/not-a-lesson')->assertNotFound();
+    $this->actAsTenant($this->academy);
+    $other = User::factory()->withRole(Role::Teacher)->create();
+    $this->clearTenant();
+    $this->withToken(teacherApp($other))->getJson("/api/v1/teacher/lessons/{$later['id']}")->assertNotFound();
+});
+
 it('lists my students with where they are and what waits for me', function () {
     $this->withToken(teacherApp($this->teacher))->getJson('/api/v1/teacher/students')
         ->assertOk()

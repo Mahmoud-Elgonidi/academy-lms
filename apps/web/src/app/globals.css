@@ -26,6 +26,15 @@
   --font-heading: var(--font-head), var(--font-plex-latin), var(--font-plex-arabic), system-ui, sans-serif;
 }
 
+/*
+ * The Quran's words (the shared mushaf, the mistakes notebook) in Amiri Quran,
+ * whose variable only those parts carry (components/mushaf/font.ts); inline,
+ * so the utility reads it on the element itself.
+ */
+@theme inline {
+  --font-quran: var(--font-amiri-quran), 'Amiri Quran', serif;
+}
+
 html {
   background: var(--color-paper);
   color: var(--color-ink);

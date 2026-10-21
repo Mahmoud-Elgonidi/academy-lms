@@ -17,6 +17,7 @@ import '../../../games/presentation/kids/island_route.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../domain/journey.dart';
 import '../journey_ui.dart';
+import '../widgets/hifz_card.dart';
 import '../widgets/missions.dart';
 import '../widgets/rewards.dart';
 import '../widgets/station_sheet.dart';
@@ -223,6 +224,7 @@ class _KidsJourneyState extends State<KidsJourney> with SingleTickerProviderStat
         _map(course),
       _SeaHeading(l.journeyMissions),
       MissionStrip(map: _m, place: widget.place, openStation: _openMission, say: _say),
+      if (_m.hifz case final hifz?) HifzJourneyCard(hifz: hifz, place: widget.place, kids: true),
       if (rewards && (_m.chest != null || (games != null && !_m.plain)))
         IntrinsicHeight(
           child: Row(

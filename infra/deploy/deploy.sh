@@ -41,7 +41,7 @@ fi
 dk compose version >/dev/null 2>&1 || fail "Docker Compose v2 (docker compose) is missing. Nothing was changed."
 compose() { dk compose -p "$PROJECT" -f "$HERE/compose.yml" "$@"; }
 
-for f in compose.yml roles.sql postgres-init.sh postgres-start.sh pg_hba.conf backup.sh offsite.sh; do
+for f in compose.yml roles.sql postgres-init.sh postgres-start.sh pg_hba.conf backup.sh offsite.sh console.sh; do
     [ -f "$f" ] || fail "$f is missing next to deploy.sh."
 done
 
@@ -245,12 +245,27 @@ CLAMAV_HOST=clamav
 # everything else still works.
 ANTHROPIC_API_KEY=
 GAME_DESIGNER_MODEL=
-# The helpers (RUNBOOKS.md, "AI helpers"): claude, or off for all of them. AI_MODEL writes
-# and AI_FAST_MODEL handles the quick, short ones; AI_DAILY_CAP is each academy's calls a day.
+# The helpers (RUNBOOKS.md, "AI helpers"): who writes their words (claude, openai, gemini or
+# ollama), or off for all of them; best chosen in the console's Platform settings, from each
+# provider's own list. AI_MODEL writes and AI_FAST_MODEL handles the quick, short ones (Claude);
+# AI_DAILY_CAP is each academy's calls a day.
 AI_DRIVER=claude
 AI_MODEL=claude-opus-5-5
 AI_FAST_MODEL=claude-haiku-5-5
 AI_DAILY_CAP=500
+# The other providers, each with its own key and models (empty: not used). OpenAI's key, or a
+# key from a Google AI Studio project with billing on (on the free tier Google may use what is
+# sent); Ollama: the platform's own server's address (https unless on a private network).
+OPENAI_API_KEY=
+OPENAI_MODEL=
+OPENAI_FAST_MODEL=
+GEMINI_API_KEY=
+GEMINI_MODEL=
+GEMINI_FAST_MODEL=
+OLLAMA_URL=
+OLLAMA_API_KEY=
+OLLAMA_MODEL=
+OLLAMA_FAST_MODEL=
 # Speech to text for the helpers that listen (a teacher's voice note, a recitation):
 # ElevenLabs, with the platform's key (ELEVENLABS_API_BASE=https://api.eu.residency.elevenlabs.io
 # keeps the audio in the EU; ELEVENLABS_ZERO_RETENTION=true once the account allows it).
@@ -373,10 +388,22 @@ done
 say "Migrations (as lms_owner), then fresh table statistics"
 compose run --rm --no-deps -T web migrate
 
+# The Quran's text: fetched from Tanzil once and checked whole, then kept in the storage volume (and its backups).
+# Not fetched now (no network, Tanzil down): the deploy goes on, and the console's Platform settings fetches it later.
+say "The Quran's text (only if the server has no copy yet)"
+compose run --rm --no-deps -T web php artisan curriculum:quran --fetch --if-missing \
+    || say "The Quran's text was not fetched this time; fetch it from the console (Platform settings) or: php artisan curriculum:quran --fetch"
+
 if [ "$DEMO_DATA" = 1 ]; then
     say "Demo academies (only if they are not there yet)"
     compose run --rm --no-deps -T web seed-demo
 fi
+
+# A demo already there takes what later versions of it add (its Quran lessons' surahs, marked words and hifz maps once
+# the text is here; the AI helpers' area), whatever DEMO_DATA says. Nothing on a server without the demo academy.
+say "The demo academy, brought up to date (when there is one)"
+compose run --rm --no-deps -T web php artisan db:seed --class='Database\Seeders\DemoCatchUpSeeder' --force \
+    || say "The demo was not brought up to date this time; the next deploy tries again."
 
 say "Starting the new version"
 compose up -d --remove-orphans
