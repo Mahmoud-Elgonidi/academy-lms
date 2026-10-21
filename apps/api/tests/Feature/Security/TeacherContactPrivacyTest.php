@@ -41,7 +41,7 @@ it('never shows a teacher a family\'s email or phone number', function () {
     $apiRoutes = collect(Route::getRoutes()->getRoutes())
         ->filter(fn ($r) => in_array('GET', $r->methods(), true) && str_starts_with($r->uri(), 'api/v1/') && ! str_starts_with($r->uri(), 'api/v1/family/'));
     $pages = ['teach', 'teach/today', 'teach/week', 'teach/students', 'teach/students/{enrollment}', 'teach/reports', 'teach/reports/{report}', 'teach/homework',
-        'teach/availability', 'teach/time-off', 'teach/trials', 'teach/earnings', 'teach/performance', 'teach/recordings', 'teach/support', 'teach/profile', 'class/{session}'];
+        'teach/availability', 'teach/time-off', 'teach/trials', 'teach/earnings', 'teach/performance', 'teach/recordings', 'teach/support', 'teach/profile', 'teach/my-card', 'class/{session}'];
 
     $seen = 0;
     $leaks = [];
@@ -103,6 +103,17 @@ it('never shows a teacher a family\'s email or phone number', function () {
         }
     }
 
+    // The academy's public page shows teachers' cards to anyone: never a teacher's email or number either, nor a family's.
+    app('auth')->forgetGuards();
+    $this->flushSession();
+    $public = $this->getJson('http://demo.lms.test/api/v1/site')->assertOk();
+    $teacherContacts = $teachers->flatMap(fn (User $t) => array_filter([$t->email, $t->phone_e164, $t->phone_e164 ? ltrim($t->phone_e164, '+') : null]))->all();
+    foreach ([...$secrets, ...$teacherContacts] as $secret) {
+        if (str_contains((string) $public->getContent(), $secret)) {
+            $leaks[] = "GET api/v1/site (no one signed in) shows {$secret}";
+        }
+    }
+
     // The same check finds them where they belong: sales open a lead and see its number.
     $this->actAsTenant($demo);
     $sales = User::query()->where('email', 'sales@demo.test')->firstOrFail();
@@ -113,6 +124,7 @@ it('never shows a teacher a family\'s email or phone number', function () {
     $control = $this->actingAs($sales, 'web')->get('http://demo.lms.test/admin/leads/'.$lead->id);
 
     expect($teachers->count())->toBeGreaterThan(2)
+        ->and(count($public->json('data.teachers')))->toBeGreaterThan(2)
         ->and($seen)->toBeGreaterThan(100)
         ->and(array_values(array_unique($leaks)))->toBe([])
         ->and($failed)->toBe([])

@@ -3,6 +3,7 @@
 namespace Modules\People;
 
 use Carbon\CarbonImmutable;
+use Modules\People\Actions\Cards\HideTeacherCard;
 use Modules\People\Actions\Checks\PauseTeacherForMinors;
 use Modules\People\Actions\Checks\ResumeTeacherForMinors;
 use Modules\People\Actions\LinkGuardian;
@@ -20,6 +21,7 @@ use Modules\People\Contracts\LearnerStage;
 use Modules\People\Contracts\PeopleApi;
 use Modules\People\Models\GuardianStudent;
 use Modules\People\Models\StudentProfile;
+use Modules\People\Queries\PublicTeachers;
 use Modules\People\Support\Countries;
 
 final class PeopleService implements PeopleApi
@@ -161,5 +163,20 @@ final class PeopleService implements PeopleApi
     public function consentStates(array $studentIds): array
     {
         return $this->consents->states(array_values(array_unique($studentIds)));
+    }
+
+    public function publicTeachers(): array
+    {
+        return app(PublicTeachers::class)->onPage();
+    }
+
+    public function teacherCards(): array
+    {
+        return app(PublicTeachers::class)->all();
+    }
+
+    public function hideTeacherCard(string $cardId, bool $hidden): void
+    {
+        app(HideTeacherCard::class)->handle($cardId, $hidden);
     }
 }

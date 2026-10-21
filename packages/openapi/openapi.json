@@ -17070,6 +17070,280 @@
                 }
             }
         },
+        "/v1/teacher/card": {
+            "get": {
+                "operationId": "teacher.card",
+                "description": "The name to show, a few words and the photo, whether the teacher switched it on (`shown`), and where it\nstands (`state`: on, off, hidden by the academy, none yet); the subjects beside it come from the teacher's\nprofile at the academy.",
+                "summary": "My card on the academy's page",
+                "tags": [
+                    "People"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "display_name": {
+                                                    "type": "string",
+                                                    "description": "The name the page shows (the account's name until a card is saved)."
+                                                },
+                                                "bio": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "photo_url": {
+                                                    "type": "null",
+                                                    "description": "The photo's address, or null."
+                                                },
+                                                "shown": {
+                                                    "type": "boolean",
+                                                    "description": "The teacher's own switch."
+                                                },
+                                                "state": {
+                                                    "type": "string",
+                                                    "description": "on | off | hidden (the academy took it off) | none (no card yet)",
+                                                    "enum": [
+                                                        "none",
+                                                        "hidden",
+                                                        "on",
+                                                        "off"
+                                                    ]
+                                                },
+                                                "state_label": {
+                                                    "type": "string",
+                                                    "description": "What the state means, in words."
+                                                },
+                                                "subjects": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "level_from": {
+                                                                "type": "string",
+                                                                "description": "The first level they teach, or null (from the start)."
+                                                            },
+                                                            "level_to": {
+                                                                "type": "string",
+                                                                "description": "The last level they teach, or null (to the end)."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "name",
+                                                            "level_from",
+                                                            "level_to"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "display_name",
+                                                "bio",
+                                                "photo_url",
+                                                "shown",
+                                                "state",
+                                                "state_label",
+                                                "subjects"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "teacher.card.update",
+                "description": "Multipart: `display_name` (60), `bio` (280, optional), `shown` (true or false), and optionally `photo` (PNG,\nJPEG or WebP, 1 MB; anyone who opens the academy's page sees it) or `remove_photo` (true). Answers with the\ncard as kept.",
+                "summary": "Save my card",
+                "tags": [
+                    "People"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "remove_photo": {
+                                        "type": "boolean",
+                                        "default": false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "display_name": {
+                                                    "type": "string",
+                                                    "description": "The name the page shows (the account's name until a card is saved)."
+                                                },
+                                                "bio": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "photo_url": {
+                                                    "type": "null",
+                                                    "description": "The photo's address, or null."
+                                                },
+                                                "shown": {
+                                                    "type": "boolean",
+                                                    "description": "The teacher's own switch."
+                                                },
+                                                "state": {
+                                                    "type": "string",
+                                                    "description": "on | off | hidden (the academy took it off) | none (no card yet)",
+                                                    "enum": [
+                                                        "none",
+                                                        "hidden",
+                                                        "on",
+                                                        "off"
+                                                    ]
+                                                },
+                                                "state_label": {
+                                                    "type": "string",
+                                                    "description": "What the state means, in words."
+                                                },
+                                                "subjects": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "level_from": {
+                                                                "type": "string",
+                                                                "description": "The first level they teach, or null (from the start)."
+                                                            },
+                                                            "level_to": {
+                                                                "type": "string",
+                                                                "description": "The last level they teach, or null (to the end)."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "name",
+                                                            "level_from",
+                                                            "level_to"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "display_name",
+                                                "bio",
+                                                "photo_url",
+                                                "shown",
+                                                "state",
+                                                "state_label",
+                                                "subjects"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/branding": {
             "get": {
                 "operationId": "platform.branding",
@@ -22855,6 +23129,576 @@
                         "$ref": "#/components/responses/ValidationException"
                     }
                 }
+            }
+        },
+        "/v1/site": {
+            "get": {
+                "operationId": "site.show",
+                "description": "In the request's language (Accept-Language). Not found while the academy keeps its page off.",
+                "summary": "The academy's page",
+                "tags": [
+                    "Site"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "academy": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "description": "The academy's name in the request's language."
+                                                        },
+                                                        "code": {
+                                                            "type": "string",
+                                                            "description": "The academy's code: what the app asks for to open it (X-Academy)."
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "name",
+                                                        "code"
+                                                    ]
+                                                },
+                                                "content": {
+                                                    "type": "object",
+                                                    "description": "The words the academy set: hero, features, testimonials, faqs, sections shown, whatsapp, seo.",
+                                                    "properties": {
+                                                        "hero": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "title": {
+                                                                    "type": "string"
+                                                                },
+                                                                "lead": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "title",
+                                                                "lead"
+                                                            ]
+                                                        },
+                                                        "features": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "title": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "text": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "title",
+                                                                    "text"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "testimonials": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "role": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "quote": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "name",
+                                                                    "role",
+                                                                    "quote"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "faqs": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "q": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "a": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "q",
+                                                                    "a"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "sections": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "whatsapp": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "seo": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "title": {
+                                                                    "type": "string"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "title",
+                                                                "description"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "hero",
+                                                        "features",
+                                                        "testimonials",
+                                                        "faqs",
+                                                        "sections",
+                                                        "whatsapp",
+                                                        "seo"
+                                                    ]
+                                                },
+                                                "subjects": {
+                                                    "type": "array",
+                                                    "description": "Every subject the academy teaches (the free-trial form picks one).",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "description": "Sent back with the free-trial form as subject_id."
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "levels": {
+                                                                "type": "array",
+                                                                "description": "The subject's levels, in order.",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "categories": {
+                                                                "type": "array",
+                                                                "description": "Its tracks or the curricula it follows.",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "programs": {
+                                                                "type": "array",
+                                                                "description": "Its published programs.",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "name": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "description": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ],
+                                                                            "description": "What the program is, or null."
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "name",
+                                                                        "description"
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "levels",
+                                                            "categories",
+                                                            "programs"
+                                                        ]
+                                                    }
+                                                },
+                                                "teachers": {
+                                                    "type": "array",
+                                                    "description": "The teachers who chose to show on the page; empty when the section is off.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "description": "The card's id (not the teacher's account)."
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "bio": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "photo_url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "gender": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "female or male."
+                                                            },
+                                                            "languages": {
+                                                                "type": "array",
+                                                                "description": "ISO 639-1 codes they explain in.",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "age_groups": {
+                                                                "type": "array",
+                                                                "description": "kids, middle, teen, adults: the ages they teach (none: any age).",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "subjects": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "name": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "level_from": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ],
+                                                                            "description": "The first level they teach, or null (from the start)."
+                                                                        },
+                                                                        "level_to": {
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ],
+                                                                            "description": "The last level they teach, or null (to the end)."
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "name",
+                                                                        "level_from",
+                                                                        "level_to"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "accepts_trials": {
+                                                                "type": "boolean",
+                                                                "description": "Whether they take free trial lessons."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "bio",
+                                                            "photo_url",
+                                                            "gender",
+                                                            "languages",
+                                                            "age_groups",
+                                                            "subjects",
+                                                            "accepts_trials"
+                                                        ]
+                                                    }
+                                                },
+                                                "plans": {
+                                                    "type": "array",
+                                                    "description": "The plans families enrol on, with a price in each region; empty when the section is off.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "session_minutes": {
+                                                                "type": "integer"
+                                                            },
+                                                            "sessions_per_week": {
+                                                                "type": "integer"
+                                                            },
+                                                            "sessions_per_block": {
+                                                                "type": "integer",
+                                                                "description": "Lessons in each paid block."
+                                                            },
+                                                            "validity_days": {
+                                                                "type": "integer",
+                                                                "description": "Days a block lasts from payment."
+                                                            },
+                                                            "shared": {
+                                                                "type": "boolean",
+                                                                "description": "One balance for all of a student's courses on it."
+                                                            },
+                                                            "prices": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "region_id": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "price": {
+                                                                            "type": "string",
+                                                                            "description": "The block's price, written out (\"SAR 480\")."
+                                                                        },
+                                                                        "amount_minor": {
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "currency": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "region_id",
+                                                                        "price",
+                                                                        "amount_minor",
+                                                                        "currency"
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "session_minutes",
+                                                            "sessions_per_week",
+                                                            "sessions_per_block",
+                                                            "validity_days",
+                                                            "shared",
+                                                            "prices"
+                                                        ]
+                                                    }
+                                                },
+                                                "regions": {
+                                                    "type": "array",
+                                                    "description": "The price regions: the page picks the visitor's by their country, else the default one.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "currency": {
+                                                                "type": "string"
+                                                            },
+                                                            "default": {
+                                                                "type": "boolean",
+                                                                "description": "The region for a visitor whose country no region names."
+                                                            },
+                                                            "countries": {
+                                                                "type": "array",
+                                                                "description": "ISO 3166-1 alpha-2 codes of the countries it serves.",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "currency",
+                                                            "default",
+                                                            "countries"
+                                                        ]
+                                                    }
+                                                },
+                                                "app": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "android_url": {
+                                                            "type": "string",
+                                                            "description": "The store page on Android, or null."
+                                                        },
+                                                        "ios_url": {
+                                                            "type": "string",
+                                                            "description": "The App Store page, or null."
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "android_url",
+                                                        "ios_url"
+                                                    ]
+                                                },
+                                                "whatsapp": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "The academy's WhatsApp number (E.164), or null."
+                                                },
+                                                "form_token": {
+                                                    "type": "string",
+                                                    "description": "Sent back with the request form, unchanged."
+                                                }
+                                            },
+                                            "required": [
+                                                "academy",
+                                                "content",
+                                                "subjects",
+                                                "teachers",
+                                                "plans",
+                                                "regions",
+                                                "app",
+                                                "whatsapp",
+                                                "form_token"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/site/requests": {
+            "post": {
+                "operationId": "site.requests",
+                "description": "kind is trial (subject_id, for_child with child_name and child_birth_year) or teach (subject_ids, years_teaching).\nThe academy answers each request. A form sent too soon or with the hidden field filled is answered the same and kept nowhere.\nNot found while the academy keeps its page off.",
+                "summary": "Ask for a free trial lesson, or to teach at the academy",
+                "tags": [
+                    "Site"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "received": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "received"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                },
+                "security": []
             }
         },
         "/v1/support/new": {

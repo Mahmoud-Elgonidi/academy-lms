@@ -42,6 +42,7 @@ use Modules\Privacy\Filament\PrivacyPlugin;
 use Modules\Safeguarding\Filament\SafeguardingPlugin;
 use Modules\Scheduling\Filament\SchedulingPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
+use Modules\Site\Filament\SitePlugin;
 use Modules\Support\Filament\SupportPlugin;
 
 /**
@@ -110,6 +111,7 @@ final class AcademyPanelProvider extends PanelProvider
                 MessagingPlugin::make(),
                 GamesPlugin::make(),
                 AnnouncementsPlugin::make(),
+                SitePlugin::make(),
                 CommunicationPlugin::make(),
                 ClassroomPlugin::make(),
                 PlatformPlugin::make(),

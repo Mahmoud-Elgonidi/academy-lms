@@ -128,6 +128,7 @@ final class CurriculumService implements CurriculumApi
             $program->name(),
             $published,
             $published ? Node::query()->where('version_id', $published)->where('kind', 'lesson')->count() : 0,
+            $program->description(),
         );
     }
 }

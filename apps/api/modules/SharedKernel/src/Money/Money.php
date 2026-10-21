@@ -74,7 +74,8 @@ final readonly class Money
     {
         $locale ??= app()->getLocale();
         $arabic = str_starts_with($locale, 'ar');
-        $text = trim(BrickMoney::ofMinor($this->minor, $this->currency)->formatToLocale($arabic ? 'ar-u-nu-latn' : $locale, hideFractionIfWhole: true), "\u{200F}\u{200E} ");
+        // The direction marks ICU puts around it go by character, not byte: trim() would cut a leading "€" (its first byte is theirs too).
+        $text = (string) preg_replace('/^[\x{200E}\x{200F}\s]+|[\x{200E}\x{200F}\s]+$/u', '', BrickMoney::ofMinor($this->minor, $this->currency)->formatToLocale($arabic ? 'ar-u-nu-latn' : $locale, hideFractionIfWhole: true));
 
         return $arabic ? "\u{2068}{$text}\u{2069}" : $text;
     }

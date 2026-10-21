@@ -70,6 +70,7 @@ function expectedAbilities(): array
         'announcements.send' => [$o, $a],
         'academy.setup' => [$o, $a],
         'ai.manage' => [$o, $a],
+        'site.manage' => [$o, $a],
     ];
 }
 

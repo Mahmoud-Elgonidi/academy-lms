@@ -1959,6 +1959,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/teacher/card": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My card on the academy's page
+         * @description The name to show, a few words and the photo, whether the teacher switched it on (`shown`), and where it
+         *     stands (`state`: on, off, hidden by the academy, none yet); the subjects beside it come from the teacher's
+         *     profile at the academy.
+         */
+        get: operations["teacher.card"];
+        put?: never;
+        /**
+         * Save my card
+         * @description Multipart: `display_name` (60), `bio` (280, optional), `shown` (true or false), and optionally `photo` (PNG,
+         *     JPEG or WebP, 1 MB; anyone who opens the academy's page sees it) or `remove_photo` (true). Answers with the
+         *     card as kept.
+         */
+        post: operations["teacher.card.update"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/branding": {
         parameters: {
             query?: never;
@@ -2416,6 +2444,48 @@ export interface paths {
          *     under review and the academy answers (the lesson's dispute). Send an Idempotency-Key.
          */
         post: operations["lessons.dispute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/site": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The academy's page
+         * @description In the request's language (Accept-Language). Not found while the academy keeps its page off.
+         */
+        get: operations["site.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/site/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask for a free trial lesson, or to teach at the academy
+         * @description kind is trial (subject_id, for_child with child_name and child_birth_year) or teach (subject_ids, years_teaching).
+         *     The academy answers each request. A form sent too soon or with the hidden field filled is answered the same and kept nowhere.
+         *     Not found while the academy keeps its page off.
+         */
+        post: operations["site.requests"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9579,6 +9649,134 @@ export interface operations {
             404: components["responses"]["ModelNotFoundException"];
         };
     };
+    "teacher.card": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The name the page shows (the account's name until a card is saved). */
+                            display_name: string;
+                            bio: string | null;
+                            /** @description The photo's address, or null. */
+                            photo_url: null;
+                            /** @description The teacher's own switch. */
+                            shown: boolean;
+                            /**
+                             * @description on | off | hidden (the academy took it off) | none (no card yet)
+                             * @enum {string}
+                             */
+                            state: "none" | "hidden" | "on" | "off";
+                            /** @description What the state means, in words. */
+                            state_label: string;
+                            subjects: {
+                                name: string;
+                                /** @description The first level they teach, or null (from the start). */
+                                level_from: string;
+                                /** @description The last level they teach, or null (to the end). */
+                                level_to: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "teacher.card.update": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @default false */
+                    remove_photo?: boolean;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The name the page shows (the account's name until a card is saved). */
+                            display_name: string;
+                            bio: string | null;
+                            /** @description The photo's address, or null. */
+                            photo_url: null;
+                            /** @description The teacher's own switch. */
+                            shown: boolean;
+                            /**
+                             * @description on | off | hidden (the academy took it off) | none (no card yet)
+                             * @enum {string}
+                             */
+                            state: "none" | "hidden" | "on" | "off";
+                            /** @description What the state means, in words. */
+                            state_label: string;
+                            subjects: {
+                                name: string;
+                                /** @description The first level they teach, or null (from the start). */
+                                level_from: string;
+                                /** @description The last level they teach, or null (to the end). */
+                                level_to: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
     "platform.branding": {
         parameters: {
             query?: never;
@@ -11620,6 +11818,197 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AccessDeniedHttpException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "site.show": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            academy: {
+                                /** @description The academy's name in the request's language. */
+                                name: string;
+                                /** @description The academy's code: what the app asks for to open it (X-Academy). */
+                                code: string;
+                            };
+                            /** @description The words the academy set: hero, features, testimonials, faqs, sections shown, whatsapp, seo. */
+                            content: {
+                                hero: {
+                                    title: string;
+                                    lead: string;
+                                };
+                                features: {
+                                    title: string;
+                                    text: string;
+                                }[];
+                                testimonials: {
+                                    name: string;
+                                    role: string;
+                                    quote: string;
+                                }[];
+                                faqs: {
+                                    q: string;
+                                    a: string;
+                                }[];
+                                sections: string[];
+                                whatsapp: string | null;
+                                seo: {
+                                    title: string;
+                                    description: string;
+                                };
+                            };
+                            /** @description Every subject the academy teaches (the free-trial form picks one). */
+                            subjects: {
+                                /** @description Sent back with the free-trial form as subject_id. */
+                                id: string;
+                                name: string;
+                                /** @description The subject's levels, in order. */
+                                levels: string[];
+                                /** @description Its tracks or the curricula it follows. */
+                                categories: string[];
+                                /** @description Its published programs. */
+                                programs: {
+                                    name: string;
+                                    /** @description What the program is, or null. */
+                                    description: string | null;
+                                }[];
+                            }[];
+                            /** @description The teachers who chose to show on the page; empty when the section is off. */
+                            teachers: {
+                                /** @description The card's id (not the teacher's account). */
+                                id: string;
+                                name: string;
+                                bio: string | null;
+                                photo_url: string | null;
+                                /** @description female or male. */
+                                gender: string | null;
+                                /** @description ISO 639-1 codes they explain in. */
+                                languages: string[];
+                                /** @description kids, middle, teen, adults: the ages they teach (none: any age). */
+                                age_groups: string[];
+                                subjects: {
+                                    name: string;
+                                    /** @description The first level they teach, or null (from the start). */
+                                    level_from: string | null;
+                                    /** @description The last level they teach, or null (to the end). */
+                                    level_to: string | null;
+                                }[];
+                                /** @description Whether they take free trial lessons. */
+                                accepts_trials: boolean;
+                            }[];
+                            /** @description The plans families enrol on, with a price in each region; empty when the section is off. */
+                            plans: {
+                                id: string;
+                                name: string;
+                                session_minutes: number;
+                                sessions_per_week: number;
+                                /** @description Lessons in each paid block. */
+                                sessions_per_block: number;
+                                /** @description Days a block lasts from payment. */
+                                validity_days: number;
+                                /** @description One balance for all of a student's courses on it. */
+                                shared: boolean;
+                                prices: {
+                                    region_id: string;
+                                    /** @description The block's price, written out ("SAR 480"). */
+                                    price: string;
+                                    amount_minor: number;
+                                    currency: string;
+                                }[];
+                            }[];
+                            /** @description The price regions: the page picks the visitor's by their country, else the default one. */
+                            regions: {
+                                id: string;
+                                name: string;
+                                currency: string;
+                                /** @description The region for a visitor whose country no region names. */
+                                default: boolean;
+                                /** @description ISO 3166-1 alpha-2 codes of the countries it serves. */
+                                countries: string[];
+                            }[];
+                            app: {
+                                /** @description The store page on Android, or null. */
+                                android_url: string;
+                                /** @description The App Store page, or null. */
+                                ios_url: string;
+                            };
+                            /** @description The academy's WhatsApp number (E.164), or null. */
+                            whatsapp: string | null;
+                            /** @description Sent back with the request form, unchanged. */
+                            form_token: string;
+                        };
+                    };
+                };
+            };
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "site.requests": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            received: boolean;
+                        };
+                    };
+                };
+            };
+            404: components["responses"]["ModelNotFoundException"];
             422: components["responses"]["ValidationException"];
         };
     };

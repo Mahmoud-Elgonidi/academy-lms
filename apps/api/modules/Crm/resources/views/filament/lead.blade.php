@@ -5,7 +5,7 @@
     $steps = ['new', 'contacted', 'trial_booked', 'attended', 'assessed', 'won'];
     $icons = ['call' => 'heroicon-m-phone', 'whatsapp' => 'heroicon-m-chat-bubble-left-ellipsis', 'note' => 'heroicon-m-pencil', 'created' => 'heroicon-m-plus',
         'assigned' => 'heroicon-m-user', 'stage' => 'heroicon-m-arrow-long-left', 'won' => 'heroicon-m-check', 'lost' => 'heroicon-m-x-mark',
-        'reopened' => 'heroicon-m-arrow-uturn-left', 'edited' => 'heroicon-m-pencil-square', 'assessed' => 'heroicon-m-clipboard-document-check'];
+        'reopened' => 'heroicon-m-arrow-uturn-left', 'edited' => 'heroicon-m-pencil-square', 'website_again' => 'heroicon-m-globe-alt', 'assessed' => 'heroicon-m-clipboard-document-check'];
 @endphp
 <x-filament-panels::page>
     @include('crm::filament.styles')

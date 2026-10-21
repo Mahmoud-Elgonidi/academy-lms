@@ -35,7 +35,10 @@ it('formats with Latin digits in Arabic, isolated so a Latin symbol stays put', 
 
     expect($plain(Money::of(450000, 'SAR')->format('ar')))->toBe("\u{2068}4,500 ر.س.\u{2069}")
         ->and($plain(Money::of(8000, 'USD')->format('ar')))->toBe("\u{2068}80 US$\u{2069}")
-        ->and(Money::of(12550, 'KWD')->format('en'))->toBe("KWD\u{00A0}12.550");
+        ->and(Money::of(12550, 'KWD')->format('en'))->toBe("KWD\u{00A0}12.550")
+        // A symbol that comes first keeps all of its bytes (the direction marks are trimmed by character).
+        ->and(Money::of(4800, 'EUR')->format('en'))->toBe('€48')
+        ->and($plain(Money::of(4800, 'EUR')->format('ar')))->toBe("\u{2068}48 €\u{2069}");
 });
 
 it('keeps the Gulf dinars to the fils and the yen whole, rounding what is typed half up', function () {

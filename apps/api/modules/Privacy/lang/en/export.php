@@ -20,5 +20,6 @@ return [
         'enquiries' => 'The enquiry you came through',
         'earnings' => 'Pay',
         'announcements' => 'Announcements you sent to families or teachers',
+        'site_requests' => "Requests you sent from the academy's page",
     ],
 ];

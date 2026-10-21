@@ -11,7 +11,8 @@ use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PriceRegion;
 
 /**
- * Demo prices: VAT 15% included (a Saudi academy), six regions, and the
+ * Demo prices: VAT 15% included (a Saudi academy), six regions (each with
+ * its countries), and the
  * block plans most academies sell: 4, 8 or 12 sessions of 30, 45 or 60 minutes;
  * and where families transfer the money by hand (on every server, the demo
  * gateway or not: a way to pay is one of "Start here"'s essentials).
@@ -23,13 +24,15 @@ class DemoBillingSeeder extends Seeder
         // A Saudi academy registered for VAT: its invoices are simplified tax invoices with the ZATCA QR code.
         $settings->handle(15, true, '310123456700003', 'NR-', 3, 'مؤسسة النور التعليمية', true);
 
+        // Each with the countries its families live in (the academy's page shows a visitor their country's prices).
+        $countries = DemoRegionCountriesSeeder::COUNTRIES;
         $regions->handle([
-            ['name_ar' => 'السعودية والخليج', 'name_en' => 'Saudi Arabia and the Gulf', 'currency' => 'SAR', 'is_default' => true],
-            ['name_ar' => 'الإمارات', 'name_en' => 'UAE', 'currency' => 'AED'],
-            ['name_ar' => 'بريطانيا', 'name_en' => 'United Kingdom', 'currency' => 'GBP'],
-            ['name_ar' => 'أوروبا', 'name_en' => 'Europe', 'currency' => 'EUR'],
-            ['name_ar' => 'أمريكا وكندا', 'name_en' => 'US and Canada', 'currency' => 'USD'],
-            ['name_ar' => 'مصر', 'name_en' => 'Egypt', 'currency' => 'EGP'],
+            ['name_ar' => 'السعودية والخليج', 'name_en' => 'Saudi Arabia and the Gulf', 'currency' => 'SAR', 'is_default' => true, 'countries' => $countries['SAR']],
+            ['name_ar' => 'الإمارات', 'name_en' => 'UAE', 'currency' => 'AED', 'countries' => $countries['AED']],
+            ['name_ar' => 'بريطانيا', 'name_en' => 'United Kingdom', 'currency' => 'GBP', 'countries' => $countries['GBP']],
+            ['name_ar' => 'أوروبا', 'name_en' => 'Europe', 'currency' => 'EUR', 'countries' => $countries['EUR']],
+            ['name_ar' => 'أمريكا وكندا', 'name_en' => 'US and Canada', 'currency' => 'USD', 'countries' => $countries['USD']],
+            ['name_ar' => 'مصر', 'name_en' => 'Egypt', 'currency' => 'EGP', 'countries' => $countries['EGP']],
         ]);
         $region = PriceRegion::query()->pluck('id', 'currency');
 

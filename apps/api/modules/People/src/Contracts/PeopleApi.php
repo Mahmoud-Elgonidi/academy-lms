@@ -4,8 +4,10 @@ namespace Modules\People\Contracts;
 
 use Carbon\CarbonImmutable;
 use Modules\People\Contracts\DTOs\ConsentState;
+use Modules\People\Contracts\DTOs\PublicTeacher;
 use Modules\People\Contracts\DTOs\StudentDetails;
 use Modules\People\Contracts\DTOs\StudentProfileData;
+use Modules\People\Contracts\DTOs\TeacherCardSummary;
 use Modules\People\Contracts\DTOs\TeacherClearance;
 use Modules\People\Contracts\DTOs\TeacherProfileData;
 
@@ -102,4 +104,19 @@ interface PeopleApi
     public function pauseForMinors(string $teacherId, string $reason, string $actorId): void;
 
     public function resumeForMinors(string $teacherId, string $reason, string $actorId): void;
+
+    /**
+     * The teachers on the academy's public page: the cards they switched on
+     * and the academy left on, of teachers who teach now, with what their
+     * profile says they teach. Never a number, an email or their account.
+     *
+     * @return list<PublicTeacher>
+     */
+    public function publicTeachers(): array;
+
+    /** @return list<TeacherCardSummary> every card the academy's teachers made, for its page settings */
+    public function teacherCards(): array;
+
+    /** Takes a teacher's card off the academy's page, or puts it back (site.manage). */
+    public function hideTeacherCard(string $cardId, bool $hidden): void;
 }

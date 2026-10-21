@@ -71,6 +71,10 @@ return [
             'concern_closed' => 'بلاغ الحماية :concern اتقفل: :concern_outcome',
             'concern_reopened' => 'بلاغ الحماية :concern اتفتح تاني',
         ],
+        'site' => [
+            'settings_saved' => 'صفحة الأكاديمية اتحفظت (:state؛ الأقسام: :shown)',
+            'request_handled' => 'طلب من صفحة الأكاديمية اترد عليه (:request_status)',
+        ],
         'announcements' => [
             'sent' => 'بعت إعلان لـ :audience (عدد اللي وصلهم: :count)',
         ],
@@ -92,6 +96,9 @@ return [
             'minors_paused' => ':teacher اتوقف عن الحصص الجديدة مع أقل من 18',
             'minors_resumed' => ':teacher رجع يدرّس لأقل من 18: :reason',
             'minor_check_required' => 'المدرس بقى محتاج فيش جنائي متأكد عشان يدرّس لأقل من 18',
+            'card_saved' => ':teacher حفظ كارته في صفحة الأكاديمية (:card)',
+            'card_hidden' => 'كارت :teacher اتشال من صفحة الأكاديمية',
+            'card_unhidden' => 'كارت :teacher رجع لصفحة الأكاديمية',
             'minor_check_optional' => 'المدرس مابقاش محتاج فيش جنائي عشان يدرّس لأقل من 18',
         ],
         'classroom' => [
@@ -177,9 +184,13 @@ return [
         'side' => ['family' => 'الأسرة', 'teacher' => 'المدرس', 'staff' => 'الإدارة سجلته'],
         'roles' => ['owner' => 'المالك', 'admin' => 'مدير', 'supervisor' => 'مشرف', 'scheduler' => 'منسق مواعيد', 'accountant' => 'محاسب', 'sales' => 'مبيعات'],
         'audience' => ['families' => 'كل الأسر', 'guardians' => 'أولياء الأمور', 'students' => 'الطلاب', 'subject' => 'أسر مادة', 'teachers' => 'المدرسين'],
+        'shown' => ['subjects' => 'المواد', 'teachers' => 'المدرسين', 'pricing' => 'الأسعار', 'app' => 'التطبيق', 'steps' => 'إزاي نبدأ', 'testimonials' => 'آراء الأسر', 'faq' => 'الأسئلة', 'teach' => 'درّس معانا'],
+        'request_status' => ['new' => 'جديد', 'contacted' => 'اتكلّمنا معاهم', 'accepted' => 'اتقبل', 'declined' => 'اترفض'],
+        'card' => ['shown' => 'ظاهر', 'hidden' => 'مش ظاهر'],
     ],
     'groups' => [
         'announcements' => 'الإعلانات',
+        'site' => 'صفحة الأكاديمية',
         'learning' => 'التقارير والواجبات',
         'games' => 'الألعاب',
         'messaging' => 'المحادثات',

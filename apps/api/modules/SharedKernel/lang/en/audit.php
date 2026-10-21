@@ -71,6 +71,10 @@ return [
             'concern_closed' => 'Safeguarding concern :concern closed: :concern_outcome',
             'concern_reopened' => 'Safeguarding concern :concern opened again',
         ],
+        'site' => [
+            'settings_saved' => "The academy's page saved (:state; sections: :shown)",
+            'request_handled' => 'A request from the academy\'s page answered (:request_status)',
+        ],
         'announcements' => [
             'sent' => 'Sent an announcement to :audience (recipients: :count)',
         ],
@@ -92,6 +96,9 @@ return [
             'minors_paused' => ':teacher paused from new lessons with under-18s',
             'minors_resumed' => ':teacher may teach under-18s again: :reason',
             'minor_check_required' => 'Teachers now need a verified criminal record check to teach under-18s',
+            'card_saved' => ':teacher saved their card for the academy\'s page (:card)',
+            'card_hidden' => ':teacher\'s card taken off the academy\'s page',
+            'card_unhidden' => ':teacher\'s card back on the academy\'s page',
             'minor_check_optional' => 'Teachers no longer need a criminal record check to teach under-18s',
         ],
         'classroom' => [
@@ -177,9 +184,13 @@ return [
         'side' => ['family' => 'the family', 'teacher' => 'the teacher', 'staff' => 'written down by the office'],
         'roles' => ['owner' => 'Owner', 'admin' => 'Admin', 'supervisor' => 'Supervisor', 'scheduler' => 'Scheduler', 'accountant' => 'Accountant', 'sales' => 'Sales'],
         'audience' => ['families' => 'all families', 'guardians' => 'guardians', 'students' => 'students', 'subject' => 'a subject\'s families', 'teachers' => 'teachers'],
+        'shown' => ['subjects' => 'subjects', 'teachers' => 'teachers', 'pricing' => 'prices', 'app' => 'the app', 'steps' => 'how it starts', 'testimonials' => 'what families say', 'faq' => 'questions', 'teach' => 'teach with us'],
+        'request_status' => ['new' => 'new', 'contacted' => 'talked to', 'accepted' => 'accepted', 'declined' => 'turned down'],
+        'card' => ['shown' => 'shown', 'hidden' => 'not shown'],
     ],
     'groups' => [
         'announcements' => 'Announcements',
+        'site' => 'The academy\'s page',
         'learning' => 'Reports and homework',
         'games' => 'Games',
         'messaging' => 'Conversations',

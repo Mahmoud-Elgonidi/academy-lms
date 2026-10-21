@@ -37,7 +37,7 @@ use Modules\SharedKernel\Setup\SetupStep;
  */
 
 const SETUP_REQUIRED = ['platform.branding', 'scheduling.policy', 'privacy.details', 'catalog.subjects', 'people.teacher', 'scheduling.teacher_hours', 'billing.prices', 'billing.payment'];
-const SETUP_OPTIONAL = ['identity.team', 'curriculum.program', 'import.people'];
+const SETUP_OPTIONAL = ['identity.team', 'site.page', 'curriculum.program', 'import.people'];
 
 beforeEach(function () {
     $this->academy = $this->actAsTenant($this->createAcademy(['slug' => 'noor']));
@@ -265,7 +265,7 @@ it('reads each step once for its page, the menu and the landing together', funct
     $withoutSteps = $queries('http://noor.lms.test/admin/start-here');
     app()->instance(SetupChecklist::class, $real);
 
-    expect($steps)->toBe(11)
+    expect($steps)->toBe(12)
         ->and($withSteps - $withoutSteps)->toBeLessThanOrEqual($steps)   // the page, the menu's place and badge: one reading
         ->and($landing)->toBeLessThanOrEqual(5)                          // a redirect: the account, its roles, the first step not done
         ->and($landingWithout)->toBeGreaterThan($landing);

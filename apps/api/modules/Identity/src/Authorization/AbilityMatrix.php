@@ -63,6 +63,8 @@ final class AbilityMatrix
             // The new academy's setup checklist ("Start here"): who gets the academy ready for its first families.
             Ability::SetUpAcademy => [Role::Owner, Role::Admin],
             Ability::ManageAi => [Role::Owner, Role::Admin],
+            // The academy's public page (its words, which sections and teachers' cards show): the academy speaking to everyone, so its owner and admins.
+            Ability::ManageSite => [Role::Owner, Role::Admin],
         };
     }
 

@@ -5,7 +5,7 @@ namespace Modules\People\Filament\Teacher;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
-/** The teacher's own vetting documents in /teach. */
+/** The teacher's own vetting documents, and their card on the academy's public page, in /teach. */
 final class PeopleTeacherPlugin implements Plugin
 {
     public static function make(): self
@@ -20,7 +20,7 @@ final class PeopleTeacherPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([MyDocuments::class]);
+        $panel->pages([MyDocuments::class, MyCard::class]);
     }
 
     public function boot(Panel $panel): void {}

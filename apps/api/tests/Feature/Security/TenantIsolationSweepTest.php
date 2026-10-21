@@ -217,6 +217,8 @@ it('keeps every record of one academy out of reach of another academy\'s people'
             'admin/announcements', 'admin/announcements?announcement={announcement}',
             // "Start here": this academy's own setup, read from its own rows.
             'admin/start-here',
+            // The academy's page and its requests: this academy's own words, cards and requests.
+            'admin/settings/site', 'admin/site/requests',
             // The academy's hifz: its own courses only; the demo's student, asked for by course, is not found.
             'admin/hifz', 'admin/hifz/{enrollment}'],
         'accountant' => ['admin/invoices/{invoice}', 'admin/payroll/{teacher}', 'billing/proofs/{proof}/file'],

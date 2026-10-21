@@ -14,6 +14,7 @@ use Modules\Crm\Contracts\Events\TrialMissed;
 use Modules\Crm\Filament\Pages\LeadPage;
 use Modules\Crm\Filament\Teacher\MyTrials;
 use Modules\Crm\Listeners\FollowLeads;
+use Modules\Crm\Listeners\FollowSiteRequests;
 use Modules\Crm\Listeners\SendCrmNotifications;
 use Modules\Crm\Models\LeadTrial;
 use Modules\Crm\Privacy\LeadsData;
@@ -25,12 +26,14 @@ use Modules\Scheduling\Contracts\Events\SessionRescheduled;
 use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
 use Modules\Scheduling\Contracts\TrialConversionRates;
 use Modules\SharedKernel\Privacy\PersonalData;
+use Modules\Site\Contracts\Events\JoinRequested;
 
 /**
  * The CRM (docs/architecture/01, section 14; 04, M14): leads, their trial
  * lessons and the teacher's assessment, up to the subscription. It sits on
- * top: it follows Scheduling's and Enrollment's events, and nothing depends
- * on it (Scheduling asks it for trial conversion through its own contract).
+ * top: it follows Scheduling's, Enrollment's and the academy's page's (Site)
+ * events, and nothing depends on it (Scheduling asks it for trial conversion
+ * through its own contract).
  */
 final class CrmServiceProvider extends ServiceProvider
 {
@@ -64,6 +67,8 @@ final class CrmServiceProvider extends ServiceProvider
         Event::listen(SessionCancelled::class, [FollowLeads::class, 'cancelled']);
         Event::listen(SessionFinalized::class, [FollowLeads::class, 'finalized']);
         Event::listen(EnrollmentCreated::class, [FollowLeads::class, 'enrolled']);
+        // A free trial asked for on the academy's page (Site) becomes a lead.
+        Event::listen(JoinRequested::class, [FollowSiteRequests::class, 'joinRequested']);
         Event::listen(LeadAssigned::class, [SendCrmNotifications::class, 'assigned']);
         Event::listen(TrialCompleted::class, [SendCrmNotifications::class, 'trialCompleted']);
         Event::listen(TrialMissed::class, [SendCrmNotifications::class, 'trialMissed']);

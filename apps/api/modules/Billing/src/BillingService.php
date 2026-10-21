@@ -100,7 +100,7 @@ final class BillingService implements BillingApi
     public function regions(): array
     {
         return PriceRegion::query()->orderByDesc('is_default')->orderBy('sort')->get()
-            ->map(fn (PriceRegion $r) => new RegionOption($r->id, $r->name(), $r->currency, $r->is_default))
+            ->map(fn (PriceRegion $r) => new RegionOption($r->id, $r->name(), $r->currency, $r->is_default, array_values($r->countries ?? [])))
             ->all();
     }
 

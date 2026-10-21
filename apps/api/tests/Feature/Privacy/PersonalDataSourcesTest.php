@@ -71,6 +71,8 @@ const PRIVACY_COVERAGE = [
     'support' => ['copy' => ['student'], 'erases' => false],
     // What the office sent: in the sender's copy (AnnouncementsTest), none of these three's; kept on erasure.
     'announcements' => ['copy' => [], 'erases' => false],
+    // What the guardian asked from the academy's page with her number, before she had an account.
+    'site_requests' => ['copy' => ['guardian'], 'erases' => true],
 ];
 
 beforeEach(function () {
@@ -115,6 +117,9 @@ function pdsSeedEverySource(object $t): void
     $t->checkScan = $file('teacher-checks', 'record.jpg');
     DB::table('teacher_checks')->insert(['id' => $id(), 'teacher_id' => $tr->id, 'kind' => 'criminal_record', 'reference' => 'CR-778899', 'uploaded_by' => $tr->id,
         'file_path' => $t->checkScan, 'file_name' => 'record.jpg', 'created_at' => $now, 'updated_at' => $now]);
+    // ...and the teacher's card on the academy's page, in her own words.
+    DB::table('teacher_public_cards')->insert(['id' => $id(), 'teacher_id' => $tr->id, 'display_name' => 'Fadwa Lutfi', 'bio' => 'Twenty years teaching, reach me on +201011122255',
+        'shown' => true, 'created_at' => $now, 'updated_at' => $now]);
 
     // billing: a receipt the guardian sent for the course's invoice (the invoice comes with the fixture).
     $t->receipt = $file('payment-proofs', 'transfer.jpg');
@@ -138,6 +143,10 @@ function pdsSeedEverySource(object $t): void
     DB::table('leads')->insert(['id' => $lead, 'contact_name' => 'Marwan Qasr', 'phone_e164' => '+966511122244', 'email' => 'marwan.qasr@noor.example', 'timezone' => 'Asia/Riyadh', 'source' => 'website',
         'learner_name' => 'Zubaida Qasr', 'learner_id' => $s->id, 'contact_id' => $g->id, 'notes' => 'Prefers evenings', 'created_at' => $now, 'updated_at' => $now]);
     DB::table('lead_activities')->insert(['id' => $id(), 'lead_id' => $lead, 'kind' => 'note', 'body' => 'Called Marwan on +966511122244']);
+
+    // site_requests: the guardian asked for a free trial from the academy's page, with the number her account has now.
+    DB::table('site_requests')->insert(['id' => $id(), 'kind' => 'trial', 'name' => 'Marwan Qasr', 'phone' => '+966511122244', 'for_child' => true, 'child_name' => 'Zubaida',
+        'message' => 'Evenings, please', 'created_at' => $now, 'updated_at' => $now]);
 
     // ratings: the student rated a lesson, with words.
     DB::table('lesson_ratings')->insert(['id' => $id(), 'session_id' => $lesson, 'rater_id' => $s->id, 'student_id' => $s->id, 'teacher_id' => $tr->id, 'stars' => 4, 'tags' => '["patient"]', 'comment' => 'Fadwa is kind', 'created_at' => $now, 'updated_at' => $now]);
@@ -216,6 +225,9 @@ it('shows each source in the copy of whoever it is about, with the files they ga
         }
     }
 
+    // The teacher's card on the academy's page is in her copy.
+    expect(pdsSources()['profile']->export($this->teacher->id)->data['public_card']['display_name'])->toBe('Fadwa Lutfi');
+
     // The ZIP: every part, and the files the person gave.
     foreach (['student' => [$this->handedIn], 'guardian' => [$this->receipt], 'teacher' => [$this->checkScan]] as $who => $files) {
         $this->actingAs($this->owner);
@@ -285,7 +297,7 @@ it('holds an erasure back for each source\'s own reasons, and erases once they a
     // What each source said it removes or blanks is gone; what it keeps is still there.
     $after = pdsSnapshot($this->people);
     expect($after['account'])->toBe(['erased', 'erased', 'erased', 0, 0])
-        ->and($after['profile'])->toBe([null, null, 0, 0, null, false])
+        ->and($after['profile'])->toBe([null, null, 0, 0, null, false, 0])
         ->and($after['messages'])->toBe([0, 0, 0])
         ->and($after['enquiries'])->toBe([null, null, null, null, null])
         ->and($after['ratings'])->toBe([null, '[]', 4])
@@ -326,7 +338,8 @@ function pdsSnapshot(array $people): array
         'profile' => [DB::table('student_profiles')->where('user_id', $s)->value('birth_date'), DB::table('teacher_profiles')->where('user_id', $t)->value('gender'),
             DB::table('guardian_student')->whereIn('guardian_id', $ids)->orWhereIn('student_id', $ids)->count(),
             DB::table('teacher_checks')->where('teacher_id', $t)->whereNotNull('file_path')->count(),
-            DB::table('teacher_checks')->where('teacher_id', $t)->value('reference'), (bool) DB::table('teacher_profiles')->where('user_id', $t)->value('accepts_new')],
+            DB::table('teacher_checks')->where('teacher_id', $t)->value('reference'), (bool) DB::table('teacher_profiles')->where('user_id', $t)->value('accepts_new'),
+            DB::table('teacher_public_cards')->where('teacher_id', $t)->count()],
         'billing' => [DB::table('invoices')->count(), DB::table('manual_payment_proofs')->where('payer_id', $g)->count()],
         'recordings' => DB::table('recording_consents')->where('person_id', $s)->count(),
         'messages' => [DB::table('notifications')->whereIn('user_id', $ids)->count(), DB::table('notification_deliveries')->where('address', 'zubaida.qasr@noor.example')->count(),

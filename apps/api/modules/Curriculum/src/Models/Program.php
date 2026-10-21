@@ -36,6 +36,15 @@ final class Program extends Model
         return app()->getLocale() === 'ar' ? $this->name_ar : $this->name_en;
     }
 
+    /** What the program is, in the current language, the other's where it is empty; null when it has none. */
+    public function description(): ?string
+    {
+        [$mine, $other] = app()->getLocale() === 'ar' ? [$this->description_ar, $this->description_en] : [$this->description_en, $this->description_ar];
+        $text = trim((string) ($mine ?: $other));
+
+        return $text === '' ? null : $text;
+    }
+
     /** The version being taught: the published one, else the draft being built. */
     public function workingVersion(): CurriculumVersion
     {

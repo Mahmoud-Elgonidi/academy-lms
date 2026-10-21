@@ -22,6 +22,7 @@ use Modules\Billing\Actions\SavePlan;
 use Modules\Billing\Actions\SavePriceRegions;
 use Modules\Billing\Models\BillingSettings;
 use Modules\Billing\Models\PriceRegion;
+use Modules\SharedKernel\Geo\Countries;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 final class ManagePlans extends ManageRecords
@@ -44,7 +45,7 @@ final class ManagePlans extends ManageRecords
                 ->color('gray')
                 ->modalHeading(__('billing::plans.regions.title'))
                 ->modalDescription(__('billing::plans.regions.hint'))
-                ->fillForm(fn () => ['regions' => PriceRegion::query()->orderBy('sort')->get()->map(fn (PriceRegion $r) => $r->only(['id', 'name_ar', 'name_en', 'currency', 'is_default']))->all()])
+                ->fillForm(fn () => ['regions' => PriceRegion::query()->orderBy('sort')->get()->map(fn (PriceRegion $r) => $r->only(['id', 'name_ar', 'name_en', 'currency', 'is_default', 'countries']))->all()])
                 ->schema([
                     Repeater::make('regions')->hiddenLabel()
                         ->schema([
@@ -55,6 +56,8 @@ final class ManagePlans extends ManageRecords
                             Select::make('currency')->label(__('billing::plans.fields.currency'))
                                 ->options(array_combine(self::CURRENCIES, self::CURRENCIES))->required()->native(false)->searchable(),
                             Toggle::make('is_default')->label(__('billing::plans.fields.is_default'))->inline(false),
+                            Select::make('countries')->label(__('billing::plans.fields.countries'))->helperText(__('billing::plans.fields.countries_hint'))
+                                ->multiple()->options(fn () => Countries::options(app()->getLocale()))->searchable()->native(false)->columnSpanFull(),
                         ])
                         ->columns(4)->defaultItems(1)->addActionLabel(__('billing::plans.regions.add'))->reorderable(),
                 ])

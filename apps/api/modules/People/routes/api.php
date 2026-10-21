@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\People\Http\V1\Controllers\ConsentController;
 use Modules\People\Http\V1\Controllers\FamilyController;
+use Modules\People\Http\V1\Controllers\TeacherCardController;
 use Modules\People\Http\V1\Controllers\TeacherChecksController;
 
 // The family app: whose account the person signed in can open (themselves as a student, their children).
@@ -20,4 +21,10 @@ Route::middleware('auth:sanctum')->prefix('teacher/checks')->group(function () {
     Route::get('/', [TeacherChecksController::class, 'index'])->name('teacher.checks');
     Route::post('/', [TeacherChecksController::class, 'store'])->middleware(['idempotent', 'throttle:10,1'])->name('teacher.checks.store');
     Route::get('{check}/file', [TeacherChecksController::class, 'file'])->name('teacher.checks.file');
+});
+
+// A teacher's own card on the academy's public page (the same as "My card" in /teach).
+Route::middleware('auth:sanctum')->prefix('teacher/card')->group(function () {
+    Route::get('/', [TeacherCardController::class, 'show'])->name('teacher.card');
+    Route::post('/', [TeacherCardController::class, 'update'])->middleware('throttle:20,1')->name('teacher.card.update');
 });

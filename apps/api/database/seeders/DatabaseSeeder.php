@@ -30,6 +30,7 @@ use Modules\Messaging\Database\Seeders\DemoMessagingSeeder;
 use Modules\Payroll\Database\Seeders\DemoPayrollSeeder;
 use Modules\People\Database\Seeders\DemoConsentsSeeder;
 use Modules\People\Database\Seeders\DemoPeopleSeeder;
+use Modules\People\Database\Seeders\DemoTeacherCardsSeeder;
 use Modules\People\Database\Seeders\DemoTeacherChecksSeeder;
 use Modules\Platform\Contracts\DTOs\NewAcademy;
 use Modules\Platform\Contracts\PlatformApi;
@@ -51,6 +52,7 @@ use Modules\Scheduling\Database\Seeders\DemoShiftsSeeder;
 use Modules\Scheduling\Database\Seeders\DemoTimeOffSeeder;
 use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\Site\Database\Seeders\DemoSiteSeeder;
 use Modules\Support\Database\Seeders\DemoTicketsSeeder;
 
 /**
@@ -59,7 +61,7 @@ use Modules\Support\Database\Seeders\DemoTicketsSeeder;
  * live board, guardians' consent to their children's accounts (one still waiting), teacher shifts and proposals, plans and prices, and enrolled
  * students with invoices in every state (payable online on the demo gateway) and five months of
  * paid renewals behind them (the revenue screen),
- * curricula, lesson reports with homework, teacher time off with a substitute
+ * curricula, lesson reports with homework, its public page (on, with three teachers' cards), teacher time off with a substitute
  * and an academy holiday, ratings, teachers' pay with last month closed, imports from sheets, and the notifications all of that sent;
  * a second academy (suspended) and the platform team's console with past support sign-ins, the academies on their SaaS plans (the demo on Pro, nine of its ten teachers' places taken). Every password is "password" (DEMO_PASSWORD on a server). `composer demo` rebuilds it.
  */
@@ -107,7 +109,7 @@ class DatabaseSeeder extends Seeder
             // What the demo does in the back office (prices, policy, voided invoices, ...) is in the activity log as the owner's.
             AuditActor::use(new AuditActor('user', $ownerId, 'هالة منصور'));
 
-            $this->call([DemoBrandingSeeder::class, DemoPolicySeeder::class, DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoRevenueSeeder::class, DemoEnrollmentsSeeder::class, DemoShiftProposalsSeeder::class, DemoCurriculumSeeder::class, DemoQuranTextsSeeder::class, DemoMaterialsSeeder::class, DemoPracticeSeeder::class, DemoLearningSeeder::class, DemoMistakesSeeder::class, DemoChallengesSeeder::class, DemoGamesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoTicketsSeeder::class, DemoRecordingsSeeder::class, DemoDiscountsSeeder::class, DemoFamilyBillingSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class, DemoCatalogSeeder::class, DemoPeopleSeeder::class, DemoDisputesSeeder::class, DemoPrivacySeeder::class, DemoTeacherChecksSeeder::class, DemoSafeguardingSeeder::class, DemoMessagingSeeder::class, DemoAnnouncementsSeeder::class]);
+            $this->call([DemoBrandingSeeder::class, DemoPolicySeeder::class, DemoCommunicationSeeder::class, DemoLiveBoardSeeder::class, DemoConsentsSeeder::class, DemoBillingSeeder::class, DemoShiftsSeeder::class, DemoRevenueSeeder::class, DemoEnrollmentsSeeder::class, DemoShiftProposalsSeeder::class, DemoCurriculumSeeder::class, DemoQuranTextsSeeder::class, DemoMaterialsSeeder::class, DemoPracticeSeeder::class, DemoLearningSeeder::class, DemoMistakesSeeder::class, DemoChallengesSeeder::class, DemoGamesSeeder::class, DemoClassroomSeeder::class, DemoPaymentsSeeder::class, DemoTimeOffSeeder::class, DemoDstSeeder::class, DemoCrmSeeder::class, DemoEvaluationSeeder::class, DemoTicketsSeeder::class, DemoRecordingsSeeder::class, DemoDiscountsSeeder::class, DemoFamilyBillingSeeder::class, DemoPayrollSeeder::class, DemoImportSeeder::class, DemoCatalogSeeder::class, DemoPeopleSeeder::class, DemoDisputesSeeder::class, DemoPrivacySeeder::class, DemoTeacherChecksSeeder::class, DemoSafeguardingSeeder::class, DemoMessagingSeeder::class, DemoAnnouncementsSeeder::class, DemoTeacherCardsSeeder::class, DemoSiteSeeder::class]);
             AuditActor::forget();
         });
 

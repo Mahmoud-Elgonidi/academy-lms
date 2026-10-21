@@ -5,6 +5,7 @@ namespace Modules\People\Privacy;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Modules\People\Models\TeacherCheck;
+use Modules\People\Models\TeacherPublicCard;
 use Modules\SharedKernel\Privacy\PersonalDataPart;
 use Modules\SharedKernel\Privacy\PersonalDataSource;
 
@@ -14,7 +15,9 @@ use Modules\SharedKernel\Privacy\PersonalDataSource;
  * as guardian, and the consents given for a child. Erasing blanks the
  * profile and undoes the guardian links; the consents stay as given (what a
  * guardian agreed to, and when, is the academy's evidence), and a guardian
- * cannot go while a child with no way in of their own has nobody else.
+ * cannot go while a child with no way in of their own has nobody else. A
+ * teacher's card on the academy's page (their words and the photo's place on
+ * the public disk) is in the copy; erasing removes it and its photo.
  */
 final class ProfileData implements PersonalDataSource
 {
@@ -43,6 +46,9 @@ final class ProfileData implements PersonalDataSource
             'guardians' => $people('student_id', 'guardian_id'),
             'guardian_consents' => DB::table('guardian_consents')->where(fn ($q) => $q->where('student_id', $userId)->orWhere('guardian_id', $userId))
                 ->orderBy('granted_at')->get(['purpose', 'version', 'via', 'granted_at', 'withdrawn_at'])->map(fn (object $r) => (array) $r)->all(),
+            // A teacher's card on the academy's page: their words, and where its photo is (on the public disk, so not in the archive).
+            'public_card' => ($card = DB::table('teacher_public_cards')->where('teacher_id', $userId)->first(['display_name', 'bio', 'photo_path', 'shown', 'hidden_by_academy', 'updated_at'])) === null ? null
+                : ['display_name' => $card->display_name, 'bio' => $card->bio, 'photo' => $card->photo_path, 'shown' => (bool) $card->shown, 'hidden_by_academy' => (bool) $card->hidden_by_academy, 'updated_at' => $card->updated_at],
             // A teacher's vetting documents: what they are and where they stand (the scans come with the copy).
             'teacher_checks' => $checks->map(fn (object $c, int $i) => ['kind' => $c->kind, 'reference' => $c->reference, 'issued_on' => $c->issued_on, 'expires_on' => $c->expires_on,
                 'status' => $c->status, 'note' => $c->decision_note, 'file' => $c->file_path ? $scan($c, $i) : null, 'at' => $c->created_at])->all(),
@@ -75,7 +81,13 @@ final class ProfileData implements PersonalDataSource
         if ($scans !== []) {
             DB::afterCommit(fn () => Storage::disk(TeacherCheck::DISK)->delete($scans));
         }
+        // The card on the academy's page goes, and its photo after commit.
+        $photos = DB::table('teacher_public_cards')->where('teacher_id', $userId)->whereNotNull('photo_path')->pluck('photo_path')->all();
+        $cards = DB::table('teacher_public_cards')->where('teacher_id', $userId)->delete();
+        if ($photos !== []) {
+            DB::afterCommit(fn () => Storage::disk(TeacherPublicCard::DISK)->delete($photos));
+        }
 
-        return ['profile' => $profiles, 'guardian_links' => $links, 'teacher_checks' => $checks];
+        return ['profile' => $profiles, 'guardian_links' => $links, 'teacher_checks' => $checks, 'public_card' => $cards];
     }
 }

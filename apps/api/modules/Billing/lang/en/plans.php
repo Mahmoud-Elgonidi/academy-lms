@@ -36,6 +36,8 @@ return [
         'is_active' => 'Open for enrolment',
         'currency' => 'Currency',
         'is_default' => 'Default',
+        'countries' => 'Countries',
+        'countries_hint' => "The countries this region's families live in. The academy's page shows the prices of the region with the visitor's country. A country is in one region only.",
     ],
     'hints' => [
         'credit_scope' => 'A shared package is one balance for a student in any subject (say 12 lessons a month across Quran and Arabic). Each new course of theirs on it draws on the same balance, with no new invoice, and the lessons a week here are for all their subjects together. It stays as it is once someone is on it.',
@@ -77,6 +79,8 @@ return [
         'negative' => 'A price cannot be negative.',
         'one_region' => 'Keep at least one price region.',
         'currency' => 'Unknown currency :currency.',
+        'country_unknown' => 'The country :country is not on the list.',
+        'country_twice' => ':country is in more than one region. A country goes in one region only.',
         'region_in_use' => 'Payers are billed in this region; it cannot be removed or change currency.',
         'region_priced' => 'Plans are priced in :currency in this region. Take those prices off the plans first, then change its currency.',
         'settings' => 'Check the rate (0–100%), the days (0–90) and the prefix (letters and digits only).',

@@ -27,6 +27,7 @@ use Modules\Privacy\Providers\PrivacyServiceProvider;
 use Modules\Safeguarding\Providers\SafeguardingServiceProvider;
 use Modules\Scheduling\Providers\SchedulingServiceProvider;
 use Modules\SharedKernel\Providers\SharedKernelServiceProvider;
+use Modules\Site\Providers\SiteServiceProvider;
 use Modules\Support\Providers\SupportServiceProvider;
 
 // Module providers, in dependency order (see docs/architecture/04-design-patterns.md).
@@ -46,6 +47,7 @@ return [
     EvaluationServiceProvider::class,
     PayrollServiceProvider::class,
     ClassroomServiceProvider::class,
+    SiteServiceProvider::class,
     CrmServiceProvider::class,
     ImportServiceProvider::class,
     SupportServiceProvider::class,

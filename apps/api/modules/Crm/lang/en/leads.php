@@ -145,6 +145,7 @@ return [
         'won' => 'Subscribed',
         'lost' => 'Lost: :reason',
         'reopened' => 'Came back',
+        'website_again' => "Asked again from the academy's page",
         'edited' => 'Details edited',
         'system' => 'System',
     ],
