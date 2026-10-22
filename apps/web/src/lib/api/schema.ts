@@ -1997,6 +1997,7 @@ export interface paths {
         /**
          * The academy's look
          * @description With `app`: the oldest app version still served (an older app asks to be updated first) and where to update it.
+         *     `time_format` is how the academy writes a clock for everyone who has not chosen their own (pages before sign-in).
          */
         get: operations["platform.branding"];
         put?: never;
@@ -2804,6 +2805,11 @@ export interface components {
             locale?: "ar" | "en";
             /** @description IANA names only ("Asia/Dubai"); offsets like "+04:00" break on summer time. */
             timezone?: string;
+            /**
+             * @description How the person reads a clock: h12 (5:00 PM) or h24 (17:00); null follows the academy's choice.
+             * @enum {string|null}
+             */
+            time_format?: "h12" | "h24" | null;
         };
         /** UserResource */
         UserResource: {
@@ -2820,6 +2826,10 @@ export interface components {
             display_timezone: string;
             /** @description The device's clock differs from the profile's: the app offers to update the profile. */
             timezone_mismatch: string;
+            /** @description How this person reads a clock: h12 (5:00 PM) or h24 (17:00), their own choice else the academy's. */
+            time_format: string;
+            /** @description Their own choice (h12, h24), or null when they follow the academy's. */
+            time_format_choice: string | null;
             roles: unknown[];
             /** @description The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll): the apps show only these. */
             plan_features: string[];
@@ -2829,6 +2839,8 @@ export interface components {
                 name_ar: string;
                 name_en: string;
                 default_timezone: string;
+                /** @description The academy's clock for everyone who has not chosen their own: h12 or h24. */
+                time_format: string;
             } | null;
         };
         /** VerifyCodeRequest */
@@ -9833,6 +9845,8 @@ export interface operations {
                                 modified: boolean;
                             };
                         };
+                        /** @description h12 (5:00 PM) or h24 (17:00): the academy's choice. */
+                        time_format: string;
                         app: {
                             /** @description The oldest app version still served, like "1.0.0". */
                             min_version: string;

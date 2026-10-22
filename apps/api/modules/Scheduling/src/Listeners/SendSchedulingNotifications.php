@@ -9,6 +9,7 @@ use Modules\Communication\Contracts\DTOs\Localized;
 use Modules\Communication\Contracts\DTOs\Message;
 use Modules\Communication\Contracts\DTOs\TemplateDefinition;
 use Modules\Communication\Contracts\DTOs\Translatable;
+use Modules\Communication\Contracts\DTOs\WeekdayTime;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Enrollment\Contracts\Events\EnrollmentEnded;
@@ -446,9 +447,9 @@ final class SendSchedulingNotifications
         ];
     }
 
-    private static function weekdayTime(CarbonImmutable $local): Localized
+    private static function weekdayTime(CarbonImmutable $local): WeekdayTime
     {
-        return new Localized($local->locale('ar')->translatedFormat('l H:i'), $local->locale('en')->translatedFormat('l H:i'));
+        return new WeekdayTime($local);
     }
 
     private static function city(string $timezone): Localized

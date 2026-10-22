@@ -225,6 +225,8 @@ it('saves from the screen, shows where each value comes from, and never shows a 
 });
 
 it('tries each service with the keys in force, in its own words', function () {
+    // "just now" below is read against the clock: held still, so a slow run cannot make it "1 second ago".
+    $this->freezeTime();
     Mail::fake();
     app(SavePlatformSettings::class)->handle($this->owner, [
         'anthropic_key' => 'sk-ant-try', 'ai_model' => 'claude-opus-5-5', 'ai_fast_model' => 'claude-haiku-5-5', 'elevenlabs_key' => 'eleven-try',

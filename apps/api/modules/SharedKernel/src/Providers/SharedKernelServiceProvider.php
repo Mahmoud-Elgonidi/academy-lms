@@ -49,6 +49,7 @@ use Modules\SharedKernel\Text\NoQuranSource;
 use Modules\SharedKernel\Text\QuranSource;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 use Modules\SharedKernel\Time\LocalTimeResolver;
+use Modules\SharedKernel\Time\ViewerClock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 final class SharedKernelServiceProvider extends ServiceProvider
@@ -59,6 +60,7 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->scoped(PgTenantSession::class);
         $this->app->scoped(TenantContext::class);
         $this->app->scoped(ViewerTimezone::class);
+        $this->app->scoped(ViewerClock::class);
         $this->app->scoped(LocalTimePresenter::class);
         $this->app->singleton(LocalTimeResolver::class);
         $this->app->singleton(LiveSignals::class);

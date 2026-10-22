@@ -92,10 +92,10 @@ it('presents one instant as UTC, local time and a translated label', function ()
         'utc' => '2026-10-05T19:00:00Z',
         'local' => '2026-10-05T22:00:00+03:00',
         'timezone' => 'Asia/Riyadh',
-        'label' => 'الاثنين 5 أكتوبر · 22:00',
+        'label' => 'الاثنين 5 أكتوبر · 10:00 م',
     ]);
 
     app()->setLocale('en');
-    expect(app(LocalTimePresenter::class)->present($instant, 'America/New_York')['label'])->toBe('Mon 5 Oct · 15:00')
+    expect(app(LocalTimePresenter::class)->present($instant, 'America/New_York')['label'])->toBe('Mon 5 Oct · 3:00 PM')
         ->and(app(LocalTimePresenter::class)->present(null))->toBeNull();
 });

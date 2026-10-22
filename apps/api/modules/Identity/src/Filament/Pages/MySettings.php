@@ -31,6 +31,8 @@ use Modules\Identity\Preferences\PreferenceStore;
 use Modules\Identity\Queries\SocialAccounts;
 use Modules\Identity\Social\Provider;
 use Modules\SharedKernel\Audit\AuditActor;
+use Modules\SharedKernel\Time\TimeFormat;
+use Modules\SharedKernel\Time\ViewerClock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use SensitiveParameter;
 
@@ -43,6 +45,9 @@ use SensitiveParameter;
  */
 final class MySettings extends EditProfile
 {
+    /** The time format choice that follows the academy's (kept as null). */
+    private const ACADEMY_CLOCK = 'academy';
+
     private ?string $localeBeforeSave = null;
 
     /** @var list<array{admin: string, when: string, minutes: int, reason: string}>|null */
@@ -93,6 +98,16 @@ final class MySettings extends EditProfile
                         ->searchable()
                         ->required()
                         ->helperText(__('identity::settings.timezone_hint')),
+                    // How times are written for this person; "the academy's" follows the academy's choice.
+                    ToggleButtons::make('time_format')
+                        ->label(__('identity::settings.fields.time_format'))
+                        ->options(fn (): array => [
+                            self::ACADEMY_CLOCK => __('identity::settings.time_format.academy', ['format' => __('identity::settings.time_format.'.app(ViewerClock::class)->academy()->value)]),
+                            TimeFormat::Twelve->value => __('identity::settings.time_format.h12'),
+                            TimeFormat::TwentyFour->value => __('identity::settings.time_format.h24'),
+                        ])
+                        ->inline()
+                        ->required(),
                 ]),
 
             Section::make(__('identity::settings.contact.title'))
@@ -278,6 +293,7 @@ final class MySettings extends EditProfile
         foreach ($this->offered() as $key => $definition) {
             $data[self::field($key)] = $this->store()->valueFor($user, $key);
         }
+        $data['time_format'] = TimeFormat::of(data_get($user, 'time_format'))?->value ?? self::ACADEMY_CLOCK;
 
         return $data;
     }
@@ -288,7 +304,7 @@ final class MySettings extends EditProfile
         /** @var User $record */
         $this->localeBeforeSave = $record->locale;
 
-        app(UpdateProfile::class)->handle($record, Arr::only($data, ['name', 'locale', 'timezone']));
+        app(UpdateProfile::class)->handle($record, Arr::only($data, ['name', 'locale', 'timezone', 'time_format']));
 
         $preferences = [];
         foreach (array_keys($this->offered()) as $key) {

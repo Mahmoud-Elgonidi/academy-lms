@@ -56,13 +56,14 @@ function moved(array $to, ?string $dedupe = null, bool $urgent = false): int
     ], ['screen' => 'session', 'id' => 's-1'], $dedupe, $urgent));
 }
 
-it('writes each person\'s message in their language and time zone, and sends it on every channel they can be reached on', function () {
+it('writes each person\'s message in their language, time zone and clock, and sends it on every channel they can be reached on', function () {
+    $this->tom->update(['time_format' => 'h24']);   // Sara keeps the academy's 12 hours
     expect(moved([$this->sara->id, $this->tom->id, $this->sara->id]))->toBe(2);
 
     $sara = Notification::query()->where('user_id', $this->sara->id)->sole();
     $tom = Notification::query()->where('user_id', $this->tom->id)->sole();
     expect($sara->title)->toBe('تغيير موعد')
-        ->and($sara->body)->toContain('18:00')->toContain('اتأجلت')        // 15:00 UTC on Riyadh's clock
+        ->and($sara->body)->toContain('6:00 م')->toContain('اتأجلت')       // 15:00 UTC on Riyadh's clock, in 12 hours
         ->and($tom->body)->toBe('Quran moves to Tue 6 Oct · 16:00 (moved).')
         ->and($sara->action)->toEqualCanonicalizing(['screen' => 'session', 'id' => 's-1']);
 

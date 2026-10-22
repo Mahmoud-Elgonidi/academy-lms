@@ -135,6 +135,7 @@ return [
             'reactivated' => 'تشغيل الأكاديمية تاني',
             'plan_changed' => 'باقة الأكاديمية بقت :plan: :reason',
             'ai_settings_saved' => 'تعديل المساعد الآلي (الشغّال: :helpers)',
+            'time_format_saved' => 'الوقت بقى بيتكتب :clock',
         ],
         'learning' => [
             'weekly_digest_saved' => 'الرسالة الأسبوعية لأولياء الأمور: :state',
@@ -187,6 +188,7 @@ return [
         'shown' => ['subjects' => 'المواد', 'teachers' => 'المدرسين', 'pricing' => 'الأسعار', 'app' => 'التطبيق', 'steps' => 'إزاي نبدأ', 'testimonials' => 'آراء الأسر', 'faq' => 'الأسئلة', 'teach' => 'درّس معانا'],
         'request_status' => ['new' => 'جديد', 'contacted' => 'اتكلّمنا معاهم', 'accepted' => 'اتقبل', 'declined' => 'اترفض'],
         'card' => ['shown' => 'ظاهر', 'hidden' => 'مش ظاهر'],
+        'clock' => ['h12' => '12 ساعة (5:00 م)', 'h24' => '24 ساعة (17:00)'],
     ],
     'groups' => [
         'announcements' => 'الإعلانات',

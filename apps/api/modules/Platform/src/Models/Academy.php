@@ -23,6 +23,7 @@ use Modules\SharedKernel\Tenancy\TenantRef;
  * @property string $default_locale
  * @property string $base_currency
  * @property ?string $country
+ * @property string $time_format h12 or h24 (SharedKernel\Time\TimeFormat)
  * @property array<string, mixed> $settings
  */
 final class Academy extends Model
@@ -64,6 +65,7 @@ final class Academy extends Model
             defaultTimezone: $this->default_timezone,
             defaultLocale: $this->default_locale,
             active: $this->status === AcademyStatus::Active,
+            timeFormat: (string) ($this->time_format ?? 'h12'),
         );
     }
 

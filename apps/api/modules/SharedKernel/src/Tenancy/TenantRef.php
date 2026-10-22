@@ -18,5 +18,7 @@ final readonly class TenantRef
         public string $defaultTimezone,
         public string $defaultLocale,
         public bool $active,
+        /** How the academy writes a clock time for everyone (Time\TimeFormat: h12 or h24). */
+        public string $timeFormat = 'h12',
     ) {}
 }

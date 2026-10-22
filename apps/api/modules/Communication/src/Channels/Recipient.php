@@ -11,5 +11,7 @@ final readonly class Recipient
         public ?string $phone,
         public string $locale,
         public string $timezone,
+        /** How they read a clock: h12 or h24 (their own choice, else the academy's). */
+        public string $timeFormat = 'h12',
     ) {}
 }

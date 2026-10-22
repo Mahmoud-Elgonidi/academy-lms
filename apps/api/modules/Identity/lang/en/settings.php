@@ -12,6 +12,12 @@ return [
     'fields' => [
         'locale' => 'Language',
         'timezone' => 'Timezone',
+        'time_format' => 'How times are written',
+    ],
+    'time_format' => [
+        'academy' => "The academy's (:format)",
+        'h12' => '12 hours (5:00 PM)',
+        'h24' => '24 hours (17:00)',
     ],
     'timezone_hint' => 'Pick your city, not an offset, so summer time is handled.',
     'contact' => [

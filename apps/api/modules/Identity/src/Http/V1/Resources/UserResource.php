@@ -10,6 +10,8 @@ use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\TimeFormat;
+use Modules\SharedKernel\Time\ViewerClock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /** @mixin User */
@@ -35,6 +37,10 @@ final class UserResource extends JsonResource
             'display_timezone' => $viewer->effective(),
             // The device's clock differs from the profile's: the app offers to update the profile.
             'timezone_mismatch' => $viewer->mismatch(),
+            // How this person reads a clock: h12 (5:00 PM) or h24 (17:00), their own choice else the academy's.
+            'time_format' => (TimeFormat::of(data_get($this->resource, 'time_format')) ?? app(ViewerClock::class)->academy())->value,
+            // Their own choice (h12, h24), or null when they follow the academy's.
+            'time_format_choice' => TimeFormat::of(data_get($this->resource, 'time_format'))?->value,
             'roles' => array_map(fn (Role $r) => $r->value, $this->roles()),
             // The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll): the apps show only these.
             'plan_features' => $academy === null ? [] : $this->planFeatures(),
@@ -44,6 +50,8 @@ final class UserResource extends JsonResource
                 'name_ar' => $academy->nameAr,
                 'name_en' => $academy->nameEn,
                 'default_timezone' => $academy->defaultTimezone,
+                // The academy's clock for everyone who has not chosen their own: h12 or h24.
+                'time_format' => (TimeFormat::of($academy->timeFormat) ?? TimeFormat::DEFAULT)->value,
             ],
         ];
     }

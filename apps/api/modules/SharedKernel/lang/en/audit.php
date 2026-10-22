@@ -135,6 +135,7 @@ return [
             'reactivated' => 'Academy back on',
             'plan_changed' => 'The academy moved to the :plan plan: :reason',
             'ai_settings_saved' => 'AI helpers changed (on: :helpers)',
+            'time_format_saved' => 'Times are now written in :clock',
         ],
         'learning' => [
             'weekly_digest_saved' => 'Turned the weekly note to guardians :state',
@@ -187,6 +188,7 @@ return [
         'shown' => ['subjects' => 'subjects', 'teachers' => 'teachers', 'pricing' => 'prices', 'app' => 'the app', 'steps' => 'how it starts', 'testimonials' => 'what families say', 'faq' => 'questions', 'teach' => 'teach with us'],
         'request_status' => ['new' => 'new', 'contacted' => 'talked to', 'accepted' => 'accepted', 'declined' => 'turned down'],
         'card' => ['shown' => 'shown', 'hidden' => 'not shown'],
+        'clock' => ['h12' => '12 hours (5:00 PM)', 'h24' => '24 hours (17:00)'],
     ],
     'groups' => [
         'announcements' => 'Announcements',

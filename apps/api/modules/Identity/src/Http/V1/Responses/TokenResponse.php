@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Modules\Identity\Http\V1\Resources\UserResource;
 use Modules\Identity\Models\User;
 use Modules\SharedKernel\Time\LocalTimePresenter;
+use Modules\SharedKernel\Time\ViewerClock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /** The answer to every way of signing in from an app: the bearer token and who it is for. */
@@ -16,6 +17,7 @@ final class TokenResponse
     public static function make(array $result): JsonResponse
     {
         app(ViewerTimezone::class)->setUser($result['user']);
+        app(ViewerClock::class)->setUser($result['user']);
 
         return response()->json([
             'token' => $result['token'],

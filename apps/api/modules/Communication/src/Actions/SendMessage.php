@@ -16,6 +16,7 @@ use Modules\Communication\NotificationPreferences;
 use Modules\Communication\Queries\Recipients;
 use Modules\Communication\Templates\Renderer;
 use Modules\Communication\Templates\TemplateRegistry;
+use Modules\SharedKernel\Time\TimeFormat;
 
 /**
  * For each recipient: the message written in their language and time zone,
@@ -59,7 +60,7 @@ final class SendMessage
                 if (in_array('link', $template->placeholders(), true) && ! array_key_exists('link', $data)) {
                     $data['link'] = $this->links->personal($message->action, $person->id) ?? '';
                 }
-                $text = $this->renderer->render($template, $person->locale, $data, $person->timezone);
+                $text = $this->renderer->render($template, $person->locale, $data, $person->timezone, TimeFormat::of($person->timeFormat));
 
                 try {
                     $notification = DB::transaction(fn () => Notification::query()->create([

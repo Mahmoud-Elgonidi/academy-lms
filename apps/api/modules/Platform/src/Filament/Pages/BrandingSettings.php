@@ -18,6 +18,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
 use Modules\Platform\Actions\DeleteBrandTemplate;
+use Modules\Platform\Actions\SaveAcademyTimeFormat;
 use Modules\Platform\Actions\SaveBranding;
 use Modules\Platform\Actions\SaveBrandTemplate;
 use Modules\Platform\Actions\UpdateAcademyIdentity;
@@ -33,6 +34,8 @@ use Modules\SharedKernel\Files\CleanFile;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\TimeFormat;
+use Modules\SharedKernel\Time\ViewerClock;
 use UnitEnum;
 
 /**
@@ -94,6 +97,7 @@ final class BrandingSettings extends Page
             'name_en' => $branding->nameEn,
             'logo' => $row?->logo_path,
             'favicon' => $row?->favicon_path,
+            'time_format' => app(ViewerClock::class)->academy()->value,
             ...$branding->tokens,
         ]);
     }
@@ -129,6 +133,14 @@ final class BrandingSettings extends Page
                                 ->maxSize(256)
                                 ->disk('public')->directory($directory)->visibility('public'),
                         ]),
+                        ToggleButtons::make('time_format')
+                            ->label(__('platform::branding.fields.time_format'))
+                            ->helperText(__('platform::branding.time_format.hint'))
+                            ->options([
+                                TimeFormat::Twelve->value => __('platform::branding.time_format.h12'),
+                                TimeFormat::TwentyFour->value => __('platform::branding.time_format.h24'),
+                            ])
+                            ->inline()->required(),
                     ]),
 
                 Section::make(__('platform::branding.sections.colours'))
@@ -187,6 +199,7 @@ final class BrandingSettings extends Page
         $actor = auth()->id();
 
         app(UpdateAcademyIdentity::class)->handle($data['name_ar'], $data['name_en'], $data['logo'] ?? null, $data['favicon'] ?? null, $actor);
+        app(SaveAcademyTimeFormat::class)->handle((string) ($data['time_format'] ?? TimeFormat::DEFAULT->value));
         app(SaveBranding::class)->handle($this->tokens(), $this->baseRef, $actor);
 
         Notification::make()->success()->title(__('platform::branding.saved'))->send();

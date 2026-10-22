@@ -17347,7 +17347,7 @@
         "/v1/branding": {
             "get": {
                 "operationId": "platform.branding",
-                "description": "With `app`: the oldest app version still served (an older app asks to be updated first) and where to update it.",
+                "description": "With `app`: the oldest app version still served (an older app asks to be updated first) and where to update it.\n`time_format` is how the academy writes a clock for everyone who has not chosen their own (pages before sign-in).",
                 "summary": "The academy's look",
                 "tags": [
                     "Platform"
@@ -17511,6 +17511,10 @@
                                                 "template"
                                             ]
                                         },
+                                        "time_format": {
+                                            "type": "string",
+                                            "description": "h12 (5:00 PM) or h24 (17:00): the academy's choice."
+                                        },
                                         "app": {
                                             "type": "object",
                                             "properties": {
@@ -17536,6 +17540,7 @@
                                     },
                                     "required": [
                                         "data",
+                                        "time_format",
                                         "app"
                                     ]
                                 }
@@ -26803,6 +26808,18 @@
                     "timezone": {
                         "type": "string",
                         "description": "IANA names only (\"Asia/Dubai\"); offsets like \"+04:00\" break on summer time."
+                    },
+                    "time_format": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "How the person reads a clock: h12 (5:00 PM) or h24 (17:00); null follows the academy's choice.",
+                        "enum": [
+                            "h12",
+                            "h24",
+                            null
+                        ]
                     }
                 },
                 "title": "UpdateProfileRequest"
@@ -26858,6 +26875,17 @@
                         "type": "string",
                         "description": "The device's clock differs from the profile's: the app offers to update the profile."
                     },
+                    "time_format": {
+                        "type": "string",
+                        "description": "How this person reads a clock: h12 (5:00 PM) or h24 (17:00), their own choice else the academy's."
+                    },
+                    "time_format_choice": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Their own choice (h12, h24), or null when they follow the academy's."
+                    },
                     "roles": {
                         "type": "array",
                         "items": {}
@@ -26889,6 +26917,10 @@
                             },
                             "default_timezone": {
                                 "type": "string"
+                            },
+                            "time_format": {
+                                "type": "string",
+                                "description": "The academy's clock for everyone who has not chosen their own: h12 or h24."
                             }
                         },
                         "required": [
@@ -26896,7 +26928,8 @@
                             "slug",
                             "name_ar",
                             "name_en",
-                            "default_timezone"
+                            "default_timezone",
+                            "time_format"
                         ]
                     }
                 },
@@ -26911,6 +26944,8 @@
                     "timezone",
                     "display_timezone",
                     "timezone_mismatch",
+                    "time_format",
+                    "time_format_choice",
                     "roles",
                     "plan_features",
                     "academy"

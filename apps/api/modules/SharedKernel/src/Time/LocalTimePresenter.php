@@ -12,7 +12,8 @@ use Carbon\CarbonInterface;
  *      "timezone": "Asia/Riyadh", "label": "الأحد 5 أكتوبر · 22:00"}
  *
  * `utc` is the truth; `local` and `label` are in the viewer's timezone unless
- * another one is passed (to show "the student's time" next to yours).
+ * another one is passed (to show "the student's time" next to yours), and
+ * `label`'s clock is the viewer's way (Clock: 12 or 24 hours).
  */
 final class LocalTimePresenter
 {
@@ -32,7 +33,7 @@ final class LocalTimePresenter
             'utc' => CarbonImmutable::instance($instant)->utc()->format('Y-m-d\TH:i:s\Z'),
             'local' => $local->format('Y-m-d\TH:i:sP'),
             'timezone' => $timezone,
-            'label' => $local->translatedFormat((string) __('shared::time.label')),
+            'label' => $local->translatedFormat(Clock::pattern((string) __('shared::time.label'))),
         ];
     }
 

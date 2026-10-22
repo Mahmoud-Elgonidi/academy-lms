@@ -12,6 +12,11 @@ return [
     ],
     'templates_hint' => 'Start from a ready-made template or one of yours, then change anything below. Nobody sees a change until you press "Save and apply".',
     'identity_hint' => 'The name and logo appear in the back office, the apps and emails.',
+    'time_format' => [
+        'h12' => '12 hours (5:00 PM)',
+        'h24' => '24 hours (17:00)',
+        'hint' => 'For everyone at the academy, everywhere: the back office, the portal, the app and messages. Each person may choose their own from their settings.',
+    ],
     'colours_hint' => 'Each colour has one fixed job on every screen.',
     'custom_not_in_plan' => "Your own colours, fonts and saved templates are not in the academy's plan. Pick any ready template above, or ask the platform team to add them.",
     'fields' => [
@@ -28,6 +33,7 @@ return [
         'body_font' => 'Text font',
         'radius' => 'Corners',
         'template_name' => 'Template name',
+        'time_format' => 'How times are written',
     ],
     'usage' => [
         'primary' => 'Main buttons, navigation, live sessions.',
@@ -78,6 +84,7 @@ return [
         'name_taken' => 'A template with this name exists.',
         'too_many' => 'At most :max templates. Delete an old one first.',
         'academy_name' => 'Enter the academy name in Arabic and English (up to 120 characters).',
+        'time_format' => 'Choose 12 or 24 hours.',
         'file' => 'That file does not belong to this academy.',
     ],
     'sample' => [

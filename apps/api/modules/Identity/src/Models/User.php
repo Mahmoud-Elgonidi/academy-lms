@@ -54,7 +54,7 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
 
     protected $fillable = [
         'name', 'email', 'phone_e164', 'username', 'password',
-        'locale', 'timezone', 'status', 'is_managed_minor',
+        'locale', 'timezone', 'time_format', 'status', 'is_managed_minor',
     ];
 
     protected $hidden = ['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes'];
