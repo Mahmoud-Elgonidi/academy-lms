@@ -12,6 +12,7 @@ use Modules\Scheduling\Domain\LiveBoard\BoardGroup;
 use Modules\Scheduling\Domain\LiveBoard\BoardIssue;
 use Modules\Scheduling\Domain\LiveBoard\BoardItem;
 use Modules\Scheduling\Domain\LiveBoard\BoardPerson;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 
 /**
@@ -120,9 +121,10 @@ final class LiveBoardView
         return ['data-tick' => $mode, 'data-at' => $at->getTimestamp(), 'data-tpl' => $template];
     }
 
+    /** The clock on the viewer's chosen zone (or another), written the reader's way: 5:00 م, or 17:00. */
     public function hm(CarbonImmutable $instant, ?string $tz = null): string
     {
-        return $instant->setTimezone($tz ?? $this->viewTz)->format('H:i');
+        return $instant->setTimezone($tz ?? $this->viewTz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i'));
     }
 
     public static function city(string $tz): string

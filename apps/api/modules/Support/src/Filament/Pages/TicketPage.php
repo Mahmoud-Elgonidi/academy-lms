@@ -19,6 +19,7 @@ use Livewire\Attributes\Computed;
 use Livewire\WithFileUploads;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Modules\Support\Actions\AssignTicket;
 use Modules\Support\Actions\ClassifyTicket;
@@ -103,7 +104,7 @@ final class TicketPage extends Page
         $names = $details['names'];
         $tz = app(ViewerTimezone::class)->effective();
         $locale = app()->getLocale();
-        $at = fn (?CarbonImmutable $i) => $i?->setTimezone($tz)->locale($locale)->translatedFormat('j M Y · H:i');
+        $at = fn (?CarbonImmutable $i) => $i?->setTimezone($tz)->locale($locale)->translatedFormat(Clock::pattern('j M Y · H:i'));
         $lesson = $details['lesson'];
 
         return [
@@ -123,7 +124,7 @@ final class TicketPage extends Page
             'mine' => $t->assignee_id === auth()->id(),
             'lesson' => $lesson ? [
                 'subject' => $lesson->subject(),
-                'when' => $lesson->startsAt->setTimezone($tz)->locale($locale)->translatedFormat('l j F · H:i'),
+                'when' => $lesson->startsAt->setTimezone($tz)->locale($locale)->translatedFormat(Clock::pattern('l j F · H:i')),
                 'teacher' => $lesson->teacherName,
                 'student' => $lesson->studentName,
                 'status' => __('support::tickets.lesson_statuses.'.$lesson->status),

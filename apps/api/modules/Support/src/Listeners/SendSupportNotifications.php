@@ -49,7 +49,7 @@ final class SendSupportNotifications
             ['assigned', 'staff', $a.'assignee', ['push'], $ticket + ['requester' => 'خالد']],
             ['resolved', 'lessons', $a.'requester', ['push', 'whatsapp', 'email'], $ticket + ['days' => (string) Ticket::CLOSE_AFTER_DAYS]],
             ['overdue', 'staff', $a.'assignee', ['push', 'email'], $ticket + ['requester' => 'خالد']],
-            ['complaint_validated', 'staff', $a.'teacher', ['push', 'email'], ['subject' => 'القرآن', 'at' => 'الأحد 5 أكتوبر · 18:00']],
+            ['complaint_validated', 'staff', $a.'teacher', ['push', 'email'], ['subject' => 'القرآن', 'at' => 'الأحد 5 أكتوبر · 6:00 م']],
             ['complaint_validated_general', 'staff', $a.'teacher', ['push', 'email'], []],
         ] as [$name, $category, $audience, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(

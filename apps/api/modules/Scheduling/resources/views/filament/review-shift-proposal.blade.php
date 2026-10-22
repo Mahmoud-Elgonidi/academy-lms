@@ -99,7 +99,7 @@
                 <section class="rv-box">
                     <div>
                         <h2 class="lms-heading">{{ __('scheduling::review.compare') }}</h2>
-                        <p class="rv-muted">{{ __('scheduling::review.compare_hint', ['city' => $r['city'], 'from' => sprintf('%02d:00', $from), 'to' => sprintf('%02d:00', $to)]) }}</p>
+                        <p class="rv-muted">{{ __('scheduling::review.compare_hint', ['city' => $r['city'], 'from' => \Modules\SharedKernel\Time\Clock::hour($from), 'to' => \Modules\SharedKernel\Time\Clock::hour($to)]) }}</p>
                     </div>
                     <div class="rv-legend">
                         <span><i data-kind="same"></i>{{ __('scheduling::review.legend.same') }}</span>
@@ -111,7 +111,7 @@
                         <span></span>
                         <div class="rv-scale">
                             @for ($h = $from; $h <= $to; $h += 2)
-                                <span style="inset-inline-start: {{ 100 * ($h - $from) / ($to - $from) }}%">{{ sprintf('%02d', $h) }}</span>
+                                <span style="inset-inline-start: {{ 100 * ($h - $from) / ($to - $from) }}%">{{ \Modules\SharedKernel\Time\Clock::hour($h) }}</span>
                             @endfor
                         </div>
                         <span class="rv-hours">{{ __('scheduling::review.hours') }}</span>
@@ -119,11 +119,11 @@
                             <span class="rv-day">{{ __('scheduling::shifts.days.'.$day) }}</span>
                             <div class="rv-track">
                                 @foreach ($r['spans'][$day] as $span)
-                                    <span class="rv-span" data-kind="{{ $span['kind'] }}" style="{{ $this->place($span['start'], $span['end']) }}" title="{{ $span['start'] }}–{{ $span['end'] }}"></span>
+                                    <span class="rv-span" data-kind="{{ $span['kind'] }}" style="{{ $this->place($span['start'], $span['end']) }}" title="{{ \Modules\SharedKernel\Time\Clock::wall($span['start']) }}–{{ \Modules\SharedKernel\Time\Clock::wall($span['end']) }}"></span>
                                 @endforeach
                                 @foreach ($r['conflicts'] as $c)
                                     @if ($c['weekday'] === $day)
-                                        <span class="rv-dot" style="{{ $this->place($c['start'], $c['start']) }}" title="{{ $c['student'] }} {{ $c['start'] }}"></span>
+                                        <span class="rv-dot" style="{{ $this->place($c['start'], $c['start']) }}" title="{{ $c['student'] }} {{ \Modules\SharedKernel\Time\Clock::wall($c['start']) }}"></span>
                                     @endif
                                 @endforeach
                             </div>

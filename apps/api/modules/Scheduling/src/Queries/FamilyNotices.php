@@ -12,6 +12,7 @@ use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Domain\Models\ShiftNotice;
 use Modules\Scheduling\Filament\TimeOffView;
 use Modules\Scheduling\Support\CourseDays;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 
 /**
@@ -91,7 +92,7 @@ final class FamilyNotices
     {
         $now = CarbonImmutable::now();
         $locale = app()->getLocale();
-        $at = fn (int $weekday, string $time) => CarbonImmutable::parse('2026-01-05 '.substr($time, 0, 5))->addDays($weekday - 1)->locale($locale)->translatedFormat('l H:i');
+        $at = fn (int $weekday, string $time) => CarbonImmutable::parse('2026-01-05 '.substr($time, 0, 5))->addDays($weekday - 1)->locale($locale)->translatedFormat(Clock::pattern('l H:i'));
 
         return ShiftNotice::query()->where('student_id', $learnerId)->where('decision', '!=', 'keep_student')
             ->where('changes_at', '>', $now)->where('changes_at', '<=', $now->addDays(SendDstNotices::EARLY_DAYS))

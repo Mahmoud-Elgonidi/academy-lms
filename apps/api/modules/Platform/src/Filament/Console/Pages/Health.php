@@ -18,6 +18,7 @@ use Modules\Platform\Models\Academy;
 use Modules\SharedKernel\Health\MailHealth;
 use Modules\SharedKernel\Health\RecentErrors;
 use Modules\SharedKernel\Health\TestAddresses;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Throwable;
 
@@ -94,7 +95,7 @@ final class Health extends Page
 
     public function checkedAt(): string
     {
-        return CarbonImmutable::now(app(ViewerTimezone::class)->effective())->locale(app()->getLocale())->translatedFormat('H:i');
+        return CarbonImmutable::now(app(ViewerTimezone::class)->effective())->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i'));
     }
 
     /** @return list<array<string, mixed>> */
@@ -106,7 +107,7 @@ final class Health extends Page
         return array_map(fn (object $b) => [
             'kind' => $b->kind,
             'status' => $b->status,
-            'when' => CarbonImmutable::parse($b->finished_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M، H:i'),
+            'when' => CarbonImmutable::parse($b->finished_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M، H:i')),
             'took' => max(1, (int) CarbonImmutable::parse($b->started_at)->diffInSeconds(CarbonImmutable::parse($b->finished_at))),
             'size' => $b->size_bytes === null ? null : SystemHealth::bytes((int) $b->size_bytes),
             'name' => $b->name,

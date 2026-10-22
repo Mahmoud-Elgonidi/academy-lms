@@ -17,6 +17,7 @@ use Modules\Scheduling\Domain\Models\SessionEvent;
 use Modules\Scheduling\Domain\Models\SessionParticipant;
 use Modules\Scheduling\Domain\Slots\WeeklyTime;
 use Modules\Scheduling\Queries\AvailabilityQuery;
+use Modules\SharedKernel\Time\Clock;
 
 /**
  * Moves one teacher's weekly times by some minutes for a period
@@ -72,7 +73,7 @@ final class ShiftSlotTimes
         if ($problems !== []) {
             $tz = $slots[0]->anchor_tz;
             throw ValidationException::withMessages(['slots' => __('scheduling::dst.errors.busy', [
-                'dates' => collect($problems)->take(6)->map(fn (array $p) => $p['start']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M H:i'))->implode('، '),
+                'dates' => collect($problems)->take(6)->map(fn (array $p) => $p['start']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M H:i')))->implode('، '),
             ])]);
         }
 

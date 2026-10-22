@@ -30,6 +30,7 @@ use Modules\Scheduling\Filament\Pages\ShiftProposals as ShiftProposalsPage;
 use Modules\Scheduling\Filament\ShiftBlocksField;
 use Modules\Scheduling\Queries\ShiftImpactQuery;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -97,8 +98,8 @@ final class ReviewShiftProposal extends Page
             return $c + [
                 'resolution' => $p->resolutions[$c['key']]['kind'] ?? null,
                 'subject' => app()->getLocale() === 'ar' ? $c['subject_ar'] : $c['subject_en'],
-                'teacher_label' => __('scheduling::shifts.days.'.$c['weekday']).' '.$c['start'].' '.LiveBoardView::city($p->timezone),
-                'student_label' => $first->setTimezone($c['student_tz'])->format('H:i').' '.LiveBoardView::city($c['student_tz']),
+                'teacher_label' => __('scheduling::shifts.days.'.$c['weekday']).' '.Clock::wall($c['start']).' '.LiveBoardView::city($p->timezone),
+                'student_label' => $first->setTimezone($c['student_tz'])->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i')).' '.LiveBoardView::city($c['student_tz']),
                 'range' => $first->locale(app()->getLocale())->translatedFormat('j M').' → '.$c['last']->locale(app()->getLocale())->translatedFormat('j M'),
                 // Moving the student to another teacher happens on their account; the conflict then goes away.
                 'move_url' => $c['enrollment_id'] ? route('filament.academy.resources.enrollments.view', ['record' => $c['enrollment_id'], 'reassign' => $p->effective_from->toDateString()]) : null,
@@ -117,7 +118,7 @@ final class ReviewShiftProposal extends Page
             'author' => $p->rules->where('revision', $p->revision)->first()?->author_role ?? $p->author_role,
             'revision' => $p->revision,
             'sent' => ($p->submitted_at ?? $p->created_at)?->setTimezone(app(ViewerTimezone::class)->effective())
-                ->locale(app()->getLocale())->translatedFormat('l j F · H:i'),
+                ->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F · H:i')),
             'from' => $p->effective_from->locale(app()->getLocale())->translatedFormat('l j F'),
             'hours_before' => ProposalRules::hours($current->weeklyMinutes()),
             'hours_after' => ProposalRules::hours($proposed->weeklyMinutes()),

@@ -20,6 +20,7 @@ use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\Payment;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Money\Money;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /** The invoice actions, shared by the list and the invoice page. */
@@ -46,7 +47,7 @@ final class InvoiceActions
                     ->inline()->required(),
                 Grid::make(2)->schema([
                     TextInput::make('amount')->label(__('billing::invoices.pay.amount'))->numeric()->minValue(0)->required()->suffix($record->currency),
-                    DateTimePicker::make('received_at')->label(__('billing::invoices.pay.received_at'))->seconds(false)->native(false)->required()
+                    DateTimePicker::make('received_at')->label(__('billing::invoices.pay.received_at'))->seconds(false)->native(false)->displayFormat(Clock::pattern('M j, Y H:i'))->required()
                         ->timezone(app(ViewerTimezone::class)->effective()),
                 ]),
                 TextInput::make('reference')->label(__('billing::invoices.pay.reference'))->maxLength(120)->placeholder(__('billing::invoices.pay.reference_hint')),

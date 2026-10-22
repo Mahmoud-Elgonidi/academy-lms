@@ -118,8 +118,8 @@
                     <div class="ac-times">
                         @forelse ($a['weekly'] as $t)
                             <div class="ac-time">
-                                <strong>{{ __('shared::time.days.'.$t['student_day']) }} {{ $t['student_time'] }}</strong>
-                                <small>{{ __('scheduling::enrollments.weekly.teacher', ['day' => __('shared::time.days.'.$t['teacher_day']), 'time' => $t['teacher_time']]) }} · {{ $t['minutes'] }} {{ __('scheduling::enrollments.min') }}</small>
+                                <strong>{{ __('shared::time.days.'.$t['student_day']) }} {{ \Modules\SharedKernel\Time\Clock::wall($t['student_time']) }}</strong>
+                                <small>{{ __('scheduling::enrollments.weekly.teacher', ['day' => __('shared::time.days.'.$t['teacher_day']), 'time' => \Modules\SharedKernel\Time\Clock::wall($t['teacher_time'])]) }} · {{ $t['minutes'] }} {{ __('scheduling::enrollments.min') }}</small>
                             </div>
                         @empty
                             <span class="ac-muted">—</span>

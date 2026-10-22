@@ -43,6 +43,7 @@ use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Ai\AudioClip;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Files\CleanFile;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -141,7 +142,7 @@ final class WriteReport extends Page
     public function getSubheading(): string|Htmlable|null
     {
         $tz = app(ViewerTimezone::class)->effective();
-        $fmt = fn ($t) => $t->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F · H:i');
+        $fmt = fn ($t) => $t->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F · H:i'));
 
         return __('learning::teacher.write.subtitle', ['when' => $fmt($this->sessionReport->session_starts_at), 'due' => $fmt($this->sessionReport->due_at)])
             .' · '.__('learning::reports.statuses.'.$this->sessionReport->status);

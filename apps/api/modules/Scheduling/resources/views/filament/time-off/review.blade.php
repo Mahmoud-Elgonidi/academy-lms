@@ -50,7 +50,7 @@
                                 <x-filament::input.select wire:model="pick.{{ $r['id'] }}">
                                     <option value="">{{ __($l.'pick') }}</option>
                                     @foreach ($r['candidates'] as $c)
-                                        <option value="{{ $c['id'] }}">{{ $c['name'] }} · {{ __($l.'local', ['time' => $c['local']]) }}@if ($c['taught'] > 0) · {{ __($l.'taught', ['count' => $c['taught']]) }}@endif</option>
+                                        <option value="{{ $c['id'] }}">{{ $c['name'] }} · {{ __($l.'local', ['time' => \Modules\SharedKernel\Time\Clock::wall($c['local'])]) }}@if ($c['taught'] > 0) · {{ __($l.'taught', ['count' => $c['taught']]) }}@endif</option>
                                     @endforeach
                                 </x-filament::input.select>
                             </x-filament::input.wrapper>

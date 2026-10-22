@@ -19,6 +19,7 @@ use Modules\Billing\Support\RevenuePeriod;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -275,11 +276,11 @@ final class Revenue extends Page
         };
     }
 
-    /** When a payment arrived, on the viewer's clock: "9 Oct, 14:05". */
+    /** When a payment arrived, on the viewer's clock: "9 Oct, 2:05 PM" (or "9 Oct, 14:05"). */
     private function moment(CarbonImmutable $at): string
     {
         $ar = app()->getLocale() === 'ar';
 
-        return $at->setTimezone(app(ViewerTimezone::class)->effective())->locale(app()->getLocale())->translatedFormat($ar ? 'j M، H:i' : 'j M, H:i');
+        return $at->setTimezone(app(ViewerTimezone::class)->effective())->locale(app()->getLocale())->translatedFormat(Clock::pattern($ar ? 'j M، H:i' : 'j M, H:i'));
     }
 }

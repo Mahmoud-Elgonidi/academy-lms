@@ -19,6 +19,7 @@ use Modules\Communication\Contracts\DTOs\TemplateDefinition;
 use Modules\Communication\Models\Delivery;
 use Modules\Communication\Models\Notification;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
 
@@ -84,7 +85,7 @@ final class MessageLog extends Page implements HasTable
             ->defaultSort('notifications.created_at', 'desc')
             ->columns([
                 TextColumn::make('created_at')->label(__($l.'log.when'))
-                    ->state(fn (Notification $n) => $n->created_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i'))
+                    ->state(fn (Notification $n) => $n->created_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('D j M · H:i')))
                     ->description(fn (Notification $n) => $n->read_at ? __($l.'log.read', ['time' => $n->read_at->locale(app()->getLocale())->diffForHumans()]) : __($l.'log.unread')),
                 TextColumn::make('recipient')->label(__($l.'log.to'))->searchable('u.name')->weight('semibold'),
                 TextColumn::make('title')->label(__($l.'log.message'))->wrap()->searchable('notifications.title')

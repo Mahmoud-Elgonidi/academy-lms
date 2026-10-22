@@ -30,6 +30,7 @@ use Modules\Scheduling\Domain\Models\ShiftProposal;
 use Modules\Scheduling\Domain\Shifts\ShiftBlock;
 use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 
 /**
@@ -94,8 +95,8 @@ final class MyAvailability extends Page
                 ->table([TableColumn::make(__($l.'day')), TableColumn::make(__($l.'from')), TableColumn::make(__($l.'to'))])
                 ->schema([
                     Select::make('weekday')->label(__($l.'day'))->options(__('scheduling::shifts.days'))->required(),
-                    TimePicker::make('start')->label(__($l.'from'))->seconds(false)->format('H:i')->minutesStep(5)->required(),
-                    TimePicker::make('end')->label(__($l.'to'))->seconds(false)->format('H:i')->minutesStep(5)->required()->after('start'),
+                    TimePicker::make('start')->label(__($l.'from'))->seconds(false)->format('H:i')->native(false)->displayFormat(Clock::pattern('H:i'))->minutesStep(5)->required(),
+                    TimePicker::make('end')->label(__($l.'to'))->seconds(false)->format('H:i')->native(false)->displayFormat(Clock::pattern('H:i'))->minutesStep(5)->required()->after('start'),
                 ]),
             DatePicker::make('effective_from')->label(__($l.'from_date'))->required()->minDate($this->today()->addDay())
                 ->helperText(__($l.'from_hint', ['days' => app(ShiftProposals::class)->settings()->reduction_notice_days])),
@@ -149,7 +150,7 @@ final class MyAvailability extends Page
     {
         $out = [];
         foreach (($shifts ?? $this->current())->blocks as $b) {
-            $out[$b->weekday][] = $b->start().' – '.$b->end();
+            $out[$b->weekday][] = Clock::wall($b->start()).' – '.Clock::wall($b->end());
         }
         ksort($out);
 

@@ -35,9 +35,16 @@ it('shows the teacher today\'s lessons on their clock, with the way in once the 
 
     CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-06 12:00', 'UTC'));
     Livewire::test(MyLessonsToday::class)
-        ->assertSee('18:00 – 18:30')->assertSee($this->student->name)
-        ->assertSee(__('classroom::classroom.today.opens', ['time' => '17:50']))
+        ->assertSee('6:00 PM – 6:30 PM')->assertSee($this->student->name)
+        ->assertSee(__('classroom::classroom.today.opens', ['time' => '5:50 PM']))
         ->assertDontSee(route('classroom.page', ['session' => $this->lesson->id]));
+
+    // A teacher who reads 24 hours.
+    $this->teacher->update(['time_format' => 'h24']);
+    $this->actingAs($this->teacher->fresh());
+    Livewire::test(MyLessonsToday::class)
+        ->assertSee('18:00 – 18:30')->assertSee(__('classroom::classroom.today.opens', ['time' => '17:50']))
+        ->assertDontSee('6:00 PM');
 
     CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-06 14:52', 'UTC'));
     Livewire::test(MyLessonsToday::class)->assertSee(route('classroom.page', ['session' => $this->lesson->id]));

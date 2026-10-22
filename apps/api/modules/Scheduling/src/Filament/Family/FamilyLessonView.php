@@ -3,8 +3,10 @@
 namespace Modules\Scheduling\Filament\Family;
 
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Route;
 use Modules\Scheduling\Domain\Disputes\DisputeRules;
+use Modules\SharedKernel\Time\Clock;
 
 /**
  * One lesson as a person in it reads it: on their clock, in their words,
@@ -39,7 +41,7 @@ final class FamilyLessonView
         return [
             'id' => $r->id,
             'day' => $this->day($start),
-            'time' => $start->format('H:i').' – '.$r->ends_at->setTimezone($this->tz)->format('H:i'),
+            'time' => self::clock($start).' – '.self::clock($r->ends_at->setTimezone($this->tz)),
             'minutes' => (int) round($r->starts_at->diffInMinutes($r->ends_at)),
             'subject' => app()->getLocale() === 'ar' ? $r->subject_ar : $r->subject_en,
             'with' => $r->{$this->counterpart},
@@ -49,7 +51,7 @@ final class FamilyLessonView
             'unfunded' => $this->money && $open && $r->funding_status === 'unfunded',
             'joinUrl' => $joinable && Route::has('classroom.page') ? route('classroom.page', ['session' => $r->id]) : null,
             'opensAt' => $open && ! $joinable && $r->starts_at->greaterThan($this->now)
-                ? $r->starts_at->subMinutes((int) config('classroom.opens_before_min', 10))->setTimezone($this->tz)->format('H:i') : null,
+                ? self::clock($r->starts_at->subMinutes((int) config('classroom.opens_before_min', 10))->setTimezone($this->tz)) : null,
             'cancellable' => $this->counterpart === 'teacher' && $r->status === 'scheduled' && $r->starts_at->greaterThan($this->now),
             // A substitute has the lesson: the family sees whose place they take, the substitute whom they cover.
             'substitute' => ($r->original_teacher ?? null) ? __($this->counterpart === 'teacher' ? 'scheduling::timeoff.family.substitute' : 'scheduling::timeoff.teacher.covering', ['name' => $r->original_teacher]) : null,
@@ -63,6 +65,12 @@ final class FamilyLessonView
             'why' => $r->status === 'cancelled' && in_array($r->cancel_reason ?? null, ['holiday', 'teacher_leave', 'substitute_refused', 'enrollment_paused', 'enrollment_ended'], true)
                 ? __('scheduling::timeoff.family.why.'.$r->cancel_reason) : null,
         ];
+    }
+
+    /** The clock alone, the reader's way (5:00 م, or 17:00). */
+    private static function clock(CarbonInterface $at): string
+    {
+        return $at->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i'));
     }
 
     private function day(CarbonImmutable $start): string

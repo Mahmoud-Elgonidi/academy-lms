@@ -6,6 +6,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Modules\Scheduling\Domain\Shifts\ShiftBlock;
 use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
+use Modules\SharedKernel\Time\Clock;
 
 /** The block editor admins use for counter-offers: day, from, to, on the teacher's clock. */
 final class ShiftBlocksField
@@ -14,7 +15,7 @@ final class ShiftBlocksField
     {
         $times = [];
         for ($m = 5 * 60; $m <= ShiftBlock::DAY_MIN; $m += 30) {
-            $times[ShiftBlock::clock($m)] = ShiftBlock::clock($m);
+            $times[ShiftBlock::clock($m)] = Clock::wall(ShiftBlock::clock($m));
         }
         $days = [];
         foreach ([6, 7, 1, 2, 3, 4, 5] as $day) {

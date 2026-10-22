@@ -21,6 +21,7 @@ use Modules\Learning\Models\LearningSettings;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\ReportFormQuery;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
 
@@ -94,7 +95,7 @@ final class ReportsOversight extends Page implements HasTable
     {
         $tab = in_array($this->tab, self::TABS, true) ? $this->tab : 'overdue';
         $tz = app(ViewerTimezone::class)->effective();
-        $at = fn (?CarbonImmutable $t) => $t?->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i');
+        $at = fn (?CarbonImmutable $t) => $t?->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('D j M · H:i'));
 
         return $table
             ->query(SessionReport::query()

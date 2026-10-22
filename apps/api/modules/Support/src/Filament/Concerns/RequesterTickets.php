@@ -16,6 +16,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\Identity\Contracts\PersonalChannel;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Modules\Support\Actions\CloseTicket;
 use Modules\Support\Actions\OpenTicket;
@@ -89,7 +90,7 @@ trait RequesterTickets
             'kind' => $t->kind->label(),
             'status' => $t->status->value,
             'statusLabel' => $t->status->label(),
-            'lesson' => $lesson ? $lesson->subject().' · '.$lesson->startsAt->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F · H:i') : null,
+            'lesson' => $lesson ? $lesson->subject().' · '.$lesson->startsAt->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F · H:i')) : null,
             'lines' => TicketView::lines($details['messages'], $details['names'], 'requester', $tz),
             'canReply' => $t->status->isActive() || $t->reopenable(),
             'canReopen' => $t->reopenable(),
@@ -184,7 +185,7 @@ trait RequesterTickets
         $side = $this->side();
 
         return collect(app(SupportRules::class)->lessonChoices($side, $this->learnerId(), (string) auth()->id()))
-            ->mapWithKeys(fn ($l) => [$l->id => $l->subject().' · '.$l->startsAt->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i').' · '.($side === 'teacher' ? $l->studentName : $l->teacherName)])
+            ->mapWithKeys(fn ($l) => [$l->id => $l->subject().' · '.$l->startsAt->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('D j M · H:i')).' · '.($side === 'teacher' ? $l->studentName : $l->teacherName)])
             ->all();
     }
 

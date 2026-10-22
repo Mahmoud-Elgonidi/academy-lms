@@ -25,6 +25,7 @@ use Modules\Billing\Queries\InvoiceDocument;
 use Modules\Billing\Queries\TransferDetails;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\ViewerClock;
 use Throwable;
 
 /**
@@ -124,10 +125,11 @@ final class PayController
         return redirect()->to($links->invoice($checkout->invoice()->firstOrFail(), $checkout->payer_id, ['checkout' => $checkout->id]));
     }
 
-    /** The page in the payer's language, else the academy's. */
+    /** The page in the payer's language and clock, else the academy's. */
     private function speak(?string $payerId, TenantContext $tenants): void
     {
-        $locale = $payerId ? DB::table('users')->where('id', $payerId)->value('locale') : null;
-        app()->setLocale($locale ?: $tenants->require()->defaultLocale);
+        $payer = $payerId ? DB::table('users')->where('id', $payerId)->first(['locale', 'time_format']) : null;
+        app()->setLocale($payer?->locale ?: $tenants->require()->defaultLocale);
+        app(ViewerClock::class)->choose($payer?->time_format);
     }
 }

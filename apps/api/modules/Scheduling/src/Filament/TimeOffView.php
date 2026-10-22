@@ -8,6 +8,7 @@ use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\TeacherTimeOff;
 use Modules\Scheduling\Queries\TimeOffCover;
+use Modules\SharedKernel\Time\Clock;
 
 /** Time off and holidays in words: the days or hours on the clock they were set on, and where the lessons stand. */
 final class TimeOffView
@@ -17,7 +18,7 @@ final class TimeOffView
         $l = 'scheduling::timeoff.period.';
         $start = $t->starts_at->setTimezone($t->timezone);
         if (! $t->all_day) {
-            return __($l.'hours', ['day' => self::day($start), 'from' => $start->format('H:i'), 'to' => $t->ends_at->setTimezone($t->timezone)->format('H:i')]);
+            return __($l.'hours', ['day' => self::day($start), 'from' => self::clock($start), 'to' => self::clock($t->ends_at->setTimezone($t->timezone))]);
         }
         $last = $t->lastDay();
 
@@ -36,6 +37,12 @@ final class TimeOffView
     public static function day(CarbonImmutable $day): string
     {
         return $day->locale(app()->getLocale())->translatedFormat('l j F');
+    }
+
+    /** The clock alone, the reader's way (5:00 م, or 17:00). */
+    public static function clock(CarbonImmutable $at): string
+    {
+        return $at->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i'));
     }
 
     /** Where a lesson of the leave stands: still the teacher's, with a substitute, cancelled, or over. */

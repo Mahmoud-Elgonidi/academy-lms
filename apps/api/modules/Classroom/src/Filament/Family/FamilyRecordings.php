@@ -13,6 +13,7 @@ use Modules\Classroom\Queries\RecordingViews;
 use Modules\Identity\Contracts\PersonalChannel;
 use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\LearnerStage;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -76,7 +77,7 @@ final class FamilyRecordings extends Page
             'shared' => $settings->recording_family,
             'consent' => $learner ? $views->consent($viewer, $learner->id, $tz) : null,
             'recordings' => $learner && $settings->recording_family ? array_map(fn (array $r) => $r + [
-                'when' => $r['at']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F · H:i'),
+                'when' => $r['at']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F · H:i')),
                 'until' => $r['expires_at']?->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F'),
             ], $views->recordings('student', $learner->id)) : [],
         ];

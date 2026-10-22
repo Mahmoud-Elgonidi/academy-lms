@@ -139,7 +139,13 @@ it('lets the student in by the signed link in their message, and nobody without 
     expect($m[1] ?? null)->not->toBeNull();
     $this->clearTenant();
 
-    $this->get($m[1])->assertOk()->assertSee('قرآن')->assertSee(config('classroom.client_js'), false);   // in the guardian's language (the academy's: Arabic)
+    $this->get($m[1])->assertOk()->assertSee('قرآن')->assertSee(config('classroom.client_js'), false)   // in the guardian's language (the academy's: Arabic)
+        ->assertSee('6 أكتوبر · 6:00 م');                                                                  // on their clock, in the academy's 12 hours
+    // The page reads the guardian's own clock from their row: 24 hours once they chose it.
+    $this->actAsTenant($this->academy);
+    $this->guardian->update(['time_format' => 'h24']);
+    $this->clearTenant();
+    $this->get($m[1])->assertOk()->assertSee('6 أكتوبر · 18:00')->assertDontSee('6:00 م');
     $this->postJson("http://noor.lms.test/class/{$this->lesson->id}/ticket")->assertOk()->assertJsonPath('data.identity', $this->student->id);
 
     app('auth')->forgetGuards();

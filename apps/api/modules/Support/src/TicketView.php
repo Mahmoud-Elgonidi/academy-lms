@@ -4,6 +4,7 @@ namespace Modules\Support;
 
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
+use Modules\SharedKernel\Time\Clock;
 use Modules\Support\Enums\TicketKind;
 use Modules\Support\Enums\TicketPriority;
 use Modules\Support\Models\Ticket;
@@ -62,7 +63,7 @@ final class TicketView
                     'image' => str_starts_with((string) $m->mime, 'image/') && $m->mime !== 'image/heic',
                     'url' => route('support.file', ['message' => $m->id]),
                 ] : null,
-                'when' => $at->translatedFormat('j M · H:i'),
+                'when' => $at->translatedFormat(Clock::pattern('j M · H:i')),
                 'ago' => $at->diffForHumans(['options' => CarbonInterface::JUST_NOW]),
             ];
         }, $messages);

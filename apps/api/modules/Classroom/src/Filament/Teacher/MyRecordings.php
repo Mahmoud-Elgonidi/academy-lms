@@ -13,6 +13,7 @@ use Modules\Classroom\Models\ClassroomSettings;
 use Modules\Classroom\Queries\RecordingViews;
 use Modules\Identity\Contracts\PersonalChannel;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -67,7 +68,7 @@ final class MyRecordings extends Page
             'shared' => $settings->recording_teacher,
             'consent' => $views->consent($viewer, $viewer, $tz),
             'recordings' => $settings->recording_teacher ? array_map(fn (array $r) => $r + [
-                'when' => $r['at']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F · H:i'),
+                'when' => $r['at']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F · H:i')),
                 'until' => $r['expires_at']?->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F'),
             ], $views->recordings('teacher', $viewer)) : [],
         ];

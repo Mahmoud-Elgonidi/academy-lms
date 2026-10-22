@@ -80,7 +80,7 @@ it('lets a guardian switch between their children, and only theirs', function ()
 
     app(FamilyView::class)->choose($this->guardian->id, $stranger->id);
     expect(app(FamilyView::class)->current($this->guardian->id)->id)->toBe($sister->id);
-    Livewire::test(FamilyLessons::class)->assertDontSee('15:00');   // Huda has no lessons
+    Livewire::test(FamilyLessons::class)->assertDontSee('6:00 PM');   // Huda has no lessons (her brother's are at 6 PM on the guardian's clock)
 });
 
 it('shows the learner\'s lessons on the viewer\'s clock, and cancels one under the policy, saying what it costs', function () {
@@ -88,7 +88,7 @@ it('shows the learner\'s lessons on the viewer\'s clock, and cancels one under t
     asFamily($this->guardian);
 
     Livewire::test(FamilyLessons::class)
-        ->assertSee('18:00 – 18:30')                                              // 15:00 UTC in Riyadh
+        ->assertSee('6:00 PM – 6:30 PM')                                          // 15:00 UTC in Riyadh, in 12 hours
         ->assertActionExists('cancel')
         ->mountAction('cancel', ['session' => $this->lesson->id])
         ->assertMountedActionModalSee(__('scheduling::family.cancel.outcomes.refund', ['hours' => 12]))   // more than 12 hours ahead: back to the balance

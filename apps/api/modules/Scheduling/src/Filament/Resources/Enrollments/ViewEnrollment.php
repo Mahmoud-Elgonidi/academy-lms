@@ -49,6 +49,7 @@ use Modules\Scheduling\Queries\Models\EnrolledStudent;
 use Modules\Scheduling\Support\CourseDays;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Money\Money;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -487,7 +488,7 @@ final class ViewEnrollment extends ViewRecord
         $minutes = (int) ($h['session_minutes'] ?? 0);
         $makeup = $q->makeupOwed($h['credit_account_id']);
         $remaining = max(0, (int) $h['available_min'] + (int) $h['reserved_min'] - $makeup['minutes']);
-        $fmt = fn ($at, string $pattern = 'D j M · H:i') => $at ? CarbonImmutable::parse($at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat($pattern) : null;
+        $fmt = fn ($at, string $pattern = 'D j M · H:i') => $at ? CarbonImmutable::parse($at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern($pattern)) : null;
 
         return [
             'header' => $h,
@@ -588,7 +589,7 @@ final class ViewEnrollment extends ViewRecord
         ];
     }
 
-    /** @return array<string, string> UTC start => "16:30 · Cairo 18:30" */
+    /** @return array<string, string> UTC start => "4:30 PM · Cairo 6:30 PM" (or "16:30 · Cairo 18:30") */
     private function freeStarts(string $date, ?Session $own): array
     {
         $tz = $this->studentTz();
@@ -611,7 +612,8 @@ final class ViewEnrollment extends ViewRecord
             if ($availability->shifts->contains($t, $t + $duration * 60) && $free->contains($t, $t + $duration * 60)
                 && $days->barredFor($this->course(), CarbonImmutable::createFromTimestamp($t, 'UTC')) === null) {
                 $at = CarbonImmutable::createFromTimestamp($t, 'UTC');
-                $options[$at->toIso8601String()] = $at->setTimezone($tz)->format('H:i').' · '.Timezones::city($teacherTz).' '.$at->setTimezone($teacherTz)->format('H:i');
+                $clock = fn (string $zone) => $at->setTimezone($zone)->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i'));
+                $options[$at->toIso8601String()] = $clock($tz).' · '.Timezones::city($teacherTz).' '.$clock($teacherTz);
             }
         }
 

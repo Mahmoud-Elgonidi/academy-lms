@@ -41,12 +41,12 @@ final class SendLearningNotifications
         $family = 'learning::notifications.audience.family';
         $teacher = 'learning::notifications.audience.teacher';
         foreach ([
-            ['report_submitted', 'learning', $family, ['push', 'whatsapp'], ['student' => 'زياد', 'teacher' => 'أ. خالد', 'when' => 'الأحد 4 أكتوبر · 18:00', 'overall' => '4', 'note' => 'تحسن واضح في التذكير والتأنيث.']],
-            ['homework_assigned', 'learning', $family, ['push', 'whatsapp'], ['student' => 'زياد', 'title' => 'صرّف الفعل كتب', 'due' => 'الخميس 8 أكتوبر · 18:00']],
+            ['report_submitted', 'learning', $family, ['push', 'whatsapp'], ['student' => 'زياد', 'teacher' => 'أ. خالد', 'when' => 'الأحد 4 أكتوبر · 6:00 م', 'overall' => '4', 'note' => 'تحسن واضح في التذكير والتأنيث.']],
+            ['homework_assigned', 'learning', $family, ['push', 'whatsapp'], ['student' => 'زياد', 'title' => 'صرّف الفعل كتب', 'due' => 'الخميس 8 أكتوبر · 6:00 م']],
             ['homework_reviewed', 'learning', $family, ['push'], ['student' => 'زياد', 'title' => 'صرّف الفعل كتب', 'grade' => '4', 'feedback' => 'ممتاز!']],
             ['node_mastered', 'learning', $family, [], ['student' => 'زياد', 'lesson' => 'الفعل الماضي', 'percent' => '30', 'program' => 'النحو الميسّر']],
             ['homework_submitted', 'staff', $teacher, ['push'], ['student' => 'زياد', 'title' => 'صرّف الفعل كتب']],
-            ['report_overdue', 'staff', $teacher, ['push', 'whatsapp'], ['student' => 'زياد', 'when' => 'الأحد 4 أكتوبر · 18:00']],
+            ['report_overdue', 'staff', $teacher, ['push', 'whatsapp'], ['student' => 'زياد', 'when' => 'الأحد 4 أكتوبر · 6:00 م']],
             ['cheer', 'learning', 'learning::notifications.audience.student', ['push'], ['from' => 'ماما', 'kind' => 'تصفيقة']],
             ['lesson_stars', 'learning', 'learning::notifications.audience.student', ['push'], ['stars' => '⭐⭐⭐⭐', 'how' => 'في الميعاد · فضلت لآخر الحصة', 'subject' => 'القرآن']],
             ['weekly_digest', 'learning', 'learning::notifications.audience.guardian', ['push', 'email', 'whatsapp'], ['student' => 'زياد', 'body' => 'أسبوع زياد في الأكاديمية: الحصص: 2 حضور. دروس خلصت بإتقان: «سورة الفيل».']],

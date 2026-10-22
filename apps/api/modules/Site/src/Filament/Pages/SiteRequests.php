@@ -15,6 +15,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\Catalog\Contracts\CatalogApi;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Modules\Site\Actions\HandleJoinRequest;
 use Modules\Site\Models\JoinRequest;
@@ -131,7 +132,7 @@ final class SiteRequests extends Page
                 'utm' => trim(implode(' / ', array_filter([$r->utm_source, $r->utm_medium, $r->utm_campaign]))) ?: null,
                 'status' => $r->status,
                 'note' => $r->note,
-                'when' => $r->created_at->setTimezone($tz)->locale($locale)->translatedFormat('j M Y، H:i'),
+                'when' => $r->created_at->setTimezone($tz)->locale($locale)->translatedFormat(Clock::pattern('j M Y، H:i')),
                 'ago' => $r->created_at->locale($locale)->diffForHumans(),
                 'lead' => $leads && $r->lead_id !== null ? route('filament.academy.pages.leads.{lead}', ['lead' => $r->lead_id]) : null,
             ];

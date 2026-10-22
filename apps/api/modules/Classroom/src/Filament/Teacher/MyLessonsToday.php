@@ -16,6 +16,7 @@ use Modules\Classroom\Models\MeetingLink;
 use Modules\Identity\Contracts\PersonalChannel;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\DTOs\LessonCard;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -85,15 +86,17 @@ final class MyLessonsToday extends Page
         }
         $next = collect($moments)->filter(fn (CarbonImmutable $m) => $m->greaterThan($now))->min();
 
+        $clock = fn (CarbonImmutable $at) => $at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i'));
+
         return [
             'lessons' => array_map(fn (LessonCard $l) => [
                 'id' => $l->id,
-                'time' => $l->startsAt->setTimezone($tz)->format('H:i').' – '.$l->endsAt->setTimezone($tz)->format('H:i'),
+                'time' => $clock($l->startsAt).' – '.$clock($l->endsAt),
                 'student' => $l->studentName,
                 'subject' => $l->subject(),
                 'status' => $l->status,
                 'open' => $l->isOpen() && $now->greaterThanOrEqualTo($l->startsAt->subMinutes($before)) && $now->lessThanOrEqualTo($l->endsAt->addMinutes($after)),
-                'opens' => $l->startsAt->subMinutes($before)->setTimezone($tz)->format('H:i'),
+                'opens' => $clock($l->startsAt->subMinutes($before)),
                 'past' => $now->greaterThan($l->endsAt->addMinutes($after)) || ! $l->isOpen(),
                 'url' => route('classroom.page', ['session' => $l->id]),
             ], $cards),

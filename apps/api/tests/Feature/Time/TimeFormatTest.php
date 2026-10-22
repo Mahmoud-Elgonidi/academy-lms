@@ -15,6 +15,7 @@ use Modules\Identity\Models\User;
 use Modules\Platform\Actions\SaveAcademyTimeFormat;
 use Modules\Platform\Filament\Pages\BrandingSettings;
 use Modules\Platform\Models\Academy;
+use Modules\Scheduling\Filament\Pages\LiveBoard;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 use Modules\SharedKernel\Time\TimeFormat;
@@ -153,4 +154,23 @@ it('writes each notification in its recipient\'s clock', function () {
 
     expect($renderer->render($template, 'en', $data, 'Asia/Riyadh', TimeFormat::Twelve)->body)->toBe('Now Mon 5 Oct · 5:05 PM, every Monday 5:05 PM.')
         ->and($renderer->render($template, 'en', $data, 'Asia/Riyadh', TimeFormat::TwentyFour)->body)->toBe('Now Mon 5 Oct · 17:05, every Monday 17:05.');
+});
+
+it('hands the live board\'s script the reader\'s clock, and writes its own the same way', function () {
+    CarbonImmutable::setTestNow($this->instant);
+    app()->setLocale('ar');
+    $this->actingAs($this->owner);
+    Filament::setCurrentPanel('academy');
+
+    Livewire::test(LiveBoard::class)
+        ->assertSeeHtml('data-hour-cycle="h12"')->assertSeeHtml('data-lb-locale="ar"')
+        ->assertSee('5:05 م')->assertDontSee('17:05');
+
+    $this->owner->update(['time_format' => 'h24']);
+    $this->actingAs($this->owner->fresh());
+    Livewire::test(LiveBoard::class)
+        ->assertSeeHtml('data-hour-cycle="h23"')
+        ->assertSee('17:05')->assertDontSee('5:05 م');
+
+    CarbonImmutable::setTestNow();
 });

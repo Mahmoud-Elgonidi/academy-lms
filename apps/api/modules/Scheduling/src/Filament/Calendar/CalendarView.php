@@ -4,6 +4,7 @@ namespace Modules\Scheduling\Filament\Calendar;
 
 use Carbon\CarbonImmutable;
 use Modules\Scheduling\Queries\Calendar\CalendarRange;
+use Modules\SharedKernel\Time\Clock;
 
 /**
  * The calendar's lessons as the office reads them: on the viewer's clock,
@@ -31,8 +32,8 @@ final class CalendarView
             'date' => $start->toDateString(),
             'start' => $from,
             'end' => min(1440, $from + max(1, (int) $r->minutes)),
-            'time' => $start->format('H:i').' – '.$end->format('H:i'),
-            'from' => $start->format('H:i'),
+            'time' => self::clock($start).' – '.self::clock($end),
+            'from' => self::clock($start),
             'minutes' => (int) $r->minutes,
             'subject' => (string) (app()->getLocale() === 'ar' ? $r->subject_ar : $r->subject_en),
             'teacher' => (string) $r->teacher,
@@ -97,6 +98,12 @@ final class CalendarView
     public function dayName(CarbonImmutable $day, string $format = 'l j F'): string
     {
         return $day->locale(app()->getLocale())->translatedFormat($format);
+    }
+
+    /** The clock alone, the reader's way (5:00 م, or 17:00). */
+    public static function clock(CarbonImmutable $at): string
+    {
+        return $at->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i'));
     }
 
     public function isToday(CarbonImmutable $day): bool

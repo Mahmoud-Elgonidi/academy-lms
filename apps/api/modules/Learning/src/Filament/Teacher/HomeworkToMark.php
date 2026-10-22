@@ -23,6 +23,7 @@ use Modules\Learning\Assist\RecitationTarget;
 use Modules\Learning\Http\V1\Resources\RecitationPresenter;
 use Modules\Learning\Models\Homework;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -95,7 +96,7 @@ final class HomeworkToMark extends Page implements HasTable
     {
         $tab = in_array($this->tab, self::TABS, true) ? $this->tab : 'submitted';
         $tz = app(ViewerTimezone::class)->effective();
-        $at = fn (?CarbonImmutable $t) => $t?->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i');
+        $at = fn (?CarbonImmutable $t) => $t?->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('D j M · H:i'));
 
         return $table
             ->query(Homework::query()->with('submissions')

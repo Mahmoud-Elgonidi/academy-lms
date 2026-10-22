@@ -30,6 +30,7 @@ use Modules\Scheduling\Domain\Models\RecurringSlot;
 use Modules\Scheduling\Domain\Models\ShiftNotice;
 use Modules\Scheduling\Filament\TimeOffForm;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -135,8 +136,8 @@ final class DstChanges extends Page
                 'teacherZone' => Timezones::city($n->anchor_tz),
                 'before' => self::weekdayTime($n->before_weekday, $n->before_time),
                 'after' => self::weekdayTime($n->after_weekday, $n->after_time),
-                'teacherBefore' => $teacherAt->locale(app()->getLocale())->translatedFormat('l H:i'),
-                'teacherAfter' => $kept ? $teacherAt->subMinutes($n->delta_min)->format('H:i') : null,
+                'teacherBefore' => $teacherAt->locale(app()->getLocale())->translatedFormat(Clock::pattern('l H:i')),
+                'teacherAfter' => $kept ? $teacherAt->subMinutes($n->delta_min)->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i')) : null,
                 'kept' => $kept,
                 'from' => __($l.'from', ['date' => $n->changes_at->setTimezone($viewer)->locale(app()->getLocale())->translatedFormat('j F')]),
                 'until' => $n->reverts_at
@@ -272,7 +273,7 @@ final class DstChanges extends Page
             $p['lessons'] === 0 => ['text' => __($l.'preview_none'), 'ok' => true],
             $p['problems'] !== [] => ['text' => __($l.'preview_busy', [
                 'count' => count($p['problems']),
-                'dates' => collect($p['problems'])->take(4)->map(fn (array $x) => $x['start']->setTimezone($p['timezone'])->locale(app()->getLocale())->translatedFormat('l j F H:i'))->implode('، '),
+                'dates' => collect($p['problems'])->take(4)->map(fn (array $x) => $x['start']->setTimezone($p['timezone'])->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F H:i')))->implode('، '),
             ]), 'ok' => false],
             default => ['text' => __($l.'preview_ok', [
                 'lessons' => trans_choice('scheduling::dst.lessons', $p['lessons'], ['count' => $p['lessons']]),
@@ -320,7 +321,7 @@ final class DstChanges extends Page
             'teacher' => (string) DB::table('users')->where('id', $n->teacher_id)->value('name'),
             'time' => self::weekdayTime($n->before_weekday, $n->before_time),
             'zone' => Timezones::city($n->other_tz),
-            'teacher_time' => $n->changes_at->subMinutes($n->delta_min)->setTimezone($n->anchor_tz)->locale($locale)->translatedFormat('l H:i'),
+            'teacher_time' => $n->changes_at->subMinutes($n->delta_min)->setTimezone($n->anchor_tz)->locale($locale)->translatedFormat(Clock::pattern('l H:i')),
             'from' => $n->changes_at->setTimezone($n->anchor_tz)->locale($locale)->translatedFormat('j F'),
             'until' => $n->reverts_at ? __($l.'until', ['date' => $n->reverts_at->subMinute()->setTimezone($n->anchor_tz)->locale($locale)->translatedFormat('j F Y')]) : __($l.'for_good'),
         ]);
@@ -352,7 +353,7 @@ final class DstChanges extends Page
 
     private static function weekdayTime(int $weekday, string $time): string
     {
-        return CarbonImmutable::parse('2026-01-05 '.substr($time, 0, 5))->addDays($weekday - 1)->locale(app()->getLocale())->translatedFormat('l H:i');
+        return CarbonImmutable::parse('2026-01-05 '.substr($time, 0, 5))->addDays($weekday - 1)->locale(app()->getLocale())->translatedFormat(Clock::pattern('l H:i'));
     }
 
     private static function day(string $date): string

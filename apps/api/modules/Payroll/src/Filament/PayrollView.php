@@ -3,6 +3,7 @@
 namespace Modules\Payroll\Filament;
 
 use Modules\Payroll\Support\PayrollMonths;
+use Modules\SharedKernel\Time\Clock;
 
 /** How payroll lines read on screen, for the back office and the teacher alike. */
 final class PayrollView
@@ -26,7 +27,7 @@ final class PayrollView
 
         return [
             'key' => $row['session_id'],
-            'when' => $row['starts_at'] ? $row['starts_at']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i') : $row['lesson_on']->translatedFormat('D j M'),
+            'when' => $row['starts_at'] ? $row['starts_at']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('D j M · H:i')) : $row['lesson_on']->translatedFormat('D j M'),
             'student' => (string) $row['student'],
             'subject' => (string) ($ar ? $row['subject_ar'] : $row['subject_en']),
             'type' => $line && $line['type'] !== 'regular' ? __($l.'types.'.$line['type']) : null,

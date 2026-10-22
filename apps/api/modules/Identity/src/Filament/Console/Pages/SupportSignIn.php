@@ -21,6 +21,7 @@ use Modules\Platform\Contracts\ConsoleApi;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantRef;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -150,7 +151,7 @@ final class SupportSignIn extends Page
                 'reason' => $i->reason,
                 'state' => $i->state(),
                 'how' => $i->ended_reason,
-                'when' => $i->created_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M Y · H:i'),
+                'when' => $i->created_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M Y · H:i')),
             ])->all());
     }
 

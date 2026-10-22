@@ -26,6 +26,7 @@ use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Queries\InvoiceDocument;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Money\Money;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -75,7 +76,7 @@ final class ViewInvoice extends ViewRecord
         return $d + [
             'dueLine' => InvoiceResource::dueLine($invoice),
             'checkouts' => PaymentCheckout::query()->with('account')->where('invoice_id', $invoice->id)->latest()->get()->map(fn (PaymentCheckout $c) => [
-                'when' => $date($c->created_at).' · '.$c->created_at->setTimezone($tz)->format('H:i'),
+                'when' => $date($c->created_at).' · '.$c->created_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i')),
                 'gateway' => $c->account?->label,
                 'status' => $c->status,
                 'amount' => $c->money()->format(),
@@ -92,7 +93,7 @@ final class ViewInvoice extends ViewRecord
         $tz = app(ViewerTimezone::class)->effective();
         $proofs = PaymentProof::query()->where('invoice_id', $this->record->id)->latest()->get();
         $names = DB::table('users')->whereIn('id', $proofs->pluck('payer_id')->merge($proofs->pluck('decided_by'))->filter()->unique())->pluck('name', 'id');
-        $when = fn (?CarbonImmutable $at) => $at?->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F Y · H:i');
+        $when = fn (?CarbonImmutable $at) => $at?->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j F Y · H:i'));
 
         return $proofs->map(fn (PaymentProof $p) => [
             'id' => $p->id,
@@ -141,7 +142,7 @@ final class ViewInvoice extends ViewRecord
                     ->options(collect(Payment::METHODS)->mapWithKeys(fn ($m) => [$m => __('billing::billing.methods.'.$m)])->all()),
                 Grid::make(2)->schema([
                     TextInput::make('amount')->label(__($l.'received_amount'))->numeric()->minValue(0)->required()->suffix($this->record->currency),
-                    DateTimePicker::make('received_at')->label(__($l.'received_at'))->seconds(false)->native(false)->required()
+                    DateTimePicker::make('received_at')->label(__($l.'received_at'))->seconds(false)->native(false)->displayFormat(Clock::pattern('M j, Y H:i'))->required()
                         ->timezone(app(ViewerTimezone::class)->effective()),
                 ]),
                 TextInput::make('reference')->label(__($l.'reference_field'))->maxLength(120),

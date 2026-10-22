@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Scheduling\Actions\TimeOff\RequestTimeOff;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\TeacherTimeOff;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 
 /**
@@ -42,9 +43,9 @@ final class TimeOffForm
                 ->helperText(fn (Get $get) => $teacher($get) ? __($l.'zone', ['zone' => Timezones::city(app(RequestTimeOff::class)->timezone($teacher($get)))]) : null),
             DatePicker::make('last_day')->label(__($l.'last_day'))->native(false)->live()
                 ->visible(fn (Get $get) => ! $hours($get))->required(fn (Get $get) => ! $hours($get))->afterOrEqual('first_day'),
-            TimePicker::make('from')->label(__($l.'from'))->seconds(false)->format('H:i')->minutesStep(15)->live()
+            TimePicker::make('from')->label(__($l.'from'))->seconds(false)->format('H:i')->native(false)->displayFormat(Clock::pattern('H:i'))->minutesStep(15)->live()
                 ->visible($hours)->required($hours),
-            TimePicker::make('to')->label(__($l.'to'))->seconds(false)->format('H:i')->minutesStep(15)->live()
+            TimePicker::make('to')->label(__($l.'to'))->seconds(false)->format('H:i')->native(false)->displayFormat(Clock::pattern('H:i'))->minutesStep(15)->live()
                 ->visible($hours)->required($hours)->after('from'),
             Select::make('reason')->label(__($l.'reason'))->required()->native(false)
                 ->options(collect(TeacherTimeOff::REASONS)->mapWithKeys(fn (string $r) => [$r => __('scheduling::timeoff.reasons.'.$r)])->all()),

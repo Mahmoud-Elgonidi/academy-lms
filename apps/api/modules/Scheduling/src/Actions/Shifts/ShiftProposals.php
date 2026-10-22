@@ -12,6 +12,7 @@ use Modules\Scheduling\Domain\Models\ShiftSchedule;
 use Modules\Scheduling\Domain\Shifts\ProposalRules;
 use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\Clock;
 
 /**
  * What every shift action shares: the teacher's timezone and current
@@ -100,6 +101,9 @@ final class ShiftProposals
     {
         if (isset($params['day'])) {
             $params['day'] = __('scheduling::shifts.days.'.$params['day']);
+        }
+        if (isset($params['start'])) {
+            $params['start'] = Clock::wall((string) $params['start']);
         }
 
         return $params;

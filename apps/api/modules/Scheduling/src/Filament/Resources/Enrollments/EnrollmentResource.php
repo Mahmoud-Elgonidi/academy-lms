@@ -17,6 +17,7 @@ use Modules\Enrollment\Contracts\EnrollmentStatus;
 use Modules\Scheduling\Queries\EnrollmentAccountQuery;
 use Modules\Scheduling\Queries\Models\EnrolledStudent;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /** Enrolled students: what they study, when, and how much credit is left. */
@@ -73,7 +74,7 @@ final class EnrollmentResource extends Resource
         $tz = app(ViewerTimezone::class)->effective();
         $query = app(EnrollmentAccountQuery::class);
         $days = fn (EnrolledStudent $e) => collect($query->weeklyTimes($e->id, $e->getAttribute('student_tz') ?? $tz))
-            ->map(fn ($t) => __('shared::time.days.'.$t['student_day']).' '.$t['student_time'])->implode(' · ');
+            ->map(fn ($t) => __('shared::time.days.'.$t['student_day']).' '.Clock::wall($t['student_time']))->implode(' · ');
 
         return $table
             ->modifyQueryUsing(fn (Builder $query) => self::withAccount($query))
@@ -99,7 +100,7 @@ final class EnrollmentResource extends Resource
                     ->state(function (EnrolledStudent $e) use ($tz) {
                         $next = DB::table('sessions')->where('enrollment_id', $e->id)->where('status', 'scheduled')->where('starts_at', '>', CarbonImmutable::now())->orderBy('starts_at')->first(['starts_at', 'funding_status']);
 
-                        return $next ? CarbonImmutable::parse($next->starts_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i') : '—';
+                        return $next ? CarbonImmutable::parse($next->starts_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('D j M · H:i')) : '—';
                     }),
             ])
             ->filters([

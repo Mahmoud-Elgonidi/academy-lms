@@ -31,6 +31,7 @@ use Modules\Privacy\Queries\DataRequests as Requests;
 use Modules\Privacy\Queries\ErasurePreview;
 use Modules\Privacy\Subjects;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -112,7 +113,7 @@ final class DataRequests extends Page
     public function when(mixed $at, bool $time = false): ?string
     {
         return $at === null ? null : CarbonImmutable::parse($at)->setTimezone(app(ViewerTimezone::class)->effective())
-            ->locale(app()->getLocale())->translatedFormat($time ? 'l j M · H:i' : 'j M Y');
+            ->locale(app()->getLocale())->translatedFormat($time ? Clock::pattern('l j M · H:i') : 'j M Y');
     }
 
     protected function getHeaderActions(): array

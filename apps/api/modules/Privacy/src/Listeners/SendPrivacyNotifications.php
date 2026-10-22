@@ -43,7 +43,7 @@ final class SendPrivacyNotifications
         foreach ([
             ['export_ready', 'lessons', $a.'requester', ['push', 'email'], $person + ['until' => 'الخميس 16 أكتوبر']],
             ['erasure_requested', 'staff', $a.'handlers', ['push', 'email'], $person + ['due' => 'السبت 8 نوفمبر']],
-            ['erasure_approved', 'lessons', $a.'requester', ['push', 'email'], $person + ['at' => 'الجمعة 10 أكتوبر · 18:00']],
+            ['erasure_approved', 'lessons', $a.'requester', ['push', 'email'], $person + ['at' => 'الجمعة 10 أكتوبر · 6:00 م']],
             ['erasure_refused', 'lessons', $a.'requester', ['push', 'email'], $person + ['answer' => 'عليه فاتورة لسه متدفعتش']],
             ['account_erased', 'lessons', $a.'guardian', ['push', 'email'], []],
             ['correction_requested', 'staff', $a.'handlers', ['push', 'email'], $person + ['due' => 'السبت 8 نوفمبر']],

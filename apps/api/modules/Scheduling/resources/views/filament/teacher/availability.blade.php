@@ -52,7 +52,7 @@
                             <div class="ta-thread">
                                 @foreach ($proposal->comments as $c)
                                     <div class="ta-msg" @if ($c->author_id === auth()->id()) data-mine @endif>
-                                        <small>{{ __('scheduling::shifts.roles.'.$c->author_role) }} · {{ $c->created_at->setTimezone(app(\Modules\SharedKernel\Time\ViewerTimezone::class)->effective())->format('j/n H:i') }}</small>
+                                        <small>{{ __('scheduling::shifts.roles.'.$c->author_role) }} · {{ $c->created_at->setTimezone(app(\Modules\SharedKernel\Time\ViewerTimezone::class)->effective())->locale(app()->getLocale())->translatedFormat(\Modules\SharedKernel\Time\Clock::pattern('j/n H:i')) }}</small>
                                         {{ $c->body }}
                                     </div>
                                 @endforeach

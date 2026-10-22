@@ -119,7 +119,7 @@
                 <tbody>
                     @foreach ($this->checkouts as $c)
                         <tr wire:key="co-{{ $c->id }}">
-                            <td class="num">{{ $c->created_at->setTimezone(app(\Modules\SharedKernel\Time\ViewerTimezone::class)->effective())->format('d/m H:i') }}</td>
+                            <td class="num">{{ $c->created_at->setTimezone(app(\Modules\SharedKernel\Time\ViewerTimezone::class)->effective())->locale(app()->getLocale())->translatedFormat(\Modules\SharedKernel\Time\Clock::pattern('d/m H:i')) }}</td>
                             <td><a href="{{ \Modules\Billing\Filament\Resources\Invoices\InvoiceResource::getUrl('view', ['record' => $c->invoice_id]) }}" style="color: var(--primary-700)">{{ $c->number }}</a><br><small class="ps-muted">{{ $c->payer ?? '—' }} · {{ __($p.'channels.'.$c->channel) }}</small></td>
                             <td class="num">{{ $c->money()->format() }}<br><small class="ps-muted">{{ $c->label }}</small></td>
                             <td><span class="ps-status" data-s="{{ $c->status }}">{{ __($p.'statuses.'.$c->status) }}</span>@if ($c->failure)<br><small class="ps-muted">{{ $c->failure }}</small>@endif</td>

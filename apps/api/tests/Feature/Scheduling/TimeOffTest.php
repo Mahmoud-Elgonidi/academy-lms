@@ -187,6 +187,28 @@ it('makes no lessons on holidays when it makes the coming weeks', function () {
     expect($days)->not->toContain('2026-12-01')->toContain('2026-12-05');
 });
 
+it('takes some hours from the teacher\'s own pickers, written on their clock both ways', function () {
+    $this->actingAs($this->teacher);
+    Filament::setCurrentPanel('teach');
+    Livewire::test(MyTimeOff::class)
+        ->mountAction('ask')
+        ->setActionData(['kind' => 'hours', 'first_day' => '2026-10-06', 'from' => '17:00', 'to' => '19:00', 'reason' => 'personal'])
+        ->assertMountedActionModalSeeHtml('h:mm A')                     // the pickers show 5:00 PM; what they keep stays 17:00
+        ->callMountedAction()
+        ->assertHasNoActionErrors()
+        ->assertSee('5:00 PM')->assertSee('7:00 PM');
+
+    $timeOff = TeacherTimeOff::query()->where('teacher_id', $this->teacher->id)->sole();
+    expect($timeOff->all_day)->toBeFalse()
+        ->and($timeOff->starts_at->setTimezone('Africa/Cairo')->format('Y-m-d H:i'))->toBe('2026-10-06 17:00')
+        ->and($timeOff->ends_at->setTimezone('Africa/Cairo')->format('Y-m-d H:i'))->toBe('2026-10-06 19:00');
+
+    $this->teacher->update(['time_format' => 'h24']);
+    $this->actingAs($this->teacher->fresh());
+    Livewire::test(MyTimeOff::class)->assertSee('17:00')->assertSee('19:00')->assertDontSee('5:00 PM')
+        ->mountAction('ask')->setActionData(['kind' => 'hours'])->assertMountedActionModalSeeHtml('HH:mm');
+});
+
 it('lets the teacher ask from their area and the academy approve and cover from the back office', function () {
     $this->actingAs($this->teacher);
     Filament::setCurrentPanel('teach');

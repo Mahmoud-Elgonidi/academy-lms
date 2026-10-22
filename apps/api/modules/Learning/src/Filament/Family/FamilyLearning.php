@@ -10,6 +10,7 @@ use Modules\Learning\Queries\RoadmapQuery;
 use Modules\People\Contracts\DTOs\Learner;
 use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\LearnerStage;
+use Modules\SharedKernel\Time\Clock;
 
 /** What the family pages share: the learner on screen, the look of the area, their courses, and dates on the viewer's clock. */
 final class FamilyLearning
@@ -57,6 +58,6 @@ final class FamilyLearning
 
     public static function date(CarbonImmutable $at, string $tz, string $format = 'l j F'): string
     {
-        return $at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat($format);
+        return $at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern($format));
     }
 }

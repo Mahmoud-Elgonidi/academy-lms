@@ -219,7 +219,7 @@ it('tells the family on their lessons page when their hour is about to move', fu
 
     Livewire::test(FamilyLessons::class)
         ->assertSee(Timezones::city('Europe/London'))
-        ->assertSeeText(CarbonImmutable::parse('2026-01-06 15:00')->locale(app()->getLocale())->translatedFormat('l H:i'));
+        ->assertSeeText('Tuesday 3:00 PM');                     // the family's new hour, in 12 hours
 });
 
 it('keeps the clock changes screen to those who manage lessons', function () {

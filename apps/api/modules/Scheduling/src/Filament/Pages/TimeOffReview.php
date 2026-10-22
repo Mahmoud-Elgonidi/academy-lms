@@ -108,7 +108,7 @@ final class TimeOffReview extends Page
             return [
                 'id' => $s->id,
                 'day' => TimeOffView::day($start),
-                'time' => $start->format('H:i').' – '.$s->ends_at->setTimezone($tz)->format('H:i'),
+                'time' => TimeOffView::clock($start).' – '.TimeOffView::clock($s->ends_at->setTimezone($tz)),
                 'student' => (string) $s->getAttribute('student_name'),
                 'subject' => app()->getLocale() === 'ar' ? $s->getAttribute('subject_ar') : $s->getAttribute('subject_en'),
                 'state' => $state,

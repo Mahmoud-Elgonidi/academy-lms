@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Gate;
 use Modules\Learning\Models\LearningSettings;
 use Modules\Learning\Models\SessionReport;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /** The teacher's reports: due and overdue first, then the last two weeks handed in. */
@@ -66,7 +67,7 @@ final class MyReports extends Page implements HasTable
     public function table(Table $table): Table
     {
         $tz = app(ViewerTimezone::class)->effective();
-        $at = fn (?CarbonImmutable $t) => $t?->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i');
+        $at = fn (?CarbonImmutable $t) => $t?->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('D j M · H:i'));
 
         return $table
             ->query(SessionReport::query()

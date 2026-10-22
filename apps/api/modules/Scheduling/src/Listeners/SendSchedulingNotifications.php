@@ -61,7 +61,7 @@ final class SendSchedulingNotifications
 
     public static function templates(NotificationsApi $notifications): void
     {
-        $lesson = ['student' => 'زياد', 'teacher' => 'أ. خالد', 'subject' => 'النحو', 'when' => 'الأحد 11 أكتوبر · 18:00'];
+        $lesson = ['student' => 'زياد', 'teacher' => 'أ. خالد', 'subject' => 'النحو', 'when' => 'الأحد 11 أكتوبر · 6:00 م'];
         $a = 'scheduling::notifications.audience.';
         // Each person's own signed link to the class page, filled in by Communication (Classroom registers it).
         $link = ['link' => 'https://demo.lms.test/class/…'];
@@ -78,8 +78,8 @@ final class SendSchedulingNotifications
             ['session_cancelled_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson],
             ['trial_booked', 'lessons', $a.'family', ['whatsapp', 'email', 'push'], $lesson + $link],
             ['trial_booked_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson],
-            ['session_moved', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson + ['from' => 'السبت 10 أكتوبر · 18:00']],
-            ['session_moved_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson + ['from' => 'السبت 10 أكتوبر · 18:00']],
+            ['session_moved', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson + ['from' => 'السبت 10 أكتوبر · 6:00 م']],
+            ['session_moved_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson + ['from' => 'السبت 10 أكتوبر · 6:00 م']],
             ['proposal_submitted', 'staff', $a.'reviewers', ['push', 'email'], ['teacher' => 'أ. سارة']],
             ['proposal_answered', 'staff', $a.'teacher', ['push', 'whatsapp'], ['outcome' => 'اتعتمد.']],
             ['timeoff_requested', 'staff', $a.'leave_managers', ['push', 'email'], ['teacher' => 'أ. خالد', 'from' => 'الخميس 8 أكتوبر', 'to' => 'السبت 10 أكتوبر', 'lessons' => '4']],
@@ -89,12 +89,12 @@ final class SendSchedulingNotifications
             ['substitute_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson + ['original' => 'أ. سارة']],
             ['holiday_family', 'lessons', $a.'family', ['whatsapp', 'email', 'push'], ['name' => 'عيد الأضحى', 'from' => 'الثلاثاء 26 مايو', 'to' => 'الجمعة 29 مايو', 'student' => 'زياد', 'count' => '2']],
             ['holiday_teacher', 'staff', $a.'teacher', ['push', 'email'], ['name' => 'عيد الأضحى', 'from' => 'الثلاثاء 26 مايو', 'to' => 'الجمعة 29 مايو', 'count' => '6']],
-            ['dst_family', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'النحو', 'teacher' => 'أ. خالد', 'when' => 'الجمعة 30 أكتوبر · 19:00', 'before' => 'الجمعة 18:00', 'after' => 'الجمعة 19:00', 'zone' => 'الرياض', 'cause' => 'القاهرة']],
-            ['dst_kept_family', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'time' => 'الجمعة 18:00', 'zone' => 'الرياض']],
-            ['lessons_shifted_family', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 19:00', 'zone' => 'الرياض', 'from' => 'الأحد 1 نوفمبر', 'until' => 'السبت 28 نوفمبر']],
-            ['lessons_shifted_family_open', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 19:00', 'zone' => 'الرياض', 'from' => 'الأحد 1 نوفمبر']],
-            ['lessons_shifted_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 19:00', 'from' => 'الأحد 1 نوفمبر', 'until' => 'السبت 28 نوفمبر', 'why' => '']],
-            ['lessons_shifted_teacher_open', 'staff', $a.'teacher', ['push', 'whatsapp'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 19:00', 'from' => 'الأحد 1 نوفمبر', 'why' => '']],
+            ['dst_family', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'النحو', 'teacher' => 'أ. خالد', 'when' => 'الجمعة 30 أكتوبر · 7:00 م', 'before' => 'الجمعة 6:00 م', 'after' => 'الجمعة 7:00 م', 'zone' => 'الرياض', 'cause' => 'القاهرة']],
+            ['dst_kept_family', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'time' => 'الجمعة 6:00 م', 'zone' => 'الرياض']],
+            ['lessons_shifted_family', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 7:00 م', 'zone' => 'الرياض', 'from' => 'الأحد 1 نوفمبر', 'until' => 'السبت 28 نوفمبر']],
+            ['lessons_shifted_family_open', 'lessons', $a.'family', ['whatsapp', 'push'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 7:00 م', 'zone' => 'الرياض', 'from' => 'الأحد 1 نوفمبر']],
+            ['lessons_shifted_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 7:00 م', 'from' => 'الأحد 1 نوفمبر', 'until' => 'السبت 28 نوفمبر', 'why' => '']],
+            ['lessons_shifted_teacher_open', 'staff', $a.'teacher', ['push', 'whatsapp'], ['student' => 'زياد', 'subject' => 'النحو', 'time' => 'الأحد 7:00 م', 'from' => 'الأحد 1 نوفمبر', 'why' => '']],
             ['dispute_opened', 'staff', $a.'session_managers', ['push', 'email'], $lesson + ['side' => 'الأسرة', 'reason' => 'المدرس ما حضرش', 'before' => 'اتعملت']],
             ['dispute_decided', 'lessons', $a.'family', ['push', 'whatsapp'], $lesson + ['outcome' => 'الاعتراض اتقبل.', 'after' => 'غياب المدرس', 'answer' => 'راجعنا الحضور، وليكم حصة تعويض.']],
             ['dispute_decided_teacher', 'staff', $a.'teacher', ['push'], $lesson + ['outcome' => 'الاعتراض اتقبل.', 'after' => 'اتعملت', 'answer' => 'راجعنا الحضور واتسجلت لك.']],

@@ -22,6 +22,7 @@ use Modules\Scheduling\Live\BoardChanged;
 use Modules\Scheduling\Queries\Disputes\DisputeList;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -107,7 +108,7 @@ final class LessonDisputes extends Page
 
             return [
                 'label' => $first === null ? __($l.'page.never_came')
-                    : __($l.'page.was_there', ['minutes' => $r->{$role.'_minutes'}, 'of' => $booked, 'at' => $first->setTimezone($tz)->format('H:i')])
+                    : __($l.'page.was_there', ['minutes' => $r->{$role.'_minutes'}, 'of' => $booked, 'at' => $first->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i'))])
                         .($late > 0 ? __($l.'page.late', ['late' => $late]) : ''),
                 'full' => $r->{$role.'_minutes'} >= $booked - 2,
             ];
@@ -119,7 +120,7 @@ final class LessonDisputes extends Page
             'subject' => $locale === 'ar' ? $r->subject_ar : $r->subject_en,
             'student' => $r->student,
             'teacher' => $r->teacher,
-            'when' => $start->locale($locale)->translatedFormat('l j F · H:i'),
+            'when' => $start->locale($locale)->translatedFormat(Clock::pattern('l j F · H:i')),
             'side' => $r->side,
             'sideLabel' => __($l.'sides.'.$r->side),
             'raisedBy' => $r->raised_by_name,
@@ -132,7 +133,7 @@ final class LessonDisputes extends Page
             'statusLabel' => __($l.'statuses.'.$r->status),
             'answer' => $r->decision_note,
             'decidedBy' => $r->decided_by_name,
-            'decidedAt' => $r->decided_at?->setTimezone($tz)->locale($locale)->translatedFormat('j F · H:i'),
+            'decidedAt' => $r->decided_at?->setTimezone($tz)->locale($locale)->translatedFormat(Clock::pattern('j F · H:i')),
             'short' => (int) ($r->credit_short ?? 0),
             'teacherPresence' => $presence('teacher'),
             'studentPresence' => $presence('student'),

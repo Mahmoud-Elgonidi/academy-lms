@@ -10,6 +10,7 @@ use Modules\Billing\Zatca\QrSvg;
 use Modules\Billing\Zatca\TaxDocument;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\Clock;
 
 /**
  * An invoice as a document, the same for the back office and for the
@@ -33,7 +34,7 @@ final class InvoiceDocument
         $academy = $this->tenants->require();
         $locale = app()->getLocale();
         $date = fn (?CarbonImmutable $at) => $at?->setTimezone($tz)->locale($locale)->translatedFormat('j F Y');
-        $time = fn (?CarbonImmutable $at) => $at?->setTimezone($tz)->locale($locale)->translatedFormat('j F Y · H:i');
+        $time = fn (?CarbonImmutable $at) => $at?->setTimezone($tz)->locale($locale)->translatedFormat(Clock::pattern('j F Y · H:i'));
         $payer = DB::table('users')->where('id', $invoice->billingAccount->payer_id)->first(['name', 'email', 'phone_e164']);
         $courses = InvoiceCourses::ofOne($invoice->id);
         $students = collect($courses)->unique('student_id')->values();

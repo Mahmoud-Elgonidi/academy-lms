@@ -16,6 +16,7 @@ use Modules\Platform\Actions\Site\HandleSignupRequest;
 use Modules\Platform\Models\PlatformAdmin;
 use Modules\Platform\Models\SaasPlan;
 use Modules\Platform\Models\Site\SignupRequest;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -91,7 +92,7 @@ final class SignupRequests extends Page
             'utm' => trim(implode(' / ', array_filter([$r->utm_source, $r->utm_medium, $r->utm_campaign]))) ?: null,
             'status' => $r->status,
             'note' => $r->note,
-            'when' => $r->created_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M Y، H:i'),
+            'when' => $r->created_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M Y، H:i')),
             'ago' => $r->created_at->locale(app()->getLocale())->diffForHumans(),
             'make' => $canMake && in_array($r->status, ['new', 'contacted'], true) ? route('filament.console.pages.new-academy', ['request' => $r->id]) : null,
         ])->all();

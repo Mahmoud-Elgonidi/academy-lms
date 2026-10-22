@@ -14,6 +14,8 @@ use Modules\Evaluation\Actions\RateLesson;
 use Modules\Evaluation\Models\LessonRating;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\Clock;
+use Modules\SharedKernel\Time\ViewerClock;
 
 /**
  * The page behind the link in "how was the lesson?": five stars, one tap
@@ -43,7 +45,7 @@ final class RateLessonController
             'problem' => $problem,
             'rating' => $rating,
             'saved' => $request->boolean('saved'),
-            'when' => $lesson ? CarbonImmutable::parse($lesson->starts_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F · H:i') : null,
+            'when' => $lesson ? CarbonImmutable::parse($lesson->starts_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F · H:i')) : null,
             'subject' => $lesson ? (app()->getLocale() === 'ar' ? $lesson->subject_ar : $lesson->subject_en) : null,
             'action' => URL::temporarySignedRoute('evaluation.rate.store', now()->addHours(12), ['session' => $session, 'u' => $raterId], absolute: false),
             'branding' => $branding->current(),
@@ -65,8 +67,9 @@ final class RateLessonController
     private function speak(string $raterId, TenantContext $tenants): void
     {
         // A link always names who rates, someone of this academy.
-        $user = Str::isUuid($raterId) ? DB::table('users')->where('id', $raterId)->first(['locale']) : null;
+        $user = Str::isUuid($raterId) ? DB::table('users')->where('id', $raterId)->first(['locale', 'time_format']) : null;
         abort_if($user === null, 404);
         app()->setLocale($user->locale ?: $tenants->require()->defaultLocale);
+        app(ViewerClock::class)->choose($user->time_format);
     }
 }

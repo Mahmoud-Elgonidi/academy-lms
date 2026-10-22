@@ -44,6 +44,7 @@ use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Contact\Phone;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
@@ -228,7 +229,7 @@ final class Team extends Page implements HasTable
                     }),
                 TextColumn::make('last_sign_in_at')->label(__($c.'last_sign_in'))->sortable()->visibleFrom('md')
                     ->state(fn (User $u) => $u->last_sign_in_at === null ? __('identity::team.never')
-                        : CarbonImmutable::parse($u->last_sign_in_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M Y · H:i'))
+                        : CarbonImmutable::parse($u->last_sign_in_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M Y · H:i')))
                     ->color(fn (User $u) => $u->last_sign_in_at === null ? 'gray' : null),
             ])
             ->filters([

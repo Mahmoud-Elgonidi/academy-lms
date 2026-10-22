@@ -6,6 +6,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Modules\Messaging\Models\Conversation;
 use Modules\Messaging\Models\ConversationMessage;
+use Modules\SharedKernel\Time\Clock;
 
 /** A conversation in words, for every screen: who is in it, and its messages in the viewer's time zone and language. */
 final class ChatView
@@ -60,7 +61,7 @@ final class ChatView
                 // The academy's eyes only: something was hidden, and the words as typed can be opened (logged).
                 'canReveal' => $staff && $m->hidden !== [],
                 'outsideApp' => $staff && in_array('outside_app', $m->flags, true),
-                'when' => $at->translatedFormat('j M · H:i'),
+                'when' => $at->translatedFormat(Clock::pattern('j M · H:i')),
                 'ago' => $at->diffForHumans(['options' => CarbonInterface::JUST_NOW]),
             ];
         }, $messages);

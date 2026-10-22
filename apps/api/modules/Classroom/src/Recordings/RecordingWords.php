@@ -6,8 +6,14 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Classroom\Models\Recording;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\Clock;
+use Modules\SharedKernel\Time\ViewerClock;
 
-/** A recording's lesson in a few words, for the activity log: "Yousef Khaled with Nour · 5 October 2026 16:00". */
+/**
+ * A recording's lesson in a few words, for the activity log: "Yousef Khaled
+ * with Nour · 5 October 2026 4:00 PM". Kept as written and read by anyone
+ * later, so on the academy's clock and zone, not the person's who acted.
+ */
 final class RecordingWords
 {
     public static function lesson(Recording $recording): string
@@ -22,7 +28,7 @@ final class RecordingWords
             return '';
         }
         $tz = app(TenantContext::class)->require()->defaultTimezone;
-        $when = CarbonImmutable::parse($row->starts_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j F Y H:i');
+        $when = CarbonImmutable::parse($row->starts_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j F Y H:i', app(ViewerClock::class)->academy()));
 
         return __('classroom::recordings.lesson_words', ['student' => $row->student ?? '—', 'teacher' => $row->teacher, 'when' => $when]);
     }

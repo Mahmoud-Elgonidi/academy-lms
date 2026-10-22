@@ -21,6 +21,7 @@ use Modules\Crm\Filament\LeadForm;
 use Modules\Crm\Models\Lead;
 use Modules\Crm\Queries\LeadFunnel;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
 
@@ -120,7 +121,7 @@ final class Leads extends Page
                         'source' => __($l.'sources.'.$lead->source->value),
                         'owner' => $lead->getAttribute('owner_name'),
                         'note' => match (true) {
-                            $lead->stage === LeadStage::TrialBooked && $trial !== null => __($l.'card.trial_at', ['when' => CarbonImmutable::parse($trial->starts_at)->setTimezone($viewer)->locale($locale)->translatedFormat('D j M · H:i')]),
+                            $lead->stage === LeadStage::TrialBooked && $trial !== null => __($l.'card.trial_at', ['when' => CarbonImmutable::parse($trial->starts_at)->setTimezone($viewer)->locale($locale)->translatedFormat(Clock::pattern('D j M · H:i'))]),
                             $lead->stage === LeadStage::Attended => __($l.'card.waiting'),
                             $lead->stage === LeadStage::Assessed && $trial?->level => __($l.'card.level', ['level' => $trial->level]),
                             $lead->last_contact_at !== null => __($l.'card.contacted', ['ago' => $lead->last_contact_at->locale($locale)->diffForHumans()]),

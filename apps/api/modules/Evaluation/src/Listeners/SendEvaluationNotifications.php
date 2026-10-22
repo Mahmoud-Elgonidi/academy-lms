@@ -35,7 +35,7 @@ final class SendEvaluationNotifications
     public static function templates(NotificationsApi $notifications): void
     {
         $a = 'evaluation::notifications.audience.';
-        $lesson = ['student' => 'زياد', 'teacher' => 'أ. خالد', 'subject' => 'النحو', 'when' => 'الأحد 11 أكتوبر · 18:00'];
+        $lesson = ['student' => 'زياد', 'teacher' => 'أ. خالد', 'subject' => 'النحو', 'when' => 'الأحد 11 أكتوبر · 6:00 م'];
         foreach ([
             ['rate_lesson', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson + ['link' => 'https://demo.lms.test/rate/…']],
             ['low_rating', 'staff', $a.'reviewers', ['push', 'email'], $lesson + ['stars' => '2', 'comment' => 'النت كان بيقطع والمدرس اتأخر.']],

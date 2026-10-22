@@ -15,6 +15,7 @@ use Modules\People\Models\GuardianStudent;
 use Modules\People\Models\PeopleSettings;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\ViewerClock;
 
 /**
  * The page behind the link in a consent request: what the academy keeps
@@ -61,8 +62,9 @@ final class ConsentLinkController
     private function speak(string $guardianId, TenantContext $tenants): void
     {
         // A link always names its guardian, someone of this academy.
-        $user = Str::isUuid($guardianId) ? DB::table('users')->where('id', $guardianId)->first(['locale']) : null;
+        $user = Str::isUuid($guardianId) ? DB::table('users')->where('id', $guardianId)->first(['locale', 'time_format']) : null;
         abort_if($user === null, 404);
         app()->setLocale($user->locale ?: $tenants->require()->defaultLocale);
+        app(ViewerClock::class)->choose($user->time_format);
     }
 }

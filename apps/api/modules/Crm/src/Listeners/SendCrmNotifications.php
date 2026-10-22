@@ -33,7 +33,7 @@ final class SendCrmNotifications
         $a = 'crm::notifications.audience.';
         foreach ([
             ['lead_assigned', $a.'sales', ['push', 'email'], ['name' => 'أم يوسف', 'source' => 'واتساب']],
-            ['assess_trial', $a.'teacher', ['push', 'whatsapp'], ['student' => 'يوسف', 'subject' => 'القرآن', 'when' => 'الثلاثاء 13 أكتوبر · 18:00']],
+            ['assess_trial', $a.'teacher', ['push', 'whatsapp'], ['student' => 'يوسف', 'subject' => 'القرآن', 'when' => 'الثلاثاء 13 أكتوبر · 6:00 م']],
             ['trial_missed', $a.'sales', ['push'], ['name' => 'أم يوسف', 'outcome' => 'الطالب ماحضرش']],
             ['trial_assessed', $a.'sales', ['push', 'email'], ['name' => 'أم يوسف', 'teacher' => 'أ. نور', 'level' => 'مبتدئ: الحروف والحركات']],
         ] as [$name, $audience, $channels, $sample]) {

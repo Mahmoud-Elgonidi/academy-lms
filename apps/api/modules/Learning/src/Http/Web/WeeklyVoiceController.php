@@ -15,6 +15,8 @@ use Modules\Learning\Models\WeeklyDigest;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\Clock;
+use Modules\SharedKernel\Time\ViewerClock;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -40,7 +42,7 @@ final class WeeklyVoiceController
         return view('learning::voice', [
             'student' => strtok(trim($name), ' ') ?: $name,
             'homework' => $row->title,
-            'when' => CarbonImmutable::parse($row->submitted_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F · H:i'),
+            'when' => CarbonImmutable::parse($row->submitted_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F · H:i')),
             'src' => URL::temporarySignedRoute('learning.voice.file', now()->addMinutes(self::FILE_MINUTES), ['submission' => $submission, 'u' => $guardian->id], absolute: false),
             'branding' => $branding->current(),
         ]);
@@ -67,9 +69,10 @@ final class WeeklyVoiceController
     {
         $guardianId = (string) $request->query('u');
         abort_unless(Str::isUuid($guardianId) && Str::isUuid($submission), 404);
-        $guardian = DB::table('users')->where('id', $guardianId)->where('status', 'active')->first(['id', 'locale', 'timezone']);
+        $guardian = DB::table('users')->where('id', $guardianId)->where('status', 'active')->first(['id', 'locale', 'timezone', 'time_format']);
         abort_if($guardian === null, 404);
         app()->setLocale($guardian->locale ?: $tenants->require()->defaultLocale);
+        app(ViewerClock::class)->choose($guardian->time_format);
 
         $row = DB::table('homework_submissions as s')
             ->join('homework as h', fn ($j) => $j->on('h.academy_id', '=', 's.academy_id')->on('h.id', '=', 's.homework_id'))

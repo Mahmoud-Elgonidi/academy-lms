@@ -35,6 +35,7 @@ use Modules\Classroom\Models\Recording;
 use Modules\Classroom\Models\RecordingAccessLog;
 use Modules\Classroom\Queries\RecordingBoard;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
 
@@ -145,7 +146,7 @@ final class RecordingsPage extends Page implements HasTable
             ->defaultSort('lesson_at', 'desc')
             ->columns([
                 TextColumn::make('lesson_at')->label(__($l.'office.columns.lesson'))->sortable()->weight('semibold')
-                    ->state(fn (Recording $r) => CarbonImmutable::parse($r->getAttribute('lesson_at'))->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i')),
+                    ->state(fn (Recording $r) => CarbonImmutable::parse($r->getAttribute('lesson_at'))->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('D j M · H:i'))),
                 TextColumn::make('student_name')->label(__($l.'office.columns.student'))
                     ->searchable(query: fn (Builder $q, string $search) => $q->where(fn ($q) => $q->where('t.name', 'ilike', "%{$search}%")
                         ->orWhereRaw("exists (select 1 from session_participants p join users u on u.academy_id = p.academy_id and u.id = p.user_id where p.academy_id = s.academy_id and p.session_id = s.id and p.role = 'student' and u.name ilike ?)", ["%{$search}%"]))),
@@ -289,7 +290,7 @@ final class RecordingsPage extends Page implements HasTable
             'url' => $link->url,
             'media' => $model->media,
             'title' => (string) $recording->getAttribute('student_name').' · '.$recording->getAttribute('teacher_name').' · '
-                .CarbonImmutable::parse($recording->getAttribute('lesson_at'))->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F · H:i'),
+                .CarbonImmutable::parse($recording->getAttribute('lesson_at'))->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F · H:i')),
         ];
     }
 
@@ -329,7 +330,7 @@ final class RecordingsPage extends Page implements HasTable
             ->map(fn (RecordingAccessLog $log) => [
                 'who' => (string) DB::table('users')->where('id', $log->user_id)->value('name'),
                 'as' => __('classroom::recordings.as.'.$log->as),
-                'when' => $log->opened_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M Y · H:i'),
+                'when' => $log->opened_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M Y · H:i')),
                 'ip' => $log->ip,
             ])->all();
     }

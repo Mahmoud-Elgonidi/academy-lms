@@ -9,7 +9,7 @@
     @include('scheduling::filament.live-board.styles')
 
     {{-- No timer here: the board refreshes when a change is signalled, or when the clock alone changes it (data-live-next); see the script below. --}}
-    <div class="lb" data-live-now="{{ $board['serverNow'] }}" data-live-next="{{ $board['nextChangeAt'] }}" data-lb-tz="{{ $this->viewTz }}" data-live-channel="{{ $board['channel'] }}">
+    <div class="lb" data-live-now="{{ $board['serverNow'] }}" data-live-next="{{ $board['nextChangeAt'] }}" data-lb-tz="{{ $this->viewTz }}" data-lb-locale="{{ app()->getLocale() }}" data-hour-cycle="{{ \Modules\SharedKernel\Time\Clock::hourCycle() }}" data-live-channel="{{ $board['channel'] }}">
         <header class="lb-head">
             <div>
                 <h1 class="lb-title lms-heading">{{ __('scheduling::board.title') }}</h1>
@@ -72,7 +72,10 @@
     // Minutes counting on are kept here, in the browser. With no live connection it refreshes every 30 seconds, and says so.
     const el = $wire.$el.querySelector('.lb');
     const badge = $wire.$el.querySelector('[data-lb-live]');
-    const hm = (ms, tz) => new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: tz }).format(ms);
+    // The clock as the server writes it (Clock): 12 hours (5:00 م, 5:00 PM) or 24 (17:00), the reader's choice in data-hour-cycle.
+    const h23 = el.dataset.hourCycle === 'h23';
+    const hm = (ms, tz) => new Intl.DateTimeFormat(h23 ? 'en-GB' : el.dataset.lbLocale + '-u-nu-latn', { hour: h23 ? '2-digit' : 'numeric', minute: '2-digit', hourCycle: el.dataset.hourCycle, timeZone: tz })
+        .format(ms).replace(/\u202f/g, ' ');
     const live = window.LmsLive
         ? window.LmsLive.watch({ el, channel: el.dataset.liveChannel, event: '.changed', refresh: () => $wire.$refresh(), every: 30000 })
         : { now: () => Date.now(), state: () => 'polling', poll: setInterval(() => $wire.$refresh(), 30000) };

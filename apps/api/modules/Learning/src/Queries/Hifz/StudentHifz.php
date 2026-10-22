@@ -4,6 +4,7 @@ namespace Modules\Learning\Queries\Hifz;
 
 use Carbon\CarbonImmutable;
 use Modules\Learning\Queries\Mushaf\MistakesBook;
+use Modules\SharedKernel\Time\Clock;
 
 /**
  * One learner's hifz as the course's teacher and the academy's supervisors
@@ -25,7 +26,7 @@ final class StudentHifz
                 'page' => $r['page'],
                 'grade' => __('learning::hifz.grades.'.$r['grade']),
                 'source' => __('learning::hifz.sources.'.$r['source']),
-                'at' => $r['reviewed_at']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i'),
+                'at' => $r['reviewed_at']->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('D j M · H:i')),
             ], $this->map->recent($studentId, $now, $recent)),
             'book' => $this->book->for($studentId, $now),
             'tz' => $tz,

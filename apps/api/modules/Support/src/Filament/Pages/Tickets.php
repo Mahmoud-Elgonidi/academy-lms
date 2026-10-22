@@ -23,6 +23,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use Modules\Support\Actions\OpenTicket;
 use Modules\Support\Actions\SaveSupportTargets;
@@ -289,6 +290,6 @@ final class Tickets extends Page
             default => [],
         };
 
-        return collect($lessons)->mapWithKeys(fn ($l) => [$l->id => $l->subject().' · '.$l->startsAt->setTimezone($tz)->locale($locale)->translatedFormat('D j M · H:i').' · '.($for === 'teacher' ? $l->studentName : $l->teacherName)])->all();
+        return collect($lessons)->mapWithKeys(fn ($l) => [$l->id => $l->subject().' · '.$l->startsAt->setTimezone($tz)->locale($locale)->translatedFormat(Clock::pattern('D j M · H:i')).' · '.($for === 'teacher' ? $l->studentName : $l->teacherName)])->all();
     }
 }

@@ -31,6 +31,7 @@ use Modules\Identity\Preferences\PreferenceStore;
 use Modules\Identity\Queries\SocialAccounts;
 use Modules\Identity\Social\Provider;
 use Modules\SharedKernel\Audit\AuditActor;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\TimeFormat;
 use Modules\SharedKernel\Time\ViewerClock;
 use Modules\SharedKernel\Time\ViewerTimezone;
@@ -345,7 +346,7 @@ final class MySettings extends EditProfile
             ->latest('redeemed_at')->limit(10)->get()
             ->map(fn (Impersonation $i) => [
                 'admin' => $i->admin_name,
-                'when' => $i->redeemed_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M Y · H:i'),
+                'when' => $i->redeemed_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M Y · H:i')),
                 'minutes' => $i->minutes,
                 'reason' => $i->reason,
             ])->all();

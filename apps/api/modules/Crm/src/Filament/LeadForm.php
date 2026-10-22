@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Support\Facades\DB;
 use Modules\Crm\Enums\LeadSource;
 use Modules\Crm\Support\Countries;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 
 /** A lead's form, for adding one and for correcting it: contact, learner, what and when, and where they came from. */
@@ -29,7 +30,7 @@ final class LeadForm
         $child = fn (Get $get) => (bool) $get('for_child');
         $year = CarbonImmutable::now()->year;
         $days = app()->getLocale() === 'ar' ? [6, 7, 1, 2, 3, 4, 5] : [1, 2, 3, 4, 5, 6, 7];
-        $hours = collect(range(0, 24))->mapWithKeys(fn (int $h) => [$h => sprintf('%02d:00', $h)])->all();
+        $hours = collect(range(0, 24))->mapWithKeys(fn (int $h) => [$h => Clock::hour($h)])->all();
 
         return [
             Fieldset::make(__($l.'sections.contact'))->columns(2)->schema([

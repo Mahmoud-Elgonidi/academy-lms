@@ -47,6 +47,7 @@ use Modules\Platform\Settings\SettingDefinition;
 use Modules\Platform\Settings\SettingValues;
 use Modules\SharedKernel\Text\QuranFetchFailed;
 use Modules\SharedKernel\Text\QuranSource;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -145,7 +146,7 @@ final class PlatformSettingsPage extends Page
 
         return array_map(fn (array $row) => [
             'by' => $names[$row['by']] ?? null,
-            'at' => CarbonImmutable::parse($row['at'])->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M Y، H:i'),
+            'at' => CarbonImmutable::parse($row['at'])->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M Y، H:i')),
         ], $saved);
     }
 
@@ -463,7 +464,7 @@ final class PlatformSettingsPage extends Page
         $status = app(QuranSource::class)->status();
         if ($status['fetched_at'] !== null) {
             $status['fetched_at'] = CarbonImmutable::parse($status['fetched_at'])->setTimezone(app(ViewerTimezone::class)->effective())
-                ->locale(app()->getLocale())->translatedFormat('j M Y، H:i');
+                ->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M Y، H:i'));
         }
 
         return $status;

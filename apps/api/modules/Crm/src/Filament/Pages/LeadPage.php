@@ -30,6 +30,7 @@ use Modules\Crm\Models\LeadTrial;
 use Modules\Crm\Support\LeadFields;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -103,11 +104,11 @@ final class LeadPage extends Page
             'email' => $lead->email,
             'country' => $lead->country ? __('crm::countries.'.$lead->country) : null,
             'zone' => Timezones::city($lead->timezone),
-            'localTime' => CarbonImmutable::now($lead->timezone)->locale($locale)->translatedFormat('l H:i'),
+            'localTime' => CarbonImmutable::now($lead->timezone)->locale($locale)->translatedFormat(Clock::pattern('l H:i')),
             'learner' => $lead->for_child ? $lead->learner_name : null,
             'age' => $lead->for_child && $lead->learner_birth_year ? CarbonImmutable::now()->year - $lead->learner_birth_year : null,
             'wants' => $lead->preferred_from !== null && $lead->preferred_to !== null && $days !== ''
-                ? __($l.'page.wants', ['subject' => $subject ?? __($l.'page.no_subject'), 'days' => $days, 'from' => sprintf('%02d:00', $lead->preferred_from), 'to' => sprintf('%02d:00', $lead->preferred_to)])
+                ? __($l.'page.wants', ['subject' => $subject ?? __($l.'page.no_subject'), 'days' => $days, 'from' => Clock::hour($lead->preferred_from), 'to' => Clock::hour($lead->preferred_to)])
                 : ($subject ?? __($l.'page.no_subject')).' · '.__($l.'page.wants_any'),
             'source' => __($l.'sources.'.$lead->source->value),
             'utm' => collect([$lead->getAttribute('utm_source'), $lead->getAttribute('utm_medium'), $lead->getAttribute('utm_campaign')])->filter()->implode(' / '),
@@ -135,8 +136,8 @@ final class LeadPage extends Page
                 'status' => $t->status,
                 'statusLabel' => __('crm::trials.statuses.'.$t->status),
                 'teacher' => $teacher->name ?? '',
-                'their' => $t->starts_at->setTimezone($lead->timezone)->locale($locale)->translatedFormat('l j F · H:i'),
-                'teacherAt' => $t->starts_at->setTimezone($teacher->timezone ?? 'UTC')->format('H:i').' '.Timezones::city($teacher->timezone ?? 'UTC'),
+                'their' => $t->starts_at->setTimezone($lead->timezone)->locale($locale)->translatedFormat(Clock::pattern('l j F · H:i')),
+                'teacherAt' => $t->starts_at->setTimezone($teacher->timezone ?? 'UTC')->locale($locale)->translatedFormat(Clock::pattern('H:i')).' '.Timezones::city($teacher->timezone ?? 'UTC'),
                 'assessed' => $t->isAssessed(),
                 'level' => $t->level,
                 'plan' => $t->recommended_plan_id ? ($plans[$t->recommended_plan_id]->name ?? null) : null,
@@ -156,7 +157,7 @@ final class LeadPage extends Page
         $activities = LeadActivity::query()->where('lead_id', $this->leadId)->orderByDesc('created_at')->limit(100)->get();
         $people = $activities->flatMap(fn (LeadActivity $a) => [$a->actor_id, $a->data['teacher'] ?? null, $a->kind === 'assigned' ? ($a->data['to'] ?? null) : null]);
         $names = DB::table('users')->whereIn('id', $people->filter()->unique()->values())->pluck('name', 'id');
-        $at = fn (?string $iso) => $iso ? CarbonImmutable::parse($iso)->setTimezone($this->lead->timezone)->locale($locale)->translatedFormat('l j F · H:i') : '';
+        $at = fn (?string $iso) => $iso ? CarbonImmutable::parse($iso)->setTimezone($this->lead->timezone)->locale($locale)->translatedFormat(Clock::pattern('l j F · H:i')) : '';
 
         return $activities->map(fn (LeadActivity $a) => [
             'id' => $a->id,
@@ -174,7 +175,7 @@ final class LeadPage extends Page
             },
             'body' => $a->body,
             'who' => $a->actor_id ? ($names[$a->actor_id] ?? '—') : __($l.'activity.system'),
-            'when' => $a->created_at->setTimezone($viewer)->locale($locale)->translatedFormat('j M · H:i'),
+            'when' => $a->created_at->setTimezone($viewer)->locale($locale)->translatedFormat(Clock::pattern('j M · H:i')),
             'ago' => $a->created_at->locale($locale)->diffForHumans(),
         ])->all();
     }

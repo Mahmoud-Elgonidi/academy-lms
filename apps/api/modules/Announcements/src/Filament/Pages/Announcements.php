@@ -34,6 +34,7 @@ use Modules\Announcements\Queries\AudienceMembers;
 use Modules\Announcements\Queries\TodaysAnnouncements;
 use Modules\Catalog\Contracts\CatalogApi;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use UnitEnum;
 
@@ -240,7 +241,7 @@ final class Announcements extends Page implements HasTable
             ->emptyStateHeading(__($l.'empty'))->emptyStateDescription(__($l.'empty_hint'))->emptyStateIcon(Heroicon::OutlinedMegaphone)
             ->columns([
                 TextColumn::make('sent_at')->label(__($l.'when'))
-                    ->state(fn (Announcement $a) => $a->sent_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i'))
+                    ->state(fn (Announcement $a) => $a->sent_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('D j M · H:i')))
                     ->description(fn (Announcement $a) => $a->getAttributes()['sender'] ?? null),
                 TextColumn::make('title')->label(__($l.'announcement'))->weight('semibold')->wrap()->searchable('announcements.title')
                     ->description(fn (Announcement $a) => Str::limit(str_replace("\n", ' ', $a->body), 140)),
@@ -268,7 +269,7 @@ final class Announcements extends Page implements HasTable
 
         return __($l.'list.sent_by', [
             'name' => $name,
-            'when' => $a->sent_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i'),
+            'when' => $a->sent_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('D j M · H:i')),
             'people' => trans_choice($l.'reach.people', $a->recipients_count, ['n' => $a->recipients_count]),
         ]).' '.$this->audienceLabel($a);
     }

@@ -8,7 +8,7 @@
                 <x-filament::badge :color="['sent' => 'success', 'failed' => 'danger', 'held' => 'warning', 'queued' => 'warning'][$d->status] ?? 'gray'">{{ __($l.'statuses.'.$d->status) }}</x-filament::badge>
                 @if ($d->address) <span style="color:var(--gray-600)" dir="ltr">{{ $d->address }}</span> @endif
                 @if ($d->status === 'held' && $d->not_before)
-                    <small style="color:var(--gray-500)">{{ __($l.'log.held_until', ['time' => $d->not_before->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('D j M · H:i')]) }}</small>
+                    <small style="color:var(--gray-500)">{{ __($l.'log.held_until', ['time' => $d->not_before->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(\Modules\SharedKernel\Time\Clock::pattern('D j M · H:i'))]) }}</small>
                 @endif
                 @if ($d->attempts > 0) <small style="color:var(--gray-500)">{{ __($l.'log.attempts', ['n' => $d->attempts]) }}</small> @endif
                 @if ($d->error)

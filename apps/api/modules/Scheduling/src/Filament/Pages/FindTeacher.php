@@ -42,6 +42,7 @@ use Modules\Scheduling\Filament\LiveBoardView;
 use Modules\Scheduling\Queries\FindTeachersQuery;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 
 /**
@@ -586,7 +587,7 @@ final class FindTeacher extends Page
 
     private function studentDate(CarbonImmutable $at): string
     {
-        return $at->setTimezone($this->data['timezone'])->locale(app()->getLocale())->translatedFormat('l j F · H:i');
+        return $at->setTimezone($this->data['timezone'])->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F · H:i'));
     }
 
     private function studentChosen(?string $studentId): void

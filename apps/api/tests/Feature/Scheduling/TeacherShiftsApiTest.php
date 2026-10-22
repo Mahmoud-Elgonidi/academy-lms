@@ -54,15 +54,21 @@ it('lets the teacher send a weekly schedule and a message', function () {
         ->assertJsonCount(2, 'data.comments');
 });
 
-it('explains in Arabic what is wrong with a schedule', function () {
-    $this->withToken(tokenFor('sara@example.test'))->withHeader('Accept-Language', 'ar')
+it('explains in Arabic what is wrong with a schedule, on the teacher\'s clock', function () {
+    $token = tokenFor('sara@example.test');
+    $send = fn () => $this->withToken($token)->withHeader('Accept-Language', 'ar')
         ->putJson('/api/v1/teacher/shifts/proposal', [
             'blocks' => [['weekday' => 6, 'start' => '17:00', 'end' => '17:30']],
             'effective_from' => '2026-10-06',
-        ])
-        ->assertUnprocessable()
+        ]);
+
+    $send()->assertUnprocessable()
         ->assertJsonPath('type', 'validation')
-        ->assertJsonPath('errors.shifts.0', 'الوقت اللي بيبدأ 17:00 يوم السبت أقل من 60 دقيقة.');
+        ->assertJsonPath('errors.shifts.0', 'الوقت اللي بيبدأ 5:00 م يوم السبت أقل من 60 دقيقة.');
+
+    // In 24 hours when she chose it.
+    $this->withToken($token)->patchJson('/api/v1/me', ['time_format' => 'h24'])->assertOk();
+    $send()->assertUnprocessable()->assertJsonPath('errors.shifts.0', 'الوقت اللي بيبدأ 17:00 يوم السبت أقل من 60 دقيقة.');
 });
 
 it('lets the teacher accept a counter-offer with one call', function () {

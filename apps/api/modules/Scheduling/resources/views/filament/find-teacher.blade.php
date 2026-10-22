@@ -69,11 +69,11 @@
                         <span>{{ mb_substr($this->dayName($day), 0, app()->getLocale() === 'ar' ? 10 : 3) }}</span>
                     @endforeach
                     @foreach ($hours as $hour)
-                        <span class="ft-hour">{{ sprintf('%02d', $hour) }}</span>
+                        <span class="ft-hour">{{ \Modules\SharedKernel\Time\Clock::hour($hour) }}</span>
                         @foreach ($days as $day)
                             <button type="button" class="ft-cell" wire:click="toggleCell({{ $day }}, {{ $hour }})"
                                 aria-pressed="{{ in_array($hour, $this->cells[$day] ?? [], true) ? 'true' : 'false' }}"
-                                aria-label="{{ $this->dayName($day) }} {{ sprintf('%02d:00', $hour) }}"></button>
+                                aria-label="{{ $this->dayName($day) }} {{ \Modules\SharedKernel\Time\Clock::hour($hour) }}"></button>
                         @endforeach
                     @endforeach
                 </div>
@@ -89,7 +89,7 @@
                 <div class="ft-select" role="status" wire:key="selection">
                     <div>
                         <span class="ft-muted">{{ __('scheduling::find.selection') }}</span><br>
-                        <strong>{{ collect($this->inWeekOrder($picked))->map(fn ($c) => $this->dayName($c->studentWeekday).' '.$c->studentTime)->implode(' + ') }}</strong>
+                        <strong>{{ collect($this->inWeekOrder($picked))->map(fn ($c) => $this->dayName($c->studentWeekday).' '.\Modules\SharedKernel\Time\Clock::wall($c->studentTime))->implode(' + ') }}</strong>
                         · {{ $pickedResult['teacher']->name }}
                     </div>
                     @if ($this->holdBatch)
@@ -156,7 +156,7 @@
                         @if ($result['pattern'] && ! $trial)
                             <div class="ft-pattern">
                                 <span>{{ __('scheduling::find.pattern') }}</span>
-                                <strong>{{ collect($this->inWeekOrder($result['pattern']))->map(fn ($c) => $this->dayName($c->studentWeekday).' '.$c->studentTime)->implode(' + ') }}</strong>
+                                <strong>{{ collect($this->inWeekOrder($result['pattern']))->map(fn ($c) => $this->dayName($c->studentWeekday).' '.\Modules\SharedKernel\Time\Clock::wall($c->studentTime))->implode(' + ') }}</strong>
                                 @if (! $this->holdBatch)
                                     <button type="button" class="ft-link" wire:click="usePattern('{{ $t->id }}')">{{ __('scheduling::find.use_pattern') }}</button>
                                 @endif
@@ -172,8 +172,8 @@
                                             <button type="button" class="ft-chip" wire:click="pick('{{ $t->id }}', '{{ $chip->key() }}')"
                                                 aria-pressed="{{ $this->pickedTeacher === $t->id && in_array($chip->key(), $this->picked, true) ? 'true' : 'false' }}"
                                                 title="{{ $chip->full() ? __('scheduling::find.all_weeks', ['n' => $chip->weeks]) : __('scheduling::find.conflicts_on', ['dates' => implode('، ', $chip->conflictDates)]) }}">
-                                                <strong>{{ $chip->studentTime }}</strong>
-                                                <small>{{ $chip->teacherTime }} {{ $this->city($t->timezone ?? 'UTC') }}</small>
+                                                <strong>{{ \Modules\SharedKernel\Time\Clock::wall($chip->studentTime) }}</strong>
+                                                <small>{{ \Modules\SharedKernel\Time\Clock::wall($chip->teacherTime) }} {{ $this->city($t->timezone ?? 'UTC') }}</small>
                                                 @if ($trial)
                                                     <em class="ft-first">{{ __('scheduling::find.first_free', ['date' => $this->firstFree($chip, $t->timezone ?? 'UTC')]) }}</em>
                                                 @elseif (! $chip->full())

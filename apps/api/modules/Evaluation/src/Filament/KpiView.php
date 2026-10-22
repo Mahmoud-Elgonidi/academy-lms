@@ -4,6 +4,7 @@ namespace Modules\Evaluation\Filament;
 
 use Carbon\CarbonImmutable;
 use Modules\Evaluation\Domain\Kpi;
+use Modules\SharedKernel\Time\Clock;
 
 /** KPI values and performance events as the screens show them: formatted, against their target, in this locale. */
 final class KpiView
@@ -62,7 +63,7 @@ final class KpiView
             'session' => $e['session_id'],
             'kind' => $e['kind'],
             'text' => __($l.$e['kind'], ['minutes' => $e['minutes'] ?? '', 'stars' => $e['stars'] ?? '']),
-            'lesson' => collect([$names ? $e['student'] : null, $locale === 'ar' ? $e['subject_ar'] : $e['subject_en'], CarbonImmutable::parse($e['at'])->setTimezone($tz)->locale($locale)->translatedFormat('D j M · H:i')])->filter()->implode(' · '),
+            'lesson' => collect([$names ? $e['student'] : null, $locale === 'ar' ? $e['subject_ar'] : $e['subject_en'], CarbonImmutable::parse($e['at'])->setTimezone($tz)->locale($locale)->translatedFormat(Clock::pattern('D j M · H:i'))])->filter()->implode(' · '),
             'comment' => $e['comment'] ?? null,
             'excluded' => $e['excluded'] ? __('evaluation::kpis.excluded', ['reason' => __('evaluation::kpis.reasons.'.$e['excluded']->reason), 'by' => $e['excluded']->by ?? '']) : null,
             'note' => $e['excluded']->note ?? null,

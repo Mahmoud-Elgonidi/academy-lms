@@ -20,6 +20,7 @@ use Modules\Crm\Filament\Concerns\Attempts;
 use Modules\Crm\Models\LeadTrial;
 use Modules\Crm\Queries\TeacherTrials;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
@@ -81,7 +82,7 @@ final class MyTrials extends Page
         $locale = app()->getLocale();
 
         return array_map(fn (array $group) => array_map(fn (array $t) => [
-            'when' => $t['starts_at']->setTimezone($viewer)->locale($locale)->translatedFormat('l j F · H:i'),
+            'when' => $t['starts_at']->setTimezone($viewer)->locale($locale)->translatedFormat(Clock::pattern('l j F · H:i')),
             'perWeek' => $t['per_week'],
         ] + $t, $group), app(TeacherTrials::class)->of((string) auth()->id()));
     }

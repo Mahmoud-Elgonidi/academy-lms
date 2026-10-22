@@ -447,7 +447,7 @@ final class AcademyCalendar extends Page
         $l = 'scheduling::calendar.';
         // Their own clock, when it reads differently from the viewer's.
         $elsewhere = fn (?string $tz) => $tz !== null && Timezones::isValid($tz) && $row->starts_at->setTimezone($tz)->format('Y-m-d H:i') !== $start->format('Y-m-d H:i')
-            ? trim(__($l.'details.their_time', ['time' => $row->starts_at->setTimezone($tz)->format('H:i'), 'city' => Timezones::city($tz),
+            ? trim(__($l.'details.their_time', ['time' => CalendarView::clock($row->starts_at->setTimezone($tz)), 'city' => Timezones::city($tz),
                 'day' => $row->starts_at->setTimezone($tz)->toDateString() !== $start->toDateString() ? $row->starts_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l') : '']))
             : null;
         $cancelled = $row->status === 'cancelled' && $row->reason !== null;

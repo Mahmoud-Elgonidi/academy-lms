@@ -20,6 +20,7 @@ use Modules\Scheduling\Queries\AvailabilityQuery;
 use Modules\Scheduling\Support\CourseDays;
 use Modules\Scheduling\Support\MinorsGuard;
 use Modules\SharedKernel\Audit\AuditTrail;
+use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\LocalTimeResolver;
 
 /**
@@ -93,7 +94,7 @@ final class ReassignTeacher
             $busy = $plan->filter(fn (array $p) => $free === null || ! $free->contains($p['start']->getTimestamp(), $p['end']->getTimestamp()));
             if ($busy->isNotEmpty()) {
                 throw ValidationException::withMessages(['teacher' => __('scheduling::policy.errors.new_teacher_busy', [
-                    'dates' => $busy->take(6)->map(fn (array $p) => $p['start']->setTimezone($newTz)->format('Y-m-d H:i'))->implode('، '),
+                    'dates' => $busy->take(6)->map(fn (array $p) => $p['start']->setTimezone($newTz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('Y-m-d H:i')))->implode('، '),
                 ])]);
             }
         }

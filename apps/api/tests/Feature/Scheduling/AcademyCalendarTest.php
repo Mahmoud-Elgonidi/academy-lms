@@ -16,6 +16,7 @@ use Modules\Scheduling\Queries\Calendar\CalendarFilter;
 use Modules\Scheduling\Queries\Calendar\CalendarRange;
 use Modules\Scheduling\Queries\Calendar\LessonsCalendar;
 use Modules\SharedKernel\Time\Timezones;
+use Modules\SharedKernel\Time\ViewerClock;
 use OpenSpout\Reader\XLSX\Reader;
 use Tests\Support\EnrolledStudent;
 
@@ -144,7 +145,8 @@ it('shows the calendar to whoever runs the lessons: week, day, month, list and b
     $page = Livewire::test(AcademyCalendar::class)
         ->assertSet('unit', 'week')->assertSet('zone', 'Africa/Cairo')
         ->assertSee('3 – 9 '.CarbonImmutable::parse('2026-10-03')->locale(app()->getLocale())->translatedFormat('F Y'))
-        ->assertSee($this->student->name)->assertSeeHtml('data-status="completed"');
+        ->assertSee($this->student->name)->assertSeeHtml('data-status="completed"')
+        ->assertSeeHtml('>6 م</span>')->assertSee('6:00 م');                 // the hours on the side and the lessons, in 12 hours
 
     // The teacher's week shows their shift hours behind the lessons.
     $page->set('teacher', $this->teacher->id)->assertSeeHtml('data-kind="shift"')
@@ -163,14 +165,23 @@ it('shows the calendar to whoever runs the lessons: week, day, month, list and b
 
     // Month, list and by status.
     $page->call('setUnit', 'month')->assertSet('unit', 'month')->assertSeeHtml('class="cal-mday"')
-        ->call('setDisplay', 'list')->assertSee('18:00 – 18:30')
+        ->call('setDisplay', 'list')->assertSee('6:00 م – 6:30 م')
         ->call('setDisplay', 'summary')->assertSee(__($l.'summary.teachers'))->assertSee($this->teacher->name)
         ->call('focus', 'teacher', $this->teacher->id)->assertSet('teacher', $this->teacher->id)->assertSet('display', 'calendar');
 
     // A lesson's details: who, when on each clock, and the way to the student's account.
     $page->call('today')->mountAction('lesson', ['id' => $this->lessons[0]->id])
         ->assertMountedActionModalSee([$this->student->name, __($l.'statuses.completed'), __($l.'details.account'),
-            trim(__($l.'details.their_time', ['day' => '', 'time' => '16:00', 'city' => Timezones::city('Europe/London')]))]);
+            trim(__($l.'details.their_time', ['day' => '', 'time' => '4:00 م', 'city' => Timezones::city('Europe/London')]))]);
+
+    // Someone who reads 24 hours sees the same calendar on a 24-hour clock.
+    $this->scheduler->update(['time_format' => 'h24']);
+    $this->actingAs($this->scheduler->fresh());
+    app(ViewerClock::class)->reset();                     // as each request does (SetPanelLocale)
+    Livewire::test(AcademyCalendar::class)->assertSeeHtml('>18:00</span>')->assertDontSeeHtml('>6 م</span>')
+        ->call('setDisplay', 'list')->assertSee('18:00 – 18:30')->assertDontSee('6:00 م')
+        ->mountAction('lesson', ['id' => $this->lessons[0]->id])
+        ->assertMountedActionModalSee(trim(__($l.'details.their_time', ['day' => '', 'time' => '16:00', 'city' => Timezones::city('Europe/London')])));
 
     Livewire::test(AcademyCalendar::class)->callAction('export')->assertFileDownloaded('lessons-2026-10-03-2026-10-09.xlsx');
 });

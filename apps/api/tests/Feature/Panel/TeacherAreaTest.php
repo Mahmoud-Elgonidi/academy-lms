@@ -28,7 +28,7 @@ afterEach(fn () => CarbonImmutable::setTestNow());
 
 it('shows the teacher\'s own week on their clock, and moves from week to week', function () {
     Livewire::test(MyWeek::class)
-        ->assertSee('18:00 – 18:30')->assertSee($this->student->name)
+        ->assertSee('6:00 PM – 6:30 PM')->assertSee($this->student->name)
         ->assertSee(trans_choice('scheduling::teacher.week.count', 2, ['n' => 2]))   // Tuesday and Saturday
         ->call('move', -1)->assertSee(__('scheduling::teacher.week.none'));
 

@@ -21,6 +21,8 @@ use Modules\Platform\Contracts\BrandingApi;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\SharedKernel\Realtime\BrowserEcho;
 use Modules\SharedKernel\Tenancy\TenantContext;
+use Modules\SharedKernel\Time\Clock;
+use Modules\SharedKernel\Time\ViewerClock;
 
 /**
  * The class page on the web. Who is looking: someone signed in to the
@@ -45,9 +47,10 @@ final class ClassroomPageController
             abort(response()->view('classroom::refused', ['brand' => $branding->current(), 'consent' => $consent], 403));
         }
 
-        $user = DB::table('users')->where('id', $viewer)->first(['locale', 'timezone']);
+        $user = DB::table('users')->where('id', $viewer)->first(['locale', 'timezone', 'time_format']);
         app()->setLocale(in_array($user->locale ?? null, ['ar', 'en'], true) ? $user->locale : $tenant->require()->defaultLocale);
         $tz = $user->timezone ?: $tenant->require()->defaultTimezone;
+        app(ViewerClock::class)->choose($user->time_format);
 
         // A Quran lesson's shared mushaf (Learning's): its teacher turns the pages and marks words, the student follows.
         $mushaf = $seat->role === 'observer' ? null : $learning->lessonMushaf($lesson->id, $seat->userId);
@@ -66,7 +69,7 @@ final class ClassroomPageController
             ],
             'lesson' => $lesson,
             'seat' => $seat,
-            'when' => $lesson->startsAt->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F · H:i'),
+            'when' => $lesson->startsAt->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F · H:i')),
             // The teacher and staff see today's plan with every material; the student, the materials meant for everyone.
             'plan' => $learning->planFor($lesson->enrollmentId, $lesson->startsAt, $seat->role !== 'student'),
             'homework' => $seat->role === 'student' || $lesson->studentId === null ? null : $learning->lastHomework($lesson->studentId, $lesson->enrollmentId, $lesson->startsAt),

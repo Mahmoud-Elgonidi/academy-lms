@@ -3,6 +3,7 @@
 namespace Modules\SharedKernel\Audit;
 
 use Carbon\CarbonImmutable;
+use Modules\SharedKernel\Time\Clock;
 
 /**
  * Audit entries as people read them: a sentence for the action (wording in
@@ -61,7 +62,7 @@ final class AuditEntries
         return [
             'title' => $title,
             'actor' => $actor,
-            'when' => CarbonImmutable::parse($row->created_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('j M Y · H:i'),
+            'when' => CarbonImmutable::parse($row->created_at)->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M Y · H:i')),
             'platform' => $row->actor_type === 'platform',
             'group' => self::group($row->action),
         ];

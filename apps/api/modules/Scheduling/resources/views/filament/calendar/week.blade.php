@@ -20,7 +20,7 @@
         <div class="cal-week-body">
             <div class="cal-axis" aria-hidden="true">
                 @for ($h = $from; $h < $to; $h++)
-                    <span style="--i: {{ $h - $from }}">{{ sprintf('%02d:00', $h) }}</span>
+                    <span style="--i: {{ $h - $from }}">{{ \Modules\SharedKernel\Time\Clock::hour($h) }}</span>
                 @endfor
             </div>
             @foreach ($board['days'] as $d)
