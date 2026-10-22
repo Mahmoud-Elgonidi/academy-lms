@@ -103,7 +103,7 @@ final class MySettings extends EditProfile
                     ToggleButtons::make('time_format')
                         ->label(__('identity::settings.fields.time_format'))
                         ->options(fn (): array => [
-                            self::ACADEMY_CLOCK => __('identity::settings.time_format.academy', ['format' => __('identity::settings.time_format.'.app(ViewerClock::class)->academy()->value)]),
+                            self::ACADEMY_CLOCK => __('identity::settings.time_format.academy', ['hours' => app(ViewerClock::class)->academy() === TimeFormat::TwentyFour ? '24' : '12']),
                             TimeFormat::Twelve->value => __('identity::settings.time_format.h12'),
                             TimeFormat::TwentyFour->value => __('identity::settings.time_format.h24'),
                         ])

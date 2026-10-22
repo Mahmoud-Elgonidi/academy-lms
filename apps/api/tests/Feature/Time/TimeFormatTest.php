@@ -131,7 +131,7 @@ it('lets anyone choose their own clock in My settings, or follow the academy\'s'
 
     Livewire::test(MySettings::class)
         ->assertSet('data.time_format', 'academy')
-        ->assertSee(__('identity::settings.time_format.academy', ['format' => __('identity::settings.time_format.h12')]))
+        ->assertSee(__('identity::settings.time_format.academy', ['hours' => '12']))
         ->set('data.time_format', 'h24')
         ->call('save')
         ->assertHasNoErrors();
