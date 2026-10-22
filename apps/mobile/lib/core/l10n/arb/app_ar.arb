@@ -1209,6 +1209,25 @@
   },
   "language": "اللغة",
   "timezone": "التوقيت",
+  "timeFormat": "شكل الساعة",
+  "timeFormatExample": "المواعيد بتظهر كده: {time}",
+  "@timeFormatExample": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "timeFormatAcademy": "زي الأكاديمية ({hours})",
+  "@timeFormatAcademy": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "timeFormat12": "12 ساعة",
+  "timeFormat24": "24 ساعة",
   "myDevices": "أجهزتي",
   "thisDevice": "الجهاز ده",
   "lastUsed": "آخر مرة {when}",

@@ -1681,6 +1681,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get timezone => 'التوقيت';
 
   @override
+  String get timeFormat => 'شكل الساعة';
+
+  @override
+  String timeFormatExample(String time) {
+    return 'المواعيد بتظهر كده: $time';
+  }
+
+  @override
+  String timeFormatAcademy(String hours) {
+    return 'زي الأكاديمية ($hours)';
+  }
+
+  @override
+  String get timeFormat12 => '12 ساعة';
+
+  @override
+  String get timeFormat24 => '24 ساعة';
+
+  @override
   String get myDevices => 'أجهزتي';
 
   @override

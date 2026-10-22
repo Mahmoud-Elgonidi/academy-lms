@@ -131,6 +131,10 @@ class Live {
     _emit(resync);
   }
 
+  /// Every open screen reloads now, as when the app comes back: what the API
+  /// writes for this person changed (how they read a clock).
+  void catchUp() => _emit(resync);
+
   /// Whether nothing is telling the screens about changes, and the last catch-up is a while ago.
   static bool needsFallback({required bool connected, required DateTime lastHeard, required DateTime lastRefresh, required DateTime now}) {
     final deaf = !connected || now.difference(lastHeard) > quiet;

@@ -122,14 +122,14 @@ class WeekView extends StatelessWidget {
                         if (week.on(day).isEmpty && (before?.on(day).isEmpty ?? true)) Text(l.dayOff, style: context.text.bodySmall),
                         for (final b in week.on(day))
                           Pill(
-                            '${b.start}–${b.end}',
+                            wallRange(b.start, b.end, context.locale),
                             tone: before != null && !before.blocks.contains(b) ? Tone.brand : Tone.neutral,
                             icon: before != null && !before.blocks.contains(b) ? Icons.add_rounded : null,
                           ),
                         if (before != null)
                           for (final b in before.on(day).where((b) => !week.blocks.contains(b)))
                             Text(
-                              '${b.start}–${b.end}',
+                              wallRange(b.start, b.end, context.locale),
                               style: context.text.bodySmall?.copyWith(color: c.dangerInk, decoration: TextDecoration.lineThrough),
                             ),
                       ],

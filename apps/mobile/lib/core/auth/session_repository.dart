@@ -1,21 +1,59 @@
 import '../network/api_client.dart';
+import '../time/clock_style.dart';
 
 /// The person behind the open account, as `GET /me` gives it: the clock of
-/// their profile and whether the phone's differs.
+/// their profile and whether the phone's differs, and how they read a clock.
 class Me {
-  const Me({required this.name, required this.timezone, required this.displayTimezone, required this.mismatch});
+  const Me({
+    required this.name,
+    required this.timezone,
+    required this.displayTimezone,
+    required this.mismatch,
+    this.timeFormat = TimeFormat.h12,
+    this.timeFormatChoice,
+    this.academyTimeFormat = TimeFormat.h12,
+  });
 
-  factory Me.fromJson(Map<String, dynamic> json) => Me(
-    name: json['name'] as String? ?? '',
-    timezone: json['timezone'] as String?,
-    displayTimezone: json['display_timezone'] as String? ?? 'UTC',
-    mismatch: json['timezone_mismatch'] == true,
-  );
+  factory Me.fromJson(Map<String, dynamic> json) {
+    final inForce = TimeFormat.parse(json['time_format']) ?? TimeFormat.h12;
+    final choice = TimeFormat.parse(json['time_format_choice']);
+    final academy = json['academy'];
+    return Me(
+      name: json['name'] as String? ?? '',
+      timezone: json['timezone'] as String?,
+      displayTimezone: json['display_timezone'] as String? ?? 'UTC',
+      mismatch: json['timezone_mismatch'] == true,
+      timeFormat: inForce,
+      timeFormatChoice: choice,
+      academyTimeFormat:
+          TimeFormat.parse(academy is Map<String, dynamic> ? academy['time_format'] : null) ?? (choice == null ? inForce : TimeFormat.h12),
+    );
+  }
 
   final String name;
   final String? timezone;
   final String displayTimezone;
   final bool mismatch;
+
+  /// How they read a clock: their own choice, else the academy's.
+  final TimeFormat timeFormat;
+
+  /// Their own choice (null: the academy's).
+  final TimeFormat? timeFormatChoice;
+
+  /// The academy's way, for everyone who has not chosen their own.
+  final TimeFormat academyTimeFormat;
+
+  /// The same person having chosen [choice] (null: the academy's way).
+  Me choosing(TimeFormat? choice) => Me(
+    name: name,
+    timezone: timezone,
+    displayTimezone: displayTimezone,
+    mismatch: mismatch,
+    timeFormat: choice ?? academyTimeFormat,
+    timeFormatChoice: choice,
+    academyTimeFormat: academyTimeFormat,
+  );
 }
 
 /// What the session needs from the API besides signing in: the academy's
@@ -48,7 +86,17 @@ class SessionRepository {
 
   Future<Me> me() async => Me.fromJson((await _api.get('me'))['data'] as Map<String, dynamic>);
 
-  Future<void> updateMe({String? locale, String? timezone}) => _api.patch('me', body: {'locale': ?locale, 'timezone': ?timezone});
+  /// Changes what is given of the profile. [timeFormat], when given, sets how
+  /// they read a clock (its value null: the academy's way). Answers the
+  /// profile as it now stands (null when the API said nothing of it).
+  Future<Me?> updateMe({String? locale, String? timezone, TimeFormat? Function()? timeFormat}) async {
+    final json = await _api.patch(
+      'me',
+      body: {'locale': ?locale, 'timezone': ?timezone, if (timeFormat != null) 'time_format': timeFormat()?.name},
+    );
+    final data = json['data'];
+    return data is Map<String, dynamic> ? Me.fromJson(data) : null;
+  }
 
   /// kids, middle, teen or classic.
   Future<String> viewerStage() async => (await _api.get('family/learners'))['viewer_stage'] as String? ?? 'classic';

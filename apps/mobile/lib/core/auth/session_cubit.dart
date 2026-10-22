@@ -8,6 +8,7 @@ import '../../app/theme/stage.dart';
 import '../app_policy.dart';
 import '../prefs/app_prefs.dart';
 import '../push/push.dart';
+import '../time/clock_style.dart';
 import 'account.dart';
 import 'account_store.dart';
 import 'session_holder.dart';
@@ -29,6 +30,7 @@ class SessionState extends Equatable {
     this.seenIntro = true,
     this.deviceTimezone,
     this.clock,
+    this.timeFormat = TimeFormat.h12,
     this.me,
     this.notice,
     this.notAdded = const [],
@@ -52,6 +54,11 @@ class SessionState extends Equatable {
 
   /// The zone this account chose to keep instead of the phone's (null: the phone's).
   final String? clock;
+
+  /// How the open account reads a clock (their own choice, else the
+  /// academy's): as last known on this phone until the profile loads, 12
+  /// hours before anyone signs in.
+  final TimeFormat timeFormat;
   final Me? me;
   final SessionNotice? notice;
 
@@ -93,6 +100,7 @@ class SessionState extends Equatable {
     bool? sounds,
     bool? seenIntro,
     String? Function()? clock,
+    TimeFormat? timeFormat,
     Me? Function()? me,
     SessionNotice? Function()? notice,
     List<NotAddedAccount>? notAdded,
@@ -108,6 +116,7 @@ class SessionState extends Equatable {
     seenIntro: seenIntro ?? this.seenIntro,
     deviceTimezone: deviceTimezone,
     clock: clock != null ? clock() : this.clock,
+    timeFormat: timeFormat ?? this.timeFormat,
     me: me != null ? me() : this.me,
     notice: notice != null ? notice() : this.notice,
     notAdded: notAdded ?? this.notAdded,
@@ -127,8 +136,11 @@ class SessionState extends Equatable {
     seenIntro,
     deviceTimezone,
     clock,
+    timeFormat,
     me?.mismatch,
     me?.timezone,
+    me?.timeFormatChoice,
+    me?.academyTimeFormat,
     notice,
     notAdded,
     greeting,
@@ -266,6 +278,27 @@ class SessionCubit extends Cubit<SessionState> {
     _set(state.copyWith(clock: () => zone, me: () => null));
   }
 
+  /// How the open account reads a clock: 12 or 24 hours, or null for the
+  /// academy's way. Written that way at once and kept by the API (whose
+  /// labels follow it); back as it was when the API refuses, whose problem
+  /// is thrown for the screen to say.
+  Future<void> setTimeFormat(TimeFormat? choice) async {
+    final account = state.current;
+    final me = state.me;
+    if (account == null || me == null || choice == me.timeFormatChoice) return;
+    final before = state.timeFormat;
+    final chosen = me.choosing(choice);
+    _set(state.copyWith(me: () => chosen, timeFormat: chosen.timeFormat));
+    try {
+      final saved = await _repo.updateMe(timeFormat: () => choice) ?? chosen;
+      await _prefs.setTimeFormat(account.id, saved.timeFormat);
+      if (state.current?.id == account.id) _set(state.copyWith(me: () => saved, timeFormat: saved.timeFormat));
+    } on Exception {
+      if (state.current?.id == account.id) _set(state.copyWith(me: () => me, timeFormat: before));
+      rethrow;
+    }
+  }
+
   /// Reloads the open account's look, stage and profile (after a sign-in, a switch, or on demand).
   Future<void> refresh() async {
     final account = state.current;
@@ -303,7 +336,9 @@ class SessionCubit extends Cubit<SessionState> {
   Future<void> _loadMe() => _quietly(() async {
     final id = state.current?.id;
     final me = await _repo.me();
-    if (state.current?.id == id) _set(state.copyWith(me: () => me));
+    if (id == null || state.current?.id != id) return;
+    _set(state.copyWith(me: () => me, timeFormat: me.timeFormat));
+    await _prefs.setTimeFormat(id, me.timeFormat);
   });
 
   Future<void> _open(Account? next) async {
@@ -314,6 +349,7 @@ class SessionCubit extends Cubit<SessionState> {
           current: () => null,
           me: () => null,
           clock: () => null,
+          timeFormat: TimeFormat.h12,
           branding: Branding.fallback,
         ),
       );
@@ -336,6 +372,7 @@ class SessionCubit extends Cubit<SessionState> {
     }
     final cached = await _prefs.branding(account.academySlug);
     final clock = await _prefs.clock(account.id);
+    final timeFormat = await _prefs.timeFormat(account.id);
     final opened = account;
     _set(
       state.copyWith(
@@ -344,6 +381,7 @@ class SessionCubit extends Cubit<SessionState> {
         branding: cached != null ? Branding.fromJson(cached) : Branding.fromColour(opened.academyColour),
         policy: AppPolicy.fromJson(cached?['app']),
         clock: () => clock,
+        timeFormat: timeFormat ?? TimeFormat.h12,
         me: () => null,
       ),
     );
@@ -356,6 +394,7 @@ class SessionCubit extends Cubit<SessionState> {
     final next = wasOpen ? accounts.firstOrNull : state.current;
     await _store.save(accounts, next?.id);
     await _prefs.setClock(account.id, null);
+    await _prefs.setTimeFormat(account.id, null);
     _set(state.copyWith(accounts: accounts, notice: () => notice));
     if (wasOpen) await _open(next);
   }

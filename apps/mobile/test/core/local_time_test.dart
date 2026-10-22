@@ -1,4 +1,5 @@
 import 'package:academy_app/core/l10n/l10n.dart';
+import 'package:academy_app/core/time/clock_style.dart';
 import 'package:academy_app/core/time/formats.dart';
 import 'package:academy_app/core/time/local_time.dart';
 import 'package:flutter/widgets.dart';
@@ -12,6 +13,7 @@ void main() {
     await initializeDateFormatting('en');
     DateFormat.useNativeDigitsByDefaultFor('ar', false);
   });
+  tearDown(() => ClockStyle.format = TimeFormat.h12);
 
   final t = LocalTime.fromJson({
     'utc': '2026-10-07T16:00:00Z',
@@ -33,6 +35,42 @@ void main() {
     expect(t.clock('en').replaceAll('\u202f', ' '), '7:00 PM');
     expect(t.day('ar'), 'الأربعاء 7 أكتوبر');
     expect(t.day('en'), 'Wednesday 7 October');
+  });
+
+  test('writes a clock the reader\'s way: 12 hours with the day\'s half by default, or 24', () {
+    String en(String s) => s.replaceAll('\u202f', ' ');
+    expect(ClockStyle.format, TimeFormat.h12);
+    expect(t.clock('ar'), '7:00 م');
+    expect(en(t.clock('en')), '7:00 PM');
+    expect(t.hourMinute('ar'), '7:00');
+    expect(t.dayPeriod('ar'), 'م');
+    expect(t.dayPeriod('en'), 'PM');
+    expect(wallClock('17:00', 'ar'), '5:00 م');
+    expect(en(wallClock('17:00', 'en')), '5:00 PM');
+    expect(en(wallClock('09:30', 'en')), '9:30 AM');
+    // The day's end, as a shift keeps it.
+    expect(wallClock('24:00', 'ar'), '12:00 ص');
+    expect(wallRange('16:00', '20:00', 'ar'), '4:00 م – 8:00 م');
+
+    ClockStyle.format = TimeFormat.h24;
+    expect(t.clock('ar'), '19:00');
+    expect(t.clock('en'), '19:00');
+    expect(t.hourMinute('ar'), '19:00');
+    expect(t.dayPeriod('ar'), '');
+    expect(t.dayPeriod('en'), '');
+    expect(wallClock('17:00', 'ar'), '17:00');
+    expect(wallClock('9:05', 'en'), '09:05');
+    expect(wallClock('24:00', 'ar'), '24:00');
+    expect(wallRange('16:00', '20:00', 'ar'), '16:00–20:00');
+    // Not a time: left as it came.
+    expect(wallClock('soon', 'ar'), 'soon');
+  });
+
+  test('reads the way from the API: h12 or h24, else nothing', () {
+    expect(TimeFormat.parse('h12'), TimeFormat.h12);
+    expect(TimeFormat.parse('h24'), TimeFormat.h24);
+    expect(TimeFormat.parse(null), isNull);
+    expect(TimeFormat.parse('24'), isNull);
   });
 
   test('negative offsets and missing values', () {

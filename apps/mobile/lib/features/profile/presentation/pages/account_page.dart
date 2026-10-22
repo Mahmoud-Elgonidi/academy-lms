@@ -5,10 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/areas.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/auth/session_cubit.dart';
+import '../../../../core/auth/session_repository.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
+import '../../../../core/realtime/live.dart';
 import '../../../../core/social/social_sign_in.dart';
 import '../../../../core/state/load_cubit.dart';
+import '../../../../core/time/clock_style.dart';
 import '../../../../core/time/formats.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../consent/presentation/privacy_page.dart';
@@ -17,8 +20,8 @@ import '../widgets/accounts_card.dart';
 import '../../../../shared/widgets/latin_digits.dart';
 
 /// What a part of "Me" holds when it opens on its own from a family's More:
-/// the accounts on this phone; the language, sounds and clock; the email,
-/// mobile, Google and Apple, and the devices signed in.
+/// the accounts on this phone; the language, sounds, clock and how times are
+/// written; the email, mobile, Google and Apple, and the devices signed in.
 enum AccountPart { accounts, settings, security }
 
 /// "Me": the accounts on this phone, the clock, language and sounds, the
@@ -349,9 +352,56 @@ class _Settings extends StatelessWidget {
               Text(zoneName(s.timezone, context.locale), style: context.text.bodyMedium?.copyWith(color: context.colors.muted)),
             ],
           ),
+          // Once the profile says what the academy's way is.
+          if (s.me case final me?) ...[const Divider(height: 22), _TimeFormatChoice(me: me)],
           const SizedBox(height: 6),
         ],
       ),
+    );
+  }
+}
+
+/// How times are written: the academy's way (named), 12 hours or 24. The
+/// app writes its clocks that way at once; the API keeps the choice and
+/// writes its own that way, so every open screen reloads.
+class _TimeFormatChoice extends StatelessWidget {
+  const _TimeFormatChoice({required this.me});
+
+  static const _academy = 'academy';
+
+  final Me me;
+
+  Future<void> _choose(BuildContext context, String value) async {
+    final live = context.read<Live>();
+    try {
+      await context.read<SessionCubit>().setTimeFormat(TimeFormat.parse(value));
+      live.catchUp();
+    } on ApiProblem catch (p) {
+      if (context.mounted) showSnack(context, context.problemText(p));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l.timeFormat, style: context.text.titleSmall),
+        Text(l.timeFormatExample(wallClock('17:00', context.locale)), style: context.text.bodySmall),
+        const SizedBox(height: 8),
+        SegmentedButton<String>(
+          key: const Key('time-format'),
+          showSelectedIcon: false,
+          segments: [
+            ButtonSegment(value: _academy, label: Text(l.timeFormatAcademy(me.academyTimeFormat == TimeFormat.h24 ? '24' : '12'))),
+            ButtonSegment(value: TimeFormat.h12.name, label: Text(l.timeFormat12)),
+            ButtonSegment(value: TimeFormat.h24.name, label: Text(l.timeFormat24)),
+          ],
+          selected: {me.timeFormatChoice?.name ?? _academy},
+          onSelectionChanged: (v) => _choose(context, v.first),
+        ),
+      ],
     );
   }
 }

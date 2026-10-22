@@ -1636,6 +1636,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timezone => 'Time zone';
 
   @override
+  String get timeFormat => 'How times are written';
+
+  @override
+  String timeFormatExample(String time) {
+    return 'Times look like this: $time';
+  }
+
+  @override
+  String timeFormatAcademy(String hours) {
+    return 'The academy\'s ($hours)';
+  }
+
+  @override
+  String get timeFormat12 => '12 hours';
+
+  @override
+  String get timeFormat24 => '24 hours';
+
+  @override
   String get myDevices => 'My devices';
 
   @override

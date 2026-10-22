@@ -16,6 +16,8 @@ import 'package:academy_app/core/prefs/app_prefs.dart';
 import 'package:academy_app/core/push/push.dart';
 import 'package:academy_app/shared/motion/juice.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
@@ -226,18 +228,39 @@ Map<String, Object?> branding() => {
   },
 };
 
-Map<String, Object?> me({bool mismatch = false}) => {
-  'data': {
-    'id': 'u-guardian',
-    'name': 'رامي فؤاد',
-    'timezone': 'Asia/Riyadh',
-    'display_timezone': 'Asia/Riyadh',
-    'timezone_mismatch': mismatch,
-    'email': 'rami@demo.test',
-    'phone': '+966500000010',
-    'can_change_contact': true,
+/// The open account's profile: [timeFormat] is their own choice (null: the
+/// academy's, [academyTimeFormat]).
+Map<String, Object?> me({bool mismatch = false, String? timeFormat, String academyTimeFormat = 'h12'}) => {
+  'data': meJson(mismatch: mismatch, timeFormat: timeFormat, academyTimeFormat: academyTimeFormat),
+};
+
+Map<String, Object?> meJson({bool mismatch = false, String? timeFormat, String academyTimeFormat = 'h12'}) => {
+  'id': 'u-guardian',
+  'name': 'رامي فؤاد',
+  'timezone': 'Asia/Riyadh',
+  'display_timezone': 'Asia/Riyadh',
+  'timezone_mismatch': mismatch,
+  'time_format': timeFormat ?? academyTimeFormat,
+  'time_format_choice': timeFormat,
+  'email': 'rami@demo.test',
+  'phone': '+966500000010',
+  'can_change_contact': true,
+  'academy': {
+    'id': 'a1',
+    'slug': 'demo',
+    'name_ar': 'أكاديمية النور',
+    'name_en': 'Noor Academy',
+    'default_timezone': 'Asia/Riyadh',
+    'time_format': academyTimeFormat,
   },
 };
+
+/// Dates and clocks in Latin digits, as the app's bootstrap sets them, for
+/// this test only (the others, and the goldens, keep the test's default).
+void latinDigitsInDates() {
+  DateFormat.useNativeDigitsByDefaultFor('ar', false);
+  addTearDown(() => DateFormat.useNativeDigitsByDefaultFor('ar', true));
+}
 
 Map<String, Object?> lesson(String id, {bool canCancel = true, String status = 'scheduled'}) => {
   'id': id,

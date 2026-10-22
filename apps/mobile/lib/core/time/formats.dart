@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 import '../l10n/l10n.dart';
+import 'clock_style.dart';
 import 'local_time.dart';
 
 /// Showing the API's times: always on the wall clock the API wrote them in
@@ -19,14 +20,14 @@ extension LocalTimeFormats on LocalTime {
     return m.group(1) == '-' ? -d : d;
   }
 
-  /// "7:00 م" / "7:00 PM".
-  String clock(String locale) => DateFormat.jm(locale).format(wall);
+  /// "7:00 م" / "7:00 PM", or "19:00" on a 24-hour clock ([ClockStyle]).
+  String clock(String locale) => (ClockStyle.use24 ? DateFormat.Hm(locale) : DateFormat.jm(locale)).format(wall);
 
-  /// "7:00" without the time of day, for a list's time column.
-  String hourMinute(String locale) => DateFormat('h:mm', locale).format(wall);
+  /// "7:00" without the time of day, for a list's time column ("19:00" on a 24-hour clock).
+  String hourMinute(String locale) => DateFormat(ClockStyle.use24 ? 'HH:mm' : 'h:mm', locale).format(wall);
 
-  /// "م" / "PM": the time of day that goes with [hourMinute].
-  String dayPeriod(String locale) => DateFormat('a', locale).format(wall);
+  /// "م" / "PM": the time of day that goes with [hourMinute]; nothing on a 24-hour clock.
+  String dayPeriod(String locale) => ClockStyle.use24 ? '' : DateFormat('a', locale).format(wall);
 
   /// "الأربعاء 7 أكتوبر" / "Wednesday 7 October".
   String day(String locale) => DateFormat('EEEE d MMMM', locale).format(wall);
@@ -59,6 +60,23 @@ extension LocalTimeFormats on LocalTime {
 
   Duration fromNow() => utc.difference(DateTime.now().toUtc());
 }
+
+/// A time of the week as the API keeps it ("17:00"; "24:00" is the day's
+/// end) written the reader's way: "5:00 م" / "5:00 PM", or "17:00" on a
+/// 24-hour clock ("24:00" stays, "12:00 ص" in 12 hours). What is sent back
+/// to the API stays "HH:mm".
+String wallClock(String hhmm, String locale) {
+  final m = RegExp(r'^(\d{1,2}):(\d{2})').firstMatch(hhmm);
+  if (m == null) return hhmm;
+  final hour = int.parse(m.group(1)!);
+  final minute = int.parse(m.group(2)!);
+  if (ClockStyle.use24) return '${hour.toString().padLeft(2, '0')}:${m.group(2)}';
+  return DateFormat.jm(locale).format(DateTime(2000, 1, 1, hour % 24, minute));
+}
+
+/// "4:00 م – 8:00 م" / "16:00–20:00": a span of the week, each end by [wallClock].
+String wallRange(String start, String end, String locale) =>
+    [wallClock(start, locale), wallClock(end, locale)].join(ClockStyle.use24 ? '–' : ' – ');
 
 /// "12 minutes", "2 hours" for a wait.
 String waitText(BuildContext context, Duration d) {

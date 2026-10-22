@@ -3,8 +3,12 @@ import 'package:academy_app/app/theme/stage.dart';
 import 'package:academy_app/core/auth/account.dart';
 import 'package:academy_app/core/auth/account_store.dart';
 import 'package:academy_app/core/auth/session_cubit.dart';
+import 'package:academy_app/core/network/api_problem.dart';
+import 'package:academy_app/core/prefs/app_prefs.dart';
+import 'package:academy_app/core/time/clock_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers.dart';
 
@@ -116,5 +120,53 @@ void main() {
     await app.session.keepProfileClock();
     expect(app.session.state.offerClock, isFalse);
     expect(app.holder.timezone, 'America/New_York');
+  });
+
+  test('how a clock is written: the academy\'s until the person chooses, at once, remembered, and back when refused', () async {
+    final app = await TestApp.create(accounts: [guardian]);
+    familyRoutes(app.api);
+    app.api
+      ..on('GET', 'me', me(academyTimeFormat: 'h24'))
+      ..onWith('PATCH', 'me', (r) {
+        final choice = (r.data as Map<String, dynamic>)['time_format'] as String?;
+        return (200, {'data': meJson(timeFormat: choice, academyTimeFormat: 'h24')});
+      });
+    expect(app.session.state.timeFormat, TimeFormat.h12);
+    await app.session.start();
+    await _settle();
+    var s = app.session.state;
+    expect(s.timeFormat, TimeFormat.h24);
+    expect(s.me?.timeFormatChoice, isNull);
+    expect(s.me?.academyTimeFormat, TimeFormat.h24);
+    // The next opening on this phone starts with it, before the profile loads.
+    expect(await AppPrefs(SharedPreferencesAsync()).timeFormat(guardian.id), TimeFormat.h24);
+
+    final seen = <SessionState>[];
+    final sub = app.session.stream.listen(seen.add);
+    await app.session.setTimeFormat(TimeFormat.h12);
+    expect(seen.first.timeFormat, TimeFormat.h12, reason: 'shown before the API answers');
+    expect(app.api.sent('PATCH', 'me').single.data, {'time_format': 'h12'});
+    s = app.session.state;
+    expect(s.timeFormat, TimeFormat.h12);
+    expect(s.me?.timeFormatChoice, TimeFormat.h12);
+    expect(await AppPrefs(SharedPreferencesAsync()).timeFormat(guardian.id), TimeFormat.h12);
+
+    // Back to the academy's way: null is sent, not left out.
+    await app.session.setTimeFormat(null);
+    expect(app.api.sent('PATCH', 'me').last.data, {'time_format': null});
+    expect(app.session.state.timeFormat, TimeFormat.h24);
+    expect(app.session.state.me?.timeFormatChoice, isNull);
+
+    app.api.on('PATCH', 'me', {'type': 'validation', 'title': 'x', 'status': 422}, status: 422);
+    await expectLater(app.session.setTimeFormat(TimeFormat.h12), throwsA(isA<ApiProblem>()));
+    expect(app.session.state.timeFormat, TimeFormat.h24);
+    expect(app.session.state.me?.timeFormatChoice, isNull);
+    await sub.cancel();
+
+    // Signed out: 12 hours, and the phone forgets the account's way.
+    await app.session.signOut();
+    await _settle();
+    expect(app.session.state.timeFormat, TimeFormat.h12);
+    expect(await AppPrefs(SharedPreferencesAsync()).timeFormat(guardian.id), isNull);
   });
 }

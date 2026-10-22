@@ -71,7 +71,11 @@ class LessonRow extends StatelessWidget {
                             decoration: struck ? TextDecoration.lineThrough : null,
                           ),
                         ),
-                        Text('${x.startsAt.dayPeriod(locale)} · ${l.minutesShort(x.minutes)}', style: context.type.caption),
+                        // On a 24-hour clock there is no day's half: the minutes alone.
+                        Text(
+                          [x.startsAt.dayPeriod(locale), l.minutesShort(x.minutes)].where((p) => p.isNotEmpty).join(' · '),
+                          style: context.type.caption,
+                        ),
                       ],
                     ),
                   ),

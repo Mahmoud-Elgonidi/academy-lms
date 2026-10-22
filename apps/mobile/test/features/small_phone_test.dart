@@ -283,7 +283,8 @@ void main() {
       expect(find.byKey(const Key('today-reports')), findsOneWidget);
       await _scrollDown(tester);
 
-      for (final place in ['/teach/week', '/teach/reports', '/teach/students', '/teach/more', '/teach/more/earnings']) {
+      // "Me" ends the list: its settings (language, sounds, the clock and how times are written).
+      for (final place in ['/teach/week', '/teach/reports', '/teach/students', '/teach/more', '/teach/more/earnings', '/account']) {
         await _go(tester, place);
         await _scrollDown(tester);
       }

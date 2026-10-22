@@ -128,6 +128,7 @@ void main() {
   });
 
   testWidgets('a teacher accepts the academy\'s change to their hours, talks it over, and proposes again', (tester) async {
+    latinDigitsInDates();
     final app = await TestApp.create(accounts: [teacher]);
     teacherRoutes(app.api);
     Map<String, Object?> block(int d, String s, String e) => {'weekday': d, 'start': s, 'end': e, 'duration_min': 0};
@@ -202,8 +203,8 @@ void main() {
     await tester.tap(find.text('مواعيدي'));
     await frames(tester, 12);
     expect(find.text('الأكاديمية عدّلت مقترحك. ده اللي اتغير:'), findsOneWidget);
-    // Saturday was added, Thursday's span removed.
-    expect(find.text('16:00–20:00'), findsOneWidget);
+    // Saturday was added, Thursday's span removed: written on the reader's clock (12 hours here).
+    expect(find.text('4:00 م – 8:00 م'), findsOneWidget);
     expect(find.text('الخميس مليان، ينفع السبت؟'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField).last, 'تمام، السبت مناسب');

@@ -2858,6 +2858,36 @@ abstract class AppLocalizations {
   /// **'التوقيت'**
   String get timezone;
 
+  /// No description provided for @timeFormat.
+  ///
+  /// In ar, this message translates to:
+  /// **'شكل الساعة'**
+  String get timeFormat;
+
+  /// No description provided for @timeFormatExample.
+  ///
+  /// In ar, this message translates to:
+  /// **'المواعيد بتظهر كده: {time}'**
+  String timeFormatExample(String time);
+
+  /// No description provided for @timeFormatAcademy.
+  ///
+  /// In ar, this message translates to:
+  /// **'زي الأكاديمية ({hours})'**
+  String timeFormatAcademy(String hours);
+
+  /// No description provided for @timeFormat12.
+  ///
+  /// In ar, this message translates to:
+  /// **'12 ساعة'**
+  String get timeFormat12;
+
+  /// No description provided for @timeFormat24.
+  ///
+  /// In ar, this message translates to:
+  /// **'24 ساعة'**
+  String get timeFormat24;
+
   /// No description provided for @myDevices.
   ///
   /// In ar, this message translates to:

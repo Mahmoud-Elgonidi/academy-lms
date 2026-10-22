@@ -165,7 +165,7 @@ class _ShiftEditorPageState extends State<ShiftEditorPage> {
                             children: [
                               for (final b in week.on(day))
                                 InputChip(
-                                  label: Text('${b.start}–${b.end}'),
+                                  label: Text(wallRange(b.start, b.end, context.locale)),
                                   onPressed: () => _addOrEdit(day, b),
                                   onDeleted: () => setState(() => _blocks.remove(b)),
                                   deleteButtonTooltipMessage: l.remove,
