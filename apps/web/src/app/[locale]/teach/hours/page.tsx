@@ -5,6 +5,7 @@ import { Badge, Card, Heading, Notice, SectionTitle } from '@/components/ui';
 import { get } from '@/lib/api/server';
 import { dayLabel, hoursOf, zoneName } from '@/lib/format';
 import type { Shifts } from '@/lib/teach/types';
+import { viewerTimeFormat } from '@/lib/viewer';
 
 /**
  * The teacher's working hours: the week the academy approved, and their own
@@ -15,7 +16,13 @@ const DONE = { sent: 'proposalSent', draft: 'draftSaved', accepted: 'proposalAcc
 
 export default async function Hours({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ done?: string }> }) {
   const [{ locale }, { done }] = await Promise.all([params, searchParams]);
-  const [t, common, nav, shifts] = await Promise.all([getTranslations('teach'), getTranslations('common'), getTranslations('nav'), get<{ data: Shifts }>('/v1/teacher/shifts')]);
+  const [t, common, nav, format, shifts] = await Promise.all([
+    getTranslations('teach'),
+    getTranslations('common'),
+    getTranslations('nav'),
+    viewerTimeFormat(),
+    get<{ data: Shifts }>('/v1/teacher/shifts'),
+  ]);
   const { current, proposal, earliest_start: earliest } = shifts.data;
   const weekly = (minutes: number) => t('weeklyHours', { h: common('hoursAmount', { h: hoursOf(minutes) }) });
   const labels = { off: t('dayOff'), added: t('timeAdded'), removed: t('timeRemoved') };
@@ -43,7 +50,7 @@ export default async function Hours({ params, searchParams }: { params: Promise<
             {t('startsOn', { date: dayLabel(proposal.effective_from, locale) })} · {weekly(proposal.week.weekly_minutes ?? 0)}
           </p>
           {proposal.status === 'countered' && proposal.previous_week ? <p className="mb-3 text-sm font-semibold">{t('academyCounter')}</p> : null}
-          <WeekView blocks={proposal.week.blocks} before={proposal.status === 'countered' && proposal.previous_week ? proposal.previous_week.blocks : current.blocks} locale={locale} labels={labels} />
+          <WeekView blocks={proposal.week.blocks} before={proposal.status === 'countered' && proposal.previous_week ? proposal.previous_week.blocks : current.blocks} locale={locale} format={format} labels={labels} />
           {proposal.note ? <p className="mt-4 whitespace-pre-line text-sm text-muted">{proposal.note}</p> : null}
           <ProposalActions proposal={proposal} current={current.blocks} earliest={earliest} />
         </Card>
@@ -54,7 +61,7 @@ export default async function Hours({ params, searchParams }: { params: Promise<
           <h2 className="font-semibold">{t('currentWeek')}</h2>
           <span className="text-sm text-muted">{weekly(current.weekly_minutes ?? 0)}</span>
         </div>
-        {current.blocks.length === 0 ? <p className="text-muted">{t('noHoursYet')}</p> : <WeekView blocks={current.blocks} locale={locale} labels={{ off: t('dayOff') }} />}
+        {current.blocks.length === 0 ? <p className="text-muted">{t('noHoursYet')}</p> : <WeekView blocks={current.blocks} locale={locale} format={format} labels={{ off: t('dayOff') }} />}
         {proposal ? null : (
           <div className="mt-5 border-t border-line pt-5">
             <ProposeButton current={current.blocks} earliest={earliest} />

@@ -2,6 +2,7 @@ import 'server-only';
 import { headers } from 'next/headers';
 import { cache } from 'react';
 import { call, get } from './api/server';
+import { timeFormatOf, type TimeFormat } from './time';
 
 export type Branding = {
   name: { ar: string; en: string };
@@ -58,12 +59,22 @@ export type Me = {
   locale: string | null;
   timezone?: string | null;
   display_timezone: string;
+  /** How this person reads a clock: their own choice, else the academy's. */
+  time_format: TimeFormat;
+  /** Their own choice, or null while they follow the academy's. */
+  time_format_choice: TimeFormat | null;
   /** The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll). */
   plan_features?: string[];
-  academy: { id: string; slug: string; name_ar: string; name_en: string; default_timezone: string } | null;
+  /** The academy's own clock is the one for everyone who has not chosen theirs. */
+  academy: { id: string; slug: string; name_ar: string; name_en: string; default_timezone: string; time_format: TimeFormat } | null;
 };
 
 /** The signed-in person (their roles decide their portal). */
 export const me = cache(async (): Promise<Me> => {
   return (await get<{ data: Me }>('/v1/me')).data;
 });
+
+/** How the signed-in person reads a clock, for a server component that writes one (client components ask `useTimeFormat`). */
+export async function viewerTimeFormat(): Promise<TimeFormat> {
+  return timeFormatOf((await me()).time_format);
+}

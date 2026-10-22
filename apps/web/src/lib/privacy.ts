@@ -1,5 +1,4 @@
-/** "My data" as the API gives it (GET /v1/me/data-requests): whom one may ask about, what may be put right for each, the requests, and the academy's public pages. */
-export type LocalTime = { utc: string; local: string; timezone: string | null; label: string };
+import type { LocalTime } from './time';
 
 export type DataRequest = {
   id: string;
@@ -25,6 +24,7 @@ export type Detail = { key: 'name' | 'gender' | 'country' | 'school_grade' | 'te
 
 export type Choice = { value: string; label: string };
 
+/** "My data" as the API gives it (GET /v1/me/data-requests): whom one may ask about, what may be put right for each, the requests, and the academy's public pages. */
 export type MyData = {
   subjects: { id: string; name: string; self: boolean; can_copy: boolean; details: Detail[] | null; correction: DataRequest | null }[];
   requests: DataRequest[];

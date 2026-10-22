@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
 import { Classroom } from '@/components/teach/classroom';
@@ -6,6 +6,7 @@ import { get } from '@/lib/api/server';
 import { lessonMushaf } from '@/lib/mushaf/server';
 import type { Lesson as TeachLesson } from '@/lib/teach/types';
 import { clock } from '@/lib/time';
+import { viewerTimeFormat } from '@/lib/viewer';
 
 /**
  * A lesson's room, the lesson read by its id (today's, one still on since
@@ -17,8 +18,10 @@ import { clock } from '@/lib/time';
  */
 export default async function Lesson({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [t, { data: lesson }, mushaf] = await Promise.all([
+  const [t, locale, format, { data: lesson }, mushaf] = await Promise.all([
     getTranslations('teach'),
+    getLocale(),
+    viewerTimeFormat(),
     get<{ data: TeachLesson }>('/v1/teacher/lessons/{session}', { params: { session: id } }),
     lessonMushaf(id),
   ]);
@@ -31,7 +34,7 @@ export default async function Lesson({ params }: { params: Promise<{ id: string 
       <header className="mb-5">
         <h1 className="text-2xl font-bold">{t('withStudent', { name: lesson.with })}</h1>
         <p className="text-muted">
-          {lesson.subject} · <span className="tabular-nums">{clock(lesson.starts_at)}–{clock(lesson.ends_at)}</span>
+          {lesson.subject} · <span className="whitespace-nowrap tabular-nums">{clock(lesson.starts_at, format, locale)}–{clock(lesson.ends_at, format, locale)}</span>
         </p>
       </header>
       <Classroom id={id} back={{ href: '/teach', label: t('backToToday') }} mushaf={mushaf} />

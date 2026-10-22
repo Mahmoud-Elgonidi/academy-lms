@@ -12,11 +12,11 @@ import { useMuted } from '@/components/games/use-muted';
 import { usePlay, type Played } from '@/components/games/use-play';
 import type { PlayTarget } from '@/lib/games/types';
 import { Icon, type IconName } from '@/components/icons';
+import { useClock } from '@/components/time-format';
 import { Badge, Button, buttonLook, join, Progress, type Tone } from '@/components/ui';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { chestShare, countdown, findStation, hasStars, homeworkGame, markOf, playsOnly, SEEN_LESSON_KEY } from '@/lib/journey/journey';
 import type { Chest, HatchedCreature, HomeworkMission, JourneyCourse, JourneyMap, LastLesson, LessonMission, Mission, OpenedChest, Station } from '@/lib/journey/types';
-import { clock } from '@/lib/time';
 import '@/components/games/games.css';
 import '@/components/games/islands.css';
 
@@ -74,6 +74,7 @@ export function Countdown({ utc, className }: { utc: string; className?: string 
 /** The way into a lesson: its room once open, else when it opens. */
 export function LessonJoin({ mission, className }: { mission: LessonMission; className?: string }) {
   const t = useTranslations('journey');
+  const { clock } = useClock();
   if (mission.join.open) {
     return (
       <Link href={`/family/lessons/${mission.lesson_id}`} className={join(buttonLook('primary'), 'min-h-10 px-4 text-sm', className)}>

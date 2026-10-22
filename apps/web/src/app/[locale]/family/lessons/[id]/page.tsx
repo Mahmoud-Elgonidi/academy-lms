@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
 import { Classroom } from '@/components/teach/classroom';
@@ -7,6 +7,7 @@ import { family } from '@/lib/family/context';
 import type { FamilyLessons } from '@/lib/family/types';
 import { lessonMushaf } from '@/lib/mushaf/server';
 import { clock } from '@/lib/time';
+import { viewerTimeFormat } from '@/lib/viewer';
 
 /**
  * The learner's lesson room: the seat is asked for only when they choose to
@@ -15,7 +16,7 @@ import { clock } from '@/lib/time';
  */
 export default async function LessonRoom({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [t, fam, mushaf] = await Promise.all([getTranslations('family'), family(), lessonMushaf(id)]);
+  const [t, locale, format, fam, mushaf] = await Promise.all([getTranslations('family'), getLocale(), viewerTimeFormat(), family(), lessonMushaf(id)]);
   const lessons = fam.current ? await get<FamilyLessons>('/v1/family/lessons', { query: { learner_id: fam.current.id } }) : null;
   const lesson = lessons?.data.find((l) => l.id === id);
   return (
@@ -28,7 +29,7 @@ export default async function LessonRoom({ params }: { params: Promise<{ id: str
         <h1 className="text-2xl font-bold">{lesson ? t('withTeacher', { name: lesson.with }) : t('joinLesson')}</h1>
         {lesson ? (
           <p className="text-muted">
-            {lesson.subject} · <span className="tabular-nums">{clock(lesson.starts_at)}–{clock(lesson.ends_at)}</span>
+            {lesson.subject} · <span className="whitespace-nowrap tabular-nums">{clock(lesson.starts_at, format, locale)}–{clock(lesson.ends_at, format, locale)}</span>
           </p>
         ) : null}
       </header>

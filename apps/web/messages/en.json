@@ -738,6 +738,15 @@
       "saved": "Link saved.",
       "removed": "Link removed.",
       "failed": "The link could not be saved."
+    },
+    "clock": {
+      "title": "How times are written",
+      "hint": "How times are written for you here, in the app and in the messages you get. Dates do not change.",
+      "academy": "The academy's ({hours} hours)",
+      "h12": "12 hours (5:00 PM)",
+      "h24": "24 hours (17:00)",
+      "saved": "Saved. Times are written this way from now on.",
+      "failed": "Your choice could not be saved. Try again."
     }
   },
   "dispute": {

@@ -4,9 +4,11 @@ import { signOut } from '@/app/[locale]/sign-in/actions';
 import { Icon } from '@/components/icons';
 import { LiveRefresh } from '@/components/live-refresh';
 import { LanguageSwitch } from '@/components/teach/nav';
+import { TimeFormatProvider } from '@/components/time-format';
 import type { Family } from '@/lib/family/context';
 import { isGuardian, seesMoney } from '@/lib/family/rules';
 import { liveOf } from '@/lib/live-server';
+import { timeFormatOf } from '@/lib/time';
 import type { Branding, Me } from '@/lib/viewer';
 import { LearnerSwitch } from './learner-switch';
 import { SideNav, TabBar } from './nav';
@@ -15,6 +17,7 @@ import { SideNav, TabBar } from './nav';
  * The family's frame in the look of the person signed in: a student's own
  * stage (fonts, corners, tab bar) or the classic one, the academy's colours
  * either way. A guardian with several children picks whose pages they see.
+ * Clocks are written the person's way (12 or 24 hours).
  */
 export async function FamilyShell({ person, look, locale, fam, fontClasses, children }: { person: Me; look: Branding; locale: string; fam: Family; fontClasses: string; children: ReactNode }) {
   const [t, live] = await Promise.all([getTranslations('common'), liveOf()]);
@@ -57,7 +60,7 @@ export async function FamilyShell({ person, look, locale, fam, fontClasses, chil
           {fam.current ? <LearnerSwitch learners={fam.learners} current={fam.current.id} /> : null}
         </header>
         <main id="main" className="mx-auto w-full max-w-4xl px-4 pb-28 pt-5 sm:px-6 lg:px-10 lg:pb-12 lg:pt-4">
-          {children}
+          <TimeFormatProvider format={timeFormatOf(person.time_format)}>{children}</TimeFormatProvider>
         </main>
       </div>
       <TabBar stage={fam.stage} money={money} unread={live.unread} chats={live.chats} />

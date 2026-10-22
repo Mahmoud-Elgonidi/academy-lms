@@ -130,7 +130,8 @@ test('new hours are proposed as a draft, talked about, and withdrawn', async ({ 
   await page.getByRole('button', { name: 'احفظ مسودة' }).click();
   await expect(page.getByText('المسودة اتحفظت.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'مقترحك' })).toBeVisible();
-  await expect(page.locator('li').filter({ hasText: 'السبت' }).filter({ hasText: '17:00–19:00' }).first()).toBeVisible();
+  // The academy's clock in the demo: 12 hours.
+  await expect(page.locator('li').filter({ hasText: 'السبت' }).filter({ hasText: '5:00 م–7:00 م' }).first()).toBeVisible();
   await page.getByLabel('اكتب رسالة…').fill('ممكن نبدأ من الأسبوع الجاي؟');
   await page.getByRole('button', { name: 'ابعت' }).click();
   await expect(page.getByText('ممكن نبدأ من الأسبوع الجاي؟')).toBeVisible();
@@ -138,6 +139,33 @@ test('new hours are proposed as a draft, talked about, and withdrawn', async ({ 
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'اسحب المقترح' }).click();
   await expect(page.getByText('المقترح اتسحب.')).toBeVisible();
+});
+
+test('the teacher reads clocks in 24 hours, then goes back to the academy\'s 12', async ({ page }) => {
+  // My account › "شكل الساعة": a choice already in place is left as it is.
+  const choose = async (name: string) => {
+    await page.goto('/ar/teach/account');
+    const form = page.getByRole('form', { name: 'شكل الساعة' });
+    const radio = form.getByRole('radio', { name, exact: true });
+    if (await radio.isChecked()) return;
+    await radio.check();
+    await form.getByRole('button', { name: 'احفظ' }).click();
+    await expect(form.getByText('اتحفظ. المواعيد هتتكتب كده من دلوقتي.')).toBeVisible();
+  };
+  // Khaled's approved week in the demo: Sunday to Thursday, 15:00 to 21:00 on his clock.
+  const sunday = page.locator('li').filter({ has: page.getByText('الأحد', { exact: true }) });
+
+  await choose('24 ساعة (17:00)');
+  try {
+    await page.goto('/ar/teach/hours');
+    await expect(sunday.filter({ hasText: '15:00–21:00' }).first()).toBeVisible();
+    await expect(page.locator('main bdi').filter({ hasText: /\d [صم]/ })).toHaveCount(0);
+  } finally {
+    // The demo as it was found: following the academy.
+    await choose('زي الأكاديمية (12 ساعة)');
+  }
+  await page.goto('/ar/teach/hours');
+  await expect(sunday.filter({ hasText: '3:00 م–9:00 م' }).first()).toBeVisible();
 });
 
 test('the language switches, keeping the page', async ({ page }) => {

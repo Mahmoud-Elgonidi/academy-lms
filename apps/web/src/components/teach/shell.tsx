@@ -3,11 +3,13 @@ import type { ReactNode } from 'react';
 import { signOut } from '@/app/[locale]/sign-in/actions';
 import { Icon } from '@/components/icons';
 import { LiveRefresh } from '@/components/live-refresh';
+import { TimeFormatProvider } from '@/components/time-format';
 import { liveOf } from '@/lib/live-server';
+import { timeFormatOf } from '@/lib/time';
 import type { Branding, Me } from '@/lib/viewer';
 import { LanguageSwitch, SideNav, TabBar } from './nav';
 
-/** The teacher's frame: the academy and the person, the menu (with the unread count), and the page, kept live. */
+/** The teacher's frame: the academy and the person, the menu (with the unread count), and the page, kept live, its clocks written the person's way. */
 export async function Shell({ person, look, locale, children }: { person: Me; look: Branding; locale: string; children: ReactNode }) {
   const [t, live] = await Promise.all([getTranslations('common'), liveOf()]);
   const academy = locale === 'ar' ? look.name.ar : look.name.en;
@@ -43,7 +45,7 @@ export async function Shell({ person, look, locale, children }: { person: Me; lo
           <p className="truncate font-heading font-bold">{academy}</p>
         </header>
         <main id="main" className="mx-auto w-full max-w-4xl px-4 pb-28 pt-5 sm:px-6 lg:px-10 lg:pb-12 lg:pt-10">
-          {children}
+          <TimeFormatProvider format={timeFormatOf(person.time_format)}>{children}</TimeFormatProvider>
         </main>
       </div>
       <TabBar unread={live.unread} chats={live.chats} />

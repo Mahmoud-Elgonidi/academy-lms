@@ -5,6 +5,7 @@ import { read, send } from '@/lib/api/server';
 import type { MushafPage, MushafResult } from '@/lib/mushaf/types';
 import type { LessonRecording } from '@/lib/recordings';
 import type { JoinTicket } from '@/lib/teach/types';
+import type { TimeFormat } from '@/lib/time';
 
 /**
  * Writes every portal makes the same way, teachers and families alike: a
@@ -14,8 +15,9 @@ import type { JoinTicket } from '@/lib/teach/types';
  * Google or Apple from one's account, disputing a lesson's outcome, a new
  * email or mobile number (confirmed by a code sent to it), and one's own
  * data (details put right, a copy, a correction, erasure, taking a request
- * back); and a lesson's shared mushaf read again (its teacher's page, or
- * another a learner looks at).
+ * back); how one reads a clock (12 or 24 hours, or the academy's); and a
+ * lesson's shared mushaf read again (its teacher's page, or another a learner
+ * looks at).
  */
 export async function joinLesson(id: string): Promise<{ ok: true; ticket: JoinTicket; recording: LessonRecording } | { ok: false; message?: string }> {
   const joined = await send<{ data: JoinTicket; recording?: LessonRecording }>('post', '/v1/lessons/{session}/join', { params: { session: id } });
@@ -172,6 +174,19 @@ export async function correctDetails(subject: string, changes: Record<string, st
 /** Asks the academy to correct what cannot be corrected here: one open at a time, answered within 30 days. */
 export async function askCorrection(subject: string, says: string, key: string): Promise<Done> {
   const done = await send('post', '/v1/me/data-requests', { body: { kind: 'correction', subject_id: subject, says: says.trim() }, idempotencyKey: key });
+  if (!done.ok) return problemOf(done.problem);
+  refresh();
+  return { ok: true };
+}
+
+/**
+ * How one reads a clock everywhere (the portal, the app, the panels, messages):
+ * 12 hours (5:00 PM) or 24 (17:00), or null to follow the academy's. The frame
+ * reads it again, so every page writes its clocks the new way.
+ */
+export async function saveTimeFormat(format: TimeFormat | null): Promise<Done> {
+  if (format !== null && format !== 'h12' && format !== 'h24') return { ok: false };
+  const done = await send('patch', '/v1/me', { body: { time_format: format } });
   if (!done.ok) return problemOf(done.problem);
   refresh();
   return { ok: true };

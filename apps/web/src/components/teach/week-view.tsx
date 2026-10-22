@@ -1,5 +1,6 @@
 import type { ShiftBlock } from '@/lib/teach/types';
 import { weekOrder, weekdayName } from '@/lib/format';
+import { formatClock, type TimeFormat } from '@/lib/time';
 import { join } from '@/components/ui';
 
 const DAY = 1440;
@@ -33,12 +34,41 @@ function segments(blocks: ShiftBlock[], before?: ShiftBlock[]): Segment[] {
 
 const clockOf = (m: number) => (m === DAY ? '24:00' : `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`);
 
+/** Spans written out ("5:00 م–7:00 م · 8:00 م–10:00 م"), each kept on one line. */
+function Spans({ spans, format, locale }: { spans: { start: string; end: string }[]; format: TimeFormat; locale: string }) {
+  return (
+    <bdi>
+      {spans.map((s, i) => (
+        <span key={s.start}>
+          {i > 0 ? ' · ' : null}
+          <span className="whitespace-nowrap">
+            {formatClock(s.start, format, locale)}–{formatClock(s.end, format, locale)}
+          </span>
+        </span>
+      ))}
+    </bdi>
+  );
+}
+
 /**
  * A week of working spans on the teacher's own clock: each day as a line from
- * midnight to midnight (in the reading direction), with its spans written out.
- * With `before`, the changes show: added and taken-out time in their own colours.
+ * midnight to midnight (in the reading direction), with its spans written out
+ * in 12 or 24 hours (`format`, as the teacher reads a clock). With `before`,
+ * the changes show: added and taken-out time in their own colours.
  */
-export function WeekView({ blocks, before, locale, labels }: { blocks: ShiftBlock[]; before?: ShiftBlock[]; locale: string; labels: { off: string; added?: string; removed?: string } }) {
+export function WeekView({
+  blocks,
+  before,
+  locale,
+  format,
+  labels,
+}: {
+  blocks: ShiftBlock[];
+  before?: ShiftBlock[];
+  locale: string;
+  format: TimeFormat;
+  labels: { off: string; added?: string; removed?: string };
+}) {
   return (
     <div>
       <ul className="space-y-2.5">
@@ -64,15 +94,14 @@ export function WeekView({ blocks, before, locale, labels }: { blocks: ShiftBloc
                 ))}
               </span>
               <span className="text-end text-sm tabular-nums text-muted">
-                {today.length === 0 ? labels.off : <bdi>{today.map((b) => `${b.start}–${b.end}`).join(' · ')}</bdi>}
+                {today.length === 0 ? labels.off : <Spans spans={today} format={format} locale={locale} />}
                 {was && parts.some((p) => p.kind === 'removed') ? (
                   <span className="block text-danger line-through">
-                    <bdi>
-                      {parts
-                        .filter((p) => p.kind === 'removed')
-                        .map((p) => `${clockOf(p.from)}–${clockOf(p.to)}`)
-                        .join(' · ')}
-                    </bdi>
+                    <Spans
+                      spans={parts.filter((p) => p.kind === 'removed').map((p) => ({ start: clockOf(p.from), end: clockOf(p.to) }))}
+                      format={format}
+                      locale={locale}
+                    />
                   </span>
                 ) : null}
               </span>

@@ -1,11 +1,12 @@
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { DisputeLesson } from '@/components/dispute-lesson';
 import { DisputeState } from '@/components/dispute-state';
 import { Icon } from '@/components/icons';
 import { Badge, buttonLook, join, type Tone } from '@/components/ui';
 import type { Lesson } from '@/lib/teach/types';
-import { clock } from '@/lib/time';
+import { clock, type LocalTime } from '@/lib/time';
+import { viewerTimeFormat } from '@/lib/viewer';
 
 const statusTone: Record<string, Tone> = {
   in_progress: 'brand',
@@ -16,9 +17,10 @@ const statusTone: Record<string, Tone> = {
   cancelled: 'danger',
 };
 
-/** One lesson: when (on the teacher's clock, as the API wrote it), with whom, where it stands, the way in, and a dispute of its outcome. */
+/** One lesson: when (on the teacher's clock, as the API wrote it, in 12 or 24 hours as they read one), with whom, where it stands, the way in, and a dispute of its outcome. */
 export async function LessonCard({ lesson, featured = false }: { lesson: Lesson; featured?: boolean }) {
-  const t = await getTranslations('teach');
+  const [t, locale, format] = await Promise.all([getTranslations('teach'), getLocale(), viewerTimeFormat()]);
+  const at = (time: LocalTime | null) => clock(time, format, locale);
   const cancelled = lesson.status === 'cancelled';
   return (
     <article
@@ -28,8 +30,8 @@ export async function LessonCard({ lesson, featured = false }: { lesson: Lesson;
       )}
     >
       <div className={join('min-w-16 text-center', cancelled && 'opacity-60')}>
-        <p className={join('font-heading font-bold tabular-nums', featured ? 'text-2xl' : 'text-lg', cancelled && 'line-through')}>{clock(lesson.starts_at)}</p>
-        <p className="text-xs tabular-nums text-muted">{clock(lesson.ends_at)}</p>
+        <p className={join('whitespace-nowrap font-heading font-bold tabular-nums', featured ? 'text-2xl' : 'text-lg', cancelled && 'line-through')}>{at(lesson.starts_at)}</p>
+        <p className="whitespace-nowrap text-xs tabular-nums text-muted">{at(lesson.ends_at)}</p>
       </div>
       <div className="min-w-0 flex-1">
         <p className="font-semibold">{lesson.with}</p>
@@ -50,7 +52,7 @@ export async function LessonCard({ lesson, featured = false }: { lesson: Lesson;
           {t('enter')}
         </Link>
       ) : lesson.status === 'scheduled' && lesson.join.opens_at && featured ? (
-        <p className="w-full text-sm text-muted sm:w-auto">{t('opensAt', { time: clock(lesson.join.opens_at) })}</p>
+        <p className="w-full text-sm text-muted sm:w-auto">{t('opensAt', { time: at(lesson.join.opens_at) })}</p>
       ) : null}
       {lesson.dispute ? (
         <div className="w-full">
