@@ -11,7 +11,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
-        "anthropic-ai/sdk": "^0.57",
+        "anthropic-ai/sdk": "^0.61",
         "brick/money": "^0.15.2",
         "chillerlan/php-qrcode": "^5.0",
         "dedoc/scramble": "^0.13",
