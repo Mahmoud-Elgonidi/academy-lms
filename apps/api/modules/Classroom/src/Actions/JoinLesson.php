@@ -45,7 +45,7 @@ final class JoinLesson
         }
         $opens = $lesson->startsAt->subMinutes(config('classroom.opens_before_min'));
         if ($now->lessThan($opens)) {
-            throw ValidationException::withMessages(['lesson' => __('classroom::classroom.errors.too_early', ['minutes' => (int) ceil($now->diffInMinutes($opens))])]);
+            throw ValidationException::withMessages(['lesson' => __('classroom::classroom.errors.too_early', ['before' => (int) config('classroom.opens_before_min'), 'minutes' => (int) ceil($now->diffInMinutes($opens))])]);
         }
 
         $room = Room::query()->firstOrCreate(['session_id' => $lesson->id], [

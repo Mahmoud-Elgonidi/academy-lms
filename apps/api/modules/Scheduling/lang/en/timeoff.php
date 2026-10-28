@@ -53,8 +53,8 @@ return [
     ],
 
     'mine' => [
-        'nav' => 'My time off',
-        'title' => 'My time off',
+        'nav' => 'Time off',
+        'title' => 'Time off',
         'subtitle' => 'Ask for time off; the academy approves it and arranges cover for your lessons. Dates on your clock (:zone).',
         'ask' => 'Ask for time off',
         'sent' => 'Your request was sent to the academy.',
@@ -159,7 +159,7 @@ return [
 
     'family' => [
         'substitute' => 'Substitute for :name',
-        'refuse' => 'Decline the substitute',
+        'refuse' => "We don't want the substitute",
         'refuse_heading' => 'Rather not have the substitute?',
         'refuse_text' => 'The lesson will be cancelled and you get makeup credit valid :days days, to book a lesson with your teacher once they are back.',
         'refuse_confirm' => 'Decline and take a makeup',

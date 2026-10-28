@@ -20,5 +20,5 @@ return [
     'paid_on' => 'Paid :date',
     'left' => ':amount left',
     'no_invoices' => 'No invoices in your name.',
-    'how_to_pay' => 'To pay, contact the academy; it records the payment and you get a confirmation.',
+    'how_to_pay' => 'If an invoice has no pay button, ask the academy how to pay. It records the payment and you get a confirmation.',
 ];

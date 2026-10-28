@@ -197,7 +197,7 @@ return [
         'best' => 'Best round: :correct of :total right first time in “:game”',
         'quiet' => 'No play this week. The games only practise their lessons, from the practice the teacher adds.',
         'hatched' => '“:name” hatched today',
-        'hatched_sub' => ['stars' => 'From game stars · :found in the album', 'mastery' => 'From a mastered lesson · :found in the album'],
+        'hatched_sub' => ['stars' => 'From journey stars · :found in the album', 'mastery' => 'From a mastered lesson · :found in the album'],
         'cheer' => 'Cheer',
         'cheered' => 'Your cheer is on its way 💛',
         'safety' => 'No purchases inside the games, no ads, no chat with strangers. Every creature and every star is earned by studying.',

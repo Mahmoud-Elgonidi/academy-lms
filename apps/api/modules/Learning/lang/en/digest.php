@@ -38,7 +38,7 @@ return [
         'what' => "It holds: lessons attended and missed, the lessons and how they went, the teacher's words for the family, the academy's questions families see, homework, practice and the week's stars (unless the journey is plain). When the week has a good recitation recording, it carries a link for the guardian to hear it.",
         'never' => "It never says: the teacher's internal notes, the academy's review, ratings, disputes, or teachers' numbers and pay.",
         'wording_on' => 'Wording: the AI helper writes it from these facts alone; anything it writes beyond them sends the facts as they are.',
-        'wording_off' => 'Wording: the facts as they are. The AI helper can word it more warmly: Settings › AI helpers.',
+        'wording_off' => 'Wording: the facts as they are. The AI helper can word it more warmly: Settings › AI.',
         'last_week' => '{0} No notes went out in the last 7 days.|{1} One note went out in the last 7 days.|[2,*] :count notes went out in the last 7 days.',
         'saved' => 'Saved.',
     ],

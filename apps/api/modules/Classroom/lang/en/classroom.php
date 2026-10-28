@@ -74,7 +74,7 @@ return [
     'errors' => [
         'not_yours' => 'This lesson is not yours.',
         'closed' => 'This lesson has ended or was cancelled.',
-        'too_early' => 'The classroom opens 10 minutes before the lesson. :minutes minutes to go.',
+        'too_early' => 'The classroom opens :before minutes before the lesson. :minutes minutes to go.',
         'no_link' => 'The teacher has not set their lesson link yet.',
         'provider' => 'The classroom is not available right now. Try again shortly or contact the academy.',
         'livekit_unavailable' => 'This server has no classroom of its own (LiveKit) set up yet: lessons use each teacher\'s outside link.',

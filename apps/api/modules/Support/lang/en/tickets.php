@@ -193,7 +193,7 @@ return [
     'mine' => [
         'title' => 'Help',
         'subtitle' => 'Write to the academy about a lesson, a payment, a technical problem or anything else. You get the answers here and in a message.',
-        'teacher_title' => 'Support',
+        'teacher_title' => 'Help',
         'teacher_subtitle' => 'Write to the academy about a technical problem, your pay or anything else. You get the answers here and in a message.',
         'nav' => [
             'classic' => 'Help',
@@ -201,7 +201,7 @@ return [
             'middle' => 'Ask for help',
             'kids' => 'Help',
         ],
-        'teacher_nav' => 'Support',
+        'teacher_nav' => 'Help',
         'new' => 'New ticket',
         'new_heading' => 'Write to the academy',
         'kind' => 'What is it about?',
