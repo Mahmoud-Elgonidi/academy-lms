@@ -849,7 +849,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navToday => 'النهارده';
 
   @override
-  String get navWeek => 'الأسبوع';
+  String get navWeek => 'أسبوعي';
 
   @override
   String get navStudents => 'الطلاب';
@@ -1979,6 +1979,135 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get meetingLinkRemoved => 'اللينك اتشال.';
+
+  @override
+  String get teacherCardTitle => 'كارتي في صفحة الأكاديمية';
+
+  @override
+  String get teacherCardLead =>
+      'الكارت اللي الأسر بتشوفه عنك في صفحة الأكاديمية. إنت اللي بتكتبه، وإنت اللي بتقرر يظهر ولا لأ. رقمك وإيميلك عمرهم ما بيظهروا.';
+
+  @override
+  String get teacherCardShown => 'اظهر في صفحة الأكاديمية';
+
+  @override
+  String get teacherCardShownHint => 'لو مقفول، كارتك مابيظهرش لحد.';
+
+  @override
+  String get teacherCardName => 'الاسم اللي يظهر';
+
+  @override
+  String get teacherCardNameHint => 'زي «أ. سارة» أو اسمك الأول بس.';
+
+  @override
+  String get teacherCardBio => 'كلمتين عنك';
+
+  @override
+  String get teacherCardBioHint => 'خبرتك واللي بتحب تدرّسه، لحد 280 حرف. من غير أرقام ولا لينكات.';
+
+  @override
+  String get teacherCardPhoto => 'صورتك (اختياري)';
+
+  @override
+  String get teacherCardPhotoHint => 'PNG أو JPEG أو WebP لحد 1 ميجا. أي حد بيفتح الصفحة بيشوفها.';
+
+  @override
+  String get teacherCardPickPhoto => 'اختار صورة';
+
+  @override
+  String get teacherCardChangePhoto => 'غيّر الصورة';
+
+  @override
+  String get teacherCardRemovePhoto => 'شيل الصورة';
+
+  @override
+  String get teacherCardTooBig => 'الصورة أكبر من 1 ميجا.';
+
+  @override
+  String get teacherCardPreview => 'كده الأسر هتشوف كارتك';
+
+  @override
+  String get teacherCardSubjectsFrom => 'المواد من ملفك في الأكاديمية';
+
+  @override
+  String get teacherCardSave => 'احفظ';
+
+  @override
+  String get teacherCardSaved => 'كارتك اتحفظ.';
+
+  @override
+  String teacherCardLevels(String from, String to) {
+    return '$from ← $to';
+  }
+
+  @override
+  String get teacherCardFromStart => 'من الأول';
+
+  @override
+  String get teacherCardToEnd => 'للآخر';
+
+  @override
+  String get performanceTitle => 'أدائي';
+
+  @override
+  String performanceLead(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'آخر $days يوم',
+      few: 'آخر $days أيام',
+      two: 'آخر يومين',
+      one: 'آخر يوم',
+    );
+    return '$_temp0 · الحصص اللي سببها المنصة مابتتحسبش';
+  }
+
+  @override
+  String get performanceGroupCommitment => 'الالتزام';
+
+  @override
+  String get performanceGroupQuality => 'الجودة';
+
+  @override
+  String get performanceGroupProfessionalism => 'الاحترافية';
+
+  @override
+  String get performanceGroupBusiness => 'النمو';
+
+  @override
+  String get performanceGood => 'تمام';
+
+  @override
+  String get performanceBad => 'محتاج تحسين';
+
+  @override
+  String get performanceNone => 'لسه';
+
+  @override
+  String get performanceCounted => 'اللي اتحسب';
+
+  @override
+  String get performanceNoEvents => 'مفيش حاجة اتحسبت عليك. استمر!';
+
+  @override
+  String get performanceExcluded => 'مش محسوبة';
+
+  @override
+  String get performanceRatings => 'تقييمات الأسر';
+
+  @override
+  String performanceAverage(String avg, int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n تقييم', few: '$n تقييمات', two: 'تقييمين', one: 'تقييم واحد');
+    return '$avg من 5 · $_temp0';
+  }
+
+  @override
+  String get performanceNoRatings => 'لسه مفيش تقييمات.';
+
+  @override
+  String performanceStars(int n) {
+    return '$n من 5';
+  }
 
   @override
   String get timeOff => 'الإجازات';

@@ -574,7 +574,7 @@
   "navHomework": "الواجبات",
   "navReports": "التقارير",
   "navToday": "النهارده",
-  "navWeek": "الأسبوع",
+  "navWeek": "أسبوعي",
   "navStudents": "الطلاب",
   "navEarnings": "أرباحي",
   "navMore": "المزيد",
@@ -1434,6 +1434,77 @@
   "meetingLinkSave": "احفظ اللينك",
   "meetingLinkSaved": "اللينك اتحفظ.",
   "meetingLinkRemoved": "اللينك اتشال.",
+  "teacherCardTitle": "كارتي في صفحة الأكاديمية",
+  "teacherCardLead": "الكارت اللي الأسر بتشوفه عنك في صفحة الأكاديمية. إنت اللي بتكتبه، وإنت اللي بتقرر يظهر ولا لأ. رقمك وإيميلك عمرهم ما بيظهروا.",
+  "teacherCardShown": "اظهر في صفحة الأكاديمية",
+  "teacherCardShownHint": "لو مقفول، كارتك مابيظهرش لحد.",
+  "teacherCardName": "الاسم اللي يظهر",
+  "teacherCardNameHint": "زي «أ. سارة» أو اسمك الأول بس.",
+  "teacherCardBio": "كلمتين عنك",
+  "teacherCardBioHint": "خبرتك واللي بتحب تدرّسه، لحد 280 حرف. من غير أرقام ولا لينكات.",
+  "teacherCardPhoto": "صورتك (اختياري)",
+  "teacherCardPhotoHint": "PNG أو JPEG أو WebP لحد 1 ميجا. أي حد بيفتح الصفحة بيشوفها.",
+  "teacherCardPickPhoto": "اختار صورة",
+  "teacherCardChangePhoto": "غيّر الصورة",
+  "teacherCardRemovePhoto": "شيل الصورة",
+  "teacherCardTooBig": "الصورة أكبر من 1 ميجا.",
+  "teacherCardPreview": "كده الأسر هتشوف كارتك",
+  "teacherCardSubjectsFrom": "المواد من ملفك في الأكاديمية",
+  "teacherCardSave": "احفظ",
+  "teacherCardSaved": "كارتك اتحفظ.",
+  "teacherCardLevels": "{from} ← {to}",
+  "@teacherCardLevels": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "teacherCardFromStart": "من الأول",
+  "teacherCardToEnd": "للآخر",
+  "performanceTitle": "أدائي",
+  "performanceLead": "{days, plural, =1{آخر يوم} =2{آخر يومين} few{آخر {days} أيام} other{آخر {days} يوم}} · الحصص اللي سببها المنصة مابتتحسبش",
+  "@performanceLead": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "performanceGroupCommitment": "الالتزام",
+  "performanceGroupQuality": "الجودة",
+  "performanceGroupProfessionalism": "الاحترافية",
+  "performanceGroupBusiness": "النمو",
+  "performanceGood": "تمام",
+  "performanceBad": "محتاج تحسين",
+  "performanceNone": "لسه",
+  "performanceCounted": "اللي اتحسب",
+  "performanceNoEvents": "مفيش حاجة اتحسبت عليك. استمر!",
+  "performanceExcluded": "مش محسوبة",
+  "performanceRatings": "تقييمات الأسر",
+  "performanceAverage": "{avg} من 5 · {n, plural, =1{تقييم واحد} =2{تقييمين} few{{n} تقييمات} other{{n} تقييم}}",
+  "@performanceAverage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "performanceNoRatings": "لسه مفيش تقييمات.",
+  "performanceStars": "{n} من 5",
+  "@performanceStars": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "timeOff": "الإجازات",
   "requestTimeOff": "اطلب إجازة",
   "timeOffLead": "بتوقيتك: {zone} · الأكاديمية بترد عليك",

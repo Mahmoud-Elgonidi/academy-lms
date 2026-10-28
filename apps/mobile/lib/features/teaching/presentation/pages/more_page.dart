@@ -14,9 +14,10 @@ import '../../domain/teaching.dart';
 import '../widgets/teacher_header.dart';
 
 /// A teacher's More: who is signed in, then three groups: teaching
-/// (messages with their count, the lesson link, recordings), work (hours,
-/// time off, earnings, documents) and the account (settings, support,
-/// raising a concern, my data), and signing out.
+/// (messages with their count, the lesson link, recordings, my card on the
+/// academy's page), work (hours, time off, earnings, my performance,
+/// documents) and the account (settings, support, raising a concern, my
+/// data), and signing out.
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
 
@@ -101,6 +102,12 @@ class _GroupsState extends State<_Groups> {
               label: l.recordingsMine,
               onTap: () => context.go('/teach/more/recordings'),
             ),
+            MenuRow(
+              key: const Key('open-card'),
+              icon: Icons.badge_outlined,
+              label: l.teacherCardTitle,
+              onTap: () => context.go('/teach/more/card'),
+            ),
           ],
         ),
         MenuGroup(
@@ -127,6 +134,12 @@ class _GroupsState extends State<_Groups> {
               icon: Icons.account_balance_wallet_outlined,
               label: l.navEarnings,
               onTap: () => context.go('/teach/more/earnings'),
+            ),
+            MenuRow(
+              key: const Key('open-performance'),
+              icon: Icons.insights_outlined,
+              label: l.performanceTitle,
+              onTap: () => context.go('/teach/more/performance'),
             ),
             MenuRow(
               key: const Key('open-documents'),

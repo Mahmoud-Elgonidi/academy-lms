@@ -16,6 +16,7 @@ String targetOf(String? screen, String? id, Area area) {
       'shift_proposal' => '/teach/hours',
       'time_off' => '/teach/more/time-off',
       'payroll_month' => '/teach/more/earnings',
+      'teacher_performance' => '/teach/more/performance',
       'ticket' when id != null => '/teach/more/help/$id',
       'my_data' => '/teach/more/my-data',
       'account' => '/account',

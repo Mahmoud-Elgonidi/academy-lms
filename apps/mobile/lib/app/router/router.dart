@@ -56,7 +56,9 @@ import '../../features/teaching/presentation/pages/shifts_page.dart';
 import '../../features/teaching/presentation/pages/reports_page.dart';
 import '../../features/teaching/presentation/pages/students_page.dart';
 import '../../features/teaching/presentation/pages/time_off_page.dart';
+import '../../features/teaching/presentation/pages/card_page.dart';
 import '../../features/teaching/presentation/pages/meeting_link_page.dart';
+import '../../features/teaching/presentation/pages/performance_page.dart';
 import '../../features/teaching/presentation/pages/today_page.dart';
 import '../../features/teaching/presentation/pages/week_page.dart';
 import '../../features/teaching/domain/teaching.dart';
@@ -405,6 +407,8 @@ GoRouter buildRouter(SessionCubit session) {
               page('earnings', (_) => const EarningsPage()),
               page('time-off', (_) => const TimeOffPage()),
               page('meeting-link', (_) => const MeetingLinkPage()),
+              page('card', (_) => const CardPage()),
+              page('performance', (_) => const PerformancePage()),
               page('recordings', (_) => const RecordingsPage(teacher: true)),
               page('my-data', (_) => const MyDataPage(teacher: true)),
               page('concern', (_) => const TellUsPage(scope: ConcernScope.teacher)),

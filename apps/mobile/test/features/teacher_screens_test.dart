@@ -150,7 +150,7 @@ void main() {
       );
     });
     await _open(tester, app);
-    await tester.tap(find.text('الأسبوع').last);
+    await tester.tap(find.text('أسبوعي').last);
     await frames(tester, 12);
     expect(app.api.requests.where((r) => r.path == 'teacher/lessons').last.queryParameters['from'], '2099-10-10');
 

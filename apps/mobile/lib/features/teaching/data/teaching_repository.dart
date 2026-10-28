@@ -9,8 +9,10 @@ import '../../homework/data/homework_repository.dart';
 import '../../homework/domain/homework.dart';
 import '../../homework/domain/recitation.dart';
 import '../../schedule/domain/lesson.dart';
+import '../domain/performance.dart';
 import '../domain/reports.dart';
 import '../domain/shifts.dart';
+import '../domain/teacher_card.dart';
 import '../domain/teaching.dart';
 import '../domain/voice_draft.dart';
 
@@ -170,4 +172,33 @@ class TeachingRepository {
   /// Saves the teacher's link; an empty one removes it.
   Future<MeetingLinkInfo> saveMeetingLink(String url) async =>
       MeetingLinkInfo.fromJson(await _api.put('teacher/meeting-link', body: {'url': url.trim()}));
+
+  /// My card on the academy's page, as the page would show it.
+  Future<TeacherCard> card() async => TeacherCard.fromJson((await _api.get('teacher/card'))['data'] as Map<String, dynamic>);
+
+  /// Saves my card (multipart, as the portal sends it): the name, a few words, my
+  /// switch, and a new [photo] or [removePhoto]. Answers with the card as kept.
+  Future<TeacherCard> saveCard({
+    required String displayName,
+    required String bio,
+    required bool shown,
+    HandInFile? photo,
+    bool removePhoto = false,
+  }) async => TeacherCard.fromJson(
+    (await _api.post(
+          'teacher/card',
+          body: FormData.fromMap({
+            'display_name': displayName.trim(),
+            'bio': bio.trim(),
+            'shown': shown ? '1' : '0',
+            if (removePhoto && photo == null) 'remove_photo': '1',
+            if (photo != null)
+              'photo': MultipartFile.fromBytes(photo.bytes, filename: photo.name, contentType: DioMediaType.parse(photo.mime)),
+          }),
+        ))['data']
+        as Map<String, dynamic>,
+  );
+
+  /// My numbers over the last 90 days, what moved them, and ratings without names.
+  Future<Performance> performance() async => Performance.fromJson(await _api.get('teacher/performance'));
 }

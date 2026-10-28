@@ -1499,7 +1499,7 @@ abstract class AppLocalizations {
   /// No description provided for @navWeek.
   ///
   /// In ar, this message translates to:
-  /// **'الأسبوع'**
+  /// **'أسبوعي'**
   String get navWeek;
 
   /// No description provided for @navStudents.
@@ -3271,6 +3271,228 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'اللينك اتشال.'**
   String get meetingLinkRemoved;
+
+  /// No description provided for @teacherCardTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'كارتي في صفحة الأكاديمية'**
+  String get teacherCardTitle;
+
+  /// No description provided for @teacherCardLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكارت اللي الأسر بتشوفه عنك في صفحة الأكاديمية. إنت اللي بتكتبه، وإنت اللي بتقرر يظهر ولا لأ. رقمك وإيميلك عمرهم ما بيظهروا.'**
+  String get teacherCardLead;
+
+  /// No description provided for @teacherCardShown.
+  ///
+  /// In ar, this message translates to:
+  /// **'اظهر في صفحة الأكاديمية'**
+  String get teacherCardShown;
+
+  /// No description provided for @teacherCardShownHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو مقفول، كارتك مابيظهرش لحد.'**
+  String get teacherCardShownHint;
+
+  /// No description provided for @teacherCardName.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاسم اللي يظهر'**
+  String get teacherCardName;
+
+  /// No description provided for @teacherCardNameHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'زي «أ. سارة» أو اسمك الأول بس.'**
+  String get teacherCardNameHint;
+
+  /// No description provided for @teacherCardBio.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلمتين عنك'**
+  String get teacherCardBio;
+
+  /// No description provided for @teacherCardBioHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'خبرتك واللي بتحب تدرّسه، لحد 280 حرف. من غير أرقام ولا لينكات.'**
+  String get teacherCardBioHint;
+
+  /// No description provided for @teacherCardPhoto.
+  ///
+  /// In ar, this message translates to:
+  /// **'صورتك (اختياري)'**
+  String get teacherCardPhoto;
+
+  /// No description provided for @teacherCardPhotoHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'PNG أو JPEG أو WebP لحد 1 ميجا. أي حد بيفتح الصفحة بيشوفها.'**
+  String get teacherCardPhotoHint;
+
+  /// No description provided for @teacherCardPickPhoto.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار صورة'**
+  String get teacherCardPickPhoto;
+
+  /// No description provided for @teacherCardChangePhoto.
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّر الصورة'**
+  String get teacherCardChangePhoto;
+
+  /// No description provided for @teacherCardRemovePhoto.
+  ///
+  /// In ar, this message translates to:
+  /// **'شيل الصورة'**
+  String get teacherCardRemovePhoto;
+
+  /// No description provided for @teacherCardTooBig.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصورة أكبر من 1 ميجا.'**
+  String get teacherCardTooBig;
+
+  /// No description provided for @teacherCardPreview.
+  ///
+  /// In ar, this message translates to:
+  /// **'كده الأسر هتشوف كارتك'**
+  String get teacherCardPreview;
+
+  /// No description provided for @teacherCardSubjectsFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'المواد من ملفك في الأكاديمية'**
+  String get teacherCardSubjectsFrom;
+
+  /// No description provided for @teacherCardSave.
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ'**
+  String get teacherCardSave;
+
+  /// No description provided for @teacherCardSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'كارتك اتحفظ.'**
+  String get teacherCardSaved;
+
+  /// No description provided for @teacherCardLevels.
+  ///
+  /// In ar, this message translates to:
+  /// **'{from} ← {to}'**
+  String teacherCardLevels(String from, String to);
+
+  /// No description provided for @teacherCardFromStart.
+  ///
+  /// In ar, this message translates to:
+  /// **'من الأول'**
+  String get teacherCardFromStart;
+
+  /// No description provided for @teacherCardToEnd.
+  ///
+  /// In ar, this message translates to:
+  /// **'للآخر'**
+  String get teacherCardToEnd;
+
+  /// No description provided for @performanceTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدائي'**
+  String get performanceTitle;
+
+  /// No description provided for @performanceLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'{days, plural, =1{آخر يوم} =2{آخر يومين} few{آخر {days} أيام} other{آخر {days} يوم}} · الحصص اللي سببها المنصة مابتتحسبش'**
+  String performanceLead(int days);
+
+  /// No description provided for @performanceGroupCommitment.
+  ///
+  /// In ar, this message translates to:
+  /// **'الالتزام'**
+  String get performanceGroupCommitment;
+
+  /// No description provided for @performanceGroupQuality.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجودة'**
+  String get performanceGroupQuality;
+
+  /// No description provided for @performanceGroupProfessionalism.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاحترافية'**
+  String get performanceGroupProfessionalism;
+
+  /// No description provided for @performanceGroupBusiness.
+  ///
+  /// In ar, this message translates to:
+  /// **'النمو'**
+  String get performanceGroupBusiness;
+
+  /// No description provided for @performanceGood.
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام'**
+  String get performanceGood;
+
+  /// No description provided for @performanceBad.
+  ///
+  /// In ar, this message translates to:
+  /// **'محتاج تحسين'**
+  String get performanceBad;
+
+  /// No description provided for @performanceNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه'**
+  String get performanceNone;
+
+  /// No description provided for @performanceCounted.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي اتحسب'**
+  String get performanceCounted;
+
+  /// No description provided for @performanceNoEvents.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش حاجة اتحسبت عليك. استمر!'**
+  String get performanceNoEvents;
+
+  /// No description provided for @performanceExcluded.
+  ///
+  /// In ar, this message translates to:
+  /// **'مش محسوبة'**
+  String get performanceExcluded;
+
+  /// No description provided for @performanceRatings.
+  ///
+  /// In ar, this message translates to:
+  /// **'تقييمات الأسر'**
+  String get performanceRatings;
+
+  /// No description provided for @performanceAverage.
+  ///
+  /// In ar, this message translates to:
+  /// **'{avg} من 5 · {n, plural, =1{تقييم واحد} =2{تقييمين} few{{n} تقييمات} other{{n} تقييم}}'**
+  String performanceAverage(String avg, int n);
+
+  /// No description provided for @performanceNoRatings.
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش تقييمات.'**
+  String get performanceNoRatings;
+
+  /// No description provided for @performanceStars.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n} من 5'**
+  String performanceStars(int n);
 
   /// No description provided for @timeOff.
   ///

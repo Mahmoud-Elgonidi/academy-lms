@@ -1897,6 +1897,128 @@ class AppLocalizationsEn extends AppLocalizations {
   String get meetingLinkRemoved => 'Link removed.';
 
   @override
+  String get teacherCardTitle => 'My card on the academy\'s page';
+
+  @override
+  String get teacherCardLead =>
+      'The card families see about you on the academy\'s page. You write it, and you decide whether it shows. Your phone number and email never show.';
+
+  @override
+  String get teacherCardShown => 'Show me on the academy\'s page';
+
+  @override
+  String get teacherCardShownHint => 'While it is off, nobody sees your card.';
+
+  @override
+  String get teacherCardName => 'The name to show';
+
+  @override
+  String get teacherCardNameHint => 'Such as “Ms Sara”, or just your first name.';
+
+  @override
+  String get teacherCardBio => 'A few words about you';
+
+  @override
+  String get teacherCardBioHint => 'Your experience and what you love teaching, up to 280 characters. No numbers or links.';
+
+  @override
+  String get teacherCardPhoto => 'Your photo (optional)';
+
+  @override
+  String get teacherCardPhotoHint => 'PNG, JPEG or WebP up to 1 MB. Anyone who opens the page sees it.';
+
+  @override
+  String get teacherCardPickPhoto => 'Choose a photo';
+
+  @override
+  String get teacherCardChangePhoto => 'Change the photo';
+
+  @override
+  String get teacherCardRemovePhoto => 'Take the photo off';
+
+  @override
+  String get teacherCardTooBig => 'The photo is larger than 1 MB.';
+
+  @override
+  String get teacherCardPreview => 'How families will see your card';
+
+  @override
+  String get teacherCardSubjectsFrom => 'Subjects from your profile at the academy';
+
+  @override
+  String get teacherCardSave => 'Save';
+
+  @override
+  String get teacherCardSaved => 'Your card is saved.';
+
+  @override
+  String teacherCardLevels(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String get teacherCardFromStart => 'the start';
+
+  @override
+  String get teacherCardToEnd => 'the end';
+
+  @override
+  String get performanceTitle => 'My performance';
+
+  @override
+  String performanceLead(int days) {
+    String _temp0 = intl.Intl.pluralLogic(days, locale: localeName, other: 'The last $days days', one: 'The last day');
+    return '$_temp0 · lessons lost to the platform do not count';
+  }
+
+  @override
+  String get performanceGroupCommitment => 'Commitment';
+
+  @override
+  String get performanceGroupQuality => 'Quality';
+
+  @override
+  String get performanceGroupProfessionalism => 'Professionalism';
+
+  @override
+  String get performanceGroupBusiness => 'Growth';
+
+  @override
+  String get performanceGood => 'On target';
+
+  @override
+  String get performanceBad => 'Needs work';
+
+  @override
+  String get performanceNone => 'Not enough yet';
+
+  @override
+  String get performanceCounted => 'What counted';
+
+  @override
+  String get performanceNoEvents => 'Nothing counted against you. Keep it up!';
+
+  @override
+  String get performanceExcluded => 'Not counted';
+
+  @override
+  String get performanceRatings => 'Family ratings';
+
+  @override
+  String performanceAverage(String avg, int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n ratings', one: '1 rating');
+    return '$avg of 5 · $_temp0';
+  }
+
+  @override
+  String get performanceNoRatings => 'No ratings yet.';
+
+  @override
+  String performanceStars(int n) {
+    return '$n of 5';
+  }
+
+  @override
   String get timeOff => 'Time off';
 
   @override
