@@ -43,7 +43,7 @@ test('a code goes to the email or number, and a wrong one is refused', async ({ 
   await page.goto('/ar/sign-in');
   // The API answers the same whether or not the account exists.
   await page.getByLabel('الإيميل أو رقم الموبايل').fill(`e2e-${Date.now()}@demo.test`);
-  await page.getByRole('button', { name: 'ابعتلي الكود' }).click();
+  await page.getByRole('button', { name: 'ابعتلي كود' }).click();
   await expect(page.getByText(/بعتنا الكود على/)).toBeVisible();
   await page.getByLabel('الكود').fill('000000');
   await page.getByRole('button', { name: 'ادخل' }).click();
