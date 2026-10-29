@@ -13,11 +13,13 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Url;
 use Modules\Identity\Actions\OnboardAcademy;
 use Modules\Identity\Http\Controllers\WelcomeController;
 use Modules\Platform\Contracts\ConsoleApi;
 use Modules\Platform\Contracts\DTOs\NewAcademy as NewAcademyData;
+use Modules\SharedKernel\Tenancy\TenantRef;
 
 /**
  * A new academy with its owner, from the platform console (docs/architecture/01,
@@ -124,7 +126,32 @@ final class NewAcademy extends Page
     public function create(): void
     {
         $d = $this->form->getState();
-        $result = app(OnboardAcademy::class)->handle(
+        try {
+            $result = $this->onboard($d);
+        } catch (ValidationException $e) {
+            // The action names its fields (owner_phone, slug…); the form holds them under data.
+            throw ValidationException::withMessages(collect($e->errors())->mapWithKeys(fn (array $messages, string $field) => ['data.'.$field => $messages])->all());
+        }
+
+        $academy = $result['academy'];
+        if ($this->request !== null) {
+            app(ConsoleApi::class)->signupRequestCreated($this->request, $academy->id);
+            $this->request = null;
+        }
+        $this->done = [
+            'name' => app()->getLocale() === 'ar' ? $academy->nameAr : $academy->nameEn,
+            'link' => $result['link'],
+            'page' => app(ConsoleApi::class)->consoleUrl('academies/'.$academy->id),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $d
+     * @return array{academy: TenantRef, owner_id: string, link: string}
+     */
+    private function onboard(array $d): array
+    {
+        return app(OnboardAcademy::class)->handle(
             new NewAcademyData(
                 slug: strtolower(trim((string) $d['slug'])),
                 nameAr: trim((string) $d['name_ar']),
@@ -139,17 +166,6 @@ final class NewAcademy extends Page
             (string) $d['owner_email'],
             $d['owner_phone'] ?? null,
         );
-
-        $academy = $result['academy'];
-        if ($this->request !== null) {
-            app(ConsoleApi::class)->signupRequestCreated($this->request, $academy->id);
-            $this->request = null;
-        }
-        $this->done = [
-            'name' => app()->getLocale() === 'ar' ? $academy->nameAr : $academy->nameEn,
-            'link' => $result['link'],
-            'page' => app(ConsoleApi::class)->consoleUrl('academies/'.$academy->id),
-        ];
     }
 
     public function another(): void

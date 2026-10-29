@@ -150,6 +150,24 @@ it('makes the academy from the console screen and shows the owner\'s link', func
     expect(Academy::query()->where('slug', 'rawda')->value('country'))->toBe('EG');
 });
 
+it('shows the owner\'s number or a taken address on the field itself, and makes nothing', function () {
+    Filament::setCurrentPanel('console');
+    $this->actingAs($this->admin, 'platform');
+    $form = ['name_ar' => 'جياد', 'name_en' => 'Jeyad', 'slug' => 'jeyad', 'base_currency' => 'EGP', 'default_timezone' => 'Africa/Cairo', 'default_locale' => 'ar', 'owner_name' => 'عمرو', 'owner_email' => 'amr@jeyad.test'];
+
+    Livewire::test(NewAcademy::class)
+        ->fillForm($form + ['owner_phone' => '05399262811'])
+        ->call('create')
+        ->assertHasFormErrors(['owner_phone'])
+        ->assertSee(__('identity::onboarding.errors.owner_phone'));
+    expect(Academy::query()->where('slug', 'jeyad')->exists())->toBeFalse();
+
+    Livewire::test(NewAcademy::class)
+        ->fillForm(['slug' => 'noor'] + $form)
+        ->call('create')
+        ->assertHasFormErrors(['slug']);
+});
+
 it('shows the audit log across academies, filtered by academy or the platform\'s own', function () {
     event(new Login('platform', $this->admin, false));
     AuditActor::use(new AuditActor('platform', $this->admin->id, $this->admin->name));
