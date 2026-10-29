@@ -17,13 +17,13 @@ for (const c of cases) {
 
 const count = (list, p) => list.filter((c) => c.priority === p).length;
 const out = [
-  '# قايمة الاعتماد اليدوية',
+  '# قائمة الاعتماد اليدوية',
   '',
-  'الحالات اللي بيتجرّب بيها النظام بالإيد على السيرفر قبل اعتماده. المصدر `cases.json`، والملف ده بيتكتب منه بـ `node docs/testing/render.mjs` (ماتعدّلوش بإيدك).',
+  'الحالات التي يُجرَّب بها النظام يدويًا على الخادم قبل اعتماده. المصدر `cases.json`، ويُكتب هذا الملف منه بـ `node docs/testing/render.mjs` (لا تعدّله يدويًا).',
   '',
-  `**${cases.length} حالة:** P0 ${count(cases, 'P0')}، وP1 ${count(cases, 'P1')}، وP2 ${count(cases, 'P2')}. منهم ${cases.filter((c) => c.edge).length} حالة حدّية.`,
+  `**${cases.length} حالة:** P0 ${count(cases, 'P0')}، وP1 ${count(cases, 'P1')}، وP2 ${count(cases, 'P2')}. منها ${cases.filter((c) => c.edge).length} حالة حدّية.`,
   '',
-  '**شرط الاعتماد:** كل حالات P0 عدّت، ومفيش حالة P0 ولا P1 لسه واقعة.',
+  '**شرط الاعتماد:** نجاح كل حالات P0، وألا تبقى أي حالة P0 أو P1 فاشلة.',
   '',
   '## المراحل',
   '',
@@ -38,10 +38,10 @@ for (const p of phases) {
   for (const c of list) {
     if (c.area !== area) { area = c.area; out.push(`### ${area}`, ''); }
     out.push(`#### - [ ] \`${c.id}\` ${c.title}`, '');
-    out.push(`**${c.priority}**${c.edge ? ' · حدّي' : ''} · **مين:** ${c.who} · **فين:** ${c.where}`, '');
-    if (c.pre) out.push(`**قبلها:** ${c.pre}`, '');
+    out.push(`**${c.priority}**${c.edge ? ' · حدّي' : ''} · **مَن:** ${c.who} · **أين:** ${c.where}`, '');
+    if (c.pre) out.push(`**يسبقها:** ${c.pre}`, '');
     out.push('**الخطوات:**', '', ...c.steps.map((s, i) => `${i + 1}. ${s}`), '');
-    out.push('**المفروض يحصل:**', '', ...c.expect.map((e) => `- ${e}`), '');
+    out.push('**النتيجة المتوقعة:**', '', ...c.expect.map((e) => `- ${e}`), '');
     if (c.rule) out.push(`<sub>المرجع: ${c.rule}</sub>`, '');
   }
 }
