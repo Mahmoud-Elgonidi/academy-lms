@@ -28,7 +28,7 @@ import {
 } from './mushaf';
 import type { MushafPage } from './types';
 
-const kinds = { wrong: 'غلط', hesitation: 'تردد', tajweed: 'تجويد' };
+const kinds = { wrong: 'خطأ', hesitation: 'تردد', tajweed: 'تجويد' };
 
 /** Page 1 of the mushaf, shortened: al-Fatiha, whose first verse is the basmala. */
 const fatiha = {
@@ -135,7 +135,7 @@ describe('the teacher’s menu on a word', () => {
   it('offers each kind in the API’s order, and taking the mark off only when there is one', () => {
     expect(wordMenu(kinds, null)).toEqual({
       kinds: [
-        { kind: 'wrong', label: 'غلط', chosen: false },
+        { kind: 'wrong', label: 'خطأ', chosen: false },
         { kind: 'hesitation', label: 'تردد', chosen: false },
         { kind: 'tajweed', label: 'تجويد', chosen: false },
       ],
@@ -246,7 +246,7 @@ describe('the mistakes notebook', () => {
   });
 
   it('says a word’s kinds in the reader’s words, weightiest first and each once', () => {
-    expect(kindLabels(['tajweed', 'wrong', 'tajweed'], kinds)).toEqual(['غلط', 'تجويد']);
+    expect(kindLabels(['tajweed', 'wrong', 'tajweed'], kinds)).toEqual(['خطأ', 'تجويد']);
     expect(kindLabels(['rhythm', 'hesitation'], kinds)).toEqual(['تردد', 'rhythm']);
   });
 });

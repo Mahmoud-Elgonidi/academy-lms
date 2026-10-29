@@ -33,26 +33,26 @@ test('the academy page shows what it offers and takes a free trial request', asy
   // Sent empty, the form says what is missing; filled, it goes to the academy.
   const form = page.locator('#ls-panel-trial form');
   await page.waitForTimeout(FORM_READY_MS);
-  await form.getByRole('button', { name: 'ابعت' }).click();
+  await form.getByRole('button', { name: 'أرسل' }).click();
   await expect(form.getByRole('alert')).toBeVisible();
   await form.getByLabel('اسمك').fill('ولي أمر من الموقع');
-  await form.getByLabel('الموبايل (واتساب)').fill(freshPhone());
+  await form.getByLabel('الجوال (واتساب)').fill(freshPhone());
   await form.getByLabel('اسم الطفل').fill('سلمى');
-  await form.getByRole('button', { name: 'ابعت' }).click();
+  await form.getByRole('button', { name: 'أرسل' }).click();
   await expect(page.getByRole('status').getByText('وصلنا طلبك')).toBeVisible();
 });
 
 test('a teacher asks to teach at the academy from its page', async ({ page }) => {
   await page.goto('/ar#teach');
-  const tab = page.getByRole('tab', { name: 'درّس معانا' });
+  const tab = page.getByRole('tab', { name: 'درّس معنا' });
   await expect(tab).toHaveAttribute('aria-selected', 'true');
   const form = page.locator('#ls-panel-teach form');
   await page.waitForTimeout(FORM_READY_MS);
-  await form.getByLabel('اسمك').fill('مدرّسة من الموقع');
-  await form.getByLabel('الموبايل (واتساب)').fill(freshPhone());
+  await form.getByLabel('اسمك').fill('معلّمة من الموقع');
+  await form.getByLabel('الجوال (واتساب)').fill(freshPhone());
   await form.locator('.ls-chip').first().click();
-  await form.getByLabel('سنين الخبرة').fill('6');
-  await form.getByRole('button', { name: 'ابعت' }).click();
+  await form.getByLabel('سنوات الخبرة').fill('6');
+  await form.getByRole('button', { name: 'أرسل' }).click();
   await expect(page.getByRole('status').getByText('وصلنا طلبك')).toBeVisible();
 });
 
@@ -79,8 +79,8 @@ test('the platform page shows its plans and takes a request to join', async ({ p
   await page.waitForTimeout(FORM_READY_MS);
   await form.getByLabel('اسم الأكاديمية').fill('أكاديمية من الاختبار');
   await form.getByLabel('اسمك').fill('صاحب أكاديمية');
-  await form.getByLabel('الإيميل').fill(`owner-${Date.now()}@example.test`);
-  await form.getByRole('button', { name: 'ابعت الطلب' }).click();
+  await form.getByLabel('البريد الإلكتروني').fill(`owner-${Date.now()}@example.test`);
+  await form.getByRole('button', { name: 'أرسل الطلب' }).click();
   await expect(page.getByRole('status').getByText('وصلنا طلبك')).toBeVisible();
 });
 

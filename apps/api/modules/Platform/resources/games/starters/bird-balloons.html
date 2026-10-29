@@ -76,7 +76,7 @@
   function startItem() {
     item = items[index]; tries = 0; locked = false;
     var sign = document.getElementById('sign');
-    sign.textContent = item.prompt || 'فرقع البالونة الصح';
+    sign.textContent = item.prompt || 'فرقع البالونة الصحيحة';
     sign.classList.remove('swing'); void sign.offsetWidth; sign.classList.add('swing');
     document.getElementById('count').textContent = (index + 1) + ' / ' + items.length;
     var order = LMS.shuffle(item.options.map(function (_, i) { return i; }));
@@ -161,13 +161,13 @@
   function next() {
     balloons = [];
     index++;
-    if (combo >= 3 && combo % 3 === 0) banner('نار! 🔥');
+    if (combo >= 3 && combo % 3 === 0) banner('رائع! 🔥');
     if (index >= items.length) { finale(); return; }
     startItem();
   }
 
   function finale() {
-    LMS.sfx('win'); banner('برافو!');
+    LMS.sfx('win'); banner('أحسنت!');
     for (var i = 0; i < 6; i++) setTimeout(function () {
       var rec = { el: el('div'), size: 60, gone: false };
       rec.el.style.position = 'absolute'; rec.el.style.left = (Math.random() * W) + 'px'; rec.el.style.top = (Math.random() * H * .6) + 'px';

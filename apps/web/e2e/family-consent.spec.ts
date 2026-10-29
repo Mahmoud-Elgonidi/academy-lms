@@ -17,25 +17,25 @@ test('a child waits for their guardian, who agrees, and then the child signs in'
   if (await withdraw.isVisible()) {
     page.once('dialog', (dialog) => dialog.accept());
     await withdraw.click();
-    await expect(card(page).getByText('مستني موافقتك')).toBeVisible();
+    await expect(card(page).getByText('بانتظار موافقتك')).toBeVisible();
   }
   await page.context().clearCookies();
 
   // Rana herself is told why she cannot come in yet.
   await signInWithPassword(page, CHILD, PASSWORD);
-  await expect(page.getByText('حسابك مستني موافقة ولي أمرك.', { exact: false })).toBeVisible();
+  await expect(page.getByText('حسابك بانتظار موافقة ولي أمرك.', { exact: false })).toBeVisible();
   await expect(page).toHaveURL(/\/ar\/sign-in/);
 
   // Her father sees it on his home, reads, ticks and agrees.
   await signInWithPassword(page, PARENT, PASSWORD);
-  await page.getByRole('link', { name: /رنا محمود مستني موافقتك/ }).click();
+  await page.getByRole('link', { name: /رنا محمود بانتظار موافقتك/ }).click();
   await expect(page).toHaveURL(/\/ar\/family\/privacy$/);
   await expect(card(page).getByText('الحصص المباشرة')).toBeVisible();
-  await card(page).getByRole('button', { name: 'موافق', exact: true }).click();
-  await expect(card(page).getByText('علّم على "أنا ولي أمر" الأول.')).toBeVisible();
+  await card(page).getByRole('button', { name: 'أوافق', exact: true }).click();
+  await expect(card(page).getByText('ضع علامة على "أنا ولي أمر" أولًا.')).toBeVisible();
   await card(page).getByRole('checkbox').check();
-  await card(page).getByRole('button', { name: 'موافق', exact: true }).click();
-  await expect(card(page).getByText('موافق عليه')).toBeVisible();
+  await card(page).getByRole('button', { name: 'أوافق', exact: true }).click();
+  await expect(card(page).getByText('تمت الموافقة')).toBeVisible();
   await expect(card(page).getByText(/^وافقت يوم /)).toBeVisible();
   await page.context().clearCookies();
 

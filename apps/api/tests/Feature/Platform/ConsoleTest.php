@@ -159,9 +159,9 @@ it('shows the audit log across academies, filtered by academy or the platform\'s
     app()->setLocale('ar');
 
     $page = Livewire::test(AuditLog::class);
-    expect(array_column($page->instance()->feed['rows'], 'title'))->toBe(['إيقاف الأكاديمية: الاشتراك متأخر', 'دخول على لوحة المنصة']);
+    expect(array_column($page->instance()->feed['rows'], 'title'))->toBe(['إيقاف الأكاديمية: الاشتراك متأخر', 'دخول إلى لوحة المنصة']);
     $page->set('academy', 'platform');
-    expect(array_column($page->instance()->feed['rows'], 'title'))->toBe(['دخول على لوحة المنصة']);
+    expect(array_column($page->instance()->feed['rows'], 'title'))->toBe(['دخول إلى لوحة المنصة']);
     $page->set('academy', $this->noor->id)->set('group', 'billing');
     expect($page->instance()->feed['rows'])->toBe([]);
 });

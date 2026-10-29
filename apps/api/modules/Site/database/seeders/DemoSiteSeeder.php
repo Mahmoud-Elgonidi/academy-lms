@@ -21,10 +21,10 @@ final class DemoSiteSeeder extends Seeder
         $content = SiteContent::defaults();
         $content['testimonials'] = [
             ['name' => 'أم يوسف', 'role_ar' => 'ولية أمر طالب في لندن', 'role_en' => 'A student\'s mother in London',
-                'quote_ar' => 'يوسف بقى بيستنى حصة القرآن، والتقرير بعد كل حصة بيطمّنّي إنه ماشي صح.',
+                'quote_ar' => 'أصبح يوسف ينتظر حصة القرآن، والتقرير بعد كل حصة يطمئنني أنه يسير على الطريق الصحيح.',
                 'quote_en' => 'Yousef looks forward to his Quran lesson now, and the report after each one tells me he is on track.'],
             ['name' => 'ناصر علي', 'role_ar' => 'ولي أمر طالب في الدوحة', 'role_en' => 'A student\'s father in Doha',
-                'quote_ar' => 'المواعيد مظبوطة على توقيتنا، ولما حصة فاتت اتعوّضت من غير ما نطلب.',
+                'quote_ar' => 'المواعيد مضبوطة على توقيتنا، وحين فاتتنا حصة عُوّضت دون أن نطلب.',
                 'quote_en' => 'The times fit our clock, and when a lesson was missed it was made up without us asking.'],
         ];
         $content['sections'] = SiteContent::SECTIONS;

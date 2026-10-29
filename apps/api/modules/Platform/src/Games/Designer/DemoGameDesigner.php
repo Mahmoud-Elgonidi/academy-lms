@@ -35,8 +35,8 @@ final class DemoGameDesigner implements GameDesigner
             minItems: $min,
             maxItems: $max,
             message: $brief->isRevision()
-                ? 'ده المصمم التجريبي (من غير Claude): وصلني طلبك بس مابغيّرش في اللعبة. حط ANTHROPIC_API_KEY عشان Claude يعدّل بجد.'
-                : 'ده المصمم التجريبي (من غير Claude): رجّعتلك «'.$ar.'» من ألعاب المنصة عشان تجرّب الدورة كلها. حط ANTHROPIC_API_KEY عشان Claude يبني اللعبة من قصتك.',
+                ? 'هذا هو المصمم التجريبي (دون Claude): وصلني طلبك لكنني لا أغيّر في اللعبة. ضع ANTHROPIC_API_KEY ليعدّل Claude فعلًا.'
+                : 'هذا هو المصمم التجريبي (دون Claude): أعدت لك «'.$ar.'» من ألعاب المنصة لتجرّب الدورة كاملة. ضع ANTHROPIC_API_KEY ليبني Claude اللعبة من قصتك.',
             html: (string) file_get_contents(StarterCatalog::starterPath($key)),
             servedModel: 'demo',
         );

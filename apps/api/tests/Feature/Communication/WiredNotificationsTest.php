@@ -148,5 +148,5 @@ it('tells the reviewers about a shift proposal and the teacher about the answer'
 
     expect(inbox($this->admin))->toBe(['scheduling.proposal_submitted'])
         ->and(inbox($this->teacher))->toBe(['scheduling.proposal_answered'])
-        ->and(Notification::query()->where('user_id', $this->teacher->id)->value('body'))->toContain('اتعتمد');
+        ->and(Notification::query()->where('user_id', $this->teacher->id)->value('body'))->toContain('اعتُمد');
 });

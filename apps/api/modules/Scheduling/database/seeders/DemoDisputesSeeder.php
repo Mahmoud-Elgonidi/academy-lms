@@ -63,22 +63,22 @@ final class DemoDisputesSeeder extends Seeder
 
         if (($found = $pick('completed')) !== null) {
             [$lesson, $who] = $found;
-            $try(fn () => $dispute->handle($lesson, 'family', $who, 'cut_short', 'حسينا إن الحصة خلصت قبل معادها، ياريت تراجعوها.'));
+            $try(fn () => $dispute->handle($lesson, 'family', $who, 'cut_short', 'شعرنا أن الحصة انتهت قبل موعدها، نرجو مراجعتها.'));
         }
 
         if (($found = $pick('teacher_absent')) !== null) {
             [$lesson] = $found;
             $try(function () use ($dispute, $decide, $lesson, $owner) {
-                $raised = $dispute->handle($lesson, 'teacher', $lesson->teacher_id, 'teacher_attended', 'كنت في الفصل من أول الحصة، بس الكاميرا ما اشتغلتش والنظام ما سجلنيش.');
-                $decide->handle($raised, 'completed', 'راجعنا سجل الفصل ولقيناك موجود الحصة كلها. اتسجلت الحصة واتحسب لك أجرها.', $owner);
+                $raised = $dispute->handle($lesson, 'teacher', $lesson->teacher_id, 'teacher_attended', 'كنت في الفصل من بداية الحصة، لكن الكاميرا لم تعمل ولم يسجّلني النظام.');
+                $decide->handle($raised, 'completed', 'راجعنا سجل الفصل ووجدناك حاضرًا طوال الحصة. سُجّلت الحصة واحتُسب لك أجرها.', $owner);
             });
         }
 
         if (($found = $pick('completed')) !== null) {
             [$lesson, $who] = $found;
             $try(function () use ($dispute, $decide, $lesson, $who, $owner) {
-                $raised = $dispute->handle($lesson, 'family', $who, 'teacher_absent', 'المدرس ما دخلش الحصة خالص.');
-                $decide->handle($raised, 'completed', 'سجل الفصل بيقول إن المدرس والطالب كانوا موجودين الحصة كلها. لو فيه حاجة تانية كلمونا.', $owner);
+                $raised = $dispute->handle($lesson, 'family', $who, 'teacher_absent', 'لم يدخل المعلّم الحصة إطلاقًا.');
+                $decide->handle($raised, 'completed', 'يُظهر سجل الفصل أن المعلّم والطالب كانا حاضرَين طوال الحصة. إن كان هناك أمر آخر فتواصلوا معنا.', $owner);
             });
         }
     }

@@ -22,8 +22,8 @@ final class DemoCatalogSeeder extends Seeder
                 [['رواية حفص', 'Hafs'], ['تحفة الأطفال', 'Tuhfat al-Atfal'], ['الجزرية', 'Al-Jazariyya']],
             ],
             'Arabic' => [
-                [['تأسيس', 'Foundations'], ['المستوى الأول', 'Level 1'], ['المستوى التاني', 'Level 2'], ['المستوى التالت', 'Level 3']],
-                [['لغير الناطقين بيها', 'For non-native speakers'], ['منهج مصري', 'Egyptian curriculum'], ['منهج سعودي', 'Saudi curriculum']],
+                [['تأسيس', 'Foundations'], ['المستوى الأول', 'Level 1'], ['المستوى الثاني', 'Level 2'], ['المستوى الثالث', 'Level 3']],
+                [['لغير الناطقين بها', 'For non-native speakers'], ['منهج مصري', 'Egyptian curriculum'], ['منهج سعودي', 'Saudi curriculum']],
             ],
             'English' => [
                 [['A1', 'A1'], ['A2', 'A2'], ['B1', 'B1'], ['B2', 'B2'], ['C1', 'C1']],

@@ -47,7 +47,7 @@ final class DemoPayrollSeeder extends Seeder
             $quran ? ['subject_id' => $quran, 'unit' => 'hour', 'amount' => '70'] : null,
             ['session_type' => 'trial', 'unit' => 'lesson', 'amount' => '25'],
         ]))]);
-        $cards->handle(null, ['name' => 'مدرسين مصر', 'currency' => 'EGP', 'lines' => [
+        $cards->handle(null, ['name' => 'معلّمو مصر', 'currency' => 'EGP', 'lines' => [
             ['unit' => 'hour', 'amount' => '400'],
             ['session_type' => 'trial', 'unit' => 'lesson', 'amount' => '150'],
         ], 'teachers' => array_values(array_filter([$teacher('khaled@demo.test'), $teacher('nour@demo.test')]))]);
@@ -68,10 +68,10 @@ final class DemoPayrollSeeder extends Seeder
             return;
         }
         if ($sara = $teacher('sara@demo.test')) {
-            $adjust->handle($sara, 'bonus', '100', 'مكافأة التزام: ولا حصة اتأخرت والتقارير كلها في ميعادها.', $accountant, $last);
+            $adjust->handle($sara, 'bonus', '100', 'مكافأة التزام: لم تتأخر أي حصة والتقارير كلها في موعدها.', $accountant, $last);
         }
         if ($khaled = $teacher('khaled@demo.test')) {
-            $adjust->handle($khaled, 'deduction', '200', 'غياب عن حصة من غير إبلاغ (القاعدة 9).', $accountant, $last);
+            $adjust->handle($khaled, 'deduction', '200', 'غياب عن حصة من دون إبلاغ (القاعدة 9).', $accountant, $last);
         }
         if ($nour = $teacher('nour@demo.test')) {
             $adjust->handle($nour, 'bonus', '150', 'غطّت حصة بديلة لزميلة في إجازة.', $accountant, $current);

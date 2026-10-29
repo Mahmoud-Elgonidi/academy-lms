@@ -29,9 +29,9 @@ final class SendConcernNotifications
     {
         $a = 'safeguarding::notifications.audience.';
         foreach ([
-            ['concern_reported', 'staff', $a.'leads', ['push', 'email'], ['concern' => '#7', 'category' => 'حد طلب يكلّمه برّه المنصة', 'urgent' => '']],
-            ['concern_waiting', 'staff', $a.'leads', ['push', 'email'], ['concern' => '#7', 'category' => 'حد طلب يكلّمه برّه المنصة', 'urgent' => '']],
-            ['concern_answered', 'lessons', $a.'reporter', ['push'], ['concern' => '#7', 'reply' => 'شكرًا إنك قلت لنا. اتكلمنا مع المدرس واتغير ميعاد الحصة.']],
+            ['concern_reported', 'staff', $a.'leads', ['push', 'email'], ['concern' => '#7', 'category' => 'طلب أحدهم التواصل خارج المنصة', 'urgent' => '']],
+            ['concern_waiting', 'staff', $a.'leads', ['push', 'email'], ['concern' => '#7', 'category' => 'طلب أحدهم التواصل خارج المنصة', 'urgent' => '']],
+            ['concern_answered', 'lessons', $a.'reporter', ['push'], ['concern' => '#7', 'reply' => 'شكرًا لأنك أخبرتنا. تحدثنا مع المعلّم وتغيّر موعد الحصة.']],
         ] as [$name, $category, $audience, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
                 key: "safeguarding.{$name}", category: $category,

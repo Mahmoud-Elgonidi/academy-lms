@@ -61,7 +61,7 @@ final class DemoCrmSeeder extends Seeder
         // New: this morning from an Instagram ad, and one from the website nobody has picked up.
         $ago($lead(['contact_name' => 'منى السيد', 'phone_e164' => '+966551230001', 'country' => 'SA', 'timezone' => 'Asia/Riyadh', 'for_child' => true,
             'learner_name' => 'عمر', 'learner_birth_year' => 2018, 'subject_id' => $quran, 'preferred_days' => [6, 7, 1], 'preferred_from' => 16, 'preferred_to' => 20,
-            'source' => 'instagram', 'utm_source' => 'instagram', 'utm_medium' => 'paid', 'utm_campaign' => 'hifz-autumn', 'notes' => 'عايزة مدرّسة ست، وعمر بيحفظ جزء عمّ.']), 3);
+            'source' => 'instagram', 'utm_source' => 'instagram', 'utm_medium' => 'paid', 'utm_campaign' => 'hifz-autumn', 'notes' => 'تريد معلّمة، وعمر يحفظ جزء عمّ.']), 3);
         $daniel = $lead(['contact_name' => 'Daniel Brooks', 'phone_e164' => '+447700900321', 'country' => 'GB', 'timezone' => 'Europe/London', 'locale' => 'en',
             'subject_id' => $arabic, 'preferred_days' => [6], 'preferred_from' => 10, 'preferred_to' => 13, 'source' => 'website', 'notes' => 'Beginner, wants conversational Arabic.']);
         $daniel->forceFill(['owner_id' => null])->save();
@@ -70,15 +70,15 @@ final class DemoCrmSeeder extends Seeder
         // Contacted: a WhatsApp and a call.
         $karim = $lead(['contact_name' => 'أبو كريم', 'phone_e164' => '+96551230003', 'country' => 'KW', 'timezone' => 'Asia/Kuwait', 'for_child' => true,
             'learner_name' => 'كريم', 'learner_birth_year' => 2015, 'subject_id' => $tajweed, 'preferred_days' => [7, 2, 4], 'preferred_from' => 17, 'preferred_to' => 21]);
-        $log->handle($karim, 'whatsapp', 'بعتنا الباقات والأسعار ومواعيد المدرسين.', $sales);
-        $log->handle($karim, 'call', 'عايز يجرّب الأسبوع ده بعد المغرب، ويفضّل مدرّس.', $sales);
+        $log->handle($karim, 'whatsapp', 'أرسلنا الباقات والأسعار ومواعيد المعلّمين.', $sales);
+        $log->handle($karim, 'call', 'يريد أن يجرّب هذا الأسبوع بعد المغرب، ويفضّل معلّمًا.', $sales);
         $ago($karim, 26);
 
         // A trial booked for the coming days, the way Find a teacher books it.
         $saraLead = $lead(['contact_name' => 'أم سارة', 'phone_e164' => '+971551230004', 'country' => 'AE', 'timezone' => 'Asia/Dubai', 'for_child' => true,
             'learner_name' => 'سارة', 'learner_birth_year' => 2016, 'subject_id' => $quran, 'preferred_days' => [2, 3, 4, 5, 6, 7, 1], 'preferred_from' => 18, 'preferred_to' => 22,
-            'source' => 'referral', 'notes' => 'جات من طرف أم حمزة.']);
-        $log->handle($saraLead, 'call', 'اتفقنا على حصة تجريبية قريب.', $sales);
+            'source' => 'referral', 'notes' => 'جاءت عن طريق أم حمزة.']);
+        $log->handle($saraLead, 'call', 'اتفقنا على حصة تجريبية قريبًا.', $sales);
         $this->bookAhead($saraLead, $learner->handle($saraLead, $sales), $find, $hold, $confirm, $sales, $now);
 
         // Trials that took place: yesterday with Nour (waiting for her assessment), three days ago with Sara (assessed).
@@ -90,14 +90,14 @@ final class DemoCrmSeeder extends Seeder
             'learner_name' => 'تميم', 'learner_birth_year' => 2016, 'subject_id' => $quran, 'preferred_days' => [7, 3], 'preferred_from' => 17, 'preferred_to' => 21, 'source' => 'tiktok']);
         $past = [];
         foreach ([[$yahya, $nour, $quran, 1], [$jana, $sara, $tajweed, 3], [$tamim, $sara, $quran, 5]] as [$l, $teacher, $subj, $days]) {
-            $log->handle($l, 'whatsapp', 'اتفقنا على ميعاد التجربة.', $sales);
+            $log->handle($l, 'whatsapp', 'اتفقنا على موعد التجربة.', $sales);
             $past[$l->id] = $this->bookPast($l, $learner->handle($l, $sales), $teacher, $subj, $now->subDays($days), $schedule, $join, $sales);
         }
         $deadlines->handle($now);
 
         $plan = collect($billing->planOptions(30))->first(fn ($p) => $p->sessionsPerWeek === 2);
-        foreach ([[$jana, 'بتقرأ كويس، ومحتاجة تشتغل على أحكام النون الساكنة والمدود.', 'تركيزها عالي. حصتين في الأسبوع هيخلّوها تخلص المستوى الأول في شهرين.'],
-            [$tamim, 'حافظ جزء عمّ، ومخارج الحروف محتاجة ضبط.', 'متحمّس جدًا. الأفضل نبدأ بحصتين ونراجع الحفظ كل حصة.']] as [$l, $level, $notes]) {
+        foreach ([[$jana, 'تقرأ جيدًا، وتحتاج إلى العمل على أحكام النون الساكنة والمدود.', 'تركيزها عالٍ. حصتان في الأسبوع ستجعلانها تنهي المستوى الأول في شهرين.'],
+            [$tamim, 'يحفظ جزء عمّ، ومخارج الحروف تحتاج إلى ضبط.', 'متحمّس جدًا. الأفضل أن نبدأ بحصتين ونراجع الحفظ في كل حصة.']] as [$l, $level, $notes]) {
             if (($trial = LeadTrial::query()->where('lead_id', $l->id)->where('status', 'attended')->first()) !== null) {
                 $assess->handle($trial, ['level' => $level, 'plan_id' => $plan?->id, 'per_week' => 2, 'notes' => $notes], $trial->teacher_id);
             }
@@ -111,8 +111,8 @@ final class DemoCrmSeeder extends Seeder
         // Lost: the price, for now.
         $malek = $lead(['contact_name' => 'أبو مالك', 'phone_e164' => '+962791230008', 'country' => 'JO', 'timezone' => 'Asia/Amman', 'for_child' => true,
             'learner_name' => 'مالك', 'learner_birth_year' => 2014, 'subject_id' => $quran, 'source' => 'facebook']);
-        $log->handle($malek, 'call', 'شايف الباقة غالية، هيرجع بعد الامتحانات.', $sales);
-        $lost->handle($malek, 'price', 'نكلّمه تاني آخر الشهر.', $sales);
+        $log->handle($malek, 'call', 'يرى أن الباقة غالية، وسيعود بعد الامتحانات.', $sales);
+        $lost->handle($malek, 'price', 'نتواصل معه مرة أخرى آخر الشهر.', $sales);
         $ago($malek, 120);
     }
 

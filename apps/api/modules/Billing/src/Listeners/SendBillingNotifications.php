@@ -39,7 +39,7 @@ final class SendBillingNotifications
             ['invoice_issued', ['email', 'whatsapp', 'push'], ['number' => 'NR-000002', 'student' => 'زياد', 'total' => '560 ر.س.', 'due' => 'الأربعاء 14 أكتوبر', 'link' => 'https://noor.example.com/pay/invoice/…']],
             ['invoice_paid', ['email', 'push'], ['number' => 'NR-000002', 'total' => '560 ر.س.']],
             ['proof_approved', ['email', 'push'], ['number' => 'NR-000002', 'amount' => '300 ر.س.', 'left' => '260 ر.س.']],
-            ['proof_rejected', ['email', 'whatsapp', 'push'], ['number' => 'NR-000002', 'amount' => '560 ر.س.', 'reason' => 'المبلغ ماوصلش الحساب لحد دلوقتي.', 'link' => 'https://noor.example.com/pay/invoice/…']],
+            ['proof_rejected', ['email', 'whatsapp', 'push'], ['number' => 'NR-000002', 'amount' => '560 ر.س.', 'reason' => 'لم يصل المبلغ إلى الحساب حتى الآن.', 'link' => 'https://noor.example.com/pay/invoice/…']],
         ] as [$name, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
                 key: "billing.{$name}", category: 'billing',

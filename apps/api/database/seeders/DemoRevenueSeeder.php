@@ -86,7 +86,7 @@ final class DemoRevenueSeeder extends Seeder
         }
         // The demo card, for the online payments (the same account DemoPaymentsSeeder shows later).
         $card = $gateways->demoAllowed()
-            ? (GatewayAccount::query()->where('gateway', 'demo')->first() ?? $saveGateway->handle(null, ['gateway' => 'demo', 'label' => 'كارت أو مدى (تجريبي)', 'mode' => 'test'], $owner))
+            ? (GatewayAccount::query()->where('gateway', 'demo')->first() ?? $saveGateway->handle(null, ['gateway' => 'demo', 'label' => 'بطاقة أو مدى (تجريبي)', 'mode' => 'test'], $owner))
             : null;
 
         // Who, with whom, when (teacher's clock, ISO weekday), how they pay and how soon after the invoice.

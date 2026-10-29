@@ -50,7 +50,7 @@ final class SchedulesImporter implements Importer
             new Field('clock', false, ['توقيت المواعيد', 'بتوقيت', 'المواعيد بتوقيت', 'clock', 'times time zone', 'time zone']),
             new Field('start_date', false, ['يبدأ من', 'تاريخ البداية', 'البداية', 'start', 'start date', 'from']),
             new Field('remaining', false, ['الحصص المتبقية', 'المتبقي', 'الحصص الباقية', 'الرصيد', 'remaining', 'lessons left', 'remaining lessons']),
-            new Field('valid_until', false, ['صالح لحد', 'تاريخ الانتهاء', 'الانتهاء', 'valid until', 'expires', 'expiry']),
+            new Field('valid_until', false, ['صالح لحد', 'الرصيد صالح لحد', 'صالح حتى', 'الرصيد صالح حتى', 'تاريخ الانتهاء', 'الانتهاء', 'valid until', 'expires', 'expiry']),
             new Field('plan', false, ['الباقة', 'الاشتراك', 'plan', 'package']),
             new Field('payer', false, ['اللي بيدفع', 'الدافع', 'رقم الدافع', 'payer']),
         ];

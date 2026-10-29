@@ -68,7 +68,7 @@ final class DemoTeacherChecksSeeder extends Seeder
         $send('khaled', 'criminal_record', $now->subDays(2)->setTime(21, 5), 'EG-2026-298016', $now->subDays(6));
         // Heba's scan could not be read.
         if ($heba = $send('heba', 'criminal_record', $now->subDays(9)->setTime(17, 40), null, null)) {
-            $at($now->subDays(8)->setTime(11, 0), fn () => $decide->handle($heba->id, false, null, 'الصورة مش واضحة ومش باين فيها الرقم ولا التاريخ. ابعتيها تاني بصورة أوضح أو الـ PDF.', $owner));
+            $at($now->subDays(8)->setTime(11, 0), fn () => $decide->handle($heba->id, false, null, 'الصورة غير واضحة ولا يظهر فيها الرقم ولا التاريخ. أرسليها مرة أخرى بصورة أوضح أو بملف PDF.', $owner));
         }
     }
 }

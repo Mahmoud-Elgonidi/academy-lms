@@ -48,7 +48,7 @@ final class ReportDraftPrompt
 
         Use only what the teacher said. Leave out (do not include) every field the teacher did not speak to: never guess, never add praise or advice they did not give. The student is called {child}: write {child} wherever you name them.
 
-        Write in the language the teacher spoke (Arabic in clear, simple Arabic as an Egyptian teacher would write it; English in plain English). Keep it short.
+        Write in the language the teacher spoke (Arabic in clear, simple Modern Standard Arabic, even when the teacher spoke a dialect; English in plain English). Keep it short.
 
         "unsure": the fields you filled but are not sure of (their names as in this answer: "overall", "notes_for_student", "homework", a lesson's key such as "L2", a question's key).
         TXT;
@@ -160,14 +160,14 @@ final class ReportDraftPrompt
     private static function demo(string $kind, array $keys): array
     {
         if ($kind === 'absence') {
-            return ['absence_note' => '{child} ماحضرش الحصة النهارده، ومستنيينه الحصة الجاية.', 'unsure' => []];
+            return ['absence_note' => 'لم يحضر {child} الحصة اليوم، وننتظره في الحصة القادمة.', 'unsure' => []];
         }
 
         return array_filter([
-            'lessons' => $keys === [] ? null : [['key' => $keys[0], 'outcome' => 'practiced', 'note' => 'قرأ كويس، ومحتاج يراجع الآخر.']],
+            'lessons' => $keys === [] ? null : [['key' => $keys[0], 'outcome' => 'practiced', 'note' => 'قرأ جيدًا، ويحتاج إلى مراجعة الجزء الأخير.']],
             'engagement' => 4,
             'overall' => 4,
-            'notes_for_student' => 'برافو يا {child}! قريت كويس النهارده. راجع آخر جزء كل يوم لحد الحصة الجاية.',
+            'notes_for_student' => 'أحسنت يا {child}! قرأت جيدًا اليوم. راجع الجزء الأخير كل يوم حتى الحصة القادمة.',
             'unsure' => ['overall'],
         ], fn ($v) => $v !== null);
     }

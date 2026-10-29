@@ -24,8 +24,8 @@ final class DemoSupportSeeder extends Seeder
         $academyId = $tenants->require()->id;
         $now = CarbonImmutable::now();
         $visits = [
-            ['guardian@demo.test', 6, 15, 'ولي الأمر بيقول إن فاتورة الشهر مش ظاهرة عنده في التطبيق، وعايزين نشوف اللي هو شايفه.', 'exit', 9],
-            ['teacher@demo.test', 2, 30, 'المدرس مش شايف حصة يوم الخميس في جدوله، والإدارة شايفاها. بنراجع اللي ظاهر عنده.', 'expired', 30],
+            ['guardian@demo.test', 6, 15, 'يقول ولي الأمر إن فاتورة الشهر لا تظهر لديه في التطبيق، ونريد أن نرى ما يراه.', 'exit', 9],
+            ['teacher@demo.test', 2, 30, 'لا يرى المعلّم حصة يوم الخميس في جدوله، بينما تراها الإدارة. نراجع ما يظهر لديه.', 'expired', 30],
         ];
 
         foreach ($visits as [$email, $daysAgo, $minutes, $reason, $how, $stayed]) {

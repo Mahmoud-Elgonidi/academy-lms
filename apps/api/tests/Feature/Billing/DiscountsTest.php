@@ -126,7 +126,7 @@ it('gives the family discount from the second child on, at its rate, as a line o
         ->and(linesOf($second->invoice->id))->toBe(['block' => 40000, 'discountsibling' => -4000])
         ->and($second->invoice->total->minor)->toBe(36000)
         ->and(linesOf($third->invoice->id))->toBe(['block' => 40000, 'discountsibling' => -6000])
-        ->and(Invoice::query()->find($third->invoice->id)->lines()->where('kind', 'discount')->value('description_ar'))->toBe('خصم الإخوات (15%)')
+        ->and(Invoice::query()->find($third->invoice->id)->lines()->where('kind', 'discount')->value('description_ar'))->toBe(__('billing::billing.lines.sibling', ['rate' => '15%'], 'ar'))
         ->and(DB::table('audit_logs')->where('action', 'billing.sibling_discount_saved')->exists())->toBeTrue();
 });
 

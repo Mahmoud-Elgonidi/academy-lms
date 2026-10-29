@@ -53,7 +53,7 @@ use RuntimeException;
 final class E2eResetSeeder extends Seeder
 {
     /** Homework the tests find by title: Ziad hands the first in in words, Khaled marks the second (a recording). */
-    public const HAND_IN = 'اكتب تلات جمل فيها فعل ماضي';
+    public const HAND_IN = 'اكتب ثلاث جمل فيها فعل ماضٍ';
 
     public const TO_MARK = 'سمّع الفقرة بصوتك';
 

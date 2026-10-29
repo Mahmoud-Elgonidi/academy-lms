@@ -39,11 +39,11 @@ class DemoBillingSeeder extends Seeder
         //  [name ar, name en, minutes, block, per week, [SAR, AED, GBP, EUR, USD, EGP]]
         $catalogue = [
             ['4 حصص · حصة في الأسبوع', '4 sessions · once a week', 30, 4, 1, [220, 215, 45, 52, 59, 1200]],
-            ['8 حصص · حصتين في الأسبوع', '8 sessions · twice a week', 30, 8, 2, [400, 390, 82, 95, 107, 2200]],
+            ['8 حصص · حصتان في الأسبوع', '8 sessions · twice a week', 30, 8, 2, [400, 390, 82, 95, 107, 2200]],
             ['12 حصة · 3 في الأسبوع', '12 sessions · 3 a week', 30, 12, 3, [570, 560, 117, 135, 152, 3100]],
             ['4 حصص · حصة في الأسبوع', '4 sessions · once a week', 45, 4, 1, [300, 295, 62, 72, 80, 1650]],
-            ['8 حصص · حصتين في الأسبوع', '8 sessions · twice a week', 45, 8, 2, [560, 550, 115, 133, 150, 3000]],
-            ['8 حصص · حصتين في الأسبوع', '8 sessions · twice a week', 60, 8, 2, [720, 705, 148, 170, 192, 3900]],
+            ['8 حصص · حصتان في الأسبوع', '8 sessions · twice a week', 45, 8, 2, [560, 550, 115, 133, 150, 3000]],
+            ['8 حصص · حصتان في الأسبوع', '8 sessions · twice a week', 60, 8, 2, [720, 705, 148, 170, 192, 3900]],
             // A shared package: one balance for all of a student's subjects.
             ['12 حصة في أي مادة', '12 lessons · any subject', 30, 12, 3, [600, 590, 125, 145, 160, 3300], Plan::SHARED],
         ];
@@ -60,6 +60,6 @@ class DemoBillingSeeder extends Seeder
             $plan->forceFill(['sort' => $i])->save();
         }
 
-        $transfer->handle("تحويل بنكي: مصرف الراجحي · SA44 2000 0001 2345 6789 1234 · أكاديمية النور\nأو STC Pay على 0500000000، وبعدين اضغطوا «دفعت بالتحويل» وابعتوا صورة الإيصال.");
+        $transfer->handle("تحويل بنكي: مصرف الراجحي · SA44 2000 0001 2345 6789 1234 · أكاديمية النور\nأو STC Pay على 0500000000، ثم اضغطوا «دفعت بالتحويل» وأرسلوا صورة الإيصال.");
     }
 }

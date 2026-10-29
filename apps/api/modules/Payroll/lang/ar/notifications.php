@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'audience' => ['teacher' => 'المدرس'],
+    'audience' => ['teacher' => 'المعلّم'],
     'month_closed' => [
         'title' => 'أرباح :month',
-        'body' => 'اتقفل شهر :month: :lessons حصة، والإجمالي :total. التفاصيل في "أرباحي".',
+        'body' => 'أُغلق شهر :month: :lessons حصة، والإجمالي :total. التفاصيل في "أرباحي".',
     ],
 ];

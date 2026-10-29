@@ -32,8 +32,8 @@ final class SendMessagingNotifications
     {
         $a = 'messaging::notifications.audience.';
         foreach ([
-            ['new_message', 'learning', $a.'members', ['push', 'whatsapp'], ['from' => 'أ. أحمد', 'excerpt' => 'برافو عليك النهارده! راجع آخر صفحتين قبل الحصة الجاية.']],
-            ['contact_hidden', 'staff', $a.'overseers', ['push', 'email'], ['teacher' => 'أ. أحمد', 'student' => 'يوسف', 'who' => 'المدرس']],
+            ['new_message', 'learning', $a.'members', ['push', 'whatsapp'], ['from' => 'أ. أحمد', 'excerpt' => 'أحسنت اليوم! راجع آخر صفحتين قبل الحصة القادمة.']],
+            ['contact_hidden', 'staff', $a.'overseers', ['push', 'email'], ['teacher' => 'أ. أحمد', 'student' => 'يوسف', 'who' => 'المعلّم']],
         ] as [$name, $category, $audience, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
                 key: "messaging.{$name}", category: $category,

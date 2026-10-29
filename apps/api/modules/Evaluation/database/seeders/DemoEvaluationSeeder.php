@@ -27,8 +27,8 @@ final class DemoEvaluationSeeder extends Seeder
             ->where('s.status', 'completed')->where('s.starts_at', '>', CarbonImmutable::now()->subDays(60))
             ->orderBy('s.starts_at')->get(['s.id', 's.ends_at', 's.teacher_id', 'p.user_id as student_id']);
 
-        $script = [[5, ['clear', 'patient'], null], [5, ['engaging'], 'ابني بقى بيستنى الحصة من أول اليوم.'], [4, ['prepared'], null], null,
-            [5, ['clear'], null], [4, [], null], [3, ['too_fast'], 'محتاجين نبطّأ شوية في الشرح.'], [5, ['patient', 'engaging'], null], null, [4, ['clear'], null]];
+        $script = [[5, ['clear', 'patient'], null], [5, ['engaging'], 'أصبح ابني ينتظر الحصة من أول اليوم.'], [4, ['prepared'], null], null,
+            [5, ['clear'], null], [4, [], null], [3, ['too_fast'], 'نحتاج إلى إبطاء الشرح قليلًا.'], [5, ['patient', 'engaging'], null], null, [4, ['clear'], null]];
         $low = false;
         foreach ($lessons as $i => $lesson) {
             $pick = $script[$i % count($script)];
@@ -37,7 +37,7 @@ final class DemoEvaluationSeeder extends Seeder
             }
             [$stars, $tags, $comment] = $pick;
             if (! $low && $i >= 4) {
-                [$stars, $tags, $comment, $low] = [2, ['connection'], 'النت كان بيقطع كتير والصوت مش واضح.', true];
+                [$stars, $tags, $comment, $low] = [2, ['connection'], 'كان الإنترنت ينقطع كثيرًا والصوت غير واضح.', true];
             }
             $rater = $people->guardiansOf($lesson->student_id)[0] ?? $lesson->student_id;
             CarbonImmutable::setTestNow(CarbonImmutable::parse($lesson->ends_at)->addHours(2));
@@ -52,7 +52,7 @@ final class DemoEvaluationSeeder extends Seeder
 
         $absence = DB::table('sessions')->where('status', 'teacher_absent')->orderByDesc('starts_at')->value('id');
         if ($absence && $owner) {
-            $exclude->handle($absence, 'provider', 'مزوّد الفيديو كان واقع الساعة دي، والمدرس حاول يدخل.', $owner);
+            $exclude->handle($absence, 'provider', 'كان مزوّد الفيديو متوقفًا في تلك الساعة، وحاول المعلّم الدخول.', $owner);
         }
     }
 }

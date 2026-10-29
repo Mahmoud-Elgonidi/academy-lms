@@ -41,11 +41,11 @@ final class SendSupportNotifications
     public static function templates(NotificationsApi $notifications): void
     {
         $a = 'support::notifications.audience.';
-        $ticket = ['ticket' => '#1024', 'subject' => 'المدرس اتأخر ربع ساعة'];
+        $ticket = ['ticket' => '#1024', 'subject' => 'تأخّر المعلّم ربع ساعة'];
         foreach ([
-            ['ticket_opened', 'staff', $a.'concerned', ['push', 'email'], $ticket + ['requester' => 'خالد', 'kind' => 'شكوى', 'excerpt' => 'الحصة بدأت متأخر…']],
-            ['answered', 'lessons', $a.'requester', ['push', 'whatsapp', 'email'], $ticket + ['excerpt' => 'آسفين جدًا، اتكلمنا مع المدرس…']],
-            ['requester_replied', 'staff', $a.'assignee', ['push'], $ticket + ['requester' => 'خالد', 'excerpt' => 'تمام، شكرًا…']],
+            ['ticket_opened', 'staff', $a.'concerned', ['push', 'email'], $ticket + ['requester' => 'خالد', 'kind' => 'شكوى', 'excerpt' => 'بدأت الحصة متأخرة…']],
+            ['answered', 'lessons', $a.'requester', ['push', 'whatsapp', 'email'], $ticket + ['excerpt' => 'نعتذر كثيرًا، تحدثنا مع المعلّم…']],
+            ['requester_replied', 'staff', $a.'assignee', ['push'], $ticket + ['requester' => 'خالد', 'excerpt' => 'حسنًا، شكرًا…']],
             ['assigned', 'staff', $a.'assignee', ['push'], $ticket + ['requester' => 'خالد']],
             ['resolved', 'lessons', $a.'requester', ['push', 'whatsapp', 'email'], $ticket + ['days' => (string) Ticket::CLOSE_AFTER_DAYS]],
             ['overdue', 'staff', $a.'assignee', ['push', 'email'], $ticket + ['requester' => 'خالد']],

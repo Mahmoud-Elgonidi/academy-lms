@@ -88,7 +88,7 @@ it('invites someone with back-office roles, welcomed in the staff\'s words, audi
         ->and($line->data)->not->toContain('mona@')
         ->and(AuditEntries::describe($line, 'UTC')['title'])->toBe('Invited Mona to the team as Accountant, Sales');
     app()->setLocale('ar');
-    expect(AuditEntries::describe($line, 'UTC')['title'])->toBe('دعوة Mona للفريق بدور: محاسب، مبيعات');
+    expect(AuditEntries::describe($line, 'UTC')['title'])->toBe(__('shared::audit.actions.identity.staff_invited', ['name' => 'Mona', 'roles' => 'محاسب، مبيعات']));
     app()->setLocale('en');
 
     // Teacher, student and guardian are People's; an address already here is refused.

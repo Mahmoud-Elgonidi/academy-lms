@@ -31,11 +31,11 @@ final class SendCheckNotifications
     {
         $a = 'people::notifications.audience.';
         foreach ([
-            ['check_submitted', $a.'safeguarding', ['push', 'email'], ['teacher' => 'أحمد', 'kind' => 'الفيش الجنائي']],
-            ['check_verified', $a.'teacher', ['push', 'email'], ['kind' => 'الفيش الجنائي', 'until' => '2027-04-30']],
-            ['check_rejected', $a.'teacher', ['push', 'email'], ['kind' => 'الفيش الجنائي', 'reason' => 'الصورة مش واضحة']],
-            ['check_expiring', $a.'teacher_and_safeguarding', ['push', 'email'], ['teacher' => 'أحمد', 'kind' => 'الفيش الجنائي', 'until' => '2026-11-08']],
-            ['check_expired', $a.'teacher_and_safeguarding', ['push', 'email'], ['teacher' => 'أحمد', 'kind' => 'الفيش الجنائي', 'until' => '2026-10-08']],
+            ['check_submitted', $a.'safeguarding', ['push', 'email'], ['teacher' => 'أحمد', 'kind' => 'صحيفة الحالة الجنائية']],
+            ['check_verified', $a.'teacher', ['push', 'email'], ['kind' => 'صحيفة الحالة الجنائية', 'until' => '2027-04-30']],
+            ['check_rejected', $a.'teacher', ['push', 'email'], ['kind' => 'صحيفة الحالة الجنائية', 'reason' => 'الصورة غير واضحة']],
+            ['check_expiring', $a.'teacher_and_safeguarding', ['push', 'email'], ['teacher' => 'أحمد', 'kind' => 'صحيفة الحالة الجنائية', 'until' => '2026-11-08']],
+            ['check_expired', $a.'teacher_and_safeguarding', ['push', 'email'], ['teacher' => 'أحمد', 'kind' => 'صحيفة الحالة الجنائية', 'until' => '2026-10-08']],
         ] as [$name, $audience, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
                 key: "people.{$name}", category: 'staff',

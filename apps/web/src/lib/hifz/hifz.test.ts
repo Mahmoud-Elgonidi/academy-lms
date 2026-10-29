@@ -19,13 +19,13 @@ describe('the hifz map', () => {
     const legend = legendOf({
       pages_total: 604,
       counts: { memorized: 30, learning: 4, strong: 20, fading: 7, weak: 3, due: 5 },
-      strengths: { strong: 'ثابت', fading: 'محتاج مراجعة قريب', weak: 'ضعيف', learning: 'بيتحفظ' },
+      strengths: { strong: 'ثابت', fading: 'تحتاج إلى مراجعة قريبًا', weak: 'ضعيف', learning: 'قيد الحفظ' },
     });
     expect(legend).toEqual([
       { strength: 'strong', label: 'ثابت', count: 20 },
-      { strength: 'fading', label: 'محتاج مراجعة قريب', count: 7 },
+      { strength: 'fading', label: 'تحتاج إلى مراجعة قريبًا', count: 7 },
       { strength: 'weak', label: 'ضعيف', count: 3 },
-      { strength: 'learning', label: 'بيتحفظ', count: 4 },
+      { strength: 'learning', label: 'قيد الحفظ', count: 4 },
       // No label from the API: the key, never an empty line.
       { strength: 'new', label: 'new', count: 570 },
     ]);

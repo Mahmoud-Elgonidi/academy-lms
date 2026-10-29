@@ -41,7 +41,7 @@ final class DemoTimeOffSeeder extends Seeder
             $last = $first;
         }
         $leave = $request->handle($nour, $first, $last, null, null, 'family', 'زواج أختي', $nour);
-        $decide->handle($leave, true, 'ربنا يتمم بخير. هندبّر بديل للحصص.', $owner);
+        $decide->handle($leave, true, 'نتمنى لكم الخير. سندبّر بديلًا للحصص.', $owner);
 
         // One lesson given to the best substitute; the others are left for the cover screen.
         $open = $lessons->filter(fn (Session $s) => $leave->covers($s->starts_at, $s->ends_at))->values();
@@ -60,7 +60,7 @@ final class DemoTimeOffSeeder extends Seeder
         if ($mona) {
             $monaTz = $request->timezone($mona);
             $from = CarbonImmutable::now($monaTz)->addDays(8);
-            $request->handle($mona, $from->toDateString(), $from->addDay()->toDateString(), null, null, 'vacation', 'سفر مع العيلة', $mona);
+            $request->handle($mona, $from->toDateString(), $from->addDay()->toDateString(), null, null, 'vacation', 'سفر مع العائلة', $mona);
         }
 
         // A mid-term break: the busiest day two to three weeks ahead on the academy's clock.

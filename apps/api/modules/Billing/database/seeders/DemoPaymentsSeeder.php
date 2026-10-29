@@ -35,7 +35,7 @@ final class DemoPaymentsSeeder extends Seeder
 
         // The demo card (already there when the academy's past months were paid with it).
         $account = GatewayAccount::query()->where('gateway', 'demo')->first()
-            ?? $save->handle(null, ['gateway' => 'demo', 'label' => 'كارت أو مدى (تجريبي)', 'mode' => 'test'], $owner);
+            ?? $save->handle(null, ['gateway' => 'demo', 'label' => 'بطاقة أو مدى (تجريبي)', 'mode' => 'test'], $owner);
 
         $omar = DB::table('users')->where('email', 'omar.guardian@demo.test')->value('id');
         $invoice = Invoice::query()->join('billing_accounts as ba', fn ($j) => $j->on('ba.academy_id', '=', 'invoices.academy_id')->on('ba.id', '=', 'invoices.billing_account_id'))
@@ -49,7 +49,7 @@ final class DemoPaymentsSeeder extends Seeder
             $copy = tempnam(sys_get_temp_dir(), 'receipt');
             copy(__DIR__.'/files/demo-receipt.jpg', $copy);
             $proofs->handle($invoice->refresh(), $omar, 'family', 'bank_transfer', $invoice->outstanding()->decimal(),
-                CarbonImmutable::now('Asia/Qatar')->subDay()->toDateString(), 'TRF-58213', 'حوّلت من حساب الراجحي بعد ما الكارت اترفض.',
+                CarbonImmutable::now('Asia/Qatar')->subDay()->toDateString(), 'TRF-58213', 'حوّلت من حساب الراجحي بعد أن رُفضت البطاقة.',
                 new UploadedFile($copy, 'إيصال التحويل.jpg', 'image/jpeg', null, true));
             @unlink($copy);
         }

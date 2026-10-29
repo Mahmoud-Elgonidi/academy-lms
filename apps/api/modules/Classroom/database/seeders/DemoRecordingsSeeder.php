@@ -38,7 +38,7 @@ final class DemoRecordingsSeeder extends Seeder
             }
         }
         if ($khaled = $id('khaled@demo.test')) {
-            $paper->handle($khaled, $owner, 'بند التسجيل في عقد المدرس، اتوقّع في سبتمبر 2026');
+            $paper->handle($khaled, $owner, 'بند التسجيل في عقد المعلّم، وُقّع في سبتمبر 2026');
         }
         foreach (['yousef' => 'yousef.guardian', 'maryam' => 'maryam.guardian'] as $student => $guardian) {
             if (($s = $id("{$student}@demo.test")) && ($g = $id("{$guardian}@demo.test"))) {
@@ -60,7 +60,7 @@ final class DemoRecordingsSeeder extends Seeder
             foreach ($lessons as $i => $lesson) {
                 $recording = $this->recording($academy, $lesson, $video, $i);
                 match (true) {
-                    $student === 'maryam' && $i === 1 => $recording->update(['held_at' => now(), 'held_by' => $owner, 'hold_reason' => 'الأسرة معترضة على طريقة شرح الدرس، والمراجعة لسه مخلصتش']),
+                    $student === 'maryam' && $i === 1 => $recording->update(['held_at' => now(), 'held_by' => $owner, 'hold_reason' => 'الأسرة معترضة على طريقة شرح الدرس، ولم تنتهِ المراجعة بعد']),
                     $student === 'maryam' && $i === 2 => $recording->forceFill(['status' => 'failed', 'size' => null, 'duration_sec' => null, 'expires_at' => null, 'error' => 'could not connect to the room'])->save(),
                     $student === 'yousef' && $i === 3 => $this->expire($recording),
                     default => null,

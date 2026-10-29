@@ -113,7 +113,7 @@ final class DesignerPrompt
         BRIEF;
 
         if (! $brief->isRevision()) {
-            return $brief_."\n\nDesign this game. Write titles and texts in Arabic (Egyptian, simple) and English.";
+            return $brief_."\n\nDesign this game. Write titles and texts in Arabic (clear, simple Modern Standard Arabic, simplest for children) and English.";
         }
 
         $turns = array_map(fn (array $t) => '['.$t['role'].'] '.$esc($t['body']), $brief->conversation);
@@ -150,7 +150,7 @@ final class DesignerPrompt
                 'kinds' => ['type' => 'array', 'items' => ['type' => 'string', 'enum' => ['choice', 'order', 'pair']], 'description' => 'The item kinds the game plays (from the brief).'],
                 'min_items' => ['type' => 'integer', 'description' => 'The fewest items a round needs, 1 to 12.'],
                 'max_items' => ['type' => 'integer', 'description' => 'The most items a round takes, from min_items to 12.'],
-                'message_ar' => $text('To the platform team, in Egyptian Arabic: what you built (or changed) and anything they should try in the preview. A short paragraph.'),
+                'message_ar' => $text('To the platform team, in clear Modern Standard Arabic: what you built (or changed) and anything they should try in the preview. A short paragraph.'),
                 'html' => $text('The complete game page, from <!doctype html> to </html>.'),
             ],
         ];

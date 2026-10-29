@@ -57,9 +57,9 @@ export const TEEN = process.env.E2E_TEEN ?? 'maryam@demo.test';
 
 export async function signInWithPassword(page: Page, login: string, password: string) {
   await page.goto('/ar/sign-in');
-  await page.getByRole('tab', { name: 'بكلمة السر' }).click();
-  await page.getByLabel('الإيميل أو الموبايل أو اسم المستخدم').fill(login);
-  await page.getByLabel('كلمة السر').fill(password);
+  await page.getByRole('tab', { name: 'بكلمة المرور' }).click();
+  await page.getByLabel('البريد الإلكتروني أو الجوال أو اسم المستخدم').fill(login);
+  await page.getByLabel('كلمة المرور').fill(password);
   await page.getByRole('button', { name: 'ادخل' }).click();
 }
 

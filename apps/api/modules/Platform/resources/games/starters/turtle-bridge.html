@@ -149,7 +149,7 @@
         setTimeout(hop, 400);
       } else {
         placeBaby(W * .1, H * .3, false); LMS.sfx('win');
-        banner(mistakes === 0 ? 'وصلت! 🐢' : 'برافو!');
+        banner(mistakes === 0 ? 'وصلت! 🐢' : 'أحسنت!');
         setTimeout(function () { index++; if (index >= items.length) { dots(); setTimeout(function () { LMS.finish(); }, 500); } else startItem(); }, 1500);
       }
     }

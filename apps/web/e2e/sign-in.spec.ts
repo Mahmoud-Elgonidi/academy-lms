@@ -4,9 +4,9 @@ import { PASSWORD, TEACHER, expect, fitsTheScreen, signInWithPassword, test } fr
 test('a page needs a session, and signing in comes back to it', async ({ page }) => {
   await page.goto('/ar/teach/week');
   await expect(page).toHaveURL(/\/ar\/sign-in\?next=%2Far%2Fteach%2Fweek/);
-  await page.getByRole('tab', { name: 'بكلمة السر' }).click();
-  await page.getByLabel('الإيميل أو الموبايل أو اسم المستخدم').fill(TEACHER);
-  await page.getByLabel('كلمة السر').fill(PASSWORD);
+  await page.getByRole('tab', { name: 'بكلمة المرور' }).click();
+  await page.getByLabel('البريد الإلكتروني أو الجوال أو اسم المستخدم').fill(TEACHER);
+  await page.getByLabel('كلمة المرور').fill(PASSWORD);
   await page.getByRole('button', { name: 'ادخل' }).click();
   await expect(page).toHaveURL(/\/ar\/teach\/week$/);
 
@@ -23,7 +23,7 @@ test('a page needs a session, and signing in comes back to it', async ({ page })
   await page.context().addCookies([cookie!]);
   await page.goto('/ar/teach');
   await expect(page).toHaveURL(/\/ar\/sign-in/);
-  await expect(page.getByText('انتهت جلستك. ادخل تاني.')).toBeVisible();
+  await expect(page.getByText('انتهت جلستك. ادخل مرة أخرى.')).toBeVisible();
   expect((await page.context().cookies()).some((c) => c.name === 'lms_session')).toBe(false);
 });
 
@@ -35,17 +35,17 @@ test('a wrong password says so', async ({ page }) => {
 
 test('staff are sent to the back office', async ({ page }) => {
   await signInWithPassword(page, 'owner@demo.test', PASSWORD);
-  await expect(page.getByText('حسابك للوحة الإدارة.')).toBeVisible();
+  await expect(page.getByText('حسابك مخصص للوحة الإدارة.')).toBeVisible();
   await expect(page.getByRole('link', { name: 'افتح لوحة الإدارة' })).toHaveAttribute('href', '/admin');
 });
 
 test('a code goes to the email or number, and a wrong one is refused', async ({ page }) => {
   await page.goto('/ar/sign-in');
   // The API answers the same whether or not the account exists.
-  await page.getByLabel('الإيميل أو رقم الموبايل').fill(`e2e-${Date.now()}@demo.test`);
-  await page.getByRole('button', { name: 'ابعتلي كود' }).click();
-  await expect(page.getByText(/بعتنا الكود على/)).toBeVisible();
-  await page.getByLabel('الكود').fill('000000');
+  await page.getByLabel('البريد الإلكتروني أو رقم الجوال').fill(`e2e-${Date.now()}@demo.test`);
+  await page.getByRole('button', { name: 'أرسل لي رمزًا' }).click();
+  await expect(page.getByText(/أرسلنا الرمز إلى/)).toBeVisible();
+  await page.getByLabel('الرمز').fill('000000');
   await page.getByRole('button', { name: 'ادخل' }).click();
   await expect(page.locator('form .text-danger')).toBeVisible();
 });

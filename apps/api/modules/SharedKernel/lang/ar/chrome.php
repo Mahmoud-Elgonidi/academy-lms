@@ -11,5 +11,5 @@ return [
     // Carbon translatedFormat pattern for today's date under the greeting.
     'today' => 'l j F',
     // A dialog's button that only closes it (Filament has a cancel and a submit, no close).
-    'close' => 'قفل',
+    'close' => 'إغلاق',
 ];

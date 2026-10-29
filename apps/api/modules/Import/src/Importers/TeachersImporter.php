@@ -49,7 +49,7 @@ final class TeachersImporter implements Importer
             new Field('subjects', true, ['المواد', 'المادة', 'بيدرس', 'subject']),
             new Field('languages', false, ['لغة الشرح', 'اللغات', 'اللغة', 'language']),
             new Field('trials', false, ['تجريبي', 'حصص تجريبية', 'بيدي تجريبي', 'accepts trials', 'trial lessons']),
-            new Field('max_hours', false, ['أقصى ساعات', 'الساعات في الأسبوع', 'ساعات الأسبوع', 'max hours', 'hours per week', 'weekly hours']),
+            new Field('max_hours', false, ['أقصى ساعات', 'الساعات في الأسبوع', 'ساعات الأسبوع', 'أقصى ساعات في الأسبوع', 'max hours', 'hours per week', 'weekly hours']),
             new Field('ages', false, ['الأعمار', 'الفئة العمرية', 'الفئات العمرية', 'بيدرس لمين', 'ages', 'age groups']),
             new Field('max_daily', false, ['أقصى حصص في اليوم', 'حصص اليوم', 'الحصص في اليوم', 'max lessons a day', 'lessons per day', 'daily lessons']),
         ];

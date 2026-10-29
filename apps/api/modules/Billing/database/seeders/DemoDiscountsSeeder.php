@@ -56,7 +56,7 @@ final class DemoDiscountsSeeder extends Seeder
         $coupons->handle(null, ['code' => 'WELCOME50', 'name' => 'أول اشتراك', 'kind' => 'amount', 'amount' => 50, 'currency' => 'SAR', 'blocks' => 1, 'max_uses' => 100], $owner);
         $coupons->handle(null, ['code' => 'FALL10', 'name' => 'عرض الخريف', 'kind' => 'percent', 'percent' => 10, 'blocks' => 2, 'ends_on' => $now->addMonths(2)->toDateString()], $owner);
         $coupons->handle(null, ['code' => 'RAMADAN15', 'name' => 'حملة رمضان', 'kind' => 'percent', 'percent' => 15, 'blocks' => 3, 'starts_on' => '2027-02-01', 'ends_on' => '2027-03-15', 'max_uses' => 200], $owner);
-        $coupons->handle(null, ['code' => 'SUMMER20', 'name' => 'الصيف اللي فات', 'kind' => 'percent', 'percent' => 20, 'blocks' => 1, 'ends_on' => '2026-08-31'], $owner);
+        $coupons->handle(null, ['code' => 'SUMMER20', 'name' => 'الصيف الماضي', 'kind' => 'percent', 'percent' => 20, 'blocks' => 1, 'ends_on' => '2026-08-31'], $owner);
         $coupons->handle(null, ['code' => 'SCHOLAR100', 'name' => 'منحة كاملة (بموافقة المالك)', 'kind' => 'percent', 'percent' => 100, 'is_active' => false], $owner);
 
         // Ziad's father enrols his younger daughter: the second child, 10% off her invoices.

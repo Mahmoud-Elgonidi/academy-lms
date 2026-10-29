@@ -39,14 +39,14 @@ describe('the recitation check', () => {
       ],
       extra: [
         { after: 0, text: 'قبل' },
-        { after: 1, text: 'تاني' },
+        { after: 1, text: 'أيضًا' },
         { after: 3, text: 'آخر' },
       ],
     });
     expect(tokens).toEqual([
       { kind: 'extra', text: 'قبل' },
       { kind: 'word', text: 'أ', state: 'ok', heard: null },
-      { kind: 'extra', text: 'تاني' },
+      { kind: 'extra', text: 'أيضًا' },
       { kind: 'word', text: 'ب', state: 'missing', heard: null },
       { kind: 'verse', number: 2 },
       { kind: 'word', text: 'ج', state: 'wrong', heard: 'د' },

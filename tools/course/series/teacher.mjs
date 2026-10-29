@@ -46,7 +46,7 @@ export default {
         await s.show(s.page.getByRole('link', { name: 'ادخل الحصة' }).first(), { hold: 1600 });
 
         await s.say("و«لينك الحصص البديل»: لو الفصل عندك فيه مشكلة.", { voice: "ولو حصل مشكلة في الفصل نفسه، فيه «لينك الحصص البديل»، لينك ثابت للمدرّسة تدخل بيه الحصة من برّه." });
-        await s.point(s.page.getByRole('button', { name: 'لينك الحصص البديل' }), { hold: 1400 });
+        await s.point(s.page.getByRole('button', { name: 'رابط الحصص البديل' }), { hold: 1400 });
 
         await s.say("القايمة فوق: كل حاجة المدرّسة محتاجاها، والرقم جنب اللي مستنيها.", { voice: "والقايمة كلها فوق: الجدول، والطلاب، والتقارير، والرسايل، والحصص التجريبية، والواجبات، والأوقات، والإجازات، والأداء، والأرباح. والرقم اللي جنب أي واحدة، هو عدد الحاجات اللي مستنياها، زي التقارير اللي لسه ماتكتبتش." });
         await s.show(s.page.locator('.fi-topbar-nav-groups'), { hold: 2200 });
@@ -58,7 +58,7 @@ export default {
         await s.show(s.page.getByText('الاعتراض', { exact: false }).locator('visible=true').first(), { hold: 2000 });
 
         await s.say("و«الأسبوع الجاي» و«الأسبوع اللي فات».", { voice: "ومن الزراير اللي فوق، تروح للأسبوع الجاي، أو ترجع للأسبوع اللي فات." });
-        await s.click(s.page.getByRole('button', { name: /الأسبوع الجاي/ }), { settle: 1600 });
+        await s.click(s.page.getByRole('button', { name: /الأسبوع القادم/ }), { settle: 1600 });
         await s.wait(1200);
       },
     },
@@ -77,7 +77,7 @@ export default {
         await s.show(s.page.getByRole('heading', { name: 'الجدول الحالي' }).locator('xpath=ancestor::section[1]'), { hold: 1600 });
 
         await s.say("«ضيف وقت»: اليوم، ومن الساعة كام، لحد الساعة كام.", { voice: "ولو عايزة تزوّد أو تغيّر، في «اقترح أوقات جديدة»: كل سطر يوم، ومن الساعة كام لحد الساعة كام. ندوس «ضيف وقت»، ونختار الأحد، من أربعة العصر لسبعة بالليل." });
-        await s.click(s.page.getByRole('button', { name: 'ضيف وقت' }), { settle: 900 });
+        await s.click(s.page.getByRole('button', { name: 'أضف وقتًا' }), { settle: 900 });
         await s.select(row().locator('select').first(), { label: 'الأحد' });
         await s.fill(row().locator('input[type=time]').first(), '16:00');
         await s.fill(row().locator('input[type=time]').last(), '19:00');
@@ -87,7 +87,7 @@ export default {
 
         await s.say("وملاحظة للأكاديمية، و«ابعت للأكاديمية». أو «احفظ مسودة» وتكمّل بعدين.", { voice: "وممكن تكتب ملاحظة للأكاديمية، زي سبب التغيير، وتدوس «ابعت للأكاديمية». ولو لسه مش متأكدة، «احفظ مسودة» وتكمّل بعدين." });
         await s.type(s.page.locator('textarea').first(), 'زوّدت يوم الأحد عشان عندي طلاب جداد عايزين الوقت ده.');
-        await s.click(s.page.getByRole('button', { name: 'ابعت للأكاديمية' }), { settle: 2200 });
+        await s.click(s.page.getByRole('button', { name: 'أرسل إلى الأكاديمية' }), { settle: 2200 });
 
         await s.say("الإدارة بتراجع: تعتمد، أو تطلب تعديل، أو تبعت عرض مضاد ترد عليه هنا.", { voice: "والإدارة بتراجع المقترح: يا تعتمده، يا تطلب تعديل، يا تبعت عرض مضاد. والرد بيوصل إشعار، وبيظهر هنا، والمدرّسة تقدر تقبل العرض، أو تسحب المقترح وتبعت غيره." });
         await s.scroll(-3000);
@@ -113,7 +113,7 @@ export default {
         await s.point(s.page.getByText('آخر واجب').first(), { hold: 1600 });
 
         await s.say("«ادخل الحصة». ولو النت ضعيف، «ادخل بالصوت بس».", { voice: "وندوس «ادخل الحصة». ولو النت ضعيف، فيه «ادخل بالصوت بس»، والحصة تكمّل بالصوت." });
-        await s.point(button('ادخل بالصوت بس'), { hold: 1000 });
+        await s.point(button('ادخل بالصوت فقط'), { hold: 1000 });
         await s.click(button('ادخل الحصة'), { settle: 3500 });
 
         await s.say("جوّه الفصل. وأول ما الطالب يدخل، بيظهر قدامك.", { voice: "وكده المدرّسة جوّه الفصل. وأول ما يوسف يدخل، بيظهر قدّامها على طول." });
@@ -122,7 +122,7 @@ export default {
         await s.wait(4500);
 
         await s.say("تحت: المايك، والكاميرا، وشارك الشاشة.", { voice: "وتحت الأزرار: «المايك»، و«الكاميرا»، و«شارك الشاشة» لو عايزة توريه المصحف أو ورقة الدرس." });
-        await s.point(button('المايك'), { hold: 900 });
+        await s.point(button('الميكروفون'), { hold: 900 });
         await s.point(button('الكاميرا'), { hold: 900 });
         await s.point(button('شارك الشاشة'), { hold: 1000 });
 
@@ -130,7 +130,7 @@ export default {
         await s.point(s.page.getByRole('button', { name: /سجّل الحصة/ }).first(), { hold: 1800 });
 
         await s.say("ولو حاجة مش شغالة: «فيه حاجة مش مظبوطة؟ قولّنا».", { voice: "ولو حاجة مش شغالة، زي الصوت أو الصورة، «فيه حاجة مش مظبوطة؟ قولّنا»، والرسالة بتوصل للأكاديمية على طول." });
-        await s.point(s.page.getByText('فيه حاجة مش مظبوطة').first(), { hold: 1400 });
+        await s.point(s.page.getByText('هل هناك شيء غير مناسب').first(), { hold: 1400 });
 
         await s.say("و«اخرج»: الحضور بيتسجّل لوحده، وبعدها التقرير.", { voice: "ولما الحصة تخلص، «اخرج». حضور المدرّسة والطالب بيتسجّل لوحده: دخلوا إمتى، وفضلوا لحد إمتى. والخطوة الجاية: تقرير الحصة." });
         await s.click(button('اخرج'), { settle: 2000 });
@@ -147,7 +147,7 @@ export default {
         await s.click(s.page.getByRole('link', { name: 'اكتب التقرير' }).first(), { settle: 2000 });
 
         await s.say("على الجنب منهج الطالب، وفوق الدرس الجاي جاهز. نختار اتعمل فيه إيه، والدرجة.", { voice: "على الجنب منهج الطالب، وهو فين فيه. وفوق، المنصّة جهّزت أول درس لسه ماتقنش، والمراجعات اللي جه ميعادها. نختار اتعمل في الدرس إيه: اتشرح، أو اتدرّب عليه، أو اتقن، أو محتاج مراجعة، والدرجة من خمسة." });
-        await s.click(s.page.locator('label').filter({ hasText: 'اتدرّب عليه' }).first(), { settle: 400 });
+        await s.click(s.page.locator('label').filter({ hasText: 'تدرّب عليه' }).first(), { settle: 400 });
         await s.click(option(s, 'الدرجة', '4'), { settle: 400 });
 
         await s.say("التقييم: التفاعل والتقييم العام، وملاحظة للأسرة، وملاحظة للإدارة بس.", { voice: "وبعدها التقييم: التفاعل، والتقييم العام. وملاحظة للطالب وولي الأمر، يشوفوها في التطبيق. وتحتها ملاحظات داخلية، دي للإدارة بس، والأسرة مابتشوفهاش." });
@@ -157,8 +157,8 @@ export default {
         await s.type(labelled(s, 'ملاحظات للطالب وولي الأمر').locator('textarea'), 'تميم ركّز كويس النهارده، ونطق الحروف المفردة بقى أحسن كتير. محتاج يراجع حرف الضاد.');
 
         await s.say("«أسئلة الأكاديمية»: أسئلة المادة اللي الأكاديمية حطّاها.", { voice: "و«أسئلة الأكاديمية»: أسئلة خاصة بالمادة دي، الأكاديمية بتحددها، زي الأحكام اللي اتطبّقت صح، والقراءة من المصحف، وعدد الصفحات." });
-        await s.scroll(labelled(s, 'الأحكام اللي اتطبقت صح'));
-        await s.click(option(s, 'الأحكام اللي اتطبقت صح', '4'), { settle: 300 });
+        await s.scroll(labelled(s, 'الأحكام المطبّقة صحيحًا'));
+        await s.click(option(s, 'الأحكام المطبّقة صحيحًا', '4'), { settle: 300 });
         await s.click(option(s, 'القراءة من المصحف', 'أخطاء قليلة'), { settle: 300 });
         await s.type(labelled(s, 'صفحات القراءة').locator('input'), '2');
 
@@ -193,7 +193,7 @@ export default {
 
         await s.say("«صحّح»: الطالب والأسرة بيوصلهم إشعار، والدرجة بتظهر في التطبيق.", { voice: "وندوس «صحّح». الطالب وولي أمره بيوصلهم إشعار، والدرجة والتعليق بيظهروا عندهم في التطبيق، والواجب بينزل في «اتصححت»." });
         await s.click(s.modal().getByRole('button', { name: 'صحّح' }), { settle: 2000 });
-        await s.click(s.page.getByRole('button', { name: /^اتصححت/ }), { settle: 1600 });
+        await s.click(s.page.getByRole('button', { name: /^صُحّحت/ }), { settle: 1600 });
         await s.wait(1400);
       },
     },
@@ -217,7 +217,7 @@ export default {
         await s.point(s.page.getByText('ورقة متابعة قريش والفيل').locator('visible=true').first(), { hold: 1600 });
 
         await s.say("و«للمدرس بس»: دليل للمدرس، الأسرة مابتشوفهوش.", { voice: "واللي مكتوب جنبه «للمدرس بس»، ده دليل للمدرس يحضّر بيه الحصة، والأسرة مابتشوفهوش خالص." });
-        await s.point(s.page.getByText('للمدرس بس').locator('visible=true').first(), { hold: 1800 });
+        await s.point(s.page.getByText('للمعلّم فقط').locator('visible=true').first(), { hold: 1800 });
 
         await s.say("وتحت: تقارير كل حصة، وحالة الواجب.", { voice: "ولو نزلنا تحت، تقارير كل الحصص اللي فاتت، وملاحظة كل حصة، وحالة الواجب ودرجته. يعني قبل الحصة، دقيقة واحدة هنا تعرّفك كل حاجة." });
         await s.scroll(s.page.getByRole('heading', { name: 'التقارير' }));
@@ -246,15 +246,15 @@ export default {
           const o = f.locator('[role=option]');
           await s.click(option ? o.filter({ hasText: new RegExp(`^\\s*${option}\\s*$`) }).first() : o.first(), { settle: 500 });
         };
-        await pick('الباقة اللي تنصح بيها');
-        await pick('كام حصة في الأسبوع', '2');
+        await pick('الباقة التي تنصح بها');
+        await pick('عدد الحصص في الأسبوع', '2');
 
         await s.say("وملاحظاتك: نقاط قوته، والمحتاج يشتغل عليه.", { voice: "وملاحظاتنا للأكاديمية: نقاط قوته، والمحتاج يشتغل عليه، وأي حاجة المبيعات لازم تعرفها." });
         await s.type(s.modal().locator('textarea').first(), 'متحمّس وبيحب يسمّع. حافظ الفاتحة والإخلاص، محتاج يشتغل على المدود. يناسبه مدرس صبور.');
 
         await s.say("«إرسال»: التقييم بيروح للمبيعات على طول.", { voice: "وندوس «إرسال». التقييم بيروح للمبيعات على طول، ولو الأسرة اشتركت، الأكاديمية بتعرف إن حصتك التجريبية هي اللي جابتها." });
         await s.click(s.modal().getByRole('button', { name: 'إرسال' }), { settle: 2000 });
-        await s.show(s.page.getByRole('heading', { name: /اتقيّمت/ }), { hold: 1600 });
+        await s.show(s.page.getByRole('heading', { name: /قُيّمت/ }), { hold: 1600 });
       },
     },
     {
@@ -281,28 +281,28 @@ export default {
         await s.say("«اطلب إجازة»: يوم أو أكتر، أو ساعات في يوم.", { voice: "ندوس «اطلب إجازة». الإجازة ممكن تبقى يوم أو أكتر، أو ساعات في يوم واحد. والتواريخ بتوقيت المدرّسة." });
         await s.click(s.page.getByRole('button', { name: 'اطلب إجازة' }).first(), { settle: 1400 });
         await pickDay('من يوم', inDays(7));
-        await pickDay('لحد يوم', inDays(8));
+        await pickDay('حتى يوم', inDays(8));
 
         await s.say("السبب، وتحت: الحصص اللي في الوقت ده.", { voice: "ونختار السبب. وتحت على طول بيبان الحصص اللي في الوقت ده، والأكاديمية هي اللي هتدبّر لها مدرس بديل أو حصة تعويض." });
         const reason = s.modal().locator('.fi-fo-field').filter({ hasText: 'السبب' }).first();
         await s.click(reason.locator('.fi-select-input-btn'), { settle: 400 });
         await s.click(reason.locator('[role=option]').filter({ hasText: 'ظرف شخصي' }).first(), { settle: 900 });
-        await s.show(s.modal().getByText('الحصص اللي في الوقت ده').first(), { hold: 1800 });
+        await s.show(s.modal().getByText('الحصص في هذا الوقت').first(), { hold: 1800 });
 
         await s.say("«اطلب إجازة»: الطلب بيستنى رد الأكاديمية، وتقدر تسحبه.", { voice: "وندوس «اطلب إجازة». الطلب بيستنى رد الأكاديمية، وبيوصلك إشعار لما ترد. ولحد ما ترد، تقدر تسحبه من هنا." });
         await s.click(s.modal().getByRole('button', { name: 'اطلب إجازة' }), { settle: 2000 });
 
         await s.say("وفي «أسبوعي»: «اعترض» تحت أي حصة نتيجتها غلط، خلال تمانية وأربعين ساعة.", { voice: "وحاجة تانية. لو حصة اتسجلت غلط، زي إن الطالب دخل دقيقتين وخرج، واتسجلت إنها اتعملت، المدرس يقدر يعترض خلال تمانية وأربعين ساعة من آخرها. من «أسبوعي» نروح للأسبوع اللي فات، وتحت الحصة ندوس «اعترض»." });
         await s.click(menuItem(s, 'أسبوعي'), { settle: 1600 });
-        await s.click(s.page.getByRole('button', { name: 'الأسبوع اللي فات' }), { settle: 1600 });
+        await s.click(s.page.getByRole('button', { name: 'الأسبوع الماضي' }), { settle: 1600 });
         await s.click(s.page.getByRole('button', { name: 'اعترض' }).last(), { settle: 1400 });
 
         await s.say("إيه اللي حصل، والتفاصيل. الأكاديمية بس اللي بتشوفها.", { voice: "نختار إيه اللي حصل، ونكتب التفاصيل بالظبط. الكلام ده الأكاديمية بس اللي بتشوفه، والأسرة مابتعرفش هو قال إيه." });
-        await s.click(s.modal().locator('label').filter({ hasText: 'الطالب ما حضرش' }).first(), { settle: 400 });
+        await s.click(s.modal().locator('label').filter({ hasText: 'لم يحضر الطالب' }).first(), { settle: 400 });
         await s.type(s.modal().locator('textarea').first(), 'تميم دخل دقيقتين بس وخرج، واستنيته لآخر الحصة.');
 
         await s.say("«ابعت الاعتراض»: الحصة بتبقى تحت المراجعة لحد ما الأكاديمية تقرّر.", { voice: "وندوس «ابعت الاعتراض». الحصة بتبقى تحت المراجعة، والأكاديمية بتراجع حضور الفصل، وتقرّر، والرصيد والمرتب بيمشوا ورا قرارها. والرد بيوصلك في الإشعارات وتحت الحصة." });
-        await s.click(s.modal().getByRole('button', { name: 'ابعت الاعتراض' }), { settle: 2200 });
+        await s.click(s.modal().getByRole('button', { name: 'أرسل الاعتراض' }), { settle: 2200 });
         await s.wait(1200);
       },
     },
@@ -319,8 +319,8 @@ export default {
         await s.show(s.page.getByText('الالتزام بالمواعيد').first(), { hold: 1600 });
 
         await s.say("والجودة: تقييم الأسر، والتقارير في ميعادها.", { voice: "وبعدها الجودة: تقييم الأسر والشكاوي المؤكدة. والاحترافية: التقارير اللي اتسلّمت في ميعادها، والواجبات اللي اتصحّحت في خلال يومين. هنا مثلًا التقارير أحمر، عشان فيه تقارير لسه ماتسلّمتش." });
-        await s.scroll(s.page.getByText('التقارير في ميعادها').first());
-        await s.point(s.page.getByText('التقارير في ميعادها').first(), { hold: 1600 });
+        await s.scroll(s.page.getByText('التقارير في موعدها').first());
+        await s.point(s.page.getByText('التقارير في موعدها').first(), { hold: 1600 });
 
         await s.say("«اللي أثّر على الأرقام»: كل حصة بسببها. و«كلام الأسر» من غير أسماء.", { voice: "وتحت، «اللي أثّر على الأرقام»: كل حصة نزّلت رقم، وليه. و«كلام الأسر»: التقييمات بالنجوم والكلام، من غير اسم أي حد. ولو حاجة اتحسبت عليك وسببها مش منك، كلّم الإدارة." });
         await s.scroll(s.page.getByText('كلام الأسر').first());
@@ -346,10 +346,10 @@ export default {
       async steps(s) {
         await s.say("«مستنداتي»: الفيش الجنائي وغيره. الأكاديمية بتراجعها على الأصل.", { voice: "[warmly] آخر درس في السلسلة. من فوق «مستنداتي»: المستندات اللي المدرّسة بعتتها، زي الفيش الجنائي، والأكاديمية بتراجعها على الأصل. والفيش الجنائي هو اللي بيخلّيها تدرّس لطلاب أقل من تمنتاشر سنة." });
         await s.click(menuItem(s, 'مستنداتي'), { settle: 1800 });
-        await s.show(s.page.getByText('الفيش الجنائي بتاعك').first(), { hold: 1600 });
+        await s.show(s.page.getByText('صحيفة الحالة الجنائية الخاصة بك').first(), { hold: 1600 });
 
         await s.say("«ابعت مستند»: نوعه، وصالح لحد إمتى، والملف.", { voice: "ولو حاجة قربت تخلص، ندوس «ابعت مستند»: نختار نوعه، وصالح لحد إمتى، ونرفع الملف. والمنصّة بتفكّرك قبل ما يخلص بشهر." });
-        await s.click(s.page.getByRole('button', { name: 'ابعت مستند' }), { settle: 1400 });
+        await s.click(s.page.getByRole('button', { name: 'أرسل مستندًا' }), { settle: 1400 });
         await s.hush();
         await s.key('Escape');
         await s.wait(600);
@@ -362,14 +362,14 @@ export default {
         await s.say("العنوان، وحصل إيه. والرد بيوصلك هنا وفي الإشعارات.", { voice: "نكتب عنوان، ونحكي حصل إيه، وممكن نرفع صورة للشاشة. وندوس «ابعت». والرد بيوصلنا هنا وفي الإشعارات." });
         await s.type(s.modal().locator('.fi-fo-field').filter({ hasText: 'العنوان' }).locator('input').first(), 'الصوت بيقطع في الفصل');
         await s.type(s.modal().locator('textarea').first(), 'من امبارح الصوت بيقطع في نص الحصة، والنت عندي كويس.');
-        await s.click(s.modal().getByRole('button', { name: 'ابعت' }), { settle: 2000 });
+        await s.click(s.modal().getByRole('button', { name: 'أرسل' }), { settle: 2000 });
 
         await s.say("«بلّغ عن قلق»: لو حاجة في أمان طالب قلقاك.", { voice: "وأهم حاجة: «بلّغ عن قلق». لو حاجة في أمان طالب أو حالته قلقاك، تقول لمسؤولين الحماية في الأكاديمية هنا، وهم بس اللي بيقروه. ماتحقّقش فيه بنفسك، ولا تكلّم الأسرة عنه." });
-        await s.click(menuItem(s, 'بلّغ عن قلق'), { settle: 1800 });
+        await s.click(menuItem(s, 'أبلغ عن قلق'), { settle: 1800 });
 
         await s.say("الموضوع، والطالب، والحصة، وحصل إيه. ولو حد في خطر: الطوارئ الأول.", { voice: "نختار الموضوع، والطالب، والحصة لو فيه، ونكتب اللي حصل بكلامنا. ولو حد في خطر دلوقتي، كلّم الطوارئ الأول، وبعدين اكتب هنا. واللي بلّغت بيه بيفضل على الجنب، بحالته." });
-        await s.point(s.page.getByText('حاجة عملها حد كبير تاني قلقاني').first(), { hold: 1400 });
-        await s.point(s.page.getByText('اللي قولتهولنا').first(), { hold: 1400 });
+        await s.point(s.page.getByText('تصرّف من شخص بالغ آخر يقلقني').first(), { hold: 1400 });
+        await s.point(s.page.getByText('ما أخبرتنا به').first(), { hold: 1400 });
 
         await s.say("و«بياناتي»: تصحّح بياناتك، أو تاخد نسخة منها.", { voice: "وآخر حاجة «بياناتي»: تصحّح اسمك، أو تطلب تصحيح حاجة تانية، أو تجهّز نسخة من كل بياناتك. وبكده المدرّس عارف كل حاجة في مساحته." });
         await s.click(menuItem(s, 'بياناتي'), { settle: 2600 });

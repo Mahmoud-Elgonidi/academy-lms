@@ -44,20 +44,20 @@ final class DemoMessagingSeeder extends Seeder
         };
 
         $talk('nour@demo.test', 'yousef@demo.test', [
-            [$now->subDays(2)->setTime(18, 40), 'nour@demo.test', 'برافو يا يوسف! حفظت سورة الفيل كلها النهارده 🌟 راجعها مع بابا قبل حصة الثلاثاء.'],
-            [$now->subDays(2)->setTime(20, 5), 'yousef.guardian@demo.test', 'متشكرين يا أستاذة نور، هنراجعها كل يوم بالليل إن شاء الله.'],
-            [$now->subDays(2)->setTime(20, 9), 'yousef@demo.test', 'حاضر يا أستاذة 😊'],
-            [$now->subMinutes(40), 'nour@demo.test', 'صباح الخير يا يوسف! لو عندك أي سؤال في الواجب ابعتلي هنا.'],
+            [$now->subDays(2)->setTime(18, 40), 'nour@demo.test', 'أحسنت يا يوسف! حفظت سورة الفيل كلها اليوم 🌟 راجعها مع أبيك قبل حصة الثلاثاء.'],
+            [$now->subDays(2)->setTime(20, 5), 'yousef.guardian@demo.test', 'شكرًا يا أستاذة نور، سنراجعها كل ليلة إن شاء الله.'],
+            [$now->subDays(2)->setTime(20, 9), 'yousef@demo.test', 'حسنًا يا أستاذة 😊'],
+            [$now->subMinutes(40), 'nour@demo.test', 'صباح الخير يا يوسف! إن كان لديك أي سؤال عن الواجب فأرسله إليّ هنا.'],
         ]);
 
         $talk('ahmed@demo.test', 'layan@demo.test', [
-            [$now->subDay()->setTime(16, 12), 'layan.guardian@demo.test', 'أستاذ أحمد، ممكن نبدّل حصة الخميس لأي يوم تاني؟ لو أسهل كلمني واتساب 0101 234 5678'],
-            [$now->subDay()->setTime(17, 3), 'ahmed@demo.test', 'أكيد يا أفندم. التغيير بيتعمل من صفحة الحصص عشان الأكاديمية تظبط الرصيد، وأنا موجود هنا لأي سؤال.'],
+            [$now->subDay()->setTime(16, 12), 'layan.guardian@demo.test', 'أستاذ أحمد، هل يمكن أن ننقل حصة الخميس إلى يوم آخر؟ إن كان أسهل فكلّمني على واتساب 0101 234 5678'],
+            [$now->subDay()->setTime(17, 3), 'ahmed@demo.test', 'بالتأكيد. يتم التغيير من صفحة الحصص لتضبط الأكاديمية الرصيد، وأنا موجود هنا لأي سؤال.'],
         ]);
 
         $talk('sara@demo.test', 'maryam@demo.test', [
-            [$now->subDays(3)->setTime(19, 0), 'sara@demo.test', 'مريم، المقال الجاي عن رحلة عملتيها. عايزاكي تستخدمي 5 كلمات جديدة من درس النهارده.'],
-            [$now->subDays(3)->setTime(21, 14), 'maryam@demo.test', 'تمام يا ميس، هبعته يوم الأربعاء.'],
+            [$now->subDays(3)->setTime(19, 0), 'sara@demo.test', 'مريم، المقال القادم عن رحلة قمتِ بها. أريدك أن تستخدمي 5 كلمات جديدة من درس اليوم.'],
+            [$now->subDays(3)->setTime(21, 14), 'maryam@demo.test', 'حسنًا يا أستاذة، سأرسله يوم الأربعاء.'],
         ]);
     }
 }

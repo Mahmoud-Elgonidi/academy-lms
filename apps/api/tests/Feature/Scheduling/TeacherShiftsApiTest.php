@@ -64,11 +64,11 @@ it('explains in Arabic what is wrong with a schedule, on the teacher\'s clock', 
 
     $send()->assertUnprocessable()
         ->assertJsonPath('type', 'validation')
-        ->assertJsonPath('errors.shifts.0', 'الوقت اللي بيبدأ 5:00 م يوم السبت أقل من 60 دقيقة.');
+        ->assertJsonPath('errors.shifts.0', 'الوقت الذي يبدأ 5:00 م يوم السبت أقل من 60 دقيقة.');
 
     // In 24 hours when she chose it.
     $this->withToken($token)->patchJson('/api/v1/me', ['time_format' => 'h24'])->assertOk();
-    $send()->assertUnprocessable()->assertJsonPath('errors.shifts.0', 'الوقت اللي بيبدأ 17:00 يوم السبت أقل من 60 دقيقة.');
+    $send()->assertUnprocessable()->assertJsonPath('errors.shifts.0', 'الوقت الذي يبدأ 17:00 يوم السبت أقل من 60 دقيقة.');
 });
 
 it('lets the teacher accept a counter-offer with one call', function () {

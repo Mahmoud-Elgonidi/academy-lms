@@ -42,14 +42,14 @@ final class FamiliesImporter implements Importer
     {
         return [
             new Field('student_name', true, ['الطالب', 'اسم الطالب', 'الطالبة', 'اسم الطالبة', 'student', 'student name', 'name', 'الاسم']),
-            new Field('student_email', false, ['إيميل الطالب', 'ايميل الطالب', 'student email']),
-            new Field('student_phone', false, ['موبايل الطالب', 'رقم الطالب', 'جوال الطالب', 'student phone', 'student mobile']),
+            new Field('student_email', false, ['إيميل الطالب', 'ايميل الطالب', 'بريد الطالب الإلكتروني', 'بريد الطالب', 'student email']),
+            new Field('student_phone', false, ['موبايل الطالب', 'رقم الطالب', 'جوال الطالب', 'هاتف الطالب', 'student phone', 'student mobile']),
             new Field('gender', false, ['نوع الطالب', 'النوع', 'الجنس', 'ولد ولا بنت', 'gender', 'sex']),
             new Field('birth_date', false, ['تاريخ الميلاد', 'سنة الميلاد', 'الميلاد', 'birth date', 'birthday', 'date of birth', 'birth year', 'dob']),
             new Field('timezone', false, ['التوقيت', 'المنطقة الزمنية', 'البلد', 'الدولة', 'المدينة', 'time zone', 'country', 'city']),
             new Field('guardian_name', false, ['ولي الأمر', 'اسم ولي الأمر', 'الأب', 'الأم', 'guardian', 'parent', 'guardian name', 'parent name']),
-            new Field('guardian_email', false, ['إيميل ولي الأمر', 'ايميل ولي الامر', 'guardian email', 'parent email', 'email', 'الإيميل', 'الايميل']),
-            new Field('guardian_phone', false, ['موبايل ولي الأمر', 'رقم ولي الأمر', 'واتساب ولي الأمر', 'جوال ولي الأمر', 'guardian phone', 'parent phone', 'phone', 'mobile', 'whatsapp', 'الموبايل', 'الجوال', 'واتساب', 'رقم الواتساب']),
+            new Field('guardian_email', false, ['إيميل ولي الأمر', 'ايميل ولي الامر', 'بريد ولي الأمر الإلكتروني', 'بريد ولي الأمر', 'guardian email', 'parent email', 'email', 'الإيميل', 'الايميل']),
+            new Field('guardian_phone', false, ['موبايل ولي الأمر', 'رقم ولي الأمر', 'واتساب ولي الأمر', 'جوال ولي الأمر', 'هاتف ولي الأمر', 'guardian phone', 'parent phone', 'phone', 'mobile', 'whatsapp', 'الموبايل', 'الجوال', 'واتساب', 'رقم الواتساب']),
             new Field('relationship', false, ['صلة القرابة', 'القرابة', 'relationship', 'relation']),
             new Field('language', false, ['لغة الرسائل', 'اللغة', 'language']),
         ];

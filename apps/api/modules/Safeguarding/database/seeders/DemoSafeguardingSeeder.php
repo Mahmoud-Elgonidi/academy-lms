@@ -40,11 +40,11 @@ final class DemoSafeguardingSeeder extends Seeder
         // Zain's father, last month: closed, with the reply he read.
         if (($zain = $id('zain@demo.test')) && ($zainsFather = $id('zain.guardian@demo.test'))) {
             $old = $at($now->subDays(26)->setTime(19, 10), fn () => $report->handle($zainsFather, 'family', $zain, 'content',
-                'في آخر الحصة اتفتح فيديو يوتيوب على الشاشة المشتركة وطلع إعلان مش مناسب لطفل.'));
+                'في آخر الحصة فُتح فيديو يوتيوب على الشاشة المشتركة وظهر إعلان غير مناسب لطفل.'));
             $at($now->subDays(26)->setTime(19, 40), fn () => $take->handle($old->id, $owner));
-            $at($now->subDays(25)->setTime(11, 0), fn () => $note->handle($old->id, 'كلمت أ. خالد: الإعلان طلع من فيديو مش من مكتبة الأكاديمية. اتفقنا الفيديوهات تتعرض من ملفات الدرس بس.', $owner));
+            $at($now->subDays(25)->setTime(11, 0), fn () => $note->handle($old->id, 'تحدثت مع أ. خالد: ظهر الإعلان من فيديو ليس من مكتبة الأكاديمية. اتفقنا على أن تُعرض الفيديوهات من ملفات الدرس فقط.', $owner));
             $at($now->subDays(24)->setTime(10, 15), fn () => $close->handle($old->id, 'resolved',
-                'شكرًا إنك قولتلنا. اتكلمنا مع المدرس، ومن دلوقتي أي فيديو في الحصة بيتعرض من ملفات الدرس بس.', 'اتنبّه المدرس كتابةً؛ الفيديوهات من مكتبة الأكاديمية بس.', $owner));
+                'شكرًا لأنك أخبرتنا. تحدثنا مع المعلّم، ومن الآن يُعرض أي فيديو في الحصة من ملفات الدرس فقط.', 'نُبّه المعلّم كتابةً؛ الفيديوهات من مكتبة الأكاديمية فقط.', $owner));
         }
 
         // Maryam's father, two days ago, about one of her lessons.
@@ -53,15 +53,15 @@ final class DemoSafeguardingSeeder extends Seeder
                 ->where('p.user_id', $maryam)->where('p.role', 'student')->where('s.starts_at', '<', $now->subDays(2))->where('s.starts_at', '>', $now->subDays(20))
                 ->orderByDesc('s.starts_at')->value('s.id');
             $concern = $at($now->subDays(2)->setTime(21, 30), fn () => $report->handle($maryamsFather, 'family', $maryam, 'outside_contact',
-                'مريم قالتلي إن في آخر الحصة اتطلب منها رقم الواتساب بتاعها عشان "يكملوا المراجعة برّه". هي ما ادتهوش.', false, $lesson));
+                'أخبرتني مريم أنه في آخر الحصة طُلب منها رقم الواتساب الخاص بها "لإكمال المراجعة خارج المنصة". لم تعطه لهم.', false, $lesson));
             $at($now->subDays(2)->setTime(21, 52), fn () => $take->handle($concern->id, $owner));
-            $at($now->subDay()->setTime(10, 20), fn () => $note->handle($concern->id, 'كلمت الأب: مريم بخير وما بعتتش حاجة. هراجع تسجيل الحصة وأكلم المدرسة النهارده.', $owner));
+            $at($now->subDay()->setTime(10, 20), fn () => $note->handle($concern->id, 'تحدثت مع الأب: مريم بخير ولم ترسل شيئًا. سأراجع تسجيل الحصة وأتحدث مع المعلّمة اليوم.', $owner));
         }
 
         // Nour, this morning, about a student of hers: urgent.
         if (($nour = $id('nour@demo.test')) && ($yousef = $id('yousef@demo.test'))) {
             $hers = $at($now->subHours(5), fn () => $report->handle($nour, 'teacher', $yousef, 'wellbeing',
-                'يوسف كان تعبان جدًا وقال إنه ما نامش وإن مفيش حد في البيت من امبارح. أنا ما سألتوش أكتر.', true));
+                'كان يوسف متعبًا جدًا وقال إنه لم ينم وإنه لا يوجد أحد في البيت منذ الأمس. لم أسأله أكثر من ذلك.', true));
             $at($now->subHours(4)->subMinutes(35), fn () => $take->handle($hers->id, $owner));
         }
 

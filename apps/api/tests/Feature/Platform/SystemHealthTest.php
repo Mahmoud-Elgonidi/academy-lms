@@ -310,7 +310,7 @@ it('tells the platform team when a check starts failing, reminds them, and says 
     $this->artisan('platform:health --alert')->assertExitCode(0);
     $well = Mail::sent(HealthAlert::class)->last();
     expect(Mail::sent(HealthAlert::class))->toHaveCount(3)->and($well->failing)->toBe([])->and($well->recovered)->toBe(['scheduler']);
-    expect($well->render())->toContain('رجع يشتغل')->toContain('working again')->toContain('/console/health');
+    expect($well->render())->toContain('عاد إلى العمل')->toContain('working again')->toContain('/console/health');
     Cache::flush();
 });
 

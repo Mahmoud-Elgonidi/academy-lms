@@ -44,12 +44,12 @@ final class SendPrivacyNotifications
             ['export_ready', 'lessons', $a.'requester', ['push', 'email'], $person + ['until' => 'الخميس 16 أكتوبر']],
             ['erasure_requested', 'staff', $a.'handlers', ['push', 'email'], $person + ['due' => 'السبت 8 نوفمبر']],
             ['erasure_approved', 'lessons', $a.'requester', ['push', 'email'], $person + ['at' => 'الجمعة 10 أكتوبر · 6:00 م']],
-            ['erasure_refused', 'lessons', $a.'requester', ['push', 'email'], $person + ['answer' => 'عليه فاتورة لسه متدفعتش']],
+            ['erasure_refused', 'lessons', $a.'requester', ['push', 'email'], $person + ['answer' => 'عليه فاتورة لم تُدفع بعد']],
             ['account_erased', 'lessons', $a.'guardian', ['push', 'email'], []],
             ['correction_requested', 'staff', $a.'handlers', ['push', 'email'], $person + ['due' => 'السبت 8 نوفمبر']],
-            ['correction_done', 'lessons', $a.'requester', ['push', 'email'], $person + ['note' => 'صلحنا تاريخ الميلاد.']],
-            ['correction_refused', 'lessons', $a.'requester', ['push', 'email'], $person + ['answer' => 'الاسم في الفاتورة لازم يفضل زي ما اتصدرت.']],
-            ['contact_changed', 'lessons', $a.'account', ['push', 'email', 'whatsapp'], ['what' => 'الإيميل']],
+            ['correction_done', 'lessons', $a.'requester', ['push', 'email'], $person + ['note' => 'صحّحنا تاريخ الميلاد.']],
+            ['correction_refused', 'lessons', $a.'requester', ['push', 'email'], $person + ['answer' => 'يجب أن يبقى الاسم في الفاتورة كما صدرت.']],
+            ['contact_changed', 'lessons', $a.'account', ['push', 'email', 'whatsapp'], ['what' => 'البريد الإلكتروني']],
         ] as [$name, $category, $audience, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
                 key: "privacy.{$name}", category: $category,

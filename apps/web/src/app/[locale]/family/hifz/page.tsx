@@ -15,11 +15,11 @@ import { familyNotebook } from '@/lib/mushaf/server';
 /**
  * The hifz map of the learner on screen (GET learning/hifz): every page of
  * the mushaf by part in its strength, the counts, the last page recited, and
- * today's review ("ورد النهارده"), each page opening to be recited or said
+ * today's review ("ورد اليوم"), each page opening to be recited or said
  * how it went. A student's own words by their look; a guardian's says whose
  * map it is. It refreshes on the hifz signal (a page reviewed, marked, or
  * recited and then heard). Under it the mistakes notebook: the words
- * teachers marked in the lessons' shared mushaf ("كلمات بنراجعها" in the
+ * teachers marked in the lessons' shared mushaf ("كلمات نراجعها" in the
  * kids' look), following the words as they are marked. Nothing while the
  * platform has no Quran text.
  */

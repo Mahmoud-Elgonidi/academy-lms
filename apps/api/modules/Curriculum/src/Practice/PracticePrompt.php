@@ -102,7 +102,7 @@ final class PracticePrompt
         $n = $passage ? count($passage->words) : 0;
         if ($n >= 4) {
             $items[] = ['kind' => 'order', 'prompt' => 'رتّب الكلمات', 'parts_from' => 1, 'parts_to' => min(6, $n)];
-            $items[] = ['kind' => 'choice', 'prompt' => 'إيه الكلمة اللي بعد {{1-2}}؟', 'options' => ['{{3}}', '{{4}}'], 'answer' => 0];
+            $items[] = ['kind' => 'choice', 'prompt' => 'ما الكلمة التي تأتي بعد {{1-2}}؟', 'options' => ['{{3}}', '{{4}}'], 'answer' => 0];
         }
         $items[] = ['kind' => 'pair', 'left' => mb_substr($lesson->title_ar, 0, 60), 'right' => mb_substr($lesson->title_en, 0, 60)];
 

@@ -29,10 +29,10 @@ final class DemoShiftProposalsSeeder extends Seeder
             $user('sara'),
             self::week([[6, '17:00', '22:00'], [7, '18:00', '20:00'], [2, '21:00', '23:00'], [3, '17:00', '21:00']], $saraTz),
             CarbonImmutable::now($saraTz)->addDays(19)->startOfDay(),
-            'الترم ده عندي محاضرات في الجامعة يوم التلات من 4 لـ 9، فشلت التلات العصر وزوّدت بالليل، وضفت يوم الأربع.',
+            'لديّ هذا الفصل الدراسي محاضرات في الجامعة يوم الثلاثاء من 4 إلى 9، فحذفت عصر الثلاثاء وزدت في المساء، وأضفت يوم الأربعاء.',
         );
-        $comment->handle($proposal, $admin, 'admin', 'تمام يا أستاذة. عندنا مريم وآدم يوم التلات العصر. ينفع مريم تكمّل معاكي التلات 21:00؟');
-        $comment->handle($proposal, $user('sara'), 'teacher', 'مريم ينفع 21:00. آدم صعب عشان فرق التوقيت، يتنقل أحسن.');
+        $comment->handle($proposal, $admin, 'admin', 'حسنًا يا أستاذة. لدينا مريم وآدم يوم الثلاثاء عصرًا. هل يمكن أن تكمل مريم معكِ الثلاثاء 21:00؟');
+        $comment->handle($proposal, $user('sara'), 'teacher', 'مريم يناسبها 21:00. آدم صعب بسبب فرق التوقيت، فالأفضل نقله.');
         DB::table('shift_proposals')->where('id', $proposal->id)->update(['submitted_at' => CarbonImmutable::now()->subHours(5)]);
 
         // Ahmed: adds Friday evening only, so it can start tomorrow.
@@ -40,13 +40,13 @@ final class DemoShiftProposalsSeeder extends Seeder
             $user('ahmed'),
             self::week([[1, '17:00', '23:00'], [2, '17:00', '23:00'], [3, '17:00', '23:00'], [4, '17:00', '23:00'], [5, '18:00', '22:00']], 'Africa/Cairo'),
             CarbonImmutable::now('Africa/Cairo')->addDays(2)->startOfDay(),
-            'ممكن أزوّد الجمعة بالليل عشان الطلب على الإنجليزي.',
+            'يمكنني إضافة مساء الجمعة بسبب الطلب على الإنجليزية.',
         );
 
         // Mona asked for Saturday mornings; the admins countered with Saturday evening.
         $mona = $user('mona');
-        $save->handle($mona, self::week([[7, '17:00', '22:00'], [4, '17:00', '22:00'], [6, '10:00', '14:00']], 'Asia/Amman'), CarbonImmutable::now('Asia/Amman')->addDays(20)->startOfDay(), 'السبت الصبح أنسب لي من الليل.');
-        $counter->handle($mona, self::week([[7, '17:00', '22:00'], [4, '17:00', '22:00'], [6, '10:00', '13:00'], [6, '20:00', '23:00']], 'Asia/Amman'), CarbonImmutable::now('Asia/Amman')->addDays(20)->startOfDay(), 'نخلي السبت الصبح لحد 1 ونحافظ على السبت بالليل عشان سلمى وطلاب أمريكا.', $admin);
+        $save->handle($mona, self::week([[7, '17:00', '22:00'], [4, '17:00', '22:00'], [6, '10:00', '14:00']], 'Asia/Amman'), CarbonImmutable::now('Asia/Amman')->addDays(20)->startOfDay(), 'صباح السبت أنسب لي من المساء.');
+        $counter->handle($mona, self::week([[7, '17:00', '22:00'], [4, '17:00', '22:00'], [6, '10:00', '13:00'], [6, '20:00', '23:00']], 'Asia/Amman'), CarbonImmutable::now('Asia/Amman')->addDays(20)->startOfDay(), 'نُبقي صباح السبت حتى 1 ونحافظ على مساء السبت من أجل سلمى وطلاب أمريكا.', $admin);
     }
 
     /** @param  list<array{0: int, 1: string, 2: string}>  $blocks */

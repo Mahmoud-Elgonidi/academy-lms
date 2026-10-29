@@ -8,24 +8,33 @@ function strings(node: unknown, path = ''): [string, string][] {
   return Object.entries(node as Record<string, unknown>).flatMap(([key, value]) => strings(value, path ? `${path}.${key}` : key));
 }
 
-// The app's glossary (apps/mobile/tool/strings.py): one word for one thing.
-// The kids' strings keep their own words.
-const GLOSSARY: [RegExp, string][] = [
-  [/الدعم/, 'المساعدة'],
-  [/معلم/, 'مدرّس'],
-  [/مدر(?!ّ)س(?!ة)/, 'مدرّس'],
-  [/المدفوعات/, 'الفلوس'],
+// Modern Standard Arabic (docs/style/arabic.md), the kids' look in simple words:
+// no colloquial word, and one word for one thing, as the API and the app check.
+const COLLOQUIAL = [
+  'ده', 'دي', 'دول', 'مش', 'مفيش', 'عشان', 'علشان', 'إزاي', 'ازاي', 'إيه', 'ايه', 'فين', 'ليه', 'دلوقتي', 'كده',
+  'بتاع', 'بتاعة', 'بتاعك', 'اللي', 'عايز', 'عاوز', 'يلا', 'لسه', 'بقى', 'أوي', 'تاني', 'كمان', 'بس', 'خلّي', 'خلي',
+  'قايمة', 'القايمة', 'دقايق', 'إمتى', 'امتى',
+];
+const GLOSSARY: [string, string][] = [
+  ['(?:ال)?مدرّس(?:ين|ون)?', 'معلّم'],
+  ['(?:ال)?مدرس(?:ين|ون)?', 'معلّم'],
+  ['الفلوس', 'المدفوعات'],
+  ['الكود', 'الرمز'],
+  ['الدعم', 'المساعدة'],
+  ['الستيكرز', 'الملصقات'],
+];
+const LETTER = '\\u0621-\\u064A\\u0671';
+const word = (w: string) => new RegExp(`(?<![${LETTER}])${w}(?![${LETTER}])`, 'u');
+const RULES: [RegExp, string][] = [
+  ...COLLOQUIAL.map((w): [RegExp, string] => [word(w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), 'a colloquial word']),
+  ...GLOSSARY.map(([w, right]): [RegExp, string] => [word(w), `"${right}"`]),
 ];
 
 describe('the portal’s words', () => {
-  it('say one thing one way, as the app does', () => {
-    const wrong = strings(ar)
-      .filter(([path]) => !/kids/i.test(path))
-      .flatMap(([path, text]) => [
-        ...GLOSSARY.filter(([word]) => word.test(text)).map(([word, right]) => `${path}: "${text.match(word)![0]}" → "${right}"`),
-        // "القايمة" names the menu itself for screen readers; a tab or a title is "المزيد".
-        ...(text.includes('القايمة') && !path.endsWith('.menu') && path !== 'menu' ? [`${path}: "القايمة" → "المزيد"`] : []),
-      ]);
+  it('are Modern Standard Arabic, one word for one thing', () => {
+    const wrong = strings(ar).flatMap(([path, text]) =>
+      RULES.filter(([rule]) => rule.test(text)).map(([rule, why]) => `${path}: "${text.match(rule)![0]}" (${why})`),
+    );
     expect(wrong).toEqual([]);
   });
 

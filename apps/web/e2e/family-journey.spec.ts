@@ -39,10 +39,10 @@ test.describe('a kid (Yousef)', () => {
     await expect(page.locator('.gw-map')).toBeVisible();
     await expect(page.locator('h1')).toHaveText(/^رحلة /);
     await fitsTheScreen(page);
-    const tabs = page.getByRole('navigation', { name: 'القايمة' }).last();
+    const tabs = page.getByRole('navigation', { name: 'القائمة' }).last();
     await expect(tabs.getByRole('link', { name: 'رحلتي' })).toHaveAttribute('aria-current', 'page');
     await expect(tabs.getByRole('link', { name: 'حصصي' })).toBeVisible();
-    await expect(tabs.getByRole('link', { name: 'كلّم مدرسك' })).toBeVisible();
+    await expect(tabs.getByRole('link', { name: 'تحدّث مع معلّمك' })).toBeVisible();
     // No islands, missions or badges tabs any more.
     await expect(tabs.getByRole('link', { name: /الجزر|مهماتي|إنجازاتي/ })).toHaveCount(0);
     // Each island is a level of the course; the one they are on says so.
@@ -62,7 +62,7 @@ test.describe('a kid (Yousef)', () => {
     const shell = page.locator('.gw-hatch button[aria-label^="البيضة"]');
     for (let i = 0; i < 3; i++) await shell.click({ force: true });
     await expect(page.locator('#gw-hatch-title')).toHaveText('فقست!');
-    await page.getByRole('button', { name: 'حطّه في الألبوم' }).click();
+    await page.getByRole('button', { name: 'ضعه في الألبوم' }).click();
     await expect(page).toHaveURL(/\/ar\/family\/games\/album\?new=/);
   });
 
@@ -87,7 +87,7 @@ test.describe('a kid (Yousef)', () => {
     await page.goto('/ar/family');
     // Last week's, every lesson attended and every homework handed in (E2eResetSeeder).
     await page.locator('button.jr-chest').click();
-    await expect(page.getByRole('status').filter({ hasText: /^خدت / })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: /^حصلت على / })).toBeVisible();
     await expect(page.locator('button.jr-chest')).toHaveCount(0);
   });
 
@@ -102,7 +102,7 @@ test.describe('a kid (Yousef)', () => {
     // A homework that is not there to play says so on the journey.
     await page.goto('/ar/family/games?homework=00000000-0000-0000-0000-000000000000');
     await expect(page).toHaveURL(/\/ar\/family\/journey\?homework=/);
-    await expect(page.getByRole('status').filter({ hasText: 'التدريب ده مش متاح' })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: 'هذا التدريب غير متاح' })).toBeVisible();
   });
 });
 
@@ -116,9 +116,9 @@ test.describe('a middle-school student (Ziad)', () => {
     await expect(page.locator('h1')).toHaveText(/^أهلًا يا /);
     await expect(page.getByRole('heading', { name: 'المستويات' })).toBeVisible();
     await fitsTheScreen(page);
-    const tabs = page.getByRole('navigation', { name: 'القايمة' }).last();
+    const tabs = page.getByRole('navigation', { name: 'القائمة' }).last();
     await expect(tabs.getByRole('link', { name: 'رحلتي' })).toHaveAttribute('aria-current', 'page');
-    await expect(tabs.getByRole('link', { name: 'الرسايل' })).toBeVisible();
+    await expect(tabs.getByRole('link', { name: 'الرسائل' })).toBeVisible();
     await expect(page.getByText('نجومك')).toBeVisible();
 
     await page.locator('[data-station]:not([data-games="0"])').first().click();
@@ -154,7 +154,7 @@ test.describe('a middle-school student (Ziad)', () => {
   test('opens the week\'s chest when it is ready', async ({ page }) => {
     await page.goto('/ar/family');
     await page.getByRole('button', { name: 'افتح الصندوق' }).click();
-    await expect(page.getByRole('status').filter({ hasText: /^خدت / })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: /^حصلت على / })).toBeVisible();
   });
 });
 
@@ -167,7 +167,7 @@ test.describe('a teen (Maryam)', () => {
     await expect(page.locator('[data-stage="teen"]')).toBeVisible();
     await expect(page.locator('h1')).toHaveText('رحلتي');
     await fitsTheScreen(page);
-    const tabs = page.getByRole('navigation', { name: 'القايمة' }).last();
+    const tabs = page.getByRole('navigation', { name: 'القائمة' }).last();
     for (const name of ['رحلتي', 'حصصي', 'الواجبات', 'التقارير', 'المزيد']) await expect(tabs.getByRole('link', { name })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'المهمات' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'المستويات' })).toBeVisible();
@@ -195,35 +195,35 @@ test.describe('a guardian (Ziad\'s)', () => {
     expect(response?.status()).toBe(200);
     await expect(page.locator('h1')).toHaveText(/^رحلة /);
     await fitsTheScreen(page);
-    const tabs = page.getByRole('navigation', { name: 'القايمة' }).last();
+    const tabs = page.getByRole('navigation', { name: 'القائمة' }).last();
     await expect(tabs.getByRole('link', { name: 'الرحلة' })).toHaveAttribute('aria-current', 'page');
     await expect(tabs.getByRole('link', { name: 'التقدم' })).toHaveCount(0);
     // The child opens the chest, never the guardian.
     await expect(page.getByRole('button', { name: 'افتح الصندوق' })).toHaveCount(0);
-    await expect(page.getByText('مفيش شراء جوه الألعاب')).toBeVisible();
+    await expect(page.getByText('لا شراء داخل الألعاب')).toBeVisible();
 
     const choice = page.getByRole('radio', { name: '15 د' });
     await choice.click();
-    await expect(page.getByRole('status').filter({ hasText: 'اتحفظ.' })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: 'تم الحفظ.' })).toBeVisible();
     await expect(choice).toHaveAttribute('aria-checked', 'true');
     await page.getByRole('radio', { name: 'الأكاديمية' }).click();
     await expect(page.getByRole('radio', { name: 'الأكاديمية' })).toHaveAttribute('aria-checked', 'true');
     // The night lock, on and off again: what is saved, whatever the hour on the child's clock.
-    const night = page.getByRole('checkbox', { name: 'قفل اللعب من 9 بالليل لـ 7 الصبح' });
+    const night = page.getByRole('checkbox', { name: 'أغلق اللعب من 9 مساءً حتى 7 صباحًا' });
     await night.check();
-    await expect(page.getByRole('status').filter({ hasText: 'اتحفظ.' })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: 'تم الحفظ.' })).toBeVisible();
     await page.reload();
     await expect(night).toBeChecked();
     await night.uncheck();
-    await expect(page.getByRole('status').filter({ hasText: 'اتحفظ.' })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: 'تم الحفظ.' })).toBeVisible();
     await page.reload();
     await expect(night).not.toBeChecked();
 
     // The roadmap and the teacher's reports stay a click away.
-    await expect(page.getByRole('link', { name: 'المنهج وتقارير المدرّس' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'المنهج وتقارير المعلّم' })).toBeVisible();
     // The child's album, to look at only.
     await page.goto('/ar/family/games/album');
-    await expect(page.getByRole('button', { name: 'خليه صاحبك' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'اجعله صديقك' })).toHaveCount(0);
   });
 
   test('finds the journey on the home page', async ({ page }) => {

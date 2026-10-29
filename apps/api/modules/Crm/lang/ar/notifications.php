@@ -3,10 +3,10 @@
 return [
     'audience' => [
         'sales' => 'المسؤول عن العميل (أو فريق المبيعات)',
-        'teacher' => 'مدرس الحصة التجريبية',
+        'teacher' => 'معلّم الحصة التجريبية',
     ],
-    'lead_assigned' => ['title' => 'عميل جديد ليك: :name', 'body' => 'جه من :source. افتحه واتواصل معاه.'],
-    'assess_trial' => ['title' => 'قيّم الحصة التجريبية', 'body' => ':student · :subject · :when. اكتب المستوى والباقة اللي تنصح بيها عشان المبيعات تكمّل.'],
-    'trial_missed' => ['title' => 'الحصة التجريبية ماتمّتش', 'body' => ':name: :outcome. كلّمه واحجز ميعاد تاني.'],
-    'trial_assessed' => ['title' => 'تقييم :name جاهز', 'body' => ':teacher: :level. وقت تكلّم الأسرة عن الاشتراك.'],
+    'lead_assigned' => ['title' => 'عميل جديد لك: :name', 'body' => 'جاء من :source. افتحه وتواصل معه.'],
+    'assess_trial' => ['title' => 'قيّم الحصة التجريبية', 'body' => ':student · :subject · :when. اكتب المستوى والباقة التي تنصح بها ليكمل فريق المبيعات.'],
+    'trial_missed' => ['title' => 'لم تتم الحصة التجريبية', 'body' => ':name: :outcome. تواصل معه واحجز موعدًا آخر.'],
+    'trial_assessed' => ['title' => 'تقييم :name جاهز', 'body' => ':teacher: :level. حان وقت الحديث مع الأسرة عن الاشتراك.'],
 ];

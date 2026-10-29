@@ -98,9 +98,9 @@ async function ensureAppSession(browser, series, user, base) {
   await page.goto(`${base}/app/`);
   await sleep(4000);
   await appSemantics(page);
-  await page.getByRole('button', { name: 'تخطّي' }).first().click();
+  await page.getByRole('button', { name: 'تخطَّ' }).first().click();
   await sleep(1200);
-  await page.getByRole('button', { name: 'عندك كلمة سر؟ ادخل بيها' }).click();
+  await page.getByRole('button', { name: 'لديك كلمة مرور؟ ادخل بها' }).click();
   await sleep(1200);
   await appSemantics(page);
   const fields = page.locator('flt-semantics input');

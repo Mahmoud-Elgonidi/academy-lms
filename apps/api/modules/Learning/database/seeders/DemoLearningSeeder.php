@@ -67,39 +67,39 @@ final class DemoLearningSeeder extends Seeder
         $scripts = [
             // Ziad (middle school, Arabic grammar): five of six reported, one late; the last is overdue.
             'ziad' => [
-                [[[0, 'mastered', 5], [1, 'introduced', 3]], 5, 4, 'بداية ممتازة: زياد بيفرّق بين الاسم والفعل بسهولة.', 2,
+                [[[0, 'mastered', 5], [1, 'introduced', 3]], 5, 4, 'بداية ممتازة: يميّز زياد بين الاسم والفعل بسهولة.', 2,
                     ['title' => 'اكتب خمس جمل فيها أسماء، وحدّد علامة كل اسم', 'accepts' => 'text', 'due_days' => 3]],
-                [[[1, 'mastered', 4], [2, 'introduced', 3]], 4, 4, 'المثنى تمام، الجمع محتاج تدريب بسيط.', 20, null],
+                [[[1, 'mastered', 4], [2, 'introduced', 3]], 4, 4, 'المثنى جيد، والجمع يحتاج إلى تدريب بسيط.', 20, null],
                 [[[2, 'mastered', 5], [3, 'practiced', 3]], 4, 5, 'تحسن واضح في التذكير والتأنيث.', 3,
                     ['title' => 'صرّف الفعل "كتب" في الماضي مع كل الضمائر', 'accepts' => 'any', 'due_days' => 3]],
-                [[[3, 'mastered', 4], [4, 'introduced', 3], [0, 'practiced', 5]], 3, 4, 'كان مرهق شوية النهارده، بس راجعنا علامات الاسم كويس.', 1, null],
-                [[[4, 'practiced', 4]], 5, 4, 'المضارع محتاج حصة كمان قبل ما ننتقل للأمر.', 2,
-                    ['title' => 'سجّل نفسك وانت بتقرا فقرة الكتاب ص 14 وتحدد الأفعال المضارعة', 'accepts' => 'audio', 'due_days' => 4]],
+                [[[3, 'mastered', 4], [4, 'introduced', 3], [0, 'practiced', 5]], 3, 4, 'كان مرهقًا قليلًا اليوم، لكننا راجعنا علامات الاسم جيدًا.', 1, null],
+                [[[4, 'practiced', 4]], 5, 4, 'المضارع يحتاج إلى حصة أخرى قبل أن ننتقل إلى الأمر.', 2,
+                    ['title' => 'سجّل نفسك وأنت تقرأ فقرة الكتاب ص 14 وتحدد الأفعال المضارعة', 'accepts' => 'audio', 'due_days' => 4]],
             ],
             // Yousef (9, Juz' Amma): the first island done, Al-Fatiha back for a review, halfway through the second; his last homework comes with a game round.
             'yousef' => [
-                [[[0, 'introduced', 4]], 5, 5, 'بداية حلوة! يوسف حافظ الفاتحة كويس، هنظبط المدود مع بعض.', 2,
+                [[[0, 'introduced', 4]], 5, 5, 'بداية جميلة! يحفظ يوسف الفاتحة جيدًا، وسنضبط المدود معًا.', 2,
                     ['title' => 'سمّع الفاتحة وسجّل صوتك', 'accepts' => 'audio', 'due_days' => 2]],
-                [[[0, 'practiced', 5], [1, 'introduced', 4]], 5, 5, 'الفاتحة بقت ممتازة ⭐ وبدأنا الناس والفلق.', 3, null],
-                [[[1, 'practiced', 5], [2, 'introduced', 3]], 4, 4, 'الناس والفلق تمام. الإخلاص محتاجة تكرار.', 2, null],
-                [[[2, 'practiced', 4], [3, 'introduced', 4]], 5, 5, 'شاطر جدًا النهارده، سمّع من غير ما يبص.', 1,
-                    ['title' => 'اقرا سورة النصر 3 مرات مع بابا أو ماما', 'accepts' => 'text', 'due_days' => 2]],
-                [[[2, 'mastered', 5], [3, 'practiced', 4]], 5, 5, 'خلّص قصار السور كلها! 🎉', 2, null],
-                [[[4, 'introduced', 4], [0, 'needs_review', 2]], 4, 4, 'بدأنا الكوثر والماعون. الفاتحة محتاجة مراجعة بسيطة في المدود.', 2, null],
-                [[[4, 'practiced', 5], [5, 'introduced', 3]], 5, 5, 'الكوثر والماعون حفظهم كويس جدًا. الحصة الجاية قريش.', 2,
+                [[[0, 'practiced', 5], [1, 'introduced', 4]], 5, 5, 'أصبحت الفاتحة ممتازة ⭐ وبدأنا الناس والفلق.', 3, null],
+                [[[1, 'practiced', 5], [2, 'introduced', 3]], 4, 4, 'الناس والفلق جيدتان. الإخلاص تحتاج إلى تكرار.', 2, null],
+                [[[2, 'practiced', 4], [3, 'introduced', 4]], 5, 5, 'ممتاز جدًا اليوم، سمّع من دون أن ينظر.', 1,
+                    ['title' => 'اقرأ سورة النصر 3 مرات مع أبيك أو أمك', 'accepts' => 'text', 'due_days' => 2]],
+                [[[2, 'mastered', 5], [3, 'practiced', 4]], 5, 5, 'أنهى قصار السور كلها! 🎉', 2, null],
+                [[[4, 'introduced', 4], [0, 'needs_review', 2]], 4, 4, 'بدأنا الكوثر والماعون. الفاتحة تحتاج إلى مراجعة بسيطة في المدود.', 2, null],
+                [[[4, 'practiced', 5], [5, 'introduced', 3]], 5, 5, 'حفظ الكوثر والماعون جيدًا جدًا. الحصة القادمة قريش.', 2,
                     ['title' => 'سجّل سورة قريش', 'accepts' => 'audio', 'due_days' => 5, 'practice' => true]],
             ],
             // Maryam (16, Nour Al-Bayan): the first level done, one lesson back for review; she missed one lesson. Her teacher has just set a game round as homework.
             'maryam' => [
-                [[[0, 'introduced', 4]], 4, 4, 'مخارج الحروف كويسة، محتاجين نشتغل على الحروف الحلقية.', 3,
-                    ['title' => 'اقري صفحة الحروف المفردة وسجّلي نفسك', 'accepts' => 'audio', 'due_days' => 3]],
+                [[[0, 'introduced', 4]], 4, 4, 'مخارج الحروف جيدة، ونحتاج إلى العمل على الحروف الحلقية.', 3,
+                    ['title' => 'اقرئي صفحة الحروف المفردة وسجّلي نفسك', 'accepts' => 'audio', 'due_days' => 3]],
                 [[[0, 'practiced', 4]], 4, 4, 'تحسن في الحروف الحلقية.', 2, null],
-                [[[0, 'mastered', 5], [1, 'introduced', 4]], 5, 5, 'الحروف المفردة اتقفلت. بدأنا المركبة.', 2,
+                [[[0, 'mastered', 5], [1, 'introduced', 4]], 5, 5, 'أتقنت الحروف المفردة. بدأنا المركبة.', 2,
                     ['title' => 'حلّي تمرين الحروف المركبة ص 9', 'accepts' => 'any', 'due_days' => 3]],
-                [[[1, 'mastered', 4], [2, 'introduced', 3]], 4, 4, 'المركبة تمام بعد الغياب. نكمّل الحركات.', 4, null],
-                [[[2, 'mastered', 5], [3, 'introduced', 4]], 5, 5, 'خلّصت المستوى الأول. ممتازة في التنوين.', 2,
+                [[[1, 'mastered', 4], [2, 'introduced', 3]], 4, 4, 'المركبة جيدة بعد الغياب. نكمل الحركات.', 4, null],
+                [[[2, 'mastered', 5], [3, 'introduced', 4]], 5, 5, 'أنهت المستوى الأول. ممتازة في التنوين.', 2,
                     ['title' => 'استخرجي 10 أمثلة للإظهار من سورة البقرة', 'accepts' => 'text', 'due_days' => 4]],
-                [[[3, 'mastered', 4], [1, 'needs_review', 2], [4, 'introduced', 3]], 4, 4, 'الإظهار تمام. الحروف المركبة محتاجة مراجعة سريعة، وبدأنا الإدغام.', 2, null],
+                [[[3, 'mastered', 4], [1, 'needs_review', 2], [4, 'introduced', 3]], 4, 4, 'الإظهار جيد. الحروف المركبة تحتاج إلى مراجعة سريعة، وبدأنا الإدغام.', 2, null],
             ],
         ];
 
@@ -107,14 +107,14 @@ final class DemoLearningSeeder extends Seeder
         $q = fn (string $ar, string $en, string $type, array $more = []) => ['label_ar' => $ar, 'label_en' => $en, 'type' => $type] + $more;
         $choices = fn (array $pairs) => ['options' => array_map(fn ($p) => ['ar' => $p[0], 'en' => $p[1]], $pairs)];
         $memorisation = [
-            $q('الآيات اللي اتحفظت', 'Verses memorised', 'number', ['required' => true, 'min' => 0, 'max' => 300, 'unit_ar' => 'آية', 'unit_ar_few' => 'آيات', 'unit_en' => 'verses']),
-            $q('التجويد', 'Tajweed', 'choice', $choices([['ممتاز', 'Excellent'], ['كويس', 'Good'], ['محتاج شغل', 'Needs work']])),
+            $q('الآيات المحفوظة', 'Verses memorised', 'number', ['required' => true, 'min' => 0, 'max' => 300, 'unit_ar' => 'آية', 'unit_ar_few' => 'آيات', 'unit_en' => 'verses']),
+            $q('التجويد', 'Tajweed', 'choice', $choices([['ممتاز', 'Excellent'], ['جيد', 'Good'], ['يحتاج إلى عمل', 'Needs work']])),
         ];
         $questions = [
             'Quran memorisation' => $memorisation,
             'Tajweed' => [
-                $q('الأحكام اللي اتطبقت صح', 'Rules applied correctly', 'rating', ['required' => true]),
-                $q('القراءة من المصحف', 'Reading from the Mushaf', 'choice', $choices([['من غير أخطاء', 'No mistakes'], ['أخطاء قليلة', 'A few mistakes'], ['محتاجة تدريب', 'Needs practice']])),
+                $q('الأحكام المطبّقة صحيحًا', 'Rules applied correctly', 'rating', ['required' => true]),
+                $q('القراءة من المصحف', 'Reading from the Mushaf', 'choice', $choices([['من دون أخطاء', 'No mistakes'], ['أخطاء قليلة', 'A few mistakes'], ['تحتاج إلى تدريب', 'Needs practice']])),
                 $q('صفحات القراءة', 'Pages read', 'number', ['min' => 0, 'max' => 40, 'unit_ar' => 'صفحة', 'unit_ar_few' => 'صفحات', 'unit_en' => 'pages']),
             ],
             'Arabic grammar' => [
@@ -135,7 +135,7 @@ final class DemoLearningSeeder extends Seeder
         // Answers by report, in the order of the scripts (keys as the templates gave them).
         $answers = [
             'ziad' => [['f1' => 4, 'f2' => 8], ['f1' => 4, 'f2' => 6], ['f1' => 5, 'f2' => 10],
-                ['f1' => 3, 'f2' => 5, 'f3' => 'الواجب اتأخر يومين؛ اتكلمت مع ولي الأمر.'], ['f1' => 4, 'f2' => 7]],
+                ['f1' => 3, 'f2' => 5, 'f3' => 'تأخر الواجب يومين؛ تحدثت مع ولي الأمر.'], ['f1' => 4, 'f2' => 7]],
             'yousef' => [['f1' => 7, 'f2' => 'o2'], ['f1' => 11, 'f2' => 'o1'], ['f1' => 9, 'f2' => 'o2'],
                 ['f1' => 8, 'f2' => 'o1', 'f3' => true, 'f4' => false], ['f1' => 12, 'f2' => 'o1', 'f3' => true, 'f4' => false],
                 ['f1' => 6, 'f2' => 'o3', 'f3' => false, 'f4' => true], ['f1' => 10, 'f2' => 'o1', 'f3' => true, 'f4' => false]],
@@ -165,14 +165,14 @@ final class DemoLearningSeeder extends Seeder
                     CarbonImmutable::setTestNow($report->session_starts_at->subHours(3));
                     $templates->handle($subject('Quran memorisation'), [...ReportTemplate::currentFor($subject('Quran memorisation'))->fields,
                         $q('راجع المحفوظ', 'Revised what he knows', 'yes_no', ['required' => true]),
-                        $q('محتاج متابعة من المشرف', 'Needs a supervisor\'s follow-up', 'yes_no', ['family' => false]),
+                        $q('يحتاج إلى متابعة من المشرف', 'Needs a supervisor\'s follow-up', 'yes_no', ['family' => false]),
                     ], $owner);
                 }
                 CarbonImmutable::setTestNow($report->session_starts_at->addMinutes(45)->addHours($after));
                 $submit->handle($report, $report->teacher_id, [
                     'answers' => $answers[$key][$i] ?? [],
                     'engagement' => $engagement, 'overall' => $overall, 'notes_for_student' => $note,
-                    'notes_internal' => $key === 'ziad' && $i === 3 ? 'ولي الأمر قال إن عنده امتحانات في المدرسة الأسبوع ده.' : null,
+                    'notes_internal' => $key === 'ziad' && $i === 3 ? 'قال ولي الأمر إن لديه امتحانات في المدرسة هذا الأسبوع.' : null,
                     'items' => array_map(fn ($it) => ['node_id' => $lesson[$it[0]], 'outcome' => $it[1], 'score' => $it[2]], $items),
                     'homework' => $homework,
                 ]);
@@ -182,13 +182,13 @@ final class DemoLearningSeeder extends Seeder
         // Maryam's teacher wrote why she missed her lesson.
         if ($absence = SessionReport::query()->where('enrollment_id', $reportsFor['maryam'][1] ?? null)->where('kind', 'absence')->first()) {
             CarbonImmutable::setTestNow($absence->session_starts_at->addHours(3));
-            $submit->handle($absence, $absence->teacher_id, ['absence_note' => 'مريم ماحضرتش وولي الأمر بلّغ بعدها إن عندها امتحان في المدرسة.']);
+            $submit->handle($absence, $absence->teacher_id, ['absence_note' => 'لم تحضر مريم، وأبلغ ولي الأمر بعدها أن لديها امتحانًا في المدرسة.']);
         }
 
         // A supervisor read Ziad's first report.
         if ($first = ($reportsFor['ziad'][2] ?? collect())->first()) {
             CarbonImmutable::setTestNow($first->refresh()->submitted_at->addDay());
-            $review->handle($first, $owner, 'تقرير واضح. ياريت تضيف ملاحظة عن الواجب في الحصة الجاية.');
+            $review->handle($first, $owner, 'تقرير واضح. نرجو أن تضيف ملاحظة عن الواجب في الحصة القادمة.');
         }
 
         // Homework, in every state: [index, what is handed in (text, or null for a recording), hours before it is due, mark, comment]
@@ -199,11 +199,11 @@ final class DemoLearningSeeder extends Seeder
             ],
             'yousef' => [  // both early and marked; the last one still to do
                 [0, null, 20, 5, 'صوتك جميل يا يوسف! ⭐'],
-                [1, 'قريت سورة النصر 3 مرات مع ماما 😊', 12, 5, 'برافو!'],
+                [1, 'قرأت سورة النصر 3 مرات مع أمي 😊', 12, 5, 'أحسنت!'],
             ],
             'maryam' => [  // three handed in on time, two marked
-                [0, null, 30, 4, 'كويس جدًا. ركّزي على القلقلة.'],
-                [1, 'حليت التمرين كله، عندي سؤال في رقم 4.', 6, 5, 'إجابة رقم 4 صح، هنشرحها الحصة الجاية.'],
+                [0, null, 30, 4, 'جيد جدًا. ركّزي على القلقلة.'],
+                [1, 'حللت التمرين كله، ولدي سؤال عن رقم 4.', 6, 5, 'إجابة رقم 4 صحيحة، وسنشرحها في الحصة القادمة.'],
                 [2, 'أنعمت، من آمن، من هاد، عليمٌ حكيم، …', 15, null, null],
             ],
         ];

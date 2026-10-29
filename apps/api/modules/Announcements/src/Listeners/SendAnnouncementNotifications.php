@@ -34,7 +34,7 @@ final class SendAnnouncementNotifications implements ShouldQueue
                 key: "announcements.{$who}", category: $category,
                 title: $n.'announcement.title', body: $n.'announcement.body',
                 audience: $n.'audience.'.$who, channels: AnnouncementRules::CHANNELS,
-                sample: ['title' => 'إجازة عيد الفطر', 'body' => "الأكاديمية في إجازة من الثلاثاء للخميس.\nالحصص بترجع يوم الجمعة في مواعيدها."],
+                sample: ['title' => 'إجازة عيد الفطر', 'body' => "الأكاديمية في إجازة من الثلاثاء إلى الخميس.\nتعود الحصص يوم الجمعة في مواعيدها."],
             ));
         }
     }

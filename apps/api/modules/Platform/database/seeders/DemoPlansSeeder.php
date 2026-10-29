@@ -25,7 +25,7 @@ final class DemoPlansSeeder extends Seeder
         $pro = SaasPlan::query()->where('code', 'pro')->first();
         if ($demo !== null && $pro !== null) {
             AuditActor::use(new AuditActor('platform', $adminId, $adminName));
-            $change->handle($demo->id, $pro->id, 'اتفاق على 10 مدرسين بس لحد تجديد العقد في يناير', ['teachers' => 10], [Feature::Ai->value]);
+            $change->handle($demo->id, $pro->id, 'اتفاق على 10 معلّمين فقط حتى تجديد العقد في يناير', ['teachers' => 10], [Feature::Ai->value]);
             AuditActor::forget();
         }
         $measure->all();

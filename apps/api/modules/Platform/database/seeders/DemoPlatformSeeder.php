@@ -47,7 +47,7 @@ final class DemoPlatformSeeder extends Seeder
         $rawda = Academy::query()->where('slug', 'rawda')->first();
         if ($rawda !== null) {
             AuditActor::use($actor);
-            $status->suspend($rawda->id, 'الاشتراك متأخر شهرين، والمالك طلب إيقاف مؤقت لحد ما يسدد.');
+            $status->suspend($rawda->id, 'الاشتراك متأخر شهرين، وطلب المالك إيقافًا مؤقتًا حتى يسدّد.');
             AuditActor::forget();
         }
     }

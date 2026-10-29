@@ -22,7 +22,7 @@ final class DemoMaterialsSeeder extends Seeder
             ['pdf', 'ورقة متابعة الفاتحة', 'Al-Fatiha follow-up sheet', 'all', 'Juz Amma - Al-Fatiha - follow-up sheet'],
             ['audio', 'تلاوة الفاتحة ببطء', 'Al-Fatiha, read slowly', 'all', null],
             ['link', 'الفاتحة على quran.com', 'Al-Fatiha on quran.com', 'all', 'https://quran.com/1'],
-            ['pdf', 'دليل المدرس: المدود في الفاتحة', 'Teacher\'s guide: the madd in Al-Fatiha', 'teachers', 'Teacher guide - madd in Al-Fatiha'],
+            ['pdf', 'دليل المعلّم: المدود في الفاتحة', 'Teacher\'s guide: the madd in Al-Fatiha', 'teachers', 'Teacher guide - madd in Al-Fatiha'],
         ]],
         ['Quran memorisation', 'An-Nas and Al-Falaq', [
             ['pdf', 'ورقة متابعة الناس والفلق', 'An-Nas and Al-Falaq sheet', 'all', 'Juz Amma - An-Nas and Al-Falaq'],
@@ -36,7 +36,7 @@ final class DemoMaterialsSeeder extends Seeder
         ['Quran memorisation', 'Quraysh and Al-Fil', [
             ['pdf', 'ورقة متابعة قريش والفيل', 'Quraysh and Al-Fil sheet', 'all', 'Juz Amma - Quraysh and Al-Fil'],
             ['link', 'سورة قريش على quran.com', 'Quraysh on quran.com', 'all', 'https://quran.com/106'],
-            ['pdf', 'دليل المدرس: قصة أصحاب الفيل للأطفال', 'Teacher\'s guide: telling Al-Fil to children', 'teachers', 'Teacher guide - Al-Fil for children'],
+            ['pdf', 'دليل المعلّم: قصة أصحاب الفيل للأطفال', 'Teacher\'s guide: telling Al-Fil to children', 'teachers', 'Teacher guide - Al-Fil for children'],
         ]],
         ['Arabic grammar', 'The past tense', [
             ['pdf', 'جدول تصريف الماضي', 'Past tense table', 'all', 'Easy Arabic Grammar - the past tense table'],

@@ -27,7 +27,7 @@ final class DemoAiAreaSeeder extends Seeder
             return;
         }
         AuditActor::use(new AuditActor('system', null, null));
-        $change->handle($demo->id, $current->plan_id, 'الديمو: مساحة المساعدات الآلية', $current->limits, [...$current->features_on, $ai], $current->features_off);
+        $change->handle($demo->id, $current->plan_id, 'العرض التجريبي: مساحة المساعدات الآلية', $current->limits, [...$current->features_on, $ai], $current->features_off);
         AuditActor::forget();
     }
 }

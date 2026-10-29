@@ -40,7 +40,7 @@ final class DemoCurriculumSeeder extends Seeder
                 ['الجملة الفعلية', 'Verbal sentences', [
                     ['الفعل والفاعل', 'Verb and subject', null],
                     ['المفعول به', 'The object', null],
-                    ['تطبيق: إعراب فقرة كاملة', 'Practice: parsing a paragraph', 'يعرب فقرة من خمس جمل من غير مساعدة', 2, 2, 'score_twice'],
+                    ['تطبيق: إعراب فقرة كاملة', 'Practice: parsing a paragraph', 'يعرب فقرة من خمس جمل من دون مساعدة', 2, 2, 'score_twice'],
                 ]],
             ]],
         ]],

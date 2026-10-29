@@ -18,7 +18,7 @@ async function tour(page: Page, paths: string[], locale: 'ar' | 'en') {
     expect(response?.status(), path).toBe(200);
     await expect(page.locator('html')).toHaveAttribute('dir', locale === 'ar' ? 'rtl' : 'ltr');
     await expect(page.locator('h1').first(), path).toBeVisible();
-    const menus = page.getByRole('navigation', { name: locale === 'ar' ? 'القايمة' : 'Menu' });
+    const menus = page.getByRole('navigation', { name: locale === 'ar' ? 'القائمة' : 'Menu' });
     // The side menu shows, and the phone's tab bar keeps out of the way.
     await expect(menus.first(), path).toBeVisible();
     if ((await menus.count()) > 1) await expect(menus.last(), path).toBeHidden();
@@ -35,7 +35,7 @@ test.describe('the teacher (Khaled)', () => {
     await tour(page, ['/teach', '/teach/week', '/teach/reports', '/teach/hours'], 'en');
     // The side menu gets around.
     await page.goto('/ar/teach');
-    await page.getByRole('navigation', { name: 'القايمة' }).first().getByRole('link', { name: 'المساعدة' }).click();
+    await page.getByRole('navigation', { name: 'القائمة' }).first().getByRole('link', { name: 'المساعدة' }).click();
     await expect(page).toHaveURL(/\/ar\/teach\/help$/);
   });
 });
@@ -48,7 +48,7 @@ test.describe('Ziad\'s guardian (classic)', () => {
     await tour(page, pages, 'ar');
     await tour(page, pages, 'en');
     await page.goto('/ar/family');
-    await page.getByRole('navigation', { name: 'القايمة' }).first().getByRole('link', { name: 'الفلوس' }).click();
+    await page.getByRole('navigation', { name: 'القائمة' }).first().getByRole('link', { name: 'المدفوعات' }).click();
     await expect(page).toHaveURL(/\/ar\/family\/money$/);
   });
 });
@@ -66,7 +66,7 @@ for (const [who, stage, home] of [
       await tour(page, familyPages(stage), 'en');
       await page.goto('/ar/family/lessons');
       await expect(page.locator(`[data-stage="${stage}"]`)).toBeVisible();
-      await page.getByRole('navigation', { name: 'القايمة' }).first().getByRole('link', { name: home }).click();
+      await page.getByRole('navigation', { name: 'القائمة' }).first().getByRole('link', { name: home }).click();
       await expect(page).toHaveURL(/\/ar\/family$/);
     });
   });

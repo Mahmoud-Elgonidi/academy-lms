@@ -60,12 +60,12 @@ final class DemoPrivacySeeder extends Seeder
             'legal_name' => 'مؤسسة النور للتعليم عن بعد',
             'contact_email' => 'privacy@demo.test',
             'address' => 'الرياض، المملكة العربية السعودية',
-            'privacy_extra' => 'بنستخدم واتساب في رسايل الحصص بس، ومابنبعتش عروض من غير ما توافق.',
+            'privacy_extra' => 'نستخدم واتساب في رسائل الحصص فقط، ولا نرسل عروضًا دون موافقتك.',
         ], $owner);
 
         // Rana finished: her father asks for her account to go.
         if (($rana = $id('rana@demo.test')) && ($ranasFather = $id('rana.guardian@demo.test'))) {
-            $at($now->subDays(3)->setTime(20, 15), fn () => $erasure->handle($rana, $ranasFather, 'family', 'رنا خلّصت المستوى ومش هتكمل، ياريت تمسحوا حسابها.'));
+            $at($now->subDays(3)->setTime(20, 15), fn () => $erasure->handle($rana, $ranasFather, 'family', 'أنهت رنا المستوى ولن تكمل، أرجو حذف حسابها.'));
         }
         // Omar's father wants his own account gone, with an invoice still due.
         if ($omarsFather = $id('omar.guardian@demo.test')) {
@@ -73,9 +73,9 @@ final class DemoPrivacySeeder extends Seeder
         }
         // Hamza's father asked last month while Hamza's course was running: refused, with the reason he read.
         if (($hamza = $id('hamza@demo.test')) && ($hamzasFather = $id('hamza.guardian@demo.test'))) {
-            $asked = $at($now->subDays(34)->setTime(18, 0), fn () => $erasure->handle($hamza, $hamzasFather, 'family', 'هنوقف شوية.'));
+            $asked = $at($now->subDays(34)->setTime(18, 0), fn () => $erasure->handle($hamza, $hamzasFather, 'family', 'سنتوقف فترة.'));
             $at($now->subDays(33)->setTime(10, 30), fn () => $refuse->handle($asked, $owner,
-                'حمزة لسه عنده كورس شغال وحصص محجوزة الشهر ده. لو حابب توقف، كلمنا نوقف الكورس الأول وبعدها نمسح الحساب.'));
+                'لدى حمزة كورس جارٍ وحصص محجوزة هذا الشهر. إن أردت التوقف، فتواصل معنا لنوقف الكورس أولًا ثم نحذف الحساب.'));
         }
         // Maryam's father downloads a copy of her data.
         if (($maryam = $id('maryam@demo.test')) && ($maryamsFather = $id('maryam.guardian@demo.test'))) {
@@ -85,13 +85,13 @@ final class DemoPrivacySeeder extends Seeder
         // Yousef's birth date is a year off: his father asks the academy to put it right.
         if (($yousef = $id('yousef@demo.test')) && ($yousefsGuardian = $id('yousef.guardian@demo.test'))) {
             $at($now->subDays(2)->setTime(21, 5), fn () => $correction->handle($yousef, $yousefsGuardian, 'family',
-                'تاريخ ميلاد يوسف المتسجل غلط: هو مولود 2018 مش 2017.'));
+                'تاريخ ميلاد يوسف المسجّل خطأ: هو مولود في 2018 لا 2017.'));
         }
         // The name on Maryam's invoices was misspelt; the academy corrected it last week and said what changed.
         if (($maryam = $id('maryam@demo.test')) && ($maryamsFather = $id('maryam.guardian@demo.test'))) {
             $asked = $at($now->subDays(9)->setTime(16, 20), fn () => $correction->handle($maryam, $maryamsFather, 'family',
-                'اسم مريم في الفواتير مكتوب «مريام». ياريت تصلحوه.'));
-            $at($now->subDays(8)->setTime(11, 0), fn () => $answer->done($asked, $owner, 'صلحنا الاسم في الفواتير الجاية، والفاتورة اللي فاتت طلعنالها إشعار دائن وفاتورة جديدة بالاسم الصح.'));
+                'اسم مريم في الفواتير مكتوب «مريام». أرجو تصحيحه.'));
+            $at($now->subDays(8)->setTime(11, 0), fn () => $answer->done($asked, $owner, 'صحّحنا الاسم في الفواتير القادمة، وأصدرنا للفاتورة السابقة إشعارًا دائنًا وفاتورة جديدة بالاسم الصحيح.'));
         }
         // A teacher's copy from last month, past its week.
         if ($teacher = $id('teacher@demo.test')) {
