@@ -3,9 +3,9 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Family\FamilyHome;
+use App\Http\Middleware\AuthenticateForPanel;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SetPanelLocale;
-use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -78,7 +78,7 @@ final class FamilyPanelProvider extends PanelProvider
                 SetPanelLocale::class,
                 EnableBrowserEcho::class,
             ], isPersistent: true)
-            ->authMiddleware([Authenticate::class], isPersistent: true)
+            ->authMiddleware([AuthenticateForPanel::class], isPersistent: true)
             ->plugins([
                 PeopleFamilyPlugin::make(),
                 SchedulingFamilyPlugin::make(),

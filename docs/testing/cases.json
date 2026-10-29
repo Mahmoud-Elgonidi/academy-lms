@@ -7779,6 +7779,28 @@
    "rule": "CLAUDE.md Security (TeacherContactPrivacyTest)"
   },
   {
+   "id": "CRS-PRM-06",
+   "phase": 7,
+   "area": "الصلاحيات والخصوصية",
+   "priority": "P1",
+   "edge": true,
+   "who": "أ. خالد (khaled@demo.test)",
+   "where": "/teach ثم /admin على نفس المتصفح",
+   "pre": "",
+   "title": "حساب مدرّس بيفتح لوحة الأكاديمية",
+   "steps": [
+    "ادخل /teach بحساب أ. خالد",
+    "افتح /admin في نفس المتصفح",
+    "دوس «اخرج وادخل بحساب تاني»"
+   ],
+   "expect": [
+    "صفحة «الحساب ده مش بيفتح لوحة الأكاديمية» فيها اسمه، مش 403 فاضية",
+    "فيها «روح لـمساحة المدرّس» بيودّي /teach",
+    "بعد الخروج بتفتح صفحة دخول /admin"
+   ],
+   "rule": "CLAUDE.md Panels (AuthenticateForPanel)"
+  },
+  {
    "id": "CRS-SEC-01",
    "phase": 7,
    "area": "الأمان",
