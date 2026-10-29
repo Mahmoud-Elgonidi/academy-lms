@@ -257,7 +257,7 @@ void main() {
     });
     await _open(tester, app);
 
-    expect(find.text('فيه نسخة جديدة من التطبيق'), findsOneWidget);
+    expect(find.text('يوجد إصدار جديد من التطبيق'), findsOneWidget);
     expect(find.text('حدّث التطبيق'), findsOneWidget);
     expect(find.text('حصص سلمى'), findsNothing);
 

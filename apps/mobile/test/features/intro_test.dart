@@ -32,17 +32,17 @@ void main() {
     await app.session.start();
     await frames(tester);
     expect(find.byType(SplashPage), findsNothing);
-    expect(find.text('حصص لايف مع مدرّسك'), findsOneWidget);
+    expect(find.text('حصص مباشرة مع معلّمك'), findsOneWidget);
     expect(find.bySemanticsLabel('شريحة 1 من 3'), findsOneWidget);
     await _close(tester);
   });
 
   testWidgets('skipping goes to signing in, and the slides never come again', (tester) async {
     final app = await _firstOpening(tester);
-    await tester.tap(find.text('تخطّي'));
+    await tester.tap(find.text('تخطَّ'));
     await frames(tester);
 
-    expect(find.text('أهلًا بيك'), findsOneWidget);
+    expect(find.text('أهلًا بك'), findsOneWidget);
     expect(find.byType(IntroPage), findsNothing);
     expect(app.session.state.seenIntro, isTrue);
     expect(await AppPrefs(SharedPreferencesAsync()).seenIntro(), isTrue);
@@ -59,13 +59,13 @@ void main() {
     // In Arabic the next slide is to the left: the finger moves right.
     await tester.fling(find.byType(PageView), const Offset(300, 0), 1200);
     await frames(tester, 6);
-    expect(find.text('المواعيد والواجبات والفلوس في مكان واحد'), findsOneWidget);
-    expect(find.text('الحصة الجاية'), findsOneWidget);
-    expect(find.text('يلا نبدأ'), findsOneWidget);
+    expect(find.text('المواعيد والواجبات والمدفوعات في مكان واحد'), findsOneWidget);
+    expect(find.text('الحصة القادمة'), findsOneWidget);
+    expect(find.text('لنبدأ'), findsOneWidget);
 
-    await tester.tap(find.text('يلا نبدأ'));
+    await tester.tap(find.text('لنبدأ'));
     await frames(tester);
-    expect(find.text('أهلًا بيك'), findsOneWidget);
+    expect(find.text('أهلًا بك'), findsOneWidget);
     await _close(tester);
   });
 
@@ -99,14 +99,14 @@ void main() {
     await _firstOpening(tester);
     // Nothing loops or waits: the screen settles at once.
     await tester.pumpAndSettle();
-    expect(find.text('حصص لايف مع مدرّسك'), findsOneWidget);
+    expect(find.text('حصص مباشرة مع معلّمك'), findsOneWidget);
 
     await tester.tap(find.text('التالي'));
     await tester.pumpAndSettle();
     expect(find.text('تابع التقدّم خطوة بخطوة'), findsOneWidget);
-    await tester.tap(find.text('تخطّي'));
+    await tester.tap(find.text('تخطَّ'));
     await tester.pumpAndSettle();
-    expect(find.text('أهلًا بيك'), findsOneWidget);
+    expect(find.text('أهلًا بك'), findsOneWidget);
     await _close(tester);
   });
 }

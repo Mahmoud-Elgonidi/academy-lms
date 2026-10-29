@@ -104,7 +104,7 @@ void main() {
     await frames(tester, 10);
     await tester.tap(find.text('يوسف خالد'));
     await frames(tester, 10);
-    await tester.tap(find.text('ادّي واجب'));
+    await tester.tap(find.text('أعطِ واجبًا'));
     await frames(tester, 3);
     await tester.enterText(find.widgetWithText(TextField, 'الواجب'), 'سمّع المقطع');
 
@@ -114,14 +114,14 @@ void main() {
     expect(find.byKey(const Key('recite')), findsNothing);
     await tester.tap(find.text('تسجيل صوت'));
     await frames(tester, 2);
-    expect(find.text('تصحيح التسميع آلي'), findsOneWidget);
+    expect(find.text('تصحيح التسميع آليًا'), findsOneWidget);
     await tester.tap(find.byKey(const Key('recite')));
     await frames(tester, 3);
     expect(find.text('1. السورة الأولى · First'), findsOneWidget);
     expect(find.text('من نص الدرس: السورة الأولى ٢–٣'), findsOneWidget);
 
-    await tester.scrollUntilVisible(find.text('ابعت التقرير'), 300, scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.text('ابعت التقرير'));
+    await tester.scrollUntilVisible(find.text('أرسل التقرير'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('أرسل التقرير'));
     await frames(tester, 12);
     final sent = app.api.sent('PUT', 'teacher/reports/r1').single.data as Map<String, dynamic>;
     expect(sent['homework'], {

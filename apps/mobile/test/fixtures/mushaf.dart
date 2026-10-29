@@ -6,7 +6,7 @@ import '../helpers.dart';
 /// A word marked in this lesson.
 Map<String, Object?> fxMark(int surah, int verse, int word, String kind) => {'surah': surah, 'verse': verse, 'word': word, 'kind': kind};
 
-const fxMushafKinds = {'wrong': 'غلط', 'hesitation': 'تردد', 'tajweed': 'تجويد'};
+const fxMushafKinds = {'wrong': 'خطأ', 'hesitation': 'تردد', 'tajweed': 'تجويد'};
 
 List<Map<String, Object?>> _verses(int page) => page == 2
     ? [

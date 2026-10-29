@@ -3,7 +3,7 @@
 # talks to, how it is signed, and what changed since the last build that went
 # out (the previous app-v* tag).
 #
-# A change is a commit's "App-Change:" lines (Egyptian Arabic, one per change,
+# A change is a commit's "App-Change:" lines (Modern Standard Arabic, one per change,
 # in the commit's last paragraph with the other trailers; "App-Change: -" leaves
 # the commit out). A commit without them that changes what goes into the app
 # (apps/mobile without its tests, tools and docs, or the OpenAPI document) is
@@ -39,23 +39,23 @@ else
   mapfile -t changes < <(said HEAD | grep -vx -- '-' || true)
 fi
 
-echo "📱 ${app} — نسخة ${name} (بناء ${build})"
+echo "📱 ${app} — الإصدار ${name} (البناء ${build})"
 [ -n "$line" ] && echo "$line"
-echo "السيرفر: ${host}"
+echo "الخادم: ${host}"
 if [ "$signing" = debug ]; then
-  echo "⚠️ النسخة دي موقّعة بمفتاح مؤقت: امسح النسخة القديمة من الموبايل قبل ما تنزّلها."
+  echo "⚠️ هذا الإصدار موقّع بمفتاح مؤقت: احذف الإصدار القديم من الهاتف قبل أن تثبّته."
 fi
 echo
 if [ -z "$prev" ]; then
-  [ ${#changes[@]} -gt 0 ] && echo "أول نسخة على القناة، وفيها:" || echo "أول نسخة على القناة."
+  [ ${#changes[@]} -gt 0 ] && echo "أول إصدار على القناة، وفيه:" || echo "أول إصدار على القناة."
 else
   was=${prev#app-v}
-  echo "الجديد من نسخة ${was%-b*} (بناء ${was##*-b}):"
-  [ ${#changes[@]} -eq 0 ] && echo "مفيش تغييرات في التطبيق نفسه من آخر نسخة."
+  echo "الجديد منذ الإصدار ${was%-b*} (البناء ${was##*-b}):"
+  [ ${#changes[@]} -eq 0 ] && echo "لا توجد تغييرات في التطبيق نفسه منذ آخر إصدار."
 fi
 if [ ${#changes[@]} -gt 0 ]; then
   printf '• %s\n' "${changes[@]:0:max}"
-  [ ${#changes[@]} -gt $max ] && echo "… و$((${#changes[@]} - max)) كمان."
+  [ ${#changes[@]} -gt $max ] && echo "… و$((${#changes[@]} - max)) أخرى."
 fi
 echo
-echo "الـ commit: $(git rev-parse --short HEAD)"
+echo "الإيداع (commit): $(git rev-parse --short HEAD)"

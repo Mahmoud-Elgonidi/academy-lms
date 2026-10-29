@@ -4,7 +4,7 @@ import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
 
 /// The heading over a group of cards, with what to do with all of them at
-/// its end ("كل الحصص"), or a quiet word about them ([note]: "بيتفتح الجمعة").
+/// its end ("كل الحصص"), or a quiet word about them ([note]: "يُفتح الجمعة").
 class SectionHeader extends StatelessWidget {
   const SectionHeader(this.title, {this.action, this.onAction, this.note, this.actionKey, super.key});
 

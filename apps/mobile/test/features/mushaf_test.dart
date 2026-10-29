@@ -216,7 +216,7 @@ void main() {
     expect(GoRouter.of(tester.element(find.byType(Scaffold).last)).state.matchedLocation, '/lessons/l1/mushaf');
     expect(find.text('صفحة 2 · السورة الأولى، السورة التانية'), findsOneWidget);
     expect(find.text('الجزء 1'), findsOneWidget); // the page is in the title already
-    expect(find.text('دوس على أي كلمة عشان تعلّمها، والطالب بيشوف الصفحة اللي إنت فاتحها.'), findsOneWidget);
+    expect(find.text('انقر على أي كلمة لتعلّمها، ويرى الطالب الصفحة التي تفتحها.'), findsOneWidget);
     // The second surah begins here: its name, then its basmala from the platform's copy; the verses numbered at their end.
     expect(find.byKey(const Key('mushaf-surah-2')), findsOneWidget);
     expect(find.byKey(const Key('mushaf-surah-1')), findsNothing);
@@ -227,7 +227,7 @@ void main() {
     expect(find.text('Tanzil Quran Text'), findsOneWidget);
     // A word marked in an earlier lesson: underlined faintly, and said so.
     expect(_word(tester, 'سَطْرٌ').style?.decorationStyle, TextDecorationStyle.dotted);
-    expect(find.semantics.byLabel('سَطْرٌ: غلط، اتعلّمت في حصة قبل كده مرتين'), findsOne);
+    expect(find.semantics.byLabel('سَطْرٌ: خطأ، عُلّمت في حصص سابقة مرتين'), findsOne);
 
     // A word: what it was.
     await tester.tapOnText(find.textRange.ofSubstring('قَصِيرَةٌ'));
@@ -244,7 +244,7 @@ void main() {
       'page': 2,
     });
     expect(_word(tester, 'قَصِيرَةٌ').style?.backgroundColor, _colours(tester).dangerSoft);
-    expect(find.semantics.byLabel('قَصِيرَةٌ: غلط'), findsOne);
+    expect(find.semantics.byLabel('قَصِيرَةٌ: خطأ'), findsOne);
 
     // Marked by mistake: the mark comes off.
     await tester.tapOnText(find.textRange.ofSubstring('قَصِيرَةٌ'));
@@ -255,7 +255,7 @@ void main() {
     expect(_word(tester, 'قَصِيرَةٌ').style?.backgroundColor, isNull);
 
     // The teacher's turn moves the student's screen: by word, and by number.
-    await tester.tap(find.text('اللي بعدها'));
+    await tester.tap(find.text('الصفحة التالية'));
     await frames(tester, 8);
     expect(app.api.sent('PUT', 'learning/lessons/l1/mushaf').single.data, {'page': 3});
     expect(find.text('صفحة 3 · السورة التانية'), findsOneWidget);
@@ -285,7 +285,7 @@ void main() {
     await frames(tester, 14);
     await tester.tap(find.text('افتح المصحف'));
     await frames(tester, 14);
-    expect(find.text('الصفحة بتتقلّب مع المدرّس.'), findsOneWidget);
+    expect(find.text('تتقلّب الصفحة مع المعلّم.'), findsOneWidget);
     expect(app.api.sent('GET', 'learning/lessons/l1/mushaf').last.queryParameters, isEmpty);
 
     // Words are only read here.
@@ -294,11 +294,11 @@ void main() {
     expect(find.byKey(const Key('kind-wrong')), findsNothing);
 
     // A look at the next page: the teacher's stays a tap away.
-    await tester.tap(find.text('اللي بعدها'));
+    await tester.tap(find.text('الصفحة التالية'));
     await frames(tester, 8);
     expect(app.api.sent('GET', 'learning/lessons/l1/mushaf').last.queryParameters, {'page': 3});
     expect(find.text('صفحة 3 · السورة التانية'), findsOneWidget);
-    expect(find.text('المدرّس على صفحة 2'), findsOneWidget);
+    expect(find.text('المعلّم على صفحة 2'), findsOneWidget);
     expect(app.api.requests.where((r) => r.method != 'GET'), isEmpty, reason: 'a student never turns the lesson\'s page');
 
     // The teacher turns meanwhile: the student stays where they look, told where the teacher is.
@@ -306,13 +306,13 @@ void main() {
     await _awayAndBack(tester);
     await frames(tester, 10);
     expect(find.text('صفحة 3 · السورة التانية'), findsOneWidget);
-    expect(find.text('المدرّس على صفحة 4'), findsOneWidget);
+    expect(find.text('المعلّم على صفحة 4'), findsOneWidget);
 
-    await tester.tap(find.text('ارجع لصفحة المدرّس'));
+    await tester.tap(find.text('ارجع إلى صفحة المعلّم'));
     await frames(tester, 8);
     expect(app.api.sent('GET', 'learning/lessons/l1/mushaf').last.queryParameters, isEmpty);
     expect(find.text('صفحة 4 · السورة التانية'), findsOneWidget);
-    expect(find.text('الصفحة بتتقلّب مع المدرّس.'), findsOneWidget);
+    expect(find.text('تتقلّب الصفحة مع المعلّم.'), findsOneWidget);
 
     // Following again: the next turn moves this screen too.
     teacherPage = 5;
@@ -338,7 +338,7 @@ void main() {
 
     unawaited(GoRouter.of(tester.element(find.byType(Scaffold).first)).push('/lessons/l1/mushaf'));
     await frames(tester, 14);
-    expect(find.text('الحصة دي مفيهاش مصحف.'), findsOneWidget);
+    expect(find.text('لا يوجد مصحف في هذه الحصة.'), findsOneWidget);
 
     await _close(tester);
   });
@@ -356,7 +356,7 @@ void main() {
     await frames(tester, 14);
     expect(find.byType(BottomSheet), findsNothing);
     expect(find.text('صفحة 2 · السورة الأولى، السورة التانية'), findsOneWidget);
-    expect(find.text('الصفحة بتتقلّب مع المدرّس.'), findsOneWidget);
+    expect(find.text('تتقلّب الصفحة مع المعلّم.'), findsOneWidget);
     expect(find.byKey(const Key('mushaf-hint')), findsNothing);
 
     await _close(tester);
@@ -374,11 +374,11 @@ void main() {
     await frames(tester, 14);
 
     expect(find.text('دفتر الأخطاء'), findsOneWidget);
-    expect(find.text('الكلمات اللي اتعلّم عليها في الحصص في آخر ست شهور، عشان تراجعها.'), findsOneWidget);
+    expect(find.text('الكلمات التي عُلّمت في الحصص خلال الأشهر الستة الأخيرة، لتراجعها.'), findsOneWidget);
     expect(find.text('3 كلمات'), findsWidgets);
     expect(find.text('سورة السورة التانية'), findsOneWidget);
     expect(app.api.sent('GET', 'learning/mistakes').single.queryParameters, isEmpty, reason: 'the student is their own learner');
-    expect(_said('قَصِيرَةٌ: تردد، غلط، مرتين، آخر مرة الثلاثاء 6 أكتوبر'), findsOneWidget);
+    expect(_said('قَصِيرَةٌ: تردد، خطأ، مرتين، آخر مرة الثلاثاء 6 أكتوبر'), findsOneWidget);
     expect(_said('جِدًّا: تجويد، مرة، آخر مرة الثلاثاء 6 أكتوبر'), findsOneWidget);
     final colours = Theme.of(tester.element(find.byKey(const Key('mistakes-book')))).extension<LmsColors>()!;
     expect(_word(tester, 'قَصِيرَةٌ').style?.backgroundColor, colours.dangerSoft);
@@ -397,15 +397,15 @@ void main() {
       ..on('GET', 'learning/hifz', fxHifzBoard())
       ..on('GET', 'learning/mistakes', fxMistakesBook());
     await _open(tester, app, size: const Size(420, 2800));
-    await tester.tap(find.text('تمام!'));
+    await tester.tap(find.text('رائع!'));
     await frames(tester, 6);
     await tester.tap(find.byKey(const Key('hifz-card')));
     await frames(tester, 14);
 
-    expect(find.text('كلمات بنراجعها'), findsOneWidget);
-    expect(find.text('دي كلمات هنقولها تاني مع بعض لحد ما تبقى سهلة.'), findsOneWidget);
+    expect(find.text('كلمات نراجعها'), findsOneWidget);
+    expect(find.text('هذه كلمات سنقولها معًا مرة أخرى حتى تصير سهلة.'), findsOneWidget);
     expect(find.text('دفتر الأخطاء'), findsNothing);
-    expect(_said('قَصِيرَةٌ: كلمة بنراجعها'), findsOneWidget);
+    expect(_said('قَصِيرَةٌ: كلمة نراجعها'), findsOneWidget);
     // No counts or dates in the kids' look.
     expect(find.text('3 كلمات'), findsNothing);
     expect(_said('مرتين'), findsNothing);
@@ -429,7 +429,7 @@ void main() {
     await frames(tester, 14);
 
     expect(find.text('دفتر الأخطاء'), findsOneWidget);
-    expect(find.text('مفيش كلمات متعلّمة في آخر ست شهور.'), findsOneWidget);
+    expect(find.text('لا توجد كلمات معلَّمة في الأشهر الستة الأخيرة.'), findsOneWidget);
     expect(app.api.sent('GET', 'teacher/students/e1/mistakes'), hasLength(1));
 
     await _close(tester);
@@ -463,7 +463,7 @@ void main() {
     await frames(tester, 10);
     await tester.tap(find.text('يوسف خالد'));
     await frames(tester, 10);
-    await tester.tap(find.text('ادّي واجب'));
+    await tester.tap(find.text('أعطِ واجبًا'));
     await frames(tester, 3);
     await tester.enterText(find.widgetWithText(TextField, 'الواجب'), 'سمّع الآيات تاني');
     await tester.tap(find.text('تسجيل صوت'));
@@ -478,8 +478,8 @@ void main() {
     expect(tester.widget<TextField>(find.byKey(const Key('recite-from'))).controller!.text, '1');
     expect(tester.widget<TextField>(find.byKey(const Key('recite-to'))).controller!.text, '2');
 
-    await tester.scrollUntilVisible(find.text('ابعت التقرير'), 300, scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.text('ابعت التقرير'));
+    await tester.scrollUntilVisible(find.text('أرسل التقرير'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('أرسل التقرير'));
     await frames(tester, 12);
     final sent = app.api.sent('PUT', 'teacher/reports/r1').single.data as Map<String, dynamic>;
     expect((sent['homework'] as Map<String, dynamic>)['expected'], {'surah': 2, 'from': 1, 'to': 2});

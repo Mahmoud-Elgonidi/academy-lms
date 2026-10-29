@@ -30,7 +30,7 @@ Map<String, Object?> template() => {
       'family': true,
       'options': [
         {'key': 'o1', 'label': 'ممتاز'},
-        {'key': 'o2', 'label': 'كويس'},
+        {'key': 'o2', 'label': 'جيد'},
       ],
       'min': null,
       'max': null,
@@ -105,26 +105,26 @@ void main() {
     await tester.tap(find.text('يوسف خالد'));
     await frames(tester, 10);
     expect(find.text('أسئلة الأكاديمية'), findsOneWidget);
-    expect(find.text('للأكاديمية بس'), findsOneWidget);
+    expect(find.text('للأكاديمية فقط'), findsOneWidget);
 
     // Ratings, but the pages memorised are still missing.
     final stars = find.byWidgetPredicate((w) => w.runtimeType.toString() == 'StarPicker');
     await tester.tap(find.descendant(of: stars.at(0), matching: find.byType(InkResponse)).at(4));
     await tester.tap(find.descendant(of: stars.at(1), matching: find.byType(InkResponse)).at(3));
     await frames(tester, 2);
-    await tester.scrollUntilVisible(find.text('ابعت التقرير'), 300, scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.text('ابعت التقرير'));
+    await tester.scrollUntilVisible(find.text('أرسل التقرير'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('أرسل التقرير'));
     await frames(tester, 3);
-    expect(find.text('جاوب على "الصفحات اللي اتحفظت".'), findsOneWidget);
+    expect(find.text('أجب عن "الصفحات اللي اتحفظت".'), findsOneWidget);
     expect(app.api.sent('PUT', 'teacher/reports/r1'), isEmpty);
 
     await tester.enterText(find.widgetWithText(TextField, 'الصفحات اللي اتحفظت'), '3');
-    await tester.tap(find.text('كويس'));
-    await tester.tap(find.text('أيوه'));
+    await tester.tap(find.text('جيد'));
+    await tester.tap(find.text('نعم'));
     await tester.enterText(find.widgetWithText(TextField, 'ملاحظة للمشرف (اختياري)'), 'محتاج تشجيع');
     await frames(tester, 2);
-    await tester.scrollUntilVisible(find.text('ابعت التقرير'), 300, scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.text('ابعت التقرير'));
+    await tester.scrollUntilVisible(find.text('أرسل التقرير'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('أرسل التقرير'));
     await frames(tester, 12);
 
     final sent = app.api.sent('PUT', 'teacher/reports/r1').single.data as Map<String, dynamic>;

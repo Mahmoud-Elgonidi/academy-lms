@@ -57,7 +57,7 @@ Future<void> _close(WidgetTester tester) async {
 /// Types a number in the one field and asks for the code.
 Future<void> _toCode(WidgetTester tester, [String contact = '0501234504']) async {
   await tester.enterText(find.byKey(const Key('contact')), contact);
-  await tester.tap(find.text('ابعتلي كود'));
+  await tester.tap(find.text('أرسل لي رمزًا'));
   await frames(tester);
 }
 
@@ -91,22 +91,22 @@ void main() {
 
     testWidgets('an empty field, a short number or half an email says what is missing and asks nothing', (tester) async {
       final app = await _open(tester);
-      await tester.tap(find.text('ابعتلي كود'));
+      await tester.tap(find.text('أرسل لي رمزًا'));
       await frames(tester, 3);
-      expect(find.text('اكتب رقم موبايلك أو إيميلك الأول.'), findsOneWidget);
+      expect(find.text('اكتب رقم هاتفك أو بريدك الإلكتروني أولًا.'), findsOneWidget);
 
       await tester.enterText(find.byKey(const Key('contact')), '05012');
       await frames(tester, 5);
       // Typing again clears what was wrong.
-      expect(find.text('اكتب رقم موبايلك أو إيميلك الأول.'), findsNothing);
-      await tester.tap(find.text('ابعتلي كود'));
+      expect(find.text('اكتب رقم هاتفك أو بريدك الإلكتروني أولًا.'), findsNothing);
+      await tester.tap(find.text('أرسل لي رمزًا'));
       await frames(tester, 3);
-      expect(find.text('الرقم ده ناقص، اكتبه كامل.'), findsOneWidget);
+      expect(find.text('هذا الرقم ناقص، اكتبه كاملًا.'), findsOneWidget);
 
       await tester.enterText(find.byKey(const Key('contact')), 'rami@demo');
-      await tester.tap(find.text('ابعتلي كود'));
+      await tester.tap(find.text('أرسل لي رمزًا'));
       await frames(tester, 3);
-      expect(find.text('الإيميل ده ناقص حاجة، زي name@mail.com'), findsOneWidget);
+      expect(find.text('ينقص هذا البريد الإلكتروني شيء، مثل name@mail.com'), findsOneWidget);
       expect(app.api.sent('POST', 'accounts/code'), isEmpty);
       await _close(tester);
     });
@@ -117,7 +117,7 @@ void main() {
       await tester.enterText(find.byKey(const Key('contact')), '01001234567');
       await frames(tester, 3);
       expect(find.text('+966'), findsOneWidget);
-      expect(find.text('الكود هيوصلك على واتساب.'), findsOneWidget);
+      expect(find.text('سيصلك الرمز على واتساب.'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('country')));
       await frames(tester, 4);
@@ -128,7 +128,7 @@ void main() {
       await frames(tester, 4);
 
       expect(find.text('+20'), findsOneWidget);
-      await tester.tap(find.text('ابعتلي كود'));
+      await tester.tap(find.text('أرسل لي رمزًا'));
       await frames(tester);
       expect(app.api.sent('POST', 'accounts/code').single.data, {'contact': '+201001234567'});
       await _close(tester);
@@ -158,12 +158,12 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
       expect(app.api.sent('POST', 'accounts/code/verify').single.data, containsPair('code', '123456'));
-      expect(find.text('تمام!'), findsOneWidget);
+      expect(find.text('تم!'), findsOneWidget);
       expect(tester.widget<CodeBoxes>(find.byType(CodeBoxes)).look, CodeLook.right);
 
       await frames(tester, 12);
       // One account: found, with a button straight into its academy and its pages to read.
-      expect(find.text('لقيناك!'), findsOneWidget);
+      expect(find.text('وجدناك!'), findsOneWidget);
       expect(find.text('ادخل أكاديمية demo'), findsOneWidget);
       expect(find.byKey(const Key('academy-privacy-demo')), findsOneWidget);
       await _close(tester);
@@ -204,19 +204,19 @@ void main() {
       final app = await _open(tester);
       app.api.on('POST', 'accounts/code', _sent(resendAfter: 30), status: 202);
       await _toCode(tester);
-      expect(find.textContaining('ابعت كود جديد بعد'), findsOneWidget);
-      expect(find.text('ابعت كود جديد'), findsNothing);
+      expect(find.textContaining('أرسل رمزًا جديدًا بعد'), findsOneWidget);
+      expect(find.text('أرسل رمزًا جديدًا'), findsNothing);
 
       await tester.pump(const Duration(seconds: 31));
       await tester.pump();
-      expect(find.text('ابعت كود جديد'), findsOneWidget);
-      await tester.ensureVisible(find.text('ابعته رسالة SMS بدل واتساب'));
-      await tester.tap(find.text('ابعته رسالة SMS بدل واتساب'));
+      expect(find.text('أرسل رمزًا جديدًا'), findsOneWidget);
+      await tester.ensureVisible(find.text('أرسله في رسالة نصية بدلًا من واتساب'));
+      await tester.tap(find.text('أرسله في رسالة نصية بدلًا من واتساب'));
       await frames(tester, 3);
       expect(app.api.sent('POST', 'accounts/code').last.data, {'contact': '+966501234504', 'channel': 'sms'});
-      expect(find.text('بعتنالك كود جديد.'), findsOneWidget);
+      expect(find.text('أرسلنا إليك رمزًا جديدًا.'), findsOneWidget);
       // The ring starts again for the new code.
-      expect(find.textContaining('ابعت كود جديد بعد'), findsOneWidget);
+      expect(find.textContaining('أرسل رمزًا جديدًا بعد'), findsOneWidget);
       await _close(tester);
     });
 
@@ -235,11 +235,11 @@ void main() {
       await _toCode(tester);
       await tester.enterText(find.byKey(const Key('code')), '123456');
       await frames(tester, 15);
-      expect(find.text('لقينا حسابين ليك'), findsOneWidget);
+      expect(find.text('وجدنا لك حسابين'), findsOneWidget);
 
       await tester.tap(find.byTooltip('رجوع'));
       await frames(tester, 6);
-      expect(find.text('اكتب الكود'), findsOneWidget);
+      expect(find.text('اكتب الرمز'), findsOneWidget);
       expect(tester.widget<TextField>(find.byKey(const Key('code'))).controller!.text, isEmpty);
       expect(tester.widget<CodeBoxes>(find.byType(CodeBoxes)).look, CodeLook.typing);
       await _close(tester);
@@ -249,8 +249,8 @@ void main() {
       await _open(tester);
       GoRouter.of(tester.element(find.byType(Scaffold).first)).go('/welcome/code');
       await frames(tester, 6);
-      expect(find.text('أهلًا بيك'), findsOneWidget);
-      expect(find.text('اكتب الكود'), findsNothing);
+      expect(find.text('أهلًا بك'), findsOneWidget);
+      expect(find.text('اكتب الرمز'), findsNothing);
       await _close(tester);
     });
   });
@@ -284,7 +284,7 @@ void main() {
     expect(app.api.sent('POST', 'accounts/sign-in'), hasLength(2));
     expect(app.session.state.status, SessionStatus.signedIn);
     expect(app.session.state.accounts.map((a) => a.academySlug), ['demo']);
-    expect(find.textContaining('دخلت، بس فيه حساب ماتضافش:'), findsOneWidget);
+    expect(find.textContaining('دخلت، لكن هناك حسابًا لم يُضَف:'), findsOneWidget);
     expect(find.textContaining('رامي فؤاد في أكاديمية hira: محتاجين موافقة ولي أمرك الأول.'), findsOneWidget);
     await _close(tester);
   });
@@ -314,9 +314,9 @@ void main() {
     expect(app.session.state.status, SessionStatus.signedOut);
     expect(find.text('الحساب ده موقوف. كلّم الأكاديمية.'), findsOneWidget);
     // "Not you?" goes back to the start, the problem left behind.
-    await tester.tap(find.text('مش حسابك؟ استخدم رقم أو إيميل تاني'));
+    await tester.tap(find.text('ليس حسابك؟ استخدم رقمًا أو بريدًا إلكترونيًا آخر'));
     await frames(tester, 6);
-    expect(find.text('أهلًا بيك'), findsOneWidget);
+    expect(find.text('أهلًا بك'), findsOneWidget);
     expect(find.text('الحساب ده موقوف. كلّم الأكاديمية.'), findsNothing);
     await _close(tester);
   });

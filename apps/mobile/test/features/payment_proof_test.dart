@@ -97,15 +97,15 @@ void main() {
 
     await tester.tap(find.text('دفعت بالتحويل'));
     await frames(tester, 12);
-    expect(find.text('ابعت إثبات الدفع'), findsOneWidget);
+    expect(find.text('أرسل إثبات الدفع'), findsOneWidget);
     expect(find.text('إنستاباي: noor@instapay'), findsOneWidget);
-    expect(find.widgetWithText(TextField, 'المبلغ اللي دفعته'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'المبلغ الذي دفعته'), findsOneWidget);
     expect(find.text('400.00'), findsOneWidget);
 
-    await tester.ensureVisible(find.text('ابعت الإثبات'));
-    await tester.tap(find.text('ابعت الإثبات'));
+    await tester.ensureVisible(find.text('أرسل الإثبات'));
+    await tester.tap(find.text('أرسل الإثبات'));
     await frames(tester, 4);
-    expect(find.text('اختار الإيصال الأول.'), findsOneWidget);
+    expect(find.text('اختر الإيصال أولًا.'), findsOneWidget);
     expect(app.api.sent('POST', 'family/invoices/i1/proofs'), isEmpty);
     await tester.binding.setSurfaceSize(null);
   });

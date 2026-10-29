@@ -105,7 +105,7 @@ class FamilyMorePage extends StatelessWidget {
                         key: const Key('open-settings'),
                         icon: Icons.language_rounded,
                         label: l.moreLanguage,
-                        value: '${s.locale == 'ar' ? 'العربي' : 'English'} · ${zoneName(s.timezone, context.locale)}',
+                        value: '${s.locale == 'ar' ? 'العربية' : 'English'} · ${zoneName(s.timezone, context.locale)}',
                         onTap: () => context.go('/family/me/settings'),
                       ),
                       MenuRow(

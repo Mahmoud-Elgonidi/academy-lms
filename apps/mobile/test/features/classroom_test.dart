@@ -80,7 +80,7 @@ void main() {
     await tester.tap(_join);
     await frames(tester, 6);
     expect(launcher.urls, ['https://meet.example/abc']);
-    expect(find.text('مفيش برنامج على الموبايل يفتح اللينك ده.'), findsOneWidget);
+    expect(find.text('لا يوجد تطبيق على هذا الهاتف يفتح هذا الرابط.'), findsOneWidget);
     await _close(tester);
   });
 

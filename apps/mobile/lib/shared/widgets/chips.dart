@@ -40,7 +40,7 @@ class StatusChip extends StatelessWidget {
 typedef Pill = StatusChip;
 
 /// When something is, as the API wrote it: the hour, or the day and the
-/// hour with [withDay] ("بكرة · 7:00 م"), never converted on the phone.
+/// hour with [withDay] ("غدًا · 7:00 م"), never converted on the phone.
 class TimeChip extends StatelessWidget {
   const TimeChip(this.time, {this.withDay = false, this.tone = Tone.neutral, super.key});
 

@@ -53,8 +53,8 @@ void main() {
   testWidgets('a card that opens something gives under the finger and ticks; one that does not, does neither', (tester) async {
     var opened = 0;
     final (played, buzzes) = await _felt(tester, () async {
-      await tester.pumpWidget(_screen(LmsCard(onTap: () => opened++, child: const Text('الحصة الجاية'))));
-      final press = await tester.startGesture(tester.getCenter(find.text('الحصة الجاية')));
+      await tester.pumpWidget(_screen(LmsCard(onTap: () => opened++, child: const Text('الحصة القادمة'))));
+      final press = await tester.startGesture(tester.getCenter(find.text('الحصة القادمة')));
       await tester.pump(const Duration(milliseconds: 150));
       expect(tester.widget<AnimatedScale>(find.byType(AnimatedScale)).scale, lessThan(1));
       await press.up();
@@ -82,8 +82,8 @@ void main() {
   testWidgets('sounds off means no sound and no buzz either', (tester) async {
     final (played, buzzes) = await _felt(tester, () async {
       Juice.sounds = false;
-      await tester.pumpWidget(_screen(MenuRow(label: 'الرسايل', onTap: () {})));
-      await tester.tap(find.text('الرسايل'));
+      await tester.pumpWidget(_screen(MenuRow(label: 'الرسائل', onTap: () {})));
+      await tester.tap(find.text('الرسائل'));
       await tester.pumpAndSettle();
     });
     expect(played, isEmpty);
@@ -122,12 +122,12 @@ void main() {
           Builder(
             builder: (c) => TextButton(
               onPressed: () => DoneMoment.show(c, title: 'الإيصال اتبعت!'),
-              child: const Text('ابعت'),
+              child: const Text('أرسل'),
             ),
           ),
         ),
       );
-      await tester.tap(find.text('ابعت'));
+      await tester.tap(find.text('أرسل'));
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('الإيصال اتبعت!'), findsOneWidget);
       // Taps go through to the screen under it.

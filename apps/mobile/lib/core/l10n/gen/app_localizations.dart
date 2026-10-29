@@ -101,19 +101,19 @@ abstract class AppLocalizations {
   /// No description provided for @retry.
   ///
   /// In ar, this message translates to:
-  /// **'جرّب تاني'**
+  /// **'حاول مرة أخرى'**
   String get retry;
 
   /// No description provided for @offline.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش نت. اتأكد من الاتصال وجرّب تاني.'**
+  /// **'لا يوجد اتصال بالإنترنت. تحقّق من الاتصال وحاول مرة أخرى.'**
   String get offline;
 
   /// No description provided for @problem.
   ///
   /// In ar, this message translates to:
-  /// **'حصلت مشكلة. جرّب تاني.'**
+  /// **'حدثت مشكلة. حاول مرة أخرى.'**
   String get problem;
 
   /// No description provided for @back.
@@ -125,49 +125,49 @@ abstract class AppLocalizations {
   /// No description provided for @close.
   ///
   /// In ar, this message translates to:
-  /// **'قفل'**
+  /// **'إغلاق'**
   String get close;
 
   /// No description provided for @errorOfflineTitle.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش نت'**
+  /// **'لا يوجد اتصال بالإنترنت'**
   String get errorOfflineTitle;
 
   /// No description provided for @errorServerTitle.
   ///
   /// In ar, this message translates to:
-  /// **'حصلت مشكلة عندنا'**
+  /// **'حدثت مشكلة لدينا'**
   String get errorServerTitle;
 
   /// No description provided for @errorServerBody.
   ///
   /// In ar, this message translates to:
-  /// **'بنصلّحها. جرّب كمان شوية.'**
+  /// **'نعمل على إصلاحها. حاول مرة أخرى بعد قليل.'**
   String get errorServerBody;
 
   /// No description provided for @errorForbiddenTitle.
   ///
   /// In ar, this message translates to:
-  /// **'مش مسموح تشوف ده'**
+  /// **'لا يُسمح لك بعرض هذا'**
   String get errorForbiddenTitle;
 
   /// No description provided for @errorForbiddenBody.
   ///
   /// In ar, this message translates to:
-  /// **'لو شايف إن ده غلط، كلّم الأكاديمية.'**
+  /// **'إن رأيت أن هذا خطأ، فتواصل مع الأكاديمية.'**
   String get errorForbiddenBody;
 
   /// No description provided for @reloadFailed.
   ///
   /// In ar, this message translates to:
-  /// **'ماقدرناش نحدّث، واللي قدامك ممكن يكون قديم.'**
+  /// **'تعذّر التحديث، وقد يكون ما تراه قديمًا.'**
   String get reloadFailed;
 
   /// No description provided for @send.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت'**
+  /// **'أرسل'**
   String get send;
 
   /// No description provided for @optional.
@@ -185,31 +185,31 @@ abstract class AppLocalizations {
   /// No description provided for @noticeExpired.
   ///
   /// In ar, this message translates to:
-  /// **'الدخول انتهى على الحساب ده. ادخل تاني.'**
+  /// **'انتهى الدخول إلى هذا الحساب. ادخل مرة أخرى.'**
   String get noticeExpired;
 
   /// No description provided for @minutes.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}'**
+  /// **'{n, plural, =1{دقيقة} =2{دقيقتان} few{{n} دقائق} other{{n} دقيقة}}'**
   String minutes(int n);
 
   /// No description provided for @today.
   ///
   /// In ar, this message translates to:
-  /// **'النهارده'**
+  /// **'اليوم'**
   String get today;
 
   /// No description provided for @tomorrow.
   ///
   /// In ar, this message translates to:
-  /// **'بكرة'**
+  /// **'غدًا'**
   String get tomorrow;
 
   /// No description provided for @inMinutes.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}'**
+  /// **'{n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقائق} other{{n} دقيقة}}'**
   String inMinutes(int n);
 
   /// No description provided for @inHours.
@@ -221,13 +221,13 @@ abstract class AppLocalizations {
   /// No description provided for @lessonsCount.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{مفيش حصص} =1{حصة واحدة} =2{حصتين} few{{n} حصص} other{{n} حصة}}'**
+  /// **'{n, plural, =0{لا توجد حصص} =1{حصة واحدة} =2{حصتان} few{{n} حصص} other{{n} حصة}}'**
   String lessonsCount(int n);
 
   /// No description provided for @introSkip.
   ///
   /// In ar, this message translates to:
-  /// **'تخطّي'**
+  /// **'تخطَّ'**
   String get introSkip;
 
   /// No description provided for @introNext.
@@ -239,7 +239,7 @@ abstract class AppLocalizations {
   /// No description provided for @introStart.
   ///
   /// In ar, this message translates to:
-  /// **'يلا نبدأ'**
+  /// **'لنبدأ'**
   String get introStart;
 
   /// No description provided for @introSlide.
@@ -251,19 +251,19 @@ abstract class AppLocalizations {
   /// No description provided for @introLive.
   ///
   /// In ar, this message translates to:
-  /// **'لايف'**
+  /// **'مباشر'**
   String get introLive;
 
   /// No description provided for @intro1Title.
   ///
   /// In ar, this message translates to:
-  /// **'حصص لايف مع مدرّسك'**
+  /// **'حصص مباشرة مع معلّمك'**
   String get intro1Title;
 
   /// No description provided for @intro1Body.
   ///
   /// In ar, this message translates to:
-  /// **'حصة واحد لواحد بالصوت والصورة، من البيت.'**
+  /// **'حصة فردية بالصوت والصورة، من البيت.'**
   String get intro1Body;
 
   /// No description provided for @intro2Title.
@@ -275,19 +275,19 @@ abstract class AppLocalizations {
   /// No description provided for @intro2Body.
   ///
   /// In ar, this message translates to:
-  /// **'كل حصة بتقرّب من الهدف، والطريق كله قدامك.'**
+  /// **'كل حصة تقرّبك من الهدف، والطريق كله أمامك.'**
   String get intro2Body;
 
   /// No description provided for @intro3Title.
   ///
   /// In ar, this message translates to:
-  /// **'المواعيد والواجبات والفلوس في مكان واحد'**
+  /// **'المواعيد والواجبات والمدفوعات في مكان واحد'**
   String get intro3Title;
 
   /// No description provided for @intro3Body.
   ///
   /// In ar, this message translates to:
-  /// **'والتنبيه بيوصلك في وقته، فمفيش حاجة بتفوتك.'**
+  /// **'والتنبيه يصلك في وقته، فلا يفوتك شيء.'**
   String get intro3Body;
 
   /// No description provided for @introLessonWhen.
@@ -311,31 +311,31 @@ abstract class AppLocalizations {
   /// No description provided for @introPaid.
   ///
   /// In ar, this message translates to:
-  /// **'الفاتورة اتدفعت'**
+  /// **'دُفعت الفاتورة'**
   String get introPaid;
 
   /// No description provided for @introThanks.
   ///
   /// In ar, this message translates to:
-  /// **'شكرًا ليك'**
+  /// **'شكرًا لك'**
   String get introThanks;
 
   /// No description provided for @welcomeTitle.
   ///
   /// In ar, this message translates to:
-  /// **'أهلًا بيك'**
+  /// **'أهلًا بك'**
   String get welcomeTitle;
 
   /// No description provided for @welcomeLead.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب رقم موبايلك أو إيميلك، وهنبعتلك كود تدخل بيه.'**
+  /// **'اكتب رقم هاتفك أو بريدك الإلكتروني، وسنرسل إليك رمزًا تدخل به.'**
   String get welcomeLead;
 
   /// No description provided for @contactLabel.
   ///
   /// In ar, this message translates to:
-  /// **'رقم الموبايل أو الإيميل'**
+  /// **'رقم الهاتف أو البريد الإلكتروني'**
   String get contactLabel;
 
   /// No description provided for @contactPlaceholder.
@@ -347,37 +347,37 @@ abstract class AppLocalizations {
   /// No description provided for @contactEmpty.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب رقم موبايلك أو إيميلك الأول.'**
+  /// **'اكتب رقم هاتفك أو بريدك الإلكتروني أولًا.'**
   String get contactEmpty;
 
   /// No description provided for @contactShortPhone.
   ///
   /// In ar, this message translates to:
-  /// **'الرقم ده ناقص، اكتبه كامل.'**
+  /// **'هذا الرقم ناقص، اكتبه كاملًا.'**
   String get contactShortPhone;
 
   /// No description provided for @contactBadEmail.
   ///
   /// In ar, this message translates to:
-  /// **'الإيميل ده ناقص حاجة، زي name@mail.com'**
+  /// **'ينقص هذا البريد الإلكتروني شيء، مثل name@mail.com'**
   String get contactBadEmail;
 
   /// No description provided for @countryChange.
   ///
   /// In ar, this message translates to:
-  /// **'كود الدولة {code}، دوس عشان تغيّره'**
+  /// **'رمز الدولة {code}، انقر لتغييره'**
   String countryChange(String code);
 
   /// No description provided for @countrySearch.
   ///
   /// In ar, this message translates to:
-  /// **'دوّر على دولة'**
+  /// **'ابحث عن دولة'**
   String get countrySearch;
 
   /// No description provided for @countryNone.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش دولة بالاسم ده.'**
+  /// **'لا توجد دولة بهذا الاسم.'**
   String get countryNone;
 
   /// No description provided for @countrySa.
@@ -437,19 +437,19 @@ abstract class AppLocalizations {
   /// No description provided for @countryUs.
   ///
   /// In ar, this message translates to:
-  /// **'أمريكا وكندا'**
+  /// **'الولايات المتحدة وكندا'**
   String get countryUs;
 
   /// No description provided for @countryGb.
   ///
   /// In ar, this message translates to:
-  /// **'بريطانيا'**
+  /// **'المملكة المتحدة'**
   String get countryGb;
 
   /// No description provided for @legalAgree.
   ///
   /// In ar, this message translates to:
-  /// **'لما تكمّل، تبقى موافق على'**
+  /// **'بالمتابعة، أنت توافق على'**
   String get legalAgree;
 
   /// No description provided for @legalAnd.
@@ -461,31 +461,31 @@ abstract class AppLocalizations {
   /// No description provided for @countryCode.
   ///
   /// In ar, this message translates to:
-  /// **'كود الدولة'**
+  /// **'رمز الدولة'**
   String get countryCode;
 
   /// No description provided for @phoneHint.
   ///
   /// In ar, this message translates to:
-  /// **'الكود هيوصلك على واتساب.'**
+  /// **'سيصلك الرمز على واتساب.'**
   String get phoneHint;
 
   /// No description provided for @emailHint.
   ///
   /// In ar, this message translates to:
-  /// **'الكود هيوصلك على الإيميل ده.'**
+  /// **'سيصلك الرمز على هذا البريد الإلكتروني.'**
   String get emailHint;
 
   /// No description provided for @sendCode.
   ///
   /// In ar, this message translates to:
-  /// **'ابعتلي كود'**
+  /// **'أرسل لي رمزًا'**
   String get sendCode;
 
   /// No description provided for @havePassword.
   ///
   /// In ar, this message translates to:
-  /// **'عندك كلمة سر؟ ادخل بيها'**
+  /// **'لديك كلمة مرور؟ ادخل بها'**
   String get havePassword;
 
   /// No description provided for @signInOr.
@@ -509,7 +509,7 @@ abstract class AppLocalizations {
   /// No description provided for @socialFailed.
   ///
   /// In ar, this message translates to:
-  /// **'الدخول بحساب {provider} ماكملش. جرّب تاني.'**
+  /// **'لم يكتمل الدخول بحساب {provider}. حاول مرة أخرى.'**
   String socialFailed(String provider);
 
   /// No description provided for @providerGoogle.
@@ -533,7 +533,7 @@ abstract class AppLocalizations {
   /// No description provided for @signInMethodsHint.
   ///
   /// In ar, this message translates to:
-  /// **'اربط حسابك بجوجل أو أبل، وادخل بيهم من غير كود ولا كلمة سر.'**
+  /// **'اربط حسابك بحساب جوجل أو أبل، وادخل بهما دون رمز أو كلمة مرور.'**
   String get signInMethodsHint;
 
   /// No description provided for @signInMethodLinkedAs.
@@ -551,7 +551,7 @@ abstract class AppLocalizations {
   /// No description provided for @signInMethodNotLinked.
   ///
   /// In ar, this message translates to:
-  /// **'مش مربوط'**
+  /// **'غير مربوط'**
   String get signInMethodNotLinked;
 
   /// No description provided for @signInMethodLink.
@@ -569,109 +569,109 @@ abstract class AppLocalizations {
   /// No description provided for @signInMethodUnlinkConfirm.
   ///
   /// In ar, this message translates to:
-  /// **'تفصل حساب {provider}؟ مش هتقدر تدخل بيه لحد ما تربطه تاني.'**
+  /// **'أتفصل حساب {provider}؟ لن تستطيع الدخول به حتى تربطه مرة أخرى.'**
   String signInMethodUnlinkConfirm(String provider);
 
   /// No description provided for @signInMethodLinkedDone.
   ///
   /// In ar, this message translates to:
-  /// **'حساب {provider} اتربط.'**
+  /// **'رُبط حساب {provider}.'**
   String signInMethodLinkedDone(String provider);
 
   /// No description provided for @signInMethodUnlinkedDone.
   ///
   /// In ar, this message translates to:
-  /// **'حساب {provider} اتفصل.'**
+  /// **'فُصل حساب {provider}.'**
   String signInMethodUnlinkedDone(String provider);
 
   /// No description provided for @codeTitle.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب الكود'**
+  /// **'اكتب الرمز'**
   String get codeTitle;
 
   /// No description provided for @codeSentWhatsapp.
   ///
   /// In ar, this message translates to:
-  /// **'بعتنالك كود من 6 أرقام على واتساب، على الرقم {to}'**
+  /// **'أرسلنا إليك رمزًا من 6 أرقام على واتساب، إلى الرقم {to}'**
   String codeSentWhatsapp(String to);
 
   /// No description provided for @codeSentSms.
   ///
   /// In ar, this message translates to:
-  /// **'بعتنالك كود من 6 أرقام في رسالة SMS، على الرقم {to}'**
+  /// **'أرسلنا إليك رمزًا من 6 أرقام في رسالة نصية، إلى الرقم {to}'**
   String codeSentSms(String to);
 
   /// No description provided for @codeSentEmail.
   ///
   /// In ar, this message translates to:
-  /// **'بعتنالك كود من 6 أرقام على الإيميل {to}'**
+  /// **'أرسلنا إليك رمزًا من 6 أرقام إلى البريد الإلكتروني {to}'**
   String codeSentEmail(String to);
 
   /// No description provided for @codeLabel.
   ///
   /// In ar, this message translates to:
-  /// **'الكود'**
+  /// **'الرمز'**
   String get codeLabel;
 
   /// No description provided for @codeValid.
   ///
   /// In ar, this message translates to:
-  /// **'الكود صالح 10 دقايق.'**
+  /// **'الرمز صالح لمدة 10 دقائق.'**
   String get codeValid;
 
   /// No description provided for @codePaste.
   ///
   /// In ar, this message translates to:
-  /// **'الصق الكود'**
+  /// **'الصق الرمز'**
   String get codePaste;
 
   /// No description provided for @codeChecking.
   ///
   /// In ar, this message translates to:
-  /// **'بنتأكد…'**
+  /// **'نتحقّق…'**
   String get codeChecking;
 
   /// No description provided for @codePasteNone.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش كود من 6 أرقام منسوخ.'**
+  /// **'لا يوجد رمز منسوخ من 6 أرقام.'**
   String get codePasteNone;
 
   /// No description provided for @codeRight.
   ///
   /// In ar, this message translates to:
-  /// **'تمام!'**
+  /// **'تم!'**
   String get codeRight;
 
   /// No description provided for @codeResent.
   ///
   /// In ar, this message translates to:
-  /// **'بعتنالك كود جديد.'**
+  /// **'أرسلنا إليك رمزًا جديدًا.'**
   String get codeResent;
 
   /// No description provided for @noCode.
   ///
   /// In ar, this message translates to:
-  /// **'ماوصلكش؟'**
+  /// **'لم يصلك؟'**
   String get noCode;
 
   /// No description provided for @resendIn.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت كود جديد بعد {time}'**
+  /// **'أرسل رمزًا جديدًا بعد {time}'**
   String resendIn(String time);
 
   /// No description provided for @resend.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت كود جديد'**
+  /// **'أرسل رمزًا جديدًا'**
   String get resend;
 
   /// No description provided for @sendBySms.
   ///
   /// In ar, this message translates to:
-  /// **'ابعته رسالة SMS بدل واتساب'**
+  /// **'أرسله في رسالة نصية بدلًا من واتساب'**
   String get sendBySms;
 
   /// No description provided for @confirm.
@@ -683,49 +683,49 @@ abstract class AppLocalizations {
   /// No description provided for @otherContact.
   ///
   /// In ar, this message translates to:
-  /// **'استخدم رقم أو إيميل تاني'**
+  /// **'استخدم رقمًا أو بريدًا إلكترونيًا آخر'**
   String get otherContact;
 
   /// No description provided for @accountsFound.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{مالقيناش حسابات} =1{لقينا حساب واحد ليك} =2{لقينا حسابين ليك} few{لقينا {n} حسابات ليك} other{لقينا {n} حساب ليك}}'**
+  /// **'{n, plural, =0{لم نجد حسابات} =1{وجدنا لك حسابًا واحدًا} =2{وجدنا لك حسابين} few{وجدنا لك {n} حسابات} other{وجدنا لك {n} حسابًا}}'**
   String accountsFound(int n);
 
   /// No description provided for @accountsLead.
   ///
   /// In ar, this message translates to:
-  /// **'اختار اللي عايزه على الموبايل ده. بعد كده بتتنقل بينهم من \"حسابي\" من غير ما تدخل تاني.'**
+  /// **'اختر ما تريده على هذا الهاتف. بعد ذلك تنتقل بينها من \"حسابي\" دون أن تدخل مرة أخرى.'**
   String get accountsLead;
 
   /// No description provided for @accountsLegal.
   ///
   /// In ar, this message translates to:
-  /// **'قبل ما تضيف حسابك، اقرا سياسة الخصوصية وشروط الاستخدام بتاعة الأكاديمية: هي اللي بتقرر إيه اللي بيحصل لبياناتك عندها.'**
+  /// **'قبل أن تضيف حسابك، اقرأ سياسة الخصوصية وشروط الاستخدام الخاصة بالأكاديمية: فهي التي تحدّد ما يحدث لبياناتك لديها.'**
   String get accountsLegal;
 
   /// No description provided for @accountsNote.
   ///
   /// In ar, this message translates to:
-  /// **'بنعرض بس الحسابات اللي على نفس الرقم، في الأكاديميات الشغالة. مش لاقي حساب؟ يمكن الأكاديمية مسجلاك برقم تاني: كلّمها.'**
+  /// **'نعرض فقط الحسابات المسجّلة بالرقم نفسه، في الأكاديميات العاملة. لم تجد حسابًا؟ ربما سجّلتك الأكاديمية برقم آخر: تواصل معها.'**
   String get accountsNote;
 
   /// No description provided for @addAccounts.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{ادخل} =2{أضف الحسابين وادخل} few{أضف {n} حسابات وادخل} other{أضف {n} حساب وادخل}}'**
+  /// **'{n, plural, =1{ادخل} =2{أضف الحسابين وادخل} few{أضف {n} حسابات وادخل} other{أضف {n} حسابًا وادخل}}'**
   String addAccounts(int n);
 
   /// No description provided for @foundYou.
   ///
   /// In ar, this message translates to:
-  /// **'لقيناك!'**
+  /// **'وجدناك!'**
   String get foundYou;
 
   /// No description provided for @foundYouLead.
   ///
   /// In ar, this message translates to:
-  /// **'لقينا حساب واحد ليك.'**
+  /// **'وجدنا لك حسابًا واحدًا.'**
   String get foundYouLead;
 
   /// No description provided for @enterAcademy.
@@ -737,19 +737,19 @@ abstract class AppLocalizations {
   /// No description provided for @notYou.
   ///
   /// In ar, this message translates to:
-  /// **'مش حسابك؟ استخدم رقم أو إيميل تاني'**
+  /// **'ليس حسابك؟ استخدم رقمًا أو بريدًا إلكترونيًا آخر'**
   String get notYou;
 
   /// No description provided for @pickOne.
   ///
   /// In ar, this message translates to:
-  /// **'اختار حساب واحد على الأقل.'**
+  /// **'اختر حسابًا واحدًا على الأقل.'**
   String get pickOne;
 
   /// No description provided for @notAddedTitle.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{دخلت، بس فيه حساب ماتضافش:} other{دخلت، بس فيه حسابات ماتضافتش:}}'**
+  /// **'{n, plural, =1{دخلت، لكن هناك حسابًا لم يُضَف:} other{دخلت، لكن هناك حسابات لم تُضَف:}}'**
   String notAddedTitle(int n);
 
   /// No description provided for @notAddedLine.
@@ -761,55 +761,55 @@ abstract class AppLocalizations {
   /// No description provided for @noAccounts.
   ///
   /// In ar, this message translates to:
-  /// **'مالقيناش حساب بالرقم أو الإيميل ده في أي أكاديمية. اتأكد منه، أو كلّم أكاديميتك.'**
+  /// **'لم نجد حسابًا بهذا الرقم أو البريد الإلكتروني في أي أكاديمية. تحقّق منه، أو تواصل مع أكاديميتك.'**
   String get noAccounts;
 
   /// No description provided for @noAccountTitle.
   ///
   /// In ar, this message translates to:
-  /// **'مالقيناش حساب'**
+  /// **'لم نجد حسابًا'**
   String get noAccountTitle;
 
   /// No description provided for @noAccountByPhone.
   ///
   /// In ar, this message translates to:
-  /// **'مالقيناش حساب بالرقم ده'**
+  /// **'لم نجد حسابًا بهذا الرقم'**
   String get noAccountByPhone;
 
   /// No description provided for @noAccountByEmail.
   ///
   /// In ar, this message translates to:
-  /// **'مالقيناش حساب بالإيميل ده'**
+  /// **'لم نجد حسابًا بهذا البريد الإلكتروني'**
   String get noAccountByEmail;
 
   /// No description provided for @noAccountCheckPhone.
   ///
   /// In ar, this message translates to:
-  /// **'اتأكد إن الرقم مكتوب صح. ويمكن الأكاديمية مسجلاك برقم أو إيميل تاني، فجرّبه أو كلّمها.'**
+  /// **'تأكّد أن الرقم مكتوب صحيحًا. وربما سجّلتك الأكاديمية برقم أو بريد إلكتروني آخر، فجرّبه أو تواصل معها.'**
   String get noAccountCheckPhone;
 
   /// No description provided for @noAccountCheckEmail.
   ///
   /// In ar, this message translates to:
-  /// **'اتأكد إن الإيميل مكتوب صح. ويمكن الأكاديمية مسجلاك برقم أو إيميل تاني، فجرّبه أو كلّمها.'**
+  /// **'تأكّد أن البريد الإلكتروني مكتوب صحيحًا. وربما سجّلتك الأكاديمية برقم أو بريد إلكتروني آخر، فجرّبه أو تواصل معها.'**
   String get noAccountCheckEmail;
 
   /// No description provided for @noAccountTryEmail.
   ///
   /// In ar, this message translates to:
-  /// **'جرّب بالإيميل'**
+  /// **'جرّب البريد الإلكتروني'**
   String get noAccountTryEmail;
 
   /// No description provided for @noAccountTryEmailBody.
   ///
   /// In ar, this message translates to:
-  /// **'لو الأكاديمية عندها إيميلك، الكود هيوصلك عليه.'**
+  /// **'إن كان بريدك الإلكتروني لدى الأكاديمية، فسيصلك الرمز عليه.'**
   String get noAccountTryEmailBody;
 
   /// No description provided for @noAccountOther.
   ///
   /// In ar, this message translates to:
-  /// **'جرّب رقم أو إيميل تاني'**
+  /// **'جرّب رقمًا أو بريدًا إلكترونيًا آخر'**
   String get noAccountOther;
 
   /// No description provided for @contactChange.
@@ -821,19 +821,19 @@ abstract class AppLocalizations {
   /// No description provided for @consentNeededTitle.
   ///
   /// In ar, this message translates to:
-  /// **'محتاجين موافقة ولي أمرك'**
+  /// **'نحتاج إلى موافقة ولي أمرك'**
   String get consentNeededTitle;
 
   /// No description provided for @consentNeededLead.
   ///
   /// In ar, this message translates to:
-  /// **'قبل ما تدخل حسابك، ولي أمرك لازم يوافق مرة واحدة بس. وبعدها تدخل على طول.'**
+  /// **'قبل أن تدخل حسابك، يجب أن يوافق ولي أمرك مرة واحدة فقط. وبعدها تدخل مباشرة.'**
   String get consentNeededLead;
 
   /// No description provided for @consentNeededStep1.
   ///
   /// In ar, this message translates to:
-  /// **'ولي أمرك يفتح التطبيق بحسابه.'**
+  /// **'يفتح ولي أمرك التطبيق بحسابه.'**
   String get consentNeededStep1;
 
   /// No description provided for @consentNeededStep2.
@@ -845,43 +845,43 @@ abstract class AppLocalizations {
   /// No description provided for @consentNeededStep3.
   ///
   /// In ar, this message translates to:
-  /// **'ارجع هنا وادخل تاني.'**
+  /// **'ارجع إلى هنا وادخل مرة أخرى.'**
   String get consentNeededStep3;
 
   /// No description provided for @signInAgain.
   ///
   /// In ar, this message translates to:
-  /// **'جرّب تدخل تاني'**
+  /// **'حاول الدخول مرة أخرى'**
   String get signInAgain;
 
   /// No description provided for @twoFactorSetupTitle.
   ///
   /// In ar, this message translates to:
-  /// **'فعّل الدخول بخطوتين الأول'**
+  /// **'فعّل الدخول بخطوتين أولًا'**
   String get twoFactorSetupTitle;
 
   /// No description provided for @twoFactorSetupLead.
   ///
   /// In ar, this message translates to:
-  /// **'حسابك ده لازم يكون عليه الدخول بخطوتين. فعّله من موقع الأكاديمية على الكمبيوتر، وبعدها ادخل من هنا عادي.'**
+  /// **'يجب أن يكون الدخول بخطوتين مفعّلًا على هذا الحساب. فعّله من موقع الأكاديمية على الحاسوب، ثم ادخل من هنا كالمعتاد.'**
   String get twoFactorSetupLead;
 
   /// No description provided for @tooManyTitle.
   ///
   /// In ar, this message translates to:
-  /// **'جرّبت كتير'**
+  /// **'محاولات كثيرة'**
   String get tooManyTitle;
 
   /// No description provided for @tooManyBody.
   ///
   /// In ar, this message translates to:
-  /// **'علشان نحمي حسابك، وقّفنا المحاولات شوية. استنى لحد ما العدّاد يخلص، وبعدها جرّب تاني.'**
+  /// **'لحماية حسابك، أوقفنا المحاولات قليلًا. انتظر حتى ينتهي العدّاد، ثم حاول مرة أخرى.'**
   String get tooManyBody;
 
   /// No description provided for @retryIn.
   ///
   /// In ar, this message translates to:
-  /// **'جرّب تاني بعد {time}'**
+  /// **'حاول مرة أخرى بعد {time}'**
   String retryIn(String time);
 
   /// No description provided for @welcomeHello.
@@ -893,7 +893,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeIn.
   ///
   /// In ar, this message translates to:
-  /// **'إنت دلوقتي في {academy}'**
+  /// **'أنت الآن في {academy}'**
   String welcomeIn(String academy);
 
   /// No description provided for @roleStudent.
@@ -911,7 +911,7 @@ abstract class AppLocalizations {
   /// No description provided for @roleTeacher.
   ///
   /// In ar, this message translates to:
-  /// **'مدرّس'**
+  /// **'معلّم'**
   String get roleTeacher;
 
   /// No description provided for @roleStaff.
@@ -923,61 +923,61 @@ abstract class AppLocalizations {
   /// No description provided for @passwordTitle.
   ///
   /// In ar, this message translates to:
-  /// **'ادخل بكلمة السر'**
+  /// **'ادخل بكلمة المرور'**
   String get passwordTitle;
 
   /// No description provided for @academyCode.
   ///
   /// In ar, this message translates to:
-  /// **'كود الأكاديمية'**
+  /// **'رمز الأكاديمية'**
   String get academyCode;
 
   /// No description provided for @academyCodeHint.
   ///
   /// In ar, this message translates to:
-  /// **'بتلاقيه في رسالة الترحيب، أو اسأل الأكاديمية.'**
+  /// **'تجده في رسالة الترحيب، أو اسأل الأكاديمية.'**
   String get academyCodeHint;
 
   /// No description provided for @loginLabel.
   ///
   /// In ar, this message translates to:
-  /// **'الإيميل أو الموبايل أو اسم المستخدم'**
+  /// **'البريد الإلكتروني أو الهاتف أو اسم المستخدم'**
   String get loginLabel;
 
   /// No description provided for @passwordLabel.
   ///
   /// In ar, this message translates to:
-  /// **'كلمة السر'**
+  /// **'كلمة المرور'**
   String get passwordLabel;
 
   /// No description provided for @academyCodeMissing.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب كود الأكاديمية.'**
+  /// **'اكتب رمز الأكاديمية.'**
   String get academyCodeMissing;
 
   /// No description provided for @loginMissing.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب إيميلك أو موبايلك أو اسم المستخدم.'**
+  /// **'اكتب بريدك الإلكتروني أو هاتفك أو اسم المستخدم.'**
   String get loginMissing;
 
   /// No description provided for @passwordMissing.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب كلمة السر.'**
+  /// **'اكتب كلمة المرور.'**
   String get passwordMissing;
 
   /// No description provided for @passwordShow.
   ///
   /// In ar, this message translates to:
-  /// **'إظهار كلمة السر'**
+  /// **'إظهار كلمة المرور'**
   String get passwordShow;
 
   /// No description provided for @passwordHide.
   ///
   /// In ar, this message translates to:
-  /// **'إخفاء كلمة السر'**
+  /// **'إخفاء كلمة المرور'**
   String get passwordHide;
 
   /// No description provided for @signIn.
@@ -989,7 +989,7 @@ abstract class AppLocalizations {
   /// No description provided for @useCodeInstead.
   ///
   /// In ar, this message translates to:
-  /// **'ادخل بكود بدل كلمة السر'**
+  /// **'ادخل برمز بدلًا من كلمة المرور'**
   String get useCodeInstead;
 
   /// No description provided for @twoFactorTitle.
@@ -1001,7 +1001,7 @@ abstract class AppLocalizations {
   /// No description provided for @twoFactorLead.
   ///
   /// In ar, this message translates to:
-  /// **'افتح تطبيق المصادقة واكتب الكود اللي فيه (6 أرقام). ضيّعت موبايلك؟ اكتب كود من أكواد الاسترجاع.'**
+  /// **'افتح تطبيق المصادقة واكتب الرمز الذي فيه (6 أرقام). فقدت هاتفك؟ اكتب رمزًا من رموز الاسترداد.'**
   String get twoFactorLead;
 
   /// No description provided for @twoFactorAccount.
@@ -1013,55 +1013,55 @@ abstract class AppLocalizations {
   /// No description provided for @twoFactorCode.
   ///
   /// In ar, this message translates to:
-  /// **'الكود'**
+  /// **'الرمز'**
   String get twoFactorCode;
 
   /// No description provided for @startAgain.
   ///
   /// In ar, this message translates to:
-  /// **'ابدأ من الأول'**
+  /// **'ابدأ من جديد'**
   String get startAgain;
 
   /// No description provided for @webOnlyTitle.
   ///
   /// In ar, this message translates to:
-  /// **'الحساب ده للإدارة'**
+  /// **'هذا الحساب للإدارة'**
   String get webOnlyTitle;
 
   /// No description provided for @webOnlyBody.
   ///
   /// In ar, this message translates to:
-  /// **'حسابات الإدارة بتشتغل من الموقع. افتح لوحة الأكاديمية من الكمبيوتر.'**
+  /// **'حسابات الإدارة تعمل من الموقع. افتح لوحة الأكاديمية من الحاسوب.'**
   String get webOnlyBody;
 
   /// No description provided for @privacyTitle.
   ///
   /// In ar, this message translates to:
-  /// **'خصوصية الأولاد'**
+  /// **'خصوصية الأبناء'**
   String get privacyTitle;
 
   /// No description provided for @privacyLead.
   ///
   /// In ar, this message translates to:
-  /// **'الأولاد اللي تحت {age, plural, =1{سنة} =2{سنتين} few{{age} سنين} other{{age} سنة}} محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.'**
+  /// **'الأبناء دون {age, plural, =1{سنة} =2{سنتين} few{{age} سنوات} other{{age} سنة}} يحتاجون إلى موافقتك ليدخلوا حساباتهم ويحضروا بأنفسهم.'**
   String privacyLead(int age);
 
   /// No description provided for @privacyNone.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش ولاد محتاجين موافقة.'**
+  /// **'لا يوجد أبناء يحتاجون إلى موافقة.'**
   String get privacyNone;
 
   /// No description provided for @consentWaiting.
   ///
   /// In ar, this message translates to:
-  /// **'مستني موافقتك'**
+  /// **'بانتظار موافقتك'**
   String get consentWaiting;
 
   /// No description provided for @consentGranted.
   ///
   /// In ar, this message translates to:
-  /// **'موافق عليه'**
+  /// **'تمت الموافقة'**
   String get consentGranted;
 
   /// No description provided for @consentAgree.
@@ -1073,7 +1073,7 @@ abstract class AppLocalizations {
   /// No description provided for @consentAgreed.
   ///
   /// In ar, this message translates to:
-  /// **'تمام، {name} يقدر يدخل دلوقتي.'**
+  /// **'تم، يستطيع {name} الدخول الآن.'**
   String consentAgreed(String name);
 
   /// No description provided for @consentWithdraw.
@@ -1085,25 +1085,25 @@ abstract class AppLocalizations {
   /// No description provided for @consentWithdrawConfirm.
   ///
   /// In ar, this message translates to:
-  /// **'{name} هيخرج من حسابه على كل الأجهزة، ومش هيقدر يدخل لحد ما توافق تاني. متأكد؟'**
+  /// **'سيخرج {name} من حسابه على كل الأجهزة، ولن يستطيع الدخول حتى توافق مرة أخرى. هل أنت متأكد؟'**
   String consentWithdrawConfirm(String name);
 
   /// No description provided for @consentWithdrawn.
   ///
   /// In ar, this message translates to:
-  /// **'سحبت موافقتك، و{name} خرج من حسابه.'**
+  /// **'سحبت موافقتك، وخرج {name} من حسابه.'**
   String consentWithdrawn(String name);
 
   /// No description provided for @consentNudge.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{{names} مستني موافقتك عشان يدخل حسابه.} other{{names} مستنيين موافقتك عشان يدخلوا حساباتهم.}}'**
+  /// **'{n, plural, =1{{names} بانتظار موافقتك ليدخل حسابه.} other{{names} بانتظار موافقتك ليدخلوا حساباتهم.}}'**
   String consentNudge(int n, String names);
 
   /// No description provided for @consentNudgeAction.
   ///
   /// In ar, this message translates to:
-  /// **'اقرا ووافق'**
+  /// **'اقرأ ووافق'**
   String get consentNudgeAction;
 
   /// No description provided for @myDataTitle.
@@ -1115,19 +1115,19 @@ abstract class AppLocalizations {
   /// No description provided for @myDataLead.
   ///
   /// In ar, this message translates to:
-  /// **'كل اللي الأكاديمية محتفظة بيه عنك وعن ولادك: صحّح بياناتك، أو نزّل نسخة، أو اطلب مسح حساب.'**
+  /// **'كل ما تحتفظ به الأكاديمية عنك وعن أبنائك: صحّح بياناتك، أو نزّل نسخة، أو اطلب حذف حساب.'**
   String get myDataLead;
 
   /// No description provided for @myDataLeadTeacher.
   ///
   /// In ar, this message translates to:
-  /// **'كل اللي الأكاديمية محتفظة بيه عنك: صحّح اسمك، أو نزّل نسخة، أو اطلب مسح حسابك.'**
+  /// **'كل ما تحتفظ به الأكاديمية عنك: صحّح اسمك، أو نزّل نسخة، أو اطلب حذف حسابك.'**
   String get myDataLeadTeacher;
 
   /// No description provided for @myDataYoung.
   ///
   /// In ar, this message translates to:
-  /// **'ولي أمرك هو اللي بيطلب بخصوص بياناتك من حسابه.'**
+  /// **'ولي أمرك هو من يقدّم الطلبات الخاصة ببياناتك من حسابه.'**
   String get myDataYoung;
 
   /// No description provided for @myDataCopyTitle.
@@ -1139,7 +1139,7 @@ abstract class AppLocalizations {
   /// No description provided for @myDataCopyBody.
   ///
   /// In ar, this message translates to:
-  /// **'ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}.'**
+  /// **'ملف ZIP واحد: البيانات في ملف يمكن قراءته، ومعها الملفات التي سُلّمت. تجهز في دقائق وتبقى {days, plural, =1{يومًا واحدًا} =2{يومين} few{{days} أيام} other{{days} يومًا}}.'**
   String myDataCopyBody(int days);
 
   /// No description provided for @myDataCopyAction.
@@ -1151,7 +1151,7 @@ abstract class AppLocalizations {
   /// No description provided for @myDataCopyPreparing.
   ///
   /// In ar, this message translates to:
-  /// **'بتتجهز: هنقولك أول ما تخلص.'**
+  /// **'قيد التجهيز: سنخبرك فور اكتمالها.'**
   String get myDataCopyPreparing;
 
   /// No description provided for @myDataCopyDownload.
@@ -1163,55 +1163,55 @@ abstract class AppLocalizations {
   /// No description provided for @myDataCopyUntil.
   ///
   /// In ar, this message translates to:
-  /// **'النسخة جاهزة لحد {when}'**
+  /// **'النسخة جاهزة حتى {when}'**
   String myDataCopyUntil(String when);
 
   /// No description provided for @myDataEraseTitle.
   ///
   /// In ar, this message translates to:
-  /// **'مسح الحساب'**
+  /// **'حذف الحساب'**
   String get myDataEraseTitle;
 
   /// No description provided for @myDataEraseBody.
   ///
   /// In ar, this message translates to:
-  /// **'الأكاديمية بترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}، ولما توافق الحساب بيتمسح بعدها بيوم.'**
+  /// **'ترد الأكاديمية خلال {days, plural, =1{يوم واحد} =2{يومين} few{{days} أيام} other{{days} يومًا}}، وعندما توافق يُحذف الحساب بعد ذلك بيوم.'**
   String myDataEraseBody(int days);
 
   /// No description provided for @myDataEraseAction.
   ///
   /// In ar, this message translates to:
-  /// **'امسح الحساب ده'**
+  /// **'احذف هذا الحساب'**
   String get myDataEraseAction;
 
   /// No description provided for @myDataEraseConfirm.
   ///
   /// In ar, this message translates to:
-  /// **'تطلب مسح حساب {name}؟'**
+  /// **'أتطلب حذف حساب {name}؟'**
   String myDataEraseConfirm(String name);
 
   /// No description provided for @myDataEraseCopyFirst.
   ///
   /// In ar, this message translates to:
-  /// **'تقدر تنزّل نسخة الأول.'**
+  /// **'يمكنك تنزيل نسخة أولًا.'**
   String get myDataEraseCopyFirst;
 
   /// No description provided for @myDataEraseReason.
   ///
   /// In ar, this message translates to:
-  /// **'ليه؟ (لو حابب)'**
+  /// **'لماذا؟ (إن أردت)'**
   String get myDataEraseReason;
 
   /// No description provided for @myDataEraseWaiting.
   ///
   /// In ar, this message translates to:
-  /// **'اتطلب: الأكاديمية هترد قبل {when}.'**
+  /// **'طُلب: سترد الأكاديمية قبل {when}.'**
   String myDataEraseWaiting(String when);
 
   /// No description provided for @myDataEraseApproved.
   ///
   /// In ar, this message translates to:
-  /// **'اتوافق: الحساب هيتمسح {when}.'**
+  /// **'تمت الموافقة: سيُحذف الحساب {when}.'**
   String myDataEraseApproved(String when);
 
   /// No description provided for @myDataEraseRefused.
@@ -1223,31 +1223,31 @@ abstract class AppLocalizations {
   /// No description provided for @myDataEraseCancel.
   ///
   /// In ar, this message translates to:
-  /// **'ارجع في طلبك'**
+  /// **'تراجع عن طلبك'**
   String get myDataEraseCancel;
 
   /// No description provided for @myDataEraseAsked.
   ///
   /// In ar, this message translates to:
-  /// **'الطلب وصل للأكاديمية.'**
+  /// **'وصل الطلب إلى الأكاديمية.'**
   String get myDataEraseAsked;
 
   /// No description provided for @myDataEraseCancelled.
   ///
   /// In ar, this message translates to:
-  /// **'رجعت في الطلب: الحساب هيفضل.'**
+  /// **'تراجعت عن الطلب: سيبقى الحساب.'**
   String get myDataEraseCancelled;
 
   /// No description provided for @myDataWhatGoes.
   ///
   /// In ar, this message translates to:
-  /// **'إيه اللي بيتمسح وإيه اللي بيفضل'**
+  /// **'ما الذي يُحذف وما الذي يبقى'**
   String get myDataWhatGoes;
 
   /// No description provided for @myDataWhatStays.
   ///
   /// In ar, this message translates to:
-  /// **'إيه اللي بيفضل، من غير اسم'**
+  /// **'ما الذي يبقى، دون الاسم'**
   String get myDataWhatStays;
 
   /// No description provided for @myDataHistory.
@@ -1259,7 +1259,7 @@ abstract class AppLocalizations {
   /// No description provided for @myDataNone.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش طلبات لسه.'**
+  /// **'لا توجد طلبات بعد.'**
   String get myDataNone;
 
   /// No description provided for @myDataAbout.
@@ -1295,37 +1295,37 @@ abstract class AppLocalizations {
   /// No description provided for @myDataFixSaved.
   ///
   /// In ar, this message translates to:
-  /// **'اتحفظ.'**
+  /// **'حُفظ.'**
   String get myDataFixSaved;
 
   /// No description provided for @myDataFixUnchanged.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش حاجة اتغيرت.'**
+  /// **'لم يتغيّر شيء.'**
   String get myDataFixUnchanged;
 
   /// No description provided for @myDataFixUnset.
   ///
   /// In ar, this message translates to:
-  /// **'مش متسجل'**
+  /// **'غير مسجّل'**
   String get myDataFixUnset;
 
   /// No description provided for @myDataFixContact.
   ///
   /// In ar, this message translates to:
-  /// **'الإيميل ورقم الموبايل بتغيّرهم من «حسابي».'**
+  /// **'تغيّر البريد الإلكتروني ورقم الهاتف من «حسابي».'**
   String get myDataFixContact;
 
   /// No description provided for @myDataFixBody.
   ///
   /// In ar, this message translates to:
-  /// **'حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}.'**
+  /// **'هل هناك خطأ آخر (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبه للأكاديمية، وسترد خلال {days, plural, =1{يوم واحد} =2{يومين} few{{days} أيام} other{{days} يومًا}}.'**
   String myDataFixBody(int days);
 
   /// No description provided for @myDataFixAsk.
   ///
   /// In ar, this message translates to:
-  /// **'اطلب تصحيح'**
+  /// **'اطلب تصحيحًا'**
   String get myDataFixAsk;
 
   /// No description provided for @myDataFixAskTitle.
@@ -1337,73 +1337,73 @@ abstract class AppLocalizations {
   /// No description provided for @myDataFixAskBody.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}، وبيوصلك ردها.'**
+  /// **'اكتب ما الخطأ وما الصواب. ترد الأكاديمية خلال {days, plural, =1{يوم واحد} =2{يومين} few{{days} أيام} other{{days} يومًا}}، ويصلك ردها.'**
   String myDataFixAskBody(int days);
 
   /// No description provided for @myDataFixSays.
   ///
   /// In ar, this message translates to:
-  /// **'إيه اللي محتاج يتصلح'**
+  /// **'ما الذي يحتاج إلى تصحيح'**
   String get myDataFixSays;
 
   /// No description provided for @myDataFixPlaceholder.
   ///
   /// In ar, this message translates to:
-  /// **'مثلًا: تاريخ الميلاد المتسجل 2016 والصح 2017.'**
+  /// **'مثلًا: تاريخ الميلاد المسجّل 2016 والصحيح 2017.'**
   String get myDataFixPlaceholder;
 
   /// No description provided for @myDataFixTooShort.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب {min, plural, =1{حرف} =2{حرفين} few{{min} حروف} other{{min} حرف}} على الأقل.'**
+  /// **'اكتب {min, plural, =1{حرفًا واحدًا} =2{حرفين} few{{min} أحرف} other{{min} حرفًا}} على الأقل.'**
   String myDataFixTooShort(int min);
 
   /// No description provided for @myDataFixSend.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت الطلب'**
+  /// **'أرسل الطلب'**
   String get myDataFixSend;
 
   /// No description provided for @myDataFixAsked.
   ///
   /// In ar, this message translates to:
-  /// **'الطلب وصل للأكاديمية.'**
+  /// **'وصل الطلب إلى الأكاديمية.'**
   String get myDataFixAsked;
 
   /// No description provided for @myDataFixWaiting.
   ///
   /// In ar, this message translates to:
-  /// **'اتطلب: الأكاديمية هترد قبل {when}.'**
+  /// **'طُلب: سترد الأكاديمية قبل {when}.'**
   String myDataFixWaiting(String when);
 
   /// No description provided for @myDataFixDone.
   ///
   /// In ar, this message translates to:
-  /// **'اتصلح'**
+  /// **'صُحّح'**
   String get myDataFixDone;
 
   /// No description provided for @myDataFixDoneWith.
   ///
   /// In ar, this message translates to:
-  /// **'اتصلح: {answer}'**
+  /// **'صُحّح: {answer}'**
   String myDataFixDoneWith(String answer);
 
   /// No description provided for @myDataFixRefused.
   ///
   /// In ar, this message translates to:
-  /// **'الأكاديمية ماصلحتش: {answer}'**
+  /// **'لم تصحّحه الأكاديمية: {answer}'**
   String myDataFixRefused(String answer);
 
   /// No description provided for @myDataFixCancel.
   ///
   /// In ar, this message translates to:
-  /// **'الغي الطلب'**
+  /// **'ألغِ الطلب'**
   String get myDataFixCancel;
 
   /// No description provided for @myDataFixCancelled.
   ///
   /// In ar, this message translates to:
-  /// **'الطلب اتلغى.'**
+  /// **'أُلغي الطلب.'**
   String get myDataFixCancelled;
 
   /// No description provided for @myDataPrivacy.
@@ -1421,7 +1421,7 @@ abstract class AppLocalizations {
   /// No description provided for @myDataDeletion.
   ///
   /// In ar, this message translates to:
-  /// **'مسح الحساب'**
+  /// **'حذف الحساب'**
   String get myDataDeletion;
 
   /// No description provided for @navHome.
@@ -1445,7 +1445,7 @@ abstract class AppLocalizations {
   /// No description provided for @navMoney.
   ///
   /// In ar, this message translates to:
-  /// **'الفلوس'**
+  /// **'المدفوعات'**
   String get navMoney;
 
   /// No description provided for @moneyEyebrow.
@@ -1493,7 +1493,7 @@ abstract class AppLocalizations {
   /// No description provided for @navToday.
   ///
   /// In ar, this message translates to:
-  /// **'النهارده'**
+  /// **'اليوم'**
   String get navToday;
 
   /// No description provided for @navWeek.
@@ -1541,19 +1541,19 @@ abstract class AppLocalizations {
   /// No description provided for @nextLesson.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة الجاية'**
+  /// **'الحصة القادمة'**
   String get nextLesson;
 
   /// No description provided for @noNextLesson.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش حصص جاية في الأربع أسابيع دول.'**
+  /// **'لا توجد حصص قادمة في الأسابيع الأربعة المقبلة.'**
   String get noNextLesson;
 
   /// No description provided for @roomOpensIn.
   ///
   /// In ar, this message translates to:
-  /// **'الفصل بيفتح بعد {time}'**
+  /// **'يُفتح الفصل بعد {time}'**
   String roomOpensIn(String time);
 
   /// No description provided for @roomOpen.
@@ -1565,7 +1565,7 @@ abstract class AppLocalizations {
   /// No description provided for @lessonOn.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة شغالة دلوقتي'**
+  /// **'الحصة جارية الآن'**
   String get lessonOn;
 
   /// No description provided for @lessonWith.
@@ -1583,7 +1583,7 @@ abstract class AppLocalizations {
   /// No description provided for @joinOpensAt.
   ///
   /// In ar, this message translates to:
-  /// **'بيفتح {time}'**
+  /// **'يُفتح {time}'**
   String joinOpensAt(String time);
 
   /// No description provided for @allLessons.
@@ -1601,7 +1601,7 @@ abstract class AppLocalizations {
   /// No description provided for @roomOpensAt.
   ///
   /// In ar, this message translates to:
-  /// **'الفصل بيفتح {time}'**
+  /// **'يُفتح الفصل {time}'**
   String roomOpensAt(String time);
 
   /// No description provided for @balanceOf.
@@ -1643,13 +1643,13 @@ abstract class AppLocalizations {
   /// No description provided for @pickLearner.
   ///
   /// In ar, this message translates to:
-  /// **'عن مين؟'**
+  /// **'عن مَن؟'**
   String get pickLearner;
 
   /// No description provided for @pickedNow.
   ///
   /// In ar, this message translates to:
-  /// **'دلوقتي'**
+  /// **'الآن'**
   String get pickedNow;
 
   /// No description provided for @balance.
@@ -1661,19 +1661,19 @@ abstract class AppLocalizations {
   /// No description provided for @owed.
   ///
   /// In ar, this message translates to:
-  /// **'عليك'**
+  /// **'المستحق عليك'**
   String get owed;
 
   /// No description provided for @payNow.
   ///
   /// In ar, this message translates to:
-  /// **'ادفع دلوقتي'**
+  /// **'ادفع الآن'**
   String get payNow;
 
   /// No description provided for @nothingOwed.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش عليك حاجة'**
+  /// **'لا شيء مستحق عليك'**
   String get nothingOwed;
 
   /// No description provided for @lastReport.
@@ -1685,7 +1685,7 @@ abstract class AppLocalizations {
   /// No description provided for @readReport.
   ///
   /// In ar, this message translates to:
-  /// **'اقراه'**
+  /// **'اقرأه'**
   String get readReport;
 
   /// No description provided for @homeworkLine.
@@ -1697,7 +1697,7 @@ abstract class AppLocalizations {
   /// No description provided for @unfunded.
   ///
   /// In ar, this message translates to:
-  /// **'مستنية الدفع'**
+  /// **'بانتظار الدفع'**
   String get unfunded;
 
   /// No description provided for @notices.
@@ -1721,61 +1721,61 @@ abstract class AppLocalizations {
   /// No description provided for @upcoming.
   ///
   /// In ar, this message translates to:
-  /// **'الجاية'**
+  /// **'القادمة'**
   String get upcoming;
 
   /// No description provided for @past.
   ///
   /// In ar, this message translates to:
-  /// **'اللي فاتت'**
+  /// **'السابقة'**
   String get past;
 
   /// No description provided for @noUpcoming.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش حصص جاية في الأربع أسابيع دول.'**
+  /// **'لا توجد حصص قادمة في الأسابيع الأربعة المقبلة.'**
   String get noUpcoming;
 
   /// No description provided for @noPast.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش حصص في الأربع أسابيع اللي فاتوا.'**
+  /// **'لا توجد حصص في الأسابيع الأربعة الماضية.'**
   String get noPast;
 
   /// No description provided for @substituteFor.
   ///
   /// In ar, this message translates to:
-  /// **'مدرّس بديل: {name} في إجازة'**
+  /// **'معلّم بديل: {name} في إجازة'**
   String substituteFor(String name);
 
   /// No description provided for @refuseSubstitute.
   ///
   /// In ar, this message translates to:
-  /// **'مش موافقين على البديل'**
+  /// **'لا نوافق على البديل'**
   String get refuseSubstitute;
 
   /// No description provided for @refuseSubstituteTitle.
   ///
   /// In ar, this message translates to:
-  /// **'مش موافقين على البديل؟'**
+  /// **'ألا توافقون على البديل؟'**
   String get refuseSubstituteTitle;
 
   /// No description provided for @refuseSubstituteBody.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة هتتلغي على حساب الأكاديمية، ودقايقها هترجعلك حصة تعويض تحجزها بعدين.'**
+  /// **'ستُلغى الحصة على حساب الأكاديمية، وتعود دقائقها إليك حصة تعويضية تحجزها لاحقًا.'**
   String get refuseSubstituteBody;
 
   /// No description provided for @refuseSubstituteYes.
   ///
   /// In ar, this message translates to:
-  /// **'أيوه، ألغيها وعوّضوني'**
+  /// **'نعم، ألغِها وعوّضونا'**
   String get refuseSubstituteYes;
 
   /// No description provided for @substituteChip.
   ///
   /// In ar, this message translates to:
-  /// **'بديل بدل {name}'**
+  /// **'بديل عن {name}'**
   String substituteChip(String name);
 
   /// No description provided for @minutesShort.
@@ -1811,7 +1811,7 @@ abstract class AppLocalizations {
   /// No description provided for @roomOpensOn.
   ///
   /// In ar, this message translates to:
-  /// **'الفصل بيفتح {when}'**
+  /// **'يُفتح الفصل {when}'**
   String roomOpensOn(String when);
 
   /// No description provided for @lessonDetails.
@@ -1823,7 +1823,7 @@ abstract class AppLocalizations {
   /// No description provided for @refusedSubstitute.
   ///
   /// In ar, this message translates to:
-  /// **'اتلغت. عندك {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}} تحجز فيهم حصة التعويض.'**
+  /// **'أُلغيت. لديك {days, plural, =1{يوم واحد} =2{يومان} few{{days} أيام} other{{days} يومًا}} لتحجز فيها حصة التعويض.'**
   String refusedSubstitute(int days);
 
   /// No description provided for @cancelLesson.
@@ -1847,19 +1847,19 @@ abstract class AppLocalizations {
   /// No description provided for @disputeIntroFamily.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة متسجلة \"{outcome}\". لو ده مش اللي حصل، قولولنا خلال 48 ساعة من آخرها، والأكاديمية هتراجع حضور الفصل وترد عليكم.'**
+  /// **'الحصة مسجّلة \"{outcome}\". إن لم يكن هذا ما حدث، فأخبرونا خلال 48 ساعة من انتهائها، وستراجع الأكاديمية حضور الفصل وترد عليكم.'**
   String disputeIntroFamily(String outcome);
 
   /// No description provided for @disputeIntroTeacher.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة متسجلة \"{outcome}\". لو ده مش اللي حصل، قولنا خلال 48 ساعة من آخرها، والأكاديمية هتراجع حضور الفصل وترد عليك.'**
+  /// **'الحصة مسجّلة \"{outcome}\". إن لم يكن هذا ما حدث، فأخبرنا خلال 48 ساعة من انتهائها، وستراجع الأكاديمية حضور الفصل وترد عليك.'**
   String disputeIntroTeacher(String outcome);
 
   /// No description provided for @disputeWhat.
   ///
   /// In ar, this message translates to:
-  /// **'إيه اللي حصل؟'**
+  /// **'ماذا حدث؟'**
   String get disputeWhat;
 
   /// No description provided for @disputeNote.
@@ -1871,25 +1871,25 @@ abstract class AppLocalizations {
   /// No description provided for @disputeNoteHint.
   ///
   /// In ar, this message translates to:
-  /// **'الأكاديمية بس اللي هتقرا ده.'**
+  /// **'لن يقرأ هذا إلا الأكاديمية.'**
   String get disputeNoteHint;
 
   /// No description provided for @disputeFillIn.
   ///
   /// In ar, this message translates to:
-  /// **'اختار السبب واكتب اللي حصل.'**
+  /// **'اختر السبب واكتب ما حدث.'**
   String get disputeFillIn;
 
   /// No description provided for @disputeSend.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت الاعتراض'**
+  /// **'أرسل الاعتراض'**
   String get disputeSend;
 
   /// No description provided for @disputeSent.
   ///
   /// In ar, this message translates to:
-  /// **'الاعتراض وصل، والحصة تحت المراجعة.'**
+  /// **'وصل الاعتراض، والحصة قيد المراجعة.'**
   String get disputeSent;
 
   /// No description provided for @disputeState.
@@ -1907,7 +1907,7 @@ abstract class AppLocalizations {
   /// No description provided for @cancelTitle.
   ///
   /// In ar, this message translates to:
-  /// **'تلغي حصة {day}؟'**
+  /// **'أتلغي حصة {day}؟'**
   String cancelTitle(String day);
 
   /// No description provided for @reason.
@@ -1925,25 +1925,25 @@ abstract class AppLocalizations {
   /// No description provided for @keepIt.
   ///
   /// In ar, this message translates to:
-  /// **'لأ، خليها'**
+  /// **'لا، أبقِها'**
   String get keepIt;
 
   /// No description provided for @yesCancel.
   ///
   /// In ar, this message translates to:
-  /// **'أيوه، ألغيها'**
+  /// **'نعم، ألغِها'**
   String get yesCancel;
 
   /// No description provided for @cancelled.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة اتلغت.'**
+  /// **'أُلغيت الحصة.'**
   String get cancelled;
 
   /// No description provided for @pickReason.
   ///
   /// In ar, this message translates to:
-  /// **'اختار سبب الأول.'**
+  /// **'اختر سببًا أولًا.'**
   String get pickReason;
 
   /// No description provided for @rateLesson.
@@ -1955,19 +1955,19 @@ abstract class AppLocalizations {
   /// No description provided for @rateTitle.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة كانت إزاي؟'**
+  /// **'كيف كانت الحصة؟'**
   String get rateTitle;
 
   /// No description provided for @rateGood.
   ///
   /// In ar, this message translates to:
-  /// **'إيه اللي عجبكم؟'**
+  /// **'ما الذي أعجبكم؟'**
   String get rateGood;
 
   /// No description provided for @rateBad.
   ///
   /// In ar, this message translates to:
-  /// **'إيه اللي ماعجبكمش؟'**
+  /// **'ما الذي لم يعجبكم؟'**
   String get rateBad;
 
   /// No description provided for @rateComment.
@@ -1979,19 +1979,19 @@ abstract class AppLocalizations {
   /// No description provided for @rateAnonymous.
   ///
   /// In ar, this message translates to:
-  /// **'المدرّس بيشوف التقييم من غير اسمك.'**
+  /// **'يرى المعلّم التقييم دون اسمك.'**
   String get rateAnonymous;
 
   /// No description provided for @sendRating.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت التقييم'**
+  /// **'أرسل التقييم'**
   String get sendRating;
 
   /// No description provided for @notNow.
   ///
   /// In ar, this message translates to:
-  /// **'مش دلوقتي'**
+  /// **'ليس الآن'**
   String get notNow;
 
   /// No description provided for @rated.
@@ -2009,25 +2009,25 @@ abstract class AppLocalizations {
   /// No description provided for @stars1.
   ///
   /// In ar, this message translates to:
-  /// **'وحشة'**
+  /// **'سيئة'**
   String get stars1;
 
   /// No description provided for @stars2.
   ///
   /// In ar, this message translates to:
-  /// **'مش أحسن حاجة'**
+  /// **'ليست جيدة تمامًا'**
   String get stars2;
 
   /// No description provided for @stars3.
   ///
   /// In ar, this message translates to:
-  /// **'كويسة'**
+  /// **'جيدة'**
   String get stars3;
 
   /// No description provided for @stars4.
   ///
   /// In ar, this message translates to:
-  /// **'حلوة'**
+  /// **'جيدة جدًا'**
   String get stars4;
 
   /// No description provided for @stars5.
@@ -2051,19 +2051,19 @@ abstract class AppLocalizations {
   /// No description provided for @hereNow.
   ///
   /// In ar, this message translates to:
-  /// **'دلوقتي: {title}'**
+  /// **'الآن: {title}'**
   String hereNow(String title);
 
   /// No description provided for @weeksLeft.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{قرّب يخلص} =1{باقي حوالي أسبوع} =2{باقي حوالي أسبوعين} few{باقي حوالي {n} أسابيع} other{باقي حوالي {n} أسبوع}}'**
+  /// **'{n, plural, =0{أوشك على الانتهاء} =1{بقي نحو أسبوع} =2{بقي نحو أسبوعين} few{بقي نحو {n} أسابيع} other{بقي نحو {n} أسبوعًا}}'**
   String weeksLeft(int n);
 
   /// No description provided for @homeworkOpen.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{واجب مفتوح} =2{واجبين مفتوحين} few{{n} واجبات مفتوحة} other{{n} واجب مفتوح}}'**
+  /// **'{n, plural, =1{واجب مفتوح} =2{واجبان مفتوحان} few{{n} واجبات مفتوحة} other{{n} واجبًا مفتوحًا}}'**
   String homeworkOpen(int n);
 
   /// No description provided for @reports.
@@ -2075,19 +2075,19 @@ abstract class AppLocalizations {
   /// No description provided for @noReports.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش تقارير لسه.'**
+  /// **'لا توجد تقارير بعد.'**
   String get noReports;
 
   /// No description provided for @noCourses.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش اشتراكات شغالة.'**
+  /// **'لا توجد اشتراكات جارية.'**
   String get noCourses;
 
   /// No description provided for @noProgram.
   ///
   /// In ar, this message translates to:
-  /// **'من غير منهج'**
+  /// **'دون منهج'**
   String get noProgram;
 
   /// No description provided for @reportOf.
@@ -2117,43 +2117,43 @@ abstract class AppLocalizations {
   /// No description provided for @homeworkWaiting.
   ///
   /// In ar, this message translates to:
-  /// **'مستني'**
+  /// **'بالانتظار'**
   String get homeworkWaiting;
 
   /// No description provided for @homeworkSent.
   ///
   /// In ar, this message translates to:
-  /// **'اتسلّم'**
+  /// **'سُلّم'**
   String get homeworkSent;
 
   /// No description provided for @homeworkMarked.
   ///
   /// In ar, this message translates to:
-  /// **'اتصحّح'**
+  /// **'صُحّح'**
   String get homeworkMarked;
 
   /// No description provided for @homeworkWaitingOnYou.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{واجب مستني منك} =2{واجبين مستنيين منك} few{{n} واجبات مستنية منك} other{{n} واجب مستني منك}}'**
+  /// **'{n, plural, =1{واجب ينتظرك} =2{واجبان ينتظرانك} few{{n} واجبات تنتظرك} other{{n} واجبًا ينتظرك}}'**
   String homeworkWaitingOnYou(int n);
 
   /// No description provided for @homeworkNoneWaiting.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش واجبات مستنياك دلوقتي.'**
+  /// **'لا توجد واجبات تنتظرك الآن.'**
   String get homeworkNoneWaiting;
 
   /// No description provided for @homeworkNoneSent.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش واجبات مستنية تصحيح.'**
+  /// **'لا توجد واجبات تنتظر التصحيح.'**
   String get homeworkNoneSent;
 
   /// No description provided for @homeworkNoneMarked.
   ///
   /// In ar, this message translates to:
-  /// **'لسه مفيش واجبات اتصحّحت.'**
+  /// **'لم يُصحَّح أي واجب بعد.'**
   String get homeworkNoneMarked;
 
   /// No description provided for @homeworkLastMarked.
@@ -2177,7 +2177,7 @@ abstract class AppLocalizations {
   /// No description provided for @noHomework.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش واجبات دلوقتي.'**
+  /// **'لا توجد واجبات الآن.'**
   String get noHomework;
 
   /// No description provided for @dueBy.
@@ -2201,13 +2201,13 @@ abstract class AppLocalizations {
   /// No description provided for @handedIn.
   ///
   /// In ar, this message translates to:
-  /// **'اتسلّم. المدرّس هيصححه.'**
+  /// **'سُلّم. سيصحّحه المعلّم.'**
   String get handedIn;
 
   /// No description provided for @teacherFeedback.
   ///
   /// In ar, this message translates to:
-  /// **'رأي المدرّس'**
+  /// **'رأي المعلّم'**
   String get teacherFeedback;
 
   /// No description provided for @grade.
@@ -2219,19 +2219,19 @@ abstract class AppLocalizations {
   /// No description provided for @yourSubmission.
   ///
   /// In ar, this message translates to:
-  /// **'اللي سلّمته'**
+  /// **'ما سلّمته'**
   String get yourSubmission;
 
   /// No description provided for @kidsHomeworkStar.
   ///
   /// In ar, this message translates to:
-  /// **'كل واجب بتسلّمه بيجيبلك نجمة جديدة!'**
+  /// **'كل واجب تسلّمه يعطيك نجمة جديدة!'**
   String get kidsHomeworkStar;
 
   /// No description provided for @owedNow.
   ///
   /// In ar, this message translates to:
-  /// **'عليك دلوقتي'**
+  /// **'المستحق الآن'**
   String get owedNow;
 
   /// No description provided for @invoiceDue.
@@ -2249,13 +2249,13 @@ abstract class AppLocalizations {
   /// No description provided for @payNote.
   ///
   /// In ar, this message translates to:
-  /// **'الدفع بيتم في صفحة بوابة الأكاديمية. لما تخلّص ارجع هنا.'**
+  /// **'يتم الدفع في صفحة الدفع الخاصة بالأكاديمية. عندما تنتهي، ارجع إلى هنا.'**
   String get payNote;
 
   /// No description provided for @lessonsLeftTitle.
   ///
   /// In ar, this message translates to:
-  /// **'الحصص الفاضلة'**
+  /// **'الحصص المتبقية'**
   String get lessonsLeftTitle;
 
   /// No description provided for @invoices.
@@ -2267,7 +2267,7 @@ abstract class AppLocalizations {
   /// No description provided for @noInvoices.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش فواتير.'**
+  /// **'لا توجد فواتير.'**
   String get noInvoices;
 
   /// No description provided for @openInvoice.
@@ -2279,25 +2279,25 @@ abstract class AppLocalizations {
   /// No description provided for @extraAction.
   ///
   /// In ar, this message translates to:
-  /// **'حصص زيادة'**
+  /// **'حصص إضافية'**
   String get extraAction;
 
   /// No description provided for @extraHint.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة الزيادة بـ {price} ({minutes, plural, =1{دقيقة} =2{دقيقتين} few{{minutes} دقايق} other{{minutes} دقيقة}}).'**
+  /// **'سعر الحصة الإضافية {price} ({minutes, plural, =1{دقيقة} =2{دقيقتان} few{{minutes} دقائق} other{{minutes} دقيقة}}).'**
   String extraHint(String price, int minutes);
 
   /// No description provided for @extraTitle.
   ///
   /// In ar, this message translates to:
-  /// **'حصص زيادة في {subject}'**
+  /// **'حصص إضافية في {subject}'**
   String extraTitle(String subject);
 
   /// No description provided for @extraBody.
   ///
   /// In ar, this message translates to:
-  /// **'اختار العدد، وهتطلعلك فاتورة تدفعها زي أي فاتورة. بعد ما تدفع، الأكاديمية بتحجز الحصص معاك.'**
+  /// **'اختر العدد، وستصدر لك فاتورة تدفعها مثل أي فاتورة. بعد أن تدفع، تحجز الأكاديمية الحصص معك.'**
   String get extraBody;
 
   /// No description provided for @extraEach.
@@ -2309,7 +2309,7 @@ abstract class AppLocalizations {
   /// No description provided for @extraSubmit.
   ///
   /// In ar, this message translates to:
-  /// **'اعمل الفاتورة'**
+  /// **'أصدر الفاتورة'**
   String get extraSubmit;
 
   /// No description provided for @extraDone.
@@ -2321,25 +2321,25 @@ abstract class AppLocalizations {
   /// No description provided for @extraWaiting.
   ///
   /// In ar, this message translates to:
-  /// **'فاتورة الحصص الزيادة {number} مستنية الدفع.'**
+  /// **'فاتورة الحصص الإضافية {number} بانتظار الدفع.'**
   String extraWaiting(String number);
 
   /// No description provided for @invoiceNote.
   ///
   /// In ar, this message translates to:
-  /// **'افتح أي فاتورة تشوفها وتطبعها، وفيها رمز QR بتاع الفاتورة الضريبية.'**
+  /// **'افتح أي فاتورة لتعرضها وتطبعها، وفيها رمز QR الخاص بالفاتورة الضريبية.'**
   String get invoiceNote;
 
   /// No description provided for @cantPayOnline.
   ///
   /// In ar, this message translates to:
-  /// **'الدفع أونلاين مش متاح للفاتورة دي. كلّم الأكاديمية.'**
+  /// **'الدفع الإلكتروني غير متاح لهذه الفاتورة. تواصل مع الأكاديمية.'**
   String get cantPayOnline;
 
   /// No description provided for @pickGateway.
   ///
   /// In ar, this message translates to:
-  /// **'تدفع بإيه؟'**
+  /// **'بماذا تدفع؟'**
   String get pickGateway;
 
   /// No description provided for @paidByTransfer.
@@ -2351,31 +2351,31 @@ abstract class AppLocalizations {
   /// No description provided for @proofTitle.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت إثبات الدفع'**
+  /// **'أرسل إثبات الدفع'**
   String get proofTitle;
 
   /// No description provided for @proofHint.
   ///
   /// In ar, this message translates to:
-  /// **'ادفع الأول، وبعدين ابعت الإيصال هنا. الأكاديمية هتتأكد إن الفلوس وصلت وتأكّد الدفعة.'**
+  /// **'ادفع أولًا، ثم أرسل الإيصال هنا. ستتحقّق الأكاديمية من وصول المبلغ وتؤكّد الدفعة.'**
   String get proofHint;
 
   /// No description provided for @proofHowTo.
   ///
   /// In ar, this message translates to:
-  /// **'إزاي تدفع بالتحويل'**
+  /// **'كيف تدفع بالتحويل'**
   String get proofHowTo;
 
   /// No description provided for @proofMethod.
   ///
   /// In ar, this message translates to:
-  /// **'دفعت إزاي'**
+  /// **'طريقة الدفع'**
   String get proofMethod;
 
   /// No description provided for @proofAmount.
   ///
   /// In ar, this message translates to:
-  /// **'المبلغ اللي دفعته'**
+  /// **'المبلغ الذي دفعته'**
   String get proofAmount;
 
   /// No description provided for @proofPaidOn.
@@ -2405,37 +2405,37 @@ abstract class AppLocalizations {
   /// No description provided for @proofPickReceipt.
   ///
   /// In ar, this message translates to:
-  /// **'اختار صورة أو PDF'**
+  /// **'اختر صورة أو ملف PDF'**
   String get proofPickReceipt;
 
   /// No description provided for @proofReceiptHint.
   ///
   /// In ar, this message translates to:
-  /// **'صورة أو سكرين شوت أو PDF البنك، لحد 10 ميجا.'**
+  /// **'صورة أو لقطة شاشة أو ملف PDF من البنك، حتى 10 ميغابايت.'**
   String get proofReceiptHint;
 
   /// No description provided for @proofSend.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت الإثبات'**
+  /// **'أرسل الإثبات'**
   String get proofSend;
 
   /// No description provided for @proofSent.
   ///
   /// In ar, this message translates to:
-  /// **'الإثبات اتبعت. هنقولك أول ما الأكاديمية تأكّده.'**
+  /// **'أُرسل الإثبات. سنخبرك فور تأكيد الأكاديمية له.'**
   String get proofSent;
 
   /// No description provided for @proofNeedsReceipt.
   ///
   /// In ar, this message translates to:
-  /// **'اختار الإيصال الأول.'**
+  /// **'اختر الإيصال أولًا.'**
   String get proofNeedsReceipt;
 
   /// No description provided for @proofFileTooBig.
   ///
   /// In ar, this message translates to:
-  /// **'الملف أكبر من 10 ميجا.'**
+  /// **'الملف أكبر من 10 ميغابايت.'**
   String get proofFileTooBig;
 
   /// No description provided for @transferTitle.
@@ -2453,25 +2453,25 @@ abstract class AppLocalizations {
   /// No description provided for @transferCopied.
   ///
   /// In ar, this message translates to:
-  /// **'بيانات التحويل اتنسخت.'**
+  /// **'نُسخت بيانات التحويل.'**
   String get transferCopied;
 
   /// No description provided for @joining.
   ///
   /// In ar, this message translates to:
-  /// **'بندخّلك الحصة…'**
+  /// **'ندخلك إلى الحصة…'**
   String get joining;
 
   /// No description provided for @linkNotOpened.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش برنامج على الموبايل يفتح اللينك ده.'**
+  /// **'لا يوجد تطبيق على هذا الهاتف يفتح هذا الرابط.'**
   String get linkNotOpened;
 
   /// No description provided for @openedOutside.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة اتفتحت في تطبيق تاني.'**
+  /// **'فُتحت الحصة في تطبيق آخر.'**
   String get openedOutside;
 
   /// No description provided for @leave.
@@ -2483,19 +2483,19 @@ abstract class AppLocalizations {
   /// No description provided for @micOff.
   ///
   /// In ar, this message translates to:
-  /// **'اقفل المايك'**
+  /// **'أغلق الميكروفون'**
   String get micOff;
 
   /// No description provided for @micOn.
   ///
   /// In ar, this message translates to:
-  /// **'افتح المايك'**
+  /// **'افتح الميكروفون'**
   String get micOn;
 
   /// No description provided for @camOff.
   ///
   /// In ar, this message translates to:
-  /// **'اقفل الكاميرا'**
+  /// **'أغلق الكاميرا'**
   String get camOff;
 
   /// No description provided for @camOn.
@@ -2507,37 +2507,37 @@ abstract class AppLocalizations {
   /// No description provided for @audioOnly.
   ///
   /// In ar, this message translates to:
-  /// **'الصوت بس'**
+  /// **'الصوت فقط'**
   String get audioOnly;
 
   /// No description provided for @rejoinHint.
   ///
   /// In ar, this message translates to:
-  /// **'لو خرجت بالغلط، ادخل تاني من نفس الزرار لحد ما الحصة تخلص.'**
+  /// **'إن خرجت بالخطأ، فادخل مرة أخرى من الزر نفسه حتى تنتهي الحصة.'**
   String get rejoinHint;
 
   /// No description provided for @weakNetwork.
   ///
   /// In ar, this message translates to:
-  /// **'النت ضعيف. جرّب \"الصوت بس\" لو الصورة بتقطّع.'**
+  /// **'الاتصال ضعيف. جرّب \"الصوت فقط\" إن كانت الصورة تتقطّع.'**
   String get weakNetwork;
 
   /// No description provided for @waitingOther.
   ///
   /// In ar, this message translates to:
-  /// **'مستنيين الطرف التاني يدخل…'**
+  /// **'ننتظر دخول الطرف الآخر…'**
   String get waitingOther;
 
   /// No description provided for @you.
   ///
   /// In ar, this message translates to:
-  /// **'انت'**
+  /// **'أنت'**
   String get you;
 
   /// No description provided for @minutesLeft.
   ///
   /// In ar, this message translates to:
-  /// **'فاضل {n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}'**
+  /// **'بقي {n, plural, =1{دقيقة} =2{دقيقتان} few{{n} دقائق} other{{n} دقيقة}}'**
   String minutesLeft(int n);
 
   /// No description provided for @sharedPackage.
@@ -2549,43 +2549,43 @@ abstract class AppLocalizations {
   /// No description provided for @familyInvoice.
   ///
   /// In ar, this message translates to:
-  /// **'فاتورة العيلة'**
+  /// **'فاتورة العائلة'**
   String get familyInvoice;
 
   /// No description provided for @coursePaused.
   ///
   /// In ar, this message translates to:
-  /// **'موقوف لحد {day}'**
+  /// **'متوقف حتى {day}'**
   String coursePaused(String day);
 
   /// No description provided for @coursePausedKids.
   ///
   /// In ar, this message translates to:
-  /// **'في إجازة لحد {day}'**
+  /// **'في إجازة حتى {day}'**
   String coursePausedKids(String day);
 
   /// No description provided for @coursePauseAhead.
   ///
   /// In ar, this message translates to:
-  /// **'هيتوقف من {from} لحد {until}'**
+  /// **'سيتوقف من {from} حتى {until}'**
   String coursePauseAhead(String from, String until);
 
   /// No description provided for @courseEnding.
   ///
   /// In ar, this message translates to:
-  /// **'بينتهي من {day}'**
+  /// **'ينتهي من {day}'**
   String courseEnding(String day);
 
   /// No description provided for @courseEnded.
   ///
   /// In ar, this message translates to:
-  /// **'انتهى، والدقايق اللي فاضلة لسه في الرصيد'**
+  /// **'انتهى، والدقائق المتبقية ما زالت في الرصيد'**
   String get courseEnded;
 
   /// No description provided for @lessonUntil.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة لحد {time}'**
+  /// **'الحصة حتى {time}'**
   String lessonUntil(String time);
 
   /// No description provided for @meTitle.
@@ -2597,7 +2597,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreChildren.
   ///
   /// In ar, this message translates to:
-  /// **'الأولاد'**
+  /// **'الأبناء'**
   String get moreChildren;
 
   /// No description provided for @moreTalk.
@@ -2639,7 +2639,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreWork.
   ///
   /// In ar, this message translates to:
-  /// **'شغلي'**
+  /// **'عملي'**
   String get moreWork;
 
   /// No description provided for @moreStudy.
@@ -2651,7 +2651,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreHelp.
   ///
   /// In ar, this message translates to:
-  /// **'مساعدة'**
+  /// **'المساعدة'**
   String get moreHelp;
 
   /// No description provided for @yourAccount.
@@ -2669,13 +2669,13 @@ abstract class AppLocalizations {
   /// No description provided for @meetingLinkMissing.
   ///
   /// In ar, this message translates to:
-  /// **'مش متحط'**
+  /// **'غير محدد'**
   String get meetingLinkMissing;
 
   /// No description provided for @moreAcademies.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{أكاديمية واحدة} =2{أكاديميتين} few{{n} أكاديميات} other{{n} أكاديمية}}'**
+  /// **'{n, plural, =1{أكاديمية واحدة} =2{أكاديميتان} few{{n} أكاديميات} other{{n} أكاديمية}}'**
   String moreAcademies(int n);
 
   /// No description provided for @guardianOf.
@@ -2687,43 +2687,43 @@ abstract class AppLocalizations {
   /// No description provided for @appVersion.
   ///
   /// In ar, this message translates to:
-  /// **'النسخة {version}'**
+  /// **'الإصدار {version}'**
   String appVersion(String version);
 
   /// No description provided for @contactTitle.
   ///
   /// In ar, this message translates to:
-  /// **'الإيميل والموبايل'**
+  /// **'البريد الإلكتروني والهاتف'**
   String get contactTitle;
 
   /// No description provided for @contactHint.
   ///
   /// In ar, this message translates to:
-  /// **'دول طرق دخولك، والأكواد والرسايل بتوصلك عليهم. لما تغيّر واحد، بنبعت كود على الجديد عشان نتأكد إنه بتاعك.'**
+  /// **'هذه طرق دخولك، وتصلك عليها الرموز والرسائل. عندما تغيّر أحدها، نرسل رمزًا إلى الجديد لنتأكد أنه لك.'**
   String get contactHint;
 
   /// No description provided for @contactEmail.
   ///
   /// In ar, this message translates to:
-  /// **'الإيميل'**
+  /// **'البريد الإلكتروني'**
   String get contactEmail;
 
   /// No description provided for @contactPhone.
   ///
   /// In ar, this message translates to:
-  /// **'رقم الموبايل'**
+  /// **'رقم الهاتف'**
   String get contactPhone;
 
   /// No description provided for @contactNone.
   ///
   /// In ar, this message translates to:
-  /// **'مش متسجل'**
+  /// **'غير مسجّل'**
   String get contactNone;
 
   /// No description provided for @contactChangeEmail.
   ///
   /// In ar, this message translates to:
-  /// **'غيّر الإيميل'**
+  /// **'غيّر البريد'**
   String get contactChangeEmail;
 
   /// No description provided for @contactChangePhone.
@@ -2735,19 +2735,19 @@ abstract class AppLocalizations {
   /// No description provided for @contactAddEmail.
   ///
   /// In ar, this message translates to:
-  /// **'ضيف إيميل'**
+  /// **'أضف بريدًا'**
   String get contactAddEmail;
 
   /// No description provided for @contactAddPhone.
   ///
   /// In ar, this message translates to:
-  /// **'ضيف رقم'**
+  /// **'أضف رقمًا'**
   String get contactAddPhone;
 
   /// No description provided for @contactNewEmail.
   ///
   /// In ar, this message translates to:
-  /// **'الإيميل الجديد'**
+  /// **'البريد الإلكتروني الجديد'**
   String get contactNewEmail;
 
   /// No description provided for @contactNewPhone.
@@ -2759,25 +2759,25 @@ abstract class AppLocalizations {
   /// No description provided for @contactPhoneHint.
   ///
   /// In ar, this message translates to:
-  /// **'بكود الدولة، أو رقم محلي من نفس بلدك.'**
+  /// **'مع رمز الدولة، أو رقمًا محليًا من بلدك.'**
   String get contactPhoneHint;
 
   /// No description provided for @contactSend.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت كود'**
+  /// **'أرسل رمزًا'**
   String get contactSend;
 
   /// No description provided for @contactCode.
   ///
   /// In ar, this message translates to:
-  /// **'الكود اللي وصلك'**
+  /// **'الرمز الذي وصلك'**
   String get contactCode;
 
   /// No description provided for @contactCodeHint.
   ///
   /// In ar, this message translates to:
-  /// **'بعتنا كود على {contact}. صالح لحد {until}.'**
+  /// **'أرسلنا رمزًا إلى {contact}. صالح حتى {until}.'**
   String contactCodeHint(String contact, String until);
 
   /// No description provided for @contactConfirm.
@@ -2789,31 +2789,31 @@ abstract class AppLocalizations {
   /// No description provided for @contactResend.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت كود تاني'**
+  /// **'أرسل رمزًا آخر'**
   String get contactResend;
 
   /// No description provided for @contactDoneEmail.
   ///
   /// In ar, this message translates to:
-  /// **'الإيميل اتغيّر. من دلوقتي بتدخل وبتوصلك الرسايل عليه.'**
+  /// **'تغيّر البريد الإلكتروني. من الآن تدخل به وتصلك الرسائل عليه.'**
   String get contactDoneEmail;
 
   /// No description provided for @contactDonePhone.
   ///
   /// In ar, this message translates to:
-  /// **'الرقم اتغيّر. من دلوقتي بتدخل وبتوصلك الرسايل عليه.'**
+  /// **'تغيّر الرقم. من الآن تدخل به وتصلك الرسائل عليه.'**
   String get contactDonePhone;
 
   /// No description provided for @contactManaged.
   ///
   /// In ar, this message translates to:
-  /// **'الأكاديمية أو ولي أمرك هم اللي بيغيّروا الإيميل والرقم بتوعك.'**
+  /// **'الأكاديمية أو ولي أمرك هما من يغيّران بريدك الإلكتروني ورقمك.'**
   String get contactManaged;
 
   /// No description provided for @openNow.
   ///
   /// In ar, this message translates to:
-  /// **'داخل فيه'**
+  /// **'مفتوح الآن'**
   String get openNow;
 
   /// No description provided for @switchTo.
@@ -2825,25 +2825,25 @@ abstract class AppLocalizations {
   /// No description provided for @addAccount.
   ///
   /// In ar, this message translates to:
-  /// **'ضيف حساب تاني'**
+  /// **'أضف حسابًا آخر'**
   String get addAccount;
 
   /// No description provided for @clockPrompt.
   ///
   /// In ar, this message translates to:
-  /// **'موبايلك على توقيت {device}، وحسابك على {profile}. نعرض المواعيد بتوقيت {device}؟'**
+  /// **'هاتفك على توقيت {device}، وحسابك على {profile}. هل نعرض المواعيد بتوقيت {device}؟'**
   String clockPrompt(String device, String profile);
 
   /// No description provided for @clockYes.
   ///
   /// In ar, this message translates to:
-  /// **'أيوه، {zone}'**
+  /// **'نعم، {zone}'**
   String clockYes(String zone);
 
   /// No description provided for @clockKeep.
   ///
   /// In ar, this message translates to:
-  /// **'خليه {zone}'**
+  /// **'أبقِه {zone}'**
   String clockKeep(String zone);
 
   /// No description provided for @language.
@@ -2867,13 +2867,13 @@ abstract class AppLocalizations {
   /// No description provided for @timeFormatExample.
   ///
   /// In ar, this message translates to:
-  /// **'المواعيد بتظهر كده: {time}'**
+  /// **'تظهر المواعيد هكذا: {time}'**
   String timeFormatExample(String time);
 
   /// No description provided for @timeFormatAcademy.
   ///
   /// In ar, this message translates to:
-  /// **'زي الأكاديمية ({hours})'**
+  /// **'مثل الأكاديمية ({hours})'**
   String timeFormatAcademy(String hours);
 
   /// No description provided for @timeFormat12.
@@ -2897,7 +2897,7 @@ abstract class AppLocalizations {
   /// No description provided for @thisDevice.
   ///
   /// In ar, this message translates to:
-  /// **'الجهاز ده'**
+  /// **'هذا الجهاز'**
   String get thisDevice;
 
   /// No description provided for @lastUsed.
@@ -2909,25 +2909,25 @@ abstract class AppLocalizations {
   /// No description provided for @signOutDevice.
   ///
   /// In ar, this message translates to:
-  /// **'خرّجه'**
+  /// **'أخرِجه'**
   String get signOutDevice;
 
   /// No description provided for @deviceSignedOut.
   ///
   /// In ar, this message translates to:
-  /// **'الجهاز خرج من الحساب.'**
+  /// **'خرج الجهاز من الحساب.'**
   String get deviceSignedOut;
 
   /// No description provided for @signOut.
   ///
   /// In ar, this message translates to:
-  /// **'اخرج من الحساب ده'**
+  /// **'اخرج من هذا الحساب'**
   String get signOut;
 
   /// No description provided for @signOutConfirm.
   ///
   /// In ar, this message translates to:
-  /// **'تخرج من {academy} على الموبايل ده؟'**
+  /// **'أتخرج من {academy} على هذا الهاتف؟'**
   String signOutConfirm(String academy);
 
   /// No description provided for @todayHeader.
@@ -2939,7 +2939,7 @@ abstract class AppLocalizations {
   /// No description provided for @todayCount.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{النهارده مفيش حصص} =1{النهارده: حصة واحدة} =2{النهارده: حصتين} few{النهارده: {n} حصص} other{النهارده: {n} حصة}}'**
+  /// **'{n, plural, =0{لا توجد حصص اليوم} =1{اليوم: حصة واحدة} =2{اليوم: حصتان} few{اليوم: {n} حصص} other{اليوم: {n} حصة}}'**
   String todayCount(int n);
 
   /// No description provided for @hours.
@@ -2951,19 +2951,19 @@ abstract class AppLocalizations {
   /// No description provided for @nextIn.
   ///
   /// In ar, this message translates to:
-  /// **'الجاية بعد {time}'**
+  /// **'القادمة بعد {time}'**
   String nextIn(String time);
 
   /// No description provided for @reportsWaiting.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{تقرير مستنيك} =2{تقريرين مستنيينك} few{{n} تقارير مستنياك} other{{n} تقرير مستنيك}}'**
+  /// **'{n, plural, =1{تقرير ينتظرك} =2{تقريران ينتظرانك} few{{n} تقارير تنتظرك} other{{n} تقريرًا ينتظرك}}'**
   String reportsWaiting(int n);
 
   /// No description provided for @homeworkToMark.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{واجب تصحّحه} =2{واجبين تصحّحهم} few{{n} واجبات تصحّحها} other{{n} واجب تصحّحه}}'**
+  /// **'{n, plural, =1{واجب تصحّحه} =2{واجبان تصحّحهما} few{{n} واجبات تصحّحها} other{{n} واجبًا تصحّحها}}'**
   String homeworkToMark(int n);
 
   /// No description provided for @reportDueBy.
@@ -2975,67 +2975,67 @@ abstract class AppLocalizations {
   /// No description provided for @prevWeek.
   ///
   /// In ar, this message translates to:
-  /// **'الأسبوع اللي فات'**
+  /// **'الأسبوع الماضي'**
   String get prevWeek;
 
   /// No description provided for @nextWeek.
   ///
   /// In ar, this message translates to:
-  /// **'الأسبوع الجاي'**
+  /// **'الأسبوع القادم'**
   String get nextWeek;
 
   /// No description provided for @noLessonsDay.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش حصص'**
+  /// **'لا توجد حصص'**
   String get noLessonsDay;
 
   /// No description provided for @noLessonsWeek.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش حصص الأسبوع ده.'**
+  /// **'لا توجد حصص هذا الأسبوع.'**
   String get noLessonsWeek;
 
   /// No description provided for @thisWeek.
   ///
   /// In ar, this message translates to:
-  /// **'الأسبوع ده'**
+  /// **'هذا الأسبوع'**
   String get thisWeek;
 
   /// No description provided for @weekdaysShort.
   ///
   /// In ar, this message translates to:
-  /// **'سبت،حد،اتنين،تلات،أربع،خميس،جمعة'**
+  /// **'سبت،أحد،اثنين،ثلاثاء،أربعاء،خميس،جمعة'**
   String get weekdaysShort;
 
   /// No description provided for @dayToday.
   ///
   /// In ar, this message translates to:
-  /// **'{day} · النهارده'**
+  /// **'{day} · اليوم'**
   String dayToday(String day);
 
   /// No description provided for @noLessonsLater.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش حصص من اليوم ده لآخر الأسبوع.'**
+  /// **'لا توجد حصص من هذا اليوم حتى آخر الأسبوع.'**
   String get noLessonsLater;
 
   /// No description provided for @laterToday.
   ///
   /// In ar, this message translates to:
-  /// **'باقي النهارده'**
+  /// **'بقية اليوم'**
   String get laterToday;
 
   /// No description provided for @doneToday.
   ///
   /// In ar, this message translates to:
-  /// **'خلصت النهارده'**
+  /// **'انتهت اليوم'**
   String get doneToday;
 
   /// No description provided for @restDay.
   ///
   /// In ar, this message translates to:
-  /// **'النهارده مفيش حصص. حصصك الجاية في الأسبوع.'**
+  /// **'لا توجد حصص اليوم. حصصك القادمة خلال الأسبوع.'**
   String get restDay;
 
   /// No description provided for @openWeek.
@@ -3059,13 +3059,13 @@ abstract class AppLocalizations {
   /// No description provided for @allWritten.
   ///
   /// In ar, this message translates to:
-  /// **'كلها اتكتبت'**
+  /// **'كُتبت كلها'**
   String get allWritten;
 
   /// No description provided for @nothingToMark.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش حاجة'**
+  /// **'لا شيء'**
   String get nothingToMark;
 
   /// No description provided for @oldestFor.
@@ -3101,7 +3101,7 @@ abstract class AppLocalizations {
   /// No description provided for @noStudents.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش طلاب لسه.'**
+  /// **'لا يوجد طلاب بعد.'**
   String get noStudents;
 
   /// No description provided for @studentsIn.
@@ -3113,19 +3113,19 @@ abstract class AppLocalizations {
   /// No description provided for @studentsCount.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{مفيش طلاب} =1{طالب واحد} =2{طالبين} few{{n} طلاب} other{{n} طالب}}'**
+  /// **'{n, plural, =0{لا يوجد طلاب} =1{طالب واحد} =2{طالبان} few{{n} طلاب} other{{n} طالبًا}}'**
   String studentsCount(int n);
 
   /// No description provided for @subjectsCount.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{مفيش مواد} =1{مادة واحدة} =2{مادتين} few{{n} مواد} other{{n} مادة}}'**
+  /// **'{n, plural, =0{لا توجد مواد} =1{مادة واحدة} =2{مادتين} few{{n} مواد} other{{n} مادة}}'**
   String subjectsCount(int n);
 
   /// No description provided for @searchByName.
   ///
   /// In ar, this message translates to:
-  /// **'دوّر بالاسم'**
+  /// **'ابحث بالاسم'**
   String get searchByName;
 
   /// No description provided for @allSubjects.
@@ -3137,19 +3137,19 @@ abstract class AppLocalizations {
   /// No description provided for @noStudentsFound.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش طالب بالاسم ده.'**
+  /// **'لا يوجد طالب بهذا الاسم.'**
   String get noStudentsFound;
 
   /// No description provided for @reportWaitingChip.
   ///
   /// In ar, this message translates to:
-  /// **'تقرير مستنيك'**
+  /// **'تقرير ينتظرك'**
   String get reportWaitingChip;
 
   /// No description provided for @messageStudent.
   ///
   /// In ar, this message translates to:
-  /// **'ابعتله رسالة'**
+  /// **'أرسل إليه رسالة'**
   String get messageStudent;
 
   /// No description provided for @markHomework.
@@ -3167,31 +3167,31 @@ abstract class AppLocalizations {
   /// No description provided for @prevMonth.
   ///
   /// In ar, this message translates to:
-  /// **'الشهر اللي فات'**
+  /// **'الشهر الماضي'**
   String get prevMonth;
 
   /// No description provided for @nextMonth.
   ///
   /// In ar, this message translates to:
-  /// **'الشهر الجاي'**
+  /// **'الشهر القادم'**
   String get nextMonth;
 
   /// No description provided for @soFar.
   ///
   /// In ar, this message translates to:
-  /// **'لحد النهارده'**
+  /// **'حتى اليوم'**
   String get soFar;
 
   /// No description provided for @monthOpen.
   ///
   /// In ar, this message translates to:
-  /// **'الشهر لسه مفتوح'**
+  /// **'الشهر ما زال مفتوحًا'**
   String get monthOpen;
 
   /// No description provided for @monthClosed.
   ///
   /// In ar, this message translates to:
-  /// **'الشهر اتقفل'**
+  /// **'أُغلق الشهر'**
   String get monthClosed;
 
   /// No description provided for @lessonsHours.
@@ -3221,13 +3221,13 @@ abstract class AppLocalizations {
   /// No description provided for @unpricedNote.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{حصة لسه مالهاش سعر} =2{حصتين لسه مالهمش سعر} few{{n} حصص لسه مالهاش سعر} other{{n} حصة لسه مالهاش سعر}}. الأكاديمية هتحدده، وهتتحسب في الشهر ده.'**
+  /// **'{n, plural, =1{حصة لم يُحدَّد سعرها بعد} =2{حصتان لم يُحدَّد سعرهما بعد} few{{n} حصص لم يُحدَّد سعرها بعد} other{{n} حصة لم يُحدَّد سعرها بعد}}. ستحدّد الأكاديمية السعر، وتُحسب في هذا الشهر.'**
   String unpricedNote(int n);
 
   /// No description provided for @noEarnings.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش حصص في الشهر ده.'**
+  /// **'لا توجد حصص في هذا الشهر.'**
   String get noEarnings;
 
   /// No description provided for @adjustments.
@@ -3239,85 +3239,85 @@ abstract class AppLocalizations {
   /// No description provided for @corrected.
   ///
   /// In ar, this message translates to:
-  /// **'اتصحّح'**
+  /// **'صُحّح'**
   String get corrected;
 
   /// No description provided for @meetingLinkTitle.
   ///
   /// In ar, this message translates to:
-  /// **'لينك الحصة بتاعك'**
+  /// **'رابط حصتك'**
   String get meetingLinkTitle;
 
   /// No description provided for @meetingLinkNeeded.
   ///
   /// In ar, this message translates to:
-  /// **'الأكاديمية شغالة على لينكات خارجية، ومفيش حصة هتفتح من غير لينكك.'**
+  /// **'تعمل الأكاديمية بروابط خارجية، ولن تُفتح أي حصة دون رابطك.'**
   String get meetingLinkNeeded;
 
   /// No description provided for @meetingLinkSave.
   ///
   /// In ar, this message translates to:
-  /// **'احفظ اللينك'**
+  /// **'احفظ الرابط'**
   String get meetingLinkSave;
 
   /// No description provided for @meetingLinkSaved.
   ///
   /// In ar, this message translates to:
-  /// **'اللينك اتحفظ.'**
+  /// **'حُفظ الرابط.'**
   String get meetingLinkSaved;
 
   /// No description provided for @meetingLinkRemoved.
   ///
   /// In ar, this message translates to:
-  /// **'اللينك اتشال.'**
+  /// **'أُزيل الرابط.'**
   String get meetingLinkRemoved;
 
   /// No description provided for @teacherCardTitle.
   ///
   /// In ar, this message translates to:
-  /// **'كارتي في صفحة الأكاديمية'**
+  /// **'بطاقتي في صفحة الأكاديمية'**
   String get teacherCardTitle;
 
   /// No description provided for @teacherCardLead.
   ///
   /// In ar, this message translates to:
-  /// **'الكارت اللي الأسر بتشوفه عنك في صفحة الأكاديمية. إنت اللي بتكتبه، وإنت اللي بتقرر يظهر ولا لأ. رقمك وإيميلك عمرهم ما بيظهروا.'**
+  /// **'البطاقة التي تراها الأسر عنك في صفحة الأكاديمية. أنت من يكتبها، وأنت من يقرّر أن تظهر أو لا. رقمك وبريدك الإلكتروني لا يظهران أبدًا.'**
   String get teacherCardLead;
 
   /// No description provided for @teacherCardShown.
   ///
   /// In ar, this message translates to:
-  /// **'اظهر في صفحة الأكاديمية'**
+  /// **'أظهرني في صفحة الأكاديمية'**
   String get teacherCardShown;
 
   /// No description provided for @teacherCardShownHint.
   ///
   /// In ar, this message translates to:
-  /// **'لو مقفول، كارتك مابيظهرش لحد.'**
+  /// **'ما دام مغلقًا، فلن يرى أحد بطاقتك.'**
   String get teacherCardShownHint;
 
   /// No description provided for @teacherCardName.
   ///
   /// In ar, this message translates to:
-  /// **'الاسم اللي يظهر'**
+  /// **'الاسم الذي يظهر'**
   String get teacherCardName;
 
   /// No description provided for @teacherCardNameHint.
   ///
   /// In ar, this message translates to:
-  /// **'زي «أ. سارة» أو اسمك الأول بس.'**
+  /// **'مثل «أ. سارة» أو اسمك الأول فقط.'**
   String get teacherCardNameHint;
 
   /// No description provided for @teacherCardBio.
   ///
   /// In ar, this message translates to:
-  /// **'كلمتين عنك'**
+  /// **'كلمات قليلة عنك'**
   String get teacherCardBio;
 
   /// No description provided for @teacherCardBioHint.
   ///
   /// In ar, this message translates to:
-  /// **'خبرتك واللي بتحب تدرّسه، لحد 280 حرف. من غير أرقام ولا لينكات.'**
+  /// **'خبرتك وما تحب تدريسه، حتى 280 حرفًا. دون أرقام أو روابط.'**
   String get teacherCardBioHint;
 
   /// No description provided for @teacherCardPhoto.
@@ -3329,13 +3329,13 @@ abstract class AppLocalizations {
   /// No description provided for @teacherCardPhotoHint.
   ///
   /// In ar, this message translates to:
-  /// **'PNG أو JPEG أو WebP لحد 1 ميجا. أي حد بيفتح الصفحة بيشوفها.'**
+  /// **'PNG أو JPEG أو WebP حتى 1 ميغابايت. يراها كل من يفتح الصفحة.'**
   String get teacherCardPhotoHint;
 
   /// No description provided for @teacherCardPickPhoto.
   ///
   /// In ar, this message translates to:
-  /// **'اختار صورة'**
+  /// **'اختر صورة'**
   String get teacherCardPickPhoto;
 
   /// No description provided for @teacherCardChangePhoto.
@@ -3347,19 +3347,19 @@ abstract class AppLocalizations {
   /// No description provided for @teacherCardRemovePhoto.
   ///
   /// In ar, this message translates to:
-  /// **'شيل الصورة'**
+  /// **'أزل الصورة'**
   String get teacherCardRemovePhoto;
 
   /// No description provided for @teacherCardTooBig.
   ///
   /// In ar, this message translates to:
-  /// **'الصورة أكبر من 1 ميجا.'**
+  /// **'الصورة أكبر من 1 ميغابايت.'**
   String get teacherCardTooBig;
 
   /// No description provided for @teacherCardPreview.
   ///
   /// In ar, this message translates to:
-  /// **'كده الأسر هتشوف كارتك'**
+  /// **'هكذا سترى الأسر بطاقتك'**
   String get teacherCardPreview;
 
   /// No description provided for @teacherCardSubjectsFrom.
@@ -3377,7 +3377,7 @@ abstract class AppLocalizations {
   /// No description provided for @teacherCardSaved.
   ///
   /// In ar, this message translates to:
-  /// **'كارتك اتحفظ.'**
+  /// **'حُفظت بطاقتك.'**
   String get teacherCardSaved;
 
   /// No description provided for @teacherCardLevels.
@@ -3389,13 +3389,13 @@ abstract class AppLocalizations {
   /// No description provided for @teacherCardFromStart.
   ///
   /// In ar, this message translates to:
-  /// **'من الأول'**
+  /// **'من البداية'**
   String get teacherCardFromStart;
 
   /// No description provided for @teacherCardToEnd.
   ///
   /// In ar, this message translates to:
-  /// **'للآخر'**
+  /// **'حتى النهاية'**
   String get teacherCardToEnd;
 
   /// No description provided for @performanceTitle.
@@ -3407,7 +3407,7 @@ abstract class AppLocalizations {
   /// No description provided for @performanceLead.
   ///
   /// In ar, this message translates to:
-  /// **'{days, plural, =1{آخر يوم} =2{آخر يومين} few{آخر {days} أيام} other{آخر {days} يوم}} · الحصص اللي سببها المنصة مابتتحسبش'**
+  /// **'{days, plural, =1{آخر يوم} =2{آخر يومين} few{آخر {days} أيام} other{آخر {days} يومًا}} · الحصص التي كان سببها المنصة لا تُحسب'**
   String performanceLead(int days);
 
   /// No description provided for @performanceGroupCommitment.
@@ -3437,37 +3437,37 @@ abstract class AppLocalizations {
   /// No description provided for @performanceGood.
   ///
   /// In ar, this message translates to:
-  /// **'تمام'**
+  /// **'جيد'**
   String get performanceGood;
 
   /// No description provided for @performanceBad.
   ///
   /// In ar, this message translates to:
-  /// **'محتاج تحسين'**
+  /// **'يحتاج إلى تحسين'**
   String get performanceBad;
 
   /// No description provided for @performanceNone.
   ///
   /// In ar, this message translates to:
-  /// **'لسه'**
+  /// **'ليس بعد'**
   String get performanceNone;
 
   /// No description provided for @performanceCounted.
   ///
   /// In ar, this message translates to:
-  /// **'اللي اتحسب'**
+  /// **'ما حُسب'**
   String get performanceCounted;
 
   /// No description provided for @performanceNoEvents.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش حاجة اتحسبت عليك. استمر!'**
+  /// **'لم يُحسب عليك شيء. استمر!'**
   String get performanceNoEvents;
 
   /// No description provided for @performanceExcluded.
   ///
   /// In ar, this message translates to:
-  /// **'مش محسوبة'**
+  /// **'غير محسوبة'**
   String get performanceExcluded;
 
   /// No description provided for @performanceRatings.
@@ -3479,13 +3479,13 @@ abstract class AppLocalizations {
   /// No description provided for @performanceAverage.
   ///
   /// In ar, this message translates to:
-  /// **'{avg} من 5 · {n, plural, =1{تقييم واحد} =2{تقييمين} few{{n} تقييمات} other{{n} تقييم}}'**
+  /// **'{avg} من 5 · {n, plural, =1{تقييم واحد} =2{تقييمان} few{{n} تقييمات} other{{n} تقييمًا}}'**
   String performanceAverage(String avg, int n);
 
   /// No description provided for @performanceNoRatings.
   ///
   /// In ar, this message translates to:
-  /// **'لسه مفيش تقييمات.'**
+  /// **'لا توجد تقييمات بعد.'**
   String get performanceNoRatings;
 
   /// No description provided for @performanceStars.
@@ -3509,7 +3509,7 @@ abstract class AppLocalizations {
   /// No description provided for @timeOffLead.
   ///
   /// In ar, this message translates to:
-  /// **'بتوقيتك: {zone} · الأكاديمية بترد عليك'**
+  /// **'بتوقيتك: {zone} · الأكاديمية ترد عليك'**
   String timeOffLead(String zone);
 
   /// No description provided for @wholeDays.
@@ -3533,7 +3533,7 @@ abstract class AppLocalizations {
   /// No description provided for @toDay.
   ///
   /// In ar, this message translates to:
-  /// **'لحد'**
+  /// **'حتى'**
   String get toDay;
 
   /// No description provided for @dayLabel.
@@ -3551,7 +3551,7 @@ abstract class AppLocalizations {
   /// No description provided for @toTime.
   ///
   /// In ar, this message translates to:
-  /// **'لحد الساعة'**
+  /// **'حتى الساعة'**
   String get toTime;
 
   /// No description provided for @reasonSick.
@@ -3587,13 +3587,13 @@ abstract class AppLocalizations {
   /// No description provided for @reasonOther.
   ///
   /// In ar, this message translates to:
-  /// **'حاجة تانية'**
+  /// **'سبب آخر'**
   String get reasonOther;
 
   /// No description provided for @sendRequest.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت الطلب'**
+  /// **'أرسل الطلب'**
   String get sendRequest;
 
   /// No description provided for @yourRequests.
@@ -3611,13 +3611,13 @@ abstract class AppLocalizations {
   /// No description provided for @requestSent.
   ///
   /// In ar, this message translates to:
-  /// **'الطلب اتبعت. هيوصلك الرد.'**
+  /// **'أُرسل الطلب. سيصلك الرد.'**
   String get requestSent;
 
   /// No description provided for @withdrawn.
   ///
   /// In ar, this message translates to:
-  /// **'الطلب اتسحب.'**
+  /// **'سُحب الطلب.'**
   String get withdrawn;
 
   /// No description provided for @academyHolidays.
@@ -3629,37 +3629,37 @@ abstract class AppLocalizations {
   /// No description provided for @coverState.
   ///
   /// In ar, this message translates to:
-  /// **'{covered} من {total, plural, =1{حصة واحدة} =2{حصتين} few{{total} حصص} other{{total} حصة}} ليها بديل'**
+  /// **'{covered} من {total, plural, =1{حصة واحدة} =2{حصتين} few{{total} حصص} other{{total} حصة}} لها بديل'**
   String coverState(int covered, int total);
 
   /// No description provided for @fillTimeOff.
   ///
   /// In ar, this message translates to:
-  /// **'اختار الأيام والسبب الأول.'**
+  /// **'اختر الأيام والسبب أولًا.'**
   String get fillTimeOff;
 
   /// No description provided for @noTimeOff.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش طلبات.'**
+  /// **'لا توجد طلبات.'**
   String get noTimeOff;
 
   /// No description provided for @youAreHere.
   ///
   /// In ar, this message translates to:
-  /// **'انت هنا!'**
+  /// **'أنت هنا!'**
   String get youAreHere;
 
   /// No description provided for @topRank.
   ///
   /// In ar, this message translates to:
-  /// **'وصلت لأعلى رتبة!'**
+  /// **'وصلت إلى أعلى رتبة!'**
   String get topRank;
 
   /// No description provided for @streak.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{لسه مفيش حصص ورا بعض} =1{حصة واحدة} =2{حصتين ورا بعض} few{{n} حصص ورا بعض} other{{n} حصة ورا بعض}}'**
+  /// **'{n, plural, =0{لا توجد حصص متتالية بعد} =1{حصة واحدة} =2{حصتان متتاليتان} few{{n} حصص متتالية} other{{n} حصة متتالية}}'**
   String streak(int n);
 
   /// No description provided for @badgesCount.
@@ -3671,25 +3671,25 @@ abstract class AppLocalizations {
   /// No description provided for @finishOn.
   ///
   /// In ar, this message translates to:
-  /// **'هتخلّص على كده'**
+  /// **'بهذه الوتيرة تنتهي'**
   String get finishOn;
 
   /// No description provided for @programDone.
   ///
   /// In ar, this message translates to:
-  /// **'خلّصت البرنامج!'**
+  /// **'أنهيت البرنامج!'**
   String get programDone;
 
   /// No description provided for @weeksLeftLevel.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{المستوى ده قرّب يخلص} =1{باقي أسبوع في المستوى ده} =2{باقي أسبوعين في المستوى ده} few{باقي {n} أسابيع في المستوى ده} other{باقي {n} أسبوع في المستوى ده}}'**
+  /// **'{n, plural, =0{أوشك هذا المستوى على الانتهاء} =1{بقي أسبوع في هذا المستوى} =2{بقي أسبوعان في هذا المستوى} few{بقيت {n} أسابيع في هذا المستوى} other{بقي {n} أسبوعًا في هذا المستوى}}'**
   String weeksLeftLevel(int n);
 
   /// No description provided for @fromLastMonth.
   ///
   /// In ar, this message translates to:
-  /// **'من الشهر اللي فات'**
+  /// **'مقارنة بالشهر الماضي'**
   String get fromLastMonth;
 
   /// No description provided for @doneMark.
@@ -3701,37 +3701,37 @@ abstract class AppLocalizations {
   /// No description provided for @chestReady.
   ///
   /// In ar, this message translates to:
-  /// **'الصندوق جاهز! دوس عليه'**
+  /// **'الصندوق جاهز! انقر عليه'**
   String get chestReady;
 
   /// No description provided for @chestOpened.
   ///
   /// In ar, this message translates to:
-  /// **'فتحت صندوق الأسبوع ده'**
+  /// **'فتحت صندوق هذا الأسبوع'**
   String get chestOpened;
 
   /// No description provided for @album.
   ///
   /// In ar, this message translates to:
-  /// **'ألبوم الستيكرز'**
+  /// **'ألبوم الملصقات'**
   String get album;
 
   /// No description provided for @albumLead.
   ///
   /// In ar, this message translates to:
-  /// **'كل صندوق بتفتحه بيجيبلك ستيكر جديد.'**
+  /// **'كل صندوق تفتحه يعطيك ملصقًا جديدًا.'**
   String get albumLead;
 
   /// No description provided for @newSticker.
   ///
   /// In ar, this message translates to:
-  /// **'ستيكر جديد في ألبومك!'**
+  /// **'ملصق جديد في ألبومك!'**
   String get newSticker;
 
   /// No description provided for @rewardKids.
   ///
   /// In ar, this message translates to:
-  /// **'برافو عليك!'**
+  /// **'أحسنت!'**
   String get rewardKids;
 
   /// No description provided for @rewardTitle.
@@ -3749,7 +3749,7 @@ abstract class AppLocalizations {
   /// No description provided for @awesome.
   ///
   /// In ar, this message translates to:
-  /// **'تمام!'**
+  /// **'رائع!'**
   String get awesome;
 
   /// No description provided for @cheerFromFamily.
@@ -3797,13 +3797,13 @@ abstract class AppLocalizations {
   /// No description provided for @cheerSent.
   ///
   /// In ar, this message translates to:
-  /// **'التشجيع وصل لـ {name}!'**
+  /// **'وصل التشجيع إلى {name}!'**
   String cheerSent(String name);
 
   /// No description provided for @cheersLeft.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{خلّصت تشجيعات النهارده} =1{فاضل تشجيع واحد النهارده} =2{فاضل تشجيعين النهارده} few{فاضل {n} تشجيعات النهارده} other{فاضل {n} تشجيع النهارده}}'**
+  /// **'{n, plural, =0{انتهت تشجيعات اليوم} =1{بقي تشجيع واحد اليوم} =2{بقي تشجيعان اليوم} few{بقيت {n} تشجيعات اليوم} other{بقي {n} تشجيعًا اليوم}}'**
   String cheersLeft(int n);
 
   /// No description provided for @sounds.
@@ -3815,19 +3815,19 @@ abstract class AppLocalizations {
   /// No description provided for @soundsHint.
   ///
   /// In ar, this message translates to:
-  /// **'أصوات خفيفة لما تدوس أو تستلم جايزة'**
+  /// **'أصوات خفيفة عند النقر أو عند استلام جائزة'**
   String get soundsHint;
 
   /// No description provided for @reportsOpen.
   ///
   /// In ar, this message translates to:
-  /// **'تقارير مستنياك'**
+  /// **'تقارير تنتظرك'**
   String get reportsOpen;
 
   /// No description provided for @reportsSent.
   ///
   /// In ar, this message translates to:
-  /// **'اتبعتت'**
+  /// **'أُرسلت'**
   String get reportsSent;
 
   /// No description provided for @writeReport.
@@ -3839,13 +3839,13 @@ abstract class AppLocalizations {
   /// No description provided for @waitingFor.
   ///
   /// In ar, this message translates to:
-  /// **'مستنيك: {what}'**
+  /// **'ينتظرك: {what}'**
   String waitingFor(String what);
 
   /// No description provided for @waitingNothing.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش حاجة مستنياك'**
+  /// **'لا شيء ينتظرك'**
   String get waitingNothing;
 
   /// No description provided for @bothWaiting.
@@ -3857,31 +3857,31 @@ abstract class AppLocalizations {
   /// No description provided for @reportsCount.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{مفيش تقارير} =1{تقرير واحد} =2{تقريرين} few{{n} تقارير} other{{n} تقرير}}'**
+  /// **'{n, plural, =0{لا توجد تقارير} =1{تقرير واحد} =2{تقريران} few{{n} تقارير} other{{n} تقريرًا}}'**
   String reportsCount(int n);
 
   /// No description provided for @homeworkCount.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{مفيش واجبات} =1{واجب واحد} =2{واجبين} few{{n} واجبات} other{{n} واجب}}'**
+  /// **'{n, plural, =0{لا توجد واجبات} =1{واجب واحد} =2{واجبان} few{{n} واجبات} other{{n} واجبًا}}'**
   String homeworkCount(int n);
 
   /// No description provided for @markingRow.
   ///
   /// In ar, this message translates to:
-  /// **'واجبات مستنية تصحيح'**
+  /// **'واجبات تنتظر التصحيح'**
   String get markingRow;
 
   /// No description provided for @markingNone.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش واجبات مستنية دلوقتي'**
+  /// **'لا توجد واجبات تنتظر الآن'**
   String get markingNone;
 
   /// No description provided for @noReportsWaiting.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش تقارير مستنياك. برافو!'**
+  /// **'لا توجد تقارير تنتظرك. أحسنت!'**
   String get noReportsWaiting;
 
   /// No description provided for @reportLesson.
@@ -3899,13 +3899,13 @@ abstract class AppLocalizations {
   /// No description provided for @todaysPlan.
   ///
   /// In ar, this message translates to:
-  /// **'خطة النهارده'**
+  /// **'خطة اليوم'**
   String get todaysPlan;
 
   /// No description provided for @planHint.
   ///
   /// In ar, this message translates to:
-  /// **'اختار اللي حصل في كل درس.'**
+  /// **'اختر ما حدث في كل درس.'**
   String get planHint;
 
   /// No description provided for @reportTitle.
@@ -3917,19 +3917,19 @@ abstract class AppLocalizations {
   /// No description provided for @workedOn.
   ///
   /// In ar, this message translates to:
-  /// **'اشتغلنا على إيه'**
+  /// **'على ماذا عملنا'**
   String get workedOn;
 
   /// No description provided for @howItWent.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة كانت إزاي'**
+  /// **'كيف كانت الحصة'**
   String get howItWent;
 
   /// No description provided for @talkSection.
   ///
   /// In ar, this message translates to:
-  /// **'الكلام'**
+  /// **'الملاحظات'**
   String get talkSection;
 
   /// No description provided for @keepDraft.
@@ -3941,19 +3941,19 @@ abstract class AppLocalizations {
   /// No description provided for @reportDraftSaved.
   ///
   /// In ar, this message translates to:
-  /// **'اتحفظت مسودة على الموبايل ده.'**
+  /// **'حُفظت مسودة على هذا الهاتف.'**
   String get reportDraftSaved;
 
   /// No description provided for @draftFrom.
   ///
   /// In ar, this message translates to:
-  /// **'كمّلت من مسودة اتحفظت من {ago}.'**
+  /// **'أكملت من مسودة حُفظت قبل {ago}.'**
   String draftFrom(String ago);
 
   /// No description provided for @discardDraft.
   ///
   /// In ar, this message translates to:
-  /// **'ابدأ من الأول'**
+  /// **'ابدأ من جديد'**
   String get discardDraft;
 
   /// No description provided for @voiceTitle.
@@ -3965,7 +3965,7 @@ abstract class AppLocalizations {
   /// No description provided for @voiceHint.
   ///
   /// In ar, this message translates to:
-  /// **'قول عملتوا إيه، والطالب كان عامل إزاي، والواجب. المسودة بتملا الخانات الفاضية بس، وإنت بتراجعها قبل ما تبعت.'**
+  /// **'قل ماذا فعلتم، وكيف كان أداء الطالب، والواجب. المسودة تملأ الخانات الفارغة فقط، وأنت تراجعها قبل أن ترسل.'**
   String get voiceHint;
 
   /// No description provided for @voiceRecord.
@@ -3977,43 +3977,43 @@ abstract class AppLocalizations {
   /// No description provided for @voiceWorking.
   ///
   /// In ar, this message translates to:
-  /// **'بنسمع ونكتب المسودة…'**
+  /// **'نستمع ونكتب المسودة…'**
   String get voiceWorking;
 
   /// No description provided for @voiceDone.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{الرسالة مازوّدتش حاجة جديدة: الفورم كان فيه كل ده.} =1{المسودة ملت خانة واحدة. راجعها قبل ما تبعت.} =2{المسودة ملت خانتين. راجعهم قبل ما تبعت.} few{المسودة ملت {n} خانات. راجعهم قبل ما تبعت.} other{المسودة ملت {n} خانة. راجعهم قبل ما تبعت.}}'**
+  /// **'{n, plural, =0{لم تُضف الرسالة شيئًا جديدًا: كان كل ذلك في النموذج.} =1{ملأت المسودة خانة واحدة. راجعها قبل أن ترسل.} =2{ملأت المسودة خانتين. راجعهما قبل أن ترسل.} few{ملأت المسودة {n} خانات. راجعها قبل أن ترسل.} other{ملأت المسودة {n} خانة. راجعها قبل أن ترسل.}}'**
   String voiceDone(int n);
 
   /// No description provided for @voiceHeard.
   ///
   /// In ar, this message translates to:
-  /// **'اللي اتسمع'**
+  /// **'ما سُمع'**
   String get voiceHeard;
 
   /// No description provided for @voiceUnsure.
   ///
   /// In ar, this message translates to:
-  /// **'راجع دول: المسودة مكانتش متأكدة'**
+  /// **'راجع هذه: لم تكن المسودة متأكدة منها'**
   String get voiceUnsure;
 
   /// No description provided for @voiceLeft.
   ///
   /// In ar, this message translates to:
-  /// **'لسه محتاج: {fields}'**
+  /// **'ما زال ينقص: {fields}'**
   String voiceLeft(String fields);
 
   /// No description provided for @voiceLimit.
   ///
   /// In ar, this message translates to:
-  /// **'لحد دقيقتين'**
+  /// **'حتى دقيقتين'**
   String get voiceLimit;
 
   /// No description provided for @voiceKept.
   ///
   /// In ar, this message translates to:
-  /// **'التسجيل بيتمسح أول ما يتسمع، وعمره ما بيتحفظ.'**
+  /// **'يُحذف التسجيل فور سماعه، ولا يُحفظ أبدًا.'**
   String get voiceKept;
 
   /// No description provided for @suggested.
@@ -4037,13 +4037,13 @@ abstract class AppLocalizations {
   /// No description provided for @reciteToggle.
   ///
   /// In ar, this message translates to:
-  /// **'تصحيح التسميع آلي'**
+  /// **'تصحيح التسميع آليًا'**
   String get reciteToggle;
 
   /// No description provided for @reciteHint.
   ///
   /// In ar, this message translates to:
-  /// **'لما الطالب يسلّم تسجيل، بنعلّم لك على الكلمات اللي ناقصة أو غلط. ليك إنت بس، والأسرة مابتشوفوش.'**
+  /// **'عندما يسلّم الطالب تسجيلًا، نعلّم لك الكلمات الناقصة أو الخاطئة. هذا لك وحدك، والأسرة لا تراه.'**
   String get reciteHint;
 
   /// No description provided for @reciteSuggestion.
@@ -4067,13 +4067,13 @@ abstract class AppLocalizations {
   /// No description provided for @reciteChooseSurah.
   ///
   /// In ar, this message translates to:
-  /// **'اختار السورة'**
+  /// **'اختر السورة'**
   String get reciteChooseSurah;
 
   /// No description provided for @reciteSearch.
   ///
   /// In ar, this message translates to:
-  /// **'دوّر على سورة'**
+  /// **'ابحث عن سورة'**
   String get reciteSearch;
 
   /// No description provided for @reciteFrom.
@@ -4085,7 +4085,7 @@ abstract class AppLocalizations {
   /// No description provided for @reciteTo.
   ///
   /// In ar, this message translates to:
-  /// **'لحد آية'**
+  /// **'إلى آية'**
   String get reciteTo;
 
   /// No description provided for @reciteWhat.
@@ -4103,7 +4103,7 @@ abstract class AppLocalizations {
   /// No description provided for @reciteWrong.
   ///
   /// In ar, this message translates to:
-  /// **'غلط'**
+  /// **'خطأ'**
   String get reciteWrong;
 
   /// No description provided for @reciteExtra.
@@ -4115,13 +4115,13 @@ abstract class AppLocalizations {
   /// No description provided for @reciteSaid.
   ///
   /// In ar, this message translates to:
-  /// **'اتقال: {word}'**
+  /// **'قيل: {word}'**
   String reciteSaid(String word);
 
   /// No description provided for @reciteHeard.
   ///
   /// In ar, this message translates to:
-  /// **'اللي اتسمع'**
+  /// **'ما سُمع'**
   String get reciteHeard;
 
   /// No description provided for @drafts.
@@ -4133,19 +4133,19 @@ abstract class AppLocalizations {
   /// No description provided for @savedAgo.
   ///
   /// In ar, this message translates to:
-  /// **'اتحفظت من {ago}'**
+  /// **'حُفظت قبل {ago}'**
   String savedAgo(String ago);
 
   /// No description provided for @continueDraft.
   ///
   /// In ar, this message translates to:
-  /// **'كمّل'**
+  /// **'أكمل'**
   String get continueDraft;
 
   /// No description provided for @reasonNext.
   ///
   /// In ar, this message translates to:
-  /// **'الدرس الجاي'**
+  /// **'الدرس القادم'**
   String get reasonNext;
 
   /// No description provided for @reasonReview.
@@ -4157,25 +4157,25 @@ abstract class AppLocalizations {
   /// No description provided for @outcomeIntroduced.
   ///
   /// In ar, this message translates to:
-  /// **'اتشرح'**
+  /// **'شُرح'**
   String get outcomeIntroduced;
 
   /// No description provided for @outcomePracticed.
   ///
   /// In ar, this message translates to:
-  /// **'اتدرّب عليه'**
+  /// **'تدرّب عليه'**
   String get outcomePracticed;
 
   /// No description provided for @outcomeMastered.
   ///
   /// In ar, this message translates to:
-  /// **'اتقن'**
+  /// **'أتقنه'**
   String get outcomeMastered;
 
   /// No description provided for @outcomeNeedsReview.
   ///
   /// In ar, this message translates to:
-  /// **'محتاج مراجعة'**
+  /// **'يحتاج إلى مراجعة'**
   String get outcomeNeedsReview;
 
   /// No description provided for @itemScore.
@@ -4193,31 +4193,31 @@ abstract class AppLocalizations {
   /// No description provided for @addNote.
   ///
   /// In ar, this message translates to:
-  /// **'ضيف ملاحظة'**
+  /// **'أضف ملاحظة'**
   String get addNote;
 
   /// No description provided for @addLesson.
   ///
   /// In ar, this message translates to:
-  /// **'ضيف درس'**
+  /// **'أضف درسًا'**
   String get addLesson;
 
   /// No description provided for @pickLesson.
   ///
   /// In ar, this message translates to:
-  /// **'اختار درس'**
+  /// **'اختر درسًا'**
   String get pickLesson;
 
   /// No description provided for @searchLessons.
   ///
   /// In ar, this message translates to:
-  /// **'دوّر على درس'**
+  /// **'ابحث عن درس'**
   String get searchLessons;
 
   /// No description provided for @remove.
   ///
   /// In ar, this message translates to:
-  /// **'شيل'**
+  /// **'أزل'**
   String get remove;
 
   /// No description provided for @notesForFamily.
@@ -4235,7 +4235,7 @@ abstract class AppLocalizations {
   /// No description provided for @notesInternalHint.
   ///
   /// In ar, this message translates to:
-  /// **'للأكاديمية بس، الأسرة مابتشوفهاش.'**
+  /// **'للأكاديمية فقط، ولا تراها الأسرة.'**
   String get notesInternalHint;
 
   /// No description provided for @questionsTitle.
@@ -4247,31 +4247,31 @@ abstract class AppLocalizations {
   /// No description provided for @questionsHint.
   ///
   /// In ar, this message translates to:
-  /// **'أسئلة الأكاديمية بتسألها في كل تقرير للمادة دي.'**
+  /// **'أسئلة تطرحها الأكاديمية في كل تقرير لهذه المادة.'**
   String get questionsHint;
 
   /// No description provided for @answerRequired.
   ///
   /// In ar, this message translates to:
-  /// **'جاوب على \"{question}\".'**
+  /// **'أجب عن \"{question}\".'**
   String answerRequired(String question);
 
   /// No description provided for @answerYes.
   ///
   /// In ar, this message translates to:
-  /// **'أيوه'**
+  /// **'نعم'**
   String get answerYes;
 
   /// No description provided for @answerNo.
   ///
   /// In ar, this message translates to:
-  /// **'لأ'**
+  /// **'لا'**
   String get answerNo;
 
   /// No description provided for @academyOnly.
   ///
   /// In ar, this message translates to:
-  /// **'للأكاديمية بس'**
+  /// **'للأكاديمية فقط'**
   String get academyOnly;
 
   /// No description provided for @lessonMaterials.
@@ -4283,7 +4283,7 @@ abstract class AppLocalizations {
   /// No description provided for @teachersOnly.
   ///
   /// In ar, this message translates to:
-  /// **'للمدرّس بس'**
+  /// **'للمعلّم فقط'**
   String get teachersOnly;
 
   /// No description provided for @recordingsTitle.
@@ -4301,7 +4301,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingsOff.
   ///
   /// In ar, this message translates to:
-  /// **'الأكاديمية مش بتسجل الحصص دلوقتي.'**
+  /// **'لا تسجّل الأكاديمية الحصص الآن.'**
   String get recordingsOff;
 
   /// No description provided for @recordingsOf.
@@ -4319,19 +4319,19 @@ abstract class AppLocalizations {
   /// No description provided for @recordingsEmpty.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش تسجيلات لسه.'**
+  /// **'لا توجد تسجيلات بعد.'**
   String get recordingsEmpty;
 
   /// No description provided for @recordingsNotShared.
   ///
   /// In ar, this message translates to:
-  /// **'الأكاديمية مش بتعرض التسجيلات هنا.'**
+  /// **'لا تعرض الأكاديمية التسجيلات هنا.'**
   String get recordingsNotShared;
 
   /// No description provided for @recordingWatch.
   ///
   /// In ar, this message translates to:
-  /// **'شوف'**
+  /// **'شاهد'**
   String get recordingWatch;
 
   /// No description provided for @recordingAgreed.
@@ -4343,7 +4343,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingNotAgreed.
   ///
   /// In ar, this message translates to:
-  /// **'مش موافق'**
+  /// **'غير موافق'**
   String get recordingNotAgreed;
 
   /// No description provided for @recordingAgree.
@@ -4355,7 +4355,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingAgreedDone.
   ///
   /// In ar, this message translates to:
-  /// **'شكرًا. الحصص ممكن تتسجل من دلوقتي.'**
+  /// **'شكرًا. يمكن تسجيل الحصص من الآن.'**
   String get recordingAgreedDone;
 
   /// No description provided for @recordingWithdraw.
@@ -4367,19 +4367,19 @@ abstract class AppLocalizations {
   /// No description provided for @recordingWithdrawConfirm.
   ///
   /// In ar, this message translates to:
-  /// **'متأكد؟ أي تسجيل شغال هيقف، ومش هيتسجل حاجة تاني.'**
+  /// **'هل أنت متأكد؟ سيتوقف أي تسجيل جارٍ، ولن يُسجَّل شيء بعد ذلك.'**
   String get recordingWithdrawConfirm;
 
   /// No description provided for @recordingWithdrawn.
   ///
   /// In ar, this message translates to:
-  /// **'الموافقة اتسحبت، ومش هيتسجل حاجة تاني.'**
+  /// **'سُحبت الموافقة، ولن يُسجَّل شيء بعد ذلك.'**
   String get recordingWithdrawn;
 
   /// No description provided for @recordingUntil.
   ///
   /// In ar, this message translates to:
-  /// **'متاح لحد {date}'**
+  /// **'متاح حتى {date}'**
   String recordingUntil(String date);
 
   /// No description provided for @recordingVideo.
@@ -4397,13 +4397,13 @@ abstract class AppLocalizations {
   /// No description provided for @recordingLogged.
   ///
   /// In ar, this message translates to:
-  /// **'فتحك للتسجيل بيتسجل باسمك.'**
+  /// **'يُسجَّل فتحك للتسجيل باسمك.'**
   String get recordingLogged;
 
   /// No description provided for @recordingOn.
   ///
   /// In ar, this message translates to:
-  /// **'بيسجل'**
+  /// **'يسجّل'**
   String get recordingOn;
 
   /// No description provided for @recordStart.
@@ -4415,13 +4415,13 @@ abstract class AppLocalizations {
   /// No description provided for @recordStop.
   ///
   /// In ar, this message translates to:
-  /// **'وقّف التسجيل'**
+  /// **'أوقف التسجيل'**
   String get recordStop;
 
   /// No description provided for @recordingMissing.
   ///
   /// In ar, this message translates to:
-  /// **'مينفعش نسجل لحد ما يوافقوا على التسجيل: {names}.'**
+  /// **'لا يمكن التسجيل حتى يوافقوا على التسجيل: {names}.'**
   String recordingMissing(String names);
 
   /// No description provided for @absenceNote.
@@ -4433,13 +4433,13 @@ abstract class AppLocalizations {
   /// No description provided for @absenceHint.
   ///
   /// In ar, this message translates to:
-  /// **'الطالب ماحضرش. اكتب اللي حصل وأي حاجة الأسرة محتاجة تعرفها.'**
+  /// **'لم يحضر الطالب. اكتب ما حدث وأي شيء تحتاج الأسرة إلى معرفته.'**
   String get absenceHint;
 
   /// No description provided for @giveHomework.
   ///
   /// In ar, this message translates to:
-  /// **'ادّي واجب'**
+  /// **'أعطِ واجبًا'**
   String get giveHomework;
 
   /// No description provided for @homeworkField.
@@ -4457,13 +4457,13 @@ abstract class AppLocalizations {
   /// No description provided for @acceptsLabel.
   ///
   /// In ar, this message translates to:
-  /// **'بيتسلّم'**
+  /// **'يُسلَّم'**
   String get acceptsLabel;
 
   /// No description provided for @acceptsAny.
   ///
   /// In ar, this message translates to:
-  /// **'أي حاجة'**
+  /// **'أي شيء'**
   String get acceptsAny;
 
   /// No description provided for @acceptsText.
@@ -4487,19 +4487,19 @@ abstract class AppLocalizations {
   /// No description provided for @dueIn.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{بعد يوم} =2{بعد يومين} few{بعد {n} أيام} other{بعد {n} يوم}}'**
+  /// **'{n, plural, =1{بعد يوم} =2{بعد يومين} few{بعد {n} أيام} other{بعد {n} يومًا}}'**
   String dueIn(int n);
 
   /// No description provided for @homeworkLocked.
   ///
   /// In ar, this message translates to:
-  /// **'الطالب سلّم الواجب ده، فمش هيتغير.'**
+  /// **'سلّم الطالب هذا الواجب، فلن يتغيّر.'**
   String get homeworkLocked;
 
   /// No description provided for @sendReport.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت التقرير'**
+  /// **'أرسل التقرير'**
   String get sendReport;
 
   /// No description provided for @updateReport.
@@ -4511,25 +4511,25 @@ abstract class AppLocalizations {
   /// No description provided for @reportSent.
   ///
   /// In ar, this message translates to:
-  /// **'التقرير اتبعت.'**
+  /// **'أُرسل التقرير.'**
   String get reportSent;
 
   /// No description provided for @reportLocked.
   ///
   /// In ar, this message translates to:
-  /// **'الأكاديمية راجعت التقرير ده، فمش هيتغير.'**
+  /// **'راجعت الأكاديمية هذا التقرير، فلن يتغيّر.'**
   String get reportLocked;
 
   /// No description provided for @pickRatings.
   ///
   /// In ar, this message translates to:
-  /// **'اختار التركيز والمستوى العام.'**
+  /// **'اختر التركيز والمستوى العام.'**
   String get pickRatings;
 
   /// No description provided for @pickOutcomes.
   ///
   /// In ar, this message translates to:
-  /// **'اختار اللي حصل في كل درس.'**
+  /// **'اختر ما حدث في كل درس.'**
   String get pickOutcomes;
 
   /// No description provided for @markTitle.
@@ -4541,19 +4541,19 @@ abstract class AppLocalizations {
   /// No description provided for @markWaiting.
   ///
   /// In ar, this message translates to:
-  /// **'مستني التصحيح'**
+  /// **'بانتظار التصحيح'**
   String get markWaiting;
 
   /// No description provided for @markDone.
   ///
   /// In ar, this message translates to:
-  /// **'اتصحّح'**
+  /// **'صُحّح'**
   String get markDone;
 
   /// No description provided for @noHomeworkToMark.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش واجبات مستنية تصحيح.'**
+  /// **'لا توجد واجبات تنتظر التصحيح.'**
   String get noHomeworkToMark;
 
   /// No description provided for @gradeLabel.
@@ -4577,19 +4577,19 @@ abstract class AppLocalizations {
   /// No description provided for @marked.
   ///
   /// In ar, this message translates to:
-  /// **'اتسجّل التصحيح.'**
+  /// **'سُجّل التصحيح.'**
   String get marked;
 
   /// No description provided for @handedInAt.
   ///
   /// In ar, this message translates to:
-  /// **'اتسلّم {when}'**
+  /// **'سُلّم {when}'**
   String handedInAt(String when);
 
   /// No description provided for @fileOnWeb.
   ///
   /// In ar, this message translates to:
-  /// **'الملف ده بيتفتح من الموقع.'**
+  /// **'يُفتح هذا الملف من الموقع.'**
   String get fileOnWeb;
 
   /// No description provided for @showPicture.
@@ -4607,19 +4607,19 @@ abstract class AppLocalizations {
   /// No description provided for @pause.
   ///
   /// In ar, this message translates to:
-  /// **'وقّف'**
+  /// **'أوقف'**
   String get pause;
 
   /// No description provided for @cannotPlay.
   ///
   /// In ar, this message translates to:
-  /// **'مش قادرين نشغّل التسجيل ده هنا.'**
+  /// **'لا نستطيع تشغيل هذا التسجيل هنا.'**
   String get cannotPlay;
 
   /// No description provided for @waitingTap.
   ///
   /// In ar, this message translates to:
-  /// **'دوس عشان تبدأ'**
+  /// **'انقر لتبدأ'**
   String get waitingTap;
 
   /// No description provided for @recordVoice.
@@ -4637,55 +4637,55 @@ abstract class AppLocalizations {
   /// No description provided for @recordingNow.
   ///
   /// In ar, this message translates to:
-  /// **'بيسجّل… {time}'**
+  /// **'يسجّل… {time}'**
   String recordingNow(String time);
 
   /// No description provided for @stopRecording.
   ///
   /// In ar, this message translates to:
-  /// **'وقّف التسجيل'**
+  /// **'أوقف التسجيل'**
   String get stopRecording;
 
   /// No description provided for @recordAgain.
   ///
   /// In ar, this message translates to:
-  /// **'سجّل تاني'**
+  /// **'سجّل مرة أخرى'**
   String get recordAgain;
 
   /// No description provided for @attachFile.
   ///
   /// In ar, this message translates to:
-  /// **'ضيف ملف'**
+  /// **'أضف ملفًا'**
   String get attachFile;
 
   /// No description provided for @attachPicture.
   ///
   /// In ar, this message translates to:
-  /// **'ضيف صورة أو PDF'**
+  /// **'أضف صورة أو ملف PDF'**
   String get attachPicture;
 
   /// No description provided for @micDenied.
   ///
   /// In ar, this message translates to:
-  /// **'محتاجين إذن المايك عشان تسجّل. فعّله من إعدادات الموبايل.'**
+  /// **'نحتاج إلى إذن الميكروفون لتسجّل. فعّله من إعدادات الهاتف.'**
   String get micDenied;
 
   /// No description provided for @recordingLimit.
   ///
   /// In ar, this message translates to:
-  /// **'التسجيل وقف عند {n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}.'**
+  /// **'توقف التسجيل عند {n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقائق} other{{n} دقيقة}}.'**
   String recordingLimit(int n);
 
   /// No description provided for @fileTooBig.
   ///
   /// In ar, this message translates to:
-  /// **'الملف أكبر من 25 ميجا.'**
+  /// **'الملف أكبر من 25 ميغابايت.'**
   String get fileTooBig;
 
   /// No description provided for @answerOptional.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب حاجة كمان (اختياري)'**
+  /// **'اكتب شيئًا آخر (اختياري)'**
   String get answerOptional;
 
   /// No description provided for @myHours.
@@ -4715,7 +4715,7 @@ abstract class AppLocalizations {
   /// No description provided for @noHoursYet.
   ///
   /// In ar, this message translates to:
-  /// **'لسه مفيش مواعيد معتمدة.'**
+  /// **'لا توجد مواعيد معتمدة بعد.'**
   String get noHoursYet;
 
   /// No description provided for @proposeHours.
@@ -4733,13 +4733,13 @@ abstract class AppLocalizations {
   /// No description provided for @waitingOnAcademy.
   ///
   /// In ar, this message translates to:
-  /// **'مستني رد الأكاديمية'**
+  /// **'بانتظار رد الأكاديمية'**
   String get waitingOnAcademy;
 
   /// No description provided for @waitingOnYou.
   ///
   /// In ar, this message translates to:
-  /// **'مستني ردك'**
+  /// **'بانتظار ردك'**
   String get waitingOnYou;
 
   /// No description provided for @startsOn.
@@ -4751,19 +4751,19 @@ abstract class AppLocalizations {
   /// No description provided for @academyCounter.
   ///
   /// In ar, this message translates to:
-  /// **'الأكاديمية عدّلت مقترحك. ده اللي اتغير:'**
+  /// **'عدّلت الأكاديمية مقترحك. هذا ما تغيّر:'**
   String get academyCounter;
 
   /// No description provided for @timeAdded.
   ///
   /// In ar, this message translates to:
-  /// **'اتضاف'**
+  /// **'أُضيف'**
   String get timeAdded;
 
   /// No description provided for @timeRemoved.
   ///
   /// In ar, this message translates to:
-  /// **'اتشال'**
+  /// **'أُزيل'**
   String get timeRemoved;
 
   /// No description provided for @acceptCounter.
@@ -4781,25 +4781,25 @@ abstract class AppLocalizations {
   /// No description provided for @withdrawConfirm.
   ///
   /// In ar, this message translates to:
-  /// **'تسحب المقترح؟ المواعيد المعتمدة هتفضل زي ما هي.'**
+  /// **'أتسحب المقترح؟ ستبقى المواعيد المعتمدة كما هي.'**
   String get withdrawConfirm;
 
   /// No description provided for @proposalAccepted.
   ///
   /// In ar, this message translates to:
-  /// **'مواعيدك اتعتمدت.'**
+  /// **'اعتُمدت مواعيدك.'**
   String get proposalAccepted;
 
   /// No description provided for @proposalSent.
   ///
   /// In ar, this message translates to:
-  /// **'المقترح اتبعت للأكاديمية.'**
+  /// **'أُرسل المقترح إلى الأكاديمية.'**
   String get proposalSent;
 
   /// No description provided for @draftSaved.
   ///
   /// In ar, this message translates to:
-  /// **'المسودة اتحفظت.'**
+  /// **'حُفظت المسودة.'**
   String get draftSaved;
 
   /// No description provided for @conversation.
@@ -4823,13 +4823,13 @@ abstract class AppLocalizations {
   /// No description provided for @addTime.
   ///
   /// In ar, this message translates to:
-  /// **'ضيف وقت'**
+  /// **'أضف وقتًا'**
   String get addTime;
 
   /// No description provided for @dayOff.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش'**
+  /// **'لا يوجد'**
   String get dayOff;
 
   /// No description provided for @effectiveFrom.
@@ -4841,19 +4841,19 @@ abstract class AppLocalizations {
   /// No description provided for @reduceNotice.
   ///
   /// In ar, this message translates to:
-  /// **'لو هتقلل ساعات، أقرب بداية {date}.'**
+  /// **'إن كنت ستقلّل الساعات، فأقرب بداية {date}.'**
   String reduceNotice(String date);
 
   /// No description provided for @minHours.
   ///
   /// In ar, this message translates to:
-  /// **'أقل ساعات في الأسبوع'**
+  /// **'أقل عدد من الساعات في الأسبوع'**
   String get minHours;
 
   /// No description provided for @maxHours.
   ///
   /// In ar, this message translates to:
-  /// **'أكتر ساعات في الأسبوع'**
+  /// **'أكثر عدد من الساعات في الأسبوع'**
   String get maxHours;
 
   /// No description provided for @proposalNote.
@@ -4871,19 +4871,19 @@ abstract class AppLocalizations {
   /// No description provided for @sendProposal.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت للأكاديمية'**
+  /// **'أرسل إلى الأكاديمية'**
   String get sendProposal;
 
   /// No description provided for @endAfterStart.
   ///
   /// In ar, this message translates to:
-  /// **'وقت النهاية لازم يكون بعد البداية.'**
+  /// **'يجب أن يكون وقت النهاية بعد البداية.'**
   String get endAfterStart;
 
   /// No description provided for @untilMidnight.
   ///
   /// In ar, this message translates to:
-  /// **'لحد نص الليل'**
+  /// **'حتى منتصف الليل'**
   String get untilMidnight;
 
   /// No description provided for @inboxTitle.
@@ -4895,19 +4895,19 @@ abstract class AppLocalizations {
   /// No description provided for @markAllRead.
   ///
   /// In ar, this message translates to:
-  /// **'علّم الكل مقروء'**
+  /// **'علّم الكل كمقروء'**
   String get markAllRead;
 
   /// No description provided for @noNotifications.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش إشعارات.'**
+  /// **'لا توجد إشعارات.'**
   String get noNotifications;
 
   /// No description provided for @loadMore.
   ///
   /// In ar, this message translates to:
-  /// **'اعرض أكتر'**
+  /// **'اعرض المزيد'**
   String get loadMore;
 
   /// No description provided for @notificationChoices.
@@ -4919,7 +4919,7 @@ abstract class AppLocalizations {
   /// No description provided for @saved.
   ///
   /// In ar, this message translates to:
-  /// **'اتحفظ.'**
+  /// **'حُفظ.'**
   String get saved;
 
   /// No description provided for @openIt.
@@ -4931,19 +4931,19 @@ abstract class AppLocalizations {
   /// No description provided for @unreadCount.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{مفيش جديد} =1{إشعار جديد} =2{إشعارين جداد} few{{n} إشعارات جديدة} other{{n} إشعار جديد}}'**
+  /// **'{n, plural, =0{لا جديد} =1{إشعار جديد} =2{إشعاران جديدان} few{{n} إشعارات جديدة} other{{n} إشعارًا جديدًا}}'**
   String unreadCount(int n);
 
   /// No description provided for @updateTitle.
   ///
   /// In ar, this message translates to:
-  /// **'فيه نسخة جديدة من التطبيق'**
+  /// **'يوجد إصدار جديد من التطبيق'**
   String get updateTitle;
 
   /// No description provided for @updateBody.
   ///
   /// In ar, this message translates to:
-  /// **'النسخة اللي عندك قديمة ومش هتشتغل مع الأكاديمية. حدّثها عشان تكمل.'**
+  /// **'الإصدار الذي لديك قديم ولن يعمل مع الأكاديمية. حدّثه لتتابع.'**
   String get updateBody;
 
   /// No description provided for @updateNow.
@@ -4955,7 +4955,7 @@ abstract class AppLocalizations {
   /// No description provided for @updateFromStore.
   ///
   /// In ar, this message translates to:
-  /// **'حدّثه من متجر التطبيقات على موبايلك.'**
+  /// **'حدّثه من متجر التطبيقات على هاتفك.'**
   String get updateFromStore;
 
   /// No description provided for @helpTitle.
@@ -4973,13 +4973,13 @@ abstract class AppLocalizations {
   /// No description provided for @helpLead.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب للأكاديمية عن حصة، أو دفع، أو مشكلة تقنية، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.'**
+  /// **'اكتب للأكاديمية عن حصة، أو دفعة، أو مشكلة تقنية، أو أي شيء آخر. يصلك الرد هنا وفي رسالة.'**
   String get helpLead;
 
   /// No description provided for @supportLead.
   ///
   /// In ar, this message translates to:
-  /// **'اكتب للأكاديمية عن مشكلة تقنية، أو مرتبك، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.'**
+  /// **'اكتب للأكاديمية عن مشكلة تقنية، أو راتبك، أو أي شيء آخر. يصلك الرد هنا وفي رسالة.'**
   String get supportLead;
 
   /// No description provided for @ticketNew.
@@ -4997,31 +4997,31 @@ abstract class AppLocalizations {
   /// No description provided for @ticketKind.
   ///
   /// In ar, this message translates to:
-  /// **'عن إيه؟'**
+  /// **'عمّ تكتب؟'**
   String get ticketKind;
 
   /// No description provided for @ticketHintComplaint.
   ///
   /// In ar, this message translates to:
-  /// **'على مدرّس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.'**
+  /// **'عن معلّم أو حصة. تبحث الأكاديمية في الأمر وتخبرك بما فعلت.'**
   String get ticketHintComplaint;
 
   /// No description provided for @ticketHintBilling.
   ///
   /// In ar, this message translates to:
-  /// **'فاتورة، أو دفعة، أو فلوس راجعة، أو باقتك.'**
+  /// **'فاتورة، أو دفعة، أو مبلغ مسترد، أو باقتك.'**
   String get ticketHintBilling;
 
   /// No description provided for @ticketHintPay.
   ///
   /// In ar, this message translates to:
-  /// **'مرتبك أو كشف حسابك.'**
+  /// **'راتبك أو كشف حسابك.'**
   String get ticketHintPay;
 
   /// No description provided for @ticketHintTechnical.
   ///
   /// In ar, this message translates to:
-  /// **'الفصل، أو التطبيق، أو الدخول مش شغال.'**
+  /// **'الفصل أو التطبيق أو الدخول لا يعمل.'**
   String get ticketHintTechnical;
 
   /// No description provided for @ticketHintOther.
@@ -5033,13 +5033,13 @@ abstract class AppLocalizations {
   /// No description provided for @ticketLesson.
   ///
   /// In ar, this message translates to:
-  /// **'أنهي حصة؟ (لو فيه)'**
+  /// **'أي حصة؟ (إن وُجدت)'**
   String get ticketLesson;
 
   /// No description provided for @ticketNoLesson.
   ///
   /// In ar, this message translates to:
-  /// **'مش حصة معينة'**
+  /// **'ليست حصة معيّنة'**
   String get ticketNoLesson;
 
   /// No description provided for @ticketSubject.
@@ -5051,37 +5051,37 @@ abstract class AppLocalizations {
   /// No description provided for @ticketSubjectHint.
   ///
   /// In ar, this message translates to:
-  /// **'في كلمتين'**
+  /// **'في كلمات قليلة'**
   String get ticketSubjectHint;
 
   /// No description provided for @ticketBody.
   ///
   /// In ar, this message translates to:
-  /// **'احكيلنا حصل إيه'**
+  /// **'أخبرنا بما حدث'**
   String get ticketBody;
 
   /// No description provided for @ticketAttach.
   ///
   /// In ar, this message translates to:
-  /// **'ارفق صورة أو PDF'**
+  /// **'أرفق صورة أو ملف PDF'**
   String get ticketAttach;
 
   /// No description provided for @ticketTooBig.
   ///
   /// In ar, this message translates to:
-  /// **'الملف أكبر من 10 ميجا.'**
+  /// **'الملف أكبر من 10 ميغابايت.'**
   String get ticketTooBig;
 
   /// No description provided for @ticketSent.
   ///
   /// In ar, this message translates to:
-  /// **'اتبعتت. الأكاديمية هترد هنا.'**
+  /// **'أُرسلت. سترد الأكاديمية هنا.'**
   String get ticketSent;
 
   /// No description provided for @ticketsEmpty.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش تذاكر لسه. لو فيه أي حاجة مش مظبوطة، اكتبلنا.'**
+  /// **'لا توجد تذاكر بعد. إن كان هناك أي شيء غير سليم، فاكتب إلينا.'**
   String get ticketsEmpty;
 
   /// No description provided for @ticketsMine.
@@ -5099,13 +5099,13 @@ abstract class AppLocalizations {
   /// No description provided for @ticketYourTurn.
   ///
   /// In ar, this message translates to:
-  /// **'الأكاديمية ردت'**
+  /// **'ردّت الأكاديمية'**
   String get ticketYourTurn;
 
   /// No description provided for @ticketYou.
   ///
   /// In ar, this message translates to:
-  /// **'انت'**
+  /// **'أنت'**
   String get ticketYou;
 
   /// No description provided for @ticketAcademy.
@@ -5123,31 +5123,31 @@ abstract class AppLocalizations {
   /// No description provided for @ticketReopen.
   ///
   /// In ar, this message translates to:
-  /// **'لسه ماتحلّتش'**
+  /// **'لم تُحَل بعد'**
   String get ticketReopen;
 
   /// No description provided for @ticketReopenHint.
   ///
   /// In ar, this message translates to:
-  /// **'لسه ماتحلّتش؟ تقدر تفتحها تاني لحد {date}.'**
+  /// **'لم تُحَل بعد؟ يمكنك إعادة فتحها حتى {date}.'**
   String ticketReopenHint(String date);
 
   /// No description provided for @ticketClose.
   ///
   /// In ar, this message translates to:
-  /// **'اقفل التذكرة'**
+  /// **'أغلق التذكرة'**
   String get ticketClose;
 
   /// No description provided for @ticketCloseHint.
   ///
   /// In ar, this message translates to:
-  /// **'اقفلها لما تتحل أو لو مابقيتش محتاجها. مش هتاخد رسايل تاني.'**
+  /// **'أغلقها عندما تُحَل أو إن لم تعد تحتاج إليها. لن تستقبل رسائل بعد ذلك.'**
   String get ticketCloseHint;
 
   /// No description provided for @ticketClosed.
   ///
   /// In ar, this message translates to:
-  /// **'التذكرة دي اتقفلت. افتح تذكرة جديدة لو محتاج حاجة.'**
+  /// **'أُغلقت هذه التذكرة. افتح تذكرة جديدة إن احتجت إلى شيء.'**
   String get ticketClosed;
 
   /// No description provided for @tellUsTitle.
@@ -5159,43 +5159,43 @@ abstract class AppLocalizations {
   /// No description provided for @tellUsTitleStudent.
   ///
   /// In ar, this message translates to:
-  /// **'فيه حاجة مش مظبوطة؟ قولّنا'**
+  /// **'هل هناك شيء غير سليم؟ أخبرنا'**
   String get tellUsTitleStudent;
 
   /// No description provided for @tellUsTitleKids.
   ///
   /// In ar, this message translates to:
-  /// **'فيه حاجة زعّلتك؟'**
+  /// **'هل أحزنك شيء؟'**
   String get tellUsTitleKids;
 
   /// No description provided for @tellUsNavKids.
   ///
   /// In ar, this message translates to:
-  /// **'قول لحد كبير'**
+  /// **'أخبر شخصًا كبيرًا'**
   String get tellUsNavKids;
 
   /// No description provided for @tellUsNavMiddle.
   ///
   /// In ar, this message translates to:
-  /// **'قولّنا لو فيه حاجة مضايقاك'**
+  /// **'أخبرنا إن كان هناك ما يزعجك'**
   String get tellUsNavMiddle;
 
   /// No description provided for @tellUsLead.
   ///
   /// In ar, this message translates to:
-  /// **'لو أي حاجة في حصة، أو من مدرّس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.'**
+  /// **'إن أقلقك أي شيء في حصة، أو من معلّم، أو من أي شخص على المنصة، فأخبرنا هنا. لا يقرؤه إلا المسؤولون عن حماية الأطفال في الأكاديمية.'**
   String get tellUsLead;
 
   /// No description provided for @tellUsLeadStudent.
   ///
   /// In ar, this message translates to:
-  /// **'لو حد خلّاك تحس إنك مش مرتاح، أو خايف، أو مش في أمان، قولّنا. اللي بيقراها بس المسؤولين عن حماية الطلاب في الأكاديمية، ومش هتتعاقب.'**
+  /// **'إن جعلك أحد تشعر بعدم الارتياح، أو بالخوف، أو بأنك لست في أمان، فأخبرنا. لا يقرؤه إلا المسؤولون عن حماية الطلاب في الأكاديمية، ولن تُعاقَب.'**
   String get tellUsLeadStudent;
 
   /// No description provided for @tellUsLeadKids.
   ///
   /// In ar, this message translates to:
-  /// **'لو حد زعّلك أو خوّفك، دوس على زرار. حد كبير في الأكاديمية هيساعدك.'**
+  /// **'إن أحزنك أحد أو أخافك، فاضغط على زر. سيساعدك شخص كبير في الأكاديمية.'**
   String get tellUsLeadKids;
 
   /// No description provided for @concernTeacherNav.
@@ -5207,13 +5207,13 @@ abstract class AppLocalizations {
   /// No description provided for @concernTeacherTitle.
   ///
   /// In ar, this message translates to:
-  /// **'بلّغ عن قلق على أمان طالب'**
+  /// **'بلّغ عن قلق على سلامة طالب'**
   String get concernTeacherTitle;
 
   /// No description provided for @concernTeacherLead.
   ///
   /// In ar, this message translates to:
-  /// **'لو حاجة في أمان طالب أو حالته قلقاك، أو تصرّف حد كبير تاني، قول لمسؤولين الحماية في الأكاديمية هنا. هما بس اللي بيقروه. ماتحققش فيه ولا تكلّم الأسرة عنه بنفسك.'**
+  /// **'إن أقلقك شيء في سلامة طالب أو حاله، أو تصرّف شخص بالغ آخر، فأخبر مسؤولي الحماية في الأكاديمية هنا. هم وحدهم من يقرؤونه. لا تحقّق فيه ولا تتواصل مع الأسرة بشأنه بنفسك.'**
   String get concernTeacherLead;
 
   /// No description provided for @concernAbout.
@@ -5225,91 +5225,91 @@ abstract class AppLocalizations {
   /// No description provided for @concernWhat.
   ///
   /// In ar, this message translates to:
-  /// **'الموضوع عن إيه؟'**
+  /// **'عمّ يتعلّق الأمر؟'**
   String get concernWhat;
 
   /// No description provided for @concernWhatKids.
   ///
   /// In ar, this message translates to:
-  /// **'إيه اللي حصل؟'**
+  /// **'ماذا حدث؟'**
   String get concernWhatKids;
 
   /// No description provided for @concernPick.
   ///
   /// In ar, this message translates to:
-  /// **'اختار الموضوع عن إيه.'**
+  /// **'اختر موضوع الأمر.'**
   String get concernPick;
 
   /// No description provided for @concernText.
   ///
   /// In ar, this message translates to:
-  /// **'إيه اللي حصل؟'**
+  /// **'ماذا حدث؟'**
   String get concernText;
 
   /// No description provided for @concernTextKids.
   ///
   /// In ar, this message translates to:
-  /// **'عايز تقول أكتر؟ مش لازم.'**
+  /// **'هل تريد أن تقول المزيد؟ ليس ضروريًا.'**
   String get concernTextKids;
 
   /// No description provided for @concernTextHint.
   ///
   /// In ar, this message translates to:
-  /// **'حصل إمتى، ومين كان موجود، وإيه اللي اتقال.'**
+  /// **'متى حدث، ومن كان موجودًا، وماذا قيل.'**
   String get concernTextHint;
 
   /// No description provided for @concernLesson.
   ///
   /// In ar, this message translates to:
-  /// **'في أنهي حصة (لو فيه)؟'**
+  /// **'في أي حصة (إن وُجدت)؟'**
   String get concernLesson;
 
   /// No description provided for @concernNoLesson.
   ///
   /// In ar, this message translates to:
-  /// **'مش عن حصة'**
+  /// **'ليس عن حصة'**
   String get concernNoLesson;
 
   /// No description provided for @concernStudent.
   ///
   /// In ar, this message translates to:
-  /// **'أنهي طالب؟'**
+  /// **'أي طالب؟'**
   String get concernStudent;
 
   /// No description provided for @concernNoStudent.
   ///
   /// In ar, this message translates to:
-  /// **'مش عن طالب معيّن'**
+  /// **'ليس عن طالب معيّن'**
   String get concernNoStudent;
 
   /// No description provided for @concernUrgent.
   ///
   /// In ar, this message translates to:
-  /// **'ممكن حد يكون في خطر دلوقتي'**
+  /// **'قد يكون أحد في خطر الآن'**
   String get concernUrgent;
 
   /// No description provided for @concernSend.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت'**
+  /// **'أرسل'**
   String get concernSend;
 
   /// No description provided for @concernSendTeacher.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت لمسؤولين الحماية'**
+  /// **'أرسل إلى مسؤولي الحماية'**
   String get concernSendTeacher;
 
   /// No description provided for @concernAgain.
   ///
   /// In ar, this message translates to:
-  /// **'قولّنا حاجة تانية'**
+  /// **'أخبرنا بشيء آخر'**
   String get concernAgain;
 
   /// No description provided for @concernAgainTeacher.
   ///
   /// In ar, this message translates to:
-  /// **'بلّغ عن حاجة تانية'**
+  /// **'بلّغ عن أمر آخر'**
   String get concernAgainTeacher;
 
   /// No description provided for @concernNumber.
@@ -5321,13 +5321,13 @@ abstract class AppLocalizations {
   /// No description provided for @concernsMine.
   ///
   /// In ar, this message translates to:
-  /// **'اللي قولتهولنا'**
+  /// **'ما أخبرتنا به'**
   String get concernsMine;
 
   /// No description provided for @concernsNone.
   ///
   /// In ar, this message translates to:
-  /// **'لسه مفيش.'**
+  /// **'لا شيء بعد.'**
   String get concernsNone;
 
   /// No description provided for @documentsTitle.
@@ -5339,19 +5339,19 @@ abstract class AppLocalizations {
   /// No description provided for @documentsLead.
   ///
   /// In ar, this message translates to:
-  /// **'الأكاديمية بتراجع المستندات دي على الأصل؛ وفيش الصحيفة الجنائية هو اللي مطلوب عشان تدرّس للي تحت 18.'**
+  /// **'تراجع الأكاديمية هذه المستندات مقارنة بالأصل؛ وشهادة خلو السوابق الجنائية هي المطلوبة لتدرّس من هم دون 18 عامًا.'**
   String get documentsLead;
 
   /// No description provided for @documentSend.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت مستند'**
+  /// **'أرسل مستندًا'**
   String get documentSend;
 
   /// No description provided for @documentSendHint.
   ///
   /// In ar, this message translates to:
-  /// **'صورة واضحة أو الـ PDF من الجهة. خلّي الأصل معاك: الأكاديمية ممكن تطلب تشوفه.'**
+  /// **'صورة واضحة أو ملف PDF من الجهة المختصة. احتفظ بالأصل: فقد تطلب الأكاديمية رؤيته.'**
   String get documentSendHint;
 
   /// No description provided for @documentKind.
@@ -5369,115 +5369,115 @@ abstract class AppLocalizations {
   /// No description provided for @documentExpires.
   ///
   /// In ar, this message translates to:
-  /// **'صالح لحد (اختياري)'**
+  /// **'صالح حتى (اختياري)'**
   String get documentExpires;
 
   /// No description provided for @documentUntil.
   ///
   /// In ar, this message translates to:
-  /// **'صالح لحد {day}'**
+  /// **'صالح حتى {day}'**
   String documentUntil(String day);
 
   /// No description provided for @documentNoEnd.
   ///
   /// In ar, this message translates to:
-  /// **'مالوش تاريخ انتهاء'**
+  /// **'دون تاريخ انتهاء'**
   String get documentNoEnd;
 
   /// No description provided for @documentPick.
   ///
   /// In ar, this message translates to:
-  /// **'اختار صورة أو PDF'**
+  /// **'اختر صورة أو ملف PDF'**
   String get documentPick;
 
   /// No description provided for @documentPickFirst.
   ///
   /// In ar, this message translates to:
-  /// **'اختار الصورة أو الـ PDF الأول.'**
+  /// **'اختر الصورة أو ملف PDF أولًا.'**
   String get documentPickFirst;
 
   /// No description provided for @documentTooBig.
   ///
   /// In ar, this message translates to:
-  /// **'الملف أكبر من 10 ميجا.'**
+  /// **'الملف أكبر من 10 ميغابايت.'**
   String get documentTooBig;
 
   /// No description provided for @documentSent.
   ///
   /// In ar, this message translates to:
-  /// **'اتبعت: الأكاديمية هتراجعه.'**
+  /// **'أُرسل: ستراجعه الأكاديمية.'**
   String get documentSent;
 
   /// No description provided for @documentsList.
   ///
   /// In ar, this message translates to:
-  /// **'اللي بعته'**
+  /// **'ما أرسلته'**
   String get documentsList;
 
   /// No description provided for @documentsNone.
   ///
   /// In ar, this message translates to:
-  /// **'لسه ما بعتش أي مستندات.'**
+  /// **'لم ترسل أي مستندات بعد.'**
   String get documentsNone;
 
   /// No description provided for @messagesTitle.
   ///
   /// In ar, this message translates to:
-  /// **'الرسايل'**
+  /// **'الرسائل'**
   String get messagesTitle;
 
   /// No description provided for @messagesFamilyTitle.
   ///
   /// In ar, this message translates to:
-  /// **'الرسايل مع المدرّسين'**
+  /// **'الرسائل مع المعلّمين'**
   String get messagesFamilyTitle;
 
   /// No description provided for @messagesStudentTitle.
   ///
   /// In ar, this message translates to:
-  /// **'الرسايل مع مدرّسينك'**
+  /// **'الرسائل مع معلّميك'**
   String get messagesStudentTitle;
 
   /// No description provided for @messagesKidsTitle.
   ///
   /// In ar, this message translates to:
-  /// **'كلّم مدرسك'**
+  /// **'تحدّث مع معلّمك'**
   String get messagesKidsTitle;
 
   /// No description provided for @messagesEmptyTeacher.
   ///
   /// In ar, this message translates to:
-  /// **'لما يبقى عندك طلاب، هتلاقيهم هنا وتقدر تكلّمهم وتكلّم أهلهم.'**
+  /// **'عندما يصبح لديك طلاب، ستجدهم هنا وتستطيع التحدث معهم ومع أسرهم.'**
   String get messagesEmptyTeacher;
 
   /// No description provided for @messagesEmptyFamily.
   ///
   /// In ar, this message translates to:
-  /// **'لما يبقى للطالب مدرّس، هتلاقيه هنا.'**
+  /// **'عندما يصبح للطالب معلّم، ستجده هنا.'**
   String get messagesEmptyFamily;
 
   /// No description provided for @messagesStart.
   ///
   /// In ar, this message translates to:
-  /// **'لسه ماحدش كتب'**
+  /// **'لم يكتب أحد بعد'**
   String get messagesStart;
 
   /// No description provided for @messagesYou.
   ///
   /// In ar, this message translates to:
-  /// **'إنت'**
+  /// **'أنت'**
   String get messagesYou;
 
   /// No description provided for @messagesAlsoHere.
   ///
   /// In ar, this message translates to:
-  /// **'معاكم: {names}'**
+  /// **'معكم: {names}'**
   String messagesAlsoHere(String names);
 
   /// No description provided for @messagesFirst.
   ///
   /// In ar, this message translates to:
-  /// **'ابدأ المحادثة: الكلام هنا بيشوفه أولياء الأمور والأكاديمية.'**
+  /// **'ابدأ المحادثة: يقرأ أولياء الأمور والأكاديمية ما يُكتب هنا.'**
   String get messagesFirst;
 
   /// No description provided for @messagesWrite.
@@ -5489,19 +5489,19 @@ abstract class AppLocalizations {
   /// No description provided for @gamesStars.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{من غير نجوم} =1{نجمة واحدة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}'**
+  /// **'{n, plural, =0{دون نجوم} =1{نجمة واحدة} =2{نجمتان} few{{n} نجوم} other{{n} نجمة}}'**
   String gamesStars(int n);
 
   /// No description provided for @gamesSoundOn.
   ///
   /// In ar, this message translates to:
-  /// **'شغّل المزيكا والأصوات'**
+  /// **'شغّل الموسيقى والأصوات'**
   String get gamesSoundOn;
 
   /// No description provided for @gamesSoundOff.
   ///
   /// In ar, this message translates to:
-  /// **'اقفل المزيكا والأصوات'**
+  /// **'أوقف الموسيقى والأصوات'**
   String get gamesSoundOff;
 
   /// No description provided for @gamesOf.
@@ -5543,25 +5543,25 @@ abstract class AppLocalizations {
   /// No description provided for @gamesEggCardKids.
   ///
   /// In ar, this message translates to:
-  /// **'البيضة الجاية: {have} من {need} ⭐'**
+  /// **'البيضة القادمة: {have} من {need} ⭐'**
   String gamesEggCardKids(int have, int need);
 
   /// No description provided for @gamesIslandDone.
   ///
   /// In ar, this message translates to:
-  /// **'لمّيت كل كائنات الجزيرة!'**
+  /// **'جمعت كل كائنات الجزيرة!'**
   String get gamesIslandDone;
 
   /// No description provided for @gamesClose.
   ///
   /// In ar, this message translates to:
-  /// **'اقفل اللعبة وارجع'**
+  /// **'أغلق اللعبة وارجع'**
   String get gamesClose;
 
   /// No description provided for @gamesToIsland.
   ///
   /// In ar, this message translates to:
-  /// **'ارجع للجزيرة'**
+  /// **'ارجع إلى الجزيرة'**
   String get gamesToIsland;
 
   /// No description provided for @gamesAlbum.
@@ -5573,43 +5573,43 @@ abstract class AppLocalizations {
   /// No description provided for @gamesItems.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{سؤال واحد} =2{سؤالين} few{{n} أسئلة} other{{n} سؤال}}'**
+  /// **'{n, plural, =1{سؤال واحد} =2{سؤالان} few{{n} أسئلة} other{{n} سؤالًا}}'**
   String gamesItems(int n);
 
   /// No description provided for @gamesPractising.
   ///
   /// In ar, this message translates to:
-  /// **'بتتمرن على: {what}'**
+  /// **'تتدرّب على: {what}'**
   String gamesPractising(String what);
 
   /// No description provided for @gamesResult0.
   ///
   /// In ar, this message translates to:
-  /// **'كمّل وحاول تاني!'**
+  /// **'استمر وحاول مرة أخرى!'**
   String get gamesResult0;
 
   /// No description provided for @gamesResult1.
   ///
   /// In ar, this message translates to:
-  /// **'بداية حلوة!'**
+  /// **'بداية جميلة!'**
   String get gamesResult1;
 
   /// No description provided for @gamesResult2.
   ///
   /// In ar, this message translates to:
-  /// **'شاطر!'**
+  /// **'أحسنت!'**
   String get gamesResult2;
 
   /// No description provided for @gamesResult3.
   ///
   /// In ar, this message translates to:
-  /// **'رائع! كله صح تقريبًا'**
+  /// **'رائع! كله صحيح تقريبًا'**
   String get gamesResult3;
 
   /// No description provided for @gamesScore.
   ///
   /// In ar, this message translates to:
-  /// **'{correct} من {total} صح من أول مرة'**
+  /// **'{correct} من {total} صحيحة من أول مرة'**
   String gamesScore(int correct, int total);
 
   /// No description provided for @gamesHatched.
@@ -5621,19 +5621,19 @@ abstract class AppLocalizations {
   /// No description provided for @gamesHomeworkDone.
   ///
   /// In ar, this message translates to:
-  /// **'الواجب «{title}» اتسلّم بالتدريب ده.'**
+  /// **'سُلّم الواجب «{title}» بهذا التدريب.'**
   String gamesHomeworkDone(String title);
 
   /// No description provided for @gamesEgg.
   ///
   /// In ar, this message translates to:
-  /// **'البيضة الجاية: {have} من {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}'**
+  /// **'البيضة القادمة: {have} من {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}'**
   String gamesEgg(int have, int need);
 
   /// No description provided for @gamesAgain.
   ///
   /// In ar, this message translates to:
-  /// **'العب تاني'**
+  /// **'العب مرة أخرى'**
   String get gamesAgain;
 
   /// No description provided for @gamesPlay.
@@ -5645,19 +5645,19 @@ abstract class AppLocalizations {
   /// No description provided for @gamesLoading.
   ///
   /// In ar, this message translates to:
-  /// **'بنجهّز الجولة…'**
+  /// **'نجهّز الجولة…'**
   String get gamesLoading;
 
   /// No description provided for @gamesSending.
   ///
   /// In ar, this message translates to:
-  /// **'بنحسب النجوم…'**
+  /// **'نحسب النجوم…'**
   String get gamesSending;
 
   /// No description provided for @gamesPageProblem.
   ///
   /// In ar, this message translates to:
-  /// **'اللعبة ما اشتغلتش. جرّب تاني.'**
+  /// **'لم تعمل اللعبة. حاول مرة أخرى.'**
   String get gamesPageProblem;
 
   /// No description provided for @gamesHatchReady.
@@ -5681,37 +5681,37 @@ abstract class AppLocalizations {
   /// No description provided for @gamesHatchDoneSub.
   ///
   /// In ar, this message translates to:
-  /// **'كل ما تجمع {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}، تفقسلك بيضة جديدة'**
+  /// **'كلما جمعت {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}، فقست لك بيضة جديدة'**
   String gamesHatchDoneSub(int need);
 
   /// No description provided for @gamesHatchTap0.
   ///
   /// In ar, this message translates to:
-  /// **'دوس على البيضة 3 مرات'**
+  /// **'انقر على البيضة 3 مرات'**
   String get gamesHatchTap0;
 
   /// No description provided for @gamesHatchTap1.
   ///
   /// In ar, this message translates to:
-  /// **'كمان مرتين!'**
+  /// **'مرتان أخريان!'**
   String get gamesHatchTap1;
 
   /// No description provided for @gamesHatchTap2.
   ///
   /// In ar, this message translates to:
-  /// **'مرة كمان!'**
+  /// **'مرة أخرى!'**
   String get gamesHatchTap2;
 
   /// No description provided for @gamesHatchTap3.
   ///
   /// In ar, this message translates to:
-  /// **'بتفقس...'**
+  /// **'تفقس...'**
   String get gamesHatchTap3;
 
   /// No description provided for @gamesHatchEgg.
   ///
   /// In ar, this message translates to:
-  /// **'البيضة، دوس عليها. فاضل {left}'**
+  /// **'البيضة، انقر عليها. بقي {left}'**
   String gamesHatchEgg(int left);
 
   /// No description provided for @gamesHatchNew.
@@ -5723,13 +5723,13 @@ abstract class AppLocalizations {
   /// No description provided for @gamesHatchAsk.
   ///
   /// In ar, this message translates to:
-  /// **'تحب تسميه إيه؟'**
+  /// **'ماذا تحب أن تسمّيه؟'**
   String get gamesHatchAsk;
 
   /// No description provided for @gamesHatchKeep.
   ///
   /// In ar, this message translates to:
-  /// **'حطّه في الألبوم'**
+  /// **'ضعه في الألبوم'**
   String get gamesHatchKeep;
 
   /// No description provided for @gamesAlbumTitle.
@@ -5741,13 +5741,13 @@ abstract class AppLocalizations {
   /// No description provided for @gamesAlbumHint.
   ///
   /// In ar, this message translates to:
-  /// **'كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.'**
+  /// **'كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} في رحلتك تفقس لك بيضة، وكل درس تتقنه يفقس لك كائنًا.'**
   String gamesAlbumHint(int need);
 
   /// No description provided for @gamesAlbumGuardian.
   ///
   /// In ar, this message translates to:
-  /// **'ده ألبوم {name}. هو بس اللي يختار صاحبه ويسمّي كائناته.'**
+  /// **'هذا ألبوم {name}. هو وحده من يختار صديقه ويسمّي كائناته.'**
   String gamesAlbumGuardian(String name);
 
   /// No description provided for @gamesAlbumAll.
@@ -5783,7 +5783,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesNotYet.
   ///
   /// In ar, this message translates to:
-  /// **'لسه'**
+  /// **'ليس بعد'**
   String get gamesNotYet;
 
   /// No description provided for @gamesAriaFound.
@@ -5795,7 +5795,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesAriaShadow.
   ///
   /// In ar, this message translates to:
-  /// **'كائن لسه ما فقسش، من {island}'**
+  /// **'كائن لم يفقس بعد، من {island}'**
   String gamesAriaShadow(String island);
 
   /// No description provided for @gamesVoice.
@@ -5807,61 +5807,61 @@ abstract class AppLocalizations {
   /// No description provided for @gamesMakeBuddy.
   ///
   /// In ar, this message translates to:
-  /// **'خليه صاحبك'**
+  /// **'اجعله صديقك'**
   String get gamesMakeBuddy;
 
   /// No description provided for @gamesIsBuddyKids.
   ///
   /// In ar, this message translates to:
-  /// **'ده صاحبك 💛'**
+  /// **'هذا صديقك 💛'**
   String get gamesIsBuddyKids;
 
   /// No description provided for @gamesIsBuddy.
   ///
   /// In ar, this message translates to:
-  /// **'ده صاحبك'**
+  /// **'هذا صديقك'**
   String get gamesIsBuddy;
 
   /// No description provided for @gamesBuddyDone.
   ///
   /// In ar, this message translates to:
-  /// **'{name} هيطير معاك في الألعاب من دلوقتي'**
+  /// **'سيطير {name} معك في الألعاب من الآن'**
   String gamesBuddyDone(String name);
 
   /// No description provided for @gamesShadowStory.
   ///
   /// In ar, this message translates to:
-  /// **'لسه ما فقسش.'**
+  /// **'لم يفقس بعد.'**
   String get gamesShadowStory;
 
   /// No description provided for @gamesHowCommon.
   ///
   /// In ar, this message translates to:
-  /// **'إزاي تفقسه: اجمع نجوم وانت على {island}: كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} بيضة.'**
+  /// **'كيف تفقسه: اجمع النجوم وأنت في {island}: كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} بيضة.'**
   String gamesHowCommon(String island, int need);
 
   /// No description provided for @gamesHowRare.
   ///
   /// In ar, this message translates to:
-  /// **'إزاي تفقسه: كائن نادر في {island}: بيفقس بعد الكائنات العادية بتاعتها.'**
+  /// **'كيف تفقسه: كائن نادر في {island}: يفقس بعد كائناتها العادية.'**
   String gamesHowRare(String island);
 
   /// No description provided for @gamesHowLegendary.
   ///
   /// In ar, this message translates to:
-  /// **'إزاي تفقسه: أسطوري! آخر كائن في {island}. اجمع اللي قبله كلهم.'**
+  /// **'كيف تفقسه: أسطوري! آخر كائن في {island}. اجمع كل ما قبله.'**
   String gamesHowLegendary(String island);
 
   /// No description provided for @gamesNameIt.
   ///
   /// In ar, this message translates to:
-  /// **'سمّيه:'**
+  /// **'سمِّه:'**
   String get gamesNameIt;
 
   /// No description provided for @gamesNamed.
   ///
   /// In ar, this message translates to:
-  /// **'اتسمّى {name}'**
+  /// **'اسمه الآن {name}'**
   String gamesNamed(String name);
 
   /// No description provided for @gamesFromStars.
@@ -5873,7 +5873,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesFromMastery.
   ///
   /// In ar, this message translates to:
-  /// **'فقس لما اتقنت درس'**
+  /// **'فقس عندما أتقنت درسًا'**
   String get gamesFromMastery;
 
   /// No description provided for @gamesRace.
@@ -5885,7 +5885,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesBest.
   ///
   /// In ar, this message translates to:
-  /// **'أحسن وقت: {s}'**
+  /// **'أفضل وقت: {s}'**
   String gamesBest(String s);
 
   /// No description provided for @gamesSeconds.
@@ -5903,25 +5903,25 @@ abstract class AppLocalizations {
   /// No description provided for @gamesSoClose.
   ///
   /// In ar, this message translates to:
-  /// **'قربت!'**
+  /// **'اقتربت!'**
   String get gamesSoClose;
 
   /// No description provided for @gamesFirst.
   ///
   /// In ar, this message translates to:
-  /// **'أول رقم ليك!'**
+  /// **'أول رقم لك!'**
   String get gamesFirst;
 
   /// No description provided for @gamesOver.
   ///
   /// In ar, this message translates to:
-  /// **'{correct} من {total} صح في {s}'**
+  /// **'{correct} من {total} صحيحة في {s}'**
   String gamesOver(int correct, int total, String s);
 
   /// No description provided for @gamesReviewAgain.
   ///
   /// In ar, this message translates to:
-  /// **'راجع تاني'**
+  /// **'راجع مرة أخرى'**
   String get gamesReviewAgain;
 
   /// No description provided for @gamesGuardianTitle.
@@ -5933,43 +5933,43 @@ abstract class AppLocalizations {
   /// No description provided for @gamesPlayTime.
   ///
   /// In ar, this message translates to:
-  /// **'وقت اللعب النهارده'**
+  /// **'وقت اللعب اليوم'**
   String get gamesPlayTime;
 
   /// No description provided for @gamesTimeText.
   ///
   /// In ar, this message translates to:
-  /// **'{used} من {limit, plural, =1{دقيقة} =2{دقيقتين} few{{limit} دقايق} other{{limit} دقيقة}} لعب النهارده. فاضل {left, plural, =1{دقيقة} =2{دقيقتين} few{{left} دقايق} other{{left} دقيقة}}.'**
+  /// **'{used} من {limit, plural, =1{دقيقة} =2{دقيقتين} few{{limit} دقائق} other{{limit} دقيقة}} لعب اليوم. بقي {left, plural, =1{دقيقة} =2{دقيقتان} few{{left} دقائق} other{{left} دقيقة}}.'**
   String gamesTimeText(int used, int limit, int left);
 
   /// No description provided for @gamesRefusedOff.
   ///
   /// In ar, this message translates to:
-  /// **'الألعاب مقفولة في الأكاديمية دلوقتي.'**
+  /// **'الألعاب مغلقة في الأكاديمية الآن.'**
   String get gamesRefusedOff;
 
   /// No description provided for @gamesRefusedPaused.
   ///
   /// In ar, this message translates to:
-  /// **'ولي الأمر قفل الألعاب دلوقتي.'**
+  /// **'أوقف ولي الأمر الألعاب الآن.'**
   String get gamesRefusedPaused;
 
   /// No description provided for @gamesRefusedNight.
   ///
   /// In ar, this message translates to:
-  /// **'الطيور نامت. الألعاب بترجع الساعة 7 الصبح.'**
+  /// **'نامت الطيور. تعود الألعاب في الساعة 7 صباحًا.'**
   String get gamesRefusedNight;
 
   /// No description provided for @gamesRefusedLimit.
   ///
   /// In ar, this message translates to:
-  /// **'خلصت دقايق اللعب النهارده. نكمل بكرة!'**
+  /// **'انتهت دقائق اللعب اليوم. نكمل غدًا!'**
   String get gamesRefusedLimit;
 
   /// No description provided for @gamesTimeOpen.
   ///
   /// In ar, this message translates to:
-  /// **'{used, plural, =1{دقيقة} =2{دقيقتين} few{{used} دقايق} other{{used} دقيقة}} لعب النهارده، من غير حد.'**
+  /// **'{used, plural, =1{دقيقة} =2{دقيقتان} few{{used} دقائق} other{{used} دقيقة}} لعب اليوم، دون حد.'**
   String gamesTimeOpen(int used);
 
   /// No description provided for @gamesMinutesShort.
@@ -5999,19 +5999,19 @@ abstract class AppLocalizations {
   /// No description provided for @gamesNightLock.
   ///
   /// In ar, this message translates to:
-  /// **'قفل اللعب من 9 بالليل لـ 7 الصبح'**
+  /// **'أغلق اللعب من 9 مساءً إلى 7 صباحًا'**
   String get gamesNightLock;
 
   /// No description provided for @gamesEnabled.
   ///
   /// In ar, this message translates to:
-  /// **'الألعاب شغالة'**
+  /// **'الألعاب مفعّلة'**
   String get gamesEnabled;
 
   /// No description provided for @gamesLearned.
   ///
   /// In ar, this message translates to:
-  /// **'اتراجع إيه في اللعب'**
+  /// **'ما رُوجع في اللعب'**
   String get gamesLearned;
 
   /// No description provided for @gamesRoundsCount.
@@ -6029,31 +6029,31 @@ abstract class AppLocalizations {
   /// No description provided for @gamesPractised.
   ///
   /// In ar, this message translates to:
-  /// **'اتراجع «{title}» {rounds} في {games}'**
+  /// **'رُوجع «{title}» {rounds} في {games}'**
   String gamesPractised(String title, String rounds, String games);
 
   /// No description provided for @gamesHardest.
   ///
   /// In ar, this message translates to:
-  /// **'أصعب سؤال: «{text}». ممكن تراجعوه سوا.'**
+  /// **'أصعب سؤال: «{text}». يمكنكما مراجعته معًا.'**
   String gamesHardest(String text);
 
   /// No description provided for @gamesBestRound.
   ///
   /// In ar, this message translates to:
-  /// **'أحسن جولة: {correct} من {total} صح من أول مرة في «{game}»'**
+  /// **'أفضل جولة: {correct} من {total} صحيحة من أول مرة في «{game}»'**
   String gamesBestRound(int correct, int total, String game);
 
   /// No description provided for @gamesQuiet.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش لعب الأسبوع ده. الألعاب بتتمرن على دروسه بس، والمدرّس بيحط التدريبات على الدرس.'**
+  /// **'لم يلعب هذا الأسبوع. الألعاب تدرّب على دروسه فقط، والمعلّم هو من يضع التدريبات على الدرس.'**
   String get gamesQuiet;
 
   /// No description provided for @gamesHatchedToday.
   ///
   /// In ar, this message translates to:
-  /// **'فقس «{name}» النهارده'**
+  /// **'فقس «{name}» اليوم'**
   String gamesHatchedToday(String name);
 
   /// No description provided for @gamesHatchedStars.
@@ -6065,13 +6065,13 @@ abstract class AppLocalizations {
   /// No description provided for @gamesHatchedMastery.
   ///
   /// In ar, this message translates to:
-  /// **'من درس اتقنه · {found} في الألبوم'**
+  /// **'من درس أتقنه · {found} في الألبوم'**
   String gamesHatchedMastery(int found);
 
   /// No description provided for @gamesCheer.
   ///
   /// In ar, this message translates to:
-  /// **'هنّيه'**
+  /// **'هنّئه'**
   String get gamesCheer;
 
   /// No description provided for @gamesCheered.
@@ -6083,31 +6083,31 @@ abstract class AppLocalizations {
   /// No description provided for @gamesSafety.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش شراء جوه الألعاب ولا إعلانات ولا كلام مع حد غريب. كل كائن وكل نجمة بتتكسب بالمذاكرة.'**
+  /// **'لا مشتريات داخل الألعاب، ولا إعلانات، ولا محادثة مع غرباء. كل كائن وكل نجمة تُكسب بالمذاكرة.'**
   String get gamesSafety;
 
   /// No description provided for @gamesTogether.
   ///
   /// In ar, this message translates to:
-  /// **'العبوا سوا'**
+  /// **'العبوا معًا'**
   String get gamesTogether;
 
   /// No description provided for @gamesSaved.
   ///
   /// In ar, this message translates to:
-  /// **'اتحفظ.'**
+  /// **'حُفظ.'**
   String get gamesSaved;
 
   /// No description provided for @gamesCardKids.
   ///
   /// In ar, this message translates to:
-  /// **'الجزر بتستناك 🏝️'**
+  /// **'الجزر تنتظرك 🏝️'**
   String get gamesCardKids;
 
   /// No description provided for @gamesCardLead.
   ///
   /// In ar, this message translates to:
-  /// **'اتمرن على دروسك بألعاب: {what}'**
+  /// **'تدرّب على دروسك بالألعاب: {what}'**
   String gamesCardLead(String what);
 
   /// No description provided for @journeyTitle.
@@ -6143,13 +6143,13 @@ abstract class AppLocalizations {
   /// No description provided for @journeyHow.
   ///
   /// In ar, this message translates to:
-  /// **'إزاي {name} ماشي'**
+  /// **'كيف يتقدّم {name}'**
   String journeyHow(String name);
 
   /// No description provided for @journeyNextStation.
   ///
   /// In ar, this message translates to:
-  /// **'الجاية: {title}'**
+  /// **'القادمة: {title}'**
   String journeyNextStation(String title);
 
   /// No description provided for @journeyLevels.
@@ -6161,91 +6161,91 @@ abstract class AppLocalizations {
   /// No description provided for @journeyLessonsDone.
   ///
   /// In ar, this message translates to:
-  /// **'{done} من {total, plural, =1{درس واحد} =2{درسين} few{{total} دروس} other{{total} درس}}'**
+  /// **'{done} من {total, plural, =1{درس واحد} =2{درسين} few{{total} دروس} other{{total} درسًا}}'**
   String journeyLessonsDone(int done, int total);
 
   /// No description provided for @journeyAheadLocked.
   ///
   /// In ar, this message translates to:
-  /// **'بتتفتح لما تخلّص {title}'**
+  /// **'تُفتح عندما تنهي {title}'**
   String journeyAheadLocked(String title);
 
   /// No description provided for @journeyAheadFirst.
   ///
   /// In ar, this message translates to:
-  /// **'بتتفتح لما توصلها'**
+  /// **'تُفتح عندما تصل إليها'**
   String get journeyAheadFirst;
 
   /// No description provided for @journeyAriaDone.
   ///
   /// In ar, this message translates to:
-  /// **'{title}، خلّصتها'**
+  /// **'{title}، أنهيتها'**
   String journeyAriaDone(String title);
 
   /// No description provided for @journeyAriaHere.
   ///
   /// In ar, this message translates to:
-  /// **'{title}، انت هنا'**
+  /// **'{title}، أنت هنا'**
   String journeyAriaHere(String title);
 
   /// No description provided for @journeyAriaAhead.
   ///
   /// In ar, this message translates to:
-  /// **'{title}، لسه مقفولة'**
+  /// **'{title}، ما زالت مغلقة'**
   String journeyAriaAhead(String title);
 
   /// No description provided for @journeyStationDone.
   ///
   /// In ar, this message translates to:
-  /// **'خلّصته'**
+  /// **'أنهيته'**
   String get journeyStationDone;
 
   /// No description provided for @journeyStationReview.
   ///
   /// In ar, this message translates to:
-  /// **'محتاج مراجعة'**
+  /// **'يحتاج إلى مراجعة'**
   String get journeyStationReview;
 
   /// No description provided for @journeyStationHere.
   ///
   /// In ar, this message translates to:
-  /// **'انت هنا'**
+  /// **'أنت هنا'**
   String get journeyStationHere;
 
   /// No description provided for @journeyStationTodo.
   ///
   /// In ar, this message translates to:
-  /// **'لسه جاي'**
+  /// **'لم يأتِ بعد'**
   String get journeyStationTodo;
 
   /// No description provided for @journeyStationTodoNote.
   ///
   /// In ar, this message translates to:
-  /// **'الدرس ده لسه جاي. هتتدرّب عليه لما توصله.'**
+  /// **'هذا الدرس لم يأتِ بعد. ستتدرّب عليه عندما تصل إليه.'**
   String get journeyStationTodoNote;
 
   /// No description provided for @journeyStationReviewNote.
   ///
   /// In ar, this message translates to:
-  /// **'وقت تراجع الدرس ده: العب لعبة عليه.'**
+  /// **'حان وقت مراجعة هذا الدرس: العب لعبة عليه.'**
   String get journeyStationReviewNote;
 
   /// No description provided for @journeyPractised.
   ///
   /// In ar, this message translates to:
-  /// **'اتدرّبت عليه {rounds} · {p}% صح'**
+  /// **'تدرّبت عليه {rounds} · {p}% صحيح'**
   String journeyPractised(String rounds, int p);
 
   /// No description provided for @journeyPlayStation.
   ///
   /// In ar, this message translates to:
-  /// **'العب على الدرس ده'**
+  /// **'العب على هذا الدرس'**
   String get journeyPlayStation;
 
   /// No description provided for @journeyNoGames.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش لعبة على تدريبات الدرس ده لسه.'**
+  /// **'لا توجد لعبة على تدريبات هذا الدرس بعد.'**
   String get journeyNoGames;
 
   /// No description provided for @journeyRaceLast.
@@ -6269,19 +6269,19 @@ abstract class AppLocalizations {
   /// No description provided for @journeyMissionsOn.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{مهمة} =2{مهمتين} few{{n} مهمات} other{{n} مهمة}}'**
+  /// **'{n, plural, =1{مهمة} =2{مهمتان} few{{n} مهمات} other{{n} مهمة}}'**
   String journeyMissionsOn(int n);
 
   /// No description provided for @journeyOpenMissions.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{مهمة مستنية} =2{مهمتين مستنيين} few{{n} مهمات مستنية} other{{n} مهمة مستنية}}'**
+  /// **'{n, plural, =1{مهمة تنتظرك} =2{مهمتان تنتظرانك} few{{n} مهمات تنتظرك} other{{n} مهمة تنتظرك}}'**
   String journeyOpenMissions(int n);
 
   /// No description provided for @journeyNoMissions.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش مهمات دلوقتي. استمتع بيومك!'**
+  /// **'لا توجد مهمات الآن. استمتع بيومك!'**
   String get journeyNoMissions;
 
   /// No description provided for @journeyReview.
@@ -6293,7 +6293,7 @@ abstract class AppLocalizations {
   /// No description provided for @reviewsWaiting.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{مراجعة مستنياك} =2{مراجعتين مستنينك} few{{n} مراجعات مستنياك} other{{n} مراجعة مستنياك}}'**
+  /// **'{n, plural, =1{مراجعة تنتظرك} =2{مراجعتان تنتظرانك} few{{n} مراجعات تنتظرك} other{{n} مراجعة تنتظرك}}'**
   String reviewsWaiting(int n);
 
   /// No description provided for @reviewsHint.
@@ -6305,13 +6305,13 @@ abstract class AppLocalizations {
   /// No description provided for @hereAndNext.
   ///
   /// In ar, this message translates to:
-  /// **'انت هنا: {here} · بعدها: {next}'**
+  /// **'أنت هنا: {here} · بعدها: {next}'**
   String hereAndNext(String here, String next);
 
   /// No description provided for @hereOnly.
   ///
   /// In ar, this message translates to:
-  /// **'انت هنا: {here}'**
+  /// **'أنت هنا: {here}'**
   String hereOnly(String here);
 
   /// No description provided for @levelNamed.
@@ -6329,31 +6329,31 @@ abstract class AppLocalizations {
   /// No description provided for @goalTitle.
   ///
   /// In ar, this message translates to:
-  /// **'هدفك: تخلّص البرنامج'**
+  /// **'هدفك: أن تنهي البرنامج'**
   String get goalTitle;
 
   /// No description provided for @goalDone.
   ///
   /// In ar, this message translates to:
-  /// **'خلّصتهم من البرنامج'**
+  /// **'أنهيتها من البرنامج'**
   String get goalDone;
 
   /// No description provided for @goalPace.
   ///
   /// In ar, this message translates to:
-  /// **'على السرعة دي هتخلّص يوم {day}'**
+  /// **'بهذه السرعة تنهيه يوم {day}'**
   String goalPace(String day);
 
   /// No description provided for @nowTitle.
   ///
   /// In ar, this message translates to:
-  /// **'دلوقتي'**
+  /// **'الآن'**
   String get nowTitle;
 
   /// No description provided for @nextIs.
   ///
   /// In ar, this message translates to:
-  /// **'الجاية: {title}'**
+  /// **'القادمة: {title}'**
   String nextIs(String title);
 
   /// No description provided for @weekPlan.
@@ -6365,19 +6365,19 @@ abstract class AppLocalizations {
   /// No description provided for @notHandedIn.
   ///
   /// In ar, this message translates to:
-  /// **'لسه ماتسلّمش'**
+  /// **'لم يُسلَّم بعد'**
   String get notHandedIn;
 
   /// No description provided for @planNoDay.
   ///
   /// In ar, this message translates to:
-  /// **'من غير ميعاد'**
+  /// **'دون موعد'**
   String get planNoDay;
 
   /// No description provided for @lessonsToReview.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{درس محتاج مراجعة} =2{درسين محتاجين مراجعة} few{{n} دروس محتاجة مراجعة} other{{n} درس محتاجين مراجعة}}'**
+  /// **'{n, plural, =1{درس يحتاج إلى مراجعة} =2{درسان يحتاجان إلى مراجعة} few{{n} دروس تحتاج إلى مراجعة} other{{n} درسًا يحتاج إلى مراجعة}}'**
   String lessonsToReview(int n);
 
   /// No description provided for @reviewEachRound.
@@ -6395,13 +6395,13 @@ abstract class AppLocalizations {
   /// No description provided for @levelsCount.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{مستوى واحد} =2{مستويين} few{{n} مستويات} other{{n} مستوى}}'**
+  /// **'{n, plural, =1{مستوى واحد} =2{مستويان} few{{n} مستويات} other{{n} مستوى}}'**
   String levelsCount(int n);
 
   /// No description provided for @curriculumLessons.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{درس واحد} =2{درسين} few{{n} دروس} other{{n} درس}}'**
+  /// **'{n, plural, =1{درس واحد} =2{درسان} few{{n} دروس} other{{n} درسًا}}'**
   String curriculumLessons(int n);
 
   /// No description provided for @journeyLate.
@@ -6419,31 +6419,31 @@ abstract class AppLocalizations {
   /// No description provided for @journeyChestProgress.
   ///
   /// In ar, this message translates to:
-  /// **'{done} من {total, plural, =1{مهمة واحدة} =2{مهمتين} few{{total} مهمات} other{{total} مهمة}} الأسبوع'**
+  /// **'{done} من {total, plural, =1{مهمة واحدة} =2{مهمتين} few{{total} مهمات} other{{total} مهمة}} هذا الأسبوع'**
   String journeyChestProgress(int done, int total);
 
   /// No description provided for @journeyChestHint.
   ///
   /// In ar, this message translates to:
-  /// **'احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ {n, plural, =1{نجمة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}'**
+  /// **'احضر كل حصص الأسبوع وسلّم واجباته، وسيُفتح الصندوق بـ {n, plural, =1{نجمة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}'**
   String journeyChestHint(int n);
 
   /// No description provided for @journeyChestMissed.
   ///
   /// In ar, this message translates to:
-  /// **'الصندوق ده فاتك. فيه صندوق جديد الأسبوع ده!'**
+  /// **'فاتك هذا الصندوق. هناك صندوق جديد هذا الأسبوع!'**
   String get journeyChestMissed;
 
   /// No description provided for @journeyChestWaiting.
   ///
   /// In ar, this message translates to:
-  /// **'الصندوق جاهز يتفتح من حساب {name}'**
+  /// **'الصندوق جاهز ليُفتح من حساب {name}'**
   String journeyChestWaiting(String name);
 
   /// No description provided for @journeyChestGot.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{+نجمة في رحلتك!} =2{+نجمتين في رحلتك!} few{+{n} نجوم في رحلتك!} other{+{n} نجمة في رحلتك!}}'**
+  /// **'{n, plural, =1{+نجمة في رحلتك!} =2{+نجمتان في رحلتك!} few{+{n} نجوم في رحلتك!} other{+{n} نجمة في رحلتك!}}'**
   String journeyChestGot(int n);
 
   /// No description provided for @journeyYourStars.
@@ -6455,13 +6455,13 @@ abstract class AppLocalizations {
   /// No description provided for @journeyStarsTo.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{باقيلك نجمة لـ {rank}} =2{باقيلك نجمتين لـ {rank}} few{باقيلك {n} نجوم لـ {rank}} other{باقيلك {n} نجمة لـ {rank}}}'**
+  /// **'{n, plural, =1{بقيت لك نجمة حتى {rank}} =2{بقيت لك نجمتان حتى {rank}} few{بقيت لك {n} نجوم حتى {rank}} other{بقيت لك {n} نجمة حتى {rank}}}'**
   String journeyStarsTo(int n, String rank);
 
   /// No description provided for @journeyStarsCount.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{مفيش نجوم لسه} =1{نجمة واحدة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}'**
+  /// **'{n, plural, =0{لا توجد نجوم بعد} =1{نجمة واحدة} =2{نجمتان} few{{n} نجوم} other{{n} نجمة}}'**
   String journeyStarsCount(int n);
 
   /// No description provided for @journeyStarsOf.
@@ -6485,13 +6485,13 @@ abstract class AppLocalizations {
   /// No description provided for @journeyLessonStars.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{ماخدتش نجوم في آخر حصة} =1{خدت نجمة في آخر حصة} =2{خدت نجمتين في آخر حصة!} few{خدت {n} نجوم في آخر حصة!} other{خدت {n} نجمة في آخر حصة!}}'**
+  /// **'{n, plural, =0{لم تأخذ نجومًا في آخر حصة} =1{أخذت نجمة في آخر حصة} =2{أخذت نجمتين في آخر حصة!} few{أخذت {n} نجوم في آخر حصة!} other{أخذت {n} نجمة في آخر حصة!}}'**
   String journeyLessonStars(int n);
 
   /// No description provided for @journeyLessonCanBring.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{تجيبلك نجمة} =2{تجيبلك نجمتين} few{تجيبلك لحد {n} نجوم} other{تجيبلك لحد {n} نجمة}}'**
+  /// **'{n, plural, =1{تمنحك نجمة} =2{تمنحك نجمتين} few{تمنحك حتى {n} نجوم} other{تمنحك حتى {n} نجمة}}'**
   String journeyLessonCanBring(int n);
 
   /// No description provided for @journeyEggReady.
@@ -6503,7 +6503,7 @@ abstract class AppLocalizations {
   /// No description provided for @journeyEggHint.
   ///
   /// In ar, this message translates to:
-  /// **'افقسها وشوف مين هيطلع'**
+  /// **'افقسها وانظر من سيخرج'**
   String get journeyEggHint;
 
   /// No description provided for @journeyEggHatch.
@@ -6515,19 +6515,19 @@ abstract class AppLocalizations {
   /// No description provided for @journeyEggNone.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش بيضة جاهزة دلوقتي. كمّل جمع نجوم!'**
+  /// **'لا توجد بيضة جاهزة الآن. استمر في جمع النجوم!'**
   String get journeyEggNone;
 
   /// No description provided for @journeyNoCourses.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش كورسات شغالة لسه.'**
+  /// **'لا توجد دورات جارية بعد.'**
   String get journeyNoCourses;
 
   /// No description provided for @journeyNoCurriculum.
   ///
   /// In ar, this message translates to:
-  /// **'الكورس ده لسه مالوش منهج. مهماته بتظهر هنا.'**
+  /// **'ليس لهذه الدورة منهج بعد. تظهر مهماتها هنا.'**
   String get journeyNoCurriculum;
 
   /// No description provided for @journeyCourses.
@@ -6545,25 +6545,25 @@ abstract class AppLocalizations {
   /// No description provided for @homeworkPracticeNotYet.
   ///
   /// In ar, this message translates to:
-  /// **'لسه ما اتلعبتش جولته.'**
+  /// **'لم تُلعب جولته بعد.'**
   String get homeworkPracticeNotYet;
 
   /// No description provided for @homeworkByPlaying.
   ///
   /// In ar, this message translates to:
-  /// **'الواجب ده بيتسلّم لما تلعب جولته.'**
+  /// **'يُسلَّم هذا الواجب عندما تلعب جولته.'**
   String get homeworkByPlaying;
 
   /// No description provided for @homeworkPracticeResult.
   ///
   /// In ar, this message translates to:
-  /// **'التدريب: {correct} من {total} صح · {stars} ({game})'**
+  /// **'التدريب: {correct} من {total} صحيحة · {stars} ({game})'**
   String homeworkPracticeResult(int correct, int total, String stars, String game);
 
   /// No description provided for @homeworkNoGame.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش لعبة للواجب ده دلوقتي.'**
+  /// **'لا توجد لعبة لهذا الواجب الآن.'**
   String get homeworkNoGame;
 
   /// No description provided for @hifzTitle.
@@ -6587,19 +6587,19 @@ abstract class AppLocalizations {
   /// No description provided for @hifzNoText.
   ///
   /// In ar, this message translates to:
-  /// **'نص القرآن لسه مش موجود، والخريطة هتظهر أول ما يوصل.'**
+  /// **'نص القرآن غير موجود بعد، وستظهر الخريطة فور وصوله.'**
   String get hifzNoText;
 
   /// No description provided for @hifzMemorized.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{لسه مفيش صفحات محفوظة من {total}} =1{صفحة واحدة محفوظة من {total}} =2{صفحتين محفوظين من {total}} few{{n} صفحات محفوظة من {total}} other{{n} صفحة محفوظة من {total}}}'**
+  /// **'{n, plural, =0{لا توجد صفحات محفوظة بعد من {total}} =1{صفحة واحدة محفوظة من {total}} =2{صفحتان محفوظتان من {total}} few{{n} صفحات محفوظة من {total}} other{{n} صفحة محفوظة من {total}}}'**
   String hifzMemorized(int n, int total);
 
   /// No description provided for @hifzMemorizedKids.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{لسه ماحفظتش صفحات. يلا نبدأ!} =1{حفظت صفحة واحدة! ⭐} =2{حفظت صفحتين! ⭐} few{حفظت {n} صفحات! ⭐} other{حفظت {n} صفحة! ⭐}}'**
+  /// **'{n, plural, =0{لم تحفظ صفحات بعد. هيا نبدأ!} =1{حفظت صفحة واحدة! ⭐} =2{حفظت صفحتين! ⭐} few{حفظت {n} صفحات! ⭐} other{حفظت {n} صفحة! ⭐}}'**
   String hifzMemorizedKids(int n);
 
   /// No description provided for @hifzJuz.
@@ -6629,43 +6629,43 @@ abstract class AppLocalizations {
   /// No description provided for @hifzToday.
   ///
   /// In ar, this message translates to:
-  /// **'ورد النهارده'**
+  /// **'ورد اليوم'**
   String get hifzToday;
 
   /// No description provided for @hifzTodayProgress.
   ///
   /// In ar, this message translates to:
-  /// **'خلص {done} من {daily, plural, =1{صفحة واحدة} =2{صفحتين} few{{daily} صفحات} other{{daily} صفحة}}'**
+  /// **'أُنجز {done} من {daily, plural, =1{صفحة واحدة} =2{صفحتين} few{{daily} صفحات} other{{daily} صفحة}}'**
   String hifzTodayProgress(int done, int daily);
 
   /// No description provided for @hifzTodayDone.
   ///
   /// In ar, this message translates to:
-  /// **'ورد النهارده خلص. برافو!'**
+  /// **'انتهى ورد اليوم. أحسنت!'**
   String get hifzTodayDone;
 
   /// No description provided for @hifzTodayNone.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش صفحات عليها مراجعة النهارده.'**
+  /// **'لا توجد صفحات عليها مراجعة اليوم.'**
   String get hifzTodayNone;
 
   /// No description provided for @hifzWirdDone.
   ///
   /// In ar, this message translates to:
-  /// **'ورد النهارده خلص!'**
+  /// **'انتهى ورد اليوم!'**
   String get hifzWirdDone;
 
   /// No description provided for @hifzWirdDoneKids.
   ///
   /// In ar, this message translates to:
-  /// **'خلّصت وردك! 🎉'**
+  /// **'أنهيت وردك! 🎉'**
   String get hifzWirdDoneKids;
 
   /// No description provided for @hifzOverdue.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{متأخرة يوم} =2{متأخرة يومين} few{متأخرة {n} أيام} other{متأخرة {n} يوم}}'**
+  /// **'{n, plural, =1{متأخرة يومًا} =2{متأخرة يومين} few{متأخرة {n} أيام} other{متأخرة {n} يومًا}}'**
   String hifzOverdue(int n);
 
   /// No description provided for @hifzReveal.
@@ -6677,13 +6677,13 @@ abstract class AppLocalizations {
   /// No description provided for @hifzRevealHint.
   ///
   /// In ar, this message translates to:
-  /// **'سمّع الصفحة من حفظك الأول، وبعدين اكشفها واتأكد.'**
+  /// **'سمّع الصفحة من حفظك أولًا، ثم اكشفها وتأكّد.'**
   String get hifzRevealHint;
 
   /// No description provided for @hifzHowWent.
   ///
   /// In ar, this message translates to:
-  /// **'الحفظ كان عامل إزاي؟'**
+  /// **'كيف كان الحفظ؟'**
   String get hifzHowWent;
 
   /// No description provided for @hifzGrade1.
@@ -6701,7 +6701,7 @@ abstract class AppLocalizations {
   /// No description provided for @hifzGrade3.
   ///
   /// In ar, this message translates to:
-  /// **'كويس'**
+  /// **'جيد'**
   String get hifzGrade3;
 
   /// No description provided for @hifzGrade4.
@@ -6713,7 +6713,7 @@ abstract class AppLocalizations {
   /// No description provided for @hifzNextReview.
   ///
   /// In ar, this message translates to:
-  /// **'اتسجّلت. الصفحة دي هترجعلك {day}.'**
+  /// **'سُجّلت. ستعود إليك هذه الصفحة {day}.'**
   String hifzNextReview(String day);
 
   /// No description provided for @hifzRecite.
@@ -6731,25 +6731,25 @@ abstract class AppLocalizations {
   /// No description provided for @hifzReciteHint.
   ///
   /// In ar, this message translates to:
-  /// **'سجّل الصفحة من حفظك، وهنصحّحها كلمة كلمة.'**
+  /// **'سجّل الصفحة من حفظك، وسنصحّحها كلمة كلمة.'**
   String get hifzReciteHint;
 
   /// No description provided for @hifzSendRecitation.
   ///
   /// In ar, this message translates to:
-  /// **'ابعت التسميع'**
+  /// **'أرسل التسميع'**
   String get hifzSendRecitation;
 
   /// No description provided for @hifzListening.
   ///
   /// In ar, this message translates to:
-  /// **'بنسمع التسميع…'**
+  /// **'نستمع إلى التسميع…'**
   String get hifzListening;
 
   /// No description provided for @hifzListeningHint.
   ///
   /// In ar, this message translates to:
-  /// **'النتيجة هتظهر هنا لوحدها.'**
+  /// **'ستظهر النتيجة هنا تلقائيًا.'**
   String get hifzListeningHint;
 
   /// No description provided for @hifzSelfGrade.
@@ -6773,49 +6773,49 @@ abstract class AppLocalizations {
   /// No description provided for @hifzCardLeft.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =1{فاضل صفحة واحدة النهارده} =2{فاضل صفحتين النهارده} few{فاضل {n} صفحات النهارده} other{فاضل {n} صفحة النهارده}}'**
+  /// **'{n, plural, =1{بقيت صفحة واحدة اليوم} =2{بقيت صفحتان اليوم} few{بقيت {n} صفحات اليوم} other{بقيت {n} صفحة اليوم}}'**
   String hifzCardLeft(int n);
 
   /// No description provided for @hifzCardDone.
   ///
   /// In ar, this message translates to:
-  /// **'خلص النهارده'**
+  /// **'انتهى اليوم'**
   String get hifzCardDone;
 
   /// No description provided for @hifzCardNone.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش صفحات النهارده'**
+  /// **'لا توجد صفحات اليوم'**
   String get hifzCardNone;
 
   /// No description provided for @hifzCardKids.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{خلّصت وردك النهارده! ⭐} =1{فاضلك صفحة واحدة تسمّعها} =2{فاضلك صفحتين تسمّعهم} few{فاضلك {n} صفحات تسمّعها} other{فاضلك {n} صفحة تسمّعها}}'**
+  /// **'{n, plural, =0{أنهيت وردك اليوم! ⭐} =1{بقيت لك صفحة واحدة تسمّعها} =2{بقيت لك صفحتان تسمّعهما} few{بقيت لك {n} صفحات تسمّعها} other{بقيت لك {n} صفحة تسمّعها}}'**
   String hifzCardKids(int n);
 
   /// No description provided for @hifzTell.
   ///
   /// In ar, this message translates to:
-  /// **'قول اللي حافظه'**
+  /// **'سجّل ما يحفظه'**
   String get hifzTell;
 
   /// No description provided for @hifzClear.
   ///
   /// In ar, this message translates to:
-  /// **'شيل صفحات'**
+  /// **'أزل صفحات'**
   String get hifzClear;
 
   /// No description provided for @hifzClearHint.
   ///
   /// In ar, this message translates to:
-  /// **'الصفحات اللي هتشيلها هترجع جديدة على الخريطة، ومراجعاتها القديمة هتفضل.'**
+  /// **'الصفحات التي تزيلها تعود جديدة على الخريطة، وتبقى مراجعاتها السابقة.'**
   String get hifzClearHint;
 
   /// No description provided for @hifzClearConfirm.
   ///
   /// In ar, this message translates to:
-  /// **'تشيل الصفحات دي من الخريطة؟'**
+  /// **'أتزيل هذه الصفحات من الخريطة؟'**
   String get hifzClearConfirm;
 
   /// No description provided for @hifzParts.
@@ -6839,13 +6839,13 @@ abstract class AppLocalizations {
   /// No description provided for @hifzHowWell.
   ///
   /// In ar, this message translates to:
-  /// **'حافظها إزاي؟'**
+  /// **'ما درجة حفظها؟'**
   String get hifzHowWell;
 
   /// No description provided for @hifzChosen.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{مااخترتش صفحات لسه} =1{صفحة واحدة} =2{صفحتين} few{{n} صفحات} other{{n} صفحة}}'**
+  /// **'{n, plural, =0{لم تختر صفحات بعد} =1{صفحة واحدة} =2{صفحتان} few{{n} صفحات} other{{n} صفحة}}'**
   String hifzChosen(int n);
 
   /// No description provided for @hifzSave.
@@ -6857,13 +6857,13 @@ abstract class AppLocalizations {
   /// No description provided for @hifzMarked.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{مااتسجّلش صفحات} =1{اتسجّلت صفحة واحدة} =2{اتسجّلت صفحتين} few{اتسجّلت {n} صفحات} other{اتسجّلت {n} صفحة}}'**
+  /// **'{n, plural, =0{لم تُسجَّل صفحات} =1{سُجّلت صفحة واحدة} =2{سُجّلت صفحتان} few{سُجّلت {n} صفحات} other{سُجّلت {n} صفحة}}'**
   String hifzMarked(int n);
 
   /// No description provided for @hifzCleared.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{مفيش صفحات اتشالت} =1{اتشالت صفحة واحدة} =2{اتشالت صفحتين} few{اتشالت {n} صفحات} other{اتشالت {n} صفحة}}'**
+  /// **'{n, plural, =0{لم تُزَل صفحات} =1{أُزيلت صفحة واحدة} =2{أُزيلت صفحتان} few{أُزيلت {n} صفحات} other{أُزيلت {n} صفحة}}'**
   String hifzCleared(int n);
 
   /// No description provided for @hifzRecent.
@@ -6875,7 +6875,7 @@ abstract class AppLocalizations {
   /// No description provided for @hifzRecentNone.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش مراجعات في آخر أسبوعين.'**
+  /// **'لا توجد مراجعات في آخر أسبوعين.'**
   String get hifzRecentNone;
 
   /// No description provided for @mushafTitle.
@@ -6893,19 +6893,19 @@ abstract class AppLocalizations {
   /// No description provided for @mushafNone.
   ///
   /// In ar, this message translates to:
-  /// **'الحصة دي مفيهاش مصحف.'**
+  /// **'لا يوجد مصحف في هذه الحصة.'**
   String get mushafNone;
 
   /// No description provided for @mushafPrevious.
   ///
   /// In ar, this message translates to:
-  /// **'اللي قبلها'**
+  /// **'الصفحة السابقة'**
   String get mushafPrevious;
 
   /// No description provided for @mushafNext.
   ///
   /// In ar, this message translates to:
-  /// **'اللي بعدها'**
+  /// **'الصفحة التالية'**
   String get mushafNext;
 
   /// No description provided for @mushafPageField.
@@ -6923,31 +6923,31 @@ abstract class AppLocalizations {
   /// No description provided for @mushafFollowing.
   ///
   /// In ar, this message translates to:
-  /// **'الصفحة بتتقلّب مع المدرّس.'**
+  /// **'تتقلّب الصفحة مع المعلّم.'**
   String get mushafFollowing;
 
   /// No description provided for @mushafBackToTeacher.
   ///
   /// In ar, this message translates to:
-  /// **'ارجع لصفحة المدرّس'**
+  /// **'ارجع إلى صفحة المعلّم'**
   String get mushafBackToTeacher;
 
   /// No description provided for @mushafTeacherOn.
   ///
   /// In ar, this message translates to:
-  /// **'المدرّس على صفحة {page}'**
+  /// **'المعلّم على صفحة {page}'**
   String mushafTeacherOn(int page);
 
   /// No description provided for @mushafHintTeacher.
   ///
   /// In ar, this message translates to:
-  /// **'دوس على أي كلمة عشان تعلّمها، والطالب بيشوف الصفحة اللي إنت فاتحها.'**
+  /// **'انقر على أي كلمة لتعلّمها، ويرى الطالب الصفحة التي تفتحها.'**
   String get mushafHintTeacher;
 
   /// No description provided for @mushafMarkingClosed.
   ///
   /// In ar, this message translates to:
-  /// **'تعليم الكلمات بيفتح مع أوضة الحصة، وبيقفل لما تسلّم التقرير.'**
+  /// **'يُفتح تعليم الكلمات مع غرفة الحصة، ويُغلق عندما تسلّم التقرير.'**
   String get mushafMarkingClosed;
 
   /// No description provided for @mushafMarkWord.
@@ -6965,7 +6965,7 @@ abstract class AppLocalizations {
   /// No description provided for @mushafEarlier.
   ///
   /// In ar, this message translates to:
-  /// **'اتعلّمت في حصة قبل كده'**
+  /// **'عُلّمت في حصة سابقة'**
   String get mushafEarlier;
 
   /// No description provided for @mushafWordMarked.
@@ -6977,7 +6977,7 @@ abstract class AppLocalizations {
   /// No description provided for @mushafWordEarlier.
   ///
   /// In ar, this message translates to:
-  /// **'{word}: {kind}، اتعلّمت في حصة قبل كده {times}'**
+  /// **'{word}: {kind}، عُلّمت في حصص سابقة {times}'**
   String mushafWordEarlier(String word, String kind, String times);
 
   /// No description provided for @mushafVerseEnd.
@@ -7007,13 +7007,13 @@ abstract class AppLocalizations {
   /// No description provided for @mushafBackToVideo.
   ///
   /// In ar, this message translates to:
-  /// **'ارجع للفيديو'**
+  /// **'ارجع إلى الفيديو'**
   String get mushafBackToVideo;
 
   /// No description provided for @mushafFailed.
   ///
   /// In ar, this message translates to:
-  /// **'ماقدرناش نحفظ. جرّب تاني.'**
+  /// **'تعذّر الحفظ. حاول مرة أخرى.'**
   String get mushafFailed;
 
   /// No description provided for @mistakesTitle.
@@ -7025,43 +7025,43 @@ abstract class AppLocalizations {
   /// No description provided for @mistakesTitleKids.
   ///
   /// In ar, this message translates to:
-  /// **'كلمات بنراجعها'**
+  /// **'كلمات نراجعها'**
   String get mistakesTitleKids;
 
   /// No description provided for @mistakesLead.
   ///
   /// In ar, this message translates to:
-  /// **'الكلمات اللي اتعلّم عليها في الحصص في آخر ست شهور، عشان تراجعها.'**
+  /// **'الكلمات التي عُلّمت في الحصص خلال الأشهر الستة الأخيرة، لتراجعها.'**
   String get mistakesLead;
 
   /// No description provided for @mistakesLeadTeacher.
   ///
   /// In ar, this message translates to:
-  /// **'الكلمات اللي اتعلّم عليها في حصص الطالب في آخر ست شهور.'**
+  /// **'الكلمات التي عُلّمت في حصص الطالب خلال الأشهر الستة الأخيرة.'**
   String get mistakesLeadTeacher;
 
   /// No description provided for @mistakesLeadKids.
   ///
   /// In ar, this message translates to:
-  /// **'دي كلمات هنقولها تاني مع بعض لحد ما تبقى سهلة.'**
+  /// **'هذه كلمات سنقولها معًا مرة أخرى حتى تصير سهلة.'**
   String get mistakesLeadKids;
 
   /// No description provided for @mistakesEmpty.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش كلمات متعلّمة في آخر ست شهور.'**
+  /// **'لا توجد كلمات معلَّمة في الأشهر الستة الأخيرة.'**
   String get mistakesEmpty;
 
   /// No description provided for @mistakesEmptyKids.
   ///
   /// In ar, this message translates to:
-  /// **'مفيش كلمات نراجعها دلوقتي. شاطر! ⭐'**
+  /// **'لا توجد كلمات نراجعها الآن. أحسنت! ⭐'**
   String get mistakesEmptyKids;
 
   /// No description provided for @mistakesWords.
   ///
   /// In ar, this message translates to:
-  /// **'{n, plural, =0{مفيش كلمات} =1{كلمة واحدة} =2{كلمتين} few{{n} كلمات} other{{n} كلمة}}'**
+  /// **'{n, plural, =0{لا توجد كلمات} =1{كلمة واحدة} =2{كلمتان} few{{n} كلمات} other{{n} كلمة}}'**
   String mistakesWords(int n);
 
   /// No description provided for @mistakesTimes.
@@ -7079,7 +7079,7 @@ abstract class AppLocalizations {
   /// No description provided for @mistakesWordKids.
   ///
   /// In ar, this message translates to:
-  /// **'{word}: كلمة بنراجعها'**
+  /// **'{word}: كلمة نراجعها'**
   String mistakesWordKids(String word);
 }
 

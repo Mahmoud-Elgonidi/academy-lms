@@ -121,7 +121,7 @@ class HifzMapView extends StatelessWidget {
     );
   }
 
-  /// "ثابت 12، لسه 8": each strength the part has, in the key's order.
+  /// "ثابت 12، يضعف 8": each strength the part has, in the key's order.
   String _summary(HifzJuz j) {
     final tally = j.tally;
     return [
@@ -163,7 +163,7 @@ class HifzLegend extends StatelessWidget {
           children: [
             _Square(size: 12, strength: s),
             const Gap(6),
-            Text('${map.label(s)} · ${map.counts.of(s, map.pagesTotal)}', style: context.type.caption),
+            Flexible(child: Text('${map.label(s)} · ${map.counts.of(s, map.pagesTotal)}', style: context.type.caption)),
           ],
         ),
     ],

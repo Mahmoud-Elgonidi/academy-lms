@@ -16,7 +16,7 @@ Map<String, Object?> _homework() => {
     {
       ...homeworkJson('h4', status: 'reviewed', body: 'تم'),
       'title': 'أمثلة الإخفاء',
-      'status_label': 'اتصحّح',
+      'status_label': 'صُحّح',
       'grade': 4,
       'feedback': 'شغل نضيف، راجع حرف الكاف',
     },
@@ -47,11 +47,11 @@ void main() {
     final app = await _open(tester, 'teen', '/teen/homework');
     app.api.on('POST', 'learning/homework/h1/submissions', {'data': homeworkJson('h1', status: 'submitted')}, status: 201);
 
-    expect(find.text('واجبين مستنيين منك'), findsOneWidget);
+    expect(find.text('واجبان ينتظرانك'), findsOneWidget);
     expect(find.text('الواجبات'), findsWidgets);
-    expect(find.text('مستني · 2'), findsOneWidget);
-    expect(find.text('اتسلّم · 1'), findsOneWidget);
-    expect(find.text('اتصحّح · 1'), findsOneWidget);
+    expect(find.text('بالانتظار · 2'), findsOneWidget);
+    expect(find.text('سُلّم · 1'), findsOneWidget);
+    expect(find.text('صُحّح · 1'), findsOneWidget);
     // What waits: one handed in by words, one by its round.
     expect(find.text('استخرج 10 أمثلة للإظهار'), findsOneWidget);
     expect(find.text('الإظهار والإدغام'), findsOneWidget);
@@ -65,7 +65,7 @@ void main() {
     await frames(tester, 8);
     await tester.enterText(find.byType(TextField), 'السماء، أنعمت');
     await frames(tester, 2);
-    await tester.tap(find.widgetWithText(FilledButton, 'ابعت'));
+    await tester.tap(find.widgetWithText(FilledButton, 'أرسل'));
     await frames(tester, 20);
     expect(app.api.sent('POST', 'learning/homework/h1/submissions').single.data, {'body': 'السماء، أنعمت'});
 
@@ -76,7 +76,7 @@ void main() {
     expect(find.text('شغل نضيف، راجع حرف الكاف'), findsOneWidget);
     expect(find.text('استخرج 10 أمثلة للإظهار'), findsNothing);
 
-    await tester.tap(find.text('اتسلّم · 1'));
+    await tester.tap(find.text('سُلّم · 1'));
     await frames(tester, 10);
     expect(find.text('سمّع سورة النصر'), findsOneWidget);
     expect(find.text('أمثلة الإخفاء'), findsNothing);
@@ -106,9 +106,9 @@ void main() {
         ],
       },
     );
-    await tester.tap(find.text('اتسلّم · 1'));
+    await tester.tap(find.text('سُلّم · 1'));
     await frames(tester, 10);
-    expect(find.text('التدريب: 9 من 10 صح · 3 نجوم (توأم العش)'), findsOneWidget);
+    expect(find.text('التدريب: 9 من 10 صحيحة · 3 نجوم (توأم العش)'), findsOneWidget);
     expect(find.textContaining('⭐'), findsNothing);
 
     await _close(tester);
@@ -119,7 +119,7 @@ void main() {
     await tester.tap(find.byKey(const Key('more-homework')));
     await frames(tester, 12);
     expect(find.byType(BackButton), findsOneWidget);
-    expect(find.text('مستني · 2'), findsOneWidget);
+    expect(find.text('بالانتظار · 2'), findsOneWidget);
     expect(find.text('استخرج 10 أمثلة للإظهار'), findsOneWidget);
 
     await _close(tester);

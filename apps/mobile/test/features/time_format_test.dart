@@ -49,14 +49,14 @@ void main() {
 
     await _go(tester, '/family/me/settings');
     expect(find.text('شكل الساعة'), findsOneWidget);
-    expect(find.text('زي الأكاديمية (12)'), findsOneWidget);
-    expect(find.text('المواعيد بتظهر كده: 5:00 م'), findsOneWidget);
+    expect(find.text('مثل الأكاديمية (12)'), findsOneWidget);
+    expect(find.text('تظهر المواعيد هكذا: 5:00 م'), findsOneWidget);
 
     final loads = app.api.sent('GET', 'family/lessons').length;
     await tester.tap(find.text('24 ساعة'));
     await frames(tester, 6);
     expect(app.api.sent('PATCH', 'me').single.data, {'time_format': 'h24'});
-    expect(find.text('المواعيد بتظهر كده: 17:00'), findsOneWidget);
+    expect(find.text('تظهر المواعيد هكذا: 17:00'), findsOneWidget);
     expect(ClockStyle.format, TimeFormat.h24);
     expect(_use24(tester), isTrue, reason: "Flutter's time pickers write 24 hours too");
     // Every open screen reloads (the lessons kept behind their tab too), so the API's own labels follow.
@@ -68,10 +68,10 @@ void main() {
 
     // Back to the academy's way: null is sent.
     await _go(tester, '/family/me/settings');
-    await tester.tap(find.text('زي الأكاديمية (12)'));
+    await tester.tap(find.text('مثل الأكاديمية (12)'));
     await frames(tester, 6);
     expect(app.api.sent('PATCH', 'me').last.data, {'time_format': null});
-    expect(find.text('المواعيد بتظهر كده: 5:00 م'), findsOneWidget);
+    expect(find.text('تظهر المواعيد هكذا: 5:00 م'), findsOneWidget);
     expect(ClockStyle.format, TimeFormat.h12);
 
     await _close(tester);

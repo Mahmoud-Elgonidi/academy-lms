@@ -42,7 +42,7 @@ Map<String, Object?> _self(String id, String name) => {
 
 Map<String, Object?> _erasure(String id, String subject, String name) => {
   'id': id,
-  'kind': {'key': 'erasure', 'label': 'مسح الحساب'},
+  'kind': {'key': 'erasure', 'label': 'حذف الحساب'},
   'status': {'key': 'pending', 'label': 'مستني الأكاديمية'},
   'subject': {'id': subject, 'name': name, 'self': true},
   'requester': name,
@@ -95,12 +95,12 @@ void main() {
     await tester.ensureVisible(find.byKey(const Key('erase-u-teacher')));
     await tester.tap(find.byKey(const Key('erase-u-teacher')));
     await frames(tester, 8);
-    await tester.tap(find.widgetWithText(FilledButton, 'امسح الحساب ده'));
+    await tester.tap(find.widgetWithText(FilledButton, 'احذف هذا الحساب'));
     await frames(tester, 12);
     final asked = app.api.sent('POST', 'me/data-requests').single;
     expect(asked.data, {'kind': 'erasure', 'subject_id': 'u-teacher', 'reason': null});
     expect(asked.headers['Idempotency-Key'], isNotNull);
-    expect(find.text('الطلب وصل للأكاديمية.'), findsOneWidget);
+    expect(find.text('وصل الطلب إلى الأكاديمية.'), findsOneWidget);
     // Asked once: the button gives way to taking it back.
     expect(find.byKey(const Key('erase-u-teacher')), findsNothing);
     expect(find.byKey(const Key('cancel-u-teacher')), findsOneWidget);
@@ -139,8 +139,8 @@ void main() {
     GoRouter.of(tester.element(find.byType(Scaffold).first)).go('/account/my-data');
     await frames(tester, 12);
 
-    expect(find.text('ولي أمرك هو اللي بيطلب بخصوص بياناتك من حسابه.'), findsOneWidget);
-    expect(find.text('امسح الحساب ده'), findsNothing);
+    expect(find.text('ولي أمرك هو من يقدّم الطلبات الخاصة ببياناتك من حسابه.'), findsOneWidget);
+    expect(find.text('احذف هذا الحساب'), findsNothing);
     await tester.tap(find.byKey(const Key('page-privacy')));
     await frames(tester, 3);
     expect(launcher.urls, ['https://demo.lms.example/privacy']);

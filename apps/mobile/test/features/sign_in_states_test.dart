@@ -44,7 +44,7 @@ Future<void> _close(WidgetTester tester) async {
 
 Future<void> _codeFor(WidgetTester tester, String contact) async {
   await tester.enterText(find.byKey(const Key('contact')), contact);
-  await tester.tap(find.text('ابعتلي كود'));
+  await tester.tap(find.text('أرسل لي رمزًا'));
   await frames(tester);
   await tester.enterText(find.byKey(const Key('code')), '123456');
   await frames(tester, 15);
@@ -71,18 +71,18 @@ void main() {
     await tester.tap(find.text('ادخل أكاديمية demo'));
     await frames(tester, 6);
 
-    expect(find.text('محتاجين موافقة ولي أمرك'), findsOneWidget);
-    expect(find.text('ولي أمرك يفتح التطبيق بحسابه.'), findsOneWidget);
-    expect(find.text('من «المزيد» ثم «خصوصية الأولاد» يوافق على حسابك.'), findsOneWidget);
+    expect(find.text('نحتاج إلى موافقة ولي أمرك'), findsOneWidget);
+    expect(find.text('يفتح ولي أمرك التطبيق بحسابه.'), findsOneWidget);
+    expect(find.text('من «المزيد» ثم «خصوصية الأبناء» يوافق على حسابك.'), findsOneWidget);
 
-    await tester.tap(find.text('جرّب تدخل تاني'));
+    await tester.tap(find.text('حاول الدخول مرة أخرى'));
     await frames(tester, 6);
     expect(app.api.sent('POST', 'accounts/sign-in'), hasLength(2));
-    expect(find.text('محتاجين موافقة ولي أمرك'), findsOneWidget);
+    expect(find.text('نحتاج إلى موافقة ولي أمرك'), findsOneWidget);
 
-    await tester.tap(find.text('ابدأ من الأول'));
+    await tester.tap(find.text('ابدأ من جديد'));
     await frames(tester, 6);
-    expect(find.text('أهلًا بيك'), findsOneWidget);
+    expect(find.text('أهلًا بك'), findsOneWidget);
     expect(app.session.state.status, SessionStatus.signedOut);
     await _close(tester);
   });
@@ -94,7 +94,7 @@ void main() {
       'title': 'لازم تفعّل الدخول بخطوتين.',
       'status': 403,
     }, status: 403);
-    await tester.tap(find.text('عندك كلمة سر؟ ادخل بيها'));
+    await tester.tap(find.text('لديك كلمة مرور؟ ادخل بها'));
     await frames(tester, 5);
     await tester.enterText(find.byKey(const Key('academy')), 'demo');
     await tester.enterText(find.byKey(const Key('login')), 'owner@demo.test');
@@ -102,24 +102,24 @@ void main() {
     await tester.tap(find.text('ادخل'));
     await frames(tester, 6);
 
-    expect(find.text('فعّل الدخول بخطوتين الأول'), findsOneWidget);
-    await tester.tap(find.text('ابدأ من الأول'));
+    expect(find.text('فعّل الدخول بخطوتين أولًا'), findsOneWidget);
+    await tester.tap(find.text('ابدأ من جديد'));
     await frames(tester, 6);
-    expect(find.text('أهلًا بيك'), findsOneWidget);
+    expect(find.text('أهلًا بك'), findsOneWidget);
     expect(app.api.sent('POST', 'auth/login'), hasLength(1));
     await _close(tester);
   });
 
   testWidgets('a password left out says which field wants it, and asks nothing', (tester) async {
     final app = await _open(tester);
-    await tester.tap(find.text('عندك كلمة سر؟ ادخل بيها'));
+    await tester.tap(find.text('لديك كلمة مرور؟ ادخل بها'));
     await frames(tester, 5);
     await tester.enterText(find.byKey(const Key('academy')), 'demo');
     await tester.tap(find.text('ادخل'));
     await frames(tester, 3);
-    expect(find.text('اكتب إيميلك أو موبايلك أو اسم المستخدم.'), findsOneWidget);
-    expect(find.text('اكتب كلمة السر.'), findsOneWidget);
-    expect(find.text('اكتب كود الأكاديمية.'), findsNothing);
+    expect(find.text('اكتب بريدك الإلكتروني أو هاتفك أو اسم المستخدم.'), findsOneWidget);
+    expect(find.text('اكتب كلمة المرور.'), findsOneWidget);
+    expect(find.text('اكتب رمز الأكاديمية.'), findsNothing);
     expect(app.api.sent('POST', 'auth/login'), isEmpty);
     await _close(tester);
   });
@@ -134,25 +134,25 @@ void main() {
       headers: {'Retry-After': '30'},
     );
     await tester.enterText(find.byKey(const Key('contact')), '0501234504');
-    await tester.tap(find.text('ابعتلي كود'));
+    await tester.tap(find.text('أرسل لي رمزًا'));
     await frames(tester, 3);
 
-    expect(find.text('جرّبت كتير'), findsOneWidget);
-    expect(find.text('جرّب تاني بعد 0:30'), findsOneWidget);
-    await tester.tap(find.text('ابعتلي كود'));
+    expect(find.text('محاولات كثيرة'), findsOneWidget);
+    expect(find.text('حاول مرة أخرى بعد 0:30'), findsOneWidget);
+    await tester.tap(find.text('أرسل لي رمزًا'));
     await frames(tester, 3);
     expect(app.api.sent('POST', 'accounts/code'), hasLength(1), reason: 'the button waits too');
 
     await tester.pump(const Duration(seconds: 12));
-    expect(find.text('جرّب تاني بعد 0:18'), findsOneWidget);
+    expect(find.text('حاول مرة أخرى بعد 0:18'), findsOneWidget);
     await tester.pump(const Duration(seconds: 19));
     await frames(tester, 3);
-    expect(find.text('جرّبت كتير'), findsNothing);
+    expect(find.text('محاولات كثيرة'), findsNothing);
 
     app.api.on('POST', 'accounts/code', _sent(), status: 202);
-    await tester.tap(find.text('ابعتلي كود'));
+    await tester.tap(find.text('أرسل لي رمزًا'));
     await frames(tester);
-    expect(find.text('اكتب الكود'), findsOneWidget);
+    expect(find.text('اكتب الرمز'), findsOneWidget);
     await _close(tester);
   });
 
@@ -163,12 +163,12 @@ void main() {
       ..on('POST', 'accounts/code/verify', _found([]));
     await _codeFor(tester, '0501234504');
 
-    expect(find.text('مالقيناش حساب بالرقم ده'), findsOneWidget);
+    expect(find.text('لم نجد حسابًا بهذا الرقم'), findsOneWidget);
     expect(find.text('+966501234504'), findsOneWidget);
-    expect(find.text('جرّب بالإيميل'), findsOneWidget);
+    expect(find.text('جرّب البريد الإلكتروني'), findsOneWidget);
     await tester.tap(find.text('غيّره'));
     await frames(tester, 6);
-    expect(find.text('أهلًا بيك'), findsOneWidget);
+    expect(find.text('أهلًا بك'), findsOneWidget);
     expect(app.session.state.status, SessionStatus.signedOut);
     await _close(tester);
   });
@@ -180,11 +180,11 @@ void main() {
       ..on('POST', 'accounts/code/verify', _found([]));
     await _codeFor(tester, 'rami@demo.test');
 
-    expect(find.text('مالقيناش حساب بالإيميل ده'), findsOneWidget);
-    expect(find.text('جرّب بالإيميل'), findsNothing);
-    await tester.tap(find.text('عندك كلمة سر؟ ادخل بيها'));
+    expect(find.text('لم نجد حسابًا بهذا البريد الإلكتروني'), findsOneWidget);
+    expect(find.text('جرّب البريد الإلكتروني'), findsNothing);
+    await tester.tap(find.text('لديك كلمة مرور؟ ادخل بها'));
     await frames(tester, 6);
-    expect(find.text('ادخل بكلمة السر'), findsOneWidget);
+    expect(find.text('ادخل بكلمة المرور'), findsOneWidget);
     expect(app.api.requests.where((r) => r.path == 'auth/login'), isEmpty);
     await _close(tester);
   });
@@ -195,11 +195,11 @@ void main() {
     final app = await _open(tester);
     app.api.on('POST', 'accounts/code', _sent(), status: 202);
     await tester.enterText(find.byKey(const Key('contact')), '0501234504');
-    await tester.tap(find.text('ابعتلي كود'));
+    await tester.tap(find.text('أرسل لي رمزًا'));
     await frames(tester);
     await tester.pump(const Duration(seconds: 10));
-    expect(find.textContaining('ابعت كود جديد بعد'), findsOneWidget);
-    expect(find.text('ابعت كود جديد'), findsNothing);
+    expect(find.textContaining('أرسل رمزًا جديدًا بعد'), findsOneWidget);
+    expect(find.text('أرسل رمزًا جديدًا'), findsNothing);
     await _close(tester);
   });
 
@@ -227,9 +227,9 @@ void main() {
       final app = await signIn(tester);
       expect(find.byType(WelcomeMoment), findsOneWidget);
       expect(find.descendant(of: find.byType(WelcomeMoment), matching: find.text('أهلًا يا رامي')), findsOneWidget);
-      expect(find.text('إنت دلوقتي في أكاديمية demo'), findsOneWidget);
+      expect(find.text('أنت الآن في أكاديمية demo'), findsOneWidget);
       // The home is already there under it.
-      expect(find.text('الحصة الجاية'), findsOneWidget);
+      expect(find.text('الحصة القادمة'), findsOneWidget);
 
       await frames(tester, 20);
       expect(find.byType(WelcomeMoment), findsNothing);

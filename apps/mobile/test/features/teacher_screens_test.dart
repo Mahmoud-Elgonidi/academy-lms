@@ -82,10 +82,10 @@ void main() {
       });
     await _open(tester, app);
 
-    expect(find.text('النهارده: حصتين'), findsOneWidget);
-    expect(find.text('الحصة الجاية'), findsOneWidget);
+    expect(find.text('اليوم: حصتان'), findsOneWidget);
+    expect(find.text('الحصة القادمة'), findsOneWidget);
     // What is done today is listed apart, with what it was recorded as.
-    expect(find.text('خلصت النهارده'), findsOneWidget);
+    expect(find.text('انتهت اليوم'), findsOneWidget);
     expect(find.text('الطالب غاب'), findsOneWidget);
     // What waits: a report to write and a homework to mark, each opening its place.
     expect(find.descendant(of: find.byKey(const Key('today-reports')), matching: find.text('1')), findsOneWidget);
@@ -99,7 +99,7 @@ void main() {
     expect(find.text('اعتراض على نتيجة الحصة'), findsOneWidget);
     await tester.tap(find.text('الطالب كان موجود'));
     await tester.enterText(find.byType(TextField).last, 'يوسف كان في الحصة والكاميرا مقفولة');
-    await tester.tap(find.text('ابعت الاعتراض'));
+    await tester.tap(find.text('أرسل الاعتراض'));
     await frames(tester, 10);
 
     final sent = app.api.sent('POST', 'teacher/lessons/l0/dispute').single;
@@ -124,8 +124,8 @@ void main() {
       ..on('GET', 'teacher/reports', {'type': 'server', 'title': 'حصلت مشكلة.', 'status': 500}, status: 500);
     await _open(tester, app);
 
-    expect(find.text('النهارده: حصة واحدة'), findsOneWidget);
-    expect(find.text('الحصة الجاية'), findsOneWidget);
+    expect(find.text('اليوم: حصة واحدة'), findsOneWidget);
+    expect(find.text('الحصة القادمة'), findsOneWidget);
     expect(find.byKey(const Key('today-reports')), findsNothing);
     await _close(tester);
   });
@@ -154,7 +154,7 @@ void main() {
     await frames(tester, 12);
     expect(app.api.requests.where((r) => r.path == 'teacher/lessons').last.queryParameters['from'], '2099-10-10');
 
-    expect(find.text('الأسبوع ده'), findsOneWidget);
+    expect(find.text('هذا الأسبوع'), findsOneWidget);
     // Seven days on the strip, the ones without lessons with a dash.
     expect(find.text('—'), findsNWidgets(4));
     // From today on: Sunday and Tuesday; Saturday is a tap away.
@@ -163,14 +163,14 @@ void main() {
     await frames(tester, 6);
     expect(find.textContaining('يوسف خالد'), findsNWidgets(3));
 
-    await tester.tap(find.byTooltip('الأسبوع اللي فات'));
+    await tester.tap(find.byTooltip('الأسبوع الماضي'));
     await frames(tester, 10);
     expect(app.api.requests.where((r) => r.path == 'teacher/lessons').last.queryParameters['from'], '2099-10-03');
-    expect(find.text('مفيش حصص الأسبوع ده.'), findsOneWidget);
+    expect(find.text('لا توجد حصص هذا الأسبوع.'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('الأسبوع الجاي'));
+    await tester.tap(find.byTooltip('الأسبوع القادم'));
     await tester.pump();
-    await tester.tap(find.byTooltip('الأسبوع الجاي'));
+    await tester.tap(find.byTooltip('الأسبوع القادم'));
     await frames(tester, 10);
     expect(app.api.requests.where((r) => r.path == 'teacher/lessons').last.queryParameters['from'], '2099-10-17');
     await _close(tester);
@@ -199,7 +199,7 @@ void main() {
     await tester.tap(find.text('الطلاب').last);
     await frames(tester, 12);
 
-    expect(find.text('طالبين في مادتين'), findsOneWidget);
+    expect(find.text('طالبان في مادتين'), findsOneWidget);
     expect(find.text('يوسف خالد'), findsOneWidget);
     expect(find.text('قرآن · سورة النصر'), findsOneWidget);
     expect(find.text('2 للتصحيح'), findsOneWidget);
@@ -221,7 +221,7 @@ void main() {
     await tester.tap(find.byKey(const Key('student-e1')));
     await frames(tester, 8);
     expect(find.text('40% من البرنامج'), findsOneWidget);
-    expect(find.text('دلوقتي: سورة النصر'), findsOneWidget);
+    expect(find.text('الآن: سورة النصر'), findsOneWidget);
     expect(find.text('صحّح الواجبات (2)'), findsOneWidget);
     await _close(tester);
   });
@@ -286,21 +286,21 @@ void main() {
 
     expect(find.text('أكتوبر 2099'), findsOneWidget);
     expect(find.text('500 ج.م.'), findsOneWidget);
-    expect(find.text('الشهر لسه مفتوح'), findsOneWidget);
+    expect(find.text('الشهر ما زال مفتوحًا'), findsOneWidget);
     expect(find.text('اتراجعت بعد اعتراض'), findsOneWidget);
-    expect(find.text('اتصحّح'), findsOneWidget);
+    expect(find.text('صُحّح'), findsOneWidget);
     expect(find.text('التزام'), findsOneWidget);
     // A reversed adjustment is not shown.
     expect(find.text('اتلغى'), findsNothing);
-    final next = find.ancestor(of: find.byTooltip('الشهر الجاي'), matching: find.byType(IconButton));
+    final next = find.ancestor(of: find.byTooltip('الشهر القادم'), matching: find.byType(IconButton));
     expect(tester.widget<IconButton>(next).onPressed, isNull);
 
-    await tester.tap(find.byTooltip('الشهر اللي فات'));
+    await tester.tap(find.byTooltip('الشهر الماضي'));
     await frames(tester, 10);
     expect(app.api.requests.where((r) => r.path == 'teacher/earnings').last.queryParameters['month'], '2099-09');
     expect(find.text('سبتمبر 2099'), findsOneWidget);
-    expect(find.text('الشهر اتقفل'), findsOneWidget);
-    await tester.tap(find.byTooltip('الشهر الجاي'));
+    expect(find.text('أُغلق الشهر'), findsOneWidget);
+    await tester.tap(find.byTooltip('الشهر القادم'));
     await frames(tester, 10);
     expect(app.api.requests.where((r) => r.path == 'teacher/earnings').last.queryParameters['month'], '2099-10');
     expect(tester.widget<IconButton>(next).onPressed, isNull);
@@ -334,9 +334,9 @@ void main() {
     await _open(tester, app, '/teach/more/time-off');
     expect(find.text('اطلب إجازة'), findsWidgets);
 
-    await tester.tap(find.text('ابعت الطلب'));
+    await tester.tap(find.text('أرسل الطلب'));
     await frames(tester, 3);
-    expect(find.text('اختار الأيام والسبب الأول.'), findsOneWidget);
+    expect(find.text('اختر الأيام والسبب أولًا.'), findsOneWidget);
     expect(app.api.sent('POST', 'teacher/time-off'), isEmpty);
 
     // From today (the picker opens on it).
@@ -346,20 +346,20 @@ void main() {
     await tester.tap(find.text(ok));
     await frames(tester, 6);
     await tester.tap(find.text('مرض'));
-    await tester.tap(find.text('ابعت الطلب'));
+    await tester.tap(find.text('أرسل الطلب'));
     await frames(tester, 10);
 
     final sent = app.api.sent('POST', 'teacher/time-off').single;
     final today = DateTime.now().toIso8601String().substring(0, 10);
     expect(sent.data, {'first_day': today, 'last_day': today, 'reason': 'sick'});
     expect(sent.headers['Idempotency-Key'], isNotNull);
-    expect(find.text('الطلب اتبعت. هيوصلك الرد.'), findsOneWidget);
+    expect(find.text('أُرسل الطلب. سيصلك الرد.'), findsOneWidget);
     expect(find.text('مستني الرد'), findsOneWidget);
 
     await tester.tap(find.text('اسحبه'));
     await frames(tester, 10);
     expect(app.api.sent('DELETE', 'teacher/time-off/t1'), hasLength(1));
-    expect(find.text('الطلب اتسحب.'), findsOneWidget);
+    expect(find.text('سُحب الطلب.'), findsOneWidget);
     expect(find.text('مستني الرد'), findsNothing);
     await _close(tester);
   });
@@ -426,15 +426,15 @@ void main() {
     await _open(tester, app, '/teach/more');
     await tester.tap(find.byKey(const Key('open-meeting-link')));
     await frames(tester, 12);
-    expect(find.text('لينك الحصة بتاعك'), findsWidgets);
-    expect(find.text('الأكاديمية شغالة على لينكات خارجية، ومفيش حصة هتفتح من غير لينكك.'), findsOneWidget);
+    expect(find.text('رابط حصتك'), findsWidgets);
+    expect(find.text('تعمل الأكاديمية بروابط خارجية، ولن تُفتح أي حصة دون رابطك.'), findsOneWidget);
 
     await tester.enterText(find.byKey(const Key('meeting-link')), ' https://meet.google.com/abc-defg-hij ');
-    await tester.tap(find.text('احفظ اللينك'));
+    await tester.tap(find.text('احفظ الرابط'));
     await frames(tester, 10);
     expect(app.api.sent('PUT', 'teacher/meeting-link').single.data, {'url': 'https://meet.google.com/abc-defg-hij'});
-    expect(find.text('اللينك اتحفظ.'), findsOneWidget);
-    expect(find.text('الأكاديمية شغالة على لينكات خارجية، ومفيش حصة هتفتح من غير لينكك.'), findsNothing);
+    expect(find.text('حُفظ الرابط.'), findsOneWidget);
+    expect(find.text('تعمل الأكاديمية بروابط خارجية، ولن تُفتح أي حصة دون رابطك.'), findsNothing);
     await _close(tester);
   });
 
@@ -465,14 +465,14 @@ void main() {
 
     // Two reports and two homework wait: the tab says 4, the line above says what.
     expect(find.descendant(of: find.byType(NavigationBar), matching: find.text('4')), findsOneWidget);
-    expect(find.text('مستنيك: تقريرين وواجبين'), findsOneWidget);
-    expect(find.text('واجبات مستنية تصحيح'), findsOneWidget);
+    expect(find.text('ينتظرك: تقريران وواجبان'), findsOneWidget);
+    expect(find.text('واجبات تنتظر التصحيح'), findsOneWidget);
     // The overdue one comes first, with how late in its line.
     final rows = tester.widgetList<InkWell>(find.byWidgetPredicate((w) => w is InkWell && '${w.key}'.contains('report-r'))).toList();
     expect(rows.first.key, const Key('report-r2'));
     expect(find.textContaining('متأخر يوم'), findsOneWidget);
     expect(find.text('اكتب'), findsNWidgets(2));
-    expect(find.text('اتبعتت'), findsOneWidget);
+    expect(find.text('أُرسلت'), findsOneWidget);
     expect(find.text('مريم خالد'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('open-marking')));
@@ -492,12 +492,12 @@ void main() {
     await _open(tester, app, '/teach/more');
 
     expect(find.text('التدريس'), findsOneWidget);
-    expect(find.text('شغلي'), findsOneWidget);
+    expect(find.text('عملي'), findsOneWidget);
     expect(find.text('حسابي'), findsOneWidget);
     expect(find.text('Zoom'), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('open-messages')), matching: find.text('3')), findsOneWidget);
     expect(find.byKey(const Key('more-who')), findsOneWidget);
-    expect(find.text('مدرّس · أكاديمية النور'), findsOneWidget);
+    expect(find.text('معلّم · أكاديمية النور'), findsOneWidget);
     // Earnings left the tabs for More.
     expect(find.descendant(of: find.byType(NavigationBar), matching: find.text('أرباحي')), findsNothing);
     await tester.tap(find.byKey(const Key('open-earnings')));

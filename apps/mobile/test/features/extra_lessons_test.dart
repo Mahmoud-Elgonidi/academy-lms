@@ -107,7 +107,7 @@ void main() {
 
     await tester.tap(find.byKey(const Key('extra-e1')));
     await frames(tester, 12);
-    expect(find.text('حصص زيادة في قرآن'), findsOneWidget);
+    expect(find.text('حصص إضافية في قرآن'), findsOneWidget);
     await tester.tap(find.byKey(const Key('extra-count-2')));
     await frames(tester, 3);
     expect(find.text('2 × 50 ر.س.'), findsOneWidget);
@@ -117,7 +117,7 @@ void main() {
     final sent = app.api.sent('POST', 'family/enrollments/e1/extra-lessons').single;
     expect(sent.headers['Idempotency-Key'], isNotNull);
     expect((sent.data as Map)['lessons'], 2);
-    expect(find.text('فاتورة الحصص الزيادة NR-000009 مستنية الدفع.'), findsOneWidget);
+    expect(find.text('فاتورة الحصص الإضافية NR-000009 بانتظار الدفع.'), findsOneWidget);
     await tester.binding.setSurfaceSize(null);
   });
 }

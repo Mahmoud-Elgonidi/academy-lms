@@ -74,7 +74,7 @@ void main() {
       Strength.fresh,
     ]);
     expect(board.map.juzs.first.tally[Strength.fresh], 16);
-    expect(board.map.label(Strength.fading), 'محتاج مراجعة قريب');
+    expect(board.map.label(Strength.fading), 'يحتاج إلى مراجعة قريبًا');
     // The new pages are the ones neither memorized nor learning.
     expect(board.map.counts.of(Strength.fresh, board.map.pagesTotal), 600);
     expect(board.wird.pages.map((p) => (p.page, p.strength, p.overdueDays)), [(2, Strength.fading, 0), (3, Strength.weak, 2)]);
@@ -158,7 +158,7 @@ void main() {
 
     // The way in is on the journey: what is left of today's review.
     expect(find.text('ورد الحفظ'), findsOneWidget);
-    expect(find.text('فاضل صفحتين النهارده'), findsOneWidget);
+    expect(find.text('بقيت صفحتان اليوم'), findsOneWidget);
     await tester.tap(find.byKey(const Key('hifz-card')));
     await frames(tester, 12);
     expect(GoRouter.of(tester.element(find.byType(Scaffold).last)).state.matchedLocation, '/teen/journey/hifz');
@@ -173,16 +173,16 @@ void main() {
     expect(_squareColour(tester, 5), colours.line);
     expect(_squareColour(tester, 604), colours.line);
     // The key, with how many pages each strength has.
-    for (final line in ['ثابت · 1', 'محتاج مراجعة قريب · 1', 'ضعيف · 1', 'بيتحفظ · 1', 'لسه · 600']) {
+    for (final line in ['ثابت · 1', 'يحتاج إلى مراجعة قريبًا · 1', 'ضعيف · 1', 'قيد الحفظ · 1', 'لم يبدأ · 600']) {
       expect(find.text(line), findsOneWidget, reason: line);
     }
     // A screen reader hears each part as one line.
-    expect(find.bySemanticsLabel('الجزء 1: ثابت 1، محتاج مراجعة قريب 1، ضعيف 1، بيتحفظ 1، لسه 16'), findsOneWidget);
-    expect(find.bySemanticsLabel('الجزء 30: لسه 24'), findsOneWidget);
+    expect(find.bySemanticsLabel('الجزء 1: ثابت 1، يحتاج إلى مراجعة قريبًا 1، ضعيف 1، قيد الحفظ 1، لم يبدأ 16'), findsOneWidget);
+    expect(find.bySemanticsLabel('الجزء 30: لم يبدأ 24'), findsOneWidget);
 
     // Today's review: two pages, the late one saying so.
-    expect(find.text('ورد النهارده'), findsOneWidget);
-    expect(find.text('خلص 0 من 3 صفحات'), findsOneWidget);
+    expect(find.text('ورد اليوم'), findsOneWidget);
+    expect(find.text('أُنجز 0 من 3 صفحات'), findsOneWidget);
     expect(find.byKey(const Key('wird-2')), findsOneWidget);
     expect(find.text('متأخرة يومين'), findsOneWidget);
     await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
@@ -226,13 +226,13 @@ void main() {
     expect(find.textContaining('كَلِمَةٌ أُولَى'), findsOneWidget);
     expect(find.text('Tanzil Quran Text'), findsOneWidget);
 
-    await tester.tap(find.text('كويس'));
+    await tester.tap(find.text('جيد'));
     await frames(tester, 12);
     final graded = app.api.sent('POST', 'learning/hifz/pages/2/grade').single;
     expect(graded.data, {'grade': 3, 'learner_id': 'c1'});
     expect(graded.headers['Idempotency-Key'], isNotNull);
     // One page left: it says when this one comes back.
-    expect(find.textContaining('اتسجّلت. الصفحة دي هترجعلك '), findsOneWidget);
+    expect(find.textContaining('سُجّلت. ستعود إليك هذه الصفحة '), findsOneWidget);
     expect(find.byKey(const Key('wird-2')), findsNothing);
 
     // The last page of the day: the look's own celebration.
@@ -243,9 +243,9 @@ void main() {
     await tester.tap(find.text('سهلة'));
     await frames(tester, 6);
     expect(app.api.sent('POST', 'learning/hifz/pages/3/grade').single.data, {'grade': 4, 'learner_id': 'c1'});
-    expect(find.text('ورد النهارده خلص!'), findsOneWidget);
+    expect(find.text('انتهى ورد اليوم!'), findsOneWidget);
     await frames(tester, 20);
-    expect(find.text('ورد النهارده خلص. برافو!'), findsOneWidget);
+    expect(find.text('انتهى ورد اليوم. أحسنت!'), findsOneWidget);
 
     await _close(tester);
   });
@@ -272,11 +272,11 @@ void main() {
       ..on('POST', 'learning/hifz/pages/3/recitations', {'data': fxRecitation()}, status: 202)
       ..onWith('GET', 'learning/hifz/recitations/rc1', (_) => (200, {'data': fxRecitation(status: heard ? 'ready' : 'pending')}));
     await _open(tester, app, size: const Size(420, 2600));
-    await tester.tap(find.text('تمام!'));
+    await tester.tap(find.text('رائع!'));
     await frames(tester, 6);
 
     // The child's own words, on the sea.
-    expect(find.text('فاضلك صفحة واحدة تسمّعها'), findsOneWidget);
+    expect(find.text('بقيت لك صفحة واحدة تسمّعها'), findsOneWidget);
     await tester.tap(find.byKey(const Key('hifz-card')));
     await frames(tester, 14);
     expect(find.text('خريطة حفظي'), findsOneWidget);
@@ -291,13 +291,13 @@ void main() {
     expect(find.byKey(const Key('grade-3')), findsNothing);
     recorder.onRecorded(HandInFile(bytes: Uint8List.fromList(List.filled(64, 1)), name: 'recording.wav', mime: 'audio/wav'));
     await frames(tester, 2);
-    await tester.tap(find.text('ابعت التسميع'));
+    await tester.tap(find.text('أرسل التسميع'));
     await frames(tester, 10);
     final form = app.api.sent('POST', 'learning/hifz/pages/3/recitations').single.data as FormData;
     expect(form.files.single.key, 'audio');
     expect(form.files.single.value.filename, 'recording.wav');
     expect(form.fields, isEmpty, reason: 'the student is their own learner');
-    expect(find.text('بنسمع التسميع…'), findsOneWidget);
+    expect(find.text('نستمع إلى التسميع…'), findsOneWidget);
     final asked = app.api.sent('GET', 'learning/hifz/recitations/rc1').length;
 
     // Heard: the signal (here, the app coming back) reloads the check, never a timer of its own.
@@ -306,7 +306,7 @@ void main() {
     heard = true;
     await _awayAndBack(tester);
     await frames(tester, 12);
-    expect(find.text('بنسمع التسميع…'), findsNothing);
+    expect(find.text('نستمع إلى التسميع…'), findsNothing);
     final sheet = find.byType(BottomSheet);
     expect(find.descendant(of: sheet, matching: find.text('صح 2 من 4 · ناقصة 1 · غلط 1 · زيادة 1')), findsOneWidget);
     expect(find.descendant(of: sheet, matching: find.text('بصعوبة')), findsOneWidget);
@@ -315,11 +315,11 @@ void main() {
     expect(words, contains('كَلِمَةٌ كلمه أُولَى (1)'));
     expect(find.textContaining('التصحيح آلي'), findsOneWidget);
     // The map came back too, with the day's review done.
-    expect(find.text('خلّصت وردك! 🎉'), findsOneWidget);
+    expect(find.text('أنهيت وردك! 🎉'), findsOneWidget);
 
-    await tester.tap(find.text('تمام!'));
+    await tester.tap(find.text('رائع!'));
     await frames(tester, 20);
-    expect(find.text('ورد النهارده خلص. برافو!'), findsOneWidget);
+    expect(find.text('انتهى ورد اليوم. أحسنت!'), findsOneWidget);
     expect(find.byKey(const Key('hifz-latest')), findsOneWidget);
 
     await _close(tester);
@@ -411,12 +411,12 @@ void main() {
     expect(find.text('3 صفحات محفوظة من 604'), findsOneWidget);
     expect(_squareColour(tester, 1), Theme.of(tester.element(find.byKey(const Key('hifz-map')))).extension<LmsColors>()!.brand);
     expect(find.text('تقرير الحصة · الثلاثاء 6 أكتوبر'), findsOneWidget);
-    expect(find.text('كويس'), findsOneWidget);
+    expect(find.text('جيد'), findsOneWidget);
 
     // Part 30 and the second surah, found by name, known well.
-    await tester.tap(find.text('قول اللي حافظه'));
+    await tester.tap(find.text('سجّل ما يحفظه'));
     await frames(tester, 10);
-    expect(find.text('مااخترتش صفحات لسه'), findsOneWidget);
+    expect(find.text('لم تختر صفحات بعد'), findsOneWidget);
     await tester.tap(find.byKey(const Key('juz-30')));
     await tester.enterText(find.byKey(const Key('surah-search')), 'التانية');
     await frames(tester, 4);
@@ -432,24 +432,24 @@ void main() {
       'surahs': [2],
       'strength': 'strong',
     });
-    expect(find.text('اتسجّلت 72 صفحة'), findsOneWidget);
+    expect(find.text('سُجّلت 72 صفحة'), findsOneWidget);
     expect(app.api.sent('GET', 'teacher/students/e1/hifz').length, greaterThanOrEqualTo(3));
     await frames(tester, 20);
 
     // Part 1 marked by mistake: taken off, after asking.
-    await tester.tap(find.text('شيل صفحات'));
+    await tester.tap(find.text('أزل صفحات'));
     await frames(tester, 10);
     await tester.tap(find.byKey(const Key('juz-1')));
     await frames(tester, 2);
     await tester.tap(find.byKey(const Key('hifz-choose')));
     await frames(tester, 8);
-    expect(find.text('تشيل الصفحات دي من الخريطة؟'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, 'شيل صفحات').last);
+    expect(find.text('أتزيل هذه الصفحات من الخريطة؟'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'أزل صفحات').last);
     await frames(tester, 10);
     expect(app.api.sent('POST', 'teacher/students/e1/hifz/clear').single.data, {
       'juz': [1],
     });
-    expect(find.text('اتشالت 20 صفحة'), findsOneWidget);
+    expect(find.text('أُزيلت 20 صفحة'), findsOneWidget);
 
     await _close(tester);
   });

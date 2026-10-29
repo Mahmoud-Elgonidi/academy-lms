@@ -35,20 +35,20 @@ void main() {
     expect(find.text('الإلغاء قبل الحصة بأكتر من 12 ساعة: الحصة هترجع لرصيدك.'), findsOneWidget);
 
     // No reason yet: nothing is sent.
-    await tester.tap(find.text('أيوه، ألغيها'));
+    await tester.tap(find.text('نعم، ألغِها'));
     await frames(tester, 3);
-    expect(find.text('اختار سبب الأول.'), findsOneWidget);
+    expect(find.text('اختر سببًا أولًا.'), findsOneWidget);
     expect(app.api.sent('POST', 'lessons/l1/cancel'), isEmpty);
 
     await tester.tap(find.text('سفر'));
     await tester.enterText(find.byType(TextField).last, 'مسافرين العمرة');
-    await tester.tap(find.text('أيوه، ألغيها'));
+    await tester.tap(find.text('نعم، ألغِها'));
     await frames(tester, 10);
 
     final cancel = app.api.sent('POST', 'lessons/l1/cancel').single;
     expect(cancel.data, {'reason': 'travel', 'note': 'مسافرين العمرة'});
     expect(cancel.headers['Idempotency-Key'], isNotNull);
-    expect(find.text('الحصة اتلغت.'), findsOneWidget);
+    expect(find.text('أُلغيت الحصة.'), findsOneWidget);
     // The list reloads after the cancel.
     expect(app.api.sent('GET', 'family/lessons').length, greaterThanOrEqualTo(2));
 

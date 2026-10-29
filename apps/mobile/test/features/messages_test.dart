@@ -129,7 +129,7 @@ void main() {
       'with_id': 't1',
       'learner_id': 'c1',
     }); // the learner the family tabs show
-    expect(find.text('معاكم: سلمى رامي (الطالب)'), findsOneWidget);
+    expect(find.text('معكم: سلمى رامي (الطالب)'), findsOneWidget);
 
     await tester.enterText(find.byKey(const Key('message-body')), 'ابعتيلي على 01001234567');
     await tester.tap(find.byKey(const Key('message-send')));

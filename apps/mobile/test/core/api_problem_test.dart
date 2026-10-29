@@ -28,7 +28,7 @@ void main() {
   });
 
   test('falls back to the detail, then the title', () {
-    expect(ApiProblem.fromDio(_with(403, {'type': 'forbidden', 'title': 'ممنوع.', 'detail': 'مش دلوقتي.'})).message, 'مش دلوقتي.');
+    expect(ApiProblem.fromDio(_with(403, {'type': 'forbidden', 'title': 'ممنوع.', 'detail': 'ليس الآن.'})).message, 'ليس الآن.');
     expect(ApiProblem.fromDio(_with(404, {'type': 'not-found', 'title': 'غير موجود.'})).message, 'غير موجود.');
   });
 

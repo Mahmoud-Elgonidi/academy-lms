@@ -73,30 +73,30 @@ void main() {
     await frames(tester, 10);
 
     // The row says who covers; its sheet says why and offers to turn it down.
-    expect(find.text('بديل بدل أ. منى إبراهيم'), findsOneWidget);
+    expect(find.text('بديل عن أ. منى إبراهيم'), findsOneWidget);
     await _sheet(tester, 'l1');
-    expect(find.text('مدرّس بديل: أ. منى إبراهيم في إجازة'), findsOneWidget);
-    await tester.tap(find.text('مش موافقين على البديل'));
+    expect(find.text('معلّم بديل: أ. منى إبراهيم في إجازة'), findsOneWidget);
+    await tester.tap(find.text('لا نوافق على البديل'));
     await frames(tester, 6);
-    expect(find.text('الحصة هتتلغي على حساب الأكاديمية، ودقايقها هترجعلك حصة تعويض تحجزها بعدين.'), findsOneWidget);
+    expect(find.text('ستُلغى الحصة على حساب الأكاديمية، وتعود دقائقها إليك حصة تعويضية تحجزها لاحقًا.'), findsOneWidget);
 
     // Keeping it sends nothing.
-    await tester.tap(find.text('لأ، خليها'));
+    await tester.tap(find.text('لا، أبقِها'));
     await frames(tester, 6);
     expect(app.api.sent('POST', 'lessons/l1/refuse-substitute'), isEmpty);
 
     await _sheet(tester, 'l1');
-    await tester.tap(find.text('مش موافقين على البديل'));
+    await tester.tap(find.text('لا نوافق على البديل'));
     await frames(tester, 6);
-    await tester.tap(find.text('أيوه، ألغيها وعوّضوني'));
+    await tester.tap(find.text('نعم، ألغِها وعوّضونا'));
     await frames(tester, 10);
     final sent = app.api.sent('POST', 'lessons/l1/refuse-substitute').single;
     expect(sent.headers['Idempotency-Key'], isNotNull);
-    expect(find.text('اتلغت. عندك 30 يوم تحجز فيهم حصة التعويض.'), findsOneWidget);
+    expect(find.text('أُلغيت. لديك 30 يومًا لتحجز فيها حصة التعويض.'), findsOneWidget);
     // The list comes back without the choice.
-    expect(find.text('بديل بدل أ. منى إبراهيم'), findsNothing);
+    expect(find.text('بديل عن أ. منى إبراهيم'), findsNothing);
     await _sheet(tester, 'l1');
-    expect(find.text('مش موافقين على البديل'), findsNothing);
+    expect(find.text('لا نوافق على البديل'), findsNothing);
     await _close(tester);
   });
 
@@ -111,13 +111,13 @@ void main() {
     await frames(tester, 10);
 
     await _sheet(tester, 'l1');
-    await tester.tap(find.text('مش موافقين على البديل'));
+    await tester.tap(find.text('لا نوافق على البديل'));
     await frames(tester, 6);
-    await tester.tap(find.text('أيوه، ألغيها وعوّضوني'));
+    await tester.tap(find.text('نعم، ألغِها وعوّضونا'));
     await frames(tester, 10);
     expect(find.text('الحصة دي مبقاش ينفع تتغير.'), findsOneWidget);
     await _sheet(tester, 'l1');
-    expect(find.text('مش موافقين على البديل'), findsOneWidget);
+    expect(find.text('لا نوافق على البديل'), findsOneWidget);
     await _close(tester);
   });
 
@@ -148,14 +148,14 @@ void main() {
     await frames(tester, 10);
     expect(find.text('الإلغاء قبل الحصة بأقل من 12 ساعة: الحصة هتتحسب.'), findsOneWidget);
     await tester.tap(find.text('تعبان'));
-    await tester.tap(find.text('أيوه، ألغيها'));
+    await tester.tap(find.text('نعم، ألغِها'));
     await frames(tester, 10);
     expect(find.text('الحصة بدأت خلاص، مينفعش تتلغي.'), findsOneWidget);
-    expect(find.text('الحصة اتلغت.'), findsNothing);
+    expect(find.text('أُلغيت الحصة.'), findsNothing);
     // Still possible to go back, and to try again.
-    final yes = tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'أيوه، ألغيها'));
+    final yes = tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'نعم، ألغِها'));
     expect(yes.onPressed, isNotNull);
-    await tester.tap(find.text('لأ، خليها'));
+    await tester.tap(find.text('لا، أبقِها'));
     await frames(tester, 6);
     expect(find.text('حصص سلمى'), findsOneWidget);
     expect(app.api.sent('POST', 'lessons/l1/cancel'), hasLength(1));
@@ -197,21 +197,21 @@ void main() {
     await _open(tester, app);
     await tester.tap(find.text('الحصص').last);
     await frames(tester, 10);
-    await tester.tap(find.text('اللي فاتت'));
+    await tester.tap(find.text('السابقة'));
     await frames(tester, 10);
 
     await _sheet(tester, 'l9');
     await tester.tap(find.text('قيّم الحصة'));
     await frames(tester, 10);
-    expect(find.text('الحصة كانت إزاي؟'), findsOneWidget);
+    expect(find.text('كيف كانت الحصة؟'), findsOneWidget);
     // Nothing to send before the stars.
-    expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'ابعت التقييم')).onPressed, isNull);
+    expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'أرسل التقييم')).onPressed, isNull);
 
     await tester.tap(find.byTooltip('5 من 5'));
     await frames(tester, 3);
     await tester.tap(find.text('صبور'));
     await tester.enterText(find.byType(TextField).last, 'ممتاز');
-    await tester.tap(find.text('ابعت التقييم'));
+    await tester.tap(find.text('أرسل التقييم'));
     await frames(tester, 10);
 
     expect(app.api.sent('PUT', 'lessons/l9/rating').single.data, {
@@ -232,13 +232,13 @@ void main() {
     await _open(tester, app);
     await tester.tap(find.text('الحصص').last);
     await frames(tester, 10);
-    await tester.tap(find.text('اللي فاتت'));
+    await tester.tap(find.text('السابقة'));
     await frames(tester, 10);
     await _sheet(tester, 'l9');
     await tester.tap(find.text('قيّم الحصة'));
     await frames(tester, 10);
     expect(find.text('التقييم بيبقى خلال 14 يوم من الحصة.'), findsOneWidget);
-    expect(find.text('ابعت التقييم'), findsNothing);
+    expect(find.text('أرسل التقييم'), findsNothing);
     expect(app.api.sent('PUT', 'lessons/l9/rating'), isEmpty);
     await _close(tester);
   });
@@ -281,9 +281,9 @@ void main() {
 
     expect(find.text('أ. هبة سمير'), findsOneWidget);
     expect(find.text('إلغاء الحصة'), findsNothing);
-    expect(find.text('مش موافقين على البديل'), findsNothing);
+    expect(find.text('لا نوافق على البديل'), findsNothing);
 
-    await tester.tap(find.text('اللي فاتت'));
+    await tester.tap(find.text('السابقة'));
     await frames(tester, 10);
     expect(find.text('اتعملت'), findsOneWidget);
     expect(find.text('اعترض'), findsNothing);

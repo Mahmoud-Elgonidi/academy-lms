@@ -12,7 +12,7 @@ void main() {
   const night = Allowance(may: false, used: 0, reason: 'night', reasonLabel: 'الطيور نامت 🌙 الألعاب بترجع الساعة 7 الصبح.');
 
   test('why a round cannot start: the app\'s words, the kids\' keep the academy\'s', () {
-    expect(night.why(l, kids: false), 'الطيور نامت. الألعاب بترجع الساعة 7 الصبح.');
+    expect(night.why(l, kids: false), 'نامت الطيور. تعود الألعاب في الساعة 7 صباحًا.');
     expect(night.why(l, kids: true), 'الطيور نامت 🌙 الألعاب بترجع الساعة 7 الصبح.');
     for (final (reason, words) in [('off', l.gamesRefusedOff), ('paused', l.gamesRefusedPaused), ('limit', l.gamesRefusedLimit)]) {
       expect(Allowance(may: false, used: 0, reason: reason, reasonLabel: '🌙').why(l, kids: false), words);
@@ -30,10 +30,10 @@ void main() {
       stars: 3,
       game: 'توأم العش',
     );
-    expect(done.result(l, kids: false), 'التدريب: 9 من 10 صح · 3 نجوم (توأم العش)');
+    expect(done.result(l, kids: false), 'التدريب: 9 من 10 صحيحة · 3 نجوم (توأم العش)');
     expect(done.result(l, kids: true), done.label);
     const one = HomeworkPractice(done: true, label: '', correct: 1, total: 4, stars: 1, game: 'العش');
-    expect(one.result(l, kids: false), 'التدريب: 1 من 4 صح · نجمة واحدة (العش)');
+    expect(one.result(l, kids: false), 'التدريب: 1 من 4 صحيحة · نجمة واحدة (العش)');
     const partial = HomeworkPractice(done: true, label: 'من السيرفر', correct: 9, total: 10);
     expect(partial.result(l, kids: false), 'من السيرفر');
   });

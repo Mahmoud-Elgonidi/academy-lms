@@ -46,9 +46,9 @@ void main() {
     expect(find.text('اعتراض على نتيجة الحصة'), findsOneWidget);
 
     // Nothing goes without a reason and words.
-    await tester.tap(find.text('ابعت الاعتراض'));
+    await tester.tap(find.text('أرسل الاعتراض'));
     await frames(tester, 3);
-    expect(find.text('اختار السبب واكتب اللي حصل.'), findsOneWidget);
+    expect(find.text('اختر السبب واكتب ما حدث.'), findsOneWidget);
     expect(app.api.sent('POST', 'lessons/l1/dispute'), isEmpty);
 
     await tester.tap(find.text('الحصة خلصت بدري'));
@@ -59,7 +59,7 @@ void main() {
       'notices': <Object>[],
       'data': [heldLesson(dispute: waiting)],
     });
-    await tester.tap(find.text('ابعت الاعتراض'));
+    await tester.tap(find.text('أرسل الاعتراض'));
     await frames(tester, 10);
 
     final sent = app.api.sent('POST', 'lessons/l1/dispute').single;

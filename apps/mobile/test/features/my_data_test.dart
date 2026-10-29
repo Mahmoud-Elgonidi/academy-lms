@@ -18,7 +18,7 @@ Map<String, Object?> _request(
   String? answer,
 }) => {
   'id': id,
-  'kind': {'key': kind, 'label': kind == 'export' ? 'نسخة من البيانات' : (kind == 'correction' ? 'تصحيح بيانات' : 'مسح الحساب')},
+  'kind': {'key': kind, 'label': kind == 'export' ? 'نسخة من البيانات' : (kind == 'correction' ? 'تصحيح بيانات' : 'حذف الحساب')},
   'status': {'key': status, 'label': status},
   'subject': {'id': subject, 'name': subject == 'g1' ? 'رامي ناصر' : 'سلمى رامي', 'self': subject == 'g1'},
   'requester': 'رامي ناصر',
@@ -192,7 +192,7 @@ void main() {
     final asked = app.api.sent('POST', 'me/data-requests').single;
     expect(asked.data, {'kind': 'correction', 'subject_id': 'c1', 'says': 'تاريخ الميلاد غلط: الصح 2018.'});
     expect(asked.headers['Idempotency-Key'], isNotNull);
-    expect(find.textContaining('اتطلب: الأكاديمية هترد قبل الأحد 8 نوفمبر.'), findsOneWidget);
+    expect(find.textContaining('طُلب: سترد الأكاديمية قبل الأحد 8 نوفمبر.'), findsOneWidget);
 
     await tester.ensureVisible(find.byKey(const Key('cancel-fix-c1')));
     await tester.tap(find.byKey(const Key('cancel-fix-c1')));
@@ -252,7 +252,7 @@ void main() {
     await tester.tap(find.byKey(const Key('contact-send')));
     await frames(tester, 10);
     expect(app.api.sent('POST', 'me/contact').single.data, {'kind': 'email', 'value': 'rami@new.test'});
-    expect(find.text('بعتنا كود على r•••@new.test. صالح لحد 10:10 ص.'), findsOneWidget);
+    expect(find.text('أرسلنا رمزًا إلى r•••@new.test. صالح حتى 10:10 ص.'), findsOneWidget);
 
     await tester.enterText(find.byKey(const Key('contact-code')), '123456');
     await frames(tester, 2);
@@ -305,12 +305,12 @@ void main() {
     await tester.ensureVisible(find.byKey(const Key('erase-c1')));
     await tester.tap(find.byKey(const Key('erase-c1')));
     await frames(tester, 8);
-    expect(find.text('تطلب مسح حساب سلمى رامي؟'), findsOneWidget);
+    expect(find.text('أتطلب حذف حساب سلمى رامي؟'), findsOneWidget);
     await tester.enterText(find.byKey(const Key('erase-reason')), 'خلّصت');
-    await tester.tap(find.widgetWithText(FilledButton, 'امسح الحساب ده'));
+    await tester.tap(find.widgetWithText(FilledButton, 'احذف هذا الحساب'));
     await frames(tester, 12);
     expect(app.api.sent('POST', 'me/data-requests').last.data, {'kind': 'erasure', 'subject_id': 'c1', 'reason': 'خلّصت'});
-    expect(find.text('اتطلب: الأكاديمية هترد قبل الأحد 8 نوفمبر.'), findsOneWidget);
+    expect(find.text('طُلب: سترد الأكاديمية قبل الأحد 8 نوفمبر.'), findsOneWidget);
 
     await tester.ensureVisible(find.byKey(const Key('cancel-c1')));
     await tester.tap(find.byKey(const Key('cancel-c1')));

@@ -118,7 +118,7 @@ Map<String, Object?> fxJourney({
       'late_min': 1,
       'on_time': true,
       'stayed': true,
-      'labels': ['في الميعاد', 'فضلت لآخر الحصة'],
+      'labels': ['في الموعد', 'بقيت حتى نهاية الحصة'],
     },
     'courses': [
       {

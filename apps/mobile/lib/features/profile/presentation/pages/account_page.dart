@@ -322,7 +322,7 @@ class _Settings extends StatelessWidget {
               SegmentedButton<String>(
                 showSelectedIcon: false,
                 segments: const [
-                  ButtonSegment(value: 'ar', label: Text('العربي')),
+                  ButtonSegment(value: 'ar', label: Text('العربية')),
                   ButtonSegment(value: 'en', label: Text('English')),
                 ],
                 selected: {s.locale},

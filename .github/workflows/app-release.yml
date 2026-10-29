@@ -199,7 +199,7 @@ jobs:
             git push origin "refs/tags/$TAG"
           fi
           gh release view "$TAG" > /dev/null 2>&1 && exit 0
-          { cat "$RUNNER_TEMP/notes.txt"; echo; echo "أغلب الموبايلات: ملف arm64-v8a. الموبايلات القديمة: armeabi-v7a. المحاكي: x86_64. ملف .aab لـ Google Play بس."; } \
+          { cat "$RUNNER_TEMP/notes.txt"; echo; echo "معظم الهواتف: ملف arm64-v8a. الهواتف القديمة: armeabi-v7a. المحاكي: x86_64. ملف ‎.aab لـ Google Play فقط."; } \
             > "$RUNNER_TEMP/release-notes.txt"
           gh release create "$TAG" "$RUNNER_TEMP"/apks/*.apk "$RUNNER_TEMP"/aab/*.aab --prerelease \
             --title "${{ steps.version.outputs.app }} ${{ steps.version.outputs.name }} (build ${{ steps.version.outputs.build }})" \
@@ -215,8 +215,8 @@ jobs:
           RELEASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}
           SECRETS_URL: ${{ github.server_url }}/${{ github.repository }}/settings/secrets/actions/new
         run: |
-          apks=("$RUNNER_TEMP/apks/${{ steps.version.outputs.base }}-arm64-v8a.apk::📲 لأغلب الموبايلات (arm64-v8a)"
-            "$RUNNER_TEMP/apks/${{ steps.version.outputs.base }}-armeabi-v7a.apk::📲 للموبايلات القديمة (armeabi-v7a)")
+          apks=("$RUNNER_TEMP/apks/${{ steps.version.outputs.base }}-arm64-v8a.apk::📲 لمعظم الهواتف (arm64-v8a)"
+            "$RUNNER_TEMP/apks/${{ steps.version.outputs.base }}-armeabi-v7a.apk::📲 للهواتف القديمة (armeabi-v7a)")
           if [ "$PUBLISH" != true ]; then
             { echo '### Telegram (dry run)'; echo '```'; TELEGRAM_DRY_RUN=1 bash tool/release/telegram.sh "$RUNNER_TEMP/notes.txt" "${apks[@]}"; echo '```'; } \
               >> "$GITHUB_STEP_SUMMARY"

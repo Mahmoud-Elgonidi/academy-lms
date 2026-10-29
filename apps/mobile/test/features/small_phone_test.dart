@@ -165,7 +165,7 @@ void main() {
       await frames(tester, 3);
       // The country code sits beside the number.
       expect(find.text('+966'), findsOneWidget);
-      await tester.tap(find.text('عندك كلمة سر؟ ادخل بيها'));
+      await tester.tap(find.text('لديك كلمة مرور؟ ادخل بها'));
       await frames(tester);
       await tester.pumpWidget(const SizedBox());
       await frames(tester, 2);
@@ -178,7 +178,7 @@ void main() {
       await app.session.start();
       await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
       await frames(tester, 15);
-      expect(find.text('الحصة شغالة دلوقتي'), findsOneWidget);
+      expect(find.text('الحصة جارية الآن'), findsOneWidget);
       await _scrollDown(tester);
 
       await _go(tester, '/family/lessons');
@@ -201,11 +201,11 @@ void main() {
       await _go(tester, '/family/money');
       await tester.tap(find.text('دفعت بالتحويل'));
       await frames(tester, 10);
-      expect(find.text('ابعت إثبات الدفع'), findsOneWidget);
+      expect(find.text('أرسل إثبات الدفع'), findsOneWidget);
       await _scrollDown(tester);
-      Navigator.of(tester.element(find.text('ابعت إثبات الدفع'))).pop();
+      Navigator.of(tester.element(find.text('أرسل إثبات الدفع'))).pop();
       await frames(tester, 10);
-      expect(find.text('ابعت إثبات الدفع'), findsNothing);
+      expect(find.text('أرسل إثبات الدفع'), findsNothing);
       await _scrollDown(tester);
 
       await tester.pumpWidget(const SizedBox());

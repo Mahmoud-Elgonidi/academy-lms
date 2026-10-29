@@ -1,22 +1,22 @@
 {
   "@@locale": "ar",
   "appName": "الأكاديمية",
-  "retry": "جرّب تاني",
-  "offline": "مفيش نت. اتأكد من الاتصال وجرّب تاني.",
-  "problem": "حصلت مشكلة. جرّب تاني.",
+  "retry": "حاول مرة أخرى",
+  "offline": "لا يوجد اتصال بالإنترنت. تحقّق من الاتصال وحاول مرة أخرى.",
+  "problem": "حدثت مشكلة. حاول مرة أخرى.",
   "back": "رجوع",
-  "close": "قفل",
-  "errorOfflineTitle": "مفيش نت",
-  "errorServerTitle": "حصلت مشكلة عندنا",
-  "errorServerBody": "بنصلّحها. جرّب كمان شوية.",
-  "errorForbiddenTitle": "مش مسموح تشوف ده",
-  "errorForbiddenBody": "لو شايف إن ده غلط، كلّم الأكاديمية.",
-  "reloadFailed": "ماقدرناش نحدّث، واللي قدامك ممكن يكون قديم.",
-  "send": "ابعت",
+  "close": "إغلاق",
+  "errorOfflineTitle": "لا يوجد اتصال بالإنترنت",
+  "errorServerTitle": "حدثت مشكلة لدينا",
+  "errorServerBody": "نعمل على إصلاحها. حاول مرة أخرى بعد قليل.",
+  "errorForbiddenTitle": "لا يُسمح لك بعرض هذا",
+  "errorForbiddenBody": "إن رأيت أن هذا خطأ، فتواصل مع الأكاديمية.",
+  "reloadFailed": "تعذّر التحديث، وقد يكون ما تراه قديمًا.",
+  "send": "أرسل",
   "optional": "(اختياري)",
   "noticeSignedOut": "خرجت من الحساب.",
-  "noticeExpired": "الدخول انتهى على الحساب ده. ادخل تاني.",
-  "minutes": "{n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}",
+  "noticeExpired": "انتهى الدخول إلى هذا الحساب. ادخل مرة أخرى.",
+  "minutes": "{n, plural, =1{دقيقة} =2{دقيقتان} few{{n} دقائق} other{{n} دقيقة}}",
   "@minutes": {
     "placeholders": {
       "n": {
@@ -24,9 +24,9 @@
       }
     }
   },
-  "today": "النهارده",
-  "tomorrow": "بكرة",
-  "inMinutes": "{n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}",
+  "today": "اليوم",
+  "tomorrow": "غدًا",
+  "inMinutes": "{n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقائق} other{{n} دقيقة}}",
   "@inMinutes": {
     "placeholders": {
       "n": {
@@ -42,7 +42,7 @@
       }
     }
   },
-  "lessonsCount": "{n, plural, =0{مفيش حصص} =1{حصة واحدة} =2{حصتين} few{{n} حصص} other{{n} حصة}}",
+  "lessonsCount": "{n, plural, =0{لا توجد حصص} =1{حصة واحدة} =2{حصتان} few{{n} حصص} other{{n} حصة}}",
   "@lessonsCount": {
     "placeholders": {
       "n": {
@@ -50,9 +50,9 @@
       }
     }
   },
-  "introSkip": "تخطّي",
+  "introSkip": "تخطَّ",
   "introNext": "التالي",
-  "introStart": "يلا نبدأ",
+  "introStart": "لنبدأ",
   "introSlide": "شريحة {n} من {total}",
   "@introSlide": {
     "placeholders": {
@@ -64,26 +64,26 @@
       }
     }
   },
-  "introLive": "لايف",
-  "intro1Title": "حصص لايف مع مدرّسك",
-  "intro1Body": "حصة واحد لواحد بالصوت والصورة، من البيت.",
+  "introLive": "مباشر",
+  "intro1Title": "حصص مباشرة مع معلّمك",
+  "intro1Body": "حصة فردية بالصوت والصورة، من البيت.",
   "intro2Title": "تابع التقدّم خطوة بخطوة",
-  "intro2Body": "كل حصة بتقرّب من الهدف، والطريق كله قدامك.",
-  "intro3Title": "المواعيد والواجبات والفلوس في مكان واحد",
-  "intro3Body": "والتنبيه بيوصلك في وقته، فمفيش حاجة بتفوتك.",
+  "intro2Body": "كل حصة تقرّبك من الهدف، والطريق كله أمامك.",
+  "intro3Title": "المواعيد والواجبات والمدفوعات في مكان واحد",
+  "intro3Body": "والتنبيه يصلك في وقته، فلا يفوتك شيء.",
   "introLessonWhen": "السبت · 7:00 م",
   "introHomework": "واجب جديد",
   "introHomeworkWhen": "قبل الثلاثاء",
-  "introPaid": "الفاتورة اتدفعت",
-  "introThanks": "شكرًا ليك",
-  "welcomeTitle": "أهلًا بيك",
-  "welcomeLead": "اكتب رقم موبايلك أو إيميلك، وهنبعتلك كود تدخل بيه.",
-  "contactLabel": "رقم الموبايل أو الإيميل",
+  "introPaid": "دُفعت الفاتورة",
+  "introThanks": "شكرًا لك",
+  "welcomeTitle": "أهلًا بك",
+  "welcomeLead": "اكتب رقم هاتفك أو بريدك الإلكتروني، وسنرسل إليك رمزًا تدخل به.",
+  "contactLabel": "رقم الهاتف أو البريد الإلكتروني",
   "contactPlaceholder": "01xxxxxxxxx أو name@mail.com",
-  "contactEmpty": "اكتب رقم موبايلك أو إيميلك الأول.",
-  "contactShortPhone": "الرقم ده ناقص، اكتبه كامل.",
-  "contactBadEmail": "الإيميل ده ناقص حاجة، زي name@mail.com",
-  "countryChange": "كود الدولة {code}، دوس عشان تغيّره",
+  "contactEmpty": "اكتب رقم هاتفك أو بريدك الإلكتروني أولًا.",
+  "contactShortPhone": "هذا الرقم ناقص، اكتبه كاملًا.",
+  "contactBadEmail": "ينقص هذا البريد الإلكتروني شيء، مثل name@mail.com",
+  "countryChange": "رمز الدولة {code}، انقر لتغييره",
   "@countryChange": {
     "placeholders": {
       "code": {
@@ -91,8 +91,8 @@
       }
     }
   },
-  "countrySearch": "دوّر على دولة",
-  "countryNone": "مفيش دولة بالاسم ده.",
+  "countrySearch": "ابحث عن دولة",
+  "countryNone": "لا توجد دولة بهذا الاسم.",
   "countrySa": "السعودية",
   "countryEg": "مصر",
   "countryAe": "الإمارات",
@@ -102,19 +102,19 @@
   "countryOm": "عُمان",
   "countryJo": "الأردن",
   "countryMa": "المغرب",
-  "countryUs": "أمريكا وكندا",
-  "countryGb": "بريطانيا",
-  "legalAgree": "لما تكمّل، تبقى موافق على",
+  "countryUs": "الولايات المتحدة وكندا",
+  "countryGb": "المملكة المتحدة",
+  "legalAgree": "بالمتابعة، أنت توافق على",
   "legalAnd": "و",
-  "countryCode": "كود الدولة",
-  "phoneHint": "الكود هيوصلك على واتساب.",
-  "emailHint": "الكود هيوصلك على الإيميل ده.",
-  "sendCode": "ابعتلي كود",
-  "havePassword": "عندك كلمة سر؟ ادخل بيها",
+  "countryCode": "رمز الدولة",
+  "phoneHint": "سيصلك الرمز على واتساب.",
+  "emailHint": "سيصلك الرمز على هذا البريد الإلكتروني.",
+  "sendCode": "أرسل لي رمزًا",
+  "havePassword": "لديك كلمة مرور؟ ادخل بها",
   "signInOr": "أو",
   "signInWithGoogle": "ادخل بحساب جوجل",
   "signInWithApple": "ادخل بحساب أبل",
-  "socialFailed": "الدخول بحساب {provider} ماكملش. جرّب تاني.",
+  "socialFailed": "لم يكتمل الدخول بحساب {provider}. حاول مرة أخرى.",
   "@socialFailed": {
     "placeholders": {
       "provider": {
@@ -125,7 +125,7 @@
   "providerGoogle": "جوجل",
   "providerApple": "أبل",
   "signInMethodsTitle": "الدخول بجوجل وأبل",
-  "signInMethodsHint": "اربط حسابك بجوجل أو أبل، وادخل بيهم من غير كود ولا كلمة سر.",
+  "signInMethodsHint": "اربط حسابك بحساب جوجل أو أبل، وادخل بهما دون رمز أو كلمة مرور.",
   "signInMethodLinkedAs": "مربوط: {email}",
   "@signInMethodLinkedAs": {
     "placeholders": {
@@ -135,10 +135,10 @@
     }
   },
   "signInMethodLinked": "مربوط",
-  "signInMethodNotLinked": "مش مربوط",
+  "signInMethodNotLinked": "غير مربوط",
   "signInMethodLink": "اربط",
   "signInMethodUnlink": "افصل",
-  "signInMethodUnlinkConfirm": "تفصل حساب {provider}؟ مش هتقدر تدخل بيه لحد ما تربطه تاني.",
+  "signInMethodUnlinkConfirm": "أتفصل حساب {provider}؟ لن تستطيع الدخول به حتى تربطه مرة أخرى.",
   "@signInMethodUnlinkConfirm": {
     "placeholders": {
       "provider": {
@@ -146,7 +146,7 @@
       }
     }
   },
-  "signInMethodLinkedDone": "حساب {provider} اتربط.",
+  "signInMethodLinkedDone": "رُبط حساب {provider}.",
   "@signInMethodLinkedDone": {
     "placeholders": {
       "provider": {
@@ -154,7 +154,7 @@
       }
     }
   },
-  "signInMethodUnlinkedDone": "حساب {provider} اتفصل.",
+  "signInMethodUnlinkedDone": "فُصل حساب {provider}.",
   "@signInMethodUnlinkedDone": {
     "placeholders": {
       "provider": {
@@ -162,8 +162,8 @@
       }
     }
   },
-  "codeTitle": "اكتب الكود",
-  "codeSentWhatsapp": "بعتنالك كود من 6 أرقام على واتساب، على الرقم {to}",
+  "codeTitle": "اكتب الرمز",
+  "codeSentWhatsapp": "أرسلنا إليك رمزًا من 6 أرقام على واتساب، إلى الرقم {to}",
   "@codeSentWhatsapp": {
     "placeholders": {
       "to": {
@@ -171,7 +171,7 @@
       }
     }
   },
-  "codeSentSms": "بعتنالك كود من 6 أرقام في رسالة SMS، على الرقم {to}",
+  "codeSentSms": "أرسلنا إليك رمزًا من 6 أرقام في رسالة نصية، إلى الرقم {to}",
   "@codeSentSms": {
     "placeholders": {
       "to": {
@@ -179,7 +179,7 @@
       }
     }
   },
-  "codeSentEmail": "بعتنالك كود من 6 أرقام على الإيميل {to}",
+  "codeSentEmail": "أرسلنا إليك رمزًا من 6 أرقام إلى البريد الإلكتروني {to}",
   "@codeSentEmail": {
     "placeholders": {
       "to": {
@@ -187,15 +187,15 @@
       }
     }
   },
-  "codeLabel": "الكود",
-  "codeValid": "الكود صالح 10 دقايق.",
-  "codePaste": "الصق الكود",
-  "codeChecking": "بنتأكد…",
-  "codePasteNone": "مفيش كود من 6 أرقام منسوخ.",
-  "codeRight": "تمام!",
-  "codeResent": "بعتنالك كود جديد.",
-  "noCode": "ماوصلكش؟",
-  "resendIn": "ابعت كود جديد بعد {time}",
+  "codeLabel": "الرمز",
+  "codeValid": "الرمز صالح لمدة 10 دقائق.",
+  "codePaste": "الصق الرمز",
+  "codeChecking": "نتحقّق…",
+  "codePasteNone": "لا يوجد رمز منسوخ من 6 أرقام.",
+  "codeRight": "تم!",
+  "codeResent": "أرسلنا إليك رمزًا جديدًا.",
+  "noCode": "لم يصلك؟",
+  "resendIn": "أرسل رمزًا جديدًا بعد {time}",
   "@resendIn": {
     "placeholders": {
       "time": {
@@ -203,11 +203,11 @@
       }
     }
   },
-  "resend": "ابعت كود جديد",
-  "sendBySms": "ابعته رسالة SMS بدل واتساب",
+  "resend": "أرسل رمزًا جديدًا",
+  "sendBySms": "أرسله في رسالة نصية بدلًا من واتساب",
   "confirm": "تأكيد",
-  "otherContact": "استخدم رقم أو إيميل تاني",
-  "accountsFound": "{n, plural, =0{مالقيناش حسابات} =1{لقينا حساب واحد ليك} =2{لقينا حسابين ليك} few{لقينا {n} حسابات ليك} other{لقينا {n} حساب ليك}}",
+  "otherContact": "استخدم رقمًا أو بريدًا إلكترونيًا آخر",
+  "accountsFound": "{n, plural, =0{لم نجد حسابات} =1{وجدنا لك حسابًا واحدًا} =2{وجدنا لك حسابين} few{وجدنا لك {n} حسابات} other{وجدنا لك {n} حسابًا}}",
   "@accountsFound": {
     "placeholders": {
       "n": {
@@ -215,10 +215,10 @@
       }
     }
   },
-  "accountsLead": "اختار اللي عايزه على الموبايل ده. بعد كده بتتنقل بينهم من \"حسابي\" من غير ما تدخل تاني.",
-  "accountsLegal": "قبل ما تضيف حسابك، اقرا سياسة الخصوصية وشروط الاستخدام بتاعة الأكاديمية: هي اللي بتقرر إيه اللي بيحصل لبياناتك عندها.",
-  "accountsNote": "بنعرض بس الحسابات اللي على نفس الرقم، في الأكاديميات الشغالة. مش لاقي حساب؟ يمكن الأكاديمية مسجلاك برقم تاني: كلّمها.",
-  "addAccounts": "{n, plural, =1{ادخل} =2{أضف الحسابين وادخل} few{أضف {n} حسابات وادخل} other{أضف {n} حساب وادخل}}",
+  "accountsLead": "اختر ما تريده على هذا الهاتف. بعد ذلك تنتقل بينها من \"حسابي\" دون أن تدخل مرة أخرى.",
+  "accountsLegal": "قبل أن تضيف حسابك، اقرأ سياسة الخصوصية وشروط الاستخدام الخاصة بالأكاديمية: فهي التي تحدّد ما يحدث لبياناتك لديها.",
+  "accountsNote": "نعرض فقط الحسابات المسجّلة بالرقم نفسه، في الأكاديميات العاملة. لم تجد حسابًا؟ ربما سجّلتك الأكاديمية برقم آخر: تواصل معها.",
+  "addAccounts": "{n, plural, =1{ادخل} =2{أضف الحسابين وادخل} few{أضف {n} حسابات وادخل} other{أضف {n} حسابًا وادخل}}",
   "@addAccounts": {
     "placeholders": {
       "n": {
@@ -226,8 +226,8 @@
       }
     }
   },
-  "foundYou": "لقيناك!",
-  "foundYouLead": "لقينا حساب واحد ليك.",
+  "foundYou": "وجدناك!",
+  "foundYouLead": "وجدنا لك حسابًا واحدًا.",
   "enterAcademy": "ادخل {academy}",
   "@enterAcademy": {
     "placeholders": {
@@ -236,9 +236,9 @@
       }
     }
   },
-  "notYou": "مش حسابك؟ استخدم رقم أو إيميل تاني",
-  "pickOne": "اختار حساب واحد على الأقل.",
-  "notAddedTitle": "{n, plural, =1{دخلت، بس فيه حساب ماتضافش:} other{دخلت، بس فيه حسابات ماتضافتش:}}",
+  "notYou": "ليس حسابك؟ استخدم رقمًا أو بريدًا إلكترونيًا آخر",
+  "pickOne": "اختر حسابًا واحدًا على الأقل.",
+  "notAddedTitle": "{n, plural, =1{دخلت، لكن هناك حسابًا لم يُضَف:} other{دخلت، لكن هناك حسابات لم تُضَف:}}",
   "@notAddedTitle": {
     "placeholders": {
       "n": {
@@ -260,19 +260,19 @@
       }
     }
   },
-  "noAccounts": "مالقيناش حساب بالرقم أو الإيميل ده في أي أكاديمية. اتأكد منه، أو كلّم أكاديميتك.",
-  "noAccountTitle": "مالقيناش حساب",
-  "noAccountByPhone": "مالقيناش حساب بالرقم ده",
-  "noAccountByEmail": "مالقيناش حساب بالإيميل ده",
-  "noAccountCheckPhone": "اتأكد إن الرقم مكتوب صح. ويمكن الأكاديمية مسجلاك برقم أو إيميل تاني، فجرّبه أو كلّمها.",
-  "noAccountCheckEmail": "اتأكد إن الإيميل مكتوب صح. ويمكن الأكاديمية مسجلاك برقم أو إيميل تاني، فجرّبه أو كلّمها.",
-  "noAccountTryEmail": "جرّب بالإيميل",
-  "noAccountTryEmailBody": "لو الأكاديمية عندها إيميلك، الكود هيوصلك عليه.",
-  "noAccountOther": "جرّب رقم أو إيميل تاني",
+  "noAccounts": "لم نجد حسابًا بهذا الرقم أو البريد الإلكتروني في أي أكاديمية. تحقّق منه، أو تواصل مع أكاديميتك.",
+  "noAccountTitle": "لم نجد حسابًا",
+  "noAccountByPhone": "لم نجد حسابًا بهذا الرقم",
+  "noAccountByEmail": "لم نجد حسابًا بهذا البريد الإلكتروني",
+  "noAccountCheckPhone": "تأكّد أن الرقم مكتوب صحيحًا. وربما سجّلتك الأكاديمية برقم أو بريد إلكتروني آخر، فجرّبه أو تواصل معها.",
+  "noAccountCheckEmail": "تأكّد أن البريد الإلكتروني مكتوب صحيحًا. وربما سجّلتك الأكاديمية برقم أو بريد إلكتروني آخر، فجرّبه أو تواصل معها.",
+  "noAccountTryEmail": "جرّب البريد الإلكتروني",
+  "noAccountTryEmailBody": "إن كان بريدك الإلكتروني لدى الأكاديمية، فسيصلك الرمز عليه.",
+  "noAccountOther": "جرّب رقمًا أو بريدًا إلكترونيًا آخر",
   "contactChange": "غيّره",
-  "consentNeededTitle": "محتاجين موافقة ولي أمرك",
-  "consentNeededLead": "قبل ما تدخل حسابك، ولي أمرك لازم يوافق مرة واحدة بس. وبعدها تدخل على طول.",
-  "consentNeededStep1": "ولي أمرك يفتح التطبيق بحسابه.",
+  "consentNeededTitle": "نحتاج إلى موافقة ولي أمرك",
+  "consentNeededLead": "قبل أن تدخل حسابك، يجب أن يوافق ولي أمرك مرة واحدة فقط. وبعدها تدخل مباشرة.",
+  "consentNeededStep1": "يفتح ولي أمرك التطبيق بحسابه.",
   "consentNeededStep2": "من «{me}» ثم «{privacy}» يوافق على حسابك.",
   "@consentNeededStep2": {
     "placeholders": {
@@ -284,13 +284,13 @@
       }
     }
   },
-  "consentNeededStep3": "ارجع هنا وادخل تاني.",
-  "signInAgain": "جرّب تدخل تاني",
-  "twoFactorSetupTitle": "فعّل الدخول بخطوتين الأول",
-  "twoFactorSetupLead": "حسابك ده لازم يكون عليه الدخول بخطوتين. فعّله من موقع الأكاديمية على الكمبيوتر، وبعدها ادخل من هنا عادي.",
-  "tooManyTitle": "جرّبت كتير",
-  "tooManyBody": "علشان نحمي حسابك، وقّفنا المحاولات شوية. استنى لحد ما العدّاد يخلص، وبعدها جرّب تاني.",
-  "retryIn": "جرّب تاني بعد {time}",
+  "consentNeededStep3": "ارجع إلى هنا وادخل مرة أخرى.",
+  "signInAgain": "حاول الدخول مرة أخرى",
+  "twoFactorSetupTitle": "فعّل الدخول بخطوتين أولًا",
+  "twoFactorSetupLead": "يجب أن يكون الدخول بخطوتين مفعّلًا على هذا الحساب. فعّله من موقع الأكاديمية على الحاسوب، ثم ادخل من هنا كالمعتاد.",
+  "tooManyTitle": "محاولات كثيرة",
+  "tooManyBody": "لحماية حسابك، أوقفنا المحاولات قليلًا. انتظر حتى ينتهي العدّاد، ثم حاول مرة أخرى.",
+  "retryIn": "حاول مرة أخرى بعد {time}",
   "@retryIn": {
     "placeholders": {
       "time": {
@@ -306,7 +306,7 @@
       }
     }
   },
-  "welcomeIn": "إنت دلوقتي في {academy}",
+  "welcomeIn": "أنت الآن في {academy}",
   "@welcomeIn": {
     "placeholders": {
       "academy": {
@@ -316,22 +316,22 @@
   },
   "roleStudent": "طالب",
   "roleGuardian": "ولي أمر",
-  "roleTeacher": "مدرّس",
+  "roleTeacher": "معلّم",
   "roleStaff": "إدارة",
-  "passwordTitle": "ادخل بكلمة السر",
-  "academyCode": "كود الأكاديمية",
-  "academyCodeHint": "بتلاقيه في رسالة الترحيب، أو اسأل الأكاديمية.",
-  "loginLabel": "الإيميل أو الموبايل أو اسم المستخدم",
-  "passwordLabel": "كلمة السر",
-  "academyCodeMissing": "اكتب كود الأكاديمية.",
-  "loginMissing": "اكتب إيميلك أو موبايلك أو اسم المستخدم.",
-  "passwordMissing": "اكتب كلمة السر.",
-  "passwordShow": "إظهار كلمة السر",
-  "passwordHide": "إخفاء كلمة السر",
+  "passwordTitle": "ادخل بكلمة المرور",
+  "academyCode": "رمز الأكاديمية",
+  "academyCodeHint": "تجده في رسالة الترحيب، أو اسأل الأكاديمية.",
+  "loginLabel": "البريد الإلكتروني أو الهاتف أو اسم المستخدم",
+  "passwordLabel": "كلمة المرور",
+  "academyCodeMissing": "اكتب رمز الأكاديمية.",
+  "loginMissing": "اكتب بريدك الإلكتروني أو هاتفك أو اسم المستخدم.",
+  "passwordMissing": "اكتب كلمة المرور.",
+  "passwordShow": "إظهار كلمة المرور",
+  "passwordHide": "إخفاء كلمة المرور",
   "signIn": "ادخل",
-  "useCodeInstead": "ادخل بكود بدل كلمة السر",
+  "useCodeInstead": "ادخل برمز بدلًا من كلمة المرور",
   "twoFactorTitle": "الدخول بخطوتين",
-  "twoFactorLead": "افتح تطبيق المصادقة واكتب الكود اللي فيه (6 أرقام). ضيّعت موبايلك؟ اكتب كود من أكواد الاسترجاع.",
+  "twoFactorLead": "افتح تطبيق المصادقة واكتب الرمز الذي فيه (6 أرقام). فقدت هاتفك؟ اكتب رمزًا من رموز الاسترداد.",
   "twoFactorAccount": "{name} في {academy}",
   "@twoFactorAccount": {
     "placeholders": {
@@ -343,12 +343,12 @@
       }
     }
   },
-  "twoFactorCode": "الكود",
-  "startAgain": "ابدأ من الأول",
-  "webOnlyTitle": "الحساب ده للإدارة",
-  "webOnlyBody": "حسابات الإدارة بتشتغل من الموقع. افتح لوحة الأكاديمية من الكمبيوتر.",
-  "privacyTitle": "خصوصية الأولاد",
-  "privacyLead": "الأولاد اللي تحت {age, plural, =1{سنة} =2{سنتين} few{{age} سنين} other{{age} سنة}} محتاجين موافقتك عشان يدخلوا حساباتهم ويحضروا بنفسهم.",
+  "twoFactorCode": "الرمز",
+  "startAgain": "ابدأ من جديد",
+  "webOnlyTitle": "هذا الحساب للإدارة",
+  "webOnlyBody": "حسابات الإدارة تعمل من الموقع. افتح لوحة الأكاديمية من الحاسوب.",
+  "privacyTitle": "خصوصية الأبناء",
+  "privacyLead": "الأبناء دون {age, plural, =1{سنة} =2{سنتين} few{{age} سنوات} other{{age} سنة}} يحتاجون إلى موافقتك ليدخلوا حساباتهم ويحضروا بأنفسهم.",
   "@privacyLead": {
     "placeholders": {
       "age": {
@@ -356,11 +356,11 @@
       }
     }
   },
-  "privacyNone": "مفيش ولاد محتاجين موافقة.",
-  "consentWaiting": "مستني موافقتك",
-  "consentGranted": "موافق عليه",
+  "privacyNone": "لا يوجد أبناء يحتاجون إلى موافقة.",
+  "consentWaiting": "بانتظار موافقتك",
+  "consentGranted": "تمت الموافقة",
   "consentAgree": "موافق",
-  "consentAgreed": "تمام، {name} يقدر يدخل دلوقتي.",
+  "consentAgreed": "تم، يستطيع {name} الدخول الآن.",
   "@consentAgreed": {
     "placeholders": {
       "name": {
@@ -369,7 +369,7 @@
     }
   },
   "consentWithdraw": "اسحب الموافقة",
-  "consentWithdrawConfirm": "{name} هيخرج من حسابه على كل الأجهزة، ومش هيقدر يدخل لحد ما توافق تاني. متأكد؟",
+  "consentWithdrawConfirm": "سيخرج {name} من حسابه على كل الأجهزة، ولن يستطيع الدخول حتى توافق مرة أخرى. هل أنت متأكد؟",
   "@consentWithdrawConfirm": {
     "placeholders": {
       "name": {
@@ -377,7 +377,7 @@
       }
     }
   },
-  "consentWithdrawn": "سحبت موافقتك، و{name} خرج من حسابه.",
+  "consentWithdrawn": "سحبت موافقتك، وخرج {name} من حسابه.",
   "@consentWithdrawn": {
     "placeholders": {
       "name": {
@@ -385,7 +385,7 @@
       }
     }
   },
-  "consentNudge": "{n, plural, =1{{names} مستني موافقتك عشان يدخل حسابه.} other{{names} مستنيين موافقتك عشان يدخلوا حساباتهم.}}",
+  "consentNudge": "{n, plural, =1{{names} بانتظار موافقتك ليدخل حسابه.} other{{names} بانتظار موافقتك ليدخلوا حساباتهم.}}",
   "@consentNudge": {
     "placeholders": {
       "n": {
@@ -396,13 +396,13 @@
       }
     }
   },
-  "consentNudgeAction": "اقرا ووافق",
+  "consentNudgeAction": "اقرأ ووافق",
   "myDataTitle": "بياناتي",
-  "myDataLead": "كل اللي الأكاديمية محتفظة بيه عنك وعن ولادك: صحّح بياناتك، أو نزّل نسخة، أو اطلب مسح حساب.",
-  "myDataLeadTeacher": "كل اللي الأكاديمية محتفظة بيه عنك: صحّح اسمك، أو نزّل نسخة، أو اطلب مسح حسابك.",
-  "myDataYoung": "ولي أمرك هو اللي بيطلب بخصوص بياناتك من حسابه.",
+  "myDataLead": "كل ما تحتفظ به الأكاديمية عنك وعن أبنائك: صحّح بياناتك، أو نزّل نسخة، أو اطلب حذف حساب.",
+  "myDataLeadTeacher": "كل ما تحتفظ به الأكاديمية عنك: صحّح اسمك، أو نزّل نسخة، أو اطلب حذف حسابك.",
+  "myDataYoung": "ولي أمرك هو من يقدّم الطلبات الخاصة ببياناتك من حسابه.",
   "myDataCopyTitle": "نسخة من البيانات",
-  "myDataCopyBody": "ملف ZIP واحد: البيانات في ملف يتقري، ومعاها الملفات اللي اتسلمت. بتجهز في دقايق وبتفضل {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}.",
+  "myDataCopyBody": "ملف ZIP واحد: البيانات في ملف يمكن قراءته، ومعها الملفات التي سُلّمت. تجهز في دقائق وتبقى {days, plural, =1{يومًا واحدًا} =2{يومين} few{{days} أيام} other{{days} يومًا}}.",
   "@myDataCopyBody": {
     "placeholders": {
       "days": {
@@ -411,9 +411,9 @@
     }
   },
   "myDataCopyAction": "جهّز نسخة",
-  "myDataCopyPreparing": "بتتجهز: هنقولك أول ما تخلص.",
+  "myDataCopyPreparing": "قيد التجهيز: سنخبرك فور اكتمالها.",
   "myDataCopyDownload": "نزّل",
-  "myDataCopyUntil": "النسخة جاهزة لحد {when}",
+  "myDataCopyUntil": "النسخة جاهزة حتى {when}",
   "@myDataCopyUntil": {
     "placeholders": {
       "when": {
@@ -421,8 +421,8 @@
       }
     }
   },
-  "myDataEraseTitle": "مسح الحساب",
-  "myDataEraseBody": "الأكاديمية بترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}، ولما توافق الحساب بيتمسح بعدها بيوم.",
+  "myDataEraseTitle": "حذف الحساب",
+  "myDataEraseBody": "ترد الأكاديمية خلال {days, plural, =1{يوم واحد} =2{يومين} few{{days} أيام} other{{days} يومًا}}، وعندما توافق يُحذف الحساب بعد ذلك بيوم.",
   "@myDataEraseBody": {
     "placeholders": {
       "days": {
@@ -430,8 +430,8 @@
       }
     }
   },
-  "myDataEraseAction": "امسح الحساب ده",
-  "myDataEraseConfirm": "تطلب مسح حساب {name}؟",
+  "myDataEraseAction": "احذف هذا الحساب",
+  "myDataEraseConfirm": "أتطلب حذف حساب {name}؟",
   "@myDataEraseConfirm": {
     "placeholders": {
       "name": {
@@ -439,9 +439,9 @@
       }
     }
   },
-  "myDataEraseCopyFirst": "تقدر تنزّل نسخة الأول.",
-  "myDataEraseReason": "ليه؟ (لو حابب)",
-  "myDataEraseWaiting": "اتطلب: الأكاديمية هترد قبل {when}.",
+  "myDataEraseCopyFirst": "يمكنك تنزيل نسخة أولًا.",
+  "myDataEraseReason": "لماذا؟ (إن أردت)",
+  "myDataEraseWaiting": "طُلب: سترد الأكاديمية قبل {when}.",
   "@myDataEraseWaiting": {
     "placeholders": {
       "when": {
@@ -449,7 +449,7 @@
       }
     }
   },
-  "myDataEraseApproved": "اتوافق: الحساب هيتمسح {when}.",
+  "myDataEraseApproved": "تمت الموافقة: سيُحذف الحساب {when}.",
   "@myDataEraseApproved": {
     "placeholders": {
       "when": {
@@ -465,13 +465,13 @@
       }
     }
   },
-  "myDataEraseCancel": "ارجع في طلبك",
-  "myDataEraseAsked": "الطلب وصل للأكاديمية.",
-  "myDataEraseCancelled": "رجعت في الطلب: الحساب هيفضل.",
-  "myDataWhatGoes": "إيه اللي بيتمسح وإيه اللي بيفضل",
-  "myDataWhatStays": "إيه اللي بيفضل، من غير اسم",
+  "myDataEraseCancel": "تراجع عن طلبك",
+  "myDataEraseAsked": "وصل الطلب إلى الأكاديمية.",
+  "myDataEraseCancelled": "تراجعت عن الطلب: سيبقى الحساب.",
+  "myDataWhatGoes": "ما الذي يُحذف وما الذي يبقى",
+  "myDataWhatStays": "ما الذي يبقى، دون الاسم",
   "myDataHistory": "الطلبات",
-  "myDataNone": "مفيش طلبات لسه.",
+  "myDataNone": "لا توجد طلبات بعد.",
   "myDataAbout": "عن {name}",
   "@myDataAbout": {
     "placeholders": {
@@ -491,11 +491,11 @@
     }
   },
   "myDataFixSave": "احفظ",
-  "myDataFixSaved": "اتحفظ.",
-  "myDataFixUnchanged": "مفيش حاجة اتغيرت.",
-  "myDataFixUnset": "مش متسجل",
-  "myDataFixContact": "الإيميل ورقم الموبايل بتغيّرهم من «حسابي».",
-  "myDataFixBody": "حاجة تانية غلط (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبها للأكاديمية، وهترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}.",
+  "myDataFixSaved": "حُفظ.",
+  "myDataFixUnchanged": "لم يتغيّر شيء.",
+  "myDataFixUnset": "غير مسجّل",
+  "myDataFixContact": "تغيّر البريد الإلكتروني ورقم الهاتف من «حسابي».",
+  "myDataFixBody": "هل هناك خطأ آخر (تاريخ الميلاد، اسم في فاتورة، كلام في تقرير)؟ اكتبه للأكاديمية، وسترد خلال {days, plural, =1{يوم واحد} =2{يومين} few{{days} أيام} other{{days} يومًا}}.",
   "@myDataFixBody": {
     "placeholders": {
       "days": {
@@ -503,7 +503,7 @@
       }
     }
   },
-  "myDataFixAsk": "اطلب تصحيح",
+  "myDataFixAsk": "اطلب تصحيحًا",
   "myDataFixAskTitle": "اطلب تصحيح بيانات {name}",
   "@myDataFixAskTitle": {
     "placeholders": {
@@ -512,7 +512,7 @@
       }
     }
   },
-  "myDataFixAskBody": "اكتب إيه اللي غلط وإيه الصح. الأكاديمية بترد في خلال {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}}، وبيوصلك ردها.",
+  "myDataFixAskBody": "اكتب ما الخطأ وما الصواب. ترد الأكاديمية خلال {days, plural, =1{يوم واحد} =2{يومين} few{{days} أيام} other{{days} يومًا}}، ويصلك ردها.",
   "@myDataFixAskBody": {
     "placeholders": {
       "days": {
@@ -520,9 +520,9 @@
       }
     }
   },
-  "myDataFixSays": "إيه اللي محتاج يتصلح",
-  "myDataFixPlaceholder": "مثلًا: تاريخ الميلاد المتسجل 2016 والصح 2017.",
-  "myDataFixTooShort": "اكتب {min, plural, =1{حرف} =2{حرفين} few{{min} حروف} other{{min} حرف}} على الأقل.",
+  "myDataFixSays": "ما الذي يحتاج إلى تصحيح",
+  "myDataFixPlaceholder": "مثلًا: تاريخ الميلاد المسجّل 2016 والصحيح 2017.",
+  "myDataFixTooShort": "اكتب {min, plural, =1{حرفًا واحدًا} =2{حرفين} few{{min} أحرف} other{{min} حرفًا}} على الأقل.",
   "@myDataFixTooShort": {
     "placeholders": {
       "min": {
@@ -530,9 +530,9 @@
       }
     }
   },
-  "myDataFixSend": "ابعت الطلب",
-  "myDataFixAsked": "الطلب وصل للأكاديمية.",
-  "myDataFixWaiting": "اتطلب: الأكاديمية هترد قبل {when}.",
+  "myDataFixSend": "أرسل الطلب",
+  "myDataFixAsked": "وصل الطلب إلى الأكاديمية.",
+  "myDataFixWaiting": "طُلب: سترد الأكاديمية قبل {when}.",
   "@myDataFixWaiting": {
     "placeholders": {
       "when": {
@@ -540,8 +540,8 @@
       }
     }
   },
-  "myDataFixDone": "اتصلح",
-  "myDataFixDoneWith": "اتصلح: {answer}",
+  "myDataFixDone": "صُحّح",
+  "myDataFixDoneWith": "صُحّح: {answer}",
   "@myDataFixDoneWith": {
     "placeholders": {
       "answer": {
@@ -549,7 +549,7 @@
       }
     }
   },
-  "myDataFixRefused": "الأكاديمية ماصلحتش: {answer}",
+  "myDataFixRefused": "لم تصحّحه الأكاديمية: {answer}",
   "@myDataFixRefused": {
     "placeholders": {
       "answer": {
@@ -557,15 +557,15 @@
       }
     }
   },
-  "myDataFixCancel": "الغي الطلب",
-  "myDataFixCancelled": "الطلب اتلغى.",
+  "myDataFixCancel": "ألغِ الطلب",
+  "myDataFixCancelled": "أُلغي الطلب.",
   "myDataPrivacy": "سياسة الخصوصية",
   "myDataTerms": "شروط الاستخدام",
-  "myDataDeletion": "مسح الحساب",
+  "myDataDeletion": "حذف الحساب",
   "navHome": "الرئيسية",
   "navLessons": "الحصص",
   "navJourneyTab": "الرحلة",
-  "navMoney": "الفلوس",
+  "navMoney": "المدفوعات",
   "moneyEyebrow": "الفواتير والرصيد",
   "navMe": "حسابي",
   "navJourney": "رحلتي",
@@ -573,7 +573,7 @@
   "navMyHomework": "واجباتي",
   "navHomework": "الواجبات",
   "navReports": "التقارير",
-  "navToday": "النهارده",
+  "navToday": "اليوم",
   "navWeek": "أسبوعي",
   "navStudents": "الطلاب",
   "navEarnings": "أرباحي",
@@ -602,9 +602,9 @@
       }
     }
   },
-  "nextLesson": "الحصة الجاية",
-  "noNextLesson": "مفيش حصص جاية في الأربع أسابيع دول.",
-  "roomOpensIn": "الفصل بيفتح بعد {time}",
+  "nextLesson": "الحصة القادمة",
+  "noNextLesson": "لا توجد حصص قادمة في الأسابيع الأربعة المقبلة.",
+  "roomOpensIn": "يُفتح الفصل بعد {time}",
   "@roomOpensIn": {
     "placeholders": {
       "time": {
@@ -613,7 +613,7 @@
     }
   },
   "roomOpen": "الفصل مفتوح",
-  "lessonOn": "الحصة شغالة دلوقتي",
+  "lessonOn": "الحصة جارية الآن",
   "lessonWith": "{subject} مع {teacher}",
   "@lessonWith": {
     "placeholders": {
@@ -626,7 +626,7 @@
     }
   },
   "joinLesson": "ادخل الحصة",
-  "joinOpensAt": "بيفتح {time}",
+  "joinOpensAt": "يُفتح {time}",
   "@joinOpensAt": {
     "placeholders": {
       "time": {
@@ -643,7 +643,7 @@
       }
     }
   },
-  "roomOpensAt": "الفصل بيفتح {time}",
+  "roomOpensAt": "يُفتح الفصل {time}",
   "@roomOpensAt": {
     "placeholders": {
       "time": {
@@ -671,14 +671,14 @@
       }
     }
   },
-  "pickLearner": "عن مين؟",
-  "pickedNow": "دلوقتي",
+  "pickLearner": "عن مَن؟",
+  "pickedNow": "الآن",
   "balance": "الرصيد",
-  "owed": "عليك",
-  "payNow": "ادفع دلوقتي",
-  "nothingOwed": "مفيش عليك حاجة",
+  "owed": "المستحق عليك",
+  "payNow": "ادفع الآن",
+  "nothingOwed": "لا شيء مستحق عليك",
   "lastReport": "آخر تقرير",
-  "readReport": "اقراه",
+  "readReport": "اقرأه",
   "homeworkLine": "واجب: {title}",
   "@homeworkLine": {
     "placeholders": {
@@ -687,7 +687,7 @@
       }
     }
   },
-  "unfunded": "مستنية الدفع",
+  "unfunded": "بانتظار الدفع",
   "notices": "تنبيهات",
   "lessonsOf": "حصص {name}",
   "@lessonsOf": {
@@ -705,11 +705,11 @@
       }
     }
   },
-  "upcoming": "الجاية",
-  "past": "اللي فاتت",
-  "noUpcoming": "مفيش حصص جاية في الأربع أسابيع دول.",
-  "noPast": "مفيش حصص في الأربع أسابيع اللي فاتوا.",
-  "substituteFor": "مدرّس بديل: {name} في إجازة",
+  "upcoming": "القادمة",
+  "past": "السابقة",
+  "noUpcoming": "لا توجد حصص قادمة في الأسابيع الأربعة المقبلة.",
+  "noPast": "لا توجد حصص في الأسابيع الأربعة الماضية.",
+  "substituteFor": "معلّم بديل: {name} في إجازة",
   "@substituteFor": {
     "placeholders": {
       "name": {
@@ -717,11 +717,11 @@
       }
     }
   },
-  "refuseSubstitute": "مش موافقين على البديل",
-  "refuseSubstituteTitle": "مش موافقين على البديل؟",
-  "refuseSubstituteBody": "الحصة هتتلغي على حساب الأكاديمية، ودقايقها هترجعلك حصة تعويض تحجزها بعدين.",
-  "refuseSubstituteYes": "أيوه، ألغيها وعوّضوني",
-  "substituteChip": "بديل بدل {name}",
+  "refuseSubstitute": "لا نوافق على البديل",
+  "refuseSubstituteTitle": "ألا توافقون على البديل؟",
+  "refuseSubstituteBody": "ستُلغى الحصة على حساب الأكاديمية، وتعود دقائقها إليك حصة تعويضية تحجزها لاحقًا.",
+  "refuseSubstituteYes": "نعم، ألغِها وعوّضونا",
+  "substituteChip": "بديل عن {name}",
   "@substituteChip": {
     "placeholders": {
       "name": {
@@ -754,7 +754,7 @@
       }
     }
   },
-  "roomOpensOn": "الفصل بيفتح {when}",
+  "roomOpensOn": "يُفتح الفصل {when}",
   "@roomOpensOn": {
     "placeholders": {
       "when": {
@@ -763,7 +763,7 @@
     }
   },
   "lessonDetails": "تفاصيل الحصة",
-  "refusedSubstitute": "اتلغت. عندك {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يوم}} تحجز فيهم حصة التعويض.",
+  "refusedSubstitute": "أُلغيت. لديك {days, plural, =1{يوم واحد} =2{يومان} few{{days} أيام} other{{days} يومًا}} لتحجز فيها حصة التعويض.",
   "@refusedSubstitute": {
     "placeholders": {
       "days": {
@@ -774,7 +774,7 @@
   "cancelLesson": "إلغاء الحصة",
   "disputeLesson": "اعترض",
   "disputeTitle": "اعتراض على نتيجة الحصة",
-  "disputeIntroFamily": "الحصة متسجلة \"{outcome}\". لو ده مش اللي حصل، قولولنا خلال 48 ساعة من آخرها، والأكاديمية هتراجع حضور الفصل وترد عليكم.",
+  "disputeIntroFamily": "الحصة مسجّلة \"{outcome}\". إن لم يكن هذا ما حدث، فأخبرونا خلال 48 ساعة من انتهائها، وستراجع الأكاديمية حضور الفصل وترد عليكم.",
   "@disputeIntroFamily": {
     "placeholders": {
       "outcome": {
@@ -782,7 +782,7 @@
       }
     }
   },
-  "disputeIntroTeacher": "الحصة متسجلة \"{outcome}\". لو ده مش اللي حصل، قولنا خلال 48 ساعة من آخرها، والأكاديمية هتراجع حضور الفصل وترد عليك.",
+  "disputeIntroTeacher": "الحصة مسجّلة \"{outcome}\". إن لم يكن هذا ما حدث، فأخبرنا خلال 48 ساعة من انتهائها، وستراجع الأكاديمية حضور الفصل وترد عليك.",
   "@disputeIntroTeacher": {
     "placeholders": {
       "outcome": {
@@ -790,12 +790,12 @@
       }
     }
   },
-  "disputeWhat": "إيه اللي حصل؟",
+  "disputeWhat": "ماذا حدث؟",
   "disputeNote": "التفاصيل",
-  "disputeNoteHint": "الأكاديمية بس اللي هتقرا ده.",
-  "disputeFillIn": "اختار السبب واكتب اللي حصل.",
-  "disputeSend": "ابعت الاعتراض",
-  "disputeSent": "الاعتراض وصل، والحصة تحت المراجعة.",
+  "disputeNoteHint": "لن يقرأ هذا إلا الأكاديمية.",
+  "disputeFillIn": "اختر السبب واكتب ما حدث.",
+  "disputeSend": "أرسل الاعتراض",
+  "disputeSent": "وصل الاعتراض، والحصة قيد المراجعة.",
   "disputeState": "الاعتراض: {status}",
   "@disputeState": {
     "placeholders": {
@@ -812,7 +812,7 @@
       }
     }
   },
-  "cancelTitle": "تلغي حصة {day}؟",
+  "cancelTitle": "أتلغي حصة {day}؟",
   "@cancelTitle": {
     "placeholders": {
       "day": {
@@ -822,18 +822,18 @@
   },
   "reason": "السبب",
   "noteForAcademy": "ملاحظة للأكاديمية",
-  "keepIt": "لأ، خليها",
-  "yesCancel": "أيوه، ألغيها",
-  "cancelled": "الحصة اتلغت.",
-  "pickReason": "اختار سبب الأول.",
+  "keepIt": "لا، أبقِها",
+  "yesCancel": "نعم، ألغِها",
+  "cancelled": "أُلغيت الحصة.",
+  "pickReason": "اختر سببًا أولًا.",
   "rateLesson": "قيّم الحصة",
-  "rateTitle": "الحصة كانت إزاي؟",
-  "rateGood": "إيه اللي عجبكم؟",
-  "rateBad": "إيه اللي ماعجبكمش؟",
+  "rateTitle": "كيف كانت الحصة؟",
+  "rateGood": "ما الذي أعجبكم؟",
+  "rateBad": "ما الذي لم يعجبكم؟",
   "rateComment": "كلمة للأكاديمية",
-  "rateAnonymous": "المدرّس بيشوف التقييم من غير اسمك.",
-  "sendRating": "ابعت التقييم",
-  "notNow": "مش دلوقتي",
+  "rateAnonymous": "يرى المعلّم التقييم دون اسمك.",
+  "sendRating": "أرسل التقييم",
+  "notNow": "ليس الآن",
   "rated": "شكرًا! وصل تقييمك.",
   "starsOf": "{n} من 5",
   "@starsOf": {
@@ -843,10 +843,10 @@
       }
     }
   },
-  "stars1": "وحشة",
-  "stars2": "مش أحسن حاجة",
-  "stars3": "كويسة",
-  "stars4": "حلوة",
+  "stars1": "سيئة",
+  "stars2": "ليست جيدة تمامًا",
+  "stars3": "جيدة",
+  "stars4": "جيدة جدًا",
   "stars5": "ممتازة",
   "yourRating": "تقييمك",
   "percentDone": "{p}% من البرنامج",
@@ -857,7 +857,7 @@
       }
     }
   },
-  "hereNow": "دلوقتي: {title}",
+  "hereNow": "الآن: {title}",
   "@hereNow": {
     "placeholders": {
       "title": {
@@ -865,7 +865,7 @@
       }
     }
   },
-  "weeksLeft": "{n, plural, =0{قرّب يخلص} =1{باقي حوالي أسبوع} =2{باقي حوالي أسبوعين} few{باقي حوالي {n} أسابيع} other{باقي حوالي {n} أسبوع}}",
+  "weeksLeft": "{n, plural, =0{أوشك على الانتهاء} =1{بقي نحو أسبوع} =2{بقي نحو أسبوعين} few{بقي نحو {n} أسابيع} other{بقي نحو {n} أسبوعًا}}",
   "@weeksLeft": {
     "placeholders": {
       "n": {
@@ -873,7 +873,7 @@
       }
     }
   },
-  "homeworkOpen": "{n, plural, =1{واجب مفتوح} =2{واجبين مفتوحين} few{{n} واجبات مفتوحة} other{{n} واجب مفتوح}}",
+  "homeworkOpen": "{n, plural, =1{واجب مفتوح} =2{واجبان مفتوحان} few{{n} واجبات مفتوحة} other{{n} واجبًا مفتوحًا}}",
   "@homeworkOpen": {
     "placeholders": {
       "n": {
@@ -882,9 +882,9 @@
     }
   },
   "reports": "التقارير",
-  "noReports": "مفيش تقارير لسه.",
-  "noCourses": "مفيش اشتراكات شغالة.",
-  "noProgram": "من غير منهج",
+  "noReports": "لا توجد تقارير بعد.",
+  "noCourses": "لا توجد اشتراكات جارية.",
+  "noProgram": "دون منهج",
   "reportOf": "تقرير {day}",
   "@reportOf": {
     "placeholders": {
@@ -896,10 +896,10 @@
   "engagement": "التركيز",
   "overall": "المستوى العام",
   "homeworkTitle": "الواجبات",
-  "homeworkWaiting": "مستني",
-  "homeworkSent": "اتسلّم",
-  "homeworkMarked": "اتصحّح",
-  "homeworkWaitingOnYou": "{n, plural, =1{واجب مستني منك} =2{واجبين مستنيين منك} few{{n} واجبات مستنية منك} other{{n} واجب مستني منك}}",
+  "homeworkWaiting": "بالانتظار",
+  "homeworkSent": "سُلّم",
+  "homeworkMarked": "صُحّح",
+  "homeworkWaitingOnYou": "{n, plural, =1{واجب ينتظرك} =2{واجبان ينتظرانك} few{{n} واجبات تنتظرك} other{{n} واجبًا ينتظرك}}",
   "@homeworkWaitingOnYou": {
     "placeholders": {
       "n": {
@@ -907,13 +907,13 @@
       }
     }
   },
-  "homeworkNoneWaiting": "مفيش واجبات مستنياك دلوقتي.",
-  "homeworkNoneSent": "مفيش واجبات مستنية تصحيح.",
-  "homeworkNoneMarked": "لسه مفيش واجبات اتصحّحت.",
+  "homeworkNoneWaiting": "لا توجد واجبات تنتظرك الآن.",
+  "homeworkNoneSent": "لا توجد واجبات تنتظر التصحيح.",
+  "homeworkNoneMarked": "لم يُصحَّح أي واجب بعد.",
   "homeworkLastMarked": "آخر تصحيح",
   "homeworkHandIn": "سلّم الواجب",
   "homeworkStartRound": "ابدأ الجولة",
-  "noHomework": "مفيش واجبات دلوقتي.",
+  "noHomework": "لا توجد واجبات الآن.",
   "dueBy": "قبل {when}",
   "@dueBy": {
     "placeholders": {
@@ -924,8 +924,8 @@
   },
   "handIn": "سلّم",
   "yourAnswer": "إجابتك",
-  "handedIn": "اتسلّم. المدرّس هيصححه.",
-  "teacherFeedback": "رأي المدرّس",
+  "handedIn": "سُلّم. سيصحّحه المعلّم.",
+  "teacherFeedback": "رأي المعلّم",
   "grade": "الدرجة: {g} من 5",
   "@grade": {
     "placeholders": {
@@ -934,9 +934,9 @@
       }
     }
   },
-  "yourSubmission": "اللي سلّمته",
-  "kidsHomeworkStar": "كل واجب بتسلّمه بيجيبلك نجمة جديدة!",
-  "owedNow": "عليك دلوقتي",
+  "yourSubmission": "ما سلّمته",
+  "kidsHomeworkStar": "كل واجب تسلّمه يعطيك نجمة جديدة!",
+  "owedNow": "المستحق الآن",
   "invoiceDue": "فاتورة {number} · قبل {when}",
   "@invoiceDue": {
     "placeholders": {
@@ -956,13 +956,13 @@
       }
     }
   },
-  "payNote": "الدفع بيتم في صفحة بوابة الأكاديمية. لما تخلّص ارجع هنا.",
-  "lessonsLeftTitle": "الحصص الفاضلة",
+  "payNote": "يتم الدفع في صفحة الدفع الخاصة بالأكاديمية. عندما تنتهي، ارجع إلى هنا.",
+  "lessonsLeftTitle": "الحصص المتبقية",
   "invoices": "الفواتير",
-  "noInvoices": "مفيش فواتير.",
+  "noInvoices": "لا توجد فواتير.",
   "openInvoice": "افتح الفاتورة",
-  "extraAction": "حصص زيادة",
-  "extraHint": "الحصة الزيادة بـ {price} ({minutes, plural, =1{دقيقة} =2{دقيقتين} few{{minutes} دقايق} other{{minutes} دقيقة}}).",
+  "extraAction": "حصص إضافية",
+  "extraHint": "سعر الحصة الإضافية {price} ({minutes, plural, =1{دقيقة} =2{دقيقتان} few{{minutes} دقائق} other{{minutes} دقيقة}}).",
   "@extraHint": {
     "placeholders": {
       "price": {
@@ -973,7 +973,7 @@
       }
     }
   },
-  "extraTitle": "حصص زيادة في {subject}",
+  "extraTitle": "حصص إضافية في {subject}",
   "@extraTitle": {
     "placeholders": {
       "subject": {
@@ -981,7 +981,7 @@
       }
     }
   },
-  "extraBody": "اختار العدد، وهتطلعلك فاتورة تدفعها زي أي فاتورة. بعد ما تدفع، الأكاديمية بتحجز الحصص معاك.",
+  "extraBody": "اختر العدد، وستصدر لك فاتورة تدفعها مثل أي فاتورة. بعد أن تدفع، تحجز الأكاديمية الحصص معك.",
   "extraEach": "{n} × {price}",
   "@extraEach": {
     "placeholders": {
@@ -993,7 +993,7 @@
       }
     }
   },
-  "extraSubmit": "اعمل الفاتورة",
+  "extraSubmit": "أصدر الفاتورة",
   "extraDone": "الفاتورة {number} جاهزة ({total}).",
   "@extraDone": {
     "placeholders": {
@@ -1005,7 +1005,7 @@
       }
     }
   },
-  "extraWaiting": "فاتورة الحصص الزيادة {number} مستنية الدفع.",
+  "extraWaiting": "فاتورة الحصص الإضافية {number} بانتظار الدفع.",
   "@extraWaiting": {
     "placeholders": {
       "number": {
@@ -1013,42 +1013,42 @@
       }
     }
   },
-  "invoiceNote": "افتح أي فاتورة تشوفها وتطبعها، وفيها رمز QR بتاع الفاتورة الضريبية.",
-  "cantPayOnline": "الدفع أونلاين مش متاح للفاتورة دي. كلّم الأكاديمية.",
-  "pickGateway": "تدفع بإيه؟",
+  "invoiceNote": "افتح أي فاتورة لتعرضها وتطبعها، وفيها رمز QR الخاص بالفاتورة الضريبية.",
+  "cantPayOnline": "الدفع الإلكتروني غير متاح لهذه الفاتورة. تواصل مع الأكاديمية.",
+  "pickGateway": "بماذا تدفع؟",
   "paidByTransfer": "دفعت بالتحويل",
-  "proofTitle": "ابعت إثبات الدفع",
-  "proofHint": "ادفع الأول، وبعدين ابعت الإيصال هنا. الأكاديمية هتتأكد إن الفلوس وصلت وتأكّد الدفعة.",
-  "proofHowTo": "إزاي تدفع بالتحويل",
-  "proofMethod": "دفعت إزاي",
-  "proofAmount": "المبلغ اللي دفعته",
+  "proofTitle": "أرسل إثبات الدفع",
+  "proofHint": "ادفع أولًا، ثم أرسل الإيصال هنا. ستتحقّق الأكاديمية من وصول المبلغ وتؤكّد الدفعة.",
+  "proofHowTo": "كيف تدفع بالتحويل",
+  "proofMethod": "طريقة الدفع",
+  "proofAmount": "المبلغ الذي دفعته",
   "proofPaidOn": "يوم الدفع",
   "proofReference": "رقم التحويل (اختياري)",
   "proofNote": "ملاحظة (اختياري)",
   "proofReceipt": "الإيصال",
-  "proofPickReceipt": "اختار صورة أو PDF",
-  "proofReceiptHint": "صورة أو سكرين شوت أو PDF البنك، لحد 10 ميجا.",
-  "proofSend": "ابعت الإثبات",
-  "proofSent": "الإثبات اتبعت. هنقولك أول ما الأكاديمية تأكّده.",
-  "proofNeedsReceipt": "اختار الإيصال الأول.",
-  "proofFileTooBig": "الملف أكبر من 10 ميجا.",
+  "proofPickReceipt": "اختر صورة أو ملف PDF",
+  "proofReceiptHint": "صورة أو لقطة شاشة أو ملف PDF من البنك، حتى 10 ميغابايت.",
+  "proofSend": "أرسل الإثبات",
+  "proofSent": "أُرسل الإثبات. سنخبرك فور تأكيد الأكاديمية له.",
+  "proofNeedsReceipt": "اختر الإيصال أولًا.",
+  "proofFileTooBig": "الملف أكبر من 10 ميغابايت.",
   "transferTitle": "بيانات التحويل",
   "transferCopy": "انسخ",
-  "transferCopied": "بيانات التحويل اتنسخت.",
-  "joining": "بندخّلك الحصة…",
-  "linkNotOpened": "مفيش برنامج على الموبايل يفتح اللينك ده.",
-  "openedOutside": "الحصة اتفتحت في تطبيق تاني.",
+  "transferCopied": "نُسخت بيانات التحويل.",
+  "joining": "ندخلك إلى الحصة…",
+  "linkNotOpened": "لا يوجد تطبيق على هذا الهاتف يفتح هذا الرابط.",
+  "openedOutside": "فُتحت الحصة في تطبيق آخر.",
   "leave": "اخرج من الحصة",
-  "micOff": "اقفل المايك",
-  "micOn": "افتح المايك",
-  "camOff": "اقفل الكاميرا",
+  "micOff": "أغلق الميكروفون",
+  "micOn": "افتح الميكروفون",
+  "camOff": "أغلق الكاميرا",
   "camOn": "افتح الكاميرا",
-  "audioOnly": "الصوت بس",
-  "rejoinHint": "لو خرجت بالغلط، ادخل تاني من نفس الزرار لحد ما الحصة تخلص.",
-  "weakNetwork": "النت ضعيف. جرّب \"الصوت بس\" لو الصورة بتقطّع.",
-  "waitingOther": "مستنيين الطرف التاني يدخل…",
-  "you": "انت",
-  "minutesLeft": "فاضل {n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}",
+  "audioOnly": "الصوت فقط",
+  "rejoinHint": "إن خرجت بالخطأ، فادخل مرة أخرى من الزر نفسه حتى تنتهي الحصة.",
+  "weakNetwork": "الاتصال ضعيف. جرّب \"الصوت فقط\" إن كانت الصورة تتقطّع.",
+  "waitingOther": "ننتظر دخول الطرف الآخر…",
+  "you": "أنت",
+  "minutesLeft": "بقي {n, plural, =1{دقيقة} =2{دقيقتان} few{{n} دقائق} other{{n} دقيقة}}",
   "@minutesLeft": {
     "placeholders": {
       "n": {
@@ -1064,8 +1064,8 @@
       }
     }
   },
-  "familyInvoice": "فاتورة العيلة",
-  "coursePaused": "موقوف لحد {day}",
+  "familyInvoice": "فاتورة العائلة",
+  "coursePaused": "متوقف حتى {day}",
   "@coursePaused": {
     "placeholders": {
       "day": {
@@ -1073,7 +1073,7 @@
       }
     }
   },
-  "coursePausedKids": "في إجازة لحد {day}",
+  "coursePausedKids": "في إجازة حتى {day}",
   "@coursePausedKids": {
     "placeholders": {
       "day": {
@@ -1081,7 +1081,7 @@
       }
     }
   },
-  "coursePauseAhead": "هيتوقف من {from} لحد {until}",
+  "coursePauseAhead": "سيتوقف من {from} حتى {until}",
   "@coursePauseAhead": {
     "placeholders": {
       "from": {
@@ -1092,7 +1092,7 @@
       }
     }
   },
-  "courseEnding": "بينتهي من {day}",
+  "courseEnding": "ينتهي من {day}",
   "@courseEnding": {
     "placeholders": {
       "day": {
@@ -1100,8 +1100,8 @@
       }
     }
   },
-  "courseEnded": "انتهى، والدقايق اللي فاضلة لسه في الرصيد",
-  "lessonUntil": "الحصة لحد {time}",
+  "courseEnded": "انتهى، والدقائق المتبقية ما زالت في الرصيد",
+  "lessonUntil": "الحصة حتى {time}",
   "@lessonUntil": {
     "placeholders": {
       "time": {
@@ -1110,20 +1110,20 @@
     }
   },
   "meTitle": "حسابي",
-  "moreChildren": "الأولاد",
+  "moreChildren": "الأبناء",
   "moreTalk": "التواصل",
   "moreMine": "حسابي",
   "moreAccounts": "الحسابات",
   "moreLanguage": "اللغة والتوقيت",
   "moreSecurity": "الدخول والأمان",
   "moreTeaching": "التدريس",
-  "moreWork": "شغلي",
+  "moreWork": "عملي",
   "moreStudy": "الدراسة",
-  "moreHelp": "مساعدة",
+  "moreHelp": "المساعدة",
   "yourAccount": "حسابك وإعداداتك",
   "moreAccountSettings": "الحساب والإعدادات",
-  "meetingLinkMissing": "مش متحط",
-  "moreAcademies": "{n, plural, =1{أكاديمية واحدة} =2{أكاديميتين} few{{n} أكاديميات} other{{n} أكاديمية}}",
+  "meetingLinkMissing": "غير محدد",
+  "moreAcademies": "{n, plural, =1{أكاديمية واحدة} =2{أكاديميتان} few{{n} أكاديميات} other{{n} أكاديمية}}",
   "@moreAcademies": {
     "placeholders": {
       "n": {
@@ -1139,7 +1139,7 @@
       }
     }
   },
-  "appVersion": "النسخة {version}",
+  "appVersion": "الإصدار {version}",
   "@appVersion": {
     "placeholders": {
       "version": {
@@ -1147,21 +1147,21 @@
       }
     }
   },
-  "contactTitle": "الإيميل والموبايل",
-  "contactHint": "دول طرق دخولك، والأكواد والرسايل بتوصلك عليهم. لما تغيّر واحد، بنبعت كود على الجديد عشان نتأكد إنه بتاعك.",
-  "contactEmail": "الإيميل",
-  "contactPhone": "رقم الموبايل",
-  "contactNone": "مش متسجل",
-  "contactChangeEmail": "غيّر الإيميل",
+  "contactTitle": "البريد الإلكتروني والهاتف",
+  "contactHint": "هذه طرق دخولك، وتصلك عليها الرموز والرسائل. عندما تغيّر أحدها، نرسل رمزًا إلى الجديد لنتأكد أنه لك.",
+  "contactEmail": "البريد الإلكتروني",
+  "contactPhone": "رقم الهاتف",
+  "contactNone": "غير مسجّل",
+  "contactChangeEmail": "غيّر البريد",
   "contactChangePhone": "غيّر الرقم",
-  "contactAddEmail": "ضيف إيميل",
-  "contactAddPhone": "ضيف رقم",
-  "contactNewEmail": "الإيميل الجديد",
+  "contactAddEmail": "أضف بريدًا",
+  "contactAddPhone": "أضف رقمًا",
+  "contactNewEmail": "البريد الإلكتروني الجديد",
   "contactNewPhone": "الرقم الجديد",
-  "contactPhoneHint": "بكود الدولة، أو رقم محلي من نفس بلدك.",
-  "contactSend": "ابعت كود",
-  "contactCode": "الكود اللي وصلك",
-  "contactCodeHint": "بعتنا كود على {contact}. صالح لحد {until}.",
+  "contactPhoneHint": "مع رمز الدولة، أو رقمًا محليًا من بلدك.",
+  "contactSend": "أرسل رمزًا",
+  "contactCode": "الرمز الذي وصلك",
+  "contactCodeHint": "أرسلنا رمزًا إلى {contact}. صالح حتى {until}.",
   "@contactCodeHint": {
     "placeholders": {
       "contact": {
@@ -1173,14 +1173,14 @@
     }
   },
   "contactConfirm": "أكّد",
-  "contactResend": "ابعت كود تاني",
-  "contactDoneEmail": "الإيميل اتغيّر. من دلوقتي بتدخل وبتوصلك الرسايل عليه.",
-  "contactDonePhone": "الرقم اتغيّر. من دلوقتي بتدخل وبتوصلك الرسايل عليه.",
-  "contactManaged": "الأكاديمية أو ولي أمرك هم اللي بيغيّروا الإيميل والرقم بتوعك.",
-  "openNow": "داخل فيه",
+  "contactResend": "أرسل رمزًا آخر",
+  "contactDoneEmail": "تغيّر البريد الإلكتروني. من الآن تدخل به وتصلك الرسائل عليه.",
+  "contactDonePhone": "تغيّر الرقم. من الآن تدخل به وتصلك الرسائل عليه.",
+  "contactManaged": "الأكاديمية أو ولي أمرك هما من يغيّران بريدك الإلكتروني ورقمك.",
+  "openNow": "مفتوح الآن",
   "switchTo": "انتقل",
-  "addAccount": "ضيف حساب تاني",
-  "clockPrompt": "موبايلك على توقيت {device}، وحسابك على {profile}. نعرض المواعيد بتوقيت {device}؟",
+  "addAccount": "أضف حسابًا آخر",
+  "clockPrompt": "هاتفك على توقيت {device}، وحسابك على {profile}. هل نعرض المواعيد بتوقيت {device}؟",
   "@clockPrompt": {
     "placeholders": {
       "device": {
@@ -1191,7 +1191,7 @@
       }
     }
   },
-  "clockYes": "أيوه، {zone}",
+  "clockYes": "نعم، {zone}",
   "@clockYes": {
     "placeholders": {
       "zone": {
@@ -1199,7 +1199,7 @@
       }
     }
   },
-  "clockKeep": "خليه {zone}",
+  "clockKeep": "أبقِه {zone}",
   "@clockKeep": {
     "placeholders": {
       "zone": {
@@ -1210,7 +1210,7 @@
   "language": "اللغة",
   "timezone": "التوقيت",
   "timeFormat": "شكل الساعة",
-  "timeFormatExample": "المواعيد بتظهر كده: {time}",
+  "timeFormatExample": "تظهر المواعيد هكذا: {time}",
   "@timeFormatExample": {
     "placeholders": {
       "time": {
@@ -1218,7 +1218,7 @@
       }
     }
   },
-  "timeFormatAcademy": "زي الأكاديمية ({hours})",
+  "timeFormatAcademy": "مثل الأكاديمية ({hours})",
   "@timeFormatAcademy": {
     "placeholders": {
       "hours": {
@@ -1229,7 +1229,7 @@
   "timeFormat12": "12 ساعة",
   "timeFormat24": "24 ساعة",
   "myDevices": "أجهزتي",
-  "thisDevice": "الجهاز ده",
+  "thisDevice": "هذا الجهاز",
   "lastUsed": "آخر مرة {when}",
   "@lastUsed": {
     "placeholders": {
@@ -1238,10 +1238,10 @@
       }
     }
   },
-  "signOutDevice": "خرّجه",
-  "deviceSignedOut": "الجهاز خرج من الحساب.",
-  "signOut": "اخرج من الحساب ده",
-  "signOutConfirm": "تخرج من {academy} على الموبايل ده؟",
+  "signOutDevice": "أخرِجه",
+  "deviceSignedOut": "خرج الجهاز من الحساب.",
+  "signOut": "اخرج من هذا الحساب",
+  "signOutConfirm": "أتخرج من {academy} على هذا الهاتف؟",
   "@signOutConfirm": {
     "placeholders": {
       "academy": {
@@ -1260,7 +1260,7 @@
       }
     }
   },
-  "todayCount": "{n, plural, =0{النهارده مفيش حصص} =1{النهارده: حصة واحدة} =2{النهارده: حصتين} few{النهارده: {n} حصص} other{النهارده: {n} حصة}}",
+  "todayCount": "{n, plural, =0{لا توجد حصص اليوم} =1{اليوم: حصة واحدة} =2{اليوم: حصتان} few{اليوم: {n} حصص} other{اليوم: {n} حصة}}",
   "@todayCount": {
     "placeholders": {
       "n": {
@@ -1276,7 +1276,7 @@
       }
     }
   },
-  "nextIn": "الجاية بعد {time}",
+  "nextIn": "القادمة بعد {time}",
   "@nextIn": {
     "placeholders": {
       "time": {
@@ -1284,7 +1284,7 @@
       }
     }
   },
-  "reportsWaiting": "{n, plural, =1{تقرير مستنيك} =2{تقريرين مستنيينك} few{{n} تقارير مستنياك} other{{n} تقرير مستنيك}}",
+  "reportsWaiting": "{n, plural, =1{تقرير ينتظرك} =2{تقريران ينتظرانك} few{{n} تقارير تنتظرك} other{{n} تقريرًا ينتظرك}}",
   "@reportsWaiting": {
     "placeholders": {
       "n": {
@@ -1292,7 +1292,7 @@
       }
     }
   },
-  "homeworkToMark": "{n, plural, =1{واجب تصحّحه} =2{واجبين تصحّحهم} few{{n} واجبات تصحّحها} other{{n} واجب تصحّحه}}",
+  "homeworkToMark": "{n, plural, =1{واجب تصحّحه} =2{واجبان تصحّحهما} few{{n} واجبات تصحّحها} other{{n} واجبًا تصحّحها}}",
   "@homeworkToMark": {
     "placeholders": {
       "n": {
@@ -1308,13 +1308,13 @@
       }
     }
   },
-  "prevWeek": "الأسبوع اللي فات",
-  "nextWeek": "الأسبوع الجاي",
-  "noLessonsDay": "مفيش حصص",
-  "noLessonsWeek": "مفيش حصص الأسبوع ده.",
-  "thisWeek": "الأسبوع ده",
-  "weekdaysShort": "سبت،حد،اتنين،تلات،أربع،خميس،جمعة",
-  "dayToday": "{day} · النهارده",
+  "prevWeek": "الأسبوع الماضي",
+  "nextWeek": "الأسبوع القادم",
+  "noLessonsDay": "لا توجد حصص",
+  "noLessonsWeek": "لا توجد حصص هذا الأسبوع.",
+  "thisWeek": "هذا الأسبوع",
+  "weekdaysShort": "سبت،أحد،اثنين،ثلاثاء،أربعاء،خميس،جمعة",
+  "dayToday": "{day} · اليوم",
   "@dayToday": {
     "placeholders": {
       "day": {
@@ -1322,15 +1322,15 @@
       }
     }
   },
-  "noLessonsLater": "مفيش حصص من اليوم ده لآخر الأسبوع.",
-  "laterToday": "باقي النهارده",
-  "doneToday": "خلصت النهارده",
-  "restDay": "النهارده مفيش حصص. حصصك الجاية في الأسبوع.",
+  "noLessonsLater": "لا توجد حصص من هذا اليوم حتى آخر الأسبوع.",
+  "laterToday": "بقية اليوم",
+  "doneToday": "انتهت اليوم",
+  "restDay": "لا توجد حصص اليوم. حصصك القادمة خلال الأسبوع.",
   "openWeek": "افتح الأسبوع",
   "writeTheReport": "اكتب التقرير",
   "markingTile": "واجبات للتصحيح",
-  "allWritten": "كلها اتكتبت",
-  "nothingToMark": "مفيش حاجة",
+  "allWritten": "كُتبت كلها",
+  "nothingToMark": "لا شيء",
   "oldestFor": "أقدمها: {name}",
   "@oldestFor": {
     "placeholders": {
@@ -1357,7 +1357,7 @@
       }
     }
   },
-  "noStudents": "مفيش طلاب لسه.",
+  "noStudents": "لا يوجد طلاب بعد.",
   "studentsIn": "{students} في {subjects}",
   "@studentsIn": {
     "placeholders": {
@@ -1369,7 +1369,7 @@
       }
     }
   },
-  "studentsCount": "{n, plural, =0{مفيش طلاب} =1{طالب واحد} =2{طالبين} few{{n} طلاب} other{{n} طالب}}",
+  "studentsCount": "{n, plural, =0{لا يوجد طلاب} =1{طالب واحد} =2{طالبان} few{{n} طلاب} other{{n} طالبًا}}",
   "@studentsCount": {
     "placeholders": {
       "n": {
@@ -1377,7 +1377,7 @@
       }
     }
   },
-  "subjectsCount": "{n, plural, =0{مفيش مواد} =1{مادة واحدة} =2{مادتين} few{{n} مواد} other{{n} مادة}}",
+  "subjectsCount": "{n, plural, =0{لا توجد مواد} =1{مادة واحدة} =2{مادتين} few{{n} مواد} other{{n} مادة}}",
   "@subjectsCount": {
     "placeholders": {
       "n": {
@@ -1385,11 +1385,11 @@
       }
     }
   },
-  "searchByName": "دوّر بالاسم",
+  "searchByName": "ابحث بالاسم",
   "allSubjects": "الكل",
-  "noStudentsFound": "مفيش طالب بالاسم ده.",
-  "reportWaitingChip": "تقرير مستنيك",
-  "messageStudent": "ابعتله رسالة",
+  "noStudentsFound": "لا يوجد طالب بهذا الاسم.",
+  "reportWaitingChip": "تقرير ينتظرك",
+  "messageStudent": "أرسل إليه رسالة",
   "markHomework": "صحّح الواجبات",
   "ofCourse": "{n}% من البرنامج",
   "@ofCourse": {
@@ -1399,11 +1399,11 @@
       }
     }
   },
-  "prevMonth": "الشهر اللي فات",
-  "nextMonth": "الشهر الجاي",
-  "soFar": "لحد النهارده",
-  "monthOpen": "الشهر لسه مفتوح",
-  "monthClosed": "الشهر اتقفل",
+  "prevMonth": "الشهر الماضي",
+  "nextMonth": "الشهر القادم",
+  "soFar": "حتى اليوم",
+  "monthOpen": "الشهر ما زال مفتوحًا",
+  "monthClosed": "أُغلق الشهر",
   "lessonsHours": "{lessons} · {hours}",
   "@lessonsHours": {
     "placeholders": {
@@ -1418,7 +1418,7 @@
   "lessonPay": "الحصص",
   "bonuses": "مكافآت",
   "deductions": "خصومات",
-  "unpricedNote": "{n, plural, =1{حصة لسه مالهاش سعر} =2{حصتين لسه مالهمش سعر} few{{n} حصص لسه مالهاش سعر} other{{n} حصة لسه مالهاش سعر}}. الأكاديمية هتحدده، وهتتحسب في الشهر ده.",
+  "unpricedNote": "{n, plural, =1{حصة لم يُحدَّد سعرها بعد} =2{حصتان لم يُحدَّد سعرهما بعد} few{{n} حصص لم يُحدَّد سعرها بعد} other{{n} حصة لم يُحدَّد سعرها بعد}}. ستحدّد الأكاديمية السعر، وتُحسب في هذا الشهر.",
   "@unpricedNote": {
     "placeholders": {
       "n": {
@@ -1426,32 +1426,32 @@
       }
     }
   },
-  "noEarnings": "مفيش حصص في الشهر ده.",
+  "noEarnings": "لا توجد حصص في هذا الشهر.",
   "adjustments": "تعديلات",
-  "corrected": "اتصحّح",
-  "meetingLinkTitle": "لينك الحصة بتاعك",
-  "meetingLinkNeeded": "الأكاديمية شغالة على لينكات خارجية، ومفيش حصة هتفتح من غير لينكك.",
-  "meetingLinkSave": "احفظ اللينك",
-  "meetingLinkSaved": "اللينك اتحفظ.",
-  "meetingLinkRemoved": "اللينك اتشال.",
-  "teacherCardTitle": "كارتي في صفحة الأكاديمية",
-  "teacherCardLead": "الكارت اللي الأسر بتشوفه عنك في صفحة الأكاديمية. إنت اللي بتكتبه، وإنت اللي بتقرر يظهر ولا لأ. رقمك وإيميلك عمرهم ما بيظهروا.",
-  "teacherCardShown": "اظهر في صفحة الأكاديمية",
-  "teacherCardShownHint": "لو مقفول، كارتك مابيظهرش لحد.",
-  "teacherCardName": "الاسم اللي يظهر",
-  "teacherCardNameHint": "زي «أ. سارة» أو اسمك الأول بس.",
-  "teacherCardBio": "كلمتين عنك",
-  "teacherCardBioHint": "خبرتك واللي بتحب تدرّسه، لحد 280 حرف. من غير أرقام ولا لينكات.",
+  "corrected": "صُحّح",
+  "meetingLinkTitle": "رابط حصتك",
+  "meetingLinkNeeded": "تعمل الأكاديمية بروابط خارجية، ولن تُفتح أي حصة دون رابطك.",
+  "meetingLinkSave": "احفظ الرابط",
+  "meetingLinkSaved": "حُفظ الرابط.",
+  "meetingLinkRemoved": "أُزيل الرابط.",
+  "teacherCardTitle": "بطاقتي في صفحة الأكاديمية",
+  "teacherCardLead": "البطاقة التي تراها الأسر عنك في صفحة الأكاديمية. أنت من يكتبها، وأنت من يقرّر أن تظهر أو لا. رقمك وبريدك الإلكتروني لا يظهران أبدًا.",
+  "teacherCardShown": "أظهرني في صفحة الأكاديمية",
+  "teacherCardShownHint": "ما دام مغلقًا، فلن يرى أحد بطاقتك.",
+  "teacherCardName": "الاسم الذي يظهر",
+  "teacherCardNameHint": "مثل «أ. سارة» أو اسمك الأول فقط.",
+  "teacherCardBio": "كلمات قليلة عنك",
+  "teacherCardBioHint": "خبرتك وما تحب تدريسه، حتى 280 حرفًا. دون أرقام أو روابط.",
   "teacherCardPhoto": "صورتك (اختياري)",
-  "teacherCardPhotoHint": "PNG أو JPEG أو WebP لحد 1 ميجا. أي حد بيفتح الصفحة بيشوفها.",
-  "teacherCardPickPhoto": "اختار صورة",
+  "teacherCardPhotoHint": "PNG أو JPEG أو WebP حتى 1 ميغابايت. يراها كل من يفتح الصفحة.",
+  "teacherCardPickPhoto": "اختر صورة",
   "teacherCardChangePhoto": "غيّر الصورة",
-  "teacherCardRemovePhoto": "شيل الصورة",
-  "teacherCardTooBig": "الصورة أكبر من 1 ميجا.",
-  "teacherCardPreview": "كده الأسر هتشوف كارتك",
+  "teacherCardRemovePhoto": "أزل الصورة",
+  "teacherCardTooBig": "الصورة أكبر من 1 ميغابايت.",
+  "teacherCardPreview": "هكذا سترى الأسر بطاقتك",
   "teacherCardSubjectsFrom": "المواد من ملفك في الأكاديمية",
   "teacherCardSave": "احفظ",
-  "teacherCardSaved": "كارتك اتحفظ.",
+  "teacherCardSaved": "حُفظت بطاقتك.",
   "teacherCardLevels": "{from} ← {to}",
   "@teacherCardLevels": {
     "placeholders": {
@@ -1463,10 +1463,10 @@
       }
     }
   },
-  "teacherCardFromStart": "من الأول",
-  "teacherCardToEnd": "للآخر",
+  "teacherCardFromStart": "من البداية",
+  "teacherCardToEnd": "حتى النهاية",
   "performanceTitle": "أدائي",
-  "performanceLead": "{days, plural, =1{آخر يوم} =2{آخر يومين} few{آخر {days} أيام} other{آخر {days} يوم}} · الحصص اللي سببها المنصة مابتتحسبش",
+  "performanceLead": "{days, plural, =1{آخر يوم} =2{آخر يومين} few{آخر {days} أيام} other{آخر {days} يومًا}} · الحصص التي كان سببها المنصة لا تُحسب",
   "@performanceLead": {
     "placeholders": {
       "days": {
@@ -1478,14 +1478,14 @@
   "performanceGroupQuality": "الجودة",
   "performanceGroupProfessionalism": "الاحترافية",
   "performanceGroupBusiness": "النمو",
-  "performanceGood": "تمام",
-  "performanceBad": "محتاج تحسين",
-  "performanceNone": "لسه",
-  "performanceCounted": "اللي اتحسب",
-  "performanceNoEvents": "مفيش حاجة اتحسبت عليك. استمر!",
-  "performanceExcluded": "مش محسوبة",
+  "performanceGood": "جيد",
+  "performanceBad": "يحتاج إلى تحسين",
+  "performanceNone": "ليس بعد",
+  "performanceCounted": "ما حُسب",
+  "performanceNoEvents": "لم يُحسب عليك شيء. استمر!",
+  "performanceExcluded": "غير محسوبة",
   "performanceRatings": "تقييمات الأسر",
-  "performanceAverage": "{avg} من 5 · {n, plural, =1{تقييم واحد} =2{تقييمين} few{{n} تقييمات} other{{n} تقييم}}",
+  "performanceAverage": "{avg} من 5 · {n, plural, =1{تقييم واحد} =2{تقييمان} few{{n} تقييمات} other{{n} تقييمًا}}",
   "@performanceAverage": {
     "placeholders": {
       "avg": {
@@ -1496,7 +1496,7 @@
       }
     }
   },
-  "performanceNoRatings": "لسه مفيش تقييمات.",
+  "performanceNoRatings": "لا توجد تقييمات بعد.",
   "performanceStars": "{n} من 5",
   "@performanceStars": {
     "placeholders": {
@@ -1507,7 +1507,7 @@
   },
   "timeOff": "الإجازات",
   "requestTimeOff": "اطلب إجازة",
-  "timeOffLead": "بتوقيتك: {zone} · الأكاديمية بترد عليك",
+  "timeOffLead": "بتوقيتك: {zone} · الأكاديمية ترد عليك",
   "@timeOffLead": {
     "placeholders": {
       "zone": {
@@ -1518,23 +1518,23 @@
   "wholeDays": "أيام كاملة",
   "partOfDay": "جزء من يوم",
   "fromDay": "من",
-  "toDay": "لحد",
+  "toDay": "حتى",
   "dayLabel": "اليوم",
   "fromTime": "من الساعة",
-  "toTime": "لحد الساعة",
+  "toTime": "حتى الساعة",
   "reasonSick": "مرض",
   "reasonVacation": "إجازة سنوية",
   "reasonPersonal": "ظرف شخصي",
   "reasonFamily": "ظرف عائلي",
   "reasonEmergency": "طارئ",
-  "reasonOther": "حاجة تانية",
-  "sendRequest": "ابعت الطلب",
+  "reasonOther": "سبب آخر",
+  "sendRequest": "أرسل الطلب",
   "yourRequests": "طلباتك",
   "withdraw": "اسحبه",
-  "requestSent": "الطلب اتبعت. هيوصلك الرد.",
-  "withdrawn": "الطلب اتسحب.",
+  "requestSent": "أُرسل الطلب. سيصلك الرد.",
+  "withdrawn": "سُحب الطلب.",
   "academyHolidays": "إجازات الأكاديمية",
-  "coverState": "{covered} من {total, plural, =1{حصة واحدة} =2{حصتين} few{{total} حصص} other{{total} حصة}} ليها بديل",
+  "coverState": "{covered} من {total, plural, =1{حصة واحدة} =2{حصتين} few{{total} حصص} other{{total} حصة}} لها بديل",
   "@coverState": {
     "placeholders": {
       "covered": {
@@ -1545,11 +1545,11 @@
       }
     }
   },
-  "fillTimeOff": "اختار الأيام والسبب الأول.",
-  "noTimeOff": "مفيش طلبات.",
-  "youAreHere": "انت هنا!",
-  "topRank": "وصلت لأعلى رتبة!",
-  "streak": "{n, plural, =0{لسه مفيش حصص ورا بعض} =1{حصة واحدة} =2{حصتين ورا بعض} few{{n} حصص ورا بعض} other{{n} حصة ورا بعض}}",
+  "fillTimeOff": "اختر الأيام والسبب أولًا.",
+  "noTimeOff": "لا توجد طلبات.",
+  "youAreHere": "أنت هنا!",
+  "topRank": "وصلت إلى أعلى رتبة!",
+  "streak": "{n, plural, =0{لا توجد حصص متتالية بعد} =1{حصة واحدة} =2{حصتان متتاليتان} few{{n} حصص متتالية} other{{n} حصة متتالية}}",
   "@streak": {
     "placeholders": {
       "n": {
@@ -1568,9 +1568,9 @@
       }
     }
   },
-  "finishOn": "هتخلّص على كده",
-  "programDone": "خلّصت البرنامج!",
-  "weeksLeftLevel": "{n, plural, =0{المستوى ده قرّب يخلص} =1{باقي أسبوع في المستوى ده} =2{باقي أسبوعين في المستوى ده} few{باقي {n} أسابيع في المستوى ده} other{باقي {n} أسبوع في المستوى ده}}",
+  "finishOn": "بهذه الوتيرة تنتهي",
+  "programDone": "أنهيت البرنامج!",
+  "weeksLeftLevel": "{n, plural, =0{أوشك هذا المستوى على الانتهاء} =1{بقي أسبوع في هذا المستوى} =2{بقي أسبوعان في هذا المستوى} few{بقيت {n} أسابيع في هذا المستوى} other{بقي {n} أسبوعًا في هذا المستوى}}",
   "@weeksLeftLevel": {
     "placeholders": {
       "n": {
@@ -1578,14 +1578,14 @@
       }
     }
   },
-  "fromLastMonth": "من الشهر اللي فات",
+  "fromLastMonth": "مقارنة بالشهر الماضي",
   "doneMark": "تم!",
-  "chestReady": "الصندوق جاهز! دوس عليه",
-  "chestOpened": "فتحت صندوق الأسبوع ده",
-  "album": "ألبوم الستيكرز",
-  "albumLead": "كل صندوق بتفتحه بيجيبلك ستيكر جديد.",
-  "newSticker": "ستيكر جديد في ألبومك!",
-  "rewardKids": "برافو عليك!",
+  "chestReady": "الصندوق جاهز! انقر عليه",
+  "chestOpened": "فتحت صندوق هذا الأسبوع",
+  "album": "ألبوم الملصقات",
+  "albumLead": "كل صندوق تفتحه يعطيك ملصقًا جديدًا.",
+  "newSticker": "ملصق جديد في ألبومك!",
+  "rewardKids": "أحسنت!",
   "rewardTitle": "أحسنت!",
   "rankUp": "رتبة جديدة: {rank}",
   "@rankUp": {
@@ -1595,7 +1595,7 @@
       }
     }
   },
-  "awesome": "تمام!",
+  "awesome": "رائع!",
   "cheerFromFamily": "تشجيع من أهلك!",
   "cheerThanks": "شكرًا!",
   "cheerClap": "تصفيقة",
@@ -1610,7 +1610,7 @@
       }
     }
   },
-  "cheerSent": "التشجيع وصل لـ {name}!",
+  "cheerSent": "وصل التشجيع إلى {name}!",
   "@cheerSent": {
     "placeholders": {
       "name": {
@@ -1618,7 +1618,7 @@
       }
     }
   },
-  "cheersLeft": "{n, plural, =0{خلّصت تشجيعات النهارده} =1{فاضل تشجيع واحد النهارده} =2{فاضل تشجيعين النهارده} few{فاضل {n} تشجيعات النهارده} other{فاضل {n} تشجيع النهارده}}",
+  "cheersLeft": "{n, plural, =0{انتهت تشجيعات اليوم} =1{بقي تشجيع واحد اليوم} =2{بقي تشجيعان اليوم} few{بقيت {n} تشجيعات اليوم} other{بقي {n} تشجيعًا اليوم}}",
   "@cheersLeft": {
     "placeholders": {
       "n": {
@@ -1627,11 +1627,11 @@
     }
   },
   "sounds": "الأصوات",
-  "soundsHint": "أصوات خفيفة لما تدوس أو تستلم جايزة",
-  "reportsOpen": "تقارير مستنياك",
-  "reportsSent": "اتبعتت",
+  "soundsHint": "أصوات خفيفة عند النقر أو عند استلام جائزة",
+  "reportsOpen": "تقارير تنتظرك",
+  "reportsSent": "أُرسلت",
   "writeReport": "اكتب",
-  "waitingFor": "مستنيك: {what}",
+  "waitingFor": "ينتظرك: {what}",
   "@waitingFor": {
     "placeholders": {
       "what": {
@@ -1639,7 +1639,7 @@
       }
     }
   },
-  "waitingNothing": "مفيش حاجة مستنياك",
+  "waitingNothing": "لا شيء ينتظرك",
   "bothWaiting": "{a} و{b}",
   "@bothWaiting": {
     "placeholders": {
@@ -1651,7 +1651,7 @@
       }
     }
   },
-  "reportsCount": "{n, plural, =0{مفيش تقارير} =1{تقرير واحد} =2{تقريرين} few{{n} تقارير} other{{n} تقرير}}",
+  "reportsCount": "{n, plural, =0{لا توجد تقارير} =1{تقرير واحد} =2{تقريران} few{{n} تقارير} other{{n} تقريرًا}}",
   "@reportsCount": {
     "placeholders": {
       "n": {
@@ -1659,7 +1659,7 @@
       }
     }
   },
-  "homeworkCount": "{n, plural, =0{مفيش واجبات} =1{واجب واحد} =2{واجبين} few{{n} واجبات} other{{n} واجب}}",
+  "homeworkCount": "{n, plural, =0{لا توجد واجبات} =1{واجب واحد} =2{واجبان} few{{n} واجبات} other{{n} واجبًا}}",
   "@homeworkCount": {
     "placeholders": {
       "n": {
@@ -1667,20 +1667,20 @@
       }
     }
   },
-  "markingRow": "واجبات مستنية تصحيح",
-  "markingNone": "مفيش واجبات مستنية دلوقتي",
-  "noReportsWaiting": "مفيش تقارير مستنياك. برافو!",
+  "markingRow": "واجبات تنتظر التصحيح",
+  "markingNone": "لا توجد واجبات تنتظر الآن",
+  "noReportsWaiting": "لا توجد تقارير تنتظرك. أحسنت!",
   "reportLesson": "تقرير حصة",
   "reportAbsence": "ملاحظة غياب",
-  "todaysPlan": "خطة النهارده",
-  "planHint": "اختار اللي حصل في كل درس.",
+  "todaysPlan": "خطة اليوم",
+  "planHint": "اختر ما حدث في كل درس.",
   "reportTitle": "تقرير الحصة",
-  "workedOn": "اشتغلنا على إيه",
-  "howItWent": "الحصة كانت إزاي",
-  "talkSection": "الكلام",
+  "workedOn": "على ماذا عملنا",
+  "howItWent": "كيف كانت الحصة",
+  "talkSection": "الملاحظات",
   "keepDraft": "مسودة",
-  "reportDraftSaved": "اتحفظت مسودة على الموبايل ده.",
-  "draftFrom": "كمّلت من مسودة اتحفظت من {ago}.",
+  "reportDraftSaved": "حُفظت مسودة على هذا الهاتف.",
+  "draftFrom": "أكملت من مسودة حُفظت قبل {ago}.",
   "@draftFrom": {
     "placeholders": {
       "ago": {
@@ -1688,12 +1688,12 @@
       }
     }
   },
-  "discardDraft": "ابدأ من الأول",
+  "discardDraft": "ابدأ من جديد",
   "voiceTitle": "مسودة من رسالة صوتية",
-  "voiceHint": "قول عملتوا إيه، والطالب كان عامل إزاي، والواجب. المسودة بتملا الخانات الفاضية بس، وإنت بتراجعها قبل ما تبعت.",
+  "voiceHint": "قل ماذا فعلتم، وكيف كان أداء الطالب، والواجب. المسودة تملأ الخانات الفارغة فقط، وأنت تراجعها قبل أن ترسل.",
   "voiceRecord": "سجّل رسالة",
-  "voiceWorking": "بنسمع ونكتب المسودة…",
-  "voiceDone": "{n, plural, =0{الرسالة مازوّدتش حاجة جديدة: الفورم كان فيه كل ده.} =1{المسودة ملت خانة واحدة. راجعها قبل ما تبعت.} =2{المسودة ملت خانتين. راجعهم قبل ما تبعت.} few{المسودة ملت {n} خانات. راجعهم قبل ما تبعت.} other{المسودة ملت {n} خانة. راجعهم قبل ما تبعت.}}",
+  "voiceWorking": "نستمع ونكتب المسودة…",
+  "voiceDone": "{n, plural, =0{لم تُضف الرسالة شيئًا جديدًا: كان كل ذلك في النموذج.} =1{ملأت المسودة خانة واحدة. راجعها قبل أن ترسل.} =2{ملأت المسودة خانتين. راجعهما قبل أن ترسل.} few{ملأت المسودة {n} خانات. راجعها قبل أن ترسل.} other{ملأت المسودة {n} خانة. راجعها قبل أن ترسل.}}",
   "@voiceDone": {
     "placeholders": {
       "n": {
@@ -1701,9 +1701,9 @@
       }
     }
   },
-  "voiceHeard": "اللي اتسمع",
-  "voiceUnsure": "راجع دول: المسودة مكانتش متأكدة",
-  "voiceLeft": "لسه محتاج: {fields}",
+  "voiceHeard": "ما سُمع",
+  "voiceUnsure": "راجع هذه: لم تكن المسودة متأكدة منها",
+  "voiceLeft": "ما زال ينقص: {fields}",
   "@voiceLeft": {
     "placeholders": {
       "fields": {
@@ -1711,13 +1711,13 @@
       }
     }
   },
-  "voiceLimit": "لحد دقيقتين",
-  "voiceKept": "التسجيل بيتمسح أول ما يتسمع، وعمره ما بيتحفظ.",
+  "voiceLimit": "حتى دقيقتين",
+  "voiceKept": "يُحذف التسجيل فور سماعه، ولا يُحفظ أبدًا.",
   "suggested": "مقترح",
   "checkThis": "راجعه",
   "reciteTitle": "تصحيح التسميع",
-  "reciteToggle": "تصحيح التسميع آلي",
-  "reciteHint": "لما الطالب يسلّم تسجيل، بنعلّم لك على الكلمات اللي ناقصة أو غلط. ليك إنت بس، والأسرة مابتشوفوش.",
+  "reciteToggle": "تصحيح التسميع آليًا",
+  "reciteHint": "عندما يسلّم الطالب تسجيلًا، نعلّم لك الكلمات الناقصة أو الخاطئة. هذا لك وحدك، والأسرة لا تراه.",
   "reciteSuggestion": "من نص الدرس: {title}",
   "@reciteSuggestion": {
     "placeholders": {
@@ -1735,10 +1735,10 @@
     }
   },
   "reciteSurah": "السورة",
-  "reciteChooseSurah": "اختار السورة",
-  "reciteSearch": "دوّر على سورة",
+  "reciteChooseSurah": "اختر السورة",
+  "reciteSearch": "ابحث عن سورة",
   "reciteFrom": "من آية",
-  "reciteTo": "لحد آية",
+  "reciteTo": "إلى آية",
   "reciteWhat": "التسميع: {title}",
   "@reciteWhat": {
     "placeholders": {
@@ -1748,9 +1748,9 @@
     }
   },
   "reciteMissing": "ناقصة",
-  "reciteWrong": "غلط",
+  "reciteWrong": "خطأ",
   "reciteExtra": "زيادة",
-  "reciteSaid": "اتقال: {word}",
+  "reciteSaid": "قيل: {word}",
   "@reciteSaid": {
     "placeholders": {
       "word": {
@@ -1758,9 +1758,9 @@
       }
     }
   },
-  "reciteHeard": "اللي اتسمع",
+  "reciteHeard": "ما سُمع",
   "drafts": "مسودات",
-  "savedAgo": "اتحفظت من {ago}",
+  "savedAgo": "حُفظت قبل {ago}",
   "@savedAgo": {
     "placeholders": {
       "ago": {
@@ -1768,26 +1768,26 @@
       }
     }
   },
-  "continueDraft": "كمّل",
-  "reasonNext": "الدرس الجاي",
+  "continueDraft": "أكمل",
+  "reasonNext": "الدرس القادم",
   "reasonReview": "مراجعة",
-  "outcomeIntroduced": "اتشرح",
-  "outcomePracticed": "اتدرّب عليه",
-  "outcomeMastered": "اتقن",
-  "outcomeNeedsReview": "محتاج مراجعة",
+  "outcomeIntroduced": "شُرح",
+  "outcomePracticed": "تدرّب عليه",
+  "outcomeMastered": "أتقنه",
+  "outcomeNeedsReview": "يحتاج إلى مراجعة",
   "itemScore": "الدرجة",
   "itemNote": "ملاحظة على الدرس",
-  "addNote": "ضيف ملاحظة",
-  "addLesson": "ضيف درس",
-  "pickLesson": "اختار درس",
-  "searchLessons": "دوّر على درس",
-  "remove": "شيل",
+  "addNote": "أضف ملاحظة",
+  "addLesson": "أضف درسًا",
+  "pickLesson": "اختر درسًا",
+  "searchLessons": "ابحث عن درس",
+  "remove": "أزل",
   "notesForFamily": "ملاحظات للطالب وولي الأمر",
   "notesInternal": "ملاحظات داخلية",
-  "notesInternalHint": "للأكاديمية بس، الأسرة مابتشوفهاش.",
+  "notesInternalHint": "للأكاديمية فقط، ولا تراها الأسرة.",
   "questionsTitle": "أسئلة الأكاديمية",
-  "questionsHint": "أسئلة الأكاديمية بتسألها في كل تقرير للمادة دي.",
-  "answerRequired": "جاوب على \"{question}\".",
+  "questionsHint": "أسئلة تطرحها الأكاديمية في كل تقرير لهذه المادة.",
+  "answerRequired": "أجب عن \"{question}\".",
   "@answerRequired": {
     "placeholders": {
       "question": {
@@ -1795,14 +1795,14 @@
       }
     }
   },
-  "answerYes": "أيوه",
-  "answerNo": "لأ",
-  "academyOnly": "للأكاديمية بس",
+  "answerYes": "نعم",
+  "answerNo": "لا",
+  "academyOnly": "للأكاديمية فقط",
   "lessonMaterials": "مواد الدرس",
-  "teachersOnly": "للمدرّس بس",
+  "teachersOnly": "للمعلّم فقط",
   "recordingsTitle": "تسجيلات الحصص",
   "recordingsMine": "تسجيلات حصصي",
-  "recordingsOff": "الأكاديمية مش بتسجل الحصص دلوقتي.",
+  "recordingsOff": "لا تسجّل الأكاديمية الحصص الآن.",
   "recordingsOf": "تسجيلات حصص {name}",
   "@recordingsOf": {
     "placeholders": {
@@ -1812,17 +1812,17 @@
     }
   },
   "recordingsTeacherList": "تسجيلات حصصك",
-  "recordingsEmpty": "مفيش تسجيلات لسه.",
-  "recordingsNotShared": "الأكاديمية مش بتعرض التسجيلات هنا.",
-  "recordingWatch": "شوف",
+  "recordingsEmpty": "لا توجد تسجيلات بعد.",
+  "recordingsNotShared": "لا تعرض الأكاديمية التسجيلات هنا.",
+  "recordingWatch": "شاهد",
   "recordingAgreed": "موافق",
-  "recordingNotAgreed": "مش موافق",
+  "recordingNotAgreed": "غير موافق",
   "recordingAgree": "موافق",
-  "recordingAgreedDone": "شكرًا. الحصص ممكن تتسجل من دلوقتي.",
+  "recordingAgreedDone": "شكرًا. يمكن تسجيل الحصص من الآن.",
   "recordingWithdraw": "اسحب الموافقة",
-  "recordingWithdrawConfirm": "متأكد؟ أي تسجيل شغال هيقف، ومش هيتسجل حاجة تاني.",
-  "recordingWithdrawn": "الموافقة اتسحبت، ومش هيتسجل حاجة تاني.",
-  "recordingUntil": "متاح لحد {date}",
+  "recordingWithdrawConfirm": "هل أنت متأكد؟ سيتوقف أي تسجيل جارٍ، ولن يُسجَّل شيء بعد ذلك.",
+  "recordingWithdrawn": "سُحبت الموافقة، ولن يُسجَّل شيء بعد ذلك.",
+  "recordingUntil": "متاح حتى {date}",
   "@recordingUntil": {
     "placeholders": {
       "date": {
@@ -1832,11 +1832,11 @@
   },
   "recordingVideo": "فيديو",
   "recordingAudio": "صوت",
-  "recordingLogged": "فتحك للتسجيل بيتسجل باسمك.",
-  "recordingOn": "بيسجل",
+  "recordingLogged": "يُسجَّل فتحك للتسجيل باسمك.",
+  "recordingOn": "يسجّل",
   "recordStart": "سجّل الحصة",
-  "recordStop": "وقّف التسجيل",
-  "recordingMissing": "مينفعش نسجل لحد ما يوافقوا على التسجيل: {names}.",
+  "recordStop": "أوقف التسجيل",
+  "recordingMissing": "لا يمكن التسجيل حتى يوافقوا على التسجيل: {names}.",
   "@recordingMissing": {
     "placeholders": {
       "names": {
@@ -1845,16 +1845,16 @@
     }
   },
   "absenceNote": "ملاحظة الغياب",
-  "absenceHint": "الطالب ماحضرش. اكتب اللي حصل وأي حاجة الأسرة محتاجة تعرفها.",
-  "giveHomework": "ادّي واجب",
+  "absenceHint": "لم يحضر الطالب. اكتب ما حدث وأي شيء تحتاج الأسرة إلى معرفته.",
+  "giveHomework": "أعطِ واجبًا",
   "homeworkField": "الواجب",
   "homeworkDetails": "التفاصيل",
-  "acceptsLabel": "بيتسلّم",
-  "acceptsAny": "أي حاجة",
+  "acceptsLabel": "يُسلَّم",
+  "acceptsAny": "أي شيء",
   "acceptsText": "كتابة",
   "acceptsAudio": "تسجيل صوت",
   "acceptsFile": "ملف",
-  "dueIn": "{n, plural, =1{بعد يوم} =2{بعد يومين} few{بعد {n} أيام} other{بعد {n} يوم}}",
+  "dueIn": "{n, plural, =1{بعد يوم} =2{بعد يومين} few{بعد {n} أيام} other{بعد {n} يومًا}}",
   "@dueIn": {
     "placeholders": {
       "n": {
@@ -1862,22 +1862,22 @@
       }
     }
   },
-  "homeworkLocked": "الطالب سلّم الواجب ده، فمش هيتغير.",
-  "sendReport": "ابعت التقرير",
+  "homeworkLocked": "سلّم الطالب هذا الواجب، فلن يتغيّر.",
+  "sendReport": "أرسل التقرير",
   "updateReport": "حدّث التقرير",
-  "reportSent": "التقرير اتبعت.",
-  "reportLocked": "الأكاديمية راجعت التقرير ده، فمش هيتغير.",
-  "pickRatings": "اختار التركيز والمستوى العام.",
-  "pickOutcomes": "اختار اللي حصل في كل درس.",
+  "reportSent": "أُرسل التقرير.",
+  "reportLocked": "راجعت الأكاديمية هذا التقرير، فلن يتغيّر.",
+  "pickRatings": "اختر التركيز والمستوى العام.",
+  "pickOutcomes": "اختر ما حدث في كل درس.",
   "markTitle": "تصحيح الواجبات",
-  "markWaiting": "مستني التصحيح",
-  "markDone": "اتصحّح",
-  "noHomeworkToMark": "مفيش واجبات مستنية تصحيح.",
+  "markWaiting": "بانتظار التصحيح",
+  "markDone": "صُحّح",
+  "noHomeworkToMark": "لا توجد واجبات تنتظر التصحيح.",
   "gradeLabel": "الدرجة",
   "feedbackLabel": "كلمتك للطالب",
   "saveMark": "سجّل التصحيح",
-  "marked": "اتسجّل التصحيح.",
-  "handedInAt": "اتسلّم {when}",
+  "marked": "سُجّل التصحيح.",
+  "handedInAt": "سُلّم {when}",
   "@handedInAt": {
     "placeholders": {
       "when": {
@@ -1885,15 +1885,15 @@
       }
     }
   },
-  "fileOnWeb": "الملف ده بيتفتح من الموقع.",
+  "fileOnWeb": "يُفتح هذا الملف من الموقع.",
   "showPicture": "اعرض الصورة",
   "playRecording": "شغّل التسجيل",
-  "pause": "وقّف",
-  "cannotPlay": "مش قادرين نشغّل التسجيل ده هنا.",
-  "waitingTap": "دوس عشان تبدأ",
+  "pause": "أوقف",
+  "cannotPlay": "لا نستطيع تشغيل هذا التسجيل هنا.",
+  "waitingTap": "انقر لتبدأ",
   "recordVoice": "سجّل صوتك",
   "recordKids": "سجّل تسميعك",
-  "recordingNow": "بيسجّل… {time}",
+  "recordingNow": "يسجّل… {time}",
   "@recordingNow": {
     "placeholders": {
       "time": {
@@ -1901,12 +1901,12 @@
       }
     }
   },
-  "stopRecording": "وقّف التسجيل",
-  "recordAgain": "سجّل تاني",
-  "attachFile": "ضيف ملف",
-  "attachPicture": "ضيف صورة أو PDF",
-  "micDenied": "محتاجين إذن المايك عشان تسجّل. فعّله من إعدادات الموبايل.",
-  "recordingLimit": "التسجيل وقف عند {n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} other{{n} دقيقة}}.",
+  "stopRecording": "أوقف التسجيل",
+  "recordAgain": "سجّل مرة أخرى",
+  "attachFile": "أضف ملفًا",
+  "attachPicture": "أضف صورة أو ملف PDF",
+  "micDenied": "نحتاج إلى إذن الميكروفون لتسجّل. فعّله من إعدادات الهاتف.",
+  "recordingLimit": "توقف التسجيل عند {n, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقائق} other{{n} دقيقة}}.",
   "@recordingLimit": {
     "placeholders": {
       "n": {
@@ -1914,8 +1914,8 @@
       }
     }
   },
-  "fileTooBig": "الملف أكبر من 25 ميجا.",
-  "answerOptional": "اكتب حاجة كمان (اختياري)",
+  "fileTooBig": "الملف أكبر من 25 ميغابايت.",
+  "answerOptional": "اكتب شيئًا آخر (اختياري)",
   "myHours": "مواعيدي",
   "hoursOnClock": "على توقيت {zone}",
   "@hoursOnClock": {
@@ -1934,11 +1934,11 @@
     }
   },
   "currentWeek": "المواعيد المعتمدة",
-  "noHoursYet": "لسه مفيش مواعيد معتمدة.",
+  "noHoursYet": "لا توجد مواعيد معتمدة بعد.",
   "proposeHours": "اقترح مواعيد جديدة",
   "yourProposal": "مقترحك",
-  "waitingOnAcademy": "مستني رد الأكاديمية",
-  "waitingOnYou": "مستني ردك",
+  "waitingOnAcademy": "بانتظار رد الأكاديمية",
+  "waitingOnYou": "بانتظار ردك",
   "startsOn": "يبدأ {date}",
   "@startsOn": {
     "placeholders": {
@@ -1947,22 +1947,22 @@
       }
     }
   },
-  "academyCounter": "الأكاديمية عدّلت مقترحك. ده اللي اتغير:",
-  "timeAdded": "اتضاف",
-  "timeRemoved": "اتشال",
+  "academyCounter": "عدّلت الأكاديمية مقترحك. هذا ما تغيّر:",
+  "timeAdded": "أُضيف",
+  "timeRemoved": "أُزيل",
   "acceptCounter": "موافق على التعديل",
   "editProposal": "عدّل المقترح",
-  "withdrawConfirm": "تسحب المقترح؟ المواعيد المعتمدة هتفضل زي ما هي.",
-  "proposalAccepted": "مواعيدك اتعتمدت.",
-  "proposalSent": "المقترح اتبعت للأكاديمية.",
-  "draftSaved": "المسودة اتحفظت.",
+  "withdrawConfirm": "أتسحب المقترح؟ ستبقى المواعيد المعتمدة كما هي.",
+  "proposalAccepted": "اعتُمدت مواعيدك.",
+  "proposalSent": "أُرسل المقترح إلى الأكاديمية.",
+  "draftSaved": "حُفظت المسودة.",
   "conversation": "المحادثة مع الأكاديمية",
   "writeMessage": "اكتب رسالة…",
   "editHours": "عدّل مواعيدك",
-  "addTime": "ضيف وقت",
-  "dayOff": "مفيش",
+  "addTime": "أضف وقتًا",
+  "dayOff": "لا يوجد",
   "effectiveFrom": "يبدأ من",
-  "reduceNotice": "لو هتقلل ساعات، أقرب بداية {date}.",
+  "reduceNotice": "إن كنت ستقلّل الساعات، فأقرب بداية {date}.",
   "@reduceNotice": {
     "placeholders": {
       "date": {
@@ -1970,21 +1970,21 @@
       }
     }
   },
-  "minHours": "أقل ساعات في الأسبوع",
-  "maxHours": "أكتر ساعات في الأسبوع",
+  "minHours": "أقل عدد من الساعات في الأسبوع",
+  "maxHours": "أكثر عدد من الساعات في الأسبوع",
   "proposalNote": "ملاحظة للأكاديمية",
   "saveDraft": "احفظ مسودة",
-  "sendProposal": "ابعت للأكاديمية",
-  "endAfterStart": "وقت النهاية لازم يكون بعد البداية.",
-  "untilMidnight": "لحد نص الليل",
+  "sendProposal": "أرسل إلى الأكاديمية",
+  "endAfterStart": "يجب أن يكون وقت النهاية بعد البداية.",
+  "untilMidnight": "حتى منتصف الليل",
   "inboxTitle": "الإشعارات",
-  "markAllRead": "علّم الكل مقروء",
-  "noNotifications": "مفيش إشعارات.",
-  "loadMore": "اعرض أكتر",
+  "markAllRead": "علّم الكل كمقروء",
+  "noNotifications": "لا توجد إشعارات.",
+  "loadMore": "اعرض المزيد",
   "notificationChoices": "اختيارات الإشعارات",
-  "saved": "اتحفظ.",
+  "saved": "حُفظ.",
   "openIt": "افتح",
-  "unreadCount": "{n, plural, =0{مفيش جديد} =1{إشعار جديد} =2{إشعارين جداد} few{{n} إشعارات جديدة} other{{n} إشعار جديد}}",
+  "unreadCount": "{n, plural, =0{لا جديد} =1{إشعار جديد} =2{إشعاران جديدان} few{{n} إشعارات جديدة} other{{n} إشعارًا جديدًا}}",
   "@unreadCount": {
     "placeholders": {
       "n": {
@@ -1992,31 +1992,31 @@
       }
     }
   },
-  "updateTitle": "فيه نسخة جديدة من التطبيق",
-  "updateBody": "النسخة اللي عندك قديمة ومش هتشتغل مع الأكاديمية. حدّثها عشان تكمل.",
+  "updateTitle": "يوجد إصدار جديد من التطبيق",
+  "updateBody": "الإصدار الذي لديك قديم ولن يعمل مع الأكاديمية. حدّثه لتتابع.",
   "updateNow": "حدّث التطبيق",
-  "updateFromStore": "حدّثه من متجر التطبيقات على موبايلك.",
+  "updateFromStore": "حدّثه من متجر التطبيقات على هاتفك.",
   "helpTitle": "المساعدة",
   "supportTitle": "المساعدة",
-  "helpLead": "اكتب للأكاديمية عن حصة، أو دفع، أو مشكلة تقنية، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.",
-  "supportLead": "اكتب للأكاديمية عن مشكلة تقنية، أو مرتبك، أو أي حاجة تانية. الرد هيوصلك هنا وفي رسالة.",
+  "helpLead": "اكتب للأكاديمية عن حصة، أو دفعة، أو مشكلة تقنية، أو أي شيء آخر. يصلك الرد هنا وفي رسالة.",
+  "supportLead": "اكتب للأكاديمية عن مشكلة تقنية، أو راتبك، أو أي شيء آخر. يصلك الرد هنا وفي رسالة.",
   "ticketNew": "تذكرة جديدة",
   "ticketNewTitle": "اكتب للأكاديمية",
-  "ticketKind": "عن إيه؟",
-  "ticketHintComplaint": "على مدرّس أو حصة. الأكاديمية بتدوّر فيها وبتقولك عملت إيه.",
-  "ticketHintBilling": "فاتورة، أو دفعة، أو فلوس راجعة، أو باقتك.",
-  "ticketHintPay": "مرتبك أو كشف حسابك.",
-  "ticketHintTechnical": "الفصل، أو التطبيق، أو الدخول مش شغال.",
+  "ticketKind": "عمّ تكتب؟",
+  "ticketHintComplaint": "عن معلّم أو حصة. تبحث الأكاديمية في الأمر وتخبرك بما فعلت.",
+  "ticketHintBilling": "فاتورة، أو دفعة، أو مبلغ مسترد، أو باقتك.",
+  "ticketHintPay": "راتبك أو كشف حسابك.",
+  "ticketHintTechnical": "الفصل أو التطبيق أو الدخول لا يعمل.",
   "ticketHintOther": "سؤال أو طلب.",
-  "ticketLesson": "أنهي حصة؟ (لو فيه)",
-  "ticketNoLesson": "مش حصة معينة",
+  "ticketLesson": "أي حصة؟ (إن وُجدت)",
+  "ticketNoLesson": "ليست حصة معيّنة",
   "ticketSubject": "العنوان",
-  "ticketSubjectHint": "في كلمتين",
-  "ticketBody": "احكيلنا حصل إيه",
-  "ticketAttach": "ارفق صورة أو PDF",
-  "ticketTooBig": "الملف أكبر من 10 ميجا.",
-  "ticketSent": "اتبعتت. الأكاديمية هترد هنا.",
-  "ticketsEmpty": "مفيش تذاكر لسه. لو فيه أي حاجة مش مظبوطة، اكتبلنا.",
+  "ticketSubjectHint": "في كلمات قليلة",
+  "ticketBody": "أخبرنا بما حدث",
+  "ticketAttach": "أرفق صورة أو ملف PDF",
+  "ticketTooBig": "الملف أكبر من 10 ميغابايت.",
+  "ticketSent": "أُرسلت. سترد الأكاديمية هنا.",
+  "ticketsEmpty": "لا توجد تذاكر بعد. إن كان هناك أي شيء غير سليم، فاكتب إلينا.",
   "ticketsMine": "تذاكري",
   "ticketAbout": "عن {name}",
   "@ticketAbout": {
@@ -2026,12 +2026,12 @@
       }
     }
   },
-  "ticketYourTurn": "الأكاديمية ردت",
-  "ticketYou": "انت",
+  "ticketYourTurn": "ردّت الأكاديمية",
+  "ticketYou": "أنت",
   "ticketAcademy": "الأكاديمية",
   "ticketReplyHint": "اكتب للأكاديمية…",
-  "ticketReopen": "لسه ماتحلّتش",
-  "ticketReopenHint": "لسه ماتحلّتش؟ تقدر تفتحها تاني لحد {date}.",
+  "ticketReopen": "لم تُحَل بعد",
+  "ticketReopenHint": "لم تُحَل بعد؟ يمكنك إعادة فتحها حتى {date}.",
   "@ticketReopenHint": {
     "placeholders": {
       "date": {
@@ -2039,20 +2039,20 @@
       }
     }
   },
-  "ticketClose": "اقفل التذكرة",
-  "ticketCloseHint": "اقفلها لما تتحل أو لو مابقيتش محتاجها. مش هتاخد رسايل تاني.",
-  "ticketClosed": "التذكرة دي اتقفلت. افتح تذكرة جديدة لو محتاج حاجة.",
+  "ticketClose": "أغلق التذكرة",
+  "ticketCloseHint": "أغلقها عندما تُحَل أو إن لم تعد تحتاج إليها. لن تستقبل رسائل بعد ذلك.",
+  "ticketClosed": "أُغلقت هذه التذكرة. افتح تذكرة جديدة إن احتجت إلى شيء.",
   "tellUsTitle": "بلّغ عن قلق",
-  "tellUsTitleStudent": "فيه حاجة مش مظبوطة؟ قولّنا",
-  "tellUsTitleKids": "فيه حاجة زعّلتك؟",
-  "tellUsNavKids": "قول لحد كبير",
-  "tellUsNavMiddle": "قولّنا لو فيه حاجة مضايقاك",
-  "tellUsLead": "لو أي حاجة في حصة، أو من مدرّس، أو من أي حد على المنصة قلقاك، قولّنا هنا. اللي بيقراها بس المسؤولين عن حماية الأطفال في الأكاديمية.",
-  "tellUsLeadStudent": "لو حد خلّاك تحس إنك مش مرتاح، أو خايف، أو مش في أمان، قولّنا. اللي بيقراها بس المسؤولين عن حماية الطلاب في الأكاديمية، ومش هتتعاقب.",
-  "tellUsLeadKids": "لو حد زعّلك أو خوّفك، دوس على زرار. حد كبير في الأكاديمية هيساعدك.",
+  "tellUsTitleStudent": "هل هناك شيء غير سليم؟ أخبرنا",
+  "tellUsTitleKids": "هل أحزنك شيء؟",
+  "tellUsNavKids": "أخبر شخصًا كبيرًا",
+  "tellUsNavMiddle": "أخبرنا إن كان هناك ما يزعجك",
+  "tellUsLead": "إن أقلقك أي شيء في حصة، أو من معلّم، أو من أي شخص على المنصة، فأخبرنا هنا. لا يقرؤه إلا المسؤولون عن حماية الأطفال في الأكاديمية.",
+  "tellUsLeadStudent": "إن جعلك أحد تشعر بعدم الارتياح، أو بالخوف، أو بأنك لست في أمان، فأخبرنا. لا يقرؤه إلا المسؤولون عن حماية الطلاب في الأكاديمية، ولن تُعاقَب.",
+  "tellUsLeadKids": "إن أحزنك أحد أو أخافك، فاضغط على زر. سيساعدك شخص كبير في الأكاديمية.",
   "concernTeacherNav": "بلّغ عن قلق",
-  "concernTeacherTitle": "بلّغ عن قلق على أمان طالب",
-  "concernTeacherLead": "لو حاجة في أمان طالب أو حالته قلقاك، أو تصرّف حد كبير تاني، قول لمسؤولين الحماية في الأكاديمية هنا. هما بس اللي بيقروه. ماتحققش فيه ولا تكلّم الأسرة عنه بنفسك.",
+  "concernTeacherTitle": "بلّغ عن قلق على سلامة طالب",
+  "concernTeacherLead": "إن أقلقك شيء في سلامة طالب أو حاله، أو تصرّف شخص بالغ آخر، فأخبر مسؤولي الحماية في الأكاديمية هنا. هم وحدهم من يقرؤونه. لا تحقّق فيه ولا تتواصل مع الأسرة بشأنه بنفسك.",
   "concernAbout": "عن {name}",
   "@concernAbout": {
     "placeholders": {
@@ -2061,21 +2061,21 @@
       }
     }
   },
-  "concernWhat": "الموضوع عن إيه؟",
-  "concernWhatKids": "إيه اللي حصل؟",
-  "concernPick": "اختار الموضوع عن إيه.",
-  "concernText": "إيه اللي حصل؟",
-  "concernTextKids": "عايز تقول أكتر؟ مش لازم.",
-  "concernTextHint": "حصل إمتى، ومين كان موجود، وإيه اللي اتقال.",
-  "concernLesson": "في أنهي حصة (لو فيه)؟",
-  "concernNoLesson": "مش عن حصة",
-  "concernStudent": "أنهي طالب؟",
-  "concernNoStudent": "مش عن طالب معيّن",
-  "concernUrgent": "ممكن حد يكون في خطر دلوقتي",
-  "concernSend": "ابعت",
-  "concernSendTeacher": "ابعت لمسؤولين الحماية",
-  "concernAgain": "قولّنا حاجة تانية",
-  "concernAgainTeacher": "بلّغ عن حاجة تانية",
+  "concernWhat": "عمّ يتعلّق الأمر؟",
+  "concernWhatKids": "ماذا حدث؟",
+  "concernPick": "اختر موضوع الأمر.",
+  "concernText": "ماذا حدث؟",
+  "concernTextKids": "هل تريد أن تقول المزيد؟ ليس ضروريًا.",
+  "concernTextHint": "متى حدث، ومن كان موجودًا، وماذا قيل.",
+  "concernLesson": "في أي حصة (إن وُجدت)؟",
+  "concernNoLesson": "ليس عن حصة",
+  "concernStudent": "أي طالب؟",
+  "concernNoStudent": "ليس عن طالب معيّن",
+  "concernUrgent": "قد يكون أحد في خطر الآن",
+  "concernSend": "أرسل",
+  "concernSendTeacher": "أرسل إلى مسؤولي الحماية",
+  "concernAgain": "أخبرنا بشيء آخر",
+  "concernAgainTeacher": "بلّغ عن أمر آخر",
   "concernNumber": "رقم {number}",
   "@concernNumber": {
     "placeholders": {
@@ -2084,16 +2084,16 @@
       }
     }
   },
-  "concernsMine": "اللي قولتهولنا",
-  "concernsNone": "لسه مفيش.",
+  "concernsMine": "ما أخبرتنا به",
+  "concernsNone": "لا شيء بعد.",
   "documentsTitle": "مستنداتي",
-  "documentsLead": "الأكاديمية بتراجع المستندات دي على الأصل؛ وفيش الصحيفة الجنائية هو اللي مطلوب عشان تدرّس للي تحت 18.",
-  "documentSend": "ابعت مستند",
-  "documentSendHint": "صورة واضحة أو الـ PDF من الجهة. خلّي الأصل معاك: الأكاديمية ممكن تطلب تشوفه.",
+  "documentsLead": "تراجع الأكاديمية هذه المستندات مقارنة بالأصل؛ وشهادة خلو السوابق الجنائية هي المطلوبة لتدرّس من هم دون 18 عامًا.",
+  "documentSend": "أرسل مستندًا",
+  "documentSendHint": "صورة واضحة أو ملف PDF من الجهة المختصة. احتفظ بالأصل: فقد تطلب الأكاديمية رؤيته.",
   "documentKind": "المستند",
   "documentReference": "رقم الشهادة (اختياري)",
-  "documentExpires": "صالح لحد (اختياري)",
-  "documentUntil": "صالح لحد {day}",
+  "documentExpires": "صالح حتى (اختياري)",
+  "documentUntil": "صالح حتى {day}",
   "@documentUntil": {
     "placeholders": {
       "day": {
@@ -2101,22 +2101,22 @@
       }
     }
   },
-  "documentNoEnd": "مالوش تاريخ انتهاء",
-  "documentPick": "اختار صورة أو PDF",
-  "documentPickFirst": "اختار الصورة أو الـ PDF الأول.",
-  "documentTooBig": "الملف أكبر من 10 ميجا.",
-  "documentSent": "اتبعت: الأكاديمية هتراجعه.",
-  "documentsList": "اللي بعته",
-  "documentsNone": "لسه ما بعتش أي مستندات.",
-  "messagesTitle": "الرسايل",
-  "messagesFamilyTitle": "الرسايل مع المدرّسين",
-  "messagesStudentTitle": "الرسايل مع مدرّسينك",
-  "messagesKidsTitle": "كلّم مدرسك",
-  "messagesEmptyTeacher": "لما يبقى عندك طلاب، هتلاقيهم هنا وتقدر تكلّمهم وتكلّم أهلهم.",
-  "messagesEmptyFamily": "لما يبقى للطالب مدرّس، هتلاقيه هنا.",
-  "messagesStart": "لسه ماحدش كتب",
-  "messagesYou": "إنت",
-  "messagesAlsoHere": "معاكم: {names}",
+  "documentNoEnd": "دون تاريخ انتهاء",
+  "documentPick": "اختر صورة أو ملف PDF",
+  "documentPickFirst": "اختر الصورة أو ملف PDF أولًا.",
+  "documentTooBig": "الملف أكبر من 10 ميغابايت.",
+  "documentSent": "أُرسل: ستراجعه الأكاديمية.",
+  "documentsList": "ما أرسلته",
+  "documentsNone": "لم ترسل أي مستندات بعد.",
+  "messagesTitle": "الرسائل",
+  "messagesFamilyTitle": "الرسائل مع المعلّمين",
+  "messagesStudentTitle": "الرسائل مع معلّميك",
+  "messagesKidsTitle": "تحدّث مع معلّمك",
+  "messagesEmptyTeacher": "عندما يصبح لديك طلاب، ستجدهم هنا وتستطيع التحدث معهم ومع أسرهم.",
+  "messagesEmptyFamily": "عندما يصبح للطالب معلّم، ستجده هنا.",
+  "messagesStart": "لم يكتب أحد بعد",
+  "messagesYou": "أنت",
+  "messagesAlsoHere": "معكم: {names}",
   "@messagesAlsoHere": {
     "placeholders": {
       "names": {
@@ -2124,9 +2124,9 @@
       }
     }
   },
-  "messagesFirst": "ابدأ المحادثة: الكلام هنا بيشوفه أولياء الأمور والأكاديمية.",
+  "messagesFirst": "ابدأ المحادثة: يقرأ أولياء الأمور والأكاديمية ما يُكتب هنا.",
   "messagesWrite": "اكتب رسالة…",
-  "gamesStars": "{n, plural, =0{من غير نجوم} =1{نجمة واحدة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}",
+  "gamesStars": "{n, plural, =0{دون نجوم} =1{نجمة واحدة} =2{نجمتان} few{{n} نجوم} other{{n} نجمة}}",
   "@gamesStars": {
     "placeholders": {
       "n": {
@@ -2134,8 +2134,8 @@
       }
     }
   },
-  "gamesSoundOn": "شغّل المزيكا والأصوات",
-  "gamesSoundOff": "اقفل المزيكا والأصوات",
+  "gamesSoundOn": "شغّل الموسيقى والأصوات",
+  "gamesSoundOff": "أوقف الموسيقى والأصوات",
   "gamesOf": "{found} من {total}",
   "@gamesOf": {
     "placeholders": {
@@ -2162,7 +2162,7 @@
       }
     }
   },
-  "gamesEggCardKids": "البيضة الجاية: {have} من {need} ⭐",
+  "gamesEggCardKids": "البيضة القادمة: {have} من {need} ⭐",
   "@gamesEggCardKids": {
     "placeholders": {
       "have": {
@@ -2173,11 +2173,11 @@
       }
     }
   },
-  "gamesIslandDone": "لمّيت كل كائنات الجزيرة!",
-  "gamesClose": "اقفل اللعبة وارجع",
-  "gamesToIsland": "ارجع للجزيرة",
+  "gamesIslandDone": "جمعت كل كائنات الجزيرة!",
+  "gamesClose": "أغلق اللعبة وارجع",
+  "gamesToIsland": "ارجع إلى الجزيرة",
   "gamesAlbum": "كائناتي",
-  "gamesItems": "{n, plural, =1{سؤال واحد} =2{سؤالين} few{{n} أسئلة} other{{n} سؤال}}",
+  "gamesItems": "{n, plural, =1{سؤال واحد} =2{سؤالان} few{{n} أسئلة} other{{n} سؤالًا}}",
   "@gamesItems": {
     "placeholders": {
       "n": {
@@ -2185,7 +2185,7 @@
       }
     }
   },
-  "gamesPractising": "بتتمرن على: {what}",
+  "gamesPractising": "تتدرّب على: {what}",
   "@gamesPractising": {
     "placeholders": {
       "what": {
@@ -2193,11 +2193,11 @@
       }
     }
   },
-  "gamesResult0": "كمّل وحاول تاني!",
-  "gamesResult1": "بداية حلوة!",
-  "gamesResult2": "شاطر!",
-  "gamesResult3": "رائع! كله صح تقريبًا",
-  "gamesScore": "{correct} من {total} صح من أول مرة",
+  "gamesResult0": "استمر وحاول مرة أخرى!",
+  "gamesResult1": "بداية جميلة!",
+  "gamesResult2": "أحسنت!",
+  "gamesResult3": "رائع! كله صحيح تقريبًا",
+  "gamesScore": "{correct} من {total} صحيحة من أول مرة",
   "@gamesScore": {
     "placeholders": {
       "correct": {
@@ -2216,7 +2216,7 @@
       }
     }
   },
-  "gamesHomeworkDone": "الواجب «{title}» اتسلّم بالتدريب ده.",
+  "gamesHomeworkDone": "سُلّم الواجب «{title}» بهذا التدريب.",
   "@gamesHomeworkDone": {
     "placeholders": {
       "title": {
@@ -2224,7 +2224,7 @@
       }
     }
   },
-  "gamesEgg": "البيضة الجاية: {have} من {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}",
+  "gamesEgg": "البيضة القادمة: {have} من {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}",
   "@gamesEgg": {
     "placeholders": {
       "have": {
@@ -2235,11 +2235,11 @@
       }
     }
   },
-  "gamesAgain": "العب تاني",
+  "gamesAgain": "العب مرة أخرى",
   "gamesPlay": "العب",
-  "gamesLoading": "بنجهّز الجولة…",
-  "gamesSending": "بنحسب النجوم…",
-  "gamesPageProblem": "اللعبة ما اشتغلتش. جرّب تاني.",
+  "gamesLoading": "نجهّز الجولة…",
+  "gamesSending": "نحسب النجوم…",
+  "gamesPageProblem": "لم تعمل اللعبة. حاول مرة أخرى.",
   "gamesHatchReady": "البيضة جاهزة!",
   "gamesHatchReadySub": "جمعت {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} في رحلتك",
   "@gamesHatchReadySub": {
@@ -2250,7 +2250,7 @@
     }
   },
   "gamesHatchDone": "فقست!",
-  "gamesHatchDoneSub": "كل ما تجمع {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}، تفقسلك بيضة جديدة",
+  "gamesHatchDoneSub": "كلما جمعت {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}}، فقست لك بيضة جديدة",
   "@gamesHatchDoneSub": {
     "placeholders": {
       "need": {
@@ -2258,11 +2258,11 @@
       }
     }
   },
-  "gamesHatchTap0": "دوس على البيضة 3 مرات",
-  "gamesHatchTap1": "كمان مرتين!",
-  "gamesHatchTap2": "مرة كمان!",
-  "gamesHatchTap3": "بتفقس...",
-  "gamesHatchEgg": "البيضة، دوس عليها. فاضل {left}",
+  "gamesHatchTap0": "انقر على البيضة 3 مرات",
+  "gamesHatchTap1": "مرتان أخريان!",
+  "gamesHatchTap2": "مرة أخرى!",
+  "gamesHatchTap3": "تفقس...",
+  "gamesHatchEgg": "البيضة، انقر عليها. بقي {left}",
   "@gamesHatchEgg": {
     "placeholders": {
       "left": {
@@ -2281,10 +2281,10 @@
       }
     }
   },
-  "gamesHatchAsk": "تحب تسميه إيه؟",
-  "gamesHatchKeep": "حطّه في الألبوم",
+  "gamesHatchAsk": "ماذا تحب أن تسمّيه؟",
+  "gamesHatchKeep": "ضعه في الألبوم",
   "gamesAlbumTitle": "ألبوم كائناتي",
-  "gamesAlbumHint": "كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} في رحلتك بتفقسلك بيضة، وكل درس تتقنه بيفقسلك كائن.",
+  "gamesAlbumHint": "كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} في رحلتك تفقس لك بيضة، وكل درس تتقنه يفقس لك كائنًا.",
   "@gamesAlbumHint": {
     "placeholders": {
       "need": {
@@ -2292,7 +2292,7 @@
       }
     }
   },
-  "gamesAlbumGuardian": "ده ألبوم {name}. هو بس اللي يختار صاحبه ويسمّي كائناته.",
+  "gamesAlbumGuardian": "هذا ألبوم {name}. هو وحده من يختار صديقه ويسمّي كائناته.",
   "@gamesAlbumGuardian": {
     "placeholders": {
       "name": {
@@ -2305,7 +2305,7 @@
   "gamesRarityRare": "نادر",
   "gamesRarityLegendary": "أسطوري",
   "gamesAllIslands": "كل الجزر",
-  "gamesNotYet": "لسه",
+  "gamesNotYet": "ليس بعد",
   "gamesAriaFound": "{name}، من {island}",
   "@gamesAriaFound": {
     "placeholders": {
@@ -2317,7 +2317,7 @@
       }
     }
   },
-  "gamesAriaShadow": "كائن لسه ما فقسش، من {island}",
+  "gamesAriaShadow": "كائن لم يفقس بعد، من {island}",
   "@gamesAriaShadow": {
     "placeholders": {
       "island": {
@@ -2326,10 +2326,10 @@
     }
   },
   "gamesVoice": "اسمع صوته",
-  "gamesMakeBuddy": "خليه صاحبك",
-  "gamesIsBuddyKids": "ده صاحبك 💛",
-  "gamesIsBuddy": "ده صاحبك",
-  "gamesBuddyDone": "{name} هيطير معاك في الألعاب من دلوقتي",
+  "gamesMakeBuddy": "اجعله صديقك",
+  "gamesIsBuddyKids": "هذا صديقك 💛",
+  "gamesIsBuddy": "هذا صديقك",
+  "gamesBuddyDone": "سيطير {name} معك في الألعاب من الآن",
   "@gamesBuddyDone": {
     "placeholders": {
       "name": {
@@ -2337,8 +2337,8 @@
       }
     }
   },
-  "gamesShadowStory": "لسه ما فقسش.",
-  "gamesHowCommon": "إزاي تفقسه: اجمع نجوم وانت على {island}: كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} بيضة.",
+  "gamesShadowStory": "لم يفقس بعد.",
+  "gamesHowCommon": "كيف تفقسه: اجمع النجوم وأنت في {island}: كل {need, plural, =1{نجمة} =2{نجمتين} few{{need} نجوم} other{{need} نجمة}} بيضة.",
   "@gamesHowCommon": {
     "placeholders": {
       "island": {
@@ -2349,7 +2349,7 @@
       }
     }
   },
-  "gamesHowRare": "إزاي تفقسه: كائن نادر في {island}: بيفقس بعد الكائنات العادية بتاعتها.",
+  "gamesHowRare": "كيف تفقسه: كائن نادر في {island}: يفقس بعد كائناتها العادية.",
   "@gamesHowRare": {
     "placeholders": {
       "island": {
@@ -2357,7 +2357,7 @@
       }
     }
   },
-  "gamesHowLegendary": "إزاي تفقسه: أسطوري! آخر كائن في {island}. اجمع اللي قبله كلهم.",
+  "gamesHowLegendary": "كيف تفقسه: أسطوري! آخر كائن في {island}. اجمع كل ما قبله.",
   "@gamesHowLegendary": {
     "placeholders": {
       "island": {
@@ -2365,8 +2365,8 @@
       }
     }
   },
-  "gamesNameIt": "سمّيه:",
-  "gamesNamed": "اتسمّى {name}",
+  "gamesNameIt": "سمِّه:",
+  "gamesNamed": "اسمه الآن {name}",
   "@gamesNamed": {
     "placeholders": {
       "name": {
@@ -2375,9 +2375,9 @@
     }
   },
   "gamesFromStars": "فقس من نجوم رحلتك",
-  "gamesFromMastery": "فقس لما اتقنت درس",
+  "gamesFromMastery": "فقس عندما أتقنت درسًا",
   "gamesRace": "سباق مع نفسك",
-  "gamesBest": "أحسن وقت: {s}",
+  "gamesBest": "أفضل وقت: {s}",
   "@gamesBest": {
     "placeholders": {
       "s": {
@@ -2394,9 +2394,9 @@
     }
   },
   "gamesBeat": "كسرت رقمك!",
-  "gamesSoClose": "قربت!",
-  "gamesFirst": "أول رقم ليك!",
-  "gamesOver": "{correct} من {total} صح في {s}",
+  "gamesSoClose": "اقتربت!",
+  "gamesFirst": "أول رقم لك!",
+  "gamesOver": "{correct} من {total} صحيحة في {s}",
   "@gamesOver": {
     "placeholders": {
       "correct": {
@@ -2410,7 +2410,7 @@
       }
     }
   },
-  "gamesReviewAgain": "راجع تاني",
+  "gamesReviewAgain": "راجع مرة أخرى",
   "gamesGuardianTitle": "ألعاب {name}",
   "@gamesGuardianTitle": {
     "placeholders": {
@@ -2419,8 +2419,8 @@
       }
     }
   },
-  "gamesPlayTime": "وقت اللعب النهارده",
-  "gamesTimeText": "{used} من {limit, plural, =1{دقيقة} =2{دقيقتين} few{{limit} دقايق} other{{limit} دقيقة}} لعب النهارده. فاضل {left, plural, =1{دقيقة} =2{دقيقتين} few{{left} دقايق} other{{left} دقيقة}}.",
+  "gamesPlayTime": "وقت اللعب اليوم",
+  "gamesTimeText": "{used} من {limit, plural, =1{دقيقة} =2{دقيقتين} few{{limit} دقائق} other{{limit} دقيقة}} لعب اليوم. بقي {left, plural, =1{دقيقة} =2{دقيقتان} few{{left} دقائق} other{{left} دقيقة}}.",
   "@gamesTimeText": {
     "placeholders": {
       "used": {
@@ -2434,11 +2434,11 @@
       }
     }
   },
-  "gamesRefusedOff": "الألعاب مقفولة في الأكاديمية دلوقتي.",
-  "gamesRefusedPaused": "ولي الأمر قفل الألعاب دلوقتي.",
-  "gamesRefusedNight": "الطيور نامت. الألعاب بترجع الساعة 7 الصبح.",
-  "gamesRefusedLimit": "خلصت دقايق اللعب النهارده. نكمل بكرة!",
-  "gamesTimeOpen": "{used, plural, =1{دقيقة} =2{دقيقتين} few{{used} دقايق} other{{used} دقيقة}} لعب النهارده، من غير حد.",
+  "gamesRefusedOff": "الألعاب مغلقة في الأكاديمية الآن.",
+  "gamesRefusedPaused": "أوقف ولي الأمر الألعاب الآن.",
+  "gamesRefusedNight": "نامت الطيور. تعود الألعاب في الساعة 7 صباحًا.",
+  "gamesRefusedLimit": "انتهت دقائق اللعب اليوم. نكمل غدًا!",
+  "gamesTimeOpen": "{used, plural, =1{دقيقة} =2{دقيقتان} few{{used} دقائق} other{{used} دقيقة}} لعب اليوم، دون حد.",
   "@gamesTimeOpen": {
     "placeholders": {
       "used": {
@@ -2457,9 +2457,9 @@
     }
   },
   "gamesAcademyChoice": "الأكاديمية",
-  "gamesNightLock": "قفل اللعب من 9 بالليل لـ 7 الصبح",
-  "gamesEnabled": "الألعاب شغالة",
-  "gamesLearned": "اتراجع إيه في اللعب",
+  "gamesNightLock": "أغلق اللعب من 9 مساءً إلى 7 صباحًا",
+  "gamesEnabled": "الألعاب مفعّلة",
+  "gamesLearned": "ما رُوجع في اللعب",
   "gamesRoundsCount": "{n, plural, =1{مرة واحدة} =2{مرتين} few{{n} مرات} other{{n} مرة}}",
   "@gamesRoundsCount": {
     "placeholders": {
@@ -2476,7 +2476,7 @@
       }
     }
   },
-  "gamesPractised": "اتراجع «{title}» {rounds} في {games}",
+  "gamesPractised": "رُوجع «{title}» {rounds} في {games}",
   "@gamesPractised": {
     "placeholders": {
       "title": {
@@ -2490,7 +2490,7 @@
       }
     }
   },
-  "gamesHardest": "أصعب سؤال: «{text}». ممكن تراجعوه سوا.",
+  "gamesHardest": "أصعب سؤال: «{text}». يمكنكما مراجعته معًا.",
   "@gamesHardest": {
     "placeholders": {
       "text": {
@@ -2498,7 +2498,7 @@
       }
     }
   },
-  "gamesBestRound": "أحسن جولة: {correct} من {total} صح من أول مرة في «{game}»",
+  "gamesBestRound": "أفضل جولة: {correct} من {total} صحيحة من أول مرة في «{game}»",
   "@gamesBestRound": {
     "placeholders": {
       "correct": {
@@ -2512,8 +2512,8 @@
       }
     }
   },
-  "gamesQuiet": "مفيش لعب الأسبوع ده. الألعاب بتتمرن على دروسه بس، والمدرّس بيحط التدريبات على الدرس.",
-  "gamesHatchedToday": "فقس «{name}» النهارده",
+  "gamesQuiet": "لم يلعب هذا الأسبوع. الألعاب تدرّب على دروسه فقط، والمعلّم هو من يضع التدريبات على الدرس.",
+  "gamesHatchedToday": "فقس «{name}» اليوم",
   "@gamesHatchedToday": {
     "placeholders": {
       "name": {
@@ -2529,7 +2529,7 @@
       }
     }
   },
-  "gamesHatchedMastery": "من درس اتقنه · {found} في الألبوم",
+  "gamesHatchedMastery": "من درس أتقنه · {found} في الألبوم",
   "@gamesHatchedMastery": {
     "placeholders": {
       "found": {
@@ -2537,13 +2537,13 @@
       }
     }
   },
-  "gamesCheer": "هنّيه",
+  "gamesCheer": "هنّئه",
   "gamesCheered": "وصلته تهنئتك",
-  "gamesSafety": "مفيش شراء جوه الألعاب ولا إعلانات ولا كلام مع حد غريب. كل كائن وكل نجمة بتتكسب بالمذاكرة.",
-  "gamesTogether": "العبوا سوا",
-  "gamesSaved": "اتحفظ.",
-  "gamesCardKids": "الجزر بتستناك 🏝️",
-  "gamesCardLead": "اتمرن على دروسك بألعاب: {what}",
+  "gamesSafety": "لا مشتريات داخل الألعاب، ولا إعلانات، ولا محادثة مع غرباء. كل كائن وكل نجمة تُكسب بالمذاكرة.",
+  "gamesTogether": "العبوا معًا",
+  "gamesSaved": "حُفظ.",
+  "gamesCardKids": "الجزر تنتظرك 🏝️",
+  "gamesCardLead": "تدرّب على دروسك بالألعاب: {what}",
   "@gamesCardLead": {
     "placeholders": {
       "what": {
@@ -2597,7 +2597,7 @@
       }
     }
   },
-  "journeyHow": "إزاي {name} ماشي",
+  "journeyHow": "كيف يتقدّم {name}",
   "@journeyHow": {
     "placeholders": {
       "name": {
@@ -2605,7 +2605,7 @@
       }
     }
   },
-  "journeyNextStation": "الجاية: {title}",
+  "journeyNextStation": "القادمة: {title}",
   "@journeyNextStation": {
     "placeholders": {
       "title": {
@@ -2614,7 +2614,7 @@
     }
   },
   "journeyLevels": "المستويات",
-  "journeyLessonsDone": "{done} من {total, plural, =1{درس واحد} =2{درسين} few{{total} دروس} other{{total} درس}}",
+  "journeyLessonsDone": "{done} من {total, plural, =1{درس واحد} =2{درسين} few{{total} دروس} other{{total} درسًا}}",
   "@journeyLessonsDone": {
     "placeholders": {
       "done": {
@@ -2625,7 +2625,7 @@
       }
     }
   },
-  "journeyAheadLocked": "بتتفتح لما تخلّص {title}",
+  "journeyAheadLocked": "تُفتح عندما تنهي {title}",
   "@journeyAheadLocked": {
     "placeholders": {
       "title": {
@@ -2633,8 +2633,8 @@
       }
     }
   },
-  "journeyAheadFirst": "بتتفتح لما توصلها",
-  "journeyAriaDone": "{title}، خلّصتها",
+  "journeyAheadFirst": "تُفتح عندما تصل إليها",
+  "journeyAriaDone": "{title}، أنهيتها",
   "@journeyAriaDone": {
     "placeholders": {
       "title": {
@@ -2642,7 +2642,7 @@
       }
     }
   },
-  "journeyAriaHere": "{title}، انت هنا",
+  "journeyAriaHere": "{title}، أنت هنا",
   "@journeyAriaHere": {
     "placeholders": {
       "title": {
@@ -2650,7 +2650,7 @@
       }
     }
   },
-  "journeyAriaAhead": "{title}، لسه مقفولة",
+  "journeyAriaAhead": "{title}، ما زالت مغلقة",
   "@journeyAriaAhead": {
     "placeholders": {
       "title": {
@@ -2658,13 +2658,13 @@
       }
     }
   },
-  "journeyStationDone": "خلّصته",
-  "journeyStationReview": "محتاج مراجعة",
-  "journeyStationHere": "انت هنا",
-  "journeyStationTodo": "لسه جاي",
-  "journeyStationTodoNote": "الدرس ده لسه جاي. هتتدرّب عليه لما توصله.",
-  "journeyStationReviewNote": "وقت تراجع الدرس ده: العب لعبة عليه.",
-  "journeyPractised": "اتدرّبت عليه {rounds} · {p}% صح",
+  "journeyStationDone": "أنهيته",
+  "journeyStationReview": "يحتاج إلى مراجعة",
+  "journeyStationHere": "أنت هنا",
+  "journeyStationTodo": "لم يأتِ بعد",
+  "journeyStationTodoNote": "هذا الدرس لم يأتِ بعد. ستتدرّب عليه عندما تصل إليه.",
+  "journeyStationReviewNote": "حان وقت مراجعة هذا الدرس: العب لعبة عليه.",
+  "journeyPractised": "تدرّبت عليه {rounds} · {p}% صحيح",
   "@journeyPractised": {
     "placeholders": {
       "rounds": {
@@ -2675,8 +2675,8 @@
       }
     }
   },
-  "journeyPlayStation": "العب على الدرس ده",
-  "journeyNoGames": "مفيش لعبة على تدريبات الدرس ده لسه.",
+  "journeyPlayStation": "العب على هذا الدرس",
+  "journeyNoGames": "لا توجد لعبة على تدريبات هذا الدرس بعد.",
   "journeyRaceLast": "آخر مرة: {s}",
   "@journeyRaceLast": {
     "placeholders": {
@@ -2694,7 +2694,7 @@
       }
     }
   },
-  "journeyMissionsOn": "{n, plural, =1{مهمة} =2{مهمتين} few{{n} مهمات} other{{n} مهمة}}",
+  "journeyMissionsOn": "{n, plural, =1{مهمة} =2{مهمتان} few{{n} مهمات} other{{n} مهمة}}",
   "@journeyMissionsOn": {
     "placeholders": {
       "n": {
@@ -2702,7 +2702,7 @@
       }
     }
   },
-  "journeyOpenMissions": "{n, plural, =1{مهمة مستنية} =2{مهمتين مستنيين} few{{n} مهمات مستنية} other{{n} مهمة مستنية}}",
+  "journeyOpenMissions": "{n, plural, =1{مهمة تنتظرك} =2{مهمتان تنتظرانك} few{{n} مهمات تنتظرك} other{{n} مهمة تنتظرك}}",
   "@journeyOpenMissions": {
     "placeholders": {
       "n": {
@@ -2710,9 +2710,9 @@
       }
     }
   },
-  "journeyNoMissions": "مفيش مهمات دلوقتي. استمتع بيومك!",
+  "journeyNoMissions": "لا توجد مهمات الآن. استمتع بيومك!",
   "journeyReview": "راجع",
-  "reviewsWaiting": "{n, plural, =1{مراجعة مستنياك} =2{مراجعتين مستنينك} few{{n} مراجعات مستنياك} other{{n} مراجعة مستنياك}}",
+  "reviewsWaiting": "{n, plural, =1{مراجعة تنتظرك} =2{مراجعتان تنتظرانك} few{{n} مراجعات تنتظرك} other{{n} مراجعة تنتظرك}}",
   "@reviewsWaiting": {
     "placeholders": {
       "n": {
@@ -2721,7 +2721,7 @@
     }
   },
   "reviewsHint": "كل مراجعة لعبة قصيرة",
-  "hereAndNext": "انت هنا: {here} · بعدها: {next}",
+  "hereAndNext": "أنت هنا: {here} · بعدها: {next}",
   "@hereAndNext": {
     "placeholders": {
       "here": {
@@ -2732,7 +2732,7 @@
       }
     }
   },
-  "hereOnly": "انت هنا: {here}",
+  "hereOnly": "أنت هنا: {here}",
   "@hereOnly": {
     "placeholders": {
       "here": {
@@ -2752,9 +2752,9 @@
     }
   },
   "allLevels": "كل المستويات",
-  "goalTitle": "هدفك: تخلّص البرنامج",
-  "goalDone": "خلّصتهم من البرنامج",
-  "goalPace": "على السرعة دي هتخلّص يوم {day}",
+  "goalTitle": "هدفك: أن تنهي البرنامج",
+  "goalDone": "أنهيتها من البرنامج",
+  "goalPace": "بهذه السرعة تنهيه يوم {day}",
   "@goalPace": {
     "placeholders": {
       "day": {
@@ -2762,8 +2762,8 @@
       }
     }
   },
-  "nowTitle": "دلوقتي",
-  "nextIs": "الجاية: {title}",
+  "nowTitle": "الآن",
+  "nextIs": "القادمة: {title}",
   "@nextIs": {
     "placeholders": {
       "title": {
@@ -2772,9 +2772,9 @@
     }
   },
   "weekPlan": "خطة الأسبوع",
-  "notHandedIn": "لسه ماتسلّمش",
-  "planNoDay": "من غير ميعاد",
-  "lessonsToReview": "{n, plural, =1{درس محتاج مراجعة} =2{درسين محتاجين مراجعة} few{{n} دروس محتاجة مراجعة} other{{n} درس محتاجين مراجعة}}",
+  "notHandedIn": "لم يُسلَّم بعد",
+  "planNoDay": "دون موعد",
+  "lessonsToReview": "{n, plural, =1{درس يحتاج إلى مراجعة} =2{درسان يحتاجان إلى مراجعة} few{{n} دروس تحتاج إلى مراجعة} other{{n} درسًا يحتاج إلى مراجعة}}",
   "@lessonsToReview": {
     "placeholders": {
       "n": {
@@ -2784,7 +2784,7 @@
   },
   "reviewEachRound": "جولة قصيرة لكل درس",
   "wholeCurriculum": "المنهج كله",
-  "levelsCount": "{n, plural, =1{مستوى واحد} =2{مستويين} few{{n} مستويات} other{{n} مستوى}}",
+  "levelsCount": "{n, plural, =1{مستوى واحد} =2{مستويان} few{{n} مستويات} other{{n} مستوى}}",
   "@levelsCount": {
     "placeholders": {
       "n": {
@@ -2792,7 +2792,7 @@
       }
     }
   },
-  "curriculumLessons": "{n, plural, =1{درس واحد} =2{درسين} few{{n} دروس} other{{n} درس}}",
+  "curriculumLessons": "{n, plural, =1{درس واحد} =2{درسان} few{{n} دروس} other{{n} درسًا}}",
   "@curriculumLessons": {
     "placeholders": {
       "n": {
@@ -2802,7 +2802,7 @@
   },
   "journeyLate": "متأخر",
   "journeyChestTitle": "صندوق الأسبوع",
-  "journeyChestProgress": "{done} من {total, plural, =1{مهمة واحدة} =2{مهمتين} few{{total} مهمات} other{{total} مهمة}} الأسبوع",
+  "journeyChestProgress": "{done} من {total, plural, =1{مهمة واحدة} =2{مهمتين} few{{total} مهمات} other{{total} مهمة}} هذا الأسبوع",
   "@journeyChestProgress": {
     "placeholders": {
       "done": {
@@ -2813,7 +2813,7 @@
       }
     }
   },
-  "journeyChestHint": "احضر كل حصص الأسبوع وسلّم واجباته، والصندوق يتفتح بـ {n, plural, =1{نجمة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}",
+  "journeyChestHint": "احضر كل حصص الأسبوع وسلّم واجباته، وسيُفتح الصندوق بـ {n, plural, =1{نجمة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}",
   "@journeyChestHint": {
     "placeholders": {
       "n": {
@@ -2821,8 +2821,8 @@
       }
     }
   },
-  "journeyChestMissed": "الصندوق ده فاتك. فيه صندوق جديد الأسبوع ده!",
-  "journeyChestWaiting": "الصندوق جاهز يتفتح من حساب {name}",
+  "journeyChestMissed": "فاتك هذا الصندوق. هناك صندوق جديد هذا الأسبوع!",
+  "journeyChestWaiting": "الصندوق جاهز ليُفتح من حساب {name}",
   "@journeyChestWaiting": {
     "placeholders": {
       "name": {
@@ -2830,7 +2830,7 @@
       }
     }
   },
-  "journeyChestGot": "{n, plural, =1{+نجمة في رحلتك!} =2{+نجمتين في رحلتك!} few{+{n} نجوم في رحلتك!} other{+{n} نجمة في رحلتك!}}",
+  "journeyChestGot": "{n, plural, =1{+نجمة في رحلتك!} =2{+نجمتان في رحلتك!} few{+{n} نجوم في رحلتك!} other{+{n} نجمة في رحلتك!}}",
   "@journeyChestGot": {
     "placeholders": {
       "n": {
@@ -2839,7 +2839,7 @@
     }
   },
   "journeyYourStars": "نجومك",
-  "journeyStarsTo": "{n, plural, =1{باقيلك نجمة لـ {rank}} =2{باقيلك نجمتين لـ {rank}} few{باقيلك {n} نجوم لـ {rank}} other{باقيلك {n} نجمة لـ {rank}}}",
+  "journeyStarsTo": "{n, plural, =1{بقيت لك نجمة حتى {rank}} =2{بقيت لك نجمتان حتى {rank}} few{بقيت لك {n} نجوم حتى {rank}} other{بقيت لك {n} نجمة حتى {rank}}}",
   "@journeyStarsTo": {
     "placeholders": {
       "n": {
@@ -2850,7 +2850,7 @@
       }
     }
   },
-  "journeyStarsCount": "{n, plural, =0{مفيش نجوم لسه} =1{نجمة واحدة} =2{نجمتين} few{{n} نجوم} other{{n} نجمة}}",
+  "journeyStarsCount": "{n, plural, =0{لا توجد نجوم بعد} =1{نجمة واحدة} =2{نجمتان} few{{n} نجوم} other{{n} نجمة}}",
   "@journeyStarsCount": {
     "placeholders": {
       "n": {
@@ -2875,7 +2875,7 @@
       }
     }
   },
-  "journeyLessonStars": "{n, plural, =0{ماخدتش نجوم في آخر حصة} =1{خدت نجمة في آخر حصة} =2{خدت نجمتين في آخر حصة!} few{خدت {n} نجوم في آخر حصة!} other{خدت {n} نجمة في آخر حصة!}}",
+  "journeyLessonStars": "{n, plural, =0{لم تأخذ نجومًا في آخر حصة} =1{أخذت نجمة في آخر حصة} =2{أخذت نجمتين في آخر حصة!} few{أخذت {n} نجوم في آخر حصة!} other{أخذت {n} نجمة في آخر حصة!}}",
   "@journeyLessonStars": {
     "placeholders": {
       "n": {
@@ -2883,7 +2883,7 @@
       }
     }
   },
-  "journeyLessonCanBring": "{n, plural, =1{تجيبلك نجمة} =2{تجيبلك نجمتين} few{تجيبلك لحد {n} نجوم} other{تجيبلك لحد {n} نجمة}}",
+  "journeyLessonCanBring": "{n, plural, =1{تمنحك نجمة} =2{تمنحك نجمتين} few{تمنحك حتى {n} نجوم} other{تمنحك حتى {n} نجمة}}",
   "@journeyLessonCanBring": {
     "placeholders": {
       "n": {
@@ -2892,16 +2892,16 @@
     }
   },
   "journeyEggReady": "بيضتك جاهزة!",
-  "journeyEggHint": "افقسها وشوف مين هيطلع",
+  "journeyEggHint": "افقسها وانظر من سيخرج",
   "journeyEggHatch": "افقسها",
-  "journeyEggNone": "مفيش بيضة جاهزة دلوقتي. كمّل جمع نجوم!",
-  "journeyNoCourses": "مفيش كورسات شغالة لسه.",
-  "journeyNoCurriculum": "الكورس ده لسه مالوش منهج. مهماته بتظهر هنا.",
+  "journeyEggNone": "لا توجد بيضة جاهزة الآن. استمر في جمع النجوم!",
+  "journeyNoCourses": "لا توجد دورات جارية بعد.",
+  "journeyNoCurriculum": "ليس لهذه الدورة منهج بعد. تظهر مهماتها هنا.",
   "journeyCourses": "مواد الدروس والتقارير",
   "homeworkPracticeTitle": "التدريب بالألعاب",
-  "homeworkPracticeNotYet": "لسه ما اتلعبتش جولته.",
-  "homeworkByPlaying": "الواجب ده بيتسلّم لما تلعب جولته.",
-  "homeworkPracticeResult": "التدريب: {correct} من {total} صح · {stars} ({game})",
+  "homeworkPracticeNotYet": "لم تُلعب جولته بعد.",
+  "homeworkByPlaying": "يُسلَّم هذا الواجب عندما تلعب جولته.",
+  "homeworkPracticeResult": "التدريب: {correct} من {total} صحيحة · {stars} ({game})",
   "@homeworkPracticeResult": {
     "placeholders": {
       "correct": {
@@ -2918,7 +2918,7 @@
       }
     }
   },
-  "homeworkNoGame": "مفيش لعبة للواجب ده دلوقتي.",
+  "homeworkNoGame": "لا توجد لعبة لهذا الواجب الآن.",
   "hifzTitle": "خريطة الحفظ",
   "hifzTitleKids": "خريطة حفظي",
   "hifzTitleOf": "خريطة حفظ {name}",
@@ -2929,8 +2929,8 @@
       }
     }
   },
-  "hifzNoText": "نص القرآن لسه مش موجود، والخريطة هتظهر أول ما يوصل.",
-  "hifzMemorized": "{n, plural, =0{لسه مفيش صفحات محفوظة من {total}} =1{صفحة واحدة محفوظة من {total}} =2{صفحتين محفوظين من {total}} few{{n} صفحات محفوظة من {total}} other{{n} صفحة محفوظة من {total}}}",
+  "hifzNoText": "نص القرآن غير موجود بعد، وستظهر الخريطة فور وصوله.",
+  "hifzMemorized": "{n, plural, =0{لا توجد صفحات محفوظة بعد من {total}} =1{صفحة واحدة محفوظة من {total}} =2{صفحتان محفوظتان من {total}} few{{n} صفحات محفوظة من {total}} other{{n} صفحة محفوظة من {total}}}",
   "@hifzMemorized": {
     "placeholders": {
       "n": {
@@ -2941,7 +2941,7 @@
       }
     }
   },
-  "hifzMemorizedKids": "{n, plural, =0{لسه ماحفظتش صفحات. يلا نبدأ!} =1{حفظت صفحة واحدة! ⭐} =2{حفظت صفحتين! ⭐} few{حفظت {n} صفحات! ⭐} other{حفظت {n} صفحة! ⭐}}",
+  "hifzMemorizedKids": "{n, plural, =0{لم تحفظ صفحات بعد. هيا نبدأ!} =1{حفظت صفحة واحدة! ⭐} =2{حفظت صفحتين! ⭐} few{حفظت {n} صفحات! ⭐} other{حفظت {n} صفحة! ⭐}}",
   "@hifzMemorizedKids": {
     "placeholders": {
       "n": {
@@ -2987,8 +2987,8 @@
       }
     }
   },
-  "hifzToday": "ورد النهارده",
-  "hifzTodayProgress": "خلص {done} من {daily, plural, =1{صفحة واحدة} =2{صفحتين} few{{daily} صفحات} other{{daily} صفحة}}",
+  "hifzToday": "ورد اليوم",
+  "hifzTodayProgress": "أُنجز {done} من {daily, plural, =1{صفحة واحدة} =2{صفحتين} few{{daily} صفحات} other{{daily} صفحة}}",
   "@hifzTodayProgress": {
     "placeholders": {
       "done": {
@@ -2999,11 +2999,11 @@
       }
     }
   },
-  "hifzTodayDone": "ورد النهارده خلص. برافو!",
-  "hifzTodayNone": "مفيش صفحات عليها مراجعة النهارده.",
-  "hifzWirdDone": "ورد النهارده خلص!",
-  "hifzWirdDoneKids": "خلّصت وردك! 🎉",
-  "hifzOverdue": "{n, plural, =1{متأخرة يوم} =2{متأخرة يومين} few{متأخرة {n} أيام} other{متأخرة {n} يوم}}",
+  "hifzTodayDone": "انتهى ورد اليوم. أحسنت!",
+  "hifzTodayNone": "لا توجد صفحات عليها مراجعة اليوم.",
+  "hifzWirdDone": "انتهى ورد اليوم!",
+  "hifzWirdDoneKids": "أنهيت وردك! 🎉",
+  "hifzOverdue": "{n, plural, =1{متأخرة يومًا} =2{متأخرة يومين} few{متأخرة {n} أيام} other{متأخرة {n} يومًا}}",
   "@hifzOverdue": {
     "placeholders": {
       "n": {
@@ -3012,13 +3012,13 @@
     }
   },
   "hifzReveal": "اكشف الصفحة",
-  "hifzRevealHint": "سمّع الصفحة من حفظك الأول، وبعدين اكشفها واتأكد.",
-  "hifzHowWent": "الحفظ كان عامل إزاي؟",
+  "hifzRevealHint": "سمّع الصفحة من حفظك أولًا، ثم اكشفها وتأكّد.",
+  "hifzHowWent": "كيف كان الحفظ؟",
   "hifzGrade1": "نسيتها",
   "hifzGrade2": "بصعوبة",
-  "hifzGrade3": "كويس",
+  "hifzGrade3": "جيد",
   "hifzGrade4": "سهلة",
-  "hifzNextReview": "اتسجّلت. الصفحة دي هترجعلك {day}.",
+  "hifzNextReview": "سُجّلت. ستعود إليك هذه الصفحة {day}.",
   "@hifzNextReview": {
     "placeholders": {
       "day": {
@@ -3028,14 +3028,14 @@
   },
   "hifzRecite": "سمّع الصفحة",
   "hifzReciteKids": "سمّع صفحة",
-  "hifzReciteHint": "سجّل الصفحة من حفظك، وهنصحّحها كلمة كلمة.",
-  "hifzSendRecitation": "ابعت التسميع",
-  "hifzListening": "بنسمع التسميع…",
-  "hifzListeningHint": "النتيجة هتظهر هنا لوحدها.",
+  "hifzReciteHint": "سجّل الصفحة من حفظك، وسنصحّحها كلمة كلمة.",
+  "hifzSendRecitation": "أرسل التسميع",
+  "hifzListening": "نستمع إلى التسميع…",
+  "hifzListeningHint": "ستظهر النتيجة هنا تلقائيًا.",
   "hifzSelfGrade": "قيّم الصفحة بنفسك",
   "hifzLatest": "آخر تسميع",
   "hifzWird": "ورد الحفظ",
-  "hifzCardLeft": "{n, plural, =1{فاضل صفحة واحدة النهارده} =2{فاضل صفحتين النهارده} few{فاضل {n} صفحات النهارده} other{فاضل {n} صفحة النهارده}}",
+  "hifzCardLeft": "{n, plural, =1{بقيت صفحة واحدة اليوم} =2{بقيت صفحتان اليوم} few{بقيت {n} صفحات اليوم} other{بقيت {n} صفحة اليوم}}",
   "@hifzCardLeft": {
     "placeholders": {
       "n": {
@@ -3043,9 +3043,9 @@
       }
     }
   },
-  "hifzCardDone": "خلص النهارده",
-  "hifzCardNone": "مفيش صفحات النهارده",
-  "hifzCardKids": "{n, plural, =0{خلّصت وردك النهارده! ⭐} =1{فاضلك صفحة واحدة تسمّعها} =2{فاضلك صفحتين تسمّعهم} few{فاضلك {n} صفحات تسمّعها} other{فاضلك {n} صفحة تسمّعها}}",
+  "hifzCardDone": "انتهى اليوم",
+  "hifzCardNone": "لا توجد صفحات اليوم",
+  "hifzCardKids": "{n, plural, =0{أنهيت وردك اليوم! ⭐} =1{بقيت لك صفحة واحدة تسمّعها} =2{بقيت لك صفحتان تسمّعهما} few{بقيت لك {n} صفحات تسمّعها} other{بقيت لك {n} صفحة تسمّعها}}",
   "@hifzCardKids": {
     "placeholders": {
       "n": {
@@ -3053,15 +3053,15 @@
       }
     }
   },
-  "hifzTell": "قول اللي حافظه",
-  "hifzClear": "شيل صفحات",
-  "hifzClearHint": "الصفحات اللي هتشيلها هترجع جديدة على الخريطة، ومراجعاتها القديمة هتفضل.",
-  "hifzClearConfirm": "تشيل الصفحات دي من الخريطة؟",
+  "hifzTell": "سجّل ما يحفظه",
+  "hifzClear": "أزل صفحات",
+  "hifzClearHint": "الصفحات التي تزيلها تعود جديدة على الخريطة، وتبقى مراجعاتها السابقة.",
+  "hifzClearConfirm": "أتزيل هذه الصفحات من الخريطة؟",
   "hifzParts": "الأجزاء",
   "hifzSurahs": "السور",
   "hifzSurahHint": "اكتب اسم السورة أو رقمها",
-  "hifzHowWell": "حافظها إزاي؟",
-  "hifzChosen": "{n, plural, =0{مااخترتش صفحات لسه} =1{صفحة واحدة} =2{صفحتين} few{{n} صفحات} other{{n} صفحة}}",
+  "hifzHowWell": "ما درجة حفظها؟",
+  "hifzChosen": "{n, plural, =0{لم تختر صفحات بعد} =1{صفحة واحدة} =2{صفحتان} few{{n} صفحات} other{{n} صفحة}}",
   "@hifzChosen": {
     "placeholders": {
       "n": {
@@ -3070,7 +3070,7 @@
     }
   },
   "hifzSave": "سجّل",
-  "hifzMarked": "{n, plural, =0{مااتسجّلش صفحات} =1{اتسجّلت صفحة واحدة} =2{اتسجّلت صفحتين} few{اتسجّلت {n} صفحات} other{اتسجّلت {n} صفحة}}",
+  "hifzMarked": "{n, plural, =0{لم تُسجَّل صفحات} =1{سُجّلت صفحة واحدة} =2{سُجّلت صفحتان} few{سُجّلت {n} صفحات} other{سُجّلت {n} صفحة}}",
   "@hifzMarked": {
     "placeholders": {
       "n": {
@@ -3078,7 +3078,7 @@
       }
     }
   },
-  "hifzCleared": "{n, plural, =0{مفيش صفحات اتشالت} =1{اتشالت صفحة واحدة} =2{اتشالت صفحتين} few{اتشالت {n} صفحات} other{اتشالت {n} صفحة}}",
+  "hifzCleared": "{n, plural, =0{لم تُزَل صفحات} =1{أُزيلت صفحة واحدة} =2{أُزيلت صفحتان} few{أُزيلت {n} صفحات} other{أُزيلت {n} صفحة}}",
   "@hifzCleared": {
     "placeholders": {
       "n": {
@@ -3087,12 +3087,12 @@
     }
   },
   "hifzRecent": "آخر المراجعات",
-  "hifzRecentNone": "مفيش مراجعات في آخر أسبوعين.",
+  "hifzRecentNone": "لا توجد مراجعات في آخر أسبوعين.",
   "mushafTitle": "المصحف",
   "mushafOpen": "افتح المصحف",
-  "mushafNone": "الحصة دي مفيهاش مصحف.",
-  "mushafPrevious": "اللي قبلها",
-  "mushafNext": "اللي بعدها",
+  "mushafNone": "لا يوجد مصحف في هذه الحصة.",
+  "mushafPrevious": "الصفحة السابقة",
+  "mushafNext": "الصفحة التالية",
   "mushafPageField": "صفحة",
   "mushafPageOfTotal": "من {total}",
   "@mushafPageOfTotal": {
@@ -3102,9 +3102,9 @@
       }
     }
   },
-  "mushafFollowing": "الصفحة بتتقلّب مع المدرّس.",
-  "mushafBackToTeacher": "ارجع لصفحة المدرّس",
-  "mushafTeacherOn": "المدرّس على صفحة {page}",
+  "mushafFollowing": "تتقلّب الصفحة مع المعلّم.",
+  "mushafBackToTeacher": "ارجع إلى صفحة المعلّم",
+  "mushafTeacherOn": "المعلّم على صفحة {page}",
   "@mushafTeacherOn": {
     "placeholders": {
       "page": {
@@ -3112,11 +3112,11 @@
       }
     }
   },
-  "mushafHintTeacher": "دوس على أي كلمة عشان تعلّمها، والطالب بيشوف الصفحة اللي إنت فاتحها.",
-  "mushafMarkingClosed": "تعليم الكلمات بيفتح مع أوضة الحصة، وبيقفل لما تسلّم التقرير.",
+  "mushafHintTeacher": "انقر على أي كلمة لتعلّمها، ويرى الطالب الصفحة التي تفتحها.",
+  "mushafMarkingClosed": "يُفتح تعليم الكلمات مع غرفة الحصة، ويُغلق عندما تسلّم التقرير.",
   "mushafMarkWord": "علّم الكلمة",
   "mushafClearMark": "امسح العلامة",
-  "mushafEarlier": "اتعلّمت في حصة قبل كده",
+  "mushafEarlier": "عُلّمت في حصة سابقة",
   "mushafWordMarked": "{word}: {kind}",
   "@mushafWordMarked": {
     "placeholders": {
@@ -3128,7 +3128,7 @@
       }
     }
   },
-  "mushafWordEarlier": "{word}: {kind}، اتعلّمت في حصة قبل كده {times}",
+  "mushafWordEarlier": "{word}: {kind}، عُلّمت في حصص سابقة {times}",
   "@mushafWordEarlier": {
     "placeholders": {
       "word": {
@@ -3160,16 +3160,16 @@
   },
   "mushafShow": "المصحف",
   "mushafShowVideo": "الفيديو",
-  "mushafBackToVideo": "ارجع للفيديو",
-  "mushafFailed": "ماقدرناش نحفظ. جرّب تاني.",
+  "mushafBackToVideo": "ارجع إلى الفيديو",
+  "mushafFailed": "تعذّر الحفظ. حاول مرة أخرى.",
   "mistakesTitle": "دفتر الأخطاء",
-  "mistakesTitleKids": "كلمات بنراجعها",
-  "mistakesLead": "الكلمات اللي اتعلّم عليها في الحصص في آخر ست شهور، عشان تراجعها.",
-  "mistakesLeadTeacher": "الكلمات اللي اتعلّم عليها في حصص الطالب في آخر ست شهور.",
-  "mistakesLeadKids": "دي كلمات هنقولها تاني مع بعض لحد ما تبقى سهلة.",
-  "mistakesEmpty": "مفيش كلمات متعلّمة في آخر ست شهور.",
-  "mistakesEmptyKids": "مفيش كلمات نراجعها دلوقتي. شاطر! ⭐",
-  "mistakesWords": "{n, plural, =0{مفيش كلمات} =1{كلمة واحدة} =2{كلمتين} few{{n} كلمات} other{{n} كلمة}}",
+  "mistakesTitleKids": "كلمات نراجعها",
+  "mistakesLead": "الكلمات التي عُلّمت في الحصص خلال الأشهر الستة الأخيرة، لتراجعها.",
+  "mistakesLeadTeacher": "الكلمات التي عُلّمت في حصص الطالب خلال الأشهر الستة الأخيرة.",
+  "mistakesLeadKids": "هذه كلمات سنقولها معًا مرة أخرى حتى تصير سهلة.",
+  "mistakesEmpty": "لا توجد كلمات معلَّمة في الأشهر الستة الأخيرة.",
+  "mistakesEmptyKids": "لا توجد كلمات نراجعها الآن. أحسنت! ⭐",
+  "mistakesWords": "{n, plural, =0{لا توجد كلمات} =1{كلمة واحدة} =2{كلمتان} few{{n} كلمات} other{{n} كلمة}}",
   "@mistakesWords": {
     "placeholders": {
       "n": {
@@ -3202,7 +3202,7 @@
       }
     }
   },
-  "mistakesWordKids": "{word}: كلمة بنراجعها",
+  "mistakesWordKids": "{word}: كلمة نراجعها",
   "@mistakesWordKids": {
     "placeholders": {
       "word": {

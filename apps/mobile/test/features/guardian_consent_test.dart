@@ -67,11 +67,11 @@ void main() {
 
     // Home: the child waiting for this guardian.
     expect(find.byKey(const Key('consent-nudge')), findsOneWidget);
-    expect(find.text('سلمى رامي مستني موافقتك عشان يدخل حسابه.'), findsOneWidget);
+    expect(find.text('سلمى رامي بانتظار موافقتك ليدخل حسابه.'), findsOneWidget);
     await tester.tap(find.byKey(const Key('consent-nudge')));
     await frames(tester, 12);
 
-    expect(find.text('خصوصية الأولاد'), findsWidgets);
+    expect(find.text('خصوصية الأبناء'), findsWidgets);
     expect(find.text('الحصص مابتتسجلش.'), findsOneWidget);
     // Nothing to send before the box is ticked.
     final agree = find.widgetWithText(FilledButton, 'موافق');
@@ -85,11 +85,11 @@ void main() {
 
     await tester.tap(find.text('اسحب الموافقة'));
     await frames(tester, 6);
-    expect(find.textContaining('هيخرج من حسابه على كل الأجهزة'), findsOneWidget);
+    expect(find.textContaining('من حسابه على كل الأجهزة'), findsOneWidget);
     await tester.tap(find.widgetWithText(FilledButton, 'اسحب الموافقة'));
     await frames(tester, 12);
     expect(app.api.sent('POST', 'family/consents/c1/withdraw'), hasLength(1));
-    expect(find.text('مستني موافقتك'), findsOneWidget);
+    expect(find.text('بانتظار موافقتك'), findsOneWidget);
 
     // A message about it opens the same page.
     GoRouter.of(tester.element(find.byType(Scaffold).first)).go('/family/home');

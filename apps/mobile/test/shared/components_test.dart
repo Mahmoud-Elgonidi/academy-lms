@@ -42,7 +42,7 @@ void main() {
         MenuGroup(
           title: 'التواصل',
           children: [
-            MenuRow(label: 'الرسايل', icon: Icons.chat_bubble_outline_rounded, count: 2, onTap: () {}),
+            MenuRow(label: 'الرسائل', icon: Icons.chat_bubble_outline_rounded, count: 2, onTap: () {}),
             const MenuRow(label: 'رقم الإصدار', value: '1.4.0'),
           ],
         ),
@@ -118,19 +118,19 @@ void main() {
         ),
       ),
     );
-    var answer = confirmDestructive(context, title: 'تلغي الحصة؟', confirm: 'أيوه، ألغيها');
+    var answer = confirmDestructive(context, title: 'تلغي الحصة؟', confirm: 'نعم، ألغِها');
     await tester.pumpAndSettle();
     expect(find.text('تلغي الحصة؟'), findsOneWidget);
-    await tester.tap(find.text('مش دلوقتي'));
+    await tester.tap(find.text('ليس الآن'));
     await tester.pumpAndSettle();
     expect(await answer, isFalse);
 
-    answer = confirmDestructive(context, title: 'تلغي الحصة؟', confirm: 'أيوه، ألغيها');
+    answer = confirmDestructive(context, title: 'تلغي الحصة؟', confirm: 'نعم، ألغِها');
     await tester.pumpAndSettle();
-    final confirm = tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'أيوه، ألغيها'));
+    final confirm = tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'نعم، ألغِها'));
     final red = confirm.style?.backgroundColor?.resolve({});
     expect(red, buildTheme(Branding.fallback, Stage.classic).extension<LmsColors>()!.danger);
-    await tester.tap(find.text('أيوه، ألغيها'));
+    await tester.tap(find.text('نعم، ألغِها'));
     await tester.pumpAndSettle();
     expect(await answer, isTrue);
   });
@@ -138,8 +138,8 @@ void main() {
   testWidgets('an error says what kind it is, and a forbidden one offers no retry', (tester) async {
     var retried = 0;
     await tester.pumpWidget(_screen(ErrorState.of(ApiProblem.offline(), onRetry: () => retried++)));
-    expect(find.text('مفيش نت'), findsOneWidget);
-    await tester.tap(find.text('جرّب تاني'));
+    expect(find.text('لا يوجد اتصال بالإنترنت'), findsOneWidget);
+    await tester.tap(find.text('حاول مرة أخرى'));
     expect(retried, 1);
 
     await tester.pumpWidget(
@@ -150,7 +150,7 @@ void main() {
         ),
       ),
     );
-    expect(find.text('حصلت مشكلة عندنا'), findsOneWidget);
+    expect(find.text('حدثت مشكلة لدينا'), findsOneWidget);
 
     await tester.pumpWidget(
       _screen(
@@ -160,8 +160,8 @@ void main() {
         ),
       ),
     );
-    expect(find.text('مش مسموح تشوف ده'), findsOneWidget);
-    expect(find.text('جرّب تاني'), findsNothing);
+    expect(find.text('لا يُسمح لك بعرض هذا'), findsOneWidget);
+    expect(find.text('حاول مرة أخرى'), findsNothing);
 
     await tester.pumpWidget(
       _screen(

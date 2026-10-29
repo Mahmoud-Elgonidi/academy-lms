@@ -212,7 +212,7 @@ class LastLesson {
   final bool onTime;
   final bool stayed;
 
-  /// "في الميعاد", "فضلت لآخر الحصة", … in the viewer's language.
+  /// "في الموعد", "بقي حتى نهاية الحصة", … in the viewer's language.
   final List<String> labels;
 }
 

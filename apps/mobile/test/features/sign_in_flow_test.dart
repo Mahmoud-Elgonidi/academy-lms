@@ -72,15 +72,15 @@ void main() {
     await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
     await frames(tester);
 
-    expect(find.text('أهلًا بيك'), findsOneWidget);
+    expect(find.text('أهلًا بك'), findsOneWidget);
     // One field: an email is told from a number as it is typed.
     await tester.enterText(find.byKey(const Key('contact')), 'rami@demo.test');
     await frames(tester, 3);
-    expect(find.text('الكود هيوصلك على الإيميل ده.'), findsOneWidget);
-    await tester.tap(find.text('ابعتلي كود'));
+    expect(find.text('سيصلك الرمز على هذا البريد الإلكتروني.'), findsOneWidget);
+    await tester.tap(find.text('أرسل لي رمزًا'));
     await frames(tester);
 
-    expect(find.text('اكتب الكود'), findsOneWidget);
+    expect(find.text('اكتب الرمز'), findsOneWidget);
     expect(app.api.sent('POST', 'accounts/code').single.data, {'contact': 'rami@demo.test'});
     expect(app.api.sent('POST', 'accounts/code').single.headers['X-Academy'], isNull);
 
@@ -88,7 +88,7 @@ void main() {
     await frames(tester, 15);
 
     // Both accounts are listed; the staff-only one is not picked.
-    expect(find.text('لقينا حسابين ليك'), findsOneWidget);
+    expect(find.text('وجدنا لك حسابين'), findsOneWidget);
     expect(find.text('الإدارة'), findsOneWidget);
     // The academy's own privacy notice and terms are there to read first (none for an academy that sent none).
     expect(find.byKey(const Key('academy-privacy-demo')), findsOneWidget);
@@ -106,7 +106,7 @@ void main() {
     expect((await AccountStore(app.secrets).load()).$1.single.token, 'tok-1');
 
     // The guardian's home, with the child's next lesson.
-    expect(find.text('الحصة الجاية'), findsOneWidget);
+    expect(find.text('الحصة القادمة'), findsOneWidget);
     expect(app.api.requests.where((r) => r.path == 'family/lessons').first.headers['Authorization'], 'Bearer tok-1');
 
     await tester.pumpWidget(const SizedBox());
@@ -136,10 +136,10 @@ void main() {
     await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
     await frames(tester);
     await tester.enterText(find.byKey(const Key('contact')), '0501234504');
-    await tester.tap(find.text('ابعتلي كود'));
+    await tester.tap(find.text('أرسل لي رمزًا'));
     await frames(tester);
     expect(app.api.sent('POST', 'accounts/code').single.data, {'contact': '+966501234504'});
-    expect(find.text('ابعته رسالة SMS بدل واتساب'), findsOneWidget);
+    expect(find.text('أرسله في رسالة نصية بدلًا من واتساب'), findsOneWidget);
     await tester.enterText(find.byKey(const Key('code')), '000000');
     await frames(tester);
     expect(find.text('الكود ده مش صح. فاضلك 4 محاولات.'), findsOneWidget);
@@ -213,7 +213,7 @@ void main() {
     await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
     await frames(tester);
     await tester.enterText(find.byKey(const Key('contact')), 'rami@demo.test');
-    await tester.tap(find.text('ابعتلي كود'));
+    await tester.tap(find.text('أرسل لي رمزًا'));
     await frames(tester);
     await tester.enterText(find.byKey(const Key('code')), '123456');
     await frames(tester, 15);
@@ -268,7 +268,7 @@ void main() {
     await app.session.start();
     await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
     await frames(tester);
-    await tester.tap(find.text('عندك كلمة سر؟ ادخل بيها'));
+    await tester.tap(find.text('لديك كلمة مرور؟ ادخل بها'));
     await frames(tester, 5);
     await tester.enterText(find.byKey(const Key('academy')), ' Demo ');
     await tester.enterText(find.byKey(const Key('login')), 'teacher@demo.test');
@@ -283,9 +283,9 @@ void main() {
     expect(find.text('الدخول ده خد وقت طويل. ادخل تاني.'), findsOneWidget);
     expect(find.byKey(const Key('two-factor-code')), findsNothing);
 
-    await tester.tap(find.text('ابدأ من الأول'));
+    await tester.tap(find.text('ابدأ من جديد'));
     await frames(tester, 5);
-    expect(find.text('أهلًا بيك'), findsOneWidget);
+    expect(find.text('أهلًا بك'), findsOneWidget);
     expect(app.session.state.status, SessionStatus.signedOut);
 
     await tester.pumpWidget(const SizedBox());

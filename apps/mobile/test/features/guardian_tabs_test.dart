@@ -83,7 +83,7 @@ void main() {
       },
     );
 
-    for (final label in ['الرئيسية', 'الحصص', 'الرحلة', 'الفلوس', 'المزيد']) {
+    for (final label in ['الرئيسية', 'الحصص', 'الرحلة', 'المدفوعات', 'المزيد']) {
       expect(_tab(label), findsOneWidget);
     }
     expect(_tab('حسابي'), findsNothing);
@@ -109,7 +109,7 @@ void main() {
     expect(find.byKey(const Key('learner-c2')), findsOneWidget);
     expect(find.text('رياضيات مع أ. منى إبراهيم'), findsOneWidget);
 
-    await tester.tap(_tab('الفلوس'));
+    await tester.tap(_tab('المدفوعات'));
     await frames(tester, 10);
     expect(find.text('الفواتير والرصيد'), findsOneWidget);
     expect(find.byKey(const Key('bell')), findsOneWidget);
@@ -119,7 +119,7 @@ void main() {
     await tester.tap(_tab('المزيد'));
     await frames(tester, 10);
     expect(find.byKey(const Key('learner-c1')), findsNothing);
-    for (final group in ['الأولاد', 'التواصل', 'حسابي']) {
+    for (final group in ['الأبناء', 'التواصل', 'حسابي']) {
       expect(find.text(group), findsOneWidget);
     }
     expect(find.text('ولي أمر سلمى، عمر · أكاديمية النور'), findsOneWidget);
@@ -158,11 +158,11 @@ void main() {
 
     // The one surface in the brand's colour: the time the room opens, nothing to press yet.
     expect(find.byKey(const Key('room-opens')), findsOneWidget);
-    expect(find.textContaining('الفصل بيفتح'), findsOneWidget);
+    expect(find.textContaining('يُفتح الفصل'), findsOneWidget);
     expect(tester.widget<OutlinedButton>(find.byKey(const Key('room-opens'))).onPressed, isNull);
 
     expect(find.descendant(of: find.byKey(const Key('home-balance')), matching: find.text('رصيد سلمى')), findsOneWidget);
-    expect(find.descendant(of: find.byKey(const Key('home-balance')), matching: find.text('حصتين')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('home-balance')), matching: find.text('حصتان')), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('home-owed')), matching: find.text('400 ر.س.')), findsOneWidget);
 
     // What is due comes first.
@@ -189,7 +189,7 @@ void main() {
     await tester.tap(_tab('المزيد'));
     await frames(tester, 10);
 
-    expect(find.descendant(of: find.byKey(const Key('open-settings')), matching: find.text('العربي · الرياض')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('open-settings')), matching: find.text('العربية · الرياض')), findsOneWidget);
     await tester.tap(find.byKey(const Key('open-settings')));
     await frames(tester, 10);
     expect(find.text('اللغة والتوقيت'), findsOneWidget);
@@ -200,15 +200,15 @@ void main() {
 
     await tester.tap(find.byKey(const Key('open-accounts')));
     await frames(tester, 10);
-    expect(find.text('ضيف حساب تاني'), findsOneWidget);
+    expect(find.text('أضف حسابًا آخر'), findsOneWidget);
     await tester.tap(find.byTooltip('رجوع'));
     await frames(tester, 10);
 
     await tester.scrollUntilVisible(find.byKey(const Key('sign-out')), 200);
     await tester.tap(find.byKey(const Key('sign-out')));
     await frames(tester, 6);
-    expect(find.text('تخرج من أكاديمية النور على الموبايل ده؟'), findsOneWidget);
-    final yes = tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'خرّجه'));
+    expect(find.text('أتخرج من أكاديمية النور على هذا الهاتف؟'), findsOneWidget);
+    final yes = tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'أخرِجه'));
     expect(yes.style?.backgroundColor?.resolve({}), isNot(isNull));
     await tester.tap(find.text('رجوع'));
     await frames(tester, 6);
@@ -265,7 +265,7 @@ void main() {
         ],
       }),
     );
-    await tester.tap(_tab('الفلوس'));
+    await tester.tap(_tab('المدفوعات'));
     await frames(tester, 10);
     expect(find.descendant(of: find.byKey(const Key('money-owed')), matching: find.text('400 ر.س.')), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('money-owed')), matching: find.text('دفعت بالتحويل')), findsOneWidget);

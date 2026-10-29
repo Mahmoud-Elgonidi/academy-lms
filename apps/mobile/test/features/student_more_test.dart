@@ -42,7 +42,7 @@ void main() {
     }
     // The one homework still open is counted on its tile.
     expect(find.descendant(of: find.byKey(const Key('more-homework')), matching: find.text('1')), findsOneWidget);
-    expect(find.text('قولّنا لو فيه حاجة مضايقاك'), findsOneWidget);
+    expect(find.text('أخبرنا إن كان هناك ما يزعجك'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('more-levels')));
     await frames(tester, 12);

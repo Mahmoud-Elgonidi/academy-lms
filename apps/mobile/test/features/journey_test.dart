@@ -105,7 +105,7 @@ void main() {
     expect(map.nextLesson?.lessonId, 'l1');
     expect(map.chest?.canOpen, isTrue);
     expect(map.games?.eggReady, isTrue);
-    expect(map.lastLesson?.labels, ['في الميعاد', 'فضلت لآخر الحصة']);
+    expect(map.lastLesson?.labels, ['في الموعد', 'بقيت حتى نهاية الحصة']);
     // The lesson's room opening, starting and ending, and the chest's week closing, reload the screen.
     expect(map.clockMoments.length, 4);
     // A practice homework plays the teacher's game, else the best one on its station.
@@ -166,7 +166,7 @@ void main() {
 
     // The tabs: the journey, lessons, talking to the teacher, more. No islands or missions tab.
     final nav = find.byType(NavigationBar);
-    for (final tab in ['رحلتي', 'حصصي', 'كلّم مدرسك', 'المزيد']) {
+    for (final tab in ['رحلتي', 'حصصي', 'تحدّث مع معلّمك', 'المزيد']) {
       expect(find.descendant(of: nav, matching: find.text(tab)), findsOneWidget);
     }
     expect(find.descendant(of: nav, matching: find.text('الجزر')), findsNothing);
@@ -180,20 +180,20 @@ void main() {
 
     expect(find.text('رحلة يوسف'), findsOneWidget);
     // The last lesson's stars, until "great!".
-    expect(find.text('خدت 4 نجوم في آخر حصة!'), findsOneWidget);
-    expect(find.text('في الميعاد · فضلت لآخر الحصة'), findsOneWidget);
-    await tester.tap(find.text('تمام!'));
+    expect(find.text('أخذت 4 نجوم في آخر حصة!'), findsOneWidget);
+    expect(find.text('في الموعد · بقيت حتى نهاية الحصة'), findsOneWidget);
+    await tester.tap(find.text('رائع!'));
     await frames(tester, 6);
-    expect(find.text('خدت 4 نجوم في آخر حصة!'), findsNothing);
+    expect(find.text('أخذت 4 نجوم في آخر حصة!'), findsNothing);
 
     // The levels as islands: done with a cup, the one they are on with its share, the one ahead locked.
     expect(find.text('سور أطول · 33%'), findsOneWidget);
-    await tester.tap(find.bySemanticsLabel('جزء تبارك، لسه مقفولة'));
+    await tester.tap(find.bySemanticsLabel('جزء تبارك، ما زالت مغلقة'));
     await frames(tester, 6);
-    expect(find.text('بتتفتح لما تخلّص سور أطول'), findsOneWidget);
+    expect(find.text('تُفتح عندما تنهي سور أطول'), findsOneWidget);
 
     // The island they are on zooms in: its lessons as a path, with the homework flag.
-    await tester.tap(find.bySemanticsLabel(RegExp('^سور أطول، انت هنا')));
+    await tester.tap(find.bySemanticsLabel(RegExp('^سور أطول، أنت هنا')));
     await frames(tester, 24);
     expect(find.text('المستوى 2'), findsOneWidget);
     expect(find.text('1 من 3 دروس'), findsOneWidget);
@@ -201,17 +201,17 @@ void main() {
     // A station ahead says so and plays nothing.
     await tester.tap(find.bySemanticsLabel(RegExp('^الهمزة والعصر')));
     await frames(tester, 10);
-    expect(find.text('الدرس ده لسه جاي. هتتدرّب عليه لما توصله.'), findsOneWidget);
-    expect(find.text('العب على الدرس ده'), findsNothing);
+    expect(find.text('هذا الدرس لم يأتِ بعد. ستتدرّب عليه عندما تصل إليه.'), findsOneWidget);
+    expect(find.text('العب على هذا الدرس'), findsNothing);
     await tester.tapAt(const Offset(200, 40));
     await frames(tester, 10);
 
     // The station they are on: its homework and lesson, its games; a game plays this lesson's own items.
-    await tester.tap(find.bySemanticsLabel(RegExp('^قريش والفيل. انت هنا. واجب')));
+    await tester.tap(find.bySemanticsLabel(RegExp('^قريش والفيل. أنت هنا. واجب')));
     await frames(tester, 10);
     expect(find.text('واجب: سجّل سورة قريش'), findsOneWidget);
     expect(find.text('حصة · قرآن · حفظ'), findsOneWidget);
-    expect(find.text('العب على الدرس ده'), findsOneWidget);
+    expect(find.text('العب على هذا الدرس'), findsOneWidget);
     await tester.tap(find.text('جسر السلاحف'));
     await frames(tester, 12);
     expect(app.api.sent('POST', 'games/plays').single.data, {'game': 'g-bridge', 'station': 's4'});
@@ -221,7 +221,7 @@ void main() {
     final finish = app.api.sent('POST', 'games/plays/0199c0de-0000-7000-8000-000000000001/finish').single;
     expect((finish.data as Map<String, dynamic>)['answers'], hasLength(4));
     expect(finish.headers['Idempotency-Key'], isNotNull);
-    expect(find.text('رائع! كله صح تقريبًا'), findsOneWidget);
+    expect(find.text('رائع! كله صحيح تقريبًا'), findsOneWidget);
 
     await _close(tester);
   });
@@ -240,19 +240,19 @@ void main() {
       },
     }, status: 201);
     await _open(tester, app, size: const Size(420, 2600));
-    await tester.tap(find.text('تمام!'));
+    await tester.tap(find.text('رائع!'));
     await frames(tester, 6);
 
-    expect(find.text('الصندوق جاهز! دوس عليه'), findsOneWidget);
-    await tester.tap(find.text('الصندوق جاهز! دوس عليه'));
+    expect(find.text('الصندوق جاهز! انقر عليه'), findsOneWidget);
+    await tester.tap(find.text('الصندوق جاهز! انقر عليه'));
     await frames(tester, 16);
     final open = app.api.sent('POST', 'learning/journey/chest').single;
     expect(open.data, {'period': '2099-10-03'});
     expect(open.headers['Idempotency-Key'], isNotNull);
-    expect(find.text('برافو عليك!'), findsOneWidget);
+    expect(find.text('أحسنت!'), findsOneWidget);
     expect(find.text('+10 نجوم في رحلتك!'), findsOneWidget);
     expect(find.text('شمس'), findsOneWidget);
-    await tester.tap(find.text('تمام!'));
+    await tester.tap(find.text('رائع!'));
     await frames(tester, 8);
     expect(app.api.sent('GET', 'learning/journey/map').length, greaterThanOrEqualTo(2));
 
@@ -303,7 +303,7 @@ void main() {
         ),
       );
     await _open(tester, app, size: const Size(420, 2600));
-    await tester.tap(find.text('تمام!'));
+    await tester.tap(find.text('رائع!'));
     await frames(tester, 6);
 
     final egg = find.bySemanticsLabel(RegExp('^بيضتك جاهزة!'));
@@ -320,7 +320,7 @@ void main() {
     expect(find.text('فقست!'), findsOneWidget);
     expect(find.text('كائن جديد في ألبومك · 3 من 20'), findsOneWidget);
     await tester.tap(find.text('بندق'));
-    await tester.tap(find.text('حطّه في الألبوم'));
+    await tester.tap(find.text('ضعه في الألبوم'));
     await frames(tester, 20);
     expect(app.api.sent('PUT', 'games/creatures/turtles.crab').single.data, {'name': 'بندق'});
     expect(find.text('ألبوم كائناتي'), findsOneWidget);
@@ -338,21 +338,21 @@ void main() {
     await _open(tester, app, size: const Size(420, 2400));
 
     final nav = find.byType(NavigationBar);
-    for (final tab in ['رحلتي', 'حصصي', 'الرسايل', 'المزيد']) {
+    for (final tab in ['رحلتي', 'حصصي', 'الرسائل', 'المزيد']) {
       expect(find.descendant(of: nav, matching: find.text(tab)), findsOneWidget);
     }
     expect(find.text('بطل'), findsOneWidget);
     expect(find.text('رحلة يوسف'), findsOneWidget);
     expect(find.text('نجومك'), findsOneWidget);
-    expect(find.text('باقيلك 226 نجمة لـ أسطورة'), findsOneWidget);
-    expect(find.text('7 حصص ورا بعض'), findsOneWidget);
-    expect(find.text('النهارده'), findsOneWidget);
+    expect(find.text('بقيت لك 226 نجمة حتى أسطورة'), findsOneWidget);
+    expect(find.text('7 حصص متتالية'), findsOneWidget);
+    expect(find.text('اليوم'), findsOneWidget);
     // The room is open: join from the mission.
     expect(find.widgetWithText(FilledButton, 'ادخل الحصة'), findsOneWidget);
 
     // The reviews are one row that opens them all.
     expect(find.text('مراجعة · الفاتحة'), findsNothing);
-    await tester.tap(find.text('مراجعتين مستنينك'));
+    await tester.tap(find.text('مراجعتان تنتظرانك'));
     await frames(tester, 10);
     expect(find.text('مراجعة · الفاتحة'), findsOneWidget);
     expect(find.text('مراجعة · الناس والفلق'), findsOneWidget);
@@ -362,17 +362,17 @@ void main() {
 
     // The level they are in, as a path; every level a tap away.
     expect(find.text('المستوى 2: سور أطول'), findsOneWidget);
-    expect(find.text('انت هنا: قريش والفيل · بعدها: الهمزة والعصر'), findsOneWidget);
+    expect(find.text('أنت هنا: قريش والفيل · بعدها: الهمزة والعصر'), findsOneWidget);
     await tester.tap(find.byKey(const Key('all-levels')));
     await frames(tester, 12);
-    expect(find.text('بتتفتح لما تخلّص سور أطول'), findsOneWidget);
+    expect(find.text('تُفتح عندما تنهي سور أطول'), findsOneWidget);
     await tester.tap(find.byType(BackButton));
     await frames(tester, 12);
 
-    await tester.tap(find.bySemanticsLabel(RegExp('^قريش والفيل. انت هنا')));
+    await tester.tap(find.bySemanticsLabel(RegExp('^قريش والفيل. أنت هنا')));
     await frames(tester, 10);
     expect(find.text('سباق مع نفسك'), findsOneWidget);
-    expect(find.textContaining('أحسن وقت: 42ث · آخر مرة: 48ث'), findsOneWidget);
+    expect(find.textContaining('أفضل وقت: 42ث · آخر مرة: 48ث'), findsOneWidget);
     await tester.tap(find.text('جسر السلاحف'));
     await frames(tester, 12);
     expect(app.api.sent('POST', 'games/plays').single.data, {'game': 'g-bridge', 'station': 's4'});
@@ -398,23 +398,23 @@ void main() {
     expect(find.text('قرآن · حفظ · حفظ جزء عمّ'), findsOneWidget);
     expect(find.text('رحلتك يا يوسف'), findsOneWidget);
     // One number with what it means.
-    expect(find.text('هدفك: تخلّص البرنامج'), findsOneWidget);
-    expect(find.text('خلّصتهم من البرنامج'), findsOneWidget);
-    expect(find.textContaining('على السرعة دي هتخلّص يوم'), findsOneWidget);
+    expect(find.text('هدفك: أن تنهي البرنامج'), findsOneWidget);
+    expect(find.text('أنهيتها من البرنامج'), findsOneWidget);
+    expect(find.textContaining('بهذه السرعة تنهيه يوم'), findsOneWidget);
     // Where they are now: the level and the lesson of how many, never "0%".
     expect(find.text('المستوى 2 من 3'), findsOneWidget);
     expect(find.text('سور أطول'), findsOneWidget);
-    expect(find.text('المحطة 2 من 3 · الجاية: الهمزة والعصر'), findsOneWidget);
+    expect(find.text('المحطة 2 من 3 · القادمة: الهمزة والعصر'), findsOneWidget);
     expect(find.text('0%'), findsNothing);
     // The week by day; the room is not open yet, so no join button.
     expect(find.text('خطة الأسبوع'), findsOneWidget);
     expect(find.text('واجب: سجّل سورة قريش'), findsOneWidget);
-    expect(find.textContaining('لسه ماتسلّمش · قبل '), findsOneWidget);
+    expect(find.textContaining('لم يُسلَّم بعد · قبل '), findsOneWidget);
     expect(find.textContaining('حصة · قرآن · حفظ · '), findsOneWidget);
     expect(find.text('ادخل الحصة'), findsNothing);
-    expect(find.text('درسين محتاجين مراجعة'), findsOneWidget);
+    expect(find.text('درسان يحتاجان إلى مراجعة'), findsOneWidget);
     expect(find.text('3 مستويات · 6 دروس'), findsOneWidget);
-    expect(find.textContaining('في الميعاد · فضلت لآخر الحصة'), findsOneWidget);
+    expect(find.textContaining('في الموعد · بقيت حتى نهاية الحصة'), findsOneWidget);
 
     // The whole curriculum, the ahead level saying what opens it.
     await tester.tap(find.byKey(const Key('whole-curriculum')));
@@ -427,7 +427,7 @@ void main() {
     await tester.tap(find.byKey(const Key('calm-now')));
     await frames(tester, 10);
     // Games are optional on a station; a closed day says why (in the app's words, no emoji) and starts nothing.
-    expect(find.text('خلصت دقايق اللعب النهارده. نكمل بكرة!'), findsOneWidget);
+    expect(find.text('انتهت دقائق اللعب اليوم. نكمل غدًا!'), findsOneWidget);
     expect(find.textContaining('🌙'), findsNothing);
     await tester.tap(find.text('جسر السلاحف'));
     await frames(tester, 8);
@@ -485,15 +485,15 @@ void main() {
     expect(find.text('رحلة سلمى'), findsWidgets);
     expect(find.byKey(const Key('journey-hero')), findsOneWidget);
     expect(
-      find.descendant(of: find.byKey(const Key('journey-hero')), matching: find.text('نجوم سلمى · بطل · 7 حصص ورا بعض')),
+      find.descendant(of: find.byKey(const Key('journey-hero')), matching: find.text('نجوم سلمى · بطل · 7 حصص متتالية')),
       findsOneWidget,
     );
-    expect(find.text('آخر حصة لـ سلمى · الخميس 8 أكتوبر · 17:00 · في الميعاد · فضلت لآخر الحصة'), findsOneWidget);
+    expect(find.text('آخر حصة لـ سلمى · الخميس 8 أكتوبر · 17:00 · في الموعد · بقيت حتى نهاية الحصة'), findsOneWidget);
     expect(find.text('مهمات سلمى'), findsOneWidget);
     // Only the child opens the chest; no join or hand-in for a guardian.
-    expect(find.text('الصندوق جاهز يتفتح من حساب سلمى'), findsOneWidget);
+    expect(find.text('الصندوق جاهز ليُفتح من حساب سلمى'), findsOneWidget);
     expect(find.text('سلّم'), findsNothing);
-    expect(find.text('12 من 30 دقيقة لعب النهارده. فاضل 18 دقيقة.'), findsOneWidget);
+    expect(find.text('12 من 30 دقيقة لعب اليوم. بقي 18 دقيقة.'), findsOneWidget);
     expect(find.text('60 د'), findsNothing);
 
     await tester.tap(find.text('قلب'));
@@ -538,14 +538,14 @@ void main() {
       ..on('POST', 'games/plays', _started(), status: 201)
       ..on('POST', 'games/plays/*/finish', _finished(homework: {'title': 'سمّع سورة النصر', 'handed_in': true}));
     await _open(tester, app, size: const Size(420, 1400));
-    await tester.tap(find.text('تمام!'));
+    await tester.tap(find.text('رائع!'));
     await frames(tester, 4);
 
     await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('المزيد')));
     await frames(tester, 10);
     await tester.tap(find.byKey(const Key('more-homework')));
     await frames(tester, 12);
-    expect(find.text('الواجب ده بيتسلّم لما تلعب جولته.'), findsOneWidget);
+    expect(find.text('يُسلَّم هذا الواجب عندما تلعب جولته.'), findsOneWidget);
     expect(find.text('التدريب: 9 من 10 صح · 3 ⭐ (توأم العش)'), findsOneWidget);
     // No empty form to hand in: play it.
     expect(find.text('سلّم'), findsNothing);
@@ -554,7 +554,7 @@ void main() {
     expect(app.api.sent('POST', 'games/plays').single.data, {'game': 'turtle-bridge', 'homework_id': 'h1'});
     await tester.tap(find.text('play the stand-in'));
     await frames(tester, 14);
-    expect(find.text('✅ الواجب «سمّع سورة النصر» اتسلّم بالتدريب ده.'), findsOneWidget);
+    expect(find.text('✅ سُلّم الواجب «سمّع سورة النصر» بهذا التدريب.'), findsOneWidget);
 
     await _close(tester);
   });

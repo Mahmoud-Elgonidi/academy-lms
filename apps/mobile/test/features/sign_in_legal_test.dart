@@ -25,7 +25,7 @@ void main() {
     await tester.pumpWidget(AcademyApp(services: app.services, session: app.session));
     await frames(tester);
 
-    expect(find.text('أهلًا بيك'), findsOneWidget);
+    expect(find.text('أهلًا بك'), findsOneWidget);
     expect(find.text('سياسة الخصوصية'), findsOneWidget);
     expect(find.text('شروط الاستخدام'), findsOneWidget);
     await tester.tap(find.byKey(const Key('legal-privacy')));
@@ -33,7 +33,7 @@ void main() {
     expect(launcher.opened, [('http://api.test/privacy?lang=ar', PreferredLaunchMode.inAppBrowserView)]);
 
     // The password step (an academy's code typed there) has them too.
-    await tester.tap(find.text('عندك كلمة سر؟ ادخل بيها'));
+    await tester.tap(find.text('لديك كلمة مرور؟ ادخل بها'));
     await frames(tester);
     await tester.tap(find.byKey(const Key('legal-terms')));
     await frames(tester, 2);
@@ -55,7 +55,7 @@ void main() {
 
     await tester.tap(find.byKey(const Key('legal-privacy')));
     await frames(tester, 3);
-    expect(find.text('مفيش برنامج على الموبايل يفتح اللينك ده.'), findsOneWidget);
+    expect(find.text('لا يوجد تطبيق على هذا الهاتف يفتح هذا الرابط.'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     await frames(tester, 2);
   });
@@ -86,7 +86,7 @@ void main() {
 
     await tester.enterText(find.byKey(const Key('contact')), '٠٥٠١٢٣٤٥٠٤');
     expect(find.text('0501234504'), findsOneWidget);
-    await tester.tap(find.text('ابعتلي كود'));
+    await tester.tap(find.text('أرسل لي رمزًا'));
     await frames(tester);
     expect(app.api.sent('POST', 'accounts/code').single.data, {'contact': '+966501234504'});
 

@@ -93,7 +93,7 @@ Map<String, Object?> _performance() => {
   'kpis': [
     {
       'key': 'attendance',
-      'label': 'الحضور في الميعاد',
+      'label': 'الحضور في الموعد',
       'value': '96%',
       'target': 'الهدف 95% على الأقل',
       'n': 40,
@@ -198,12 +198,12 @@ void main() {
       );
     await _open(tester, app, 'open-card');
 
-    expect(find.text('كارتي في صفحة الأكاديمية'), findsWidgets);
+    expect(find.text('بطاقتي في صفحة الأكاديمية'), findsWidgets);
     expect(find.text('كارتك مقفول ومابيظهرش في الصفحة.'), findsOneWidget);
     // The preview: the name, each subject with its levels (the start or the end when open), and where they come from.
     final preview = find.byKey(const Key('card-preview'));
     expect(find.descendant(of: preview, matching: find.text('أ. سارة')), findsOneWidget);
-    expect(find.descendant(of: preview, matching: find.text('جزء عم ← للآخر')), findsOneWidget);
+    expect(find.descendant(of: preview, matching: find.text('جزء عم ← حتى النهاية')), findsOneWidget);
     expect(find.descendant(of: preview, matching: find.text('عربي')), findsOneWidget);
     expect(find.text('المواد من ملفك في الأكاديمية'), findsOneWidget);
 
@@ -257,7 +257,7 @@ void main() {
     expect(find.byKey(const Key('card-saved')), findsNothing);
 
     // Something else wrong is said under the form.
-    app.api.on('POST', 'teacher/card', {'type': 'server', 'title': 'حصلت مشكلة عندنا.', 'status': 500}, status: 500);
+    app.api.on('POST', 'teacher/card', {'type': 'server', 'title': 'حدثت مشكلة لدينا.', 'status': 500}, status: 500);
     await _save(tester);
     expect(find.byKey(const Key('card-error')), findsOneWidget);
     await _close(tester);
@@ -273,7 +273,7 @@ void main() {
     await tester.ensureVisible(find.byKey(const Key('card-photo')));
     await tester.tap(find.byKey(const Key('card-photo')));
     await frames(tester, 4);
-    expect(find.text('الصورة أكبر من 1 ميجا.'), findsOneWidget);
+    expect(find.text('الصورة أكبر من 1 ميغابايت.'), findsOneWidget);
     expect(find.text('big.jpg'), findsNothing);
     expect(app.api.sent('POST', 'teacher/card'), isEmpty);
     await _close(tester);
@@ -286,24 +286,24 @@ void main() {
     await _open(tester, app, 'open-performance');
 
     expect(find.text('أدائي'), findsWidgets);
-    expect(find.text('آخر 90 يوم · الحصص اللي سببها المنصة مابتتحسبش'), findsOneWidget);
+    expect(find.text('آخر 90 يومًا · الحصص التي كان سببها المنصة لا تُحسب'), findsOneWidget);
     expect(find.text('الالتزام'), findsOneWidget);
     expect(find.text('الجودة'), findsOneWidget);
     expect(find.text('الاحترافية'), findsNothing); // a group with no numbers is left out
     expect(find.descendant(of: find.byKey(const Key('kpi-attendance')), matching: find.text('96%')), findsOneWidget);
-    expect(find.descendant(of: find.byKey(const Key('kpi-attendance')), matching: find.text('تمام')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('kpi-attendance')), matching: find.text('جيد')), findsOneWidget);
     expect(
       find.descendant(of: find.byKey(const Key('kpi-attendance')), matching: find.text('الهدف 95% على الأقل · من 40 حصة')),
       findsOneWidget,
     );
-    expect(find.descendant(of: find.byKey(const Key('kpi-report_on_time')), matching: find.text('محتاج تحسين')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('kpi-report_on_time')), matching: find.text('يحتاج إلى تحسين')), findsOneWidget);
 
     expect(find.text('دخلت متأخر 7 دقايق'), findsOneWidget);
     expect(find.text('قرآن · السبت 10 أكتوبر · 5:00 م'), findsOneWidget); // as the API wrote it
-    expect(find.text('مش محسوبة'), findsOneWidget);
+    expect(find.text('غير محسوبة'), findsOneWidget);
     expect(find.text('النت وقع عند الكل'), findsOneWidget);
 
-    expect(find.text('4.5 من 5 · تقييمين'), findsOneWidget);
+    expect(find.text('4.5 من 5 · تقييمان'), findsOneWidget);
     expect(find.text('شرح واضح'), findsOneWidget);
     expect(find.text('“حصة حلوة”'), findsOneWidget);
     final semantics = tester.ensureSemantics();
@@ -324,15 +324,15 @@ void main() {
       'ratings': {'avg': null, 'count': 0, 'list': <Object>[]},
     });
     await _open(tester, app, 'open-performance');
-    expect(find.text('مفيش حاجة اتحسبت عليك. استمر!'), findsOneWidget);
-    expect(find.text('لسه مفيش تقييمات.'), findsOneWidget);
+    expect(find.text('لم يُحسب عليك شيء. استمر!'), findsOneWidget);
+    expect(find.text('لا توجد تقييمات بعد.'), findsOneWidget);
     await _close(tester);
 
     final refused = await TestApp.create(accounts: [teacher]);
     teacherRoutes(refused.api);
     refused.api.on('GET', 'teacher/performance', {'type': 'forbidden', 'title': 'مش مسموح.', 'status': 403}, status: 403);
     await _open(tester, refused, 'open-performance');
-    expect(find.text('مش مسموح تشوف ده'), findsOneWidget);
+    expect(find.text('لا يُسمح لك بعرض هذا'), findsOneWidget);
     await _close(tester);
   });
 }

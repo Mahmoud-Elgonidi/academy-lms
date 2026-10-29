@@ -171,12 +171,12 @@ void main() {
       );
     await _open(tester, app);
 
-    expect(find.text('الحصص الفاضلة'), findsOneWidget);
+    expect(find.text('الحصص المتبقية'), findsOneWidget);
     expect(find.text('قرآن'), findsOneWidget);
     expect(find.text('حصة واحدة'), findsOneWidget);
     expect(find.text('عربي وإنجليزي · باقة مشتركة'), findsOneWidget);
     // Nothing owed: no card asking to pay.
-    expect(find.text('عليك دلوقتي'), findsNothing);
+    expect(find.text('المستحق الآن'), findsNothing);
     expect(find.text('مدفوعة'), findsOneWidget);
     expect(find.text('خصم الإخوات  -40 ر.س.'), findsOneWidget);
 
@@ -212,12 +212,12 @@ void main() {
       ..on('POST', 'family/invoices/i1/checkout', {'url': 'https://pay.example/checkout/abc'});
     await _open(tester, app);
 
-    expect(find.text('عليك دلوقتي'), findsOneWidget);
+    expect(find.text('المستحق الآن'), findsOneWidget);
     // This academy takes no proofs: paying online is the way.
     expect(find.text('دفعت بالتحويل'), findsNothing);
     await tester.tap(find.text('ادفع 400 ر.س.'));
     await frames(tester, 6);
-    expect(find.text('تدفع بإيه؟'), findsOneWidget);
+    expect(find.text('بماذا تدفع؟'), findsOneWidget);
     await tester.tap(find.text('مدى (Moyasar)'));
     await frames(tester, 8);
 
@@ -236,7 +236,7 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await frames(tester, 10);
-    expect(find.text('عليك دلوقتي'), findsNothing);
+    expect(find.text('المستحق الآن'), findsNothing);
     expect(find.text('مدفوعة'), findsOneWidget);
     await _close(tester);
   });
@@ -307,15 +307,15 @@ void main() {
     await tester.tap(find.text('دفعت بالتحويل'));
     await frames(tester, 10);
     expect(find.text('حوّل على حساب الأكاديمية في بنك الراجحي'), findsOneWidget);
-    await tester.tap(find.text('اختار صورة أو PDF'));
+    await tester.tap(find.text('اختر صورة أو ملف PDF'));
     await frames(tester, 4);
     expect(picker.asked, containsAll(['jpg', 'png', 'pdf']));
     expect(find.text('receipt.jpg'), findsOneWidget);
 
-    await tester.enterText(find.widgetWithText(TextField, 'المبلغ اللي دفعته'), '٤٠٠٫٥٠');
+    await tester.enterText(find.widgetWithText(TextField, 'المبلغ الذي دفعته'), '٤٠٠٫٥٠');
     await tester.enterText(find.widgetWithText(TextField, 'رقم التحويل (اختياري)'), 'TR-1');
-    await tester.ensureVisible(find.text('ابعت الإثبات'));
-    await tester.tap(find.text('ابعت الإثبات'));
+    await tester.ensureVisible(find.text('أرسل الإثبات'));
+    await tester.tap(find.text('أرسل الإثبات'));
     await frames(tester, 10);
 
     final post = app.api.sent('POST', 'family/invoices/i1/proofs').single;
@@ -328,7 +328,7 @@ void main() {
     expect(fields['paid_on'], DateTime.now().toIso8601String().substring(0, 10));
     expect(form.files.single.value.filename, 'receipt.jpg');
     expect(form.files.single.value.contentType.toString(), 'image/jpeg');
-    expect(find.text('الإثبات اتبعت. هنقولك أول ما الأكاديمية تأكّده.'), findsOneWidget);
+    expect(find.text('أُرسل الإثبات. سنخبرك فور تأكيد الأكاديمية له.'), findsOneWidget);
 
     // Waiting for the academy: where it stands, and nothing to press (no gateway, no second proof).
     expect(find.text('إثبات دفع 400 ر.س. اتبعت، ومستني الأكاديمية'), findsWidgets);
@@ -360,10 +360,10 @@ void main() {
     expect(find.text('إثبات الدفع اترفض: المبلغ ماوصلش الحساب'), findsWidgets);
     await tester.tap(find.text('دفعت بالتحويل'));
     await frames(tester, 10);
-    await tester.tap(find.text('اختار صورة أو PDF'));
+    await tester.tap(find.text('اختر صورة أو ملف PDF'));
     await frames(tester, 4);
-    await tester.ensureVisible(find.text('ابعت الإثبات'));
-    await tester.tap(find.text('ابعت الإثبات'));
+    await tester.ensureVisible(find.text('أرسل الإثبات'));
+    await tester.tap(find.text('أرسل الإثبات'));
     await frames(tester, 10);
     final form = app.api.sent('POST', 'family/invoices/i1/proofs').single.data as FormData;
     expect(form.files.single.value.contentType.toString(), 'application/pdf');
@@ -379,13 +379,13 @@ void main() {
 
     await tester.tap(find.text('دفعت بالتحويل'));
     await frames(tester, 10);
-    await tester.tap(find.text('اختار صورة أو PDF'));
+    await tester.tap(find.text('اختر صورة أو ملف PDF'));
     await frames(tester, 4);
-    expect(find.text('الملف أكبر من 10 ميجا.'), findsOneWidget);
-    await tester.ensureVisible(find.text('ابعت الإثبات'));
-    await tester.tap(find.text('ابعت الإثبات'));
+    expect(find.text('الملف أكبر من 10 ميغابايت.'), findsOneWidget);
+    await tester.ensureVisible(find.text('أرسل الإثبات'));
+    await tester.tap(find.text('أرسل الإثبات'));
     await frames(tester, 4);
-    expect(find.text('اختار الإيصال الأول.'), findsOneWidget);
+    expect(find.text('اختر الإيصال أولًا.'), findsOneWidget);
     expect(app.api.sent('POST', 'family/invoices/i1/proofs'), isEmpty);
     await _close(tester);
   });

@@ -76,7 +76,7 @@ void main() {
     expect(asked.data, {'provider': 'google', 'id_token': 'id-token-google'});
     expect(asked.headers['X-Academy'], isNull);
     // One account: found, with its academy and a button straight in.
-    expect(find.text('لقيناك!'), findsOneWidget);
+    expect(find.text('وجدناك!'), findsOneWidget);
     expect(find.text('أكاديمية النور'), findsWidgets);
 
     await tester.tap(find.text('ادخل أكاديمية النور'));
@@ -124,7 +124,7 @@ void main() {
     await frames(tester);
     expect(social.asked, ['apple']);
     expect(app.api.sent('POST', 'me/social').single.data, {'provider': 'apple', 'id_token': 'id-token-apple', 'nonce': 'raw-nonce'});
-    expect(find.text('حساب أبل اتربط.'), findsOneWidget);
+    expect(find.text('رُبط حساب أبل.'), findsOneWidget);
 
     await tester.tap(find.descendant(of: find.byKey(const Key('sign-in-method-google')), matching: find.text('افصل')));
     await frames(tester, 3);

@@ -59,38 +59,38 @@ void main() {
     // Today's waiting tile opens the reports.
     await tester.tap(find.byKey(const Key('today-reports')));
     await frames(tester, 10);
-    expect(find.text('تقارير مستنياك'), findsOneWidget);
+    expect(find.text('تقارير تنتظرك'), findsOneWidget);
     await tester.tap(find.text('يوسف خالد'));
     await frames(tester, 10);
-    expect(find.text('اشتغلنا على إيه'), findsOneWidget);
+    expect(find.text('على ماذا عملنا'), findsOneWidget);
     expect(find.text('• يقرأ السورة بالتجويد'), findsOneWidget);
 
     // No ratings yet: nothing is sent.
-    await tester.tap(find.text('ابعت التقرير'));
+    await tester.tap(find.text('أرسل التقرير'));
     await frames(tester, 3);
-    expect(find.text('اختار التركيز والمستوى العام.'), findsOneWidget);
+    expect(find.text('اختر التركيز والمستوى العام.'), findsOneWidget);
     expect(app.api.sent('PUT', 'teacher/reports/r1'), isEmpty);
 
-    await tester.tap(find.text('اتقن'));
+    await tester.tap(find.text('أتقنه'));
     await frames(tester, 2);
     await _star(tester, 0, 4); // the lesson's score
     await _star(tester, 1, 5); // focus
     await _star(tester, 2, 4); // overall
     await tester.enterText(find.widgetWithText(TextField, 'ملاحظات للطالب وولي الأمر'), 'شاطر جدًا');
-    await tester.tap(find.text('ادّي واجب'));
+    await tester.tap(find.text('أعطِ واجبًا'));
     await frames(tester, 3);
     await tester.enterText(find.widgetWithText(TextField, 'الواجب'), 'سمّع سورة النصر');
     await tester.ensureVisible(find.text('تسجيل صوت'));
     await frames(tester, 2);
     await tester.tap(find.text('تسجيل صوت'));
     await frames(tester, 2);
-    await tester.scrollUntilVisible(find.text('ابعت التقرير'), 300, scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.text('ابعت التقرير'));
+    await tester.scrollUntilVisible(find.text('أرسل التقرير'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('أرسل التقرير'));
     await frames(tester, 5);
     // A quick moment says it went, then gets out of the way.
-    expect(find.text('التقرير اتبعت.'), findsOneWidget);
+    expect(find.text('أُرسل التقرير.'), findsOneWidget);
     await frames(tester, 12);
-    expect(find.text('التقرير اتبعت.'), findsNothing);
+    expect(find.text('أُرسل التقرير.'), findsNothing);
 
     final sent = app.api.sent('PUT', 'teacher/reports/r1').single.data as Map<String, dynamic>;
     expect(sent['engagement'], 5);
@@ -122,7 +122,7 @@ void main() {
     await tester.tap(find.text('سجّل التصحيح'));
     await frames(tester, 8);
     expect(app.api.sent('POST', 'teacher/homework/h1/review').single.data, {'grade': 4, 'feedback': 'برافو!'});
-    expect(find.text('اتسجّل التصحيح.'), findsOneWidget);
+    expect(find.text('سُجّل التصحيح.'), findsOneWidget);
 
     await _close(tester);
   });
@@ -202,13 +202,13 @@ void main() {
     await frames(tester, 8);
     await tester.tap(find.text('مواعيدي'));
     await frames(tester, 12);
-    expect(find.text('الأكاديمية عدّلت مقترحك. ده اللي اتغير:'), findsOneWidget);
+    expect(find.text('عدّلت الأكاديمية مقترحك. هذا ما تغيّر:'), findsOneWidget);
     // Saturday was added, Thursday's span removed: written on the reader's clock (12 hours here).
     expect(find.text('4:00 م – 8:00 م'), findsOneWidget);
     expect(find.text('الخميس مليان، ينفع السبت؟'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField).last, 'تمام، السبت مناسب');
-    await tester.tap(find.byTooltip('ابعت'));
+    await tester.tap(find.byTooltip('أرسل'));
     await frames(tester, 6);
     expect(app.api.sent('POST', 'teacher/shifts/proposal/comments').single.data, {'body': 'تمام، السبت مناسب'});
     expect(find.text('تمام، السبت مناسب'), findsOneWidget);
@@ -216,16 +216,16 @@ void main() {
     await tester.tap(find.text('موافق على التعديل'));
     await frames(tester, 10);
     expect(app.api.sent('POST', 'teacher/shifts/proposal/accept'), hasLength(1));
-    expect(find.text('مواعيدك اتعتمدت.'), findsOneWidget);
+    expect(find.text('اعتُمدت مواعيدك.'), findsOneWidget);
 
     // No open proposal now: propose again from the week in force, without Thursday.
     await tester.tap(find.text('اقترح مواعيد جديدة'));
     await frames(tester, 10);
     expect(find.text('عدّل مواعيدك'), findsOneWidget);
-    await tester.tap(find.byTooltip('شيل').last);
+    await tester.tap(find.byTooltip('أزل').last);
     await frames(tester, 3);
-    await tester.scrollUntilVisible(find.text('ابعت للأكاديمية'), 300, scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.text('ابعت للأكاديمية'));
+    await tester.scrollUntilVisible(find.text('أرسل إلى الأكاديمية'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('أرسل إلى الأكاديمية'));
     await frames(tester, 10);
     final put = app.api.sent('PUT', 'teacher/shifts/proposal').single.data as Map<String, dynamic>;
     expect(put['blocks'], [
@@ -233,7 +233,7 @@ void main() {
     ]);
     expect(put['effective_from'], '2099-10-08');
     expect(put['submit'], true);
-    expect(find.text('المقترح اتبعت للأكاديمية.'), findsOneWidget);
+    expect(find.text('أُرسل المقترح إلى الأكاديمية.'), findsOneWidget);
 
     await _close(tester);
   });
@@ -266,7 +266,7 @@ void main() {
     await tester.tap(find.byKey(const Key('report-r1')));
     await frames(tester, 10);
 
-    await tester.tap(find.text('اتقن'));
+    await tester.tap(find.text('أتقنه'));
     await tester.enterText(find.widgetWithText(TextField, 'ملاحظات للطالب وولي الأمر'), 'شاطر جدًا');
     await tester.tap(find.text('مسودة'));
     await frames(tester, 10);
@@ -278,14 +278,14 @@ void main() {
 
     await tester.tap(find.byKey(const Key('draft-r1')));
     await frames(tester, 10);
-    expect(find.textContaining('كمّلت من مسودة'), findsOneWidget);
+    expect(find.textContaining('أكملت من مسودة'), findsOneWidget);
     expect(find.text('شاطر جدًا'), findsOneWidget);
-    final chip = tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'اتقن'));
+    final chip = tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'أتقنه'));
     expect(chip.selected, isTrue);
 
-    await tester.tap(find.text('ابدأ من الأول'));
+    await tester.tap(find.text('ابدأ من جديد'));
     await frames(tester, 10);
-    expect(find.textContaining('كمّلت من مسودة'), findsNothing);
+    expect(find.textContaining('أكملت من مسودة'), findsNothing);
     expect(find.text('شاطر جدًا'), findsNothing);
     await _close(tester);
   });

@@ -136,9 +136,9 @@ void main() {
     });
     await _open(tester, app, '/family/money');
 
-    expect(find.textContaining('موقوف لحد '), findsOneWidget);
+    expect(find.textContaining('متوقف حتى '), findsOneWidget);
     expect(find.textContaining('أكتوبر'), findsWidgets);
-    expect(find.text('انتهى، والدقايق اللي فاضلة لسه في الرصيد'), findsOneWidget);
+    expect(find.text('انتهى، والدقائق المتبقية ما زالت في الرصيد'), findsOneWidget);
     // Extra lessons: only on the course that is on.
     expect(find.byKey(const Key('extra-e1')), findsNothing);
     expect(find.byKey(const Key('extra-e2')), findsNothing);
@@ -162,7 +162,7 @@ void main() {
       ..on('POST', 'learning/cheers/seen', null, status: 204);
     await _open(tester, app, '');
 
-    expect(find.textContaining('في إجازة لحد '), findsOneWidget);
+    expect(find.textContaining('في إجازة حتى '), findsOneWidget);
     expect(find.textContaining('موقوف'), findsNothing);
     await _close(tester);
   });
@@ -176,7 +176,7 @@ void main() {
     await _open(tester, app, '/family/journey');
 
     expect(find.byKey(const Key('course-state')), findsOneWidget);
-    expect(find.textContaining('موقوف لحد '), findsOneWidget);
+    expect(find.textContaining('متوقف حتى '), findsOneWidget);
     await _close(tester);
   });
 }

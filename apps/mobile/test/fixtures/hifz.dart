@@ -2,7 +2,7 @@
 import '../helpers.dart';
 
 /// The API's strength names (as the reader's language gives them).
-const fxHifzStrengths = {'new': 'لسه', 'learning': 'بيتحفظ', 'strong': 'ثابت', 'fading': 'محتاج مراجعة قريب', 'weak': 'ضعيف'};
+const fxHifzStrengths = {'new': 'لم يبدأ', 'learning': 'قيد الحفظ', 'strong': 'ثابت', 'fading': 'يحتاج إلى مراجعة قريبًا', 'weak': 'ضعيف'};
 
 /// The mushaf's 604 pages in 30 parts (20 each, the last 24), each page new unless [strengths] says otherwise.
 List<Map<String, Object?>> fxHifzJuzs([Map<int, String> strengths = const {}]) => [
@@ -129,7 +129,7 @@ Map<String, Object?> fxStudentHifz({int total = 604, bool follows = true}) => {
       {
         'page': 2,
         'grade': 3,
-        'grade_label': 'كويس',
+        'grade_label': 'جيد',
         'source': 'report',
         'source_label': 'تقرير الحصة',
         'at': time('2099-10-06T16:00:00Z', '2099-10-06T19:00:00+03:00', label: 'الثلاثاء 6 أكتوبر'),

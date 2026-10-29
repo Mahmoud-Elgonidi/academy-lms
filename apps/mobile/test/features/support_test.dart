@@ -46,7 +46,7 @@ Map<String, Object?> _line(String id, String side, String body) => {
 
 void main() {
   test('reads a ticket, its lines and what a new one can be about', () {
-    final ticket = Ticket.fromJson(_ticket(messages: [_line('m1', 'requester', 'مش بيفتح'), _line('m2', 'staff', 'جرّب تاني')]));
+    final ticket = Ticket.fromJson(_ticket(messages: [_line('m1', 'requester', 'مش بيفتح'), _line('m2', 'staff', 'حاول مرة أخرى')]));
     expect(ticket.summary.reference, '#7');
     expect(ticket.summary.yourTurn, isTrue);
     expect(ticket.lines.first.mine, isTrue);
@@ -140,7 +140,7 @@ void main() {
     await frames(tester, 12);
     await tester.tap(find.byKey(const Key('open-help')));
     await frames(tester, 12);
-    expect(find.text('مفيش تذاكر لسه. لو فيه أي حاجة مش مظبوطة، اكتبلنا.'), findsOneWidget);
+    expect(find.text('لا توجد تذاكر بعد. إن كان هناك أي شيء غير سليم، فاكتب إلينا.'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('new-ticket')));
     await frames(tester, 12);
@@ -192,7 +192,7 @@ void main() {
     await tester.tap(find.byKey(const Key('new-ticket')));
     await frames(tester, 12);
     // A teacher's "payments" is their pay.
-    expect(find.text('مرتبك أو كشف حسابك.'), findsOneWidget);
+    expect(find.text('راتبك أو كشف حسابك.'), findsOneWidget);
     await tester.binding.setSurfaceSize(null);
   });
 }

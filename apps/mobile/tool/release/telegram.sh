@@ -31,7 +31,7 @@ limit=$((50 * 1024 * 1024))
 cap=1000 # Telegram's caption is 1024 UTF-16 units; an emoji takes two
 notes_file=${1:?the notes file}
 shift
-release=${RELEASE_URL:-صفحة النسخة على GitHub}
+release=${RELEASE_URL:-صفحة الإصدار على GitHub}
 
 # call METHOD [curl -F fields…]: one Bot API request; fails with Telegram's own reason.
 call() {
@@ -98,7 +98,7 @@ caption() {
     printf '%s' "$whole"
     return
   fi
-  more="… والباقي على ${release}"
+  more="… والبقية على ${release}"
   for l in "${lines[@]}"; do
     [ $((${#part} + ${#l} + 1 + ${#more})) -gt "$room" ] && break
     part+="$l"$'\n'
@@ -123,7 +123,7 @@ for item in "$@"; do
   label=""
   [ "$item" != "$file" ] && label=${item#*::}
   if [ "$(stat -c %s "$file")" -gt "$limit" ]; then
-    text="$(caption "$label")"$'\n\n'"الملف ده ($(basename "$file")) أكبر من حد تليجرام (50 ميجا)، نزّله من هنا: ${release}"
+    text="$(caption "$label")"$'\n\n'"هذا الملف ($(basename "$file")) أكبر من حد تيليجرام (50 ميغابايت)، نزّله من هنا: ${release}"
     if [ -n "$dry" ]; then
       printf -- '--- message (%s too big to send)\n%s\n\n' "$(basename "$file")" "$text"
     else
@@ -141,7 +141,7 @@ for item in "$@"; do
   fi
 done
 if [ -n "$found" ]; then
-  call sendMessage --form-string "text=📌 عشان النسخ الجاية توصل هنا على طول، حط الرقم ده في GitHub باسم TELEGRAM_CHAT_ID:
+  call sendMessage --form-string "text=📌 لتصل الإصدارات القادمة إلى هنا مباشرة، ضع هذا الرقم في GitHub باسم TELEGRAM_CHAT_ID:
 ${TELEGRAM_CHAT_ID}
 ${SECRETS_URL:-}" --form-string "disable_web_page_preview=true"
 fi

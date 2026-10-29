@@ -146,12 +146,12 @@ void main() {
     expect(find.text('Long vowels'), findsWidgets);
     expect(find.text('مقترح'), findsWidgets);
     expect(find.text('راجعه'), findsWidgets);
-    expect(find.text('راجع دول: المسودة مكانتش متأكدة'), findsOneWidget);
-    expect(find.text('سجّل تاني'), findsOneWidget);
-    expect(find.text('المسودة ملت 8 خانات. راجعهم قبل ما تبعت.'), findsOneWidget);
+    expect(find.text('راجع هذه: لم تكن المسودة متأكدة منها'), findsOneWidget);
+    expect(find.text('سجّل مرة أخرى'), findsOneWidget);
+    expect(find.text('ملأت المسودة 8 خانات. راجعها قبل أن ترسل.'), findsOneWidget);
 
-    await tester.scrollUntilVisible(find.text('ابعت التقرير'), 300, scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.text('ابعت التقرير'));
+    await tester.scrollUntilVisible(find.text('أرسل التقرير'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('أرسل التقرير'));
     await frames(tester, 12);
     final sent = app.api.sent('PUT', 'teacher/reports/r1').single.data as Map<String, dynamic>;
     expect(sent['engagement'], 5);

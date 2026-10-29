@@ -88,7 +88,7 @@ void main() {
     await tester.tap(find.byKey(const Key('transfer-copy')));
     await frames(tester, 6);
     expect(copied, _gulf);
-    expect(find.text('بيانات التحويل اتنسخت.'), findsOneWidget);
+    expect(find.text('نُسخت بيانات التحويل.'), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('transfer-details')), matching: find.byIcon(Icons.check_rounded)), findsOneWidget);
   });
 
@@ -100,7 +100,7 @@ void main() {
     await tester.tap(find.text('دفعت بالتحويل'));
     await frames(tester, 12);
     final sheet = find.byType(BottomSheet);
-    expect(find.descendant(of: sheet, matching: find.text('ابعت إثبات الدفع')), findsOneWidget);
+    expect(find.descendant(of: sheet, matching: find.text('أرسل إثبات الدفع')), findsOneWidget);
     expect(find.descendant(of: sheet, matching: find.widgetWithText(SelectableText, _gulf)), findsOneWidget);
 
     await tester.tap(find.descendant(of: sheet, matching: find.byKey(const Key('transfer-copy'))));
