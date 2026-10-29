@@ -10,6 +10,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\View;
@@ -124,11 +125,12 @@ final class MySettings extends EditProfile
                 ->visible(fn (): bool => $this->offered() !== []),
 
             Section::make(__('identity::settings.sections.password'))
-                ->schema([
+                // No password yet (in by a code or a link): choosing one comes first, on its own page.
+                ->schema(fn (): array => $this->hasPassword() ? [
                     $this->getPasswordFormComponent(),
                     $this->getPasswordConfirmationFormComponent(),
                     $this->getCurrentPasswordFormComponent(),
-                ])
+                ] : [$this->choosePasswordFirst()])
                 // Not while the platform team is signed in as this person (ChangePassword refuses too).
                 ->visible(fn (): bool => AuditActor::current()->onBehalfOf === null),
 
@@ -279,10 +281,38 @@ final class MySettings extends EditProfile
         ], app(SocialAccounts::class)->of($user));
     }
 
-    /** Two-step sign-in (set up, new recovery codes, turn off), never while the platform team is signed in as this person. */
+    /**
+     * Two-step sign-in (set up, new recovery codes, turn off), never while the platform team is signed in as this person.
+     * Each step asks for the password, so someone with none is sent to choose one first.
+     */
     public function getMultiFactorAuthenticationContentComponent(): ?Component
     {
-        return AuditActor::current()->onBehalfOf === null ? parent::getMultiFactorAuthenticationContentComponent() : null;
+        if (AuditActor::current()->onBehalfOf !== null) {
+            return null;
+        }
+        if (! $this->hasPassword() && Filament::hasMultiFactorAuthentication()) {
+            return Section::make(__('filament-panels::auth/pages/edit-profile.multi_factor_authentication.label'))
+                ->compact()->secondary()
+                ->schema([$this->choosePasswordFirst()]);
+        }
+
+        return parent::getMultiFactorAuthenticationContentComponent();
+    }
+
+    private function hasPassword(): bool
+    {
+        return User::query()->whereKey($this->getUser()->getAuthIdentifier())->whereNotNull('password')->exists();
+    }
+
+    /** A word and the way to "Choose a password", back here afterwards. */
+    private function choosePasswordFirst(): Component
+    {
+        return Callout::make()->description(__('identity::security.password.settings_hint'))->info()
+            ->actions([
+                Action::make('choosePassword')
+                    ->label(__('identity::security.password.choose'))
+                    ->url(ChoosePassword::getUrl(['back' => 'settings'])),
+            ]);
     }
 
     /** @param  array<string, mixed>  $data */

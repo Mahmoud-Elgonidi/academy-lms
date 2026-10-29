@@ -8,6 +8,9 @@
             .na-link { display: flex; gap: .5rem; align-items: stretch; flex-wrap: wrap; }
             .na-link code { flex: 1 1 18rem; min-width: 0; padding: .6rem .75rem; border-radius: .6rem; background: var(--gray-50); border: 1px solid var(--gray-200); font-size: .78rem; direction: ltr; overflow-wrap: anywhere; }
             .na-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+            .na-next { display: flex; flex-direction: column; gap: .5rem; padding-top: .8rem; border-top: 1px solid var(--gray-200); }
+            .na-next h4 { font-weight: 700; font-size: .95rem; }
+            .dark .na-next { border-color: var(--gray-800); }
             .dark .na-done { background: var(--gray-900); border-color: var(--gray-800); }
             .dark .na-done p { color: var(--gray-400); }
             .dark .na-link code { background: rgb(255 255 255 / .04); border-color: var(--gray-800); }
@@ -21,6 +24,17 @@
                     <span x-show="! copied">{{ __($l.'done.copy') }}</span><span x-show="copied" x-cloak>{{ __($l.'done.copied') }}</span>
                 </x-filament::button>
             </div>
+            <div class="na-next" x-data="{ copied: false }">
+                <h4>{{ __($l.'done.next_title', ['host' => $done['host']]) }}</h4>
+                <p>{{ __($l.'done.next_dns', ['domain' => $done['domain'], 'host' => $done['host']]) }}</p>
+                <p>{{ __($l.'done.next_cert') }}</p>
+                <div class="na-link">
+                    <code x-ref="command">sudo certbot --nginx --expand -d {{ $done['domain'] }} -d {{ $done['host'] }}</code>
+                    <x-filament::button color="gray" icon="heroicon-o-clipboard-document" x-on:click="navigator.clipboard.writeText($refs.command.textContent.trim()); copied = true; setTimeout(() => copied = false, 2000)">
+                        <span x-show="! copied">{{ __($l.'done.copy_command') }}</span><span x-show="copied" x-cloak>{{ __($l.'done.copied') }}</span>
+                    </x-filament::button>
+                </div>
+            </div>
             <div class="na-actions">
                 <x-filament::button tag="a" :href="$done['page']" icon="heroicon-o-building-library">{{ __($l.'done.open') }}</x-filament::button>
                 <x-filament::button color="gray" wire:click="another" wire:key="another">{{ __($l.'done.another') }}</x-filament::button>
@@ -29,7 +43,6 @@
     @else
         <form wire:submit="create" class="flex flex-col gap-6">
             {{ $this->form }}
-            <div><x-filament::button type="submit" icon="heroicon-o-plus">{{ __($l.'create') }}</x-filament::button></div>
         </form>
     @endif
 </x-filament-panels::page>

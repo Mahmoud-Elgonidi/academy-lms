@@ -64,6 +64,9 @@ return [
             'staff_deactivated' => 'Turned off the account of :name (team: :roles)',
             'staff_reactivated' => 'Turned the account of :name back on (team: :roles)',
             'welcome_link_shown' => "Showed :name's welcome link to copy",
+            'two_factor_required' => 'Two-step sign-in made required of the owner, admins and accountants',
+            'two_factor_optional' => 'Two-step sign-in made optional for the owner, admins and accountants',
+            'password_chosen' => ':name chose a password for their account',
         ],
         'safeguarding' => [
             'concern_reported' => 'Safeguarding concern :concern raised',

@@ -61,6 +61,7 @@ enum Ability: string
     case SetUpAcademy = 'academy.setup';
     case ManageAi = 'ai.manage';
     case ManageSite = 'site.manage';
+    case ManageSecurity = 'security.manage';
 
     /** The plan area this ability belongs to, if a plan may leave it out. */
     public function feature(): ?Feature

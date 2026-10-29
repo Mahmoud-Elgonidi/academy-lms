@@ -65,6 +65,8 @@ final class AbilityMatrix
             Ability::ManageAi => [Role::Owner, Role::Admin],
             // The academy's public page (its words, which sections and teachers' cards show): the academy speaking to everyone, so its owner and admins.
             Ability::ManageSite => [Role::Owner, Role::Admin],
+            // How everyone signs in (whether two-step sign-in is required of the back office): the owner alone.
+            Ability::ManageSecurity => [Role::Owner],
         };
     }
 

@@ -29,6 +29,7 @@ use Modules\Curriculum\Filament\CurriculumPlugin;
 use Modules\Evaluation\Filament\EvaluationPlugin;
 use Modules\Games\Filament\GamesPlugin;
 use Modules\Identity\Filament\IdentityPlugin;
+use Modules\Identity\Filament\Pages\SetUpTwoFactor;
 use Modules\Identity\Filament\Pages\SignIn;
 use Modules\Identity\Http\Middleware\RequireTwoFactor;
 use Modules\Identity\TwoFactor\TwoFactor;
@@ -73,8 +74,10 @@ final class AcademyPanelProvider extends PanelProvider
             // "Start here": the new academy's setup checklist, from the steps each module registers (SharedKernel\Setup).
             ->pages([StartHere::class])
             ->login(SignIn::class)
-            // Two-step sign-in (an authenticator app): asked of whoever has it on; the owner, admins and accountants must set it up first.
-            ->multiFactorAuthentication(fn () => [TwoFactor::provider()], isRequired: true)
+            // Two-step sign-in (an authenticator app): asked of whoever has it on; the owner, admins and accountants must set it up first
+            // while their academy requires it. Filament reads isRequired once, when it registers the routes (the set-up page and the
+            // middleware on every page), so it stays on here and RequireTwoFactor asks TwoFactor::requiredFor on each request.
+            ->multiFactorAuthentication(fn () => [TwoFactor::provider()], setUpRequiredAction: SetUpTwoFactor::class, isRequired: true)
             ->multiFactorAuthenticationRequiredMiddlewareName(RequireTwoFactor::class)
             ->spa()
             ->sidebarCollapsibleOnDesktop()

@@ -64,6 +64,9 @@ return [
             'staff_deactivated' => 'إيقاف حساب :name (في الفريق: :roles)',
             'staff_reactivated' => 'إعادة تفعيل حساب :name (في الفريق: :roles)',
             'welcome_link_shown' => 'عرض رابط الترحيب الخاص بـ :name لنسخه',
+            'two_factor_required' => 'أصبح الدخول بخطوتين مطلوبًا من المالك والمديرين والمحاسبين',
+            'two_factor_optional' => 'أصبح الدخول بخطوتين اختياريًا للمالك والمديرين والمحاسبين',
+            'password_chosen' => 'اختار :name كلمة مرور لحسابه',
         ],
         'safeguarding' => [
             'concern_reported' => 'أُرسل بلاغ الحماية :concern',

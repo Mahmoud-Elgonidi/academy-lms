@@ -28,6 +28,7 @@ use Modules\Identity\Queries\ActiveTeachers;
 use Modules\Identity\Setup\TeamStep;
 use Modules\Identity\SignIn\LastSignIn;
 use Modules\Identity\SignIn\OpenSignInGate;
+use Modules\Identity\TwoFactor\AcademyTwoFactorRule;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Privacy\PersonalData;
@@ -46,6 +47,7 @@ final class IdentityServiceProvider extends ServiceProvider
 
         // One registry per process: modules declare their preferences in boot().
         $this->app->singleton(PreferenceStore::class);
+        $this->app->scoped(AcademyTwoFactorRule::class);
         $this->app->alias(PreferenceStore::class, UserPreferences::class);
     }
 

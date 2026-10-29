@@ -11,7 +11,9 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * Signing in with a second factor: an authenticator app (a code that
  * changes every 30 seconds) with one-time recovery codes. Required of the
  * owner, the admins and the accountants (they hold the money, the gateway
- * keys and every family's data); anyone else may turn it on. Whoever has it
+ * keys and every family's data) unless the academy's owner turned that off
+ * (identity_settings.require_two_factor, SaveSecuritySettings); anyone else
+ * may turn it on. Whoever has it
  * on is asked for it on every way in: the panels (by password or by a code
  * sent to them), the portal and the apps.
  */
@@ -20,9 +22,10 @@ final class TwoFactor
     /** @var list<Role> */
     public const REQUIRED_FOR = [Role::Owner, Role::Admin, Role::Accountant];
 
+    /** One of the roles it is asked of, in an academy that requires it. */
     public static function requiredFor(User $user): bool
     {
-        return $user->hasRole(...self::REQUIRED_FOR);
+        return $user->hasRole(...self::REQUIRED_FOR) && app(AcademyTwoFactorRule::class)->required();
     }
 
     public static function enabledFor(User $user): bool

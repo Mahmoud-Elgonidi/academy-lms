@@ -8,6 +8,8 @@ use Filament\Facades\Filament;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Modules\Identity\Models\User;
+use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\SharedKernel\Authorization\Ability;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -48,12 +50,12 @@ final class OpenFirstAllowedScreen
         return $next($request);
     }
 
-    /** Whether the panel asks for two-step sign-in and the person has no way of it on yet. */
+    /** Whether the panel asks this person for two-step sign-in (their academy requires it) and they have no way of it on yet. */
     private static function twoFactorFirst(): bool
     {
         $panel = Filament::getCurrentPanel();
         $user = Filament::auth()->user();
-        if ($panel === null || $user === null || ! $panel->isMultiFactorAuthenticationRequired()) {
+        if ($panel === null || ! $user instanceof User || ! $panel->isMultiFactorAuthenticationRequired() || ! TwoFactor::requiredFor($user)) {
             return false;
         }
 

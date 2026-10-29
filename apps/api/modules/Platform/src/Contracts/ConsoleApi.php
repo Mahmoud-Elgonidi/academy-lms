@@ -20,6 +20,16 @@ interface ConsoleApi
     /** @return array<string, string> the plans a new academy can start on, code => name, the default first */
     public function offeredPlans(): array;
 
+    /**
+     * Each plan's limits, for choosing one (null: none), code => limit => value, in offeredPlans()' order.
+     *
+     * @return array<string, array{teachers: ?int, active_students: ?int, video_minutes: ?int, storage_mb: ?int}>
+     */
+    public function offeredPlanLimits(): array;
+
+    /** Whether a new academy cannot take this address: reserved, or another academy's. */
+    public function slugTaken(string $slug): bool;
+
     /** A request to join from the platform's page, to make the academy from (null when there is none). */
     public function signupRequest(string $id): ?SignupRequestRef;
 

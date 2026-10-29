@@ -6,9 +6,12 @@ use Modules\Platform\Actions\Site\HandleSignupRequest;
 use Modules\Platform\Contracts\ConsoleApi;
 use Modules\Platform\Contracts\DTOs\PlatformAdminRef;
 use Modules\Platform\Contracts\DTOs\SignupRequestRef;
+use Modules\Platform\Models\Academy;
+use Modules\Platform\Models\AcademyDomain;
 use Modules\Platform\Models\PlatformAdmin;
 use Modules\Platform\Models\SaasPlan;
 use Modules\Platform\Models\Site\SignupRequest;
+use Modules\SharedKernel\Plans\Limit;
 
 final class ConsoleService implements ConsoleApi
 {
@@ -35,6 +38,26 @@ final class ConsoleService implements ConsoleApi
     {
         return SaasPlan::query()->offered()->orderByDesc('is_default')->orderBy('sort')->orderBy('code')->get()
             ->mapWithKeys(fn (SaasPlan $plan) => [$plan->code => $plan->name()])->all();
+    }
+
+    public function offeredPlanLimits(): array
+    {
+        return SaasPlan::query()->offered()->orderByDesc('is_default')->orderBy('sort')->orderBy('code')->get()
+            ->mapWithKeys(fn (SaasPlan $plan) => [$plan->code => [
+                'teachers' => $plan->limit(Limit::Teachers),
+                'active_students' => $plan->limit(Limit::ActiveStudents),
+                'video_minutes' => $plan->limit(Limit::VideoMinutes),
+                'storage_mb' => $plan->limit(Limit::StorageMb),
+            ]])->all();
+    }
+
+    public function slugTaken(string $slug): bool
+    {
+        $slug = strtolower(trim($slug));
+
+        return in_array($slug, (array) config('platform.reserved_slugs'), true)
+            || Academy::query()->where('slug', $slug)->exists()
+            || AcademyDomain::query()->where('host', $slug.'.'.config('platform.domain'))->exists();
     }
 
     public function signupRequest(string $id): ?SignupRequestRef

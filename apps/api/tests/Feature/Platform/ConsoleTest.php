@@ -137,35 +137,73 @@ it('checks the owner before making the academy, so none is left without one', fu
     ))->toThrow(ValidationException::class);
 });
 
-it('makes the academy from the console screen and shows the owner\'s link', function () {
+it('makes the academy in steps: the address from the name, the country filling the rest, the owner\'s mobile with its code', function () {
     Filament::setCurrentPanel('console');
     $this->actingAs($this->admin, 'platform');
 
-    Livewire::test(NewAcademy::class)
-        ->fillForm(['name_ar' => 'الروضة', 'name_en' => 'Rawda', 'slug' => 'rawda', 'base_currency' => 'EGP', 'default_timezone' => 'Africa/Cairo', 'default_locale' => 'ar', 'country' => 'eg', 'owner_name' => 'محمود', 'owner_email' => 'm@rawda.test'])
+    $page = Livewire::test(NewAcademy::class)
+        ->set('data.name_ar', 'أكاديمية جياد')
+        ->set('data.name_en', 'Jeyad Academy')
+        ->assertSet('data.slug', 'jeyad-academy')
+        ->assertSee(__('identity::onboarding.slug.free'))
+        ->goToNextWizardStep()->assertHasNoFormErrors();
+
+    // A country fills in its currency, clock, language and calling code; each stays editable.
+    $page->set('data.country', 'TR')
+        ->assertSet('data.base_currency', 'USD')->assertSet('data.default_timezone', 'Europe/Istanbul')
+        ->assertSet('data.default_locale', 'en')->assertSet('data.owner_dial', 'TR')
+        ->set('data.default_locale', 'ar')
+        ->goToNextWizardStep()->assertHasNoFormErrors();
+
+    $page->set('data.owner_name', 'عمرو')->set('data.owner_email', 'amr@jeyad.test')->set('data.owner_phone', '05399262811')
+        ->goToNextWizardStep()->assertHasNoFormErrors()
+        ->assertSee('+905399262811')
         ->call('create')
         ->assertHasNoFormErrors()
-        ->assertSee('rawda.lms.test')->assertSee('/welcome/');
+        ->assertSee('jeyad-academy.lms.test')->assertSee('/welcome/')
+        ->assertSee('sudo certbot --nginx --expand -d lms.test -d jeyad-academy.lms.test');
 
-    expect(Academy::query()->where('slug', 'rawda')->value('country'))->toBe('EG');
+    $academy = Academy::query()->where('slug', 'jeyad-academy')->sole();
+    expect($academy->only(['country', 'base_currency', 'default_timezone', 'default_locale']))
+        ->toBe(['country' => 'TR', 'base_currency' => 'USD', 'default_timezone' => 'Europe/Istanbul', 'default_locale' => 'ar']);
+    $this->actAsTenant($academy->toTenantRef());
+    expect(User::query()->sole()->phone_e164)->toBe('+905399262811');
 });
 
-it('shows the owner\'s number or a taken address on the field itself, and makes nothing', function () {
+it('refuses a taken address on the first step, as it is typed', function () {
     Filament::setCurrentPanel('console');
     $this->actingAs($this->admin, 'platform');
-    $form = ['name_ar' => 'جياد', 'name_en' => 'Jeyad', 'slug' => 'jeyad', 'base_currency' => 'EGP', 'default_timezone' => 'Africa/Cairo', 'default_locale' => 'ar', 'owner_name' => 'عمرو', 'owner_email' => 'amr@jeyad.test'];
 
     Livewire::test(NewAcademy::class)
-        ->fillForm($form + ['owner_phone' => '05399262811'])
+        ->set('data.name_ar', 'نور')
+        ->set('data.name_en', 'Noor')
+        ->assertSet('data.slug', 'noor')
+        ->assertSee(__('identity::onboarding.slug.taken'))
+        ->goToNextWizardStep()
+        ->assertHasFormErrors(['slug']);
+    // A reserved one too.
+    Livewire::test(NewAcademy::class)->set('data.name_ar', 'لوحة')->set('data.slug', 'admin')
+        ->goToNextWizardStep()->assertHasFormErrors(['slug']);
+});
+
+it('shows a refusal on its own field and opens its step, and makes nothing', function () {
+    Filament::setCurrentPanel('console');
+    $this->actingAs($this->admin, 'platform');
+    $form = ['name_ar' => 'جياد', 'name_en' => 'Jeyad', 'slug' => 'jeyad', 'country' => 'EG', 'base_currency' => 'EGP', 'default_timezone' => 'Africa/Cairo', 'default_locale' => 'ar', 'owner_name' => 'عمرو', 'owner_email' => 'amr@jeyad.test', 'owner_dial' => 'EG'];
+
+    Livewire::test(NewAcademy::class)
+        ->fillForm($form + ['owner_phone' => '12'])
         ->call('create')
         ->assertHasFormErrors(['owner_phone'])
-        ->assertSee(__('identity::onboarding.errors.owner_phone'));
+        ->assertSee(__('identity::onboarding.errors.owner_phone'))
+        ->assertDispatched('go-to-wizard-step', fn (string $name, array $params) => str_contains($params['step'], 'owner'));
     expect(Academy::query()->where('slug', 'jeyad')->exists())->toBeFalse();
 
     Livewire::test(NewAcademy::class)
         ->fillForm(['slug' => 'noor'] + $form)
         ->call('create')
-        ->assertHasFormErrors(['slug']);
+        ->assertHasFormErrors(['slug'])
+        ->assertDispatched('go-to-wizard-step', fn (string $name, array $params) => str_contains($params['step'], 'academy'));
 });
 
 it('shows the audit log across academies, filtered by academy or the platform\'s own', function () {

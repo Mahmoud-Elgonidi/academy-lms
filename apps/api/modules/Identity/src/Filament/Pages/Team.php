@@ -40,6 +40,7 @@ use Modules\Identity\Enums\Role;
 use Modules\Identity\Enums\UserStatus;
 use Modules\Identity\Http\Controllers\WelcomeController;
 use Modules\Identity\Models\User;
+use Modules\Identity\TwoFactor\AcademyTwoFactorRule;
 use Modules\Identity\TwoFactor\TwoFactor;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Contact\Phone;
@@ -103,7 +104,8 @@ final class Team extends Page implements HasTable
         return [
             'members' => $active()->count(),
             'invited' => $active()->whereNull('password')->count(),
-            'two_step' => $active()->whereNull('app_authentication_secret')
+            // Only while the academy requires it (Settings › Security).
+            'two_step' => ! app(AcademyTwoFactorRule::class)->required() ? 0 : $active()->whereNull('app_authentication_secret')
                 ->whereHas('roleRecords', fn ($q) => $q->whereIn('role', array_map(fn (Role $r) => $r->value, TwoFactor::REQUIRED_FOR)))->count(),
             'off' => self::staff()->where('status', UserStatus::Disabled->value)->count(),
         ];

@@ -71,6 +71,7 @@ function expectedAbilities(): array
         'academy.setup' => [$o, $a],
         'ai.manage' => [$o, $a],
         'site.manage' => [$o, $a],
+        'security.manage' => [$o],
     ];
 }
 
