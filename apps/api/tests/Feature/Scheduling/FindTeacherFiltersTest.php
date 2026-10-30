@@ -1,9 +1,14 @@
 <?php
 
 use Carbon\CarbonImmutable;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
+use Modules\Billing\Models\Plan;
+use Modules\Billing\Models\PriceRegion;
 use Modules\Catalog\Actions\SaveSubject;
+use Modules\Identity\Enums\Role;
+use Modules\Identity\Models\User;
 use Modules\People\Actions\SaveStudentDetails;
 use Modules\People\Contracts\DTOs\StudentDetails;
 use Modules\People\Contracts\DTOs\TeacherProfileData;
@@ -79,4 +84,38 @@ it('starts from the student\'s own profile', function () {
         ->assertSet('data.age_group', 'adults')     // born 2004
         ->fillForm(['subject_id' => $this->quran])
         ->assertSee('جزء عم');
+});
+
+it('never fails to enrol for want of a plan: the button waits, and the plan can be made right there', function () {
+    $this->actingAs($this->admin);
+    Filament::setCurrentPanel('academy');
+    // 25-minute lessons twice a week: no plan has that shape.
+    $page = Livewire::test(FindTeacher::class)
+        ->set('holdBatch', 'x')->set('picked', ['a', 'b'])
+        ->set('data.student_id', $this->student->id)->set('data.subject_id', $this->quran)->set('data.duration', 25)
+        ->mountAction('enroll')
+        // An admin may enrol but not make plans: they are told whom to ask.
+        ->assertMountedActionModalSee(__('scheduling::find.enroll.no_plans_ask'))
+        ->assertMountedActionModalDontSee(__('scheduling::find.enroll.create_plan'));
+
+    // Sent anyway, it says why instead of failing.
+    $page->callMountedAction()->assertHasNoErrors()->assertNotified(__('scheduling::find.errors.plan'));
+
+    // The owner makes the plan in place, and it is picked.
+    $this->actingAs(User::factory()->withRole(Role::Owner, Role::Admin)->create());
+    $region = PriceRegion::query()->where('is_default', true)->value('id');
+    $page = Livewire::test(FindTeacher::class)
+        ->set('holdBatch', 'x')->set('picked', ['a', 'b'])
+        ->set('data.student_id', $this->student->id)->set('data.subject_id', $this->quran)->set('data.duration', 25)
+        ->mountAction([TestAction::make('enroll'), TestAction::make('createPlan')->schemaComponent('newPlan', schema: 'mountedActionSchema0')])
+        ->assertSet('mountedActions.1.data.name_ar', '25 دقيقة · حصتان في الأسبوع')
+        ->assertSet('mountedActions.1.data.sessions_per_block', 8)
+        ->set('mountedActions.1.data.price_'.$region, '400')
+        ->callMountedAction()
+        ->assertNotified(__('scheduling::find.enroll.plan_created'));
+
+    $plan = Plan::query()->where('session_minutes', 25)->sole();
+    expect($plan->sessions_per_week)->toBe(2)
+        ->and($plan->sessions_per_block)->toBe(8)
+        ->and($page->get('mountedActions.0.data.plan_id'))->toBe($plan->id);
 });

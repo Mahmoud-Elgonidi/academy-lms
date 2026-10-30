@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Modules\Billing\Contracts\DTOs\CourseBilling;
 use Modules\Billing\Contracts\DTOs\EndedCourseBilling;
 use Modules\Billing\Contracts\DTOs\IssuedInvoice;
+use Modules\Billing\Contracts\DTOs\NewPlan;
 use Modules\Billing\Contracts\DTOs\NewSubscription;
 use Modules\Billing\Contracts\DTOs\PlanOption;
 use Modules\Billing\Contracts\DTOs\PriceQuote;
@@ -41,6 +42,9 @@ interface BillingApi
 
     /** @return list<RegionOption> */
     public function regions(): array;
+
+    /** Makes an active plan through SavePlan (its checks and audit) and answers its id. */
+    public function createPlan(NewPlan $plan): string;
 
     /**
      * The student's live shared package on this plan, paid by this payer,

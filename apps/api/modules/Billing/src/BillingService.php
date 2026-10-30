@@ -10,11 +10,13 @@ use Modules\Billing\Actions\CloseEndedCourse;
 use Modules\Billing\Actions\Discounts\ApplyCoupon;
 use Modules\Billing\Actions\Discounts\RemoveCoupon;
 use Modules\Billing\Actions\RecordPayment;
+use Modules\Billing\Actions\SavePlan;
 use Modules\Billing\Actions\SubscribeEnrollment;
 use Modules\Billing\Contracts\BillingApi;
 use Modules\Billing\Contracts\DTOs\CourseBilling;
 use Modules\Billing\Contracts\DTOs\EndedCourseBilling;
 use Modules\Billing\Contracts\DTOs\IssuedInvoice;
+use Modules\Billing\Contracts\DTOs\NewPlan;
 use Modules\Billing\Contracts\DTOs\NewSubscription;
 use Modules\Billing\Contracts\DTOs\PlanOption;
 use Modules\Billing\Contracts\DTOs\PriceQuote;
@@ -72,6 +74,18 @@ final class BillingService implements BillingApi
                 shared: $plan->isShared(),
             ))
             ->all();
+    }
+
+    public function createPlan(NewPlan $plan): string
+    {
+        return app(SavePlan::class)->handle(null, [
+            'name_ar' => $plan->nameAr,
+            'name_en' => $plan->nameEn,
+            'session_minutes' => $plan->sessionMinutes,
+            'sessions_per_week' => $plan->sessionsPerWeek,
+            'sessions_per_block' => $plan->sessionsPerBlock,
+            'prices' => collect($plan->prices)->map(fn (string $amount, string $region) => ['price_region_id' => $region, 'amount' => $amount])->values()->all(),
+        ])->id;
     }
 
     public function sharedPackage(string $studentId, string $planId, string $payerId): ?SharedPackage

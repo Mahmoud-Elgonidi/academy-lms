@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Modules\Billing\Contracts\BillingApi;
+use Modules\Billing\Contracts\DTOs\NewPlan;
 use Modules\Billing\Contracts\DTOs\PlanOption;
 use Modules\Billing\Contracts\DTOs\PriceQuote;
 use Modules\Billing\Contracts\DTOs\RegionOption;
@@ -327,6 +329,8 @@ final class FindTeacher extends Page
                 'teacher' => collect($this->results)->first(fn (array $r) => $r['teacher']->id === $this->pickedTeacher)['teacher']->name ?? '',
             ]))
             ->modalSubmitActionLabel(__('scheduling::find.enroll.submit'))
+            // Nothing to enrol on until a plan of this shape exists: the button waits, the form says why.
+            ->modalSubmitAction(fn (Action $submit) => $submit->disabled(fn () => $this->matchingPlans() === []))
             ->modalWidth('lg')
             ->fillForm(fn () => [
                 'price_region_id' => collect($this->regions())->first(fn (RegionOption $r) => $r->isDefault)?->id ?? ($this->regions()[0]->id ?? null),
@@ -348,7 +352,9 @@ final class FindTeacher extends Page
                 Text::make(fn () => __('scheduling::find.enroll.no_plans', [
                     'minutes' => $this->data['duration'],
                     'per_week' => trans_choice('scheduling::find.per_week', count($this->picked), ['n' => count($this->picked)]),
-                ]))->visible(fn () => $this->matchingPlans() === [])->color('danger'),
+                ]).(Gate::allows(Ability::ManageBilling->value) ? '' : ' '.__('scheduling::find.enroll.no_plans_ask')))->visible(fn () => $this->matchingPlans() === [])->color('danger'),
+                Actions::make([$this->createPlanAction()])->key('newPlan')
+                    ->visible(fn () => $this->matchingPlans() === [] && Gate::allows(Ability::ManageBilling->value)),
                 Radio::make('payer_id')->label(__('scheduling::find.enroll.payer'))
                     ->options(fn () => $this->payers())->required()->live(),
                 // A course joining the student's shared package draws on its balance: no invoice, so no price or coupon.
@@ -365,6 +371,10 @@ final class FindTeacher extends Page
                     ->visible(fn (Get $get) => $this->quote($get) !== null && ! $this->joining($get)),
             ])
             ->action(function (array $data, Action $action) {
+                if (blank($data['plan_id'] ?? null) || blank($data['payer_id'] ?? null) || blank($data['price_region_id'] ?? null)) {
+                    Notification::make()->danger()->title(__('scheduling::find.errors.plan'))->send();
+                    $action->halt();
+                }
                 try {
                     $booked = app(EnrollStudent::class)->handle(
                         $this->holdBatch,
@@ -407,6 +417,48 @@ final class FindTeacher extends Page
     }
 
     /** Whether the chosen shared plan is one the student already has with this payer: the course joins it. */
+    /**
+     * The plan the enrolment is missing, made where it is missed: this lesson
+     * length and lessons a week, a block of four weeks, a price per region
+     * (through BillingApi, so SavePlan's checks and audit), then picked.
+     */
+    private function createPlanAction(): Action
+    {
+        $perWeek = fn () => max(1, count($this->picked));
+        $minutes = fn () => (int) $this->data['duration'];
+
+        return Action::make('createPlan')
+            ->label(__('scheduling::find.enroll.create_plan'))
+            ->icon(Heroicon::OutlinedPlusCircle)
+            ->color('primary')
+            ->modalHeading(__('scheduling::find.enroll.create_plan'))
+            ->modalDescription(fn () => __('scheduling::find.enroll.create_plan_hint'))
+            ->modalWidth('md')
+            ->fillForm(fn () => [
+                'name_ar' => __('scheduling::find.enroll.plan_name', ['minutes' => $minutes(), 'per_week' => trans_choice('scheduling::find.per_week', $perWeek(), ['n' => $perWeek()], 'ar')], 'ar'),
+                'name_en' => __('scheduling::find.enroll.plan_name', ['minutes' => $minutes(), 'per_week' => trans_choice('scheduling::find.per_week', $perWeek(), ['n' => $perWeek()], 'en')], 'en'),
+                'sessions_per_block' => $perWeek() * 4,
+            ])
+            ->schema(fn () => [
+                TextInput::make('name_ar')->label(__('scheduling::find.enroll.plan_name_ar'))->required()->maxLength(120),
+                TextInput::make('name_en')->label(__('scheduling::find.enroll.plan_name_en'))->required()->maxLength(120),
+                TextInput::make('sessions_per_block')->label(__('scheduling::find.enroll.plan_block'))->numeric()->integer()->minValue(1)->maxValue(200)->required(),
+                ...collect($this->regions())->map(fn (RegionOption $r) => TextInput::make('price_'.$r->id)
+                    ->label(__('scheduling::find.enroll.plan_price', ['region' => $r->name, 'currency' => $r->currency]))
+                    ->numeric()->minValue(0)->required($r->isDefault))->all(),
+            ])
+            ->action(function (array $data, Set $set) use ($perWeek, $minutes) {
+                $prices = collect($this->regions())
+                    ->mapWithKeys(fn (RegionOption $r) => [$r->id => (string) ($data['price_'.$r->id] ?? '')])
+                    ->filter(fn (string $amount) => $amount !== '')->all();
+                $id = app(BillingApi::class)->createPlan(new NewPlan(
+                    trim($data['name_ar']), trim($data['name_en']), $minutes(), $perWeek(), (int) $data['sessions_per_block'], $prices,
+                ));
+                $set('plan_id', $id);
+                Notification::make()->success()->title(__('scheduling::find.enroll.plan_created'))->send();
+            });
+    }
+
     private function joining(Get $get): bool
     {
         $plan = collect($this->matchingPlans())->firstWhere('id', $get('plan_id'));
