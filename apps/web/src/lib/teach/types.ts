@@ -223,13 +223,23 @@ export type ShiftProposal = {
   week: ShiftWeek;
   /** The version before the academy's counter-offer, to show what changed. */
   previous_week: ShiftWeek | null;
-  comments: { mine: boolean; body: string; at: LocalTime | null }[];
+  submitted_at?: LocalTime | null;
+  /** author_role system: a step the proposal took, written down by the academy's system. */
+  comments: { author_role?: 'teacher' | 'admin' | 'system'; mine: boolean; body: string; at: LocalTime | null }[];
 };
+
+/** An approved schedule that starts on a later day; `current` stays until then. */
+export type UpcomingShifts = { starts_on: LocalTime; version: number; timezone: string; weekly_minutes: number; blocks: ShiftBlock[] };
+
+/** A decided proposal (approved, superseded, rejected); `reason` for a rejected one only. */
+export type ShiftDecision = { id: string; status: string; status_label: string; effective_from: string; decided_at: LocalTime | null; reason: string | null };
 
 export type Shifts = {
   timezone: string;
   current: ShiftWeek;
+  upcoming?: UpcomingShifts | null;
   proposal: ShiftProposal | null;
+  history?: ShiftDecision[];
   earliest_start: { adding_time: string; removing_time: string };
 };
 

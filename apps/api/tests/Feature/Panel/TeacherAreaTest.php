@@ -3,10 +3,15 @@
 use Carbon\CarbonImmutable;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
+use Modules\Identity\Enums\Role;
+use Modules\Identity\Models\User;
 use Modules\Learning\Filament\Teacher\MyStudents;
 use Modules\Learning\Filament\Teacher\StudentProgress;
+use Modules\Scheduling\Actions\Shifts\ApproveShiftProposal;
+use Modules\Scheduling\Actions\Shifts\SaveShiftProposal;
 use Modules\Scheduling\Domain\Enums\ShiftProposalStatus;
 use Modules\Scheduling\Domain\Models\ShiftProposal;
+use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
 use Modules\Scheduling\Filament\Teacher\MyAvailability;
 use Modules\Scheduling\Filament\Teacher\MyWeek;
 use Tests\Support\EnrolledStudent;
@@ -74,4 +79,34 @@ it('says why hours were not sent, and keeps nothing', function () {
         ->assertNotified(__('scheduling::teacher.availability.not_sent'));
 
     expect(ShiftProposal::query()->where('teacher_id', $this->teacher->id)->where('status', '<>', 'draft')->exists())->toBeFalse();
+});
+
+it('shows the teacher a schedule approved to start later, and starts the next proposal from it', function () {
+    // Monday added from Monday the 12th, approved by the office: today's week stays until then.
+    $proposal = app(SaveShiftProposal::class)->handle($this->teacher->id, WeeklyShifts::fromArray([
+        ['weekday' => 2, 'start' => '17:00', 'end' => '21:00'],
+        ['weekday' => 6, 'start' => '17:00', 'end' => '21:00'],
+        ['weekday' => 1, 'start' => '10:00', 'end' => '13:00'],
+    ], 'Africa/Cairo'), CarbonImmutable::parse('2026-10-12'));
+    app(ApproveShiftProposal::class)->handle($proposal->refresh(), User::factory()->withRole(Role::Admin)->create()->id, 'admin');
+
+    Livewire::test(MyAvailability::class)
+        ->assertSee(__('scheduling::teacher.availability.upcoming', ['date' => 'Monday 12 October']))
+        ->assertSee(__('scheduling::review.summary.hours', ['before' => 8, 'after' => 11, 'arrow' => __('scheduling::shifts.arrow')]))
+        ->assertSeeHtml('data-kind="added"')                                // Monday's new hours in the grid
+        ->assertSet('data.effective_from', '2026-10-12')
+        ->assertCount('data.blocks', 3)
+        ->assertDontSee(__('scheduling::teacher.availability.your_proposal'));
+});
+
+it('shows an open proposal in steps, with the conversation as bubbles and its steps between them', function () {
+    Livewire::test(MyAvailability::class)->call('send');
+    Livewire::test(MyAvailability::class)
+        ->set('reply', 'Saturday mornings work too.')->call('comment')
+        ->assertSeeHtml('aria-current="step"')
+        ->assertSee(__('scheduling::teacher.availability.steps.review'))
+        ->assertSee(__('scheduling::teacher.availability.review_hint'))
+        ->assertSee(__('scheduling::teacher.availability.sent_event'))
+        ->assertSeeHtml('data-mine="true"')
+        ->assertSee('Saturday mornings work too.');
 });

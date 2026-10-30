@@ -52,6 +52,7 @@ import '../../features/teaching/presentation/pages/marking_page.dart';
 import '../../features/teaching/presentation/pages/more_page.dart';
 import '../../features/teaching/presentation/pages/report_page.dart';
 import '../../features/teaching/presentation/pages/shift_editor_page.dart';
+import '../../features/teaching/presentation/pages/shift_chat_page.dart';
 import '../../features/teaching/presentation/pages/shifts_page.dart';
 import '../../features/teaching/presentation/pages/reports_page.dart';
 import '../../features/teaching/presentation/pages/students_page.dart';
@@ -209,6 +210,8 @@ GoRouter buildRouter(SessionCubit session) {
             pageBuilder: (_, s) =>
                 fadeScalePage(s, s.extra is ShiftDraft ? ShiftEditorPage(draft: s.extra! as ShiftDraft) : const ShiftsPage()),
           ),
+          // The open proposal's conversation with the academy.
+          GoRoute(path: 'chat', pageBuilder: (_, s) => fadeScalePage(s, const ShiftChatPage())),
         ],
       ),
       page('/reports/:enrollment', (s) => ReportsPage(enrollmentId: s.pathParameters['enrollment'], title: s.uri.queryParameters['title'])),

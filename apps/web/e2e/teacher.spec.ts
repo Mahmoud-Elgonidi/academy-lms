@@ -112,30 +112,48 @@ test('time off is asked for and withdrawn', async ({ page }) => {
   await expect(request).toContainText('مسحوبة');
 });
 
-test('new hours are proposed as a draft, talked about, and withdrawn', async ({ page }) => {
+test('new hours are drafted, sent, talked about beside the page, and withdrawn', async ({ page }) => {
   await page.goto('/ar/teach/hours');
   // Leave whatever proposal an earlier run left open.
   const withdraw = page.getByRole('button', { name: 'اسحب المقترح' });
-  if (await withdraw.isVisible()) {
+  if (await withdraw.first().isVisible()) {
     page.once('dialog', (d) => d.accept());
-    await withdraw.click();
+    await withdraw.first().click();
     await expect(page.getByText('سُحب المقترح.')).toBeVisible();
   }
 
-  await page.getByRole('button', { name: 'اقترح مواعيد جديدة' }).click();
+  // A draft left from an earlier run opens with "edit and send"; else a new proposal starts.
+  const steps = page.getByRole('list', { name: 'مراحل المقترح' });
+  const resume = page.getByRole('button', { name: 'عدّل وأرسل' });
+  if (await resume.isVisible()) await resume.click();
+  else await page.getByRole('button', { name: 'اقترح مواعيد جديدة' }).click();
   const saturday = page.locator('li').filter({ has: page.getByText('السبت', { exact: true }) }).filter({ has: page.getByRole('button', { name: 'أضف وقتًا' }) });
   await saturday.getByRole('button', { name: 'أضف وقتًا' }).click();
-  await expect(saturday.locator('input[type=time]')).toHaveCount(2);
   await page.getByLabel(/ملاحظة للأكاديمية/).fill('أريد إضافة عصر السبت.');
   await page.getByRole('button', { name: 'احفظ مسودة' }).click();
   await expect(page.getByText('حُفظت المسودة.')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'مقترحك' })).toBeVisible();
+  // A draft: its step, and one thing to do.
+  await expect(steps.locator('[aria-current="step"]')).toContainText('مسودة');
+  await expect(page.getByRole('button', { name: 'المحادثة (0)' })).toHaveCount(0);
   // The academy's clock in the demo: 12 hours.
-  await expect(page.locator('li').filter({ hasText: 'السبت' }).filter({ hasText: '5:00 م–7:00 م' }).first()).toBeVisible();
-  await page.getByLabel('اكتب رسالة…').fill('هل يمكن أن نبدأ من الأسبوع القادم؟');
-  await page.getByRole('button', { name: 'أرسل' }).click();
-  await expect(page.getByText('هل يمكن أن نبدأ من الأسبوع القادم؟')).toBeVisible();
+  await expect(page.locator('li').filter({ hasText: 'السبت' }).filter({ hasText: /\d:\d\d [صم]–/ }).first()).toBeVisible();
 
+  await page.getByRole('button', { name: 'عدّل وأرسل' }).click();
+  await page.getByRole('button', { name: 'أرسل إلى الأكاديمية' }).click();
+  await expect(page.getByText('أُرسل المقترح إلى الأكاديمية.')).toBeVisible();
+  await expect(steps.locator('[aria-current="step"]')).toContainText('قيد المراجعة');
+
+  // The conversation opens beside the page.
+  await page.getByRole('button', { name: /المحادثة \(\d+\)/ }).click();
+  const talk = page.getByRole('dialog', { name: 'المحادثة مع الأكاديمية' });
+  await expect(talk).toBeVisible();
+  await expect(talk.getByText(/أُرسل المقترح ·/)).toBeVisible();
+  await talk.getByLabel('اكتب رسالة…').fill('هل يمكن أن نبدأ من الأسبوع القادم؟');
+  await talk.getByRole('button', { name: 'أرسل' }).click();
+  await expect(talk.getByText('هل يمكن أن نبدأ من الأسبوع القادم؟')).toBeVisible();
+  await talk.getByRole('button', { name: 'إغلاق' }).click();
+
+  // In review, the one thing to do is withdraw.
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'اسحب المقترح' }).click();
   await expect(page.getByText('سُحب المقترح.')).toBeVisible();

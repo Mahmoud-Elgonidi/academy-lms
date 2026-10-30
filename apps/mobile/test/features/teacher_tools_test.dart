@@ -203,16 +203,25 @@ void main() {
     await tester.tap(find.text('مواعيدي'));
     await frames(tester, 12);
     expect(find.text('عدّلت الأكاديمية مقترحك. هذا ما تغيّر:'), findsOneWidget);
+    expect(find.text('عرض مضاد'), findsOneWidget);
     // Saturday was added, Thursday's span removed: written on the reader's clock (12 hours here).
     expect(find.text('4:00 م – 8:00 م'), findsOneWidget);
+    // The conversation sits behind one row, not under the proposal.
+    expect(find.text('الخميس مليان، ينفع السبت؟'), findsNothing);
+    await tester.scrollUntilVisible(find.text('المحادثة (1)'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('المحادثة (1)'));
+    await frames(tester, 12);
     expect(find.text('الخميس مليان، ينفع السبت؟'), findsOneWidget);
 
-    await tester.enterText(find.byType(TextField).last, 'تمام، السبت مناسب');
-    await tester.tap(find.byTooltip('أرسل'));
+    await tester.enterText(find.byKey(const Key('shift-message')), 'تمام، السبت مناسب');
+    await tester.tap(find.byKey(const Key('shift-send')));
     await frames(tester, 6);
     expect(app.api.sent('POST', 'teacher/shifts/proposal/comments').single.data, {'body': 'تمام، السبت مناسب'});
     expect(find.text('تمام، السبت مناسب'), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await frames(tester, 12);
 
+    await tester.scrollUntilVisible(find.text('موافق على التعديل'), -300, scrollable: find.byType(Scrollable).first);
     await tester.tap(find.text('موافق على التعديل'));
     await frames(tester, 10);
     expect(app.api.sent('POST', 'teacher/shifts/proposal/accept'), hasLength(1));

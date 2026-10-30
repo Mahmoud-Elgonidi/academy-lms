@@ -2714,7 +2714,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get currentWeek => 'Approved hours';
+  String get currentWeek => 'Your current schedule';
 
   @override
   String get noHoursYet => 'No approved hours yet.';
@@ -2724,12 +2724,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yourProposal => 'Your proposal';
-
-  @override
-  String get waitingOnAcademy => 'Waiting for the academy';
-
-  @override
-  String get waitingOnYou => 'Waiting for you';
 
   @override
   String startsOn(String date) {
@@ -2747,9 +2741,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get acceptCounter => 'Accept the change';
-
-  @override
-  String get editProposal => 'Edit the proposal';
 
   @override
   String get withdrawConfirm => 'Withdraw the proposal? Your approved hours stay as they are.';
@@ -2806,6 +2797,102 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get untilMidnight => 'Until midnight';
+
+  @override
+  String upcomingTitle(String date) {
+    return 'A new schedule starts $date';
+  }
+
+  @override
+  String get upcomingNote => 'The academy approved it; your current schedule stays until that day.';
+
+  @override
+  String hoursChange(String before, String after) {
+    return 'From $before to $after a week';
+  }
+
+  @override
+  String hoursSame(String h) {
+    return 'The same $h a week, at other times';
+  }
+
+  @override
+  String get stepDraft => 'Draft';
+
+  @override
+  String get stepSent => 'Sent';
+
+  @override
+  String get stepReview => 'In review';
+
+  @override
+  String get stepDecision => 'Decision';
+
+  @override
+  String get stepCountered => 'Counter-offer';
+
+  @override
+  String get stepChanges => 'Changes asked';
+
+  @override
+  String get stepApproved => 'Approved';
+
+  @override
+  String get stepRejected => 'Rejected';
+
+  @override
+  String get stageDraft => 'The draft is saved and not sent yet.';
+
+  @override
+  String get stageReview => 'The academy has your proposal; we will tell you when it answers.';
+
+  @override
+  String get stageChanges => 'The academy asked for changes. Read the conversation, then edit and send.';
+
+  @override
+  String get stageApproved => 'Your proposal was approved.';
+
+  @override
+  String get stageRejected => 'The academy did not approve your proposal; your schedule stays as it is.';
+
+  @override
+  String reasonLine(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String get editAndSend => 'Edit and send';
+
+  @override
+  String get withdrawProposal => 'Withdraw the proposal';
+
+  @override
+  String get newProposalHint => 'Want other hours? Propose a schedule and the academy reviews it.';
+
+  @override
+  String conversationCount(int n) {
+    return 'Conversation ($n)';
+  }
+
+  @override
+  String get conversationStart => 'Write to the academy about your proposal.';
+
+  @override
+  String get conversationEmpty => 'No messages yet. Write to the academy; its answer comes here.';
+
+  @override
+  String get conversationClosed => 'There is no open proposal now, so nothing can be written here.';
+
+  @override
+  String get proposalSentEvent => 'Proposal sent';
+
+  @override
+  String get earlierProposals => 'Earlier';
+
+  @override
+  String askedToStart(String date) {
+    return 'Asked to start $date';
+  }
 
   @override
   String get inboxTitle => 'Notifications';

@@ -27,11 +27,15 @@ use Modules\Scheduling\Actions\Shifts\ShiftProposals;
 use Modules\Scheduling\Actions\Shifts\WithdrawShiftProposal;
 use Modules\Scheduling\Domain\Enums\ShiftProposalStatus;
 use Modules\Scheduling\Domain\Models\ShiftProposal;
+use Modules\Scheduling\Domain\Models\ShiftProposalComment;
+use Modules\Scheduling\Domain\Models\ShiftSchedule;
 use Modules\Scheduling\Domain\Shifts\ShiftBlock;
 use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
+use Modules\Scheduling\Filament\ShiftProposalView;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
+use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
  * The teacher's hours: the week in force, and a proposal for a new one
@@ -77,11 +81,16 @@ final class MyAvailability extends Page
     public function mount(): void
     {
         $proposal = $this->proposal;
-        $shifts = $proposal && $proposal->status !== ShiftProposalStatus::Submitted ? $proposal->shifts() : $this->current();
+        // A new proposal starts from the latest approved week (one that starts later, else today's), and not before it begins.
+        $shifts = $proposal && $proposal->status !== ShiftProposalStatus::Submitted
+            ? $proposal->shifts()
+            : app(ShiftProposals::class)->latestShifts((string) auth()->id(), $this->today(), $this->timezone());
+        $tomorrow = $this->today()->addDay()->toDateString();
+        $later = $this->upcomingSchedule()?->effectiveFrom()->toDateString();
 
         $this->form->fill([
             'blocks' => array_map(fn (ShiftBlock $b) => ['weekday' => $b->weekday, 'start' => $b->start(), 'end' => $b->end() === '24:00' ? '23:55' : $b->end()], $shifts->blocks),
-            'effective_from' => $proposal?->effective_from->toDateString() ?? $this->today()->addDay()->toDateString(),
+            'effective_from' => $proposal?->effective_from->toDateString() ?? ($later !== null && $later > $tomorrow ? $later : $tomorrow),
             'note' => $proposal?->note,
         ]);
     }
@@ -136,7 +145,7 @@ final class MyAvailability extends Page
         abort_unless($this->proposal !== null, 404);
         app(CommentOnShiftProposal::class)->handle($this->proposal, (string) auth()->id(), 'teacher', $this->reply);
         $this->reply = '';
-        unset($this->proposal);
+        unset($this->proposal, $this->upcoming);
     }
 
     #[Computed]
@@ -145,16 +154,93 @@ final class MyAvailability extends Page
         return app(ShiftProposals::class)->openOrDraft((string) auth()->id())?->load('rules', 'comments');
     }
 
-    /** @return array<int, list<string>> weekday => "from – to" in force today */
-    public function week(?WeeklyShifts $shifts = null): array
+    /**
+     * The week in force, as the admins' day grid shows it.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function currentGrid(): array
     {
-        $out = [];
-        foreach (($shifts ?? $this->current())->blocks as $b) {
-            $out[$b->weekday][] = Clock::wall($b->start()).' – '.Clock::wall($b->end());
-        }
-        ksort($out);
+        return app(ShiftProposalView::class)->compare($this->current(), $this->current());
+    }
 
-        return $out;
+    /**
+     * An approved schedule that starts later: its first day, the hours before and after, and both weeks side by side.
+     *
+     * @return array{from: string, summary: array<string, mixed>, week: list<array<string, mixed>>}|null
+     */
+    #[Computed]
+    public function upcoming(): ?array
+    {
+        $upcoming = $this->upcomingSchedule();
+        if ($upcoming === null) {
+            return null;
+        }
+        $view = app(ShiftProposalView::class);
+
+        return [
+            'from' => $upcoming->effectiveFrom()->locale(app()->getLocale())->translatedFormat('l j F'),
+            'summary' => $view->summary($this->current(), $upcoming->shifts()),
+            'week' => $view->compare($this->current(), $upcoming->shifts()),
+        ];
+    }
+
+    /**
+     * Where the proposal stands: four steps (draft, sent, in review, the academy's answer) and the one it is on.
+     *
+     * @return array{steps: list<array{label: string, state: string}>, tone: string}|null
+     */
+    public function steps(): ?array
+    {
+        $status = $this->proposal?->status;
+        if ($status === null) {
+            return null;
+        }
+        $l = 'scheduling::teacher.availability.steps.';
+        $at = match ($status) {
+            ShiftProposalStatus::Draft => 0,
+            ShiftProposalStatus::Submitted => 2,
+            default => 3,
+        };
+        $answer = match ($status) {
+            ShiftProposalStatus::Countered => __($l.'countered'),
+            ShiftProposalStatus::ChangesRequested => __($l.'changes'),
+            default => __($l.'decision'),
+        };
+        $labels = [__($l.'draft'), __($l.'sent'), __($l.'review'), $answer];
+
+        return [
+            'steps' => array_map(fn (int $i) => ['label' => $labels[$i], 'state' => $i < $at ? 'done' : ($i === $at ? 'now' : 'next')], array_keys($labels)),
+            'tone' => $at === 3 ? 'warning' : 'primary',
+        ];
+    }
+
+    /**
+     * The conversation in time order: the teacher's words and the academy's as bubbles, the proposal's steps as small lines.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function thread(): array
+    {
+        $p = $this->proposal;
+        if ($p === null) {
+            return [];
+        }
+        $zone = app(ViewerTimezone::class)->effective();
+        $when = fn (CarbonImmutable $at) => $at->setTimezone($zone)->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M · H:i'));
+        $items = [];
+        if ($p->submitted_at !== null) {
+            $items[] = ['type' => 'event', 'text' => __('scheduling::teacher.availability.sent_event'), 'at' => $when($p->submitted_at), 'ts' => $p->submitted_at->getTimestamp()];
+        }
+        foreach ($p->comments as $c) {
+            /** @var ShiftProposalComment $c */
+            $items[] = $c->author_role === 'system'
+                ? ['type' => 'event', 'text' => $c->body, 'at' => $when($c->created_at), 'ts' => $c->created_at->getTimestamp()]
+                : ['type' => 'message', 'mine' => $c->author_id === $p->teacher_id, 'who' => __('scheduling::shifts.roles.'.$c->author_role), 'body' => $c->body, 'at' => $when($c->created_at), 'ts' => $c->created_at->getTimestamp()];
+        }
+        usort($items, fn (array $a, array $b) => $a['ts'] <=> $b['ts']);
+
+        return $items;
     }
 
     public function current(): WeeklyShifts
@@ -190,8 +276,13 @@ final class MyAvailability extends Page
 
     private function done(string $message): void
     {
-        unset($this->proposal);
+        unset($this->proposal, $this->upcoming);
         Notification::make()->success()->title($message)->send();
+    }
+
+    private function upcomingSchedule(): ?ShiftSchedule
+    {
+        return app(ShiftProposals::class)->upcoming((string) auth()->id(), $this->today());
     }
 
     private function timezone(): string

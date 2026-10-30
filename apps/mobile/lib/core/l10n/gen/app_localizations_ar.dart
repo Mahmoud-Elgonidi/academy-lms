@@ -2869,7 +2869,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get currentWeek => 'المواعيد المعتمدة';
+  String get currentWeek => 'جدولك الحالي';
 
   @override
   String get noHoursYet => 'لا توجد مواعيد معتمدة بعد.';
@@ -2879,12 +2879,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get yourProposal => 'مقترحك';
-
-  @override
-  String get waitingOnAcademy => 'بانتظار رد الأكاديمية';
-
-  @override
-  String get waitingOnYou => 'بانتظار ردك';
 
   @override
   String startsOn(String date) {
@@ -2902,9 +2896,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get acceptCounter => 'موافق على التعديل';
-
-  @override
-  String get editProposal => 'عدّل المقترح';
 
   @override
   String get withdrawConfirm => 'أتسحب المقترح؟ ستبقى المواعيد المعتمدة كما هي.';
@@ -2961,6 +2952,102 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get untilMidnight => 'حتى منتصف الليل';
+
+  @override
+  String upcomingTitle(String date) {
+    return 'جدول جديد يبدأ $date';
+  }
+
+  @override
+  String get upcomingNote => 'اعتمدته الأكاديمية، ويبقى جدولك الحالي حتى ذلك اليوم.';
+
+  @override
+  String hoursChange(String before, String after) {
+    return 'من $before إلى $after في الأسبوع';
+  }
+
+  @override
+  String hoursSame(String h) {
+    return '$h في الأسبوع كما هي، بأوقات أخرى';
+  }
+
+  @override
+  String get stepDraft => 'مسودة';
+
+  @override
+  String get stepSent => 'أُرسل';
+
+  @override
+  String get stepReview => 'قيد المراجعة';
+
+  @override
+  String get stepDecision => 'القرار';
+
+  @override
+  String get stepCountered => 'عرض مضاد';
+
+  @override
+  String get stepChanges => 'طُلب تعديل';
+
+  @override
+  String get stepApproved => 'معتمد';
+
+  @override
+  String get stepRejected => 'مرفوض';
+
+  @override
+  String get stageDraft => 'المسودة محفوظة على حسابك ولم تُرسل بعد.';
+
+  @override
+  String get stageReview => 'وصل مقترحك إلى الأكاديمية، وسنخبرك حين ترد.';
+
+  @override
+  String get stageChanges => 'طلبت الأكاديمية تعديلًا. اقرأ المحادثة، ثم عدّل المقترح وأرسله.';
+
+  @override
+  String get stageApproved => 'اعتُمد مقترحك.';
+
+  @override
+  String get stageRejected => 'لم تعتمد الأكاديمية مقترحك، ويبقى جدولك كما هو.';
+
+  @override
+  String reasonLine(String reason) {
+    return 'السبب: $reason';
+  }
+
+  @override
+  String get editAndSend => 'عدّل وأرسل';
+
+  @override
+  String get withdrawProposal => 'اسحب المقترح';
+
+  @override
+  String get newProposalHint => 'تريد تغيير أوقاتك؟ اقترح جدولًا، وتراجعه الأكاديمية.';
+
+  @override
+  String conversationCount(int n) {
+    return 'المحادثة ($n)';
+  }
+
+  @override
+  String get conversationStart => 'اكتب للأكاديمية عن مقترحك.';
+
+  @override
+  String get conversationEmpty => 'لا رسائل بعد. اكتب للأكاديمية، وسيصلك ردها هنا.';
+
+  @override
+  String get conversationClosed => 'لا يوجد مقترح مفتوح الآن، فلا يمكن الكتابة هنا.';
+
+  @override
+  String get proposalSentEvent => 'أُرسل المقترح';
+
+  @override
+  String get earlierProposals => 'السابقة';
+
+  @override
+  String askedToStart(String date) {
+    return 'طُلب أن يبدأ $date';
+  }
 
   @override
   String get inboxTitle => 'الإشعارات';

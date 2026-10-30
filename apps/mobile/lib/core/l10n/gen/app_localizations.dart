@@ -4709,7 +4709,7 @@ abstract class AppLocalizations {
   /// No description provided for @currentWeek.
   ///
   /// In ar, this message translates to:
-  /// **'المواعيد المعتمدة'**
+  /// **'جدولك الحالي'**
   String get currentWeek;
 
   /// No description provided for @noHoursYet.
@@ -4729,18 +4729,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'مقترحك'**
   String get yourProposal;
-
-  /// No description provided for @waitingOnAcademy.
-  ///
-  /// In ar, this message translates to:
-  /// **'بانتظار رد الأكاديمية'**
-  String get waitingOnAcademy;
-
-  /// No description provided for @waitingOnYou.
-  ///
-  /// In ar, this message translates to:
-  /// **'بانتظار ردك'**
-  String get waitingOnYou;
 
   /// No description provided for @startsOn.
   ///
@@ -4771,12 +4759,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'موافق على التعديل'**
   String get acceptCounter;
-
-  /// No description provided for @editProposal.
-  ///
-  /// In ar, this message translates to:
-  /// **'عدّل المقترح'**
-  String get editProposal;
 
   /// No description provided for @withdrawConfirm.
   ///
@@ -4885,6 +4867,174 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'حتى منتصف الليل'**
   String get untilMidnight;
+
+  /// No description provided for @upcomingTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'جدول جديد يبدأ {date}'**
+  String upcomingTitle(String date);
+
+  /// No description provided for @upcomingNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'اعتمدته الأكاديمية، ويبقى جدولك الحالي حتى ذلك اليوم.'**
+  String get upcomingNote;
+
+  /// No description provided for @hoursChange.
+  ///
+  /// In ar, this message translates to:
+  /// **'من {before} إلى {after} في الأسبوع'**
+  String hoursChange(String before, String after);
+
+  /// No description provided for @hoursSame.
+  ///
+  /// In ar, this message translates to:
+  /// **'{h} في الأسبوع كما هي، بأوقات أخرى'**
+  String hoursSame(String h);
+
+  /// No description provided for @stepDraft.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسودة'**
+  String get stepDraft;
+
+  /// No description provided for @stepSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُرسل'**
+  String get stepSent;
+
+  /// No description provided for @stepReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'قيد المراجعة'**
+  String get stepReview;
+
+  /// No description provided for @stepDecision.
+  ///
+  /// In ar, this message translates to:
+  /// **'القرار'**
+  String get stepDecision;
+
+  /// No description provided for @stepCountered.
+  ///
+  /// In ar, this message translates to:
+  /// **'عرض مضاد'**
+  String get stepCountered;
+
+  /// No description provided for @stepChanges.
+  ///
+  /// In ar, this message translates to:
+  /// **'طُلب تعديل'**
+  String get stepChanges;
+
+  /// No description provided for @stepApproved.
+  ///
+  /// In ar, this message translates to:
+  /// **'معتمد'**
+  String get stepApproved;
+
+  /// No description provided for @stepRejected.
+  ///
+  /// In ar, this message translates to:
+  /// **'مرفوض'**
+  String get stepRejected;
+
+  /// No description provided for @stageDraft.
+  ///
+  /// In ar, this message translates to:
+  /// **'المسودة محفوظة على حسابك ولم تُرسل بعد.'**
+  String get stageDraft;
+
+  /// No description provided for @stageReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'وصل مقترحك إلى الأكاديمية، وسنخبرك حين ترد.'**
+  String get stageReview;
+
+  /// No description provided for @stageChanges.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلبت الأكاديمية تعديلًا. اقرأ المحادثة، ثم عدّل المقترح وأرسله.'**
+  String get stageChanges;
+
+  /// No description provided for @stageApproved.
+  ///
+  /// In ar, this message translates to:
+  /// **'اعتُمد مقترحك.'**
+  String get stageApproved;
+
+  /// No description provided for @stageRejected.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم تعتمد الأكاديمية مقترحك، ويبقى جدولك كما هو.'**
+  String get stageRejected;
+
+  /// No description provided for @reasonLine.
+  ///
+  /// In ar, this message translates to:
+  /// **'السبب: {reason}'**
+  String reasonLine(String reason);
+
+  /// No description provided for @editAndSend.
+  ///
+  /// In ar, this message translates to:
+  /// **'عدّل وأرسل'**
+  String get editAndSend;
+
+  /// No description provided for @withdrawProposal.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسحب المقترح'**
+  String get withdrawProposal;
+
+  /// No description provided for @newProposalHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'تريد تغيير أوقاتك؟ اقترح جدولًا، وتراجعه الأكاديمية.'**
+  String get newProposalHint;
+
+  /// No description provided for @conversationCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'المحادثة ({n})'**
+  String conversationCount(int n);
+
+  /// No description provided for @conversationStart.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب للأكاديمية عن مقترحك.'**
+  String get conversationStart;
+
+  /// No description provided for @conversationEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا رسائل بعد. اكتب للأكاديمية، وسيصلك ردها هنا.'**
+  String get conversationEmpty;
+
+  /// No description provided for @conversationClosed.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يوجد مقترح مفتوح الآن، فلا يمكن الكتابة هنا.'**
+  String get conversationClosed;
+
+  /// No description provided for @proposalSentEvent.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُرسل المقترح'**
+  String get proposalSentEvent;
+
+  /// No description provided for @earlierProposals.
+  ///
+  /// In ar, this message translates to:
+  /// **'السابقة'**
+  String get earlierProposals;
+
+  /// No description provided for @askedToStart.
+  ///
+  /// In ar, this message translates to:
+  /// **'طُلب أن يبدأ {date}'**
+  String askedToStart(String date);
 
   /// No description provided for @inboxTitle.
   ///

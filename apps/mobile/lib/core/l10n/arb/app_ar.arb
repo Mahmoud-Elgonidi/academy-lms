@@ -1933,12 +1933,10 @@
       }
     }
   },
-  "currentWeek": "المواعيد المعتمدة",
+  "currentWeek": "جدولك الحالي",
   "noHoursYet": "لا توجد مواعيد معتمدة بعد.",
   "proposeHours": "اقترح مواعيد جديدة",
   "yourProposal": "مقترحك",
-  "waitingOnAcademy": "بانتظار رد الأكاديمية",
-  "waitingOnYou": "بانتظار ردك",
   "startsOn": "يبدأ {date}",
   "@startsOn": {
     "placeholders": {
@@ -1951,7 +1949,6 @@
   "timeAdded": "أُضيف",
   "timeRemoved": "أُزيل",
   "acceptCounter": "موافق على التعديل",
-  "editProposal": "عدّل المقترح",
   "withdrawConfirm": "أتسحب المقترح؟ ستبقى المواعيد المعتمدة كما هي.",
   "proposalAccepted": "اعتُمدت مواعيدك.",
   "proposalSent": "أُرسل المقترح إلى الأكاديمية.",
@@ -1977,6 +1974,79 @@
   "sendProposal": "أرسل إلى الأكاديمية",
   "endAfterStart": "يجب أن يكون وقت النهاية بعد البداية.",
   "untilMidnight": "حتى منتصف الليل",
+  "upcomingTitle": "جدول جديد يبدأ {date}",
+  "@upcomingTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "upcomingNote": "اعتمدته الأكاديمية، ويبقى جدولك الحالي حتى ذلك اليوم.",
+  "hoursChange": "من {before} إلى {after} في الأسبوع",
+  "@hoursChange": {
+    "placeholders": {
+      "before": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      }
+    }
+  },
+  "hoursSame": "{h} في الأسبوع كما هي، بأوقات أخرى",
+  "@hoursSame": {
+    "placeholders": {
+      "h": {
+        "type": "String"
+      }
+    }
+  },
+  "stepDraft": "مسودة",
+  "stepSent": "أُرسل",
+  "stepReview": "قيد المراجعة",
+  "stepDecision": "القرار",
+  "stepCountered": "عرض مضاد",
+  "stepChanges": "طُلب تعديل",
+  "stepApproved": "معتمد",
+  "stepRejected": "مرفوض",
+  "stageDraft": "المسودة محفوظة على حسابك ولم تُرسل بعد.",
+  "stageReview": "وصل مقترحك إلى الأكاديمية، وسنخبرك حين ترد.",
+  "stageChanges": "طلبت الأكاديمية تعديلًا. اقرأ المحادثة، ثم عدّل المقترح وأرسله.",
+  "stageApproved": "اعتُمد مقترحك.",
+  "stageRejected": "لم تعتمد الأكاديمية مقترحك، ويبقى جدولك كما هو.",
+  "reasonLine": "السبب: {reason}",
+  "@reasonLine": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "editAndSend": "عدّل وأرسل",
+  "withdrawProposal": "اسحب المقترح",
+  "newProposalHint": "تريد تغيير أوقاتك؟ اقترح جدولًا، وتراجعه الأكاديمية.",
+  "conversationCount": "المحادثة ({n})",
+  "@conversationCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "conversationStart": "اكتب للأكاديمية عن مقترحك.",
+  "conversationEmpty": "لا رسائل بعد. اكتب للأكاديمية، وسيصلك ردها هنا.",
+  "conversationClosed": "لا يوجد مقترح مفتوح الآن، فلا يمكن الكتابة هنا.",
+  "proposalSentEvent": "أُرسل المقترح",
+  "earlierProposals": "السابقة",
+  "askedToStart": "طُلب أن يبدأ {date}",
+  "@askedToStart": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "inboxTitle": "الإشعارات",
   "markAllRead": "علّم الكل كمقروء",
   "noNotifications": "لا توجد إشعارات.",
