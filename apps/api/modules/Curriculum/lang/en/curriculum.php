@@ -80,6 +80,7 @@ return [
     ],
     'readiness' => [
         'title' => 'Ready to publish',
+        'complete' => 'content complete',
         'ready' => 'This version is ready to publish.',
         'ready_warnings' => 'You can publish; a few things are worth a look.',
         'blocked' => 'Not ready to publish yet.',

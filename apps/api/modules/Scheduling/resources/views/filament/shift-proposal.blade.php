@@ -92,14 +92,15 @@
                 @endforelse
             </ol>
             @if ($r['status']->isOpen())
-                <form class="spo-composer" wire:submit="sendReply(@js($r['id']))">
+                {{-- Not a <form>: the slide-over is one already, and a form inside it would end it early. --}}
+                <div class="spo-composer">
                     <textarea wire:model="reply" rows="1" maxlength="2000" placeholder="{{ __($l.'write_message') }}" aria-label="{{ __($l.'write_message') }}"></textarea>
                     @error('reply')<p class="sp-bad spo-error">{{ $message }}</p>@enderror
                     <div class="spo-composer-foot">
                         <small class="sp-muted">{{ __($l.'reply_hint') }}</small>
-                        <x-filament::button type="submit" size="sm">{{ __($l.'send') }}</x-filament::button>
+                        <x-filament::button type="button" size="sm" wire:click="sendReply(@js($r['id']))">{{ __($l.'send') }}</x-filament::button>
                     </div>
-                </form>
+                </div>
             @endif
         </section>
     </div>

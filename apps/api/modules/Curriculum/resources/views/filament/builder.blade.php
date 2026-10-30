@@ -21,7 +21,8 @@
         /* The readiness bar: stays in sight under the top bar while the tree scrolls. */
         .cb-ready { position: sticky; top: 4.5rem; z-index: 10; display: flex; flex-direction: column; gap: .5rem; padding: .75rem 1rem; border-radius: var(--radius-xl); background: white; border: 1px solid var(--gray-200); box-shadow: 0 6px 20px -14px rgb(0 0 0 / .35); }
         .cb-ready-top { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
-        .cb-ready-pct { font-size: 1.15rem; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 3.2rem; color: var(--success-700); }
+        .cb-ready-pct { font-size: 1.15rem; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 3.2rem; color: var(--success-700); display: flex; flex-direction: column; line-height: 1.1; }
+        .cb-ready-pct small { font-size: .68rem; font-weight: 600; color: var(--gray-500); }
         .cb-ready[data-state="warn"] .cb-ready-pct { color: var(--warning-700); }
         .cb-ready[data-state="blocked"] .cb-ready-pct { color: var(--danger-700); }
         .cb-ready-meter { flex: 1 1 8rem; min-width: 6rem; height: .5rem; border-radius: 999px; background: var(--gray-100); overflow: hidden; }
@@ -111,11 +112,11 @@
 
         /* An empty curriculum. */
         .cb-empty { display: flex; flex-direction: column; align-items: center; gap: .75rem; padding: 2.5rem 1.5rem; text-align: center; border: 1px dashed var(--gray-300); border-radius: var(--radius-xl); background: white; }
-        .cb-empty svg { width: 4.5rem; height: 4.5rem; color: var(--primary-500); }
+        .cb-empty > svg { width: 4.5rem; height: 4.5rem; color: var(--primary-500); }
         .cb-empty h2 { font-size: 1.15rem; font-weight: 700; }
         .cb-empty p { color: var(--gray-600); font-size: .9rem; max-width: 34rem; }
         .cb-empty .cb-quick { width: 100%; max-width: 28rem; padding: 0; }
-        .cb-ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .6rem; width: 100%; max-width: 40rem; }
+        .cb-ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: .6rem; width: 100%; max-width: 46rem; }
         .cb-way-card { display: flex; flex-direction: column; align-items: stretch; gap: .35rem; padding: .6rem; border-radius: var(--radius-xl); border: 1px solid var(--gray-200); background: var(--gray-50); }
         .cb-way-card .fi-btn { width: 100%; justify-content: center; }
         .cb-way-card small { color: var(--gray-500); font-size: .75rem; line-height: 1.35; }
@@ -159,7 +160,7 @@
             @endphp
             <div class="cb-ready" data-state="{{ $state }}" role="region" aria-label="{{ __('curriculum::curriculum.readiness.title') }}">
                 <div class="cb-ready-top">
-                    <span class="cb-ready-pct">{{ $readiness->percent }}%</span>
+                    <span class="cb-ready-pct">{{ $readiness->percent }}%<small>{{ __('curriculum::curriculum.readiness.complete') }}</small></span>
                     <span class="cb-ready-meter" aria-hidden="true"><i class="lms-bar-fill" style="width: {{ $readiness->percent }}%"></i></span>
                     <span class="cb-ready-say">{{ __('curriculum::curriculum.readiness.'.['blocked' => 'blocked', 'warn' => 'ready_warnings', 'ok' => 'ready'][$state]) }}</span>
                 </div>
