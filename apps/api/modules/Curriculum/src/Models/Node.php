@@ -33,6 +33,9 @@ final class Node extends Model
 
     public const MASTERY_RULES = ['mastered_once', 'score_twice'];
 
+    /** Where each kind may sit: levels at the top, units in a level, lessons in a unit or a level. */
+    public const PARENTS = ['level' => [null], 'unit' => ['level'], 'lesson' => ['unit', 'level']];
+
     protected $table = 'curriculum_nodes';
 
     protected $fillable = ['version_id', 'parent_id', 'kind', 'ordinal', 'title_ar', 'title_en', 'objectives', 'weight', 'est_sessions', 'mastery_rule', 'text_source'];

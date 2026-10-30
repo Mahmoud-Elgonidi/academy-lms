@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\LanguageModel;
 use Modules\SharedKernel\Ai\NoAi;
@@ -26,6 +27,7 @@ use Modules\SharedKernel\Ai\RecitationEngine;
 use Modules\SharedKernel\Ai\SpeechRecitation;
 use Modules\SharedKernel\Ai\SpeechToText;
 use Modules\SharedKernel\Auth\TimingSafeUserProvider;
+use Modules\SharedKernel\Filament\ShowRefusals;
 use Modules\SharedKernel\Files\ClamAvScanner;
 use Modules\SharedKernel\Files\NullUploadScanner;
 use Modules\SharedKernel\Files\UploadScanner;
@@ -86,6 +88,9 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->singleton(PersonalData::class);
         // What a new academy gets ready before its first families come, each module's steps, for the "Start here" page.
         $this->app->singleton(SetupChecklist::class);
+        // No silent refusal on any screen: a refusal keyed by something that is not a field shows as a notice.
+        // Before the providers boot, because Livewire sets up its component hooks while it boots.
+        $this->app->booting(fn () => Livewire::componentHook(ShowRefusals::class));
     }
 
     public function boot(): void

@@ -18,8 +18,6 @@ use Modules\Curriculum\Texts\QuranText;
  */
 final class SaveNode
 {
-    private const PARENTS = ['level' => [null], 'unit' => ['level'], 'lesson' => ['unit', 'level']];
-
     public function __construct(private readonly QuranText $quran) {}
 
     /** @param  array{kind?: string, parent_id?: ?string, title_ar: string, title_en: string, objectives?: ?string, weight?: int|string, est_sessions?: int|string, mastery_rule?: string, text_source?: ?array<string, mixed>}  $data */
@@ -34,7 +32,7 @@ final class SaveNode
             if ($node === null) {
                 $kind = $data['kind'] ?? 'lesson';
                 $parent = isset($data['parent_id']) ? Node::query()->where('version_id', $version->id)->find($data['parent_id']) : null;
-                if (! in_array($kind, Node::KINDS, true) || ! in_array($parent?->kind, self::PARENTS[$kind], true)) {
+                if (! in_array($kind, Node::KINDS, true) || ! in_array($parent?->kind, Node::PARENTS[$kind], true)) {
                     throw ValidationException::withMessages(['node' => __('curriculum::curriculum.errors.place')]);
                 }
                 $node = new Node([

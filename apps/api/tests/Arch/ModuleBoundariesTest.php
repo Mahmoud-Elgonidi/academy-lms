@@ -34,6 +34,10 @@ arch('curriculum knows only catalog\'s contracts and the shared kernel')
     ->and('Modules\Curriculum')
     ->not->toUse(['Modules\Catalog\Models', 'Modules\Catalog\Actions']);
 
+arch('curriculum\'s readiness to publish is pure')
+    ->expect('Modules\Curriculum\Domain')
+    ->toOnlyUse(['Modules\Curriculum\Domain', 'Modules\Curriculum\Contracts\DTOs']);
+
 arch('learning reaches other modules only through their contracts, and nothing depends on it')
     ->expect('Modules\Learning')
     ->not->toUse([

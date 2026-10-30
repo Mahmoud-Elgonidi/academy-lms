@@ -23,6 +23,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Modules\Catalog\Contracts\CatalogApi;
@@ -39,16 +40,20 @@ use Modules\Curriculum\Actions\SaveNode;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
 use Modules\Curriculum\Contracts\DTOs\TextSource;
+use Modules\Curriculum\Domain\PublishReadiness;
+use Modules\Curriculum\Domain\ReadinessItem;
 use Modules\Curriculum\Models\CurriculumVersion;
 use Modules\Curriculum\Models\Node;
 use Modules\Curriculum\Models\NodeItem;
 use Modules\Curriculum\Models\NodeResource;
 use Modules\Curriculum\Models\Program;
+use Modules\Curriculum\Queries\VersionReadiness;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Games\CatalogGame;
+use Modules\SharedKernel\Games\CatalogIsland;
 use Modules\SharedKernel\Games\GameCatalog;
 use Modules\SharedKernel\Games\ItemKind;
 
@@ -63,6 +68,14 @@ use Modules\SharedKernel\Games\ItemKind;
  * A lesson's text (typed, or a passage of the Quran) is set with the lesson;
  * when the academy turned the helper on, "Suggest practice" puts suggested
  * items in the practice form, marked, to look over and save.
+ *
+ * Built quickly: a title typed under a level or unit and Enter adds it
+ * (quickAdd, through SaveNode) with the field kept for the next one; rows are
+ * dragged within their parent and lessons between the units of a level
+ * (wire:sort, MoveNode::place), the arrows staying for the keyboard. A
+ * readiness bar (Domain\PublishReadiness, the same reading as PublishVersion)
+ * says what stops publishing and what is only worth a look, each item leading
+ * to its node; "Preview" draws the levels as the journey's islands.
  *
  * @property Program $record
  */
@@ -81,6 +94,9 @@ final class EditCurriculum extends Page
 
     /** The lesson whose materials are open under its row. */
     public ?string $openLesson = null;
+
+    /** @var array<string, string> what is typed in each quick-add field, by its parent's id ("root" for a new level) */
+    public array $quick = [];
 
     public function mount(int|string $record): void
     {
@@ -109,6 +125,95 @@ final class EditCurriculum extends Page
     public function tree(): CurriculumTree
     {
         return app(CurriculumApi::class)->tree($this->version()->id);
+    }
+
+    /** @return array{0: PublishReadiness, 1: CurriculumTree} */
+    #[Computed]
+    public function readiness(): array
+    {
+        return app(VersionReadiness::class)->read($this->version());
+    }
+
+    public function sayReadiness(ReadinessItem $item): string
+    {
+        return VersionReadiness::say($item, $this->readiness[1]);
+    }
+
+    /** @return array<string, string> lesson id => the kind of its text (text, quran) */
+    #[Computed]
+    public function texts(): array
+    {
+        return Node::query()->where('version_id', $this->version()->id)->where('kind', 'lesson')->whereNotNull('text_source')
+            ->get(['id', 'text_source'])->mapWithKeys(fn (Node $n) => [$n->id => (string) ($n->text_source['kind'] ?? '')])->filter()->all();
+    }
+
+    /**
+     * The quick ways to start an empty curriculum (an outline from the helper, a pasted list, a
+     * template, a copy of a program). None yet: the empty screen shows them once they exist.
+     *
+     * @return list<Action>
+     */
+    public function startWays(): array
+    {
+        return [];
+    }
+
+    /** What a quick-add field under $parent adds: a level at the top, a unit in a level that has units, else a lesson. */
+    public function quickKind(string $parent): string
+    {
+        if ($parent === 'root') {
+            return 'level';
+        }
+        $node = $this->tree->nodes[$parent] ?? null;
+        if ($node?->kind === 'level' && array_filter($this->tree->childrenOf($parent), fn ($n) => $n->kind === 'unit') !== []) {
+            return 'unit';
+        }
+
+        return 'lesson';
+    }
+
+    /** Adds what was typed in a quick-add field (Enter) and empties the field for the next one. */
+    public function quickAdd(string $parent): void
+    {
+        $title = trim((string) ($this->quick[$parent] ?? ''));
+        if ($title === '') {
+            return;
+        }
+        Validator::make(['title' => $title], ['title' => ['string', 'max:200']], [], ['title' => __('curriculum::curriculum.builder.quick.title')])->validate();
+        $kind = $this->quickKind($parent);
+        $this->saveNode(null, ['kind' => $kind, 'parent_id' => $parent === 'root' ? null : $this->node($parent)->id, 'title_ar' => $title, 'title_en' => $title]);
+        $this->quick[$parent] = '';
+    }
+
+    /**
+     * A row dropped by drag and drop (wire:sort): $position among the rows of the list it was dropped
+     * in, whose parent is $parentId (the list's wire:sort:group-id; none for the levels).
+     */
+    public function sortNode(string $nodeId, int $position, ?string $parentId = null): void
+    {
+        app(MoveNode::class)->place($this->node($nodeId), $parentId === null ? null : $this->node($parentId)->id, $position);
+        $this->forget();
+    }
+
+    /**
+     * The student's view of the program, without any learner: each level an island of the world in
+     * turn (as the journey draws them), its lessons the stations.
+     *
+     * @return list<array{title: string, art: ?CatalogIsland, stations: list<string>}>
+     */
+    public function previewIslands(): array
+    {
+        $islands = array_values(app(GameCatalog::class)->islands());
+        $out = [];
+        foreach ($this->tree->childrenOf(null) as $i => $level) {
+            $out[] = [
+                'title' => $level->title(),
+                'art' => $islands === [] ? null : $islands[$i % count($islands)],
+                'stations' => array_map(fn ($l) => $l->title(), $this->tree->lessons($level->id)),
+            ];
+        }
+
+        return $out;
     }
 
     public function toggleMaterials(string $nodeId): void
@@ -181,20 +286,47 @@ final class EditCurriculum extends Page
     public function move(string $nodeId, string $direction): void
     {
         app(MoveNode::class)->handle($this->node($nodeId), $direction === 'up' ? 'up' : 'down');
-        unset($this->tree);
+        $this->forget();
+    }
+
+    /** Drops what this request read of the tree, so the screen shows it as it now is. */
+    private function forget(): void
+    {
+        unset($this->tree, $this->readiness, $this->texts, $this->practiceCounts, $this->materialCounts, $this->playsIn);
     }
 
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('preview')
+                ->label(__('curriculum::curriculum.preview.action'))
+                ->icon(Heroicon::OutlinedEye)
+                ->color('gray')
+                ->visible(fn () => $this->tree->nodes !== [])
+                ->modalHeading(__('curriculum::curriculum.preview.title'))
+                ->modalDescription(__('curriculum::curriculum.preview.hint'))
+                ->modalWidth('4xl')
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel(__('curriculum::curriculum.preview.close'))
+                ->modalContent(fn () => view('curriculum::filament.preview', ['islands' => $this->previewIslands()])),
+            // Closed with the reason while something stops it (the readiness bar lists it); else its
+            // confirmation names what is only worth a look. PublishVersion checks the same again.
             Action::make('publish')
                 ->label(__('curriculum::curriculum.builder.publish'))
                 ->icon(Heroicon::OutlinedCheckBadge)
                 ->visible(fn () => $this->version()->status === 'draft')
+                ->disabled(fn () => ! $this->readiness[0]->canPublish())
+                ->tooltip(fn () => $this->readiness[0]->canPublish() ? null : __('curriculum::curriculum.readiness.closed', [
+                    'reason' => $this->sayReadiness($this->readiness[0]->blockers()[0]),
+                ]))
                 ->requiresConfirmation()
                 ->modalDescription(__('curriculum::curriculum.builder.publish_hint'))
+                ->modalContent(fn () => $this->readiness[0]->warnings() === [] ? null : view('curriculum::filament.publish-warnings', [
+                    'warnings' => array_map(fn (ReadinessItem $w) => $this->sayReadiness($w), $this->readiness[0]->warnings()),
+                ]))
                 ->action(function () {
                     app(PublishVersion::class)->handle($this->version(), (string) auth()->id());
+                    $this->forget();
                     Notification::make()->success()->title(__('curriculum::curriculum.builder.published'))->send();
                 }),
             Action::make('addLevel')
@@ -208,13 +340,18 @@ final class EditCurriculum extends Page
 
     public function addChildAction(): Action
     {
+        // With `details`, the quick-add field's full form: what was typed there comes along.
         return Action::make('addChild')
-            ->label(fn (array $arguments) => __('curriculum::curriculum.builder.add_'.($arguments['kind'] ?? 'lesson')))
-            ->icon(Heroicon::OutlinedPlus)
+            ->label(fn (array $arguments) => __('curriculum::curriculum.builder.'.(($arguments['details'] ?? false) ? 'quick.details' : 'add_'.($arguments['kind'] ?? 'lesson'))))
+            ->icon(fn (array $arguments) => ($arguments['details'] ?? false) ? Heroicon::OutlinedAdjustmentsHorizontal : Heroicon::OutlinedPlus)
             ->link()->size('sm')
             ->modalHeading(fn (array $arguments) => __('curriculum::curriculum.builder.add_'.($arguments['kind'] ?? 'lesson')))
+            ->fillForm(fn (array $arguments) => array_fill_keys(['title_ar', 'title_en'], trim((string) ($this->quick[$arguments['node'] ?? 'root'] ?? ''))))
             ->schema(fn (array $arguments) => $this->nodeSchema($arguments['kind'] ?? 'lesson'))
-            ->action(fn (array $data, array $arguments) => $this->saveNode(null, ['kind' => $arguments['kind'] ?? 'lesson', 'parent_id' => $arguments['node']] + $data));
+            ->action(function (array $data, array $arguments) {
+                $this->saveNode(null, ['kind' => $arguments['kind'] ?? 'lesson', 'parent_id' => $arguments['node'] ?? null] + $data);
+                $this->quick[$arguments['node'] ?? 'root'] = '';
+            });
     }
 
     public function editNodeAction(): Action
@@ -240,7 +377,7 @@ final class EditCurriculum extends Page
             ->modalDescription(__('curriculum::curriculum.builder.delete_confirm'))
             ->action(function (array $arguments) {
                 app(DeleteNode::class)->handle($this->node($arguments['node']));
-                unset($this->tree);
+                $this->forget();
             });
     }
 
@@ -361,7 +498,7 @@ final class EditCurriculum extends Page
                 $this->attempt($action, fn () => app(SaveNodeItems::class)->handle(
                     $this->node($arguments['node']), array_values($data['items'] ?? []), (string) auth()->id(),
                 ), __($l.'saved'));
-                unset($this->practiceCounts, $this->playsIn);
+                $this->forget();
             });
     }
 
@@ -538,7 +675,7 @@ final class EditCurriculum extends Page
         }
         unset($data['text_kind'], $data['text'], $data['surah'], $data['from'], $data['to']);
         app(SaveNode::class)->handle($this->version(), $node, $data);
-        unset($this->tree);
+        $this->forget();
     }
 
     private function node(string $id): Node
