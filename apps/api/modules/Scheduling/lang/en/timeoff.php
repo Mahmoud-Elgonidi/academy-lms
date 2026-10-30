@@ -103,6 +103,7 @@ return [
         'cover_all' => 'Cover every lesson',
         'cover_all_hint' => 'Each lesson goes to the best free teacher of the subject (who taught the student before first, then the least busy).',
         'covered_all' => '{0} No free substitutes found.|[1,*] :covered covered, :left left.',
+        'teacher_time' => 'For the teacher :time (:zone)',
         'teacher_zone' => 'On the teacher\'s clock (:zone)',
         'lessons' => 'Lessons in the time off',
         'no_lessons' => 'No lessons in that time.',

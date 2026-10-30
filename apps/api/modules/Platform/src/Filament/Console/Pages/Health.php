@@ -20,6 +20,7 @@ use Modules\SharedKernel\Health\RecentErrors;
 use Modules\SharedKernel\Health\TestAddresses;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use Modules\SharedKernel\Time\ZoneHint;
 use Throwable;
 
 /**
@@ -53,7 +54,7 @@ final class Health extends Page
 
     public function getSubheading(): string|Htmlable|null
     {
-        return __('platform::health.subtitle');
+        return __('platform::health.subtitle').' '.ZoneHint::yours();
     }
 
     /** @return array<string, array{status: string, value: string, hint: ?string}> */

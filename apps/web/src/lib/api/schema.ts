@@ -809,6 +809,26 @@ export interface paths {
         patch: operations["identity.me.update"];
         trace?: never;
     };
+    "/v1/timezones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Time zones to choose from
+         * @description Every IANA zone, sorted by region, then by how far it is from UTC, then by city; names in the reader's language.
+         */
+        get: operations["identity.timezones"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/me/contact": {
         parameters: {
             query?: never;
@@ -2799,6 +2819,19 @@ export interface components {
             reason: "sick" | "vacation" | "personal" | "family" | "emergency" | "other";
             note?: string | null;
         };
+        /** TimezoneResource */
+        TimezoneResource: {
+            /** @description The IANA name, what PATCH me takes as timezone: "Africa/Cairo". */
+            id: string;
+            /** @description Its city in the reader's language: "القاهرة". */
+            city: string;
+            /** @description How far it is from UTC today: "UTC+2", "UTC+5:30", "UTC−3". */
+            offset: string;
+            /** @description The two as one, to show as is: "القاهرة (UTC+2)". */
+            label: string;
+            /** @description The region it is listed under, in the reader's language: "أفريقيا". */
+            region: string;
+        };
         /** UpdateProfileRequest */
         UpdateProfileRequest: {
             name?: string;
@@ -2825,6 +2858,8 @@ export interface components {
             timezone: string | null;
             /** @description The zone this response's times are written in (device, else profile, else academy). */
             display_timezone: string;
+            /** @description display_timezone as people read it, in the reader's language: "القاهرة (UTC+2)". */
+            timezone_label: string;
             /** @description The device's clock differs from the profile's: the app offers to update the profile. */
             timezone_mismatch: string;
             /** @description How this person reads a clock: h12 (5:00 PM) or h24 (17:00), their own choice else the academy's. */
@@ -2840,6 +2875,8 @@ export interface components {
                 name_ar: string;
                 name_en: string;
                 default_timezone: string;
+                /** @description default_timezone as people read it, in the reader's language: "الرياض (UTC+3)". */
+                timezone_label: string;
                 /** @description The academy's clock for everyone who has not chosen their own: h12 or h24. */
                 time_format: string;
             } | null;
@@ -5423,6 +5460,45 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "identity.timezones": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `TimezoneResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TimezoneResource"][];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
         };
     };
     "identity.contact.send": {

@@ -67,6 +67,8 @@ final class AbilityMatrix
             Ability::ManageSite => [Role::Owner, Role::Admin],
             // How everyone signs in (whether two-step sign-in is required of the back office): the owner alone.
             Ability::ManageSecurity => [Role::Owner],
+            // The academy's own zone (accounts with none of their own, the academy's holidays and calendar days): the owner alone.
+            Ability::ManageAcademyTimezone => [Role::Owner],
         };
     }
 

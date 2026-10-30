@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
+use Modules\Identity\Actions\SaveOwnTimezone;
 use Modules\Identity\Authorization\AbilityMatrix;
 use Modules\Identity\Commands\RotateDemoSecrets;
 use Modules\Identity\Contracts\IdentityApi;
@@ -33,6 +34,7 @@ use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Setup\SetupChecklist;
+use Modules\SharedKernel\Time\OwnTimezones;
 
 final class IdentityServiceProvider extends ServiceProvider
 {
@@ -61,6 +63,8 @@ final class IdentityServiceProvider extends ServiceProvider
         $this->app->make(PersonalData::class)->add(AccountData::class);
         // The new academy's checklist (optional): someone else on the team.
         $this->app->make(SetupChecklist::class)->add(TeamStep::class);
+        // The panels' zone chip changes an academy account's own zone as My settings does.
+        $this->app->make(OwnTimezones::class)->add(User::class, SaveOwnTimezone::class);
 
         // Each person's own channel: only they listen (their inbox, their lessons, the panels' pop-ups).
         Broadcast::channel(PersonalChannel::PATTERN, fn (User $user, string $id) => (string) $user->getKey() === $id);

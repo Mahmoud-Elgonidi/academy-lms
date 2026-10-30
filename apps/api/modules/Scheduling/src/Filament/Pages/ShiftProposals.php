@@ -32,6 +32,7 @@ use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
 use Modules\Scheduling\Filament\ShiftBlocksField;
 use Modules\Scheduling\Filament\ShiftProposalView;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Time\ZoneHint;
 
 /**
  * Teachers' shifts (docs/architecture/02, section 2): proposals grouped by
@@ -80,6 +81,12 @@ final class ShiftProposals extends Page
     public function getTitle(): string|Htmlable
     {
         return __('scheduling::review.list_title');
+    }
+
+    /** Shifts are kept on each teacher's own clock: the page says so, and names the zone beside each teacher. */
+    public function getSubheading(): string|Htmlable|null
+    {
+        return ZoneHint::teachers();
     }
 
     public function mount(): void

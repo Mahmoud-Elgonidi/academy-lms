@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
+use Modules\Platform\Actions\SavePlatformAdminTimezone;
 use Modules\Platform\Ai\AiProvider;
 use Modules\Platform\Ai\AiSlots;
 use Modules\Platform\Ai\ClaudeLanguageModel;
@@ -67,6 +68,7 @@ use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Setup\SetupChecklist;
 use Modules\SharedKernel\Tenancy\TenantResolver;
+use Modules\SharedKernel\Time\OwnTimezones;
 
 final class PlatformServiceProvider extends ServiceProvider
 {
@@ -112,6 +114,8 @@ final class PlatformServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'platform');
         // The new academy's checklist: its name and logo.
         $this->app->make(SetupChecklist::class)->add(BrandingStep::class);
+        // The console's zone chip changes the platform team's own zone.
+        $this->app->make(OwnTimezones::class)->add(PlatformAdmin::class, SavePlatformAdminTimezone::class);
         Event::listen(Login::class, RecordConsoleSignIn::class);
         // The platform's settings from the console over the server's .env: at each job and command too (requests:
         // ApplyPlatformSettings). Never here in boot, so caching the config never writes them out.

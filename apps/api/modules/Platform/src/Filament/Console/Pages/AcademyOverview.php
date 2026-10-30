@@ -35,6 +35,7 @@ use Modules\SharedKernel\Audit\AuditEntries;
 use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use Modules\SharedKernel\Time\ZoneHint;
 
 /**
  * One academy for the platform team: its use, who runs it, its latest
@@ -73,7 +74,7 @@ final class AcademyOverview extends Page
         return __('platform::console.overview.subtitle', [
             'host' => $this->host(),
             'date' => ConsoleView::date($this->record->created_at, app(ViewerTimezone::class)->effective()),
-        ]);
+        ]).' '.ZoneHint::yours();
     }
 
     public function getBreadcrumbs(): array

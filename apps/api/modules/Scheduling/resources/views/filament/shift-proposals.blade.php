@@ -33,7 +33,7 @@
                                         wire:click="mountAction('open', { proposal: '{{ $row['id'] }}' })">
                                         <span class="sp-who">
                                             <strong>{{ $row['teacher'] }}</strong>
-                                            <small>{{ __($l.'sent', ['ago' => $row['sent']]) }}@if ($row['overdue']) · <b class="sp-late">{{ __($l.'overdue') }}</b>@endif</small>
+                                            <small>{{ __($l.'zone', ['zone' => $row['zone']]) }} · {{ __($l.'sent', ['ago' => $row['sent']]) }}@if ($row['overdue']) · <b class="sp-late">{{ __($l.'overdue') }}</b>@endif</small>
                                         </span>
                                         <span class="sp-when">
                                             <small>{{ __($l.'starts') }}</small>
@@ -76,7 +76,7 @@
                     @foreach ($this->teachers as $t)
                         <li wire:key="st-{{ $t['id'] }}">
                             <button type="button" class="sp-item sp-item-teacher lms-lift" wire:click="mountAction('teacher', { teacher: '{{ $t['id'] }}' })">
-                                <span class="sp-who"><strong>{{ $t['name'] }}</strong></span>
+                                <span class="sp-who"><strong>{{ $t['name'] }}</strong><small>{{ __($l.'zone', ['zone' => $t['zone']]) }}</small></span>
                                 <span class="sp-when">
                                     <small>{{ __($l.'now') }}</small>
                                     {{ $t['current_hours'] !== null ? __($l.'hours_week', ['hours' => $t['current_hours']]) : __($l.'no_schedule') }}

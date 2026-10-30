@@ -74,6 +74,8 @@ final class ShiftProposalView
                 'id' => $p->id,
                 'teacher_id' => $p->teacher_id,
                 'teacher' => $p->getAttribute('teacher_name'),
+                // The proposal's hours are on this zone (the teacher's own).
+                'zone' => LiveBoardView::city($p->timezone),
                 'status' => $p->status->value,
                 'status_label' => __('scheduling::shifts.statuses.'.$p->status->value),
                 'sent' => $sent->locale(app()->getLocale())->diffForHumans(),
@@ -205,6 +207,7 @@ final class ShiftProposalView
             return [
                 'id' => $t->id,
                 'name' => $t->name,
+                'zone' => LiveBoardView::city($t->timezone ?? $fallback),
                 'current_hours' => $current ? ProposalRules::hours($current->shifts()->weeklyMinutes()) : null,
                 'days' => $current ? count(array_unique(array_map(fn (ShiftBlock $b) => $b->weekday, $current->shifts()->blocks))) : 0,
                 'upcoming' => $upcoming ? [

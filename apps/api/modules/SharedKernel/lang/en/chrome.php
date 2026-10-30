@@ -12,4 +12,23 @@ return [
     'today' => 'l, j F',
     // A dialog's button that only closes it (Filament has a cancel and a submit, no close).
     'close' => 'Close',
+    // The zone chip in the corner of every panel (shared::chrome.zone-chip): the account's clock, the academy's and the device's.
+    'zone' => [
+        'open' => 'Your time zone: :zone. Open for details or to change it.',
+        'title' => 'Time zone',
+        'yours' => 'Your time zone',
+        'academy' => 'Academy time zone',
+        'device' => 'Your device',
+        'device_differs' => 'Your device keeps a different clock from your account.',
+        'use_device' => 'Use my device\'s zone',
+        'change' => 'Change my zone',
+        'search' => 'Search for a city or region',
+        'none' => 'No results.',
+        'back' => 'Back',
+        'current' => 'Current',
+        'hint' => 'Times on every screen show on your time zone.',
+        'saved' => 'Your time zone is now :zone.',
+        'invalid' => 'Choose a time zone from the list.',
+        'cannot' => 'The time zone cannot be changed here.',
+    ],
 ];

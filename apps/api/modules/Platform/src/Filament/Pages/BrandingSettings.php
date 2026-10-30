@@ -19,6 +19,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
 use Modules\Platform\Actions\DeleteBrandTemplate;
 use Modules\Platform\Actions\SaveAcademyTimeFormat;
+use Modules\Platform\Actions\SaveAcademyTimezone;
 use Modules\Platform\Actions\SaveBranding;
 use Modules\Platform\Actions\SaveBrandTemplate;
 use Modules\Platform\Actions\UpdateAcademyIdentity;
@@ -35,6 +36,7 @@ use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\TimeFormat;
+use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerClock;
 use UnitEnum;
 
@@ -98,6 +100,7 @@ final class BrandingSettings extends Page
             'logo' => $row?->logo_path,
             'favicon' => $row?->favicon_path,
             'time_format' => app(ViewerClock::class)->academy()->value,
+            'default_timezone' => app(TenantContext::class)->require()->defaultTimezone,
             ...$branding->tokens,
         ]);
     }
@@ -141,6 +144,16 @@ final class BrandingSettings extends Page
                                 TimeFormat::TwentyFour->value => __('platform::branding.time_format.h24'),
                             ])
                             ->inline()->required(),
+                        // The academy's own zone: the owner alone changes it (SaveAcademyTimezone); the others read it.
+                        Select::make('default_timezone')
+                            ->label(__('platform::branding.fields.default_timezone'))
+                            ->helperText(fn (): string => Gate::allows(Ability::ManageAcademyTimezone->value)
+                                ? __('platform::branding.timezone.hint')
+                                : __('platform::branding.timezone.owner_only'))
+                            ->options(fn (): array => Timezones::options())
+                            ->searchable()
+                            ->required()
+                            ->disabled(fn (): bool => ! Gate::allows(Ability::ManageAcademyTimezone->value)),
                     ]),
 
                 Section::make(__('platform::branding.sections.colours'))
@@ -200,6 +213,9 @@ final class BrandingSettings extends Page
 
         app(UpdateAcademyIdentity::class)->handle($data['name_ar'], $data['name_en'], $data['logo'] ?? null, $data['favicon'] ?? null, $actor);
         app(SaveAcademyTimeFormat::class)->handle((string) ($data['time_format'] ?? TimeFormat::DEFAULT->value));
+        if (Gate::allows(Ability::ManageAcademyTimezone->value) && is_string($data['default_timezone'] ?? null)) {
+            app(SaveAcademyTimezone::class)->handle($data['default_timezone']);
+        }
         app(SaveBranding::class)->handle($this->tokens(), $this->baseRef, $actor);
 
         Notification::make()->success()->title(__('platform::branding.saved'))->send();

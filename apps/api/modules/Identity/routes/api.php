@@ -8,6 +8,7 @@ use Modules\Identity\Http\V1\Controllers\ContactController;
 use Modules\Identity\Http\V1\Controllers\RealtimeController;
 use Modules\Identity\Http\V1\Controllers\SessionsController;
 use Modules\Identity\Http\V1\Controllers\SocialSignInController;
+use Modules\Identity\Http\V1\Controllers\TimezonesController;
 
 // Mounted at /api/v1 with the api, tenant and locale middleware (IdentityServiceProvider).
 
@@ -29,6 +30,8 @@ Route::middleware('throttle:20,1')->group(function (): void {
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('me', [AuthController::class, 'me'])->name('identity.me');
     Route::patch('me', [AuthController::class, 'updateMe'])->name('identity.me.update');
+    // The zones to choose from for PATCH me, with their cities in the reader's language.
+    Route::get('timezones', [TimezonesController::class, 'index'])->name('identity.timezones');
     // A new email or mobile number, confirmed by a code sent to it.
     Route::post('me/contact', [ContactController::class, 'send'])->middleware('throttle:10,1')->name('identity.contact.send');
     Route::post('me/contact/confirm', [ContactController::class, 'confirm'])->middleware('throttle:20,1')->name('identity.contact.confirm');

@@ -17,6 +17,7 @@ use Modules\Platform\Enums\DomainKind;
 use Modules\Platform\Filament\Console\ConsoleView;
 use Modules\Platform\Models\Academy;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use Modules\SharedKernel\Time\ZoneHint;
 
 /**
  * Every academy on the platform (docs/architecture/01, section 1: "لوحة
@@ -51,7 +52,7 @@ final class Academies extends Page
 
     public function getSubheading(): string|Htmlable|null
     {
-        return __('platform::console.academies.subtitle');
+        return __('platform::console.academies.subtitle').' '.ZoneHint::yours();
     }
 
     protected function getHeaderActions(): array

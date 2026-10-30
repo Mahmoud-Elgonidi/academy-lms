@@ -2,7 +2,6 @@
 
 namespace Modules\Identity\Filament\Pages;
 
-use DateTimeZone;
 use Filament\Actions\Action;
 use Filament\Auth\Pages\EditProfile;
 use Filament\Facades\Filament;
@@ -34,6 +33,7 @@ use Modules\Identity\Social\Provider;
 use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\TimeFormat;
+use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerClock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 use SensitiveParameter;
@@ -96,7 +96,7 @@ final class MySettings extends EditProfile
                         ->native(false),
                     Select::make('timezone')
                         ->label(__('identity::settings.fields.timezone'))
-                        ->options(fn (): array => self::timezoneOptions())
+                        ->options(fn (): array => Timezones::options())
                         ->searchable()
                         ->required()
                         ->helperText(__('identity::settings.timezone_hint')),
@@ -409,22 +409,6 @@ final class MySettings extends EditProfile
     private static function field(string $key): string
     {
         return 'pref__'.str_replace('.', '__', $key);
-    }
-
-    /** @return array<string, array<string, string>> IANA names grouped by region, labelled with today's offset. */
-    private static function timezoneOptions(): array
-    {
-        $groups = [];
-        $now = new \DateTimeImmutable('now');
-
-        foreach (DateTimeZone::listIdentifiers() as $id) {
-            $offset = (new DateTimeZone($id))->getOffset($now);
-            $sign = $offset < 0 ? '−' : '+';
-            $label = sprintf('%s (UTC%s%02d:%02d)', str_replace('_', ' ', $id), $sign, intdiv(abs($offset), 3600), intdiv(abs($offset) % 3600, 60));
-            $groups[strstr($id, '/', true) ?: $id][$id] = $label;
-        }
-
-        return $groups;
     }
 
     private function store(): PreferenceStore

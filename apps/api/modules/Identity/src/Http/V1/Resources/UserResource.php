@@ -11,6 +11,7 @@ use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\TimeFormat;
+use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerClock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -35,6 +36,8 @@ final class UserResource extends JsonResource
             'timezone' => $this->timezone,
             // The zone this response's times are written in (device, else profile, else academy).
             'display_timezone' => $viewer->effective(),
+            // display_timezone as people read it, in the reader's language: "القاهرة (UTC+2)".
+            'timezone_label' => Timezones::label($viewer->effective()),
             // The device's clock differs from the profile's: the app offers to update the profile.
             'timezone_mismatch' => $viewer->mismatch(),
             // How this person reads a clock: h12 (5:00 PM) or h24 (17:00), their own choice else the academy's.
@@ -50,6 +53,8 @@ final class UserResource extends JsonResource
                 'name_ar' => $academy->nameAr,
                 'name_en' => $academy->nameEn,
                 'default_timezone' => $academy->defaultTimezone,
+                // default_timezone as people read it, in the reader's language: "الرياض (UTC+3)".
+                'timezone_label' => Timezones::label($academy->defaultTimezone),
                 // The academy's clock for everyone who has not chosen their own: h12 or h24.
                 'time_format' => (TimeFormat::of($academy->timeFormat) ?? TimeFormat::DEFAULT)->value,
             ],

@@ -139,6 +139,7 @@ return [
             'plan_changed' => 'The academy moved to the :plan plan: :reason',
             'ai_settings_saved' => 'AI helpers changed (on: :helpers)',
             'time_format_saved' => 'Times are now written in :clock',
+            'timezone_saved' => 'The academy\'s time zone is now :to (was :from)',
         ],
         'curriculum' => [
             'outline_applied' => 'Added an outline to a curriculum draft (:levels levels, :units units, :lessons lessons)',

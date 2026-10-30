@@ -48,6 +48,7 @@
         .fi-topbar-open-sidebar-btn, .fi-topbar-close-sidebar-btn { display: none !important; }
         .fi-topbar-start { display: flex; min-width: 0; margin-inline-end: .5rem; }   /* the academy's name, where the menu button was */
         .fi-topbar-start .fi-logo { margin-inline-start: 0; font-size: 1.05rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .lms-zone { bottom: calc(5rem + env(safe-area-inset-bottom)); }   /* the zone chip sits above the tab bar */
     }
     @media (prefers-reduced-motion: no-preference) {
         .lms-tab[aria-current] svg { animation: lms-tab-hop .55s var(--lms-spring) .1s backwards; }   /* the tab just opened hops */
@@ -81,6 +82,7 @@
     @media (max-width: 1023.98px) { .fi-body { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); } }
     .lms-more { bottom: calc(6.2rem + env(safe-area-inset-bottom)); border: 2px solid var(--gray-200); border-radius: 1.6rem; box-shadow: 0 5px 0 var(--gray-200); }
     .lms-more-item { font-weight: 800; font-size: .98rem; border-radius: 1.2rem; }
+    .lms-zone { display: none; }   /* children: no zone chip, their times are simply their own */
     .dark .fi-body { background: var(--gray-950); }
     .dark .fi-section { box-shadow: 0 5px 0 var(--gray-800); }
     .dark .lms-tabs { border-color: var(--gray-700); box-shadow: 0 5px 0 var(--gray-800); }

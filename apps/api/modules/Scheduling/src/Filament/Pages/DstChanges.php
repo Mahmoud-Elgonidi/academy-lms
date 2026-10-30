@@ -33,6 +33,7 @@ use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use Modules\SharedKernel\Time\ZoneHint;
 
 /**
  * The DST planner's screen (docs/architecture/01, "مخطِّط التوقيت الصيفي"):
@@ -87,7 +88,7 @@ final class DstChanges extends Page
 
     public function getSubheading(): string|Htmlable|null
     {
-        return __('scheduling::dst.subtitle', ['days' => PlanDstChanges::DAYS_AHEAD]);
+        return __('scheduling::dst.subtitle', ['days' => PlanDstChanges::DAYS_AHEAD]).' '.ZoneHint::yours();
     }
 
     /**

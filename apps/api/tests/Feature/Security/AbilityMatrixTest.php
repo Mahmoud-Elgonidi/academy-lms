@@ -72,6 +72,7 @@ function expectedAbilities(): array
         'ai.manage' => [$o, $a],
         'site.manage' => [$o, $a],
         'security.manage' => [$o],
+        'academy.manage-timezone' => [$o],
     ];
 }
 

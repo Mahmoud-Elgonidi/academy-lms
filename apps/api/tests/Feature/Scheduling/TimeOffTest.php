@@ -33,6 +33,7 @@ use Modules\Scheduling\Queries\AvailabilityQuery;
 use Modules\Scheduling\Queries\SubstituteCandidates;
 use Modules\Scheduling\Queries\TimeOffCover;
 use Modules\SharedKernel\Money\Money;
+use Modules\SharedKernel\Time\ZoneHint;
 use Tests\Support\EnrolledStudent;
 
 uses(EnrolledStudent::class);
@@ -222,6 +223,7 @@ it('lets the teacher ask from their area and the academy approve and cover from 
     Filament::setCurrentPanel('academy');
     Livewire::test(TimeOffReview::class, ['timeOff' => $timeOff->id])
         ->assertSee($this->student->name)
+        ->assertSee(ZoneHint::lessonsWithTeacher())   // the lessons on my clock, the teacher's beside them
         ->callAction('approve', data: ['note' => 'Get well'])
         ->assertHasNoActionErrors()
         ->set('pick.'.$this->tuesday->id, $this->other->id)

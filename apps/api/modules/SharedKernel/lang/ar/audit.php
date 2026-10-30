@@ -139,6 +139,7 @@ return [
             'plan_changed' => 'أصبحت باقة الأكاديمية :plan: :reason',
             'ai_settings_saved' => 'تعديل المساعد الآلي (المفعّل: :helpers)',
             'time_format_saved' => 'أصبح الوقت يُكتب بنظام :clock',
+            'timezone_saved' => 'أصبح توقيت الأكاديمية :to (كان :from)',
         ],
         'curriculum' => [
             'outline_applied' => 'إضافة مخطط إلى مسودة منهج (:levels مستوى، :units وحدة، :lessons درس)',

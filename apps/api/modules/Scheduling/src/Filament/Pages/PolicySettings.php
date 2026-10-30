@@ -24,6 +24,7 @@ use Modules\Scheduling\Domain\Policy\PolicySettings as Settings;
 use Modules\Scheduling\Domain\Policy\Rule;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use Modules\SharedKernel\Time\ZoneHint;
 use UnitEnum;
 
 /**
@@ -68,7 +69,7 @@ final class PolicySettings extends Page
 
     public function getSubheading(): string|Htmlable|null
     {
-        return __('scheduling::policy.subtitle');
+        return __('scheduling::policy.subtitle').' '.ZoneHint::yours();
     }
 
     public function mount(): void

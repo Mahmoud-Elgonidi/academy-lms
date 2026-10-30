@@ -62,6 +62,7 @@ enum Ability: string
     case ManageAi = 'ai.manage';
     case ManageSite = 'site.manage';
     case ManageSecurity = 'security.manage';
+    case ManageAcademyTimezone = 'academy.manage-timezone';
 
     /** The plan area this ability belongs to, if a plan may leave it out. */
     public function feature(): ?Feature

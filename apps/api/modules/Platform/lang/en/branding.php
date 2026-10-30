@@ -34,6 +34,7 @@ return [
         'radius' => 'Corners',
         'template_name' => 'Template name',
         'time_format' => 'How times are written',
+        'default_timezone' => 'Academy time zone',
     ],
     'usage' => [
         'primary' => 'Main buttons, navigation, live sessions.',
@@ -79,6 +80,10 @@ return [
     'template_updated' => 'Template updated.',
     'template_deleted' => 'Template deleted.',
     'contrast_warning' => ':colour is too light under white text (contrast :ratio, 4.5 needed). Pick a darker shade so buttons stay readable.',
+    'timezone' => [
+        'hint' => 'Used for accounts with no zone of their own and for the academy\'s holidays and days.',
+        'owner_only' => 'Used for accounts with no zone of their own and for the academy\'s holidays. Only the academy\'s owner changes it.',
+    ],
     'errors' => [
         'name_length' => 'A template name has 1 to 60 characters.',
         'name_taken' => 'A template with this name exists.',
@@ -86,6 +91,7 @@ return [
         'academy_name' => 'Enter the academy name in Arabic and English (up to 120 characters).',
         'time_format' => 'Choose 12 or 24 hours.',
         'file' => 'That file does not belong to this academy.',
+        'timezone' => 'Choose a time zone from the list.',
     ],
     'sample' => [
         'nav_live' => 'Live operations',

@@ -12,4 +12,23 @@ return [
     'today' => 'l j F',
     // A dialog's button that only closes it (Filament has a cancel and a submit, no close).
     'close' => 'إغلاق',
+    // The zone chip in the corner of every panel (shared::chrome.zone-chip): the account's clock, the academy's and the device's.
+    'zone' => [
+        'open' => 'توقيتك: :zone. افتح لترى التفاصيل أو تغيّر التوقيت.',
+        'title' => 'التوقيت',
+        'yours' => 'توقيتك',
+        'academy' => 'توقيت الأكاديمية',
+        'device' => 'توقيت جهازك',
+        'device_differs' => 'ساعة جهازك تختلف عن توقيت حسابك.',
+        'use_device' => 'استخدم توقيت جهازي',
+        'change' => 'تغيير توقيتي',
+        'search' => 'ابحث عن مدينة أو منطقة',
+        'none' => 'لا توجد نتائج.',
+        'back' => 'رجوع',
+        'current' => 'الحالي',
+        'hint' => 'تظهر المواعيد في كل الشاشات بتوقيتك.',
+        'saved' => 'حُفظ توقيتك: :zone.',
+        'invalid' => 'اختر توقيتًا من القائمة.',
+        'cannot' => 'لا يمكن تغيير التوقيت من هنا.',
+    ],
 ];

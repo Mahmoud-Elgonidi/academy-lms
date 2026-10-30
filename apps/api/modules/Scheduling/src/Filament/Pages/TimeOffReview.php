@@ -25,6 +25,7 @@ use Modules\Scheduling\Queries\TimeOffCover;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use Modules\SharedKernel\Time\ZoneHint;
 
 /**
  * One teacher's time off: the answer, and cover for each of its lessons
@@ -66,6 +67,12 @@ final class TimeOffReview extends Page
         return __('scheduling::timeoff.review.title', ['teacher' => $this->teacherName()]);
     }
 
+    /** The lessons are on the viewer's clock, the teacher's beside each one when it differs. */
+    public function getSubheading(): string|Htmlable|null
+    {
+        return ZoneHint::lessonsWithTeacher();
+    }
+
     public function getBreadcrumbs(): array
     {
         return [TimeOffRequests::getUrl() => __('scheduling::timeoff.admin.nav'), $this->teacherName()];
@@ -101,7 +108,9 @@ final class TimeOffReview extends Page
         $candidates = app(SubstituteCandidates::class)->forSessions($open, (string) auth()->id());
         $originals = DB::table('users')->whereIn('id', array_filter(array_map(fn (Session $s) => $s->original_teacher_id, $lessons)))->pluck('name', 'id');
 
-        return array_map(function (Session $s) use ($t, $tz, $candidates) {
+        $theirs = ! Timezones::sameClock($t->timezone, $tz);
+
+        return array_map(function (Session $s) use ($t, $tz, $theirs, $candidates) {
             $state = TimeOffView::state($s, $t);
             $start = $s->starts_at->setTimezone($tz);
 
@@ -109,6 +118,11 @@ final class TimeOffReview extends Page
                 'id' => $s->id,
                 'day' => TimeOffView::day($start),
                 'time' => TimeOffView::clock($start).' – '.TimeOffView::clock($s->ends_at->setTimezone($tz)),
+                // The same lesson on the teacher's clock, when it keeps another one than the viewer's.
+                'teacher_time' => $theirs ? __('scheduling::timeoff.review.teacher_time', [
+                    'time' => TimeOffView::clock($s->starts_at->setTimezone($t->timezone)),
+                    'zone' => Timezones::city($t->timezone),
+                ]) : null,
                 'student' => (string) $s->getAttribute('student_name'),
                 'subject' => app()->getLocale() === 'ar' ? $s->getAttribute('subject_ar') : $s->getAttribute('subject_en'),
                 'state' => $state,

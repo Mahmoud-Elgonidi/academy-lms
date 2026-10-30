@@ -233,4 +233,88 @@
         ::view-transition-old(lms-nav-top), ::view-transition-new(lms-nav-top),
         ::view-transition-old(lms-nav-tab), ::view-transition-new(lms-nav-tab) { animation-duration: .3s; }
     }
+    /* ── The zone chip (chrome/zone): a pill in the start corner over the page, its card above it ── */
+    .lms-zone { position: fixed; z-index: 25; bottom: calc(1rem + env(safe-area-inset-bottom)); inset-inline-start: 1rem; display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; max-width: calc(100vw - 2rem); }
+    @media (min-width: 1024px) {
+        /* Beside the side menu, not over it. */
+        .fi-body-has-sidebar-collapsible-on-desktop .lms-zone { inset-inline-start: calc(var(--collapsed-sidebar-width) + 1rem); }
+        .fi-body-has-sidebar-collapsible-on-desktop:has(.fi-main-ctn-sidebar-open) .lms-zone { inset-inline-start: calc(var(--sidebar-width) + 1rem); }
+    }
+    .lms-zone-pill {
+        position: relative; display: inline-flex; align-items: center; gap: .4rem; padding: .4rem .85rem .4rem .65rem; border: 0; border-radius: 999px; cursor: pointer;
+        font: inherit; font-size: .8rem; font-weight: 600; line-height: 1.2; color: var(--gray-700);
+        background: color-mix(in oklab, white 84%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+        box-shadow: 0 0 0 1px var(--lms-line), 0 10px 24px -14px rgb(0 0 0 / .4);
+    }
+    .lms-zone-pill:focus-visible { outline: 2px solid var(--primary-500); outline-offset: 2px; }
+    .lms-zone-pill svg { width: 1.05rem; height: 1.05rem; color: var(--primary-600); }
+    .lms-zone-city { max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lms-zone-time { font-variant-numeric: tabular-nums; color: var(--gray-950); padding-inline-start: .4rem; border-inline-start: 1px solid var(--gray-200); }
+    .lms-zone-dot { position: absolute; top: -.1rem; inset-inline-end: -.1rem; width: .65rem; height: .65rem; border-radius: 999px; background: var(--warning-500); box-shadow: 0 0 0 2px white; }
+    .lms-zone-card {
+        width: min(21rem, calc(100vw - 2rem)); padding: .9rem; border-radius: calc(var(--radius-xl, .75rem) + .25rem);
+        background: white; box-shadow: 0 0 0 1px var(--lms-line), 0 22px 44px -20px rgb(0 0 0 / .35); color: var(--gray-700); font-size: .875rem;
+        transform-origin: bottom left;
+    }
+    [dir="rtl"] .lms-zone-card { transform-origin: bottom right; }
+    .lms-zone-rows { display: grid; gap: .55rem; margin: 0; }
+    .lms-zone-row { display: grid; gap: .1rem; padding: .55rem .7rem; border-radius: var(--radius-lg, .5rem); background: var(--gray-50); }
+    .lms-zone-row[data-kind="mine"] { background: color-mix(in oklab, var(--primary-50) 85%, white); }
+    .lms-zone-row[data-kind="device"] { background: color-mix(in oklab, var(--warning-50) 85%, white); }
+    .lms-zone-row dt { font-size: .75rem; color: var(--gray-500); }
+    .lms-zone-row dd { margin: 0; display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; }
+    .lms-zone-row strong { color: var(--gray-950); font-weight: 600; }
+    .lms-zone-at { font-variant-numeric: tabular-nums; color: var(--gray-600); white-space: nowrap; }
+    .lms-zone-note { margin: .6rem .1rem 0; font-size: .78rem; color: var(--gray-500); }
+    .lms-zone-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .7rem; }
+    .lms-zone-btn { flex: 1 1 auto; padding: .45rem .75rem; border: 0; border-radius: var(--radius-lg, .5rem); cursor: pointer; font: inherit; font-size: .8rem; font-weight: 600; color: var(--primary-700); background: var(--primary-50); }
+    .lms-zone-btn[data-primary] { color: white; background: var(--primary-600); }
+    .lms-zone-btn:disabled { opacity: .6; cursor: wait; }
+    .lms-zone-pick-head { display: flex; align-items: center; gap: .4rem; }
+    .lms-zone-back { display: grid; place-items: center; width: 2rem; height: 2rem; border: 0; border-radius: 999px; cursor: pointer; color: var(--gray-600); background: var(--gray-100); }
+    .lms-zone-back svg { width: 1rem; height: 1rem; }
+    [dir="ltr"] .lms-zone-flip { transform: scaleX(-1); }
+    .lms-zone-search { flex: 1; min-width: 0; padding: .45rem .7rem; border: 1px solid var(--gray-200); border-radius: var(--radius-lg, .5rem); font: inherit; font-size: .85rem; background: white; color: var(--gray-950); }
+    .lms-zone-search:focus { outline: 2px solid var(--primary-500); outline-offset: -1px; }
+    .lms-zone-list { max-height: min(22rem, 55dvh); overflow-y: auto; margin-top: .6rem; scrollbar-width: thin; }
+    .lms-zone-list h3 { position: sticky; top: 0; margin: 0; padding: .35rem .25rem; font-size: .7rem; font-weight: 600; color: var(--gray-500); background: inherit; }
+    .lms-zone-list section { background: white; }
+    .lms-zone-option { display: flex; width: 100%; align-items: baseline; justify-content: space-between; gap: .75rem; padding: .4rem .55rem; border: 0; border-radius: var(--radius-md, .375rem); cursor: pointer; font: inherit; font-size: .85rem; text-align: start; color: var(--gray-700); background: none; }
+    .lms-zone-option small { color: var(--gray-500); font-variant-numeric: tabular-nums; }
+    .lms-zone-option:hover, .lms-zone-option:focus-visible { background: var(--gray-50); outline: none; }
+    .lms-zone-option[aria-current] { color: var(--primary-700); background: var(--primary-50); font-weight: 600; }
+    .dark .lms-zone-pill { color: var(--gray-200); background: color-mix(in oklab, var(--gray-900) 82%, transparent); box-shadow: 0 0 0 1px rgb(255 255 255 / .08), 0 10px 24px -14px rgb(0 0 0 / .7); }
+    .dark .lms-zone-pill svg { color: var(--primary-400); }
+    .dark .lms-zone-time { color: white; border-color: var(--gray-700); }
+    .dark .lms-zone-dot { box-shadow: 0 0 0 2px var(--gray-900); }
+    .dark .lms-zone-card, .dark .lms-zone-list section, .dark .lms-zone-search { background: var(--gray-900); color: var(--gray-200); }
+    .dark .lms-zone-card { box-shadow: 0 0 0 1px rgb(255 255 255 / .08), 0 22px 44px -20px rgb(0 0 0 / .7); }
+    .dark .lms-zone-row { background: rgb(255 255 255 / .04); }
+    .dark .lms-zone-row[data-kind="mine"] { background: color-mix(in oklab, var(--primary-500) 14%, transparent); }
+    .dark .lms-zone-row[data-kind="device"] { background: color-mix(in oklab, var(--warning-500) 14%, transparent); }
+    .dark .lms-zone-row strong { color: white; }
+    .dark .lms-zone-search { border-color: var(--gray-700); color: white; }
+    .dark .lms-zone-back { background: var(--gray-800); color: var(--gray-300); }
+    .dark .lms-zone-option { color: var(--gray-200); }
+    .dark .lms-zone-option:hover { background: rgb(255 255 255 / .05); }
+    .dark .lms-zone-option[aria-current] { color: var(--primary-300); background: color-mix(in oklab, var(--primary-500) 15%, transparent); }
+    .dark .lms-zone-btn:not([data-primary]) { color: var(--primary-300); background: color-mix(in oklab, var(--primary-500) 15%, transparent); }
+    @media print { .lms-zone { display: none; } }
+    @media (prefers-reduced-motion: no-preference) {
+        /* It comes in once, on the panel's first page; beats with each new minute; its card rises from it. */
+        html:not(.lms-settled) .lms-zone-pill { animation: lms-zone-in .7s var(--lms-out) .45s backwards; }
+        .lms-zone-pill { transition: transform .2s var(--lms-out); }
+        .lms-zone-pill:hover { transform: translateY(-2px); }
+        .lms-zone-pill:active { transform: scale(.96); }
+        .lms-zone-pill.lms-zone-beat svg { animation: lms-zone-beat .9s var(--lms-out); }
+        .lms-zone-pill.lms-zone-beat .lms-zone-time { animation: lms-zone-new .5s var(--lms-out) backwards; }
+        .lms-zone-dot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: inherit; animation: lms-zone-ping 2.4s ease-out infinite; }
+        .lms-zone-card { animation: lms-zone-card .28s var(--lms-out) backwards; }
+        .lms-zone-pick { animation: lms-zone-new .25s var(--lms-out) backwards; }
+    }
+    @keyframes lms-zone-in { from { opacity: 0; transform: translateY(14px) scale(.9); } }
+    @keyframes lms-zone-beat { 35% { transform: scale(1.22) rotate(-14deg); } 70% { transform: scale(.96) rotate(4deg); } }
+    @keyframes lms-zone-new { from { opacity: .2; transform: translateY(4px); } }
+    @keyframes lms-zone-ping { 0% { opacity: .7; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(2.4); } }
+    @keyframes lms-zone-card { from { opacity: 0; transform: translateY(8px) scale(.96); } }
 </style>

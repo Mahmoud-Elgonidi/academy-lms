@@ -167,6 +167,7 @@ it('shows a child their journey as the home: the islands, where they are, and th
         ->assertSee('data-stage="kids"', false)
         ->assertSee('Baloo Bhaijaan 2 Variable', false)
         ->assertSee('class="lms-tabs"', false)
+        ->assertSee('.lms-zone { display: none; }', false)          // no zone chip for children
         // Motion: the shared layer, the star count that counts up, and a cheer for new stars (the journey is drawn with the page).
         ->assertSee('window.LmsMotion', false)
         ->assertSee('data-count="12"', false)

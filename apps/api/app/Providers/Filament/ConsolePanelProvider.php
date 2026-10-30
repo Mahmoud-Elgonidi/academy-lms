@@ -57,6 +57,8 @@ final class ConsolePanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('shared::chrome.styles'))
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn () => view('shared::chrome.script'))
             ->renderHook(PanelsRenderHook::SIDEBAR_NAV_START, fn () => view('shared::chrome.greeting'))
+            // The zone chip in the start corner: the person's own zone and its time, ticking; opened, the academy's and the device's, and a way to change it.
+            ->renderHook(PanelsRenderHook::LAYOUT_END, fn () => view('shared::chrome.zone'))
             ->spa()
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')

@@ -38,6 +38,7 @@
                 <div>
                     <strong>{{ $r['day'] }}</strong>
                     <span class="fl-time" style="font-variant-numeric: tabular-nums; color: var(--gray-600)">{{ $r['time'] }}</span>
+                    @if ($r['teacher_time'])<small class="to-muted">{{ $r['teacher_time'] }}</small>@endif
                 </div>
                 <div>
                     <strong>{{ $r['student'] }}</strong>

@@ -28,6 +28,7 @@ use Modules\SharedKernel\Ai\SpeechRecitation;
 use Modules\SharedKernel\Ai\SpeechToText;
 use Modules\SharedKernel\Auth\TimingSafeUserProvider;
 use Modules\SharedKernel\Filament\ShowRefusals;
+use Modules\SharedKernel\Filament\ZoneChip;
 use Modules\SharedKernel\Files\ClamAvScanner;
 use Modules\SharedKernel\Files\NullUploadScanner;
 use Modules\SharedKernel\Files\UploadScanner;
@@ -51,6 +52,7 @@ use Modules\SharedKernel\Text\NoQuranSource;
 use Modules\SharedKernel\Text\QuranSource;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 use Modules\SharedKernel\Time\LocalTimeResolver;
+use Modules\SharedKernel\Time\OwnTimezones;
 use Modules\SharedKernel\Time\ViewerClock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -66,6 +68,8 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->scoped(LocalTimePresenter::class);
         $this->app->singleton(LocalTimeResolver::class);
         $this->app->singleton(LiveSignals::class);
+        // Who saves a person's own zone, by the kind of account (Identity's users, Platform's console team).
+        $this->app->singleton(OwnTimezones::class);
         // Uploads are checked for malware by clamd when the server runs one (UPLOAD_SCANNER=clamav), else not at all.
         $this->mergeConfigFrom(__DIR__.'/../../config/uploads.php', 'uploads');
         $this->app->singleton(UploadScanner::class, fn () => config('uploads.scanner') === 'clamav'
@@ -100,6 +104,8 @@ final class SharedKernelServiceProvider extends ServiceProvider
         // Signing in takes as long whether or not the account exists (config/auth.php's providers).
         Auth::provider('timing-safe', fn ($app, array $config) => new TimingSafeUserProvider($app['hash'], $config['model']));
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'shared');
+        // The zone chip every panel shows in its corner (shared::chrome.zone).
+        Livewire::component('shared.zone-chip', ZoneChip::class);
         // Every <script> a template writes carries the request's nonce (the page's script-src).
         Blade::precompiler(fn (string $template): string => ContentSecurityPolicy::nonceScripts($template));
         if ($this->app->runningInConsole()) {

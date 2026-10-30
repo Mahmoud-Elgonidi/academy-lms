@@ -18,6 +18,7 @@ use Modules\Platform\Models\SaasPlan;
 use Modules\Platform\Models\Site\SignupRequest;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use Modules\SharedKernel\Time\ZoneHint;
 
 /**
  * Academies that asked to join from the platform's page: who to talk to,
@@ -61,7 +62,7 @@ final class SignupRequests extends Page
 
     public function getSubheading(): string|Htmlable|null
     {
-        return __('platform::site.requests.subtitle');
+        return __('platform::site.requests.subtitle').' '.ZoneHint::yours();
     }
 
     /** @return list<array<string, mixed>> */

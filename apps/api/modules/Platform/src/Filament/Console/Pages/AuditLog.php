@@ -13,6 +13,7 @@ use Modules\Platform\Filament\Console\ConsoleView;
 use Modules\Platform\Models\Academy;
 use Modules\SharedKernel\Audit\AuditEntries;
 use Modules\SharedKernel\Time\ViewerTimezone;
+use Modules\SharedKernel\Time\ZoneHint;
 
 /**
  * The audit log across the platform (docs/architecture/03: audit_logs):
@@ -54,7 +55,7 @@ final class AuditLog extends Page
 
     public function getSubheading(): string|Htmlable|null
     {
-        return __('platform::console.audit.subtitle');
+        return __('platform::console.audit.subtitle').' '.ZoneHint::yours();
     }
 
     /** @return array<string, string> */

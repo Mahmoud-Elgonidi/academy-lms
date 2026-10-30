@@ -65,6 +65,7 @@ return [
     'teachers_hint' => 'Each teacher\'s schedule in force today and any approved to start later. Edit sends a counter-offer that starts from the newest one.',
     'no_teachers' => 'No teachers yet.',
     'view_schedule' => 'View schedule',
+    'zone' => 'On :zone time',
     'sent' => 'sent :ago',
     'sent_at' => 'sent :when',
     'overdue' => 'reply overdue',
