@@ -242,3 +242,14 @@ it('never changes anyone\'s email or number while signed in as a staff member, w
     app(UpdateUserDetails::class)->handle($this->accountant->id, new UserDetails('المحاسب الأول', $this->accountant->email, $this->accountant->phone_e164));
     expect($this->accountant->fresh()->name)->toBe('المحاسب الأول');
 });
+
+it('never meets the two-step set-up while signed in as someone: the home opens, and an old link to it comes back home', function () {
+    // Owners must set it up in this academy, and this one has not yet.
+    ['url' => $url] = startSignIn($this->owner);
+    $this->get(pathOf($url));
+
+    $this->get('http://noor.lms.test/admin/payroll')->assertOk();
+    $this->get('http://noor.lms.test/admin/multi-factor-authentication/set-up')
+        ->assertRedirect('http://noor.lms.test/admin')
+        ->assertSessionHas('filament.notifications');
+});

@@ -20,4 +20,5 @@ return [
         'reset_hint' => 'For someone who lost their phone and their recovery codes: they set it up again at their next sign-in. Write why in the reason above.',
         'reset_done' => 'Two-step sign-in reset; they set it up again at their next sign-in.',
     ],
+    'impersonating_set_up' => 'Two-step sign-in is set up by the account\'s owner. You are signed in as them from the platform team, so carry on from here.',
 ];
