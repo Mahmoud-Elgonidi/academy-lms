@@ -29,18 +29,22 @@ use Modules\Scheduling\Domain\Enums\ShiftProposalStatus;
 use Modules\Scheduling\Domain\Models\ShiftProposal;
 use Modules\Scheduling\Domain\Models\ShiftProposalComment;
 use Modules\Scheduling\Domain\Models\ShiftSchedule;
+use Modules\Scheduling\Domain\Shifts\ProposalRules;
 use Modules\Scheduling\Domain\Shifts\ShiftBlock;
 use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
-use Modules\Scheduling\Filament\ShiftProposalView;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
- * The teacher's hours: the week in force, and a proposal for a new one
- * that goes to the academy for approval (docs/architecture/02, "مصدر
- * الشفتات"). The same Actions as the teacher API and the back office.
+ * The teacher's hours (docs/architecture/02, "مصدر الشفتات"), one thing at a
+ * time, as the portal and the app show them: on top the one thing that
+ * matters now (the open proposal with its step and its one action, else an
+ * approved week that starts later, else a proposal turned down lately); then
+ * one card with the agreed week (a switch between now and the later one);
+ * "propose a change" under it while nothing is open; the history folded away.
+ * The same Actions as the teacher API and the back office.
  *
  * @property-read Schema $form
  */
@@ -57,6 +61,15 @@ final class MyAvailability extends Page
     public ?array $data = [];
 
     public string $reply = '';
+
+    /** The proposal form is open (a new proposal, or the open one being edited). */
+    public bool $editing = false;
+
+    /** A proposal turned down this recently still shows on top. */
+    private const REJECTED_SHOWS_DAYS = 14;
+
+    /** The bar of a day starts at 06:00 (or earlier on the hour when a span does) and ends at midnight. */
+    private const MORNING = 360;
 
     public static function canAccess(): bool
     {
@@ -118,25 +131,46 @@ final class MyAvailability extends Page
         $this->store(submit: true);
     }
 
-    protected function getHeaderActions(): array
+    public function saveDraft(): void
+    {
+        $this->store(submit: false);
+    }
+
+    public function startEditing(): void
+    {
+        $this->editing = true;
+    }
+
+    public function stopEditing(): void
+    {
+        $this->editing = false;
+    }
+
+    /** The academy's counter-offer, taken as it is. */
+    public function acceptAction(): Action
     {
         $l = 'scheduling::teacher.availability.';
 
-        return [
-            Action::make('draft')->label(__($l.'save_draft'))->color('gray')->action(fn () => $this->store(submit: false)),
-            Action::make('accept')->label(__($l.'accept'))->color('success')->requiresConfirmation()
-                ->visible(fn () => $this->proposal?->status === ShiftProposalStatus::Countered)
-                ->action(function () use ($l) {
-                    app(ApproveShiftProposal::class)->handle($this->proposal, (string) auth()->id(), 'teacher');
-                    $this->done(__($l.'accepted'));
-                }),
-            Action::make('withdraw')->label(__($l.'withdraw'))->color('danger')->requiresConfirmation()
-                ->visible(fn () => $this->proposal?->status->canTransitionTo(ShiftProposalStatus::Withdrawn) ?? false)
-                ->action(function () use ($l) {
-                    app(WithdrawShiftProposal::class)->handle($this->proposal, (string) auth()->id());
-                    $this->done(__($l.'withdrawn'));
-                }),
-        ];
+        return Action::make('accept')->label(__($l.'accept'))->color('primary')->icon(Heroicon::OutlinedCheck)->requiresConfirmation()
+            ->visible(fn () => $this->proposal?->status === ShiftProposalStatus::Countered)
+            ->action(function () use ($l) {
+                app(ApproveShiftProposal::class)->handle($this->proposal, (string) auth()->id(), 'teacher');
+                $this->done(__($l.'accepted'));
+            });
+    }
+
+    /** Withdraw a sent proposal (a draft is only finished and sent). */
+    public function withdrawAction(): Action
+    {
+        $l = 'scheduling::teacher.availability.';
+
+        return Action::make('withdraw')->label(__($l.'withdraw'))->color('danger')->link()->requiresConfirmation()
+            ->visible(fn () => $this->proposal !== null && $this->proposal->status !== ShiftProposalStatus::Draft
+                && $this->proposal->status->canTransitionTo(ShiftProposalStatus::Withdrawn))
+            ->action(function () use ($l) {
+                app(WithdrawShiftProposal::class)->handle($this->proposal, (string) auth()->id());
+                $this->done(__($l.'withdrawn'));
+            });
     }
 
     public function comment(): void
@@ -145,7 +179,7 @@ final class MyAvailability extends Page
         abort_unless($this->proposal !== null, 404);
         app(CommentOnShiftProposal::class)->handle($this->proposal, (string) auth()->id(), 'teacher', $this->reply);
         $this->reply = '';
-        unset($this->proposal, $this->upcoming);
+        unset($this->proposal, $this->hero);
     }
 
     #[Computed]
@@ -155,34 +189,204 @@ final class MyAvailability extends Page
     }
 
     /**
-     * The week in force, as the admins' day grid shows it.
+     * The one thing on top: the open proposal (its step, what it means, its one
+     * action), else an approved week that starts later, else a proposal turned
+     * down in the last two weeks; null when there is nothing to say.
      *
-     * @return list<array<string, mixed>>
+     * @return array<string, mixed>|null
      */
-    public function currentGrid(): array
+    #[Computed]
+    public function hero(): ?array
     {
-        return app(ShiftProposalView::class)->compare($this->current(), $this->current());
+        $l = 'scheduling::teacher.availability.hero.';
+        $p = $this->proposal;
+        if ($p !== null) {
+            $stage = $p->status->value;
+            $countered = $p->status === ShiftProposalStatus::Countered;
+            $before = $countered && $p->revision > 1 ? $p->shifts($p->revision - 1) : $this->latest();
+
+            return [
+                'kind' => 'proposal',
+                'stage' => $stage,
+                'title' => __($l.$stage.'.title'),
+                'text' => __($l.$stage.'.text'),
+                'from' => $this->day($p->effective_from),
+                'hours' => ProposalRules::hours($p->shifts()->weeklyMinutes()),
+                'week' => $this->rows($p->shifts(), $before),
+                'open' => $countered,
+                'messages' => $p->comments->where('author_role', '!=', 'system')->count(),
+            ];
+        }
+
+        $upcoming = $this->upcomingSchedule();
+        if ($upcoming !== null) {
+            $now = $this->current()->weeklyMinutes();
+            $then = $upcoming->shifts()->weeklyMinutes();
+            $days = (int) round(CarbonImmutable::parse($this->today()->toDateString())->diffInDays(CarbonImmutable::parse($upcoming->effectiveFrom()->toDateString())));
+
+            return [
+                'kind' => 'upcoming',
+                'title' => __($l.'upcoming', ['date' => $this->day($upcoming->effectiveFrom())]),
+                'when' => trans_choice($l.'in_days', max(1, $days), ['count' => max(1, $days)]),
+                'before' => $this->current()->blocks === [] || $now === $then ? null : ProposalRules::hours($now),
+                'after' => ProposalRules::hours($then),
+            ];
+        }
+
+        $last = $this->history()[0] ?? null;
+        if ($last !== null && $last->status === ShiftProposalStatus::Rejected && $last->decided_at?->greaterThan(CarbonImmutable::now()->subDays(self::REJECTED_SHOWS_DAYS))) {
+            return ['kind' => 'rejected', 'title' => __($l.'rejected.title'), 'text' => __($l.'rejected.text'), 'reason' => $last->decision_note];
+        }
+
+        return null;
     }
 
     /**
-     * An approved schedule that starts later: its first day, the hours before and after, and both weeks side by side.
+     * The agreed week, one card: the week in force and, when one is approved to
+     * start later, that one too (marked against today's); with no hours today,
+     * only the later week and a quiet line about the days before it.
      *
-     * @return array{from: string, summary: array<string, mixed>, week: list<array<string, mixed>>}|null
+     * @return array{tabs: list<array{key: string, tab: string, hours: string, rows: list<array<string, mixed>>}>, quiet: ?string}
      */
-    #[Computed]
-    public function upcoming(): ?array
+    public function weeks(): array
+    {
+        $l = 'scheduling::teacher.availability.';
+        $current = $this->current();
+        $upcoming = $this->upcomingSchedule();
+        $hours = fn (WeeklyShifts $w) => __($l.'hours', ['h' => ProposalRules::hours($w->weeklyMinutes())]);
+        $now = ['key' => 'now', 'tab' => __($l.'now'), 'hours' => $hours($current), 'rows' => $this->rows($current)];
+
+        if ($upcoming === null) {
+            return ['tabs' => $current->blocks === [] ? [] : [$now], 'quiet' => null];
+        }
+        $short = $upcoming->effectiveFrom()->locale(app()->getLocale())->translatedFormat('j F');
+        if ($current->blocks === []) {
+            return [
+                'tabs' => [['key' => 'upcoming', 'tab' => __($l.'from_day', ['date' => $short]), 'hours' => $hours($upcoming->shifts()), 'rows' => $this->rows($upcoming->shifts())]],
+                'quiet' => __($l.'no_hours_before', ['date' => $short]),
+            ];
+        }
+
+        return ['tabs' => [
+            $now,
+            ['key' => 'upcoming', 'tab' => __($l.'from_day', ['date' => $short]), 'hours' => $hours($upcoming->shifts()), 'rows' => $this->rows($upcoming->shifts(), $current)],
+        ], 'quiet' => null];
+    }
+
+    /** Under the week, while no proposal is open: what a new one starts from. */
+    public function builtOn(): ?string
     {
         $upcoming = $this->upcomingSchedule();
-        if ($upcoming === null) {
-            return null;
-        }
-        $view = app(ShiftProposalView::class);
 
-        return [
-            'from' => $upcoming->effectiveFrom()->locale(app()->getLocale())->translatedFormat('l j F'),
-            'summary' => $view->summary($this->current(), $upcoming->shifts()),
-            'week' => $view->compare($this->current(), $upcoming->shifts()),
-        ];
+        return $upcoming === null ? null : __('scheduling::teacher.availability.built_on', [
+            'date' => $upcoming->effectiveFrom()->locale(app()->getLocale())->translatedFormat('j F'),
+        ]);
+    }
+
+    /**
+     * The last three decided proposals, newest first, as the teacher API gives them.
+     *
+     * @return list<ShiftProposal>
+     */
+    public function history(): array
+    {
+        return ShiftProposal::query()
+            ->where('teacher_id', (string) auth()->id())
+            ->whereIn('status', [ShiftProposalStatus::Approved->value, ShiftProposalStatus::Superseded->value, ShiftProposalStatus::Rejected->value])
+            ->orderByDesc('decided_at')->orderByDesc('updated_at')
+            ->limit(3)
+            ->get()->all();
+    }
+
+    /** A decision's moment on the viewer's clock. */
+    public function decidedAt(ShiftProposal $p): ?string
+    {
+        return $p->decided_at?->setTimezone(app(ViewerTimezone::class)->effective())->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M · H:i'));
+    }
+
+    public function day(CarbonImmutable $date): string
+    {
+        return $date->locale(app()->getLocale())->translatedFormat('l j F');
+    }
+
+    /**
+     * A week as rows: each day's spans written out and placed on a line from
+     * the morning to midnight; with a week before, each day marked (unchanged,
+     * new, changed, removed) and the time taken out written struck through.
+     *
+     * @return list<array{day: int, label: string, times: list<string>, removed: list<string>, spans: list<array{kind: string, style: string}>, mark: string}>
+     */
+    private function rows(WeeklyShifts $week, ?WeeklyShifts $before = null): array
+    {
+        $all = [...$week->blocks, ...($before?->blocks ?? [])];
+        $start = min([self::MORNING, ...array_map(fn (ShiftBlock $b) => intdiv($b->startMin, 60) * 60, $all)]);
+        $span = ShiftBlock::DAY_MIN - $start;
+        $label = fn (int $from, int $to) => Clock::wall(ShiftBlock::clock($from)).' – '.Clock::wall(ShiftBlock::clock($to));
+        $days = app()->getLocale() === 'ar' ? [6, 7, 1, 2, 3, 4, 5] : [1, 2, 3, 4, 5, 6, 7];
+        $slots = function (array $blocks): array {
+            $on = array_fill(0, ShiftBlock::DAY_MIN / 5, false);
+            foreach ($blocks as $b) {
+                for ($m = $b->startMin; $m < min($b->endMin(), ShiftBlock::DAY_MIN); $m += 5) {
+                    $on[intdiv($m, 5)] = true;
+                }
+            }
+
+            return $on;
+        };
+        $key = fn (array $blocks) => implode(',', array_map(fn (ShiftBlock $b) => $b->startMin.'-'.$b->endMin(), $blocks));
+
+        $rows = [];
+        foreach ($days as $day) {
+            $now = $this->sorted($week->on($day));
+            $was = $before === null ? null : $this->sorted($before->on($day));
+            $parts = [];
+            if ($was === null) {
+                $parts = array_map(fn (ShiftBlock $b) => ['kind' => 'kept', 'from' => $b->startMin, 'to' => min($b->endMin(), ShiftBlock::DAY_MIN)], $now);
+            } else {
+                $then = $slots($was);
+                foreach ($slots($now) as $i => $on) {
+                    $kind = $on && $then[$i] ? 'kept' : ($on ? 'added' : ($then[$i] ? 'removed' : null));
+                    if ($kind === null) {
+                        continue;
+                    }
+                    $last = array_key_last($parts);
+                    if ($last !== null && $parts[$last]['kind'] === $kind && $parts[$last]['to'] === $i * 5) {
+                        $parts[$last]['to'] += 5;
+                    } else {
+                        $parts[] = ['kind' => $kind, 'from' => $i * 5, 'to' => $i * 5 + 5];
+                    }
+                }
+            }
+            $mark = match (true) {
+                $was === null || $key($now) === $key($was) => 'same',
+                $was === [] => 'added',
+                $now === [] => 'removed',
+                default => 'changed',
+            };
+
+            $rows[] = [
+                'day' => $day,
+                'label' => __('scheduling::shifts.days.'.$day),
+                'times' => array_map(fn (ShiftBlock $b) => $label($b->startMin, $b->endMin()), $now),
+                'removed' => array_values(array_map(fn (array $p) => $label($p['from'], $p['to']), array_filter($parts, fn (array $p) => $p['kind'] === 'removed'))),
+                'spans' => array_map(function (array $p) use ($start, $span) {
+                    $from = max($p['from'], $start);
+
+                    return ['kind' => $p['kind'], 'style' => sprintf('inset-inline-start: %s%%; width: %s%%', round(($from - $start) / $span * 100, 2), round(max($p['to'] - $from, 0) / $span * 100, 2))];
+                }, $parts),
+                'mark' => $mark,
+            ];
+        }
+
+        return $rows;
+    }
+
+    /** @param list<ShiftBlock> $blocks @return list<ShiftBlock> */
+    private function sorted(array $blocks): array
+    {
+        usort($blocks, fn (ShiftBlock $a, ShiftBlock $b) => $a->startMin <=> $b->startMin);
+
+        return $blocks;
     }
 
     /**
@@ -276,8 +480,14 @@ final class MyAvailability extends Page
 
     private function done(string $message): void
     {
-        unset($this->proposal, $this->upcoming);
+        $this->editing = false;
+        unset($this->proposal, $this->hero);
         Notification::make()->success()->title($message)->send();
+    }
+
+    private function latest(): WeeklyShifts
+    {
+        return app(ShiftProposals::class)->latestShifts((string) auth()->id(), $this->today(), $this->timezone());
     }
 
     private function upcomingSchedule(): ?ShiftSchedule

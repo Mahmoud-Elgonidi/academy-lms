@@ -122,11 +122,15 @@ test('new hours are drafted, sent, talked about beside the page, and withdrawn',
     await expect(page.getByText('سُحب المقترح.')).toBeVisible();
   }
 
-  // A draft left from an earlier run opens with "edit and send"; else a new proposal starts.
+  // One card on top says where things stand; the agreed week has a card of its own under it.
+  const hero = page.getByTestId('shifts-hero');
   const steps = page.getByRole('list', { name: 'مراحل المقترح' });
-  const resume = page.getByRole('button', { name: 'عدّل وأرسل' });
+  await expect(page.getByRole('heading', { name: 'أسبوعك' })).toBeVisible();
+
+  // A draft left from an earlier run opens with "finish and send"; else "propose a change" under the week.
+  const resume = page.getByRole('button', { name: 'أكمل وأرسل' });
   if (await resume.isVisible()) await resume.click();
-  else await page.getByRole('button', { name: 'اقترح مواعيد جديدة' }).click();
+  else await page.getByRole('button', { name: 'اقترح تغييرًا' }).click();
   const saturday = page.locator('li').filter({ has: page.getByText('السبت', { exact: true }) }).filter({ has: page.getByRole('button', { name: 'أضف وقتًا' }) });
   if ((await saturday.locator('input[type=time]').count()) === 0) await saturday.getByRole('button', { name: 'أضف وقتًا' }).click();
   // Two hours on Saturday, two fewer on Sunday: the week stays within Khaled's 30-hour contract, so it can be sent.
@@ -136,19 +140,27 @@ test('new hours are drafted, sent, talked about beside the page, and withdrawn',
   await page.getByLabel(/ملاحظة للأكاديمية/).fill('أريد إضافة عصر السبت.');
   await page.getByRole('button', { name: 'احفظ مسودة' }).click();
   await expect(page.getByText('حُفظت المسودة.')).toBeVisible();
-  // A draft: its step, and one thing to do.
+  // A draft: its step on top, one thing to do, and no "propose a change" while it is open.
+  await expect(hero).toHaveAttribute('data-stage', 'draft');
+  await expect(hero.getByRole('heading', { name: 'مسودتك لم تُرسل بعد' })).toBeVisible();
   await expect(steps.locator('[aria-current="step"]')).toContainText('مسودة');
   await expect(page.getByRole('button', { name: 'المحادثة (0)' })).toHaveCount(0);
-  // The academy's clock in the demo: 12 hours.
-  await expect(page.locator('li').filter({ hasText: 'السبت' }).filter({ hasText: /\d:\d\d [صم]–/ }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'اقترح تغييرًا' })).toHaveCount(0);
+  // The proposed week folds open, Saturday marked new, on the academy's clock in the demo: 12 hours.
+  await hero.getByText('الأسبوع المقترح').click();
+  const newSaturday = hero.locator('li[data-mark]').filter({ hasText: 'السبت' });
+  await expect(newSaturday).toHaveAttribute('data-mark', 'added');
+  await expect(newSaturday.filter({ hasText: /\d:\d\d [صم]–/ })).toBeVisible();
 
-  await page.getByRole('button', { name: 'عدّل وأرسل' }).click();
+  await page.getByRole('button', { name: 'أكمل وأرسل' }).click();
   await page.getByRole('button', { name: 'أرسل إلى الأكاديمية' }).click();
   await expect(page.getByText('أُرسل المقترح إلى الأكاديمية.')).toBeVisible();
+  await expect(hero).toHaveAttribute('data-stage', 'review');
+  await expect(hero.getByRole('heading', { name: 'في انتظار الأكاديمية' })).toBeVisible();
   await expect(steps.locator('[aria-current="step"]')).toContainText('قيد المراجعة');
 
   // The conversation opens beside the page.
-  await page.getByRole('button', { name: /المحادثة \(\d+\)/ }).click();
+  await hero.getByRole('button', { name: /المحادثة \(\d+\)/ }).click();
   const talk = page.getByRole('dialog', { name: 'المحادثة مع الأكاديمية' });
   await expect(talk).toBeVisible();
   await expect(talk.getByText(/أُرسل المقترح ·/)).toBeVisible();
@@ -157,10 +169,20 @@ test('new hours are drafted, sent, talked about beside the page, and withdrawn',
   await expect(talk.getByText('هل يمكن أن نبدأ من الأسبوع القادم؟')).toBeVisible();
   await talk.getByRole('button', { name: 'إغلاق' }).click();
 
-  // In review, the one thing to do is withdraw.
+  // In review there is nothing to do but wait, or withdraw.
   page.once('dialog', (d) => d.accept());
-  await page.getByRole('button', { name: 'اسحب المقترح' }).click();
+  await hero.getByRole('button', { name: 'اسحب المقترح' }).click();
   await expect(page.getByText('سُحب المقترح.')).toBeVisible();
+  // Nothing open: the hero is gone (unless it says a proposal was turned down lately), and "propose a change" is back.
+  await expect(page.locator('[data-testid="shifts-hero"]:not([data-stage="rejected"])')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'اقترح تغييرًا' })).toBeVisible();
+  // Earlier decisions stay folded in the history, a replaced one only there.
+  const history = page.getByTestId('shifts-history');
+  if (await history.isVisible()) {
+    await expect(history.getByRole('listitem').first()).toBeHidden();
+    await history.getByText(/^السجل \(\d\)$/).click();
+    await expect(history.getByRole('listitem').first()).toBeVisible();
+  }
 });
 
 test('the teacher reads clocks in 24 hours, then goes back to the academy\'s 12', async ({ page }) => {

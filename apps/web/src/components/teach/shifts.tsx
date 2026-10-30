@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition, type ReactNode } from 'react';
 import { acceptShifts, commentOnShifts, saveShifts, withdrawShifts, type Result } from '@/app/[locale]/teach/actions';
 import { useRouter } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
@@ -193,7 +193,7 @@ export function ShiftStepper({ stage }: { stage: ShiftStage }) {
   const labels = [t('stepDraft'), t('stepSent'), t('stepReview'), answer[stage] ?? t('stepDecision')];
   const end = stage === 'rejected' ? 'danger' : stage === 'countered' || stage === 'changes' ? 'attention' : 'brand';
   return (
-    <ol className="grid grid-cols-4" aria-label={t('proposalSteps')}>
+    <ol className="stagger grid grid-cols-4" aria-label={t('proposalSteps')}>
       {labels.map((label, i) => {
         const done = i < step || stage === 'approved';
         const answered = i === 3 && step === 3;
@@ -225,9 +225,10 @@ export function ShiftStepper({ stage }: { stage: ShiftStage }) {
 }
 
 /**
- * The one thing to do at each step: send a draft, withdraw while the academy
- * reviews, take its counter-offer, or edit and send again when it asks for
- * changes; editing and withdrawing stay small links beside an answer.
+ * The one thing to do at each step: finish and send a draft, take the
+ * academy's counter-offer, or edit and send again when it asks for changes;
+ * while it reviews there is nothing to do but wait. Editing and withdrawing
+ * stay small links beside an answer.
  */
 export function ProposalActions({ proposal, start, earliest }: { proposal: ShiftProposal; start: ShiftBlock[]; earliest: { adding_time: string; removing_time: string } }) {
   const t = useTranslations('teach');
@@ -251,7 +252,7 @@ export function ProposalActions({ proposal, start, earliest }: { proposal: Shift
 
   if (editing) {
     return (
-      <div className="mt-5 border-t border-line pt-5">
+      <div className="appear mt-5 border-t border-line pt-5">
         <ShiftEditor start={proposal.week.blocks.length > 0 ? proposal.week.blocks : start} proposal={proposal} earliest={earliest} onClose={() => setEditing(false)} />
       </div>
     );
@@ -265,21 +266,21 @@ export function ProposalActions({ proposal, start, earliest }: { proposal: Shift
             <Icon name="check" size={18} />
             {t('acceptCounter')}
           </Button>
-        ) : stage === 'review' ? (
-          <Button variant="quiet" className="text-danger" disabled={pending} onClick={withdraw}>
-            {t('withdrawProposal')}
+        ) : stage === 'draft' ? (
+          <Button disabled={pending} onClick={() => setEditing(true)}>
+            {t('continueAndSend')}
           </Button>
-        ) : (
+        ) : stage === 'changes' ? (
           <Button disabled={pending} onClick={() => setEditing(true)}>
             {t('editAndSend')}
           </Button>
-        )}
+        ) : null}
         {stage === 'countered' ? (
           <button type="button" className={join(link, 'text-brand-strong')} disabled={pending} onClick={() => setEditing(true)}>
-            {t('editAndSend')}
+            {t('editProposal')}
           </button>
         ) : null}
-        {stage === 'countered' || stage === 'changes' ? (
+        {stage !== 'draft' ? (
           <button type="button" className={join(link, 'text-danger')} disabled={pending} onClick={withdraw}>
             {t('withdrawProposal')}
           </button>
@@ -289,17 +290,88 @@ export function ProposalActions({ proposal, start, earliest }: { proposal: Shift
   );
 }
 
-/** "Propose new hours": the editor opens on the latest agreed week. */
-export function ProposeButton({ start, from, earliest }: { start: ShiftBlock[]; from?: string; earliest: { adding_time: string; removing_time: string } }) {
+/**
+ * "Propose a change", under the week when no proposal is open: the editor
+ * opens in its place on the latest agreed week.
+ */
+export function ProposeButton({ start, from, earliest, note }: { start: ShiftBlock[]; from?: string; earliest: { adding_time: string; removing_time: string }; note?: string }) {
   const t = useTranslations('teach');
   const [open, setOpen] = useState(false);
-  if (open) return <ShiftEditor start={start} proposal={null} from={from} earliest={earliest} onClose={() => setOpen(false)} />;
+  if (open)
+    return (
+      <div className="appear rounded-card border border-line bg-white p-5">
+        <ShiftEditor start={start} proposal={null} from={from} earliest={earliest} onClose={() => setOpen(false)} />
+      </div>
+    );
   return (
-    <Button onClick={() => setOpen(true)}>
-      <Icon name="plus" size={18} />
-      {t('proposeHours')}
-    </Button>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <Button variant="quiet" onClick={() => setOpen(true)}>
+        <Icon name="plus" size={18} />
+        {t('proposeChange')}
+      </Button>
+      {note ? <p className="text-sm text-muted">{note}</p> : null}
+    </div>
   );
+}
+
+/**
+ * One week card for two agreed weeks: a small switch between the week in
+ * force and the one that starts later; the chosen week slides in.
+ */
+export function WeekSwitch({ label, weeks }: { label: string; weeks: { key: string; tab: string; hours: string; content: ReactNode }[] }) {
+  const [active, setActive] = useState(weeks[0]?.key ?? '');
+  const shown = weeks.find((w) => w.key === active) ?? weeks[0];
+  if (!shown) return null;
+  return (
+    <div>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div role="tablist" aria-label={label} className="inline-flex rounded-full border border-line bg-paper p-1">
+          {weeks.map((w) => (
+            <button
+              key={w.key}
+              type="button"
+              role="tab"
+              id={`week-tab-${w.key}`}
+              aria-selected={w.key === shown.key}
+              aria-controls="week-panel"
+              onClick={() => setActive(w.key)}
+              className={join(
+                'min-h-9 rounded-full px-4 text-sm font-semibold transition-colors',
+                w.key === shown.key ? 'bg-white text-brand-strong shadow-sm' : 'text-muted hover:text-ink',
+              )}
+            >
+              {w.tab}
+            </button>
+          ))}
+        </div>
+        <span className="text-sm text-muted">{shown.hours}</span>
+      </div>
+      <div key={shown.key} id="week-panel" role="tabpanel" aria-labelledby={`week-tab-${shown.key}`} className="appear">
+        {shown.content}
+      </div>
+    </div>
+  );
+}
+
+const calm = () => typeof window === 'undefined' || !window.matchMedia || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/** A number of hours that counts up from nothing when the page opens (still under reduced motion). */
+export function CountUp({ to }: { to: number }) {
+  const [shown, setShown] = useState(to);
+  useEffect(() => {
+    if (calm() || to <= 0) return;
+    let frame = 0;
+    const begun = performance.now();
+    const step = (now: number) => {
+      const p = Math.min(1, (now - begun) / 900);
+      const value = to * (1 - Math.pow(1 - p, 3));
+      setShown(p < 1 ? Math.round(value) : to);
+      if (p < 1) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [to]);
+  return <span className="tabular-nums">{Number.isInteger(shown) ? shown : shown.toFixed(1)}</span>;
 }
 
 type Comment = ShiftProposal['comments'][number];

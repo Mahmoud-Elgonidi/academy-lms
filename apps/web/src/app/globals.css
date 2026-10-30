@@ -152,6 +152,10 @@ h1, h2, h3 {
   .nudge {
     animation: nudge 2.6s ease-in-out 1.2s infinite backwards;
   }
+  /* Something waiting on someone else breathes softly (a proposal in review). */
+  .pulse-soft {
+    animation: pulse-soft 2.4s ease-in-out infinite;
+  }
 }
 
 @keyframes bob {
@@ -160,6 +164,10 @@ h1, h2, h3 {
 
 @keyframes pop {
   from { opacity: 0; transform: scale(0.6); }
+}
+
+@keyframes pulse-soft {
+  50% { opacity: 0.35; transform: scale(1.6); }
 }
 
 @keyframes nudge {
