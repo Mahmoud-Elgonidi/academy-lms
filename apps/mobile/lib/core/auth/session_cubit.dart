@@ -139,6 +139,10 @@ class SessionState extends Equatable {
     timeFormat,
     me?.mismatch,
     me?.timezone,
+    me?.displayTimezone,
+    me?.timezoneLabel,
+    me?.academyTimezone,
+    me?.academyTimezoneLabel,
     me?.timeFormatChoice,
     me?.academyTimeFormat,
     notice,
@@ -276,6 +280,20 @@ class SessionCubit extends Cubit<SessionState> {
     if (zone == null || account == null) return;
     await _prefs.setClock(account.id, zone);
     _set(state.copyWith(clock: () => zone, me: () => null));
+  }
+
+  /// "Change my zone": the profile takes [zone], and this phone asks for
+  /// times on it (on the phone's own clock again when it is the phone's).
+  /// The API's refusal is thrown for the screen to say.
+  Future<void> chooseZone(String zone) async {
+    final account = state.current;
+    if (account == null) return;
+    await _repo.updateMe(timezone: zone);
+    final keep = zone == state.deviceTimezone ? null : zone;
+    await _prefs.setClock(account.id, keep);
+    if (state.current?.id != account.id) return;
+    _set(state.copyWith(clock: () => keep));
+    await _loadMe();
   }
 
   /// How the open account reads a clock: 12 or 24 hours, or null for the

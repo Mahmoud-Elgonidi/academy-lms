@@ -2858,6 +2858,90 @@ abstract class AppLocalizations {
   /// **'التوقيت'**
   String get timezone;
 
+  /// No description provided for @zoneChip.
+  ///
+  /// In ar, this message translates to:
+  /// **'توقيتك {city}، والساعة الآن {time}'**
+  String zoneChip(String city, String time);
+
+  /// No description provided for @zoneChipMismatch.
+  ///
+  /// In ar, this message translates to:
+  /// **'توقيت هاتفك يختلف عن توقيت حسابك'**
+  String get zoneChipMismatch;
+
+  /// No description provided for @zoneShownIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'المواعيد في التطبيق بتوقيت {zone}.'**
+  String zoneShownIn(String zone);
+
+  /// No description provided for @zoneYours.
+  ///
+  /// In ar, this message translates to:
+  /// **'توقيت حسابك'**
+  String get zoneYours;
+
+  /// No description provided for @zoneAcademy.
+  ///
+  /// In ar, this message translates to:
+  /// **'توقيت الأكاديمية'**
+  String get zoneAcademy;
+
+  /// No description provided for @zoneDevice.
+  ///
+  /// In ar, this message translates to:
+  /// **'توقيت هاتفك'**
+  String get zoneDevice;
+
+  /// No description provided for @zoneUseDevice.
+  ///
+  /// In ar, this message translates to:
+  /// **'استخدم توقيت هاتفي'**
+  String get zoneUseDevice;
+
+  /// No description provided for @zoneChange.
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّر توقيتي'**
+  String get zoneChange;
+
+  /// No description provided for @zonePick.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر توقيتك'**
+  String get zonePick;
+
+  /// No description provided for @zoneSearch.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابحث عن مدينة أو منطقة'**
+  String get zoneSearch;
+
+  /// No description provided for @zoneNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد مدينة بهذا الاسم.'**
+  String get zoneNone;
+
+  /// No description provided for @zoneSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'صارت مواعيدك بتوقيت {zone}.'**
+  String zoneSaved(String zone);
+
+  /// No description provided for @zoneHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'تظهر مواعيد حصصك وتذكيراتها بهذا التوقيت، واضغط لتغييره.'**
+  String get zoneHint;
+
+  /// No description provided for @zoneCurrent.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحالي'**
+  String get zoneCurrent;
+
   /// No description provided for @timeFormat.
   ///
   /// In ar, this message translates to:

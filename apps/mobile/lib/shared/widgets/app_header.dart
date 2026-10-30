@@ -2,19 +2,22 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/app_theme.dart';
 import 'lms.dart';
+import 'zone_chip.dart';
 
 /// The top of a main tab: an optional line above, the title, and the
 /// buttons that are always there (the bell, the account). [leading] stands
 /// before them (the academy's logo, on a home only); [bottom] sits under it
-/// (the children switcher).
+/// (the children switcher). The zone chip stands before the buttons in
+/// every look but the kids' ([zone] false leaves it out).
 class AppHeader extends StatelessWidget {
-  const AppHeader({required this.title, this.eyebrow, this.leading, this.actions = const [], this.bottom, super.key});
+  const AppHeader({required this.title, this.eyebrow, this.leading, this.actions = const [], this.bottom, this.zone = true, super.key});
 
   final String title;
   final String? eyebrow;
   final Widget? leading;
   final List<Widget> actions;
   final Widget? bottom;
+  final bool zone;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -38,6 +41,7 @@ class AppHeader extends StatelessWidget {
                 ],
               ),
             ),
+            if (zone) const ZoneChip(),
             for (final (i, a) in actions.indexed) ...[if (i > 0) const Gap(Space.s), a],
           ],
         ),

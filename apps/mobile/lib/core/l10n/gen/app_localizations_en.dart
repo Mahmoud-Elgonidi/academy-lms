@@ -1636,6 +1636,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timezone => 'Time zone';
 
   @override
+  String zoneChip(String city, String time) {
+    return 'Your time zone, $city, $time now';
+  }
+
+  @override
+  String get zoneChipMismatch => 'Your phone\'s time zone differs from your account\'s';
+
+  @override
+  String zoneShownIn(String zone) {
+    return 'Times in the app are on $zone time.';
+  }
+
+  @override
+  String get zoneYours => 'Your account\'s time zone';
+
+  @override
+  String get zoneAcademy => 'The academy\'s time zone';
+
+  @override
+  String get zoneDevice => 'Your phone\'s time zone';
+
+  @override
+  String get zoneUseDevice => 'Use my phone\'s time zone';
+
+  @override
+  String get zoneChange => 'Change my time zone';
+
+  @override
+  String get zonePick => 'Choose your time zone';
+
+  @override
+  String get zoneSearch => 'Search for a city or region';
+
+  @override
+  String get zoneNone => 'No city by that name.';
+
+  @override
+  String zoneSaved(String zone) {
+    return 'Your times are now on $zone time.';
+  }
+
+  @override
+  String get zoneHint => 'Your lessons and their reminders show on this time zone. Tap to change it.';
+
+  @override
+  String get zoneCurrent => 'Current';
+
+  @override
   String get timeFormat => 'How times are written';
 
   @override

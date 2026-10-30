@@ -9,6 +9,9 @@ class Me {
     required this.timezone,
     required this.displayTimezone,
     required this.mismatch,
+    this.timezoneLabel,
+    this.academyTimezone,
+    this.academyTimezoneLabel,
     this.timeFormat = TimeFormat.h12,
     this.timeFormatChoice,
     this.academyTimeFormat = TimeFormat.h12,
@@ -18,15 +21,18 @@ class Me {
     final inForce = TimeFormat.parse(json['time_format']) ?? TimeFormat.h12;
     final choice = TimeFormat.parse(json['time_format_choice']);
     final academy = json['academy'];
+    final school = academy is Map<String, dynamic> ? academy : const <String, dynamic>{};
     return Me(
       name: json['name'] as String? ?? '',
       timezone: json['timezone'] as String?,
       displayTimezone: json['display_timezone'] as String? ?? 'UTC',
-      mismatch: json['timezone_mismatch'] == true,
+      mismatch: json['timezone_mismatch'] == true || json['timezone_mismatch'] == 'true',
+      timezoneLabel: json['timezone_label'] as String?,
+      academyTimezone: school['default_timezone'] as String?,
+      academyTimezoneLabel: school['timezone_label'] as String?,
       timeFormat: inForce,
       timeFormatChoice: choice,
-      academyTimeFormat:
-          TimeFormat.parse(academy is Map<String, dynamic> ? academy['time_format'] : null) ?? (choice == null ? inForce : TimeFormat.h12),
+      academyTimeFormat: TimeFormat.parse(school['time_format']) ?? (choice == null ? inForce : TimeFormat.h12),
     );
   }
 
@@ -34,6 +40,15 @@ class Me {
   final String? timezone;
   final String displayTimezone;
   final bool mismatch;
+
+  /// [displayTimezone] as people read it, in their language: "القاهرة (UTC+2)".
+  final String? timezoneLabel;
+
+  /// The academy's own zone (for accounts with none, and its holidays).
+  final String? academyTimezone;
+
+  /// [academyTimezone] as people read it: "الرياض (UTC+3)".
+  final String? academyTimezoneLabel;
 
   /// How they read a clock: their own choice, else the academy's.
   final TimeFormat timeFormat;
@@ -50,6 +65,9 @@ class Me {
     timezone: timezone,
     displayTimezone: displayTimezone,
     mismatch: mismatch,
+    timezoneLabel: timezoneLabel,
+    academyTimezone: academyTimezone,
+    academyTimezoneLabel: academyTimezoneLabel,
     timeFormat: choice ?? academyTimeFormat,
     timeFormatChoice: choice,
     academyTimeFormat: academyTimeFormat,

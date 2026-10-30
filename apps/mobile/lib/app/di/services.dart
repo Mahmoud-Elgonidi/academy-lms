@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/network/api_client.dart';
 import '../../core/realtime/live.dart';
 import '../../core/social/social_sign_in.dart';
+import '../../core/time/zones.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/billing/data/billing_repository.dart';
 import '../../features/challenges/data/challenges_repository.dart';
@@ -40,6 +41,7 @@ class Services {
       homework = HomeworkRepository(api),
       classroom = ClassroomRepository(api),
       profile = ProfileRepository(api),
+      zones = ZoneRepository(api),
       teaching = TeachingRepository(api),
       challenges = ChallengesRepository(api),
       games = GamesRepository(api),
@@ -69,6 +71,9 @@ class Services {
   final HomeworkRepository homework;
   final ClassroomRepository classroom;
   final ProfileRepository profile;
+
+  /// The time zones a person may choose.
+  final ZoneRepository zones;
   final TeachingRepository teaching;
   final ChallengesRepository challenges;
   final GamesRepository games;
@@ -107,6 +112,7 @@ class Services {
       RepositoryProvider.value(value: homework),
       RepositoryProvider.value(value: classroom),
       RepositoryProvider.value(value: profile),
+      RepositoryProvider.value(value: zones),
       RepositoryProvider.value(value: teaching),
       RepositoryProvider.value(value: challenges),
       RepositoryProvider.value(value: games),

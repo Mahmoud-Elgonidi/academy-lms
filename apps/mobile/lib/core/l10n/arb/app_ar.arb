@@ -1209,6 +1209,44 @@
   },
   "language": "اللغة",
   "timezone": "التوقيت",
+  "zoneChip": "توقيتك {city}، والساعة الآن {time}",
+  "@zoneChip": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "zoneChipMismatch": "توقيت هاتفك يختلف عن توقيت حسابك",
+  "zoneShownIn": "المواعيد في التطبيق بتوقيت {zone}.",
+  "@zoneShownIn": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "zoneYours": "توقيت حسابك",
+  "zoneAcademy": "توقيت الأكاديمية",
+  "zoneDevice": "توقيت هاتفك",
+  "zoneUseDevice": "استخدم توقيت هاتفي",
+  "zoneChange": "غيّر توقيتي",
+  "zonePick": "اختر توقيتك",
+  "zoneSearch": "ابحث عن مدينة أو منطقة",
+  "zoneNone": "لا توجد مدينة بهذا الاسم.",
+  "zoneSaved": "صارت مواعيدك بتوقيت {zone}.",
+  "@zoneSaved": {
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "zoneHint": "تظهر مواعيد حصصك وتذكيراتها بهذا التوقيت، واضغط لتغييره.",
+  "zoneCurrent": "الحالي",
   "timeFormat": "شكل الساعة",
   "timeFormatExample": "تظهر المواعيد هكذا: {time}",
   "@timeFormatExample": {

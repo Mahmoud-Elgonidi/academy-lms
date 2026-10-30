@@ -1701,6 +1701,54 @@ class AppLocalizationsAr extends AppLocalizations {
   String get timezone => 'التوقيت';
 
   @override
+  String zoneChip(String city, String time) {
+    return 'توقيتك $city، والساعة الآن $time';
+  }
+
+  @override
+  String get zoneChipMismatch => 'توقيت هاتفك يختلف عن توقيت حسابك';
+
+  @override
+  String zoneShownIn(String zone) {
+    return 'المواعيد في التطبيق بتوقيت $zone.';
+  }
+
+  @override
+  String get zoneYours => 'توقيت حسابك';
+
+  @override
+  String get zoneAcademy => 'توقيت الأكاديمية';
+
+  @override
+  String get zoneDevice => 'توقيت هاتفك';
+
+  @override
+  String get zoneUseDevice => 'استخدم توقيت هاتفي';
+
+  @override
+  String get zoneChange => 'غيّر توقيتي';
+
+  @override
+  String get zonePick => 'اختر توقيتك';
+
+  @override
+  String get zoneSearch => 'ابحث عن مدينة أو منطقة';
+
+  @override
+  String get zoneNone => 'لا توجد مدينة بهذا الاسم.';
+
+  @override
+  String zoneSaved(String zone) {
+    return 'صارت مواعيدك بتوقيت $zone.';
+  }
+
+  @override
+  String get zoneHint => 'تظهر مواعيد حصصك وتذكيراتها بهذا التوقيت، واضغط لتغييره.';
+
+  @override
+  String get zoneCurrent => 'الحالي';
+
+  @override
   String get timeFormat => 'شكل الساعة';
 
   @override

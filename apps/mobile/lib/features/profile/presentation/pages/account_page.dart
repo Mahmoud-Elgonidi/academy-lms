@@ -14,6 +14,7 @@ import '../../../../core/state/load_cubit.dart';
 import '../../../../core/time/clock_style.dart';
 import '../../../../core/time/formats.dart';
 import '../../../../shared/widgets/lms.dart';
+import '../../../../shared/widgets/zone_chip.dart';
 import '../../../consent/presentation/privacy_page.dart';
 import '../../data/profile_repository.dart';
 import '../widgets/accounts_card.dart';
@@ -346,16 +347,57 @@ class _Settings extends StatelessWidget {
             ],
           ),
           const Divider(height: 22),
-          Row(
-            children: [
-              Expanded(child: Text(context.l10n.timezone, style: context.text.titleSmall)),
-              Text(zoneName(s.timezone, context.locale), style: context.text.bodyMedium?.copyWith(color: context.colors.muted)),
-            ],
-          ),
+          const _ZoneSetting(),
           // Once the profile says what the academy's way is.
           if (s.me case final me?) ...[const Divider(height: 22), _TimeFormatChoice(me: me)],
           const SizedBox(height: 6),
         ],
+      ),
+    );
+  }
+}
+
+/// The account's time zone, changeable here (the same list as the zone
+/// chip's card), with what it governs said under it.
+class _ZoneSetting extends StatelessWidget {
+  const _ZoneSetting();
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<SessionCubit>().state;
+    final facts = ZoneFacts.of(s, context.locale);
+    final zone = facts == null ? zoneName(s.timezone, context.locale) : facts.label(facts.account);
+    return Semantics(
+      button: true,
+      child: InkWell(
+        key: const Key('zone-setting'),
+        borderRadius: BorderRadius.circular(context.shape.field),
+        onTap: s.me == null ? null : () => changeZone(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(context.l10n.timezone, style: context.text.titleSmall),
+                    Text(context.l10n.zoneHint, style: context.text.bodySmall),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  zone,
+                  textAlign: TextAlign.end,
+                  style: context.text.bodyMedium?.copyWith(color: context.colors.muted),
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: context.colors.muted),
+            ],
+          ),
+        ),
       ),
     );
   }
