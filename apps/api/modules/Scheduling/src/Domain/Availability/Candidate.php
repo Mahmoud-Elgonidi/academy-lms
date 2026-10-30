@@ -5,6 +5,7 @@ namespace Modules\Scheduling\Domain\Availability;
 /**
  * A weekly time with one teacher: anchored on the teacher's clock (weekday and
  * time), shown on the student's clock, free in $coverage of the $weeks weeks.
+ * Proposed on the teacher's 15-minute grid, or typed at any minute.
  */
 final readonly class Candidate
 {
@@ -21,7 +22,24 @@ final readonly class Candidate
         public int $weeks,
         public array $occurrences,
         public array $conflictDates,
+        public bool $typed = false,
     ) {}
+
+    /** The same time, marked as typed by hand ("another time…") rather than proposed. */
+    public function asTyped(): self
+    {
+        return new self($this->teacherWeekday, $this->teacherTime, $this->studentWeekday, $this->studentTime,
+            $this->coverage, $this->weeks, $this->occurrences, $this->conflictDates, true);
+    }
+
+    /** The student-clock end of a lesson of this length ("18:25"; past midnight it wraps). */
+    public function studentEnd(int $durationMin): string
+    {
+        [$h, $m] = array_map('intval', explode(':', $this->studentTime));
+        $end = ($h * 60 + $m + $durationMin) % (24 * 60);
+
+        return sprintf('%02d:%02d', intdiv($end, 60), $end % 60);
+    }
 
     public function key(): string
     {

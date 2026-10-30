@@ -10,7 +10,7 @@ use Modules\Scheduling\Domain\Availability\StudentPreference;
  * "Available now" on Find a teacher: where the teachers a search would find
  * are free across the week, before anyone marks the student's hours. It runs
  * FindTeachersQuery with the same filters, length, weeks, start and minimum
- * of weeks, but with every hour from 07:00 to midnight of every day on the
+ * of weeks, but with every hour of every day (00:00 to 24:00) on the
  * student's clock, so every rule of the search (minors, time off, holidays,
  * daily caps, lessons and holds) holds here too; nothing is stored.
  *
@@ -23,7 +23,7 @@ use Modules\Scheduling\Domain\Availability\StudentPreference;
  */
 final class FreeTimesQuery
 {
-    public const FIRST_HOUR = 7;
+    public const FIRST_HOUR = 0;
 
     public const LAST_HOUR = 23;
 
@@ -51,6 +51,7 @@ final class FreeTimesQuery
     private function work(TeacherSearch $base): array
     {
         $pref = $base->preference;
+        // The matcher walks each teacher's free time once whatever the hours, so the whole day costs no more than part of it.
         $everyHour = array_fill_keys(range(1, 7), range(self::FIRST_HOUR, self::LAST_HOUR));
         $search = new TeacherSearch(
             subjectId: $base->subjectId,

@@ -71,6 +71,21 @@ final readonly class IntervalSet
         return false;
     }
 
+    /** Does any interval share time with [start, end)? */
+    public function overlaps(int $start, int $end): bool
+    {
+        foreach ($this->intervals as [$from, $to]) {
+            if ($from < $end && $start < $to) {
+                return true;
+            }
+            if ($from >= $end) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
     public function totalSeconds(int $from = PHP_INT_MIN, int $to = PHP_INT_MAX): int
     {
         $total = 0;

@@ -90,16 +90,18 @@ final class AvailabilityQuery
                 }
             }
 
-            $shifts = (new IntervalSet($shiftIntervals))
-                ->minus(new IntervalSet([[PHP_INT_MIN, $from->getTimestamp()], [$to->getTimestamp(), PHP_INT_MAX]]))
-                ->minus(new IntervalSet(array_merge($closed, $off->get($teacherId, collect())->map(fn ($o) => [(int) $o->s, (int) $o->e])->all())));
-            $lessons = array_merge(
-                $busy->get($teacherId, collect())->map(fn ($b) => [(int) $b->s, (int) $b->e])->all(),
-                $holds->get($teacherId, collect())->map(fn ($h) => [(int) $h->s, (int) $h->e])->all(),
-            );
-            $taken = new IntervalSet(array_merge($lessons, $this->fullDays($lessons, $timezone, isset($caps[$teacherId]) ? (int) $caps[$teacherId] : null)));
+            $planned = (new IntervalSet($shiftIntervals))
+                ->minus(new IntervalSet([[PHP_INT_MIN, $from->getTimestamp()], [$to->getTimestamp(), PHP_INT_MAX]]));
+            $leave = $off->get($teacherId, collect())->map(fn ($o) => [(int) $o->s, (int) $o->e])->all();
+            $shifts = $planned->minus(new IntervalSet(array_merge($closed, $leave)));
+            $booked = $busy->get($teacherId, collect())->map(fn ($b) => [(int) $b->s, (int) $b->e])->all();
+            $held = $holds->get($teacherId, collect())->map(fn ($h) => [(int) $h->s, (int) $h->e])->all();
+            $lessons = array_merge($booked, $held);
+            $capped = $this->fullDays($lessons, $timezone, isset($caps[$teacherId]) ? (int) $caps[$teacherId] : null);
+            $taken = new IntervalSet(array_merge($lessons, $capped));
 
-            $result[$teacherId] = new TeacherAvailability($teacherId, $timezone, $shifts, $shifts->minus($taken));
+            $result[$teacherId] = new TeacherAvailability($teacherId, $timezone, $shifts, $shifts->minus($taken),
+                $planned, new IntervalSet($leave), new IntervalSet($closed), new IntervalSet($booked), new IntervalSet($held), new IntervalSet($capped));
         }
 
         return $result;

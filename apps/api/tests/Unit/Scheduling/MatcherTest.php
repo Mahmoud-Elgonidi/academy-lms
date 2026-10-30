@@ -98,3 +98,94 @@ it('compares two weeks into kept, added and removed spans', function () {
         ['kind' => 'added', 'start' => '21:00', 'end' => '22:00', 'minutes' => 60],
     ])->and($after->addedAndRemovedMinutes($before))->toBe([60, 120]);
 });
+
+it('carries a window up to midnight into the next day\'s first hours, Sunday into Monday too', function () {
+    expect(StudentPreference::windowsFromHours([6 => [22, 23], 7 => [0, 1, 5]]))->toBe([
+        ['weekday' => 6, 'start' => 22 * 60, 'end' => 26 * 60],
+        ['weekday' => 7, 'start' => 0, 'end' => 2 * 60],
+        ['weekday' => 7, 'start' => 5 * 60, 'end' => 6 * 60],
+    ])->and(StudentPreference::windowsFromHours([7 => [23], 1 => [0]])[0])->toBe(['weekday' => 7, 'start' => 23 * 60, 'end' => 25 * 60]);
+});
+
+/** A Riyadh teacher free every Saturday 22:00 to Sunday 02:00 for $weeks weeks from 3 Oct 2026. */
+function nightTeacher(int $weeks = 9): TeacherAvailability
+{
+    $free = [];
+    for ($i = 0; $i < $weeks; $i++) {
+        $day = CarbonImmutable::parse('2026-10-03', 'Asia/Riyadh')->addWeeks($i)->toDateString();
+        $free[] = [ts($day.' 22:00', 'Asia/Riyadh'), ts($day.' 22:00', 'Asia/Riyadh') + 4 * 3600];
+    }
+    $shifts = new IntervalSet($free);
+
+    return new TeacherAvailability('layla', 'Asia/Riyadh', $shifts, $shifts);
+}
+
+it('lets a lesson that starts late run past midnight; it belongs to the day it starts', function () {
+    $matcher = new Matcher(new LocalTimeResolver);
+    $riyadh = fn (array $cells) => new StudentPreference('Asia/Riyadh', StudentPreference::windowsFromHours($cells), 1, 45, CarbonImmutable::parse('2026-10-03'), 8, 8);
+
+    $late = collect($matcher->candidates(nightTeacher(), $riyadh([6 => [23], 7 => [0]])))->first(fn ($c) => $c->teacherTime === '23:30');
+    expect($late->studentWeekday)->toBe(6)
+        ->and($late->teacherWeekday)->toBe(6)
+        ->and($late->coverage)->toBe(8)
+        ->and($late->studentEnd(45))->toBe('00:15');
+
+    // Saturday 23:00 alone ends at midnight: 23:30 for 45 minutes does not fit in it.
+    expect(collect($matcher->candidates(nightTeacher(), $riyadh([6 => [23]])))->contains(fn ($c) => $c->teacherTime === '23:30'))->toBeFalse();
+
+    // Sunday 00:10, typed: a Sunday lesson inside Saturday night's shift.
+    $sunday = $matcher->exact(nightTeacher(), $riyadh([]), 7, '00:10');
+    expect($sunday->fits())->toBeTrue()
+        ->and($sunday->candidate->key())->toBe('7|00:10')
+        ->and($sunday->candidate->typed)->toBeTrue();
+});
+
+it('checks an exact minute for a teacher: free on every week, as a weekly time on the teacher\'s clock', function () {
+    $matcher = new Matcher(new LocalTimeResolver);
+    $check = $matcher->exact(cairoTeacher(), londonStudent(), 6, '16:40');
+
+    expect($check->fits())->toBeTrue()
+        ->and($check->reasons)->toBe([])
+        ->and($check->candidate->teacherTime)->toBe('18:40')
+        ->and($check->candidate->studentTime)->toBe('16:40')
+        ->and($check->candidate->coverage)->toBe(8)
+        ->and($check->candidate->typed)->toBeTrue();
+});
+
+it('says why an exact minute does not fit, week by week', function () {
+    $matcher = new Matcher(new LocalTimeResolver);
+    $busy = [[ts('2026-11-10 18:00', 'Africa/Cairo'), ts('2026-11-10 18:30', 'Africa/Cairo')]];
+
+    // Tuesday 16:10 London is 18:10 Cairo: a lesson on the 10th; and between London's (25th) and Cairo's (29th) clock changes it is 15:10 for the student.
+    $tuesday = $matcher->exact(cairoTeacher(busy: $busy), londonStudent(), 2, '16:10');
+    expect($tuesday->fits())->toBeFalse()
+        ->and($tuesday->coverage())->toBe(6)
+        ->and($tuesday->reasons)->toEqual(['clock' => ['2026-10-27'], 'busy' => ['2026-11-10']]);
+
+    // Noon is outside her shifts every week.
+    $noon = $matcher->exact(cairoTeacher(), londonStudent(), 6, '12:00');
+    expect($noon->candidate)->toBeNull()
+        ->and(array_keys($noon->reasons))->toBe(['shifts'])
+        ->and($noon->reasons['shifts'])->toHaveCount(8);
+
+    // Weeks already gone.
+    $later = $matcher->exact(cairoTeacher(), londonStudent(minCoverage: 1), 6, '16:40', ts('2026-10-20 00:00', 'UTC'));
+    expect($later->reasons['past'])->toBe(['2026-10-03', '2026-10-10', '2026-10-17'])
+        ->and($later->fits())->toBeTrue();
+});
+
+it('tells leave, a holiday, a full day and another coordinator\'s hold apart', function () {
+    $hour = fn (string $local) => [ts($local, 'Africa/Cairo'), ts($local, 'Africa/Cairo') + 3600];
+    $planned = new IntervalSet([[ts('2026-10-03 17:00', 'Africa/Cairo'), ts('2026-10-03 23:00', 'Africa/Cairo')]]);
+    $teacher = new TeacherAvailability('nour', 'Africa/Cairo', $planned, new IntervalSet, $planned,
+        off: new IntervalSet([$hour('2026-10-03 17:00')]),
+        closed: new IntervalSet([$hour('2026-10-03 18:00')]),
+        booked: new IntervalSet([$hour('2026-10-03 19:00')]),
+        held: new IntervalSet([$hour('2026-10-03 20:00')]),
+        capped: new IntervalSet([$hour('2026-10-03 21:00')]),
+    );
+    $why = fn (string $local) => $teacher->whyBusy(ts($local, 'Africa/Cairo'), ts($local, 'Africa/Cairo') + 1800);
+
+    expect([$why('2026-10-03 17:00'), $why('2026-10-03 18:00'), $why('2026-10-03 19:00'), $why('2026-10-03 20:00'), $why('2026-10-03 21:00'), $why('2026-10-03 23:00')])
+        ->toBe(['time_off', 'holiday', 'busy', 'held', 'cap', 'shifts']);
+});

@@ -10,7 +10,7 @@ use Modules\SharedKernel\Time\LocalTimeResolver;
  * (docs/architecture/02, section 2, "الخوارزمية", steps 3–4):
  *
  *  - start times on a 15-minute grid of the teacher's clock, wherever the
- *    teacher is free;
+ *    teacher is free (and any minute typed by hand, through exact());
  *  - each one checked week by week (summer time moves clocks, bookings come
  *    and go): the whole session free, and inside the student's windows on
  *    the student's clock;
@@ -110,7 +110,41 @@ final class Matcher
         return $best;
     }
 
+    /**
+     * One exact start on the student's clock (any minute, "17:40") checked
+     * for this teacher with the same rules as a proposed time: it becomes
+     * the weekly time on the teacher's clock that its first week falls on,
+     * then every week of the horizon must be free and still at that time for
+     * the student. A start before $notBefore (now) counts as gone.
+     */
+    public function exact(TeacherAvailability $teacher, StudentPreference $pref, int $studentWeekday, string $studentTime, ?int $notBefore = null): ExactCheck
+    {
+        [$h, $m] = array_map('intval', explode(':', $studentTime));
+        $exact = $pref->exactly($studentWeekday, $h * 60 + $m);
+        $horizonStart = CarbonImmutable::parse($pref->startDate->toDateString(), $pref->timezone)->utc();
+
+        $firstDate = CarbonImmutable::parse($pref->startDate->toDateString(), $pref->timezone);
+        $firstDate = $firstDate->addDays(($studentWeekday - $firstDate->dayOfWeekIso + 7) % 7);
+        $teacherLocal = $this->resolver->resolve($firstDate->toDateString(), sprintf('%02d:%02d', $h, $m), $pref->timezone)->utc->setTimezone($teacher->timezone);
+
+        $walk = $this->walk($teacher, $exact, $teacherLocal->dayOfWeekIso, $teacherLocal->format('H:i'), $horizonStart, $notBefore, explain: true);
+
+        return new ExactCheck($studentWeekday, sprintf('%02d:%02d', $h, $m), $walk['candidate']?->asTyped(), $walk['weeks'], $pref->minCoverage, $walk['reasons']);
+    }
+
     private function evaluate(TeacherAvailability $teacher, StudentPreference $pref, int $weekday, string $time, CarbonImmutable $horizonStart): ?Candidate
+    {
+        return $this->walk($teacher, $pref, $weekday, $time, $horizonStart)['candidate'];
+    }
+
+    /**
+     * Every week of a weekly time on the teacher's clock: whether the whole
+     * lesson is free and inside the student's windows on their clock (the
+     * day it starts), and why not where it is not.
+     *
+     * @return array{candidate: ?Candidate, weeks: int, reasons: array<string, list<string>>}
+     */
+    private function walk(TeacherAvailability $teacher, StudentPreference $pref, int $weekday, string $time, CarbonImmutable $horizonStart, ?int $notBefore = null, bool $explain = false): array
     {
         $firstDay = $horizonStart->setTimezone($teacher->timezone)->startOfDay();
         $firstDay = $firstDay->addDays(($weekday - $firstDay->dayOfWeekIso + 7) % 7);
@@ -118,6 +152,7 @@ final class Matcher
         $coverage = 0;
         $occurrences = [];
         $conflicts = [];
+        $reasons = [];
         $student = null;
         $week = 0;
 
@@ -129,25 +164,38 @@ final class Matcher
             }
 
             $ts = $start->getTimestamp();
+            $end = $ts + $pref->durationMin * 60;
             $occurrences[] = $ts;
             $studentLocal = $start->setTimezone($pref->timezone);
             $inWindow = $pref->accepts($studentLocal->dayOfWeekIso, $studentLocal->hour * 60 + $studentLocal->minute, $pref->durationMin);
-            $free = $teacher->free->contains($ts, $ts + $pref->durationMin * 60);
+            $gone = $notBefore !== null && $ts < $notBefore;
+            $free = ! $gone && $teacher->free->contains($ts, $end);
 
             if ($inWindow && $free) {
                 $coverage++;
                 $student ??= $studentLocal;
             } else {
                 $conflicts[] = $date->toDateString();
+                if (! $explain) {
+                    $week++;
+
+                    continue;
+                }
+                $reasons[match (true) {
+                    $gone => ExactCheck::PAST,
+                    ! $free => $teacher->whyBusy($ts, $end),
+                    default => ExactCheck::CLOCK,
+                }][] = $date->toDateString();
             }
             $week++;
         }
 
-        if ($student === null) {
-            return null;
-        }
-
-        return new Candidate($weekday, $time, $student->dayOfWeekIso, $student->format('H:i'), $coverage, $week, $occurrences, $conflicts);
+        return [
+            'candidate' => $student === null ? null
+                : new Candidate($weekday, $time, $student->dayOfWeekIso, $student->format('H:i'), $coverage, $week, $occurrences, $conflicts),
+            'weeks' => $week,
+            'reasons' => $reasons,
+        ];
     }
 
     /** @param  list<Candidate>  $pick */

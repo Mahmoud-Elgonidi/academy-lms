@@ -40,6 +40,8 @@ use Modules\Scheduling\Actions\PlaceBookingHold;
 use Modules\Scheduling\Contracts\DTOs\EnrollmentTerms;
 use Modules\Scheduling\Contracts\DTOs\TeacherSearch;
 use Modules\Scheduling\Domain\Availability\Candidate;
+use Modules\Scheduling\Domain\Availability\ExactCheck;
+use Modules\Scheduling\Domain\Availability\Matcher;
 use Modules\Scheduling\Domain\Availability\StudentPreference;
 use Modules\Scheduling\Domain\Models\BookingHold;
 use Modules\Scheduling\Filament\LiveBoardView;
@@ -89,8 +91,27 @@ final class FindTeacher extends Page
 
     public ?int $holdExpiresAt = null;
 
-    /** "free": where teachers are free now, with suggestions; "mine": the hours that suit the student. */
+    /** "free": where teachers are free now, with suggestions; "mine": the hours that suit the student; "exact": one exact time. */
     public string $timesTab = 'free';
+
+    /**
+     * Times typed for one teacher ("another time…"), on the student's clock at
+     * any minute; a trial's on its one date. Checked again on every render.
+     *
+     * @var list<array{teacher: string, weekday: int, time: string, date: ?string}>
+     */
+    public array $typed = [];
+
+    /** @var array<string, array{ok: bool, text: string}> teacher => what their last typed time said */
+    public array $typedNotes = [];
+
+    /**
+     * "Search at an exact time": weekdays (a series) or a date (a trial) and
+     * HH:MM on the student's clock; null until it runs.
+     *
+     * @var array{days: list<int>, date: ?string, time: string}|null
+     */
+    public ?array $exact = null;
 
     /** Why the last hold or booking was refused, shown beside its button. */
     public ?string $refusal = null;
@@ -143,10 +164,13 @@ final class FindTeacher extends Page
         [$from, $to] = [(int) ($query['from'] ?? 0), (int) ($query['to'] ?? 0)];
         if ($days !== [] && $from >= 0 && $to > $from && $to <= 24) {
             foreach ($days as $day) {
-                $this->cells[$day] = array_values(array_filter(range($from, $to - 1), fn (int $h) => $h >= 6 && $h <= 23));
+                $this->cells[$day] = range($from, $to - 1);
             }
             $this->searched = filled($this->data['subject_id']) && array_filter($this->cells) !== [];
             $this->timesTab = 'mine';
+        } elseif ($this->isTrial()) {
+            // A trial is one lesson: a date and an exact time first, suggestions beside it.
+            $this->timesTab = 'exact';
         }
     }
 
@@ -164,7 +188,11 @@ final class FindTeacher extends Page
             ToggleButtons::make('mode')->label(__('scheduling::find.fields.mode'))->hiddenLabel()->inline()->required()->live()
                 ->options(['series' => __('scheduling::find.modes.series'), 'trial' => __('scheduling::find.modes.trial')])
                 ->icons(['series' => Heroicon::OutlinedCalendarDays, 'trial' => Heroicon::OutlinedSparkles])
-                ->afterStateUpdated($changed),
+                ->afterStateUpdated(function (?string $state) {
+                    $this->exact = null;
+                    $this->timesTab = $state === 'trial' ? 'exact' : ($this->timesTab === 'exact' ? 'free' : $this->timesTab);
+                    $this->resetResults();
+                }),
             Grid::make(['default' => 1, 'md' => 3])->schema([
                 Select::make('student_id')->label(__('scheduling::find.fields.student'))
                     ->options(fn () => self::students())->searchable()->live()
@@ -249,7 +277,7 @@ final class FindTeacher extends Page
 
     public function showTimes(string $tab): void
     {
-        $this->timesTab = $tab === 'mine' ? 'mine' : 'free';
+        $this->timesTab = in_array($tab, ['mine', 'exact'], true) ? $tab : 'free';
     }
 
     /**
@@ -280,8 +308,9 @@ final class FindTeacher extends Page
         $duration = (int) $this->data['duration'];
         foreach ($suggestion['times'] as ['weekday' => $weekday, 'time' => $time]) {
             [$h, $m] = array_map('intval', explode(':', $time));
-            for ($hour = $h; $hour * 60 < $h * 60 + $m + $duration && $hour <= 23; $hour++) {
-                $cells[$weekday][] = $hour;
+            // A time that runs past midnight takes the next day's first hour too.
+            for ($hour = $h; $hour * 60 < $h * 60 + $m + $duration; $hour++) {
+                $cells[$hour < 24 ? $weekday : $weekday % 7 + 1][] = $hour % 24;
             }
         }
         $this->cells = $cells;
@@ -308,14 +337,8 @@ final class FindTeacher extends Page
         if (! $this->ready()) {
             return null;
         }
-        $teachers = DB::table('teacher_profiles as tp')
-            ->join('users as u', fn ($j) => $j->on('u.academy_id', '=', 'tp.academy_id')->on('u.id', '=', 'tp.user_id'))
-            ->join('teacher_subjects as ts', fn ($j) => $j->on('ts.academy_id', '=', 'tp.academy_id')->on('ts.teacher_id', '=', 'tp.user_id'))
-            ->where('ts.subject_id', $this->data['subject_id'])
-            ->where('tp.status', 'active')->where('u.status', 'active')
-            ->where($this->isTrial() ? 'tp.accepts_trials' : 'tp.accepts_new', true);
-        if (! $teachers->exists()) {
-            return $this->isTrial() ? 'no_trial_teachers' : 'no_teachers';
+        if (($none = $this->noTeachers) !== null) {
+            return $none;
         }
         if ($this->freeTimes['teachers'] > 0) {
             return 'times';
@@ -328,6 +351,26 @@ final class FindTeacher extends Page
         }
 
         return 'no_time';
+    }
+
+    /** The subject has no teacher taking students (or trials) at all: "no_teachers", "no_trial_teachers", else null. */
+    #[Computed]
+    public function noTeachers(): ?string
+    {
+        if (! $this->ready()) {
+            return null;
+        }
+        $teachers = DB::table('teacher_profiles as tp')
+            ->join('users as u', fn ($j) => $j->on('u.academy_id', '=', 'tp.academy_id')->on('u.id', '=', 'tp.user_id'))
+            ->join('teacher_subjects as ts', fn ($j) => $j->on('ts.academy_id', '=', 'tp.academy_id')->on('ts.teacher_id', '=', 'tp.user_id'))
+            ->where('ts.subject_id', $this->data['subject_id'])
+            ->where('tp.status', 'active')->where('u.status', 'active')
+            ->where($this->isTrial() ? 'tp.accepts_trials' : 'tp.accepts_new', true);
+        if (! $teachers->exists()) {
+            return $this->isTrial() ? 'no_trial_teachers' : 'no_teachers';
+        }
+
+        return null;
     }
 
     /** The subject and the lesson's shape are there: a search can run. */
@@ -362,23 +405,233 @@ final class FindTeacher extends Page
             : __('scheduling::find.bar.shape', ['n' => (int) ($this->data['per_week'] ?? 1), 'minutes' => (int) ($this->data['duration'] ?? 30)]);
         $picked = $this->pickedCandidates();
         $times = $picked !== []
-            ? collect($this->inWeekOrder($picked))->map(fn (Candidate $c) => $this->dayName($c->studentWeekday).' '.Clock::wall($c->studentTime))->implode(' + ')
-            : (($marked = array_sum(array_map('count', $this->cells))) > 0 ? trans_choice('scheduling::find.bar.marked', $marked, ['n' => $marked]) : null);
+            ? collect($this->inWeekOrder($picked))->map(fn (Candidate $c) => $this->lessonLabel($c))->implode(' + ')
+            : ($this->exactLabel() ?? (($marked = array_sum(array_map('count', $this->cells))) > 0 ? trans_choice('scheduling::find.bar.marked', $marked, ['n' => $marked]) : null));
 
         return array_values(array_filter([$student, $subject, $shape, $times]));
     }
 
+    /** The exact time searched, for people ("السبت والثلاثاء 17:40", "السبت 7 نوفمبر 17:40"); null without one. */
+    public function exactLabel(): ?string
+    {
+        if ($this->exact === null) {
+            return null;
+        }
+        $days = $this->exact['date'] !== null
+            ? $this->dayName(CarbonImmutable::parse($this->exact['date'])->dayOfWeekIso).' '.CarbonImmutable::parse($this->exact['date'])->locale(app()->getLocale())->translatedFormat('j F')
+            : collect($this->inWeekOrder(array_flip($this->exact['days'])))->keys()->map(fn (int $d) => $this->dayName($d))->implode(__('scheduling::find.free.and'));
+
+        return $days.' '.Clock::wall($this->exact['time']);
+    }
+
+    /** "السبت 17:40–18:25": a lesson on the student's clock, start to end. */
+    public function lessonLabel(Candidate $c): string
+    {
+        return $this->dayName($c->studentWeekday).' '.Clock::wall($c->studentTime).'–'.Clock::wall($c->studentEnd((int) ($this->data['duration'] ?? 30)));
+    }
+
     public function toggleCell(int $weekday, int $hour): void
     {
+        if ($weekday < 1 || $weekday > 7 || $hour < 0 || $hour > 23) {
+            return;
+        }
         $hours = $this->cells[$weekday] ?? [];
         $this->cells[$weekday] = in_array($hour, $hours, true) ? array_values(array_diff($hours, [$hour])) : [...$hours, $hour];
         $this->resetResults();
+    }
+
+    /**
+     * Hours dragged over on the board, all marked or all cleared at once.
+     *
+     * @param  list<array{0: int, 1: int}>  $cells  [weekday, hour]
+     */
+    public function paint(array $cells, bool $on): void
+    {
+        foreach (array_slice($cells, 0, 7 * 24) as $cell) {
+            [$weekday, $hour] = [(int) ($cell[0] ?? 0), (int) ($cell[1] ?? -1)];
+            if ($weekday < 1 || $weekday > 7 || $hour < 0 || $hour > 23) {
+                continue;
+            }
+            $hours = array_values(array_diff($this->cells[$weekday] ?? [], [$hour]));
+            $this->cells[$weekday] = $on ? [...$hours, $hour] : $hours;
+        }
+        $this->cells = array_filter($this->cells);
+        $this->resetResults();
+    }
+
+    /** One marked range taken off (its chip's ✕). */
+    public function clearRange(int $weekday, int $from, int $to): void
+    {
+        $this->cells[$weekday] = array_values(array_diff($this->cells[$weekday] ?? [], range(max(0, $from), min(23, $to - 1))));
+        $this->cells = array_filter($this->cells);
+        $this->resetResults();
+    }
+
+    /**
+     * The marked hours as ranges in the week's order ("السبت 17:00–19:00"),
+     * each day on its own (a range to midnight and one from it are two).
+     *
+     * @return list<array{weekday: int, from: int, to: int}>
+     */
+    public function markedRanges(): array
+    {
+        $ranges = [];
+        foreach ($this->inWeekOrder(array_filter($this->cells)) as $weekday => $hours) {
+            $hours = array_values(array_unique(array_map('intval', $hours)));
+            sort($hours);
+            $from = null;
+            foreach ($hours as $i => $hour) {
+                $from ??= $hour;
+                if (! isset($hours[$i + 1]) || $hours[$i + 1] !== $hour + 1) {
+                    $ranges[] = ['weekday' => (int) $weekday, 'from' => $from, 'to' => $hour + 1];
+                    $from = null;
+                }
+            }
+        }
+
+        return $ranges;
     }
 
     public function clearCells(): void
     {
         $this->cells = [];
         $this->resetResults();
+    }
+
+    /**
+     * "Search at an exact time": the teachers free at exactly HH:MM (any
+     * minute) on these weekdays every week, or, for a trial, on that date.
+     *
+     * @param  list<int|string>  $days
+     */
+    public function searchExact(array $days, ?string $date, string $time): void
+    {
+        $this->form->validate();
+        $days = array_values(array_unique(array_filter(array_map('intval', $days), fn (int $d) => $d >= 1 && $d <= 7)));
+        if (! self::validTime($time)) {
+            throw ValidationException::withMessages(['exact' => __('scheduling::find.exact.errors.time')]);
+        }
+        if ($this->isTrial()) {
+            $this->assertTrialDate($date);
+            $days = [];
+        } elseif ($days === []) {
+            throw ValidationException::withMessages(['exact' => __('scheduling::find.exact.errors.days')]);
+        } elseif (count($days) > (int) $this->data['per_week']) {
+            throw ValidationException::withMessages(['exact' => __('scheduling::find.errors.enough', ['n' => $this->data['per_week']])]);
+        }
+
+        $this->resetResults();
+        $this->exact = ['days' => $days, 'date' => $this->isTrial() ? $date : null, 'time' => $time];
+        $this->timesTab = 'exact';
+        $this->searched = true;
+        $this->dispatch('ft-results');
+    }
+
+    /**
+     * "Another time…" on a teacher's card: that exact start checked for
+     * them now; it joins their times (marked as typed) when it fits, else
+     * the card says why (busy on some weeks, outside their shifts, leave,
+     * a holiday, their daily cap, before the start…).
+     */
+    public function checkTime(string $teacherId, int $weekday, string $time, ?string $date = null): void
+    {
+        if ($this->holdBatch !== null || ! $this->ready()) {
+            return;
+        }
+        if (! self::validTime($time)) {
+            throw ValidationException::withMessages(['typed' => __('scheduling::find.exact.errors.time')]);
+        }
+        if ($this->isTrial()) {
+            $this->assertTrialDate($date);
+            $weekday = CarbonImmutable::parse($date)->dayOfWeekIso;
+        } elseif ($weekday < 1 || $weekday > 7) {
+            throw ValidationException::withMessages(['typed' => __('scheduling::find.exact.errors.days')]);
+        } else {
+            $date = null;
+        }
+
+        $check = $this->checkFor($teacherId, $weekday, $time, $date);
+        if ($check === null) {
+            return;
+        }
+        if ($check->fits()) {
+            $this->typed = array_values(array_filter($this->typed, fn (array $t) => ! ($t['teacher'] === $teacherId && $t['weekday'] === $weekday && $t['time'] === $time)));
+            $this->typed[] = ['teacher' => $teacherId, 'weekday' => $weekday, 'time' => $time, 'date' => $date];
+            unset($this->results);
+        }
+        $this->typedNotes[$teacherId] = $this->explain($check, $date);
+    }
+
+    /** One exact start for one teacher, with this search's rules (a trial's on its date, one lesson). */
+    private function checkFor(string $teacherId, int $weekday, string $time, ?string $date): ?ExactCheck
+    {
+        return app(FindTeachersQuery::class)->check($this->exactSearch($date), $teacherId, $weekday, $time, CarbonImmutable::now()->getTimestamp());
+    }
+
+    /** The search for an exact time: a series as the form says; a trial, its one date. */
+    private function exactSearch(?string $date): TeacherSearch
+    {
+        $search = $this->teacherSearch([]);
+        if ($date === null) {
+            return $search;
+        }
+        $pref = $search->preference;
+
+        return new TeacherSearch($search->subjectId, new StudentPreference($pref->timezone, [], 1, $pref->durationMin, CarbonImmutable::parse($date), 1, 1),
+            $search->gender, $search->language, $search->forTrial, $search->searcherId, $search->levelId, $search->categoryId, $search->ageGroup, $search->forMinor);
+    }
+
+    /**
+     * What a typed time came to, in the reader's words: free (and on how
+     * many weeks), or why not, each reason with its weeks.
+     *
+     * @return array{ok: bool, text: string}
+     */
+    public function explain(ExactCheck $check, ?string $date = null): array
+    {
+        $at = $date !== null
+            ? $this->dayName($check->studentWeekday).' '.CarbonImmutable::parse($date)->locale(app()->getLocale())->translatedFormat('j M').' '.Clock::wall($check->studentTime)
+            : $this->dayName($check->studentWeekday).' '.Clock::wall($check->studentTime);
+        if ($check->fits()) {
+            return ['ok' => true, 'text' => $date !== null || $check->coverage() === $check->weeks
+                ? __('scheduling::find.exact.fits', ['at' => $at])
+                : __('scheduling::find.exact.fits_some', ['at' => $at, 'n' => $check->coverage(), 'weeks' => $check->weeks])];
+        }
+
+        $reasons = [];
+        foreach ($check->sortedReasons() as $reason => $dates) {
+            $n = count($dates);
+            $when = match (true) {
+                $date !== null => '',
+                $n === 0 || $n >= $check->weeks => __('scheduling::find.exact.when.all'),
+                default => trans_choice('scheduling::find.exact.when.some', $n, [
+                    'n' => $n, 'weeks' => $check->weeks,
+                    'dates' => collect($dates)->take(3)->map(fn (string $d) => CarbonImmutable::parse($d)->locale(app()->getLocale())->translatedFormat('j M'))->implode('، ').($n > 3 ? '…' : ''),
+                ]),
+            };
+            $reasons[] = trim(__('scheduling::find.exact.reasons.'.$reason).' '.$when);
+        }
+        $lead = $check->coverage() > 0
+            ? __('scheduling::find.exact.short', ['at' => $at, 'n' => $check->coverage(), 'weeks' => $check->weeks, 'min' => $check->minCoverage])
+            : __('scheduling::find.exact.refused', ['at' => $at]);
+
+        return ['ok' => false, 'text' => $lead.' '.implode('؛ ', $reasons).'.'];
+    }
+
+    /** "HH:MM" of a 24-hour day, any minute. */
+    public static function validTime(string $time): bool
+    {
+        return preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $time) === 1;
+    }
+
+    /** A trial's date: a real day, from today on the student's clock, within three months. */
+    private function assertTrialDate(?string $date): void
+    {
+        $today = CarbonImmutable::now($this->data['timezone'] ?? 'UTC')->startOfDay();
+        $day = $date !== null && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) === 1 ? CarbonImmutable::createFromFormat('!Y-m-d', $date, $this->data['timezone'] ?? 'UTC') : null;
+        if (! $day || $day->format('Y-m-d') !== $date || $day->lessThan($today) || $day->greaterThan($today->addMonths(3))) {
+            throw ValidationException::withMessages(['exact' => __('scheduling::find.exact.errors.date')]);
+        }
     }
 
     public function search(): void
@@ -705,11 +958,75 @@ final class FindTeacher extends Page
     #[Computed]
     public function results(): array
     {
-        if (! $this->searched || array_filter($this->cells) === []) {
+        if (! $this->searched) {
+            return [];
+        }
+        if ($this->exact !== null) {
+            $results = $this->exactAnswer['results'];
+        } elseif (array_filter($this->cells) !== []) {
+            $results = app(FindTeachersQuery::class)->run($this->teacherSearch($this->cells));
+        } else {
             return [];
         }
 
-        return app(FindTeachersQuery::class)->run($this->teacherSearch($this->cells));
+        return $this->withTyped($results);
+    }
+
+    /**
+     * The exact-time search's answer: teachers free then, and the others
+     * with each one's reasons (null when no exact search ran).
+     *
+     * @return array{results: list<array<string, mixed>>, refused: list<array{teacher: object, checks: list<ExactCheck>}>}|null
+     */
+    #[Computed]
+    public function exactAnswer(): ?array
+    {
+        if ($this->exact === null || ! $this->ready()) {
+            return null;
+        }
+        $times = $this->exact['date'] !== null
+            ? [['weekday' => CarbonImmutable::parse($this->exact['date'])->dayOfWeekIso, 'time' => $this->exact['time']]]
+            : array_map(fn (int $d) => ['weekday' => $d, 'time' => $this->exact['time']], $this->exact['days']);
+
+        return app(FindTeachersQuery::class)->exact($this->exactSearch($this->exact['date']), $times, CarbonImmutable::now()->getTimestamp());
+    }
+
+    /**
+     * The times typed for a teacher join their chips (marked as typed),
+     * checked again now; one gone since is left out.
+     *
+     * @param  list<array<string, mixed>>  $results
+     * @return list<array<string, mixed>>
+     */
+    private function withTyped(array $results): array
+    {
+        if ($this->typed === []) {
+            return $results;
+        }
+        foreach ($results as &$result) {
+            $id = $result['teacher']->id;
+            foreach ($this->typed as $t) {
+                if ($t['teacher'] !== $id) {
+                    continue;
+                }
+                // A series' weeks are the search's (its free time is at hand); a trial's date is its own.
+                $check = $t['date'] === null
+                    ? app(Matcher::class)->exact($result['availability'], $this->teacherSearch([])->preference, $t['weekday'], $t['time'], CarbonImmutable::now()->getTimestamp())
+                    : $this->checkFor($id, $t['weekday'], $t['time'], $t['date']);
+                if (! $check?->fits()) {
+                    continue;
+                }
+                $typed = $check->candidate;
+                $result['candidates'] = [...array_values(array_filter($result['candidates'], fn (Candidate $c) => $c->key() !== $typed->key())), $typed];
+                $day = array_values(array_filter($result['chips'][$typed->studentWeekday] ?? [], fn (Candidate $c) => $c->key() !== $typed->key()));
+                $day[] = $typed;
+                usort($day, fn (Candidate $a, Candidate $b) => $a->studentTime <=> $b->studentTime);
+                $result['chips'][$typed->studentWeekday] = $day;
+            }
+        }
+        unset($result);
+
+        return $results;
     }
 
     /**
@@ -846,8 +1163,8 @@ final class FindTeacher extends Page
 
     private function bookingDone(): void
     {
-        [$this->holdBatch, $this->holdExpiresAt, $this->picked, $this->pickedTeacher, $this->refusal] = [null, null, [], null, null];
-        unset($this->results);
+        [$this->holdBatch, $this->holdExpiresAt, $this->picked, $this->pickedTeacher, $this->refusal, $this->typed, $this->typedNotes] = [null, null, [], null, null, [], []];
+        unset($this->results, $this->exactAnswer);
     }
 
     private function studentDate(CarbonImmutable $at): string
@@ -878,11 +1195,13 @@ final class FindTeacher extends Page
     private function resetResults(): void
     {
         if ($this->holdBatch === null) {
-            [$this->picked, $this->pickedTeacher] = [[], null];
+            [$this->picked, $this->pickedTeacher, $this->typed] = [[], null, []];
         }
         $this->searched = false;
         $this->refusal = null;
-        unset($this->results);
+        $this->exact = null;
+        $this->typedNotes = [];
+        unset($this->results, $this->exactAnswer, $this->noTeachers);
     }
 
     /** @return array<string, string> students of this academy, with their city */
