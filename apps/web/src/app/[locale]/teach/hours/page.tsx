@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { ConversationPanel, ProposalActions, ProposeButton, ShiftStepper, stageOf, type ShiftStage } from '@/components/teach/shifts';
+import { ConversationPanel, ProposalActions, ProposeButton, ShiftStepper } from '@/components/teach/shifts';
+import { stageOf, type ShiftStage } from '@/lib/teach/shifts';
 import { WeekView } from '@/components/teach/week-view';
 import { Badge, Card, Heading, Notice, SectionTitle } from '@/components/ui';
 import { get } from '@/lib/api/server';

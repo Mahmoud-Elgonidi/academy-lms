@@ -8,6 +8,7 @@ import { Icon } from '@/components/icons';
 import { Button, Field, Input, Notice, Textarea, join } from '@/components/ui';
 import { hoursOf, weekOrder, weekdayName } from '@/lib/format';
 import { formProblem } from '@/lib/problems';
+import { stageOf, type ShiftStage } from '@/lib/teach/shifts';
 import type { ShiftBlock, ShiftProposal } from '@/lib/teach/types';
 import { minutesOf, weeklyMinutes } from './week-view';
 
@@ -180,25 +181,6 @@ export function ShiftEditor({
   );
 }
 
-/** Where a proposal stands, as the steps the teacher sees. */
-export type ShiftStage = 'draft' | 'review' | 'changes' | 'countered' | 'approved' | 'rejected';
-
-export function stageOf(status: string): ShiftStage {
-  switch (status) {
-    case 'draft':
-      return 'draft';
-    case 'submitted':
-      return 'review';
-    case 'changes_requested':
-      return 'changes';
-    case 'countered':
-      return 'countered';
-    case 'rejected':
-      return 'rejected';
-    default:
-      return 'approved';
-  }
-}
 
 /** The step it is on: 0 draft, 2 in review, 3 the academy's answer. */
 const stepOf = (stage: ShiftStage) => (stage === 'draft' ? 0 : stage === 'review' ? 2 : 3);

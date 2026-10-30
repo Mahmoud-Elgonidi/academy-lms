@@ -128,7 +128,11 @@ test('new hours are drafted, sent, talked about beside the page, and withdrawn',
   if (await resume.isVisible()) await resume.click();
   else await page.getByRole('button', { name: 'اقترح مواعيد جديدة' }).click();
   const saturday = page.locator('li').filter({ has: page.getByText('السبت', { exact: true }) }).filter({ has: page.getByRole('button', { name: 'أضف وقتًا' }) });
-  await saturday.getByRole('button', { name: 'أضف وقتًا' }).click();
+  if ((await saturday.locator('input[type=time]').count()) === 0) await saturday.getByRole('button', { name: 'أضف وقتًا' }).click();
+  // Two hours on Saturday, two fewer on Sunday: the week stays within Khaled's 30-hour contract, so it can be sent.
+  await page.getByLabel('الأحد · حتى').fill('19:00');
+  // Fewer hours on a day starts no sooner than two weeks out.
+  await page.getByLabel(/^يبدأ من/).fill(new Date(Date.now() + 21 * 86_400_000).toISOString().slice(0, 10));
   await page.getByLabel(/ملاحظة للأكاديمية/).fill('أريد إضافة عصر السبت.');
   await page.getByRole('button', { name: 'احفظ مسودة' }).click();
   await expect(page.getByText('حُفظت المسودة.')).toBeVisible();
