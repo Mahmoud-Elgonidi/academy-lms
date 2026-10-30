@@ -2,8 +2,11 @@
 
 namespace Modules\Scheduling\Filament;
 
+use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
 use Modules\Scheduling\Domain\Shifts\ShiftBlock;
 use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
 use Modules\SharedKernel\Time\Clock;
@@ -39,5 +42,39 @@ final class ShiftBlocksField
     public static function fill(WeeklyShifts $week): array
     {
         return array_map(fn (ShiftBlock $b) => ['weekday' => $b->weekday, 'start' => $b->start(), 'end' => $b->end()], $week->blocks);
+    }
+
+    /**
+     * Runs a shift Action from an action's form and puts its refusals on the
+     * form's own fields: the Actions say `shifts` (or `blocks`) for what is
+     * wrong with the week, which no field is called, so the modal would stay
+     * open without a word.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $run
+     * @return T
+     */
+    public static function refusalsOnBlocks(Action $action, callable $run, string $name = 'blocks'): mixed
+    {
+        $field = fn (string $f) => 'mountedActions.'.($action->getNestingIndex() ?? 0).'.data.'.$f;
+
+        try {
+            return $run();
+        } catch (InvalidArgumentException) {
+            throw ValidationException::withMessages([$field($name) => __('scheduling::review.bad_block')]);
+        } catch (ValidationException $e) {
+            $errors = [];
+            foreach ($e->errors() as $key => $messages) {
+                $target = match ((string) $key) {
+                    'shifts', 'blocks' => $field($name),
+                    'effective_from' => $field('effective_from'),
+                    default => (string) $key,
+                };
+                $errors[$target] = [...($errors[$target] ?? []), ...(array) $messages];
+            }
+
+            throw ValidationException::withMessages($errors);
+        }
     }
 }

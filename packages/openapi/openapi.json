@@ -20068,6 +20068,7 @@
         "/v1/teacher/shifts": {
             "get": {
                 "operationId": "teacher.shifts.show",
+                "summary": "The teacher's schedule in force today, one approved to start later, the open proposal and the last decisions",
                 "tags": [
                     "Scheduling"
                 ],
@@ -20129,6 +20130,63 @@
                                                         }
                                                     },
                                                     "required": [
+                                                        "timezone",
+                                                        "weekly_minutes",
+                                                        "blocks"
+                                                    ]
+                                                },
+                                                "upcoming": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "An approved schedule that starts on a later day: `current` stays until then.",
+                                                    "properties": {
+                                                        "starts_on": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The first day it is in force (`local` holds that date; `label` names the day).",
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "string"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "version": {
+                                                            "type": "integer"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "string"
+                                                        },
+                                                        "weekly_minutes": {
+                                                            "type": "integer"
+                                                        },
+                                                        "blocks": {
+                                                            "type": "array",
+                                                            "description": "Same shape as `current.blocks`.",
+                                                            "items": {}
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "starts_on",
+                                                        "version",
                                                         "timezone",
                                                         "weekly_minutes",
                                                         "blocks"
@@ -20323,6 +20381,69 @@
                                                         "comments"
                                                     ]
                                                 },
+                                                "history": {
+                                                    "type": "array",
+                                                    "description": "The last three decided proposals, newest first.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "status": {
+                                                                "type": "string"
+                                                            },
+                                                            "status_label": {
+                                                                "type": "string"
+                                                            },
+                                                            "effective_from": {
+                                                                "type": "string",
+                                                                "description": "The start date the proposal asked for."
+                                                            },
+                                                            "decided_at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            },
+                                                            "reason": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "The admins' reason, for a rejected proposal only."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "status",
+                                                            "status_label",
+                                                            "effective_from",
+                                                            "decided_at",
+                                                            "reason"
+                                                        ]
+                                                    }
+                                                },
                                                 "earliest_start": {
                                                     "type": "object",
                                                     "properties": {
@@ -20342,7 +20463,9 @@
                                             "required": [
                                                 "timezone",
                                                 "current",
+                                                "upcoming",
                                                 "proposal",
+                                                "history",
                                                 "earliest_start"
                                             ]
                                         }

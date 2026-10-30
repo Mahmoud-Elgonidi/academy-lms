@@ -12,6 +12,7 @@ use Modules\Scheduling\Actions\Shifts\CommentOnShiftProposal;
 use Modules\Scheduling\Actions\Shifts\SaveShiftProposal;
 use Modules\Scheduling\Actions\Shifts\ShiftProposals;
 use Modules\Scheduling\Actions\Shifts\WithdrawShiftProposal;
+use Modules\Scheduling\Domain\Enums\ShiftProposalStatus;
 use Modules\Scheduling\Domain\Models\ShiftProposal;
 use Modules\Scheduling\Domain\Models\ShiftProposalComment;
 use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
@@ -27,18 +28,47 @@ final class TeacherShiftsController
         private readonly LocalTimePresenter $time,
     ) {}
 
+    /** The teacher's schedule in force today, one approved to start later, the open proposal and the last decisions. */
     public function show(Request $request): JsonResponse
     {
         $teacherId = $request->user()->getAuthIdentifier();
         $timezone = $this->proposals->teacherTimezone($teacherId);
         $today = CarbonImmutable::now($timezone)->startOfDay();
         $current = $this->proposals->scheduleOn($teacherId, $today, $timezone);
+        $upcoming = $this->proposals->upcoming($teacherId, $today);
         $proposal = $this->proposals->openOrDraft($teacherId);
 
         return response()->json(['data' => [
             'timezone' => $timezone,
             'current' => ShiftWeekResource::make($current),
+            // An approved schedule that starts on a later day: `current` stays until then.
+            'upcoming' => $upcoming ? [
+                // The first day it is in force (`local` holds that date; `label` names the day).
+                'starts_on' => $this->time->academyDay($upcoming->effectiveFrom()),
+                'version' => $upcoming->version,
+                'timezone' => $upcoming->timezone,
+                'weekly_minutes' => $upcoming->shifts()->weeklyMinutes(),
+                // Same shape as `current.blocks`.
+                'blocks' => $upcoming->shifts()->toArray(),
+            ] : null,
             'proposal' => $proposal ? $this->proposal($proposal->load('rules', 'comments')) : null,
+            // The last three decided proposals, newest first.
+            'history' => ShiftProposal::query()
+                ->where('teacher_id', $teacherId)
+                ->whereIn('status', [ShiftProposalStatus::Approved->value, ShiftProposalStatus::Superseded->value, ShiftProposalStatus::Rejected->value])
+                ->orderByDesc('decided_at')->orderByDesc('updated_at')
+                ->limit(3)
+                ->get()
+                ->map(fn (ShiftProposal $p) => [
+                    'id' => $p->id,
+                    'status' => $p->status->value,
+                    'status_label' => __('scheduling::shifts.statuses.'.$p->status->value),
+                    // The start date the proposal asked for.
+                    'effective_from' => $p->effective_from->toDateString(),
+                    'decided_at' => $this->time->present($p->decided_at),
+                    // The admins' reason, for a rejected proposal only.
+                    'reason' => $p->status === ShiftProposalStatus::Rejected ? $p->decision_note : null,
+                ])->values()->all(),
             'earliest_start' => [
                 'adding_time' => $today->addDay()->toDateString(),
                 'removing_time' => $today->addDays($this->proposals->settings()->reduction_notice_days)->toDateString(),

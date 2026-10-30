@@ -45,6 +45,26 @@ final class ShiftProposals
         return ShiftSchedule::inForce($teacherId, $date)?->shifts() ?? WeeklyShifts::empty($timezone);
     }
 
+    /** An approved version that starts after $today (approved ahead of its day), if any. */
+    public function upcoming(string $teacherId, CarbonImmutable $today): ?ShiftSchedule
+    {
+        $latest = ShiftSchedule::latest($teacherId, $today);
+
+        return $latest !== null && $latest->effectiveFrom()->toDateString() > $today->toDateString() ? $latest : null;
+    }
+
+    /** The newest approved version: the upcoming one, else the one in force on $today. */
+    public function latest(string $teacherId, CarbonImmutable $today): ?ShiftSchedule
+    {
+        return ShiftSchedule::latest($teacherId, $today);
+    }
+
+    /** The newest approved week (upcoming, else in force), or an empty week: what an edit starts from. */
+    public function latestShifts(string $teacherId, CarbonImmutable $today, string $timezone): WeeklyShifts
+    {
+        return $this->latest($teacherId, $today)?->shifts() ?? WeeklyShifts::empty($timezone);
+    }
+
     /** Throws a validation error listing every problem, or returns quietly. */
     public function assertValid(string $teacherId, WeeklyShifts $shifts, CarbonImmutable $effectiveFrom, ?int $min, ?int $max): void
     {

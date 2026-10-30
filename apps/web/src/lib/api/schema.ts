@@ -2179,6 +2179,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** The teacher's schedule in force today, one approved to start later, the open proposal and the last decisions */
         get: operations["teacher.shifts.show"];
         put?: never;
         post?: never;
@@ -10752,6 +10753,21 @@ export interface operations {
                                 weekly_minutes: number;
                                 blocks: unknown[];
                             };
+                            /** @description An approved schedule that starts on a later day: `current` stays until then. */
+                            upcoming: {
+                                /** @description The first day it is in force (`local` holds that date; `label` names the day). */
+                                starts_on: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: string;
+                                    label: string;
+                                } | null;
+                                version: number;
+                                timezone: string;
+                                weekly_minutes: number;
+                                /** @description Same shape as `current.blocks`. */
+                                blocks: unknown[];
+                            } | null;
                             proposal: {
                                 id: string;
                                 status: string;
@@ -10792,6 +10808,22 @@ export interface operations {
                                     } | null;
                                 }[];
                             } | null;
+                            /** @description The last three decided proposals, newest first. */
+                            history: {
+                                id: string;
+                                status: string;
+                                status_label: string;
+                                /** @description The start date the proposal asked for. */
+                                effective_from: string;
+                                decided_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description The admins' reason, for a rejected proposal only. */
+                                reason: string | null;
+                            }[];
                             earliest_start: {
                                 adding_time: string;
                                 removing_time: string;

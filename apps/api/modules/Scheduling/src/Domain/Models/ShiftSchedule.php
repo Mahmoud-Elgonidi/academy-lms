@@ -61,4 +61,19 @@ final class ShiftSchedule extends Model
             ->with('rules')
             ->first();
     }
+
+    /**
+     * The newest approved version a teacher has that has not ended by $date:
+     * one that starts later (approved ahead of its day), else the one in force.
+     */
+    public static function latest(string $teacherId, CarbonImmutable $date): ?self
+    {
+        return self::query()
+            ->where('teacher_id', $teacherId)
+            ->where('status', 'active')
+            ->whereRaw('(upper_inf(effective) or upper(effective) > ?::date)', [$date->toDateString()])
+            ->orderByRaw('lower(effective) desc')
+            ->with('rules')
+            ->first();
+    }
 }
