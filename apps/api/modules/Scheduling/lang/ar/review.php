@@ -1,6 +1,24 @@
 <?php
 
 return [
+    'zone_chip' => 'كل معلّم بتوقيته',
+    'tab_groups' => [
+        'review' => 'تحتاج قرارك',
+        'teacher' => 'عند المعلّم',
+        'approved' => 'معتمدة',
+        'closed' => 'مغلقة',
+    ],
+    'empty_teachers' => 'لا يوجد معلّمون بعد.',
+    'days_short' => [6 => 'سبت', 7 => 'أحد', 1 => 'اثنين', 2 => 'ثلاثاء', 3 => 'أربعاء', 4 => 'خميس', 5 => 'جمعة'],
+    'day_kinds' => ['added' => 'يُضاف', 'removed' => 'يُحذف', 'changed' => 'يتغيّر', 'same' => 'دون تغيير', 'off' => 'إجازة', 'on' => 'يوم عمل'],
+    'week_strip' => 'أيام الأسبوع',
+    'unresolved_short' => ':count بلا حل',
+    'hours_a_week' => 'ساعة أسبوعيًا',
+    'review_cta' => 'راجِع',
+    'panes' => ['compare' => 'المقارنة', 'conflicts' => 'التعارضات', 'thread' => 'المحادثة'],
+    'bar_before' => 'الحالي',
+    'bar_after' => 'المقترح',
+    'starts_on' => 'يبدأ :date',
     'nav' => 'مقترحات مواعيد العمل',
     'list_title' => 'مقترحات مواعيد العمل',
     'title' => 'مقترح مواعيد عمل: :teacher',

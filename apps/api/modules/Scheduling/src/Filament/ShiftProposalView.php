@@ -69,11 +69,13 @@ final class ShiftProposalView
             $open = $p->status->isOpen();
             $conflicts = $open ? $this->impact->conflicts($p->teacher_id, $proposed, $p->effective_from) : [];
             $sent = $p->submitted_at ?? $p->created_at;
+            $name = (string) $p->getAttribute('teacher_name');
 
             $rows[self::group($p->status)][] = [
                 'id' => $p->id,
                 'teacher_id' => $p->teacher_id,
-                'teacher' => $p->getAttribute('teacher_name'),
+                'teacher' => $name,
+                'initial' => self::initial($name),
                 // The proposal's hours are on this zone (the teacher's own).
                 'zone' => LiveBoardView::city($p->timezone),
                 'status' => $p->status->value,
@@ -83,6 +85,11 @@ final class ShiftProposalView
                 'overdue' => $p->status === ShiftProposalStatus::Submitted && (bool) $p->submitted_at?->addHours($replyHours)->isPast(),
                 'from' => $this->day($p->effective_from),
                 'summary' => $this->summary($before, $proposed),
+                'hours_before' => ProposalRules::hours($before->weeklyMinutes()),
+                'hours_after' => ProposalRules::hours($proposed->weeklyMinutes()),
+                'delta' => $proposed->weeklyMinutes() - $before->weeklyMinutes(),
+                'delta_hours' => ProposalRules::hours(abs($proposed->weeklyMinutes() - $before->weeklyMinutes())),
+                'days7' => $this->days7($before, $proposed),
                 'conflicts' => count($conflicts),
                 'unresolved' => count(array_filter($conflicts, fn ($c) => ! isset($p->resolutions[$c['key']]))),
             ];
@@ -116,6 +123,8 @@ final class ShiftProposalView
             // Moving the student to another teacher happens on their account; the conflict then goes away.
             'move_url' => $c['enrollment_id'] ? route('filament.academy.resources.enrollments.view', ['record' => $c['enrollment_id'], 'reassign' => $p->effective_from->toDateString()]) : null,
         ], $p->status->isOpen() ? $this->impact->conflicts($p->teacher_id, $proposed, $p->effective_from) : []);
+        $unresolved = count(array_filter($conflicts, fn ($c) => $c['resolution'] === null));
+        $timeline = $this->timeline($p, $teacher->name ?? '');
 
         return [
             'id' => $p->id,
@@ -129,14 +138,20 @@ final class ShiftProposalView
             'from' => $this->day($p->effective_from),
             'hours_before' => ProposalRules::hours($before->weeklyMinutes()),
             'hours_after' => ProposalRules::hours($proposed->weeklyMinutes()),
+            'minutes_before' => $before->weeklyMinutes(),
+            'minutes_after' => $proposed->weeklyMinutes(),
             'delta' => $proposed->weeklyMinutes() - $before->weeklyMinutes(),
+            'delta_hours' => ProposalRules::hours(abs($proposed->weeklyMinutes() - $before->weeklyMinutes())),
             'reduces' => $removed > 0,
             'notice_days' => $this->proposals->settings()->reduction_notice_days,
             'notice_ok' => ! $p->effective_from->lessThan($earliest),
             'week' => $this->compare($before, $proposed),
             'conflicts' => $conflicts,
-            'unresolved' => count(array_filter($conflicts, fn ($c) => $c['resolution'] === null)),
-            'timeline' => $this->timeline($p, $teacher->name ?? ''),
+            'unresolved' => $unresolved,
+            'timeline' => $timeline,
+            'messages' => count(array_filter($timeline, fn (array $m) => $m['type'] === 'message')),
+            // The slide-over opens on the conflicts while one still needs a decision.
+            'pane' => $unresolved > 0 ? 'conflicts' : 'compare',
         ];
     }
 
@@ -191,6 +206,7 @@ final class ShiftProposalView
         $fallback = app(TenantContext::class)->require()->defaultTimezone;
 
         return $teachers->map(function ($t) use ($schedules, $open, $fallback) {
+            $tz = $t->timezone ?? $fallback;
             $today = CarbonImmutable::now($t->timezone ?? $fallback)->toDateString();
             $current = $upcoming = null;
             foreach ($schedules->get($t->id, collect()) as $s) {
@@ -203,13 +219,17 @@ final class ShiftProposalView
                 }
             }
             $proposal = $open->get($t->id);
+            $inForce = $current?->shifts() ?? WeeklyShifts::empty($tz);
 
             return [
                 'id' => $t->id,
                 'name' => $t->name,
-                'zone' => LiveBoardView::city($t->timezone ?? $fallback),
+                'initial' => self::initial((string) $t->name),
+                'zone' => LiveBoardView::city($tz),
                 'current_hours' => $current ? ProposalRules::hours($current->shifts()->weeklyMinutes()) : null,
                 'days' => $current ? count(array_unique(array_map(fn (ShiftBlock $b) => $b->weekday, $current->shifts()->blocks))) : 0,
+                // The schedule in force, day by day: working or off.
+                'days7' => $this->days7($inForce),
                 'upcoming' => $upcoming ? [
                     'from' => $this->day($upcoming->effectiveFrom()),
                     'hours' => ProposalRules::hours($upcoming->shifts()->weeklyMinutes()),
@@ -286,6 +306,49 @@ final class ShiftProposalView
             ))),
             'same' => $parts === ['added' => [], 'removed' => [], 'changed' => []],
         ];
+    }
+
+    /**
+     * The week in seven cells, in the order the comparison reads (Saturday
+     * first in Arabic): each day added, removed, changed, the same, or off on
+     * both sides, with its times for a tooltip. With one week ($after null),
+     * each day is a working day ("on") or off.
+     *
+     * @return list<array{day: int, short: string, name: string, kind: string, title: string}>
+     */
+    public function days7(WeeklyShifts $before, ?WeeklyShifts $after = null): array
+    {
+        $single = $after === null;
+
+        return array_map(function (array $row) use ($single): array {
+            $kind = match (true) {
+                $row['before'] === [] && $row['after'] === [] => 'off',
+                $single => 'on',
+                ! $row['changed'] => 'same',
+                $row['before'] === [] => 'added',
+                $row['after'] === [] => 'removed',
+                default => 'changed',
+            };
+            $times = array_column($kind === 'removed' ? $row['before'] : $row['after'], 'label');
+
+            return [
+                'day' => $row['day'],
+                'short' => __('scheduling::review.days_short.'.$row['day']),
+                'name' => $row['label'],
+                'kind' => $kind,
+                'title' => implode(' · ', array_filter([$row['label'], __('scheduling::review.day_kinds.'.$kind), implode('، ', $times)])),
+            ];
+        }, $this->compare($before, $after ?? $before));
+    }
+
+    /** The first letter of a name, for the round sign beside it. */
+    public static function initial(string $name): string
+    {
+        // A title before the name ("أ.", "Dr.") is skipped.
+        $words = array_values(array_filter(preg_split('/\s+/u', trim($name)) ?: [], fn (string $w) => $w !== '' && ! str_ends_with($w, '.')));
+        $first = $words[0] ?? trim($name);
+
+        return $first === '' ? '?' : mb_strtoupper(mb_substr($first, 0, 1));
     }
 
     /** The week a proposal replaces: for an open one, what is approved for its start date; for a decided one, what it was based on. */

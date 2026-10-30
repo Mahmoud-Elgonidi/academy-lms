@@ -12,11 +12,13 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Support\Enums\IconSize;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
@@ -34,9 +36,11 @@ use Modules\Scheduling\Filament\ShiftProposalView;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\ZoneHint;
 
+use function Filament\Support\generate_icon_html;
+
 /**
- * Teachers' shifts (docs/architecture/02, section 2): proposals grouped by
- * status, what waits on the admins first; each opens in a slide-over with the
+ * Teachers' shifts (docs/architecture/02, section 2): proposals in tabs by
+ * status, what waits on the admins first, as cards with the week in seven days; each opens in a slide-over with the
  * two weeks side by side, the booked students it leaves out, the conversation
  * and one clear next step. A second tab holds every teacher's schedule, in
  * force and approved to come, with "Edit" starting from the newest.
@@ -51,8 +55,9 @@ final class ShiftProposals extends Page
 
     protected static ?string $slug = 'shifts/proposals';
 
+    /** One of ShiftProposalView::GROUPS, or "teachers"; empty opens the first group with something in it. */
     #[Url]
-    public string $tab = 'proposals';
+    public string $tab = '';
 
     public string $reply = '';
 
@@ -83,10 +88,15 @@ final class ShiftProposals extends Page
         return __('scheduling::review.list_title');
     }
 
-    /** Shifts are kept on each teacher's own clock: the page says so, and names the zone beside each teacher. */
+    /** Shifts are kept on each teacher's own clock: a small chip says so (the viewer's zone in its tooltip), and each card names the teacher's zone. */
     public function getSubheading(): string|Htmlable|null
     {
-        return ZoneHint::teachers();
+        return new HtmlString(sprintf(
+            '<span class="sp-zone-chip" title="%s">%s<span>%s</span></span>',
+            e(ZoneHint::teachers()),
+            generate_icon_html(Heroicon::OutlinedClock, size: IconSize::Small)?->toHtml() ?? '',
+            e(__('scheduling::review.zone_chip')),
+        ));
     }
 
     public function mount(): void
@@ -101,9 +111,48 @@ final class ShiftProposals extends Page
             $this->defaultAction = 'teacher';
             $this->defaultActionArguments = ['teacher' => $id];
         }
-        if (! in_array($this->tab, ['proposals', 'teachers'], true)) {
-            $this->tab = 'proposals';
+        if (! in_array($this->tab, [...ShiftProposalView::GROUPS, 'teachers'], true)) {
+            $this->tab = $this->firstTab();
         }
+    }
+
+    public function updatedTab(): void
+    {
+        if (! in_array($this->tab, [...ShiftProposalView::GROUPS, 'teachers'], true)) {
+            $this->tab = $this->firstTab();
+        }
+    }
+
+    /**
+     * The tabs: "needs your decision" always, every other group with something
+     * in it (or open now), then the teachers' schedules.
+     *
+     * @return list<array{key: string, count: int|null}>
+     */
+    #[Computed]
+    public function tabs(): array
+    {
+        $tabs = [];
+        foreach ($this->groups as $group => $rows) {
+            if ($group === 'review' || $rows !== [] || $group === $this->tab) {
+                $tabs[] = ['key' => $group, 'count' => count($rows)];
+            }
+        }
+        $tabs[] = ['key' => 'teachers', 'count' => null];
+
+        return $tabs;
+    }
+
+    /** The first group with a proposal in it, else "needs your decision". */
+    private function firstTab(): string
+    {
+        foreach ($this->groups as $group => $rows) {
+            if ($rows !== []) {
+                return $group;
+            }
+        }
+
+        return 'review';
     }
 
     /** @return array<string, list<array<string, mixed>>> */
@@ -124,7 +173,7 @@ final class ShiftProposals extends Page
     {
         $this->authorizeReview();
         app(ResolveShiftConflict::class)->handle(ShiftProposal::query()->findOrFail($proposalId), $key, $kind, (string) auth()->id());
-        unset($this->groups);
+        unset($this->groups, $this->tabs);
     }
 
     public function sendReply(string $proposalId): void
@@ -152,9 +201,8 @@ final class ShiftProposals extends Page
             ->slideOver()
             ->modalWidth(Width::FourExtraLarge)
             ->modalHeading(fn (array $arguments) => $this->proposalView($arguments)['teacher'] ?? __('scheduling::review.missing'))
-            ->modalDescription(fn (array $arguments) => ($r = $this->proposalView($arguments))
-                ? __('scheduling::review.slide_hint', ['status' => __('scheduling::shifts.statuses.'.$r['status']->value), 'date' => $r['from']])
-                : null)
+            // The status and start date sit in the slide-over's summary; the heading names the clock its hours are on.
+            ->modalDescription(fn (array $arguments) => ($r = $this->proposalView($arguments)) ? __('scheduling::review.teacher_clock', ['city' => $r['city']]) : null)
             ->modalContent(fn (array $arguments) => view('scheduling::filament.shift-proposal', ['r' => $this->proposalView($arguments)]))
             ->modalSubmitAction(false)
             ->modalCancelActionLabel(__('scheduling::review.close'))
@@ -340,7 +388,7 @@ final class ShiftProposals extends Page
     {
         $this->authorizeReview();
         $action();
-        unset($this->groups, $this->teachers);
+        unset($this->groups, $this->teachers, $this->tabs);
         Notification::make()->success()->title(__('scheduling::review.done.'.$outcome))->send();
     }
 

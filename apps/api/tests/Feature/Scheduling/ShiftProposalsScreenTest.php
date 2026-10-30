@@ -5,16 +5,21 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Catalog\Contracts\CatalogApi;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
+use Modules\Scheduling\Actions\ScheduleSession;
 use Modules\Scheduling\Actions\Shifts\ApproveShiftProposal;
 use Modules\Scheduling\Actions\Shifts\CounterShiftProposal;
+use Modules\Scheduling\Actions\Shifts\ResolveShiftConflict;
 use Modules\Scheduling\Actions\Shifts\SaveShiftProposal;
+use Modules\Scheduling\Contracts\DTOs\NewSession;
 use Modules\Scheduling\Domain\Enums\ShiftProposalStatus;
 use Modules\Scheduling\Domain\Models\ShiftProposal;
 use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
 use Modules\Scheduling\Filament\Pages\ReviewShiftProposal;
 use Modules\Scheduling\Filament\Pages\ShiftProposals;
+use Modules\Scheduling\Filament\ShiftProposalView;
 
 /*
  * The shifts screen and the teacher's view of an approved schedule that
@@ -216,4 +221,88 @@ it('leads the old review address and links to the slide-over', function () {
         ->assertSet('tab', 'teachers')
         ->assertSet('defaultAction', 'teacher')
         ->assertSet('defaultActionArguments', ['teacher' => $this->teacher->id]);
+});
+
+it('shows proposals in tabs with their counts, opening on the first that has something', function () {
+    app()->setLocale('ar');
+
+    // Nothing at all: "needs your decision" (empty) and the teachers' schedules.
+    shiftsScreen()
+        ->assertSet('tab', 'review')
+        ->assertSee(['تحتاج قرارك', 'جداول المعلّمين', 'لا توجد مقترحات بانتظار المراجعة.', 'كل معلّم بتوقيته'])
+        ->assertDontSee('عند المعلّم');
+
+    // Only a counter-offer with the teacher: the page opens on it.
+    app(CounterShiftProposal::class)->handle($this->teacher->id, shiftsWeek([[3, '16:00', '20:00']]), CarbonImmutable::parse('2026-10-07'), null, $this->admin->id);
+    $screen = shiftsScreen()->assertSet('tab', 'teacher')->assertSee(['سارة', 'عند المعلّم', 'لا يوجد تعارض', 'راجِع']);
+    expect(array_column($screen->instance()->tabs, 'count', 'key'))->toBe(['review' => 0, 'teacher' => 1, 'teachers' => null]);
+
+    // A proposal to decide comes first, with its count; the others stay a click away.
+    $other = User::factory()->withRole(Role::Teacher)->create(['name' => 'أحمد', 'timezone' => 'Africa/Cairo']);
+    proposeShifts($other, [[6, '17:00', '21:00']], '2026-10-06');
+    $screen = shiftsScreen()->assertSet('tab', 'review')->assertSee('أحمد')->assertDontSee('سارة');
+    expect(array_column($screen->instance()->tabs, 'count', 'key'))->toBe(['review' => 1, 'teacher' => 1, 'teachers' => null]);
+    $screen->set('tab', 'teacher')->assertSee('سارة')->assertDontSee('أحمد')
+        ->set('tab', 'nonsense')->assertSet('tab', 'review');
+
+    // An old link to the proposals tab opens on the default one.
+    Livewire::withQueryParams(['tab' => 'proposals'])->test(ShiftProposals::class)->assertSet('tab', 'review');
+});
+
+it('gives each card the week in seven days, Saturday first, each day marked', function () {
+    app()->setLocale('ar');
+    approvedLater();   // Saturday 17–21, Tuesday 16–21 from the 10th.
+    CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-11 07:00', 'UTC'));
+    // Saturday longer, Tuesday gone, Wednesday added.
+    proposeShifts($this->teacher, [[6, '17:00', '22:00'], [3, '16:00', '21:00']], '2026-10-27');
+
+    $row = shiftsScreen()->instance()->groups['review'][0];
+    expect(array_column($row['days7'], 'kind', 'day'))->toBe([6 => 'changed', 7 => 'off', 1 => 'off', 2 => 'removed', 3 => 'added', 4 => 'off', 5 => 'off'])
+        ->and(array_column($row['days7'], 'short'))->toBe(['سبت', 'أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة'])
+        ->and($row['days7'][3]['title'])->toBe('الثلاثاء · يُحذف · 4:00 م – 9:00 م')
+        ->and($row)->toMatchArray(['initial' => 'س', 'hours_before' => '9', 'hours_after' => '10', 'delta' => 60, 'delta_hours' => '1']);
+
+    expect(ShiftProposalView::initial('أ. سارة عبد الرحمن'))->toBe('س')
+        ->and(ShiftProposalView::initial('Dr. omar'))->toBe('O');
+
+    // The teachers' tab: the schedule in force, working days and days off.
+    $teacher = collect(shiftsScreen()->instance()->teachers)->firstWhere('id', $this->teacher->id);
+    expect(array_column($teacher['days7'], 'kind', 'day'))->toBe([6 => 'on', 7 => 'off', 1 => 'off', 2 => 'on', 3 => 'off', 4 => 'off', 5 => 'off']);
+});
+
+it('opens a proposal on its conflicts while one waits for a decision, then on the comparison', function () {
+    app()->setLocale('ar');
+    approvedLater();
+    $student = User::factory()->withRole(Role::Student)->create(['name' => 'يوسف', 'timezone' => 'Asia/Riyadh']);
+    $subject = app(CatalogApi::class)->createSubject('تجويد', 'Tajweed');
+    foreach (['2026-10-27', '2026-11-03'] as $day) {
+        app(ScheduleSession::class)->handle(new NewSession($this->teacher->id, $student->id, $subject, CarbonImmutable::parse("{$day} 17:00", 'Africa/Cairo'), 45, 'Africa/Cairo'));
+    }
+    $proposal = proposeShifts($this->teacher, [[6, '17:00', '21:00'], [3, '16:00', '21:00']], '2026-10-24');
+
+    $row = shiftsScreen()->instance()->groups['review'][0];
+    expect($row)->toMatchArray(['conflicts' => 1, 'unresolved' => 1]);
+    shiftsScreen()->assertSee(['تعارض واحد', '1 بلا حل']);
+
+    shiftsScreen()
+        ->mountAction('open', ['proposal' => $proposal->id])
+        ->assertMountedActionModalSeeHtml(['data-pane="conflicts"', 'data-pane-tab="conflicts"', 'data-pane-tab="thread"'])
+        ->assertMountedActionModalSee(['المقارنة', 'التعارضات', 'المحادثة', 'يوسف', 'حلّ التعارضات أولًا (1 من 1)'])
+        ->assertMountedActionModalSeeHtml("sendReply('{$proposal->id}')");   // the composer's button calls the page with the id itself
+
+    $key = app(ShiftProposalView::class)->proposal($proposal->id)['conflicts'][0]['key'];
+    app(ResolveShiftConflict::class)->handle($proposal->refresh(), $key, 'exception', $this->admin->id);
+
+    expect(app(ShiftProposalView::class)->proposal($proposal->id))->toMatchArray(['pane' => 'compare', 'unresolved' => 0]);
+    shiftsScreen()
+        ->mountAction('open', ['proposal' => $proposal->id])
+        ->assertMountedActionModalSeeHtml(['data-pane="compare"', 'data-pane-tab="conflicts"']);
+
+    // With no conflicts there is no conflicts tab.
+    $other = User::factory()->withRole(Role::Teacher)->create(['timezone' => 'Africa/Cairo']);
+    $quiet = proposeShifts($other, [[6, '17:00', '21:00']], '2026-10-06');
+    shiftsScreen()
+        ->mountAction('open', ['proposal' => $quiet->id])
+        ->assertMountedActionModalSeeHtml(['data-pane="compare"', 'data-pane-tab="thread"'])
+        ->assertMountedActionModalDontSeeHtml('data-pane-tab="conflicts"');
 });

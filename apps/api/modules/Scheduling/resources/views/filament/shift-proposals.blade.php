@@ -1,95 +1,141 @@
-{{-- Teachers' shifts: proposals grouped by status (what waits on the admins first), and every teacher's schedule. --}}
-@php $l = 'scheduling::review.'; @endphp
+{{-- Teachers' shifts: proposals in tabs by status (what waits on the admins first) as cards, and every teacher's schedule. --}}
+@php
+    use Filament\Support\Icons\Heroicon;
+
+    $l = 'scheduling::review.';
+    $arrow = __('scheduling::shifts.arrow');
+    $emptyIcons = [
+        'review' => Heroicon::OutlinedCheckCircle,
+        'teacher' => Heroicon::OutlinedChatBubbleLeftRight,
+        'approved' => Heroicon::OutlinedCheckBadge,
+        'closed' => Heroicon::OutlinedArchiveBox,
+        'teachers' => Heroicon::OutlinedUserGroup,
+    ];
+@endphp
 
 <x-filament-panels::page>
     @include('scheduling::filament.shift-styles')
 
-    <x-filament::tabs>
-        @foreach (['proposals', 'teachers'] as $t)
-            <x-filament::tabs.item :active="$tab === $t" wire:click="$set('tab', '{{ $t }}')"
-                :badge="$t === 'proposals' ? (count($this->groups['review']) ?: null) : null">
-                {{ __($l.'tabs.'.$t) }}
+    <x-filament::tabs class="sp-tabs">
+        @foreach ($this->tabs as $t)
+            <x-filament::tabs.item :active="$tab === $t['key']" wire:click="$set('tab', '{{ $t['key'] }}')" data-tab="{{ $t['key'] }}"
+                :badge="$t['count'] ?: null" :badge-color="$t['key'] === 'review' ? 'warning' : 'gray'">
+                {{ $t['key'] === 'teachers' ? __($l.'tabs.teachers') : __($l.'tab_groups.'.$t['key']) }}
             </x-filament::tabs.item>
         @endforeach
     </x-filament::tabs>
 
-    @if ($tab === 'proposals')
-        @php $groups = $this->groups; @endphp
-        <div class="sp">
-            @foreach (\Modules\Scheduling\Filament\ShiftProposalView::GROUPS as $group)
-                @continue(in_array($group, ['approved', 'closed'], true) && $groups[$group] === [])
-                <section class="sp-group" data-group="{{ $group }}" wire:key="sp-group-{{ $group }}">
-                    <header class="sp-group-head">
-                        <h2 class="lms-heading">{{ __($l.'groups.'.$group) }} <span class="sp-count">{{ count($groups[$group]) }}</span></h2>
-                        <p>{{ __($l.'group_hints.'.$group) }}</p>
-                    </header>
-                    @if ($groups[$group] === [])
-                        <div class="sp-empty">{{ __($l.'empty.'.$group) }}</div>
-                    @else
-                        <ul class="sp-list lms-stagger">
-                            @foreach ($groups[$group] as $row)
-                                <li wire:key="sp-{{ $row['id'] }}">
-                                    <button type="button" class="sp-item lms-lift" data-overdue="{{ $row['overdue'] ? 'true' : 'false' }}"
-                                        wire:click="mountAction('open', { proposal: '{{ $row['id'] }}' })">
-                                        <span class="sp-who">
-                                            <strong>{{ $row['teacher'] }}</strong>
-                                            <small>{{ __($l.'zone', ['zone' => $row['zone']]) }} · {{ __($l.'sent', ['ago' => $row['sent']]) }}@if ($row['overdue']) · <b class="sp-late">{{ __($l.'overdue') }}</b>@endif</small>
-                                        </span>
-                                        <span class="sp-when">
-                                            <small>{{ __($l.'starts') }}</small>
-                                            {{ $row['from'] }}
-                                        </span>
-                                        <span class="sp-change">
-                                            <span class="sp-hours">{{ $row['summary']['hours'] }}</span>
-                                            <small>
-                                                @forelse ($row['summary']['days'] as $d)
-                                                    <span class="sp-days" data-kind="{{ $d['kind'] }}">{{ $d['text'] }}</span>
-                                                @empty
-                                                    <span class="sp-days">{{ __($l.'summary.same_days') }}</span>
-                                                @endforelse
-                                            </small>
-                                        </span>
-                                        <span class="sp-conf">
-                                            @if ($row['conflicts'] > 0)
-                                                <span class="sp-conf-n" data-open="{{ $row['unresolved'] > 0 ? 'true' : 'false' }}">{{ trans_choice($l.'conflicts_count', $row['conflicts'], ['count' => $row['conflicts']]) }}</span>
-                                                <small>{{ $row['unresolved'] > 0 ? __($l.'unresolved_count', ['count' => $row['unresolved']]) : __($l.'all_resolved') }}</small>
-                                            @elseif (in_array($group, ['review', 'teacher'], true))
-                                                <span class="sp-ok">{{ __($l.'no_conflicts') }}</span>
-                                            @endif
-                                        </span>
-                                        <span class="sp-pill" data-status="{{ $row['status'] }}">{{ $row['status_label'] }}</span>
-                                    </button>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endif
-                </section>
-            @endforeach
-        </div>
-    @else
-        <section class="sp-group">
-            <header class="sp-group-head"><p>{{ __($l.'teachers_hint') }}</p></header>
-            @if ($this->teachers === [])
-                <div class="sp-empty">{{ __($l.'no_teachers') }}</div>
+    @if ($tab !== 'teachers')
+        @php $rows = $this->groups[$tab] ?? []; @endphp
+        <section class="sp" data-group="{{ $tab }}" wire:key="sp-tab-{{ $tab }}">
+            <p class="sp-hint">{{ __($l.'group_hints.'.$tab) }}</p>
+            @if ($rows === [])
+                <div class="sp-empty">
+                    <x-filament::icon :icon="$emptyIcons[$tab]" class="sp-empty-icon" />
+                    <p>{{ __($l.'empty.'.$tab) }}</p>
+                </div>
             @else
-                <ul class="sp-list lms-stagger">
-                    @foreach ($this->teachers as $t)
-                        <li wire:key="st-{{ $t['id'] }}">
-                            <button type="button" class="sp-item sp-item-teacher lms-lift" wire:click="mountAction('teacher', { teacher: '{{ $t['id'] }}' })">
-                                <span class="sp-who"><strong>{{ $t['name'] }}</strong><small>{{ __($l.'zone', ['zone' => $t['zone']]) }}</small></span>
-                                <span class="sp-when">
-                                    <small>{{ __($l.'now') }}</small>
-                                    {{ $t['current_hours'] !== null ? __($l.'hours_week', ['hours' => $t['current_hours']]) : __($l.'no_schedule') }}
+                <ul class="sp-grid lms-stagger">
+                    @foreach ($rows as $row)
+                        @php $open = in_array($tab, ['review', 'teacher'], true); @endphp
+                        <li wire:key="sp-{{ $row['id'] }}">
+                            <button type="button" class="sp-card lms-lift" data-overdue="{{ $row['overdue'] ? 'true' : 'false' }}"
+                                wire:click="mountAction('open', { proposal: '{{ $row['id'] }}' })">
+                                <span class="sp-card-head">
+                                    <span class="sp-avatar" aria-hidden="true">{{ $row['initial'] }}</span>
+                                    <span class="sp-who">
+                                        <strong>{{ $row['teacher'] }}</strong>
+                                        <small>{{ __($l.'zone', ['zone' => $row['zone']]) }} · {{ __($l.'sent', ['ago' => $row['sent']]) }}</small>
+                                    </span>
+                                    <span class="sp-tags">
+                                        @if ($row['overdue'])<span class="sp-late">{{ __($l.'overdue') }}</span>@endif
+                                        <span class="sp-pill" data-status="{{ $row['status'] }}">{{ $row['status_label'] }}</span>
+                                    </span>
                                 </span>
-                                <span class="sp-change">
-                                    @if ($t['upcoming'])
-                                        <span class="sp-days" data-kind="added">{{ __($l.'upcoming_from', ['date' => $t['upcoming']['from'], 'hours' => $t['upcoming']['hours']]) }}</span>
+
+                                <span class="sp-hours" aria-label="{{ $row['summary']['hours'] }}">
+                                    <span class="sp-h-before">{{ $row['hours_before'] }}</span>
+                                    <span class="sp-h-arrow" aria-hidden="true">{{ $arrow }}</span>
+                                    <span class="sp-h-after">{{ $row['hours_after'] }}</span>
+                                    <small>{{ __($l.'hours_a_week') }}</small>
+                                    @if ($row['delta'] !== 0)
+                                        <span class="sp-delta" dir="ltr" data-sign="{{ $row['delta'] > 0 ? 'up' : 'down' }}">{{ $row['delta'] > 0 ? '+' : '−' }}{{ $row['delta_hours'] }}</span>
+                                    @else
+                                        <span class="sp-delta" data-sign="same">{{ __($l.'same_hours') }}</span>
                                     @endif
                                 </span>
-                                <span class="sp-conf">
-                                    @if ($t['open'])<span class="sp-pill" data-status="{{ $t['open']['status'] }}">{{ $t['open']['status_label'] }}</span>@endif
+
+                                @include('scheduling::filament.shift-strip', ['days' => $row['days7']])
+
+                                <span class="sp-card-foot">
+                                    <span class="sp-from">
+                                        <x-filament::icon :icon="Heroicon::OutlinedCalendar" class="sp-ico" />
+                                        {{ __($l.'starts_on', ['date' => $row['from']]) }}
+                                    </span>
+                                    @if ($row['conflicts'] > 0)
+                                        <span class="sp-conf" data-open="{{ $row['unresolved'] > 0 ? 'true' : 'false' }}">
+                                            <x-filament::icon :icon="$row['unresolved'] > 0 ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedCheckCircle" class="sp-ico" />
+                                            {{ trans_choice($l.'conflicts_count', $row['conflicts'], ['count' => $row['conflicts']]) }}
+                                            · {{ $row['unresolved'] > 0 ? __($l.'unresolved_short', ['count' => $row['unresolved']]) : __($l.'all_resolved') }}
+                                        </span>
+                                    @elseif ($open)
+                                        <span class="sp-conf" data-open="false">
+                                            <x-filament::icon :icon="Heroicon::OutlinedCheckCircle" class="sp-ico" />
+                                            {{ __($l.'no_conflicts') }}
+                                        </span>
+                                    @endif
+                                    <span class="sp-cta">{{ __($l.'review_cta') }} <span aria-hidden="true">{{ $arrow }}</span></span>
                                 </span>
-                                <span class="sp-go">{{ __($l.'view_schedule') }}</span>
+                            </button>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </section>
+    @else
+        <section class="sp" data-group="teachers" wire:key="sp-tab-teachers">
+            <p class="sp-hint">{{ __($l.'teachers_hint') }}</p>
+            @if ($this->teachers === [])
+                <div class="sp-empty">
+                    <x-filament::icon :icon="$emptyIcons['teachers']" class="sp-empty-icon" />
+                    <p>{{ __($l.'no_teachers') }}</p>
+                </div>
+            @else
+                <ul class="sp-grid lms-stagger">
+                    @foreach ($this->teachers as $t)
+                        <li wire:key="st-{{ $t['id'] }}">
+                            <button type="button" class="sp-card lms-lift" wire:click="mountAction('teacher', { teacher: '{{ $t['id'] }}' })">
+                                <span class="sp-card-head">
+                                    <span class="sp-avatar" aria-hidden="true">{{ $t['initial'] }}</span>
+                                    <span class="sp-who">
+                                        <strong>{{ $t['name'] }}</strong>
+                                        <small>{{ __($l.'zone', ['zone' => $t['zone']]) }}</small>
+                                    </span>
+                                    @if ($t['open'])
+                                        <span class="sp-tags"><span class="sp-pill" data-status="{{ $t['open']['status'] }}">{{ $t['open']['status_label'] }}</span></span>
+                                    @endif
+                                </span>
+
+                                <span class="sp-hours">
+                                    @if ($t['current_hours'] !== null)
+                                        <span class="sp-h-after">{{ $t['current_hours'] }}</span>
+                                        <small>{{ __($l.'hours_a_week') }}</small>
+                                    @else
+                                        <span class="sp-h-none">{{ __($l.'no_schedule') }}</span>
+                                    @endif
+                                </span>
+
+                                @include('scheduling::filament.shift-strip', ['days' => $t['days7']])
+
+                                <span class="sp-card-foot">
+                                    @if ($t['upcoming'])
+                                        <span class="sp-from" data-kind="upcoming">
+                                            <x-filament::icon :icon="Heroicon::OutlinedCalendar" class="sp-ico" />
+                                            {{ __($l.'upcoming_from', ['date' => $t['upcoming']['from'], 'hours' => $t['upcoming']['hours']]) }}
+                                        </span>
+                                    @endif
+                                    <span class="sp-cta">{{ __($l.'view_schedule') }} <span aria-hidden="true">{{ $arrow }}</span></span>
+                                </span>
                             </button>
                         </li>
                     @endforeach

@@ -1,6 +1,24 @@
 <?php
 
 return [
+    'zone_chip' => 'Each teacher\'s own clock',
+    'tab_groups' => [
+        'review' => 'Needs your decision',
+        'teacher' => 'With the teacher',
+        'approved' => 'Approved',
+        'closed' => 'Closed',
+    ],
+    'empty_teachers' => 'No teachers yet.',
+    'days_short' => [1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'],
+    'day_kinds' => ['added' => 'Added', 'removed' => 'Removed', 'changed' => 'Changed', 'same' => 'Unchanged', 'off' => 'Day off', 'on' => 'Working day'],
+    'week_strip' => 'Days of the week',
+    'unresolved_short' => ':count unresolved',
+    'hours_a_week' => 'hours a week',
+    'review_cta' => 'Review',
+    'panes' => ['compare' => 'Compare', 'conflicts' => 'Conflicts', 'thread' => 'Conversation'],
+    'bar_before' => 'Current',
+    'bar_after' => 'Proposed',
+    'starts_on' => 'Starts :date',
     'nav' => 'Shift proposals',
     'list_title' => 'Shift proposals',
     'title' => 'Shift proposal: :teacher',
