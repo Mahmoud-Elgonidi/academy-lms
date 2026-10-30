@@ -14,6 +14,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -22,6 +23,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Modules\Billing\Contracts\BillingApi;
@@ -42,6 +44,7 @@ use Modules\Scheduling\Domain\Availability\StudentPreference;
 use Modules\Scheduling\Domain\Models\BookingHold;
 use Modules\Scheduling\Filament\LiveBoardView;
 use Modules\Scheduling\Queries\FindTeachersQuery;
+use Modules\Scheduling\Queries\FreeTimesQuery;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Clock;
@@ -85,6 +88,12 @@ final class FindTeacher extends Page
     public ?string $holdBatch = null;
 
     public ?int $holdExpiresAt = null;
+
+    /** "free": where teachers are free now, with suggestions; "mine": the hours that suit the student. */
+    public string $timesTab = 'free';
+
+    /** Why the last hold or booking was refused, shown beside its button. */
+    public ?string $refusal = null;
 
     /** Where to go after booking (a path in this panel), when another screen sent us here. */
     public ?string $back = null;
@@ -137,6 +146,7 @@ final class FindTeacher extends Page
                 $this->cells[$day] = array_values(array_filter(range($from, $to - 1), fn (int $h) => $h >= 6 && $h <= 23));
             }
             $this->searched = filled($this->data['subject_id']) && array_filter($this->cells) !== [];
+            $this->timesTab = 'mine';
         }
     }
 
@@ -148,53 +158,214 @@ final class FindTeacher extends Page
     public function form(Schema $schema): Schema
     {
         $series = fn (Get $get) => $get('mode') !== 'trial';
+        $changed = fn () => $this->resetResults();
 
         return $schema->statePath('data')->components([
-            ToggleButtons::make('mode')->hiddenLabel()->inline()->required()->live()
+            ToggleButtons::make('mode')->label(__('scheduling::find.fields.mode'))->hiddenLabel()->inline()->required()->live()
                 ->options(['series' => __('scheduling::find.modes.series'), 'trial' => __('scheduling::find.modes.trial')])
                 ->icons(['series' => Heroicon::OutlinedCalendarDays, 'trial' => Heroicon::OutlinedSparkles])
-                ->afterStateUpdated(fn () => $this->resetResults()),
-            Grid::make(2)->schema([
+                ->afterStateUpdated($changed),
+            Grid::make(['default' => 1, 'md' => 3])->schema([
                 Select::make('student_id')->label(__('scheduling::find.fields.student'))
                     ->options(fn () => self::students())->searchable()->live()
                     ->afterStateUpdated(fn (?string $state) => $this->studentChosen($state)),
-                Select::make('timezone')->label(__('scheduling::find.fields.timezone'))
-                    ->options(fn () => array_combine(Timezones::all(), Timezones::all()))->searchable()->required()->live(),
                 Select::make('subject_id')->label(__('scheduling::find.fields.subject'))
                     ->options(fn () => DB::table('subjects')->orderBy('name_ar')->pluck(app()->getLocale() === 'ar' ? 'name_ar' : 'name_en', 'id'))->required()->native(false)
                     ->live()->afterStateUpdated(function (Set $set) {
                         $set('level_id', null);
                         $set('category_id', null);
+                        $this->resetResults();
                     }),
-                Select::make('language')->label(__('scheduling::find.fields.language'))
-                    ->options(['ar' => __('scheduling::find.languages.ar'), 'en' => __('scheduling::find.languages.en')])
-                    ->placeholder(__('scheduling::find.languages.any'))->native(false),
-            ]),
-            Grid::make(2)->schema([
-                Select::make('level_id')->label(__('scheduling::find.fields.level'))->placeholder(__('scheduling::find.any_level'))->native(false)
-                    ->options(fn (Get $get) => $get('subject_id') ? app(CatalogApi::class)->levels($get('subject_id')) : [])
-                    ->visible(fn (Get $get) => $get('subject_id') && app(CatalogApi::class)->levels($get('subject_id')) !== []),
-                Select::make('category_id')->label(__('scheduling::find.fields.category'))->placeholder(__('scheduling::find.any_category'))->native(false)
-                    ->options(fn (Get $get) => $get('subject_id') ? app(CatalogApi::class)->categories($get('subject_id')) : [])
-                    ->visible(fn (Get $get) => $get('subject_id') && app(CatalogApi::class)->categories($get('subject_id')) !== []),
-                Select::make('age_group')->label(__('scheduling::find.fields.age_group'))->placeholder(__('scheduling::find.any_age'))->native(false)
-                    ->options(fn () => AgeGroup::options()),
-            ]),
-            ToggleButtons::make('gender')->label(__('scheduling::find.fields.gender'))
-                ->options(collect(TeacherSearch::GENDERS)->mapWithKeys(fn ($g) => [$g => __('scheduling::find.genders.'.$g)])->all())
-                ->inline()->required(),
-            Grid::make(3)->schema([
+                Select::make('timezone')->label(__('scheduling::find.fields.timezone'))
+                    ->options(fn () => array_combine(Timezones::all(), Timezones::all()))->searchable()->required()->live()
+                    ->afterStateUpdated($changed),
                 Select::make('per_week')->label(__('scheduling::find.fields.per_week'))
                     ->options(array_combine(range(1, 5), array_map(fn ($n) => trans_choice('scheduling::find.per_week', $n, ['n' => $n]), range(1, 5))))->required()->native(false)
-                    ->visible($series),
+                    ->visible($series)->live()->afterStateUpdated($changed),
                 ToggleButtons::make('duration')->label(__('scheduling::find.fields.duration'))
-                    ->options([30 => '30', 45 => '45', 60 => '60'])->inline()->required(),
-                DatePicker::make('start_date')->label(__('scheduling::find.fields.start_date'))->required()->native(false),
+                    ->options([30 => '30', 45 => '45', 60 => '60'])->inline()->required()->live()->afterStateUpdated($changed),
+                DatePicker::make('start_date')->label(__('scheduling::find.fields.start_date'))->required()->native(false)
+                    ->live()->afterStateUpdated($changed),
             ]),
-            ToggleButtons::make('min_coverage')->label(__('scheduling::find.fields.min_coverage'))
-                ->options([8 => __('scheduling::find.coverage.all', ['n' => 8]), 7 => __('scheduling::find.coverage.allow_one', ['n' => 8])])
-                ->inline()->required()->visible($series),
+            // What narrows the search beyond the subject: folded, and its heading says how many are on.
+            Section::make(__('scheduling::find.more.title'))
+                ->description(fn () => ($n = $this->activeFilters()) > 0 ? trans_choice('scheduling::find.more.active', $n, ['n' => $n]) : __('scheduling::find.more.hint'))
+                ->collapsed()->compact()
+                ->schema([
+                    Grid::make(['default' => 1, 'md' => 2])->schema([
+                        Select::make('language')->label(__('scheduling::find.fields.language'))
+                            ->options(['ar' => __('scheduling::find.languages.ar'), 'en' => __('scheduling::find.languages.en')])
+                            ->placeholder(__('scheduling::find.languages.any'))->native(false)->live()->afterStateUpdated($changed),
+                        Select::make('age_group')->label(__('scheduling::find.fields.age_group'))->placeholder(__('scheduling::find.any_age'))->native(false)
+                            ->options(fn () => AgeGroup::options())->live()->afterStateUpdated($changed),
+                        Select::make('level_id')->label(__('scheduling::find.fields.level'))->placeholder(__('scheduling::find.any_level'))->native(false)
+                            ->options(fn (Get $get) => $get('subject_id') ? app(CatalogApi::class)->levels($get('subject_id')) : [])
+                            ->visible(fn (Get $get) => $get('subject_id') && app(CatalogApi::class)->levels($get('subject_id')) !== [])
+                            ->live()->afterStateUpdated($changed),
+                        Select::make('category_id')->label(__('scheduling::find.fields.category'))->placeholder(__('scheduling::find.any_category'))->native(false)
+                            ->options(fn (Get $get) => $get('subject_id') ? app(CatalogApi::class)->categories($get('subject_id')) : [])
+                            ->visible(fn (Get $get) => $get('subject_id') && app(CatalogApi::class)->categories($get('subject_id')) !== [])
+                            ->live()->afterStateUpdated($changed),
+                    ]),
+                    ToggleButtons::make('gender')->label(__('scheduling::find.fields.gender'))
+                        ->options(collect(TeacherSearch::GENDERS)->mapWithKeys(fn ($g) => [$g => __('scheduling::find.genders.'.$g)])->all())
+                        ->inline()->required()->live()->afterStateUpdated($changed),
+                    ToggleButtons::make('min_coverage')->label(__('scheduling::find.fields.min_coverage'))
+                        ->options([8 => __('scheduling::find.coverage.all', ['n' => 8]), 7 => __('scheduling::find.coverage.allow_one', ['n' => 8])])
+                        ->inline()->required()->visible($series)->live()->afterStateUpdated($changed),
+                ]),
         ]);
+    }
+
+    /** How many of the filters that can leave a subject's teachers out are set (gender, language, level, category, age). */
+    public function activeFilters(): int
+    {
+        return count(array_filter([
+            ($this->data['gender'] ?? 'any') !== 'any',
+            filled($this->data['language'] ?? null),
+            filled($this->data['level_id'] ?? null),
+            filled($this->data['category_id'] ?? null),
+            filled($this->data['age_group'] ?? null),
+        ]));
+    }
+
+    /** "Clear filters": the subject's teachers again, whoever and whatever they teach it in. */
+    public function clearFilters(): void
+    {
+        $this->data = array_merge($this->data, ['gender' => 'any', 'language' => null, 'level_id' => null, 'category_id' => null, 'age_group' => null]);
+        $this->resetResults();
+    }
+
+    /** "Allow one week missing" or another length, offered when nobody is free. */
+    public function relax(string $what, int $value = 0): void
+    {
+        match ($what) {
+            'coverage' => $this->data['min_coverage'] = 7,
+            'duration' => $this->data['duration'] = in_array($value, [30, 45, 60], true) ? $value : $this->data['duration'],
+            default => null,
+        };
+        $this->resetResults();
+    }
+
+    public function showTimes(string $tab): void
+    {
+        $this->timesTab = $tab === 'mine' ? 'mine' : 'free';
+    }
+
+    /**
+     * "Available now" for this search: where its teachers are free across the
+     * week and a few ready sets of weekly times (null until the subject is chosen).
+     *
+     * @return array{cells: array<int, array<int, array{count: int, names: list<string>}>>, suggestions: list<array<string, mixed>>, teachers: int}|null
+     */
+    #[Computed]
+    public function freeTimes(): ?array
+    {
+        if (! $this->ready()) {
+            return null;
+        }
+
+        return app(FreeTimesQuery::class)->run($this->teacherSearch([]));
+    }
+
+    /** A suggestion taken: its hours become the student's, the search runs, and its best teacher's times are picked. */
+    public function useSuggestion(int $index): void
+    {
+        $suggestion = $this->freeTimes['suggestions'][$index] ?? null;
+        if ($suggestion === null || $this->holdBatch !== null) {
+            return;
+        }
+
+        $cells = [];
+        $duration = (int) $this->data['duration'];
+        foreach ($suggestion['times'] as ['weekday' => $weekday, 'time' => $time]) {
+            [$h, $m] = array_map('intval', explode(':', $time));
+            for ($hour = $h; $hour * 60 < $h * 60 + $m + $duration && $hour <= 23; $hour++) {
+                $cells[$weekday][] = $hour;
+            }
+        }
+        $this->cells = $cells;
+        $this->search();
+
+        $result = collect($this->results)->first(fn (array $r) => $r['teacher']->id === $suggestion['teacher_id']);
+        $wanted = array_map(fn (array $t) => $t['weekday'].'|'.$t['time'], $suggestion['times']);
+        $keys = $result ? array_values(array_map(fn (Candidate $c) => $c->key(), array_filter($result['candidates'],
+            fn (Candidate $c) => in_array($c->studentWeekday.'|'.$c->studentTime, $wanted, true)))) : [];
+        if (count($keys) === count($wanted)) {
+            [$this->pickedTeacher, $this->picked] = [$suggestion['teacher_id'], $keys];
+        }
+    }
+
+    /**
+     * Why a search finds nobody, said where it shows: the subject has no
+     * teacher taking students (or trials), the filters left everyone out,
+     * nobody is free at all for this length and these weeks, or only the
+     * marked hours are taken.
+     */
+    #[Computed]
+    public function emptyReason(): ?string
+    {
+        if (! $this->ready()) {
+            return null;
+        }
+        $teachers = DB::table('teacher_profiles as tp')
+            ->join('users as u', fn ($j) => $j->on('u.academy_id', '=', 'tp.academy_id')->on('u.id', '=', 'tp.user_id'))
+            ->join('teacher_subjects as ts', fn ($j) => $j->on('ts.academy_id', '=', 'tp.academy_id')->on('ts.teacher_id', '=', 'tp.user_id'))
+            ->where('ts.subject_id', $this->data['subject_id'])
+            ->where('tp.status', 'active')->where('u.status', 'active')
+            ->where($this->isTrial() ? 'tp.accepts_trials' : 'tp.accepts_new', true);
+        if (! $teachers->exists()) {
+            return $this->isTrial() ? 'no_trial_teachers' : 'no_teachers';
+        }
+        if ($this->freeTimes['teachers'] > 0) {
+            return 'times';
+        }
+        if ($this->activeFilters() > 0) {
+            $open = $this->teacherSearch([], filters: false);
+            if (app(FreeTimesQuery::class)->run($open)['teachers'] > 0) {
+                return 'filters';
+            }
+        }
+
+        return 'no_time';
+    }
+
+    /** The subject and the lesson's shape are there: a search can run. */
+    public function ready(): bool
+    {
+        return filled($this->data['subject_id'] ?? null) && filled($this->data['start_date'] ?? null)
+            && filled($this->data['duration'] ?? null) && filled($this->data['timezone'] ?? null);
+    }
+
+    /** Which step the bottom bar's one main button is for. */
+    public function step(): string
+    {
+        return match (true) {
+            $this->holdBatch !== null => 'confirm',
+            $this->picked !== [] && $this->pickedTeacher !== null => 'hold',
+            default => 'search',
+        };
+    }
+
+    public function holdExpired(): bool
+    {
+        return $this->holdExpiresAt !== null && $this->holdExpiresAt <= CarbonImmutable::now()->getTimestamp();
+    }
+
+    /** The bar's summary: student · subject · 2 × 30 min · the times chosen. */
+    public function summary(): array
+    {
+        $student = ($this->data['student_id'] ?? null) ? DB::table('users')->where('id', $this->data['student_id'])->value('name') : null;
+        $subject = ($this->data['subject_id'] ?? null) ? DB::table('subjects')->where('id', $this->data['subject_id'])->value(app()->getLocale() === 'ar' ? 'name_ar' : 'name_en') : null;
+        $shape = $this->isTrial()
+            ? __('scheduling::find.bar.trial', ['minutes' => (int) ($this->data['duration'] ?? 30)])
+            : __('scheduling::find.bar.shape', ['n' => (int) ($this->data['per_week'] ?? 1), 'minutes' => (int) ($this->data['duration'] ?? 30)]);
+        $picked = $this->pickedCandidates();
+        $times = $picked !== []
+            ? collect($this->inWeekOrder($picked))->map(fn (Candidate $c) => $this->dayName($c->studentWeekday).' '.Clock::wall($c->studentTime))->implode(' + ')
+            : (($marked = array_sum(array_map('count', $this->cells))) > 0 ? trans_choice('scheduling::find.bar.marked', $marked, ['n' => $marked]) : null);
+
+        return array_values(array_filter([$student, $subject, $shape, $times]));
     }
 
     public function toggleCell(int $weekday, int $hour): void
@@ -220,6 +391,7 @@ final class FindTeacher extends Page
         }
         $this->resetResults();
         $this->searched = true;
+        $this->dispatch('ft-results');
     }
 
     public function pick(string $teacherId, string $key): void
@@ -259,6 +431,8 @@ final class FindTeacher extends Page
     {
         $candidates = $this->pickedCandidates();
         if ($candidates === [] || $this->pickedTeacher === null) {
+            $this->refusal = $this->pickedTeacher === null ? null : __('scheduling::find.errors.hold_gone');
+
             return;
         }
 
@@ -271,7 +445,16 @@ final class FindTeacher extends Page
             }
         }
 
-        $this->holdBatch = app(PlaceBookingHold::class)->handle($this->pickedTeacher, $this->data['student_id'] ?: null, $occurrences, (int) $this->data['duration'], (string) auth()->id());
+        try {
+            $this->holdBatch = app(PlaceBookingHold::class)->handle($this->pickedTeacher, $this->data['student_id'] ?: null, $occurrences, (int) $this->data['duration'], (string) auth()->id());
+        } catch (ValidationException $e) {
+            // Said beside the button too; ShowRefusals sends it as a notification.
+            $this->refusal = $e->validator->errors()->first();
+            unset($this->results);
+
+            throw $e;
+        }
+        $this->refusal = null;
         $this->holdExpiresAt = CarbonImmutable::now()->addMinutes(BookingHold::MINUTES)->getTimestamp();
         Notification::make()->success()->title(__('scheduling::find.held', ['count' => count($occurrences)]))->send();
     }
@@ -279,8 +462,20 @@ final class FindTeacher extends Page
     public function release(): void
     {
         BookingHold::query()->where('created_by', auth()->id())->delete();
-        [$this->holdBatch, $this->holdExpiresAt, $this->picked, $this->pickedTeacher] = [null, null, [], null];
+        [$this->holdBatch, $this->holdExpiresAt, $this->picked, $this->pickedTeacher, $this->refusal] = [null, null, [], null, null];
         unset($this->results);
+    }
+
+    /** The hold ran out: the same times held again, if they are still free. */
+    public function holdAgain(): void
+    {
+        [$teacher, $picked] = [$this->pickedTeacher, $this->picked];
+        if ($this->holdBatch !== null) {
+            BookingHold::query()->where('batch_id', $this->holdBatch)->where('created_by', auth()->id())->delete();
+        }
+        [$this->holdBatch, $this->holdExpiresAt, $this->pickedTeacher, $this->picked] = [null, null, $teacher, $picked];
+        unset($this->results);
+        $this->hold();
     }
 
     public function confirm(string $kind): void
@@ -306,7 +501,13 @@ final class FindTeacher extends Page
             return;
         }
 
-        $trial = app(ConfirmBooking::class)->trial($this->holdBatch, $this->data['student_id'], $this->data['subject_id'], (string) auth()->id());
+        try {
+            $trial = app(ConfirmBooking::class)->trial($this->holdBatch, $this->data['student_id'], $this->data['subject_id'], (string) auth()->id());
+        } catch (ValidationException $e) {
+            $this->refusal = $e->validator->errors()->first();
+
+            throw $e;
+        }
         $this->bookingDone();
 
         Notification::make()->success()
@@ -414,7 +615,7 @@ final class FindTeacher extends Page
 
     public function heldCount(): int
     {
-        return $this->holdBatch ? BookingHold::query()->where('batch_id', $this->holdBatch)->count() : 0;
+        return $this->holdBatch && Str::isUuid($this->holdBatch) ? BookingHold::query()->where('batch_id', $this->holdBatch)->count() : 0;
     }
 
     /** Whether the chosen shared plan is one the student already has with this payer: the course joins it. */
@@ -508,11 +709,22 @@ final class FindTeacher extends Page
             return [];
         }
 
+        return app(FindTeachersQuery::class)->run($this->teacherSearch($this->cells));
+    }
+
+    /**
+     * The search as the form says, at these hours of the student's week
+     * (FreeTimesQuery puts its own); without the filters for "clear filters".
+     *
+     * @param  array<int|string, list<int>>  $cells
+     */
+    private function teacherSearch(array $cells, bool $filters = true): TeacherSearch
+    {
         // A trial is one lesson: any free time in the next two weeks will do.
         $trial = $this->isTrial();
         $preference = new StudentPreference(
             timezone: $this->data['timezone'],
-            windows: StudentPreference::windowsFromHours($this->cells),
+            windows: StudentPreference::windowsFromHours($cells),
             perWeek: $trial ? 1 : (int) $this->data['per_week'],
             durationMin: (int) $this->data['duration'],
             startDate: CarbonImmutable::parse($this->data['start_date']),
@@ -520,18 +732,18 @@ final class FindTeacher extends Page
             minCoverage: $trial ? 1 : (int) $this->data['min_coverage'],
         );
 
-        return app(FindTeachersQuery::class)->run(new TeacherSearch(
+        return new TeacherSearch(
             subjectId: $this->data['subject_id'],
             preference: $preference,
-            gender: $this->data['gender'],
-            language: $this->data['language'] ?: null,
+            gender: $filters ? $this->data['gender'] : 'any',
+            language: $filters ? (($this->data['language'] ?? null) ?: null) : null,
             forTrial: $trial,
             searcherId: (string) auth()->id(),
-            levelId: ($this->data['level_id'] ?? null) ?: null,
-            categoryId: ($this->data['category_id'] ?? null) ?: null,
-            ageGroup: ($this->data['age_group'] ?? null) ?: null,
+            levelId: $filters ? (($this->data['level_id'] ?? null) ?: null) : null,
+            categoryId: $filters ? (($this->data['category_id'] ?? null) ?: null) : null,
+            ageGroup: $filters ? (($this->data['age_group'] ?? null) ?: null) : null,
             forMinor: $this->forMinor(),
-        ));
+        );
     }
 
     /** The student is under 18 (their profile), or, with none chosen, the age group searched for is a child's. */
@@ -634,7 +846,7 @@ final class FindTeacher extends Page
 
     private function bookingDone(): void
     {
-        [$this->holdBatch, $this->holdExpiresAt, $this->picked, $this->pickedTeacher] = [null, null, [], null];
+        [$this->holdBatch, $this->holdExpiresAt, $this->picked, $this->pickedTeacher, $this->refusal] = [null, null, [], null, null];
         unset($this->results);
     }
 
@@ -669,6 +881,7 @@ final class FindTeacher extends Page
             [$this->picked, $this->pickedTeacher] = [[], null];
         }
         $this->searched = false;
+        $this->refusal = null;
         unset($this->results);
     }
 
