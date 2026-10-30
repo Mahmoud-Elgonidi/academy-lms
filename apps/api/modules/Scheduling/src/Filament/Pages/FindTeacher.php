@@ -330,7 +330,8 @@ final class FindTeacher extends Page
             ]))
             ->modalSubmitActionLabel(__('scheduling::find.enroll.submit'))
             // Nothing to enrol on until a plan of this shape exists: the button waits, the form says why.
-            ->modalSubmitAction(fn (Action $submit) => $submit->disabled(fn () => $this->matchingPlans() === []))
+            // Filament hands the submit button in by the name \$action (by type it would be this action itself).
+            ->modalSubmitAction(fn (Action $action) => $action->disabled(fn () => $this->matchingPlans() === []))
             ->modalWidth('lg')
             ->fillForm(fn () => [
                 'price_region_id' => collect($this->regions())->first(fn (RegionOption $r) => $r->isDefault)?->id ?? ($this->regions()[0]->id ?? null),

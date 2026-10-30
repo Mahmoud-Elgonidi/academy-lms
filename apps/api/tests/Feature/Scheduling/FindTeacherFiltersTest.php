@@ -118,4 +118,8 @@ it('never fails to enrol for want of a plan: the button waits, and the plan can 
     expect($plan->sessions_per_week)->toBe(2)
         ->and($plan->sessions_per_block)->toBe(8)
         ->and($page->get('mountedActions.0.data.plan_id'))->toBe($plan->id);
+
+    // Its own submit button sends the form (it once became a copy of the enrol action that only reopened it).
+    $page->assertMountedActionModalSee(__('scheduling::find.enroll.submit'))
+        ->assertMountedActionModalDontSee("mountAction('enroll')", false);
 });
