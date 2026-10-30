@@ -6,12 +6,14 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Modules\Classroom\Actions\JoinLesson;
 use Modules\Classroom\Actions\SaveClassroomSettings;
+use Modules\Classroom\Models\Room;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
 use Modules\People\Actions\Consent\GrantConsent;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Actions\ScheduleSession;
+use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\DTOs\NewSession;
 use Modules\Scheduling\Domain\Models\Session;
 use Tests\Support\EnrolledStudent;
@@ -78,4 +80,17 @@ it('brings students in with the camera the academy chose: off for under-18s leav
 
     app(SaveClassroomSettings::class)->handle('livekit', 'off');
     expect($cameras())->toBe(['child' => false, 'guardian' => false, 'teacher' => true, 'adult' => false, 'supervisor' => false]);
+});
+
+it('moves a room opened before the academy chose LiveKit onto it, until someone has gone in', function () {
+    // The class page was opened early, while lessons went by outside link.
+    Room::query()->create(['session_id' => $this->adultLesson->id, 'provider' => 'external', 'name' => 'early']);
+
+    app(SaveClassroomSettings::class)->handle('livekit');
+    expect(seatAt($this->adultLesson, $this->student, '15:00')['provider'])->toBe('livekit');
+
+    // Once the teacher has come in the lesson is under way, and it stays on the room it began in.
+    app(AttendanceApi::class)->participantJoined($this->adultLesson->id, $this->teacher->id, CarbonImmutable::parse('2026-10-06 15:00 UTC'));
+    app(SaveClassroomSettings::class)->handle('external');
+    expect(seatAt($this->adultLesson, $this->student, '15:01')['provider'])->toBe('livekit');
 });

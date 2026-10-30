@@ -48,10 +48,16 @@ final class JoinLesson
             throw ValidationException::withMessages(['lesson' => __('classroom::classroom.errors.too_early', ['before' => (int) config('classroom.opens_before_min'), 'minutes' => (int) ceil($now->diffInMinutes($opens))])]);
         }
 
+        $chosen = ClassroomSettings::current()->provider;
         $room = Room::query()->firstOrCreate(['session_id' => $lesson->id], [
-            'provider' => ClassroomSettings::current()->provider,
+            'provider' => $chosen,
             'name' => Room::nameFor($this->tenant->require()->id, $lesson->id),
         ]);
+        // A room made before the academy changed its provider (someone opened the class page early) follows the
+        // new choice until the teacher has come in (the lesson is under way then and stays where it is).
+        if ($room->provider !== $chosen && $room->started_at === null && $lesson->status === 'scheduled') {
+            $room->update(['provider' => $chosen]);
+        }
 
         // A LiveKit room on a server that no longer has LiveKit: the teacher's outside link still works.
         return $this->providers->get($this->providers->effective($room->provider))->ticket($room, $seat, $lesson)->withCamera($this->cameraOn($seat, $lesson));
