@@ -224,6 +224,15 @@ export async function saveZone(zone: string, follow: 'chosen' | 'device'): Promi
   return { ok: true };
 }
 
+/** Shows or hides the floating zone chip on every page (and in the app and the panels): saved on the account (`PATCH /v1/me`). */
+export async function saveZoneChip(shown: boolean): Promise<Done> {
+  if (typeof shown !== 'boolean') return { ok: false };
+  const done = await send('patch', '/v1/me', { body: { zone_chip: shown } });
+  if (!done.ok) return problemOf(done.problem);
+  refresh();
+  return { ok: true };
+}
+
 /** Lets go of a zone chosen on this browser that is no longer the account's (changed in the app or the panels): the pages follow the device again. */
 export async function forgetChosenZone(): Promise<void> {
   (await cookies()).delete(CHOSEN_ZONE_COOKIE);

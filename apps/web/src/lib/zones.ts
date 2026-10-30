@@ -10,6 +10,11 @@ export type Zone = { id: string; city: string; offset: string; label: string; re
 
 export type ZoneGroup = { region: string; zones: Zone[] };
 
+/** Whether the person wants the zone chip (`me.zone_chip`): shown unless they hid it (an older answer without it shows it). */
+export function zoneChipWanted(me: { zone_chip?: boolean | null }): boolean {
+  return me.zone_chip !== false;
+}
+
 /** Letters as a search compares them: case, Arabic marks and the forms of alif, yaa and taa marbuta set aside. */
 export function searchable(text: string): string {
   return text

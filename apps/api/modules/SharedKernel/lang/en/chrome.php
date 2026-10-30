@@ -30,5 +30,12 @@ return [
         'saved' => 'Your time zone is now :zone.',
         'invalid' => 'Choose a time zone from the list.',
         'cannot' => 'The time zone cannot be changed here.',
+        // Hiding the chip from its card, and bringing it back (My settings; the console's account menu).
+        'hide' => 'Hide this',
+        'hidden' => 'The time-zone chip is hidden.',
+        'back_in_settings' => 'You can show it again from My settings.',
+        'back_in_menu' => 'You can show it again from your account menu.',
+        'show' => 'Show the time-zone chip',
+        'shown_again' => 'The time-zone chip is back.',
     ],
 ];

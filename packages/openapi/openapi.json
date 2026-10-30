@@ -27041,6 +27041,10 @@
                             "h24",
                             null
                         ]
+                    },
+                    "zone_chip": {
+                        "type": "boolean",
+                        "description": "Whether the floating time-zone chip shows (false: hidden; it comes back from the account page)."
                     }
                 },
                 "title": "UpdateProfileRequest"
@@ -27111,6 +27115,10 @@
                         ],
                         "description": "Their own choice (h12, h24), or null when they follow the academy's."
                     },
+                    "zone_chip": {
+                        "type": "boolean",
+                        "description": "Whether the person shows the floating time-zone chip (they may hide it from its card, and show it again from the account page)."
+                    },
                     "roles": {
                         "type": "array",
                         "items": {}
@@ -27177,6 +27185,7 @@
                     "timezone_mismatch",
                     "time_format",
                     "time_format_choice",
+                    "zone_chip",
                     "roles",
                     "plan_features",
                     "academy"

@@ -2844,6 +2844,8 @@ export interface components {
              * @enum {string|null}
              */
             time_format?: "h12" | "h24" | null;
+            /** @description Whether the floating time-zone chip shows (false: hidden; it comes back from the account page). */
+            zone_chip?: boolean;
         };
         /** UserResource */
         UserResource: {
@@ -2866,6 +2868,8 @@ export interface components {
             time_format: string;
             /** @description Their own choice (h12, h24), or null when they follow the academy's. */
             time_format_choice: string | null;
+            /** @description Whether the person shows the floating time-zone chip (they may hide it from its card, and show it again from the account page). */
+            zone_chip: boolean;
             roles: unknown[];
             /** @description The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll): the apps show only these. */
             plan_features: string[];

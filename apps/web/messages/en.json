@@ -1798,6 +1798,14 @@
       "now": "Times are now shown on {zone}.",
       "list": "Cities",
       "chosen": "Chosen: {zone}"
+    },
+    "hide": "Hide this",
+    "hidden": "The time-zone chip is hidden. You can show it again from My account.",
+    "hideFailed": "We could not hide the chip. Please try again.",
+    "chipSetting": {
+      "title": "Show the time-zone chip",
+      "hint": "The floating chip in the corner: your city and its time, and where you change your zone. Your choice applies here and in the app.",
+      "failed": "We could not save your choice. Please try again."
     }
   }
 }

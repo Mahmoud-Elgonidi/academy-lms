@@ -56,3 +56,18 @@ it('lists every zone to choose from, by region then offset', function () {
     sort($sorted);
     expect($asia)->toBe($sorted);
 });
+
+it('says whether the zone chip shows, and keeps the choice from PATCH me', function () {
+    $headers = ['X-Academy' => 'noor', 'Accept-Language' => 'ar'];
+    $this->withToken($this->token)->withHeaders($headers)->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.zone_chip', true);
+
+    $this->withToken($this->token)->withHeaders($headers)->patchJson('/api/v1/me', ['zone_chip' => false])->assertOk()
+        ->assertJsonPath('data.zone_chip', false)
+        ->assertJsonPath('data.timezone', 'Africa/Cairo');   // nothing else changes
+    $this->withToken($this->token)->withHeaders($headers)->getJson('/api/v1/me')->assertJsonPath('data.zone_chip', false);
+
+    // Another change leaves it as it is; true brings it back; anything else is refused.
+    $this->withToken($this->token)->withHeaders($headers)->patchJson('/api/v1/me', ['locale' => 'en'])->assertOk()->assertJsonPath('data.zone_chip', false);
+    $this->withToken($this->token)->withHeaders($headers)->patchJson('/api/v1/me', ['zone_chip' => 'maybe'])->assertUnprocessable();
+    $this->withToken($this->token)->withHeaders($headers)->patchJson('/api/v1/me', ['zone_chip' => true])->assertOk()->assertJsonPath('data.zone_chip', true);
+});

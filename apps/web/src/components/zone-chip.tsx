@@ -5,7 +5,7 @@ import { useEffect, useId, useRef, useState, useTransition } from 'react';
 import { Icon } from '@/components/icons';
 import { join } from '@/components/ui';
 import { ZonePicker, useDeviceZone, useMinute } from '@/components/zone-parts';
-import { forgetChosenZone, listZones, saveZone } from '@/lib/actions/shared';
+import { forgetChosenZone, listZones, saveZone, saveZoneChip } from '@/lib/actions/shared';
 import { zoneName } from '@/lib/format';
 import { formatClock, type TimeFormat } from '@/lib/time';
 import { cityOf, sameClock, wallClockIn, zoneDifferences, type Zone } from '@/lib/zones';
@@ -24,6 +24,8 @@ type Props = {
   /** The device's zone as the page wrote it last (its cookie), for the first drawing. */
   device: string | null;
   format: TimeFormat;
+  /** `me.zone_chip`: the person shows the chip (hidden from its card, shown again from My account). */
+  wanted: boolean;
 };
 
 /**
@@ -34,8 +36,13 @@ type Props = {
  * academy's and the device's when they keep another clock ("Use my device's
  * zone"), and "Change my zone" with the cities by region. Saved on the
  * account (`PATCH /v1/me`), then the page is read again.
+ *
+ * "Hide this" at the bottom of the card hides it on every page (and in the
+ * app and the panels): it sinks away, the account keeps the choice
+ * (`zone_chip`), and a note says it comes back from My account. Hidden, only
+ * that note shows until it is closed.
  */
-export function ZoneChip({ shown, shownLabel, account, academy, mismatch, chosen, device: fromCookie, format }: Props) {
+export function ZoneChip({ shown, shownLabel, account, academy, mismatch, chosen, device: fromCookie, format, wanted }: Props) {
   const t = useTranslations('zone');
   const common = useTranslations('common');
   const locale = useLocale();
@@ -47,6 +54,8 @@ export function ZoneChip({ shown, shownLabel, account, academy, mismatch, chosen
   const [notice, setNotice] = useState<{ tone: 'brand' | 'danger'; text: string }>();
   const [pending, start] = useTransition();
   const [loading, load] = useTransition();
+  const [leaving, setLeaving] = useState(false);
+  const [hidNote, setHidNote] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const pill = useRef<HTMLButtonElement>(null);
   const card = useId();
@@ -111,6 +120,36 @@ export function ZoneChip({ shown, shownLabel, account, academy, mismatch, chosen
       }
     });
 
+  const hide = () =>
+    start(async () => {
+      const done = await saveZoneChip(false);
+      setLeaving(false);
+      if (done.ok) {
+        setOpen(false);
+        setHidNote(true);
+      } else {
+        setNotice({ tone: 'danger', text: done.message ?? t('hideFailed') });
+      }
+    });
+
+  // It sinks away first (only where motion is allowed: else at once), then the account keeps the choice.
+  const startHiding = () => {
+    setNotice(undefined);
+    if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) setLeaving(true);
+    else hide();
+  };
+
+  if (!wanted) {
+    return hidNote ? (
+      <div role="status" data-testid="zone-hidden" className="zone-note fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] start-3 z-30 flex max-w-[min(22rem,calc(100vw-1.5rem))] items-start gap-2 rounded-card border border-line bg-white py-2.5 pe-2 ps-3.5 text-sm shadow-[0_10px_30px_-14px_color-mix(in_oklab,var(--neutral)_60%,transparent)] lg:bottom-5 lg:start-[17rem]">
+        <p className="py-1">{t('hidden')}</p>
+        <button type="button" onClick={() => setHidNote(false)} aria-label={common('close')} className="grid size-8 shrink-0 place-items-center rounded-control text-muted hover:bg-paper">
+          <Icon name="x" size={14} />
+        </button>
+      </div>
+    ) : null;
+  }
+
   const rows: { kind: string; title: string; label: string; zone: string }[] = [
     { kind: 'mine', title: t('yours'), label: shownLabel, zone: shown },
     ...(academyRow ? [{ kind: 'academy', title: t('academy'), label: academyRow.label, zone: academyRow.zone }] : []),
@@ -119,7 +158,14 @@ export function ZoneChip({ shown, shownLabel, account, academy, mismatch, chosen
   ];
 
   return (
-    <div ref={box} data-testid="zone-chip" className="zone-chip fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] start-3 z-30 lg:bottom-5 lg:start-[17rem]">
+    <div
+      ref={box}
+      data-testid="zone-chip"
+      onAnimationEnd={(e) => {
+        if (leaving && e.target === e.currentTarget) hide();
+      }}
+      className={join(leaving && 'zone-leaving pointer-events-none', 'zone-chip fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] start-3 z-30 lg:bottom-5 lg:start-[17rem]')}
+    >
       {open ? (
         <div
           id={card}
@@ -205,6 +251,15 @@ export function ZoneChip({ shown, shownLabel, account, academy, mismatch, chosen
                   {t('change')}
                 </button>
               </div>
+              <button
+                type="button"
+                disabled={pending || leaving}
+                onClick={startHiding}
+                className="mt-3 flex min-h-9 w-full items-center justify-center gap-1.5 rounded-control text-xs font-semibold text-muted hover:bg-paper hover:text-ink disabled:opacity-60"
+              >
+                <Icon name="eyeOff" size={14} />
+                {t('hide')}
+              </button>
             </>
           )}
         </div>

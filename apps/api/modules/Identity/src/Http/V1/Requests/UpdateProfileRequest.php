@@ -18,6 +18,8 @@ final class UpdateProfileRequest extends FormRequest
             'timezone' => ['sometimes', 'timezone:all'],
             // How the person reads a clock: h12 (5:00 PM) or h24 (17:00); null follows the academy's choice.
             'time_format' => ['sometimes', 'nullable', Rule::in(TimeFormat::values())],
+            // Whether the floating time-zone chip shows (false: hidden; it comes back from the account page).
+            'zone_chip' => ['sometimes', 'boolean'],
         ];
     }
 }

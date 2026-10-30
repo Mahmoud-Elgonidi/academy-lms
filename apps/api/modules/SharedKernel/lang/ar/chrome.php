@@ -30,5 +30,12 @@ return [
         'saved' => 'حُفظ توقيتك: :zone.',
         'invalid' => 'اختر توقيتًا من القائمة.',
         'cannot' => 'لا يمكن تغيير التوقيت من هنا.',
+        // Hiding the chip from its card, and bringing it back (My settings; the console's account menu).
+        'hide' => 'أخفِ المؤشّر',
+        'hidden' => 'أخفيت مؤشّر التوقيت.',
+        'back_in_settings' => 'يمكنك إظهاره من إعداداتي.',
+        'back_in_menu' => 'يمكنك إظهاره من قائمة حسابك.',
+        'show' => 'أظهر مؤشّر التوقيت',
+        'shown_again' => 'ظهر مؤشّر التوقيت.',
     ],
 ];

@@ -10,6 +10,7 @@ import { liveOf } from '@/lib/live-server';
 import { CHOSEN_ZONE_COOKIE, TIMEZONE_COOKIE } from '@/lib/session';
 import { timeFormatOf } from '@/lib/time';
 import type { Branding, Me } from '@/lib/viewer';
+import { zoneChipWanted } from '@/lib/zones';
 import { LanguageSwitch, SideNav, TabBar } from './nav';
 
 /** The teacher's frame: the academy and the person, the menu (with the unread count), and the page, kept live, its clocks written the person's way. */
@@ -60,6 +61,7 @@ export async function Shell({ person, look, locale, children }: { person: Me; lo
         chosen={jar.get(CHOSEN_ZONE_COOKIE)?.value ?? null}
         device={jar.get(TIMEZONE_COOKIE)?.value ?? null}
         format={timeFormatOf(person.time_format)}
+        wanted={zoneChipWanted(person)}
       />
       <TabBar unread={live.unread} chats={live.chats} />
     </div>

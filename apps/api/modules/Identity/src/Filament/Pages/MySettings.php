@@ -31,6 +31,7 @@ use Modules\Identity\Preferences\PreferenceStore;
 use Modules\Identity\Queries\SocialAccounts;
 use Modules\Identity\Social\Provider;
 use Modules\SharedKernel\Audit\AuditActor;
+use Modules\SharedKernel\Filament\ZoneChip;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\TimeFormat;
 use Modules\SharedKernel\Time\Timezones;
@@ -344,6 +345,8 @@ final class MySettings extends EditProfile
             }
         }
         app(UpdatePreferences::class)->handle($record, $preferences);
+        // The zone chip may have been shown or hidden here: it looks again without a reload.
+        $this->dispatch(ZoneChip::RECONSIDER);
 
         if (filled($data['password'] ?? null)) {
             app(ChangePassword::class)->handle($record, $data['password']);

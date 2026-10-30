@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 use Modules\Identity\Actions\Login;
 use Modules\Identity\Actions\TwoFactor\CompleteTwoFactorSignIn;
+use Modules\Identity\Actions\UpdatePreferences;
 use Modules\Identity\Actions\UpdateProfile;
 use Modules\Identity\Http\V1\Requests\LoginRequest;
 use Modules\Identity\Http\V1\Requests\UpdateProfileRequest;
@@ -15,6 +16,7 @@ use Modules\Identity\Http\V1\Resources\UserResource;
 use Modules\Identity\Http\V1\Responses\TokenResponse;
 use Modules\Identity\Models\PersonalAccessToken;
 use Modules\Identity\Models\User;
+use Modules\Identity\Preferences\ZoneChipPreference;
 
 final class AuthController
 {
@@ -74,12 +76,16 @@ final class AuthController
         return new UserResource($user->load('roleRecords'));
     }
 
-    public function updateMe(UpdateProfileRequest $request, UpdateProfile $update): UserResource
+    public function updateMe(UpdateProfileRequest $request, UpdateProfile $update, UpdatePreferences $preferences): UserResource
     {
         /** @var User $user */
         $user = $request->user();
+        $user = $update->handle($user, $request->validated());
+        if ($request->has('zone_chip')) {
+            $user = $preferences->handle($user, [ZoneChipPreference::KEY => ZoneChipPreference::value($request->boolean('zone_chip'))]);
+        }
 
-        return new UserResource($update->handle($user, $request->validated())->load('roleRecords'));
+        return new UserResource($user->load('roleRecords'));
     }
 
     public function logout(Request $request): Response

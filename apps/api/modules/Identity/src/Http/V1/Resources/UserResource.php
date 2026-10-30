@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
+use Modules\Identity\Preferences\PreferenceStore;
+use Modules\Identity\Preferences\ZoneChipPreference;
 use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\Feature;
@@ -44,6 +46,8 @@ final class UserResource extends JsonResource
             'time_format' => (TimeFormat::of(data_get($this->resource, 'time_format')) ?? app(ViewerClock::class)->academy())->value,
             // Their own choice (h12, h24), or null when they follow the academy's.
             'time_format_choice' => TimeFormat::of(data_get($this->resource, 'time_format'))?->value,
+            // Whether the person shows the floating time-zone chip (they may hide it from its card, and show it again from the account page).
+            'zone_chip' => app(PreferenceStore::class)->valueFor($this->resource, ZoneChipPreference::KEY) === ZoneChipPreference::SHOWN,
             'roles' => array_map(fn (Role $r) => $r->value, $this->roles()),
             // The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll): the apps show only these.
             'plan_features' => $academy === null ? [] : $this->planFeatures(),

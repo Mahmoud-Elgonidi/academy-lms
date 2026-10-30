@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cityOf, groupZones, offsetMinutes, sameClock, searchable, untilNextMinute, wallClockIn, zoneDifferences, type Zone } from './zones';
+import { cityOf, groupZones, offsetMinutes, sameClock, searchable, untilNextMinute, wallClockIn, zoneChipWanted, zoneDifferences, type Zone } from './zones';
 
 const zone = (id: string, city: string, offset: string, region: string): Zone => ({ id, city, offset, label: `${city} (${offset})`, region });
 
@@ -94,5 +94,15 @@ describe('what the chip points out', () => {
 
   it('keeps the API’s word for the dot, and leaves out zones the browser does not know', () => {
     expect(zoneDifferences({ shown: 'Asia/Riyadh', account: 'Nowhere/Here', device: 'Nowhere/There', mismatch: true, at })).toEqual({ device: null, account: null, dot: true });
+  });
+});
+
+describe('whether the zone chip shows', () => {
+  it('shows it unless the person hid it', () => {
+    expect(zoneChipWanted({ zone_chip: true })).toBe(true);
+    expect(zoneChipWanted({ zone_chip: false })).toBe(false);
+    // An answer from before the choice existed: shown.
+    expect(zoneChipWanted({})).toBe(true);
+    expect(zoneChipWanted({ zone_chip: null })).toBe(true);
   });
 });

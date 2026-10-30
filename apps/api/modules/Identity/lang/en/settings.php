@@ -19,6 +19,13 @@ return [
         'h12' => '12 hours (5:00 PM)',
         'h24' => '24 hours (17:00)',
     ],
+    // The zone chip in the corner of every screen (ZoneChipPreference).
+    'zone_chip' => [
+        'label' => 'Time-zone chip',
+        'shown' => 'Shown',
+        'hidden' => 'Hidden',
+        'hint' => 'The floating chip in the corner: your city and its time, and where you change your zone.',
+    ],
     'timezone_hint' => 'Pick your city, not an offset, so summer time is handled.',
     'contact' => [
         'title' => 'Email and mobile',

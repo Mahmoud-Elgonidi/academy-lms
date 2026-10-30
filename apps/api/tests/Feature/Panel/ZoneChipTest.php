@@ -2,8 +2,10 @@
 
 use Carbon\CarbonImmutable;
 use Filament\Facades\Filament;
+use Filament\Livewire\Topbar;
 use Livewire\Livewire;
 use Modules\Identity\Enums\Role;
+use Modules\Identity\Filament\Pages\MySettings;
 use Modules\Identity\Models\User;
 use Modules\Platform\Models\PlatformAdmin;
 use Modules\Scheduling\Filament\Pages\DstChanges;
@@ -141,4 +143,59 @@ it('says under the title which zone a page\'s times are on', function () {
     foreach (['/console/academies', '/console/academies/'.$this->academy->id, '/console/audit', '/console/health', '/console/signup-requests'] as $page) {
         $this->get($page)->assertOk()->assertSee('المواعيد هنا بتوقيتك: القاهرة (UTC+2).');
     }
+});
+
+it('hides the chip from its card and brings it back from My settings', function () {
+    $this->actAsTenant($this->academy);
+    $this->actingAs($this->teacher);
+    Filament::setCurrentPanel('teach');
+    app()->setLocale('ar');
+
+    Livewire::test(ZoneChip::class)
+        ->assertSee(__('shared::chrome.zone.hide'))
+        ->assertSee('LmsZone.hide(', false)
+        ->call('hide')
+        ->assertNotified(__('shared::chrome.zone.hidden'))
+        ->assertDontSee('class="lms-zone-pill"', false)
+        ->assertSee('hidden', false);
+    expect($this->teacher->fresh()->preferences['zone_chip'])->toBe('hidden');
+    $this->clearTenant();
+
+    // Hidden on every page of every panel, until shown again.
+    $this->followingRedirects()->get('http://noor.lms.test/teach')->assertOk()->assertDontSee('class="lms-zone-pill"', false);
+    $this->followingRedirects()->get('http://noor.lms.test/teach/profile')->assertOk()
+        ->assertSee(__('identity::settings.zone_chip.label'))
+        ->assertSee(__('identity::settings.zone_chip.hidden'));
+
+    $this->actAsTenant($this->academy);
+    Filament::setCurrentPanel('teach');
+    Livewire::test(MySettings::class)
+        ->assertSet('data.pref__zone_chip', 'hidden')
+        ->set('data.pref__zone_chip', 'shown')
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->assertDispatched(ZoneChip::RECONSIDER);
+    expect($this->teacher->fresh()->preferences['zone_chip'])->toBe('shown');
+    Livewire::test(ZoneChip::class)->dispatch(ZoneChip::RECONSIDER)->assertSee('class="lms-zone-pill"', false);
+});
+
+it('lets the platform team hide the console\'s chip and show it again from the account menu', function () {
+    $admin = PlatformAdmin::query()->create(['name' => 'سلمى', 'email' => 'salma@platform.test', 'password' => 'a-long-password', 'timezone' => 'Europe/Istanbul']);
+    $admin->saveAppAuthenticationSecret('LMSDEMOPLATFORMCONSOLE2FASECRET2');
+    $this->actingAs($admin, 'platform');
+    Filament::setCurrentPanel('console');
+    app()->setLocale('ar');
+
+    Livewire::test(ZoneChip::class)->call('hide')->assertNotified(__('shared::chrome.zone.hidden'));
+    expect($admin->fresh()->zone_chip)->toBeFalse();
+
+    $this->get('/console/academies')->assertOk()
+        ->assertDontSee('class="lms-zone-pill"', false)
+        ->assertSee(__('shared::chrome.zone.show'));
+
+    Livewire::test(Topbar::class)->callAction('showZoneChip')->assertDispatched(ZoneChip::RECONSIDER);
+    expect($admin->fresh()->zone_chip)->toBeTrue();
+    $this->get('/console/academies')->assertOk()
+        ->assertSee('class="lms-zone-pill"', false)
+        ->assertDontSee(__('shared::chrome.zone.show'));
 });

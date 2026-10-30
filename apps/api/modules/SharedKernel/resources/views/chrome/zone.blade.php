@@ -67,7 +67,14 @@
                 if (none) none.hidden = any;
             }
 
-            return { mount, filter, device };
+            // The person hides the chip: it leaves (transform and opacity, only for those who allow motion), then the server keeps the choice.
+            function hide(chip, wire) {
+                chip.dataset.leaving = '';
+                const leaving = chip.getAnimations().filter((a) => a.animationName === 'lms-zone-out');
+                return Promise.all(leaving.map((a) => a.finished.catch(() => null))).then(() => wire.hide());
+            }
+
+            return { mount, filter, device, hide };
         })();
     </script>
 @endif

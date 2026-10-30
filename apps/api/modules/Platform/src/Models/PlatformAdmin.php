@@ -25,6 +25,7 @@ use SensitiveParameter;
  * @property bool $is_owner the platform's settings are theirs to change (SetPlatformAdminOwner)
  * @property string $locale
  * @property string $timezone
+ * @property bool $zone_chip whether the console shows them the zone chip (SavePlatformAdminTimezone)
  * @property ?CarbonImmutable $last_login_at
  */
 final class PlatformAdmin extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasLocalePreference, HasName
@@ -33,11 +34,11 @@ final class PlatformAdmin extends Authenticatable implements FilamentUser, HasAp
 
     protected $connection = 'pgsql_platform';
 
-    protected $fillable = ['name', 'email', 'password', 'is_active', 'locale', 'timezone'];
+    protected $fillable = ['name', 'email', 'password', 'is_active', 'locale', 'timezone', 'zone_chip'];
 
     protected $hidden = ['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes'];
 
-    protected $attributes = ['is_active' => true, 'is_owner' => false, 'locale' => 'ar', 'timezone' => 'UTC'];
+    protected $attributes = ['is_active' => true, 'is_owner' => false, 'locale' => 'ar', 'timezone' => 'UTC', 'zone_chip' => true];
 
     protected function casts(): array
     {
@@ -47,6 +48,7 @@ final class PlatformAdmin extends Authenticatable implements FilamentUser, HasAp
             'app_authentication_recovery_codes' => 'encrypted:array',
             'is_active' => 'boolean',
             'is_owner' => 'boolean',
+            'zone_chip' => 'boolean',
             'last_login_at' => 'immutable_datetime',
         ];
     }

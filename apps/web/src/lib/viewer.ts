@@ -69,6 +69,8 @@ export type Me = {
   time_format: TimeFormat;
   /** Their own choice, or null while they follow the academy's. */
   time_format_choice: TimeFormat | null;
+  /** Whether they show the floating zone chip (hidden from its card, shown again from My account). */
+  zone_chip?: boolean;
   /** The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll). */
   plan_features?: string[];
   /** The academy's own clock is the one for everyone who has not chosen theirs. */

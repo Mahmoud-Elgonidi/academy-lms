@@ -24,6 +24,7 @@ use Modules\Identity\Models\SocialSignIn;
 use Modules\Identity\Models\User;
 use Modules\Identity\Otp\LogOtpSender;
 use Modules\Identity\Preferences\PreferenceStore;
+use Modules\Identity\Preferences\ZoneChipPreference;
 use Modules\Identity\Privacy\AccountData;
 use Modules\Identity\Queries\ActiveTeachers;
 use Modules\Identity\Setup\TeamStep;
@@ -65,6 +66,8 @@ final class IdentityServiceProvider extends ServiceProvider
         $this->app->make(SetupChecklist::class)->add(TeamStep::class);
         // The panels' zone chip changes an academy account's own zone as My settings does.
         $this->app->make(OwnTimezones::class)->add(User::class, SaveOwnTimezone::class);
+        // Whether the zone chip shows: hidden from its card, back from My settings (and GET/PATCH me `zone_chip`).
+        $this->app->make(UserPreferences::class)->define(ZoneChipPreference::definition());
 
         // Each person's own channel: only they listen (their inbox, their lessons, the panels' pop-ups).
         Broadcast::channel(PersonalChannel::PATTERN, fn (User $user, string $id) => (string) $user->getKey() === $id);

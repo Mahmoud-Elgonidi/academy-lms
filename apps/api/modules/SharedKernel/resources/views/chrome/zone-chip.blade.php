@@ -3,11 +3,14 @@
     time; opened, a card with the academy's zone and the device's when they keep
     another clock, and a way to change the person's own. Styles in chrome/styles;
     the ticking in chrome/zone. A student's kids look leaves it out (People's stage).
+    Hidden by the person (ZoneChip::hide), only its empty root stays, so it can come back
+    in place when they show it again (ZoneChip::RECONSIDER).
 --}}
-<div class="lms-zone" wire:key="lms-zone"
-    data-device="{{ $this->device }}" data-locale="{{ $intlLocale }}" data-hour-cycle="{{ $hourCycle }}" data-mismatch="{{ $deviceRow ? 'true' : 'false' }}"
+<div class="lms-zone" wire:key="lms-zone" data-device="{{ $this->device }}"
+    @if ($hidden) hidden @else data-locale="{{ $intlLocale }}" data-hour-cycle="{{ $hourCycle }}" data-mismatch="{{ $deviceRow ? 'true' : 'false' }}" @endif
     x-data="{ open: false }" x-init="LmsZone.mount($el, $wire)"
     x-on:click.outside="open = false" x-on:keydown.escape.window="open = false">
+@unless ($hidden)
     <div class="lms-zone-card" x-show="open" x-cloak role="dialog" aria-label="{{ __('shared::chrome.zone.title') }}">
         @if (! $changing)
             <dl class="lms-zone-rows">
@@ -40,6 +43,10 @@
                     @endif
                     <button type="button" class="lms-zone-btn" @if (! $deviceRow) data-primary @endif wire:click="$set('changing', true)" wire:loading.attr="disabled">{{ __('shared::chrome.zone.change') }}</button>
                 </div>
+                <button type="button" class="lms-zone-hide" x-on:click="LmsZone.hide($root, $wire).then(() => open = false)" wire:loading.attr="disabled">
+                    {{ \Filament\Support\generate_icon_html(\Filament\Support\Icons\Heroicon::OutlinedEyeSlash) }}
+                    <span>{{ __('shared::chrome.zone.hide') }}</span>
+                </button>
             @endif
         @else
             <div class="lms-zone-pick">
@@ -78,4 +85,5 @@
             <span class="lms-zone-dot" aria-hidden="true"></span>
         @endif
     </button>
+@endunless
 </div>

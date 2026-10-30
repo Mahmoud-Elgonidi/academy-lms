@@ -4,25 +4,29 @@ import { ClockSetting } from '@/components/clock-setting';
 import { ContactChange } from '@/components/contact-change';
 import { SocialLinks } from '@/components/social-links';
 import { Heading, Notice } from '@/components/ui';
+import { ZoneChipSetting } from '@/components/zone-chip-setting';
 import { ZoneSetting } from '@/components/zone-setting';
 import { get, read } from '@/lib/api/server';
+import { family } from '@/lib/family/context';
+import { showsZoneChip } from '@/lib/family/rules';
 import { TIMEZONE_COOKIE } from '@/lib/session';
 import { timeFormatOf, type TimeFormat } from '@/lib/time';
-import type { Zone } from '@/lib/zones';
+import { zoneChipWanted, type Zone } from '@/lib/zones';
 
 const OUTCOMES = ['linked', 'taken', 'expired', 'denied', 'failed', 'off'] as const;
 
 type Props = { searchParams: Promise<{ social?: string }> };
 
-/** My account: the email and mobile number (a new one by code), my time zone, how I read a clock (12 or 24 hours, or the academy's), and signing in with Google or Apple (linked, or link it). */
+/** My account: the email and mobile number (a new one by code), my time zone and whether its chip shows, how I read a clock (12 or 24 hours, or the academy's), and signing in with Google or Apple (linked, or link it). */
 export default async function Account({ searchParams }: Props) {
-  const [{ social }, t, locale, me, zones, jar] = await Promise.all([
+  const [{ social }, t, locale, me, zones, jar, fam] = await Promise.all([
     searchParams,
     getTranslations('account'),
     getLocale(),
-    get<{ data: { email: string | null; phone: string | null; can_change_contact: boolean; time_format_choice: TimeFormat | null; timezone: string | null; display_timezone: string; timezone_label: string; academy: { time_format: TimeFormat } | null } }>('/v1/me'),
+    get<{ data: { email: string | null; phone: string | null; can_change_contact: boolean; time_format_choice: TimeFormat | null; zone_chip?: boolean; timezone: string | null; display_timezone: string; timezone_label: string; academy: { time_format: TimeFormat } | null } }>('/v1/me'),
     read<{ data: Zone[] }>('/v1/timezones'),
     cookies(),
+    family(),
   ]);
   const outcome = (OUTCOMES as readonly string[]).includes(social ?? '') ? (social as (typeof OUTCOMES)[number]) : null;
   return (
@@ -37,6 +41,8 @@ export default async function Account({ searchParams }: Props) {
         account={me.data.timezone ?? null}
         device={jar.get(TIMEZONE_COOKIE)?.value ?? null}
       />
+      {/* The kids' look has no zone chip, so nothing to show or hide. */}
+      {showsZoneChip(fam.stage) ? <ZoneChipSetting shown={zoneChipWanted(me.data)} /> : null}
       <ClockSetting choice={me.data.time_format_choice ?? null} academy={timeFormatOf(me.data.academy?.time_format)} />
       <SocialLinks back={`/${locale}/family/account`} />
     </div>

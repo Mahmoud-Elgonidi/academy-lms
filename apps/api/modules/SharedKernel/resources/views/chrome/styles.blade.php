@@ -283,6 +283,11 @@
     .lms-zone-option small { color: var(--gray-500); font-variant-numeric: tabular-nums; }
     .lms-zone-option:hover, .lms-zone-option:focus-visible { background: var(--gray-50); outline: none; }
     .lms-zone-option[aria-current] { color: var(--primary-700); background: var(--primary-50); font-weight: 600; }
+    .lms-zone[hidden] { display: none; }
+    .lms-zone[data-leaving] { pointer-events: none; }
+    .lms-zone-hide { display: flex; align-items: center; justify-content: center; gap: .3rem; width: 100%; margin-top: .55rem; padding: .3rem .5rem; border: 0; border-radius: var(--radius-md, .375rem); cursor: pointer; font: inherit; font-size: .75rem; color: var(--gray-500); background: none; }
+    .lms-zone-hide svg { width: .9rem; height: .9rem; }
+    .lms-zone-hide:hover, .lms-zone-hide:focus-visible { color: var(--gray-700); background: var(--gray-50); outline: none; }
     .dark .lms-zone-pill { color: var(--gray-200); background: color-mix(in oklab, var(--gray-900) 82%, transparent); box-shadow: 0 0 0 1px rgb(255 255 255 / .08), 0 10px 24px -14px rgb(0 0 0 / .7); }
     .dark .lms-zone-pill svg { color: var(--primary-400); }
     .dark .lms-zone-time { color: white; border-color: var(--gray-700); }
@@ -298,6 +303,8 @@
     .dark .lms-zone-option { color: var(--gray-200); }
     .dark .lms-zone-option:hover { background: rgb(255 255 255 / .05); }
     .dark .lms-zone-option[aria-current] { color: var(--primary-300); background: color-mix(in oklab, var(--primary-500) 15%, transparent); }
+    .dark .lms-zone-hide { color: var(--gray-400); }
+    .dark .lms-zone-hide:hover, .dark .lms-zone-hide:focus-visible { color: var(--gray-200); background: rgb(255 255 255 / .05); }
     .dark .lms-zone-btn:not([data-primary]) { color: var(--primary-300); background: color-mix(in oklab, var(--primary-500) 15%, transparent); }
     @media print { .lms-zone { display: none; } }
     @media (prefers-reduced-motion: no-preference) {
@@ -311,10 +318,13 @@
         .lms-zone-dot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: inherit; animation: lms-zone-ping 2.4s ease-out infinite; }
         .lms-zone-card { animation: lms-zone-card .28s var(--lms-out) backwards; }
         .lms-zone-pick { animation: lms-zone-new .25s var(--lms-out) backwards; }
+        /* Hidden by the person: the card and the chip sink away together. */
+        .lms-zone[data-leaving] { animation: lms-zone-out .22s ease-in forwards; }
     }
     @keyframes lms-zone-in { from { opacity: 0; transform: translateY(14px) scale(.9); } }
     @keyframes lms-zone-beat { 35% { transform: scale(1.22) rotate(-14deg); } 70% { transform: scale(.96) rotate(4deg); } }
     @keyframes lms-zone-new { from { opacity: .2; transform: translateY(4px); } }
     @keyframes lms-zone-ping { 0% { opacity: .7; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(2.4); } }
+    @keyframes lms-zone-out { to { opacity: 0; transform: translateY(10px) scale(.94); } }
     @keyframes lms-zone-card { from { opacity: 0; transform: translateY(8px) scale(.96); } }
 </style>
