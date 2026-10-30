@@ -1,17 +1,20 @@
+import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { signOut } from '@/app/[locale]/sign-in/actions';
 import { Icon } from '@/components/icons';
 import { LiveRefresh } from '@/components/live-refresh';
 import { TimeFormatProvider } from '@/components/time-format';
+import { ZoneChip } from '@/components/zone-chip';
 import { liveOf } from '@/lib/live-server';
+import { CHOSEN_ZONE_COOKIE, TIMEZONE_COOKIE } from '@/lib/session';
 import { timeFormatOf } from '@/lib/time';
 import type { Branding, Me } from '@/lib/viewer';
 import { LanguageSwitch, SideNav, TabBar } from './nav';
 
 /** The teacher's frame: the academy and the person, the menu (with the unread count), and the page, kept live, its clocks written the person's way. */
 export async function Shell({ person, look, locale, children }: { person: Me; look: Branding; locale: string; children: ReactNode }) {
-  const [t, live] = await Promise.all([getTranslations('common'), liveOf()]);
+  const [t, live, jar] = await Promise.all([getTranslations('common'), liveOf(), cookies()]);
   const academy = locale === 'ar' ? look.name.ar : look.name.en;
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[16rem_1fr]">
@@ -48,6 +51,16 @@ export async function Shell({ person, look, locale, children }: { person: Me; lo
           <TimeFormatProvider format={timeFormatOf(person.time_format)}>{children}</TimeFormatProvider>
         </main>
       </div>
+      <ZoneChip
+        shown={person.display_timezone}
+        shownLabel={person.timezone_label}
+        account={person.timezone ?? null}
+        academy={person.academy ? { zone: person.academy.default_timezone, label: person.academy.timezone_label } : null}
+        mismatch={person.timezone_mismatch === true}
+        chosen={jar.get(CHOSEN_ZONE_COOKIE)?.value ?? null}
+        device={jar.get(TIMEZONE_COOKIE)?.value ?? null}
+        format={timeFormatOf(person.time_format)}
+      />
       <TabBar unread={live.unread} chats={live.chats} />
     </div>
   );

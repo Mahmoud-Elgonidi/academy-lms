@@ -1771,5 +1771,33 @@
     "levels": "{from} → {to}",
     "fromStart": "the start",
     "toEnd": "the end"
+  },
+  "zone": {
+    "title": "Time zone",
+    "open": "Your time zone: {zone}. Open for details or to change it.",
+    "yours": "Your time zone",
+    "academy": "Academy time zone",
+    "device": "Your device",
+    "account": "Your account",
+    "deviceDiffers": "Your device keeps a different clock from the one times are shown in.",
+    "accountDiffers": "Your account's time zone differs from the one times are shown in here.",
+    "hint": "Times on every page show on your time zone.",
+    "useDevice": "Use my device's zone",
+    "change": "Change my zone",
+    "search": "Search for a city or region",
+    "none": "No results.",
+    "back": "Back",
+    "current": "Current",
+    "loading": "Loading the cities…",
+    "unavailable": "The list of cities could not be loaded. Try again.",
+    "saved": "Your time zone is now {zone}.",
+    "failed": "Your time zone could not be saved. Try again.",
+    "field": {
+      "title": "My time zone",
+      "hint": "Times are shown on this zone here, in the app and in the messages you get.",
+      "now": "Times are now shown on {zone}.",
+      "list": "Cities",
+      "chosen": "Chosen: {zone}"
+    }
   }
 }

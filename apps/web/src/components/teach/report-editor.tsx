@@ -379,7 +379,7 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
       </Card>
 
       {problem.message ? <Notice tone="danger">{problem.message}</Notice> : null}
-      <div className="sticky bottom-16 z-10 -mx-1 rounded-card bg-paper/90 px-1 py-2 backdrop-blur lg:bottom-0">
+      <div data-hides-zone-chip className="sticky bottom-16 z-10 -mx-1 rounded-card bg-paper/90 px-1 py-2 backdrop-blur lg:bottom-0">
         <Button wide disabled={pending}>
           {pending ? common('loading') : sent ? t('updateReport') : t('sendReport')}
         </Button>

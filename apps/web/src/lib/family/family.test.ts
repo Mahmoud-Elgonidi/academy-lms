@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isAt, itemsOf } from './nav-items';
-import { isGuardian, lessonActionsFor, seesMoney } from './rules';
+import { isGuardian, lessonActionsFor, seesMoney, showsZoneChip } from './rules';
 import { familyTargetOf } from './targets';
 import { STAGES } from './types';
 
@@ -35,6 +35,8 @@ describe('what a family may do with a lesson', () => {
 describe('the places of each look', () => {
   it('shows money only in the classic look', () => {
     expect(STAGES.filter(seesMoney)).toEqual(['classic']);
+    // The zone chip: every look but the kids'.
+    expect(STAGES.filter(showsZoneChip)).toEqual(STAGES.filter((s) => s !== 'kids'));
     for (const stage of ['kids', 'middle', 'teen'] as const) {
       const { all, tabs } = itemsOf(stage, seesMoney(stage));
       expect([...all, ...tabs].some((i) => i.href === '/family/money')).toBe(false);

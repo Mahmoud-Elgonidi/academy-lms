@@ -5,6 +5,11 @@ export function canAct(stage: Stage): boolean {
   return stage !== 'kids';
 }
 
+/** The zone chip in the corner: every look but the kids' (as the panels and the app leave it out there). */
+export function showsZoneChip(stage: Stage): boolean {
+  return stage !== 'kids';
+}
+
 export function seesMoney(stage: Stage): boolean {
   return stage === 'classic';
 }

@@ -9,6 +9,14 @@ export const SESSION_COOKIE = 'lms_session';
 /** The viewer's IANA zone, written by the page itself (Intl), sent as X-Timezone. */
 export const TIMEZONE_COOKIE = 'lms_tz';
 
+/**
+ * The zone the person chose for their account on this browser (the zone chip,
+ * My account), sent as X-Timezone instead of the device's, so the pages show
+ * the clock they chose. Gone when they go back to their device's zone, sign in
+ * or out, or when the account's zone changed elsewhere (the chip lets go of it).
+ */
+export const CHOSEN_ZONE_COOKIE = 'lms_tz_chosen';
+
 export type Role = 'owner' | 'admin' | 'scheduler' | 'accountant' | 'sales' | 'supervisor' | 'teacher' | 'guardian' | 'student';
 
 export const STAFF_ROLES: readonly Role[] = ['owner', 'admin', 'scheduler', 'accountant', 'sales', 'supervisor'];

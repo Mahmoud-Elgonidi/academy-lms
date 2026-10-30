@@ -3,7 +3,7 @@ import { cookies, headers } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import type { paths } from './schema';
-import { SESSION_COOKIE, TIMEZONE_COOKIE } from '../session';
+import { CHOSEN_ZONE_COOKIE, SESSION_COOKIE, TIMEZONE_COOKIE } from '../session';
 
 /** Laravel inside the stack (compose: http://web:8080); `php artisan serve` on a laptop. */
 export const API = process.env.API_INTERNAL_URL ?? 'http://127.0.0.1:8000';
@@ -48,7 +48,8 @@ async function outgoing(token?: string): Promise<Record<string, string>> {
 
   const bearer = token ?? jar.get(SESSION_COOKIE)?.value;
   if (bearer) sent.Authorization = `Bearer ${bearer}`;
-  const zone = jar.get(TIMEZONE_COOKIE)?.value;
+  // The zone chosen on this browser, else the device's.
+  const zone = jar.get(CHOSEN_ZONE_COOKIE)?.value ?? jar.get(TIMEZONE_COOKIE)?.value;
   if (zone) sent['X-Timezone'] = decodeURIComponent(zone);
   const host = incoming.get('x-forwarded-host') ?? incoming.get('host');
   if (host) sent['X-Forwarded-Host'] = host;

@@ -4,7 +4,7 @@ import { Icon } from '@/components/icons';
 import { LessonCard } from '@/components/teach/lesson-card';
 import { Heading, buttonLook, join } from '@/components/ui';
 import { get } from '@/lib/api/server';
-import { addDays, dayLabel, hoursOf, zoneName } from '@/lib/format';
+import { addDays, dayLabel, hoursOf } from '@/lib/format';
 import type { Lesson, LessonDays } from '@/lib/teach/types';
 import { me } from '@/lib/viewer';
 
@@ -34,7 +34,7 @@ export default async function Week({ params, searchParams }: { params: Promise<{
     <div>
       <Heading
         title={t('weekRange', { from: dayLabel(week.from, locale, short), to: dayLabel(week.to, locale, short) })}
-        hint={`${common('lessonsHours', { lessons: common('lessons', { n: week.count }), hours: common('hoursAmount', { h: hoursOf(week.minutes) }) })} · ${common('onClock', { zone: zoneName(person.display_timezone, locale) })}`}
+        hint={`${common('lessonsHours', { lessons: common('lessons', { n: week.count }), hours: common('hoursAmount', { h: hoursOf(week.minutes) }) })} · ${common('onClock', { zone: person.timezone_label })}`}
         action={
           <div className="flex items-center gap-2">
             {nav(addDays(week.from, -7), t('prevWeek'), 'prev')}

@@ -5,7 +5,7 @@ import { RefreshAt } from '@/components/live-refresh';
 import { LessonCard } from '@/components/teach/lesson-card';
 import { SectionTitle, join, type Tone } from '@/components/ui';
 import { get } from '@/lib/api/server';
-import { dayLabel, hoursOf, zoneName } from '@/lib/format';
+import { dayLabel, hoursOf } from '@/lib/format';
 import { momentsOf } from '@/lib/live';
 import type { Homework, Lesson, LessonDays, ReportSummary, Trials } from '@/lib/teach/types';
 import { me } from '@/lib/viewer';
@@ -55,7 +55,7 @@ export default async function Today({ params }: { params: Promise<{ locale: stri
     <div className="stagger space-y-4">
       <RefreshAt moments={momentsOf(lessons)} />
       <header>
-        <p className="text-sm text-muted">{t('todayHeader', { date: dayLabel(day.from, locale), zone: zoneName(person.display_timezone, locale) })}</p>
+        <p className="text-sm text-muted">{t('todayHeader', { date: dayLabel(day.from, locale), zone: person.timezone_label })}</p>
         <h1 className="mt-1 text-2xl font-bold sm:text-3xl">{t('todayCount', { n: day.count })}</h1>
         {day.minutes > 0 ? <p className="text-muted">{common('hoursAmount', { h: hoursOf(day.minutes) })}</p> : null}
       </header>

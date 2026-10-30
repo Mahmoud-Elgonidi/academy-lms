@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { routing } from '@/i18n/routing';
 import { outside } from '@/lib/outside';
-import { SESSION_COOKIE } from '@/lib/session';
+import { CHOSEN_ZONE_COOKIE, SESSION_COOKIE } from '@/lib/session';
 
 /**
  * The API refused the session (it ended, or was signed out on another
@@ -13,5 +13,6 @@ export function GET(request: NextRequest) {
   const locale = (routing.locales as readonly string[]).includes(asked) ? asked : routing.defaultLocale;
   const response = NextResponse.redirect(outside(request, `/${locale}/sign-in?expired=1`));
   response.cookies.delete(SESSION_COOKIE);
+  response.cookies.delete(CHOSEN_ZONE_COOKIE);
   return response;
 }

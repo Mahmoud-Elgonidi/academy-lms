@@ -1,11 +1,14 @@
 'use server';
 
 import { refresh } from 'next/cache';
+import { cookies, headers } from 'next/headers';
 import { read, send } from '@/lib/api/server';
 import type { MushafPage, MushafResult } from '@/lib/mushaf/types';
 import type { LessonRecording } from '@/lib/recordings';
 import type { JoinTicket } from '@/lib/teach/types';
+import { CHOSEN_ZONE_COOKIE, TIMEZONE_COOKIE } from '@/lib/session';
 import type { TimeFormat } from '@/lib/time';
+import type { Zone } from '@/lib/zones';
 
 /**
  * Writes every portal makes the same way, teachers and families alike: a
@@ -15,7 +18,8 @@ import type { TimeFormat } from '@/lib/time';
  * Google or Apple from one's account, disputing a lesson's outcome, a new
  * email or mobile number (confirmed by a code sent to it), and one's own
  * data (details put right, a copy, a correction, erasure, taking a request
- * back); how one reads a clock (12 or 24 hours, or the academy's); and a
+ * back); how one reads a clock (12 or 24 hours, or the academy's), and
+ * one's own time zone (the zone chip, My account); and a
  * lesson's shared mushaf read again (its teacher's page, or another a learner
  * looks at).
  */
@@ -190,6 +194,40 @@ export async function saveTimeFormat(format: TimeFormat | null): Promise<Done> {
   if (!done.ok) return problemOf(done.problem);
   refresh();
   return { ok: true };
+}
+
+/** The zones one may choose (city and offset in the reader's language, by region), or null when the API did not answer. */
+export async function listZones(): Promise<Zone[] | null> {
+  const found = await read<{ data: Zone[] }>('/v1/timezones');
+  return found.ok ? found.data.data : null;
+}
+
+/**
+ * One's own time zone, saved on the account (`PATCH /v1/me`), so the app, the
+ * panels and messages follow it too. Chosen from the list, this browser keeps
+ * showing the pages on it (sent as X-Timezone instead of the device's);
+ * `device` (the device's own zone) lets the pages follow the device again.
+ */
+export async function saveZone(zone: string, follow: 'chosen' | 'device'): Promise<Done> {
+  const done = await send('patch', '/v1/me', { body: { timezone: zone } });
+  if (!done.ok) return problemOf(done.problem);
+  const [jar, incoming] = await Promise.all([cookies(), headers()]);
+  const secure = (incoming.get('x-forwarded-proto') ?? 'http') === 'https';
+  if (follow === 'chosen') {
+    jar.set(CHOSEN_ZONE_COOKIE, zone, { httpOnly: true, secure, sameSite: 'lax', path: '/', maxAge: 31_536_000 });
+  } else {
+    jar.delete(CHOSEN_ZONE_COOKIE);
+    // The page writes it too (layout's script); written here, the refresh already reads it.
+    jar.set(TIMEZONE_COOKIE, zone, { secure, sameSite: 'lax', path: '/', maxAge: 31_536_000 });
+  }
+  refresh();
+  return { ok: true };
+}
+
+/** Lets go of a zone chosen on this browser that is no longer the account's (changed in the app or the panels): the pages follow the device again. */
+export async function forgetChosenZone(): Promise<void> {
+  (await cookies()).delete(CHOSEN_ZONE_COOKIE);
+  refresh();
 }
 
 /** Sends a code to a new email or mobile number of one's own; nothing changes until the code comes back. */

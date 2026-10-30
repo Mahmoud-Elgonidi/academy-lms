@@ -1,6 +1,6 @@
 import 'server-only';
 import { cookies, headers } from 'next/headers';
-import { SESSION_COOKIE } from './session';
+import { CHOSEN_ZONE_COOKIE, SESSION_COOKIE } from './session';
 
 /** A short name for this browser on the person's device list ("Web · Chrome on Windows"). */
 export function deviceName(userAgent: string | null): string {
@@ -14,7 +14,10 @@ export function deviceName(userAgent: string | null): string {
 export async function keepSession(token: string, expiresAt: string | null): Promise<void> {
   const secure = ((await headers()).get('x-forwarded-proto') ?? 'http') === 'https';
   const expires = new Date(expiresAt ?? NaN);
-  (await cookies()).set(SESSION_COOKIE, token, {
+  const jar = await cookies();
+  // A zone chosen by whoever used this browser before is not this person's.
+  jar.delete(CHOSEN_ZONE_COOKIE);
+  jar.set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure,
     sameSite: 'lax',
@@ -24,5 +27,7 @@ export async function keepSession(token: string, expiresAt: string | null): Prom
 }
 
 export async function forgetSession(): Promise<void> {
-  (await cookies()).delete(SESSION_COOKIE);
+  const jar = await cookies();
+  jar.delete(SESSION_COOKIE);
+  jar.delete(CHOSEN_ZONE_COOKIE);
 }

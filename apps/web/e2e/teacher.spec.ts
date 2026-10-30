@@ -212,6 +212,41 @@ test('the teacher reads clocks in 24 hours, then goes back to the academy\'s 12'
   await expect(sunday.filter({ hasText: '3:00 م–9:00 م' }).first()).toBeVisible();
 });
 
+test('the zone chip shows the teacher\'s clock, changes it, and goes back to the device\'s', async ({ page }) => {
+  // Khaled keeps Cairo in the demo, as this browser does (playwright.config.ts).
+  const chip = page.getByTestId('zone-chip');
+  const pill = chip.getByRole('button', { name: /^توقيتك: / });
+  const card = chip.getByRole('dialog', { name: 'التوقيت' });
+  await page.goto('/ar/teach');
+  await expect(pill).toContainText('القاهرة');
+  await expect(pill).toContainText(/\d{1,2}:\d{2} [صم]/);
+  await expect(chip.getByTestId('zone-dot')).toHaveCount(0);
+
+  await pill.click();
+  await expect(card.getByText('توقيتك', { exact: true })).toBeVisible();
+  await card.getByRole('button', { name: 'تغيير توقيتي' }).click();
+  await card.getByRole('searchbox', { name: 'ابحث عن مدينة أو منطقة' }).fill('دبي');
+  await card.getByRole('button', { name: /دبي/ }).click();
+  try {
+    await expect(card.getByText(/حُفظ توقيتك: دبي/)).toBeVisible();
+    // The pages follow the zone chosen; the device keeps Cairo, so the chip points it out.
+    await expect(pill).toContainText('دبي');
+    await expect(chip.getByTestId('zone-dot')).toBeVisible();
+    await expect(page.getByText(/بتوقيت دبي/).first()).toBeVisible();
+    await expect(card.getByText('توقيت جهازك')).toBeVisible();
+  } finally {
+    // The demo as it was found: Cairo, following the device.
+    if (!(await card.isVisible())) await pill.click();
+    await card.getByRole('button', { name: 'استخدم توقيت جهازي' }).click();
+  }
+  await expect(pill).toContainText('القاهرة');
+  await expect(chip.getByTestId('zone-dot')).toHaveCount(0);
+
+  // My account names the zone the times are shown in.
+  await page.goto('/ar/teach/account');
+  await expect(page.getByRole('form', { name: 'توقيتي' }).getByTestId('zone-now')).toContainText('القاهرة');
+});
+
 test('the language switches, keeping the page', async ({ page }) => {
   await page.goto('/ar/teach/more');
   await page.getByRole('link', { name: 'English' }).click();

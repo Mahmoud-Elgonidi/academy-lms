@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { TimeOffForm, WithdrawButton } from '@/components/teach/time-off-form';
 import { Badge, Card, Empty, Heading, SectionTitle, type Tone } from '@/components/ui';
 import { get } from '@/lib/api/server';
-import { zoneName } from '@/lib/format';
+
 import type { TimeOffList } from '@/lib/teach/types';
 import { me } from '@/lib/viewer';
 
@@ -14,7 +14,7 @@ export default async function TimeOff({ params }: { params: Promise<{ locale: st
   const [t, nav, person, list] = await Promise.all([getTranslations('teach'), getTranslations('nav'), me(), get<TimeOffList>('/v1/teacher/time-off')]);
   return (
     <div>
-      <Heading title={nav('timeOff')} hint={t('timeOffLead', { zone: zoneName(person.display_timezone, locale) })} />
+      <Heading title={nav('timeOff')} hint={t('timeOffLead', { zone: person.timezone_label })} />
       <Card>
         <h2 className="mb-4 font-semibold">{t('requestTimeOff')}</h2>
         <TimeOffForm />

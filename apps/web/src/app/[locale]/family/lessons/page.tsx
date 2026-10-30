@@ -8,7 +8,7 @@ import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
 import { momentsOf } from '@/lib/live';
 import { lessonActionsFor } from '@/lib/family/rules';
-import { dayLabel, zoneName } from '@/lib/format';
+import { dayLabel } from '@/lib/format';
 import type { FamilyLessons } from '@/lib/family/types';
 import { me } from '@/lib/viewer';
 
@@ -34,7 +34,7 @@ export default async function Lessons({ searchParams }: { searchParams: Promise<
   return (
     <div>
       {past ? null : <RefreshAt moments={momentsOf(lessons.data)} />}
-      <Heading title={learner.is_self ? t('lessonsOf', { name: learner.name.split(' ')[0] ?? learner.name }) : t('lessonsOf', { name: learner.name })} hint={common('onClock', { zone: zoneName(person.display_timezone, locale) })} />
+      <Heading title={learner.is_self ? t('lessonsOf', { name: learner.name.split(' ')[0] ?? learner.name }) : t('lessonsOf', { name: learner.name })} hint={common('onClock', { zone: person.timezone_label })} />
       {lessons.notices.length > 0 ? (
         <ul className="mb-4 space-y-2">
           {lessons.notices.map((n) => (

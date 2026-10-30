@@ -20,6 +20,8 @@ test.describe('a kid (Yousef)', () => {
     await expect(tabs.getByRole('link', { name: 'رحلتي' })).toBeVisible();
     await expect(tabs.getByRole('link', { name: 'تحدّث مع معلّمك' })).toBeVisible();
     await expect(tabs.getByRole('link', { name: 'مهماتي' })).toHaveCount(0);
+    // No zone chip in the kids' look.
+    await expect(page.getByTestId('zone-chip')).toHaveCount(0);
   });
 
   test('tells a grown-up at the academy with one big button, no words needed', async ({ page }) => {
@@ -58,6 +60,8 @@ test.describe('a middle-school student (Ziad)', () => {
       await fitsTheScreen(page);
       await noRawKeys(page);
     }
+    // The zone chip, in every look but the kids'.
+    await expect(page.getByTestId('zone-chip').getByRole('button', { name: /^توقيتك: / })).toBeVisible();
     await expect(page.locator('[data-stage="middle"]')).toBeVisible();
     const tabs = page.getByRole('navigation', { name: 'القائمة' }).last();
     await expect(tabs.getByRole('link', { name: 'الرسائل' })).toBeVisible();

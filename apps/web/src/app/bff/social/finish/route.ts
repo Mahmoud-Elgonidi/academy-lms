@@ -3,7 +3,7 @@ import { routing } from '@/i18n/routing';
 import { send } from '@/lib/api/server';
 import { deviceName } from '@/lib/auth';
 import { outside } from '@/lib/outside';
-import { SESSION_COOKIE, homeOf, safeNext } from '@/lib/session';
+import { CHOSEN_ZONE_COOKIE, SESSION_COOKIE, homeOf, safeNext } from '@/lib/session';
 import { SOCIAL_COOKIE, TWO_FACTOR_COOKIE, refusalOf } from '@/lib/social';
 import type { LocalTime } from '@/lib/time';
 import { twoFactorTurn } from '@/lib/two-factor';
@@ -67,6 +67,7 @@ export async function GET(request: NextRequest) {
   }
   const response = to(back ?? `/${locale}/${home}`);
   const expires = new Date(signed.data.expires_at?.utc ?? NaN);
+  response.cookies.delete(CHOSEN_ZONE_COOKIE);
   response.cookies.set(SESSION_COOKIE, signed.data.token, {
     httpOnly: true,
     secure,

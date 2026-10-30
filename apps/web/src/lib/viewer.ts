@@ -57,8 +57,14 @@ export type Me = {
   roles: string[];
   phone?: string | null;
   locale: string | null;
+  /** The zone the person chose for their account, or null while they have none. */
   timezone?: string | null;
+  /** The zone this answer's times are written in (the zone chosen on this browser, else the device's, else the account's, else the academy's). */
   display_timezone: string;
+  /** display_timezone as people read it, in the reader's language: "القاهرة (UTC+2)". */
+  timezone_label: string;
+  /** The device's clock (X-Timezone) and the account's differ. */
+  timezone_mismatch: boolean;
   /** How this person reads a clock: their own choice, else the academy's. */
   time_format: TimeFormat;
   /** Their own choice, or null while they follow the academy's. */
@@ -66,7 +72,7 @@ export type Me = {
   /** The areas the academy's plan includes (crm, online_payments, import, custom_branding, payroll). */
   plan_features?: string[];
   /** The academy's own clock is the one for everyone who has not chosen theirs. */
-  academy: { id: string; slug: string; name_ar: string; name_en: string; default_timezone: string; time_format: TimeFormat } | null;
+  academy: { id: string; slug: string; name_ar: string; name_en: string; default_timezone: string; timezone_label: string; time_format: TimeFormat } | null;
 };
 
 /** The signed-in person (their roles decide their portal). */
