@@ -162,6 +162,45 @@ it('shows the teacher the class page with today\'s plan beside the video', funct
         ->assertOk()->assertSee(__('classroom::classroom.plan.title'))->assertSee(__('classroom::classroom.roles.teacher'));
 });
 
+it('gives the class page a call\'s controls: mic, camera, screen, picture in picture, layouts, the panel and leaving', function () {
+    CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-06 14:55', 'UTC'));
+    $this->clearTenant();
+    $room = 'classroom::classroom.room.';
+
+    $teacher = $this->actingAs($this->teacher)->get("http://noor.lms.test/class/{$this->lesson->id}")->assertOk()
+        ->assertSee('id="room-styles"', false)
+        ->assertSee(__('classroom::classroom.check.join'))->assertSee(__('classroom::classroom.check.join_audio'))
+        ->assertSee('id="pre-mic"', false)->assertSee('id="pre-cam"', false)
+        ->assertSee('id="mic"', false)->assertSee('id="camera"', false)->assertSee('id="screen"', false)
+        ->assertSee('id="pip"', false)->assertSee(__($room.'pip'))
+        ->assertSee('id="layout"', false)->assertSee('data-layout="auto"', false)->assertSee('data-layout="grid"', false)->assertSee('data-layout="spotlight"', false)
+        ->assertSee('id="panel-toggle"', false)->assertSee('aria-controls="panel"', false)->assertSee('<aside id="panel"', false)
+        ->assertSee('id="audio-only"', false)->assertSee('id="timer"', false)->assertSee('id="people"', false)
+        ->assertSee(__($room.'leave'))->assertSee(__($room.'mic_off').' (Ctrl+D)')->assertSee(__($room.'camera_off').' (Ctrl+E)')
+        ->assertDontSee('id="record"', false);                     // the academy records nothing: no button
+    expect($teacher->getContent())->toContain("dispatchEvent(new CustomEvent('lms:room'")   // the mushaf hears the room
+        ->toContain('documentPictureInPicture')->toContain("setActionHandler('enterpictureinpicture'")
+        ->toContain('adaptiveStream: true, dynacast: true');
+
+    // The student: the same bar; with nothing to read beside the lesson, no panel.
+    app('auth')->forgetGuards();
+    $this->actingAs($this->student)->get("http://noor.lms.test/class/{$this->lesson->id}")->assertOk()
+        ->assertSee('id="mic"', false)->assertSee('id="pip"', false)->assertSee('id="layout"', false)
+        ->assertDontSee('id="panel-toggle"', false)->assertDontSee('<aside', false)->assertDontSee('id="record"', false);
+});
+
+it('lets someone watching unseen follow the call without a mic, camera or screen of their own', function () {
+    CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-06 14:55', 'UTC'));
+    $this->clearTenant();
+
+    $this->actingAs($this->admin)->get("http://noor.lms.test/class/{$this->lesson->id}")->assertOk()
+        ->assertSee(__('classroom::classroom.check.observer'))->assertSee(__('classroom::classroom.roles.observer'))
+        ->assertSee('class="prejoin observer"', false)
+        ->assertDontSee('id="mic"', false)->assertDontSee('id="camera"', false)->assertDontSee('id="screen"', false)
+        ->assertDontSee('id="join-audio"', false)->assertDontSee('id="preview"', false)
+        ->assertSee('id="pip"', false)->assertSee('id="layout"', false)->assertSee('id="leave"', false);
+});
+
 it('gives the app a ticket through the API', function () {
     CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-06 14:56', 'UTC'));
     $this->clearTenant();
