@@ -112,10 +112,10 @@ it('starts the admin\'s editor from the approved schedule that starts later, and
     expect(substr($fromTeacher->get('mountedActions.1.data.effective_from'), 0, 10))->toBe('2026-10-10')
         ->and(count($fromTeacher->get('mountedActions.1.data.blocks')))->toBe(2);
 
-    // With nothing approved, it starts empty from tomorrow.
+    // With nothing approved, it starts empty from today (the academy may start a schedule today).
     $other = User::factory()->withRole(Role::Teacher)->create(['timezone' => 'Africa/Cairo']);
     $empty = shiftsScreen()->mountAction('editTeacher')->set('mountedActions.0.data.teacher_id', $other->id);
-    expect(substr($empty->get('mountedActions.0.data.effective_from'), 0, 10))->toBe('2026-10-06')
+    expect(substr($empty->get('mountedActions.0.data.effective_from'), 0, 10))->toBe('2026-10-05')
         ->and($empty->get('mountedActions.0.data.blocks'))->toBe([]);
 });
 

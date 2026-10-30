@@ -126,6 +126,34 @@ it('applies an admin schedule at once in an admin-only academy', function () {
         ->and(ShiftSchedule::inForce($this->teacher->id, CarbonImmutable::parse('2026-10-10')))->not->toBeNull();
 });
 
+it('lets the academy start a schedule today, adding or taking time away, while the teacher waits for tomorrow and two weeks\' notice', function () {
+    SchedulingSettings::query()->create(['shift_mode' => 'admin_only']);
+
+    // Today, Monday the 5th: a first schedule, then the same day one with Tuesday dropped.
+    expect(fn () => submit(from: '2026-10-05'))->toThrow(ValidationException::class);
+    $first = app(CounterShiftProposal::class)->handle($this->teacher->id, week(), CarbonImmutable::parse('2026-10-05'), null, $this->admin->id);
+    expect($first->status)->toBe(ShiftProposalStatus::Approved)
+        ->and(ShiftSchedule::inForce($this->teacher->id, CarbonImmutable::parse('2026-10-05')))->not->toBeNull();
+
+    expect(fn () => submit(week([[6, '17:00', '21:00']]), '2026-10-06'))->toThrow(ValidationException::class);
+    app(CounterShiftProposal::class)->handle($this->teacher->id, week([[6, '17:00', '21:00']]), CarbonImmutable::parse('2026-10-05'), null, $this->admin->id);
+    expect(ShiftSchedule::inForce($this->teacher->id, CarbonImmutable::parse('2026-10-05'))->shifts()->weeklyMinutes())->toBe(240);
+
+    // Never a day gone by.
+    expect(fn () => app(CounterShiftProposal::class)->handle($this->teacher->id, week(), CarbonImmutable::parse('2026-10-04'), null, $this->admin->id))
+        ->toThrow(ValidationException::class);
+});
+
+it('starts a counter-offer the teacher takes up after its day on the day they take it up', function () {
+    $proposal = app(CounterShiftProposal::class)->handle($this->teacher->id, week(), CarbonImmutable::parse('2026-10-05'), null, $this->admin->id);
+
+    CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-08 07:00', 'UTC'));
+    approve($proposal, 'teacher');
+
+    expect(ShiftSchedule::query()->sole()->effective)->toBe('[2026-10-08,)')
+        ->and($proposal->refresh()->effective_from->toDateString())->toBe('2026-10-08');
+});
+
 it('blocks approval while a booked weekly slot falls outside the new shifts, until it is resolved', function () {
     approve(submit());
     $student = User::factory()->withRole(Role::Student)->create(['timezone' => 'Asia/Riyadh']);

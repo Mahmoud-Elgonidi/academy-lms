@@ -18,6 +18,7 @@ final readonly class ProposalRules
 
     /**
      * @param  CarbonImmutable  $today  today in the teacher's timezone
+     * @param  bool  $byAcademy  the academy's own schedule for the teacher, which may start today and needs no notice
      * @return list<array{0: string, 1: array<string, mixed>}>
      */
     public function check(
@@ -28,6 +29,7 @@ final readonly class ProposalRules
         ?int $minWeekly = null,
         ?int $maxWeekly = null,
         ?int $contractMaxWeekly = null,
+        bool $byAcademy = false,
     ): array {
         $problems = $proposed->problems($this->minBlockMin);
 
@@ -46,11 +48,12 @@ final readonly class ProposalRules
             $problems[] = ['above_contract', ['hours' => self::hours($weekly), 'max' => self::hours($contractMaxWeekly)]];
         }
 
-        // Taking time away needs notice; only adding time can start tomorrow.
+        // The teacher's own: taking time away needs notice, and only adding time can start tomorrow.
+        // The academy's may start today, either way.
         [, $removed] = $proposed->addedAndRemovedMinutes($current);
-        $earliest = $removed > 0 ? $today->addDays($this->reductionNoticeDays) : $today->addDay();
-        if ($effectiveFrom->lessThan($earliest->startOfDay())) {
-            $problems[] = $removed > 0
+        $earliest = $this->earliestStart($proposed, $current, $today, $byAcademy);
+        if ($effectiveFrom->lessThan($earliest)) {
+            $problems[] = $removed > 0 && ! $byAcademy
                 ? ['notice_needed', ['days' => $this->reductionNoticeDays, 'date' => $earliest->toDateString()]]
                 : ['starts_tomorrow_at_earliest', ['date' => $earliest->toDateString()]];
         }
@@ -59,8 +62,11 @@ final readonly class ProposalRules
     }
 
     /** The earliest start date allowed for $proposed against $current. */
-    public function earliestStart(WeeklyShifts $proposed, WeeklyShifts $current, CarbonImmutable $today): CarbonImmutable
+    public function earliestStart(WeeklyShifts $proposed, WeeklyShifts $current, CarbonImmutable $today, bool $byAcademy = false): CarbonImmutable
     {
+        if ($byAcademy) {
+            return $today->startOfDay();
+        }
         [, $removed] = $proposed->addedAndRemovedMinutes($current);
 
         return ($removed > 0 ? $today->addDays($this->reductionNoticeDays) : $today->addDay())->startOfDay();

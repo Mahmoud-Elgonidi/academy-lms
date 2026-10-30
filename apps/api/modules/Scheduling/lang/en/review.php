@@ -120,6 +120,7 @@ return [
     'what_to_change' => 'What should change?',
     'note_to_teacher' => 'Message to the teacher (optional)',
     'effective_from' => 'Starts',
+    'effective_from_hint' => 'It can start today. Booked lessons are kept; any outside the new hours shows as a conflict to resolve.',
     'blocks' => 'Times',
     'day' => 'Day',
     'from' => 'From',

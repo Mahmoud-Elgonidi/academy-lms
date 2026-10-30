@@ -66,7 +66,7 @@ final class ShiftProposals
     }
 
     /** Throws a validation error listing every problem, or returns quietly. */
-    public function assertValid(string $teacherId, WeeklyShifts $shifts, CarbonImmutable $effectiveFrom, ?int $min, ?int $max): void
+    public function assertValid(string $teacherId, WeeklyShifts $shifts, CarbonImmutable $effectiveFrom, ?int $min, ?int $max, bool $byAcademy = false): void
     {
         $today = CarbonImmutable::now($shifts->timezone)->startOfDay();
         $problems = $this->rules()->check(
@@ -77,6 +77,7 @@ final class ShiftProposals
             $min,
             $max,
             DB::table('teacher_profiles')->where('user_id', $teacherId)->value('max_weekly_min'),
+            $byAcademy,
         );
 
         if ($problems !== []) {

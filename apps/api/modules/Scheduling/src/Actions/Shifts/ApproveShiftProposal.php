@@ -48,6 +48,11 @@ final class ApproveShiftProposal
         }
 
         $shifts = $proposal->shifts();
+        // The academy's schedule may start today; taken up on a later day, it starts that day, never in the past.
+        $today = CarbonImmutable::now($proposal->timezone)->startOfDay();
+        if ($proposal->effective_from->toDateString() < $today->toDateString()) {
+            $proposal->effective_from = $today->toDateString();
+        }
         $unresolved = array_filter(
             $this->impact->conflicts($proposal->teacher_id, $shifts, $proposal->effective_from),
             fn (array $conflict) => ! isset($proposal->resolutions[$conflict['key']]),

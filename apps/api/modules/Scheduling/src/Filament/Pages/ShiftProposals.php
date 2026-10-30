@@ -202,7 +202,8 @@ final class ShiftProposals extends Page
             ->fillForm(fn () => ['blocks' => ShiftBlocksField::fill($p()->shifts()), 'effective_from' => $p()->effective_from->toDateString()])
             ->schema([
                 ShiftBlocksField::make(),
-                DatePicker::make('effective_from')->label(__('scheduling::review.effective_from'))->required()->native(false),
+                DatePicker::make('effective_from')->label(__('scheduling::review.effective_from'))->required()->native(false)
+                    ->minDate(fn () => CarbonImmutable::now()->subDay()->toDateString())->helperText(__('scheduling::review.effective_from_hint')),
                 Textarea::make('note')->label(__('scheduling::review.note_to_teacher'))->rows(2),
             ])
             ->action(fn (array $data, Action $action) => $this->decide(fn () => ShiftBlocksField::refusalsOnBlocks($action, fn () => app(CounterShiftProposal::class)->handle(
@@ -248,7 +249,7 @@ final class ShiftProposals extends Page
     /**
      * The schedule editor: blocks start from the teacher's newest approved
      * schedule (one approved to start later, else the one in force), and the
-     * start date from that later schedule's day, else tomorrow. Sent as a
+     * start date from that later schedule's day, else today. Sent as a
      * counter-offer (applied at once in an "admin only" academy).
      */
     private function editor(Action $action, ?string $teacherId = null): Action
@@ -261,7 +262,7 @@ final class ShiftProposals extends Page
             ->modalHeading(__('scheduling::review.edit_teacher'))
             ->modalDescription(__('scheduling::review.edit_teacher_hint'))
             ->modalSubmitActionLabel(__('scheduling::review.send_schedule'))
-            ->fillForm(fn () => $teacherId !== null ? ['teacher_id' => $teacherId] + $this->startingPoint($teacherId) : ['effective_from' => CarbonImmutable::now()->addDay()->toDateString()])
+            ->fillForm(fn () => $teacherId !== null ? ['teacher_id' => $teacherId] + $this->startingPoint($teacherId) : ['effective_from' => CarbonImmutable::now()->toDateString()])
             ->schema([
                 Select::make('teacher_id')->label(__('scheduling::review.teacher'))
                     ->options(fn () => DB::table('users as u')
@@ -277,7 +278,8 @@ final class ShiftProposals extends Page
                         }
                     }),
                 ShiftBlocksField::make(),
-                DatePicker::make('effective_from')->label(__('scheduling::review.effective_from'))->required()->native(false),
+                DatePicker::make('effective_from')->label(__('scheduling::review.effective_from'))->required()->native(false)
+                    ->minDate(fn () => CarbonImmutable::now()->subDay()->toDateString())->helperText(__('scheduling::review.effective_from_hint')),
                 Textarea::make('note')->label(__('scheduling::review.note_to_teacher'))->rows(2),
             ])
             ->action(function (array $data, Action $action) use ($teacherId) {
@@ -306,7 +308,7 @@ final class ShiftProposals extends Page
 
         return [
             'blocks' => ShiftBlocksField::fill($proposals->latestShifts($teacherId, $today, $tz)),
-            'effective_from' => ($upcoming?->effectiveFrom() ?? $today->addDay())->toDateString(),
+            'effective_from' => ($upcoming?->effectiveFrom() ?? $today)->toDateString(),
         ];
     }
 

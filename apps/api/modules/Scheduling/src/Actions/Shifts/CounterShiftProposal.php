@@ -15,7 +15,8 @@ use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
  * An admin edits the blocks and sends them back (a counter-offer), or starts
  * a schedule for a teacher with no open proposal. The teacher accepts with
  * one tap or edits again. In an "admin only" academy it applies at once.
- * Same validation as the teacher's own proposals: one code path.
+ * Same validation as the teacher's own proposals, except the date: the
+ * academy's schedule may start today, with no notice for fewer hours.
  */
 final class CounterShiftProposal
 {
@@ -26,7 +27,7 @@ final class CounterShiftProposal
 
     public function handle(string $teacherId, WeeklyShifts $shifts, CarbonImmutable $effectiveFrom, ?string $note, string $actorId): ShiftProposal
     {
-        $this->proposals->assertValid($teacherId, $shifts, $effectiveFrom, null, null);
+        $this->proposals->assertValid($teacherId, $shifts, $effectiveFrom, null, null, byAcademy: true);
         $adminOnly = $this->proposals->settings()->shift_mode === 'admin_only';
 
         $proposal = DB::transaction(function () use ($teacherId, $shifts, $effectiveFrom, $note, $actorId) {
