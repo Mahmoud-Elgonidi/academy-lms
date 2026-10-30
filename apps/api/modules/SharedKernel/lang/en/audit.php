@@ -140,6 +140,10 @@ return [
             'ai_settings_saved' => 'AI helpers changed (on: :helpers)',
             'time_format_saved' => 'Times are now written in :clock',
         ],
+        'curriculum' => [
+            'outline_applied' => 'Added an outline to a curriculum draft (:levels levels, :units units, :lessons lessons)',
+            'program_copied' => 'Copied a curriculum (:levels levels, :lessons lessons, :items practice items, :materials materials)',
+        ],
         'learning' => [
             'weekly_digest_saved' => 'Turned the weekly note to guardians :state',
             'hifz_daily_saved' => 'The daily hifz review is now :pages pages at most',
@@ -170,7 +174,7 @@ return [
     'values' => [
         'signup' => ['contacted' => 'talked to', 'declined' => 'turned down', 'created' => 'academy made'],
         'sections' => ['ai' => 'AI helpers', 'mail' => 'email', 'whatsapp' => 'WhatsApp', 'sms' => 'texts', 'push' => 'phone notifications', 'classroom' => 'classroom', 'stripe' => 'Stripe Connect', 'social' => 'Google and Apple sign-in', 'platform' => 'the platform'],
-        'helpers' => ['practice_items' => 'practice suggestions', 'report_draft' => 'reports from voice notes', 'recitation_check' => 'recitation check', 'digest_wording' => 'weekly note wording'],
+        'helpers' => ['practice_items' => 'practice suggestions', 'report_draft' => 'reports from voice notes', 'recitation_check' => 'recitation check', 'digest_wording' => 'weekly note wording', 'curriculum_outline' => 'curriculum outline'],
         'early' => ['early' => 'early, by the office', 'on_time' => 'on time, by itself'],
         'style' => ['playful' => 'playful (islands and games)', 'calm' => 'calm (levels and missions)', 'plain' => 'plain (no stars)'],
         'concern_outcome' => ['no_concern' => 'nothing to act on', 'resolved' => 'dealt with', 'teacher_action' => 'action with a teacher', 'referred' => 'referred outside', 'duplicate' => 'duplicate'],

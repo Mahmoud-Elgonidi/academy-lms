@@ -140,6 +140,10 @@ return [
             'ai_settings_saved' => 'تعديل المساعد الآلي (المفعّل: :helpers)',
             'time_format_saved' => 'أصبح الوقت يُكتب بنظام :clock',
         ],
+        'curriculum' => [
+            'outline_applied' => 'إضافة مخطط إلى مسودة منهج (:levels مستوى، :units وحدة، :lessons درس)',
+            'program_copied' => 'نسخ منهج (:levels مستوى، :lessons درس، :items تدريب، :materials مادة)',
+        ],
         'learning' => [
             'weekly_digest_saved' => 'الرسالة الأسبوعية لأولياء الأمور: :state',
             'hifz_daily_saved' => 'أصبح ورد المراجعة :pages صفحة في اليوم على الأكثر',
@@ -170,7 +174,7 @@ return [
     'values' => [
         'signup' => ['contacted' => 'تواصلنا معهم', 'declined' => 'رُفض', 'created' => 'أُنشئت الأكاديمية'],
         'sections' => ['ai' => 'المساعد الآلي', 'mail' => 'البريد الإلكتروني', 'whatsapp' => 'واتساب', 'sms' => 'الرسائل النصية', 'push' => 'إشعارات الهاتف', 'classroom' => 'الفصل', 'stripe' => 'Stripe Connect', 'social' => 'الدخول بجوجل وأبل', 'platform' => 'المنصة'],
-        'helpers' => ['practice_items' => 'اقتراح التدريبات', 'report_draft' => 'تقرير من رسالة صوتية', 'recitation_check' => 'تصحيح التسميع', 'digest_wording' => 'صياغة الرسالة الأسبوعية'],
+        'helpers' => ['practice_items' => 'اقتراح التدريبات', 'report_draft' => 'تقرير من رسالة صوتية', 'recitation_check' => 'تصحيح التسميع', 'digest_wording' => 'صياغة الرسالة الأسبوعية', 'curriculum_outline' => 'مخطط المنهج'],
         'early' => ['early' => 'مبكرًا، من الإدارة', 'on_time' => 'في موعده، تلقائيًا'],
         'style' => ['playful' => 'مرح (جزر وألعاب)', 'calm' => 'هادئ (مستويات ومهمات)', 'plain' => 'بلا نجوم'],
         'concern_outcome' => ['no_concern' => 'لا يلزم إجراء', 'resolved' => 'حُلّ', 'teacher_action' => 'إجراء مع معلّم', 'referred' => 'أُحيل إلى جهة خارجية', 'duplicate' => 'مكرر'],

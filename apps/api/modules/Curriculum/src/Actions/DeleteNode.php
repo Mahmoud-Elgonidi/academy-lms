@@ -3,8 +3,8 @@
 namespace Modules\Curriculum\Actions;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Modules\Curriculum\Actions\Resources\ResourceFiles;
 use Modules\Curriculum\Models\Node;
 use Modules\Curriculum\Models\NodeResource;
 
@@ -26,7 +26,7 @@ final class DeleteNode
             }
             $files = NodeResource::query()->whereIn('node_id', $under)->whereNotNull('file_path')->pluck('file_path')->all();
             $node->delete();
-            DB::afterCommit(fn () => $files === [] ? null : Storage::disk(NodeResource::DISK)->delete($files));
+            ResourceFiles::forgetAfterCommit($files);
         });
     }
 }

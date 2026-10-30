@@ -7,6 +7,7 @@ return [
         'report_draft' => 'تقرير الحصة من رسالة صوتية',
         'recitation_check' => 'تصحيح التسميع',
         'digest_wording' => 'صياغة رسالة ولي الأمر الأسبوعية',
+        'curriculum_outline' => 'مخطط المنهج',
     ],
     'failed' => [
         'off' => 'هذه المساعدة مغلقة في الأكاديمية.',

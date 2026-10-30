@@ -12,9 +12,11 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -29,6 +31,9 @@ use Livewire\Attributes\Computed;
 use Modules\Catalog\Contracts\CatalogApi;
 use Modules\Curriculum\Actions\DeleteNode;
 use Modules\Curriculum\Actions\MoveNode;
+use Modules\Curriculum\Actions\Outline\ApplyOutline;
+use Modules\Curriculum\Actions\Outline\CopyProgram;
+use Modules\Curriculum\Actions\Outline\SuggestOutline;
 use Modules\Curriculum\Actions\Practice\SaveNodeItems;
 use Modules\Curriculum\Actions\Practice\SuggestNodeItems;
 use Modules\Curriculum\Actions\PublishVersion;
@@ -40,6 +45,7 @@ use Modules\Curriculum\Actions\SaveNode;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
 use Modules\Curriculum\Contracts\DTOs\TextSource;
+use Modules\Curriculum\Domain\Outline\OutlineRules;
 use Modules\Curriculum\Domain\PublishReadiness;
 use Modules\Curriculum\Domain\ReadinessItem;
 use Modules\Curriculum\Models\CurriculumVersion;
@@ -47,7 +53,12 @@ use Modules\Curriculum\Models\Node;
 use Modules\Curriculum\Models\NodeItem;
 use Modules\Curriculum\Models\NodeResource;
 use Modules\Curriculum\Models\Program;
+use Modules\Curriculum\Outline\OutlinePrompt;
+use Modules\Curriculum\Outline\OutlineSheet;
+use Modules\Curriculum\Outline\Templates;
+use Modules\Curriculum\Outline\TextOutline;
 use Modules\Curriculum\Queries\VersionReadiness;
+use Modules\Curriculum\Texts\QuranText;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
@@ -97,6 +108,9 @@ final class EditCurriculum extends Page
 
     /** @var array<string, string> what is typed in each quick-add field, by its parent's id ("root" for a new level) */
     public array $quick = [];
+
+    /** The outline being reviewed (Domain\Outline\OutlineRules rows), nothing saved yet. */
+    public array $outline = [];
 
     public function mount(int|string $record): void
     {
@@ -148,14 +162,214 @@ final class EditCurriculum extends Page
     }
 
     /**
-     * The quick ways to start an empty curriculum (an outline from the helper, a pasted list, a
-     * template, a copy of a program). None yet: the empty screen shows them once they exist.
+     * The quick ways to start an empty curriculum (docs/architecture/02, section 6): an outline from the
+     * helper, a pasted list or a sheet, a template, each shown for review before ApplyOutline saves it;
+     * or a copy of another program (CopyProgram), saved at once.
      *
      * @return list<Action>
      */
     public function startWays(): array
     {
-        return [];
+        if ($this->version()->status !== 'draft') {
+            return [];
+        }
+
+        return [$this->startAiAction, $this->startListAction, $this->startTemplateAction, $this->startCopyAction];
+    }
+
+    /** A title typed in the review: one written the same in both languages changes in both. */
+    public function updatingOutline(mixed $value, string $key): void
+    {
+        [$i, $field] = array_pad(explode('.', $key, 2), 2, null);
+        $other = ['title_ar' => 'title_en', 'title_en' => 'title_ar'][$field] ?? null;
+        if ($other !== null && isset($this->outline[$i]) && ($this->outline[$i][$other] ?? null) === ($this->outline[$i][$field] ?? null)) {
+            $this->outline[$i][$other] = $value;
+        }
+    }
+
+    /** Takes a row out of the review, with what is under it. */
+    public function dropOutlineRow(int $index): void
+    {
+        foreach (OutlineRules::branch(array_values($this->outline), $index) as $i) {
+            unset($this->outline[$i]);
+        }
+        $this->outline = array_values($this->outline);
+    }
+
+    /** Why the outline helper cannot run now, in the reader's words; null when it can. */
+    public function aiOff(): ?string
+    {
+        try {
+            app(AcademyAi::class)->require(AiFeature::CurriculumOutline);
+        } catch (AiFailed $e) {
+            return $e->reason === 'off' ? __('curriculum::outline.ai.off') : $e->sayable();
+        }
+
+        return null;
+    }
+
+    public function startAiAction(): Action
+    {
+        $o = 'curriculum::outline.';
+        $surahs = app(QuranText::class)->available();
+        $subject = (string) (app(CatalogApi::class)->subjectNames()[$this->record->subject_id] ?? '');
+
+        return $this->startWay('startAi', 'ai', Heroicon::OutlinedSparkles)
+            ->modalDescription(fn () => $this->aiOff() ?? __($o.'ai.description'))
+            ->modalSubmitActionLabel(__($o.'ai.go'))
+            ->modalSubmitAction(fn (Action $action) => $this->aiOff() === null ? $action : false)
+            ->schema(fn () => $this->aiOff() !== null ? [] : [
+                Textarea::make('goal')->label(__($o.'ai.fields.goal'))->helperText(__($o.'ai.fields.goal_hint'))
+                    ->placeholder(__($o.'ai.fields.goal_placeholder'))->rows(3)->required()->maxLength(SuggestOutline::GOAL_MAX),
+                Grid::make(2)->schema([
+                    Select::make('age')->label(__($o.'ai.fields.age'))->native(false)->default('any')->required()
+                        ->options(collect(OutlinePrompt::AGES)->mapWithKeys(fn ($a) => [$a => __($o.'ai.ages.'.$a)])->all()),
+                    TextInput::make('lessons')->label(__($o.'ai.fields.lessons'))->numeric()->required()
+                        ->minValue(1)->maxValue(OutlineRules::LESSONS_MAX)->default(24),
+                ]),
+                Toggle::make('quran')->label(__($o.'ai.fields.quran'))->helperText(__($o.'ai.fields.quran_hint'))
+                    ->visible($surahs)->default($surahs && preg_match('/قرآن|قران|quran|qur.an|حفظ|تحفيظ/iu', $subject) === 1),
+            ])
+            ->action(function (array $data, Action $action) use ($o) {
+                try {
+                    $result = app(SuggestOutline::class)->handle($this->record, $data, (string) auth()->id());
+                } catch (AiFailed $e) {
+                    Notification::make()->danger()->title($e->getMessage())->send();
+                    $action->halt();
+
+                    return;
+                }
+                if ($result['dropped'] > 0) {
+                    Notification::make()->warning()->title(trans_choice($o.'ai.dropped', $result['dropped'], ['count' => $result['dropped']]))->send();
+                }
+                $this->review($result['rows']);
+            });
+    }
+
+    public function startListAction(): Action
+    {
+        $o = 'curriculum::outline.list.';
+
+        return $this->startWay('startList', 'list', Heroicon::OutlinedClipboardDocumentList)
+            ->modalDescription(__($o.'description'))
+            ->modalWidth('2xl')
+            ->schema([
+                Textarea::make('text')->label(__($o.'text'))->rows(10)->placeholder(__($o.'text_placeholder'))
+                    ->extraInputAttributes(['dir' => 'auto'])->maxLength(60000),
+                FileUpload::make('sheet')->label(__($o.'sheet'))->helperText(__($o.'sheet_hint'))
+                    ->storeFiles(false)->acceptedFileTypes(OutlineSheet::TYPES)->maxSize(2048),
+                Actions::make([
+                    Action::make('outlineSheet')->label(__($o.'template'))->icon(Heroicon::OutlinedArrowDownTray)->link()
+                        ->action(fn () => response()->download(OutlineSheet::template(), 'curriculum-outline.xlsx')->deleteFileAfterSend()),
+                ]),
+            ])
+            ->action(function (array $data, Action $action) use ($o) {
+                $file = is_array($data['sheet'] ?? null) ? collect($data['sheet'])->first() : ($data['sheet'] ?? null);
+                $text = trim((string) ($data['text'] ?? ''));
+                if ($file === null && $text === '') {
+                    Notification::make()->danger()->title(__($o.'one'))->send();
+                    $action->halt();
+                }
+                if ($file !== null) {
+                    $cells = OutlineSheet::read((string) $file->getRealPath(), (string) $file->getClientOriginalName());
+                    if ($cells === null) {
+                        Notification::make()->danger()->title(__($o.'unreadable'))->send();
+                        $action->halt();
+                    }
+                    $rows = TextOutline::fromSheet((array) $cells, OutlineSheet::headers());
+                } else {
+                    $rows = TextOutline::parse($text, __($o.'first_level'));
+                }
+                $clean = OutlineRules::clean($rows);
+                if ($clean['rows'] === []) {
+                    Notification::make()->danger()->title(__($o.'nothing'))->send();
+                    $action->halt();
+                }
+                $this->review($clean['rows']);
+            });
+    }
+
+    public function startTemplateAction(): Action
+    {
+        $o = 'curriculum::outline.template.';
+        $templates = app(Templates::class);
+
+        return $this->startWay('startTemplate', 'template', Heroicon::OutlinedSquares2x2)
+            ->modalDescription(__($o.'description'))
+            ->schema([
+                Radio::make('template')->label(__($o.'field'))->required()
+                    ->options($templates->options())->descriptions($templates->hints()),
+            ])
+            ->action(fn (array $data) => $this->review(OutlineRules::clean($templates->rows((string) $data['template']))['rows']));
+    }
+
+    public function startCopyAction(): Action
+    {
+        $o = 'curriculum::outline.copy.';
+
+        return $this->startWay('startCopy', 'copy', Heroicon::OutlinedDocumentDuplicate)
+            ->modalDescription(__($o.'description'))
+            ->modalSubmitActionLabel(__($o.'go'))
+            ->schema([
+                Select::make('program')->label(__($o.'field'))->required()->native(false)->searchable()
+                    ->options(fn () => Program::query()->whereKeyNot($this->record->id)->orderBy('name_ar')->get()
+                        ->mapWithKeys(fn (Program $p) => [$p->id => $p->name()])->all()),
+            ])
+            ->action(function (array $data) use ($o) {
+                app(CopyProgram::class)->into((string) $data['program'], $this->record, (string) auth()->id());
+                $this->forget();
+                $counts = OutlineRules::counts(array_map(fn ($n) => ['kind' => $n->kind], $this->tree->nodes));
+                Notification::make()->success()->title(__($o.'done', $counts))->send();
+            });
+    }
+
+    /** One of the start ways, as a card on the empty screen. */
+    private function startWay(string $name, string $way, Heroicon $icon): Action
+    {
+        $o = 'curriculum::outline.ways.'.$way.'.';
+
+        return Action::make($name)
+            ->label(__($o.'label'))
+            ->icon($icon)
+            ->color('gray')
+            ->outlined()
+            ->extraAttributes(['class' => 'cb-way', 'title' => __($o.'hint')])
+            ->modalHeading(__('curriculum::outline.'.$way.'.heading'))
+            ->visible(fn () => $this->version()->status === 'draft' && $this->tree->nodes === []);
+    }
+
+    /** Opens the review of an outline instead of the way that made it. */
+    private function review(array $rows): void
+    {
+        $this->outline = array_values($rows);
+        $this->replaceMountedAction('reviewOutline');
+    }
+
+    /**
+     * The outline as an editable tree: titles to rename, rows to untick or take out; saved to the draft by
+     * ApplyOutline, which refuses past the limits.
+     */
+    public function reviewOutlineAction(): Action
+    {
+        $o = 'curriculum::outline.review.';
+
+        return Action::make('reviewOutline')
+            ->modalHeading(__($o.'heading'))
+            ->modalDescription(__($o.'description'))
+            ->modalWidth('4xl')
+            ->modalSubmitActionLabel(__($o.'save'))
+            ->modalContent(fn () => view('curriculum::filament.outline-review', [
+                'rows' => $this->outline,
+                'counting' => OutlineRules::counting($this->outline),
+                'counts' => OutlineRules::counts(OutlineRules::selected($this->outline)),
+                'field' => app()->getLocale() === 'ar' ? 'title_ar' : 'title_en',
+            ]))
+            ->action(function () use ($o) {
+                $counts = app(ApplyOutline::class)->handle($this->version(), $this->outline);
+                $this->outline = [];
+                $this->forget();
+                Notification::make()->success()->title(__($o.'saved', $counts))->send();
+            });
     }
 
     /** What a quick-add field under $parent adds: a level at the top, a unit in a level that has units, else a lesson. */

@@ -7,6 +7,7 @@ return [
         'report_draft' => 'Lesson report from a voice note',
         'recitation_check' => 'Recitation check',
         'digest_wording' => 'Wording of the weekly note to guardians',
+        'curriculum_outline' => 'Curriculum outline',
     ],
     'failed' => [
         'off' => 'This helper is off at the academy.',

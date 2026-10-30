@@ -15,6 +15,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property bool $report_draft
  * @property bool $recitation_check
  * @property bool $digest_wording
+ * @property bool $curriculum_outline
  * @property ?string $updated_by
  */
 final class AiSettings extends Model
@@ -31,11 +32,11 @@ final class AiSettings extends Model
 
     protected $guarded = [];
 
-    protected $attributes = ['practice_items' => false, 'report_draft' => false, 'recitation_check' => false, 'digest_wording' => false];
+    protected $attributes = ['practice_items' => false, 'report_draft' => false, 'recitation_check' => false, 'digest_wording' => false, 'curriculum_outline' => false];
 
     protected function casts(): array
     {
-        return ['practice_items' => 'boolean', 'report_draft' => 'boolean', 'recitation_check' => 'boolean', 'digest_wording' => 'boolean'];
+        return ['practice_items' => 'boolean', 'report_draft' => 'boolean', 'recitation_check' => 'boolean', 'digest_wording' => 'boolean', 'curriculum_outline' => 'boolean'];
     }
 
     public static function current(): self

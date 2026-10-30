@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Modules\Catalog\Contracts\CatalogApi;
+use Modules\Curriculum\Actions\Outline\CopyProgram;
 use Modules\Curriculum\Actions\SaveProgram;
 use Modules\Curriculum\Models\Program;
 use Modules\SharedKernel\Authorization\Ability;
@@ -105,6 +107,24 @@ final class ProgramResource extends Resource
                 Action::make('content')->label(__('curriculum::curriculum.open_builder'))->icon(Heroicon::OutlinedListBullet)
                     ->url(fn (Program $p) => EditCurriculum::getUrl(['record' => $p])),
                 EditAction::make()->using(fn (Model $record, array $data) => app(SaveProgram::class)->handle($record, $data)),
+                // A new program with a draft copied from this one (CopyProgram): the same files, never a second copy of them.
+                Action::make('copy')->label(__('curriculum::outline.copy.action'))->icon(Heroicon::OutlinedDocumentDuplicate)->color('gray')
+                    ->modalHeading(__('curriculum::outline.copy.heading'))
+                    ->modalDescription(__('curriculum::outline.copy.description'))
+                    ->fillForm(fn (Program $p) => [
+                        'name_ar' => __('curriculum::outline.copy.name_ar', ['name' => $p->name_ar]),
+                        'name_en' => __('curriculum::outline.copy.name_en', ['name' => $p->name_en]),
+                    ])
+                    ->schema([Grid::make(2)->schema([
+                        TextInput::make('name_ar')->label(__('curriculum::curriculum.fields.name_ar'))->required()->maxLength(120),
+                        TextInput::make('name_en')->label(__('curriculum::curriculum.fields.name_en'))->required()->maxLength(120),
+                    ])])
+                    ->action(function (Program $p, array $data) {
+                        $copy = app(CopyProgram::class)->handle($p->id, $data, (string) auth()->id());
+                        Notification::make()->success()->title(__('curriculum::outline.copy.copied'))->send();
+
+                        return redirect(EditCurriculum::getUrl(['record' => $copy]));
+                    }),
             ]);
     }
 

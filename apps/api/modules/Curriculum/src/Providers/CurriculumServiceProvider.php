@@ -46,8 +46,9 @@ final class CurriculumServiceProvider extends ServiceProvider
         // The new academy's checklist (optional): a published curriculum.
         $this->app->make(SetupChecklist::class)->add(ProgramStep::class);
 
-        // The plan's storage counts the files on lessons.
-        $this->app->make(UsageMeters::class)->add(Limit::StorageMb, fn () => (int) DB::table('node_resources')->sum('size'));
+        // The plan's storage counts the files on lessons, each once (a copied program's lessons share the file).
+        $this->app->make(UsageMeters::class)->add(Limit::StorageMb, fn () => (int) DB::query()
+            ->fromSub(DB::table('node_resources')->whereNotNull('file_path')->select('file_path', 'size')->distinct(), 'files')->sum('size'));
 
         // Staff who build the curriculum open a lesson's file from the builder; everyone else gets a signed link from Learning.
         Route::middleware(['web', 'tenant', 'auth'])->get('curriculum/resources/{resource}', ResourcePreviewController::class)->name('curriculum.resource');

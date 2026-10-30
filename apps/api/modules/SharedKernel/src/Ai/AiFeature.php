@@ -13,6 +13,7 @@ enum AiFeature: string
     case ReportDraft = 'report_draft';
     case RecitationCheck = 'recitation_check';
     case DigestWording = 'digest_wording';
+    case CurriculumOutline = 'curriculum_outline';
 
     /** It writes words through the language model (Claude). */
     public function needsLanguage(): bool

@@ -34,6 +34,10 @@ return [
                 'what' => 'The weekly note to guardians is written warmly from the week\'s facts, instead of the fixed list.',
                 'data' => 'Sent to :provider: the week\'s numbers, lesson titles and the teacher\'s notes for the student, with the child written as "the child", no name. No internal notes.',
             ],
+            'curriculum_outline' => [
+                'what' => 'In the curriculum builder: an outline of levels, units and lessons from the goal you type, which you review and edit before it is saved.',
+                'data' => 'Sent to :provider: the subject and its levels, the age group, the number of lessons and the goal you type. No one\'s name or details. For the Quran, lessons are surah and verse numbers only.',
+            ],
         ],
     ],
     // What the demo driver "hears" (AI_DRIVER=demo, never in production).
@@ -43,6 +47,7 @@ return [
             'report_draft' => 'We finished An-Nasr and he knew it well, we reviewed Al-Kafirun and he needed focus. Homework: recite An-Nasr three times. Great engagement.',
             'recitation_check' => 'بسم الله الرحمن الرحيم إذا جاء نصر الله والفتح ورأيت الناس يدخلون في دين الله أفواجا فسبح بحمد ربك واستغفره إنه كان توابا',
             'digest_wording' => 'A demo week',
+            'curriculum_outline' => 'A demo outline',
         ],
     ],
 ];

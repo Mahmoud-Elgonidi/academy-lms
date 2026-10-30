@@ -116,7 +116,12 @@
         .cb-empty p { color: var(--gray-600); font-size: .9rem; max-width: 34rem; }
         .cb-empty .cb-quick { width: 100%; max-width: 28rem; padding: 0; }
         .cb-ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .6rem; width: 100%; max-width: 40rem; }
+        .cb-way-card { display: flex; flex-direction: column; align-items: stretch; gap: .35rem; padding: .6rem; border-radius: var(--radius-xl); border: 1px solid var(--gray-200); background: var(--gray-50); }
+        .cb-way-card .fi-btn { width: 100%; justify-content: center; }
+        .cb-way-card small { color: var(--gray-500); font-size: .75rem; line-height: 1.35; }
+        .cb-ways + .cb-quick, .cb-ways ~ .cb-quick { margin-top: .5rem; }
 
+        .dark .cb-way-card { background: var(--gray-800); border-color: var(--gray-700); }
         .dark .cb-ready, .dark .cb-level, .dark .cb-empty, .dark .cb-root-quick { background: var(--gray-900); border-color: var(--gray-800); }
         .dark .cb-ready-meter { background: var(--gray-800); }
         .dark .cb-ready li a:hover { background: var(--gray-800); }
@@ -203,7 +208,9 @@
                 @if ($this->startWays() !== [])
                     <div class="cb-ways lms-stagger">
                         @foreach ($this->startWays() as $way)
-                            <div class="lms-lift">{{ $way }}</div>
+                            @if ($way->isVisible())
+                                <div class="cb-way-card lms-lift">{{ $way }}<small>{{ $way->getExtraAttributes()['title'] ?? '' }}</small></div>
+                            @endif
                         @endforeach
                     </div>
                 @endif
