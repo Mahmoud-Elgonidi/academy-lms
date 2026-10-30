@@ -2723,9 +2723,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proposeHours => 'Propose new hours';
 
   @override
-  String get yourProposal => 'Your proposal';
-
-  @override
   String startsOn(String date) {
     return 'Starts $date';
   }
@@ -2799,17 +2796,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get untilMidnight => 'Until midnight';
 
   @override
-  String upcomingTitle(String date) {
-    return 'A new schedule starts $date';
-  }
-
-  @override
   String get upcomingNote => 'The academy approved it; your current schedule stays until that day.';
-
-  @override
-  String hoursChange(String before, String after) {
-    return 'From $before to $after a week';
-  }
 
   @override
   String hoursSame(String h) {
@@ -2850,9 +2837,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stageChanges => 'The academy asked for changes. Read the conversation, then edit and send.';
 
   @override
-  String get stageApproved => 'Your proposal was approved.';
-
-  @override
   String get stageRejected => 'The academy did not approve your proposal; your schedule stays as it is.';
 
   @override
@@ -2887,12 +2871,79 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proposalSentEvent => 'Proposal sent';
 
   @override
-  String get earlierProposals => 'Earlier';
-
-  @override
   String askedToStart(String date) {
     return 'Asked to start $date';
   }
+
+  @override
+  String get heroDraftTitle => 'A draft not sent yet';
+
+  @override
+  String get heroReviewTitle => 'Waiting for the academy';
+
+  @override
+  String get heroChangesTitle => 'The academy asked for changes';
+
+  @override
+  String get heroCounterTitle => 'An offer from the academy';
+
+  @override
+  String get continueAndSend => 'Continue and send';
+
+  @override
+  String get proposalDays => 'What your proposal changes';
+
+  @override
+  String upcomingHeroTitle(String date) {
+    return 'Your new schedule starts $date';
+  }
+
+  @override
+  String startsInDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: 'in $n days', one: 'tomorrow', zero: 'today');
+    return '$_temp0';
+  }
+
+  @override
+  String get upcomingApproved => 'The academy approved it.';
+
+  @override
+  String get rejectedHeroTitle => 'Your hours were not approved';
+
+  @override
+  String get weekNow => 'Now';
+
+  @override
+  String weekFrom(String date) {
+    return 'From $date';
+  }
+
+  @override
+  String noHoursBefore(String date) {
+    return 'No hours before $date';
+  }
+
+  @override
+  String get proposeChange => 'Propose a change';
+
+  @override
+  String builtOnUpcoming(String date) {
+    return 'Built on your schedule from $date';
+  }
+
+  @override
+  String historyCount(int n) {
+    return 'History ($n)';
+  }
+
+  @override
+  String get supersededLabel => 'Replaced by a newer proposal';
+
+  @override
+  String get dayNew => 'New';
+
+  @override
+  String get dayChanged => 'Changed';
 
   @override
   String get inboxTitle => 'Notifications';

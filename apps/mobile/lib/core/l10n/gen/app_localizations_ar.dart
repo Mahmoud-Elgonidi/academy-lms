@@ -2878,9 +2878,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get proposeHours => 'اقترح مواعيد جديدة';
 
   @override
-  String get yourProposal => 'مقترحك';
-
-  @override
   String startsOn(String date) {
     return 'يبدأ $date';
   }
@@ -2954,17 +2951,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get untilMidnight => 'حتى منتصف الليل';
 
   @override
-  String upcomingTitle(String date) {
-    return 'جدول جديد يبدأ $date';
-  }
-
-  @override
   String get upcomingNote => 'اعتمدته الأكاديمية، ويبقى جدولك الحالي حتى ذلك اليوم.';
-
-  @override
-  String hoursChange(String before, String after) {
-    return 'من $before إلى $after في الأسبوع';
-  }
 
   @override
   String hoursSame(String h) {
@@ -3005,9 +2992,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get stageChanges => 'طلبت الأكاديمية تعديلًا. اقرأ المحادثة، ثم عدّل المقترح وأرسله.';
 
   @override
-  String get stageApproved => 'اعتُمد مقترحك.';
-
-  @override
   String get stageRejected => 'لم تعتمد الأكاديمية مقترحك، ويبقى جدولك كما هو.';
 
   @override
@@ -3042,12 +3026,87 @@ class AppLocalizationsAr extends AppLocalizations {
   String get proposalSentEvent => 'أُرسل المقترح';
 
   @override
-  String get earlierProposals => 'السابقة';
-
-  @override
   String askedToStart(String date) {
     return 'طُلب أن يبدأ $date';
   }
+
+  @override
+  String get heroDraftTitle => 'مسودة لم تُرسل بعد';
+
+  @override
+  String get heroReviewTitle => 'في انتظار الأكاديمية';
+
+  @override
+  String get heroChangesTitle => 'طلبت الأكاديمية تعديلًا';
+
+  @override
+  String get heroCounterTitle => 'عرض من الأكاديمية';
+
+  @override
+  String get continueAndSend => 'أكمل وأرسل';
+
+  @override
+  String get proposalDays => 'ما يتغيّر في مقترحك';
+
+  @override
+  String upcomingHeroTitle(String date) {
+    return 'جدولك الجديد يبدأ $date';
+  }
+
+  @override
+  String startsInDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'بعد $n يومًا',
+      few: 'بعد $n أيام',
+      two: 'بعد يومين',
+      one: 'غدًا',
+      zero: 'اليوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get upcomingApproved => 'اعتمدته الأكاديمية.';
+
+  @override
+  String get rejectedHeroTitle => 'لم تُعتمد مواعيدك';
+
+  @override
+  String get weekNow => 'الآن';
+
+  @override
+  String weekFrom(String date) {
+    return 'من $date';
+  }
+
+  @override
+  String noHoursBefore(String date) {
+    return 'لا مواعيد قبل $date';
+  }
+
+  @override
+  String get proposeChange => 'اقترح تغييرًا';
+
+  @override
+  String builtOnUpcoming(String date) {
+    return 'سيُبنى على جدولك من $date';
+  }
+
+  @override
+  String historyCount(int n) {
+    return 'السجل ($n)';
+  }
+
+  @override
+  String get supersededLabel => 'حلّ محلّه مقترح أحدث';
+
+  @override
+  String get dayNew => 'جديد';
+
+  @override
+  String get dayChanged => 'تغيّر';
 
   @override
   String get inboxTitle => 'الإشعارات';

@@ -228,7 +228,8 @@ void main() {
     expect(find.text('اعتُمدت مواعيدك.'), findsOneWidget);
 
     // No open proposal now: propose again from the week in force, without Thursday.
-    await tester.tap(find.text('اقترح مواعيد جديدة'));
+    expect(find.byKey(const Key('shifts-proposal')), findsNothing);
+    await tester.tap(find.text('اقترح تغييرًا'));
     await frames(tester, 10);
     expect(find.text('عدّل مواعيدك'), findsOneWidget);
     await tester.tap(find.byTooltip('أزل').last);

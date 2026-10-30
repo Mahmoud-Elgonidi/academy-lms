@@ -1936,7 +1936,6 @@
   "currentWeek": "جدولك الحالي",
   "noHoursYet": "لا توجد مواعيد معتمدة بعد.",
   "proposeHours": "اقترح مواعيد جديدة",
-  "yourProposal": "مقترحك",
   "startsOn": "يبدأ {date}",
   "@startsOn": {
     "placeholders": {
@@ -1974,26 +1973,7 @@
   "sendProposal": "أرسل إلى الأكاديمية",
   "endAfterStart": "يجب أن يكون وقت النهاية بعد البداية.",
   "untilMidnight": "حتى منتصف الليل",
-  "upcomingTitle": "جدول جديد يبدأ {date}",
-  "@upcomingTitle": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "upcomingNote": "اعتمدته الأكاديمية، ويبقى جدولك الحالي حتى ذلك اليوم.",
-  "hoursChange": "من {before} إلى {after} في الأسبوع",
-  "@hoursChange": {
-    "placeholders": {
-      "before": {
-        "type": "String"
-      },
-      "after": {
-        "type": "String"
-      }
-    }
-  },
   "hoursSame": "{h} في الأسبوع كما هي، بأوقات أخرى",
   "@hoursSame": {
     "placeholders": {
@@ -2013,7 +1993,6 @@
   "stageDraft": "المسودة محفوظة على حسابك ولم تُرسل بعد.",
   "stageReview": "وصل مقترحك إلى الأكاديمية، وسنخبرك حين ترد.",
   "stageChanges": "طلبت الأكاديمية تعديلًا. اقرأ المحادثة، ثم عدّل المقترح وأرسله.",
-  "stageApproved": "اعتُمد مقترحك.",
   "stageRejected": "لم تعتمد الأكاديمية مقترحك، ويبقى جدولك كما هو.",
   "reasonLine": "السبب: {reason}",
   "@reasonLine": {
@@ -2038,7 +2017,6 @@
   "conversationEmpty": "لا رسائل بعد. اكتب للأكاديمية، وسيصلك ردها هنا.",
   "conversationClosed": "لا يوجد مقترح مفتوح الآن، فلا يمكن الكتابة هنا.",
   "proposalSentEvent": "أُرسل المقترح",
-  "earlierProposals": "السابقة",
   "askedToStart": "طُلب أن يبدأ {date}",
   "@askedToStart": {
     "placeholders": {
@@ -2047,6 +2025,67 @@
       }
     }
   },
+  "heroDraftTitle": "مسودة لم تُرسل بعد",
+  "heroReviewTitle": "في انتظار الأكاديمية",
+  "heroChangesTitle": "طلبت الأكاديمية تعديلًا",
+  "heroCounterTitle": "عرض من الأكاديمية",
+  "continueAndSend": "أكمل وأرسل",
+  "proposalDays": "ما يتغيّر في مقترحك",
+  "upcomingHeroTitle": "جدولك الجديد يبدأ {date}",
+  "@upcomingHeroTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "startsInDays": "{n, plural, =0{اليوم} =1{غدًا} =2{بعد يومين} few{بعد {n} أيام} other{بعد {n} يومًا}}",
+  "@startsInDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "upcomingApproved": "اعتمدته الأكاديمية.",
+  "rejectedHeroTitle": "لم تُعتمد مواعيدك",
+  "weekNow": "الآن",
+  "weekFrom": "من {date}",
+  "@weekFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noHoursBefore": "لا مواعيد قبل {date}",
+  "@noHoursBefore": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "proposeChange": "اقترح تغييرًا",
+  "builtOnUpcoming": "سيُبنى على جدولك من {date}",
+  "@builtOnUpcoming": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "historyCount": "السجل ({n})",
+  "@historyCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "supersededLabel": "حلّ محلّه مقترح أحدث",
+  "dayNew": "جديد",
+  "dayChanged": "تغيّر",
   "inboxTitle": "الإشعارات",
   "markAllRead": "علّم الكل كمقروء",
   "noNotifications": "لا توجد إشعارات.",

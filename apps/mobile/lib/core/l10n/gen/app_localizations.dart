@@ -4724,12 +4724,6 @@ abstract class AppLocalizations {
   /// **'اقترح مواعيد جديدة'**
   String get proposeHours;
 
-  /// No description provided for @yourProposal.
-  ///
-  /// In ar, this message translates to:
-  /// **'مقترحك'**
-  String get yourProposal;
-
   /// No description provided for @startsOn.
   ///
   /// In ar, this message translates to:
@@ -4868,23 +4862,11 @@ abstract class AppLocalizations {
   /// **'حتى منتصف الليل'**
   String get untilMidnight;
 
-  /// No description provided for @upcomingTitle.
-  ///
-  /// In ar, this message translates to:
-  /// **'جدول جديد يبدأ {date}'**
-  String upcomingTitle(String date);
-
   /// No description provided for @upcomingNote.
   ///
   /// In ar, this message translates to:
   /// **'اعتمدته الأكاديمية، ويبقى جدولك الحالي حتى ذلك اليوم.'**
   String get upcomingNote;
-
-  /// No description provided for @hoursChange.
-  ///
-  /// In ar, this message translates to:
-  /// **'من {before} إلى {after} في الأسبوع'**
-  String hoursChange(String before, String after);
 
   /// No description provided for @hoursSame.
   ///
@@ -4958,12 +4940,6 @@ abstract class AppLocalizations {
   /// **'طلبت الأكاديمية تعديلًا. اقرأ المحادثة، ثم عدّل المقترح وأرسله.'**
   String get stageChanges;
 
-  /// No description provided for @stageApproved.
-  ///
-  /// In ar, this message translates to:
-  /// **'اعتُمد مقترحك.'**
-  String get stageApproved;
-
   /// No description provided for @stageRejected.
   ///
   /// In ar, this message translates to:
@@ -5024,17 +5000,125 @@ abstract class AppLocalizations {
   /// **'أُرسل المقترح'**
   String get proposalSentEvent;
 
-  /// No description provided for @earlierProposals.
-  ///
-  /// In ar, this message translates to:
-  /// **'السابقة'**
-  String get earlierProposals;
-
   /// No description provided for @askedToStart.
   ///
   /// In ar, this message translates to:
   /// **'طُلب أن يبدأ {date}'**
   String askedToStart(String date);
+
+  /// No description provided for @heroDraftTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسودة لم تُرسل بعد'**
+  String get heroDraftTitle;
+
+  /// No description provided for @heroReviewTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'في انتظار الأكاديمية'**
+  String get heroReviewTitle;
+
+  /// No description provided for @heroChangesTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلبت الأكاديمية تعديلًا'**
+  String get heroChangesTitle;
+
+  /// No description provided for @heroCounterTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'عرض من الأكاديمية'**
+  String get heroCounterTitle;
+
+  /// No description provided for @continueAndSend.
+  ///
+  /// In ar, this message translates to:
+  /// **'أكمل وأرسل'**
+  String get continueAndSend;
+
+  /// No description provided for @proposalDays.
+  ///
+  /// In ar, this message translates to:
+  /// **'ما يتغيّر في مقترحك'**
+  String get proposalDays;
+
+  /// No description provided for @upcomingHeroTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'جدولك الجديد يبدأ {date}'**
+  String upcomingHeroTitle(String date);
+
+  /// No description provided for @startsInDays.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{اليوم} =1{غدًا} =2{بعد يومين} few{بعد {n} أيام} other{بعد {n} يومًا}}'**
+  String startsInDays(int n);
+
+  /// No description provided for @upcomingApproved.
+  ///
+  /// In ar, this message translates to:
+  /// **'اعتمدته الأكاديمية.'**
+  String get upcomingApproved;
+
+  /// No description provided for @rejectedHeroTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم تُعتمد مواعيدك'**
+  String get rejectedHeroTitle;
+
+  /// No description provided for @weekNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'الآن'**
+  String get weekNow;
+
+  /// No description provided for @weekFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'من {date}'**
+  String weekFrom(String date);
+
+  /// No description provided for @noHoursBefore.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا مواعيد قبل {date}'**
+  String noHoursBefore(String date);
+
+  /// No description provided for @proposeChange.
+  ///
+  /// In ar, this message translates to:
+  /// **'اقترح تغييرًا'**
+  String get proposeChange;
+
+  /// No description provided for @builtOnUpcoming.
+  ///
+  /// In ar, this message translates to:
+  /// **'سيُبنى على جدولك من {date}'**
+  String builtOnUpcoming(String date);
+
+  /// No description provided for @historyCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'السجل ({n})'**
+  String historyCount(int n);
+
+  /// No description provided for @supersededLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'حلّ محلّه مقترح أحدث'**
+  String get supersededLabel;
+
+  /// No description provided for @dayNew.
+  ///
+  /// In ar, this message translates to:
+  /// **'جديد'**
+  String get dayNew;
+
+  /// No description provided for @dayChanged.
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيّر'**
+  String get dayChanged;
 
   /// No description provided for @inboxTitle.
   ///
