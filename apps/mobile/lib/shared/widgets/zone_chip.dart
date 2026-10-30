@@ -80,7 +80,9 @@ class ZoneFacts {
 /// its time, ticking on the minute (the phone's clock; nothing asked of the
 /// server). It comes in softly and beats each minute; a dot says the phone's
 /// zone is not the account's. A tap opens the zone card. Not in the kids'
-/// look, and not before the profile has loaded.
+/// look, not before the profile has loaded, and not while the person hid it
+/// (`zone_chip`, from its card; back from the account's settings): it
+/// shrinks away as it goes and comes back the same way.
 class ZoneChip extends StatelessWidget {
   const ZoneChip({super.key});
 
@@ -96,10 +98,23 @@ class ZoneChip extends StatelessWidget {
     if (state.stage == Stage.kids) return const SizedBox.shrink();
     final facts = ZoneFacts.of(state, context.locale);
     if (facts == null) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(end: Space.s),
-      child: MinuteTick(builder: (context) => _Pill(facts: facts)),
-    ).appear(context, 1);
+    final wanted = state.me!.zoneChip;
+    return AnimatedSwitcher(
+      duration: context.calm ? Duration.zero : const Duration(milliseconds: 240),
+      switchInCurve: Curves.easeOutBack,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, t) => FadeTransition(
+        opacity: t,
+        child: ScaleTransition(scale: Tween<double>(begin: 0.8, end: 1).animate(t), child: child),
+      ),
+      child: wanted
+          ? Padding(
+              key: const ValueKey('zone-chip-on'),
+              padding: const EdgeInsetsDirectional.only(end: Space.s),
+              child: MinuteTick(builder: (context) => _Pill(facts: facts)),
+            ).appear(context, 1)
+          : const SizedBox.shrink(key: ValueKey('zone-chip-off')),
+    );
   }
 }
 
@@ -250,6 +265,26 @@ class _ZoneSheetState extends State<ZoneSheet> {
     }
   });
 
+  /// "Hide this": the card closes, the chip shrinks away, and the account
+  /// keeps the choice; a note says where it comes back.
+  Future<void> _hide() async {
+    final session = context.read<SessionCubit>();
+    final messenger = ScaffoldMessenger.of(context);
+    final l = context.l10n;
+    final problem = context.problemText;
+    Navigator.of(context).pop();
+    try {
+      await session.setZoneChip(false);
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l.zoneHidden)));
+    } on ApiProblem catch (p) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(problem(p))));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -295,6 +330,16 @@ class _ZoneSheetState extends State<ZoneSheet> {
               icon: const Icon(Icons.travel_explore_rounded, size: 18),
               label: Text(l.zoneChange),
             ),
+            if (state.me?.zoneChip ?? false) ...[
+              const SizedBox(height: Space.xs),
+              TextButton.icon(
+                key: const Key('zone-hide'),
+                onPressed: _busy ? null : _hide,
+                style: TextButton.styleFrom(foregroundColor: context.colors.muted),
+                icon: const Icon(Icons.visibility_off_outlined, size: 18),
+                label: Text(l.zoneHide),
+              ),
+            ],
           ]),
         ),
       ),

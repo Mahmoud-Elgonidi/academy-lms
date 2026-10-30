@@ -145,6 +145,7 @@ class SessionState extends Equatable {
     me?.academyTimezoneLabel,
     me?.timeFormatChoice,
     me?.academyTimeFormat,
+    me?.zoneChip,
     notice,
     notAdded,
     greeting,
@@ -313,6 +314,23 @@ class SessionCubit extends Cubit<SessionState> {
       if (state.current?.id == account.id) _set(state.copyWith(me: () => saved, timeFormat: saved.timeFormat));
     } on Exception {
       if (state.current?.id == account.id) _set(state.copyWith(me: () => me, timeFormat: before));
+      rethrow;
+    }
+  }
+
+  /// Shows or hides the zone chip in the headers: at once here, kept by the
+  /// API (so the web and the panels follow); back as it was when the API
+  /// refuses, whose problem is thrown for the screen to say.
+  Future<void> setZoneChip(bool shown) async {
+    final account = state.current;
+    final me = state.me;
+    if (account == null || me == null || me.zoneChip == shown) return;
+    _set(state.copyWith(me: () => me.showingZoneChip(shown)));
+    try {
+      final saved = await _repo.updateMe(zoneChip: shown);
+      if (saved != null && state.current?.id == account.id) _set(state.copyWith(me: () => saved));
+    } on Exception {
+      if (state.current?.id == account.id) _set(state.copyWith(me: () => state.me?.showingZoneChip(me.zoneChip)));
       rethrow;
     }
   }

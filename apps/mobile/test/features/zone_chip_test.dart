@@ -9,7 +9,7 @@ import '../helpers.dart';
 import 'sign_in_flow_test.dart' show frames;
 
 /// The profile as `GET me` gives it, on [zone] (the phone is on Riyadh in tests).
-Map<String, Object?> _me({String zone = 'Africa/Cairo', String? shown, bool mismatch = false}) {
+Map<String, Object?> _me({String zone = 'Africa/Cairo', String? shown, bool mismatch = false, bool chip = true}) {
   const labels = {'Africa/Cairo': 'القاهرة (UTC+2)', 'Asia/Riyadh': 'الرياض (UTC+3)', 'Asia/Dubai': 'دبي (UTC+4)'};
   final display = shown ?? zone;
   return {
@@ -17,6 +17,7 @@ Map<String, Object?> _me({String zone = 'Africa/Cairo', String? shown, bool mism
     'timezone': zone,
     'display_timezone': display,
     'timezone_label': labels[display],
+    'zone_chip': chip,
     'academy': {
       'id': 'a1',
       'slug': 'demo',
@@ -51,19 +52,22 @@ Future<TestApp> _open(
   final app = await TestApp.create(accounts: [guardian]);
   familyRoutes(app.api);
   var profile = zone;
+  var chip = true;
   var first = true;
   app.api
     ..onWith('GET', 'me', (r) {
       final asked = r.headers['X-Timezone'] as String? ?? profile;
       final answer = first
-          ? _me(zone: profile, shown: shown, mismatch: mismatch)
-          : _me(zone: profile, shown: asked, mismatch: asked != profile);
+          ? _me(zone: profile, shown: shown, mismatch: mismatch, chip: chip)
+          : _me(zone: profile, shown: asked, mismatch: asked != profile, chip: chip);
       first = false;
       return (200, {'data': answer});
     })
     ..onWith('PATCH', 'me', (r) {
-      profile = (r.data as Map<String, dynamic>)['timezone'] as String? ?? profile;
-      return (200, {'data': _me(zone: profile)});
+      final sent = r.data as Map<String, dynamic>;
+      profile = sent['timezone'] as String? ?? profile;
+      chip = sent['zone_chip'] as bool? ?? chip;
+      return (200, {'data': _me(zone: profile, chip: chip)});
     })
     ..on('GET', 'timezones', _zones);
   await app.session.start();
@@ -196,6 +200,36 @@ void main() {
     await frames(tester, 10);
     expect(app.api.sent('PATCH', 'me').single.data, {'timezone': 'Africa/Cairo'});
     expect(find.descendant(of: row, matching: find.text('القاهرة (UTC+2)')), findsOneWidget);
+    await _close(tester);
+  });
+
+  testWidgets('"Hide this" hides the chip on the account, and settings bring it back', (tester) async {
+    final app = await _open(tester, zone: 'Asia/Riyadh');
+
+    await tester.tap(find.byKey(const Key('zone-chip')).first);
+    await frames(tester, 8);
+    expect(find.text('أخفِ المؤشّر'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('zone-hide')));
+    await frames(tester, 10);
+
+    expect(app.api.sent('PATCH', 'me').single.data, {'zone_chip': false});
+    expect(app.session.state.me?.zoneChip, isFalse);
+    expect(find.byKey(const Key('zone-chip')), findsNothing);
+    expect(find.text('أخفيت مؤشّر التوقيت. يمكنك إظهاره من الحساب والإعدادات.'), findsOneWidget);
+
+    GoRouter.of(tester.element(find.byType(Scaffold).first)).go('/family/me/settings');
+    await frames(tester, 12);
+    final toggle = find.byKey(const Key('zone-chip-switch'));
+    expect(find.text('إظهار مؤشّر التوقيت'), findsOneWidget);
+    expect(tester.widget<Switch>(toggle).value, isFalse);
+    await tester.tap(toggle);
+    await frames(tester, 10);
+    expect(app.api.sent('PATCH', 'me').last.data, {'zone_chip': true});
+    expect(app.session.state.me?.zoneChip, isTrue);
+
+    GoRouter.of(tester.element(find.byType(Scaffold).first)).go('/family/lessons');
+    await frames(tester, 12);
+    expect(find.byKey(const Key('zone-chip')), findsWidgets);
     await _close(tester);
   });
 }

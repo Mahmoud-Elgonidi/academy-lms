@@ -1684,6 +1684,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get zoneCurrent => 'Current';
 
   @override
+  String get zoneHide => 'Hide this';
+
+  @override
+  String get zoneHidden => 'The time-zone chip is hidden. You can show it again from Account and settings.';
+
+  @override
+  String get zoneChipShow => 'Show the time-zone chip';
+
+  @override
+  String get zoneChipShowHint =>
+      'Your city and its time at the top of the screens, where you change your zone. Your choice applies here and on the web.';
+
+  @override
   String get timeFormat => 'How times are written';
 
   @override

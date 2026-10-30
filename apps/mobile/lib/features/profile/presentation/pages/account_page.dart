@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/areas.dart';
 import '../../../../app/theme/app_theme.dart';
+import '../../../../app/theme/stage.dart';
 import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/auth/session_repository.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -348,6 +349,8 @@ class _Settings extends StatelessWidget {
           ),
           const Divider(height: 22),
           const _ZoneSetting(),
+          // The kids' look has no zone chip, so nothing to show or hide.
+          if (s.me case final me? when !context.isKids && s.stage != Stage.kids) ...[const Divider(height: 22), _ZoneChipSwitch(me: me)],
           // Once the profile says what the academy's way is.
           if (s.me case final me?) ...[const Divider(height: 22), _TimeFormatChoice(me: me)],
           const SizedBox(height: 6),
@@ -399,6 +402,42 @@ class _ZoneSetting extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Whether the zone chip shows in the headers (as "مؤشّر التوقيت" on My
+/// settings in the panels and the portal's account page): switched here at
+/// once and kept by the API, so the web and the panels follow.
+class _ZoneChipSwitch extends StatelessWidget {
+  const _ZoneChipSwitch({required this.me});
+
+  final Me me;
+
+  Future<void> _set(BuildContext context, bool on) async {
+    try {
+      await context.read<SessionCubit>().setZoneChip(on);
+    } on ApiProblem catch (p) {
+      if (context.mounted) showSnack(context, context.problemText(p));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.zoneChipShow, style: context.text.titleSmall),
+              Text(l.zoneChipShowHint, style: context.text.bodySmall),
+            ],
+          ),
+        ),
+        Switch.adaptive(key: const Key('zone-chip-switch'), value: me.zoneChip, onChanged: (on) => _set(context, on)),
+      ],
     );
   }
 }

@@ -15,6 +15,7 @@ class Me {
     this.timeFormat = TimeFormat.h12,
     this.timeFormatChoice,
     this.academyTimeFormat = TimeFormat.h12,
+    this.zoneChip = true,
   });
 
   factory Me.fromJson(Map<String, dynamic> json) {
@@ -33,6 +34,7 @@ class Me {
       timeFormat: inForce,
       timeFormatChoice: choice,
       academyTimeFormat: TimeFormat.parse(school['time_format']) ?? (choice == null ? inForce : TimeFormat.h12),
+      zoneChip: json['zone_chip'] != false,
     );
   }
 
@@ -59,8 +61,17 @@ class Me {
   /// The academy's way, for everyone who has not chosen their own.
   final TimeFormat academyTimeFormat;
 
+  /// Whether they show the zone chip in the headers (hidden from its card,
+  /// shown again from the account's settings; the same on the web).
+  final bool zoneChip;
+
   /// The same person having chosen [choice] (null: the academy's way).
-  Me choosing(TimeFormat? choice) => Me(
+  Me choosing(TimeFormat? choice) => _with(timeFormat: choice ?? academyTimeFormat, timeFormatChoice: () => choice);
+
+  /// The same person showing the zone chip or not.
+  Me showingZoneChip(bool shown) => _with(zoneChip: shown);
+
+  Me _with({TimeFormat? timeFormat, TimeFormat? Function()? timeFormatChoice, bool? zoneChip}) => Me(
     name: name,
     timezone: timezone,
     displayTimezone: displayTimezone,
@@ -68,9 +79,10 @@ class Me {
     timezoneLabel: timezoneLabel,
     academyTimezone: academyTimezone,
     academyTimezoneLabel: academyTimezoneLabel,
-    timeFormat: choice ?? academyTimeFormat,
-    timeFormatChoice: choice,
+    timeFormat: timeFormat ?? this.timeFormat,
+    timeFormatChoice: timeFormatChoice == null ? this.timeFormatChoice : timeFormatChoice(),
     academyTimeFormat: academyTimeFormat,
+    zoneChip: zoneChip ?? this.zoneChip,
   );
 }
 
@@ -105,12 +117,13 @@ class SessionRepository {
   Future<Me> me() async => Me.fromJson((await _api.get('me'))['data'] as Map<String, dynamic>);
 
   /// Changes what is given of the profile. [timeFormat], when given, sets how
-  /// they read a clock (its value null: the academy's way). Answers the
-  /// profile as it now stands (null when the API said nothing of it).
-  Future<Me?> updateMe({String? locale, String? timezone, TimeFormat? Function()? timeFormat}) async {
+  /// they read a clock (its value null: the academy's way); [zoneChip] shows
+  /// or hides the zone chip. Answers the profile as it now stands (null when
+  /// the API said nothing of it).
+  Future<Me?> updateMe({String? locale, String? timezone, TimeFormat? Function()? timeFormat, bool? zoneChip}) async {
     final json = await _api.patch(
       'me',
-      body: {'locale': ?locale, 'timezone': ?timezone, if (timeFormat != null) 'time_format': timeFormat()?.name},
+      body: {'locale': ?locale, 'timezone': ?timezone, if (timeFormat != null) 'time_format': timeFormat()?.name, 'zone_chip': ?zoneChip},
     );
     final data = json['data'];
     return data is Map<String, dynamic> ? Me.fromJson(data) : null;

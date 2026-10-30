@@ -1749,6 +1749,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get zoneCurrent => 'الحالي';
 
   @override
+  String get zoneHide => 'أخفِ المؤشّر';
+
+  @override
+  String get zoneHidden => 'أخفيت مؤشّر التوقيت. يمكنك إظهاره من الحساب والإعدادات.';
+
+  @override
+  String get zoneChipShow => 'إظهار مؤشّر التوقيت';
+
+  @override
+  String get zoneChipShowHint => 'مدينتك وساعتها أعلى الشاشات، ومنه تغيّر توقيتك. يسري اختيارك هنا وعلى الويب.';
+
+  @override
   String get timeFormat => 'شكل الساعة';
 
   @override

@@ -2942,6 +2942,30 @@ abstract class AppLocalizations {
   /// **'الحالي'**
   String get zoneCurrent;
 
+  /// No description provided for @zoneHide.
+  ///
+  /// In ar, this message translates to:
+  /// **'أخفِ المؤشّر'**
+  String get zoneHide;
+
+  /// No description provided for @zoneHidden.
+  ///
+  /// In ar, this message translates to:
+  /// **'أخفيت مؤشّر التوقيت. يمكنك إظهاره من الحساب والإعدادات.'**
+  String get zoneHidden;
+
+  /// No description provided for @zoneChipShow.
+  ///
+  /// In ar, this message translates to:
+  /// **'إظهار مؤشّر التوقيت'**
+  String get zoneChipShow;
+
+  /// No description provided for @zoneChipShowHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'مدينتك وساعتها أعلى الشاشات، ومنه تغيّر توقيتك. يسري اختيارك هنا وعلى الويب.'**
+  String get zoneChipShowHint;
+
   /// No description provided for @timeFormat.
   ///
   /// In ar, this message translates to:
