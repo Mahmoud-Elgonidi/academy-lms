@@ -1,0 +1,748 @@
+/*
+ * The lesson room: a dark stage in fixed neutrals (always dark, as on Meet
+ * and Zoom, the same values as the API's class page), the academy's brand
+ * only on the main accents. Logical properties throughout, so it reads the
+ * same in Arabic and English. Motion is transform and opacity only, and only
+ * when the person allows it. Also copied into the picture-in-picture window.
+ */
+.room {
+  --room-bg: #17181b;
+  --room-panel: #222326;
+  --room-line: #36373c;
+  --room-text: #eceef1;
+  --room-muted: #a2a6ad;
+  --room-tile: #2b2c30;
+  --room-ctl: #35363b;
+  --room-ctl-hover: #44464c;
+  --room-ok: #34a853;
+  --room-warn: #fbbc04;
+  --room-gap: 8px;
+  --lk-grid-gap: var(--room-gap);
+  --lk-border-radius: 14px;
+  --lk-accent-bg: var(--brand);
+  --lk-bg2: var(--room-tile);
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--room-bg);
+  color: var(--room-text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  color-scheme: dark;
+  overflow: hidden;
+}
+.room[data-lk-theme] {
+  font-family: var(--font-sans);
+  font-size: 15px;
+}
+.room *,
+.room *::before,
+.room *::after {
+  box-sizing: border-box;
+}
+.room .ic {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+.room :focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--brand) 70%, #fff);
+  outline-offset: 2px;
+}
+
+/* LiveKit's room fills ours, as a column: the top bar, the stage, the controls. */
+.room > .room-host {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+/* Top bar. */
+.room-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 6px 16px;
+  flex: none;
+}
+.room-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.room-title strong {
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.room-title small {
+  color: var(--room-muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.room-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--room-muted);
+  white-space: nowrap;
+}
+.room-stat .ic {
+  width: 18px;
+  height: 18px;
+}
+.room-timer {
+  color: var(--room-text);
+  font-variant-numeric: tabular-nums;
+}
+.room-quality::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--room-muted);
+}
+.room-quality[data-q='excellent']::before,
+.room-quality[data-q='good']::before {
+  background: var(--room-ok);
+}
+.room-quality[data-q='poor']::before {
+  background: var(--room-warn);
+}
+.room-quality[data-q='lost']::before {
+  background: var(--danger);
+}
+.room-quality .room-quality-text {
+  display: none;
+}
+.room-quality[data-q='poor'],
+.room-quality[data-q='lost'] {
+  color: #fde68a;
+}
+.room-quality[data-q='poor'] .room-quality-text,
+.room-quality[data-q='lost'] .room-quality-text {
+  display: inline;
+}
+.room-rec {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--danger) 22%, transparent);
+  color: #fecaca;
+  white-space: nowrap;
+}
+.room-rec::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .room-rec::before {
+    animation: room-pulse 1.4s ease-in-out infinite;
+  }
+}
+@keyframes room-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+}
+
+/* Notes over the stage: reconnecting, a refusal, sharing one's own screen. */
+.room-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 12px 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--room-panel);
+  font-size: 14px;
+}
+.room-note[data-tone='danger'] {
+  background: color-mix(in oklab, var(--danger) 25%, var(--room-panel));
+}
+.room-note button {
+  margin-inline-start: auto;
+}
+
+/* The stage and the side panel. */
+.room-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 12px;
+  padding: 0 12px;
+}
+.room-stage {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+.room-stage > * {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.room-side {
+  flex: none;
+  width: min(440px, 40%);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  color-scheme: light;
+}
+.room-side[hidden] {
+  display: none;
+}
+.room-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 8px 8px 14px;
+  border-bottom: 1px solid var(--color-line);
+  font-weight: 600;
+  font-size: 14px;
+}
+.room-side-head button {
+  width: 36px;
+  height: 36px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-muted);
+}
+.room-side-head button:hover {
+  background: var(--color-brand-soft);
+  color: var(--color-ink);
+}
+.room-side-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.room-side-body > * {
+  height: 100%;
+}
+.room-side-body > section {
+  border: 0;
+  border-radius: 0;
+}
+@media (max-width: 1023px) {
+  /* On a phone or a narrow window the panel takes the stage's place; the sound goes on. */
+  .room-main[data-panel='open'] .room-stage {
+    display: none;
+  }
+  .room-side {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .room-side {
+    animation: room-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+}
+@keyframes room-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Tiles. */
+.room .lk-participant-tile {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--room-tile);
+  cursor: pointer;
+  padding: 0;
+}
+.room .lk-participant-tile::after {
+  border-radius: 14px;
+  border-color: var(--brand);
+  transition-property: border-width, opacity;
+}
+.room .lk-participant-tile[data-lk-speaking='true']:not([data-lk-source='screen_share'])::after {
+  border-width: 3px;
+}
+.room-tile-video,
+.room .lk-participant-media-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+.room [data-lk-source='screen_share'] .lk-participant-media-video,
+.room-tile[data-fit='contain'] .lk-participant-media-video {
+  object-fit: contain;
+  background: #000;
+}
+.room-avatar {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.room-avatar span {
+  width: clamp(48px, 28%, 120px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--brand) 55%, var(--room-tile));
+  color: #fff;
+  font-weight: 600;
+  font-size: clamp(20px, 5vmin, 48px);
+}
+.room-name {
+  position: absolute;
+  inset-inline-start: 8px;
+  bottom: 8px;
+  max-width: calc(100% - 16px);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.room-name > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.room-name .ic {
+  width: 15px;
+  height: 15px;
+}
+.room-badge {
+  position: absolute;
+  top: 8px;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+}
+.room-badge .ic {
+  width: 16px;
+  height: 16px;
+}
+.room-badge[data-at='start'] {
+  inset-inline-start: 8px;
+}
+.room-badge[data-at='end'] {
+  inset-inline-end: 8px;
+}
+.room-badge[data-tone='danger'] {
+  background: var(--danger);
+}
+.room-signal {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+.room-signal i {
+  width: 3px;
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.35);
+}
+.room-signal i:nth-child(1) {
+  height: 4px;
+}
+.room-signal i:nth-child(2) {
+  height: 8px;
+}
+.room-signal i:nth-child(3) {
+  height: 12px;
+}
+.room-signal[data-q='excellent'] i,
+.room-signal[data-q='good'] i:nth-child(-n + 2) {
+  background: var(--room-ok);
+}
+.room-signal[data-q='poor'] i:nth-child(1) {
+  background: var(--room-warn);
+}
+.room-signal[data-q='lost'] i:nth-child(1) {
+  background: var(--danger);
+}
+
+/* Layouts: one tile; the other person with one's own small picture; the grid; the spotlight. */
+.room-solo,
+.room-pair {
+  position: relative;
+  display: flex;
+}
+.room-solo > .lk-participant-tile,
+.room-pair > .lk-participant-tile {
+  flex: 1;
+}
+.room-alone {
+  position: absolute;
+  inset-inline: 0;
+  top: 16px;
+  margin-inline: auto;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  font-size: 13px;
+  text-align: center;
+  pointer-events: none;
+}
+.room-self {
+  position: absolute;
+  z-index: 2;
+  width: clamp(112px, 22%, 260px);
+  aspect-ratio: 16 / 9;
+  touch-action: none;
+  cursor: grab;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  border-radius: 14px;
+}
+.room-self:active {
+  cursor: grabbing;
+}
+.room-self > .lk-participant-tile {
+  position: absolute;
+  inset: 0;
+}
+.room-self[data-corner^='top'] {
+  top: 12px;
+}
+.room-self[data-corner^='bottom'] {
+  bottom: 12px;
+}
+.room-self[data-corner$='left'] {
+  left: 12px;
+}
+.room-self[data-corner$='right'] {
+  right: 12px;
+}
+@media (max-width: 640px) {
+  .room-self {
+    width: 96px;
+    aspect-ratio: 3 / 4;
+  }
+}
+.room-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: var(--room-gap);
+}
+.room-grid > .lk-participant-tile {
+  flex: none;
+}
+
+.room .lk-focus-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(160px, 18vw, 240px);
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--room-gap);
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  padding: 0;
+}
+.room .lk-focus-layout[data-strip='none'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.room .lk-focus-layout > .lk-participant-tile {
+  min-height: 0;
+}
+.room .lk-carousel {
+  order: 0;
+  min-height: 0;
+  min-width: 0;
+}
+.room .lk-carousel > * {
+  aspect-ratio: 16 / 10;
+}
+@media (max-width: 767px) {
+  .room .lk-focus-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 96px;
+  }
+  .room .lk-focus-layout[data-strip='none'] {
+    grid-template-rows: minmax(0, 1fr);
+  }
+}
+
+/* The control bar: round buttons, the brand on what is on, red to leave. */
+.room-bar {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 12px max(12px, env(safe-area-inset-bottom));
+}
+.room-round {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--room-ctl);
+  color: var(--room-text);
+  cursor: pointer;
+}
+.room-round:hover {
+  background: var(--room-ctl-hover);
+}
+.room-round:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.room-round[data-state='off'] {
+  background: var(--danger);
+  color: #fff;
+}
+.room-round[data-state='active'] {
+  background: var(--brand);
+  color: #fff;
+}
+.room-leave {
+  height: 48px;
+  min-width: 72px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.room-leave:hover {
+  background: color-mix(in oklab, var(--danger) 85%, #000);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .room-round,
+  .room-leave {
+    transition: transform 120ms ease;
+  }
+  .room-round:active,
+  .room-leave:active {
+    transform: scale(0.94);
+  }
+}
+@media (max-width: 480px) {
+  .room-bar {
+    gap: 6px;
+    padding-inline: 8px;
+  }
+  .room-round {
+    width: 44px;
+    height: 44px;
+  }
+  .room-leave {
+    height: 44px;
+    min-width: 0;
+    padding: 0 14px;
+  }
+  .room-leave-word,
+  .room-wide-only,
+  .room-top .room-people {
+    display: none;
+  }
+}
+@media (min-width: 481px) {
+  .room-narrow-only {
+    display: none;
+  }
+}
+
+/* Tooltips from the label (aria-label stays the name screen readers hear). */
+.room-tip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #000;
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 5;
+}
+[dir='rtl'] .room-tip {
+  translate: 50% 0;
+}
+.room-round:hover > .room-tip,
+.room-round:focus-visible > .room-tip {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .room-tip {
+    transition: opacity 120ms ease 300ms;
+  }
+}
+@media (hover: none) {
+  .room-tip {
+    display: none;
+  }
+}
+
+/* Menus: the layout and "more". */
+.room-menu {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  inset-inline-end: 12px;
+  z-index: 10;
+  min-width: 240px;
+  max-width: calc(100vw - 24px);
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--room-panel);
+  border: 1px solid var(--room-line);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .room-menu {
+    animation: room-in 160ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+}
+.room-menu-head {
+  padding: 6px 10px 4px;
+  font-size: 12px;
+  color: var(--room-muted);
+}
+.room-menu [role^='menuitem'] {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--room-text);
+  text-align: start;
+  cursor: pointer;
+  font: inherit;
+}
+.room-menu [role^='menuitem']:hover:not(:disabled) {
+  background: var(--room-ctl);
+}
+.room-menu [role^='menuitem']:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.room-menu [role^='menuitem'] small {
+  display: block;
+  color: var(--room-muted);
+  font-size: 12px;
+}
+.room-menu .room-check {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  color: var(--brand);
+}
+.room-menu hr {
+  border: 0;
+  border-top: 1px solid var(--room-line);
+  margin: 6px 0;
+}
+
+/* LiveKit's own button when the browser held the sound back. */
+.room .lk-start-audio-button {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 84px;
+  margin-inline: auto;
+  width: fit-content;
+  z-index: 3;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* The picture-in-picture window: the main video and its buttons. */
+body.room-pip {
+  margin: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #17181b;
+}
+.room-pip-root .room-pip-video {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.room-pip-root .room-pip-video > .lk-participant-tile {
+  flex: 1;
+  border-radius: 0;
+}
+.room-pip-root .room-pip-bar {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 3;
+}
+.room-pip-root .room-round,
+.room-pip-root .room-leave {
+  width: 40px;
+  height: 40px;
+  min-width: 0;
+  padding: 0;
+  border-radius: 50%;
+}
+.room-pip-root .room-name {
+  top: 8px;
+  bottom: auto;
+}

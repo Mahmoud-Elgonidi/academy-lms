@@ -33,7 +33,13 @@ export default async function LessonRoom({ params }: { params: Promise<{ id: str
           </p>
         ) : null}
       </header>
-      <Classroom id={id} back={{ href: '/family/lessons', label: t('backToLessons') }} mushaf={mushaf} />
+      <Classroom
+        id={id}
+        back={{ href: '/family/lessons', label: t('backToLessons') }}
+        mushaf={mushaf}
+        title={lesson ? t('withTeacher', { name: lesson.with }) : undefined}
+        subtitle={lesson?.subject}
+      />
     </div>
   );
 }

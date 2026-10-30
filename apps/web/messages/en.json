@@ -1807,5 +1807,54 @@
       "hint": "The floating chip in the corner: your city and its time, and where you change your zone. Your choice applies here and in the app.",
       "failed": "We could not save your choice. Please try again."
     }
+  },
+  "room": {
+    "lesson": "Lesson",
+    "timer": "Time since you joined",
+    "people": "People in the lesson: {count}",
+    "quality": {
+      "excellent": "Excellent connection",
+      "good": "Good connection",
+      "poor": "Weak connection: try audio only",
+      "lost": "Connection lost",
+      "unknown": "Connection quality unknown"
+    },
+    "reconnecting": "Connection lost, reconnecting…",
+    "you": "{name} (you)",
+    "screenOf": "{name}'s screen",
+    "presenting": "You are showing your screen to everyone",
+    "muted": "Microphone off",
+    "micOff": "Turn off microphone",
+    "micOn": "Turn on microphone",
+    "cameraOff": "Turn off camera",
+    "cameraOn": "Turn on camera",
+    "screen": "Share screen",
+    "screenStop": "Stop sharing",
+    "pip": "Picture in picture",
+    "pipClose": "Back to the lesson",
+    "layout": "Layout",
+    "layouts": {
+      "auto": "Auto",
+      "grid": "Grid",
+      "spotlight": "Spotlight"
+    },
+    "panelOpen": "Open the {name}",
+    "panelClose": "Close the {name}",
+    "more": "More",
+    "audioOnly": "Audio only",
+    "audioOnlyHint": "Cameras stop to save data; the sound and a shared screen stay.",
+    "leave": "Leave",
+    "leaveHint": "Leave the lesson",
+    "pin": "Pin to the spotlight",
+    "unpin": "Unpin",
+    "pinned": "Pinned",
+    "selfView": "Drag your picture to any corner",
+    "alone": "You are the only one here now; the others appear here when they join.",
+    "deviceFailed": "The device did not start. Check the browser’s permission and try again.",
+    "startAudio": "Turn on the sound",
+    "controls": "Lesson controls",
+    "stage": "People in the lesson",
+    "close": "Close",
+    "shortcut": "{label} ({keys})"
   }
 }

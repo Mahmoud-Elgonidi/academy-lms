@@ -1,44 +1,59 @@
 'use client';
 
 import '@livekit/components-styles';
-import { ControlBar, GridLayout, LiveKitRoom, ParticipantTile, RoomAudioRenderer, useIsRecording, useRoomInfo, useTracks } from '@livekit/components-react';
-import { Track } from 'livekit-client';
+import { LiveKitRoom, RoomAudioRenderer, StartAudio } from '@livekit/components-react';
 import { useTranslations } from 'next-intl';
 import { useState, useTransition, type ReactNode } from 'react';
-import { joinLesson, recordLesson } from '@/lib/actions/shared';
+import { createPortal } from 'react-dom';
+import { joinLesson } from '@/lib/actions/shared';
 import type { MushafPage } from '@/lib/mushaf/types';
 import type { LessonRecording } from '@/lib/recordings';
 import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
 import { Mushaf } from '@/components/mushaf/mushaf';
-import { Button, Card, Notice, buttonLook, join } from '@/components/ui';
+import { LessonRoom } from '@/components/room/room';
+import { Button, Card, Notice, buttonLook } from '@/components/ui';
 import type { JoinTicket } from '@/lib/teach/types';
 
 type Stage = { kind: 'ready' } | { kind: 'in'; ticket: JoinTicket; recording: LessonRecording } | { kind: 'left' };
 
 /**
  * Going into the lesson: the API gives this person a seat (JoinLesson, which
- * also says when it is too early or the lesson is over). A LiveKit room opens
- * here with camera and microphone (a student's camera off when the academy
- * says so; they can switch it on); an outside link opens in a new tab.
- * Attendance comes from the room itself (webhooks), not from this page.
- * Everyone sees when the lesson is being recorded; its teacher starts and
- * stops it here, once everyone it records agreed. A Quran lesson of a course
- * the hifz map belongs to has its shared mushaf: beside the room on a wide
- * screen (a switch between the video and the mushaf on a phone, the sound
- * going on), and under the card otherwise, so a lesson on an outside link
- * keeps it open beside the meeting.
+ * also says when it is too early, the lesson is over, or a guardian's consent
+ * is awaited). A LiveKit room opens over the whole window (components/room:
+ * as on Meet or Zoom, with picture-in-picture when the tab is left) with
+ * camera and microphone (a student's camera off when the academy says so;
+ * they can switch it on); an outside link opens in a new tab. Attendance
+ * comes from the room itself (webhooks), not from this page. Everyone sees
+ * when the lesson is being recorded; its teacher starts and stops it from the
+ * room's "more", once everyone it records agreed. A Quran lesson of a course
+ * the hifz map belongs to has its shared mushaf: the room's side panel (in
+ * the stage's place on a phone, the sound going on), and under the card
+ * otherwise, so a lesson on an outside link keeps it open beside the meeting.
  */
-export function Classroom({ id, back, mushaf: first = null }: { id: string; back: { href: string; label: string }; mushaf?: MushafPage | null }) {
+export function Classroom({
+  id,
+  back,
+  mushaf: first = null,
+  title,
+  subtitle,
+}: {
+  id: string;
+  back: { href: string; label: string };
+  mushaf?: MushafPage | null;
+  /** The lesson as the room's top bar names it. */
+  title?: string;
+  subtitle?: string;
+}) {
   const t = useTranslations('teach');
   const m = useTranslations('mushaf');
+  const room = useTranslations('room');
   const common = useTranslations('common');
   const [stage, setStage] = useState<Stage>({ kind: 'ready' });
   const [message, setMessage] = useState<string>();
   const [pending, start] = useTransition();
   // The mushaf as last drawn, so it starts from there when the room opens or closes around it.
   const [mushaf, setMushaf] = useState(first);
-  const [view, setView] = useState<'video' | 'mushaf'>('video');
 
   const enter = () =>
     start(async () => {
@@ -55,29 +70,8 @@ export function Classroom({ id, back, mushaf: first = null }: { id: string; back
     });
 
   if (stage.kind === 'in' && stage.ticket.provider === 'livekit' && stage.ticket.token) {
-    const video = (
-      <div data-lk-theme="default" className={join('overflow-hidden rounded-card border border-line bg-black', mushaf && view === 'mushaf' && 'max-lg:hidden')} style={{ height: 'min(78dvh, 720px)' }}>
-        <Room lesson={id} recording={stage.recording} />
-      </div>
-    );
-    return (
-      <div className="space-y-3">
-        {mushaf ? (
-          <div role="group" aria-label={m('views')} className="grid grid-cols-2 gap-1 rounded-control border border-line bg-white p-1 lg:hidden">
-            {(['video', 'mushaf'] as const).map((v) => (
-              <button
-                key={v}
-                type="button"
-                aria-pressed={view === v}
-                onClick={() => setView(v)}
-                className={join('inline-flex min-h-10 items-center justify-center gap-2 rounded-control text-sm font-semibold', view === v ? 'bg-brand text-white' : 'text-ink hover:bg-brand-soft')}
-              >
-                <Icon name={v === 'video' ? 'video' : 'book'} size={16} />
-                {v === 'video' ? m('video') : m('title')}
-              </button>
-            ))}
-          </div>
-        ) : null}
+    return createPortal(
+      <div className="room" data-lk-theme="default">
         <LiveKitRoom
           serverUrl={stage.ticket.url}
           token={stage.ticket.token}
@@ -85,20 +79,23 @@ export function Classroom({ id, back, mushaf: first = null }: { id: string; back
           video={stage.ticket.can_publish && stage.ticket.camera !== false}
           audio={stage.ticket.can_publish}
           onDisconnected={() => setStage({ kind: 'left' })}
-          className={mushaf ? 'lg:grid lg:grid-cols-2 lg:gap-4' : undefined}
-          style={{ height: 'auto' }}
+          className="room-host"
         >
-          {video}
-          {mushaf ? (
+          <LessonRoom
+            lesson={id}
+            title={title ?? room('lesson')}
+            subtitle={subtitle}
+            recording={stage.recording}
+            canPublish={stage.ticket.can_publish}
             // Inside the room, so the teacher's changes reach the others over its data channel.
-            <div className={join('lg:h-[min(78dvh,720px)]', view === 'video' && 'max-lg:hidden')}>
-              <Mushaf initial={mushaf} onChange={setMushaf} fill readOnMount />
-            </div>
-          ) : null}
-          {/* The sound goes on whichever of the two a phone shows. */}
+            panel={mushaf ? { name: m('title'), content: <Mushaf initial={mushaf} onChange={setMushaf} fill readOnMount /> } : null}
+          />
+          {/* The sound goes on whatever the stage shows, the panel included. */}
           <RoomAudioRenderer />
+          <StartAudio label={room('startAudio')} />
         </LiveKitRoom>
-      </div>
+      </div>,
+      document.body,
     );
   }
 
@@ -149,85 +146,5 @@ export function Classroom({ id, back, mushaf: first = null }: { id: string; back
         {pending ? t('connecting') : t('enterRoom')}
       </Button>
     </Card>,
-  );
-}
-
-/**
- * The room: everyone's camera (or their name), a shared screen when there is
- * one, and icon-only controls (LiveKit's own labels are English only).
- */
-function Room({ lesson, recording }: { lesson: string; recording: LessonRecording }) {
-  const tracks = useTracks(
-    [
-      { source: Track.Source.Camera, withPlaceholder: true },
-      { source: Track.Source.ScreenShare, withPlaceholder: false },
-    ],
-    { onlySubscribed: false },
-  );
-  return (
-    <div className="flex h-full flex-col" dir="ltr">
-      <RecordingBar lesson={lesson} recording={recording} />
-      <GridLayout tracks={tracks} className="min-h-0 flex-1">
-        <ParticipantTile />
-      </GridLayout>
-      <ControlBar variation="minimal" controls={{ chat: false }} />
-    </div>
-  );
-}
-
-/**
- * The recording sign, for everyone (LiveKit says when the room is recorded,
- * and so does the room's metadata), and the teacher's start and stop.
- */
-function RecordingBar({ lesson, recording }: { lesson: string; recording: LessonRecording }) {
-  const t = useTranslations('recordings');
-  const recorded = useIsRecording();
-  const { metadata } = useRoomInfo();
-  const [running, setRunning] = useState<boolean | undefined>(undefined);
-  const [error, setError] = useState<string>();
-  const [pending, start] = useTransition();
-  const said = (() => {
-    try {
-      const meta = JSON.parse(metadata || '{}') as { recording?: boolean };
-      return typeof meta.recording === 'boolean' ? meta.recording : undefined;
-    } catch {
-      return undefined;
-    }
-  })();
-  const on = recorded || (running ?? said ?? recording.running);
-  if (recording.mode === 'off' && !on) return null;
-
-  const toggle = () =>
-    start(async () => {
-      const done = await recordLesson(lesson, !on);
-      if (!done.ok) {
-        setError(done.message);
-        return;
-      }
-      setError(undefined);
-      setRunning(done.running);
-    });
-
-  return (
-    <div className="flex flex-wrap items-center gap-2 bg-ink/90 px-3 py-2 text-sm text-white" dir="auto">
-      {on ? (
-        <span role="status" className="inline-flex items-center gap-1.5 rounded-full bg-danger px-2.5 py-0.5 text-xs font-bold">
-          <span className="size-2 rounded-full bg-white motion-safe:animate-pulse" />
-          {t('on')}
-        </span>
-      ) : null}
-      {recording.controls ? (
-        <button
-          type="button"
-          onClick={toggle}
-          disabled={pending || (!on && recording.missing.length > 0)}
-          className={`rounded-control px-3 py-1 font-semibold disabled:opacity-50 ${on ? 'bg-danger text-white' : 'bg-white/15 text-white hover:bg-white/25'}`}
-        >
-          {on ? t('stop') : t('start')}
-        </button>
-      ) : null}
-      {recording.controls && !on && recording.missing.length > 0 ? <span className="text-white/75">{t('missing', { names: recording.missing.join(t('separator')) })}</span> : null}
-      {error ? <span className="text-danger-soft">{error}</span> : null}
-    </div>
   );
 }

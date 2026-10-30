@@ -37,7 +37,7 @@ export default async function Lesson({ params }: { params: Promise<{ id: string 
           {lesson.subject} · <span className="whitespace-nowrap tabular-nums">{clock(lesson.starts_at, format, locale)}–{clock(lesson.ends_at, format, locale)}</span>
         </p>
       </header>
-      <Classroom id={id} back={{ href: '/teach', label: t('backToToday') }} mushaf={mushaf} />
+      <Classroom id={id} back={{ href: '/teach', label: t('backToToday') }} mushaf={mushaf} title={t('withStudent', { name: lesson.with })} subtitle={lesson.subject} />
     </div>
   );
 }
