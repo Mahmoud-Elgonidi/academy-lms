@@ -11,6 +11,7 @@ use Modules\Billing\Actions\Proofs\ApprovePaymentProof;
 use Modules\Billing\Actions\Proofs\RejectPaymentProof;
 use Modules\Billing\Contracts\BillingApi;
 use Modules\Billing\Models\PaymentProof;
+use Modules\Classroom\Actions\SaveClassroomSettings;
 use Modules\Classroom\Actions\SaveMeetingLink;
 use Modules\Classroom\Models\Room;
 use Modules\Games\Actions\SaveGameLimit;
@@ -345,6 +346,8 @@ final class E2eResetSeeder extends Seeder
             if (! DB::table('meeting_links')->where('teacher_id', $lesson->teacher_id)->exists()) {
                 app(SaveMeetingLink::class)->handle($lesson->teacher_id, 'https://meet.google.com/noor-demo-e2e');
             }
+            // The tests go into lessons by the teacher's outside link: the academy's choice, so a room follows it.
+            app(SaveClassroomSettings::class)->handle('external');
             Room::query()->updateOrCreate(['session_id' => $lesson->id], ['provider' => 'external', 'name' => Room::nameFor($academy->id, $lesson->id)]);
 
             return (string) $lesson->id;
