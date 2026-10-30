@@ -1502,6 +1502,53 @@ class AppLocalizationsAr extends AppLocalizations {
   String get you => 'أنت';
 
   @override
+  String roomScreenOf(String name) {
+    return 'شاشة $name';
+  }
+
+  @override
+  String get roomFlipCamera => 'بدّل الكاميرا';
+
+  @override
+  String get roomLayout => 'طريقة العرض';
+
+  @override
+  String get roomLayoutAuto => 'تلقائي';
+
+  @override
+  String get roomLayoutGrid => 'شبكة';
+
+  @override
+  String get roomLayoutSpotlight => 'عرض مكبّر';
+
+  @override
+  String get roomMoreOptions => 'خيارات أخرى';
+
+  @override
+  String get roomPin => 'ثبّت في الواجهة';
+
+  @override
+  String get roomUnpin => 'ألغِ التثبيت';
+
+  @override
+  String get roomMicMuted => 'الميكروفون مغلق';
+
+  @override
+  String get roomQualityGood => 'الاتصال جيد';
+
+  @override
+  String get roomQualityFair => 'الاتصال متوسط';
+
+  @override
+  String get roomQualityPoor => 'الاتصال ضعيف';
+
+  @override
+  String get roomZoomHint => 'باعد بإصبعين للتكبير، وانقر مرتين للعودة.';
+
+  @override
+  String get roomShowBars => 'أظهر أزرار الحصة';
+
+  @override
   String minutesLeft(int n) {
     String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n دقيقة', few: '$n دقائق', two: 'دقيقتان', one: 'دقيقة');
     return 'بقي $_temp0';

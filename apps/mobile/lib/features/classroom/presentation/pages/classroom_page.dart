@@ -1,11 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:livekit_client/livekit_client.dart' as lk;
 
-import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/api_problem.dart';
 import '../../../../core/state/load_cubit.dart';
@@ -16,17 +17,26 @@ import '../../../mushaf/presentation/widgets/mushaf_pane.dart';
 import '../../../recordings/data/recordings_repository.dart';
 import '../../../recordings/domain/recordings.dart';
 import '../../data/classroom_repository.dart';
+import '../../data/picture_in_picture.dart';
 import '../../domain/join_ticket.dart';
+import '../../domain/room_stage.dart';
+import '../widgets/room/room_colors.dart';
+import '../widgets/room/room_controls.dart';
+import '../widgets/room/room_view.dart';
 
-/// The live lesson in the app, on the academy's LiveKit room: the other
-/// person large, me small, and four big buttons (mic, camera, audio only,
-/// leave). Attendance is the server's (LiveKit tells it who is in the room).
-/// Everyone sees when the lesson is being recorded; its teacher starts and
-/// stops it here, once everyone it records agreed. A Quran lesson has its
-/// shared mushaf a tap away, the other person small over it: the teacher's
-/// turns and marks reach the room at once (data on the `mushaf` topic, heard
-/// only from the teacher's seat), and the mushaf signal follows for anyone
-/// beside the room.
+/// The live lesson in the app, on the academy's LiveKit room, laid out as a
+/// video call ([RoomView]): a dark stage with the other person large and me
+/// floating, everyone in a grid when more come, and a shared screen whole
+/// (pinch to look closer) with its presenter's camera on it; a bar of round
+/// buttons under it. Turned sideways, the picture takes the screen and the
+/// bars step aside; on Android, leaving the app shrinks the room into a small
+/// window ([PictureInPicture]). Attendance is the server's (LiveKit tells it
+/// who is in the room). Everyone sees when the lesson is being recorded; its
+/// teacher starts and stops it here, once everyone it records agreed. A
+/// Quran lesson has its shared mushaf a tap away, the main picture small over
+/// it: the teacher's turns and marks reach the room at once (data on the
+/// `mushaf` topic, heard only from the teacher's seat), and the mushaf signal
+/// follows for anyone beside the room.
 class ClassroomPage extends StatefulWidget {
   const ClassroomPage({required this.lessonId, this.ticket, super.key});
 
@@ -53,6 +63,12 @@ class _ClassroomPageState extends State<ClassroomPage> {
   bool _recordBusy = false;
   bool _leaving = false;
 
+  /// Android's small window while the room is open.
+  final _pip = PictureInPicture();
+
+  /// The camera in use on a phone with two.
+  lk.CameraPosition _facing = lk.CameraPosition.front;
+
   /// The lesson's shared mushaf, once the API says it has one; shown over the video while [_showMushaf].
   late final _place = MushafPlace(widget.lessonId);
   LoadCubit<LessonMushaf>? _mushaf;
@@ -66,6 +82,10 @@ class _ClassroomPageState extends State<ClassroomPage> {
     _events.on<lk.DataReceivedEvent>((e) {
       if (isMushafSignal(topic: e.topic, metadata: e.participant?.metadata)) unawaited(_mushaf?.load());
     });
+    // Whoever speaks gets the ring at once.
+    _events.on<lk.ActiveSpeakersChangedEvent>((_) => _changed());
+    // The room turns sideways with the phone (a shared screen reads better so); the app's own way comes back on leaving.
+    unawaited(SystemChrome.setPreferredOrientations(DeviceOrientation.values));
     unawaited(_connect());
     unawaited(_findMushaf());
     _tick = Timer.periodic(const Duration(seconds: 1), (_) => mounted ? setState(() {}) : null);
@@ -74,6 +94,9 @@ class _ClassroomPageState extends State<ClassroomPage> {
   @override
   void dispose() {
     _tick?.cancel();
+    unawaited(_pip.setEnabled(false).whenComplete(_pip.dispose));
+    // The app locks no orientation of its own (manifest, Info.plist, main.dart): the phone decides again.
+    unawaited(SystemChrome.setPreferredOrientations(const []));
     _room.removeListener(_changed);
     unawaited(_events.dispose());
     unawaited(_mushaf?.close());
@@ -109,6 +132,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
       // Left while it connected: the microphone and camera stay off.
       if (!mounted) return;
       _clock.start();
+      unawaited(_pip.setEnabled(true));
       if (ticket.canPublish) {
         await _room.localParticipant?.setMicrophoneEnabled(true);
         try {
@@ -144,6 +168,21 @@ class _ClassroomPageState extends State<ClassroomPage> {
   Future<void> _toggleCam() async {
     final me = _room.localParticipant;
     if (me != null) await me.setCameraEnabled(!me.isCameraEnabled());
+  }
+
+  /// A phone's front and back cameras: the other one.
+  bool get _canFlip => !kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS);
+
+  Future<void> _flipCamera() async {
+    final track = _room.localParticipant?.videoTrackPublications.where((p) => p.source == lk.TrackSource.camera).firstOrNull?.track;
+    if (track is! lk.LocalVideoTrack) return;
+    final next = _facing == lk.CameraPosition.front ? lk.CameraPosition.back : lk.CameraPosition.front;
+    try {
+      await track.setCameraPosition(next);
+      if (mounted) setState(() => _facing = next);
+    } on Object {
+      // One camera only after all: the picture stays as it was.
+    }
   }
 
   /// Saves the line: my camera off and the other side's video not fetched.
@@ -189,250 +228,111 @@ class _ClassroomPageState extends State<ClassroomPage> {
   void _leave() {
     if (_leaving) return;
     _leaving = true;
+    unawaited(_pip.setEnabled(false));
     context.canPop() ? context.pop() : context.go('/');
+  }
+
+  /// The people in the room as the stage needs them: me first, then the others as they came in.
+  List<RoomPerson> _people() => [
+    if (_room.localParticipant case final me?) _person(me, local: true),
+    for (final p in _room.remoteParticipants.values) _person(p),
+  ];
+
+  RoomPerson _person(lk.Participant p, {bool local = false}) {
+    bool shows(lk.TrackSource source) =>
+        (local || !_audioOnly) && p.videoTrackPublications.any((pub) => _isSource(pub, source) && pub.subscribed && !pub.muted);
+    return RoomPerson(
+      identity: p.identity,
+      name: p.name.isNotEmpty ? p.name : p.identity,
+      isLocal: local,
+      camera: shows(lk.TrackSource.camera),
+      screen: shows(lk.TrackSource.screenShareVideo),
+      micOn: p.isMicrophoneEnabled(),
+      speaking: p.isSpeaking,
+    );
+  }
+
+  /// A camera is anything that is not a shared screen (an older client says "unknown").
+  static bool _isSource(lk.TrackPublication pub, lk.TrackSource source) => source == lk.TrackSource.screenShareVideo
+      ? pub.source == lk.TrackSource.screenShareVideo
+      : pub.source != lk.TrackSource.screenShareVideo;
+
+  /// LiveKit's picture for a tile: a camera fills its box, a shared screen shows whole.
+  Widget? _video(Tile tile) {
+    if (!tile.hasVideo) return null;
+    final lk.Participant? p = tile.person.isLocal ? _room.localParticipant : _room.remoteParticipants[tile.person.identity];
+    final source = tile.source == FeedSource.screen ? lk.TrackSource.screenShareVideo : lk.TrackSource.camera;
+    final track = p?.videoTrackPublications.where((pub) => _isSource(pub, source) && pub.subscribed && !pub.muted).firstOrNull?.track;
+    if (track is! lk.VideoTrack) return null;
+    return lk.VideoTrackRenderer(
+      track,
+      key: ValueKey('video-${track.sid}-${tile.fit.name}'),
+      fit: tile.fit == TileFit.contain ? lk.VideoViewFit.contain : lk.VideoViewFit.cover,
+    );
+  }
+
+  /// The worst line in the room: LiveKit's three steps as three bars.
+  RoomQuality _quality() {
+    final all = <lk.Participant>[?_room.localParticipant, ..._room.remoteParticipants.values].map((p) => p.connectionQuality);
+    if (all.any((q) => q == lk.ConnectionQuality.poor || q == lk.ConnectionQuality.lost)) return RoomQuality.poor;
+    if (all.any((q) => q == lk.ConnectionQuality.good)) return RoomQuality.fair;
+    if (all.any((q) => q == lk.ConnectionQuality.excellent)) return RoomQuality.good;
+    return RoomQuality.unknown;
   }
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final c = context.colors;
-    final other = _room.remoteParticipants.values.firstOrNull;
+    final others = _room.remoteParticipants.values.map((p) => p.name.isNotEmpty ? p.name : p.identity).toList();
     final me = _room.localParticipant;
-    final otherVideo = _audioOnly ? null : other?.videoTrackPublications.where((p) => p.subscribed && !p.muted).firstOrNull?.track;
-    final myVideo = me?.videoTrackPublications.where((p) => !p.muted).firstOrNull?.track;
-    final weak = me?.connectionQuality == lk.ConnectionQuality.poor || other?.connectionQuality == lk.ConnectionQuality.poor;
-    final elapsed = _clock.elapsed;
-    final mmss = '${elapsed.inMinutes.toString().padLeft(2, '0')}:${(elapsed.inSeconds % 60).toString().padLeft(2, '0')}';
-    const ink = Color(0xFFFAFAF9);
+    final quality = _quality();
+    final ready = me != null;
 
     return Theme(
-      data: Theme.of(context).copyWith(scaffoldBackgroundColor: const Color(0xFF0C0A09)),
+      data: Theme.of(context).copyWith(scaffoldBackgroundColor: RoomColors.stage),
       child: Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        other?.name.isNotEmpty ?? false ? other!.name : (_connecting ? l.joining : l.waitingOther),
-                        style: const TextStyle(color: ink, fontSize: 16, fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                    if (_mushaf != null) ...[
-                      _MushafToggle(
-                        on: _showMushaf,
-                        label: _showMushaf ? l.mushafShowVideo : l.mushafShow,
-                        onPressed: () => setState(() => _showMushaf = !_showMushaf),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    if (_recordingOn) ...[
-                      Semantics(
-                        liveRegion: true,
-                        child: Container(
-                          key: const Key('recording-on'),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(color: const Color(0xFFDC2626), borderRadius: BorderRadius.circular(999)),
-                          child: Text(
-                            l.recordingOn,
-                            style: const TextStyle(color: ink, fontWeight: FontWeight.w700, fontSize: 12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(999)),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(color: Color(0xFF34D399), shape: BoxShape.circle),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            mmss,
-                            textDirection: TextDirection.ltr,
-                            style: const TextStyle(color: ink, fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (_showMushaf && _mushaf != null)
-                Expanded(
-                  child: Container(
-                    key: const Key('classroom-mushaf'),
-                    margin: const EdgeInsets.symmetric(horizontal: 12),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(color: c.page, borderRadius: BorderRadius.circular(26)),
-                    child: Stack(
-                      children: [
-                        Positioned.fill(
-                          child: BlocProvider.value(
-                            value: _mushaf!,
-                            child: MushafPane(place: _place, onChanged: _tellRoom, size: 22),
-                          ),
-                        ),
-                        // The other person small over the page; a tap goes back to them.
-                        PositionedDirectional(
-                          top: 10,
-                          end: 10,
-                          child: _Pip(
-                            video: otherVideo,
-                            name: other?.name ?? '',
-                            colour: c.brandDeep,
-                            tooltip: l.mushafBackToVideo,
-                            onTap: () => setState(() => _showMushaf = false),
-                          ),
-                        ),
-                      ],
-                    ),
+        body: ValueListenableBuilder<bool>(
+          valueListenable: _pip.active,
+          builder: (context, pip, _) => RoomView(
+            people: _people(),
+            video: _video,
+            pip: pip,
+            title: others.isNotEmpty ? others.join('، ') : (_connecting ? l.joining : l.waitingOther),
+            elapsed: _clock.elapsed,
+            recording: _recordingOn,
+            quality: quality,
+            connecting: _connecting,
+            notice: _problem != null || quality == RoomQuality.poor
+                ? Note(_problem ?? l.weakNetwork, tone: _problem != null ? Tone.danger : Tone.reward, icon: Icons.wifi_rounded)
+                : null,
+            panel: _mushaf == null
+                ? null
+                : BlocProvider.value(
+                    value: _mushaf!,
+                    child: MushafPane(place: _place, onChanged: _tellRoom, size: 22),
                   ),
-                )
-              else
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 12),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(color: const Color(0xFF1C1917), borderRadius: BorderRadius.circular(26)),
-                    child: Stack(
-                      children: [
-                        Positioned.fill(
-                          child: otherVideo != null
-                              ? lk.VideoTrackRenderer(otherVideo, fit: lk.VideoViewFit.cover)
-                              : Center(
-                                  child: other == null
-                                      ? Icon(Icons.hourglass_empty_rounded, size: 56, color: ink.withValues(alpha: 0.5))
-                                      : _Initial(name: other.name, size: 140, colour: c.brandDeep),
-                                ),
-                        ),
-                        if (other != null) PositionedDirectional(bottom: 14, start: 14, child: _Label(other.name)),
-                        PositionedDirectional(
-                          top: 14,
-                          end: 14,
-                          child: Container(
-                            width: 112,
-                            height: 150,
-                            clipBehavior: Clip.antiAlias,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF44403C),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 2),
-                            ),
-                            child: Stack(
-                              children: [
-                                Positioned.fill(
-                                  child: myVideo != null
-                                      ? lk.VideoTrackRenderer(myVideo, fit: lk.VideoViewFit.cover)
-                                      : Center(
-                                          child: _Initial(name: me?.name ?? '', size: 56, colour: c.attention),
-                                        ),
-                                ),
-                                PositionedDirectional(bottom: 8, start: 8, child: _Label(l.you)),
-                              ],
-                            ),
-                          ),
-                        ),
-                        if (weak || _problem != null)
-                          PositionedDirectional(
-                            top: 14,
-                            start: 14,
-                            end: 140,
-                            child: Note(
-                              _problem ?? l.weakNetwork,
-                              tone: _problem != null ? Tone.danger : Tone.reward,
-                              icon: Icons.wifi_rounded,
-                            ),
-                          ),
-                        if (_connecting) const Center(child: CircularProgressIndicator(color: ink)),
-                      ],
-                    ),
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _RoundButton(
-                          tooltip: me?.isMicrophoneEnabled() ?? false ? l.micOff : l.micOn,
-                          icon: me?.isMicrophoneEnabled() ?? false ? Icons.mic_rounded : Icons.mic_off_rounded,
-                          pressed: !(me?.isMicrophoneEnabled() ?? true),
-                          onPressed: me == null ? null : _toggleMic,
-                        ),
-                        const SizedBox(width: 14),
-                        _RoundButton(
-                          tooltip: me?.isCameraEnabled() ?? false ? l.camOff : l.camOn,
-                          icon: me?.isCameraEnabled() ?? false ? Icons.videocam_rounded : Icons.videocam_off_rounded,
-                          pressed: !(me?.isCameraEnabled() ?? true),
-                          onPressed: me == null || _audioOnly ? null : _toggleCam,
-                        ),
-                        const SizedBox(width: 14),
-                        _RoundButton(
-                          tooltip: l.audioOnly,
-                          icon: Icons.headphones_rounded,
-                          pressed: _audioOnly,
-                          onPressed: me == null ? null : _toggleAudioOnly,
-                        ),
-                        if (_recording.controls) ...[
-                          const SizedBox(width: 14),
-                          _RoundButton(
-                            key: const Key('record'),
-                            tooltip: _recordingOn ? l.recordStop : l.recordStart,
-                            icon: _recordingOn ? Icons.stop_circle_outlined : Icons.fiber_manual_record_rounded,
-                            pressed: _recordingOn,
-                            onPressed: me == null || _recordBusy || (!_recordingOn && _recording.missing.isNotEmpty)
-                                ? null
-                                : _toggleRecording,
-                          ),
-                        ],
-                        const SizedBox(width: 14),
-                        Tooltip(
-                          message: l.leave,
-                          child: SizedBox(
-                            width: 76,
-                            height: 60,
-                            child: FilledButton(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFFDC2626),
-                                padding: EdgeInsets.zero,
-                                shape: const StadiumBorder(),
-                              ),
-                              onPressed: _leave,
-                              child: const Icon(Icons.call_end_rounded, size: 28),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (_recording.controls && !_recordingOn && _recording.missing.isNotEmpty) ...[
-                      const SizedBox(height: 10),
-                      Text(
-                        l.recordingMissing(_recording.missing.join('، ')),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Color(0xFFFCA5A5), fontSize: 12),
-                      ),
-                    ],
-                    const SizedBox(height: 12),
-                    Text(
-                      l.rejoinHint,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Color(0xFFD6D3D1), fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            controls: RoomControlsState(
+              ready: ready,
+              micOn: me?.isMicrophoneEnabled() ?? false,
+              camOn: me?.isCameraEnabled() ?? false,
+              canFlip: _canFlip,
+              audioOnly: _audioOnly,
+              hasPanel: _mushaf != null,
+              panelOpen: _showMushaf,
+              recordControls: _recording.controls,
+              recordingOn: _recordingOn,
+              recordBusy: _recordBusy,
+              recordMissing: _recording.missing,
+            ),
+            actions: RoomActions(
+              onMic: () => unawaited(_toggleMic()),
+              onCam: () => unawaited(_toggleCam()),
+              onFlip: () => unawaited(_flipCamera()),
+              onAudioOnly: () => unawaited(_toggleAudioOnly()),
+              onRecord: () => unawaited(_toggleRecording()),
+              onPanel: () => setState(() => _showMushaf = !_showMushaf),
+              onLeave: _leave,
+            ),
           ),
         ),
       ),
@@ -451,134 +351,4 @@ Future<void> closeRoom({required Future<void> Function() disconnect, required Fu
     // Nothing more to say to the server.
   }
   await dispose();
-}
-
-class _RoundButton extends StatelessWidget {
-  const _RoundButton({required this.tooltip, required this.icon, required this.pressed, required this.onPressed, super.key});
-
-  final String tooltip;
-  final IconData icon;
-  final bool pressed;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    toggled: pressed,
-    child: IconButton(
-      tooltip: tooltip,
-      onPressed: onPressed,
-      iconSize: 26,
-      style: IconButton.styleFrom(
-        fixedSize: const Size(60, 60),
-        backgroundColor: pressed ? Colors.white : Colors.white.withValues(alpha: 0.14),
-        foregroundColor: pressed ? const Color(0xFF1C1917) : Colors.white,
-        disabledBackgroundColor: Colors.white.withValues(alpha: 0.06),
-      ),
-      icon: Icon(icon),
-    ),
-  );
-}
-
-/// Between the video and the mushaf, in the top bar.
-class _MushafToggle extends StatelessWidget {
-  const _MushafToggle({required this.on, required this.label, required this.onPressed});
-
-  /// The mushaf is shown (the button goes back to the video).
-  final bool on;
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    toggled: on,
-    child: TextButton.icon(
-      key: const Key('mushaf-toggle'),
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        minimumSize: const Size(48, 40),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        backgroundColor: on ? Colors.white : Colors.white.withValues(alpha: 0.14),
-        foregroundColor: on ? const Color(0xFF1C1917) : Colors.white,
-        shape: const StadiumBorder(),
-      ),
-      icon: Icon(on ? Icons.videocam_rounded : Icons.menu_book_rounded, size: 18),
-      label: Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-    ),
-  );
-}
-
-/// The other person small over the mushaf: their video, else their initial.
-class _Pip extends StatelessWidget {
-  const _Pip({required this.video, required this.name, required this.colour, required this.tooltip, required this.onTap});
-
-  final lk.VideoTrack? video;
-  final String name;
-  final Color colour;
-  final String tooltip;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Tooltip(
-    message: tooltip,
-    child: Semantics(
-      button: true,
-      label: tooltip,
-      child: GestureDetector(
-        key: const Key('mushaf-pip'),
-        onTap: onTap,
-        child: Container(
-          width: 92,
-          height: 122,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: const Color(0xFF44403C),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white, width: 2),
-            boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 12, offset: Offset(0, 4))],
-          ),
-          child: video != null
-              ? lk.VideoTrackRenderer(video!, fit: lk.VideoViewFit.cover)
-              : Center(
-                  child: _Initial(name: name, size: 52, colour: colour),
-                ),
-        ),
-      ),
-    ),
-  );
-}
-
-class _Initial extends StatelessWidget {
-  const _Initial({required this.name, required this.size, required this.colour});
-
-  final String name;
-  final double size;
-  final Color colour;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: size,
-    height: size,
-    alignment: Alignment.center,
-    decoration: BoxDecoration(color: colour, shape: BoxShape.circle),
-    child: Text(
-      name.trim().isEmpty ? '' : name.trim().characters.first,
-      style: TextStyle(color: Colors.white, fontSize: size * 0.4, fontWeight: FontWeight.w700),
-    ),
-  );
-}
-
-class _Label extends StatelessWidget {
-  const _Label(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-    decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.55), borderRadius: BorderRadius.circular(999)),
-    child: Text(
-      text,
-      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
-    ),
-  );
 }

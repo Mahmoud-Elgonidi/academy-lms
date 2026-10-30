@@ -1444,6 +1444,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get you => 'You';
 
   @override
+  String roomScreenOf(String name) {
+    return '$name\'s screen';
+  }
+
+  @override
+  String get roomFlipCamera => 'Switch camera';
+
+  @override
+  String get roomLayout => 'Layout';
+
+  @override
+  String get roomLayoutAuto => 'Auto';
+
+  @override
+  String get roomLayoutGrid => 'Grid';
+
+  @override
+  String get roomLayoutSpotlight => 'Spotlight';
+
+  @override
+  String get roomMoreOptions => 'More options';
+
+  @override
+  String get roomPin => 'Pin';
+
+  @override
+  String get roomUnpin => 'Unpin';
+
+  @override
+  String get roomMicMuted => 'Muted';
+
+  @override
+  String get roomQualityGood => 'Good connection';
+
+  @override
+  String get roomQualityFair => 'Fair connection';
+
+  @override
+  String get roomQualityPoor => 'Poor connection';
+
+  @override
+  String get roomZoomHint => 'Pinch to zoom, double-tap to reset.';
+
+  @override
+  String get roomShowBars => 'Show the lesson controls';
+
+  @override
   String minutesLeft(int n) {
     return '$n min left';
   }

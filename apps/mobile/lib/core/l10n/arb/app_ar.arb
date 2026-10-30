@@ -1048,6 +1048,28 @@
   "weakNetwork": "الاتصال ضعيف. جرّب \"الصوت فقط\" إن كانت الصورة تتقطّع.",
   "waitingOther": "ننتظر دخول الطرف الآخر…",
   "you": "أنت",
+  "roomScreenOf": "شاشة {name}",
+  "@roomScreenOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "roomFlipCamera": "بدّل الكاميرا",
+  "roomLayout": "طريقة العرض",
+  "roomLayoutAuto": "تلقائي",
+  "roomLayoutGrid": "شبكة",
+  "roomLayoutSpotlight": "عرض مكبّر",
+  "roomMoreOptions": "خيارات أخرى",
+  "roomPin": "ثبّت في الواجهة",
+  "roomUnpin": "ألغِ التثبيت",
+  "roomMicMuted": "الميكروفون مغلق",
+  "roomQualityGood": "الاتصال جيد",
+  "roomQualityFair": "الاتصال متوسط",
+  "roomQualityPoor": "الاتصال ضعيف",
+  "roomZoomHint": "باعد بإصبعين للتكبير، وانقر مرتين للعودة.",
+  "roomShowBars": "أظهر أزرار الحصة",
   "minutesLeft": "بقي {n, plural, =1{دقيقة} =2{دقيقتان} few{{n} دقائق} other{{n} دقيقة}}",
   "@minutesLeft": {
     "placeholders": {

@@ -2534,6 +2534,96 @@ abstract class AppLocalizations {
   /// **'أنت'**
   String get you;
 
+  /// No description provided for @roomScreenOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'شاشة {name}'**
+  String roomScreenOf(String name);
+
+  /// No description provided for @roomFlipCamera.
+  ///
+  /// In ar, this message translates to:
+  /// **'بدّل الكاميرا'**
+  String get roomFlipCamera;
+
+  /// No description provided for @roomLayout.
+  ///
+  /// In ar, this message translates to:
+  /// **'طريقة العرض'**
+  String get roomLayout;
+
+  /// No description provided for @roomLayoutAuto.
+  ///
+  /// In ar, this message translates to:
+  /// **'تلقائي'**
+  String get roomLayoutAuto;
+
+  /// No description provided for @roomLayoutGrid.
+  ///
+  /// In ar, this message translates to:
+  /// **'شبكة'**
+  String get roomLayoutGrid;
+
+  /// No description provided for @roomLayoutSpotlight.
+  ///
+  /// In ar, this message translates to:
+  /// **'عرض مكبّر'**
+  String get roomLayoutSpotlight;
+
+  /// No description provided for @roomMoreOptions.
+  ///
+  /// In ar, this message translates to:
+  /// **'خيارات أخرى'**
+  String get roomMoreOptions;
+
+  /// No description provided for @roomPin.
+  ///
+  /// In ar, this message translates to:
+  /// **'ثبّت في الواجهة'**
+  String get roomPin;
+
+  /// No description provided for @roomUnpin.
+  ///
+  /// In ar, this message translates to:
+  /// **'ألغِ التثبيت'**
+  String get roomUnpin;
+
+  /// No description provided for @roomMicMuted.
+  ///
+  /// In ar, this message translates to:
+  /// **'الميكروفون مغلق'**
+  String get roomMicMuted;
+
+  /// No description provided for @roomQualityGood.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاتصال جيد'**
+  String get roomQualityGood;
+
+  /// No description provided for @roomQualityFair.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاتصال متوسط'**
+  String get roomQualityFair;
+
+  /// No description provided for @roomQualityPoor.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاتصال ضعيف'**
+  String get roomQualityPoor;
+
+  /// No description provided for @roomZoomHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'باعد بإصبعين للتكبير، وانقر مرتين للعودة.'**
+  String get roomZoomHint;
+
+  /// No description provided for @roomShowBars.
+  ///
+  /// In ar, this message translates to:
+  /// **'أظهر أزرار الحصة'**
+  String get roomShowBars;
+
   /// No description provided for @minutesLeft.
   ///
   /// In ar, this message translates to:
