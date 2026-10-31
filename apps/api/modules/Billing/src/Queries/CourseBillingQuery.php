@@ -14,6 +14,7 @@ use Modules\Billing\Models\BillingSettings;
 use Modules\Billing\Models\Coupon;
 use Modules\Billing\Models\CouponRedemption;
 use Modules\Billing\Models\Invoice;
+use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PlanPrice;
 use Modules\Billing\Models\Subscription;
 use Modules\SharedKernel\Money\Money;
@@ -61,7 +62,7 @@ final class CourseBillingQuery
         );
     }
 
-    public function quote(string $planId, string $priceRegionId, string $payerId, string $studentId, ?string $couponCode): ?PriceQuote
+    public function quote(string $planId, string $priceRegionId, string $payerId, string $studentId, ?string $couponCode, int $lateJoinLessons = 0): ?PriceQuote
     {
         $price = PlanPrice::query()->where('plan_id', $planId)->where('price_region_id', $priceRegionId)->first();
         if ($price === null) {
@@ -80,7 +81,8 @@ final class CourseBillingQuery
             }
         }
 
-        $discounts = Discounts::on($price->amount_minor, $siblingBp, $coupon?->terms());
+        $perBlock = $lateJoinLessons > 0 ? (int) Plan::query()->whereKey($planId)->value('sessions_per_block') : 0;
+        $discounts = Discounts::on($price->amount_minor, $siblingBp, $coupon?->terms(), $lateJoinLessons > 0 ? [$lateJoinLessons, $perBlock] : null);
         if ($coupon !== null && ! in_array(Discount::COUPON, array_map(fn (Discount $d) => $d->source, $discounts), true)) {
             $note = __('billing::discounts.quote.sibling_bigger');     // kept for a later invoice
         }
@@ -88,9 +90,11 @@ final class CourseBillingQuery
         return new PriceQuote(
             price: Money::of($price->amount_minor, $price->currency),
             discounts: array_map(fn (Discount $d) => [
-                'label' => $d->source === Discount::COUPON
-                    ? __('billing::discounts.quote.coupon', ['code' => $coupon?->code, 'value' => $coupon?->valueLabel()])
-                    : __('billing::discounts.quote.sibling', ['rate' => Coupon::rate((int) $d->rateBp)]),
+                'label' => match ($d->source) {
+                    Discount::COUPON => __('billing::discounts.quote.coupon', ['code' => $coupon?->code, 'value' => $coupon?->valueLabel()]),
+                    Discount::LATE_JOIN => __('billing::discounts.quote.late_join', ['count' => $d->lessons]),
+                    default => __('billing::discounts.quote.sibling', ['rate' => Coupon::rate((int) $d->rateBp)]),
+                },
                 'amount' => Money::of($d->minor, $price->currency),
             ], $discounts),
             total: Money::of($price->amount_minor - Discounts::total($discounts), $price->currency),

@@ -72,6 +72,9 @@ return [
     'errors' => [
         'scope' => 'A plan is either per course or a shared package.',
         'scope_locked' => 'Students are on this plan, so whether it is per course or shared stays as it is. Make a new plan.',
+        'format' => 'Lessons are either private or group.',
+        'format_locked' => 'Students are on this plan, so its lessons stay private or group as they are. Make a new plan.',
+        'group_shared' => 'A group plan cannot be a shared package; choose "per course".',
         'shape_locked' => 'Students are on this plan, so its lesson length, lessons a week and lessons per block stay as they are. Make a new plan.',
         'vat_number' => 'A Saudi VAT number has 15 digits, starting and ending with 3.',
         'positive' => 'Length and number of sessions must be above zero.',

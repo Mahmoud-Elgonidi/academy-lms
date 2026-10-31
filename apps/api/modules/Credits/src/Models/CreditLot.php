@@ -18,6 +18,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property int $remaining_min
  * @property ?CarbonImmutable $expires_at
  * @property CarbonImmutable $created_at
+ * @property ?string $use_for a makeup lot kept for private or group makeup lessons; null: either
  */
 final class CreditLot extends Model
 {
@@ -26,7 +27,7 @@ final class CreditLot extends Model
 
     public const UPDATED_AT = null;
 
-    protected $fillable = ['account_id', 'source', 'source_id', 'granted_min', 'remaining_min', 'expires_at'];
+    protected $fillable = ['account_id', 'source', 'source_id', 'granted_min', 'remaining_min', 'expires_at', 'use_for'];
 
     protected function casts(): array
     {
@@ -41,7 +42,7 @@ final class CreditLot extends Model
 
     public function toBalance(): LotBalance
     {
-        return new LotBalance($this->id, $this->source->value, $this->remaining_min, $this->expires_at, $this->created_at);
+        return new LotBalance($this->id, $this->source->value, $this->remaining_min, $this->expires_at, $this->created_at, $this->use_for);
     }
 
     /**

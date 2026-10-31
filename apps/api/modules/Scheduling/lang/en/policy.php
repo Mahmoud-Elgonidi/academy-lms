@@ -102,6 +102,7 @@ return [
         'substitute_refused' => 'Declined the substitute',
         'enrollment_paused' => 'Course paused',
         'enrollment_ended' => 'Course ended',
+        'group_ended' => 'Group ended',
         'other' => 'Other',
     ],
     'preview' => [

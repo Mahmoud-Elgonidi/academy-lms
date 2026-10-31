@@ -30,11 +30,11 @@ final class CancelSession
         'teacher' => ['illness', 'emergency', 'technical', 'other'],
         'academy' => ['closure', 'emergency', 'unpaid', 'teacher_leave', 'other'],
         'family' => ['substitute_refused'],             // turned down the substitute for their teacher on leave
-        'system' => ['unpaid', 'holiday', 'teacher_leave', 'enrollment_paused', 'enrollment_ended'],
+        'system' => ['unpaid', 'holiday', 'teacher_leave', 'enrollment_paused', 'enrollment_ended', 'group_ended'],
     ];
 
-    /** Lessons a paused or ended course does not have. */
-    public const COURSE_STOPPED = ['enrollment_paused', 'enrollment_ended'];
+    /** Lessons a paused or ended course (or an ended group) does not have. */
+    public const COURSE_STOPPED = ['enrollment_paused', 'enrollment_ended', 'group_ended'];
 
     public function __construct(
         private readonly PolicyDecider $decider,

@@ -17,5 +17,6 @@ final readonly class NewPlan
         public int $sessionsPerWeek,
         public int $sessionsPerBlock,
         public array $prices,
+        public string $lessonFormat = 'private',   // private | group
     ) {}
 }

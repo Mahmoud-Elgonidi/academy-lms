@@ -32,15 +32,17 @@ use Modules\Credits\Models\CreditReservation;
 final class CorrectSettlement
 {
     /** @return int minutes that could not be taken back */
-    public function handle(string $sessionId, string $effect, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): int
+    public function handle(string $sessionId, string $effect, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null, ?string $accountId = null): int
     {
-        return DB::transaction(function () use ($sessionId, $effect, $actorId, $reason, $makeupDays) {
-            $accountId = CreditReservation::query()->where('session_id', $sessionId)->value('account_id');
+        return DB::transaction(function () use ($sessionId, $effect, $actorId, $reason, $makeupDays, $accountId) {
+            // A group lesson is decided again for one student: their own account's credit moves, keyed by it.
+            $perAccount = $accountId !== null;
+            $accountId = CreditReservation::accountFor($sessionId, $accountId);
             if ($accountId === null) {
                 return 0;
             }
             $account = CreditAccount::lock($accountId);
-            $reservation = CreditReservation::query()->where('session_id', $sessionId)->lockForUpdate()->firstOrFail();
+            $reservation = CreditReservation::of($sessionId, $accountId)->lockForUpdate()->firstOrFail();
             $now = self::settledAs($reservation);
             $want = match ($effect) {
                 'consumed', 'forfeit' => 'consumed',
@@ -50,12 +52,13 @@ final class CorrectSettlement
             if ($now === null || $now === $want) {
                 return 0;
             }
-            $corrections = CreditEntry::query()->where('session_id', $sessionId)->whereIn('type', ['restore', 'reclaim'])->count();
-            $key = "session:{$sessionId}:correct:{$corrections}";
+            $corrections = CreditEntry::query()->where('session_id', $sessionId)->where('account_id', $accountId)->whereIn('type', ['restore', 'reclaim'])->count();
+            $prefix = $perAccount ? "session:{$sessionId}:account:{$accountId}:correct:" : "session:{$sessionId}:correct:";
+            $key = $prefix.$corrections;
 
             if ($now === 'consumed' && $want === 'makeup') {
                 // What it used: all its minutes, or what the last reclaim took back (the rest was never used again).
-                $last = $corrections === 0 ? null : CreditEntry::query()->where('idempotency_key', 'session:'.$sessionId.':correct:'.($corrections - 1))->first();
+                $last = $corrections === 0 ? null : CreditEntry::query()->where('idempotency_key', $prefix.($corrections - 1))->first();
                 $used = $last?->type === 'reclaim' ? $last->minutes : $reservation->minutes;
                 $lot = $used === 0 ? null : CreditLot::query()->create([
                     'account_id' => $account->id,

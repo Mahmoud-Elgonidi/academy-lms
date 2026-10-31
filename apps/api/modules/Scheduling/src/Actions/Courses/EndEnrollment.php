@@ -13,6 +13,7 @@ use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Enrollment\Contracts\EnrollmentStatus;
 use Modules\Scheduling\Actions\CancelSession;
 use Modules\Scheduling\Actions\Dst\PlanDstChanges;
+use Modules\Scheduling\Actions\Groups\LeaveGroup;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Models\RecurringSlot;
 use Modules\Scheduling\Domain\Models\Session;
@@ -33,7 +34,10 @@ use Modules\SharedKernel\Audit\AuditTrail;
  * to the teacher ends as for any course that is not running
  * (MessagingRules). The family and the teacher hear it (EnrollmentEnded).
  * An ended course never comes back: a new enrollment is the way back. An
- * end set ahead completes on its day (FollowCourseDays → complete()).
+ * end set ahead completes on its day (FollowCourseDays → complete()). A
+ * course in a group leaves it on that day (LeaveGroup): its seat is free
+ * from then, and the student comes out of the group's lessons from then
+ * on; the group's lessons go on for the others.
  */
 final class EndEnrollment
 {
@@ -44,6 +48,7 @@ final class EndEnrollment
         private readonly CancelSession $cancel,
         private readonly CourseDays $days,
         private readonly PlanDstChanges $dst,
+        private readonly LeaveGroup $leave,
     ) {}
 
     /**
@@ -80,6 +85,7 @@ final class EndEnrollment
             $lessons = $this->lessons($enrollmentId, $endsAt);
             $minutes = PauseEnrollment::paidMinutes($lessons);
             $cancelled = $this->cancelFrom($lessons, $actorId);
+            $this->leave->handle($enrollmentId, $day, $actorId);
             $this->endSlots($enrollmentId, $endsAt, now: $day->lessThanOrEqualTo($today));
             $billing = $day->lessThanOrEqualTo($today) ? $this->billing->closeEndedCourse($enrollmentId, $actorId) : null;
 

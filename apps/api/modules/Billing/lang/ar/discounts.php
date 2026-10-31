@@ -5,6 +5,7 @@ return [
     'quote' => [
         'sibling' => 'خصم الإخوة (:rate)',
         'coupon' => 'كوبون :code (:value)',
+        'late_join' => 'حصص فاتت قبل الانضمام (:count)',
         'sibling_bigger' => 'خصم الإخوة أكبر، فهو الذي سيُطبَّق الآن، وسينتظر الكوبون فاتورة قادمة.',
     ],
     'errors' => [

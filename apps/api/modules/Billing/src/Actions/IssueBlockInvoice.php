@@ -94,7 +94,7 @@ final class IssueBlockInvoice
 
         return array_map(
             fn (array $line) => $line + ['subscription_id' => $subscription->id],
-            [$block, ...$this->discounts->lines($subscription, $subscription->amount_minor, withCoupon: true)],
+            [$block, ...$this->discounts->lines($subscription, $subscription->amount_minor, withCoupon: true, lateJoin: $blockNo === 1)],
         );
     }
 

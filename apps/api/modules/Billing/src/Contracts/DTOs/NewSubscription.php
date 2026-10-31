@@ -15,5 +15,6 @@ final readonly class NewSubscription
         public string $subjectNameEn,
         public ?string $actorId = null,
         public ?string $couponCode = null,     // a coupon to put on it before its first invoice
+        public int $lateJoinLessons = 0,       // a group's lessons held before the course joined it: taken off block 1
     ) {}
 }

@@ -18,6 +18,17 @@ interface PeopleApi
 
     public function saveTeacherProfile(TeacherProfileData $profile): void;
 
+    /** The most students one of this teacher's group lessons may hold; null when they take no groups. */
+    public function groupCapacity(string $teacherId): ?int;
+
+    /**
+     * groupCapacity() for many teachers in one read (Find a teacher's group mode).
+     *
+     * @param  list<string>  $teacherIds
+     * @return array<string, int> by teacher id; one who takes no groups is left out
+     */
+    public function groupCapacities(array $teacherIds): array;
+
     /** @return list<string> ids of the student's guardians; with $reportsOnly, those who asked for reports */
     public function guardiansOf(string $studentId, bool $reportsOnly = false): array;
 

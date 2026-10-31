@@ -6,6 +6,7 @@ return [
         'extra' => ':subject — حصص إضافية (:minutes دقيقة للحصة)',
         'sibling' => 'خصم الإخوة (:rate)',
         'coupon' => 'كوبون :code (:value)',
+        'late_join' => 'حصص فاتت قبل الانضمام إلى المجموعة (:count)',
         'shared' => 'باقة مشتركة',
     ],
     'statuses' => [

@@ -10,8 +10,9 @@ use Modules\Scheduling\Domain\Models\RecurringSlot;
 use Modules\Scheduling\Domain\Slots\WeeklyTime;
 
 /**
- * Books an enrollment's weekly times with its teacher. The database refuses
- * a weekly time that overlaps another live one of the same teacher.
+ * Books an enrollment's weekly times with its teacher, or a group's (then no
+ * enrollment and no student: $groupId). The database refuses a weekly time
+ * that overlaps another live one of the same teacher.
  */
 final class CreateRecurringSlots
 {
@@ -19,11 +20,12 @@ final class CreateRecurringSlots
      * @param  array<int, array{time: WeeklyTime, from: CarbonImmutable, until?: ?CarbonImmutable}>  $times  on the teacher's clock, each from its first local date (and up to a local date, excluded)
      * @return list<RecurringSlot>
      */
-    public function handle(string $enrollmentId, string $teacherId, string $studentId, string $anchorTz, array $times, ?string $actorId): array
+    public function handle(?string $enrollmentId, string $teacherId, ?string $studentId, string $anchorTz, array $times, ?string $actorId, ?string $groupId = null): array
     {
         try {
             return DB::transaction(fn () => array_map(fn (array $t) => RecurringSlot::query()->create([
                 'enrollment_id' => $enrollmentId,
+                'group_id' => $groupId,
                 'teacher_id' => $teacherId,
                 'student_id' => $studentId,
                 'weekday' => $t['time']->weekday,

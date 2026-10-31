@@ -1135,7 +1135,7 @@ final class FindTeacher extends Page
     private function matchingPlans(): array
     {
         return array_values(array_filter(
-            app(BillingApi::class)->planOptions((int) $this->data['duration']),
+            app(BillingApi::class)->planOptions((int) $this->data['duration'], 'private'),
             // A shared package's lessons a week are across the student's courses, so only its length has to match.
             fn (PlanOption $p) => $p->sessionMinutes === (int) $this->data['duration'] && ($p->shared || $p->sessionsPerWeek === count($this->picked)),
         ));

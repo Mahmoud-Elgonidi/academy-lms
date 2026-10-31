@@ -72,12 +72,51 @@ final class CreditsService implements CreditsApi
 
     public function settledAs(string $sessionId): ?string
     {
-        return CorrectSettlement::settledAs(CreditReservation::query()->where('session_id', $sessionId)->first());
+        $accountId = CreditReservation::accountFor($sessionId, null);
+
+        return $accountId === null ? null : CorrectSettlement::settledAs(CreditReservation::of($sessionId, $accountId)->first());
     }
 
     public function correct(string $sessionId, string $effect, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): int
     {
         return $this->correct->handle($sessionId, $effect, $actorId, $reason, $makeupDays);
+    }
+
+    public function grantMakeup(string $accountId, int $minutes, int $days, ?string $sourceId, string $idempotencyKey, ?string $actorId = null, ?string $reason = null, ?string $useFor = null): string
+    {
+        $expires = CarbonImmutable::now()->addDays(max(1, $days))->endOfDay();
+
+        return $this->grant->handle($accountId, LotSource::Makeup, $sourceId, $minutes, $expires, $idempotencyKey, $actorId, $reason, $useFor)->id;
+    }
+
+    public function reserveFor(string $sessionId, string $accountId, int $minutes, CarbonImmutable $usableAt, string $idempotencyKey, bool $forMakeup = false, string $makeupFor = 'private'): bool
+    {
+        return $this->reserve->handle($sessionId, $accountId, $minutes, $usableAt, $idempotencyKey, $forMakeup, $makeupFor);
+    }
+
+    public function consumeFor(string $sessionId, string $accountId, string $idempotencyKey, ?string $reason = null): void
+    {
+        $this->consume->handle($sessionId, $idempotencyKey, $reason, $accountId);
+    }
+
+    public function releaseFor(string $sessionId, string $accountId, ReleaseMode $mode, string $idempotencyKey, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): void
+    {
+        $this->release->handle($sessionId, $mode, $idempotencyKey, $actorId, $reason, $makeupDays, $accountId);
+    }
+
+    public function correctFor(string $sessionId, string $accountId, string $effect, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): int
+    {
+        return $this->correct->handle($sessionId, $effect, $actorId, $reason, $makeupDays, $accountId);
+    }
+
+    public function isReservedFor(string $sessionId, string $accountId): bool
+    {
+        return CreditReservation::of($sessionId, $accountId)->where('status', 'held')->exists();
+    }
+
+    public function settledAsFor(string $sessionId, string $accountId): ?string
+    {
+        return CorrectSettlement::settledAs(CreditReservation::of($sessionId, $accountId)->first());
     }
 
     public function balance(string $accountId): CreditBalance

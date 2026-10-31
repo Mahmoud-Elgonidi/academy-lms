@@ -18,7 +18,9 @@ use Modules\Credits\Contracts\CreditsApi;
  * Puts an enrollment on a plan at the payer's regional price, sets the
  * credit account's renewal mark (N sessions left) and issues block 1,
  * with a coupon on it when one was given (a code that cannot be used
- * stops the whole enrolment and says why).
+ * stops the whole enrolment and says why). A course joining a group late
+ * on a group plan has the lessons it missed taken off block 1 (at most the
+ * block's lessons).
  */
 final class SubscribeEnrollment
 {
@@ -84,6 +86,7 @@ final class SubscribeEnrollment
             'amount_minor' => $price->amount_minor,
             'currency' => $price->currency,
             'block_no' => $blocksPaid,
+            'late_join_lessons' => $plan->isGroup() ? max(0, min($new->lateJoinLessons, (int) $plan->sessions_per_block)) : 0,
         ]);
 
         $lowMark = $plan->terms()->lowBalanceMinutes();

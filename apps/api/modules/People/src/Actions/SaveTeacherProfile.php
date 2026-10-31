@@ -15,6 +15,9 @@ use Modules\People\Models\TeacherProfile;
  * the ages they teach, their caps, and the subjects they teach with the
  * levels (from one to another) and categories of each. A subject given
  * without its details keeps the ones it had (an import updating a teacher).
+ * Whether they take group lessons, and how many students one may hold
+ * (2–20); left out, both stay. Groups already formed keep their seats
+ * (Scheduling checks a group's capacity against this at every change).
  */
 final class SaveTeacherProfile
 {
@@ -35,6 +38,9 @@ final class SaveTeacherProfile
         if ($data->maxWeeklyMinutes !== null && ($data->maxWeeklyMinutes < 30 || $data->maxWeeklyMinutes > 100 * 60)) {
             throw ValidationException::withMessages(['max_weekly_hours' => __($e.'max_weekly')]);
         }
+        if ($data->acceptsGroups === true && ($data->maxGroupSize === null || $data->maxGroupSize < 2 || $data->maxGroupSize > 20)) {
+            throw ValidationException::withMessages(['max_group_size' => __($e.'max_group')]);
+        }
         $details = [];
         foreach ($data->subjects as $subject) {
             $details[$subject->subjectId] = $this->checked($subject);
@@ -52,6 +58,10 @@ final class SaveTeacherProfile
                 'max_weekly_min' => $data->maxWeeklyMinutes,
                 'max_daily_lessons' => $data->maxDailyLessons,
             ]);
+            if ($data->acceptsGroups !== null) {
+                $profile->accepts_groups = $data->acceptsGroups;
+                $profile->max_group_size = $data->acceptsGroups ? $data->maxGroupSize : null;
+            }
             if ($data->ageGroups !== null || ! $profile->exists) {
                 $profile->age_groups = array_values(array_unique($data->ageGroups ?? []));
             }

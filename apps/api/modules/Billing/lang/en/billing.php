@@ -6,6 +6,7 @@ return [
         'extra' => ':subject — extra lessons (:minutes min each)',
         'sibling' => 'Sibling discount (:rate)',
         'coupon' => 'Coupon :code (:value)',
+        'late_join' => 'Lessons held before joining the group (:count)',
         'shared' => 'Shared package',
     ],
     'statuses' => [

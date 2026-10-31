@@ -100,7 +100,7 @@ final class ShiftSlotTimes
                     if ($end !== null && ($origEnd === null || $end < $origEnd)) {
                         $times[] = ['time' => $slot->weeklyTime(), 'from' => CarbonImmutable::parse($end), 'until' => $origEnd ? CarbonImmutable::parse($origEnd) : null];
                     }
-                    $created = $this->slots->handle($slot->enrollment_id, $slot->teacher_id, $slot->student_id, $slot->anchor_tz, $times, $actorId);
+                    $created = $this->slots->handle($slot->enrollment_id, $slot->teacher_id, $slot->student_id, $slot->anchor_tz, $times, $actorId, $slot->group_id);
                     $shifted[$slot->id] = $created[0];
 
                     // Every lesson of the old slot from the period on follows its new slot (by its occurrence date),

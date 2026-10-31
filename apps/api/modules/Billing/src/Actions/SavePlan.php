@@ -17,14 +17,15 @@ use Modules\SharedKernel\Money\Money;
  * Subscriptions keep the price they were sold at, so a new price applies to
  * new enrolments only. A plan is per course or a shared package ("12
  * lessons in any subject"); which, and its shape (lesson length, lessons a
- * week and per block, which renewals and lesson prices read from it), are
- * fixed once anyone is on it: another shape is another plan.
+ * week and per block, which renewals and lesson prices read from it, and
+ * whether its lessons are private or group), are fixed once anyone is on
+ * it: another shape is another plan. A group plan is never a shared package.
  */
 final class SavePlan
 {
     /**
      * @param  array{name_ar: string, name_en: string, session_minutes: int|string, sessions_per_block: int|string, sessions_per_week: int|string,
-     *               validity_days?: int|string|null, renew_at_sessions?: int|string|null, is_active?: bool, credit_scope?: ?string,
+     *               validity_days?: int|string|null, renew_at_sessions?: int|string|null, is_active?: bool, credit_scope?: ?string, lesson_format?: ?string,
      *               prices?: list<array{price_region_id: string, amount: string|int|float|null}>}  $data
      */
     public function handle(?Plan $plan, array $data): Plan
@@ -41,9 +42,19 @@ final class SavePlan
         if (! in_array($scope, ['enrollment', Plan::SHARED], true)) {
             throw ValidationException::withMessages(['credit_scope' => __('billing::plans.errors.scope')]);
         }
+        $format = $data['lesson_format'] ?? $plan?->lesson_format ?? Plan::PRIVATE;
+        if (! in_array($format, [Plan::PRIVATE, Plan::GROUP], true)) {
+            throw ValidationException::withMessages(['lesson_format' => __('billing::plans.errors.format')]);
+        }
+        if ($format === Plan::GROUP && $scope === Plan::SHARED) {
+            throw ValidationException::withMessages(['credit_scope' => __('billing::plans.errors.group_shared')]);
+        }
         if ($plan?->exists && Subscription::query()->where('plan_id', $plan->id)->exists()) {
             if ($scope !== $plan->credit_scope) {
                 throw ValidationException::withMessages(['credit_scope' => __('billing::plans.errors.scope_locked')]);
+            }
+            if ($format !== $plan->lesson_format) {
+                throw ValidationException::withMessages(['lesson_format' => __('billing::plans.errors.format_locked')]);
             }
             if ([$minutes, $perWeek, $perBlock] !== [(int) $plan->session_minutes, (int) $plan->sessions_per_week, (int) $plan->sessions_per_block]) {
                 throw ValidationException::withMessages(['session_minutes' => __('billing::plans.errors.shape_locked')]);
@@ -67,7 +78,7 @@ final class SavePlan
             $prices[$row['price_region_id']] = $money;
         }
 
-        return DB::transaction(function () use ($plan, $data, $perBlock, $perWeek, $minutes, $prices, $scope) {
+        return DB::transaction(function () use ($plan, $data, $perBlock, $perWeek, $minutes, $prices, $scope, $format) {
             $plan ??= new Plan;
             $plan->fill([
                 'name_ar' => trim($data['name_ar']),
@@ -79,6 +90,7 @@ final class SavePlan
                 'renew_at_sessions' => max(0, min($perBlock - 1, (int) ($data['renew_at_sessions'] ?? 2))),
                 'is_active' => (bool) ($data['is_active'] ?? true),
                 'credit_scope' => $scope,
+                'lesson_format' => $format,
             ])->save();
 
             $plan->prices()->whereNotIn('price_region_id', array_keys($prices))->delete();
@@ -90,6 +102,7 @@ final class SavePlan
                 'name' => $plan->name(),
                 'prices' => implode(' · ', array_map(fn (Money $m) => $m->format(), $prices)) ?: '—',
                 'active' => $plan->is_active,
+                'format' => $plan->lesson_format,
             ]);
 
             return $plan;

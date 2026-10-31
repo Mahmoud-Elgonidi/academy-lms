@@ -86,6 +86,9 @@ final class BringExistingSchedule implements ScheduleImport
             if ($plan === null) {
                 throw ValidationException::withMessages(['plan' => __('scheduling::find.errors.plan')]);
             }
+            if ($plan->group) {
+                throw ValidationException::withMessages(['plan' => __('scheduling::groups.errors.plan_is_group')]);
+            }
             if ($plan->sessionMinutes !== $s->durationMin || $plan->sessionsPerWeek !== $count) {
                 throw ValidationException::withMessages(['plan' => __('scheduling::find.errors.plan_mismatch', ['minutes' => $s->durationMin, 'per_week' => $count])]);
             }

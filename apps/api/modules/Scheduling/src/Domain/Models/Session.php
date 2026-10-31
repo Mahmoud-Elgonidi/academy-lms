@@ -25,6 +25,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?string $original_teacher_id
  * @property string $subject_id
  * @property ?string $enrollment_id
+ * @property ?string $group_id a group's lesson (enrollment_id null; each student's course is on their participant row)
  * @property ?string $slot_id
  * @property ?string $occurrence_key
  * @property CarbonImmutable $starts_at
@@ -45,7 +46,7 @@ final class Session extends Model
     protected $table = 'sessions';
 
     protected $fillable = [
-        'type', 'teacher_id', 'original_teacher_id', 'subject_id', 'enrollment_id', 'slot_id', 'occurrence_key', 'starts_at', 'ends_at',
+        'type', 'teacher_id', 'original_teacher_id', 'subject_id', 'enrollment_id', 'group_id', 'slot_id', 'occurrence_key', 'starts_at', 'ends_at',
         'status', 'review_reason', 'funding_status', 'makeup_for_session_id', 'anchor_tz', 'decision',
     ];
 
@@ -82,6 +83,11 @@ final class Session extends Model
     public function participant(ParticipantRole $role): ?SessionParticipant
     {
         return $this->participants->first(fn (SessionParticipant $p) => $p->role === $role && $p->is_active);
+    }
+
+    public function isGroup(): bool
+    {
+        return $this->group_id !== null;
     }
 
     public function durationMinutes(): int

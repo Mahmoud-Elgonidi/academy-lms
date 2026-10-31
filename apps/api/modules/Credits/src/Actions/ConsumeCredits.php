@@ -7,21 +7,25 @@ use Modules\Credits\Models\CreditAccount;
 use Modules\Credits\Models\CreditEntry;
 use Modules\Credits\Models\CreditReservation;
 
-/** The session took place (or its minutes were forfeited): the reserved minutes are used. */
+/**
+ * The session took place (or its minutes were forfeited): the reserved
+ * minutes are used. A group lesson names the student's account; a
+ * one-to-one lesson has one reservation and needs none.
+ */
 final class ConsumeCredits
 {
     public function __construct(private readonly LowBalanceWatch $watch) {}
 
-    public function handle(string $sessionId, string $idempotencyKey, ?string $reason = null): void
+    public function handle(string $sessionId, string $idempotencyKey, ?string $reason = null, ?string $accountId = null): void
     {
-        DB::transaction(function () use ($sessionId, $idempotencyKey, $reason) {
-            $accountId = CreditReservation::query()->where('session_id', $sessionId)->value('account_id');
+        DB::transaction(function () use ($sessionId, $idempotencyKey, $reason, $accountId) {
+            $accountId = CreditReservation::accountFor($sessionId, $accountId);
             if ($accountId === null) {
                 return;
             }
 
             $account = CreditAccount::lock($accountId);
-            $reservation = CreditReservation::heldFor($sessionId);
+            $reservation = CreditReservation::heldFor($sessionId, $accountId);
             if ($reservation === null || CreditEntry::recorded($idempotencyKey)) {
                 return;
             }

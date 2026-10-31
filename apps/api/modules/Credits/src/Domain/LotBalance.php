@@ -13,5 +13,6 @@ final readonly class LotBalance
         public int $remainingMin,
         public ?CarbonImmutable $expiresAt,
         public CarbonImmutable $createdAt,
+        public ?string $useFor = null,          // a makeup lot kept for private or group makeup lessons; null: either
     ) {}
 }

@@ -60,6 +60,10 @@ final class EnrollStudent
         if ($plan === null) {
             throw ValidationException::withMessages(['plan' => __('scheduling::find.errors.plan')]);
         }
+        if ($plan->group) {
+            // Private lessons take a private plan; a group plan is for a seat in a group (JoinGroup).
+            throw ValidationException::withMessages(['plan' => __('scheduling::groups.errors.plan_is_group')]);
+        }
         if ($plan->sessionMinutes !== $duration || (! $plan->shared && $plan->sessionsPerWeek !== count($times))) {
             throw ValidationException::withMessages(['plan' => __('scheduling::find.errors.plan_mismatch', [
                 'minutes' => $duration, 'per_week' => count($times),

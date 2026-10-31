@@ -11,6 +11,9 @@ use Modules\Enrollment\Contracts\DTOs\EnrollmentData;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Scheduling\Actions\CancelSession;
 use Modules\Scheduling\Actions\Dst\PlanDstChanges;
+use Modules\Scheduling\Actions\FundSessions;
+use Modules\Scheduling\Actions\Groups\GroupSeats;
+use Modules\Scheduling\Actions\Groups\LeaveGroup;
 use Modules\Scheduling\Domain\Enums\FundingStatus;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Models\Session;
@@ -30,7 +33,10 @@ use Modules\SharedKernel\Audit\AuditTrail;
  * set may be made longer: only the added days are cancelled and given back.
  * The course comes back by itself the day after (ResumeEnrollment through
  * FollowCourseDays), or earlier when the office resumes it. The family and
- * the teacher hear it once (EnrollmentPaused), not once a lesson.
+ * the teacher hear it once (EnrollmentPaused), not once a lesson. A
+ * course in a group keeps its seat: the student is taken out of the group's
+ * lessons in those days, with their minutes given back, and the group's
+ * lessons go on for the others.
  */
 final class PauseEnrollment
 {
@@ -40,6 +46,8 @@ final class PauseEnrollment
         private readonly CancelSession $cancel,
         private readonly CourseDays $days,
         private readonly PlanDstChanges $dst,
+        private readonly GroupSeats $seats,
+        private readonly FundSessions $fund,
     ) {}
 
     /**
@@ -77,6 +85,12 @@ final class PauseEnrollment
 
             $lessons = $this->lessons($course, $first, $last);
             $minutes = self::paidMinutes($lessons);
+            $seats = 0;
+            if (LeaveGroup::memberOf($course->id) !== null) {
+                [$from, $until] = $this->days->span($first, $last);
+                $seats = $this->seats->unseatFrom($course->id, $from, $until, $actorId, 'enrollment_paused');
+                $this->fund->handle($course->id);    // the minutes back pay for the seats after the pause
+            }
             $cancelled = 0;
             foreach ($lessons as $lesson) {
                 try {
@@ -89,7 +103,7 @@ final class PauseEnrollment
 
             app(AuditTrail::class)->record('enrollment.paused', 'enrollment', $course->id, [
                 'from' => $first->toDateString(), 'until' => $last->toDateString(), 'reason' => trim($reason), 'lessons' => $cancelled, 'minutes' => $minutes, 'days' => $days,
-            ]);
+            ] + ($seats > 0 ? ['group_lessons' => $seats] : []));
             $this->dst->handle(enrollmentIds: [$course->id]);
 
             return ['cancelled' => $cancelled, 'minutes' => $minutes, 'days' => $days];

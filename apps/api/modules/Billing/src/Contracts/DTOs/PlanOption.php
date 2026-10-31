@@ -21,5 +21,6 @@ final readonly class PlanOption
         public array $prices,
         public array $names = [],
         public bool $shared = false,          // a shared package: one balance for all of a student's courses on it
+        public bool $group = false,           // group lessons: several students in one lesson; else private
     ) {}
 }

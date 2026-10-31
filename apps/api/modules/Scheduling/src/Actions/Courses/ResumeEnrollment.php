@@ -8,6 +8,8 @@ use Illuminate\Validation\ValidationException;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Scheduling\Actions\Dst\PlanDstChanges;
 use Modules\Scheduling\Actions\FundSessions;
+use Modules\Scheduling\Actions\Groups\GroupSeats;
+use Modules\Scheduling\Actions\Groups\LeaveGroup;
 use Modules\Scheduling\Actions\MaterializeSessions;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Models\Session;
@@ -23,6 +25,7 @@ use Modules\SharedKernel\Audit\AuditTrail;
  * free to be made again), the weekly times become lessons up to the
  * horizon, and the balance funds them in date order. The credit keeps the
  * days the pause gave it. The family and the teacher hear it (EnrollmentResumed).
+ * A course in a group takes its seat again in the group's lessons from now.
  */
 final class ResumeEnrollment
 {
@@ -32,6 +35,7 @@ final class ResumeEnrollment
         private readonly FundSessions $fund,
         private readonly CourseDays $days,
         private readonly PlanDstChanges $dst,
+        private readonly GroupSeats $seats,
     ) {}
 
     /** @return int lessons made from now */
@@ -50,6 +54,9 @@ final class ResumeEnrollment
                 ->whereRaw("decision->>'reason' = 'enrollment_paused'")->where('starts_at', '>', $now)->whereNotNull('occurrence_key')
                 ->update(['occurrence_key' => null]);
             $made = count($this->materialize->handle([$course->id], $now, $actorId)['created']);
+            if (($member = LeaveGroup::memberOf($course->id)) !== null) {
+                $made += $this->seats->seatFrom($member, $now, null, $actorId);
+            }
             $this->fund->handle($course->id, $now);
 
             app(AuditTrail::class)->record('enrollment.resumed', 'enrollment', $course->id, array_filter([

@@ -37,8 +37,8 @@ interface BillingApi
      */
     public function recordPayment(string $invoiceId, string $method, Money $amount, ?string $reference, CarbonImmutable $receivedAt, ?string $actorId): void;
 
-    /** @return list<PlanOption> active plans, those with this session length first */
-    public function planOptions(?int $sessionMinutes = null): array;
+    /** @return list<PlanOption> active plans, those with this session length first; with a format (private, group), only those */
+    public function planOptions(?int $sessionMinutes = null, ?string $lessonFormat = null): array;
 
     /** @return list<RegionOption> */
     public function regions(): array;
@@ -56,9 +56,11 @@ interface BillingApi
     /**
      * What a first block would come to for this student and payer: the
      * plan's regional price, the family discount, the coupon (or why it
-     * cannot be used). Null when the plan has no price in the region.
+     * cannot be used), and a group's lessons the course joins too late for
+     * (the lesson's price each, at most the block). Null when the plan has no
+     * price in the region.
      */
-    public function quote(string $planId, string $priceRegionId, string $payerId, string $studentId, ?string $couponCode = null): ?PriceQuote;
+    public function quote(string $planId, string $priceRegionId, string $payerId, string $studentId, ?string $couponCode = null, int $lateJoinLessons = 0): ?PriceQuote;
 
     /** A course's money side: extra lessons' price, its coupon, invoices waiting. Null without a subscription. */
     public function courseBilling(string $enrollmentId): ?CourseBilling;

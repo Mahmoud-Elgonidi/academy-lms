@@ -19,6 +19,8 @@ use Modules\Scheduling\Support\MinorsGuard;
  * from makeup credit only (docs/architecture/01, "رصيد تعويض"): it must be
  * valid on that day, and a makeup that is then cancelled is not made up again.
  * Not on a paused day of the course, nor once it has ended (CourseDays).
+ * Makeup credit kept for group makeup lessons (a late join's) pays only for
+ * BookGroupMakeup; the rest pays for this.
  */
 final class BookMakeup
 {
@@ -39,7 +41,11 @@ final class BookMakeup
         }
 
         $this->minors->assert($enrollment->teacherId, $enrollment->studentId);
-        $duration = (int) (DB::table('recurring_slots')->where('enrollment_id', $enrollmentId)->value('duration_min') ?? 30);
+        // A course in a group has no weekly times of its own: its lessons are the group's length.
+        $duration = (int) (DB::table('recurring_slots')->where('enrollment_id', $enrollmentId)->value('duration_min')
+            ?? DB::table('group_members as m')->join('lesson_groups as g', fn ($j) => $j->on('g.academy_id', '=', 'm.academy_id')->on('g.id', '=', 'm.group_id'))
+                ->where('m.enrollment_id', $enrollmentId)->orderByDesc('m.joined_on')->value('g.session_minutes')
+            ?? 30);
         $startsAt = $startsAt->utc();
         $endsAt = $startsAt->addMinutes($duration);
         if ($startsAt->isPast()) {

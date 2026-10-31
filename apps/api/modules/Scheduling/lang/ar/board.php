@@ -292,6 +292,8 @@ return [
         'contact' => 'تواصل :actor مع :target: :outcome',
         'decision_allow_unfunded' => 'سمح :actor بالحصة دون دفع',
         'decision_funded' => 'دُفعت من الرصيد',
+        'decision_student_added' => 'انضم طالب إلى الحصة',
+        'decision_student_removed' => 'خرج طالب من الحصة',
         'policy' => 'السياسة (القاعدة :rule): الرصيد :credit',
         'rescheduled' => 'أجّلها :actor (كانت :from)',
         'teacher_changed' => 'نقلها :actor إلى معلّم آخر',

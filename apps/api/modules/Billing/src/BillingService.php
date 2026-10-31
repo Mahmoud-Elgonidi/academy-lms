@@ -56,9 +56,10 @@ final class BillingService implements BillingApi
         $this->payments->handle($invoiceId, $method, $amount, $reference, $receivedAt, null, $actorId);
     }
 
-    public function planOptions(?int $sessionMinutes = null): array
+    public function planOptions(?int $sessionMinutes = null, ?string $lessonFormat = null): array
     {
         return Plan::query()->where('is_active', true)->with('prices')
+            ->when($lessonFormat !== null, fn ($q) => $q->where('lesson_format', $lessonFormat))
             ->orderByRaw('session_minutes = ? desc', [$sessionMinutes ?? 0])
             ->orderBy('sort')->orderBy('session_minutes')->orderBy('sessions_per_week')->orderBy('sessions_per_block')
             ->get()
@@ -72,6 +73,7 @@ final class BillingService implements BillingApi
                 prices: $plan->prices->mapWithKeys(fn (PlanPrice $p) => [$p->price_region_id => $p->money()])->all(),
                 names: [$plan->name_ar, $plan->name_en],
                 shared: $plan->isShared(),
+                group: $plan->isGroup(),
             ))
             ->all();
     }
@@ -84,6 +86,7 @@ final class BillingService implements BillingApi
             'session_minutes' => $plan->sessionMinutes,
             'sessions_per_week' => $plan->sessionsPerWeek,
             'sessions_per_block' => $plan->sessionsPerBlock,
+            'lesson_format' => $plan->lessonFormat,
             'prices' => collect($plan->prices)->map(fn (string $amount, string $region) => ['price_region_id' => $region, 'amount' => $amount])->values()->all(),
         ])->id;
     }
@@ -118,9 +121,9 @@ final class BillingService implements BillingApi
             ->all();
     }
 
-    public function quote(string $planId, string $priceRegionId, string $payerId, string $studentId, ?string $couponCode = null): ?PriceQuote
+    public function quote(string $planId, string $priceRegionId, string $payerId, string $studentId, ?string $couponCode = null, int $lateJoinLessons = 0): ?PriceQuote
     {
-        return $this->courses->quote($planId, $priceRegionId, $payerId, $studentId, $couponCode);
+        return $this->courses->quote($planId, $priceRegionId, $payerId, $studentId, $couponCode, $lateJoinLessons);
     }
 
     public function courseBilling(string $enrollmentId): ?CourseBilling

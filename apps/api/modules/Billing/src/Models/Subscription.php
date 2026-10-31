@@ -25,19 +25,20 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property string $currency
  * @property string $status active | past_due | paused | cancelled
  * @property int $block_no blocks paid so far
+ * @property int $late_join_lessons lessons a group held before the course joined it, taken off block 1
  */
 final class Subscription extends Model
 {
     use BelongsToTenant;
     use HasUuids;
 
-    protected $fillable = ['billing_account_id', 'enrollment_id', 'plan_id', 'credit_account_id', 'amount_minor', 'currency', 'status', 'block_no'];
+    protected $fillable = ['billing_account_id', 'enrollment_id', 'plan_id', 'credit_account_id', 'amount_minor', 'currency', 'status', 'block_no', 'late_join_lessons'];
 
-    protected $attributes = ['status' => 'active', 'block_no' => 0];
+    protected $attributes = ['status' => 'active', 'block_no' => 0, 'late_join_lessons' => 0];
 
     protected function casts(): array
     {
-        return ['amount_minor' => 'integer', 'block_no' => 'integer'];
+        return ['amount_minor' => 'integer', 'block_no' => 'integer', 'late_join_lessons' => 'integer'];
     }
 
     /** @return BelongsTo<Plan, $this> */

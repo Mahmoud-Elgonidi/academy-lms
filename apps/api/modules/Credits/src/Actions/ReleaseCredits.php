@@ -24,16 +24,16 @@ final class ReleaseCredits
 
     public function __construct(private readonly LowBalanceWatch $watch) {}
 
-    public function handle(string $sessionId, ReleaseMode $mode, string $idempotencyKey, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null): void
+    public function handle(string $sessionId, ReleaseMode $mode, string $idempotencyKey, ?string $actorId = null, ?string $reason = null, ?int $makeupDays = null, ?string $accountId = null): void
     {
-        DB::transaction(function () use ($sessionId, $mode, $idempotencyKey, $actorId, $reason, $makeupDays) {
-            $accountId = CreditReservation::query()->where('session_id', $sessionId)->value('account_id');
+        DB::transaction(function () use ($sessionId, $mode, $idempotencyKey, $actorId, $reason, $makeupDays, $accountId) {
+            $accountId = CreditReservation::accountFor($sessionId, $accountId);
             if ($accountId === null) {
                 return;
             }
 
             $account = CreditAccount::lock($accountId);
-            $reservation = CreditReservation::heldFor($sessionId);
+            $reservation = CreditReservation::heldFor($sessionId, $accountId);
             if ($reservation === null || CreditEntry::recorded($idempotencyKey)) {
                 return;
             }

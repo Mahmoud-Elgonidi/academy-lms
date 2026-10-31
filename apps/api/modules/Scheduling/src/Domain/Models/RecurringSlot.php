@@ -9,14 +9,17 @@ use Modules\Scheduling\Domain\Slots\WeeklyTime;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
- * An enrollment's weekly time on the teacher's clock. Sessions are generated
+ * An enrollment's weekly time on the teacher's clock, or a group's (then
+ * no enrollment and no student: its members are the group's).
+ Sessions are generated
  * from it over the horizon; minute_of_week and effective back the exclusion
  * constraint that keeps one teacher's weekly times apart.
  *
  * @property string $id
- * @property string $enrollment_id
+ * @property ?string $enrollment_id
+ * @property ?string $group_id
  * @property string $teacher_id
- * @property string $student_id
+ * @property ?string $student_id
  * @property int $weekday
  * @property string $local_start
  * @property int $duration_min
@@ -29,7 +32,7 @@ final class RecurringSlot extends Model
     use BelongsToTenant;
     use HasUuids;
 
-    protected $fillable = ['enrollment_id', 'teacher_id', 'student_id', 'weekday', 'local_start', 'duration_min', 'anchor_tz', 'status', 'minute_of_week', 'effective', 'created_by'];
+    protected $fillable = ['enrollment_id', 'group_id', 'teacher_id', 'student_id', 'weekday', 'local_start', 'duration_min', 'anchor_tz', 'status', 'minute_of_week', 'effective', 'created_by'];
 
     protected $attributes = ['status' => 'active'];
 

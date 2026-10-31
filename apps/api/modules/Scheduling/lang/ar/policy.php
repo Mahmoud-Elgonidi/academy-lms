@@ -102,6 +102,7 @@ return [
         'substitute_refused' => 'رُفض المعلّم البديل',
         'enrollment_paused' => 'أُوقف الكورس',
         'enrollment_ended' => 'انتهى الكورس',
+        'group_ended' => 'انتهت المجموعة',
         'other' => 'سبب آخر',
     ],
     'preview' => [

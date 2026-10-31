@@ -14,6 +14,9 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property int $reduction_notice_days
  * @property int $proposal_reply_hours
  * @property int $horizon_weeks how far ahead weekly times become sessions
+ * @property string $late_join what a student joining a running group gets for its lessons held: discount | private | group | none
+ * @property bool $allow_mixed_ages whether a group may mix age groups (and minors with adults)
+ * @property ?int $group_min_default the students a new group waits for before it starts (none: its first)
  */
 final class SchedulingSettings extends Model
 {
@@ -25,7 +28,7 @@ final class SchedulingSettings extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['shift_mode', 'min_block_min', 'reduction_notice_days', 'proposal_reply_hours', 'horizon_weeks'];
+    protected $fillable = ['shift_mode', 'min_block_min', 'reduction_notice_days', 'proposal_reply_hours', 'horizon_weeks', 'late_join', 'allow_mixed_ages', 'group_min_default'];
 
     protected $attributes = [
         'shift_mode' => 'teacher_proposes',
@@ -33,7 +36,14 @@ final class SchedulingSettings extends Model
         'reduction_notice_days' => 14,
         'proposal_reply_hours' => 48,
         'horizon_weeks' => 8,
+        'late_join' => 'discount',
+        'allow_mixed_ages' => false,
     ];
+
+    protected function casts(): array
+    {
+        return ['allow_mixed_ages' => 'boolean', 'group_min_default' => 'integer'];
+    }
 
     public static function current(): self
     {

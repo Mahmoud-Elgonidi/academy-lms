@@ -30,6 +30,14 @@ return [
         'shift' => [
             'approved_override' => 'اعتماد مواعيد عمل دون موافقة المعلّم: :reason',
         ],
+        'lesson_group' => [
+            'created' => 'إنشاء مجموعة (:capacity مقاعد، :per_week في الأسبوع، :minutes دقيقة)',
+            'started' => 'بدء مجموعة (:members طلاب، الحصص المُنشأة: :lessons)',
+            'joined' => 'انضمام طالب إلى مجموعة (المقعد :seat من :capacity، الحصص الفائتة: :missed، التعويض: :late_join عن :lessons)',
+            'left' => 'خروج طالب من مجموعة من :on (الحصص: :lessons)',
+            'capacity' => 'تغيير مقاعد مجموعة من :from إلى :to',
+            'ended' => 'إنهاء مجموعة (الكورسات: :courses، الحصص الملغاة: :lessons)',
+        ],
         'enrollment' => [
             'teacher_changed' => 'تغيير معلّم طالب بدءًا من :starting',
             'paused' => 'إيقاف كورس من :from حتى :until (الحصص الملغاة: :lessons): :reason',

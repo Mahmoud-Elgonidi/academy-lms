@@ -29,7 +29,7 @@ final class ProfileData implements PersonalDataSource
     public function export(string $userId): PersonalDataPart
     {
         $student = DB::table('student_profiles')->where('user_id', $userId)->first(['birth_date', 'stage', 'gender', 'country', 'school_grade', 'teacher_gender']);
-        $teacher = DB::table('teacher_profiles')->where('user_id', $userId)->first(['gender', 'languages', 'dialect', 'age_groups', 'accepts_new', 'accepts_trials']);
+        $teacher = DB::table('teacher_profiles')->where('user_id', $userId)->first(['gender', 'languages', 'dialect', 'age_groups', 'accepts_new', 'accepts_trials', 'accepts_groups', 'max_group_size']);
         $checks = DB::table('teacher_checks')->where('teacher_id', $userId)->orderBy('created_at')
             ->get(['kind', 'reference', 'issued_on', 'expires_on', 'status', 'decision_note', 'file_path', 'file_name', 'created_at'])->values();
         $scan = fn (object $c, int $i) => 'checks/'.($i + 1).'-'.basename((string) $c->file_name);
@@ -73,7 +73,7 @@ final class ProfileData implements PersonalDataSource
         $profiles = DB::table('student_profiles')->where('user_id', $userId)
             ->update(['birth_date' => null, 'gender' => null, 'country' => null, 'school_grade' => null, 'teacher_gender' => null, 'updated_at' => now()]);
         $profiles += DB::table('teacher_profiles')->where('user_id', $userId)
-            ->update(['gender' => null, 'languages' => '[]', 'dialect' => null, 'accepts_new' => false, 'accepts_trials' => false, 'updated_at' => now()]);
+            ->update(['gender' => null, 'languages' => '[]', 'dialect' => null, 'accepts_new' => false, 'accepts_trials' => false, 'accepts_groups' => false, 'max_group_size' => null, 'updated_at' => now()]);
         $links = DB::table('guardian_student')->where(fn ($q) => $q->where('guardian_id', $userId)->orWhere('student_id', $userId))->delete();
         // A teacher's vetting record stays (who was checked, and when); the scans and certificate numbers go.
         $scans = DB::table('teacher_checks')->where('teacher_id', $userId)->whereNotNull('file_path')->pluck('file_path')->all();

@@ -17,6 +17,9 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?CarbonImmutable $first_join_at
  * @property ?CarbonImmutable $last_left_at
  * @property int $attended_min
+ * @property ?string $enrollment_id a group lesson's student: their own course
+ * @property ?string $funding_status a group lesson's student: funded | unfunded | makeup
+ * @property ?string $outcome a group lesson's student: attended | absent | excused | makeup
  */
 final class SessionParticipant extends Model
 {
@@ -32,7 +35,7 @@ final class SessionParticipant extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['session_id', 'user_id', 'role', 'is_active', 'first_join_at', 'last_left_at', 'attended_min', 'block_period'];
+    protected $fillable = ['session_id', 'user_id', 'role', 'is_active', 'first_join_at', 'last_left_at', 'attended_min', 'block_period', 'enrollment_id', 'funding_status', 'outcome'];
 
     protected function casts(): array
     {

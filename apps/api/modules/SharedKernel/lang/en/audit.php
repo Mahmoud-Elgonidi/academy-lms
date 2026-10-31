@@ -30,6 +30,14 @@ return [
         'shift' => [
             'approved_override' => 'Shifts approved without the teacher: :reason',
         ],
+        'lesson_group' => [
+            'created' => 'A group opened (:capacity seats, :per_week a week, :minutes minutes)',
+            'started' => 'A group started (:members students, lessons made: :lessons)',
+            'joined' => 'A student joined a group (seat :seat of :capacity, missed: :missed, made up by :late_join for :lessons)',
+            'left' => 'A student left a group from :on (lessons: :lessons)',
+            'capacity' => "A group's seats changed from :from to :to",
+            'ended' => 'A group ended (courses: :courses, lessons cancelled: :lessons)',
+        ],
         'enrollment' => [
             'teacher_changed' => 'A student\'s teacher changed from :starting',
             'paused' => 'A course paused from :from until :until (:lessons lessons cancelled): :reason',

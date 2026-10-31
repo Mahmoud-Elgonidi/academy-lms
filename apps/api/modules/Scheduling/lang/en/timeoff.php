@@ -172,6 +172,7 @@ return [
             'substitute_refused' => 'You declined the substitute; a makeup is owed',
             'enrollment_paused' => 'The course is paused; the minutes are back in the balance',
             'enrollment_ended' => 'The course ended; the minutes are back in the balance',
+            'group_ended' => 'The group ended; the minutes are back in the balance',
         ],
     ],
     'teacher' => [

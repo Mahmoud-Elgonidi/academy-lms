@@ -21,6 +21,7 @@ use Modules\People\Contracts\LearnerStage;
 use Modules\People\Contracts\PeopleApi;
 use Modules\People\Models\GuardianStudent;
 use Modules\People\Models\StudentProfile;
+use Modules\People\Models\TeacherProfile;
 use Modules\People\Queries\PublicTeachers;
 use Modules\People\Support\Countries;
 
@@ -136,6 +137,17 @@ final class PeopleService implements PeopleApi
     public function saveTeacherProfile(TeacherProfileData $profile): void
     {
         $this->saveTeacherProfile->handle($profile);
+    }
+
+    public function groupCapacity(string $teacherId): ?int
+    {
+        return $this->groupCapacities([$teacherId])[$teacherId] ?? null;
+    }
+
+    public function groupCapacities(array $teacherIds): array
+    {
+        return TeacherProfile::query()->whereIn('user_id', array_values(array_unique($teacherIds)))->where('accepts_groups', true)
+            ->whereNotNull('max_group_size')->pluck('max_group_size', 'user_id')->map(fn ($n) => (int) $n)->all();
     }
 
     public function guardiansOf(string $studentId, bool $reportsOnly = false): array

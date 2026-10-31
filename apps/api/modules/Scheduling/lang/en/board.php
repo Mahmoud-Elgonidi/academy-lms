@@ -292,6 +292,8 @@ return [
         'contact' => ':actor contacted :target: :outcome',
         'decision_allow_unfunded' => ':actor allowed it without payment',
         'decision_funded' => 'Paid from credit',
+        'decision_student_added' => 'A student joined the lesson',
+        'decision_student_removed' => 'A student left the lesson',
         'policy' => 'Policy (rule :rule): credit :credit',
         'rescheduled' => ':actor moved it (was :from)',
         'teacher_changed' => ':actor moved it to another teacher',

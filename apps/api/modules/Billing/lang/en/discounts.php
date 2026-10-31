@@ -5,6 +5,7 @@ return [
     'quote' => [
         'sibling' => 'Sibling discount (:rate)',
         'coupon' => 'Coupon :code (:value)',
+        'late_join' => 'Lessons missed before joining (:count)',
         'sibling_bigger' => 'The sibling discount is bigger, so it applies now; the coupon waits for a later invoice.',
     ],
     'errors' => [

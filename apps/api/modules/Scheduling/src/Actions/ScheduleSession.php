@@ -17,7 +17,9 @@ use Modules\Scheduling\Domain\Models\SessionParticipant;
 /**
  * Books one session for a teacher and a student. The database refuses a
  * second booking that overlaps either of them (exclusion constraint), so two
- * coordinators cannot book the same hour at once.
+ * coordinators cannot book the same hour at once. A group's lesson is booked
+ * with its teacher alone; its members are seated after (GroupSeats), each
+ * on their own so one booked elsewhere is left out, not the lesson.
  */
 final class ScheduleSession
 {
@@ -32,6 +34,7 @@ final class ScheduleSession
                     'teacher_id' => $new->teacherId,
                     'subject_id' => $new->subjectId,
                     'enrollment_id' => $new->enrollmentId,
+                    'group_id' => $new->groupId,
                     'slot_id' => $new->slotId,
                     'occurrence_key' => $new->occurrenceKey,
                     'starts_at' => $new->startsAt->utc(),
@@ -41,7 +44,7 @@ final class ScheduleSession
                 ]);
 
                 $period = SessionParticipant::blockPeriod($new->startsAt, $endsAt);
-                foreach ([ParticipantRole::Teacher->value => $new->teacherId, ParticipantRole::Student->value => $new->studentId] as $role => $userId) {
+                foreach (array_filter([ParticipantRole::Teacher->value => $new->teacherId, ParticipantRole::Student->value => $new->studentId]) as $role => $userId) {
                     SessionParticipant::query()->create([
                         'session_id' => $session->id,
                         'user_id' => $userId,
