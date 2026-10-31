@@ -7,6 +7,13 @@
     </div>
     <div class="fl-what">
         <strong>{{ $lesson['subject'] }} @if ($lesson['type']) <span class="fl-tag">{{ $lesson['type'] }}</span> @endif</strong>
+        @if ($lesson['group'] ?? null)
+            <span class="fl-group" data-group>
+                <x-filament::icon icon="heroicon-m-user-group" class="fl-group-ico" />{{ $lesson['group']['badge'] }}
+            </span>
+            @if ($lesson['group']['names'])<small class="fl-muted">{{ $lesson['group']['names'] }}</small>@endif
+            @if ($lesson['group']['seat'])<small class="fl-muted" data-seat>{{ $lesson['group']['seat'] }}</small>@endif
+        @endif
         <small>{{ __($l.'with', ['name' => $lesson['with']]) }}@if ($lesson['substitute'] ?? null) <span class="fl-tag" data-kind="substitute">{{ $lesson['substitute'] }}</span>@endif</small>
         @if ($lesson['why'] ?? null)<small class="fl-muted">{{ $lesson['why'] }}</small>@endif
     </div>
@@ -32,8 +39,8 @@
             @endif
         @endisset
         @isset($cancel)
-            @if ($lesson['cancellable'] && ($cancel)(['session' => $lesson['id']])->isVisible())
-                {{ ($cancel)(['session' => $lesson['id']]) }}
+            @if ($lesson['cancellable'] && ($cancel)(['session' => $lesson['id'], 'group' => ($lesson['group'] ?? null) !== null])->isVisible())
+                {{ ($cancel)(['session' => $lesson['id'], 'group' => ($lesson['group'] ?? null) !== null]) }}
             @endif
         @endisset
     </div>

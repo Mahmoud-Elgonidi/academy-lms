@@ -1,6 +1,7 @@
 import type { LocalTime } from '../time';
 import type { CourseDays } from './course-state';
 import type { ReportAnswer } from '../report-answers';
+import type { CourseGroupRaw } from '../lesson-format';
 import type { Homework, Lesson as TeacherLesson, Roadmap } from '../teach/types';
 
 /**
@@ -24,7 +25,8 @@ export type FamilyLesson = TeacherLesson & {
 
 export type FamilyLessons = { learner: { id: string; name: string }; notices: string[]; data: FamilyLesson[] };
 
-export type CancelPreview = { outcome: string; reasons: { value: string; label: string }[] };
+/** What cancelling would do; a group lesson (excuse_only) is never cancelled, only the learner's own seat excused ("I won't attend"). */
+export type CancelPreview = { outcome: string; excuse_only?: boolean; reasons: { value: string; label: string }[] };
 
 export type Rating = {
   can_rate: boolean;
@@ -41,7 +43,7 @@ export type ExtraOffer = { price: string; price_minor: number; currency: string;
 export type Balance = {
   learner: { id: string; name: string };
   /** One per balance: a course's own, or a shared package's (shared: all its subjects in subject). */
-  data: ({ enrollment_id: string; subject: string | null; shared: boolean; minutes: number; session_minutes: number | null; sessions: number | null; extra: ExtraOffer | null } & CourseDays)[];
+  data: ({ enrollment_id: string; subject: string | null; shared: boolean; format: 'private' | 'group'; group: CourseGroupRaw | null; minutes: number; session_minutes: number | null; sessions: number | null; extra: ExtraOffer | null } & CourseDays)[];
 };
 
 /** A line of an invoice: what it is for, and what came off it (a discount is negative). */

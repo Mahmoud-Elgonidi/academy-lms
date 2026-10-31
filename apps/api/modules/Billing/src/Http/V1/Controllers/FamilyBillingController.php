@@ -60,6 +60,18 @@ final class FamilyBillingController
                 'subject' => $b['subject'] === null ? null : (string) $b['subject'],
                 /** A shared package ("12 lessons in any subject"): one balance for all these courses. */
                 'shared' => (bool) $b['shared'],
+                /** private (one student a lesson) or group. */
+                'format' => $b['group'] === null ? 'private' : 'group',
+                /** A group course: its group, seats and the learner's own seat (by when they joined); null for a private course. */
+                'group' => $b['group'] === null ? null : [
+                    'id' => (string) $b['group']['id'],
+                    /** Seats in the group. */
+                    'capacity' => (int) $b['group']['capacity'],
+                    /** Seats taken now. */
+                    'seats_taken' => (int) $b['group']['seats_taken'],
+                    /** The learner's seat ("seat 4 of 5": 4). */
+                    'seat' => (int) $b['group']['seat'],
+                ],
                 'minutes' => (int) $b['minutes'],
                 /** A lesson's length, when the plan has one. */
                 'session_minutes' => $b['session_minutes'] === null ? null : (int) $b['session_minutes'],

@@ -1148,7 +1148,9 @@ export interface paths {
         /**
          * Hand in or correct a report
          * @description Answers to the subject's questions go in `answers`, by the field's key (stars 1-5, a number, a choice's key,
-         *     true or false, a text).
+         *     true or false, a text). A group lesson's report (`group` on GET) goes in once for the whole class: the shared
+         *     part (items, answers, homework, notes_internal) and `students`, a row per student in it (student_id, and
+         *     engagement, overall, notes_for_student for a lesson, absence_note for an absence); the homework goes to each.
          */
         put: operations["teacher.reports.submit"];
         post?: never;
@@ -2325,8 +2327,9 @@ export interface paths {
         put?: never;
         /**
          * Dispute a lesson's outcome
-         * @description Within 48 hours of the end of my lesson recorded as held or missed (can_dispute), once per lesson: it goes back
-         *     under review and the academy answers (the lesson's dispute). Send an Idempotency-Key.
+         * @description Within 48 hours of the end of my lesson recorded as held or missed (can_dispute), once per lesson (a group lesson:
+         *     once per student, naming the seat with student_id): it goes back under review and the academy answers (the
+         *     lesson's dispute). Send an Idempotency-Key.
          */
         post: operations["teacher.lessons.dispute"];
         delete?: never;
@@ -2422,7 +2425,9 @@ export interface paths {
         put?: never;
         /**
          * Cancel a lesson
-         * @description Send an Idempotency-Key: a retry answers the same without cancelling twice.
+         * @description A group lesson is never cancelled: the learner's own seat is excused ("I won't attend") and the policy's notice
+         *     rule decides their credit; the lesson goes on for the others (learner_id names the seat when several are followed).
+         *     Send an Idempotency-Key: a retry answers the same without cancelling twice.
          */
         post: operations["lessons.cancel"];
         delete?: never;
@@ -2673,6 +2678,8 @@ export interface components {
              */
             reason: "illness" | "travel" | "school" | "family" | "technical" | "other";
             note?: string | null;
+            /** @description A group lesson: the learner whose seat is excused, when the lesson has several this person follows. */
+            learner_id?: string | null;
         };
         /** DiscoveredAccountResource */
         DiscoveredAccountResource: {
@@ -2712,6 +2719,13 @@ export interface components {
             reason: "teacher_absent" | "student_attended" | "cut_short" | "technical" | "other" | "teacher_attended" | "student_absent";
             /** @description What happened, in the person's words; the academy reads it. */
             note: string;
+            /**
+             * Format: uuid
+             * @description A group lesson: whose seat it is about (the teacher names one of group.students; a family, the learner when it follows several).
+             */
+            student_id?: string | null;
+            /** @description The family's learner whose seat it is about, when the lesson has several it follows. */
+            learner_id?: string | null;
         };
         /** LoginRequest */
         LoginRequest: {
@@ -2998,6 +3012,21 @@ export interface operations {
                             subject: string | null;
                             /** @description A shared package ("12 lessons in any subject"): one balance for all these courses. */
                             shared: boolean;
+                            /**
+                             * @description private (one student a lesson) or group.
+                             * @enum {string}
+                             */
+                            format: "private" | "group";
+                            /** @description A group course: its group, seats and the learner's own seat (by when they joined); null for a private course. */
+                            group: {
+                                id: string;
+                                /** @description Seats in the group. */
+                                capacity: number;
+                                /** @description Seats taken now. */
+                                seats_taken: number;
+                                /** @description The learner's seat ("seat 4 of 5": 4). */
+                                seat: number;
+                            } | null;
                             minutes: number;
                             /** @description A lesson's length, when the plan has one. */
                             session_minutes: number | null;
@@ -6316,6 +6345,13 @@ export interface operations {
                             id: string;
                             session_id: string;
                             enrollment_id: string | null;
+                            /**
+                             * @description private (one student a lesson) or group: a group lesson has a report per student, sharing its session_id.
+                             * @enum {string}
+                             */
+                            format: "private" | "group";
+                            /** @description A group lesson's group; null for a one-to-one lesson. */
+                            group_id: string | null;
                             kind: string;
                             status: string;
                             status_label: string;
@@ -6438,7 +6474,15 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    students: {
+                        student_id: string;
+                    }[];
+                };
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -6450,6 +6494,13 @@ export interface operations {
                             id: string;
                             session_id: string;
                             enrollment_id: string | null;
+                            /**
+                             * @description private (one student a lesson) or group: a group lesson has a report per student, sharing its session_id.
+                             * @enum {string}
+                             */
+                            format: "private" | "group";
+                            /** @description A group lesson's group; null for a one-to-one lesson. */
+                            group_id: string | null;
                             kind: string;
                             status: string;
                             status_label: string;
@@ -6504,6 +6555,7 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
         };
     };
     "teacher.reports.draft": {
@@ -7951,6 +8003,13 @@ export interface operations {
                             id: string;
                             session_id: string;
                             enrollment_id: string | null;
+                            /**
+                             * @description private (one student a lesson) or group: a group lesson has a report per student, sharing its session_id.
+                             * @enum {string}
+                             */
+                            format: "private" | "group";
+                            /** @description A group lesson's group; null for a one-to-one lesson. */
+                            group_id: string | null;
                             kind: string;
                             status: string;
                             status_label: string;
@@ -11336,8 +11395,35 @@ export interface operations {
                             } | null;
                             minutes: number;
                             subject: string;
-                            /** @description The teacher's name (family) or the student's (teacher). */
+                            /** @description The teacher's name (family) or the student's (teacher; a group lesson reads "group · n"). */
                             with: string;
+                            /**
+                             * @description private (one student) or group
+                             * @enum {string}
+                             */
+                            format: "group" | "private";
+                            format_label: string;
+                            /** @description A group lesson: its seats, and who else is in it as the viewer may see them; null for a private lesson. */
+                            group: {
+                                /** @description Seats in the group. */
+                                capacity: number;
+                                /** @description Students seated in this lesson. */
+                                seats_taken: number;
+                                /** @description The family: the learner's seat in the group by when they joined ("seat 4 of 5": 4); null for the teacher. */
+                                seat_number: number | null;
+                                /** @description The family: classmates' first names (null in the kids' look, which reads only how many). */
+                                classmates: string | string[] | null;
+                                classmates_count: number | null;
+                                classmates_label: string | null;
+                                /** @description The family: what the learner's own seat came to (attended, absent, excused, makeup), once decided. */
+                                seat: string | null;
+                                seat_label: string | null;
+                                /** @description The teacher: every student seated (id, name). */
+                                students: {
+                                    id: string;
+                                    name: string;
+                                }[] | null;
+                            } | null;
                             /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
                             status: string;
                             status_label: string;
@@ -11358,6 +11444,7 @@ export interface operations {
                             };
                             /** @description A substitute has the lesson: the family's own teacher (family), or whom the teacher covers (teacher). */
                             substitute_for: string | null;
+                            /** @description A group lesson's "I won't attend": the learner's own seat is excused, never the lesson cancelled. */
                             can_cancel: string;
                             can_refuse_substitute: string;
                             /** @description Why the academy cancelled it (a holiday, the teacher's leave, the course paused or ended), when it did. */
@@ -11445,8 +11532,35 @@ export interface operations {
                             } | null;
                             minutes: number;
                             subject: string;
-                            /** @description The teacher's name (family) or the student's (teacher). */
+                            /** @description The teacher's name (family) or the student's (teacher; a group lesson reads "group · n"). */
                             with: string;
+                            /**
+                             * @description private (one student) or group
+                             * @enum {string}
+                             */
+                            format: "group" | "private";
+                            format_label: string;
+                            /** @description A group lesson: its seats, and who else is in it as the viewer may see them; null for a private lesson. */
+                            group: {
+                                /** @description Seats in the group. */
+                                capacity: number;
+                                /** @description Students seated in this lesson. */
+                                seats_taken: number;
+                                /** @description The family: the learner's seat in the group by when they joined ("seat 4 of 5": 4); null for the teacher. */
+                                seat_number: number | null;
+                                /** @description The family: classmates' first names (null in the kids' look, which reads only how many). */
+                                classmates: string | string[] | null;
+                                classmates_count: number | null;
+                                classmates_label: string | null;
+                                /** @description The family: what the learner's own seat came to (attended, absent, excused, makeup), once decided. */
+                                seat: string | null;
+                                seat_label: string | null;
+                                /** @description The teacher: every student seated (id, name). */
+                                students: {
+                                    id: string;
+                                    name: string;
+                                }[] | null;
+                            } | null;
                             /** @description scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
                             status: string;
                             status_label: string;
@@ -11467,6 +11581,7 @@ export interface operations {
                             };
                             /** @description A substitute has the lesson: the family's own teacher (family), or whom the teacher covers (teacher). */
                             substitute_for: string | null;
+                            /** @description A group lesson's "I won't attend": the learner's own seat is excused, never the lesson cancelled. */
                             can_cancel: string;
                             can_refuse_substitute: string;
                             /** @description Why the academy cancelled it (a holiday, the teacher's leave, the course paused or ended), when it did. */
@@ -11789,8 +11904,10 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** @description The policy's answer: back to the balance, or counted. */
+                        /** @description The policy's answer: back to the balance, or counted. A group lesson's says the learner's seat is excused, the lesson goes on. */
                         outcome: string;
+                        /** @description A group lesson: "I won't attend" excuses the learner's own seat; the lesson is never cancelled. */
+                        excuse_only: boolean;
                         reasons: unknown[];
                     };
                 };
@@ -12049,11 +12166,20 @@ export interface operations {
                                 }[];
                                 /** @description Whether they take free trial lessons. */
                                 accepts_trials: boolean;
+                                /** @description Whether they teach group lessons. */
+                                accepts_groups: boolean;
                             }[];
                             /** @description The plans families enrol on, with a price in each region; empty when the section is off. */
                             plans: {
                                 id: string;
                                 name: string;
+                                /**
+                                 * @description private (one student a lesson) or group.
+                                 * @enum {string}
+                                 */
+                                format: "group" | "private";
+                                /** @description A group plan: the most students in one of its lessons (the largest group any of the academy's teachers takes); null for a private plan. */
+                                max_students: number | null;
                                 session_minutes: number;
                                 sessions_per_week: number;
                                 /** @description Lessons in each paid block. */

@@ -7,6 +7,7 @@ import { useRouter } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
 import { Badge, Button, Card, Field, Input, Notice, Select, Textarea, join } from '@/components/ui';
 import { ReportAnswers } from '@/components/report-answers';
+import { GroupRows } from '@/components/teach/group-rows';
 import { RecitationField } from '@/components/teach/recitation-field';
 import { VoiceDraft } from '@/components/teach/voice-draft';
 import { formProblem } from '@/lib/problems';
@@ -14,6 +15,7 @@ import { answersOf, answersPayload, missingAnswers, type Answers, type Question 
 import { ACCEPTS, OUTCOMES, type HomeworkAccepts, type Outcome, type ReportForm, type ReportItem } from '@/lib/teach/types';
 import { expectedPayload, recitable, suggestionsOf, type Expected, type Surah } from '@/lib/teach/recitation';
 import { draftAnswers, draftItems, fieldNames, marksOf, nearestDays, type Mark, type VoiceDraft as Draft } from '@/lib/teach/voice-draft';
+import { rowErrors, rowProblems, rowsOf, sharedLessonNeeded, studentsPayload, type GroupRow } from '@/lib/teach/group-report';
 
 type Item = ReportItem & { noteOpen: boolean };
 
@@ -27,13 +29,22 @@ const DUE_DAYS = [1, 2, 3, 4, 5, 6, 7, 10, 14] as const;
  * what is still empty (marked suggested until sent), and homework handed in by
  * voice may say what to recite, for a check of each recording. The API checks
  * it again (SubmitSessionReport) and its words come back here.
+ *
+ * A group lesson's report (form.group) is written once for the class: the
+ * shared part (the plan, the questions, homework, the note for the academy;
+ * the voice note fills only these) and a compact row per student below it
+ * (SubmitGroupReport), each row's problems marked on the row.
  */
 export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?: Surah[] }) {
   const t = useTranslations('teach');
   const common = useTranslations('common');
   const router = useRouter();
   const [pending, start] = useTransition();
-  const absence = form.kind === 'absence';
+  const group = form.group && form.group.students.length > 0 ? form.group : null;
+  const [rows, setRows] = useState<GroupRow[]>(() => (group ? rowsOf(group.students) : []));
+  const [tried, setTried] = useState(false);
+  // One student's absence note, or (a group) nobody came whose report is still the teacher's: no lesson part.
+  const absence = group ? !sharedLessonNeeded(rows) : form.kind === 'absence';
   const locked = form.status === 'reviewed';
   const sent = form.status === 'submitted';
   const hw = form.homework;
@@ -74,10 +85,18 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
     ]);
   };
 
-  /** The form as it stands, as the draft endpoint reads it (a homework already handed in counts as set). */
+  /** The form as it stands, as the draft endpoint reads it (a homework already handed in counts as set); a group's shared part only. */
   const current = () => ({
     notes_internal: internal,
-    ...(absence
+    ...(group
+      ? absence
+        ? {}
+        : {
+            items: items.map((i) => ({ node_id: i.node_id, outcome: i.outcome, score: i.score, note: i.note })),
+            answers: answersPayload(form.template, answers),
+            homework: homeworkLocked && hw ? { title: hw.title } : giving && title.trim() ? { title, instructions, accepts, due_days: dueDays } : null,
+          }
+      : absence
       ? { absence_note: absenceNote }
       : {
           engagement,
@@ -92,7 +111,8 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
   /** The draft into the form: only what it filled, so whatever the teacher set stays. */
   const takeDraft = (draft: Draft) => {
     const r = draft.report;
-    const filled = new Set(draft.filled);
+    // A group report: each student's own scores and notes are theirs to write, so the draft fills the shared part only.
+    const filled = new Set(group ? draft.filled.filter((f) => !['engagement', 'overall', 'notes_for_student', 'absence_note'].includes(f)) : draft.filled);
     if (filled.has('engagement') && r.engagement) setEngagement(r.engagement);
     if (filled.has('overall') && r.overall) setOverall(r.overall);
     if (filled.has('notes_for_student') && r.notes_for_student) setForFamily(r.notes_for_student);
@@ -127,7 +147,18 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
       questions: form.template?.fields ?? [],
     });
 
+  const rowFound = group ? rowProblems(rows) : {};
+  const [refused, setRefused] = useState<Record<string, Record<string, string>>>({});
+  const updateRow = (studentId: string, change: Partial<GroupRow>) => {
+    setRows((all) => all.map((r) => (r.studentId === studentId ? { ...r, ...change } : r)));
+    setRefused((all) => (all[studentId] ? { ...all, [studentId]: {} } : all));
+  };
+
   const send = () => {
+    if (group) {
+      sendGroup();
+      return;
+    }
     if (!absence && (engagement === null || overall === null)) {
       setProblem({ message: t('pickRatings'), errors: {} });
       return;
@@ -175,6 +206,62 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
     });
   };
 
+  /** The class's report: the shared part once and every student's row, all together (SubmitGroupReport). */
+  const sendGroup = () => {
+    setTried(true);
+    if (!absence && items.some((i) => i.outcome === null)) {
+      setProblem({ message: t('planHint'), errors: {} });
+      return;
+    }
+    const missing = absence ? [] : missingAnswers(form.template, answers);
+    if (missing.length > 0) {
+      setProblem({ message: t('answerRequired', { question: missing[0]!.label }), errors: {} });
+      return;
+    }
+    const wrongRows = Object.keys(rowProblems(rows)).length;
+    if (wrongRows > 0) {
+      setProblem({ message: t('rowsMissing', { n: wrongRows }), errors: {} });
+      return;
+    }
+    const payload: ReportPayload = {
+      notes_internal: internal.trim() || null,
+      ...(absence
+        ? {}
+        : {
+            items: items.map((i) => ({ node_id: i.node_id, outcome: i.outcome!, score: i.score, note: i.note?.trim() || null })),
+            answers: answersPayload(form.template, answers),
+          }),
+      students: studentsPayload(rows),
+    };
+    if (!homeworkLocked) {
+      payload.homework =
+        giving && title.trim()
+          ? { title: title.trim(), instructions: instructions.trim() || null, accepts, due_days: dueDays, ...expectedPayload(reciteOffered, reciteOn, accepts, recite) }
+          : null;
+    }
+    start(async () => {
+      const done = await submitReport(form.id, payload);
+      if (done.ok) {
+        router.push('/teach/reports?sent=1');
+        return;
+      }
+      const errors = done.errors ?? {};
+      const byRow = rowErrors(errors, rows);
+      setRefused(byRow);
+      const rowCount = Object.keys(byRow).length;
+      setProblem({
+        message:
+          formProblem({ message: done.message ?? common('problem'), errors }, [
+            'students',
+            'notes_internal', 'items', 'homework.title', 'homework.instructions',
+            'homework.expected', 'homework.expected.surah', 'homework.expected.from', 'homework.expected.to',
+            ...(form.template?.fields ?? []).map((q) => `answers.${q.key}`),
+          ]) ?? (errors.students?.[0] || (rowCount > 0 ? t('rowsMissing', { n: rowCount }) : undefined)),
+        errors,
+      });
+    });
+  };
+
   if (locked) {
     return (
       <div className="space-y-4">
@@ -206,7 +293,9 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
 
       {form.assist?.voice_draft ? <VoiceDraft reportId={form.id} current={current} onDraft={takeDraft} names={names} /> : null}
 
-      {absence ? (
+      {group && !absence ? <SharedNote /> : null}
+
+      {group && absence ? null : absence ? (
         <Card>
           <Field label={<Labelled mark={marks.absence_note}>{t('absenceNote')}</Labelled>} hint={t('absenceHint')} error={error('absence_note')}>
             <Textarea value={absenceNote} onChange={(e) => setAbsenceNote(e.target.value)} rows={4} required maxLength={1000} />
@@ -283,13 +372,15 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
             ) : null}
           </Card>
 
-          <Card className="space-y-4">
-            <Scale label={<Labelled mark={marks.engagement}>{t('engagement')}</Labelled>} name={t('engagement')} value={engagement} onChange={setEngagement} error={error('engagement')} />
-            <Scale label={<Labelled mark={marks.overall}>{t('overall')}</Labelled>} name={t('overall')} value={overall} onChange={setOverall} error={error('overall')} />
-            <Field label={<Labelled mark={marks.notes_for_student}>{t('notesForFamily')}</Labelled>} error={error('notes_for_student')}>
-              <Textarea value={forFamily} onChange={(e) => setForFamily(e.target.value)} rows={3} maxLength={3000} />
-            </Field>
-          </Card>
+          {group ? null : (
+            <Card className="space-y-4">
+              <Scale label={<Labelled mark={marks.engagement}>{t('engagement')}</Labelled>} name={t('engagement')} value={engagement} onChange={setEngagement} error={error('engagement')} />
+              <Scale label={<Labelled mark={marks.overall}>{t('overall')}</Labelled>} name={t('overall')} value={overall} onChange={setOverall} error={error('overall')} />
+              <Field label={<Labelled mark={marks.notes_for_student}>{t('notesForFamily')}</Labelled>} error={error('notes_for_student')}>
+                <Textarea value={forFamily} onChange={(e) => setForFamily(e.target.value)} rows={3} maxLength={3000} />
+              </Field>
+            </Card>
+          )}
 
           {form.template && form.template.fields.length > 0 ? (
             <Card className="space-y-4">
@@ -377,6 +468,18 @@ export function ReportEditor({ form, surahs = [] }: { form: ReportForm; surahs?:
           </>
         )}
       </Card>
+
+      {group ? (
+        <section aria-labelledby="group-students" className="rounded-card border border-group-line bg-white p-5">
+          <h2 id="group-students" className="flex items-center gap-2 font-semibold">
+            <Icon name="people" size={18} className="text-group-strong" />
+            {t('groupStudents', { n: rows.length })}
+          </h2>
+          <p className="mb-4 text-sm text-muted">{t('groupStudentsHint')}</p>
+          {error('students') ? <p className="mb-3 text-sm text-danger">{error('students')}</p> : null}
+          <GroupRows rows={rows} onChange={updateRow} problems={tried ? rowFound : {}} errors={refused} />
+        </section>
+      ) : null}
 
       {problem.message ? <Notice tone="danger">{problem.message}</Notice> : null}
       <div data-hides-zone-chip className="sticky bottom-16 z-10 -mx-1 rounded-card bg-paper/90 px-1 py-2 backdrop-blur lg:bottom-0">
@@ -558,5 +661,18 @@ function ReadOnly({ form }: { form: ReportForm }) {
         </>
       )}
     </Card>
+  );
+}
+
+/** Above a group report's shared part: written once, for the whole class. */
+function SharedNote() {
+  const t = useTranslations('teach');
+  return (
+    <div className="flex items-start gap-3 rounded-card border border-group-line bg-group-soft p-4 text-sm text-group-strong">
+      <Icon name="people" size={20} className="mt-0.5 shrink-0" />
+      <p>
+        <span className="font-semibold">{t('groupShared')}.</span> {t('groupSharedHint')}
+      </p>
+    </div>
   );
 }

@@ -11,32 +11,39 @@ import type { CancelPreview, Rating } from '@/lib/family/types';
 
 /**
  * What a family may do with a lesson, as the API allows it (lessonActionsFor):
- * cancel after seeing what the policy will do, turn down a substitute, rate it
- * once it took place, dispute what it was recorded as. A kid's look gets none
- * of these; the API refuses them anyway.
+ * cancel after seeing what the policy will do (on a group lesson, "I won't
+ * attend": only the learner's own seat is excused, the lesson goes on), turn
+ * down a substitute, rate it once it took place, dispute what it was
+ * recorded as. A kid's look gets none of these; the API refuses them anyway.
  */
 export function LessonActions({
   id,
   day,
   allowed,
   disputeReasons = [],
+  group = false,
+  learnerId,
 }: {
   id: string;
   day: string;
   allowed: { cancel: boolean; refuse: boolean; rate: boolean; dispute: boolean };
   disputeReasons?: { key: string; label: string }[];
+  /** A group lesson: cancelling becomes "I won't attend" (the API answers excuse_only). */
+  group?: boolean;
+  /** Whose seat, when a guardian follows several learners. */
+  learnerId?: string;
 }) {
   return (
     <div className="flex flex-wrap gap-2">
       {allowed.refuse ? <RefuseSubstitute id={id} /> : null}
-      {allowed.cancel ? <CancelLesson id={id} day={day} /> : null}
+      {allowed.cancel ? <CancelLesson id={id} day={day} group={group} learnerId={learnerId} /> : null}
       {allowed.rate ? <RateLesson id={id} /> : null}
       {allowed.dispute ? <DisputeLesson id={id} side="family" reasons={disputeReasons} /> : null}
     </div>
   );
 }
 
-function CancelLesson({ id, day }: { id: string; day: string }) {
+function CancelLesson({ id, day, group, learnerId }: { id: string; day: string; group: boolean; learnerId?: string }) {
   const t = useTranslations('family');
   const common = useTranslations('common');
   const [open, setOpen] = useState(false);
@@ -52,7 +59,7 @@ function CancelLesson({ id, day }: { id: string; day: string }) {
   const openIt = () =>
     start(async () => {
       setMessage(undefined);
-      const got = await cancellationOf(id);
+      const got = await cancellationOf(id, learnerId);
       if (!got.ok) {
         setMessage(got.message ?? common('problem'));
         return;
@@ -62,18 +69,26 @@ function CancelLesson({ id, day }: { id: string; day: string }) {
       setOpen(true);
     });
 
+  // The API has the last word: a group lesson is only ever excused, never cancelled.
+  const excuse = preview ? preview.excuse_only === true : group;
   return (
     <>
       <Button type="button" variant="quiet" className="min-h-10 px-4 text-sm" onClick={openIt} disabled={pending}>
-        {t('cancelLesson')}
+        {group ? t('excuseAction') : t('cancelLesson')}
       </Button>
       {message && !open ? <p className="w-full text-sm text-danger">{message}</p> : null}
-      {done ? <p className="w-full text-sm text-brand-strong">{t('cancelled')}</p> : null}
-      <Dialog open={open} onClose={() => setOpen(false)} title={t('cancelTitle', { day })}>
+      {done ? <p className="w-full text-sm text-brand-strong">{excuse ? t('excused') : t('cancelled')}</p> : null}
+      <Dialog open={open} onClose={() => setOpen(false)} title={excuse ? t('excuseTitle', { day }) : t('cancelTitle', { day })}>
         {preview ? (
           <>
+            {excuse ? (
+              <div className="flex items-start gap-3 rounded-card border border-group-line bg-group-soft p-3.5 text-sm text-group-strong">
+                <Icon name="people" size={20} className="mt-0.5 shrink-0" />
+                <p>{t('excuseLead')}</p>
+              </div>
+            ) : null}
             <Notice tone="attention">
-              <span className="font-semibold">{t('policySays')}</span> {preview.outcome}
+              <span className="font-semibold">{excuse ? t('excusePolicy') : t('policySays')}</span> {preview.outcome}
             </Notice>
             <Field label={t('reason')}>
               <Select value={reason} onChange={(e) => setReason(e.target.value)} required>
@@ -93,11 +108,11 @@ function CancelLesson({ id, day }: { id: string; day: string }) {
             {message ? <Notice tone="danger">{message}</Notice> : null}
             <div className="flex flex-wrap justify-end gap-2">
               <Button type="button" variant="quiet" onClick={() => setOpen(false)}>
-                {t('keepIt')}
+                {excuse ? t('excuseKeep') : t('keepIt')}
               </Button>
               <Button
                 type="button"
-                variant="danger"
+                variant={excuse ? 'primary' : 'danger'}
                 disabled={pending}
                 onClick={() => {
                   if (!reason) {
@@ -105,7 +120,7 @@ function CancelLesson({ id, day }: { id: string; day: string }) {
                     return;
                   }
                   start(async () => {
-                    const result = await cancelLesson(id, reason, note, key);
+                    const result = await cancelLesson(id, reason, note, key, learnerId);
                     if (result.ok) {
                       setOpen(false);
                       setDone(true);
@@ -115,7 +130,7 @@ function CancelLesson({ id, day }: { id: string; day: string }) {
                   });
                 }}
               >
-                {t('yesCancel')}
+                {excuse ? t('excuseYes') : t('yesCancel')}
               </Button>
             </div>
           </>

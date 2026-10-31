@@ -15,6 +15,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Modules\Communication\Contracts\DTOs\Message;
 use Modules\Communication\Contracts\NotificationsApi;
@@ -240,8 +241,14 @@ final class LiveBoard extends Page
             ->schema(fn (array $arguments) => PolicyPreview::cancelFields($this->session($arguments)))
             ->modalSubmitActionLabel(__('scheduling::board.cancel.submit'))
             ->action(function (array $data, array $arguments) {
-                app(CancelSession::class)->handle($this->session($arguments), $data['by'], $data['reason'], $data['note'] ?? null, (string) auth()->id(), (bool) ($data['waive'] ?? false));
-                $this->done(__('scheduling::board.done.cancelled'));
+                $session = $this->session($arguments);
+                // A group lesson asked off by the student's side: only the chosen student's seat is excused, the lesson goes on.
+                $seat = $session->isGroup() && $data['by'] === 'student' ? ($data['student'] ?? null) : null;
+                if ($session->isGroup() && $data['by'] === 'student' && ! array_key_exists((string) $seat, PolicyPreview::openSeats($session))) {
+                    throw ValidationException::withMessages(['seat' => __('scheduling::group_outcomes.errors.'.(PolicyPreview::openSeats($session) === [] ? 'no_open_seat' : 'pick_seat'))]);
+                }
+                app(CancelSession::class)->handle($session, $data['by'], $data['reason'], $data['note'] ?? null, (string) auth()->id(), (bool) ($data['waive'] ?? false), studentId: $seat);
+                $this->done(__($seat !== null ? 'scheduling::board.done.excused' : 'scheduling::board.done.cancelled'));
             });
     }
 

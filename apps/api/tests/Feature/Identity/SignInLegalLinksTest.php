@@ -1,5 +1,8 @@
 <?php
 
+use Carbon\CarbonImmutable;
+use Modules\Privacy\Http\Controllers\LegalController;
+
 /*
  * Every panel's sign-in links to the academy's own privacy notice and terms
  * (Privacy's LegalController on the academy's host), in the language the
@@ -23,4 +26,13 @@ it('links each panel\'s sign-in to the academy\'s own privacy notice and terms, 
     // Where they lead: the academy's pages on its own host.
     $this->get('http://huda.lms.test/privacy?lang=en')->assertOk()->assertSee('Huda');
     $this->get('http://huda.lms.test/terms?lang=ar')->assertOk()->assertSee('شروط الاستخدام');
+});
+
+it('tells families in the privacy notice that group classmates see first names only, in the notice\'s current version', function () {
+    $this->createAcademy(['slug' => 'huda', 'name_en' => 'Huda']);
+
+    $this->get('http://huda.lms.test/privacy?lang=en')->assertOk()
+        ->assertSee(CarbonImmutable::parse(LegalController::VERSION)->locale('en')->translatedFormat('j F Y'))
+        ->assertSee(e('Classmates in a group lesson: each other\'s first name only'), false);
+    $this->get('http://huda.lms.test/privacy?lang=ar')->assertOk()->assertSee('زملاء الحصة الجماعية: الاسم الأول فقط');
 });

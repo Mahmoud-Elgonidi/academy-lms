@@ -222,7 +222,13 @@ test('the zone chip shows the teacher\'s clock, changes it, and goes back to the
   await expect(pill).toContainText(/\d{1,2}:\d{2} [صم]/);
   await expect(chip.getByTestId('zone-dot')).toHaveCount(0);
 
-  await pill.click();
+  // The pill floats forever while no one points at it (globals.css: zone-float), so it is never "stable" for a
+  // pointer click to wait on; it is opened from the keyboard, as a keyboard user would.
+  const openCard = async () => {
+    await pill.focus();
+    await page.keyboard.press('Enter');
+  };
+  await openCard();
   await expect(card.getByText('توقيتك', { exact: true })).toBeVisible();
   await card.getByRole('button', { name: 'تغيير توقيتي' }).click();
   await card.getByRole('searchbox', { name: 'ابحث عن مدينة أو منطقة' }).fill('دبي');
@@ -236,7 +242,7 @@ test('the zone chip shows the teacher\'s clock, changes it, and goes back to the
     await expect(card.getByText('توقيت جهازك')).toBeVisible();
   } finally {
     // The demo as it was found: Cairo, following the device.
-    if (!(await card.isVisible())) await pill.click();
+    if (!(await card.isVisible())) await openCard();
     await card.getByRole('button', { name: 'استخدم توقيت جهازي' }).click();
   }
   await expect(pill).toContainText('القاهرة');

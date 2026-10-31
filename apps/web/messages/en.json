@@ -311,7 +311,14 @@
       "pauseAhead": "Paused from {from} until {until}",
       "ending": "Ends from {day}",
       "ended": "Ended: the minutes left stay in the balance"
-    }
+    },
+    "excuseAction": "I won't attend this lesson",
+    "excuseTitle": "Not attending the lesson on {day}?",
+    "excuseLead": "This is a group lesson: it goes on for the classmates at its time; only this seat is excused, and the lesson is not cancelled.",
+    "excusePolicy": "What happens to the balance:",
+    "excuseYes": "Yes, I won't attend",
+    "excuseKeep": "I'll attend",
+    "excused": "The teacher knows you won't attend this lesson; the seat in the group stays for the lessons after it."
   },
   "teach": {
     "todayHeader": "{date} · {zone} time",
@@ -597,7 +604,24 @@
     "superseded": "Replaced by a newer proposal",
     "dayAdded": "New",
     "dayChanged": "Changed",
-    "dayRemoved": "Removed"
+    "dayRemoved": "Removed",
+    "groupReport": "Group lesson report",
+    "groupShared": "For the whole class",
+    "groupSharedHint": "What was covered, the questions, the homework and the note for the academy are written once for the class; the homework goes to each student.",
+    "groupStudents": "Students ({n})",
+    "groupStudentsHint": "Each student gets their own ratings and note; for one who was absent, a note for their family is enough.",
+    "attended": "Attended",
+    "absent": "Absent",
+    "rowFocus": "Focus",
+    "rowOverall": "Overall",
+    "rowNote": "A note for them and their family",
+    "rowAbsenceNote": "Absence note for the family",
+    "rowReviewed": "Reviewed by a supervisor; it stays as it is.",
+    "forStudent": "{what} · {name}",
+    "rowRatingsMissing": "Pick focus and overall.",
+    "rowAbsenceMissing": "Write the absence note.",
+    "rowsMissing": "{n, plural, =1 {One student's row is missing something} other {# students' rows are missing something}}: see the ones marked in red.",
+    "roster": "Students in the lesson"
   },
   "errors": {
     "title": "Something went wrong",
@@ -1555,6 +1579,7 @@
       "doneTitle": "We have your request",
       "doneText": "Our team will be in touch very soon on the email or mobile you gave.",
       "failed": "We could not send the request just now. Try again in a moment.",
+      "tooMany": "We have had many requests from this device. Try again in an hour.",
       "fix": "Check the marked fields.",
       "privacy": "We use your details only to get in touch with you."
     },
@@ -1622,7 +1647,8 @@
       },
       "levels": "{from} → {to}",
       "fromStart": "the start",
-      "toEnd": "the end"
+      "toEnd": "the end",
+      "groups": "Teaches groups"
     },
     "steps": {
       "eyebrow": "How it starts",
@@ -1692,7 +1718,8 @@
       "shared": "One balance for all of a student's subjects",
       "perLesson": "That is {price} a lesson",
       "start": "Start with a trial lesson",
-      "ask": "Ask us about the price"
+      "ask": "Ask us about the price",
+      "upTo": "Up to {count} students a lesson"
     },
     "testimonials": {
       "eyebrow": "What they say",
@@ -1743,7 +1770,8 @@
       },
       "privacy": "We use your details only to get in touch with you.",
       "fix": "Look at the fields below.",
-      "failed": "The request did not go through. Try again in a little while."
+      "failed": "The request did not go through. Try again in a little while.",
+      "tooMany": "We have had many requests from this device. Try again in an hour."
     },
     "footer": {
       "rights": "All rights reserved",
@@ -1856,5 +1884,17 @@
     "stage": "People in the lesson",
     "close": "Close",
     "shortcut": "{label} ({keys})"
+  },
+  "format": {
+    "group": "Group",
+    "private": "Private",
+    "seatsTaken": "Seats taken: {taken} of {capacity}",
+    "groupOf": "{subject} group",
+    "named": "{label}: {names}",
+    "more": "+{n}",
+    "yourSeat": "Your seat: {label}",
+    "seatNumber": "Your seat: {seat} of {capacity}",
+    "groupPlan": "Group plan",
+    "listJoin": ", "
   }
 }

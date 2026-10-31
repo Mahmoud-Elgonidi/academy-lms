@@ -150,6 +150,13 @@ final class PeopleService implements PeopleApi
             ->whereNotNull('max_group_size')->pluck('max_group_size', 'user_id')->map(fn ($n) => (int) $n)->all();
     }
 
+    public function largestGroupSize(): ?int
+    {
+        $max = TeacherProfile::query()->where('accepts_groups', true)->where('status', 'active')->max('max_group_size');
+
+        return $max === null ? null : (int) $max;
+    }
+
     public function guardiansOf(string $studentId, bool $reportsOnly = false): array
     {
         return GuardianStudent::query()->where('student_id', $studentId)

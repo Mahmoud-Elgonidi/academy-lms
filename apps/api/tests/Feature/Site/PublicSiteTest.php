@@ -91,7 +91,7 @@ it('shows only the teachers who chose to show, teach now and were not taken off,
     expect($teachers)->toBe([[
         'id' => $sara, 'name' => 'Ms Sara', 'bio' => 'Sara Fathy teaches Quran.', 'photo_url' => null, 'gender' => 'female',
         'languages' => ['ar', 'en'], 'age_groups' => ['kids', 'teen'],
-        'subjects' => [['name' => 'Quran', 'level_from' => 'Beginner', 'level_to' => 'Intermediate']], 'accepts_trials' => true,
+        'subjects' => [['name' => 'Quran', 'level_from' => 'Beginner', 'level_to' => 'Intermediate']], 'accepts_trials' => true, 'accepts_groups' => false,
     ]]);
     $body = (string) $page->getContent();
     foreach ($this->noorContacts() as $contact) {
@@ -121,7 +121,7 @@ it('prices each plan in every region, and names each region\'s countries', funct
         ['id' => $this->regions['EGP'], 'name' => 'Egypt', 'currency' => 'EGP', 'default' => false, 'countries' => ['EG']],
     ]);
     $plan = $page->json('data.plans.0');
-    expect($plan)->toMatchArray(['name' => '8 lessons', 'session_minutes' => 30, 'sessions_per_week' => 2, 'sessions_per_block' => 8, 'shared' => false])
+    expect($plan)->toMatchArray(['name' => '8 lessons', 'session_minutes' => 30, 'sessions_per_week' => 2, 'sessions_per_block' => 8, 'shared' => false, 'format' => 'private', 'max_students' => null])
         ->and(collect($plan['prices'])->keyBy('currency')->map(fn ($p) => [$p['region_id'], $p['amount_minor']])->all())
         ->toBe(['SAR' => [$this->regions['SAR'], 40000], 'EGP' => [$this->regions['EGP'], 220000]])
         ->and(collect($plan['prices'])->firstWhere('currency', 'SAR')['price'])->toContain('400');

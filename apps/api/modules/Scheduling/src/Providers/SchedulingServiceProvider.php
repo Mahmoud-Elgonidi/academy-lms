@@ -24,6 +24,7 @@ use Modules\Scheduling\Console\MaterializeSessionsCommand;
 use Modules\Scheduling\Console\PlanDstCommand;
 use Modules\Scheduling\Console\SweepSessionsCommand;
 use Modules\Scheduling\Contracts\AttendanceApi;
+use Modules\Scheduling\Contracts\CourseGroups;
 use Modules\Scheduling\Contracts\Events\DstShiftDecided;
 use Modules\Scheduling\Contracts\Events\DstShiftUpcoming;
 use Modules\Scheduling\Contracts\Events\GroupStarted;
@@ -61,6 +62,7 @@ use Modules\Scheduling\Listeners\TellGroupStarted;
 use Modules\Scheduling\Live\BoardChanged;
 use Modules\Scheduling\Live\LessonsChanged;
 use Modules\Scheduling\Privacy\LessonsData;
+use Modules\Scheduling\Queries\Groups\CourseGroupsQuery;
 use Modules\Scheduling\Setup\PolicyStep;
 use Modules\Scheduling\Setup\TeacherHoursStep;
 use Modules\SharedKernel\Authorization\Ability;
@@ -77,6 +79,7 @@ final class SchedulingServiceProvider extends ServiceProvider
         $this->app->bind(AttendancePolicy::class, fn () => PolicyVersion::settingsInForce()->attendance());
         $this->app->singleton(AttendanceApi::class, AttendanceService::class);
         $this->app->bind(ScheduleImport::class, BringExistingSchedule::class);
+        $this->app->bind(CourseGroups::class, CourseGroupsQuery::class);
         // Trial conversion is the CRM's to know; without it no teacher gets ahead in a trial search.
         $this->app->bindIf(TrialConversionRates::class, fn () => new class implements TrialConversionRates
         {

@@ -124,7 +124,7 @@ function OneForm({ kind, token, subjects, countries, utm, chosenSubject }: {
   return (
     <form action={action} className="ls-form" noValidate>
       {kind === 'teach' ? <p className="ls-form-lead">{t('teachLead')}</p> : null}
-      {state.status === 'failed' ? <p className="ls-error" role="alert">{state.message ?? (Object.keys(state.errors).length ? t('fix') : t('failed'))}</p> : null}
+      {state.status === 'failed' ? <p className="ls-error" role="alert">{state.limited ? t('tooMany') : (state.message ?? (Object.keys(state.errors).length ? t('fix') : t('failed')))}</p> : null}
       <div className="ls-form-grid">
         {field('name', <input name="name" defaultValue={was('name')} required maxLength={120} autoComplete="name" {...invalid('name')} />)}
         {field('phone', <input name="phone" type="tel" defaultValue={was('phone')} required maxLength={20} autoComplete="tel" dir="ltr" placeholder="+966 50 000 0000" {...invalid('phone')} />)}

@@ -7,7 +7,14 @@ import { send } from '@/lib/api/server';
  * word for the whole form; with what was typed, so the form shows it again
  * (React empties a form once its action is done).
  */
-export type SiteFormState = { status: 'idle' | 'sent' | 'failed'; errors: Record<string, string>; message?: string; values?: Record<string, string | string[]> };
+export type SiteFormState = {
+  status: 'idle' | 'sent' | 'failed';
+  errors: Record<string, string>;
+  message?: string;
+  /** Too many requests from here (the API's throttle): the form says so in its own words. */
+  limited?: boolean;
+  values?: Record<string, string | string[]>;
+};
 
 /** What a visitor typed, to put back (never the form's token or its hidden field). */
 function typed(form: FormData): Record<string, string | string[]> {
@@ -29,6 +36,7 @@ export async function askToJoinPlatform(_previous: SiteFormState, form: FormData
   const done = await send('post', '/v1/site/platform/requests', { body });
   if (done.ok) return { status: 'sent', errors: {} };
   const errors = Object.fromEntries(Object.entries(done.problem.errors).map(([field, messages]) => [field, messages[0] ?? '']));
+  if (done.problem.status === 429) return { status: 'failed', errors, limited: true, values: typed(form) };
   return { status: 'failed', errors, message: done.problem.status === 422 ? undefined : done.problem.title || undefined, values: typed(form) };
 }
 
@@ -46,5 +54,6 @@ export async function askTheAcademy(_previous: SiteFormState, form: FormData): P
   const done = await send('post', '/v1/site/requests', { body });
   if (done.ok) return { status: 'sent', errors: {} };
   const errors = Object.fromEntries(Object.entries(done.problem.errors).map(([field, messages]) => [field, messages[0] ?? '']));
+  if (done.problem.status === 429) return { status: 'failed', errors, limited: true, values: typed(form) };
   return { status: 'failed', errors, message: done.problem.status === 422 ? undefined : done.problem.title || undefined, values: typed(form) };
 }

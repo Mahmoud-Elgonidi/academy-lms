@@ -136,7 +136,7 @@ final class SendSchedulingNotifications
             $this->notifications->send(new Message('scheduling.session_cancelled', $this->without($seat['family'], $event->actorId),
                 self::lessonData($seat) + ['outcome' => $data['outcome']], $action, "cancelled:{$s['session_id']}"));
         }
-        $this->notifications->send(new Message('scheduling.session_cancelled_teacher', $this->without([$s['teacher_id']], $event->actorId), $data, $action, "cancelled:{$s['session_id']}"));
+        $this->notifications->send(new Message('scheduling.session_cancelled_teacher', $this->without([$s['teacher_id']], $event->actorId), self::teacherData($s) + ['outcome' => $data['outcome']], $action, "cancelled:{$s['session_id']}"));
     }
 
     /** A family or a teacher disputed a lesson: whoever manages lessons decides it. */
@@ -192,7 +192,7 @@ final class SendSchedulingNotifications
         foreach ($this->sessions->seats($event->sessionId) as $seat) {
             $this->notifications->send(new Message('scheduling.session_moved', $this->without($seat['family'], $event->actorId), self::lessonData($seat) + ['from' => $data['from']], $action, $key));
         }
-        $this->notifications->send(new Message('scheduling.session_moved_teacher', $this->without([$s['teacher_id']], $event->actorId), $data, $action, $key));
+        $this->notifications->send(new Message('scheduling.session_moved_teacher', $this->without([$s['teacher_id']], $event->actorId), self::teacherData($s) + ['from' => $data['from']], $action, $key));
     }
 
     /** A free trial: the family gets the time and each person their own link to the class; the teacher hears of it. */
@@ -274,7 +274,7 @@ final class SendSchedulingNotifications
             $this->notifications->send(new Message($original ? 'scheduling.substitute_family' : 'scheduling.teacher_back_family', $this->without($seat['family'], $event->actorId),
                 self::lessonData($seat) + ['original' => $data['original']], $action, $key));
         }
-        $this->notifications->send(new Message('scheduling.substitute_teacher', $this->without([$event->toTeacherId], $event->actorId), $data + ['original' => (string) ($original ?? '')], $action, $key));
+        $this->notifications->send(new Message('scheduling.substitute_teacher', $this->without([$event->toTeacherId], $event->actorId), self::teacherData($s) + ['original' => (string) ($original ?? '')], $action, $key));
     }
 
     /** One message per family and per teacher, with how many of their lessons the holiday took. */
@@ -482,6 +482,12 @@ final class SendSchedulingNotifications
     public static function lessonData(array $s): array
     {
         return ['student' => $s['student'], 'teacher' => $s['teacher'], 'subject' => $s['subject'], 'when' => $s['starts_at']];
+    }
+
+    /** The same for the teacher (and the supervisors): a group lesson named as the group, its subject and weekly times, never its first student. */
+    public static function teacherData(array $s): array
+    {
+        return array_replace(self::lessonData($s), ($s['group_name'] ?? null) !== null ? ['student' => $s['group_name']] : []);
     }
 
     /** @param  list<string>  $ids */

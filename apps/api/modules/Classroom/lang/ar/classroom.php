@@ -100,6 +100,7 @@ return [
     ],
     'today' => [
         'nav' => 'حصصي اليوم',
+        'group' => 'جماعية · :taken/:capacity',
         'title' => 'حصصي اليوم',
         'subtitle' => 'يُفتح الفصل قبل كل حصة بـ :minutes دقائق.',
         'join' => 'ادخل الحصة',

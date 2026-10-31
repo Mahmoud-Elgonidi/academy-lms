@@ -62,6 +62,8 @@ export type AcademySite = {
     age_groups: string[];
     subjects: { name: string; level_from: string | null; level_to: string | null }[];
     accepts_trials: boolean;
+    /** Teaches group lessons too. */
+    accepts_groups: boolean;
   }[];
   plans: {
     id: string;
@@ -71,6 +73,10 @@ export type AcademySite = {
     sessions_per_block: number;
     validity_days: number;
     shared: boolean;
+    /** private (one student a lesson) or group. */
+    format: 'private' | 'group';
+    /** A group plan: the most students in one of its lessons (the largest group any of the academy's teachers takes); null for a private plan. */
+    max_students: number | null;
     prices: { region_id: string; price: string; amount_minor: number; currency: string }[];
   }[];
   regions: { id: string; name: string; currency: string; default: boolean; countries: string[] }[];

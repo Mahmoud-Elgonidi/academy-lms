@@ -21,7 +21,9 @@ use Modules\Site\Database\Seeders\DemoSiteSeeder;
  * Amma lessons read their surahs, each Quran learner's last lesson has a few
  * marked words, and the reports already handed in make their hifz maps; the
  * demo's plan takes the AI helpers' area; and its public page is on, with
- * three teachers' cards and its price regions naming their countries.
+ * three teachers' cards and its price regions naming their countries; and
+ * group lessons (DemoGroupsSeeder: teachers who take groups, group plans and
+ * pay, a running group of adults, a children's group and one forming).
  * Nothing without the demo academy (an academy's own server), and each step
  * only once.
  */
@@ -36,15 +38,16 @@ final class DemoCatchUpSeeder extends Seeder
             return;
         }
         $counts = $tenants->run($demo, function (): array {
-            $this->call([DemoQuranTextsSeeder::class, DemoMistakesSeeder::class, DemoHifzSeeder::class, DemoRegionCountriesSeeder::class, DemoTeacherCardsSeeder::class, DemoSiteSeeder::class]);
+            $this->call([DemoQuranTextsSeeder::class, DemoMistakesSeeder::class, DemoHifzSeeder::class, DemoRegionCountriesSeeder::class, DemoTeacherCardsSeeder::class, DemoSiteSeeder::class, DemoGroupsSeeder::class]);
 
             return [
                 DB::table('curriculum_nodes')->whereNotNull('text_source')->count(),
                 DB::table('hifz_pages')->distinct()->count('student_id'),
                 DB::table('recitation_mistakes')->count(),
+                DB::table('lesson_groups')->where('status', '!=', 'ended')->count(),
             ];
         });
         $this->call(DemoAiAreaSeeder::class);
-        $this->command?->info(vsprintf('Demo: %d lessons with their text, %d learners with a hifz map, %d marked words.', $counts));
+        $this->command?->info(vsprintf('Demo: %d lessons with their text, %d learners with a hifz map, %d marked words, %d groups.', $counts));
     }
 }

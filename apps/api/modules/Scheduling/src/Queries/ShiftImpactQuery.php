@@ -55,7 +55,7 @@ final class ShiftImpactQuery
             $groups[$key] ??= [
                 'key' => $key,
                 'student_id' => $row->student_id,
-                'student' => $row->group_id !== null ? __('scheduling::group_outcomes.label', ['count' => (int) $row->students]) : ($row->student ?? '—'),
+                'student' => $row->group_id !== null ? trans_choice('scheduling::group_outcomes.conflict', (int) $row->students, ['count' => (int) $row->students]) : ($row->student ?? '—'),
                 'group_id' => $row->group_id,
                 'student_tz' => $row->student_tz ?? $fallbackTz,
                 'enrollment_id' => $row->enrollment_id,

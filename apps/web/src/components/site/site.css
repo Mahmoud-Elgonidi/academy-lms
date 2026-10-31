@@ -381,6 +381,7 @@
 .ls-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
 .ls-tags span { font-size: 0.78rem; padding: 0.2rem 0.65rem; border-radius: 999px; background: color-mix(in oklab, var(--ls-main) 10%, white); color: var(--ls-main); font-weight: 600; }
 .ls-tags span[data-tone='good'] { background: color-mix(in oklab, var(--ls-gold) 22%, white); color: color-mix(in oklab, var(--ls-gold) 45%, black); }
+.ls-tags span[data-tone='group'] { background: var(--color-group-soft); color: var(--color-group-strong); }
 
 /* Subjects, each with its levels as a staircase */
 .ls-subjects { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); align-items: start; }

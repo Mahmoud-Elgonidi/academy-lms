@@ -2,14 +2,20 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { CourseState } from '@/components/family/course-state';
 import { Icon } from '@/components/icons';
-import { Empty, Heading, Progress } from '@/components/ui';
+import { FormatBadge } from '@/components/lesson-format';
+import { Empty, Heading, Progress, join } from '@/components/ui';
 import { get } from '@/lib/api/server';
 import { family } from '@/lib/family/context';
 import type { JourneyMap } from '@/lib/journey/types';
+import { courseGroup } from '@/lib/lesson-format';
 
-/** The learner's courses (from the journey), each with how far along and where now; each opens its roadmap and reports. */
+/**
+ * The learner's courses (from the journey), each with how far along and
+ * where now; each opens its roadmap and reports. A group course says so, with
+ * its seats and the learner's own, as the journey's course says it.
+ */
 export default async function ProgressPage() {
-  const [t, fam] = await Promise.all([getTranslations('family'), family()]);
+  const [t, f, fam] = await Promise.all([getTranslations('family'), getTranslations('format'), family()]);
   const learner = fam.current;
   if (!learner) return <Empty>{t('noLearner')}</Empty>;
   const journey = await get<{ data: JourneyMap }>('/v1/learning/journey/map', { query: { learner_id: learner.id } });
@@ -21,9 +27,15 @@ export default async function ProgressPage() {
         <Empty>{t('noCourses')}</Empty>
       ) : (
         <ul className="stagger space-y-3">
-          {courses.map((c) => (
+          {courses.map((c) => {
+            const group = courseGroup(c);
+            return (
             <li key={c.enrollment_id}>
-              <Link href={`/family/progress/${c.enrollment_id}`} className="lift block rounded-card border border-line bg-white p-5">
+              <Link
+                href={`/family/progress/${c.enrollment_id}`}
+                data-format={group ? 'group' : 'private'}
+                className={join('lift block rounded-card border bg-white p-5', group ? 'border-group-line border-s-4 border-s-group' : 'border-line')}
+              >
                 <span className="flex items-start justify-between gap-3">
                   <span>
                     <span className="block font-heading text-lg font-bold">{c.program ?? c.subject}</span>
@@ -31,6 +43,15 @@ export default async function ProgressPage() {
                       {c.subject}
                       {c.teacher ? ` · ${c.teacher}` : ''}
                     </span>
+                    {group ? (
+                      <span className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                        <FormatBadge format="group" seats={{ taken: group.taken, capacity: group.capacity }} />
+                        <span className="text-ink">
+                          {f('groupOf', { subject: c.subject ?? '' })}
+                          {group.seat ? <> · <span className="font-semibold text-group-strong">{f('seatNumber', { seat: group.seat, capacity: group.capacity })}</span></> : null}
+                        </span>
+                      </span>
+                    ) : null}
                     <span className="mt-1 block">
                       <CourseState course={c} stage={fam.stage} />
                     </span>
@@ -50,7 +71,8 @@ export default async function ProgressPage() {
                 )}
               </Link>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </div>

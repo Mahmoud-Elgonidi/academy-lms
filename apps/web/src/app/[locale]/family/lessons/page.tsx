@@ -10,6 +10,7 @@ import { momentsOf } from '@/lib/live';
 import { lessonActionsFor } from '@/lib/family/rules';
 import { dayLabel } from '@/lib/format';
 import type { FamilyLessons } from '@/lib/family/types';
+import { formatOf } from '@/lib/lesson-format';
 import { me } from '@/lib/viewer';
 
 /** The learner's lessons: the coming four weeks, or the last four (?when=past), with what the family may do with each. */
@@ -60,7 +61,14 @@ export default async function Lessons({ searchParams }: { searchParams: Promise<
                   lesson={lesson}
                   actions={
                     allowed ? (
-                      <LessonActions id={lesson.id} allowed={allowed} disputeReasons={lesson.dispute_reasons} day={dayLabel(lesson.starts_at.local.slice(0, 10), locale)} />
+                      <LessonActions
+                        id={lesson.id}
+                        allowed={allowed}
+                        disputeReasons={lesson.dispute_reasons}
+                        day={dayLabel(lesson.starts_at.local.slice(0, 10), locale)}
+                        group={formatOf(lesson) === 'group'}
+                        learnerId={learner.id}
+                      />
                     ) : undefined
                   }
                 />

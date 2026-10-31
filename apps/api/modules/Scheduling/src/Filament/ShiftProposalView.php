@@ -12,6 +12,7 @@ use Modules\Scheduling\Domain\Models\ShiftSchedule;
 use Modules\Scheduling\Domain\Shifts\ProposalRules;
 use Modules\Scheduling\Domain\Shifts\ShiftBlock;
 use Modules\Scheduling\Domain\Shifts\WeeklyShifts;
+use Modules\Scheduling\Filament\Pages\GroupDetails;
 use Modules\Scheduling\Queries\ShiftImpactQuery;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Clock;
@@ -118,10 +119,11 @@ final class ShiftProposalView
             'resolution' => $p->resolutions[$c['key']]['kind'] ?? null,
             'subject' => app()->getLocale() === 'ar' ? $c['subject_ar'] : $c['subject_en'],
             'teacher_label' => __('scheduling::shifts.days.'.$c['weekday']).' '.Clock::wall($c['start']).' '.LiveBoardView::city($p->timezone),
-            'student_label' => $c['first']->setTimezone($c['student_tz'])->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i')).' '.LiveBoardView::city($c['student_tz']),
+            // A group's lesson is at a different hour for each of its students: it says so instead of naming one clock.
+            'student_label' => ($c['group_id'] ?? null) !== null ? __('scheduling::group_outcomes.conflict_times') : $c['first']->setTimezone($c['student_tz'])->locale(app()->getLocale())->translatedFormat(Clock::pattern('H:i')).' '.LiveBoardView::city($c['student_tz']),
             'range' => $c['first']->locale(app()->getLocale())->translatedFormat('j M').' → '.$c['last']->locale(app()->getLocale())->translatedFormat('j M'),
-            // Moving the student to another teacher happens on their account; the conflict then goes away.
-            'move_url' => $c['enrollment_id'] ? route('filament.academy.resources.enrollments.view', ['record' => $c['enrollment_id'], 'reassign' => $p->effective_from->toDateString()]) : null,
+            // Moving the student to another teacher happens on their account (a group's, on the group's page: the whole group moves); the conflict then goes away.
+            'move_url' => ($c['group_id'] ?? null) !== null ? GroupDetails::getUrl(['group' => $c['group_id']], panel: 'academy') : ($c['enrollment_id'] ? route('filament.academy.resources.enrollments.view', ['record' => $c['enrollment_id'], 'reassign' => $p->effective_from->toDateString()]) : null),
         ], $p->status->isOpen() ? $this->impact->conflicts($p->teacher_id, $proposed, $p->effective_from) : []);
         $unresolved = count(array_filter($conflicts, fn ($c) => $c['resolution'] === null));
         $timeline = $this->timeline($p, $teacher->name ?? '');

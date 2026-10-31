@@ -76,6 +76,20 @@ final class JourneyController
                 'enrollment_id' => $c['enrollment_id'],
                 'subject' => $c['subject'],
                 'teacher' => $c['teacher'],
+                /** private (one student a lesson) or group. */
+                'format' => (string) $c['format'],
+                /** A group course: its group, seats and the learner's own seat (by when they joined); null for a private course. */
+                'group' => $c['group'] === null ? null : [
+                    'id' => (string) $c['group']['id'],
+                    /** Seats in the group. */
+                    'capacity' => (int) $c['group']['capacity'],
+                    /** Seats taken now. */
+                    'seats_taken' => (int) $c['group']['seats_taken'],
+                    /** The learner's seat ("seat 4 of 5": 4). */
+                    'seat' => (int) $c['group']['seat'],
+                    /** forming (waits for its students) or running. */
+                    'status' => (string) $c['group']['status'],
+                ],
                 'program' => $c['program'],
                 /** false: the course follows no published curriculum yet (its missions only). */
                 'has_curriculum' => $c['has_curriculum'],

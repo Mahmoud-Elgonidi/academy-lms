@@ -29,6 +29,9 @@ interface PeopleApi
      */
     public function groupCapacities(array $teacherIds): array;
 
+    /** The most students any active teacher takes in a group lesson (the academy's page says "up to N"); null when none teaches groups. */
+    public function largestGroupSize(): ?int;
+
     /** @return list<string> ids of the student's guardians; with $reportsOnly, those who asked for reports */
     public function guardiansOf(string $studentId, bool $reportsOnly = false): array;
 

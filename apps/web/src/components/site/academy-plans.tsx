@@ -2,14 +2,17 @@
 
 import { useState, type CSSProperties } from 'react';
 import { useTranslations } from 'next-intl';
+import { FormatBadge } from '@/components/lesson-format';
+import type { LessonFormat } from '@/lib/lesson-format';
 import { Icon } from './icons';
 
-/** A plan as the page shows it: every word made on the server, its price per region. */
+/** A plan as the page shows it: every word made on the server, its price per region; its format only when the page has both kinds. */
 export type ShownPlan = {
   id: string;
   name: string;
   facts: string[];
   prices: Record<string, { price: string; perLesson: string | null }>;
+  format: LessonFormat | null;
 };
 
 /**
@@ -43,7 +46,8 @@ export function AcademyPlans({ plans, regions, start }: {
         {plans.map((plan, i) => {
           const here = plan.prices[region];
           return (
-            <article key={plan.id} className="ls-card ls-plan" data-reveal="" style={{ '--i': i } as CSSProperties}>
+            <article key={plan.id} className="ls-card ls-plan" data-reveal="" data-format={plan.format ?? undefined} style={{ '--i': i } as CSSProperties}>
+              {plan.format ? <FormatBadge format={plan.format} size="md" className="self-start" /> : null}
               <h3>{plan.name}</h3>
               <div className="ls-price" aria-live="polite">
                 {here ? (

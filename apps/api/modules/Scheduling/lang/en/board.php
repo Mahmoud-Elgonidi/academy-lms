@@ -276,6 +276,7 @@ return [
         'link_sent' => 'Link sent again.',
         'contact' => 'Contact logged.',
         'cancelled' => 'Session cancelled.',
+        'excused' => 'The student\'s seat is excused; the lesson goes on for the rest of the group.',
         'student_absent' => 'Student marked absent.',
         'extended' => 'Session extended by :min minutes.',
         'flagged' => 'Session sent to review.',

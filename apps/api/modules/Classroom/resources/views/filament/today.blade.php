@@ -12,6 +12,9 @@
         .td-who { display: flex; flex-direction: column; min-width: 0; }
         .td-who small { color: var(--gray-500); }
         .td-wait { color: var(--gray-500); font-size: .85rem; white-space: nowrap; }
+        .td-group { align-self: flex-start; display: inline-flex; align-items: center; gap: .3rem; margin-bottom: .15rem; padding: .1rem .55rem; border-radius: 999px; font-size: .72rem; font-weight: 700; background: var(--info-50); color: var(--info-700); border: 1px solid var(--info-200); }
+        .td-group-ico { width: .85rem; height: .85rem; }
+        .dark .td-group { background: color-mix(in oklab, var(--info-500) 16%, var(--gray-900)); color: var(--info-300); border-color: color-mix(in oklab, var(--info-500) 35%, var(--gray-900)); }
         .td-empty { padding: 2rem; text-align: center; color: var(--gray-500); border: 1px dashed var(--gray-300); border-radius: var(--radius-xl); }
         @media (max-width: 640px) { .td-row { grid-template-columns: minmax(0, 1fr) auto; } .td-time { grid-column: 1 / -1; } }
         .dark .td-row { background: var(--gray-900); border-color: var(--gray-800); }
@@ -20,7 +23,14 @@
         @forelse ($this->lessons as $lesson)
             <div class="td-row" @if ($lesson['open']) data-open @endif @if ($lesson['past'] && ! $lesson['open']) data-past @endif wire:key="td-{{ $lesson['id'] }}">
                 <span class="td-time">{{ $lesson['time'] }}</span>
-                <span class="td-who"><strong>{{ $lesson['student'] }}</strong><small>{{ $lesson['subject'] }}</small></span>
+                @if ($lesson['group'])
+                    <span class="td-who" data-group>
+                        <span class="td-group"><x-filament::icon icon="heroicon-m-user-group" class="td-group-ico" />{{ $lesson['group']['badge'] }}</span>
+                        <strong>{{ $lesson['group']['names'] }}</strong><small>{{ $lesson['subject'] }}</small>
+                    </span>
+                @else
+                    <span class="td-who"><strong>{{ $lesson['student'] }}</strong><small>{{ $lesson['subject'] }}</small></span>
+                @endif
                 @if ($lesson['open'])
                     <x-filament::button tag="a" :href="$lesson['url']" target="_blank" icon="heroicon-o-video-camera">{{ __($l.'today.join') }}</x-filament::button>
                 @elseif ($lesson['status'] === 'cancelled')

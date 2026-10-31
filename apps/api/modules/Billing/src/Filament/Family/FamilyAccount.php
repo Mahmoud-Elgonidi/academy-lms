@@ -11,6 +11,7 @@ use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Models\Plan;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Queries\CourseBillingQuery;
+use Modules\Billing\Queries\GroupSeats;
 use Modules\Billing\Queries\InvoiceCourses;
 use Modules\Billing\Queries\TransferDetails;
 use Modules\Credits\Contracts\CreditsApi;
@@ -31,7 +32,7 @@ final class FamilyAccount
      * refund is the academy's to make), and a shared package goes on with
      * the courses still on it.
      *
-     * @return list<array{enrollment_id: string, subject: ?string, shared: bool, sessions: ?int, minutes: int, session_minutes: ?int, extra: ?array<string, mixed>, status: string, paused_from: ?CarbonImmutable, paused_until: ?CarbonImmutable, ends_on: ?CarbonImmutable}>
+     * @return list<array{enrollment_id: string, subject: ?string, shared: bool, sessions: ?int, minutes: int, session_minutes: ?int, extra: ?array<string, mixed>, status: string, paused_from: ?CarbonImmutable, paused_until: ?CarbonImmutable, ends_on: ?CarbonImmutable, group: ?array{id: string, capacity: int, seats_taken: int, seat: int}}>
      */
     public static function balances(string $learnerId, ?string $payerId = null): array
     {
@@ -41,6 +42,7 @@ final class FamilyAccount
             ->whereIn('s.credit_account_id', array_map(fn (EnrollmentData $e) => $e->creditAccountId, $enrollments))->where('s.status', '<>', 'cancelled')
             ->get(['s.credit_account_id', 'p.session_minutes', 'p.credit_scope'])->keyBy('credit_account_id');
 
+        $groups = GroupSeats::of(array_map(fn (EnrollmentData $e) => $e->id, $enrollments));
         $rows = [];
         foreach (collect($enrollments)->groupBy(fn (EnrollmentData $e) => $e->creditAccountId) as $accountId => $all) {
             // The courses still on it (running or paused); an account whose courses all ended is shown while minutes are left.
@@ -71,6 +73,7 @@ final class FamilyAccount
                 'paused_from' => $paused?->pausedFrom,
                 'paused_until' => $paused?->pausedUntil,
                 'ends_on' => $courses->count() === 1 ? $first->endsOn : null,
+                'group' => $groups[$first->id] ?? null,
             ];
         }
 

@@ -83,7 +83,7 @@ export function JoinPlatformForm({ token, plans, countries, utm, chosen }: {
 
   return (
     <form action={action} className="ls-form" noValidate>
-      {state.status === 'failed' ? <p className="ls-error" role="alert">{state.message ?? (Object.keys(state.errors).length ? t('fix') : t('failed'))}</p> : null}
+      {state.status === 'failed' ? <p className="ls-error" role="alert">{state.limited ? t('tooMany') : (state.message ?? (Object.keys(state.errors).length ? t('fix') : t('failed')))}</p> : null}
       <div className="ls-form-grid">
         {field('academy_name', <input name="academy_name" defaultValue={was('academy_name')} required maxLength={120} autoComplete="organization" {...invalid('academy_name')} />, true)}
         {field('contact_name', <input name="contact_name" defaultValue={was('contact_name')} required maxLength={120} autoComplete="name" {...invalid('contact_name')} />)}

@@ -20,6 +20,15 @@
   --color-muted: var(--neutral);
   --color-line: color-mix(in oklab, var(--neutral) 18%, white);
   --color-paper: color-mix(in oklab, var(--neutral) 4%, white);
+  /*
+   * A group lesson's own tone (docs/architecture/02, section 25), so a group
+   * never reads as a private lesson: between the academy's info and brand
+   * colours (mixed along the hue), never either one, with its tints.
+   */
+  --color-group: color-mix(in oklch, var(--info) 62%, var(--brand));
+  --color-group-strong: color-mix(in oklab, var(--color-group) 78%, black);
+  --color-group-soft: color-mix(in oklab, var(--color-group) 11%, white);
+  --color-group-line: color-mix(in oklab, var(--color-group) 34%, white);
   --radius-card: var(--radius-lg);
   --radius-control: var(--radius-md);
   --font-sans: var(--font-body), var(--font-plex-latin), var(--font-plex-arabic), system-ui, sans-serif;

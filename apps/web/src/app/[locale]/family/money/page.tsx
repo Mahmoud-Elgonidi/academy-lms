@@ -5,6 +5,7 @@ import { PayInvoice } from '@/components/family/pay-invoice';
 import { SendProof } from '@/components/family/send-proof';
 import { TransferDetails } from '@/components/family/transfer-details';
 import { Icon } from '@/components/icons';
+import { FormatBadge } from '@/components/lesson-format';
 import { Badge, Empty, Heading, Notice, SectionTitle, join, type Tone } from '@/components/ui';
 import { redirect } from '@/i18n/navigation';
 import { get } from '@/lib/api/server';
@@ -12,6 +13,7 @@ import { family } from '@/lib/family/context';
 import { seesMoney } from '@/lib/family/rules';
 import { transferGroups, transferText } from '@/lib/family/transfer';
 import type { Balance, Invoice, Invoices } from '@/lib/family/types';
+import { courseGroup } from '@/lib/lesson-format';
 
 const tone: Record<string, Tone> = { paid: 'brand', overdue: 'danger', partly_paid: 'attention', issued: 'info', void: 'muted', draft: 'muted' };
 const proofTone: Record<string, Tone> = { pending: 'info', approved: 'brand', rejected: 'danger' };
@@ -49,9 +51,10 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
   if (!seesMoney(fam.stage)) redirect({ href: '/family', locale });
   const learner = fam.current;
 
-  const [invoices, balance] = await Promise.all([
+  const [invoices, balance, f] = await Promise.all([
     get<Invoices>('/v1/family/invoices'),
     learner ? get<Balance>('/v1/family/balance', { query: { learner_id: learner.id } }) : Promise.resolve(null),
+    getTranslations('format'),
   ]);
   const owed = invoices.data.filter((i) => i.outstanding_minor > 0);
   // Where to transfer, once per text: named by invoice only when the payer's invoices go to different places.
@@ -106,18 +109,28 @@ export default async function Money({ params }: { params: Promise<{ locale: stri
             <Empty>{t('lessonsLeft', { n: 0 })}</Empty>
           ) : (
             <ul className="grid gap-3 sm:grid-cols-2">
-              {balance.data.map((b) => (
-                <li key={b.enrollment_id} className="rounded-card border border-line bg-white p-4">
+              {balance.data.map((b) => {
+                const group = courseGroup(b);
+                return (
+                <li key={b.enrollment_id} data-format={group ? 'group' : 'private'} className={join('rounded-card border bg-white p-4', group ? 'border-group-line border-s-4 border-s-group' : 'border-line')}>
                   <p className="text-sm text-muted">
                     {b.subject}
                     {b.shared ? ` · ${t('sharedPackage')}` : ''}
+                    {group ? ` · ${f('groupPlan')}` : ''}
                   </p>
+                  {group ? (
+                    <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                      <FormatBadge format="group" seats={{ taken: group.taken, capacity: group.capacity }} />
+                      {group.seat ? <span className="font-semibold text-group-strong">{f('seatNumber', { seat: group.seat, capacity: group.capacity })}</span> : null}
+                    </p>
+                  ) : null}
                   <CourseState course={b} />
                   <p className="mt-1 font-heading text-2xl font-bold">{t('lessonsLeft', { n: b.sessions ?? 0 })}</p>
                   <p className="text-sm tabular-nums text-muted">{t('minutesLeft', { n: b.minutes })}</p>
                   {b.extra ? <ExtraLessons enrollment={b.enrollment_id} learnerId={learner.id} subject={b.subject ?? ''} offer={b.extra} /> : null}
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </section>

@@ -100,6 +100,7 @@ return [
     ],
     'today' => [
         'nav' => 'My lessons today',
+        'group' => 'Group · :taken/:capacity',
         'title' => 'My lessons today',
         'subtitle' => 'The classroom opens :minutes minutes before each lesson.',
         'join' => 'Join the lesson',

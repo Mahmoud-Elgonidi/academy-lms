@@ -50,6 +50,7 @@ return [
                 'items' => [
                     'The academy\'s staff, each only what their work needs.',
                     'The teacher: the student\'s name, lessons, reports and homework. Never a family\'s phone number or email.',
+                    'Classmates in a group lesson: each other\'s first name only (children see how many they are, not their names). Never another student\'s phone number, email, reports or balance.',
                     'Services that run parts of the lessons, under contract and only for that: hosting and backups, email, text and WhatsApp messages, app notifications (Google and Apple), the video classroom, and the academy\'s payment provider.',
                     'AI services, only for the helpers the academy turns on (practice questions from a lesson\'s text, a report drafted from the teacher\'s voice note, checking a recited passage, the wording of a weekly message to guardians, a curriculum outline from what the academy describes): each gets only what that helper needs, never a name, under contract: it keeps it no longer than its service and its safety checks need, and never uses it to train its models. Where the platform runs its own AI server, the words never leave it. What they suggest is checked by a person.',
                     'Authorities, only where the law requires it.',

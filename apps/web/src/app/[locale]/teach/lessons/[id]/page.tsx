@@ -1,8 +1,10 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/icons';
+import { FormatBadge } from '@/components/lesson-format';
 import { Classroom } from '@/components/teach/classroom';
 import { get } from '@/lib/api/server';
+import { groupOf } from '@/lib/lesson-format';
 import { lessonMushaf } from '@/lib/mushaf/server';
 import type { Lesson as TeachLesson } from '@/lib/teach/types';
 import { clock } from '@/lib/time';
@@ -18,13 +20,17 @@ import { viewerTimeFormat } from '@/lib/viewer';
  */
 export default async function Lesson({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [t, locale, format, { data: lesson }, mushaf] = await Promise.all([
+  const [t, f, locale, format, { data: lesson }, mushaf] = await Promise.all([
     getTranslations('teach'),
+    getTranslations('format'),
     getLocale(),
     viewerTimeFormat(),
     get<{ data: TeachLesson }>('/v1/teacher/lessons/{session}', { params: { session: id } }),
     lessonMushaf(id),
   ]);
+  // A group lesson: the class by its subject, its seats, and everyone seated (the room shows each one's tile).
+  const group = groupOf(lesson);
+  const title = group ? f('groupOf', { subject: lesson.subject }) : t('withStudent', { name: lesson.with });
   return (
     <div>
       <Link href="/teach" className="mb-3 inline-flex items-center gap-1 text-sm text-muted hover:text-ink">
@@ -32,12 +38,23 @@ export default async function Lesson({ params }: { params: Promise<{ id: string 
         {t('backToToday')}
       </Link>
       <header className="mb-5">
-        <h1 className="text-2xl font-bold">{t('withStudent', { name: lesson.with })}</h1>
+        <h1 className="text-2xl font-bold">{title}</h1>
         <p className="text-muted">
           {lesson.subject} · <span className="whitespace-nowrap tabular-nums">{clock(lesson.starts_at, format, locale)}–{clock(lesson.ends_at, format, locale)}</span>
         </p>
+        {group ? (
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <FormatBadge format="group" size="md" seats={{ taken: group.taken, capacity: group.capacity }} />
+            {group.students.length > 0 ? (
+              <p className="text-sm text-muted">
+                <span className="sr-only">{t('roster')}: </span>
+                {group.students.map((s) => s.name).join(f('listJoin'))}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </header>
-      <Classroom id={id} back={{ href: '/teach', label: t('backToToday') }} mushaf={mushaf} title={t('withStudent', { name: lesson.with })} subtitle={lesson.subject} />
+      <Classroom id={id} back={{ href: '/teach', label: t('backToToday') }} mushaf={mushaf} title={title} subtitle={lesson.subject} />
     </div>
   );
 }

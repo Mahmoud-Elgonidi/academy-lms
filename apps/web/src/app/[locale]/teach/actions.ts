@@ -3,6 +3,7 @@
 import { refresh } from 'next/cache';
 import { send, type Outcome } from '@/lib/api/server';
 import type { MushafPage, MushafResult, WordRef } from '@/lib/mushaf/types';
+import type { StudentPayload } from '@/lib/teach/group-report';
 import type { ShiftBlock } from '@/lib/teach/types';
 import type { VoiceDraft } from '@/lib/teach/voice-draft';
 
@@ -31,6 +32,8 @@ export type ReportPayload = {
   homework?: { title: string; instructions: string | null; accepts: string; due_days: number; expected?: { surah: number; from: number; to: number } | null } | null;
   /** Answers to the subject's questions, by key. */
   answers?: Record<string, number | string | boolean>;
+  /** A group lesson: a row per student in it (lib/teach/group-report), the rest above being the class's shared part. */
+  students?: StudentPayload[];
 };
 
 /** Sends (or corrects) a lesson report or absence note. */

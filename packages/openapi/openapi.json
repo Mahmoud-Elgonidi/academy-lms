@@ -107,6 +107,44 @@
                                                         "type": "boolean",
                                                         "description": "A shared package (\"12 lessons in any subject\"): one balance for all these courses."
                                                     },
+                                                    "format": {
+                                                        "type": "string",
+                                                        "description": "private (one student a lesson) or group.",
+                                                        "enum": [
+                                                            "private",
+                                                            "group"
+                                                        ]
+                                                    },
+                                                    "group": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "A group course: its group, seats and the learner's own seat (by when they joined); null for a private course.",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "capacity": {
+                                                                "type": "integer",
+                                                                "description": "Seats in the group."
+                                                            },
+                                                            "seats_taken": {
+                                                                "type": "integer",
+                                                                "description": "Seats taken now."
+                                                            },
+                                                            "seat": {
+                                                                "type": "integer",
+                                                                "description": "The learner's seat (\"seat 4 of 5\": 4)."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "capacity",
+                                                            "seats_taken",
+                                                            "seat"
+                                                        ]
+                                                    },
                                                     "minutes": {
                                                         "type": "integer"
                                                     },
@@ -265,6 +303,8 @@
                                                     "enrollment_id",
                                                     "subject",
                                                     "shared",
+                                                    "format",
+                                                    "group",
                                                     "minutes",
                                                     "session_minutes",
                                                     "sessions",
@@ -7431,6 +7471,21 @@
                                                             "null"
                                                         ]
                                                     },
+                                                    "format": {
+                                                        "type": "string",
+                                                        "description": "private (one student a lesson) or group: a group lesson has a report per student, sharing its session_id.",
+                                                        "enum": [
+                                                            "private",
+                                                            "group"
+                                                        ]
+                                                    },
+                                                    "group_id": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "description": "A group lesson's group; null for a one-to-one lesson."
+                                                    },
                                                     "kind": {
                                                         "type": "string"
                                                     },
@@ -7640,6 +7695,8 @@
                                                     "id",
                                                     "session_id",
                                                     "enrollment_id",
+                                                    "format",
+                                                    "group_id",
                                                     "kind",
                                                     "status",
                                                     "status_label",
@@ -7846,6 +7903,21 @@
                                                         "string",
                                                         "null"
                                                     ]
+                                                },
+                                                "format": {
+                                                    "type": "string",
+                                                    "description": "private (one student a lesson) or group: a group lesson has a report per student, sharing its session_id.",
+                                                    "enum": [
+                                                        "private",
+                                                        "group"
+                                                    ]
+                                                },
+                                                "group_id": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "A group lesson's group; null for a one-to-one lesson."
                                                 },
                                                 "kind": {
                                                     "type": "string"
@@ -8062,6 +8134,8 @@
                                                 "id",
                                                 "session_id",
                                                 "enrollment_id",
+                                                "format",
+                                                "group_id",
                                                 "kind",
                                                 "status",
                                                 "status_label",
@@ -12402,6 +12476,21 @@
                                                             "null"
                                                         ]
                                                     },
+                                                    "format": {
+                                                        "type": "string",
+                                                        "description": "private (one student a lesson) or group: a group lesson has a report per student, sharing its session_id.",
+                                                        "enum": [
+                                                            "private",
+                                                            "group"
+                                                        ]
+                                                    },
+                                                    "group_id": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "description": "A group lesson's group; null for a one-to-one lesson."
+                                                    },
                                                     "kind": {
                                                         "type": "string"
                                                     },
@@ -12646,6 +12735,8 @@
                                                     "id",
                                                     "session_id",
                                                     "enrollment_id",
+                                                    "format",
+                                                    "group_id",
                                                     "kind",
                                                     "status",
                                                     "status_label",
@@ -21841,11 +21932,7 @@
                                                     ]
                                                 },
                                                 "format_label": {
-                                                    "type": "string",
-                                                    "enum": [
-                                                        "scheduling::group_outcomes.format.group",
-                                                        "scheduling::group_outcomes.format.private"
-                                                    ]
+                                                    "type": "string"
                                                 },
                                                 "group": {
                                                     "type": [
@@ -21855,10 +21942,19 @@
                                                     "description": "A group lesson: its seats, and who else is in it as the viewer may see them; null for a private lesson.",
                                                     "properties": {
                                                         "capacity": {
-                                                            "type": "string"
+                                                            "type": "integer",
+                                                            "description": "Seats in the group."
                                                         },
                                                         "seats_taken": {
-                                                            "type": "integer"
+                                                            "type": "integer",
+                                                            "description": "Students seated in this lesson."
+                                                        },
+                                                        "seat_number": {
+                                                            "type": [
+                                                                "integer",
+                                                                "null"
+                                                            ],
+                                                            "description": "The family: the learner's seat in the group by when they joined (\"seat 4 of 5\": 4); null for the teacher."
                                                         },
                                                         "classmates": {
                                                             "description": "The family: classmates' first names (null in the kids' look, which reads only how many).",
@@ -21905,28 +22001,32 @@
                                                             ]
                                                         },
                                                         "students": {
+                                                            "type": [
+                                                                "array",
+                                                                "null"
+                                                            ],
                                                             "description": "The teacher: every student seated (id, name).",
-                                                            "anyOf": [
-                                                                {
-                                                                    "type": "null"
-                                                                },
-                                                                {
-                                                                    "type": "string"
-                                                                },
-                                                                {
-                                                                    "type": "array",
-                                                                    "items": {
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "id": {
                                                                         "type": "string"
                                                                     },
-                                                                    "minItems": 0,
-                                                                    "maxItems": 0
-                                                                }
-                                                            ]
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "id",
+                                                                    "name"
+                                                                ]
+                                                            }
                                                         }
                                                     },
                                                     "required": [
                                                         "capacity",
                                                         "seats_taken",
+                                                        "seat_number",
                                                         "classmates",
                                                         "classmates_count",
                                                         "classmates_label",
@@ -22272,11 +22372,7 @@
                                                     ]
                                                 },
                                                 "format_label": {
-                                                    "type": "string",
-                                                    "enum": [
-                                                        "scheduling::group_outcomes.format.group",
-                                                        "scheduling::group_outcomes.format.private"
-                                                    ]
+                                                    "type": "string"
                                                 },
                                                 "group": {
                                                     "type": [
@@ -22286,10 +22382,19 @@
                                                     "description": "A group lesson: its seats, and who else is in it as the viewer may see them; null for a private lesson.",
                                                     "properties": {
                                                         "capacity": {
-                                                            "type": "string"
+                                                            "type": "integer",
+                                                            "description": "Seats in the group."
                                                         },
                                                         "seats_taken": {
-                                                            "type": "integer"
+                                                            "type": "integer",
+                                                            "description": "Students seated in this lesson."
+                                                        },
+                                                        "seat_number": {
+                                                            "type": [
+                                                                "integer",
+                                                                "null"
+                                                            ],
+                                                            "description": "The family: the learner's seat in the group by when they joined (\"seat 4 of 5\": 4); null for the teacher."
                                                         },
                                                         "classmates": {
                                                             "description": "The family: classmates' first names (null in the kids' look, which reads only how many).",
@@ -22336,28 +22441,32 @@
                                                             ]
                                                         },
                                                         "students": {
+                                                            "type": [
+                                                                "array",
+                                                                "null"
+                                                            ],
                                                             "description": "The teacher: every student seated (id, name).",
-                                                            "anyOf": [
-                                                                {
-                                                                    "type": "null"
-                                                                },
-                                                                {
-                                                                    "type": "string"
-                                                                },
-                                                                {
-                                                                    "type": "array",
-                                                                    "items": {
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "id": {
                                                                         "type": "string"
                                                                     },
-                                                                    "minItems": 0,
-                                                                    "maxItems": 0
-                                                                }
-                                                            ]
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "id",
+                                                                    "name"
+                                                                ]
+                                                            }
                                                         }
                                                     },
                                                     "required": [
                                                         "capacity",
                                                         "seats_taken",
+                                                        "seat_number",
                                                         "classmates",
                                                         "classmates_count",
                                                         "classmates_label",
@@ -23897,6 +24006,10 @@
                                                             "accepts_trials": {
                                                                 "type": "boolean",
                                                                 "description": "Whether they take free trial lessons."
+                                                            },
+                                                            "accepts_groups": {
+                                                                "type": "boolean",
+                                                                "description": "Whether they teach group lessons."
                                                             }
                                                         },
                                                         "required": [
@@ -23908,7 +24021,8 @@
                                                             "languages",
                                                             "age_groups",
                                                             "subjects",
-                                                            "accepts_trials"
+                                                            "accepts_trials",
+                                                            "accepts_groups"
                                                         ]
                                                     }
                                                 },
@@ -23923,6 +24037,21 @@
                                                             },
                                                             "name": {
                                                                 "type": "string"
+                                                            },
+                                                            "format": {
+                                                                "type": "string",
+                                                                "description": "private (one student a lesson) or group.",
+                                                                "enum": [
+                                                                    "group",
+                                                                    "private"
+                                                                ]
+                                                            },
+                                                            "max_students": {
+                                                                "type": [
+                                                                    "integer",
+                                                                    "null"
+                                                                ],
+                                                                "description": "A group plan: the most students in one of its lessons (the largest group any of the academy's teachers takes); null for a private plan."
                                                             },
                                                             "session_minutes": {
                                                                 "type": "integer"
@@ -23973,6 +24102,8 @@
                                                         "required": [
                                                             "id",
                                                             "name",
+                                                            "format",
+                                                            "max_students",
                                                             "session_minutes",
                                                             "sessions_per_week",
                                                             "sessions_per_block",

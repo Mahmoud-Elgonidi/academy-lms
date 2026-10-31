@@ -31,9 +31,13 @@ export async function chooseLearner(id: string): Promise<void> {
   refresh();
 }
 
-/** What cancelling would do by the academy's policy, and the reasons to pick from. */
-export async function cancellationOf(id: string): Promise<{ ok: true; preview: CancelPreview } | { ok: false; message?: string }> {
-  return read<CancelPreview>('/v1/lessons/{session}/cancellation', id);
+/**
+ * What cancelling would do by the academy's policy, and the reasons to pick
+ * from. A group lesson answers excuse_only: the learner's own seat is excused
+ * ("I won't attend"), named by learner_id when a guardian follows several in it.
+ */
+export async function cancellationOf(id: string, learnerId?: string): Promise<{ ok: true; preview: CancelPreview } | { ok: false; message?: string }> {
+  return read<CancelPreview>('/v1/lessons/{session}/cancellation', id, learnerId ? { learner_id: learnerId } : undefined);
 }
 
 /** This person's rating of a lesson, and the tags to offer. */
@@ -45,19 +49,27 @@ export async function ratingOf(id: string): Promise<{ ok: true; preview: Rating 
 }
 
 /** A read a dialog asks for while it opens (the page itself is already there). */
-async function read<T>(path: '/v1/lessons/{session}/cancellation' | '/v1/lessons/{session}/rating', id: string): Promise<{ ok: true; preview: T } | { ok: false; message?: string }> {
-  const response = await call('get', path, { params: { session: id } });
+async function read<T>(
+  path: '/v1/lessons/{session}/cancellation' | '/v1/lessons/{session}/rating',
+  id: string,
+  query?: Record<string, string>,
+): Promise<{ ok: true; preview: T } | { ok: false; message?: string }> {
+  const response = await call('get', path, { params: { session: id }, query });
   const body = (await response.json().catch(() => ({}))) as T & { title?: string; detail?: string };
   if (!response.ok) return { ok: false, message: body.detail ?? body.title };
   return { ok: true, preview: body };
 }
 
-/** Cancels a lesson; a retry of the same confirmation sends the same key and cancels once. */
-export async function cancelLesson(id: string, reason: string, note: string, key: string): Promise<Result> {
+/**
+ * Cancels a lesson, or on a group lesson excuses the learner's own seat (the
+ * same endpoint: the lesson goes on for the others); a retry of the same
+ * confirmation sends the same key and does it once.
+ */
+export async function cancelLesson(id: string, reason: string, note: string, key: string, learnerId?: string): Promise<Result> {
   return result(
     await send('post', '/v1/lessons/{session}/cancel', {
       params: { session: id },
-      body: { reason, note: note.trim() || null },
+      body: { reason, note: note.trim() || null, ...(learnerId ? { learner_id: learnerId } : {}) },
       idempotencyKey: key,
     }),
   );

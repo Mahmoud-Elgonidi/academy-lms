@@ -44,6 +44,9 @@ export default defineConfig({
     // Each family spec picks its account (test.use storageState).
     { name: 'family', testMatch: /family-.*\.spec\.ts/, dependencies: ['setup'], use: { ...devices['Pixel 7'] } },
     { name: 'desktop', testMatch: /desktop\.spec\.ts/, dependencies: ['setup'], use: desktop },
+    // Group lessons (the demo group): its family and student signed in apart, the teacher as above.
+    { name: 'groups-setup', testMatch: /groups\.setup\.ts/ },
+    { name: 'groups', testMatch: /groups\.spec\.ts/, dependencies: ['setup', 'groups-setup'], use: { ...devices['Pixel 7'] } },
     // The pages before signing in (the academy's, the platform's), on a phone.
     { name: 'site', testMatch: /site\.spec\.ts/, dependencies: ['setup'], use: { ...devices['Pixel 7'] } },
   ],

@@ -72,8 +72,12 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
   const subjects = site.subjects.filter((s) => s.name);
   const teachers = shown('teachers') ? site.teachers : [];
 
+  // Private or group: said on each plan only when the academy sells both (a group plan always says so).
+  const isGroup = (plan: AcademySite['plans'][number]) => plan.format === 'group';
+  const bothKinds = site.plans.some(isGroup) && site.plans.some((p) => !isGroup(p));
   const plans: ShownPlan[] = site.plans.map((plan) => {
     const facts = [
+      ...(isGroup(plan) && plan.max_students ? [t('pricing.upTo', { count: plan.max_students })] : []),
       t('pricing.lessons', { count: plan.sessions_per_block }),
       t('pricing.minutes', { count: plan.session_minutes }),
       t('pricing.perWeek', { count: plan.sessions_per_week }),
@@ -84,7 +88,7 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
     for (const p of plan.prices) {
       prices[p.region_id] = { price: p.price, perLesson: perLesson(p.amount_minor, p.currency, plan.sessions_per_block, locale) };
     }
-    return { id: plan.id, name: plan.name, facts, prices };
+    return { id: plan.id, name: plan.name, facts, prices, format: isGroup(plan) ? 'group' : bothKinds ? 'private' : null };
   });
 
   const range = (from: string | null, to: string | null) =>
@@ -270,6 +274,7 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
                         {teacher.languages.length > 0 ? <span>{t('teachers.explains')} {teacher.languages.map((code) => languages.of(code) ?? code).join('، ')}</span> : null}
                         {teacher.age_groups.map((age) => <span key={age}>{t.has(`teachers.ages.${age}`) ? t(`teachers.ages.${age}`) : age}</span>)}
                         {teacher.accepts_trials ? <span data-tone="good">{t('teachers.trials')}</span> : null}
+                        {teacher.accepts_groups ? <span data-tone="group">{t('teachers.groups')}</span> : null}
                       </p>
                     </article>
                   ))}

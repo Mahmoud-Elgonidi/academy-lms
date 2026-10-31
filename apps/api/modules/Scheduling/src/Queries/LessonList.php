@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Modules\Scheduling\AttendanceService;
+use Modules\Scheduling\Support\CourseDays;
 
 /**
  * Lessons for the people in them: a student's (for their family) or a
@@ -29,7 +30,15 @@ final class LessonList
             ->addSelect(['su.name as student', 'st.outcome as seat_outcome', 'st.is_active as seat_active', DB::raw('coalesce(s.enrollment_id, st.enrollment_id) as enrollment_id')]),
             $from, $to, $latestFirst);
 
-        return $this->withSeated($rows, $studentId);
+        $rows = $this->withSeated($rows, $studentId);
+        // The learner's own seat in each group (by when they joined: "seat 4 of 5").
+        $groupCourses = array_values(array_unique(array_filter(array_map(fn (object $r) => $r->group_id === null ? null : $r->enrollment_id, $rows))));
+        $seats = Groups\CourseGroupsQuery::read($groupCourses, app(CourseDays::class)->today()->toDateString());
+        foreach ($rows as $r) {
+            $r->seat_number = $r->group_id === null ? null : ($seats[$r->enrollment_id]['seat'] ?? null);
+        }
+
+        return $rows;
     }
 
     /** @return list<object> the same, a group lesson once with `roster` (each student seated: id, name) */

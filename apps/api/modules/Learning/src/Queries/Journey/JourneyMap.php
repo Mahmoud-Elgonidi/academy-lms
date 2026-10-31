@@ -18,6 +18,7 @@ use Modules\Learning\Models\LearningSettings;
 use Modules\Learning\Models\ReportItem;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\RoadmapQuery;
+use Modules\Scheduling\Contracts\CourseGroups;
 use Modules\Scheduling\Contracts\DTOs\LearnerLesson;
 use Modules\SharedKernel\Games\CatalogIsland;
 use Modules\SharedKernel\Games\GameCatalog;
@@ -175,8 +176,10 @@ final class JourneyMap
         $teachers = DB::table('users')->whereIn('id', array_map(fn (EnrollmentData $e) => $e->teacherId, $enrollments))->pluck('name', 'id');
         $practiceNodes = Homework::query()->where('student_id', $studentId)->whereNotNull('practice_nodes')->where('status', 'assigned')
             ->pluck('practice_nodes')->flatten()->all();
+        // A course that is a seat in a group (docs/architecture/02, section 25): its group, seats and the learner's own.
+        $groups = app(CourseGroups::class)->of(array_map(fn (EnrollmentData $e) => $e->id, $enrollments));
 
-        return array_map(function (EnrollmentData $e) use ($subjects, $teachers, $practiceNodes, $now) {
+        return array_map(function (EnrollmentData $e) use ($subjects, $teachers, $practiceNodes, $now, $groups) {
             $map = $this->roadmap->for($e->id);
             $taught = $this->lastTaught($e->id, $now);
             $due = DB::table('enrollment_progress')->where('enrollment_id', $e->id)->whereNotNull('mastered_at')
@@ -233,6 +236,8 @@ final class JourneyMap
                 'enrollment_id' => $e->id,
                 'subject' => $subjects[$e->subjectId] ?? null,
                 'teacher' => $teachers[$e->teacherId] ?? null,
+                'format' => isset($groups[$e->id]) ? 'group' : 'private',
+                'group' => $groups[$e->id] ?? null,
                 'program' => $map['program']['name'] ?? null,
                 /** false: the course follows no published curriculum (its missions only). */
                 'has_curriculum' => $map !== null,

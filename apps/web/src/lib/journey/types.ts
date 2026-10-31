@@ -1,3 +1,4 @@
+import type { CourseGroupRaw } from '../lesson-format';
 import type { Look } from '../games/art';
 import type { Allowance, Creature, GameLimits, Glance } from '../games/types';
 import type { JourneyHifz } from '../hifz/types';
@@ -78,6 +79,10 @@ export type JourneyCourse = {
   enrollment_id: string;
   subject: string | null;
   teacher: string | null;
+  /** private (one student a lesson) or group. */
+  format: 'private' | 'group';
+  /** A group course: its group, seats and the learner's own seat (by when they joined); null for a private course. */
+  group: CourseGroupRaw | null;
   program: string | null;
   /** false: the course follows no published curriculum yet (its missions only). */
   has_curriculum: boolean;

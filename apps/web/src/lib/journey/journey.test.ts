@@ -62,6 +62,8 @@ const course = (id: string, islands: JourneyIsland[]): JourneyCourse => ({
   enrollment_id: id,
   subject: 'Quran',
   teacher: null,
+  format: 'private',
+  group: null,
   program: null,
   has_curriculum: true,
   percent: 40,

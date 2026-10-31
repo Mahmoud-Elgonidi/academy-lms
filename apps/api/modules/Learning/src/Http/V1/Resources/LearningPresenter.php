@@ -20,7 +20,20 @@ final class LearningPresenter
     /** @var array<string, ?ReportTemplate> */
     private array $templates = [];
 
+    /** @var array<string, ?string> session id => its group */
+    private array $groups = [];
+
     public function __construct(private readonly LocalTimePresenter $time) {}
+
+    private function groupOf(string $sessionId): ?string
+    {
+        if (! array_key_exists($sessionId, $this->groups)) {
+            $group = DB::table('sessions')->where('id', $sessionId)->value('group_id');
+            $this->groups[$sessionId] = $group === null ? null : (string) $group;
+        }
+
+        return $this->groups[$sessionId];
+    }
 
     /** @return array<string, mixed> */
     public function report(SessionReport $r, bool $internal, ?array $items = null): array
@@ -29,6 +42,10 @@ final class LearningPresenter
             'id' => $r->id,
             'session_id' => $r->session_id,
             'enrollment_id' => $r->enrollment_id,
+            /** private (one student a lesson) or group: a group lesson has a report per student, sharing its session_id. */
+            'format' => $this->groupOf($r->session_id) === null ? 'private' : 'group',
+            /** A group lesson's group; null for a one-to-one lesson. */
+            'group_id' => $this->groupOf($r->session_id),
             'kind' => $r->kind,
             'status' => $r->status,
             'status_label' => __('learning::reports.statuses.'.$r->status),

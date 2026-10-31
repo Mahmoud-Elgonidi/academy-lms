@@ -54,7 +54,7 @@ final class LessonPresenter
             'with' => $group && $counterpart === 'student' ? __('scheduling::group_outcomes.label', ['count' => (int) $r->students]) : $r->{$counterpart},
             /** private (one student) or group */
             'format' => $group ? 'group' : 'private',
-            'format_label' => __('scheduling::group_outcomes.format.'.($group ? 'group' : 'private')),
+            'format_label' => (string) __('scheduling::group_outcomes.format.'.($group ? 'group' : 'private')),
             /** A group lesson: its seats, and who else is in it as the viewer may see them; null for a private lesson. */
             'group' => $group ? $this->group($r, $counterpart, $kids, $seat) : null,
             /** scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled */
@@ -94,24 +94,34 @@ final class LessonPresenter
         ];
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @return array{capacity: int, seats_taken: int, seat_number: int|null, classmates: list<string>|null, classmates_count: int|null, classmates_label: string|null, seat: string|null, seat_label: string|null, students: list<array{id: string, name: string}>|null}
+     */
     private function group(object $r, string $counterpart, bool $kids, ?string $seat): array
     {
         $family = $counterpart === 'teacher';
         $classmates = $r->classmates ?? [];
+        $students = [];
+        foreach ($family ? [] : (array) ($r->roster ?? []) as $s) {
+            $students[] = ['id' => (string) $s['id'], 'name' => (string) $s['name']];
+        }
 
         return [
-            'capacity' => $r->capacity,
+            /** Seats in the group. */
+            'capacity' => (int) ($r->capacity ?? $r->students),
+            /** Students seated in this lesson. */
             'seats_taken' => (int) $r->students,
+            /** The family: the learner's seat in the group by when they joined ("seat 4 of 5": 4); null for the teacher. */
+            'seat_number' => $family && ($r->seat_number ?? null) !== null ? (int) $r->seat_number : null,
             /** The family: classmates' first names (null in the kids' look, which reads only how many). */
             'classmates' => $family && ! $kids ? $classmates : null,
             'classmates_count' => $family ? count($classmates) : null,
-            'classmates_label' => $family ? trans_choice('scheduling::group_outcomes.with_classmates', count($classmates), ['count' => count($classmates)]) : null,
+            'classmates_label' => $family ? (string) trans_choice('scheduling::group_outcomes.with_classmates', count($classmates), ['count' => count($classmates)]) : null,
             /** The family: what the learner's own seat came to (attended, absent, excused, makeup), once decided. */
             'seat' => $family ? $seat : null,
-            'seat_label' => $family && $seat !== null ? __('scheduling::group_outcomes.outcomes.'.$seat) : null,
+            'seat_label' => $family && $seat !== null ? (string) __('scheduling::group_outcomes.outcomes.'.$seat) : null,
             /** The teacher: every student seated (id, name). */
-            'students' => $family ? null : ($r->roster ?? []),
+            'students' => $family ? null : $students,
         ];
     }
 }

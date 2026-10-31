@@ -15,7 +15,7 @@ use Modules\SharedKernel\Audit\AuditActor;
 /**
  * Payroll in the demo, set up the way an academy would: a default card in
  * riyals (by the hour, Quran memorisation a little higher, trials a flat
- * amount) and a card in Egyptian pounds for the teachers paid in Egypt; the
+ * amount, a group's lesson at the group rate) and a card in Egyptian pounds for the teachers paid in Egypt; the
  * lessons that took place priced from them; the months before closed in
  * order, last month with a bonus and a deduction (so its teachers were told
  * their totals), and a bonus in the month still open.
@@ -46,10 +46,12 @@ final class DemoPayrollSeeder extends Seeder
             ['unit' => 'hour', 'amount' => '60'],
             $quran ? ['subject_id' => $quran, 'unit' => 'hour', 'amount' => '70'] : null,
             ['session_type' => 'trial', 'unit' => 'lesson', 'amount' => '25'],
+            ['session_format' => 'group', 'unit' => 'hour', 'amount' => '90'],
         ]))]);
         $cards->handle(null, ['name' => 'معلّمو مصر', 'currency' => 'EGP', 'lines' => [
             ['unit' => 'hour', 'amount' => '400'],
             ['session_type' => 'trial', 'unit' => 'lesson', 'amount' => '150'],
+            ['session_format' => 'group', 'unit' => 'hour', 'amount' => '600'],
         ], 'teachers' => array_values(array_filter([$teacher('khaled@demo.test'), $teacher('nour@demo.test')]))]);
 
         // Every month with lessons, from the first (the demo's past months) to this one.

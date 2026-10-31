@@ -81,8 +81,9 @@ final class SiteController
 
         $plans = [];
         if (SiteContent::shows($said, 'pricing')) {
+            $groupSize = $people->largestGroupSize();
             foreach ($billing->planOptions() as $plan) {
-                $plans[] = $this->plan($plan, $locale);
+                $plans[] = $this->plan($plan, $locale, $groupSize);
             }
         }
 
@@ -141,7 +142,7 @@ final class SiteController
         return response()->json(['data' => ['received' => true]], 201);
     }
 
-    /** @return array{id: string, name: string, bio: ?string, photo_url: ?string, gender: ?string, languages: list<string>, age_groups: list<string>, subjects: list<array{name: string, level_from: ?string, level_to: ?string}>, accepts_trials: bool} */
+    /** @return array{id: string, name: string, bio: ?string, photo_url: ?string, gender: ?string, languages: list<string>, age_groups: list<string>, subjects: list<array{name: string, level_from: ?string, level_to: ?string}>, accepts_trials: bool, accepts_groups: bool} */
     private function teacher(PublicTeacher $teacher): array
     {
         $subjects = [];
@@ -164,6 +165,8 @@ final class SiteController
             'subjects' => $subjects,
             /** Whether they take free trial lessons. */
             'accepts_trials' => $teacher->acceptsTrials,
+            /** Whether they teach group lessons. */
+            'accepts_groups' => $teacher->acceptsGroups,
         ];
     }
 
@@ -179,8 +182,8 @@ final class SiteController
         ];
     }
 
-    /** @return array{id: string, name: string, session_minutes: int, sessions_per_week: int, sessions_per_block: int, validity_days: int, shared: bool, prices: list<array{region_id: string, price: string, amount_minor: int, currency: string}>} */
-    private function plan(PlanOption $plan, string $locale): array
+    /** @return array{id: string, name: string, format: string, max_students: ?int, session_minutes: int, sessions_per_week: int, sessions_per_block: int, validity_days: int, shared: bool, prices: list<array{region_id: string, price: string, amount_minor: int, currency: string}>} */
+    private function plan(PlanOption $plan, string $locale, ?int $groupSize): array
     {
         $prices = [];
         foreach ($plan->prices as $regionId => $money) {
@@ -196,6 +199,10 @@ final class SiteController
         return [
             'id' => $plan->id,
             'name' => $plan->name,
+            /** private (one student a lesson) or group. */
+            'format' => $plan->group ? 'group' : 'private',
+            /** A group plan: the most students in one of its lessons (the largest group any of the academy's teachers takes); null for a private plan. */
+            'max_students' => $plan->group ? $groupSize : null,
             'session_minutes' => $plan->sessionMinutes,
             'sessions_per_week' => $plan->sessionsPerWeek,
             /** Lessons in each paid block. */

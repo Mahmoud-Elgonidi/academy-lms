@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Route;
 use Modules\Scheduling\Domain\Disputes\DisputeRules;
+use Modules\Scheduling\Filament\GroupView;
 use Modules\SharedKernel\Time\Clock;
 
 /**
@@ -23,6 +24,8 @@ final class FamilyLessonView
         private readonly bool $disputes = true,
         // Whether the viewer sees money ("awaiting payment"): the classic look only.
         private readonly bool $money = true,
+        // The kids' look: a group lesson's classmates as a number, never names.
+        private readonly bool $kids = false,
     ) {}
 
     /** @return array<string, mixed> */
@@ -36,6 +39,10 @@ final class FamilyLessonView
             && $this->now->lessThanOrEqualTo($r->ends_at->addMinutes((int) config('classroom.closes_after_min', 10)));
 
         $side = $this->counterpart === 'teacher' ? 'family' : 'teacher';
+        $group = ($r->group_id ?? null) !== null;
+        // A group lesson, for the family: what their own seat came to, and whether it is still theirs to excuse.
+        $seat = $group && $this->counterpart === 'teacher' ? ($r->seat_outcome ?? null) : null;
+        $seatOpen = ! $group || $this->counterpart !== 'teacher' || (($r->seat_active ?? true) && $seat === null);
         $dispute = $this->disputes && ($r->dispute_side ?? null) === $side ? $r : null;
 
         return [
@@ -44,7 +51,8 @@ final class FamilyLessonView
             'time' => self::clock($start).' – '.self::clock($r->ends_at->setTimezone($this->tz)),
             'minutes' => (int) round($r->starts_at->diffInMinutes($r->ends_at)),
             'subject' => app()->getLocale() === 'ar' ? $r->subject_ar : $r->subject_en,
-            'with' => $r->{$this->counterpart},
+            'with' => $group && $this->counterpart === 'student' ? implode(app()->getLocale() === 'ar' ? '، ' : ', ', array_column($r->roster ?? [], 'name')) ?: '—' : $r->{$this->counterpart},
+            'group' => $group ? $this->group($r, $seat) : null,
             'status' => $r->status,
             'statusLabel' => __($l.'statuses.'.$r->status),
             'type' => $r->type === 'regular' ? null : __($l.'types.'.$r->type),
@@ -52,7 +60,8 @@ final class FamilyLessonView
             'joinUrl' => $joinable && Route::has('classroom.page') ? route('classroom.page', ['session' => $r->id]) : null,
             'opensAt' => $open && ! $joinable && $r->starts_at->greaterThan($this->now)
                 ? self::clock($r->starts_at->subMinutes((int) config('classroom.opens_before_min', 10))->setTimezone($this->tz)) : null,
-            'cancellable' => $this->counterpart === 'teacher' && $r->status === 'scheduled' && $r->starts_at->greaterThan($this->now),
+            // A group lesson's "I won't attend" excuses the learner's own seat while it is still open.
+            'cancellable' => $this->counterpart === 'teacher' && $r->status === 'scheduled' && $r->starts_at->greaterThan($this->now) && $seatOpen,
             // A substitute has the lesson: the family sees whose place they take, the substitute whom they cover.
             'substitute' => ($r->original_teacher ?? null) ? __($this->counterpart === 'teacher' ? 'scheduling::timeoff.family.substitute' : 'scheduling::timeoff.teacher.covering', ['name' => $r->original_teacher]) : null,
             'refusable' => $this->counterpart === 'teacher' && ($r->original_teacher ?? null) !== null && $r->status === 'scheduled' && $r->starts_at->greaterThan($this->now),
@@ -64,6 +73,31 @@ final class FamilyLessonView
             ],
             'why' => $r->status === 'cancelled' && in_array($r->cancel_reason ?? null, ['holiday', 'teacher_leave', 'substitute_refused', 'enrollment_paused', 'enrollment_ended', 'group_ended'], true)
                 ? __('scheduling::timeoff.family.why.'.$r->cancel_reason) : null,
+        ];
+    }
+
+    /**
+     * A group lesson as the viewer reads it: the family "group · with 2
+     * classmates" (their first names under it; the kids' look the number
+     * only) and their own seat's outcome once decided; the teacher the seats
+     * taken of the group's.
+     *
+     * @return array{badge: string, names: ?string, seat: ?string, seats: ?string}
+     */
+    private function group(object $r, ?string $seat): array
+    {
+        $g = 'scheduling::group_outcomes.';
+        if ($this->counterpart === 'student') {
+            return ['badge' => __($g.'family.teacher_badge', ['taken' => (int) $r->students, 'capacity' => (int) ($r->capacity ?? $r->students)]),
+                'names' => null, 'seat' => null, 'seats' => GroupView::seatsLabel((int) $r->students, (int) ($r->capacity ?? $r->students))];
+        }
+        $classmates = $r->classmates ?? [];
+
+        return [
+            'badge' => __($g.'format.group').' · '.trans_choice($g.'with_classmates', count($classmates), ['count' => count($classmates)]),
+            'names' => $this->kids || $classmates === [] ? null : __($g.'family.names', ['names' => implode(app()->getLocale() === 'ar' ? '، ' : ', ', $classmates)]),
+            'seat' => $seat === null ? null : __($g.'family.seat', ['outcome' => __($g.'outcomes.'.$seat)]),
+            'seats' => null,
         ];
     }
 

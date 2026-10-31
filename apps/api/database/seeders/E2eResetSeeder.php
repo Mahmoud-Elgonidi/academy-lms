@@ -20,17 +20,24 @@ use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Contracts\LearningApi;
 use Modules\Learning\Domain\Challenges\ChallengeCatalog;
 use Modules\Learning\Models\Homework;
+use Modules\Learning\Models\SessionReport;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Scheduling\Actions\ApplyAttendanceDeadlines;
 use Modules\Scheduling\Actions\CancelUnpaidSessions;
 use Modules\Scheduling\Actions\FundSessions;
+use Modules\Scheduling\Actions\Groups\GroupOutcomes;
+use Modules\Scheduling\Actions\Groups\GroupSeats;
 use Modules\Scheduling\Actions\MaterializeSessions;
 use Modules\Scheduling\Actions\RecordParticipantJoin;
 use Modules\Scheduling\Actions\ResolveReview;
 use Modules\Scheduling\Actions\ScheduleSession;
 use Modules\Scheduling\Contracts\DTOs\NewSession;
+use Modules\Scheduling\Domain\Enums\SessionEventKind;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
+use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
+use Modules\Scheduling\Domain\Models\SessionEvent;
+use Modules\Scheduling\Domain\Models\SessionParticipant;
 use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -49,7 +56,8 @@ use RuntimeException;
  * what earlier runs made where nothing else depends on it (a week's chest
  * opened, cheers, ratings, eggs hatched, rounds left open, their homework).
  * What the tests need (the homework's titles, the academy's own host) is
- * printed as one line, `E2E_FIXTURES {json}`. What depends on the moment a
+ * printed as one line, `E2E_FIXTURES {json}` (with `group`: the children's group, a lesson of it to excuse,
+ * a report of it to write, and the family's sign-ins). What depends on the moment a
  * test runs is done when it asks, through artisan tinker: a lesson to go
  * into now (`lessonNow`) and staff approving a receipt (`approveProof`).
  */
@@ -98,12 +106,13 @@ final class E2eResetSeeder extends Seeder
                 $this->money();
                 $this->lessonsAhead();
                 $this->practiceHomework();
+                $group = $this->group();
             } finally {
                 CarbonImmutable::setTestNow();
                 AuditActor::forget();
             }
 
-            return ['homework' => ['hand_in' => self::HAND_IN, 'to_mark' => self::TO_MARK]];
+            return ['homework' => ['hand_in' => self::HAND_IN, 'to_mark' => self::TO_MARK], 'group' => $group];
         });
         // Its own host ({slug}.{platform domain}), as a browser reaches it on a server (here perhaps without DNS).
         $port = parse_url((string) config('app.url'), PHP_URL_PORT);
@@ -391,6 +400,83 @@ final class E2eResetSeeder extends Seeder
             'title' => 'جولة تدريب على الإظهار والإدغام', 'accepts' => 'practice',
             'due_at' => $this->now->addDays(2)->setTime(18, 0), 'practice_nodes' => $nodes === null ? null : json_decode((string) $nodes, true),
         ]);
+    }
+
+    /**
+     * The children's group (DemoGroupsSeeder: Mona's Arabic group, Lina and Yahya whose mother Huda pays, and Tala),
+     * as the group tests need it: lessons since the demo was seeded happen (everyone comes, the sweep closes them);
+     * the next lesson far enough ahead to excuse in good time has Huda's children seated again where a run excused
+     * them; and the last lesson held has its reports to write again where a run handed them in. Its ids and the
+     * family's sign-ins (the demo password) go into the fixtures; null on a demo without groups.
+     *
+     * @return ?array{id: string, lesson_id: ?string, report_id: ?string, guardian: string, student: string, teacher: string}
+     */
+    private function group(): ?array
+    {
+        $lina = $this->ids['lina'] ?? null;
+        $group = $lina === null ? null : DB::table('group_members as m')->join('lesson_groups as g', 'g.id', '=', 'm.group_id')
+            ->where('m.student_id', $lina)->whereNull('m.left_on')->where('g.status', 'running')->first(['g.id', 'g.teacher_id']);
+        if ($group === null) {
+            return null;
+        }
+        $family = array_values(array_filter([$lina, $this->ids['yahya'] ?? null]));
+
+        // Lessons since the demo was seeded, held.
+        $past = Session::query()->where('group_id', $group->id)->where('status', 'scheduled')->where('ends_at', '<', $this->now->subMinutes(15))
+            ->orderBy('starts_at')->with('participants')->get();
+        foreach ($past as $session) {
+            CarbonImmutable::setTestNow($session->starts_at->addMinute());
+            app(RecordParticipantJoin::class)->handle($session->refresh(), $session->teacher_id);
+            foreach ($session->participants->filter(fn ($p) => $p->role->value === 'student' && $p->is_active) as $seat) {
+                CarbonImmutable::setTestNow($session->starts_at->addMinutes(2));
+                app(RecordParticipantJoin::class)->handle($session->refresh(), $seat->user_id);
+            }
+            CarbonImmutable::setTestNow($session->ends_at->addMinutes(11));
+            app(ApplyAttendanceDeadlines::class)->handle();
+        }
+        CarbonImmutable::setTestNow();
+
+        // The next lesson to excuse in good time: the family's seats a run excused are taken again (a new reservation).
+        $notice = (int) PolicyVersion::current()->policy()->get('student_notice_hours');
+        $lesson = Session::query()->where('group_id', $group->id)->where('status', 'scheduled')
+            ->where('starts_at', '>', $this->now->addHours($notice + 2))->orderBy('starts_at')->first();
+        if ($lesson !== null) {
+            $excused = SessionParticipant::query()->where('session_id', $lesson->id)->whereIn('user_id', $family)
+                ->where('outcome', GroupOutcomes::EXCUSED)->get();
+            foreach ($excused as $seat) {
+                DB::transaction(function () use ($lesson, $seat) {
+                    SessionParticipant::query()->where('session_id', $lesson->id)->where('user_id', $seat->user_id)->delete();
+                    SessionEvent::record($lesson, SessionEventKind::DecisionLogged, ['decision' => 'student_removed', 'user_id' => $seat->user_id, 'reason' => 'e2e_reset']);
+                    app(GroupSeats::class)->seat($lesson, $seat->user_id, (string) $seat->enrollment_id, null);
+                });
+                app(FundSessions::class)->handle((string) $seat->enrollment_id);
+            }
+        }
+
+        // The last lesson held: its reports to write again where a run handed them in.
+        $held = Session::query()->where('group_id', $group->id)->whereIn('status', ['completed', 'student_absent'])->orderByDesc('starts_at')->first();
+        $report = null;
+        if ($held !== null) {
+            $reports = SessionReport::query()->where('session_id', $held->id)->get();
+            $redo = $reports->filter(fn (SessionReport $r) => $r->status === 'submitted' && $r->submitted_at?->greaterThan($this->seeded));
+            foreach ($redo as $r) {
+                Homework::query()->where('report_id', $r->id)->where('created_at', '>', $this->seeded)->get()->each->delete();
+                $r->items()->delete();
+                $r->forceFill(['status' => $r->due_at->isPast() ? 'overdue' : 'due', 'submitted_at' => null, 'late' => false, 'engagement' => null, 'overall' => null,
+                    'notes_for_student' => null, 'notes_internal' => null, 'absence_note' => null, 'answers' => [], 'template_id' => null])->save();
+            }
+            $report = $reports->sortBy(fn (SessionReport $r) => [$r->kind !== 'lesson', $r->student_id])->first()?->id;
+        }
+        $email = fn (?string $id) => $id === null ? null : (string) DB::table('users')->where('id', $id)->value('email');
+
+        return [
+            'id' => (string) $group->id,
+            'lesson_id' => $lesson?->id,
+            'report_id' => $report,
+            'guardian' => 'lina.guardian@demo.test',
+            'student' => 'lina@demo.test',
+            'teacher' => $email($group->teacher_id),
+        ];
     }
 
     /** The student's first course (the one with history in the demo). */

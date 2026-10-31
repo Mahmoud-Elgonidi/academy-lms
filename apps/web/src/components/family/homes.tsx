@@ -2,10 +2,12 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { HifzCard } from '@/components/hifz/card';
 import { Icon } from '@/components/icons';
+import { FormatBadge } from '@/components/lesson-format';
 import { Card, Empty, Progress, SectionTitle, buttonLook, join } from '@/components/ui';
 import type { FamilyLesson, Homework, Invoices, Learner } from '@/lib/family/types';
 import { hasStars, hereIsland } from '@/lib/journey/journey';
 import type { JourneyMap } from '@/lib/journey/types';
+import { courseGroup } from '@/lib/lesson-format';
 import { FamilyLessonCard } from './lesson-card';
 
 /** The lesson on now or next to come: booked, and not over by the clock. */
@@ -46,7 +48,7 @@ async function HomeworkDue({ homework }: { homework: Homework | undefined }) {
  * adult): each course's level and how far, the stars, and the missions open.
  */
 async function JourneyCard({ journey, learner }: { journey: JourneyMap; learner: Learner }) {
-  const t = await getTranslations('journey');
+  const [t, f] = await Promise.all([getTranslations('journey'), getTranslations('format')]);
   const open = journey.missions.filter((m) => m.state !== 'done').length;
   return (
     <Link href="/family/journey" className="lift block rounded-card border border-brand-line bg-white p-4">
@@ -70,10 +72,14 @@ async function JourneyCard({ journey, learner }: { journey: JourneyMap; learner:
         <span className="mt-3 grid gap-3 sm:grid-cols-2">
           {journey.courses.slice(0, 4).map((c) => {
             const island = hereIsland(c);
+            const group = courseGroup(c);
             return (
               <span key={c.enrollment_id} className="block rounded-control bg-paper p-3">
                 <span className="flex items-baseline justify-between gap-2">
-                  <span className="truncate font-semibold">{c.program ?? c.subject}</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="truncate font-semibold">{c.program ?? c.subject}</span>
+                    {group ? <FormatBadge format="group" seats={{ taken: group.taken, capacity: group.capacity }} className="shrink-0" /> : null}
+                  </span>
                   {c.percent !== null ? <span className="shrink-0 text-sm tabular-nums text-muted">{t('percent', { p: c.percent })}</span> : null}
                 </span>
                 {c.percent !== null ? (
@@ -83,6 +89,7 @@ async function JourneyCard({ journey, learner }: { journey: JourneyMap; learner:
                 ) : (
                   <span className="mt-1 block text-sm text-muted">{t('noCurriculum')}</span>
                 )}
+                {group?.seat ? <span className="mt-1.5 block text-sm font-semibold text-group-strong">{f('seatNumber', { seat: group.seat, capacity: group.capacity })}</span> : null}
                 {island ? <span className="mt-1.5 block truncate text-sm text-muted">{t('levelOf', { n: island.index, total: c.islands.length, title: island.title })}</span> : null}
               </span>
             );

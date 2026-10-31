@@ -27,7 +27,7 @@ final class PublicTeachers
             ->where('u.status', 'active')->where('p.status', 'active')
             ->whereExists(fn ($q) => $q->from('user_roles as r')->whereColumn('r.user_id', 'c.teacher_id')->where('r.role', 'teacher'))
             ->orderBy('c.display_name')->orderBy('c.id')
-            ->get(['c.id', 'c.teacher_id', 'c.display_name', 'c.bio', 'c.photo_path', 'p.gender', 'p.languages', 'p.age_groups', 'p.accepts_trials']);
+            ->get(['c.id', 'c.teacher_id', 'c.display_name', 'c.bio', 'c.photo_path', 'p.gender', 'p.languages', 'p.age_groups', 'p.accepts_trials', 'p.accepts_groups']);
         if ($rows->isEmpty()) {
             return [];
         }
@@ -46,6 +46,7 @@ final class PublicTeachers
                 ageGroups: array_values((array) json_decode((string) $row->age_groups, true)),
                 subjects: $subjects[$row->teacher_id] ?? [],
                 acceptsTrials: (bool) $row->accepts_trials,
+                acceptsGroups: (bool) $row->accepts_groups,
             );
         }
 

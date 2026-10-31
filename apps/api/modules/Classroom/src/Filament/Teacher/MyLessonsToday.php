@@ -21,7 +21,8 @@ use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
  * The teacher's lessons today, on their clock, with the way into each
- * classroom once it opens. Updates when a lesson changes or a classroom
+ * classroom once it opens; a group lesson with its badge, roster count and
+ * every student seated by name. Updates when a lesson changes or a classroom
  * opens, not on a timer.
  */
 final class MyLessonsToday extends Page
@@ -93,6 +94,11 @@ final class MyLessonsToday extends Page
                 'id' => $l->id,
                 'time' => $clock($l->startsAt).' – '.$clock($l->endsAt),
                 'student' => $l->studentName,
+                // A group lesson: everyone seated by name, and the seats taken of the group's.
+                'group' => $l->isGroup() ? [
+                    'names' => implode(app()->getLocale() === 'ar' ? '، ' : ', ', array_column($l->students, 'name')),
+                    'badge' => __('classroom::classroom.today.group', ['taken' => count($l->students), 'capacity' => $l->capacity ?? count($l->students)]),
+                ] : null,
                 'subject' => $l->subject(),
                 'status' => $l->status,
                 'open' => $l->isOpen() && $now->greaterThanOrEqualTo($l->startsAt->subMinutes($before)) && $now->lessThanOrEqualTo($l->endsAt->addMinutes($after)),

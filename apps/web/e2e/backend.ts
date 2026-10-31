@@ -32,6 +32,24 @@ export type Fixtures = {
   homework: { hand_in: string; to_mark: string };
   /** The demo academy's own host ({slug}.{platform domain}, with the API's port here). */
   academy_host: string;
+  /**
+   * The demo group (docs/architecture/02, section 25: Mona's children's
+   * Arabic group, running): one of its lessons ahead for a family to say they
+   * will not attend, the report of one held for Mona to write for the whole
+   * class, and who signs in (a guardian of a child in it, a student in it in
+   * the kids' look, and its teacher).
+   */
+  group: {
+    id: string;
+    /** A lesson of the group ahead, in good time to excuse (the guardian's child seated, not yet excused). */
+    lesson_id: string;
+    /** A report of a held lesson of the group, due (any student's: the form is the class's). */
+    report_id: string;
+    /** Sign-ins (the demo password): a guardian of a child in the group, a student in it, and its teacher. */
+    guardian: string;
+    student: string;
+    teacher: string;
+  };
 };
 
 export function fixtures(): Fixtures {

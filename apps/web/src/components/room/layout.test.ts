@@ -25,6 +25,20 @@ describe('the room’s layout', () => {
     expect(arrange([me, teacher], 'grid')).toEqual({ kind: 'grid', tiles: ['me:camera', 'teacher:camera'] });
   });
 
+  it('gives every student of a group lesson a tile of their own, the whole class fitting the stage', () => {
+    // The teacher (here) and a full group of eight: nine equal tiles, none of them off the stage.
+    const students = Array.from({ length: 8 }, (_, i): TileFact => ({ key: `student${i}:camera`, local: false, screen: false }));
+    const room = arrange([me, ...students], 'auto');
+    expect(room).toEqual({ kind: 'grid', tiles: ['me:camera', ...students.map((s) => s.key)] });
+    const shape = gridShape(9, 1200, 700);
+    expect(shape.cols * shape.rows).toBeGreaterThanOrEqual(9);
+    expect(shape.cols * shape.width).toBeLessThanOrEqual(1200);
+    expect(shape.rows * shape.height).toBeLessThanOrEqual(700);
+    // A student sharing their screen puts it first, the class in the strip.
+    const shared: TileFact = { key: 'student3:screen', local: false, screen: true };
+    expect(arrange([me, ...students, shared], 'auto')).toMatchObject({ kind: 'spotlight', main: 'student3:screen' });
+  });
+
   it('puts a shared screen in the spotlight, someone else’s before one’s own', () => {
     expect(arrange([me, teacher, teacherScreen], 'auto')).toEqual({ kind: 'spotlight', main: 'teacher:screen', strip: ['me:camera', 'teacher:camera'] });
     expect(arrange([me, myScreen, teacher], 'auto')).toEqual({ kind: 'spotlight', main: 'me:screen', strip: ['me:camera', 'teacher:camera'] });

@@ -15,14 +15,17 @@ use Livewire\Attributes\Computed;
 use Modules\People\Contracts\FamilyView;
 use Modules\People\Contracts\LearnerStage;
 use Modules\Scheduling\Actions\CancelSession;
+use Modules\Scheduling\Actions\Groups\ExcuseSeat;
 use Modules\Scheduling\Actions\RefuseSubstitute;
 use Modules\Scheduling\Domain\Enums\ParticipantRole;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Filament\DisputeAction;
+use Modules\Scheduling\Filament\GroupView;
 use Modules\Scheduling\Queries\FamilyCancellation;
 use Modules\Scheduling\Queries\FamilyNotices;
+use Modules\Scheduling\Queries\Groups\LearnerGroups;
 use Modules\Scheduling\Queries\LessonList;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\SharedKernel\Time\ViewerTimezone;
@@ -63,7 +66,7 @@ final class FamilyLessons extends Page
         }
         $now = CarbonImmutable::now();
         $stage = app(FamilyView::class)->stage((string) auth()->id());
-        $view = new FamilyLessonView($now, app(ViewerTimezone::class)->effective(), disputes: $stage !== LearnerStage::Kids, money: $stage === LearnerStage::Classic);
+        $view = new FamilyLessonView($now, app(ViewerTimezone::class)->effective(), disputes: $stage !== LearnerStage::Kids, money: $stage === LearnerStage::Classic, kids: $stage === LearnerStage::Kids);
         $query = app(LessonList::class);
         $today = $now->setTimezone(app(ViewerTimezone::class)->effective())->startOfDay()->utc();
 
@@ -77,28 +80,68 @@ final class FamilyLessons extends Page
      * Cancelling a lesson, under the academy's policy: what happens to the
      * lesson is said before it is confirmed (back to the balance, or counted).
      * Moving it to another time goes through the academy for now. A child
-     * does not cancel on their own: their guardian does.
+     * does not cancel on their own: their guardian does. A group lesson is
+     * never cancelled by a family: "I won't attend" excuses the learner's own
+     * seat (ExcuseSeat), says what the policy does to their credit, and the
+     * lesson goes on for the others.
      */
     public function cancelAction(): Action
     {
         $l = 'scheduling::family.cancel.';
+        $g = 'scheduling::group_outcomes.excuse.';
+        $group = fn (array $arguments) => (bool) ($arguments['group'] ?? false);
 
         return Action::make('cancel')
-            ->label(__($l.'button'))->link()->color('danger')->size('sm')
+            ->label(fn (array $arguments) => __($group($arguments) ? $g.'button' : $l.'button'))->link()->color('danger')->size('sm')
             ->visible(fn () => app(FamilyView::class)->stage((string) auth()->id()) !== LearnerStage::Kids)
-            ->modalHeading(__($l.'heading'))
+            ->modalHeading(fn (array $arguments) => __($group($arguments) ? $g.'heading' : $l.'heading'))
             ->modalDescription(fn (array $arguments) => $this->outcome($this->ownLesson($arguments)))
             ->schema([
                 Select::make('reason')->label(__($l.'reason'))->required()
                     ->options(collect(CancelSession::REASONS['student'])->mapWithKeys(fn (string $r) => [$r => __($l.'reasons.'.$r)])->all()),
                 Textarea::make('note')->label(__($l.'note'))->rows(2)->maxLength(500),
             ])
-            ->modalSubmitActionLabel(__($l.'confirm'))
-            ->action(function (array $data, array $arguments) use ($l) {
-                app(CancelSession::class)->handle($this->ownLesson($arguments), 'student', $data['reason'], $data['note'] ?? null, (string) auth()->id());
+            ->modalSubmitActionLabel(fn (array $arguments) => __($group($arguments) ? $g.'confirm' : $l.'confirm'))
+            ->action(function (array $data, array $arguments) use ($l, $g) {
+                $session = $this->ownLesson($arguments);
+                if ($session->isGroup()) {
+                    app(ExcuseSeat::class)->handle($session, $this->learnerId(), $data['reason'], $data['note'] ?? null, (string) auth()->id());
+                    unset($this->lessons);
+                    Notification::make()->success()->title(__($g.'done'))->send();
+
+                    return;
+                }
+                app(CancelSession::class)->handle($session, 'student', $data['reason'], $data['note'] ?? null, (string) auth()->id());
                 unset($this->lessons);
                 Notification::make()->success()->title(__($l.'done'))->send();
             });
+    }
+
+    /**
+     * The learner's groups, as course cards above the lessons: the subject
+     * and teacher, the weekly times on the viewer's clock, and their own seat
+     * ("seat 4 of 5"); a forming group says it waits for its students.
+     *
+     * @return list<array{id: string, title: string, teacher: string, times: string, seat: string, status: string, waits: ?string}>
+     */
+    #[Computed]
+    public function groups(): array
+    {
+        $learner = app(FamilyView::class)->current((string) auth()->id());
+        if ($learner === null) {
+            return [];
+        }
+        $c = 'scheduling::group_outcomes.course.';
+
+        return array_map(fn (array $g) => [
+            'id' => $g['id'],
+            'title' => __($c.'title', ['subject' => $g['subject']]),
+            'teacher' => __('scheduling::family.with', ['name' => $g['teacher']]),
+            'times' => GroupView::timesLine($g['times']),
+            'seat' => __($c.'seat', ['seat' => $g['seat'], 'capacity' => $g['capacity']]),
+            'status' => $g['status'],
+            'waits' => $g['status'] === 'forming' ? ($g['waits'] === null ? __($c.'forming') : trans_choice($c.'waits', $g['waits'], ['n' => $g['waits']])) : null,
+        ], app(LearnerGroups::class)->of($learner->id, app(ViewerTimezone::class)->effective()));
     }
 
     /**
@@ -192,9 +235,16 @@ final class FamilyLessons extends Page
         return $session;
     }
 
-    /** The policy's answer in the family's words: no teacher pay, no scores. */
+    /** The policy's answer in the family's words: no teacher pay, no scores; a group lesson's for the learner's own seat. */
     private function outcome(Session $session): string
     {
-        return app(FamilyCancellation::class)->outcome($session);
+        $seat = $session->isGroup() ? $session->participants->first(fn ($p) => $p->role === ParticipantRole::Student && $p->user_id === $this->learnerId()) : null;
+
+        return app(FamilyCancellation::class)->outcome($session, $seat?->enrollment_id);
+    }
+
+    private function learnerId(): string
+    {
+        return (string) app(FamilyView::class)->current((string) auth()->id())?->id;
     }
 }

@@ -63,7 +63,7 @@ final class SendLessonReminders
             $s = $this->sessions->of($id);
             if ($s !== null) {
                 $supervisors = array_values(array_diff($this->identity->usersWithAbility(Ability::ViewLiveBoard), [$s['teacher_id']]));
-                $sent += $this->notifications->send(new Message('scheduling.teacher_late', $supervisors, SendSchedulingNotifications::lessonData($s),
+                $sent += $this->notifications->send(new Message('scheduling.teacher_late', $supervisors, SendSchedulingNotifications::teacherData($s),
                     ['screen' => 'live_board', 'id' => $id], "teacher-late:{$id}"));
             }
         }
@@ -114,7 +114,7 @@ final class SendLessonReminders
     {
         $s = $this->sessions->of($sessionId);
 
-        return $s === null ? 0 : $this->notifications->send(new Message($template, [$s['teacher_id']], SendSchedulingNotifications::lessonData($s),
+        return $s === null ? 0 : $this->notifications->send(new Message($template, [$s['teacher_id']], SendSchedulingNotifications::teacherData($s),
             ['screen' => 'session', 'id' => $sessionId], $key, $urgent));
     }
 }

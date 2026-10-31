@@ -26,5 +26,7 @@ final readonly class PublicTeacher
         public array $ageGroups,
         public array $subjects,
         public bool $acceptsTrials,
+        // Teaches group lessons (docs/architecture/02, section 25).
+        public bool $acceptsGroups = false,
     ) {}
 }

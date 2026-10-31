@@ -1,4 +1,6 @@
 import type { LocalTime } from '../time';
+import type { LessonFormat, RawLessonGroup } from '../lesson-format';
+import type { GroupStudent } from './group-report';
 import type { ReportAnswer, ReportTemplate } from '../report-answers';
 
 /**
@@ -13,8 +15,13 @@ export type Lesson = {
   ends_at: LocalTime;
   minutes: number;
   subject: string;
-  /** The student (for a teacher). */
+  /** The student (for a teacher; a group lesson reads "group · n"). */
   with: string;
+  /** private (one student) or group (lib/lesson-format: groupOf). */
+  format?: LessonFormat;
+  format_label?: string;
+  /** A group lesson's seats and who is in it as the viewer may see them; null for a private one. */
+  group?: RawLessonGroup | null;
   /** scheduled, in_progress, completed, student_absent, teacher_absent, needs_review, cancelled. */
   status: string;
   status_label: string;
@@ -45,6 +52,10 @@ export type ReportSummary = {
   id: string;
   session_id: string;
   enrollment_id: string | null;
+  /** private, or group: a group lesson has a report per student, sharing its session_id (lib/teach/group-report: reportRows). */
+  format: LessonFormat;
+  /** A group lesson's group; null for a one-to-one lesson. */
+  group_id: string | null;
   /** lesson or absence. */
   kind: 'lesson' | 'absence';
   /** due, overdue, submitted, reviewed. */
@@ -175,6 +186,8 @@ export type ReportForm = ReportSummary & {
   expected_suggestion?: Expected | null;
   /** The verses with the words marked in the lesson's shared mushaf (null: none marked). */
   mistakes_suggestion?: Expected | null;
+  /** A group lesson: every student's report in it, all sent together (lib/teach/group-report); null for a one-to-one lesson. */
+  group?: { students: GroupStudent[] } | null;
 };
 
 export type Student = {
