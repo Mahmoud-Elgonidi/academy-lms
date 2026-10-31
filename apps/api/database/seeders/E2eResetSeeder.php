@@ -26,8 +26,10 @@ use Modules\Scheduling\Actions\CancelUnpaidSessions;
 use Modules\Scheduling\Actions\FundSessions;
 use Modules\Scheduling\Actions\MaterializeSessions;
 use Modules\Scheduling\Actions\RecordParticipantJoin;
+use Modules\Scheduling\Actions\ResolveReview;
 use Modules\Scheduling\Actions\ScheduleSession;
 use Modules\Scheduling\Contracts\DTOs\NewSession;
+use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Money\Money;
@@ -85,6 +87,7 @@ final class E2eResetSeeder extends Seeder
             try {
                 foreach (['ziad', 'yousef', 'maryam'] as $student) {
                     $this->livePast($student);
+                    $this->reviewLastWeek($student);
                     $this->handInLastWeek($student);
                 }
                 $this->play();
@@ -170,6 +173,24 @@ final class E2eResetSeeder extends Seeder
             app(ApplyAttendanceDeadlines::class)->handle();
         }
         CarbonImmutable::setTestNow();
+    }
+
+    /**
+     * Last week's lessons left to review, decided as held (the owner, as staff would on the board). The demo leaves
+     * one lesson to review an hour before it was seeded; just after midnight on the student's clock on a Friday
+     * that lesson falls in last week, and last week's chest would wait on it.
+     */
+    private function reviewLastWeek(string $student): void
+    {
+        $id = $this->ids[$student];
+        $week = $this->now->setTimezone($this->zone($id))->startOfWeek(ChallengeCatalog::WEEK_STARTS)->startOfDay();
+        $waiting = Session::query()->where('status', SessionStatus::NeedsReview->value)
+            ->where('starts_at', '>=', $week->subWeek()->utc())->where('starts_at', '<', $week->utc())
+            ->whereHas('participants', fn ($q) => $q->where('user_id', $id)->where('role', 'student'))->get();
+        foreach ($waiting as $session) {
+            // A disputed one needs the academy's answer, which its author reads.
+            app(ResolveReview::class)->handle($session, 'completed', 'راجعنا الحصة: حضرها الطرفان كاملة.', $this->ids['owner']);
+        }
     }
 
     /** Last week's homework (Saturday to Friday on the student's clock) handed in before it was due, so last week's chest is ready. */
