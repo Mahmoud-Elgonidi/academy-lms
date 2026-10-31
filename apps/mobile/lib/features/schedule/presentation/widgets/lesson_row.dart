@@ -8,6 +8,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../classroom/presentation/join.dart';
 import '../../../mushaf/presentation/widgets/mushaf_entry.dart';
 import '../../domain/lesson.dart';
+import 'group_lesson.dart';
 
 /// What a lesson's own sheet can do now; each is null when it may not.
 class LessonActions {
@@ -26,7 +27,15 @@ class LessonActions {
 /// state as a chip; a tap opens its sheet. A room open now joins from the
 /// row itself.
 class LessonRow extends StatelessWidget {
-  const LessonRow({required this.lesson, required this.onTap, this.highlight = false, this.grouped = false, this.trailing, super.key});
+  const LessonRow({
+    required this.lesson,
+    required this.onTap,
+    this.highlight = false,
+    this.grouped = false,
+    this.showPrivate = false,
+    this.trailing,
+    super.key,
+  });
 
   final Lesson lesson;
   final VoidCallback onTap;
@@ -36,6 +45,9 @@ class LessonRow extends StatelessWidget {
 
   /// One of the rows on a day's card (a teacher's), rather than a card of its own.
   final bool grouped;
+
+  /// Says «فردية» on a one-to-one lesson: group lessons stand beside it in the list.
+  final bool showPrivate;
 
   /// What stands in place of the arrow (a teacher's Write).
   final Widget? trailing;
@@ -85,16 +97,24 @@ class LessonRow extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          x.withName.isEmpty ? x.subject : l.lessonWith(x.subject, x.withName),
-                          style: context.type.cardTitle.copyWith(color: struck ? c.muted : null),
-                        ),
+                        Text(lessonTitle(context, x), style: context.type.cardTitle.copyWith(color: struck ? c.muted : null)),
+                        if (groupLine(context, x) case final others?)
+                          Text(
+                            others,
+                            key: Key('group-line-${x.id}'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.type.caption,
+                          ),
                         const Gap(Space.xs + 2),
                         Wrap(
                           spacing: 6,
                           runSpacing: 4,
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
+                            ?formatPill(x, showPrivate: showPrivate),
                             StatusChip(lessonStateLabel(context, x), tone: lessonTone(x)),
+                            if (x.group?.seatLabel case final seat?) StatusChip(seat, tone: Tone.neutral),
                             if (x.substituteFor != null) StatusChip(l.substituteChip(x.substituteFor!), tone: Tone.info),
                             if (x.typeLabel != null) StatusChip(x.typeLabel!, tone: Tone.info),
                             if (x.dispute case final d?)
@@ -215,9 +235,37 @@ class _LessonSheet extends StatelessWidget {
                       )
                       .trim(),
                 ),
-                if (x.withName.isNotEmpty) ...[const Divider(height: 1), row(l.lessonWho, x.withName)],
+                if (x.withName.isNotEmpty && !(x.group?.forTeacher ?? false)) ...[const Divider(height: 1), row(l.lessonWho, x.withName)],
+                if (x.isGroup) ...[
+                  const Divider(height: 1),
+                  Padding(
+                    key: const Key('sheet-group'),
+                    padding: const EdgeInsets.symmetric(horizontal: Space.l, vertical: Space.m),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 72,
+                          child: Text((x.group?.forTeacher ?? false) ? l.groupStudents : l.groupClassmates, style: context.type.caption),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ?formatPill(x),
+                              if (groupLine(context, x) case final others?) ...[
+                                const Gap(Space.xs),
+                                Text(others, style: context.type.body.copyWith(fontWeight: FontWeight.w600)),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const Divider(height: 1),
-                row(l.lessonState, [lessonStateLabel(context, x), ?x.typeLabel].join(' · ')),
+                row(l.lessonState, [lessonStateLabel(context, x), ?x.typeLabel, ?x.group?.seatLabel].join(' · ')),
               ],
             ),
           ),
@@ -295,7 +343,7 @@ class _LessonSheet extends StatelessWidget {
               key: const Key('sheet-cancel'),
               style: TextButton.styleFrom(foregroundColor: c.dangerInk, minimumSize: const Size.fromHeight(48)),
               onPressed: _after(context, actions.cancel!),
-              child: Text(l.cancelLesson, style: const TextStyle(fontWeight: FontWeight.w700)),
+              child: Text(x.isGroup ? l.skipLesson : l.cancelLesson, style: const TextStyle(fontWeight: FontWeight.w700)),
             ),
           ],
         ],

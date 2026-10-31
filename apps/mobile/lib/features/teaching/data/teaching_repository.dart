@@ -28,8 +28,13 @@ class TeachingRepository {
   );
 
   /// Disputes what one of my lessons was recorded as; it comes back under review, with the dispute.
-  Future<Lesson> dispute(String lessonId, {required String reason, required String note}) async => Lesson.fromJson(
-    (await _api.post('teacher/lessons/$lessonId/dispute', idempotent: true, body: {'reason': reason, 'note': note.trim()}))['data']
+  /// A group lesson's dispute is about one student's seat ([studentId], one of its `group.students`).
+  Future<Lesson> dispute(String lessonId, {required String reason, required String note, String? studentId}) async => Lesson.fromJson(
+    (await _api.post(
+          'teacher/lessons/$lessonId/dispute',
+          idempotent: true,
+          body: {'reason': reason, 'note': note.trim(), 'student_id': ?studentId},
+        ))['data']
         as Map<String, dynamic>,
   );
 
@@ -46,7 +51,8 @@ class TeachingRepository {
     final homework = (await _api.get('teacher/homework'))['data'] as List<dynamic>;
     final first = open.firstOrNull;
     return TeacherTodo(
-      reports: open.length,
+      // A group lesson's reports are written together: one to write.
+      reports: {for (final r in open) r['format'] == 'group' && r['group_id'] != null ? 'lesson:${r['session_id']}' : r['id']}.length,
       homework: homework.length,
       openReports: {
         for (final r in open)
@@ -62,10 +68,10 @@ class TeachingRepository {
     );
   }
 
-  /// Reports still to write first, then the ones sent in the last two weeks.
-  Future<List<ReportSummary>> reports() async => [
+  /// Reports still to write first, then the ones sent in the last two weeks; a group lesson's as one row.
+  Future<List<ReportSummary>> reports() async => ReportSummary.grouped([
     for (final r in (await _api.get('teacher/reports'))['data'] as List<dynamic>) ReportSummary.fromJson(r as Map<String, dynamic>),
-  ];
+  ]);
 
   Future<ReportForm> report(String id) async =>
       ReportForm.fromJson((await _api.get('teacher/reports/$id'))['data'] as Map<String, dynamic>);

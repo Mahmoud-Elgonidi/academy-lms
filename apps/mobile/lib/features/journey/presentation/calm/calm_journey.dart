@@ -73,6 +73,7 @@ class _CalmJourneyState extends State<CalmJourney> {
         CourseChips(courses: _m.courses, selected: course?.enrollmentId, onPick: (id) => setState(() => _course = id)),
       if (course != null && course.days.stand != CourseStand.on)
         Align(alignment: AlignmentDirectional.centerStart, child: CourseStatePill(course.days)),
+      ?courseGroupLine(course),
       if (course == null) EmptyNote(l.journeyNoCourses, icon: Icons.menu_book_outlined) else _GoalCard(course: course),
       if (course != null && course.hasCurriculum && here != null)
         _NowCard(course: course, level: here, onOpen: (s) => _openStation(here, s)),

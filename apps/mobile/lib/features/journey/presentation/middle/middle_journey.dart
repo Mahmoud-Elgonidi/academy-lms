@@ -68,6 +68,7 @@ class _MiddleJourneyState extends State<MiddleJourney> {
         CourseChips(courses: _m.courses, selected: course?.enrollmentId, onPick: (id) => setState(() => _course = id)),
       if (course != null && course.days.stand != CourseStand.on)
         Align(alignment: AlignmentDirectional.centerStart, child: CourseStatePill(course.days)),
+      ?courseGroupLine(course),
       SectionHeader(l.today),
       if (today.isEmpty && !grouped) EmptyNote(l.journeyNoMissions, icon: Icons.flag_outlined),
       for (final m in today) MissionTile(mission: m, map: _m, place: widget.place, openStation: () => _openMission(m)),

@@ -120,6 +120,14 @@ class _Reports extends StatelessWidget {
   }
 }
 
+/// Whose report a row is: the student's (an absence says so), or a group
+/// lesson's as one row with how many students it has.
+String _who(BuildContext context, ReportSummary r) {
+  final l = context.l10n;
+  if (r.isGroup) return '${l.groupLessonRow} · ${l.groupStudentsCount(r.students.length)}';
+  return [if (r.absence) l.reportAbsence, r.student].join(' · ');
+}
+
 /// Opens a report from this list; once back, the drafts are read again, and
 /// the list too when it was sent.
 Future<void> _openHere(BuildContext context, String id, Future<void> Function() onBack) async {
@@ -227,12 +235,7 @@ class _OpenRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    [if (r.absence) l.reportAbsence, r.student].join(' · '),
-                    style: context.type.cardTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  Text(_who(context, r), style: context.type.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
                   Text.rich(
                     TextSpan(
                       children: [
@@ -281,7 +284,6 @@ class _SentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l = context.l10n;
     final c = context.colors;
     final r = report;
     final day = (r.submittedAt ?? r.lessonAt)?.day(context.locale);
@@ -298,7 +300,7 @@ class _SentRow extends StatelessWidget {
               const Gap(Space.m),
               Expanded(
                 child: Text(
-                  [if (r.absence) l.reportAbsence, r.student].join(' · '),
+                  _who(context, r),
                   style: context.type.body.copyWith(fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -342,12 +344,7 @@ class _DraftRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    [if (r.absence) l.reportAbsence, r.student].join(' · '),
-                    style: context.type.cardTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  Text(_who(context, r), style: context.type.cardTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
                   Text([if (r.lessonAt != null) r.lessonAt!.when(context), ago].join(' · '), style: context.type.caption),
                 ],
               ),

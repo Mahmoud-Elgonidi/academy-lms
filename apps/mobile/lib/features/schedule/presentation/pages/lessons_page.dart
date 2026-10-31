@@ -18,6 +18,7 @@ import '../../data/lessons_repository.dart';
 import '../../domain/lesson.dart';
 import '../widgets/lesson_card.dart';
 import '../widgets/lesson_row.dart';
+import '../widgets/group_lesson.dart';
 import '../widgets/lesson_sheets.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../core/realtime/live.dart';
@@ -146,6 +147,7 @@ class _LessonDays extends StatelessWidget {
     final nextId = past ? null : data.lessons.where((x) => x.upcoming).firstOrNull?.id;
     // A child in the kids' look only joins: cancelling, turning down a substitute, disputing and rating are the family's.
     final kids = context.shape.stage == Stage.kids;
+    final mixed = mixesFormats(data.lessons);
     return ListView(
       padding: pagePadding,
       physics: const AlwaysScrollableScrollPhysics(),
@@ -162,10 +164,11 @@ class _LessonDays extends StatelessWidget {
             LessonCard(
               lesson: lesson,
               highlight: lesson.id == nextId,
+              showPrivate: mixed,
               onCancel: lesson.canCancel && !kids
                   ? () async {
                       if (await showCancelSheet(context, lesson) && context.mounted) {
-                        DoneMoment.show(context, title: l.cancelled);
+                        DoneMoment.show(context, title: lesson.isGroup ? l.skipDone : l.cancelled);
                         await reload();
                       }
                     }
@@ -225,12 +228,14 @@ class _FamilyLessonDays extends StatelessWidget {
     final nextId = past ? null : data.lessons.where((x) => x.upcoming).firstOrNull?.id;
     final learner = context.read<LearnerCubit>().state.selected;
     final who = learner == null || learner.isSelf ? null : learner.firstName;
+    final learnerId = context.learnerId();
+    final mixed = mixesFormats(data.lessons);
 
     LessonActions actionsFor(Lesson lesson) => LessonActions(
       cancel: lesson.canCancel
           ? () async {
-              if (await showCancelSheet(context, lesson, learner: who) && context.mounted) {
-                DoneMoment.show(context, title: l.cancelled);
+              if (await showCancelSheet(context, lesson, learner: who, learnerId: learnerId) && context.mounted) {
+                DoneMoment.show(context, title: lesson.isGroup ? l.skipDone : l.cancelled);
                 await reload();
               }
             }
@@ -275,6 +280,7 @@ class _FamilyLessonDays extends StatelessWidget {
               key: Key('lesson-${lesson.id}'),
               lesson: lesson,
               highlight: lesson.id == nextId,
+              showPrivate: mixed,
               onTap: () => showLessonSheet(context, lesson, actions: actionsFor(lesson), learner: who, zone: zone),
             ),
             const Gap(Space.m),

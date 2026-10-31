@@ -27,6 +27,8 @@ class Lesson extends Equatable {
     this.canDispute = false,
     this.disputeUntil,
     this.disputeReasons = const [],
+    this.format = 'private',
+    this.group,
   });
 
   factory Lesson.fromJson(Map<String, dynamic> json) {
@@ -56,6 +58,8 @@ class Lesson extends Equatable {
         for (final r in json['dispute_reasons'] as List<dynamic>? ?? const [])
           (key: (r as Map<String, dynamic>)['key'] as String, label: r['label'] as String),
       ],
+      format: json['format'] as String? ?? (json['group'] is Map ? 'group' : 'private'),
+      group: LessonGroup.fromJson(json['group']),
     );
   }
 
@@ -93,6 +97,14 @@ class Lesson extends Equatable {
   final LocalTime? disputeUntil;
   final List<({String key, String label})> disputeReasons;
 
+  /// private (one student) or group.
+  final String format;
+
+  /// A group lesson's seats and who else is in it, as the viewer may see them; null for a one-to-one lesson.
+  final LessonGroup? group;
+
+  bool get isGroup => format == 'group';
+
   bool get ahead => status == 'scheduled' || status == 'in_progress';
 
   /// Still to come or on now: booked, and not yet over by the clock.
@@ -101,13 +113,112 @@ class Lesson extends Equatable {
   bool get tookPlace => status == 'completed' || status == 'student_absent';
 
   @override
-  List<Object?> get props => [id, status, joinOpen, canCancel, unfunded, canDispute, dispute];
+  List<Object?> get props => [id, status, joinOpen, canCancel, unfunded, canDispute, dispute, format, group];
 
   /// The room opens 10 minutes before and closes 10 minutes after (Classroom).
   static const roomCloses = Duration(minutes: 10);
 
   /// The moments the clock alone changes what this lesson shows: the room opening, the start, the room closing.
   Iterable<DateTime> get clockMoments => [?joinOpensAt?.utc, startsAt.utc, endsAt.utc.add(roomCloses)];
+}
+
+/// A group lesson as the viewer may see it (`LessonPresenter::group`): its
+/// seats, and the others in it. A family reads its classmates' first names
+/// ([classmates]; null in the kids' look, which reads only [classmatesCount])
+/// and what its own seat came to ([seat]); the teacher reads everyone seated
+/// ([students]).
+class LessonGroup extends Equatable {
+  const LessonGroup({
+    required this.capacity,
+    required this.seatsTaken,
+    this.classmates,
+    this.classmatesCount,
+    this.seat,
+    this.seatLabel,
+    this.seatNumber,
+    this.students,
+  });
+
+  static LessonGroup? fromJson(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    int number(Object? v) => v is num ? v.toInt() : int.tryParse('$v') ?? 0;
+    final classmates = raw['classmates'];
+    final students = raw['students'];
+    return LessonGroup(
+      capacity: number(raw['capacity']),
+      seatsTaken: number(raw['seats_taken']),
+      classmates: classmates is List ? [for (final n in classmates) '$n'] : null,
+      classmatesCount: (raw['classmates_count'] as num?)?.toInt(),
+      seat: raw['seat'] as String?,
+      seatLabel: raw['seat_label'] as String?,
+      seatNumber: (raw['seat_number'] as num?)?.toInt(),
+      students: students is List
+          ? [for (final s in students.whereType<Map<String, dynamic>>()) (id: '${s['id'] ?? ''}', name: '${s['name'] ?? ''}')]
+          : null,
+    );
+  }
+
+  final int capacity;
+  final int seatsTaken;
+
+  /// The family: the classmates' first names (null in the kids' look).
+  final List<String>? classmates;
+
+  /// The family: how many classmates (the kids' look reads only this).
+  final int? classmatesCount;
+
+  /// The family: what the learner's own seat came to (attended, absent, excused, makeup), once decided.
+  final String? seat;
+  final String? seatLabel;
+
+  /// The family: the learner's seat in the group by when they joined ("seat 4 of 5": 4); null for the teacher.
+  final int? seatNumber;
+
+  /// The teacher: every student seated; null for a family.
+  final List<({String id, String name})>? students;
+
+  /// The teacher's view (it lists everyone seated).
+  bool get forTeacher => students != null;
+
+  /// The learner's own seat is excused ("I won't attend").
+  bool get excused => seat == 'excused';
+
+  @override
+  List<Object?> get props => [capacity, seatsTaken, classmates, classmatesCount, seat, seatNumber, students];
+}
+
+/// A course that is a seat in a group (the journey's courses, the balance):
+/// its group, its seats and the learner's own seat by when they joined.
+class CourseGroup extends Equatable {
+  const CourseGroup({required this.id, required this.capacity, required this.seatsTaken, required this.seat, this.status});
+
+  /// Null for a one-to-one course (no `group`).
+  static CourseGroup? fromJson(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    int number(Object? v) => v is num ? v.toInt() : int.tryParse('$v') ?? 0;
+    return CourseGroup(
+      id: '${raw['id'] ?? ''}',
+      capacity: number(raw['capacity']),
+      seatsTaken: number(raw['seats_taken']),
+      seat: number(raw['seat']),
+      status: raw['status'] as String?,
+    );
+  }
+
+  final String id;
+  final int capacity;
+  final int seatsTaken;
+
+  /// The learner's seat ("seat 4 of 5": 4); 0 when not known.
+  final int seat;
+
+  /// forming (waits for its students) or running; null where the answer does not say.
+  final String? status;
+
+  bool get forming => status == 'forming';
+
+  @override
+  List<Object?> get props => [id, capacity, seatsTaken, seat, status];
 }
 
 /// A dispute of a lesson's outcome: open, upheld (the outcome changed) or
@@ -160,10 +271,11 @@ class LessonList extends Equatable {
 
 /// What cancelling would do, by the academy's policy, and the reasons to pick.
 class CancelPreview {
-  const CancelPreview({required this.outcome, required this.reasons});
+  const CancelPreview({required this.outcome, required this.reasons, this.excuseOnly = false});
 
   factory CancelPreview.fromJson(Map<String, dynamic> json) => CancelPreview(
     outcome: json['outcome'] as String? ?? '',
+    excuseOnly: json['excuse_only'] == true,
     reasons: [
       for (final r in json['reasons'] as List<dynamic>)
         (value: (r as Map<String, dynamic>)['value'] as String, label: r['label'] as String),
@@ -172,6 +284,9 @@ class CancelPreview {
 
   final String outcome;
   final List<({String value, String label})> reasons;
+
+  /// A group lesson: "I won't attend" excuses the learner's own seat; the lesson goes on for the others.
+  final bool excuseOnly;
 }
 
 /// A lesson's rating by this person, and the tags to offer.

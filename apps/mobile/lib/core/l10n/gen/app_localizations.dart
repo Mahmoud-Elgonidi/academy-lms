@@ -1946,6 +1946,132 @@ abstract class AppLocalizations {
   /// **'اختر سببًا أولًا.'**
   String get pickReason;
 
+  /// No description provided for @formatGroup.
+  ///
+  /// In ar, this message translates to:
+  /// **'جماعية'**
+  String get formatGroup;
+
+  /// No description provided for @formatPrivate.
+  ///
+  /// In ar, this message translates to:
+  /// **'فردية'**
+  String get formatPrivate;
+
+  /// No description provided for @groupSeats.
+  ///
+  /// In ar, this message translates to:
+  /// **'{taken}/{capacity}'**
+  String groupSeats(int taken, int capacity);
+
+  /// No description provided for @groupSeatsSpoken.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصة جماعية، المقاعد المشغولة {taken} من {capacity}'**
+  String groupSeatsSpoken(int taken, int capacity);
+
+  /// No description provided for @groupWithNames.
+  ///
+  /// In ar, this message translates to:
+  /// **'مع {names}'**
+  String groupWithNames(String names);
+
+  /// No description provided for @groupWithCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{لا زملاء معك في هذه الحصة} =1{مع زميل واحد} =2{مع زميلين} few{مع {n} زملاء} other{مع {n} زميلًا}}'**
+  String groupWithCount(int n);
+
+  /// No description provided for @groupStudentsCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n, plural, =0{لا طلاب بعد} =1{طالب واحد} =2{طالبان} few{{n} طلاب} other{{n} طالبًا}}'**
+  String groupStudentsCount(int n);
+
+  /// No description provided for @groupClassmates.
+  ///
+  /// In ar, this message translates to:
+  /// **'الزملاء'**
+  String get groupClassmates;
+
+  /// No description provided for @groupStudents.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطلاب'**
+  String get groupStudents;
+
+  /// No description provided for @groupFormat.
+  ///
+  /// In ar, this message translates to:
+  /// **'النوع'**
+  String get groupFormat;
+
+  /// No description provided for @skipLesson.
+  ///
+  /// In ar, this message translates to:
+  /// **'لن أحضر هذه الحصة'**
+  String get skipLesson;
+
+  /// No description provided for @skipTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاعتذار عن حصة {day} الجماعية'**
+  String skipTitle(String day);
+
+  /// No description provided for @skipGoesOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحصة جماعية فلا تُلغى: تستمر لبقية المجموعة، ويُعفى مقعدك وحدك.'**
+  String get skipGoesOn;
+
+  /// No description provided for @skipYes.
+  ///
+  /// In ar, this message translates to:
+  /// **'نعم، لن أحضر'**
+  String get skipYes;
+
+  /// No description provided for @skipDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّلنا الاعتذار، وتستمر الحصة للمجموعة.'**
+  String get skipDone;
+
+  /// No description provided for @groupYourSeat.
+  ///
+  /// In ar, this message translates to:
+  /// **'مقعدك {seat} من {capacity}'**
+  String groupYourSeat(int seat, int capacity);
+
+  /// No description provided for @groupCourse.
+  ///
+  /// In ar, this message translates to:
+  /// **'مجموعة'**
+  String get groupCourse;
+
+  /// No description provided for @groupCourseSpoken.
+  ///
+  /// In ar, this message translates to:
+  /// **'مجموعة، المقاعد المشغولة {taken} من {capacity}'**
+  String groupCourseSpoken(int taken, int capacity);
+
+  /// No description provided for @groupForming.
+  ///
+  /// In ar, this message translates to:
+  /// **'المجموعة قيد التكوين، وتبدأ حصصها حين يكتمل عددها.'**
+  String get groupForming;
+
+  /// No description provided for @groupPlan.
+  ///
+  /// In ar, this message translates to:
+  /// **'باقة جماعية'**
+  String get groupPlan;
+
+  /// No description provided for @groupPlanSpoken.
+  ///
+  /// In ar, this message translates to:
+  /// **'باقة جماعية، المقاعد المشغولة {taken} من {capacity}'**
+  String groupPlanSpoken(int taken, int capacity);
+
   /// No description provided for @rateLesson.
   ///
   /// In ar, this message translates to:
@@ -4723,6 +4849,90 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'اختر التركيز والمستوى العام.'**
   String get pickRatings;
+
+  /// No description provided for @groupReportTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تقرير الحصة الجماعية'**
+  String get groupReportTitle;
+
+  /// No description provided for @groupReportShared.
+  ///
+  /// In ar, this message translates to:
+  /// **'ما دُرس والأسئلة والواجب هنا للمجموعة كلها، ويصل الواجب إلى كل طالب.'**
+  String get groupReportShared;
+
+  /// No description provided for @groupReportRowsHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'لكل طالب سطر: التركيز والمستوى العام وملاحظة له، أو ملاحظة غيابه.'**
+  String get groupReportRowsHint;
+
+  /// No description provided for @groupAttended.
+  ///
+  /// In ar, this message translates to:
+  /// **'حضر'**
+  String get groupAttended;
+
+  /// No description provided for @groupAbsent.
+  ///
+  /// In ar, this message translates to:
+  /// **'غاب'**
+  String get groupAbsent;
+
+  /// No description provided for @groupRowNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظة له ولأسرته'**
+  String get groupRowNote;
+
+  /// No description provided for @groupRowAbsence.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظة الغياب لأسرته'**
+  String get groupRowAbsence;
+
+  /// No description provided for @groupRowRate.
+  ///
+  /// In ar, this message translates to:
+  /// **'قيّم {name}: التركيز والمستوى العام.'**
+  String groupRowRate(String name);
+
+  /// No description provided for @groupRowsMissing.
+  ///
+  /// In ar, this message translates to:
+  /// **'أكمل سطر كل طالب حضر.'**
+  String get groupRowsMissing;
+
+  /// No description provided for @groupVoiceShared.
+  ///
+  /// In ar, this message translates to:
+  /// **'يملأ التسجيل الجزء المشترك فقط، وسطر كل طالب تكتبه بنفسك.'**
+  String get groupVoiceShared;
+
+  /// No description provided for @groupLessonRow.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصة جماعية'**
+  String get groupLessonRow;
+
+  /// No description provided for @disputeWhose.
+  ///
+  /// In ar, this message translates to:
+  /// **'عن أي طالب الاعتراض؟'**
+  String get disputeWhose;
+
+  /// No description provided for @disputeWhoseHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'يكون الاعتراض في الحصة الجماعية على مقعد طالب واحد.'**
+  String get disputeWhoseHint;
+
+  /// No description provided for @disputeAbout.
+  ///
+  /// In ar, this message translates to:
+  /// **'عن {name}'**
+  String disputeAbout(String name);
 
   /// No description provided for @pickOutcomes.
   ///

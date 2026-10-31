@@ -15,10 +15,15 @@ class ReportSummary {
     this.lessonAt,
     this.dueAt,
     this.submittedAt,
+    this.sessionId = '',
+    this.groupId,
+    this.students = const [],
   });
 
   factory ReportSummary.fromJson(Map<String, dynamic> json) => ReportSummary(
     id: json['id'] as String,
+    sessionId: json['session_id'] as String? ?? '',
+    groupId: json['format'] == 'private' ? null : json['group_id'] as String?,
     kind: json['kind'] as String? ?? 'lesson',
     status: json['status'] as String? ?? 'due',
     statusLabel: json['status_label'] as String? ?? '',
@@ -43,8 +48,55 @@ class ReportSummary {
   final LocalTime? dueAt;
   final LocalTime? submittedAt;
 
+  /// The lesson it is for: a group lesson's reports share it.
+  final String sessionId;
+
+  /// A group lesson's group; null for a one-to-one lesson.
+  final String? groupId;
+
+  /// A group lesson's row ([grouped]): every student in it, in the list's order.
+  final List<String> students;
+
   bool get open => status == 'due' || status == 'overdue';
   bool get absence => kind == 'absence';
+  bool get isGroup => groupId != null;
+
+  /// The teacher's list: a group lesson is one row (its report opens the
+  /// form with every student in it), still to write while any of its
+  /// reports is, overdue when any is; one-to-one reports stay as they are.
+  static List<ReportSummary> grouped(List<ReportSummary> reports) {
+    final byLesson = <String, List<ReportSummary>>{};
+    for (final r in reports) {
+      if (r.isGroup) byLesson.putIfAbsent(r.sessionId, () => []).add(r);
+    }
+    final out = <ReportSummary>[];
+    for (final r in reports) {
+      if (!r.isGroup) {
+        out.add(r);
+        continue;
+      }
+      final all = byLesson.remove(r.sessionId);
+      if (all == null) continue;
+      final lead = all.where((x) => x.status == 'overdue').firstOrNull ?? all.where((x) => x.open).firstOrNull ?? all.first;
+      out.add(
+        ReportSummary(
+          id: lead.id,
+          kind: 'lesson',
+          status: lead.status,
+          statusLabel: lead.statusLabel,
+          student: lead.student,
+          late: all.any((x) => x.late),
+          lessonAt: lead.lessonAt,
+          dueAt: lead.dueAt,
+          submittedAt: all.map((x) => x.submittedAt).nonNulls.lastOrNull,
+          sessionId: lead.sessionId,
+          groupId: lead.groupId,
+          students: [for (final x in all) x.student],
+        ),
+      );
+    }
+    return out;
+  }
 }
 
 /// One lesson of the curriculum in a report: today's plan suggests them,
@@ -121,6 +173,7 @@ class ReportForm {
     this.recitationCheck = false,
     this.expectedSuggestion,
     this.mistakesSuggestion,
+    this.group,
   });
 
   factory ReportForm.fromJson(Map<String, dynamic> json) => ReportForm(
@@ -143,6 +196,10 @@ class ReportForm {
     recitationCheck: (json['assist'] as Map<String, dynamic>?)?['recitation_check'] == true,
     expectedSuggestion: Expected.fromJson(json['expected_suggestion']),
     mistakesSuggestion: Expected.fromJson(json['mistakes_suggestion']),
+    group: switch ((json['group'] as Map<String, dynamic>?)?['students']) {
+      final List<dynamic> rows => [for (final r in rows.whereType<Map<String, dynamic>>()) GroupReportRow.fromJson(r)],
+      _ => null,
+    },
   );
 
   final ReportSummary summary;
@@ -174,6 +231,57 @@ class ReportForm {
   /// The verses with the words marked in the lesson's shared mushaf (the surah with the most marks), to recite again.
   final Expected? mistakesSuggestion;
 
+  /// A group lesson: every student's report in it, handed in together (the shared part once, a row each);
+  /// null for a one-to-one lesson.
+  final List<GroupReportRow>? group;
+
+  bool get isGroup => group != null;
+
   /// Reviewed by the academy: it no longer changes.
   bool get locked => summary.status == 'reviewed';
+}
+
+/// One student's row in a group lesson's report: they came (scores and a
+/// note for them) or not (the note for their absence), as the API decided.
+class GroupReportRow {
+  const GroupReportRow({
+    required this.reportId,
+    required this.studentId,
+    required this.name,
+    required this.kind,
+    required this.status,
+    this.engagement,
+    this.overall,
+    this.notesForStudent,
+    this.absenceNote,
+  });
+
+  factory GroupReportRow.fromJson(Map<String, dynamic> json) => GroupReportRow(
+    reportId: '${json['report_id'] ?? ''}',
+    studentId: '${json['student_id'] ?? ''}',
+    name: json['name'] as String? ?? '',
+    kind: json['kind'] as String? ?? 'lesson',
+    status: json['status'] as String? ?? 'due',
+    engagement: (json['engagement'] as num?)?.toInt(),
+    overall: (json['overall'] as num?)?.toInt(),
+    notesForStudent: json['notes_for_student'] as String?,
+    absenceNote: json['absence_note'] as String?,
+  );
+
+  final String reportId;
+  final String studentId;
+  final String name;
+
+  /// lesson (they came) or absence.
+  final String kind;
+  final String status;
+  final int? engagement;
+  final int? overall;
+  final String? notesForStudent;
+  final String? absenceNote;
+
+  bool get absent => kind == 'absence';
+
+  /// A supervisor reviewed it: it stays as it is.
+  bool get locked => status == 'reviewed';
 }

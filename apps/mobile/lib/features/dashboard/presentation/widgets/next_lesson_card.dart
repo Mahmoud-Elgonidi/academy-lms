@@ -6,6 +6,7 @@ import '../../../../core/time/formats.dart';
 import '../../../classroom/presentation/join.dart';
 import '../../../mushaf/presentation/widgets/mushaf_entry.dart';
 import '../../../schedule/domain/lesson.dart';
+import '../../../schedule/presentation/widgets/group_lesson.dart';
 import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../../shared/widgets/minute_tick.dart';
@@ -101,9 +102,26 @@ class NextLessonCard extends StatelessWidget {
           ),
           const Gap(Space.xs),
           Text(
-            '${l.lessonWith(lesson.subject, lesson.withName)} · ${l.minutes(lesson.minutes)}',
+            '${lessonTitle(context, lesson)} · ${l.minutes(lesson.minutes)}',
             style: TextStyle(color: ink.withValues(alpha: 0.9), fontSize: 15),
           ),
+          if (lesson.isGroup) ...[
+            const Gap(Space.s),
+            // A group lesson: its seats, and the others in it as this viewer may see them.
+            Wrap(
+              spacing: Space.s,
+              runSpacing: Space.xs,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                ?formatPill(lesson, onBrand: true),
+                if (groupLine(context, lesson) case final others?)
+                  Text(
+                    others,
+                    style: TextStyle(color: ink.withValues(alpha: 0.95), fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+              ],
+            ),
+          ],
           if (lesson.unfunded) ...[
             const Gap(Space.s),
             Row(

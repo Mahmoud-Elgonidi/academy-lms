@@ -232,11 +232,12 @@ class _ClassroomPageState extends State<ClassroomPage> {
     context.canPop() ? context.pop() : context.go('/');
   }
 
-  /// The people in the room as the stage needs them: me first, then the others as they came in.
-  List<RoomPerson> _people() => [
+  /// The people in the room as the stage needs them: me first, then the others as they came in;
+  /// in a group lesson (two or more others) each by their first name.
+  List<RoomPerson> _people() => namedForRoom([
     if (_room.localParticipant case final me?) _person(me, local: true),
     for (final p in _room.remoteParticipants.values) _person(p),
-  ];
+  ]);
 
   RoomPerson _person(lk.Participant p, {bool local = false}) {
     bool shows(lk.TrackSource source) =>

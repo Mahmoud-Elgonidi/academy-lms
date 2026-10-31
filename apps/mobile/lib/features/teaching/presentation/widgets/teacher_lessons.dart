@@ -6,6 +6,7 @@ import '../../../../core/auth/session_cubit.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../schedule/domain/lesson.dart';
+import '../../../schedule/presentation/widgets/group_lesson.dart';
 import '../../../schedule/presentation/widgets/lesson_row.dart';
 import 'dispute_lesson.dart';
 import 'waiting.dart';
@@ -27,6 +28,7 @@ class TeacherDayCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
+    final mixed = mixesFormats(lessons);
     return LmsCard(
       padding: EdgeInsets.zero,
       child: Column(
@@ -37,6 +39,7 @@ class TeacherDayCard extends StatelessWidget {
               key: Key('lesson-${x.id}'),
               lesson: x,
               grouped: true,
+              showPrivate: mixed,
               onTap: () => openTeacherLesson(context, x, reportId: openReports[x.id], reload: reload),
               trailing: switch (openReports[x.id]) {
                 final id? when !x.ahead => OutlinedButton(

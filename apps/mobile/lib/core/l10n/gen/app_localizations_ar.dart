@@ -1143,6 +1143,105 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pickReason => 'اختر سببًا أولًا.';
 
   @override
+  String get formatGroup => 'جماعية';
+
+  @override
+  String get formatPrivate => 'فردية';
+
+  @override
+  String groupSeats(int taken, int capacity) {
+    return '$taken/$capacity';
+  }
+
+  @override
+  String groupSeatsSpoken(int taken, int capacity) {
+    return 'حصة جماعية، المقاعد المشغولة $taken من $capacity';
+  }
+
+  @override
+  String groupWithNames(String names) {
+    return 'مع $names';
+  }
+
+  @override
+  String groupWithCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'مع $n زميلًا',
+      few: 'مع $n زملاء',
+      two: 'مع زميلين',
+      one: 'مع زميل واحد',
+      zero: 'لا زملاء معك في هذه الحصة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupStudentsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n طالبًا',
+      few: '$n طلاب',
+      two: 'طالبان',
+      one: 'طالب واحد',
+      zero: 'لا طلاب بعد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupClassmates => 'الزملاء';
+
+  @override
+  String get groupStudents => 'الطلاب';
+
+  @override
+  String get groupFormat => 'النوع';
+
+  @override
+  String get skipLesson => 'لن أحضر هذه الحصة';
+
+  @override
+  String skipTitle(String day) {
+    return 'الاعتذار عن حصة $day الجماعية';
+  }
+
+  @override
+  String get skipGoesOn => 'الحصة جماعية فلا تُلغى: تستمر لبقية المجموعة، ويُعفى مقعدك وحدك.';
+
+  @override
+  String get skipYes => 'نعم، لن أحضر';
+
+  @override
+  String get skipDone => 'سجّلنا الاعتذار، وتستمر الحصة للمجموعة.';
+
+  @override
+  String groupYourSeat(int seat, int capacity) {
+    return 'مقعدك $seat من $capacity';
+  }
+
+  @override
+  String get groupCourse => 'مجموعة';
+
+  @override
+  String groupCourseSpoken(int taken, int capacity) {
+    return 'مجموعة، المقاعد المشغولة $taken من $capacity';
+  }
+
+  @override
+  String get groupForming => 'المجموعة قيد التكوين، وتبدأ حصصها حين يكتمل عددها.';
+
+  @override
+  String get groupPlan => 'باقة جماعية';
+
+  @override
+  String groupPlanSpoken(int taken, int capacity) {
+    return 'باقة جماعية، المقاعد المشغولة $taken من $capacity';
+  }
+
+  @override
   String get rateLesson => 'قيّم الحصة';
 
   @override
@@ -2873,6 +2972,52 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pickRatings => 'اختر التركيز والمستوى العام.';
+
+  @override
+  String get groupReportTitle => 'تقرير الحصة الجماعية';
+
+  @override
+  String get groupReportShared => 'ما دُرس والأسئلة والواجب هنا للمجموعة كلها، ويصل الواجب إلى كل طالب.';
+
+  @override
+  String get groupReportRowsHint => 'لكل طالب سطر: التركيز والمستوى العام وملاحظة له، أو ملاحظة غيابه.';
+
+  @override
+  String get groupAttended => 'حضر';
+
+  @override
+  String get groupAbsent => 'غاب';
+
+  @override
+  String get groupRowNote => 'ملاحظة له ولأسرته';
+
+  @override
+  String get groupRowAbsence => 'ملاحظة الغياب لأسرته';
+
+  @override
+  String groupRowRate(String name) {
+    return 'قيّم $name: التركيز والمستوى العام.';
+  }
+
+  @override
+  String get groupRowsMissing => 'أكمل سطر كل طالب حضر.';
+
+  @override
+  String get groupVoiceShared => 'يملأ التسجيل الجزء المشترك فقط، وسطر كل طالب تكتبه بنفسك.';
+
+  @override
+  String get groupLessonRow => 'حصة جماعية';
+
+  @override
+  String get disputeWhose => 'عن أي طالب الاعتراض؟';
+
+  @override
+  String get disputeWhoseHint => 'يكون الاعتراض في الحصة الجماعية على مقعد طالب واحد.';
+
+  @override
+  String disputeAbout(String name) {
+    return 'عن $name';
+  }
 
   @override
   String get pickOutcomes => 'اختر ما حدث في كل درس.';

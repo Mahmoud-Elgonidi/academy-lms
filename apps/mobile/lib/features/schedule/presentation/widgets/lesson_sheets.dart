@@ -21,9 +21,11 @@ Future<T?> _sheet<T>(BuildContext context, Widget child) => showActionSheet<T>(
 );
 
 /// Asks first, telling what the academy's policy does with this
-/// cancellation; returns true once cancelled.
-Future<bool> showCancelSheet(BuildContext context, Lesson lesson, {String? learner}) async =>
-    await _sheet<bool>(context, _CancelSheet(lesson, learner: learner)) ?? false;
+/// cancellation; returns true once cancelled. A group lesson is never
+/// cancelled: "I won't attend" excuses the seat of [learnerId] (the learner
+/// on screen) and the lesson goes on for the others; the sheet says so.
+Future<bool> showCancelSheet(BuildContext context, Lesson lesson, {String? learner, String? learnerId}) async =>
+    await _sheet<bool>(context, _CancelSheet(lesson, learner: learner, learnerId: lesson.isGroup ? learnerId : null)) ?? false;
 
 /// Returns true once rated.
 Future<bool> showRateSheet(BuildContext context, Lesson lesson) async => await _sheet<bool>(context, _RateSheet(lesson)) ?? false;
@@ -36,12 +38,13 @@ Future<bool> showDisputeSheet(
   Lesson lesson, {
   required bool teacher,
   required Future<void> Function(String reason, String note) send,
+  String? about,
 }) async =>
     await showActionSheet<bool>(
       context,
       builder: (c) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(c).bottom),
-        child: _DisputeSheet(lesson: lesson, teacher: teacher, send: send),
+        child: _DisputeSheet(lesson: lesson, teacher: teacher, send: send, about: about),
       ),
     ) ??
     false;
@@ -101,9 +104,12 @@ class _SheetTitle extends StatelessWidget {
 }
 
 class _CancelSheet extends StatefulWidget {
-  const _CancelSheet(this.lesson, {this.learner});
+  const _CancelSheet(this.lesson, {this.learner, this.learnerId});
 
   final Lesson lesson;
+
+  /// Whose seat a group lesson excuses (a guardian's learner on screen).
+  final String? learnerId;
 
   /// The child it is for (a guardian's sheet), said under the question.
   final String? learner;
@@ -113,7 +119,7 @@ class _CancelSheet extends StatefulWidget {
 }
 
 class _CancelSheetState extends State<_CancelSheet> {
-  late final Future<CancelPreview> _preview = context.read<LessonsRepository>().cancellation(widget.lesson.id);
+  late final Future<CancelPreview> _preview = context.read<LessonsRepository>().cancellation(widget.lesson.id, learnerId: widget.learnerId);
   final _note = TextEditingController();
   String? _reason;
   bool _busy = false;
@@ -135,7 +141,7 @@ class _CancelSheetState extends State<_CancelSheet> {
       _error = null;
     });
     try {
-      await context.read<LessonsRepository>().cancel(widget.lesson.id, reason: _reason!, note: _note.text);
+      await context.read<LessonsRepository>().cancel(widget.lesson.id, reason: _reason!, note: _note.text, learnerId: widget.learnerId);
       if (mounted) Navigator.pop(context, true);
     } on ApiProblem catch (p) {
       if (mounted) {
@@ -167,17 +173,23 @@ class _CancelSheetState extends State<_CancelSheet> {
         final preview = snap.data;
         if (preview == null) return const SizedBox(height: 200, child: Center(child: CircularProgressIndicator.adaptive()));
         final c = context.colors;
+        // A group lesson goes on for the others: only the learner's own seat is excused.
+        final excuse = lesson.isGroup || preview.excuseOnly;
         return _SheetBody(
           children: [
             _SheetTitle(
               line: [lesson.withName.isEmpty ? lesson.subject : l.lessonWith(lesson.subject, lesson.withName), ?widget.learner].join(' · '),
-              title: l.cancelTitle(lesson.startsAt.relativeDay(context)),
+              title: excuse ? l.skipTitle(lesson.startsAt.relativeDay(context)) : l.cancelTitle(lesson.startsAt.relativeDay(context)),
             ),
             const Gap(Space.xs),
             Text(
               '${lesson.startsAt.day(locale)} · ${lesson.startsAt.clock(locale)}–${lesson.endsAt.clock(locale)}',
               style: context.type.caption,
             ),
+            if (excuse) ...[
+              const Gap(Space.m),
+              Note(l.skipGoesOn, key: const Key('cancel-group'), tone: Tone.info, icon: Icons.groups_rounded),
+            ],
             const Gap(Space.l),
             // What the academy's policy does with this cancellation, before anything is sent.
             Container(
@@ -221,7 +233,7 @@ class _CancelSheetState extends State<_CancelSheet> {
               decoration: InputDecoration(labelText: '${l.noteForAcademy} ${l.optional}'),
             ),
             if (_error != null) ...[Note(_error!, tone: Tone.danger, icon: Icons.error_outline_rounded), const Gap(Space.m)],
-            PrimaryAction(l.yesCancel, danger: true, busy: _busy, onPressed: _cancel),
+            PrimaryAction(excuse ? l.skipYes : l.yesCancel, danger: !excuse, busy: _busy, onPressed: _cancel),
             const Gap(Space.s),
             SecondaryAction(l.keepIt, onPressed: _busy ? null : () => Navigator.pop(context, false)),
           ],
@@ -378,11 +390,14 @@ class _RateSheetState extends State<_RateSheet> {
 }
 
 class _DisputeSheet extends StatefulWidget {
-  const _DisputeSheet({required this.lesson, required this.teacher, required this.send});
+  const _DisputeSheet({required this.lesson, required this.teacher, required this.send, this.about});
 
   final Lesson lesson;
   final bool teacher;
   final Future<void> Function(String reason, String note) send;
+
+  /// Whose seat it is about, in a group lesson (the student's name).
+  final String? about;
 
   @override
   State<_DisputeSheet> createState() => _DisputeSheetState();
@@ -430,7 +445,10 @@ class _DisputeSheetState extends State<_DisputeSheet> {
     return _SheetBody(
       children: [
         _SheetTitle(
-          line: '${lesson.startsAt.day(locale)} · ${lesson.startsAt.clock(locale)}–${lesson.endsAt.clock(locale)} · ${lesson.subject}',
+          line: [
+            '${lesson.startsAt.day(locale)} · ${lesson.startsAt.clock(locale)}–${lesson.endsAt.clock(locale)} · ${lesson.subject}',
+            if (widget.about case final who?) l.disputeAbout(who),
+          ].join(' · '),
           title: l.disputeTitle,
         ),
         const Gap(Space.l),

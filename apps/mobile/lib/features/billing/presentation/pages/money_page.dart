@@ -222,6 +222,11 @@ class _BalanceRow extends StatelessWidget {
               StatusChip(l.lessonsCount(b.sessions), tone: low ? Tone.attention : Tone.brand),
             ],
           ),
+          // A group plan: the group's seats and the learner's own.
+          if (b.group case final g?) ...[
+            const Gap(Space.xs),
+            CourseGroupLine(taken: g.seatsTaken, capacity: g.capacity, seat: g.seat, forming: g.forming, plan: true),
+          ],
           if (b.days.stand != CourseStand.on) ...[const Gap(Space.xs), CourseStatePill(b.days)],
           if (b.extra case final extra?)
             extra.waitingNumber != null

@@ -12,13 +12,17 @@ class LessonsRepository {
   Future<LessonList> family({String? learnerId, bool past = false}) async =>
       LessonList.fromJson(await _api.get('family/lessons', query: {'learner_id': ?learnerId, if (past) 'when': 'past'}));
 
-  Future<CancelPreview> cancellation(String lessonId) async => CancelPreview.fromJson(await _api.get('lessons/$lessonId/cancellation'));
+  /// What cancelling would do. A group lesson is never cancelled: its answer says the seat of [learnerId]
+  /// (the learner on screen, when a guardian follows several in it) is excused instead.
+  Future<CancelPreview> cancellation(String lessonId, {String? learnerId}) async =>
+      CancelPreview.fromJson(await _api.get('lessons/$lessonId/cancellation', query: {'learner_id': ?learnerId}));
 
-  Future<Lesson> cancel(String lessonId, {required String reason, String? note}) async => Lesson.fromJson(
+  /// Cancels the lesson, or in a group lesson excuses [learnerId]'s seat ("I won't attend") while it goes on.
+  Future<Lesson> cancel(String lessonId, {required String reason, String? note, String? learnerId}) async => Lesson.fromJson(
     (await _api.post(
           'lessons/$lessonId/cancel',
           idempotent: true,
-          body: {'reason': reason, if (note != null && note.trim().isNotEmpty) 'note': note.trim()},
+          body: {'reason': reason, if (note != null && note.trim().isNotEmpty) 'note': note.trim(), 'learner_id': ?learnerId},
         ))['data']
         as Map<String, dynamic>,
   );

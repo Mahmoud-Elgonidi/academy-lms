@@ -1108,6 +1108,95 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickReason => 'Pick a reason first.';
 
   @override
+  String get formatGroup => 'Group';
+
+  @override
+  String get formatPrivate => 'One-to-one';
+
+  @override
+  String groupSeats(int taken, int capacity) {
+    return '$taken/$capacity';
+  }
+
+  @override
+  String groupSeatsSpoken(int taken, int capacity) {
+    return 'Group lesson, $taken of $capacity seats taken';
+  }
+
+  @override
+  String groupWithNames(String names) {
+    return 'With $names';
+  }
+
+  @override
+  String groupWithCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'With $n classmates',
+      one: 'With 1 classmate',
+      zero: 'No classmates in this one',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupStudentsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n students', one: '1 student', zero: 'No students yet');
+    return '$_temp0';
+  }
+
+  @override
+  String get groupClassmates => 'Classmates';
+
+  @override
+  String get groupStudents => 'Students';
+
+  @override
+  String get groupFormat => 'Kind';
+
+  @override
+  String get skipLesson => 'I won\'t attend this lesson';
+
+  @override
+  String skipTitle(String day) {
+    return 'Missing the group lesson on $day';
+  }
+
+  @override
+  String get skipGoesOn => 'A group lesson isn\'t cancelled: it goes on for the others, and only your seat is excused.';
+
+  @override
+  String get skipYes => 'Yes, I won\'t attend';
+
+  @override
+  String get skipDone => 'Noted. The lesson goes on for the group.';
+
+  @override
+  String groupYourSeat(int seat, int capacity) {
+    return 'Your seat: $seat of $capacity';
+  }
+
+  @override
+  String get groupCourse => 'Group';
+
+  @override
+  String groupCourseSpoken(int taken, int capacity) {
+    return 'Group, $taken of $capacity seats taken';
+  }
+
+  @override
+  String get groupForming => 'The group is still forming: its lessons start once enough students join.';
+
+  @override
+  String get groupPlan => 'Group plan';
+
+  @override
+  String groupPlanSpoken(int taken, int capacity) {
+    return 'Group plan, $taken of $capacity seats taken';
+  }
+
+  @override
   String get rateLesson => 'Rate the lesson';
 
   @override
@@ -2720,6 +2809,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pickRatings => 'Pick focus and overall.';
+
+  @override
+  String get groupReportTitle => 'Group lesson report';
+
+  @override
+  String get groupReportShared =>
+      'What was covered, the questions and the homework here are for the whole group; the homework goes to every student.';
+
+  @override
+  String get groupReportRowsHint => 'A row for each student: focus, overall and a note for them, or the note for their absence.';
+
+  @override
+  String get groupAttended => 'Attended';
+
+  @override
+  String get groupAbsent => 'Absent';
+
+  @override
+  String get groupRowNote => 'A note for them and their family';
+
+  @override
+  String get groupRowAbsence => 'Absence note for their family';
+
+  @override
+  String groupRowRate(String name) {
+    return 'Rate $name: focus and overall.';
+  }
+
+  @override
+  String get groupRowsMissing => 'Finish the row of every student who came.';
+
+  @override
+  String get groupVoiceShared => 'The voice note fills the shared part only; each student\'s row is yours to write.';
+
+  @override
+  String get groupLessonRow => 'Group lesson';
+
+  @override
+  String get disputeWhose => 'Which student is it about?';
+
+  @override
+  String get disputeWhoseHint => 'In a group lesson, a dispute is about one student\'s seat.';
+
+  @override
+  String disputeAbout(String name) {
+    return 'About $name';
+  }
 
   @override
   String get pickOutcomes => 'Pick what happened with each lesson.';

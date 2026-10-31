@@ -7,12 +7,22 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../classroom/presentation/join.dart';
 import '../../../mushaf/presentation/widgets/mushaf_entry.dart';
 import '../../domain/lesson.dart';
+import 'group_lesson.dart';
 
 /// One lesson in a list: its time on the viewer's clock, whom it is with,
 /// its state, and what can be done now (join, open its mushaf in a Quran
 /// lesson, cancel, turn down a substitute, rate).
 class LessonCard extends StatelessWidget {
-  const LessonCard({required this.lesson, this.onCancel, this.onRefuse, this.onRate, this.onDispute, this.highlight = false, super.key});
+  const LessonCard({
+    required this.lesson,
+    this.onCancel,
+    this.onRefuse,
+    this.onRate,
+    this.onDispute,
+    this.highlight = false,
+    this.showPrivate = false,
+    super.key,
+  });
 
   final Lesson lesson;
   final VoidCallback? onCancel;
@@ -22,6 +32,9 @@ class LessonCard extends StatelessWidget {
   /// Disputing what the lesson was recorded as (the family's or the teacher's own sheet).
   final VoidCallback? onDispute;
   final bool highlight;
+
+  /// Says «فردية» on a one-to-one lesson: group lessons stand beside it in the list.
+  final bool showPrivate;
 
   @override
   Widget build(BuildContext context) {
@@ -72,14 +85,24 @@ class LessonCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(l0.subject, style: context.text.titleMedium),
-                    if (l0.withName.isNotEmpty) Text(l0.withName, style: context.text.bodyMedium?.copyWith(color: c.muted)),
+                    if (l0.withName.isNotEmpty && !(l0.group?.forTeacher ?? false))
+                      Text(l0.withName, style: context.text.bodyMedium?.copyWith(color: c.muted)),
+                    if (groupLine(context, l0) case final others?)
+                      Text(
+                        others,
+                        key: Key('group-line-${l0.id}'),
+                        style: context.text.bodySmall?.copyWith(color: c.muted),
+                      ),
                     const SizedBox(height: 6),
                     Wrap(
                       spacing: 6,
                       runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
+                        ?formatPill(l0, showPrivate: showPrivate),
                         Pill(l0.unfunded && l0.ahead ? l.unfunded : l0.statusLabel, tone: tone),
                         if (l0.typeLabel != null) Pill(l0.typeLabel!, tone: Tone.info),
+                        if (l0.group?.seatLabel case final seat?) Pill(seat, tone: Tone.neutral),
                       ],
                     ),
                   ],
@@ -139,7 +162,7 @@ class LessonCard extends StatelessWidget {
                   TextButton(
                     style: TextButton.styleFrom(foregroundColor: c.dangerInk),
                     onPressed: onCancel,
-                    child: Text(l.cancelLesson),
+                    child: Text(l0.isGroup ? l.skipLesson : l.cancelLesson),
                   ),
               ],
             ),

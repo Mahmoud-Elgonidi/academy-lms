@@ -1,6 +1,7 @@
 import '../../../core/time/course_days.dart';
 import '../../../core/time/local_time.dart';
 import '../../games/domain/games.dart';
+import '../../schedule/domain/lesson.dart' show CourseGroup;
 
 List<Map<String, dynamic>> _list(Object? raw) => [for (final x in raw as List<dynamic>? ?? const []) x as Map<String, dynamic>];
 
@@ -234,6 +235,7 @@ class JourneyCourse {
     this.currentId,
     this.currentTitle,
     this.days = const CourseDays(),
+    this.group,
   });
 
   factory JourneyCourse.fromJson(Map<String, dynamic> json) {
@@ -255,8 +257,12 @@ class JourneyCourse {
       currentTitle: current?['title'] as String?,
       islands: [for (final i in _list(json['islands'])) JourneyIsland.fromJson(i)],
       days: CourseDays.fromJson(json),
+      group: json['format'] == 'private' ? null : CourseGroup.fromJson(json['group']),
     );
   }
+
+  /// A group course: its seats and the learner's own; null for a one-to-one course.
+  final CourseGroup? group;
 
   /// The course paused (until when), to be paused, or ending (an ended course is not on the journey).
   final CourseDays days;

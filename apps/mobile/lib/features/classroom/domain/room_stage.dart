@@ -157,6 +157,35 @@ StagePlan pickStage(List<RoomPerson> people, {RoomLayout layout = RoomLayout.aut
   return StagePlan(kind: StageKind.grid, grid: cameras);
 }
 
+/// A name as a tile says it in a group lesson's room: the first name only
+/// (families see their classmates by first name), a title such as "أ." or
+/// "Dr." kept with the name after it.
+String firstNameOf(String name) {
+  final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+  if (words.isEmpty) return name.trim();
+  final title = words.first.endsWith('.') && words.length > 1;
+  return title ? '${words[0]} ${words[1]}' : words.first;
+}
+
+/// The names the room's tiles carry: in a group lesson's room (two or more
+/// others) everyone by their first name, else as the room gave them.
+List<RoomPerson> namedForRoom(List<RoomPerson> people) {
+  final group = people.where((p) => !p.isLocal).length > 1;
+  if (!group) return people;
+  return [
+    for (final p in people)
+      RoomPerson(
+        identity: p.identity,
+        name: firstNameOf(p.name),
+        isLocal: p.isLocal,
+        camera: p.camera,
+        screen: p.screen,
+        micOn: p.micOn,
+        speaking: p.speaking,
+      ),
+  ];
+}
+
 /// The next choice of the layout button: auto, grid, spotlight, and round again.
 RoomLayout nextLayout(RoomLayout layout) => RoomLayout.values[(layout.index + 1) % RoomLayout.values.length];
 

@@ -33,6 +33,13 @@ import '../../../../shared/widgets/latin_digits.dart';
 /// say what to recite (the lesson's text, or the verses with the words marked
 /// in its mushaf), for a check of each recording. Sending and keeping a
 /// draft on this phone stay at the foot. Pops with true once sent.
+///
+/// A group lesson's report goes in once for the whole class: the shared part
+/// (what was covered, the questions, the homework for every student, the
+/// note for the academy) and then a compact row per student, as the API
+/// decided who came (focus, overall and a note for them) and who did not
+/// (the note for their absence); each row is checked on its own. The voice
+/// note fills the shared part only.
 typedef _Loaded = (ReportForm, ReportDraft?, List<Surah>);
 
 class TeacherReportPage extends StatelessWidget {
@@ -61,9 +68,21 @@ class TeacherReportPage extends StatelessWidget {
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(s?.absence ?? false ? l.reportAbsence : l.reportTitle),
+                  Text(switch (state.data?.$1.group) {
+                    _? => l.groupReportTitle,
+                    null => s?.absence ?? false ? l.reportAbsence : l.reportTitle,
+                  }),
                   if (s != null)
-                    Text([s.student, if (s.lessonAt != null) s.lessonAt!.when(context)].join(' · '), style: context.type.caption),
+                    Text(
+                      [
+                        switch (state.data?.$1.group) {
+                          final rows? => l.groupStudentsCount(rows.length),
+                          null => s.student,
+                        },
+                        if (s.lessonAt != null) s.lessonAt!.when(context),
+                      ].join(' · '),
+                      style: context.type.caption,
+                    ),
                 ],
               ),
             ),
@@ -138,6 +157,29 @@ class _EditorState extends State<_Editor> {
   final _notes = <String>{};
   bool _busy = false;
 
+  /// A group lesson: a row per student, by student; what a kept draft held stands in for the form's own.
+  late final List<GroupReportRow> _rows = f.group ?? const [];
+  late final Map<String, dynamic> _keptRows = {...?(d?['group'] as Map<String, dynamic>?)};
+  Map<String, dynamic>? _kept(String studentId) => _keptRows[studentId] as Map<String, dynamic>?;
+  late final Map<String, int?> _rowEngagement = {
+    for (final r in _rows) r.studentId: d == null ? r.engagement : (_kept(r.studentId)?['engagement'] as num?)?.toInt(),
+  };
+  late final Map<String, int?> _rowOverall = {
+    for (final r in _rows) r.studentId: d == null ? r.overall : (_kept(r.studentId)?['overall'] as num?)?.toInt(),
+  };
+  late final Map<String, TextEditingController> _rowNote = {
+    for (final r in _rows)
+      r.studentId: TextEditingController(text: d == null ? r.notesForStudent : _kept(r.studentId)?['notes_for_student'] as String?),
+  };
+  late final Map<String, TextEditingController> _rowAbsence = {
+    for (final r in _rows)
+      r.studentId: TextEditingController(text: d == null ? r.absenceNote : _kept(r.studentId)?['absence_note'] as String?),
+  };
+  final _rowNotesOpen = <String>{};
+
+  /// What is missing or refused in a student's row, by student.
+  Map<String, String> _rowErrors = const {};
+
   /// The voice note's draft: what it filled shows as suggested (or check this) until sent.
   VoiceDraft? _heard;
   Map<String, DraftMark> _marks = const {};
@@ -149,7 +191,10 @@ class _EditorState extends State<_Editor> {
   String? _error;
   Map<String, List<String>> _fieldErrors = const {};
 
-  bool get _absent => f.summary.absence;
+  bool get _group => f.isGroup;
+
+  /// Nobody came (a group lesson: every student absent): only the absence notes are asked.
+  bool get _absent => _group ? _rows.isNotEmpty && _rows.every((r) => r.absent) : f.summary.absence;
 
   /// Handed in or marked: the homework stays as it is.
   bool get _homeworkLocked => f.homework != null && (f.homework!.status != 'assigned' || f.homework!.submissions.isNotEmpty);
@@ -159,7 +204,18 @@ class _EditorState extends State<_Editor> {
 
   @override
   void dispose() {
-    for (final c in [_forFamily, _internal, _absence, _hwTitle, _hwDetails, _reciteFrom, _reciteTo, ..._typed.values]) {
+    for (final c in [
+      _forFamily,
+      _internal,
+      _absence,
+      _hwTitle,
+      _hwDetails,
+      _reciteFrom,
+      _reciteTo,
+      ..._typed.values,
+      ..._rowNote.values,
+      ..._rowAbsence.values,
+    ]) {
       c.dispose();
     }
     super.dispose();
@@ -194,7 +250,21 @@ class _EditorState extends State<_Editor> {
 
   Future<void> _send() async {
     final l = context.l10n;
-    if (!_absent && (_engagement == null || _overall == null)) {
+    if (_group) {
+      // Each student who came needs focus and overall; the row says what is missing.
+      final missing = {
+        for (final r in _rows)
+          if (!r.absent && !r.locked && (_rowEngagement[r.studentId] == null || _rowOverall[r.studentId] == null))
+            r.studentId: l.groupRowRate(r.name),
+      };
+      if (missing.isNotEmpty) {
+        setState(() {
+          _rowErrors = missing;
+          _error = l.groupRowsMissing;
+        });
+        return;
+      }
+    } else if (!_absent && (_engagement == null || _overall == null)) {
       setState(() => _error = l.pickRatings);
       return;
     }
@@ -213,6 +283,7 @@ class _EditorState extends State<_Editor> {
       _busy = true;
       _error = null;
       _fieldErrors = const {};
+      _rowErrors = const {};
     });
     final recite = expectedPayload(
       offered: _reciteOffered,
@@ -233,7 +304,17 @@ class _EditorState extends State<_Editor> {
                   if (recite.send) 'expected': recite.value,
                 }
               : {'title': ''});
-    final payload = _absent
+    final payload = _group
+        ? {
+            'notes_internal': _internal.text.trim(),
+            if (!_absent) ...{
+              'items': [for (final i in _items) i.toJson()],
+              'homework': ?homework,
+              if (template != null) 'answers': template.payload(answers),
+            },
+            'students': [for (final r in _rows) _rowPayload(r)],
+          }
+        : _absent
         ? {'absence_note': _absence.text.trim(), 'notes_internal': _internal.text.trim()}
         : {
             'engagement': _engagement,
@@ -256,10 +337,28 @@ class _EditorState extends State<_Editor> {
           _busy = false;
           _error = context.problemText(p);
           _fieldErrors = p.errors;
+          _rowErrors = _rowErrorsOf(p.errors);
         });
       }
     }
   }
+
+  /// One student's row as the API takes it: their scores and a note, or the note for their absence.
+  Map<String, dynamic> _rowPayload(GroupReportRow r) => r.absent
+      ? {'student_id': r.studentId, 'absence_note': _rowAbsence[r.studentId]!.text.trim()}
+      : {
+          'student_id': r.studentId,
+          'engagement': _rowEngagement[r.studentId],
+          'overall': _rowOverall[r.studentId],
+          'notes_for_student': _rowNote[r.studentId]!.text.trim(),
+        };
+
+  /// The API names a row's field by its place in `students` (students.1.engagement): back to whose row it is.
+  Map<String, String> _rowErrorsOf(Map<String, List<String>> errors) => {
+    for (final MapEntry(:key, :value) in errors.entries)
+      if (RegExp(r'^students\.(\d+)\.').firstMatch(key) case final m? when value.isNotEmpty)
+        if (int.parse(m.group(1)!) case final i when i < _rows.length) _rows[i].studentId: value.first,
+  };
 
   /// The form as it stands, as the draft endpoint reads it (a homework already handed in counts as set).
   Map<String, dynamic> _current() {
@@ -267,9 +366,8 @@ class _EditorState extends State<_Editor> {
     final answers = {..._answers, for (final e in _typed.entries) e.key: e.value.text};
     if (_absent) return {'absence_note': _absence.text, 'notes_internal': _internal.text};
     return {
-      'engagement': _engagement,
-      'overall': _overall,
-      'notes_for_student': _forFamily.text,
+      // A group lesson's draft fills the shared part only: each student's row is the teacher's own.
+      if (!_group) ...{'engagement': _engagement, 'overall': _overall, 'notes_for_student': _forFamily.text},
       'notes_internal': _internal.text,
       'items': [for (final i in _items) i.toJson()],
       if (template != null) 'answers': template.payload(answers),
@@ -300,11 +398,13 @@ class _EditorState extends State<_Editor> {
 
   /// The draft into the form: only what it filled, so whatever the teacher set stays.
   void _take(VoiceDraft d) {
-    _engagement = d.stars('engagement') ?? _engagement;
-    _overall = d.stars('overall') ?? _overall;
-    if (d.text('notes_for_student') case final t?) _forFamily.text = t;
+    if (!_group) {
+      _engagement = d.stars('engagement') ?? _engagement;
+      _overall = d.stars('overall') ?? _overall;
+      if (d.text('notes_for_student') case final t?) _forFamily.text = t;
+      if (d.text('absence_note') case final t?) _absence.text = t;
+    }
     if (d.text('notes_internal') case final t?) _internal.text = t;
-    if (d.text('absence_note') case final t?) _absence.text = t;
     final items = d.items(_items);
     _items
       ..clear()
@@ -324,7 +424,13 @@ class _EditorState extends State<_Editor> {
       _dueDays = h.dueDays;
     }
     _heard = d;
-    _marks = d.marks;
+    // A group lesson's rows are not the draft's: only the shared part carries its marks.
+    _marks = _group
+        ? {
+            for (final e in d.marks.entries)
+              if (!const {'engagement', 'overall', 'notes_for_student', 'absence_note'}.contains(e.key)) e.key: e.value,
+          }
+        : d.marks;
     _error = null;
     _round++;
   }
@@ -358,7 +464,7 @@ class _EditorState extends State<_Editor> {
     return _Section(
       title: l.voiceTitle,
       children: [
-        Text(l.voiceHint, style: context.type.caption),
+        Text(_group ? l.groupVoiceShared : l.voiceHint, style: context.type.caption),
         const Gap(Space.m),
         if (_drafting)
           Row(
@@ -430,6 +536,16 @@ class _EditorState extends State<_Editor> {
       'recite_from': _reciteFrom.text,
       'recite_to': _reciteTo.text,
       'answers': {..._answers, for (final e in _typed.entries) e.key: e.value.text},
+      if (_group)
+        'group': {
+          for (final r in _rows)
+            r.studentId: {
+              'engagement': _rowEngagement[r.studentId],
+              'overall': _rowOverall[r.studentId],
+              'notes_for_student': _rowNote[r.studentId]!.text,
+              'absence_note': _rowAbsence[r.studentId]!.text,
+            },
+        },
     });
     if (!mounted) return;
     showSnack(context, l.reportDraftSaved);
@@ -473,8 +589,12 @@ class _EditorState extends State<_Editor> {
             icon: Icons.lock_outline_rounded,
           ),
         ],
+        if (_group && !_absent) ...[
+          const Gap(Space.m),
+          Note(l.groupReportShared, key: const Key('group-shared'), tone: Tone.info, icon: Icons.groups_rounded),
+        ],
         if (f.voiceDraft && !locked) _voiceCard(),
-        if (_absent) ...[
+        if (_absent && !_group) ...[
           const Gap(Space.m),
           _Section(
             title: l.absenceNote,
@@ -492,7 +612,7 @@ class _EditorState extends State<_Editor> {
               ),
             ],
           ),
-        ] else ...[
+        ] else if (!_absent) ...[
           const Gap(Space.m),
           _Section(
             title: l.workedOn,
@@ -507,39 +627,41 @@ class _EditorState extends State<_Editor> {
               if (_err('items') != null) Text(_err('items')!, style: TextStyle(color: c.dangerInk)),
             ],
           ),
-          _Section(
-            title: l.howItWent,
-            children: [
-              Row(
-                children: [
-                  Text(l.engagement, style: context.type.label),
-                  if (_marks['engagement'] case final m?) ...[const Gap(Space.s), _Mark(m)],
-                ],
-              ),
-              IgnorePointer(
-                ignoring: locked,
-                child: StarPicker(value: _engagement, label: l.engagement, onChanged: (v) => setState(() => _engagement = v)),
-              ),
-              const Gap(Space.s),
-              Row(
-                children: [
-                  Text(l.overall, style: context.type.label),
-                  if (_marks['overall'] case final m?) ...[const Gap(Space.s), _Mark(m)],
-                ],
-              ),
-              IgnorePointer(
-                ignoring: locked,
-                child: StarPicker(value: _overall, label: l.overall, onChanged: (v) => setState(() => _overall = v)),
-              ),
-            ],
-          ),
+          if (!_group)
+            _Section(
+              title: l.howItWent,
+              children: [
+                Row(
+                  children: [
+                    Text(l.engagement, style: context.type.label),
+                    if (_marks['engagement'] case final m?) ...[const Gap(Space.s), _Mark(m)],
+                  ],
+                ),
+                IgnorePointer(
+                  ignoring: locked,
+                  child: StarPicker(value: _engagement, label: l.engagement, onChanged: (v) => setState(() => _engagement = v)),
+                ),
+                const Gap(Space.s),
+                Row(
+                  children: [
+                    Text(l.overall, style: context.type.label),
+                    if (_marks['overall'] case final m?) ...[const Gap(Space.s), _Mark(m)],
+                  ],
+                ),
+                IgnorePointer(
+                  ignoring: locked,
+                  child: StarPicker(value: _overall, label: l.overall, onChanged: (v) => setState(() => _overall = v)),
+                ),
+              ],
+            ),
           if (f.template case final t? when t.questions.isNotEmpty) _questionsCard(t, locked),
         ],
+        if (_group) _studentsCard(locked),
         _Section(
           title: l.talkSection,
           children: [
-            if (!_absent) _markOf('notes_for_student'),
-            if (!_absent)
+            if (!_absent && !_group) _markOf('notes_for_student'),
+            if (!_absent && !_group)
               TextField(
                 controller: _forFamily,
                 enabled: !locked,
@@ -594,6 +716,110 @@ class _EditorState extends State<_Editor> {
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  /// A group lesson's students, a compact row each: who came (focus, overall, a note for them) and who did not
+  /// (the note for their absence), each with its own error.
+  Widget _studentsCard(bool locked) {
+    final l = context.l10n;
+    return _Section(
+      title: l.groupStudents,
+      children: [
+        Text(l.groupReportRowsHint, style: context.type.caption),
+        for (final (i, r) in _rows.indexed) ...[if (i > 0) const Divider(height: Space.xl), _studentRow(r, locked || r.locked)],
+      ],
+    );
+  }
+
+  Widget _studentRow(GroupReportRow r, bool locked) {
+    final l = context.l10n;
+    final c = context.colors;
+    final id = r.studentId;
+    final error = _rowErrors[id];
+    final noteOpen = _rowNotesOpen.contains(id) || _rowNote[id]!.text.isNotEmpty;
+    Widget stars(String label, int? value, ValueChanged<int?> set, String key) => Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: Space.s,
+      children: [
+        SizedBox(width: 96, child: Text(label, style: context.type.caption)),
+        IgnorePointer(
+          ignoring: locked,
+          child: StarPicker(key: Key(key), value: value, size: 26, label: '${r.name}: $label', onChanged: set),
+        ),
+      ],
+    );
+    return Column(
+      key: Key('group-row-$id'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(child: Text(r.name, style: context.text.titleSmall)),
+            StatusChip(
+              r.absent ? l.groupAbsent : l.groupAttended,
+              tone: r.absent ? Tone.attention : Tone.brand,
+              icon: r.absent ? Icons.person_off_outlined : Icons.check_rounded,
+            ),
+          ],
+        ),
+        const Gap(Space.xs),
+        if (r.absent)
+          TextField(
+            key: Key('row-absence-$id'),
+            controller: _rowAbsence[id],
+            enabled: !locked,
+            minLines: 1,
+            maxLines: 4,
+            maxLength: 1000,
+            decoration: InputDecoration(labelText: l.groupRowAbsence, isDense: true, errorText: error),
+          )
+        else ...[
+          stars(
+            l.engagement,
+            _rowEngagement[id],
+            (v) => setState(() {
+              _rowEngagement[id] = v;
+              _rowErrors = {..._rowErrors}..remove(id);
+            }),
+            'row-engagement-$id',
+          ),
+          stars(
+            l.overall,
+            _rowOverall[id],
+            (v) => setState(() {
+              _rowOverall[id] = v;
+              _rowErrors = {..._rowErrors}..remove(id);
+            }),
+            'row-overall-$id',
+          ),
+          if (noteOpen)
+            TextField(
+              key: Key('row-note-$id'),
+              controller: _rowNote[id],
+              enabled: !locked,
+              minLines: 1,
+              maxLines: 4,
+              maxLength: 3000,
+              decoration: InputDecoration(labelText: l.groupRowNote, isDense: true),
+            )
+          else if (!locked)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                onPressed: () => setState(() => _rowNotesOpen.add(id)),
+                icon: const Icon(Icons.add_comment_outlined, size: 18),
+                label: Text(l.addNote),
+              ),
+            ),
+          if (error != null)
+            Text(
+              error,
+              key: Key('row-error-$id'),
+              style: TextStyle(color: c.dangerInk),
+            ),
+        ],
       ],
     );
   }

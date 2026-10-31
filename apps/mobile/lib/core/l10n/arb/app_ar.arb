@@ -826,6 +826,105 @@
   "yesCancel": "نعم، ألغِها",
   "cancelled": "أُلغيت الحصة.",
   "pickReason": "اختر سببًا أولًا.",
+  "formatGroup": "جماعية",
+  "formatPrivate": "فردية",
+  "groupSeats": "{taken}/{capacity}",
+  "@groupSeats": {
+    "placeholders": {
+      "taken": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "groupSeatsSpoken": "حصة جماعية، المقاعد المشغولة {taken} من {capacity}",
+  "@groupSeatsSpoken": {
+    "placeholders": {
+      "taken": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "groupWithNames": "مع {names}",
+  "@groupWithNames": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "groupWithCount": "{n, plural, =0{لا زملاء معك في هذه الحصة} =1{مع زميل واحد} =2{مع زميلين} few{مع {n} زملاء} other{مع {n} زميلًا}}",
+  "@groupWithCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "groupStudentsCount": "{n, plural, =0{لا طلاب بعد} =1{طالب واحد} =2{طالبان} few{{n} طلاب} other{{n} طالبًا}}",
+  "@groupStudentsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "groupClassmates": "الزملاء",
+  "groupStudents": "الطلاب",
+  "groupFormat": "النوع",
+  "skipLesson": "لن أحضر هذه الحصة",
+  "skipTitle": "الاعتذار عن حصة {day} الجماعية",
+  "@skipTitle": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "skipGoesOn": "الحصة جماعية فلا تُلغى: تستمر لبقية المجموعة، ويُعفى مقعدك وحدك.",
+  "skipYes": "نعم، لن أحضر",
+  "skipDone": "سجّلنا الاعتذار، وتستمر الحصة للمجموعة.",
+  "groupYourSeat": "مقعدك {seat} من {capacity}",
+  "@groupYourSeat": {
+    "placeholders": {
+      "seat": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "groupCourse": "مجموعة",
+  "groupCourseSpoken": "مجموعة، المقاعد المشغولة {taken} من {capacity}",
+  "@groupCourseSpoken": {
+    "placeholders": {
+      "taken": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "groupForming": "المجموعة قيد التكوين، وتبدأ حصصها حين يكتمل عددها.",
+  "groupPlan": "باقة جماعية",
+  "groupPlanSpoken": "باقة جماعية، المقاعد المشغولة {taken} من {capacity}",
+  "@groupPlanSpoken": {
+    "placeholders": {
+      "taken": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
   "rateLesson": "قيّم الحصة",
   "rateTitle": "كيف كانت الحصة؟",
   "rateGood": "ما الذي أعجبكم؟",
@@ -1932,6 +2031,34 @@
   "reportSent": "أُرسل التقرير.",
   "reportLocked": "راجعت الأكاديمية هذا التقرير، فلن يتغيّر.",
   "pickRatings": "اختر التركيز والمستوى العام.",
+  "groupReportTitle": "تقرير الحصة الجماعية",
+  "groupReportShared": "ما دُرس والأسئلة والواجب هنا للمجموعة كلها، ويصل الواجب إلى كل طالب.",
+  "groupReportRowsHint": "لكل طالب سطر: التركيز والمستوى العام وملاحظة له، أو ملاحظة غيابه.",
+  "groupAttended": "حضر",
+  "groupAbsent": "غاب",
+  "groupRowNote": "ملاحظة له ولأسرته",
+  "groupRowAbsence": "ملاحظة الغياب لأسرته",
+  "groupRowRate": "قيّم {name}: التركيز والمستوى العام.",
+  "@groupRowRate": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupRowsMissing": "أكمل سطر كل طالب حضر.",
+  "groupVoiceShared": "يملأ التسجيل الجزء المشترك فقط، وسطر كل طالب تكتبه بنفسك.",
+  "groupLessonRow": "حصة جماعية",
+  "disputeWhose": "عن أي طالب الاعتراض؟",
+  "disputeWhoseHint": "يكون الاعتراض في الحصة الجماعية على مقعد طالب واحد.",
+  "disputeAbout": "عن {name}",
+  "@disputeAbout": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "pickOutcomes": "اختر ما حدث في كل درس.",
   "markTitle": "تصحيح الواجبات",
   "markWaiting": "بانتظار التصحيح",

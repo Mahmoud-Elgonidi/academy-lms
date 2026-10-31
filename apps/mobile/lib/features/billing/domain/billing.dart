@@ -1,5 +1,6 @@
 import '../../../core/time/course_days.dart';
 import '../../../core/time/local_time.dart';
+import '../../schedule/domain/lesson.dart' show CourseGroup;
 
 /// What is left of a learner's balance for one subject (or a shared
 /// package's subjects together), and extra lessons the person can buy on it
@@ -13,6 +14,7 @@ class Balance {
     this.extra,
     this.shared = false,
     this.days = const CourseDays(),
+    this.group,
   });
 
   factory Balance.fromJson(Map<String, dynamic> json) => Balance(
@@ -23,7 +25,11 @@ class Balance {
     extra: json['extra'] == null ? null : ExtraOffer.fromJson(json['extra'] as Map<String, dynamic>),
     shared: json['shared'] as bool? ?? false,
     days: CourseDays.fromJson(json),
+    group: json['format'] == 'private' ? null : CourseGroup.fromJson(json['group']),
   );
+
+  /// A group plan: the group's seats and the learner's own; null for a one-to-one course.
+  final CourseGroup? group;
 
   /// The course paused (until when), to be paused, ending, or ended (listed while minutes are left on it).
   final CourseDays days;

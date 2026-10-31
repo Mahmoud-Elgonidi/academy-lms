@@ -9,6 +9,7 @@ export 'actions.dart';
 export 'app_header.dart';
 export 'chips.dart';
 export 'icon_badge.dart';
+export 'lesson_format.dart';
 export 'menu.dart';
 export 'section_header.dart';
 export 'sheets.dart';
