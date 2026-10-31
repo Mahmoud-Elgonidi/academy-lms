@@ -46,11 +46,11 @@ dependencies:
   intl: ^0.20.3
   flutter_localizations:
     sdk: flutter
-  livekit_client: ^2.13.0
+  livekit_client: ^2.13.2
   flutter_animate: ^4.5.2
   audioplayers: ^6.8.1
-  record: ^7.1.1
-  file_picker: ^13.1.0
+  record: ^7.1.2
+  file_picker: ^13.3.0
   path_provider: ^2.1.6
   firebase_core: ^4.15.0
   firebase_messaging: ^16.7.0
@@ -58,10 +58,10 @@ dependencies:
   web_socket_channel: ^3.0.3
   google_sign_in: ^7.2.0
   sign_in_with_apple: ^7.0.1
-  crypto: ^3.0.6
+  crypto: ^3.0.8
   webview_flutter: ^4.14.1
   flutter_svg: ^2.3.0
-  web: ^1.1.1
+  web: ^1.1.2
 
 dev_dependencies:
   flutter_test:
