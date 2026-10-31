@@ -7850,7 +7850,6 @@
                     }
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
@@ -7873,10 +7872,7 @@
                                         "minItems": 1,
                                         "maxItems": 20
                                     }
-                                },
-                                "required": [
-                                    "students"
-                                ]
+                                }
                             }
                         }
                     }

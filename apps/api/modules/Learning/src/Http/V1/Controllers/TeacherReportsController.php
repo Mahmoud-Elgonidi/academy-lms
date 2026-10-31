@@ -166,7 +166,7 @@ final class TeacherReportsController
     public function submit(Request $request, string $report, SubmitSessionReport $submit, SubmitGroupReport $group): JsonResponse
     {
         if ($request->has('students') && SubmitGroupReport::isGroup($own = $this->mine($request, $report))) {
-            $request->validate(['students' => ['required', 'array', 'max:20'], 'students.*.student_id' => ['required', 'string', 'max:64']]);
+            $request->validate(['students' => ['array', 'min:1', 'max:20'], 'students.*.student_id' => ['required', 'string', 'max:64']]);
             $done = $group->handle($own, (string) $request->user()->getAuthIdentifier(), $request->only(SubmitGroupReport::SHARED), array_values((array) $request->input('students')));
 
             return response()->json(['data' => $this->present->report($done[0], true, $this->form->items($done[0]))]);

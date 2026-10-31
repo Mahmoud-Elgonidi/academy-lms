@@ -6474,10 +6474,10 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": {
-                    students: {
+                    students?: {
                         student_id: string;
                     }[];
                 };
