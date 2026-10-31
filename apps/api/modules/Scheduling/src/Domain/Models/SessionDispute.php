@@ -12,10 +12,13 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * The family or the teacher saying a decided lesson's outcome is wrong.
  * The lesson waits in "needs review" while it is open; the academy's
  * decision closes it (upheld when the outcome changed, rejected when it
- * stayed), with an answer the person reads.
+ * stayed), with an answer the person reads. One per lesson and student: a
+ * group lesson's dispute is about one student's seat (outcome_before and
+ * outcome_after are that seat's, as the status it stands for).
  *
  * @property string $id
  * @property string $session_id
+ * @property ?string $student_id whose seat it is about (a one-to-one lesson's student)
  * @property string $raised_by
  * @property string $side family | teacher
  * @property string $reason
@@ -33,7 +36,7 @@ final class SessionDispute extends Model
     use BelongsToTenant;
     use HasUuids;
 
-    protected $fillable = ['session_id', 'raised_by', 'side', 'reason', 'note', 'outcome_before', 'status', 'outcome_after', 'decided_by', 'decided_at', 'decision_note'];
+    protected $fillable = ['session_id', 'student_id', 'raised_by', 'side', 'reason', 'note', 'outcome_before', 'status', 'outcome_after', 'decided_by', 'decided_at', 'decision_note'];
 
     protected $attributes = ['status' => 'open'];
 

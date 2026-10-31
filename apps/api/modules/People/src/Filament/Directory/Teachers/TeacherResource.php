@@ -6,11 +6,14 @@ use BackedEnum;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Slider;
+use Filament\Forms\Components\Slider\Enums\PipsMode;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
@@ -94,6 +97,17 @@ final class TeacherResource extends Resource
                 CheckboxList::make('age_groups')->label(__($l.'age_groups'))->helperText(__($l.'age_groups_hint'))->columns(2)->options(AgeGroup::options()),
                 Toggle::make('accepts_new')->label(__($l.'accepts_new'))->default(true),
                 Toggle::make('accepts_trials')->label(__($l.'accepts_trials'))->default(true),
+                // Group lessons beside the private ones: the switch, then how many one lesson may hold.
+                Toggle::make('accepts_groups')->label(__($l.'accepts_groups'))->helperText(__($l.'accepts_groups_hint'))
+                    ->onIcon(Heroicon::UserGroup)->onColor('info')->default(false)->live()->columnSpanFull(),
+                Slider::make('max_group_size')->label(__($l.'max_group_size'))
+                    ->range(2, 20)->step(1)->default(6)->tooltips()->pips(PipsMode::Values)->pipsValues([2, 5, 10, 15, 20])
+                    ->hint(fn (Get $get) => trans_choice($l.'group_up_to', (int) ($get('max_group_size') ?? 6), ['n' => (int) ($get('max_group_size') ?? 6)]))
+                    ->hintIcon(Heroicon::UserGroup)->hintColor('info')
+                    ->helperText(__($l.'max_group_hint'))
+                    ->visible(fn (Get $get) => (bool) $get('accepts_groups'))->required(fn (Get $get) => (bool) $get('accepts_groups'))
+                    ->live()->columnSpanFull(),
+                Text::make(__($l.'groups_note'))->color('gray')->visible(fn (Get $get) => (bool) $get('accepts_groups'))->columnSpanFull(),
                 TextInput::make('max_weekly_hours')->label(__($l.'max_weekly_hours'))->numeric()->minValue(0.5)->maxValue(100)->step(0.5),
                 TextInput::make('max_daily_lessons')->label(__($l.'max_daily_lessons'))->helperText(__($l.'max_daily_hint'))->numeric()->integer()->minValue(1)->maxValue(30),
             ]),
@@ -145,6 +159,13 @@ final class TeacherResource extends Resource
                 TextColumn::make('weekly')->label(__($c.'weekly'))->visibleFrom('md')
                     ->state(fn (Person $p) => $p->teacherProfile?->max_weekly_min ? __('people::directory.hours', ['hours' => round($p->teacherProfile->max_weekly_min / 60, 1)]) : null),
                 IconColumn::make('accepts_new')->label(__($c.'accepts_new'))->visibleFrom('md')->boolean()->state(fn (Person $p) => (bool) $p->teacherProfile?->accepts_new),
+                IconColumn::make('accepts_groups')->label(__($c.'groups'))->visibleFrom('md')
+                    ->state(fn (Person $p) => (bool) $p->teacherProfile?->accepts_groups)
+                    ->icon(fn (bool $state) => $state ? Heroicon::OutlinedUserGroup : Heroicon::OutlinedMinus)
+                    ->color(fn (bool $state) => $state ? 'info' : 'gray')
+                    ->tooltip(fn (Person $p) => $p->teacherProfile?->accepts_groups
+                        ? trans_choice('people::directory.fields.group_up_to', (int) $p->teacherProfile->max_group_size, ['n' => (int) $p->teacherProfile->max_group_size])
+                        : __('people::directory.columns.no_groups')),
                 TextColumn::make('status')->label(__($c.'status'))->badge()
                     ->state(fn (Person $p) => __('people::directory.statuses.'.DirectoryForm::status($p)))
                     ->color(fn (Person $p) => match (DirectoryForm::status($p)) {
@@ -161,6 +182,12 @@ final class TeacherResource extends Resource
                 SelectFilter::make('gender')->label(__('people::directory.filters.gender'))->options(__('people::directory.options.genders'))
                     ->query(fn (Builder $query, array $data) => $query->when($data['value'] ?? null, fn ($q, $g) => $q->whereExists(
                         fn ($s) => $s->from('teacher_profiles')->whereColumn('teacher_profiles.user_id', 'users.id')->where('teacher_profiles.gender', $g)))),
+                TernaryFilter::make('groups')->label(__('people::directory.filters.groups'))
+                    ->trueLabel(__('people::directory.filters.groups_yes'))->falseLabel(__('people::directory.filters.groups_no'))
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereExists(fn ($s) => $s->from('teacher_profiles')->whereColumn('teacher_profiles.user_id', 'users.id')->where('teacher_profiles.accepts_groups', true)),
+                        false: fn (Builder $query) => $query->whereNotExists(fn ($s) => $s->from('teacher_profiles')->whereColumn('teacher_profiles.user_id', 'users.id')->where('teacher_profiles.accepts_groups', true)),
+                    ),
                 TernaryFilter::make('active')->label(__('people::directory.filters.status'))
                     ->queries(true: fn (Builder $query) => $query->where('status', 'active'), false: fn (Builder $query) => $query->where('status', '!=', 'active')),
             ])
@@ -189,6 +216,8 @@ final class TeacherResource extends Resource
             ageGroups: array_values($data['age_groups'] ?? []),
             maxDailyLessons: ($data['max_daily_lessons'] ?? null) === null || $data['max_daily_lessons'] === '' ? null : (int) $data['max_daily_lessons'],
             subjects: $subjects,
+            acceptsGroups: array_key_exists('accepts_groups', $data) ? (bool) $data['accepts_groups'] : null,
+            maxGroupSize: (bool) ($data['accepts_groups'] ?? false) && ($data['max_group_size'] ?? null) !== null ? (int) $data['max_group_size'] : null,
         );
     }
 
@@ -213,6 +242,8 @@ final class TeacherResource extends Resource
             'accepts_trials' => $profile->accepts_trials ?? true,
             'max_weekly_hours' => $profile?->max_weekly_min ? round($profile->max_weekly_min / 60, 1) : null,
             'max_daily_lessons' => $profile?->max_daily_lessons,
+            'accepts_groups' => (bool) ($profile?->accepts_groups ?? false),
+            'max_group_size' => $profile?->max_group_size ?? 6,
             'subjects' => $subjects,
         ];
     }

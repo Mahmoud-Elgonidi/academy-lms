@@ -5,6 +5,7 @@ namespace Modules\Scheduling\Actions;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Scheduling\Actions\Groups\ExcuseSeat;
 use Modules\Scheduling\Actions\Policy\PolicyDecider;
 use Modules\Scheduling\Actions\Policy\RecordPolicyDecision;
 use Modules\Scheduling\Contracts\Events\SessionCancelled;
@@ -21,6 +22,8 @@ use Modules\SharedKernel\Audit\AuditTrail;
  * who asked and how long before the start decide what happens to the
  * student's credit, the teacher's pay and the performance record. A manager
  * may waive a forfeit (the credit comes back); the waiver is recorded.
+ * A student never cancels a group lesson: their own seat is excused
+ * instead (Groups\ExcuseSeat, $studentId), and the lesson goes on.
  */
 final class CancelSession
 {
@@ -40,16 +43,26 @@ final class CancelSession
         private readonly PolicyDecider $decider,
         private readonly RecordPolicyDecision $record,
         private readonly SettleSessionCredits $settle,
+        private readonly ExcuseSeat $excuse,
     ) {}
 
     /** What would happen, without doing it (for the cancel dialog). */
-    public function preview(Session $session, string $askedBy, string $reason, ?CarbonImmutable $at = null): Decision
+    public function preview(Session $session, string $askedBy, string $reason, ?CarbonImmutable $at = null, ?string $studentId = null): Decision
     {
+        if ($session->isGroup() && $askedBy === 'student') {
+            return $this->excuse->preview($session, (string) $studentId, $at);
+        }
+
         return $this->decider->decide($session, self::event($askedBy, $reason), $at)[0];
     }
 
-    public function handle(Session $session, string $askedBy, string $reason, ?string $note, ?string $actorId, bool $waive = false, ?CarbonImmutable $at = null): Session
+    public function handle(Session $session, string $askedBy, string $reason, ?string $note, ?string $actorId, bool $waive = false, ?CarbonImmutable $at = null, ?string $studentId = null): Session
     {
+        if ($session->isGroup() && $askedBy === 'student') {
+            $this->excuse->handle($session, (string) $studentId, $reason, $note, $actorId, $waive, $at);
+
+            return $session->refresh();
+        }
         if (! in_array($reason, self::REASONS[$askedBy] ?? [], true)) {
             throw ValidationException::withMessages(['reason' => __('scheduling::board.errors.bad_reason')]);
         }

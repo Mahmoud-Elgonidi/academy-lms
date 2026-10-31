@@ -3,6 +3,7 @@
 namespace Modules\Learning\Hifz;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Learning\Actions\Hifz\RecordHifzReview;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
@@ -41,8 +42,10 @@ final class HifzFromLessons
         }
         $at = CarbonImmutable::parse($report->session_starts_at);
         $seen = [];
-        foreach ($this->markedPages($report->session_id) as $page => $grade) {
-            $this->review->handle($event->studentId, $page, $grade, 'mistakes', $report->session_id, $at);
+        // A group lesson's marks are each student's own; its reviews are kept by each student's report.
+        $group = DB::table('sessions')->where('id', $report->session_id)->whereNotNull('group_id')->exists();
+        foreach ($this->markedPages($report->session_id, $event->studentId) as $page => $grade) {
+            $this->review->handle($event->studentId, $page, $grade, 'mistakes', $group ? $report->id : $report->session_id, $at);
             $seen[$page] = true;
         }
         $items = ReportItem::query()->where('report_id', $report->id)->get(['node_id', 'outcome']);
@@ -76,9 +79,9 @@ final class HifzFromLessons
      *
      * @return array<int, int> page => grade
      */
-    private function markedPages(string $sessionId): array
+    private function markedPages(string $sessionId, string $studentId): array
     {
-        $marks = RecitationMistake::query()->where('session_id', $sessionId)->get(['surah', 'verse', 'kind']);
+        $marks = RecitationMistake::query()->where('session_id', $sessionId)->where('student_id', $studentId)->get(['surah', 'verse', 'kind']);
         $pages = $this->pages->ofVerses($marks->map(fn (RecitationMistake $m) => ['surah' => $m->surah, 'verse' => $m->verse])->all());
         $count = [];
         foreach ($marks->values() as $i => $mark) {

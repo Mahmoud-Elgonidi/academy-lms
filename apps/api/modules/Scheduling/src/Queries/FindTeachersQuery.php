@@ -135,7 +135,11 @@ final class FindTeachersQuery
             ->where('tp.status', 'active')
             ->where('u.status', 'active')
             ->when($only !== null, fn ($q) => $q->whereIn('u.id', $only))
-            ->where($search->forTrial ? 'tp.accepts_trials' : 'tp.accepts_new', true)
+            ->where(match (true) {
+                $search->forTrial => 'tp.accepts_trials',
+                $search->forGroups => 'tp.accepts_groups',
+                default => 'tp.accepts_new',
+            }, true)
             ->when($search->gender === 'female_only', fn ($q) => $q->where('tp.gender', 'female'))
             ->when($search->gender === 'male_only', fn ($q) => $q->where('tp.gender', 'male'))
             ->when($search->language, fn ($q, $lang) => $q->whereRaw('tp.languages @> ?::jsonb', [json_encode([$lang])]))
@@ -153,7 +157,7 @@ final class FindTeachersQuery
             ->when($search->categoryId, fn ($q, $categoryId) => $q->where(fn ($w) => $w
                 ->whereNotExists(fn ($c) => $c->from('teacher_subject_categories as c')->whereColumn('c.teacher_id', 'ts.teacher_id')->whereColumn('c.subject_id', 'ts.subject_id'))
                 ->orWhereExists(fn ($c) => $c->from('teacher_subject_categories as c')->whereColumn('c.teacher_id', 'ts.teacher_id')->whereColumn('c.subject_id', 'ts.subject_id')->where('c.category_id', $categoryId))))
-            ->select('u.id', 'u.name', 'u.timezone', 'tp.gender', 'tp.languages', 'tp.dialect')
+            ->select('u.id', 'u.name', 'u.timezone', 'tp.gender', 'tp.languages', 'tp.dialect', 'tp.max_group_size')
             ->get()
             ->keyBy('id');
         // A student under 18: only teachers cleared for minors (not paused; a valid check where the academy asks for one).

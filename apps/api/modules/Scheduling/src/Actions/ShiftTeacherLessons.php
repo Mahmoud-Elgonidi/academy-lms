@@ -40,7 +40,8 @@ final class ShiftTeacherLessons
 
         return [
             'lessons' => count($moves),
-            'students' => collect($moves)->map(fn (array $m) => $m['session']->participant(ParticipantRole::Student)?->user_id)->filter()->unique()->count(),
+            // Every student moved, a group lesson's each one.
+            'students' => collect($moves)->flatMap(fn (array $m) => $m['session']->participants->filter(fn ($p) => $p->role === ParticipantRole::Student && $p->is_active)->pluck('user_id'))->unique()->count(),
             'problems' => array_map(fn (array $p) => ['start' => $p['start'], 'why' => $p['why']], $problems),
             'timezone' => $tz,
         ];
@@ -57,7 +58,10 @@ final class ShiftTeacherLessons
         return DB::transaction(function () use ($teacherId, $slots, $from, $until, $minutes, $actorId, $firstDay, $lastDay) {
             $moved = $this->shift->handle($slots, $from, $until, $minutes, $actorId, 'academy');
             // A clock change inside the period now falls on other times.
-            $this->planner->handle(enrollmentIds: array_values(array_unique(array_map(fn (RecurringSlot $s) => $s->enrollment_id, $slots))));
+            $courses = array_values(array_unique(array_filter(array_map(fn (RecurringSlot $s) => $s->enrollment_id, $slots))));
+            if ($courses !== [] || $slots === []) {
+                $this->planner->handle(enrollmentIds: $courses);
+            }
             if ($slots !== []) {
                 DB::afterCommit(fn () => event(new TeacherLessonsShifted($slots[0]->academy_id, $teacherId, $firstDay, $lastDay, $minutes, $moved, $actorId)));
             }

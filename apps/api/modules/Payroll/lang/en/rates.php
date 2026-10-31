@@ -7,6 +7,7 @@ return [
     'subtitle' => 'Each teacher is paid from one card; the default card covers everyone without one. The closest price wins: subject and kind of lesson, then subject, then kind, then any lesson. A new price applies to lessons from now on.',
     'create' => 'New rate card',
     'fields' => [
+        'format' => 'Lessons',
         'name' => 'Name',
         'currency' => 'Currency',
         'is_default' => 'Default card',
@@ -21,6 +22,7 @@ return [
         'teachers' => 'Teachers on this card',
         'teachers_hint' => 'A teacher is on one card; choosing them here moves them from their old one.',
     ],
+    'formats' => ['private' => 'Private', 'group' => 'Group (fixed rate per lesson)'],
     'units' => ['hour' => 'By the hour', 'lesson' => 'By the lesson'],
     'unit_hints' => ['hour' => 'paid by the minute of the lesson', 'lesson' => 'a flat amount per lesson'],
     'add_line' => 'Add a price',

@@ -122,7 +122,7 @@ final class ManagePlans extends ManageRecords
                 }),
             CreateAction::make()
                 ->label(__('billing::plans.create'))
-                ->using(fn (array $data) => app(SavePlan::class)->handle(null, $data)),
+                ->using(fn (array $data) => app(SavePlan::class)->handle(null, PlanResource::saved($data))),
         ];
     }
 }

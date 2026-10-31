@@ -61,9 +61,10 @@ final class RateLesson
     public function check(string $sessionId, string $raterId): object
     {
         $l = 'evaluation::ratings.errors.';
-        $lesson = $this->lessons->find($sessionId);
-        if ($lesson === null || $lesson->student_id === null
-            || ($raterId !== $lesson->student_id && ! in_array($raterId, $this->people->guardiansOf($lesson->student_id), true))) {
+        // The rater's own seat: themself, or the first child of theirs in it (a group lesson has a student per seat).
+        $student = collect($this->lessons->students($sessionId))->first(fn (string $id) => $raterId === $id || in_array($raterId, $this->people->guardiansOf($id), true));
+        $lesson = $student === null ? null : $this->lessons->find($sessionId, $student);
+        if ($lesson === null || $lesson->student_id === null) {
             throw ValidationException::withMessages(['lesson' => __($l.'not_yours')]);
         }
         if ($lesson->status !== 'completed') {

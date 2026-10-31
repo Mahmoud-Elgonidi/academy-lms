@@ -5,10 +5,12 @@ namespace Modules\Learning\Http\V1\Controllers;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\Contracts\DTOs\TextSource;
 use Modules\Learning\Actions\Assist\DraftReportFromVoice;
 use Modules\Learning\Actions\ReviewHomework;
+use Modules\Learning\Actions\SubmitGroupReport;
 use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Actions\SubmitSessionReport;
 use Modules\Learning\Assist\RecitationTarget;
@@ -75,7 +77,7 @@ final class TeacherReportsController
      * `assist.recitation_check`; `expected_suggestion` is the passage of the report's lessons' text, and
      * `mistakes_suggestion` the verses with the words marked in the lesson's shared mushaf.
      */
-    public function show(Request $request, string $report, RoadmapQuery $roadmap, AcademyAi $ai): JsonResponse
+    public function show(Request $request, string $report, RoadmapQuery $roadmap, AcademyAi $ai, SubmitGroupReport $groups): JsonResponse
     {
         $report = $this->mine($request, $report);
         $items = $this->form->items($report);
@@ -96,6 +98,19 @@ final class TeacherReportsController
             'expected_suggestion' => $report->kind === 'lesson' ? $this->recitation->suggestion(array_column($items, 'node_id')) : null,
             // The verses with the words marked in the lesson's shared mushaf (the surah with the most marks; null: none).
             'mistakes_suggestion' => $report->kind === 'lesson' ? $this->recitation->fromMistakes($report->session_id) : null,
+            // A group lesson: every student's report in it (send them all as `students` to PUT); null for a one-to-one lesson.
+            'group' => SubmitGroupReport::isGroup($report) ? ['students' => $groups->reportsOf($report)->map(fn (SessionReport $r) => [
+                'report_id' => $r->id,
+                'student_id' => $r->student_id,
+                'name' => (string) DB::table('users')->where('id', $r->student_id)->value('name'),
+                /** lesson (scores and a note) or absence (a note) */
+                'kind' => $r->kind,
+                'status' => $r->status,
+                'engagement' => $r->engagement,
+                'overall' => $r->overall,
+                'notes_for_student' => $r->notes_for_student,
+                'absence_note' => $r->absence_note,
+            ])->values()->all()] : null,
         ]]);
     }
 
@@ -144,10 +159,18 @@ final class TeacherReportsController
      * Hand in or correct a report.
      *
      * Answers to the subject's questions go in `answers`, by the field's key (stars 1-5, a number, a choice's key,
-     * true or false, a text).
+     * true or false, a text). A group lesson's report (`group` on GET) goes in once for the whole class: the shared
+     * part (items, answers, homework, notes_internal) and `students`, a row per student in it (student_id, and
+     * engagement, overall, notes_for_student for a lesson, absence_note for an absence); the homework goes to each.
      */
-    public function submit(Request $request, string $report, SubmitSessionReport $submit): JsonResponse
+    public function submit(Request $request, string $report, SubmitSessionReport $submit, SubmitGroupReport $group): JsonResponse
     {
+        if ($request->has('students') && SubmitGroupReport::isGroup($own = $this->mine($request, $report))) {
+            $request->validate(['students' => ['required', 'array', 'max:20'], 'students.*.student_id' => ['required', 'string', 'max:64']]);
+            $done = $group->handle($own, (string) $request->user()->getAuthIdentifier(), $request->only(SubmitGroupReport::SHARED), array_values((array) $request->input('students')));
+
+            return response()->json(['data' => $this->present->report($done[0], true, $this->form->items($done[0]))]);
+        }
         $report = $submit->handle($this->mine($request, $report), $request->user()->getAuthIdentifier(), $request->only([
             'engagement', 'overall', 'notes_for_student', 'notes_internal', 'absence_note', 'items', 'homework', 'answers',
         ]));

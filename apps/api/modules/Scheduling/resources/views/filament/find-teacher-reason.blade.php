@@ -1,9 +1,13 @@
 {{-- Why nobody was found, and what would help (Find a teacher). --}}
-@php $reason ??= 'no_time'; @endphp
-<div class="ft-card ft-reason" data-tone="{{ in_array($reason, ['no_teachers', 'no_trial_teachers'], true) ? 'danger' : 'muted' }}" role="status" wire:key="reason-{{ $reason }}">
+@php
+    $reason ??= 'no_time';
+    // Group mode's own reason lives with the group screens' wording.
+    $key = $reason === 'no_group_teachers' ? 'scheduling::group_screens.find.no_group_teachers' : 'scheduling::find.reasons.'.$reason;
+@endphp
+<div class="ft-card ft-reason" data-tone="{{ in_array($reason, ['no_teachers', 'no_trial_teachers', 'no_group_teachers'], true) ? 'danger' : 'muted' }}" role="status" wire:key="reason-{{ $reason }}">
     <x-filament::icon :icon="match ($reason) { 'filters' => 'heroicon-o-funnel', 'times' => 'heroicon-o-clock', default => 'heroicon-o-user-minus' }" style="width: 1.75rem; height: 1.75rem" />
-    <strong>{{ __('scheduling::find.reasons.'.$reason.'.title') }}</strong>
-    <p class="ft-muted">{{ __('scheduling::find.reasons.'.$reason.'.hint') }}</p>
+    <strong>{{ __($key.'.title') }}</strong>
+    <p class="ft-muted">{{ __($key.'.hint') }}</p>
     <div class="ft-reason-actions">
         @switch($reason)
             @case('filters')

@@ -12,9 +12,20 @@ final class FamilyCancellation
 {
     public function __construct(private readonly PolicyDecider $decider) {}
 
-    public function outcome(Session $session): string
+    /** A group lesson's seat ($enrollmentId: the student's course) is excused, never the lesson cancelled; its words say so. */
+    public function outcome(Session $session, ?string $enrollmentId = null): string
     {
-        [$decision, $input, $version] = $this->decider->decide($session, PolicyEvent::StudentCancel);
+        [$decision, $input, $version] = $this->decider->decide($session, PolicyEvent::StudentCancel, null, $enrollmentId);
+        if ($session->isGroup()) {
+            $g = 'scheduling::group_outcomes.excuse.';
+
+            return match (true) {
+                $decision->credit === 'refund' => __($g.'refund', ['hours' => $version->policy()->get('student_notice_hours')]),
+                $decision->credit === 'makeup' => __($g.'makeup'),
+                $input->noticeHours < $version->policy()->get('student_notice_hours') => __($g.'late', ['hours' => $version->policy()->get('student_notice_hours')]),
+                default => __($g.'quota', ['quota' => $version->policy()->get('quota_per_block')]),
+            };
+        }
         $policy = $version->policy();
         $l = 'scheduling::family.cancel.outcomes.';
 

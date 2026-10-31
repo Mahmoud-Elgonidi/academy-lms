@@ -42,9 +42,21 @@ final class RecordingAccess
         return match (true) {
             $lesson === null => null,
             $lesson->teacherId === $userId => $settings->recording_teacher ? 'teacher' : null,
-            $lesson->studentId !== null && ($userId === $lesson->studentId || in_array($userId, $this->people->guardiansOf($lesson->studentId), true)) => $settings->recording_family ? 'family' : null,
+            $this->isFamily($userId, $lesson) => $settings->recording_family ? 'family' : null,
             default => null,
         };
+    }
+
+    /** One of the lesson's students (any seat of a group lesson), or one of their guardians. */
+    private function isFamily(string $userId, LessonCard $lesson): bool
+    {
+        foreach ($lesson->studentIds() as $studentId) {
+            if ($userId === $studentId || in_array($userId, $this->people->guardiansOf($studentId), true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** The lesson's teacher, or a supervisor in it. */

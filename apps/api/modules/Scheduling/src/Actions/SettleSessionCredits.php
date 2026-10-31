@@ -21,8 +21,9 @@ use Modules\Scheduling\Domain\Models\SessionParticipant;
  *
  * A group lesson settles seat by seat: each student's own reservation, on
  * their own account, with the same effect (a decision for the whole lesson,
- * such as the group's lesson cancelled; one student's own outcome is G2's
- * per-student branch, through settleSeat()).
+ * such as the group's lesson cancelled or its teacher absent), skipping a
+ * seat already excused; one student's own outcome goes through settleSeat()
+ * (Groups\GroupOutcomes).
  */
 final class SettleSessionCredits
 {
@@ -40,7 +41,9 @@ final class SettleSessionCredits
         if ($session->group_id !== null) {
             $short = 0;
             $seats = SessionParticipant::query()->where('session_id', $session->id)->where('role', ParticipantRole::Student->value)
-                ->whereNotNull('enrollment_id')->get(['user_id', 'enrollment_id']);
+                ->whereNotNull('enrollment_id')
+                ->where(fn ($q) => $q->whereNull('outcome')->orWhere('outcome', '!=', 'excused'))     // an excused seat was settled when excused
+                ->get(['user_id', 'enrollment_id']);
             foreach ($seats as $seat) {
                 $short += $this->settleSeat($session, (string) $seat->enrollment_id, $effect, $actorId, $makeupDays);
             }

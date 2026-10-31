@@ -11,6 +11,7 @@ use Modules\Enrollment\Contracts\EnrollmentStatus;
 use Modules\Scheduling\Domain\Enums\ParticipantRole;
 use Modules\Scheduling\Domain\Enums\SessionEventKind;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
+use Modules\Scheduling\Domain\Models\GroupMember;
 use Modules\Scheduling\Domain\Models\RecurringSlot;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionEvent;
@@ -32,6 +33,7 @@ use Modules\SharedKernel\Time\LocalTimeResolver;
  * summer-time change can shift by an hour, and the result says how many).
  * The old weekly times end the day before. An ended course keeps its last
  * teacher; one set to end has its new weekly times end on that day too.
+ * A group's student changes teacher only with their group (Groups\ReassignGroupTeacher).
  */
 final class ReassignTeacher
 {
@@ -58,6 +60,10 @@ final class ReassignTeacher
         }
         if ($enrollment->teacherId === $teacherId) {
             throw ValidationException::withMessages(['teacher' => __('scheduling::policy.errors.same_teacher')]);
+        }
+        // A group's student changes teacher only with the group (Groups\ReassignGroupTeacher).
+        if (GroupMember::query()->where('enrollment_id', $enrollmentId)->whereNull('left_on')->exists()) {
+            throw ValidationException::withMessages(['enrollment' => __('scheduling::group_outcomes.errors.whole_group')]);
         }
         $this->minors->assert($teacherId, $enrollment->studentId);
         $newTz = DB::table('users')->where('id', $teacherId)->value('timezone') ?? 'UTC';

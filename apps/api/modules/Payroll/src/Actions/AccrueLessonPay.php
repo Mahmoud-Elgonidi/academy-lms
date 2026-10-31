@@ -27,7 +27,9 @@ use Modules\Payroll\Support\PayrollMonths;
  * A line keeps the price it was written at: a later change to the rate card
  * reaches it only through $reprice (the month's "recalculate"). A lesson with
  * no price on its teacher's card gets no line until one is added; the month
- * shows it as unpriced.
+ * shows it as unpriced. A group lesson is one line for its teacher, priced
+ * from the card's group line (falling back to the private one), however
+ * many students it had.
  */
 final class AccrueLessonPay
 {
@@ -112,7 +114,7 @@ final class AccrueLessonPay
         ];
 
         $card = RateCard::forTeacher($lesson->teacher_id);
-        $line = $card ? Pay::pick($card->rateLines(), $lesson->subject_id, $lesson->type) : null;
+        $line = $card ? Pay::pick($card->rateLines(), $lesson->subject_id, $lesson->type, $lesson->format) : null;
         if ($card === null || $line === null) {
             return $basis;
         }

@@ -52,7 +52,9 @@ final class TeacherKpis
 
         $lessons = DB::table('sessions as s')
             ->leftJoin('session_participants as tp', fn ($j) => $j->on('tp.academy_id', '=', 's.academy_id')->on('tp.session_id', '=', 's.id')->where('tp.role', 'teacher')->whereColumn('tp.user_id', 's.teacher_id'))
-            ->leftJoin('session_participants as sp', fn ($j) => $j->on('sp.academy_id', '=', 's.academy_id')->on('sp.session_id', '=', 's.id')->where('sp.role', 'student'))
+            // One row a lesson: a group lesson's students as the longest any of them stayed.
+            ->leftJoinLateral(DB::table('session_participants as p')->whereColumn('p.academy_id', 's.academy_id')->whereColumn('p.session_id', 's.id')->where('p.role', 'student')
+                ->selectRaw('max(p.attended_min) as attended_min'), 'sp')
             ->whereIn('s.teacher_id', $teacherIds)->where('s.starts_at', '>=', $from)->where('s.starts_at', '<', $now)
             ->whereNotExists(fn ($q) => $q->from('kpi_exclusions as x')->whereColumn('x.session_id', 's.id')->whereColumn('x.academy_id', 's.academy_id'))
             ->groupBy('s.teacher_id')

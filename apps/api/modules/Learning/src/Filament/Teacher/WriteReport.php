@@ -26,6 +26,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Learning\Actions\Assist\DraftReportFromVoice;
+use Modules\Learning\Actions\SubmitGroupReport;
 use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Actions\SubmitSessionReport;
 use Modules\Learning\Assist\RecitationTarget;
@@ -93,10 +94,18 @@ final class WriteReport extends Page
         return Gate::allows(Ability::WriteReports->value);
     }
 
+    /** A group lesson: the class's report is written once, with a row for each student. */
+    public bool $group = false;
+
     public function mount(string $report): void
     {
         $this->sessionReport = SessionReport::query()->findOrFail($report);
         abort_unless($this->sessionReport->teacher_id === auth()->id(), 403);
+        $this->group = SubmitGroupReport::isGroup($this->sessionReport);
+        if ($this->group && $this->sessionReport->kind === 'absence') {
+            // The shared part is a lesson's: write it from a student who attended, when one did.
+            $this->sessionReport = app(SubmitGroupReport::class)->reportsOf($this->sessionReport)->firstWhere('kind', 'lesson') ?? $this->sessionReport;
+        }
 
         $homework = $this->sessionReport->homework()->first();
         $target = app(RecitationTarget::class);
@@ -117,6 +126,7 @@ final class WriteReport extends Page
             'notes_internal' => $this->sessionReport->notes_internal,
             'absence_note' => $this->sessionReport->absence_note,
             'answers' => $this->sessionReport->answers ?? [],
+            'students' => $this->group ? $this->classmates() : [],
             'homework' => [
                 'title' => $homework?->title,
                 'instructions' => $homework?->instructions,
@@ -202,6 +212,7 @@ final class WriteReport extends Page
                 Textarea::make('notes_internal')->label(__('learning::teacher.write.notes_internal'))->rows(2)->maxLength(3000),
             ]),
             $this->questions(),
+            $this->group ? $this->studentRows($scores) : null,
             Section::make(__('learning::teacher.write.homework'))->collapsible()->collapsed(fn () => blank($this->data['homework']['title'] ?? null))
                 ->schema([
                     TextInput::make('homework.title')->label(__('learning::teacher.write.homework_title'))->maxLength(200),
@@ -216,6 +227,46 @@ final class WriteReport extends Page
                     ...$this->recitation(),
                 ]),
         ])));
+    }
+
+    /** @return list<array<string, mixed>> the other students' rows of a group lesson's report */
+    private function classmates(): array
+    {
+        return app(SubmitGroupReport::class)->reportsOf($this->sessionReport)->except($this->sessionReport->student_id)->map(fn (SessionReport $r) => [
+            'student_id' => $r->student_id,
+            'name' => (string) DB::table('users')->where('id', $r->student_id)->value('name'),
+            'kind' => $r->kind,
+            'engagement' => $r->engagement,
+            'overall' => $r->overall,
+            'notes_for_student' => $r->notes_for_student,
+            'absence_note' => $r->absence_note,
+        ])->values()->all();
+    }
+
+    /** @param  array<int, string>  $scores */
+    private function studentRows(array $scores): Section
+    {
+        $lesson = fn (Get $get) => $get('kind') === 'lesson';
+
+        return Section::make(__('learning::group_reports.students'))->description(__('learning::group_reports.students_hint'))
+            ->visible(fn () => ($this->data['students'] ?? []) !== [])
+            ->schema([
+                Repeater::make('students')->hiddenLabel()
+                    ->addable(false)->deletable(false)->reorderable(false)
+                    ->itemLabel(fn (array $state) => ($state['name'] ?? '').($state['kind'] === 'absence' ? ' · '.__('learning::reports.kinds.absence') : ''))
+                    ->schema([
+                        Hidden::make('student_id'),
+                        Hidden::make('kind'),
+                        Hidden::make('name'),
+                        Grid::make(2)->visible($lesson)->schema([
+                            ToggleButtons::make('engagement')->label(__('learning::teacher.write.engagement'))->options($scores)->inline()->required($lesson),
+                            ToggleButtons::make('overall')->label(__('learning::teacher.write.overall'))->options($scores)->inline()->required($lesson),
+                        ]),
+                        Textarea::make('notes_for_student')->label(__('learning::teacher.write.notes_for_student'))->rows(2)->maxLength(3000)->visible($lesson),
+                        Textarea::make('absence_note')->label(__('learning::group_reports.absent'))->rows(2)->maxLength(1000)
+                            ->visible(fn (Get $get) => $get('kind') === 'absence')->required(fn (Get $get) => $get('kind') === 'absence'),
+                    ]),
+            ]);
     }
 
     /** Whether the form asks what the homework is to recite: the helper is on, or the homework already says. */
@@ -397,7 +448,13 @@ final class WriteReport extends Page
         unset($data['homework']['recite']);
 
         try {
-            app(SubmitSessionReport::class)->handle($this->sessionReport, (string) auth()->id(), $data);
+            if ($this->group) {
+                $own = ['student_id' => $this->sessionReport->student_id] + array_intersect_key($data, array_flip(SubmitGroupReport::ROW));
+                $rows = array_map(fn (array $r) => array_intersect_key($r, array_flip(['student_id', ...SubmitGroupReport::ROW])), array_values($data['students'] ?? []));
+                app(SubmitGroupReport::class)->handle($this->sessionReport, (string) auth()->id(), $data, [$own, ...$rows]);
+            } else {
+                app(SubmitSessionReport::class)->handle($this->sessionReport, (string) auth()->id(), $data);
+            }
         } catch (ValidationException $e) {
             // Why what to recite cannot be checked shows under its switch.
             throw ValidationException::withMessages(collect($e->errors())->mapWithKeys(fn ($messages, $key) => ['data.'.($key === 'homework.expected' ? 'homework.recite' : $key) => $messages])->all());

@@ -21,8 +21,11 @@ final class PerformanceEvents
         $from = $now->subDays($days);
         $late = (int) (json_decode((string) DB::table('policy_versions')->orderByDesc('version')->value('settings'), true)['teacher_late_after_min'] ?? 2);
         $lesson = fn () => DB::table('sessions as s')
-            ->leftJoin('session_participants as sp', fn ($j) => $j->on('sp.academy_id', '=', 's.academy_id')->on('sp.session_id', '=', 's.id')->where('sp.role', 'student'))
-            ->leftJoin('users as u', fn ($j) => $j->on('u.academy_id', '=', 'sp.academy_id')->on('u.id', '=', 'sp.user_id'))
+            // One row a lesson: a group lesson as its first student and how many more.
+            ->leftJoinLateral(DB::table('session_participants as sp')
+                ->join('users as su', fn ($j) => $j->on('su.academy_id', '=', 'sp.academy_id')->on('su.id', '=', 'sp.user_id'))
+                ->whereColumn('sp.academy_id', 's.academy_id')->whereColumn('sp.session_id', 's.id')->where('sp.role', 'student')
+                ->selectRaw("min(su.name) || case when count(*) > 1 then ' +' || (count(*) - 1) else '' end as name"), 'u')
             ->leftJoin('subjects as sub', fn ($j) => $j->on('sub.academy_id', '=', 's.academy_id')->on('sub.id', '=', 's.subject_id'))
             ->where('s.teacher_id', $teacherId)->where('s.starts_at', '>=', $from)->where('s.starts_at', '<', $now);
         $cols = ['s.id as session_id', 's.starts_at as at', 'u.name as student', 'sub.name_ar as subject_ar', 'sub.name_en as subject_en'];
@@ -37,9 +40,11 @@ final class PerformanceEvents
             ->merge($lesson()->join('session_participants as tp', fn ($j) => $j->on('tp.academy_id', '=', 's.academy_id')->on('tp.session_id', '=', 's.id')->where('tp.role', 'teacher')->whereColumn('tp.user_id', 's.teacher_id'))
                 ->where('s.status', 'completed')->whereRaw('tp.last_left_at < s.ends_at - make_interval(mins => ?)', [TeacherKpis::EARLY_LEAVE_MIN])
                 ->selectRaw("'early_leave' as kind, round(extract(epoch from s.ends_at - tp.last_left_at) / 60)::int as minutes")->addSelect($cols)->get())
-            ->merge($lesson()->join('session_reports as r', fn ($j) => $j->on('r.academy_id', '=', 's.academy_id')->on('r.session_id', '=', 's.id'))
-                ->where('r.kind', 'lesson')->where(fn ($q) => $q->where('r.late', true)->orWhere(fn ($q) => $q->whereNull('r.submitted_at')->where('r.due_at', '<', $now)))
-                ->selectRaw("case when r.submitted_at is null then 'report_missing' else 'report_late' end as kind, null::int as minutes")->addSelect($cols)->get());
+            // A lesson's reports (one per student in a group lesson): missing when any is, else late when any was.
+            ->merge($lesson()->whereExists(fn ($q) => $q->from('session_reports as r')->whereColumn('r.academy_id', 's.academy_id')->whereColumn('r.session_id', 's.id')
+                ->where('r.kind', 'lesson')->where(fn ($q) => $q->where('r.late', true)->orWhere(fn ($q) => $q->whereNull('r.submitted_at')->where('r.due_at', '<', $now))))
+                ->selectRaw("case when exists (select 1 from session_reports r where r.academy_id = s.academy_id and r.session_id = s.id and r.kind = 'lesson' and r.submitted_at is null and r.due_at < ?)
+                    then 'report_missing' else 'report_late' end as kind, null::int as minutes", [$now])->addSelect($cols)->get());
 
         $low = DB::table('lesson_ratings as g')
             ->join('sessions as s', fn ($j) => $j->on('s.academy_id', '=', 'g.academy_id')->on('s.id', '=', 'g.session_id'))

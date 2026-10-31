@@ -16,12 +16,28 @@ return [
     'renew_when' => '{1} when one session is left|[2,*] when :n sessions are left',
     'activate' => 'Turn on',
     'deactivate' => 'Turn off',
+    'formats' => [
+        'private' => [
+            'title' => 'Private',
+            'line' => 'One teacher and one student in the lesson, at times of the student\'s own.',
+        ],
+        'group' => [
+            'title' => 'Group',
+            'line' => 'Several students of the same level and age with one teacher at fixed times (up to :max), cheaper for each student.',
+        ],
+    ],
+    'compare' => [
+        'less' => 'A group lesson in :region costs :lesson, :pct% less than a private lesson on ":plan" (:private).',
+        'more' => 'A group lesson in :region costs :lesson, :pct% more than a private lesson on ":plan" (:private). Price it below the private one.',
+        'same' => 'A group lesson in :region costs as much as a private lesson on ":plan" (:private). Price it below the private one.',
+    ],
     'scopes' => [
         'enrollment' => 'Per course',
         'student_pool' => 'Shared package',
     ],
     'fields' => [
         'credit_scope' => 'Balance',
+        'lesson_format' => 'Lesson format',
         'name' => 'Plan',
         'name_ar' => 'Name (Arabic)',
         'name_en' => 'Name (English)',
@@ -42,6 +58,7 @@ return [
     'hints' => [
         'credit_scope' => 'A shared package is one balance for a student in any subject (say 12 lessons a month across Quran and Arabic). Each new course of theirs on it draws on the same balance, with no new invoice, and the lessons a week here are for all their subjects together. It stays as it is once someone is on it.',
         'validity' => 'The weeks the block needs plus two weeks\' grace. Minutes left after that expire.',
+        'format_locked' => 'Students are on this plan, so its lesson format stays as it is. For the other format, make a new plan.',
         'shape' => 'Lesson length, lessons a week and lessons per block stay as they are once someone is on it. For another shape, make a new plan.',
         'renew' => 'How many sessions are left when the next block\'s invoice goes out.',
     ],

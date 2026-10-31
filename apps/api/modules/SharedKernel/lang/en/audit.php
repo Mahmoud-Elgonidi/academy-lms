@@ -37,6 +37,7 @@ return [
             'left' => 'A student left a group from :on (lessons: :lessons)',
             'capacity' => "A group's seats changed from :from to :to",
             'ended' => 'A group ended (courses: :courses, lessons cancelled: :lessons)',
+            'settings' => 'Group lesson settings (default makeup: :late_join, mixed ages: :mixed, starts at: :min)',
         ],
         'enrollment' => [
             'teacher_changed' => 'A student\'s teacher changed from :starting',

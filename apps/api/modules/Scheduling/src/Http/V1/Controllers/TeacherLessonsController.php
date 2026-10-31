@@ -76,8 +76,9 @@ final class TeacherLessonsController
     /**
      * Dispute a lesson's outcome.
      *
-     * Within 48 hours of the end of my lesson recorded as held or missed (can_dispute), once per lesson: it goes back
-     * under review and the academy answers (the lesson's dispute). Send an Idempotency-Key.
+     * Within 48 hours of the end of my lesson recorded as held or missed (can_dispute), once per lesson (a group lesson:
+     * once per student, naming the seat with student_id): it goes back under review and the academy answers (the
+     * lesson's dispute). Send an Idempotency-Key.
      *
      * @throws NotFoundHttpException not my lesson
      */
@@ -88,7 +89,8 @@ final class TeacherLessonsController
         if ($lesson === null) {
             throw new NotFoundHttpException;
         }
-        $dispute->handle($lesson, 'teacher', $me, (string) $request->string('reason'), (string) $request->string('note'));
+        // A group lesson's dispute is about one student's seat (student_id).
+        $dispute->handle($lesson, 'teacher', $me, (string) $request->string('reason'), (string) $request->string('note'), $request->input('student_id') ?: null);
         $row = collect($lessons->forTeacher($me, $lesson->starts_at, $lesson->starts_at->addSecond()))->firstWhere('id', $lesson->id);
 
         return response()->json(['data' => $present->lesson($row, CarbonImmutable::now(), 'student')]);

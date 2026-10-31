@@ -26,13 +26,17 @@ final class ShiftImpactQuery
 
         $rows = DB::table('sessions as s')
             ->join('subjects as sub', fn ($j) => $j->on('sub.academy_id', '=', 's.academy_id')->on('sub.id', '=', 's.subject_id'))
-            ->leftJoin('session_participants as p', fn ($j) => $j->on('p.academy_id', '=', 's.academy_id')->on('p.session_id', '=', 's.id')->where('p.role', 'student'))
-            ->leftJoin('users as u', fn ($j) => $j->on('u.academy_id', '=', 'p.academy_id')->on('u.id', '=', 'p.user_id'))
+            // One row a lesson: a group lesson's first student stands for it, with how many it seats.
+            ->leftJoinLateral(DB::table('session_participants as p')
+                ->join('users as u', fn ($j) => $j->on('u.academy_id', '=', 'p.academy_id')->on('u.id', '=', 'p.user_id'))
+                ->whereColumn('p.academy_id', 's.academy_id')->whereColumn('p.session_id', 's.id')->where('p.role', 'student')
+                ->orderBy('u.name')->limit(1)->select(['u.id', 'u.name', 'u.timezone']), 'u')
             ->where('s.teacher_id', $teacherId)
             ->where('s.status', SessionStatus::Scheduled->value)
             ->where('s.starts_at', '>=', $from)
             ->orderBy('s.starts_at')
-            ->select('s.id', 's.starts_at', 's.ends_at', 's.enrollment_id', 'sub.name_ar', 'sub.name_en', 'u.id as student_id', 'u.name as student', 'u.timezone as student_tz')
+            ->select('s.id', 's.starts_at', 's.ends_at', 's.enrollment_id', 's.group_id', 'sub.name_ar', 'sub.name_en', 'u.id as student_id', 'u.name as student', 'u.timezone as student_tz',
+                DB::raw("(select count(*) from session_participants c where c.academy_id = s.academy_id and c.session_id = s.id and c.role = 'student') as students"))
             ->get();
 
         $groups = [];
@@ -46,11 +50,13 @@ final class ShiftImpactQuery
                 continue;
             }
 
-            $key = implode('|', [$row->student_id ?? '-', $weekday, $clock, $minutes]);
+            // A group's lessons are one conflict, the group's (its time moves for everyone).
+            $key = implode('|', [$row->group_id !== null ? 'group:'.$row->group_id : ($row->student_id ?? '-'), $weekday, $clock, $minutes]);
             $groups[$key] ??= [
                 'key' => $key,
                 'student_id' => $row->student_id,
-                'student' => $row->student ?? '—',
+                'student' => $row->group_id !== null ? __('scheduling::group_outcomes.label', ['count' => (int) $row->students]) : ($row->student ?? '—'),
+                'group_id' => $row->group_id,
                 'student_tz' => $row->student_tz ?? $fallbackTz,
                 'enrollment_id' => $row->enrollment_id,
                 'subject_ar' => $row->name_ar,

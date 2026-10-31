@@ -28,6 +28,11 @@ use Modules\Scheduling\Support\CourseDays;
  * time either person is already booked. The credit stays reserved, and the
  * session no longer follows its weekly time. A course's lesson does not move
  * onto one of its paused days, nor past its end (CourseDays).
+ *
+ * A group lesson moves only for the whole group, and only by the academy
+ * (a student's own change is a makeup lesson): every student seated moves
+ * with it, each one's course must be open on the new day, and the database
+ * refuses a time any of them is booked.
  */
 final class RescheduleSession
 {
@@ -50,8 +55,16 @@ final class RescheduleSession
         if ($newStart->lessThanOrEqualTo($at)) {
             throw ValidationException::withMessages(['starts_at' => __('scheduling::policy.errors.in_the_past')]);
         }
-        if ($session->enrollment_id !== null && ($course = $this->enrollments->find($session->enrollment_id)) !== null) {
-            $this->days->assertOpen($course, $newStart);
+        if ($session->isGroup() && $askedBy !== 'academy') {
+            throw ValidationException::withMessages(['session' => __('scheduling::group_outcomes.errors.whole_group')]);
+        }
+        $courses = $session->isGroup()
+            ? SessionParticipant::query()->where('session_id', $session->id)->where('role', ParticipantRole::Student->value)->where('is_active', true)->whereNotNull('enrollment_id')->pluck('enrollment_id')->all()
+            : array_filter([$session->enrollment_id]);
+        foreach ($courses as $enrollmentId) {
+            if (($course = $this->enrollments->find($enrollmentId)) !== null) {
+                $this->days->assertOpen($course, $newStart);
+            }
         }
 
         [$decision, $input, $version] = $this->decider->decide($session, $askedBy === 'student' ? PolicyEvent::StudentReschedule : PolicyEvent::AcademyReschedule, $at);

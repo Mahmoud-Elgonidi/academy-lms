@@ -6,11 +6,18 @@ use InvalidArgumentException;
 
 /**
  * One price on a rate card: for a subject and a kind of lesson (null: any),
- * by the hour (paid by the minute) or by the lesson, in minor units.
+ * by the hour (paid by the minute) or by the lesson, in minor units; for
+ * private lessons, or a group lesson's fixed rate (whatever its students).
  */
 final readonly class RateLine
 {
     public const UNITS = ['hour', 'lesson'];
+
+    public const PRIVATE = 'private';
+
+    public const GROUP = 'group';
+
+    public const FORMATS = [self::PRIVATE, self::GROUP];
 
     public function __construct(
         public ?string $subjectId,
@@ -18,8 +25,9 @@ final readonly class RateLine
         public string $unit,
         public int $amountMinor,
         public ?string $id = null,
+        public string $format = self::PRIVATE,
     ) {
-        if (! in_array($unit, self::UNITS, true) || $amountMinor < 0) {
+        if (! in_array($unit, self::UNITS, true) || $amountMinor < 0 || ! in_array($format, self::FORMATS, true)) {
             throw new InvalidArgumentException("Bad rate line [{$unit} {$amountMinor}].");
         }
     }

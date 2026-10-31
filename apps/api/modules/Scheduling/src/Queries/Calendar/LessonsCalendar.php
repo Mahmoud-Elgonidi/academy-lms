@@ -32,7 +32,8 @@ final class LessonsCalendar
      * Lessons starting in [from, to), earliest first.
      *
      * @return list<object> rows with id, starts_at, ends_at (UTC), minutes, status, type, funding_status, review_reason, reason, reason_by, reason_note (a cancellation's),
-     *                      enrollment_id, teacher_id, teacher, teacher_tz, original_teacher, student_id, student, student_tz, subject_id, subject_ar, subject_en
+     *                      enrollment_id, teacher_id, teacher, teacher_tz, original_teacher, student_id, student, student_tz, subject_id, subject_ar, subject_en,
+     *                      group_id and students (a group lesson's student reads "group · n")
      */
     public function lessons(CalendarFilter $filter, CarbonImmutable $from, CarbonImmutable $to, ?int $limit = null): array
     {
@@ -169,7 +170,7 @@ final class LessonsCalendar
     /** @return list<object> */
     private function rows(Builder $query): array
     {
-        // A lesson's learner (one: lessons are one to one; the first by id if a group ever comes).
+        // A lesson's learner: its one student, or a group lesson's first by id (it shows as the group, "group · n").
         $learner = DB::table('session_participants as p')->whereColumn('p.academy_id', 's.academy_id')->whereColumn('p.session_id', 's.id')
             ->where('p.role', 'student')->orderBy('p.user_id')->limit(1)->select('p.user_id');
 
@@ -179,8 +180,11 @@ final class LessonsCalendar
             ->join('users as t', fn ($j) => $j->on('t.academy_id', '=', 's.academy_id')->on('t.id', '=', 's.teacher_id'))
             ->join('subjects as sub', fn ($j) => $j->on('sub.academy_id', '=', 's.academy_id')->on('sub.id', '=', 's.subject_id'))
             ->leftJoin('users as ot', fn ($j) => $j->on('ot.academy_id', '=', 's.academy_id')->on('ot.id', '=', 's.original_teacher_id'))
-            ->leftJoin('session_disputes as d', fn ($j) => $j->on('d.academy_id', '=', 's.academy_id')->on('d.session_id', '=', 's.id'))
-            ->get(['s.id', 's.starts_at', 's.ends_at', 's.status', 's.type', 's.funding_status', 's.review_reason', 's.enrollment_id', 's.subject_id',
+            // Its dispute: a group lesson may have one per seat; an open one first.
+            ->leftJoinLateral(DB::table('session_disputes as d')->whereColumn('d.academy_id', 's.academy_id')->whereColumn('d.session_id', 's.id')
+                ->orderByRaw("(d.status = 'open') desc")->orderBy('d.created_at')->limit(1)->select(['d.id', 'd.status', 'd.side']), 'd')
+            ->get(['s.id', 's.group_id',
+                DB::raw("(select count(*) from session_participants c where c.academy_id = s.academy_id and c.session_id = s.id and c.role = 'student' and c.is_active) as students"), 's.starts_at', 's.ends_at', 's.status', 's.type', 's.funding_status', 's.review_reason', 's.enrollment_id', 's.subject_id',
                 's.teacher_id', 't.name as teacher', 't.timezone as teacher_tz', 'ot.name as original_teacher',
                 'st.user_id as student_id', 'su.name as student', 'su.timezone as student_tz',
                 'sub.name_ar as subject_ar', 'sub.name_en as subject_en', 'd.id as dispute_id', 'd.status as dispute_status', 'd.side as dispute_side',
@@ -189,6 +193,10 @@ final class LessonsCalendar
                 $r->starts_at = CarbonImmutable::parse($r->starts_at)->utc();
                 $r->ends_at = CarbonImmutable::parse($r->ends_at)->utc();
                 $r->minutes = (int) $r->starts_at->diffInMinutes($r->ends_at);
+                $r->students = (int) $r->students;
+                if ($r->group_id !== null) {
+                    $r->student = __('scheduling::group_outcomes.label', ['count' => $r->students]);
+                }
 
                 return $r;
             })->all();

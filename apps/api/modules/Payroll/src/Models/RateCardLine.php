@@ -13,6 +13,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?string $subject_id
  * @property ?string $session_type
  * @property string $unit hour | lesson
+ * @property string $session_format private | group (a group lesson's fixed rate)
  * @property int $amount_minor
  */
 final class RateCardLine extends Model
@@ -20,7 +21,7 @@ final class RateCardLine extends Model
     use BelongsToTenant;
     use HasUuids;
 
-    protected $fillable = ['rate_card_id', 'subject_id', 'session_type', 'unit', 'amount_minor'];
+    protected $fillable = ['rate_card_id', 'subject_id', 'session_type', 'session_format', 'unit', 'amount_minor'];
 
     protected function casts(): array
     {
@@ -29,6 +30,6 @@ final class RateCardLine extends Model
 
     public function toRateLine(): RateLine
     {
-        return new RateLine($this->subject_id, $this->session_type, $this->unit, $this->amount_minor, $this->id);
+        return new RateLine($this->subject_id, $this->session_type, $this->unit, $this->amount_minor, $this->id, $this->session_format ?? RateLine::PRIVATE);
     }
 }

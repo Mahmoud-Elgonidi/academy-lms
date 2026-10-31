@@ -19,13 +19,20 @@ final class TimeOffCover
     {
         return Session::query()
             ->join('users as t', fn ($j) => $j->on('t.academy_id', '=', 'sessions.academy_id')->on('t.id', '=', 'sessions.teacher_id'))
-            ->leftJoin('session_participants as p', fn ($j) => $j->on('p.academy_id', '=', 'sessions.academy_id')->on('p.session_id', '=', 'sessions.id')->where('p.role', '=', 'student'))
-            ->leftJoin('users as st', fn ($j) => $j->on('st.academy_id', '=', 'p.academy_id')->on('st.id', '=', 'p.user_id'))
             ->join('subjects as sub', fn ($j) => $j->on('sub.academy_id', '=', 'sessions.academy_id')->on('sub.id', '=', 'sessions.subject_id'))
             ->where(fn ($q) => $q->where('sessions.teacher_id', $timeOff->teacher_id)->orWhere('sessions.original_teacher_id', $timeOff->teacher_id))
             ->where('sessions.starts_at', '<', $timeOff->ends_at)->where('sessions.ends_at', '>', $timeOff->starts_at)
             ->orderBy('sessions.starts_at')
-            ->get(['sessions.*', 't.name as teacher_name', 'st.name as student_name', 'sub.name_ar as subject_ar', 'sub.name_en as subject_en'])
+            ->get(['sessions.*', 't.name as teacher_name', 'sub.name_ar as subject_ar', 'sub.name_en as subject_en',
+                // One row a lesson: its student, or a group lesson as the group (how many it seats).
+                DB::raw("(select u.name from session_participants p join users u on u.academy_id = p.academy_id and u.id = p.user_id
+                    where p.academy_id = sessions.academy_id and p.session_id = sessions.id and p.role = 'student' order by u.name limit 1) as student_name"),
+                DB::raw("(select count(*) from session_participants p where p.academy_id = sessions.academy_id and p.session_id = sessions.id and p.role = 'student') as students")])
+            ->each(function (Session $s) {
+                if ($s->group_id !== null) {
+                    $s->setAttribute('student_name', __('scheduling::group_outcomes.label', ['count' => (int) $s->getAttribute('students')]));
+                }
+            })
             ->all();
     }
 

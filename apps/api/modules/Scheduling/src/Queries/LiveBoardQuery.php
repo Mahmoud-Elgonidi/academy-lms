@@ -44,7 +44,7 @@ final class LiveBoardQuery
             ->join('users as u', fn ($j) => $j->on('u.academy_id', '=', 'p.academy_id')->on('u.id', '=', 'p.user_id'))
             ->whereIn('p.session_id', $ids)
             ->orderByDesc('p.is_active')
-            ->select('p.session_id', 'p.role', 'p.first_join_at', 'u.id', 'u.name', 'u.timezone', 'u.phone_e164')
+            ->select('p.session_id', 'p.role', 'p.is_active', 'p.first_join_at', 'u.id', 'u.name', 'u.timezone', 'u.phone_e164')
             ->get()
             ->groupBy('session_id');
 
@@ -69,7 +69,12 @@ final class LiveBoardQuery
             /** @var Collection<int, object> $people */
             $people = $participants->get($row->id, collect());
             $teacher = $people->firstWhere('role', 'teacher');
-            $student = $people->firstWhere('role', 'student');
+            // A group lesson: every student seated in it; the one who came in first stands for them on the board.
+            $seated = $row->group_id === null ? collect() : $people->where('role', 'student')->where('is_active', true)->sortBy('name')->values();
+            $student = $row->group_id === null
+                ? $people->firstWhere('role', 'student')
+                : ($seated->filter(fn (object $p) => $p->first_join_at !== null)->sortBy('first_join_at')->first() ?? $seated->first());
+            $family = $row->group_id === null ? collect([$student])->filter() : $seated;
 
             return new BoardSession(
                 id: $row->id,
@@ -82,9 +87,8 @@ final class LiveBoardQuery
                 subjectEn: $row->subject_en,
                 teacher: self::person($teacher, $fallbackTimezone),
                 student: $student ? self::person($student, $fallbackTimezone) : null,
-                guardians: $student
-                    ? $guardians->get($student->id, collect())->map(fn (object $g) => new BoardPerson($g->id, $g->name, $g->timezone ?? $fallbackTimezone, $g->phone_e164, null, $g->relationship))->values()->all()
-                    : [],
+                guardians: $family->flatMap(fn (object $st) => $guardians->get($st->id, collect()))->unique('id')
+                    ->map(fn (object $g) => new BoardPerson($g->id, $g->name, $g->timezone ?? $fallbackTimezone, $g->phone_e164, null, $g->relationship))->values()->all(),
                 events: $events->get($row->id, collect())->map(fn (object $e) => new BoardEvent(
                     SessionEventKind::from($e->kind),
                     self::time($e->occurred_at),
@@ -92,6 +96,8 @@ final class LiveBoardQuery
                     $e->actor_name,
                 ))->values()->all(),
                 reviewReason: $row->review_reason,
+                students: $seated->map(fn (object $p) => self::person($p, $fallbackTimezone))->all(),
+                groupId: $row->group_id,
             );
         })->values()->all();
     }

@@ -65,6 +65,7 @@ final class FreeTimesQuery
             categoryId: $base->categoryId,
             ageGroup: $base->ageGroup,
             forMinor: $base->forMinor,
+            forGroups: $base->forGroups,
         );
         $results = $this->teachers->run($search);
 

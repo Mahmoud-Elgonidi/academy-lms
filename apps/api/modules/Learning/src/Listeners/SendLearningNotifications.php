@@ -22,6 +22,7 @@ use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\RoadmapQuery;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Contracts\AttendanceApi;
+use Modules\Scheduling\Contracts\DTOs\LessonCard;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
 
 /**
@@ -79,10 +80,15 @@ final class SendLearningNotifications
             return;
         }
         $card = app(AttendanceApi::class)->lesson($event->sessionId);
-        if ($card?->studentId === null) {
-            return;
+        // Each student of a group lesson by their own seat.
+        foreach ($card?->studentIds() ?? [] as $studentId) {
+            $this->starsFor($card, $studentId);
         }
-        $lesson = collect(app(AttendanceApi::class)->lessonsOfStudent($card->studentId, $card->startsAt, $card->startsAt->addSecond()))->firstWhere('id', $card->id);
+    }
+
+    private function starsFor(LessonCard $card, string $studentId): void
+    {
+        $lesson = collect(app(AttendanceApi::class)->lessonsOfStudent($studentId, $card->startsAt, $card->startsAt->addSecond()))->firstWhere('id', $card->id);
         $stars = $lesson === null ? null : LessonStars::for($lesson->status, $lesson->startsAt, $lesson->endsAt, $lesson->joinedAt, $lesson->lastLeftAt);
         if ($stars === null || $stars['stars'] === 0) {
             return;
@@ -93,7 +99,7 @@ final class SendLearningNotifications
             default => $stars['stayed'] ? 'late_stayed' : 'late',
         };
 
-        $this->notifications->send(new Message('learning.lesson_stars', [$card->studentId], [
+        $this->notifications->send(new Message('learning.lesson_stars', [$studentId], [
             'stars' => str_repeat('⭐', $stars['stars']),
             'how' => new Translatable('learning::map.notice.'.$how, ['n' => (int) $stars['late_min']]),
             'subject' => new Localized($card->subjectAr, $card->subjectEn),

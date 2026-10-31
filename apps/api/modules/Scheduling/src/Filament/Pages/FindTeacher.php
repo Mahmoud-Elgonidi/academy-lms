@@ -6,10 +6,12 @@ use BackedEnum;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
@@ -18,6 +20,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -36,17 +39,25 @@ use Modules\People\Contracts\AgeGroup;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Actions\ConfirmBooking;
 use Modules\Scheduling\Actions\EnrollStudent;
+use Modules\Scheduling\Actions\Groups\CreateGroup;
+use Modules\Scheduling\Actions\Groups\JoinGroup;
 use Modules\Scheduling\Actions\PlaceBookingHold;
 use Modules\Scheduling\Contracts\DTOs\EnrollmentTerms;
+use Modules\Scheduling\Contracts\DTOs\GroupJoin;
+use Modules\Scheduling\Contracts\DTOs\NewGroup;
 use Modules\Scheduling\Contracts\DTOs\TeacherSearch;
 use Modules\Scheduling\Domain\Availability\Candidate;
 use Modules\Scheduling\Domain\Availability\ExactCheck;
 use Modules\Scheduling\Domain\Availability\Matcher;
 use Modules\Scheduling\Domain\Availability\StudentPreference;
+use Modules\Scheduling\Domain\Groups\GroupRules;
+use Modules\Scheduling\Domain\Groups\LateJoin;
 use Modules\Scheduling\Domain\Models\BookingHold;
+use Modules\Scheduling\Domain\Models\LessonGroup;
 use Modules\Scheduling\Filament\LiveBoardView;
 use Modules\Scheduling\Queries\FindTeachersQuery;
 use Modules\Scheduling\Queries\FreeTimesQuery;
+use Modules\Scheduling\Queries\Groups\OpenGroups;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Clock;
@@ -61,6 +72,15 @@ use Modules\SharedKernel\Time\Timezones;
  * with a teacher who takes trials, ranked by how often their trials became
  * subscriptions; sales may book it. Other screens (the CRM's lead page) open
  * it filled in (?mode, student, subject, tz, days, from, to, return).
+ *
+ * In group mode (docs/architecture/02, "الحصص الجماعية"; ?mode=group, and
+ * ?group= for one group, from its page): the groups with a free seat of the
+ * subject come first (OpenGroups: the student's level and ages, at the
+ * hours marked), each joined through JoinGroup with its plan, payer and,
+ * for a group that began, what makes up for the lessons it held; below
+ * them, a new group from the free times of the teachers who take groups
+ * (CreateGroup), joined right after. In private mode a teacher's card says
+ * when they have a group with a seat at those hours.
  *
  * @property-read Schema $form
  */
@@ -119,6 +139,9 @@ final class FindTeacher extends Page
     /** Where to go after booking (a path in this panel), when another screen sent us here. */
     public ?string $back = null;
 
+    /** The group another screen sent us to (?group=, "add a student" on its page): shown first, marked. */
+    public ?string $focusGroup = null;
+
     public static function canAccess(): bool
     {
         return Gate::allows(Ability::FindTeachers->value);
@@ -139,18 +162,20 @@ final class FindTeacher extends Page
         $query = request()->query();
         $back = (string) ($query['return'] ?? '');
         $this->back = str_starts_with($back, '/') && ! str_starts_with($back, '//') ? $back : null;
+        $focus = Str::isUuid((string) ($query['group'] ?? '')) ? LessonGroup::query()->whereKey($query['group'])->where('status', '!=', LessonGroup::ENDED)->first() : null;
+        $this->focusGroup = $focus?->id;
         $this->form->fill([
-            'mode' => ($query['mode'] ?? null) === 'trial' ? 'trial' : 'series',
+            'mode' => $focus !== null ? 'group' : (in_array($query['mode'] ?? null, ['trial', 'group'], true) ? $query['mode'] : 'series'),
             'student_id' => $query['student'] ?? null,
             'timezone' => in_array($query['tz'] ?? null, Timezones::all(), true) ? $query['tz'] : app(TenantContext::class)->require()->defaultTimezone,
-            'subject_id' => $query['subject'] ?? null,
+            'subject_id' => $focus?->subject_id ?? $query['subject'] ?? null,
             'gender' => 'any',
             'language' => null,
             'level_id' => null,
             'category_id' => null,
             'age_group' => null,
-            'per_week' => min(5, max(1, (int) ($query['per_week'] ?? 2))),
-            'duration' => 30,
+            'per_week' => min(5, max(1, (int) ($focus?->sessions_per_week ?? $query['per_week'] ?? 2))),
+            'duration' => in_array($focus?->session_minutes, [30, 45, 60], true) ? $focus->session_minutes : 30,
             'start_date' => CarbonImmutable::now()->addDay()->toDateString(),
             'weeks' => 8,
             'min_coverage' => 8,
@@ -179,20 +204,41 @@ final class FindTeacher extends Page
         return ($this->data['mode'] ?? 'series') === 'trial';
     }
 
+    /** Group mode: a seat in a group, or a new group. */
+    public function isGroup(): bool
+    {
+        return ($this->data['mode'] ?? 'series') === 'group';
+    }
+
+    /** The big switch at the top: private, group or a trial. */
+    public function setMode(string $mode): void
+    {
+        if (! in_array($mode, ['series', 'group', 'trial'], true) || ($this->data['mode'] ?? 'series') === $mode) {
+            return;
+        }
+        if ($this->holdBatch !== null) {
+            $this->release();
+        }
+        $this->data['mode'] = $mode;
+        $this->modeChanged($mode);
+    }
+
+    private function modeChanged(?string $mode): void
+    {
+        $this->exact = null;
+        $this->timesTab = $mode === 'trial' ? 'exact' : ($this->timesTab === 'exact' ? 'free' : $this->timesTab);
+        $this->resetResults();
+    }
+
     public function form(Schema $schema): Schema
     {
         $series = fn (Get $get) => $get('mode') !== 'trial';
         $changed = fn () => $this->resetResults();
 
         return $schema->statePath('data')->components([
-            ToggleButtons::make('mode')->label(__('scheduling::find.fields.mode'))->hiddenLabel()->inline()->required()->live()
-                ->options(['series' => __('scheduling::find.modes.series'), 'trial' => __('scheduling::find.modes.trial')])
-                ->icons(['series' => Heroicon::OutlinedCalendarDays, 'trial' => Heroicon::OutlinedSparkles])
-                ->afterStateUpdated(function (?string $state) {
-                    $this->exact = null;
-                    $this->timesTab = $state === 'trial' ? 'exact' : ($this->timesTab === 'exact' ? 'free' : $this->timesTab);
-                    $this->resetResults();
-                }),
+            // Chosen on the big switch above the form (setMode); kept here so the form carries it.
+            Hidden::make('mode')->required()->in(['series', 'group', 'trial'])
+                ->afterStateUpdated(fn (?string $state) => $this->modeChanged($state)),
             Grid::make(['default' => 1, 'md' => 3])->schema([
                 Select::make('student_id')->label(__('scheduling::find.fields.student'))
                     ->options(fn () => self::students())->searchable()->live()
@@ -365,9 +411,9 @@ final class FindTeacher extends Page
             ->join('teacher_subjects as ts', fn ($j) => $j->on('ts.academy_id', '=', 'tp.academy_id')->on('ts.teacher_id', '=', 'tp.user_id'))
             ->where('ts.subject_id', $this->data['subject_id'])
             ->where('tp.status', 'active')->where('u.status', 'active')
-            ->where($this->isTrial() ? 'tp.accepts_trials' : 'tp.accepts_new', true);
+            ->where($this->isTrial() ? 'tp.accepts_trials' : ($this->isGroup() ? 'tp.accepts_groups' : 'tp.accepts_new'), true);
         if (! $teachers->exists()) {
-            return $this->isTrial() ? 'no_trial_teachers' : 'no_teachers';
+            return $this->isTrial() ? 'no_trial_teachers' : ($this->isGroup() ? 'no_group_teachers' : 'no_teachers');
         }
 
         return null;
@@ -403,6 +449,9 @@ final class FindTeacher extends Page
         $shape = $this->isTrial()
             ? __('scheduling::find.bar.trial', ['minutes' => (int) ($this->data['duration'] ?? 30)])
             : __('scheduling::find.bar.shape', ['n' => (int) ($this->data['per_week'] ?? 1), 'minutes' => (int) ($this->data['duration'] ?? 30)]);
+        if ($this->isGroup()) {
+            $shape = __('scheduling::group_screens.find.bar_shape', ['shape' => $shape]);
+        }
         $picked = $this->pickedCandidates();
         $times = $picked !== []
             ? collect($this->inWeekOrder($picked))->map(fn (Candidate $c) => $this->lessonLabel($c))->implode(' + ')
@@ -578,7 +627,7 @@ final class FindTeacher extends Page
         $pref = $search->preference;
 
         return new TeacherSearch($search->subjectId, new StudentPreference($pref->timezone, [], 1, $pref->durationMin, CarbonImmutable::parse($date), 1, 1),
-            $search->gender, $search->language, $search->forTrial, $search->searcherId, $search->levelId, $search->categoryId, $search->ageGroup, $search->forMinor);
+            $search->gender, $search->language, $search->forTrial, $search->searcherId, $search->levelId, $search->categoryId, $search->ageGroup, $search->forMinor, $search->forGroups);
     }
 
     /**
@@ -866,6 +915,325 @@ final class FindTeacher extends Page
             });
     }
 
+    /**
+     * Group mode's first answer: the groups with a free seat of this subject,
+     * for the student's level and ages (OpenGroups), their weekly times on the
+     * student's clock; with hours marked, only those whose every time starts
+     * in one. The group another screen sent us to comes first.
+     *
+     * @return list<array<string, mixed>>
+     */
+    #[Computed]
+    public function openGroups(): array
+    {
+        if (! filled($this->data['subject_id'] ?? null) || ! filled($this->data['timezone'] ?? null) || $this->isTrial()) {
+            return [];
+        }
+        $groups = app(OpenGroups::class)->handle($this->data['subject_id'], ($this->data['level_id'] ?? null) ?: null, ($this->data['age_group'] ?? null) ?: null, $this->data['timezone']);
+        $cells = array_filter($this->cells);
+        if ($cells !== []) {
+            $groups = array_values(array_filter($groups, fn (array $g) => $g['id'] === $this->focusGroup || ($g['times'] !== [] && collect($g['times'])->every(
+                fn (array $t) => in_array((int) substr($t['start'], 0, 2), array_map('intval', $cells[$t['weekday']] ?? []), true),
+            ))));
+        }
+        usort($groups, fn (array $a, array $b) => [$a['id'] !== $this->focusGroup, $a['status'] !== LessonGroup::RUNNING] <=> [$b['id'] !== $this->focusGroup, $b['status'] !== LessonGroup::RUNNING]);
+
+        return $groups;
+    }
+
+    /** A teacher's groups with a seat at the student's hours (the private mode's hint on their card). */
+    public function groupsOf(string $teacherId): array
+    {
+        return array_values(array_filter($this->openGroups, fn (array $g) => $g['teacher_id'] === $teacherId));
+    }
+
+    /** "انضم" on a group's card: the join step, once a student is chosen and the viewer may enrol. */
+    public function join(string $groupId): void
+    {
+        if (! ($this->data['student_id'] ?? null)) {
+            Notification::make()->warning()->title(__('scheduling::group_screens.find.join.student_first'))->send();
+
+            return;
+        }
+        if (! Gate::allows(Ability::ManageSessions->value)) {
+            Notification::make()->danger()->title(__('scheduling::find.errors.cannot_book'))->send();
+
+            return;
+        }
+        $this->mountAction('joinGroup', ['group' => $groupId]);
+    }
+
+    /** The bar's button in group mode: a new group at the times picked. */
+    public function startGroup(): void
+    {
+        if ($this->pickedCandidates() === [] || $this->pickedTeacher === null) {
+            return;
+        }
+        if (! Gate::allows(Ability::ManageSessions->value)) {
+            Notification::make()->danger()->title(__('scheduling::find.errors.cannot_book'))->send();
+
+            return;
+        }
+        $this->mountAction('createGroup');
+    }
+
+    /** The most students the picked teacher takes in a group. */
+    public function pickedTeacherMax(): int
+    {
+        $teacher = collect($this->results)->first(fn (array $r) => $r['teacher']->id === $this->pickedTeacher)['teacher'] ?? null;
+
+        return (int) ($teacher->max_group_size ?? 0) ?: (int) (app(PeopleApi::class)->groupCapacity((string) $this->pickedTeacher) ?? GroupRules::MIN_SIZE);
+    }
+
+    /**
+     * A new group with the picked teacher at the picked weekly times: its
+     * seats (the teacher's most unless fewer), the students it waits for,
+     * its level and ages, then the student (when chosen) joins it at once.
+     */
+    public function createGroupAction(): Action
+    {
+        $w = 'scheduling::group_screens.find.create.';
+
+        return Action::make('createGroup')
+            ->modalHeading(__($w.'title'))
+            ->modalIcon(Heroicon::OutlinedUserGroup)
+            ->modalDescription(fn () => __($w.'intro', [
+                'teacher' => collect($this->results)->first(fn (array $r) => $r['teacher']->id === $this->pickedTeacher)['teacher']->name ?? '',
+                'times' => collect($this->inWeekOrder($this->pickedCandidates()))->map(fn (Candidate $c) => $this->lessonLabel($c))->implode(' + '),
+                'minutes' => (int) $this->data['duration'],
+            ]))
+            ->modalWidth('lg')
+            ->modalSubmitActionLabel(fn () => filled($this->data['student_id'] ?? null) ? __($w.'submit_join') : __($w.'submit'))
+            ->fillForm(fn () => [
+                'capacity' => $this->pickedTeacherMax(),
+                'min_to_start' => null,
+                'level_id' => ($this->data['level_id'] ?? null) ?: null,
+                'age_group' => ($this->data['age_group'] ?? null) ?: null,
+                'name' => null,
+            ])
+            ->schema(fn () => [
+                Grid::make(['default' => 1, 'sm' => 2])->schema([
+                    TextInput::make('capacity')->label(__($w.'capacity'))->numeric()->integer()->required()
+                        ->minValue(GroupRules::MIN_SIZE)->maxValue(fn () => $this->pickedTeacherMax())->suffix(__('scheduling::group_screens.details.seats.students'))
+                        ->helperText(fn () => __($w.'capacity_hint', ['max' => $this->pickedTeacherMax()])),
+                    TextInput::make('min_to_start')->label(__($w.'min'))->placeholder(__($w.'first'))->numeric()->integer()->minValue(1)
+                        ->maxValue(fn (Get $get) => max(1, (int) $get('capacity')))->suffix(__('scheduling::group_screens.details.seats.students'))
+                        ->helperText(__($w.'min_hint')),
+                    Select::make('level_id')->label(__($w.'level'))->placeholder(__($w.'any_level'))->native(false)
+                        ->options(fn () => app(CatalogApi::class)->levels((string) $this->data['subject_id']))
+                        ->visible(fn () => app(CatalogApi::class)->levels((string) $this->data['subject_id']) !== []),
+                    Select::make('age_group')->label(__($w.'age'))->placeholder(__($w.'first_age'))->native(false)->options(AgeGroup::options()),
+                ]),
+                TextInput::make('name')->label(__($w.'name'))->placeholder(__($w.'name_hint'))->maxLength(120),
+            ])
+            ->action(function (array $data) {
+                $times = array_map(fn (Candidate $c) => ['weekday' => $c->teacherWeekday, 'start' => $c->teacherTime], $this->pickedCandidates());
+                $group = app(CreateGroup::class)->handle(new NewGroup(
+                    teacherId: (string) $this->pickedTeacher,
+                    subjectId: (string) $this->data['subject_id'],
+                    sessionMinutes: (int) $this->data['duration'],
+                    times: $times,
+                    levelId: ($data['level_id'] ?? null) ?: null,
+                    ageGroup: ($data['age_group'] ?? null) ?: null,
+                    capacity: (int) $data['capacity'],
+                    minToStart: ($data['min_to_start'] ?? null) === null || $data['min_to_start'] === '' ? null : (int) $data['min_to_start'],
+                    startsOn: CarbonImmutable::parse($this->data['start_date']),
+                    name: $data['name'] ?? null,
+                ), (string) auth()->id());
+                $this->bookingDone();
+                $this->focusGroup = $group->id;
+                unset($this->openGroups);
+
+                Notification::make()->success()->title(__('scheduling::group_screens.find.create.done'))
+                    ->actions([Action::make('open')->label(__('scheduling::group_screens.find.open_group'))->link()->url(GroupDetails::getUrl(['group' => $group->id]))])
+                    ->send();
+                // The student this search is for takes the first seat now.
+                if (filled($this->data['student_id'] ?? null)) {
+                    $this->replaceMountedAction('joinGroup', ['group' => $group->id]);
+                }
+            });
+    }
+
+    /**
+     * The join step: the group and the seat it takes, a group plan of its
+     * shape, who pays and in what region, a coupon, and for a group that
+     * began, the lessons missed (fewer if the office says so) and what makes
+     * up for them; then the first invoice as it will come out.
+     */
+    public function joinGroupAction(): Action
+    {
+        $w = 'scheduling::group_screens.find.join.';
+        $group = fn (array $arguments) => LessonGroup::query()->find($arguments['group'] ?? null);
+        $card = fn (array $arguments) => collect(app(OpenGroups::class)->handle((string) ($group($arguments)?->subject_id), null, null, $this->data['timezone']))
+            ->firstWhere('id', $arguments['group'] ?? null);
+        $plans = fn (array $arguments) => ($g = $group($arguments)) ? $this->groupPlans($g->session_minutes, $g->sessions_per_week) : [];
+        $missed = fn (array $arguments, Get $get) => filled($get('plan_id')) ? (int) $this->joinPreview((string) $arguments['group'], (string) $get('plan_id'))['missed'] : 0;
+        $lessons = fn (array $arguments, Get $get) => LateJoin::lessons($missed($arguments, $get), ($get('late_lessons') ?? '') === '' ? null : (int) $get('late_lessons'));
+
+        return Action::make('joinGroup')
+            ->modalHeading(__($w.'title'))
+            ->modalIcon(Heroicon::OutlinedUserPlus)
+            ->modalWidth('2xl')
+            ->modalContent(fn (array $arguments) => ($c = $card($arguments)) === null ? null : view('scheduling::filament.groups.join-summary', [
+                'g' => $c,
+                'student' => DB::table('users')->where('id', $this->data['student_id'])->value('name'),
+                'subject' => DB::table('subjects')->where('id', $c['subject_id'])->value(app()->getLocale() === 'ar' ? 'name_ar' : 'name_en'),
+                'city' => $this->city($this->data['timezone']),
+            ]))
+            ->modalSubmitActionLabel(__($w.'submit'))
+            ->fillForm(function (array $arguments) use ($plans) {
+                $plan = $plans($arguments)[0]->id ?? null;
+                $preview = $plan === null ? null : $this->joinPreview((string) $arguments['group'], $plan);
+
+                return [
+                    'price_region_id' => collect($this->regions())->first(fn (RegionOption $r) => $r->isDefault)?->id ?? ($this->regions()[0]->id ?? null),
+                    'payer_id' => array_key_first($this->payers()),
+                    'plan_id' => $plan,
+                    'late_join' => $preview['late_join'] ?? null,
+                    'late_lessons' => $preview['missed'] ?? null,
+                ];
+            })
+            ->schema(fn (array $arguments) => [
+                Grid::make(['default' => 1, 'sm' => 2])->schema([
+                    Select::make('price_region_id')->label(__('scheduling::find.enroll.region'))
+                        ->options(fn () => collect($this->regions())->mapWithKeys(fn (RegionOption $r) => [$r->id => $r->name.' · '.$r->currency])->all())
+                        ->required()->native(false)->live(),
+                    Radio::make('payer_id')->label(__('scheduling::find.enroll.payer'))->options(fn () => $this->payers())->required()->live(),
+                ]),
+                Radio::make('plan_id')->label(__($w.'plan'))
+                    ->options(fn (Get $get) => collect($plans($arguments))->mapWithKeys(fn (PlanOption $p) => [$p->id => __('scheduling::find.enroll.plan_option', [
+                        'name' => $p->name,
+                        'price' => isset($p->prices[$get('price_region_id')]) ? $p->prices[$get('price_region_id')]->format() : __('scheduling::find.enroll.no_price'),
+                    ])])->all())
+                    ->descriptions(fn () => collect($plans($arguments))->mapWithKeys(fn (PlanOption $p) => [$p->id => trans_choice($w.'plan_block', $p->sessionsPerBlock, ['n' => $p->sessionsPerBlock])])->all())
+                    ->disableOptionWhen(fn (string $value, Get $get) => ! isset(collect($plans($arguments))->firstWhere('id', $value)?->prices[$get('price_region_id')]))
+                    ->required()->live()
+                    ->afterStateUpdated(function (?string $state, Set $set) use ($arguments) {
+                        // Another block size, another count missed: the academy's choice for it again.
+                        if (filled($state)) {
+                            $preview = $this->joinPreview((string) $arguments['group'], $state);
+                            $set('late_lessons', $preview['missed']);
+                            $set('late_join', $preview['late_join']);
+                        }
+                    })
+                    ->visible(fn () => $plans($arguments) !== []),
+                Text::make(fn () => ($g = $group($arguments)) ? __($w.'no_plans', ['minutes' => $g->session_minutes, 'per_week' => trans_choice('scheduling::find.per_week', $g->sessions_per_week, ['n' => $g->sessions_per_week])])
+                    .(Gate::allows(Ability::ManageBilling->value) ? '' : ' '.__('scheduling::find.enroll.no_plans_ask')) : '')
+                    ->visible(fn () => $plans($arguments) === [])->color('danger'),
+                Actions::make([$this->createPlanAction($group($arguments))])->key('newGroupPlan')
+                    ->visible(fn () => $plans($arguments) === [] && Gate::allows(Ability::ManageBilling->value)),
+
+                // The lessons it already held, and what makes up for them (the academy's choice first).
+                Section::make(fn (Get $get) => trans_choice($w.'late.title', $missed($arguments, $get), ['n' => $missed($arguments, $get)]))
+                    ->description(fn (Get $get) => __($w.'late.hint', ['held' => (int) ($card($arguments)['held'] ?? 0)]))
+                    ->icon(Heroicon::OutlinedClock)->iconColor('warning')
+                    ->compact()->key('lateJoin')
+                    ->visible(fn (Get $get) => $missed($arguments, $get) > 0)
+                    ->schema([
+                        TextInput::make('late_lessons')->label(__($w.'late.lessons'))->helperText(fn (Get $get) => __($w.'late.lessons_hint', ['n' => $missed($arguments, $get)]))
+                            ->numeric()->integer()->minValue(0)->maxValue(fn (Get $get) => $missed($arguments, $get))->live(onBlur: true)
+                            ->extraInputAttributes(['style' => 'max-width: 6rem']),
+                        ViewField::make('late_join')->label(__($w.'late.choice'))
+                            ->view('shared::forms.choice-cards')
+                            ->viewData(fn (Get $get) => ['columns' => 2, 'options' => $this->lateJoinOptions($arguments, $get, $lessons($arguments, $get))])
+                            ->required(fn (Get $get) => $missed($arguments, $get) > 0)->in(LateJoin::CHOICES),
+                    ]),
+
+                TextInput::make('coupon')->label(__('scheduling::find.enroll.coupon'))->maxLength(32)->live(onBlur: true)
+                    ->extraInputAttributes(['dir' => 'ltr', 'style' => 'text-transform: uppercase'])
+                    ->visible(fn () => $plans($arguments) !== []),
+                Text::make(fn (Get $get) => $this->groupQuote($get, $this->discounted($get, $lessons($arguments, $get)))?->couponError ?? '')->color('danger')
+                    ->visible(fn (Get $get) => filled($this->groupQuote($get, $this->discounted($get, $lessons($arguments, $get)))?->couponError)),
+                Text::make(fn (Get $get) => $this->groupQuote($get, $this->discounted($get, $lessons($arguments, $get)))?->couponNote ?? '')->color('warning')
+                    ->visible(fn (Get $get) => filled($this->groupQuote($get, $this->discounted($get, $lessons($arguments, $get)))?->couponNote)),
+                View::make('scheduling::filament.groups.join-quote')
+                    ->viewData(fn (Get $get) => ['quote' => $this->groupQuote($get, $this->discounted($get, $lessons($arguments, $get)))])
+                    ->visible(fn (Get $get) => $this->groupQuote($get, $this->discounted($get, $lessons($arguments, $get))) !== null),
+            ])
+            ->action(function (array $data, array $arguments) {
+                $groupId = (string) ($arguments['group'] ?? '');
+                $late = $this->joinPreview($groupId, (string) $data['plan_id'])['missed'] > 0;
+                $joined = app(JoinGroup::class)->handle($groupId, (string) $this->data['student_id'], new GroupJoin(
+                    planId: (string) $data['plan_id'],
+                    payerId: (string) $data['payer_id'],
+                    priceRegionId: (string) $data['price_region_id'],
+                    couponCode: filled($data['coupon'] ?? null) ? $data['coupon'] : null,
+                    levelId: ($this->data['level_id'] ?? null) ?: null,
+                    lateJoin: $late ? ($data['late_join'] ?? null) : null,
+                    lateJoinLessons: $late && ($data['late_lessons'] ?? '') !== '' ? (int) $data['late_lessons'] : null,
+                ), (string) auth()->id());
+                $this->bookingDone();
+                unset($this->openGroups);
+
+                $student = DB::table('users')->where('id', $this->data['student_id'])->value('name');
+                Notification::make()->success()->persistent()
+                    ->title(__('scheduling::group_screens.find.join.done', ['name' => $student, 'seat' => $joined->seat, 'capacity' => $joined->capacity]))
+                    ->body(implode(' ', array_filter([
+                        __('scheduling::group_screens.find.join.done_invoice', ['number' => $joined->invoice->number, 'total' => $joined->invoice->total->format()]),
+                        $joined->started ? __('scheduling::group_screens.find.join.done_started') : null,
+                        $joined->lateJoinLessons > 0 ? trans_choice('scheduling::group_screens.find.join.done_late.'.$joined->lateJoin, $joined->lateJoinLessons, ['n' => $joined->lateJoinLessons]) : null,
+                    ])))
+                    ->actions(array_values(array_filter([
+                        Gate::allows(Ability::ViewBilling->value) ? Action::make('invoice')->label(__('scheduling::find.enroll.open_invoice'))->button()
+                            ->url(route('filament.academy.resources.invoices.view', ['record' => $joined->invoice->id])) : null,
+                        Action::make('group')->label(__('scheduling::group_screens.find.open_group'))->link()->url(GroupDetails::getUrl(['group' => $groupId])),
+                    ])))
+                    ->send();
+                if ($this->back !== null) {
+                    $this->redirect($this->back, navigate: true);
+                }
+            });
+    }
+
+    /** @var array<string, array{seat: int, capacity: int, missed: int, late_join: ?string}> previews worked out in this request */
+    private array $previews = [];
+
+    /** What joining would bring now (JoinGroup::preview): the seat, the lessons missed on this plan, the academy's choice. */
+    private function joinPreview(string $groupId, string $planId): array
+    {
+        return $this->previews[$groupId.'|'.$planId] ??= app(JoinGroup::class)->preview($groupId, $planId);
+    }
+
+    /** The lessons the first invoice takes off: the missed ones settled on, when the choice is the discount. */
+    private function discounted(Get $get, int $lessons): int
+    {
+        return $get('late_join') === LateJoin::DISCOUNT ? $lessons : 0;
+    }
+
+    /** What the group plan comes to for this student and payer, with the lessons missed taken off. */
+    private function groupQuote(Get $get, int $lateLessons): ?PriceQuote
+    {
+        if (blank($get('plan_id')) || blank($get('payer_id')) || blank($get('price_region_id'))) {
+            return null;
+        }
+        $key = implode('|', [$get('plan_id'), $get('price_region_id'), $get('payer_id'), $this->data['student_id'], $get('coupon'), $lateLessons]);
+
+        return $this->quotes[$key] ??= app(BillingApi::class)->quote($get('plan_id'), $get('price_region_id'), $get('payer_id'), $this->data['student_id'], $get('coupon'), $lateLessons);
+    }
+
+    /**
+     * The four ways to make up for the lessons missed, each with what it
+     * gives here: the discount's amount on the first invoice, the makeup
+     * minutes, or nothing.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function lateJoinOptions(array $arguments, Get $get, int $lessons): array
+    {
+        $w = 'scheduling::group_screens.late_join.';
+        $minutes = (int) (LessonGroup::query()->whereKey($arguments['group'] ?? null)->value('session_minutes') ?? 0);
+        $full = $this->groupQuote($get, 0);
+        $less = $this->groupQuote($get, $lessons);
+        $off = $full !== null && $less !== null && $lessons > 0 ? $full->total->minus($less->total) : null;
+
+        return array_map(fn (array $card) => $card + ['note' => match ($card['value']) {
+            LateJoin::DISCOUNT => $off !== null && ! $off->isZero() ? __($w.'notes.discount', ['amount' => $off->format()]) : null,
+            LateJoin::PRIVATE => $lessons > 0 ? __($w.'notes.private', ['minutes' => $lessons * $minutes, 'days' => LateJoin::MAKEUP_DAYS]) : null,
+            LateJoin::GROUP => $lessons > 0 ? __($w.'notes.group', ['minutes' => $lessons * $minutes, 'days' => LateJoin::MAKEUP_DAYS]) : null,
+            default => null,
+        }], GroupSettings::lateJoinCards());
+    }
+
     public function heldCount(): int
     {
         return $this->holdBatch && Str::isUuid($this->holdBatch) ? BookingHold::query()->where('batch_id', $this->holdBatch)->count() : 0;
@@ -877,12 +1245,14 @@ final class FindTeacher extends Page
      * length and lessons a week, a block of four weeks, a price per region
      * (through BillingApi, so SavePlan's checks and audit), then picked.
      */
-    private function createPlanAction(): Action
+    private function createPlanAction(?LessonGroup $group = null): Action
     {
-        $perWeek = fn () => max(1, count($this->picked));
-        $minutes = fn () => (int) $this->data['duration'];
+        // For a group: a group plan of the group's shape.
+        $perWeek = fn () => $group?->sessions_per_week ?? max(1, count($this->picked));
+        $minutes = fn () => $group?->session_minutes ?? (int) $this->data['duration'];
+        $format = $group === null ? 'private' : 'group';
 
-        return Action::make('createPlan')
+        return Action::make($group === null ? 'createPlan' : 'createGroupPlan')
             ->label(__('scheduling::find.enroll.create_plan'))
             ->icon(Heroicon::OutlinedPlusCircle)
             ->color('primary')
@@ -890,8 +1260,8 @@ final class FindTeacher extends Page
             ->modalDescription(fn () => __('scheduling::find.enroll.create_plan_hint'))
             ->modalWidth('md')
             ->fillForm(fn () => [
-                'name_ar' => __('scheduling::find.enroll.plan_name', ['minutes' => $minutes(), 'per_week' => trans_choice('scheduling::find.per_week', $perWeek(), ['n' => $perWeek()], 'ar')], 'ar'),
-                'name_en' => __('scheduling::find.enroll.plan_name', ['minutes' => $minutes(), 'per_week' => trans_choice('scheduling::find.per_week', $perWeek(), ['n' => $perWeek()], 'en')], 'en'),
+                'name_ar' => ($group ? __('scheduling::group_screens.badge', [], 'ar').' · ' : '').__('scheduling::find.enroll.plan_name', ['minutes' => $minutes(), 'per_week' => trans_choice('scheduling::find.per_week', $perWeek(), ['n' => $perWeek()], 'ar')], 'ar'),
+                'name_en' => ($group ? __('scheduling::group_screens.badge', [], 'en').' · ' : '').__('scheduling::find.enroll.plan_name', ['minutes' => $minutes(), 'per_week' => trans_choice('scheduling::find.per_week', $perWeek(), ['n' => $perWeek()], 'en')], 'en'),
                 'sessions_per_block' => $perWeek() * 4,
             ])
             ->schema(fn () => [
@@ -902,12 +1272,12 @@ final class FindTeacher extends Page
                     ->label(__('scheduling::find.enroll.plan_price', ['region' => $r->name, 'currency' => $r->currency]))
                     ->numeric()->minValue(0)->required($r->isDefault))->all(),
             ])
-            ->action(function (array $data, Set $set) use ($perWeek, $minutes) {
+            ->action(function (array $data, Set $set) use ($perWeek, $minutes, $format) {
                 $prices = collect($this->regions())
                     ->mapWithKeys(fn (RegionOption $r) => [$r->id => (string) ($data['price_'.$r->id] ?? '')])
                     ->filter(fn (string $amount) => $amount !== '')->all();
                 $id = app(BillingApi::class)->createPlan(new NewPlan(
-                    trim($data['name_ar']), trim($data['name_en']), $minutes(), $perWeek(), (int) $data['sessions_per_block'], $prices,
+                    trim($data['name_ar']), trim($data['name_en']), $minutes(), $perWeek(), (int) $data['sessions_per_block'], $prices, $format,
                 ));
                 $set('plan_id', $id);
                 Notification::make()->success()->title(__('scheduling::find.enroll.plan_created'))->send();
@@ -1060,6 +1430,7 @@ final class FindTeacher extends Page
             categoryId: $filters ? (($this->data['category_id'] ?? null) ?: null) : null,
             ageGroup: $filters ? (($this->data['age_group'] ?? null) ?: null) : null,
             forMinor: $this->forMinor(),
+            forGroups: $this->isGroup(),
         );
     }
 
@@ -1129,6 +1500,15 @@ final class FindTeacher extends Page
     public function gridDays(): array
     {
         return app()->getLocale() === 'ar' ? [6, 7, 1, 2, 3, 4, 5] : [1, 2, 3, 4, 5, 6, 7];
+    }
+
+    /** @return list<PlanOption> active group plans of a group's shape: its lesson length and lessons a week */
+    private function groupPlans(int $minutes, int $perWeek): array
+    {
+        return array_values(array_filter(
+            app(BillingApi::class)->planOptions($minutes, 'group'),
+            fn (PlanOption $p) => $p->group && $p->sessionMinutes === $minutes && $p->sessionsPerWeek === $perWeek,
+        ));
     }
 
     /** @return list<PlanOption> active plans with this session length and weekly count */
@@ -1201,7 +1581,7 @@ final class FindTeacher extends Page
         $this->refusal = null;
         $this->exact = null;
         $this->typedNotes = [];
-        unset($this->results, $this->exactAnswer, $this->noTeachers);
+        unset($this->results, $this->exactAnswer, $this->noTeachers, $this->openGroups);
     }
 
     /** @return array<string, string> students of this academy, with their city */

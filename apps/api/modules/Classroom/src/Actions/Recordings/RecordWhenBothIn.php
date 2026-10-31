@@ -12,7 +12,8 @@ use Throwable;
 
 /**
  * When the academy records every lesson: once the teacher and the student
- * are both in the room, recording starts by itself (if everyone agreed). It
+ * (in a group lesson, at least one student) are in the room, recording
+ * starts by itself (if everyone in the lesson agreed). It
  * does not start again in a lesson where someone stopped it.
  */
 final class RecordWhenBothIn
@@ -28,11 +29,11 @@ final class RecordWhenBothIn
             return null;
         }
         $lesson = $this->attendance->lesson($room->session_id);
-        if ($lesson === null || $lesson->studentId === null) {
+        if ($lesson === null || $lesson->studentIds() === []) {
             return null;
         }
         $in = $this->attendance->inClassroom($room->session_id);
-        if (! in_array($lesson->teacherId, $in, true) || ! in_array($lesson->studentId, $in, true)) {
+        if (! in_array($lesson->teacherId, $in, true) || array_intersect($lesson->studentIds(), $in) === []) {
             return null;
         }
         if (Recording::query()->where('session_id', $room->session_id)->where(fn ($q) => $q->whereIn('status', Recording::RUNNING)->orWhereNotNull('stopped_by'))->exists()) {

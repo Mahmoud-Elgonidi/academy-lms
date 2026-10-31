@@ -80,7 +80,7 @@ final class SupportRules
         if ($lesson === null || $lesson->startsAt->lessThan($now->subDays(self::LESSON_PAST_DAYS)) || $lesson->startsAt->greaterThan($now->addDays(self::LESSON_AHEAD_DAYS))) {
             return null;
         }
-        $own = $side === 'teacher' ? $lesson->teacherId === $requesterId : ($studentId !== null && $lesson->studentId === $studentId);
+        $own = $side === 'teacher' ? $lesson->teacherId === $requesterId : $lesson->hasStudent($studentId);
 
         return $own ? $lesson : null;
     }

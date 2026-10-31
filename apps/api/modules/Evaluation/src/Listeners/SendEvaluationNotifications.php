@@ -50,7 +50,7 @@ final class SendEvaluationNotifications
 
     public function ratingDue(LessonRatingDue $event): void
     {
-        $lesson = $this->lessons->find($event->sessionId);
+        $lesson = $this->lessons->find($event->sessionId, $event->studentId);
         if ($lesson === null) {
             return;
         }
@@ -64,7 +64,7 @@ final class SendEvaluationNotifications
         if ($event->stars > self::LOW || ($event->previousStars !== null && $event->previousStars <= self::LOW)) {
             return;
         }
-        $lesson = $this->lessons->find($event->sessionId);
+        $lesson = $this->lessons->find($event->sessionId, $event->studentId ?: null);
         $rating = LessonRating::query()->find($event->ratingId);
         if ($lesson === null || $rating === null) {
             return;

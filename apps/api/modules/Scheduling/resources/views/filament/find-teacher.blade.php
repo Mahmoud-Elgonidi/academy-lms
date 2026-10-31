@@ -7,7 +7,13 @@
     $picked = $this->pickedCandidates();
     $pickedResult = collect($results)->first(fn ($r) => $r['teacher']->id === $this->pickedTeacher);
     $trial = $this->isTrial();
+    $group = $this->isGroup();
+    $mode = $this->data['mode'] ?? 'series';
+    // Group mode puts the open groups second: the steps after it move down one.
+    $n = fn (int $step) => $group && $step >= 2 ? $step + 1 : $step;
+    $gw = 'scheduling::group_screens.find.';
     $ready = $this->ready();
+    $openGroups = $ready && ! $trial ? $this->openGroups : [];
     $tab = $this->timesTab;
     $free = $ready && $tab === 'free' ? $this->freeTimes : null;
     $exactAnswer = $this->exact !== null ? $this->exactAnswer : null;
@@ -26,7 +32,47 @@
 @endphp
 
 <x-filament-panels::page>
+    @include('scheduling::filament.groups.styles')
     <style>
+        /* What is booked: private, group or a trial — the first choice, large. */
+        .ft-mode { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; }
+        .ft-mode button { display: flex; align-items: center; gap: .75rem; text-align: start; padding: .85rem 1rem; border-radius: var(--radius-xl); border: 1.5px solid var(--gray-200); background: white; }
+        .ft-mode button:hover { border-color: var(--primary-300); }
+        .ft-mode button:focus-visible { outline: 2px solid var(--primary-600); outline-offset: 2px; }
+        .ft-mode-ico { width: 2.5rem; height: 2.5rem; border-radius: .75rem; display: grid; place-items: center; flex-shrink: 0; background: var(--gray-100); color: var(--gray-600); }
+        .ft-mode-ico svg { width: 1.35rem; height: 1.35rem; }
+        .ft-mode strong { display: block; font-size: .98rem; }
+        .ft-mode small { display: block; font-size: .76rem; color: var(--gray-500); line-height: 1.4; }
+        .ft-mode button[aria-checked="true"] { border-color: var(--primary-600); background: var(--primary-50); box-shadow: 0 0 0 1px var(--primary-600); }
+        .ft-mode button[aria-checked="true"] .ft-mode-ico { background: var(--primary-600); color: white; }
+        .ft-mode button[data-tone="group"] .ft-mode-ico { background: var(--info-50); color: var(--info-700); }
+        .ft-mode button[data-tone="group"][aria-checked="true"] { border-color: var(--info-600); background: var(--info-50); box-shadow: 0 0 0 1px var(--info-600); }
+        .ft-mode button[data-tone="group"][aria-checked="true"] .ft-mode-ico { background: var(--info-600); color: white; }
+        .dark .ft-mode button { background: var(--gray-900); border-color: var(--gray-700); }
+        .dark .ft-mode button[aria-checked="true"] { background: color-mix(in oklab, var(--primary-500) 14%, var(--gray-900)); border-color: var(--primary-500); }
+        .dark .ft-mode button[data-tone="group"][aria-checked="true"] { background: color-mix(in oklab, var(--info-500) 14%, var(--gray-900)); border-color: var(--info-500); }
+        .dark .ft-mode-ico { background: var(--gray-800); color: var(--gray-300); }
+        .dark .ft-mode button[data-tone="group"] .ft-mode-ico { background: color-mix(in oklab, var(--info-500) 18%, var(--gray-900)); color: var(--info-300); }
+        @media (max-width: 639px) {
+            .ft-mode { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .4rem; }
+            .ft-mode button { flex-direction: column; align-items: center; text-align: center; gap: .35rem; padding: .65rem .4rem; }
+            .ft-mode small { display: none; }
+            .ft-mode strong { font-size: .85rem; }
+        }
+        /* Group mode: the groups with a seat. */
+        .ft-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); gap: .8rem; }
+        .ft-or { display: flex; align-items: center; gap: .75rem; color: var(--gray-500); font-size: .8125rem; font-weight: 600; }
+        .ft-or::before, .ft-or::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
+        .dark .ft-or::before, .dark .ft-or::after { background: var(--gray-800); }
+        .ft-hint-group { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-size: .8125rem; padding: .5rem .7rem; border-radius: var(--radius-lg);
+            background: var(--info-50); color: var(--info-800); }
+        .ft-hint-group svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+        .ft-hint-group button { font-weight: 700; color: var(--info-700); text-decoration: underline; text-underline-offset: 2px; }
+        .dark .ft-hint-group { background: color-mix(in oklab, var(--info-500) 14%, var(--gray-900)); color: var(--info-200); }
+        .dark .ft-hint-group button { color: var(--info-300); }
+        .ft-teacher[data-group] .ft-avatar { background: var(--info-50); color: var(--info-700); }
+        .dark .ft-teacher[data-group] .ft-avatar { background: color-mix(in oklab, var(--info-500) 18%, var(--gray-900)); color: var(--info-300); }
+
         .ft { display: flex; flex-direction: column; gap: 1.5rem; max-width: 72rem; margin-inline: auto; width: 100%; padding-bottom: 1rem; }
         .ft-step { display: flex; flex-direction: column; gap: .75rem; min-width: 0; scroll-margin-top: 5rem; }
         .ft-step-head { display: flex; align-items: center; gap: .75rem; }
@@ -248,6 +294,17 @@
     </style>
 
     <div class="ft">
+        {{-- What is booked: a private course, a seat in a group, or a trial. --}}
+        <div class="ft-mode" role="radiogroup" aria-label="{{ __($gw.'mode.label') }}">
+            @foreach (['series' => ['heroicon-o-user', null], 'group' => ['heroicon-o-user-group', 'group'], 'trial' => ['heroicon-o-sparkles', null]] as $m => [$icon, $tone])
+                <button type="button" role="radio" aria-checked="{{ $mode === $m ? 'true' : 'false' }}" wire:click="setMode('{{ $m }}')" wire:key="mode-{{ $m }}"
+                    @if ($tone) data-tone="{{ $tone }}" @endif>
+                    <span class="ft-mode-ico" aria-hidden="true"><x-filament::icon :icon="$icon" /></span>
+                    <span><strong>{{ __($gw.'mode.'.$m.'.title') }}</strong><small>{{ __($gw.'mode.'.$m.'.line') }}</small></span>
+                </button>
+            @endforeach
+        </div>
+
         {{-- 1. The student and the subject. --}}
         <section class="ft-step" data-state="{{ $ready ? 'done' : 'now' }}" aria-labelledby="ft-step-1">
             <div class="ft-step-head">
@@ -261,12 +318,70 @@
         </section>
 
         {{-- 2. The times: where teachers are free now, the student's own hours, or one exact time. --}}
-        <section class="ft-step" data-state="{{ ! $ready ? 'later' : ($this->searched ? 'done' : 'now') }}" aria-labelledby="ft-step-2">
-            <div class="ft-head-row">
+        @if ($group)
+            {{-- 2 (group mode). The groups with a free seat, first. --}}
+            <section class="ft-step" id="ft-groups" data-state="{{ $ready ? 'now' : 'later' }}" aria-labelledby="ft-step-groups"
+                x-data x-init="@js($this->focusGroup !== null) && $nextTick(() => document.querySelector('[data-focus]')?.scrollIntoView({ block: 'center' }))">
                 <div class="ft-step-head">
                     <span class="ft-num">2</span>
                     <div>
-                        <h2 id="ft-step-2">{{ __('scheduling::find.steps.times') }}</h2>
+                        <h2 id="ft-step-groups">{{ __($gw.'open.title') }}</h2>
+                        <p class="ft-muted">{{ $ready ? __($gw.'open.hint', ['city' => $this->city($tz)]) : __('scheduling::find.free.wait.title') }}</p>
+                    </div>
+                </div>
+                @if (! $ready)
+                    <div class="ft-card ft-reason">
+                        <x-filament::icon icon="heroicon-o-user-group" style="width: 1.75rem; height: 1.75rem; color: var(--gray-400)" />
+                        <strong>{{ __($gw.'open.wait') }}</strong>
+                    </div>
+                @elseif ($openGroups === [])
+                    <div class="ft-card ft-reason" role="status">
+                        <x-filament::icon icon="heroicon-o-user-group" style="width: 1.75rem; height: 1.75rem; color: var(--gray-400)" />
+                        <strong>{{ __($gw.'open.none.title') }}</strong>
+                        <p class="ft-muted">{{ array_filter($this->cells) !== [] ? __($gw.'open.none.hours') : __($gw.'open.none.hint') }}</p>
+                    </div>
+                @else
+                    <div class="ft-groups lms-stagger">
+                        @foreach ($openGroups as $og)
+                            <article class="gr-card lms-lift" wire:key="og-{{ $og['id'] }}" data-status="{{ $og['status'] }}" @if ($og['id'] === $this->focusGroup) data-focus @endif>
+                                <div class="gr-card-head">
+                                    <div style="display: flex; gap: .65rem; min-width: 0">
+                                        <span class="gr-avatar" aria-hidden="true">{{ mb_substr(preg_replace('/^(أ\.|د\.)\s*/u', '', $og['teacher_name']), 0, 1) }}</span>
+                                        <div style="min-width: 0">
+                                            <h3 class="gr-card-title">{{ $og['teacher_name'] }}</h3>
+                                            <p class="gr-card-sub">{{ collect([$og['name'], \Modules\Scheduling\Filament\GroupView::shape($og['minutes'], $og['per_week']), $og['age_group'] ? \Modules\People\Contracts\AgeGroup::tryFrom($og['age_group'])?->label() : null])->filter()->implode(' · ') }}</p>
+                                        </div>
+                                    </div>
+                                    <span class="gr-pill" data-tone="{{ \Modules\Scheduling\Filament\GroupView::tone($og['status']) }}">{{ \Modules\Scheduling\Filament\GroupView::status($og['status']) }}</span>
+                                </div>
+                                <div class="gr-times"><x-filament::icon icon="heroicon-m-clock" /><span>{{ \Modules\Scheduling\Filament\GroupView::timesLine($og['times']) }}</span></div>
+                                <div class="gr-meta">
+                                    @if ($og['status'] === 'running')
+                                        <span>{{ trans_choice('scheduling::group_screens.card.held', $og['held'], ['n' => $og['held']]) }}</span>
+                                        @if ($og['next'])<span><x-filament::icon icon="heroicon-m-calendar" />{{ __('scheduling::group_screens.card.next') }} <strong>{{ $og['next']['label'] }}</strong></span>@endif
+                                    @else
+                                        <span>{{ __('scheduling::group_screens.card.forming_line') }}</span>
+                                    @endif
+                                </div>
+                                <div class="gr-foot">
+                                    @include('scheduling::filament.groups.seats', ['taken' => $og['taken'], 'capacity' => $og['capacity']])
+                                    <x-filament::button size="sm" icon="heroicon-m-user-plus" wire:click="join('{{ $og['id'] }}')" color="info">{{ __($gw.'open.join') }}</x-filament::button>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
+
+            <div class="ft-or" role="separator">{{ __($gw.'or_new') }}</div>
+        @endif
+
+        <section class="ft-step" data-state="{{ ! $ready ? 'later' : ($this->searched ? 'done' : 'now') }}" aria-labelledby="ft-step-2">
+            <div class="ft-head-row">
+                <div class="ft-step-head">
+                    <span class="ft-num">{{ $n(2) }}</span>
+                    <div>
+                        <h2 id="ft-step-2">{{ $group ? __($gw.'steps.times') : __('scheduling::find.steps.times') }}</h2>
                         <p class="ft-muted">{{ __('scheduling::find.grid.clock', ['city' => $this->city($tz)]) }}</p>
                     </div>
                 </div>
@@ -392,9 +507,9 @@
         <section class="ft-step" id="ft-teachers" data-state="{{ $this->searched ? 'now' : 'later' }}" aria-labelledby="ft-step-3"
             x-data x-on:ft-results.window="$nextTick(() => $el.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }))">
             <div class="ft-step-head">
-                <span class="ft-num">3</span>
+                <span class="ft-num">{{ $n(3) }}</span>
                 <div>
-                    <h2 id="ft-step-3">{{ __('scheduling::find.steps.teachers') }}</h2>
+                    <h2 id="ft-step-3">{{ $group ? __($gw.'steps.teachers') : __('scheduling::find.steps.teachers') }}</h2>
                     @if ($this->searched && $results !== [])
                         <p class="ft-muted">
                             @if ($exactAt) {{ __('scheduling::find.exact.searched', ['at' => $exactAt]) }} · @endif
@@ -434,7 +549,7 @@
                 <div class="ft-list lms-stagger">
                     @foreach ($results as $result)
                         @php $t = $result['teacher']; @endphp
-                        <article class="ft-card ft-teacher lms-lift" wire:key="t-{{ $t->id }}" data-picked="{{ $this->pickedTeacher === $t->id ? 'true' : 'false' }}">
+                        <article class="ft-card ft-teacher lms-lift" wire:key="t-{{ $t->id }}" data-picked="{{ $this->pickedTeacher === $t->id ? 'true' : 'false' }}" @if ($group) data-group @endif>
                             <div class="ft-teacher-head">
                                 <span class="ft-avatar">{{ mb_substr(preg_replace('/^(أ\.|د\.)\s*/u', '', $t->name), 0, 1) }}</span>
                                 <div>
@@ -445,6 +560,9 @@
                                         @if ($t->dialect) · {{ $t->dialect }} @endif
                                         · {{ $this->city($t->timezone ?? 'UTC') }}
                                     </p>
+                                    @if ($group && ($t->max_group_size ?? null))
+                                        <span class="gr-badge" style="margin-top: .3rem"><x-filament::icon icon="heroicon-m-user-group" class="gr-badge-ico" />{{ trans_choice($gw.'teacher_max', (int) $t->max_group_size, ['n' => (int) $t->max_group_size]) }}</span>
+                                    @endif
                                 </div>
                                 <div class="ft-stats">
                                     <div><small>{{ __('scheduling::find.fit') }}</small><strong>{{ $result['score'] }}%</strong></div>
@@ -455,6 +573,15 @@
                                     @endif
                                 </div>
                             </div>
+
+                            @if (! $group && ! $trial && ($theirs = $this->groupsOf($t->id)) !== [])
+                                {{-- The same teacher has a group with a seat at these hours: a cheaper way in. --}}
+                                <div class="ft-hint-group" role="note" wire:key="hint-{{ $t->id }}">
+                                    <x-filament::icon icon="heroicon-m-user-group" />
+                                    <span>{{ trans_choice($gw.'hint', count($theirs), ['n' => count($theirs), 'times' => \Modules\Scheduling\Filament\GroupView::timesLine($theirs[0]['times'])]) }}</span>
+                                    <button type="button" wire:click="setMode('group')">{{ __($gw.'hint_open') }}</button>
+                                </div>
+                            @endif
 
                             @if ($result['pattern'] && ! $trial)
                                 <div class="ft-pattern">
@@ -561,6 +688,8 @@
                 <x-filament::button x-data x-on:click="$dispatch('ft-exact-search')" icon="heroicon-m-magnifying-glass" :disabled="! $ready">{{ __('scheduling::find.exact.search') }}</x-filament::button>
             @elseif ($step === 'search')
                 <x-filament::button wire:click="search" icon="heroicon-m-magnifying-glass" :disabled="! $ready">{{ __('scheduling::find.search') }}</x-filament::button>
+            @elseif ($step === 'hold' && $group)
+                <x-filament::button wire:click="startGroup" icon="heroicon-m-user-group" color="info">{{ __($gw.'create.bar') }}</x-filament::button>
             @elseif ($step === 'hold')
                 <x-filament::button wire:click="hold" icon="heroicon-m-lock-closed">{{ __('scheduling::find.hold', ['min' => \Modules\Scheduling\Domain\Models\BookingHold::MINUTES]) }}</x-filament::button>
             @else

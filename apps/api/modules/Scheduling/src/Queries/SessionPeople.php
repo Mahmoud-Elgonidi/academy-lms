@@ -7,34 +7,65 @@ use Illuminate\Support\Facades\DB;
 use Modules\Communication\Contracts\DTOs\Localized;
 use Modules\People\Contracts\PeopleApi;
 
-/** Who a session concerns and how to name it in a message: the student, their guardians, the teacher, the subject. */
+/**
+ * Who a session concerns and how to name it in a message: the student, their
+ * guardians, the teacher, the subject. A group lesson has a student per
+ * seat: of() names one (the one asked for, else the first), and seats()
+ * gives each seat on its own, so a family only ever reads its own child's
+ * name (docs/architecture/02, "الحصص الجماعية": no classmate's details).
+ */
 final class SessionPeople
 {
     public function __construct(private readonly PeopleApi $people) {}
 
-    /** @return array{session_id: string, starts_at: CarbonImmutable, teacher_id: string, teacher: string, student_id: ?string, student: string, subject: Localized, family: list<string>}|null */
-    public function of(string $sessionId): ?array
+    /** @return array{session_id: string, starts_at: CarbonImmutable, teacher_id: string, teacher: string, student_id: ?string, student: string, subject: Localized, family: list<string>, group: bool}|null */
+    public function of(string $sessionId, ?string $studentId = null): ?array
     {
-        $row = DB::table('sessions as s')
+        return $this->rows($sessionId, $studentId, true)[0] ?? null;
+    }
+
+    /**
+     * One entry per student seated in the lesson (one for a one-to-one lesson), each with only that student's family.
+     *
+     * @return list<array{session_id: string, starts_at: CarbonImmutable, teacher_id: string, teacher: string, student_id: ?string, student: string, subject: Localized, family: list<string>, group: bool}>
+     */
+    public function seats(string $sessionId): array
+    {
+        return $this->rows($sessionId, null, false);
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function rows(string $sessionId, ?string $studentId, bool $one): array
+    {
+        $lesson = DB::table('sessions as s')
             ->join('users as t', fn ($j) => $j->on('t.academy_id', '=', 's.academy_id')->on('t.id', '=', 's.teacher_id'))
             ->join('subjects as su', fn ($j) => $j->on('su.academy_id', '=', 's.academy_id')->on('su.id', '=', 's.subject_id'))
-            ->leftJoin('session_participants as p', fn ($j) => $j->on('p.academy_id', '=', 's.academy_id')->on('p.session_id', '=', 's.id')->where('p.role', 'student'))
-            ->leftJoin('users as st', fn ($j) => $j->on('st.academy_id', '=', 'p.academy_id')->on('st.id', '=', 'p.user_id'))
             ->where('s.id', $sessionId)
-            ->first(['s.id', 's.starts_at', 's.teacher_id', 't.name as teacher', 'p.user_id as student_id', 'st.name as student', 'su.name_ar', 'su.name_en']);
-        if ($row === null) {
-            return null;
+            ->first(['s.id', 's.starts_at', 's.teacher_id', 's.group_id', 't.name as teacher', 'su.name_ar', 'su.name_en']);
+        if ($lesson === null) {
+            return [];
+        }
+        $students = DB::table('session_participants as p')
+            ->join('users as st', fn ($j) => $j->on('st.academy_id', '=', 'p.academy_id')->on('st.id', '=', 'p.user_id'))
+            ->where('p.session_id', $sessionId)->where('p.role', 'student')
+            ->when($studentId, fn ($q) => $q->where('p.user_id', $studentId))
+            ->orderBy('p.user_id')
+            ->when($one, fn ($q) => $q->limit(1))
+            ->get(['p.user_id', 'st.name']);
+        if ($students->isEmpty() && $one) {
+            $students = collect([(object) ['user_id' => null, 'name' => '']]);
         }
 
-        return [
-            'session_id' => $row->id,
-            'starts_at' => CarbonImmutable::parse($row->starts_at),
-            'teacher_id' => $row->teacher_id,
-            'teacher' => $row->teacher,
-            'student_id' => $row->student_id,
-            'student' => (string) $row->student,
-            'subject' => new Localized($row->name_ar, $row->name_en),
-            'family' => $row->student_id === null ? [] : [$row->student_id, ...$this->people->guardiansOf($row->student_id)],
-        ];
+        return $students->map(fn (object $st) => [
+            'session_id' => $lesson->id,
+            'starts_at' => CarbonImmutable::parse($lesson->starts_at),
+            'teacher_id' => $lesson->teacher_id,
+            'teacher' => $lesson->teacher,
+            'student_id' => $st->user_id,
+            'student' => (string) $st->name,
+            'subject' => new Localized($lesson->name_ar, $lesson->name_en),
+            'family' => $st->user_id === null ? [] : [$st->user_id, ...$this->people->guardiansOf($st->user_id)],
+            'group' => $lesson->group_id !== null,
+        ])->values()->all();
     }
 }

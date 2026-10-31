@@ -82,8 +82,6 @@ final class PayrollMonth
             ->leftJoin('teacher_earnings as later', fn ($j) => $j->on('later.academy_id', '=', 'e.academy_id')->on('later.reverses_id', '=', 'e.id')
                 ->where('later.period', '<=', $month->format('Y-m-d')))
             ->leftJoin('sessions as s', fn ($j) => $j->on('s.academy_id', '=', 'e.academy_id')->on('s.id', '=', 'e.session_id'))
-            ->leftJoin('session_participants as p', fn ($j) => $j->on('p.academy_id', '=', 's.academy_id')->on('p.session_id', '=', 's.id')->where('p.role', 'student'))
-            ->leftJoin('users as st', fn ($j) => $j->on('st.academy_id', '=', 'p.academy_id')->on('st.id', '=', 'p.user_id'))
             ->leftJoin('subjects as sub', fn ($j) => $j->on('sub.academy_id', '=', 'e.academy_id')->on('sub.id', '=', 'e.subject_id'))
             ->leftJoin('subjects as osub', fn ($j) => $j->on('osub.academy_id', '=', 'o.academy_id')->on('osub.id', '=', 'o.subject_id'))
             ->whereDate('e.period', $month->format('Y-m-d'))
@@ -94,7 +92,11 @@ final class PayrollMonth
                 'e.amount_minor', 'e.currency', 'e.note', 'e.created_at', 'e.period',
                 'o.kind as reversed_kind', 'o.lesson_on as reversed_lesson_on', 'o.outcome as reversed_outcome', 'o.session_type as reversed_type', 'o.booked_min as reversed_booked_min',
                 'o.pay_pct as reversed_pay_pct', 'o.note as reversed_note', 'o.period as reversed_period',
-                'later.id as reversed_by', 's.starts_at', 's.status as status_now', 'st.name as student',
+                'later.id as reversed_by', 's.starts_at', 's.status as status_now',
+                // One row a line: a group lesson's students as its first and how many more.
+                DB::raw("(select u.name from session_participants p join users u on u.academy_id = p.academy_id and u.id = p.user_id
+                    where p.academy_id = s.academy_id and p.session_id = s.id and p.role = 'student' order by u.name limit 1) as student"),
+                DB::raw("(select count(*) from session_participants p where p.academy_id = s.academy_id and p.session_id = s.id and p.role = 'student') as students"),
                 DB::raw('coalesce(sub.name_ar, osub.name_ar) as subject_ar'), DB::raw('coalesce(sub.name_en, osub.name_en) as subject_en'),
             ]);
 
@@ -108,7 +110,7 @@ final class PayrollMonth
                     'session_id' => $r->session_id,
                     'starts_at' => $r->starts_at ? CarbonImmutable::parse($r->starts_at) : null,
                     'lesson_on' => CarbonImmutable::parse($r->lesson_on ?? $r->reversed_lesson_on),
-                    'student' => $r->student,
+                    'student' => (int) $r->students > 1 ? $r->student.' +'.((int) $r->students - 1) : $r->student,
                     'subject_ar' => $r->subject_ar,
                     'subject_en' => $r->subject_en,
                     'amount_minor' => 0,

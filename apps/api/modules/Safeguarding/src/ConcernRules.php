@@ -87,7 +87,7 @@ final class ConcernRules
         $own = match ($side) {
             'teacher' => $lesson->teacherId === $reporterId,
             'staff' => true,
-            default => $studentId !== null && $lesson->studentId === $studentId,
+            default => $lesson->hasStudent($studentId),
         };
 
         return $own ? $lesson : null;

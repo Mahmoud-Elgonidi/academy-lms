@@ -13,6 +13,10 @@ use Modules\Learning\Queries\SessionFacts;
  * for nothing, and so does a trial lesson: its teacher assesses it in the
  * CRM instead. Due report_due_hours after the lesson ends, or after now when
  * the lesson was closed late (a review decided days later). Idempotent.
+ *
+ * A group lesson asks for one report per student in it (docs/architecture/02,
+ * "الحصص الجماعية"): a lesson report for each who attended, an absence
+ * note for each who did not; a seat excused or owed a makeup asks nothing.
  */
 final class OpenSessionReport
 {
@@ -31,16 +35,33 @@ final class OpenSessionReport
         }
 
         $ended = CarbonImmutable::parse($session->ends_at);
-        $from = $ended->max(CarbonImmutable::now());
-
-        return SessionReport::query()->firstOrCreate(['session_id' => $sessionId], [
-            'enrollment_id' => $session->enrollment_id,
+        $due = $ended->max(CarbonImmutable::now())->addHours(LearningSettings::current()->report_due_hours);
+        $open = fn (string $studentId, ?string $enrollmentId, string $kind) => SessionReport::query()->firstOrCreate(['session_id' => $sessionId, 'student_id' => $studentId], [
+            'enrollment_id' => $enrollmentId,
             'teacher_id' => $session->teacher_id,
-            'student_id' => $session->student_id,
             'kind' => $kind,
             'status' => 'due',
             'session_starts_at' => CarbonImmutable::parse($session->starts_at),
-            'due_at' => $from->addHours(LearningSettings::current()->report_due_hours),
+            'due_at' => $due,
         ]);
+
+        if ($session->group_id === null) {
+            return $open($session->student_id, $session->enrollment_id, $kind);
+        }
+
+        $first = null;
+        foreach ($this->sessions->seats($sessionId) as $seat) {
+            $seatKind = match ($seat->outcome) {
+                'attended' => 'lesson',
+                'absent' => 'absence',
+                default => null,
+            };
+            if ($seatKind !== null) {
+                $report = $open($seat->student_id, $seat->enrollment_id, $seatKind);
+                $first ??= $report;
+            }
+        }
+
+        return $first;
     }
 }

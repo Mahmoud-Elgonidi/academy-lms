@@ -4,6 +4,7 @@ namespace Modules\Scheduling\Actions;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\Scheduling\Actions\Groups\GroupOutcomes;
 use Modules\Scheduling\Actions\Policy\PolicyDecider;
 use Modules\Scheduling\Actions\Policy\RecordPolicyDecision;
 use Modules\Scheduling\Contracts\Events\SessionFinalized;
@@ -15,6 +16,7 @@ use Modules\Scheduling\Domain\LessonChanged;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionEvent;
+use Modules\Scheduling\Domain\Models\SessionParticipant;
 use Modules\Scheduling\Domain\Policy\PolicyEvent;
 use Modules\Scheduling\Queries\TaughtMinutes;
 
@@ -25,6 +27,14 @@ use Modules\Scheduling\Queries\TaughtMinutes;
  *  - teacher never joined by T+10: teacher absent (student in) or needs review (nobody in);
  *  - teacher in, student never joined by the end of the wait: student absent;
  *  - ten minutes after the end: completed if 75% was taught, else needs review.
+ *
+ * A group lesson (docs/architecture/02, "الحصص الجماعية") is decided seat
+ * by seat: the teacher absent makes it the teacher's absence and owes every
+ * student a makeup; with the teacher in and nobody in by the end of the
+ * wait, every seat is absent; otherwise at the end each student who never
+ * came is absent and each who came attended when they were taught the
+ * share (their own minutes with the teacher), the lesson going to review
+ * when someone in it was taught less.
  */
 final class ApplyAttendanceDeadlines
 {
@@ -35,6 +45,7 @@ final class ApplyAttendanceDeadlines
         private readonly PolicyDecider $decider,
         private readonly RecordPolicyDecision $record,
         private readonly TaughtMinutes $taught,
+        private readonly GroupOutcomes $groups,
     ) {}
 
     /** @return int how many sessions changed */
@@ -64,6 +75,9 @@ final class ApplyAttendanceDeadlines
     /** @return int 1 when the lesson changed */
     private function deadline(Session $session, CarbonImmutable $now, AttendancePolicy $policy): int
     {
+        if ($session->isGroup()) {
+            return $this->groupDeadline($session, $now, $policy);
+        }
         $teacher = $session->participant(ParticipantRole::Teacher);
         $student = $session->participant(ParticipantRole::Student);
         $teacherIn = $teacher?->first_join_at !== null;
@@ -90,6 +104,54 @@ final class ApplyAttendanceDeadlines
             $taught >= $policy->completionShare * $session->durationMinutes()
                 ? $this->complete($session, (int) $taught, $now)
                 : $this->flagForReview->handle($session, 'short_delivery', null, null);
+
+            return 1;
+        }
+
+        return 0;
+    }
+
+    /** @return int 1 when the lesson changed */
+    private function groupDeadline(Session $session, CarbonImmutable $now, AttendancePolicy $policy): int
+    {
+        $teacher = $session->participant(ParticipantRole::Teacher);
+        $seats = $session->participants->filter(fn (SessionParticipant $p) => $p->role === ParticipantRole::Student && $p->is_active && $p->outcome === null && $p->enrollment_id !== null);
+        $teacherIn = $teacher?->first_join_at !== null;
+        $anyIn = $seats->contains(fn (SessionParticipant $p) => $p->first_join_at !== null);
+
+        if (! $teacherIn && $now->greaterThanOrEqualTo($session->starts_at->addMinutes($policy->teacherAbsentAfterMin))) {
+            $anyIn ? $this->groups->teacherAbsent($session, $now) : $this->flagForReview->handle($session, 'nobody_joined', null, null);
+
+            return 1;
+        }
+
+        if ($teacherIn && ! $anyIn && $now->greaterThanOrEqualTo($session->starts_at->addMinutes($policy->studentWaitMin($session->durationMinutes())))) {
+            $this->groups->apply($session, $seats->mapWithKeys(fn (SessionParticipant $p) => [$p->user_id => GroupOutcomes::ABSENT])->all(), null, 'system', $now);
+
+            return 1;
+        }
+
+        if ($teacherIn && $anyIn && $now->greaterThanOrEqualTo($session->ends_at->addMinutes($policy->finalizeAfterEndMin))) {
+            $outcomes = [];
+            $minutes = [];
+            foreach ($seats as $seat) {
+                if ($seat->first_join_at === null) {
+                    $outcomes[$seat->user_id] = GroupOutcomes::ABSENT;
+
+                    continue;
+                }
+                $taught = $this->taught->hasSegments($session->id, $seat->user_id)
+                    ? $this->taught->of($session->id, $session->starts_at, $session->ends_at, $now, $seat->user_id)
+                    : (int) max(0, $teacher->first_join_at->max($seat->first_join_at)->max($session->starts_at)->diffInMinutes($session->ends_at, false));
+                if ($taught < $policy->completionShare * $session->durationMinutes()) {
+                    $this->flagForReview->handle($session, 'short_delivery', null, null);
+
+                    return 1;
+                }
+                $outcomes[$seat->user_id] = GroupOutcomes::ATTENDED;
+                $minutes[] = (int) $taught;
+            }
+            $this->groups->apply($session, $outcomes, null, 'system', $now, ['taught_min' => $minutes === [] ? null : max($minutes)]);
 
             return 1;
         }

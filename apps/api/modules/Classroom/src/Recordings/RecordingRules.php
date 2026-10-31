@@ -11,7 +11,7 @@ use Modules\Scheduling\Contracts\DTOs\LessonCard;
 /**
  * Who has to agree before a lesson is recorded, and who may agree for whom
  * (docs/architecture/02, "تسجيل الحصص"): everyone the lesson records, its
- * teacher and its student. A teacher agrees for themself (or the office
+ * teacher and its student (in a group lesson every student seated in it). A teacher agrees for themself (or the office
  * records it from their contract); an adult student for themself; a child
  * (one whose account needs a guardian's consent) only through a guardian.
  */
@@ -27,8 +27,8 @@ final class RecordingRules
     public function people(LessonCard $lesson): array
     {
         $people = [['id' => $lesson->teacherId, 'name' => $lesson->teacherName, 'role' => 'teacher']];
-        if ($lesson->studentId !== null) {
-            $people[] = ['id' => $lesson->studentId, 'name' => $lesson->studentName, 'role' => 'student'];
+        foreach ($lesson->students !== [] ? $lesson->students : array_filter([$lesson->studentId === null ? null : ['id' => $lesson->studentId, 'name' => $lesson->studentName]]) as $student) {
+            $people[] = ['id' => $student['id'], 'name' => $student['name'], 'role' => 'student'];
         }
         $agreed = $this->consents(array_column($people, 'id'));
 
@@ -46,7 +46,7 @@ final class RecordingRules
     {
         return match ($settings->recording_media) {
             'video', 'audio' => $settings->recording_media,
-            default => $lesson->studentId !== null && $this->isChild($lesson->studentId) ? 'video' : 'audio',
+            default => array_filter($lesson->studentIds(), fn (string $id) => $this->isChild($id)) !== [] ? 'video' : 'audio',
         };
     }
 

@@ -20,10 +20,11 @@ final class RecordingWords
     {
         $row = DB::table('sessions as s')
             ->join('users as t', fn ($j) => $j->on('t.id', '=', 's.teacher_id')->on('t.academy_id', '=', 's.academy_id'))
-            ->leftJoin('session_participants as p', fn ($j) => $j->on('p.session_id', '=', 's.id')->on('p.academy_id', '=', 's.academy_id')->where('p.role', 'student'))
-            ->leftJoin('users as u', fn ($j) => $j->on('u.id', '=', 'p.user_id')->on('u.academy_id', '=', 'p.academy_id'))
             ->where('s.id', $recording->session_id)
-            ->first(['s.starts_at', 't.name as teacher', 'u.name as student']);
+            // A group lesson's students as its first and how many more.
+            ->first(['s.starts_at', 't.name as teacher', DB::raw("(select min(u.name) || case when count(*) > 1 then ' +' || (count(*) - 1) else '' end
+                from session_participants p join users u on u.id = p.user_id and u.academy_id = p.academy_id
+                where p.session_id = s.id and p.academy_id = s.academy_id and p.role = 'student') as student")]);
         if ($row === null) {
             return '';
         }

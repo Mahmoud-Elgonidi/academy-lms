@@ -7750,7 +7750,7 @@
             },
             "put": {
                 "operationId": "teacher.reports.submit",
-                "description": "Answers to the subject's questions go in `answers`, by the field's key (stars 1-5, a number, a choice's key,\ntrue or false, a text).",
+                "description": "Answers to the subject's questions go in `answers`, by the field's key (stars 1-5, a number, a choice's key,\ntrue or false, a text). A group lesson's report (`group` on GET) goes in once for the whole class: the shared\npart (items, answers, homework, notes_internal) and `students`, a row per student in it (student_id, and\nengagement, overall, notes_for_student for a lesson, absence_note for an absence); the homework goes to each.",
                 "summary": "Hand in or correct a report",
                 "tags": [
                     "Learning"
@@ -7792,6 +7792,38 @@
                         "example": "Asia/Riyadh"
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "students": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "student_id": {
+                                                    "type": "string",
+                                                    "maxLength": 64
+                                                }
+                                            },
+                                            "required": [
+                                                "student_id"
+                                            ]
+                                        },
+                                        "minItems": 1,
+                                        "maxItems": 20
+                                    }
+                                },
+                                "required": [
+                                    "students"
+                                ]
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "",
@@ -8054,6 +8086,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
@@ -21795,7 +21830,110 @@
                                                 },
                                                 "with": {
                                                     "type": "string",
-                                                    "description": "The teacher's name (family) or the student's (teacher)."
+                                                    "description": "The teacher's name (family) or the student's (teacher; a group lesson reads \"group \u00b7 n\")."
+                                                },
+                                                "format": {
+                                                    "type": "string",
+                                                    "description": "private (one student) or group",
+                                                    "enum": [
+                                                        "group",
+                                                        "private"
+                                                    ]
+                                                },
+                                                "format_label": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "scheduling::group_outcomes.format.group",
+                                                        "scheduling::group_outcomes.format.private"
+                                                    ]
+                                                },
+                                                "group": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "A group lesson: its seats, and who else is in it as the viewer may see them; null for a private lesson.",
+                                                    "properties": {
+                                                        "capacity": {
+                                                            "type": "string"
+                                                        },
+                                                        "seats_taken": {
+                                                            "type": "integer"
+                                                        },
+                                                        "classmates": {
+                                                            "description": "The family: classmates' first names (null in the kids' look, which reads only how many).",
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "array",
+                                                                    "items": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "minItems": 0,
+                                                                    "maxItems": 0
+                                                                },
+                                                                {
+                                                                    "type": "null"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "classmates_count": {
+                                                            "type": [
+                                                                "integer",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "classmates_label": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "seat": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ],
+                                                            "description": "The family: what the learner's own seat came to (attended, absent, excused, makeup), once decided."
+                                                        },
+                                                        "seat_label": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "students": {
+                                                            "description": "The teacher: every student seated (id, name).",
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "array",
+                                                                    "items": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "minItems": 0,
+                                                                    "maxItems": 0
+                                                                }
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "capacity",
+                                                        "seats_taken",
+                                                        "classmates",
+                                                        "classmates_count",
+                                                        "classmates_label",
+                                                        "seat",
+                                                        "seat_label",
+                                                        "students"
+                                                    ]
                                                 },
                                                 "status": {
                                                     "type": "string",
@@ -21865,7 +22003,8 @@
                                                     "description": "A substitute has the lesson: the family's own teacher (family), or whom the teacher covers (teacher)."
                                                 },
                                                 "can_cancel": {
-                                                    "type": "string"
+                                                    "type": "string",
+                                                    "description": "A group lesson's \"I won't attend\": the learner's own seat is excused, never the lesson cancelled."
                                                 },
                                                 "can_refuse_substitute": {
                                                     "type": "string"
@@ -21951,6 +22090,9 @@
                                                 "minutes",
                                                 "subject",
                                                 "with",
+                                                "format",
+                                                "format_label",
+                                                "group",
                                                 "status",
                                                 "status_label",
                                                 "type",
@@ -21984,7 +22126,7 @@
         "/v1/teacher/lessons/{session}/dispute": {
             "post": {
                 "operationId": "teacher.lessons.dispute",
-                "description": "Within 48 hours of the end of my lesson recorded as held or missed (can_dispute), once per lesson: it goes back\nunder review and the academy answers (the lesson's dispute). Send an Idempotency-Key.",
+                "description": "Within 48 hours of the end of my lesson recorded as held or missed (can_dispute), once per lesson (a group lesson:\nonce per student, naming the seat with student_id): it goes back under review and the academy answers (the\nlesson's dispute). Send an Idempotency-Key.",
                 "summary": "Dispute a lesson's outcome",
                 "tags": [
                     "Scheduling"
@@ -22119,7 +22261,110 @@
                                                 },
                                                 "with": {
                                                     "type": "string",
-                                                    "description": "The teacher's name (family) or the student's (teacher)."
+                                                    "description": "The teacher's name (family) or the student's (teacher; a group lesson reads \"group \u00b7 n\")."
+                                                },
+                                                "format": {
+                                                    "type": "string",
+                                                    "description": "private (one student) or group",
+                                                    "enum": [
+                                                        "group",
+                                                        "private"
+                                                    ]
+                                                },
+                                                "format_label": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "scheduling::group_outcomes.format.group",
+                                                        "scheduling::group_outcomes.format.private"
+                                                    ]
+                                                },
+                                                "group": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "A group lesson: its seats, and who else is in it as the viewer may see them; null for a private lesson.",
+                                                    "properties": {
+                                                        "capacity": {
+                                                            "type": "string"
+                                                        },
+                                                        "seats_taken": {
+                                                            "type": "integer"
+                                                        },
+                                                        "classmates": {
+                                                            "description": "The family: classmates' first names (null in the kids' look, which reads only how many).",
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "array",
+                                                                    "items": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "minItems": 0,
+                                                                    "maxItems": 0
+                                                                },
+                                                                {
+                                                                    "type": "null"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "classmates_count": {
+                                                            "type": [
+                                                                "integer",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "classmates_label": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "seat": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ],
+                                                            "description": "The family: what the learner's own seat came to (attended, absent, excused, makeup), once decided."
+                                                        },
+                                                        "seat_label": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "students": {
+                                                            "description": "The teacher: every student seated (id, name).",
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "array",
+                                                                    "items": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "minItems": 0,
+                                                                    "maxItems": 0
+                                                                }
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "capacity",
+                                                        "seats_taken",
+                                                        "classmates",
+                                                        "classmates_count",
+                                                        "classmates_label",
+                                                        "seat",
+                                                        "seat_label",
+                                                        "students"
+                                                    ]
                                                 },
                                                 "status": {
                                                     "type": "string",
@@ -22189,7 +22434,8 @@
                                                     "description": "A substitute has the lesson: the family's own teacher (family), or whom the teacher covers (teacher)."
                                                 },
                                                 "can_cancel": {
-                                                    "type": "string"
+                                                    "type": "string",
+                                                    "description": "A group lesson's \"I won't attend\": the learner's own seat is excused, never the lesson cancelled."
                                                 },
                                                 "can_refuse_substitute": {
                                                     "type": "string"
@@ -22275,6 +22521,9 @@
                                                 "minutes",
                                                 "subject",
                                                 "with",
+                                                "format",
+                                                "format_label",
+                                                "group",
                                                 "status",
                                                 "status_label",
                                                 "type",
@@ -23035,7 +23284,11 @@
                                     "properties": {
                                         "outcome": {
                                             "type": "string",
-                                            "description": "The policy's answer: back to the balance, or counted."
+                                            "description": "The policy's answer: back to the balance, or counted. A group lesson's says the learner's seat is excused, the lesson goes on."
+                                        },
+                                        "excuse_only": {
+                                            "type": "boolean",
+                                            "description": "A group lesson: \"I won't attend\" excuses the learner's own seat; the lesson is never cancelled."
                                         },
                                         "reasons": {
                                             "type": "array",
@@ -23044,6 +23297,7 @@
                                     },
                                     "required": [
                                         "outcome",
+                                        "excuse_only",
                                         "reasons"
                                     ]
                                 }
@@ -23062,7 +23316,7 @@
         "/v1/lessons/{session}/cancel": {
             "post": {
                 "operationId": "lessons.cancel",
-                "description": "Send an Idempotency-Key: a retry answers the same without cancelling twice.",
+                "description": "A group lesson is never cancelled: the learner's own seat is excused (\"I won't attend\") and the policy's notice\nrule decides their credit; the lesson goes on for the others (learner_id names the seat when several are followed).\nSend an Idempotency-Key: a retry answers the same without cancelling twice.",
                 "summary": "Cancel a lesson",
                 "tags": [
                     "Scheduling"
@@ -26492,6 +26746,14 @@
                             "null"
                         ],
                         "maxLength": 500
+                    },
+                    "learner_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "A group lesson: the learner whose seat is excused, when the lesson has several this person follows.",
+                        "maxLength": 64
                     }
                 },
                 "required": [
@@ -26630,6 +26892,22 @@
                         "type": "string",
                         "description": "What happened, in the person's words; the academy reads it.",
                         "maxLength": 1000
+                    },
+                    "student_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uuid",
+                        "description": "A group lesson: whose seat it is about (the teacher names one of group.students; a family, the learner when it follows several)."
+                    },
+                    "learner_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The family's learner whose seat it is about, when the lesson has several it follows.",
+                        "maxLength": 64
                     }
                 },
                 "required": [

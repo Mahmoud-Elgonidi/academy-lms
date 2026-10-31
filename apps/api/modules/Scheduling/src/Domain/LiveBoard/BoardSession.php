@@ -8,12 +8,17 @@ use Modules\Scheduling\Domain\Enums\SessionEventKind;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Enums\SessionType;
 
-/** A session as the live board sees it: one read, no models. */
+/**
+ * A session as the live board sees it: one read, no models. A group lesson
+ * (groupId) lists every student seated (students); student is the one who
+ * came in first (else the first), so "nobody came" reads as for one.
+ */
 final readonly class BoardSession
 {
     /**
      * @param  list<BoardPerson>  $guardians
      * @param  list<BoardEvent>  $events  oldest first
+     * @param  list<BoardPerson>  $students  a group lesson's, each seated
      */
     public function __construct(
         public string $id,
@@ -29,6 +34,8 @@ final readonly class BoardSession
         public array $guardians,
         public array $events,
         public ?string $reviewReason = null,
+        public array $students = [],
+        public ?string $groupId = null,
     ) {}
 
     public function durationMin(): int

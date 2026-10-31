@@ -135,7 +135,15 @@ final class ShiftSlotTimes
                     SessionEvent::record($session, SessionEventKind::Rescheduled, ['from' => $old->toIso8601String(), 'to' => $start->toIso8601String(), 'by' => 'academy', 'reason' => $reason, 'minutes' => $minutes], $actorId);
                 }
 
-                $this->materialize->handle(array_values(array_unique(array_map(fn (RecurringSlot $s) => $s->enrollment_id, $slots))), actorId: $actorId);
+                // A group's weekly time moves for the whole group (its lessons are made by the group).
+                $courses = array_values(array_unique(array_filter(array_map(fn (RecurringSlot $s) => $s->enrollment_id, $slots))));
+                $groups = array_values(array_unique(array_filter(array_map(fn (RecurringSlot $s) => $s->group_id, $slots))));
+                if ($courses !== []) {
+                    $this->materialize->handle($courses, actorId: $actorId);
+                }
+                if ($groups !== []) {
+                    $this->materialize->groups($groups, actorId: $actorId);
+                }
 
                 foreach ($slots as $slot) {
                     $count = $counts[$slot->id] ?? 0;
@@ -193,7 +201,9 @@ final class ShiftSlotTimes
         // The lessons being moved do not stand in their own way.
         $own = array_map(fn (array $m) => [$m['session']->starts_at->getTimestamp(), $m['session']->ends_at->getTimestamp()], $moves);
         $free = new IntervalSet(array_merge($teacher?->free->intervals ?? [], $own));
-        $students = collect($moves)->map(fn (array $m) => $m['session']->participant(ParticipantRole::Student)?->user_id)->filter()->unique()->values()->all();
+        // Every student of each lesson (a group lesson's every seat).
+        $seated = fn (Session $session) => $session->participants->filter(fn ($p) => $p->role === ParticipantRole::Student && $p->is_active)->pluck('user_id')->all();
+        $students = collect($moves)->flatMap(fn (array $m) => $seated($m['session']))->unique()->values()->all();
         $blocks = DB::table('session_participants')->whereIn('user_id', $students)->where('is_active', true)
             ->whereNotIn('session_id', array_map(fn (array $m) => $m['session']->id, $moves))
             ->whereRaw('block_period && tstzrange(?, ?)', [$first->utc(), $last->utc()])
@@ -203,10 +213,10 @@ final class ShiftSlotTimes
         $problems = [];
         foreach ($moves as ['session' => $session, 'start' => $start, 'end' => $end]) {
             [$s, $e] = [$start->getTimestamp(), $end->getTimestamp()];
-            $student = $session->participant(ParticipantRole::Student)?->user_id;
+            $busy = array_filter($seated($session), fn (string $student) => ($blocks[$student] ?? collect())->contains(fn ($b) => (int) $b->s < $e && (int) $b->e > $s));
             $why = match (true) {
                 $teacher === null || ! $teacher->shifts->contains($s, $e) || ! $free->contains($s, $e) => 'teacher',
-                ($blocks[$student] ?? collect())->contains(fn ($b) => (int) $b->s < $e && (int) $b->e > $s) => 'student',
+                $busy !== [] => 'student',
                 default => null,
             };
             if ($why !== null) {

@@ -15,6 +15,7 @@ use Modules\Scheduling\Domain\Enums\ParticipantRole;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
+use Modules\Scheduling\Domain\Models\SessionParticipant;
 use Modules\Scheduling\Http\V1\Requests\CancelLessonRequest;
 use Modules\Scheduling\Http\V1\Requests\DisputeLessonRequest;
 use Modules\Scheduling\Http\V1\Resources\LessonPresenter;
@@ -59,7 +60,7 @@ final class FamilyLessonsController
 
         return response()->json([
             'learner' => ['id' => $learner->id, 'name' => $learner->name],
-            'data' => array_map(fn (object $r) => $this->present->lesson($r, $now, 'teacher', $mayAct), $rows),
+            'data' => array_map(fn (object $r) => $this->present->lesson($r, $now, 'teacher', $mayAct, kids: ! $mayAct), $rows),
             /** Coming holidays; the learner's courses paused, ending or just ended; clock changes that move the learner's hour. */
             'notices' => [
                 ...array_map(fn (array $h) => $h['name'].' · '.$h['period'], $notices->holidays()),
@@ -78,10 +79,13 @@ final class FamilyLessonsController
     {
         $lesson = $this->ownLesson($request, $session);
         $l = 'scheduling::family.cancel.';
+        $seat = $this->seatOf($request, $lesson);
 
         return response()->json([
-            /** The policy's answer: back to the balance, or counted. */
-            'outcome' => $cancellation->outcome($lesson),
+            /** The policy's answer: back to the balance, or counted. A group lesson's says the learner's seat is excused, the lesson goes on. */
+            'outcome' => $cancellation->outcome($lesson, $lesson->isGroup() ? $seat->enrollment_id : null),
+            /** A group lesson: "I won't attend" excuses the learner's own seat; the lesson is never cancelled. */
+            'excuse_only' => $lesson->isGroup(),
             'reasons' => array_map(fn (string $r) => ['value' => $r, 'label' => __($l.'reasons.'.$r)], CancelSession::REASONS['student']),
         ]);
     }
@@ -89,6 +93,8 @@ final class FamilyLessonsController
     /**
      * Cancel a lesson.
      *
+     * A group lesson is never cancelled: the learner's own seat is excused ("I won't attend") and the policy's notice
+     * rule decides their credit; the lesson goes on for the others (learner_id names the seat when several are followed).
      * Send an Idempotency-Key: a retry answers the same without cancelling twice.
      *
      * @throws NotFoundHttpException not a lesson of someone I follow
@@ -97,9 +103,10 @@ final class FamilyLessonsController
     public function cancel(CancelLessonRequest $request, string $session, CancelSession $cancel): JsonResponse
     {
         $lesson = $this->ownLesson($request, $session);
-        $cancel->handle($lesson, 'student', (string) $request->string('reason'), $request->input('note'), (string) $request->user()?->getAuthIdentifier());
+        $seat = $this->seatOf($request, $lesson);
+        $cancel->handle($lesson, 'student', (string) $request->string('reason'), $request->input('note'), (string) $request->user()?->getAuthIdentifier(), studentId: $seat->user_id);
 
-        return $this->one($lesson->refresh());
+        return $this->one($lesson->refresh(), [], $seat->user_id);
     }
 
     /**
@@ -131,22 +138,39 @@ final class FamilyLessonsController
     {
         $me = (string) $request->user()?->getAuthIdentifier();
         $lesson = Str::isUuid($session) ? Session::query()->with('participants')->find($session) : null;
-        $student = $lesson?->participants->firstWhere('role', ParticipantRole::Student);
-        if ($student === null || ! $this->family->follows($me, $student->user_id)) {
+        $student = $lesson === null ? null : $this->followedSeat($me, $lesson, $request->input('learner_id'));
+        if ($student === null) {
             throw new NotFoundHttpException;
         }
-        $dispute->handle($lesson, 'family', $me, (string) $request->string('reason'), (string) $request->string('note'));
+        $dispute->handle($lesson, 'family', $me, (string) $request->string('reason'), (string) $request->string('note'), $student->user_id);
 
-        return $this->one($lesson->refresh());
+        return $this->one($lesson->refresh(), [], $student->user_id);
     }
 
     /** @param  array<string, mixed>  $extra */
-    private function one(Session $session, array $extra = []): JsonResponse
+    private function one(Session $session, array $extra = [], ?string $studentId = null): JsonResponse
     {
-        $student = $session->participants->firstWhere('role', ParticipantRole::Student);
-        $row = collect($this->lessons->forStudent((string) $student?->user_id, $session->starts_at, $session->starts_at->addSecond()))->firstWhere('id', $session->id);
+        $studentId ??= $session->participants->firstWhere('role', ParticipantRole::Student)?->user_id;
+        $row = collect($this->lessons->forStudent((string) $studentId, $session->starts_at, $session->starts_at->addSecond()))->firstWhere('id', $session->id);
 
         return response()->json(['data' => $this->present->lesson($row, CarbonImmutable::now(), 'teacher', true)] + $extra);
+    }
+
+    /**
+     * The seat in the lesson of a learner this person follows: the learner named (learner_id), else the first
+     * one they follow (a guardian of two in the same group lesson names which).
+     */
+    private function followedSeat(string $me, Session $session, mixed $learnerId): ?SessionParticipant
+    {
+        return $session->participants
+            ->filter(fn ($p) => $p->role === ParticipantRole::Student && (! is_string($learnerId) || $learnerId === '' || $p->user_id === $learnerId))
+            ->sortBy('user_id')
+            ->first(fn ($p) => $this->family->follows($me, $p->user_id));
+    }
+
+    private function seatOf(Request $request, Session $session): SessionParticipant
+    {
+        return $this->followedSeat((string) $request->user()?->getAuthIdentifier(), $session, $request->input('learner_id')) ?? throw new NotFoundHttpException;
     }
 
     private function mayAct(string $viewerId): bool
@@ -159,11 +183,13 @@ final class FamilyLessonsController
     {
         $me = (string) $request->user()?->getAuthIdentifier();
         $session = Str::isUuid($id) ? Session::query()->with('participants')->find($id) : null;
-        $student = $session?->participants->firstWhere('role', ParticipantRole::Student);
-        if ($student === null || ! $this->family->follows($me, $student->user_id)) {
+        $student = $session === null ? null : $this->followedSeat($me, $session, $request->input('learner_id'));
+        if ($student === null) {
             throw new NotFoundHttpException;
         }
-        if (! $this->mayAct($me) || $session->status !== SessionStatus::Scheduled || ! $session->starts_at->isFuture()) {
+        // A group lesson: the learner's own seat must still be theirs to excuse.
+        if (! $this->mayAct($me) || $session->status !== SessionStatus::Scheduled || ! $session->starts_at->isFuture()
+            || ($session->isGroup() && (! $student->is_active || $student->outcome !== null))) {
             throw new AccessDeniedHttpException(__('scheduling::family.cancel.not_now'));
         }
 

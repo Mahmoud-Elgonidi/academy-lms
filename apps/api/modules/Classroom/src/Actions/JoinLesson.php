@@ -88,7 +88,7 @@ final class JoinLesson
 
         return match (ClassroomSettings::current()->student_camera) {
             'off' => false,
-            'off_for_minors' => $lesson->studentId === null || ! $this->people->isMinor($lesson->studentId),
+            'off_for_minors' => ! $this->people->isMinor($seat->identity),   // the seat's student (a guardian comes in as them)
             default => true,
         };
     }

@@ -11,10 +11,10 @@ final class LessonPayFacts
     /** Lessons that are over one way or another. */
     public const FINAL = ['completed', 'student_absent', 'teacher_absent', 'cancelled'];
 
-    /** @return object{id: string, status: string, type: string, teacher_id: string, subject_id: string, starts_at: CarbonImmutable, booked_min: int, decision: ?array<string, mixed>}|null */
+    /** @return object{id: string, status: string, type: string, format: string, teacher_id: string, subject_id: string, starts_at: CarbonImmutable, booked_min: int, decision: ?array<string, mixed>}|null */
     public function find(string $sessionId): ?object
     {
-        $row = DB::table('sessions')->where('id', $sessionId)->first(['id', 'status', 'type', 'teacher_id', 'subject_id', 'starts_at', 'ends_at', 'decision']);
+        $row = DB::table('sessions')->where('id', $sessionId)->first(['id', 'status', 'type', 'group_id', 'teacher_id', 'subject_id', 'starts_at', 'ends_at', 'decision']);
         if ($row === null) {
             return null;
         }
@@ -24,6 +24,8 @@ final class LessonPayFacts
             'id' => $row->id,
             'status' => $row->status,
             'type' => $row->type,
+            // A group lesson is one lesson for its teacher, paid at the card's group rate.
+            'format' => $row->group_id === null ? 'private' : 'group',
             'teacher_id' => $row->teacher_id,
             'subject_id' => $row->subject_id,
             'starts_at' => $starts,

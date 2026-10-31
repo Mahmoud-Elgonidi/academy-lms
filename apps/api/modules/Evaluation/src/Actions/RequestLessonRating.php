@@ -20,7 +20,18 @@ final class RequestLessonRating
 
     public function handle(string $sessionId, string $outcome): bool
     {
-        $lesson = $outcome === 'completed' ? $this->lessons->find($sessionId) : null;
+        $asked = false;
+        // Each student who was there: a group lesson asks each attending seat's family on its own.
+        foreach ($outcome === 'completed' ? $this->lessons->students($sessionId, attended: true) : [] as $studentId) {
+            $asked = $this->ask($sessionId, $studentId) || $asked;
+        }
+
+        return $asked;
+    }
+
+    private function ask(string $sessionId, string $studentId): bool
+    {
+        $lesson = $this->lessons->find($sessionId, $studentId);
         if ($lesson === null || $lesson->student_id === null || $lesson->status !== 'completed') {
             return false;
         }

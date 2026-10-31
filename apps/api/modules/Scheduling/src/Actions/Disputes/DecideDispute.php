@@ -29,7 +29,9 @@ final class DecideDispute
             throw ValidationException::withMessages(['answer' => __($e.'answer')]);
         }
 
-        $this->resolve->handle(Session::query()->findOrFail($dispute->session_id), $outcome, $answer, $actorId);
+        $session = Session::query()->findOrFail($dispute->session_id);
+        // A group lesson's dispute is about one student's seat: the decision is theirs alone.
+        $this->resolve->handle($session, $outcome, $answer, $actorId, $session->isGroup() ? $dispute->student_id : null);
 
         return $dispute->refresh();
     }

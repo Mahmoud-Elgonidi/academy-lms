@@ -26,6 +26,9 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * academy kept the student's time there: that one is a record). A paused or
  * ended course has no notice, nor a lesson on its paused days or after its
  * end (its lessons there are cancelled: nothing moves for the family).
+ * A group's weekly times are not a course's and follow the teacher's clock
+ * for everyone (docs/architecture/02, "الحصص الجماعية"): no notice offers
+ * one student their own hour; only the academy moves the group's time.
  */
 final class PlanDstChanges
 {

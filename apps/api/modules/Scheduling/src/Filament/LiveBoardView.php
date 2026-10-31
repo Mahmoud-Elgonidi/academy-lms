@@ -48,7 +48,9 @@ final class LiveBoardView
             'teacherPhone' => $s->teacher->phone,
             'studentPhone' => $s->student?->phone,
             'teacherLine' => $this->personLine($s->teacher, $s->startsAt, true, $item),
-            'student' => $s->student?->name ?? '—',
+            // A group lesson reads as the group, with each student seated in it.
+            'student' => $s->groupId !== null ? __('scheduling::group_outcomes.label', ['count' => count($s->students)]) : ($s->student?->name ?? '—'),
+            'students' => array_map(fn ($p) => ['name' => $p->name, 'in' => $p->joinedAt !== null], $s->students),
             'studentLine' => $s->student ? $this->personLine($s->student, $s->startsAt, false, $item) : '',
             'teacherDot' => $this->dot($s->teacher, $item),
             'studentDot' => $s->student ? $this->dot($s->student, $item) : 'none',

@@ -12,7 +12,7 @@ use Modules\SharedKernel\Money\Money;
 
 /**
  * Creates or updates a rate card: its currency, its prices (by subject and
- * kind of lesson, by the hour or by the lesson) and the teachers paid from
+ * kind of lesson, private or group, by the hour or by the lesson) and the teachers paid from
  * it. A teacher is on one card at a time; the default card covers the rest.
  * Lines already in the ledger keep the price they were written at.
  */
@@ -23,7 +23,7 @@ final class SaveRateCard
     public const SESSION_TYPES = ['regular', 'trial', 'makeup', 'extra', 'assessment'];
 
     /**
-     * @param  array{name: string, currency: string, is_default?: bool, lines?: list<array{subject_id?: ?string, session_type?: ?string, unit: string, amount: string|int|float|null}>, teachers?: list<string>}  $data
+     * @param  array{name: string, currency: string, is_default?: bool, lines?: list<array{subject_id?: ?string, session_type?: ?string, session_format?: ?string, unit: string, amount: string|int|float|null}>, teachers?: list<string>}  $data
      */
     public function handle(?RateCard $card, array $data): RateCard
     {
@@ -49,11 +49,15 @@ final class SaveRateCard
             if ($money->minor < 0 || ! in_array($row['unit'] ?? null, RateLine::UNITS, true)) {
                 throw ValidationException::withMessages(['lines' => __('payroll::rates.errors.amount')]);
             }
-            $key = (($row['subject_id'] ?? null) ?: '*').'|'.($type ?? '*');
+            $format = ($row['session_format'] ?? null) ?: RateLine::PRIVATE;
+            if (! in_array($format, RateLine::FORMATS, true)) {
+                throw ValidationException::withMessages(['lines' => __('payroll::rates.errors.type')]);
+            }
+            $key = (($row['subject_id'] ?? null) ?: '*').'|'.($type ?? '*').'|'.$format;
             if (isset($lines[$key])) {
                 throw ValidationException::withMessages(['lines' => __('payroll::rates.errors.twice')]);
             }
-            $lines[$key] = ['subject_id' => ($row['subject_id'] ?? null) ?: null, 'session_type' => $type, 'unit' => $row['unit'], 'amount_minor' => $money->minor];
+            $lines[$key] = ['subject_id' => ($row['subject_id'] ?? null) ?: null, 'session_type' => $type, 'session_format' => $format, 'unit' => $row['unit'], 'amount_minor' => $money->minor];
         }
 
         return DB::transaction(function () use ($card, $name, $currency, $data, $lines) {

@@ -55,8 +55,8 @@ final class SendLessonReminders
             $sent += $this->toFamily($id, 'scheduling.reminder_soon', "reminder-soon:{$id}");
             $sent += $this->toTeacher($id, 'scheduling.reminder_soon_teacher', "reminder-soon:{$id}");
         }
-        foreach ($this->notJoined('student', $now, self::JOIN_NOW_AFTER_MIN) as $id) {
-            $sent += $this->toFamily($id, 'scheduling.join_now', "join-now:{$id}", urgent: true);
+        foreach ($this->notJoined('student', $now, self::JOIN_NOW_AFTER_MIN, seats: true) as [$id, $studentId]) {
+            $sent += $this->toFamily($id, 'scheduling.join_now', "join-now:{$id}", urgent: true, studentId: $studentId);
         }
         foreach ($this->notJoined('teacher', $now, self::TEACHER_LATE_AFTER_MIN) as $id) {
             $sent += $this->toTeacher($id, 'scheduling.teacher_join_now', "teacher-late:{$id}", urgent: true);
@@ -82,24 +82,32 @@ final class SendLessonReminders
             ->pluck('id')->all();
     }
 
-    /** @return list<string> sessions under way for at least $minutes (up to 15) whose $role has not joined */
-    private function notJoined(string $role, CarbonImmutable $now, int $minutes): array
+    /** @return list<string>|list<array{0: string, 1: string}> sessions under way for at least $minutes (up to 15) whose $role has not joined; with $seats each student not in (a group lesson's) */
+    private function notJoined(string $role, CarbonImmutable $now, int $minutes, bool $seats = false): array
     {
-        return DB::table('sessions as s')
+        $query = DB::table('sessions as s')
             ->join('session_participants as p', fn ($j) => $j->on('p.academy_id', '=', 's.academy_id')->on('p.session_id', '=', 's.id')
                 ->where('p.role', $role)->where('p.is_active', true))
             ->whereIn('s.status', ['scheduled', 'in_progress'])
             ->where('s.starts_at', '<=', $now->subMinutes($minutes))->where('s.starts_at', '>', $now->subMinutes(15))
-            ->whereNull('p.first_join_at')
-            ->pluck('s.id')->all();
+            ->whereNull('p.first_join_at');
+
+        return $seats
+            ? $query->get(['s.id', 'p.user_id'])->map(fn (object $r) => [$r->id, $r->user_id])->all()
+            : $query->distinct()->pluck('s.id')->all();
     }
 
-    private function toFamily(string $sessionId, string $template, string $key, bool $urgent = false): int
+    /** Each seat's family on its own (a group lesson's families read their own child's name only); one student's alone with $studentId. */
+    private function toFamily(string $sessionId, string $template, string $key, bool $urgent = false, ?string $studentId = null): int
     {
-        $s = $this->sessions->of($sessionId);
+        $seats = $studentId === null ? $this->sessions->seats($sessionId) : array_filter([$this->sessions->of($sessionId, $studentId)]);
+        $sent = 0;
+        foreach ($seats as $s) {
+            $sent += $this->notifications->send(new Message($template, $s['family'], SendSchedulingNotifications::lessonData($s),
+                ['screen' => 'session', 'id' => $sessionId], $key, $urgent));
+        }
 
-        return $s === null ? 0 : $this->notifications->send(new Message($template, $s['family'], SendSchedulingNotifications::lessonData($s),
-            ['screen' => 'session', 'id' => $sessionId], $key, $urgent));
+        return $sent;
     }
 
     private function toTeacher(string $sessionId, string $template, string $key, bool $urgent = false): int

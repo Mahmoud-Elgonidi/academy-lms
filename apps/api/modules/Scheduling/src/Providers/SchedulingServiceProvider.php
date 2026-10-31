@@ -26,6 +26,7 @@ use Modules\Scheduling\Console\SweepSessionsCommand;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\Events\DstShiftDecided;
 use Modules\Scheduling\Contracts\Events\DstShiftUpcoming;
+use Modules\Scheduling\Contracts\Events\GroupStarted;
 use Modules\Scheduling\Contracts\Events\HolidayDeclared;
 use Modules\Scheduling\Contracts\Events\LessonDisputed;
 use Modules\Scheduling\Contracts\Events\LessonDisputeDecided;
@@ -56,6 +57,7 @@ use Modules\Scheduling\Filament\Teacher\MyTimeOff;
 use Modules\Scheduling\Filament\Teacher\MyWeek;
 use Modules\Scheduling\Listeners\FundSessionsFromNewCredit;
 use Modules\Scheduling\Listeners\SendSchedulingNotifications;
+use Modules\Scheduling\Listeners\TellGroupStarted;
 use Modules\Scheduling\Live\BoardChanged;
 use Modules\Scheduling\Live\LessonsChanged;
 use Modules\Scheduling\Privacy\LessonsData;
@@ -120,6 +122,7 @@ final class SchedulingServiceProvider extends ServiceProvider
             && Gate::forUser($user)->allows(Ability::ViewLiveBoard->value));
 
         SendSchedulingNotifications::templates($this->app->make(NotificationsApi::class));
+        TellGroupStarted::templates($this->app->make(NotificationsApi::class));
         $links = $this->app->make(NotificationLinks::class);
         $links->register('shift_proposal', fn (array $a, string $panel) => $panel === 'academy' ? ReviewShiftProposal::getUrl(['proposal' => $a['id']], panel: 'academy') : null);
         $links->register('dispute', fn (array $a, string $panel) => $panel === 'academy' ? LessonDisputes::getUrl(['dispute' => $a['id']], panel: 'academy') : null);
@@ -155,6 +158,7 @@ final class SchedulingServiceProvider extends ServiceProvider
         Event::listen(TrialLessonBooked::class, [SendSchedulingNotifications::class, 'trialBooked']);
         Event::listen(LessonDisputed::class, [SendSchedulingNotifications::class, 'disputed']);
         Event::listen(LessonDisputeDecided::class, [SendSchedulingNotifications::class, 'disputeDecided']);
+        Event::listen(GroupStarted::class, TellGroupStarted::class);
         // A course paused, back on, or ended: the family and the teacher hear it once, not once a lesson.
         Event::listen(EnrollmentPaused::class, [SendSchedulingNotifications::class, 'coursePaused']);
         Event::listen(EnrollmentResumed::class, [SendSchedulingNotifications::class, 'courseResumed']);

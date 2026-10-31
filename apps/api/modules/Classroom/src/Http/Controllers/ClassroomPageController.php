@@ -72,7 +72,7 @@ final class ClassroomPageController
             'when' => $lesson->startsAt->setTimezone($tz)->locale(app()->getLocale())->translatedFormat(Clock::pattern('l j F · H:i')),
             // The teacher and staff see today's plan with every material; the student, the materials meant for everyone.
             'plan' => $learning->planFor($lesson->enrollmentId, $lesson->startsAt, $seat->role !== 'student'),
-            'homework' => $seat->role === 'student' || $lesson->studentId === null ? null : $learning->lastHomework($lesson->studentId, $lesson->enrollmentId, $lesson->startsAt),
+            'homework' => $seat->role === 'student' || $lesson->studentId === null || $lesson->isGroup() ? null : $learning->lastHomework($lesson->studentId, $lesson->enrollmentId, $lesson->startsAt),
             'tz' => $tz,
             'ticketUrl' => route('classroom.ticket', ['session' => $session]),
             'goUrl' => route('classroom.go', ['session' => $session]),

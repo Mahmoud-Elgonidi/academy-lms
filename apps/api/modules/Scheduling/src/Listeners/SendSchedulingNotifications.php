@@ -131,15 +131,19 @@ final class SendSchedulingNotifications
         $data = self::lessonData($s) + ['outcome' => new Translatable("scheduling::notifications.outcomes.{$outcome}")];
         $action = ['screen' => 'session', 'id' => $s['session_id']];
 
-        $this->notifications->send(new Message('scheduling.session_cancelled', $this->without($s['family'], $event->actorId), $data, $action, "cancelled:{$s['session_id']}"));
+        // Each family of a group lesson reads its own child's name only.
+        foreach ($this->sessions->seats($event->sessionId) as $seat) {
+            $this->notifications->send(new Message('scheduling.session_cancelled', $this->without($seat['family'], $event->actorId),
+                self::lessonData($seat) + ['outcome' => $data['outcome']], $action, "cancelled:{$s['session_id']}"));
+        }
         $this->notifications->send(new Message('scheduling.session_cancelled_teacher', $this->without([$s['teacher_id']], $event->actorId), $data, $action, "cancelled:{$s['session_id']}"));
     }
 
     /** A family or a teacher disputed a lesson: whoever manages lessons decides it. */
     public function disputed(LessonDisputed $event): void
     {
-        $s = $this->sessions->of($event->sessionId);
         $dispute = SessionDispute::query()->find($event->disputeId);
+        $s = $this->sessions->of($event->sessionId, $dispute?->student_id);
         if ($s === null || $dispute === null) {
             return;
         }
@@ -154,8 +158,8 @@ final class SendSchedulingNotifications
     /** Whoever disputed reads the academy's answer; when the outcome changed, the other side hears what it is now. */
     public function disputeDecided(LessonDisputeDecided $event): void
     {
-        $s = $this->sessions->of($event->sessionId);
         $dispute = SessionDispute::query()->find($event->disputeId);
+        $s = $this->sessions->of($event->sessionId, $dispute?->student_id);
         if ($s === null || $dispute === null) {
             return;
         }
@@ -185,7 +189,9 @@ final class SendSchedulingNotifications
         $action = ['screen' => 'session', 'id' => $s['session_id']];
         $key = "moved:{$s['session_id']}:{$s['starts_at']->getTimestamp()}";
 
-        $this->notifications->send(new Message('scheduling.session_moved', $this->without($s['family'], $event->actorId), $data, $action, $key));
+        foreach ($this->sessions->seats($event->sessionId) as $seat) {
+            $this->notifications->send(new Message('scheduling.session_moved', $this->without($seat['family'], $event->actorId), self::lessonData($seat) + ['from' => $data['from']], $action, $key));
+        }
         $this->notifications->send(new Message('scheduling.session_moved_teacher', $this->without([$s['teacher_id']], $event->actorId), $data, $action, $key));
     }
 
@@ -264,7 +270,10 @@ final class SendSchedulingNotifications
         $action = ['screen' => 'session', 'id' => $s['session_id']];
         $key = "substitute:{$s['session_id']}:{$event->toTeacherId}";
 
-        $this->notifications->send(new Message($original ? 'scheduling.substitute_family' : 'scheduling.teacher_back_family', $this->without($s['family'], $event->actorId), $data, $action, $key));
+        foreach ($this->sessions->seats($event->sessionId) as $seat) {
+            $this->notifications->send(new Message($original ? 'scheduling.substitute_family' : 'scheduling.teacher_back_family', $this->without($seat['family'], $event->actorId),
+                self::lessonData($seat) + ['original' => $data['original']], $action, $key));
+        }
         $this->notifications->send(new Message('scheduling.substitute_teacher', $this->without([$event->toTeacherId], $event->actorId), $data + ['original' => (string) ($original ?? '')], $action, $key));
     }
 
@@ -281,12 +290,12 @@ final class SendSchedulingNotifications
         $students = [];
         $teachers = [];
         foreach ($event->sessionIds as $id) {
-            $s = $this->sessions->of($id);
-            if ($s === null) {
+            $seats = $this->sessions->seats($id);
+            if ($seats === []) {
                 continue;
             }
-            $teachers[$s['teacher_id']] = ($teachers[$s['teacher_id']] ?? 0) + 1;
-            if ($s['student_id'] !== null) {
+            $teachers[$seats[0]['teacher_id']] = ($teachers[$seats[0]['teacher_id']] ?? 0) + 1;
+            foreach ($seats as $s) {
                 $students[$s['student_id']] ??= ['name' => $s['student'], 'family' => $s['family'], 'count' => 0];
                 $students[$s['student_id']]['count']++;
             }
@@ -370,10 +379,14 @@ final class SendSchedulingNotifications
 
             return;
         }
-        $this->notifications->send(new Message("scheduling.lessons_shifted_family{$open}", $this->without($s['family'] ?? [], $event->actorId), $common + $period + [
-            'time' => self::weekdayTime($first->starts_at->setTimezone($studentTz)),
-            'zone' => self::city($studentTz),
-        ], $action, $key));
+        // A group's weekly time: each seat's family on its own, on its student's clock.
+        foreach ($first->group_id === null ? [$s] : $this->sessions->seats($first->id) as $seat) {
+            $tz = $first->group_id === null ? $studentTz : (string) (DB::table('users')->where('id', $seat['student_id'])->value('timezone') ?? $teacherTz);
+            $this->notifications->send(new Message("scheduling.lessons_shifted_family{$open}", $this->without($seat['family'] ?? [], $event->actorId), ['student' => $seat['student'] ?? '', 'subject' => $seat['subject'] ?? ''] + $period + [
+                'time' => self::weekdayTime($first->starts_at->setTimezone($tz)),
+                'zone' => self::city($tz),
+            ], $action, $key));
+        }
     }
 
     /** Every weekly lesson of a teacher moved for some days: they hear it once. */

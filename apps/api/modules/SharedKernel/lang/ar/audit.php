@@ -37,6 +37,7 @@ return [
             'left' => 'خروج طالب من مجموعة من :on (الحصص: :lessons)',
             'capacity' => 'تغيير مقاعد مجموعة من :from إلى :to',
             'ended' => 'إنهاء مجموعة (الكورسات: :courses، الحصص الملغاة: :lessons)',
+            'settings' => 'إعدادات الحصص الجماعية (التعويض الافتراضي: :late_join، الأعمار المختلطة: :mixed، البدء عند: :min)',
         ],
         'enrollment' => [
             'teacher_changed' => 'تغيير معلّم طالب بدءًا من :starting',

@@ -94,11 +94,14 @@ final class RateCardResource extends Resource
                         ->options(fn () => self::subjects()),
                     Select::make('session_type')->label(__($l.'fields.type'))->placeholder(__($l.'fields.any_type'))->native(false)
                         ->options(collect(SaveRateCard::SESSION_TYPES)->mapWithKeys(fn (string $t) => [$t => __('payroll::payroll.types.'.$t)])->all()),
+                    // A group lesson's fixed rate, whatever its students; without one it is paid as private.
+                    ToggleButtons::make('session_format')->label(__($l.'fields.format'))->inline()->default(RateLine::PRIVATE)
+                        ->options(collect(RateLine::FORMATS)->mapWithKeys(fn (string $f) => [$f => __($l.'formats.'.$f)])->all()),
                     ToggleButtons::make('unit')->label(__($l.'fields.unit'))->inline()->required()->default('hour')
                         ->options(collect(RateLine::UNITS)->mapWithKeys(fn (string $u) => [$u => __($l.'units.'.$u)])->all()),
                     TextInput::make('amount')->label(__($l.'fields.amount'))->numeric()->minValue(0)->required(),
                 ])
-                ->columns(4)->defaultItems(1)->addActionLabel(__($l.'add_line'))->reorderable(false),
+                ->columns(5)->defaultItems(1)->addActionLabel(__($l.'add_line'))->reorderable(false),
             Select::make('teachers')->label(__($l.'fields.teachers'))->helperText(__($l.'fields.teachers_hint'))
                 ->multiple()->native(false)->searchable()->options(fn () => app(PayrollTeachers::class)->options()),
         ]);
@@ -131,7 +134,7 @@ final class RateCardResource extends Resource
                 EditAction::make()
                     ->mutateRecordDataUsing(fn (array $data, RateCard $record) => $data + [
                         'lines' => $record->lines->map(fn (RateCardLine $line) => [
-                            'subject_id' => $line->subject_id, 'session_type' => $line->session_type, 'unit' => $line->unit,
+                            'subject_id' => $line->subject_id, 'session_type' => $line->session_type, 'session_format' => $line->session_format, 'unit' => $line->unit,
                             'amount' => Money::of($line->amount_minor, $record->currency)->decimal(),
                         ])->all(),
                         'teachers' => TeacherRateCard::query()->where('rate_card_id', $record->id)->pluck('teacher_id')->all(),
@@ -167,6 +170,7 @@ final class RateCardResource extends Resource
         $what = implode(' · ', array_filter([
             $line->subject_id ? ($subjects[$line->subject_id] ?? '') : null,
             $line->session_type ? __('payroll::payroll.types.'.$line->session_type) : null,
+            $line->session_format === RateLine::GROUP ? __('payroll::rates.formats.group') : null,
         ])) ?: __('payroll::payroll.mine.any');
 
         return $what.': '.__('payroll::payroll.units.'.$line->unit, ['amount' => Money::of($line->amount_minor, $currency)->format()]);

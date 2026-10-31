@@ -13,8 +13,22 @@ use InvalidArgumentException;
  */
 final class Pay
 {
-    /** @param  iterable<RateLine>  $lines */
-    public static function pick(iterable $lines, string $subjectId, string $sessionType): ?RateLine
+    /**
+     * The best line for a lesson of its format: a group lesson takes the
+     * card's group lines, and falls back to its private ones when none fits.
+     *
+     * @param  iterable<RateLine>  $lines
+     */
+    public static function pick(iterable $lines, string $subjectId, string $sessionType, string $format = RateLine::PRIVATE): ?RateLine
+    {
+        $lines = is_array($lines) ? $lines : iterator_to_array($lines, false);
+        $own = self::bestOf(array_filter($lines, fn (RateLine $l) => $l->format === $format), $subjectId, $sessionType);
+
+        return $own ?? ($format === RateLine::GROUP ? self::bestOf(array_filter($lines, fn (RateLine $l) => $l->format === RateLine::PRIVATE), $subjectId, $sessionType) : null);
+    }
+
+    /** @param  array<RateLine>  $lines */
+    private static function bestOf(array $lines, string $subjectId, string $sessionType): ?RateLine
     {
         $best = null;
         $bestFit = -1;

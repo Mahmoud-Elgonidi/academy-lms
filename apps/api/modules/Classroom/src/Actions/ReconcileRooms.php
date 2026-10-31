@@ -42,7 +42,7 @@ final class ReconcileRooms
                 continue;   // the provider cannot tell (outside link)
             }
             $lesson = $this->attendance->lesson($room->session_id);
-            $people = array_values(array_intersect($present, array_filter([$lesson?->teacherId, $lesson?->studentId])));
+            $people = array_values(array_intersect($present, array_filter([$lesson?->teacherId, ...($lesson?->studentIds() ?? [])])));
             $open = $this->attendance->inClassroom($room->session_id);
 
             foreach (array_diff($people, $open) as $userId) {
