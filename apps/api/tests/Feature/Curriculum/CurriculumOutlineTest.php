@@ -29,7 +29,6 @@ use Modules\Curriculum\Models\Program;
 use Modules\Curriculum\Outline\OutlineSheet;
 use Modules\Curriculum\Outline\Templates;
 use Modules\Curriculum\Outline\TextOutline;
-use Modules\Curriculum\Texts\QuranText;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
 use Modules\Platform\Actions\SaveAiSettings;
@@ -43,12 +42,9 @@ use Modules\SharedKernel\Ai\LanguageModel;
  * The quick ways to start a curriculum (docs/architecture/02, section 6):
  * every way hands back an outline to review, saved to the draft in one
  * transaction by ApplyOutline (limits, audited with counts); the helper's
- * outline is sent the subject and nothing about a person, and for the Quran
- * keeps only numbers the platform's copy has; templates; and a copy of a
- * program of the same academy, its materials pointing at the same files.
- *
- * The Quran here is made up in the shape of Tanzil's files: 114 surahs named
- * "سورة n", each with n % 7 + 3 verses.
+ * outline is sent the subject and nothing about a person; templates; and a
+ * copy of a program of the same academy, its materials pointing at the same
+ * files. (The Quran's outlines and tracks are the Quran module's.)
  */
 
 beforeEach(function () {
@@ -59,32 +55,9 @@ beforeEach(function () {
     $this->subject = app(CatalogApi::class)->createSubject('تحفيظ القرآن', 'Quran');
     $this->program = app(SaveProgram::class)->handle(null, ['subject_id' => $this->subject, 'name_ar' => 'جزء عمّ', 'name_en' => 'Juz Amma']);
     $this->version = $this->program->workingVersion();
-    app()->instance(QuranText::class, new QuranText(oQuran()));
     config(['platform.ai.driver' => 'claude', 'platform.ai.key' => 'a-key-for-the-test']);
     RateLimiter::clear('ai:outline:'.$this->academy->id.':'.$this->admin->id);
 });
-
-/** A made-up Quran of 114 surahs in Tanzil's shape, written once a run. */
-function oQuran(): string
-{
-    $dir = sys_get_temp_dir().'/lms-outline-quran';
-    if (! is_file($dir.'/quran-data.xml')) {
-        @mkdir($dir, 0777, true);
-        $suras = '';
-        $text = '';
-        foreach (range(1, 114) as $s) {
-            $ayas = $s % 7 + 3;
-            $suras .= "<sura index=\"{$s}\" ayas=\"{$ayas}\" start=\"0\" name=\"سورة {$s}\" tname=\"Surah-{$s}\" ename=\"S{$s}\" type=\"Meccan\" order=\"{$s}\" rukus=\"1\" />\n";
-            foreach (range(1, $ayas) as $v) {
-                $text .= "{$s}|{$v}|كلمة{$s} آية{$v} نص\n";
-            }
-        }
-        file_put_contents($dir.'/quran-data.xml', "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n<quran><suras alias=\"chapters\">\n{$suras}</suras><juzs alias=\"parts\"><juz index=\"1\" sura=\"1\" aya=\"1\" /></juzs><pages><page index=\"1\" sura=\"1\" aya=\"1\" /></pages></quran>");
-        file_put_contents($dir.'/quran-simple.txt', $text."\n# A made-up test copy\n");
-    }
-
-    return $dir;
-}
 
 /** A language model that answers what it is given and keeps the prompt it was sent. */
 function oModel(array $answer): object
@@ -138,7 +111,7 @@ it('saves a reviewed outline to the draft in one go, unticked branches left out,
     $rows[1]['on'] = true;
     $rows[5]['on'] = false;                                         // Level two and its lesson stay out
     $rows[] = ['kind' => 'level', 'depth' => 0, 'title_ar' => 'قرآن', 'title_en' => 'Quran'];
-    $rows[] = ['kind' => 'lesson', 'depth' => 1, 'title_ar' => 'سورة 112', 'title_en' => 'Surah 112', 'quran' => ['surah' => 112, 'from' => 1, 'to' => 3]];
+    $rows[] = ['kind' => 'lesson', 'depth' => 1, 'title_ar' => 'سورة 112', 'title_en' => 'Surah 112', 'quran' => ['surah' => 112, 'from' => 1, 'to' => 3]];   // no longer a curriculum's: left out
 
     expect(app(ApplyOutline::class)->handle($this->version, $rows))->toBe(['levels' => 2, 'units' => 1, 'lessons' => 4]);
 
@@ -146,7 +119,7 @@ it('saves a reviewed outline to the draft in one go, unticked branches left out,
         'level Level one', '> unit Unit', '> > lesson Alif', '> > lesson Baa', '> lesson Loose',
         'level Quran', '> lesson Surah 112',
     ])->and(Node::query()->where('title_en', 'Alif')->value('objectives'))->toBe('Knows alif')
-        ->and(Node::query()->where('title_en', 'Surah 112')->first()->text_source)->toEqual(['kind' => 'quran', 'surah' => 112, 'from' => 1, 'to' => 3]);
+        ->and(Node::query()->where('title_en', 'Surah 112')->first()->text_source)->toBeNull();
 
     $log = DB::connection('pgsql_platform')->table('audit_logs')->where('action', 'curriculum.outline_applied')->sole();
     expect(json_decode($log->data, true))->toEqual(['levels' => 2, 'units' => 1, 'lessons' => 4])
@@ -154,15 +127,6 @@ it('saves a reviewed outline to the draft in one go, unticked branches left out,
 });
 
 it('saves all of it or nothing, within the limits, on a draft only', function () {
-    // A passage the platform does not have refuses the whole outline (SaveNode checks it), nothing kept.
-    $rows = [
-        ['kind' => 'level', 'depth' => 0, 'title_ar' => 'L', 'title_en' => 'L'],
-        ['kind' => 'lesson', 'depth' => 1, 'title_ar' => 'a', 'title_en' => 'a'],
-        ['kind' => 'lesson', 'depth' => 1, 'title_ar' => 'b', 'title_en' => 'b', 'quran' => ['surah' => 112, 'from' => 1, 'to' => 40]],
-    ];
-    expect(oRefusal(fn () => app(ApplyOutline::class)->handle($this->version, $rows)))->not->toBeNull()
-        ->and(Node::query()->where('version_id', $this->version->id)->count())->toBe(0);
-
     $many = [['kind' => 'level', 'depth' => 0, 'title_ar' => 'L', 'title_en' => 'L'], ...array_map(fn ($i) => ['kind' => 'lesson', 'depth' => 1, 'title_ar' => "a{$i}", 'title_en' => "a{$i}"], range(1, OutlineRules::LESSONS_MAX + 1))];
     expect(oRefusal(fn () => app(ApplyOutline::class)->handle($this->version, $many)))->toBe(__('curriculum::outline.errors.lessons', ['lessons' => OutlineRules::LESSONS_MAX]));
 
@@ -181,36 +145,32 @@ it('saves all of it or nothing, within the limits, on a draft only', function ()
         ->and(DB::connection('pgsql_platform')->table('audit_logs')->where('action', 'curriculum.outline_applied')->count())->toBe(1);
 });
 
-it('asks the helper with the subject and no one, and keeps for the Quran only numbers the copy has', function () {
+it('asks the helper with the subject and no one, and keeps what fits', function () {
     app(SaveAiSettings::class)->handle(['curriculum_outline' => true], $this->admin->id);
     $model = oModel(['levels' => [[
-        'title_ar' => 'قصار السور', 'title_en' => 'Short surahs', 'units' => [],
+        'title_ar' => 'الحروف', 'title_en' => 'Letters', 'units' => [],
         'lessons' => [
-            ['surah' => 114, 'from' => 1, 'to' => 5, 'objective' => 'الحفظ'],
-            ['surah' => 2, 'from' => 1, 'to' => 3, 'objective' => 'تلاوة كلمة2 آية1 نص بإتقان'],   // the objective writes the Quran: left out
-            ['surah' => 115, 'from' => 1, 'to' => 2, 'objective' => 'x'],                         // no such surah
-            ['surah' => 112, 'from' => 2, 'to' => 9, 'objective' => 'x'],                         // past the surah's end
-            ['surah' => 113, 'from' => 2, 'to' => 3, 'objective' => 'مراجعة'],
+            ['title_ar' => 'الألف', 'title_en' => 'Alif', 'objective' => 'يعرف الألف'],
+            'not a lesson',
+            ['title_ar' => 'الباء', 'title_en' => '', 'objective' => ''],
         ],
     ]]]);
 
-    $result = app(SuggestOutline::class)->handle($this->program, ['goal' => 'حفظ قصار السور', 'lessons' => 10, 'age' => 'kids', 'quran' => true], $this->admin->id);
+    $result = app(SuggestOutline::class)->handle($this->program, ['goal' => 'قراءة الحروف', 'lessons' => 10, 'age' => 'kids'], $this->admin->id);
 
-    expect($result['dropped'])->toBe(2)
-        ->and(array_map(fn ($r) => [$r['kind'], $r['title_ar'], $r['objective'], $r['quran']], $result['rows']))->toBe([
-            ['level', 'قصار السور', null, null],
-            ['lesson', 'سورة سورة 114', 'الحفظ', ['surah' => 114, 'from' => 1, 'to' => 5]],
-            ['lesson', 'سورة سورة 2 (1–3)', null, ['surah' => 2, 'from' => 1, 'to' => 3]],
-            ['lesson', 'سورة سورة 113 (2–3)', 'مراجعة', ['surah' => 113, 'from' => 2, 'to' => 3]],
+    expect($result['dropped'])->toBe(1)
+        ->and(array_map(fn ($r) => [$r['kind'], $r['title_ar'], $r['title_en'], $r['objective']], $result['rows']))->toBe([
+            ['level', 'الحروف', 'Letters', null],
+            ['lesson', 'الألف', 'Alif', 'يعرف الألف'],
+            ['lesson', 'الباء', 'الباء', null],
         ])
-        ->and($result['rows'][1]['title_en'])->toBe('Surah Surah-114')
         ->and(Node::query()->count())->toBe(0);                     // nothing saved
 
-    expect($model->prompt->user)->toContain('Subject: Quran')->toContain('children aged 6 to 9')->toContain('about 10')->toContain('حفظ قصار السور')
-        ->toContain('only by numbers')->not->toContain('Huda')->not->toContain('huda@noor.test')
+    expect($model->prompt->user)->toContain('Subject: Quran')->toContain('children aged 6 to 9')->toContain('about 10')->toContain('قراءة الحروف')
+        ->not->toContain('Huda')->not->toContain('huda@noor.test')->not->toContain('surah')
         ->and($model->prompt->tier)->toBe('best')
-        ->and($model->prompt->schema['properties']['levels']['items']['properties']['lessons']['items']['required'])->toBe(['surah', 'from', 'to', 'objective'])
-        ->and($model->prompt->system)->toContain('never write any of the Quran');
+        ->and($model->prompt->schema['properties']['levels']['items']['properties']['lessons']['items']['required'])->toBe(['title_ar', 'title_en', 'objective'])
+        ->and($model->prompt->system)->not->toContain('Quran');
 });
 
 it('suggests nothing while the helper is off, and says why when it fails', function () {
@@ -226,44 +186,32 @@ it('suggests nothing while the helper is off, and says why when it fails', funct
         ->and(oRefusal(fn () => app(SuggestOutline::class)->handle($this->program, ['lessons' => 301] + $ask, $this->admin->id)))->toBe(__('curriculum::outline.ai.errors.lessons', ['max' => OutlineRules::LESSONS_MAX]));
 });
 
-it('runs on the demo\'s answer: the academy\'s levels, or the last surahs for the Quran', function () {
+it('runs on the demo\'s answer: the academy\'s levels', function () {
     config(['platform.ai.driver' => 'demo', 'platform.ai.key' => '']);
     app()->forgetInstance(LanguageModel::class);
     app(SaveAiSettings::class)->handle(['curriculum_outline' => true], $this->admin->id);
 
     $plain = app(SuggestOutline::class)->handle($this->program, ['goal' => 'x', 'lessons' => 4, 'age' => 'any'], $this->admin->id)['rows'];
-    $quran = app(SuggestOutline::class)->handle($this->program, ['goal' => 'x', 'lessons' => 3, 'age' => 'any', 'quran' => true], $this->admin->id)['rows'];
 
-    expect(OutlineRules::counts($plain))->toBe(['levels' => 2, 'units' => 0, 'lessons' => 4])
-        ->and(array_column(array_filter($quran, fn ($r) => $r['kind'] === 'lesson'), 'quran'))->toBe([
-            ['surah' => 114, 'from' => 1, 'to' => 5], ['surah' => 113, 'from' => 1, 'to' => 4], ['surah' => 112, 'from' => 1, 'to' => 3],
-        ]);
+    expect(OutlineRules::counts($plain))->toBe(['levels' => 2, 'units' => 0, 'lessons' => 4]);
 });
 
-it('offers templates in both languages, Juz Amma from the platform\'s names only while it has them', function () {
+it('offers templates in both languages', function () {
     $templates = app(Templates::class);
-    $juz = $templates->rows('juz_amma');
     $letters = $templates->rows('arabic_letters');
     $english = OutlineRules::clean($templates->rows('english_cefr'))['rows'];
-    $noorani = $templates->rows('noorani');
 
     expect(array_keys($templates->options()))->toBe(Templates::KEYS)
-        ->and(count($juz))->toBe(38)
-        ->and($juz[1])->toMatchArray(['title_ar' => 'سورة سورة 114', 'title_en' => 'Surah Surah-114', 'quran' => ['surah' => 114, 'from' => 1, 'to' => 5]])
-        ->and(end($juz)['quran'])->toBe(['surah' => 78, 'from' => 1, 'to' => 4])
+        ->and(Templates::KEYS)->toBe(['arabic_letters', 'english_cefr'])
+        ->and($templates->rows('juz_amma'))->toBe([])
         ->and(count($letters))->toBe(29)
         ->and($letters[2])->toMatchArray(['title_ar' => 'حرف الباء (ب)', 'title_en' => 'The letter Baa (ب)'])
         ->and(OutlineRules::counts($english))->toBe(['levels' => 5, 'units' => 20, 'lessons' => 60])
-        ->and($english[0]['title_en'])->toBe('Level A1')
-        ->and(count($noorani))->toBe(18);
+        ->and($english[0]['title_en'])->toBe('Level A1');
 
-    // Saved as they are, the Quran's text from the copy.
-    app(ApplyOutline::class)->handle($this->version, $juz);
-    expect(Node::query()->where('kind', 'lesson')->count())->toBe(37);
-
-    app()->instance(QuranText::class, new QuranText(base_path('tests/Fixtures/nowhere')));
-    expect(app(Templates::class)->options())->not->toHaveKey('juz_amma')
-        ->and(app(Templates::class)->rows('juz_amma'))->toBe([]);
+    // Saved as they are.
+    app(ApplyOutline::class)->handle($this->version, $letters);
+    expect(Node::query()->where('kind', 'lesson')->count())->toBe(28);
 });
 
 it('reads the example sheet it hands out', function () {
@@ -279,7 +227,7 @@ it('copies a program with its practice, texts and materials, the files shared an
     Storage::fake('local');
     $level = app(SaveNode::class)->handle($this->version, null, ['kind' => 'level', 'title_ar' => 'م', 'title_en' => 'L']);
     $unit = app(SaveNode::class)->handle($this->version, null, ['kind' => 'unit', 'parent_id' => $level->id, 'title_ar' => 'و', 'title_en' => 'U']);
-    $lesson = app(SaveNode::class)->handle($this->version, null, ['kind' => 'lesson', 'parent_id' => $unit->id, 'title_ar' => 'د', 'title_en' => 'A', 'objectives' => 'Goal', 'weight' => 3, 'est_sessions' => 2, 'mastery_rule' => 'score_twice', 'text_source' => ['kind' => 'quran', 'surah' => 112, 'from' => 1, 'to' => 3]]);
+    $lesson = app(SaveNode::class)->handle($this->version, null, ['kind' => 'lesson', 'parent_id' => $unit->id, 'title_ar' => 'د', 'title_en' => 'A', 'objectives' => 'Goal', 'weight' => 3, 'est_sessions' => 2, 'mastery_rule' => 'score_twice', 'text_source' => ['kind' => 'text', 'text' => 'نص الدرس']]);
     app(SaveNode::class)->handle($this->version, null, ['kind' => 'lesson', 'parent_id' => $level->id, 'title_ar' => 'ب', 'title_en' => 'B']);
     app(SaveNodeItems::class)->handle($lesson, [['kind' => 'pair', 'left' => 'a', 'right' => 'b'], ['kind' => 'choice', 'prompt' => 'Q', 'options' => ['x', 'y'], 'answer' => 1]], $this->admin->id);
     $file = app(AddNodeResource::class)->handle($lesson, ['kind' => 'file', 'audience' => 'teachers'], UploadedFile::fake()->create('page.pdf', 30, 'application/pdf'), $this->admin->id);
@@ -294,7 +242,7 @@ it('copies a program with its practice, texts and materials, the files shared an
         ->and(oTree($version->id))->toBe(oTree($this->version->id));
     $copied = Node::query()->where('version_id', $version->id)->where('title_en', 'A')->sole();
     expect($copied->only(['objectives', 'weight', 'est_sessions', 'mastery_rule']))->toBe(['objectives' => 'Goal', 'weight' => 3, 'est_sessions' => 2, 'mastery_rule' => 'score_twice'])
-        ->and($copied->text_source)->toEqual(['kind' => 'quran', 'surah' => 112, 'from' => 1, 'to' => 3])
+        ->and($copied->text_source)->toEqual(['kind' => 'text', 'text' => 'نص الدرس'])
         ->and(NodeItem::query()->where('node_id', $copied->id)->orderBy('ordinal')->pluck('kind')->all())->toBe(['pair', 'choice']);
     $materials = NodeResource::query()->where('node_id', $copied->id)->orderBy('ordinal')->get();
     expect($materials->pluck('kind')->all())->toBe(['file', 'link'])
@@ -383,12 +331,12 @@ it('starts from the helper\'s outline when it is on, says why when it is off, an
         ->assertMountedActionModalSee(__('curriculum::outline.ai.off'));
 
     app(SaveAiSettings::class)->handle(['curriculum_outline' => true], $this->admin->id);
-    oModel(['levels' => [['title_ar' => 'المستوى الأول', 'title_en' => 'Level one', 'units' => [], 'lessons' => [['surah' => 112, 'from' => 1, 'to' => 3, 'objective' => 'الحفظ']]]]]);
+    oModel(['levels' => [['title_ar' => 'المستوى الأول', 'title_en' => 'Level one', 'units' => [], 'lessons' => [['title_ar' => 'الألف', 'title_en' => 'Alif', 'objective' => 'يعرف الألف']]]]]);
     Livewire::test(EditCurriculum::class, ['record' => $this->program->id])
-        ->callAction('startAi', ['goal' => 'حفظ', 'lessons' => 5, 'age' => 'kids', 'quran' => true])
+        ->callAction('startAi', ['goal' => 'الحروف', 'lessons' => 5, 'age' => 'kids'])
         ->assertActionMounted('reviewOutline')
         ->callMountedAction();
-    expect(oTree($this->version->id))->toBe(['level Level one', '> lesson Surah Surah-112']);
+    expect(oTree($this->version->id))->toBe(['level Level one', '> lesson Alif']);
 
     // A failing helper says so and keeps the form.
     $failing = new class implements LanguageModel
@@ -410,7 +358,7 @@ it('starts from the helper\'s outline when it is on, says why when it is off, an
         ->callAction(TestAction::make('startCopy'), ['program' => $this->program->id])
         ->assertNotified(__('curriculum::outline.copy.done', ['levels' => 1, 'lessons' => 1]))
         ->assertDontSee(__('curriculum::outline.ways.copy.label'));
-    expect(oTree($second->workingVersion()->id))->toBe(['level Level one', '> lesson Surah Surah-112']);
+    expect(oTree($second->workingVersion()->id))->toBe(['level Level one', '> lesson Alif']);
 });
 
 it('copies a program as a new one from the programs list', function () {

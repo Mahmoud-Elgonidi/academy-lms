@@ -5,13 +5,14 @@ use Database\Seeders\DemoCatchUpSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Modules\Curriculum\Contracts\CurriculumApi;
-use Modules\Curriculum\Contracts\DTOs\TextSource;
-use Modules\Curriculum\Texts\QuranText;
 use Modules\Learning\Contracts\LearningApi;
 use Modules\Platform\Actions\Plans\ChangeAcademyPlan;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\Platform\Models\SaasPlan;
 use Modules\Platform\Models\SaasSubscription;
+use Modules\Quran\Contracts\DTOs\VerseRange;
+use Modules\Quran\Contracts\QuranApi;
+use Modules\Quran\Texts\QuranText;
 use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
@@ -82,7 +83,7 @@ it('does nothing on a server without the demo academy', function () {
 
 it('brings a demo made before the Quran\'s text up to date, once', function () {
     SaasPlan::query()->create(['code' => 'pro', 'name_ar' => 'الاحتراف', 'name_en' => 'Pro', 'max_teachers' => 75, 'max_active_students' => 1000,
-        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll']]);
+        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll', 'quran']]);
     app()->instance(QuranText::class, new QuranText(base_path('tests/Fixtures/none')));
     $this->seed(DatabaseSeeder::class);
     $this->clearTenant();
@@ -93,17 +94,18 @@ it('brings a demo made before the Quran\'s text up to date, once', function () {
     app(ChangeAcademyPlan::class)->handle($demo->id, $before->plan_id, 'خطة الديمو قبل المساعدات', $before->limits);
     AuditActor::forget();
     $state = fn () => inDemo(fn () => [
-        'texts' => DB::table('curriculum_nodes')->whereNotNull('text_source')->count(),
+        'texts' => DB::table('quran_lesson_passages')->count(),
+        'quran_subjects' => DB::table('subjects')->where('kind', 'quran')->count(),
         'maps' => DB::table('hifz_pages')->distinct()->count('student_id'),
         'reviews' => DB::table('hifz_reviews')->count(),
         'marks' => DB::table('recitation_mistakes')->count(),
         'from_marks' => DB::table('hifz_reviews')->where('source', 'mistakes')->count(),
     ]);
-    expect($state())->toBe(['texts' => 0, 'maps' => 0, 'reviews' => 0, 'marks' => 0, 'from_marks' => 0]);
+    expect($state())->toBe(['texts' => 0, 'quran_subjects' => 1, 'maps' => 0, 'reviews' => 0, 'marks' => 0, 'from_marks' => 0]);
 
     // Before the text reaches the server: only the plan's area.
     $this->seed(DemoCatchUpSeeder::class);
-    expect($state())->toBe(['texts' => 0, 'maps' => 0, 'reviews' => 0, 'marks' => 0, 'from_marks' => 0])
+    expect($state())->toBe(['texts' => 0, 'quran_subjects' => 1, 'maps' => 0, 'reviews' => 0, 'marks' => 0, 'from_marks' => 0])
         ->and(SaasSubscription::currentFor($demo->id)->features_on)->toBe(['ai']);
 
     catchUpTextArrives();
@@ -117,7 +119,7 @@ it('brings a demo made before the Quran\'s text up to date, once', function () {
     // The marks are words that are there, on the lesson's own passage.
     inDemo(function () {
         $mark = DB::table('recitation_mistakes')->first();
-        $words = app(CurriculumApi::class)->passage(TextSource::quran($mark->surah, $mark->verse, $mark->verse))->words;
+        $words = app(QuranApi::class)->passage(VerseRange::of($mark->surah, $mark->verse, $mark->verse))->words;
         expect($mark->word)->toBeLessThanOrEqual(count($words));
     });
 

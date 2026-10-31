@@ -3,14 +3,12 @@
 namespace Modules\Curriculum\Practice;
 
 use Modules\Curriculum\Contracts\DTOs\Passage;
-use Modules\Curriculum\Texts\QuranText;
 
 /**
  * Turns the model's answer into items a teacher may save: each {{a-b}}
  * becomes the passage's own words as kept, an order item's word range is
  * cut into its parts here, and an item is dropped when it quotes outside
- * the passage, writes three words of the Quran itself instead of quoting
- * them, or misses ItemRules. Nothing is saved: the teacher sees them first.
+ * the passage or misses ItemRules. Nothing is saved: the teacher sees them first.
  */
 final class Suggestions
 {
@@ -24,13 +22,13 @@ final class Suggestions
      * @param  list<string>  $existing  summaries of the lesson's items, not to be offered again
      * @return array{items: list<array<string, mixed>>, dropped: int}
      */
-    public static function read(array $data, ?Passage $passage, QuranText $quran, int $count, array $existing = []): array
+    public static function read(array $data, ?Passage $passage, int $count, array $existing = []): array
     {
         $items = [];
         $dropped = 0;
         $seen = array_flip(array_map('mb_strtolower', $existing));
         foreach (array_slice(array_values((array) ($data['items'] ?? [])), 0, $count) as $raw) {
-            $item = is_array($raw) ? self::item($raw, $passage, $quran) : null;
+            $item = is_array($raw) ? self::item($raw, $passage) : null;
             $key = $item ? mb_strtolower(self::summary($item)) : null;
             if ($item === null || isset($seen[$key])) {
                 $dropped++;
@@ -48,7 +46,7 @@ final class Suggestions
      * @param  array<string, mixed>  $raw
      * @return ?array<string, mixed>
      */
-    private static function item(array $raw, ?Passage $passage, QuranText $quran): ?array
+    private static function item(array $raw, ?Passage $passage): ?array
     {
         $kind = $raw['kind'] ?? null;
         $texts = match ($kind) {
@@ -58,12 +56,6 @@ final class Suggestions
             default => null,
         };
         if ($texts === null) {
-            return null;
-        }
-
-        // What the model wrote itself, references aside: never the Quran's words.
-        $own = implode(' ', array_map(fn ($t) => preg_replace(self::QUOTE, ' ', (string) $t) ?? '', [$texts['prompt'] ?? '', ...($texts['options'] ?? []), $texts['left'] ?? '', $texts['right'] ?? '']));
-        if ($passage?->source->isQuran() && $quran->quotes($own)) {
             return null;
         }
 

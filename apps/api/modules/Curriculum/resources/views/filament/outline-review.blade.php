@@ -23,14 +23,13 @@
         .cb-orow[data-kind="unit"] .cb-orow-kind { background: var(--gray-100); color: var(--gray-700); }
         .cb-orow[data-kind="lesson"] .cb-orow-kind { background: transparent; color: var(--gray-500); }
         .cb-orow-note { flex: none; max-width: 40%; font-size: .72rem; color: var(--gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .cb-orow-quran { flex: none; font-size: .68rem; font-weight: 600; padding: 0 .45rem; border-radius: 999px; background: var(--primary-50); color: var(--primary-700); }
         .cb-orow button { flex: none; border: 0; background: none; color: var(--gray-400); cursor: pointer; padding: .15rem .35rem; border-radius: .35rem; font-size: .8rem; }
         .cb-orow button:hover { color: var(--danger-600); background: var(--danger-50); }
         .cb-outline-empty { color: var(--gray-500); font-size: .875rem; }
         .dark .cb-orow[data-kind="level"] { background: var(--gray-800); }
         .dark .cb-orow input[type="text"]:focus { background: var(--gray-900); }
         .dark .cb-outline-sum { color: var(--gray-300); }
-        .dark .cb-orow-kind, .dark .cb-orow-quran { background: color-mix(in oklab, var(--primary-500) 18%, transparent); color: var(--primary-300); }
+        .dark .cb-orow-kind { background: color-mix(in oklab, var(--primary-500) 18%, transparent); color: var(--primary-300); }
         .dark .cb-orow[data-kind="unit"] .cb-orow-kind { background: var(--gray-800); color: var(--gray-300); }
     </style>
 
@@ -48,9 +47,6 @@
                     <input type="checkbox" wire:model.live="outline.{{ $i }}.on" aria-label="{{ __($r.'include') }}" class="fi-checkbox-input">
                     <span class="cb-orow-kind">{{ __('curriculum::curriculum.kinds.'.$row['kind']) }}</span>
                     <input type="text" wire:model.blur="outline.{{ $i }}.{{ $field }}" maxlength="{{ $rules::TITLE_MAX }}" dir="auto" aria-label="{{ __('curriculum::curriculum.builder.quick.title') }}">
-                    @if (! empty($row['quran']))
-                        <span class="cb-orow-quran">{{ __($r.'quran') }}</span>
-                    @endif
                     @if (! empty($row['objective']))
                         <span class="cb-orow-note" title="{{ $row['objective'] }}">{{ __($r.'objective') }}: {{ $row['objective'] }}</span>
                     @endif

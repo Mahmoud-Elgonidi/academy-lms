@@ -19,8 +19,7 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Url;
 use Modules\Identity\Contracts\PersonalChannel;
 use Modules\Learning\Actions\ReviewHomework;
-use Modules\Learning\Assist\RecitationTarget;
-use Modules\Learning\Http\V1\Resources\RecitationPresenter;
+use Modules\Learning\Contracts\LearningQuran;
 use Modules\Learning\Models\Homework;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Time\Clock;
@@ -122,8 +121,8 @@ final class HomeworkToMark extends Page implements HasTable
                     ->modalHeading(fn (Homework $h) => $h->title.' · '.$h->getAttribute('student_name'))
                     ->modalContent(fn (Homework $h) => view('learning::filament.teacher.submissions', [
                         'homework' => $h, 'at' => $at,
-                        'expected' => app(RecitationTarget::class)->present($h->expectedSource()),
-                        'checks' => app(RecitationPresenter::class)->checks($h),
+                        'target' => app(LearningQuran::class)->targetView($h->expected),
+                        'checks' => array_map(fn (array $c) => app(LearningQuran::class)->checkView($c), app(LearningQuran::class)->checks($h->id, $h->expected)),
                     ]))
                     ->schema(fn (Homework $h) => $h->status === 'submitted' ? [
                         ToggleButtons::make('grade')->label(__('learning::teacher.homework.grade'))->inline()->options(array_combine(range(1, 5), array_map('strval', range(1, 5)))),

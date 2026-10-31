@@ -63,6 +63,11 @@ enum Ability: string
     case ManageSite = 'site.manage';
     case ManageSecurity = 'security.manage';
     case ManageAcademyTimezone = 'academy.manage-timezone';
+    // The Quran module (docs/architecture/02, section 26): its settings and programs, teaching it, examining, the board.
+    case ManageQuran = 'quran.manage';
+    case TeachQuran = 'quran.teach';
+    case ExamineQuran = 'quran.examine';
+    case ViewQuranBoard = 'quran.board';
 
     /** The plan area this ability belongs to, if a plan may leave it out. */
     public function feature(): ?Feature
@@ -72,6 +77,7 @@ enum Ability: string
             self::ManagePayroll, self::ViewOwnEarnings => Feature::Payroll,
             self::ImportData => Feature::Import,
             self::ManageAi => Feature::Ai,
+            self::ManageQuran, self::TeachQuran, self::ExamineQuran, self::ViewQuranBoard => Feature::Quran,
             default => null,
         };
     }

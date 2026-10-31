@@ -13,7 +13,6 @@ use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Enrollment\Contracts\Events\CurriculumAttached;
 use Modules\Learning\Console\SendWeeklyDigestsCommand;
 use Modules\Learning\Console\SweepLearningCommand;
-use Modules\Learning\Console\TryRecitationCommand;
 use Modules\Learning\Contracts\Events\CheerSent;
 use Modules\Learning\Contracts\Events\HomeworkAssigned;
 use Modules\Learning\Contracts\Events\HomeworkReviewed;
@@ -22,24 +21,24 @@ use Modules\Learning\Contracts\Events\NodeMastered;
 use Modules\Learning\Contracts\Events\SessionReportOverdue;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
 use Modules\Learning\Contracts\JourneyGames;
+use Modules\Learning\Contracts\JourneyQuran;
 use Modules\Learning\Contracts\LearningApi;
+use Modules\Learning\Contracts\LearningQuran;
+use Modules\Learning\Contracts\NoJourneyQuran;
+use Modules\Learning\Contracts\NoLearningQuran;
 use Modules\Learning\Filament\Family\FamilyJourney;
 use Modules\Learning\Filament\LearningPlugin;
 use Modules\Learning\Filament\Pages\ReportsOversight;
 use Modules\Learning\Filament\Teacher\HomeworkToMark;
 use Modules\Learning\Filament\Teacher\WriteReport;
-use Modules\Learning\Hifz\HifzFromLessons;
 use Modules\Learning\Http\Web\MaterialController;
 use Modules\Learning\Http\Web\SubmissionFileController;
 use Modules\Learning\Http\Web\WeeklyVoiceController;
 use Modules\Learning\LearningService;
 use Modules\Learning\Listeners\OpenReportWhenSessionCloses;
-use Modules\Learning\Listeners\QueueRecitationCheck;
 use Modules\Learning\Listeners\RebuildProgressOnProgramChange;
 use Modules\Learning\Listeners\SendLearningNotifications;
-use Modules\Learning\Live\HifzChanged;
 use Modules\Learning\Live\HomeworkChanged;
-use Modules\Learning\Live\MushafChanged;
 use Modules\Learning\Live\PracticeChanged;
 use Modules\Learning\Privacy\LearningData;
 use Modules\Learning\Queries\Journey\NoJourneyGames;
@@ -59,6 +58,9 @@ final class LearningServiceProvider extends ServiceProvider
         $this->app->singleton(LearningApi::class, LearningService::class);
         // The journey without games until the Games module binds its own.
         $this->app->bindIf(JourneyGames::class, NoJourneyGames::class);
+        // Reports, homework and the journey ask nothing of the Quran until the Quran module binds its own.
+        $this->app->bindIf(LearningQuran::class, NoLearningQuran::class);
+        $this->app->bindIf(JourneyQuran::class, NoJourneyQuran::class);
     }
 
     public function boot(): void
@@ -111,9 +113,6 @@ final class LearningServiceProvider extends ServiceProvider
         Event::listen(HomeworkReviewed::class, [SendLearningNotifications::class, 'homeworkReviewed']);
         Event::listen(NodeMastered::class, [SendLearningNotifications::class, 'nodeMastered']);
         Event::listen(HomeworkSubmitted::class, [SendLearningNotifications::class, 'homeworkSubmitted']);
-        Event::listen(HomeworkSubmitted::class, QueueRecitationCheck::class);
-        // A report on a lesson of the Quran reviews its pages on the learner's hifz map.
-        Event::listen(SessionReportSubmitted::class, [HifzFromLessons::class, 'reportSubmitted']);
         Event::listen(SessionReportOverdue::class, [SendLearningNotifications::class, 'reportOverdue']);
         Event::listen(CheerSent::class, [SendLearningNotifications::class, 'cheerSent']);
         Event::listen(SessionFinalized::class, [SendLearningNotifications::class, 'lessonStars']);
@@ -122,12 +121,9 @@ final class LearningServiceProvider extends ServiceProvider
         // Homework pages refresh when homework changes (the homework triggers raise "homework:{person}").
         $this->app->make(LiveSignals::class)->on('homework', fn (string $userId) => new HomeworkChanged($userId));
         $this->app->make(LiveSignals::class)->on('practice', fn (string $userId) => new PracticeChanged($userId));
-        // The hifz map refreshes when a page is reviewed, marked or recited (the hifz triggers raise "hifz:{person}").
-        $this->app->make(LiveSignals::class)->on('hifz', fn (string $userId) => new HifzChanged($userId));
-        $this->app->make(LiveSignals::class)->on('mushaf', fn (string $userId) => new MushafChanged($userId));
 
         if ($this->app->runningInConsole()) {
-            $this->commands([SweepLearningCommand::class, TryRecitationCommand::class, SendWeeklyDigestsCommand::class]);
+            $this->commands([SweepLearningCommand::class, SendWeeklyDigestsCommand::class]);
         }
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {

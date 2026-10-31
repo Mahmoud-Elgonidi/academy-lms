@@ -20,7 +20,7 @@ use Modules\SharedKernel\Time\ViewerTimezone;
 
 /**
  * The learner's homework: what is still to do, with the answer written,
- * a file or a recording made right here (Quran recitation, reading), or
+ * a file or a recording made right here (reciting, reading), or
  * played in the games when it asks for practice (the round opens on the
  * journey, and its result shows here); then what was handed in, with the
  * teacher's mark.

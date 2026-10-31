@@ -6,14 +6,12 @@ use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
 use Modules\Curriculum\Contracts\DTOs\Passage;
 use Modules\Curriculum\Contracts\DTOs\ProgramOption;
-use Modules\Curriculum\Contracts\DTOs\QuranPage;
 use Modules\Curriculum\Contracts\DTOs\ResourceFile;
 use Modules\Curriculum\Contracts\DTOs\TextSource;
 use Modules\Curriculum\Models\Node;
 use Modules\Curriculum\Models\NodeItem;
 use Modules\Curriculum\Models\NodeResource;
 use Modules\Curriculum\Models\Program;
-use Modules\Curriculum\Texts\QuranText;
 
 final class CurriculumService implements CurriculumApi
 {
@@ -87,35 +85,9 @@ final class CurriculumService implements CurriculumApi
 
     public function passage(TextSource $source): ?Passage
     {
-        if ($source->isQuran()) {
-            return app(QuranText::class)->passage($source);
-        }
-        $words = preg_split('/\s+/u', trim((string) $source->text), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $words = preg_split('/\s+/u', trim($source->text), -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
-        return $words === [] ? null : new Passage($source, '', $words);
-    }
-
-    public function surahs(): array
-    {
-        return app(QuranText::class)->surahs();
-    }
-
-    public function quranPages(): array
-    {
-        return app(QuranText::class)->pages();
-    }
-
-    public function quranPagesOf(TextSource $source): array
-    {
-        return $source->isQuran() ? app(QuranText::class)->pagesOf((int) $source->surah, (int) $source->from, (int) $source->to) : [];
-    }
-
-    public function quranPage(int $page): ?QuranPage
-    {
-        $quran = app(QuranText::class);
-        $found = $quran->page($page);
-
-        return $found === null ? null : new QuranPage($found['page'], $found['juz'], $found['verses'], $found['words'], $found['surahs'], $quran->notice());
+        return $words === [] ? null : new Passage($source, $words);
     }
 
     private function option(Program $program): ProgramOption

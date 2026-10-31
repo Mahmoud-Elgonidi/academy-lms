@@ -3,7 +3,7 @@
 namespace Modules\SharedKernel\Text;
 
 /**
- * Where the platform's copy of the Quran comes from (Curriculum binds it:
+ * Where the platform's copy of the Quran comes from (the Quran module binds it:
  * Tanzil's files, fetched to the server and checked before they are kept),
  * for the console to show and to fetch it again. Default: none.
  */

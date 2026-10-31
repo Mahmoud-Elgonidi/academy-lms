@@ -10,9 +10,9 @@ use Illuminate\Validation\ValidationException;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
 use Modules\Enrollment\Contracts\EnrollmentApi;
-use Modules\Learning\Assist\RecitationTarget;
 use Modules\Learning\Contracts\Events\NodeMastered;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
+use Modules\Learning\Contracts\LearningQuran;
 use Modules\Learning\Domain\MasteryRule;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\LearningSettings;
@@ -36,7 +36,7 @@ final class SubmitSessionReport
         private readonly CurriculumApi $curriculum,
         private readonly ProjectProgress $project,
         private readonly AssignHomework $assign,
-        private readonly RecitationTarget $recitation,
+        private readonly LearningQuran $recitation,
     ) {}
 
     /**
@@ -56,7 +56,7 @@ final class SubmitSessionReport
         // What the homework asks to recite, for the teacher's check: left as it is unless the form says.
         $given = is_array($data['homework'] ?? null) ? $data['homework'] : [];
         $expected = array_key_exists('expected', $given) && trim((string) ($given['title'] ?? '')) !== ''
-            ? ['value' => $this->recitation->from($given['expected'], (string) ($given['accepts'] ?? 'any'), $report->homework()->first()?->expected)]
+            ? ['value' => $this->recitation->recitationTarget($given['expected'], (string) ($given['accepts'] ?? 'any'), $report->homework()->first()?->expected)]
             : [];
 
         DB::transaction(function () use ($report, $actorId, $data, $template, $answers, $expected) {
@@ -147,7 +147,7 @@ final class SubmitSessionReport
      * learner practises their items in the games.
      *
      * @param  array{title?: ?string, instructions?: ?string, accepts?: ?string, due_days?: ?int, practice?: ?bool}|null  $input
-     * @param  array{value?: ?array<string, mixed>}  $expected  what to recite, when the form says (RecitationTarget)
+     * @param  array{value?: ?array<string, mixed>}  $expected  what to recite, when the form says (LearningQuran)
      */
     private function homework(SessionReport $report, string $actorId, ?array $input, CarbonImmutable $now, array $expected = []): void
     {

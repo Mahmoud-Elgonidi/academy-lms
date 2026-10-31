@@ -29,6 +29,7 @@ use Modules\Messaging\Filament\Family\MessagingFamilyPlugin;
 use Modules\People\Filament\Family\PeopleFamilyPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
 use Modules\Privacy\Filament\Family\PrivacyFamilyPlugin;
+use Modules\Quran\Filament\Family\QuranFamilyPlugin;
 use Modules\Safeguarding\Filament\Family\SafeguardingFamilyPlugin;
 use Modules\Scheduling\Filament\Family\SchedulingFamilyPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
@@ -85,6 +86,7 @@ final class FamilyPanelProvider extends PanelProvider
                 PeopleFamilyPlugin::make(),
                 SchedulingFamilyPlugin::make(),
                 LearningFamilyPlugin::make(),
+                QuranFamilyPlugin::make(),
                 BillingFamilyPlugin::make(),
                 ClassroomFamilyPlugin::make(),
                 SupportFamilyPlugin::make(),

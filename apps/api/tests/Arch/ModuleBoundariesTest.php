@@ -6,7 +6,7 @@
  * no cycles, and only platform code may use the BYPASSRLS connection.
  */
 
-const MODULES_ABOVE_KERNEL = ['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging', 'Modules\Games', 'Modules\Announcements', 'Modules\Site', 'App'];
+const MODULES_ABOVE_KERNEL = ['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging', 'Modules\Games', 'Modules\Announcements', 'Modules\Site', 'Modules\Quran', 'App'];
 
 arch('the shared kernel depends on no module')
     ->expect('Modules\SharedKernel')
@@ -272,6 +272,27 @@ arch('games sit on top: practice from curriculum and learning, the look from peo
     ->and(['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging'])
     ->not->toUse('Modules\Games');
 
+arch('the Quran sits on top: learning, lessons, courses, people, the catalog and the classroom through their contracts and the tables it reads, and nothing depends on it')
+    ->expect('Modules\Quran')
+    ->not->toUse([
+        'Modules\Platform', 'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\Identity\Preferences', 'Modules\Identity\Authorization',
+        'Modules\People\Models', 'Modules\People\Actions', 'Modules\People\Filament', 'Modules\People\Checks',
+        'Modules\Catalog\Models', 'Modules\Catalog\Actions', 'Modules\Catalog\Filament', 'Modules\Curriculum',
+        'Modules\Learning\Actions', 'Modules\Learning\Queries', 'Modules\Learning\Domain', 'Modules\Learning\Filament', 'Modules\Learning\Http',
+        'Modules\Enrollment\Models', 'Modules\Enrollment\Actions',
+        'Modules\Scheduling\Domain', 'Modules\Scheduling\Actions', 'Modules\Scheduling\Queries', 'Modules\Scheduling\Filament',
+        'Modules\Classroom\Models', 'Modules\Classroom\Actions', 'Modules\Classroom\Http', 'Modules\Classroom\Filament',
+        'Modules\Credits', 'Modules\Billing', 'Modules\Communication', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import',
+        'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging', 'Modules\Games', 'Modules\Announcements', 'Modules\Site', 'App',
+    ])
+    ->ignoring('Modules\Quran\Database')
+    ->and(['Modules\SharedKernel', 'Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging', 'Modules\Games', 'Modules\Announcements', 'Modules\Site'])
+    ->not->toUse('Modules\Quran');
+
+arch('the hifz map\'s spaced repetition is pure: dates and numbers only')
+    ->expect('Modules\Quran\Domain')
+    ->toOnlyUse(['Carbon\CarbonImmutable', 'Modules\Quran\Domain', 'InvalidArgumentException']);
+
 arch('an outside service\'s faults are read purely: its code in, our words out')
     ->expect('Modules\SharedKernel\Health\Faults')
     ->toOnlyUse(['Modules\SharedKernel\Health\ServiceFault', 'Modules\SharedKernel\Health\ServiceProblem', 'data_get']);
@@ -321,7 +342,7 @@ arch('what the academy\'s page says is checked words alone: text in, content out
     ->toOnlyUse(['Modules\Site\Domain', 'Illuminate\Support\Facades\Validator', 'Illuminate\Validation\ValidationException', '__']);
 
 arch('each module says what it holds about a person through the shared kernel\'s PersonalDataSource')
-    ->expect(['Modules\Identity\Privacy', 'Modules\People\Privacy', 'Modules\Communication\Privacy', 'Modules\Learning\Privacy', 'Modules\Scheduling\Privacy', 'Modules\Enrollment\Privacy', 'Modules\Billing\Privacy', 'Modules\Evaluation\Privacy', 'Modules\Classroom\Privacy', 'Modules\Support\Privacy', 'Modules\Crm\Privacy', 'Modules\Payroll\Privacy', 'Modules\Import\Privacy', 'Modules\Safeguarding\Privacy', 'Modules\Messaging\Privacy', 'Modules\Games\Privacy', 'Modules\Announcements\Privacy', 'Modules\Site\Privacy'])
+    ->expect(['Modules\Identity\Privacy', 'Modules\People\Privacy', 'Modules\Communication\Privacy', 'Modules\Learning\Privacy', 'Modules\Scheduling\Privacy', 'Modules\Enrollment\Privacy', 'Modules\Billing\Privacy', 'Modules\Evaluation\Privacy', 'Modules\Classroom\Privacy', 'Modules\Support\Privacy', 'Modules\Crm\Privacy', 'Modules\Payroll\Privacy', 'Modules\Import\Privacy', 'Modules\Safeguarding\Privacy', 'Modules\Messaging\Privacy', 'Modules\Games\Privacy', 'Modules\Announcements\Privacy', 'Modules\Site\Privacy', 'Modules\Quran\Privacy'])
     ->toImplement('Modules\SharedKernel\Privacy\PersonalDataSource');
 
 arch('each module tells "Start here" what a new academy sets up through the shared kernel\'s SetupStep')
@@ -357,14 +378,15 @@ arch('the app layer uses modules only through contracts, plugins and the shared 
         'Modules\Games\Models', 'Modules\Games\Actions',
         'Modules\Announcements\Models', 'Modules\Announcements\Actions',
         'Modules\Site\Models', 'Modules\Site\Actions',
+        'Modules\Quran\Models', 'Modules\Quran\Actions',
     ]);
 
 arch('actions and models are final')
     ->expect([
         'Modules\Platform\Actions', 'Modules\Identity\Actions', 'Modules\Catalog\Actions', 'Modules\People\Actions', 'Modules\Scheduling\Actions',
-        'Modules\Credits\Actions', 'Modules\Enrollment\Actions', 'Modules\Billing\Actions', 'Modules\Curriculum\Actions', 'Modules\Learning\Actions', 'Modules\Communication\Actions', 'Modules\Classroom\Actions', 'Modules\Crm\Actions', 'Modules\Evaluation\Actions', 'Modules\Payroll\Actions', 'Modules\Import\Actions', 'Modules\Support\Actions', 'Modules\Messaging\Actions', 'Modules\Games\Actions', 'Modules\Announcements\Actions', 'Modules\Site\Actions',
+        'Modules\Credits\Actions', 'Modules\Enrollment\Actions', 'Modules\Billing\Actions', 'Modules\Curriculum\Actions', 'Modules\Learning\Actions', 'Modules\Communication\Actions', 'Modules\Classroom\Actions', 'Modules\Crm\Actions', 'Modules\Evaluation\Actions', 'Modules\Payroll\Actions', 'Modules\Import\Actions', 'Modules\Support\Actions', 'Modules\Messaging\Actions', 'Modules\Games\Actions', 'Modules\Announcements\Actions', 'Modules\Site\Actions', 'Modules\Quran\Actions',
         'Modules\Platform\Models', 'Modules\Identity\Models', 'Modules\Catalog\Models', 'Modules\People\Models', 'Modules\Scheduling\Domain\Models',
-        'Modules\Credits\Models', 'Modules\Enrollment\Models', 'Modules\Billing\Models', 'Modules\Curriculum\Models', 'Modules\Learning\Models', 'Modules\Communication\Models', 'Modules\Classroom\Models', 'Modules\Crm\Models', 'Modules\Evaluation\Models', 'Modules\Payroll\Models', 'Modules\Import\Models', 'Modules\Support\Models', 'Modules\Messaging\Models', 'Modules\Games\Models', 'Modules\Announcements\Models', 'Modules\Site\Models',
+        'Modules\Credits\Models', 'Modules\Enrollment\Models', 'Modules\Billing\Models', 'Modules\Curriculum\Models', 'Modules\Learning\Models', 'Modules\Communication\Models', 'Modules\Classroom\Models', 'Modules\Crm\Models', 'Modules\Evaluation\Models', 'Modules\Payroll\Models', 'Modules\Import\Models', 'Modules\Support\Models', 'Modules\Messaging\Models', 'Modules\Games\Models', 'Modules\Announcements\Models', 'Modules\Site\Models', 'Modules\Quran\Models',
     ])
     ->toBeFinal();
 

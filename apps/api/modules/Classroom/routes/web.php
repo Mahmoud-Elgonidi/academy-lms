@@ -10,8 +10,6 @@ Route::middleware(['web', 'tenant', 'throttle:links'])->prefix('class/{session}'
     Route::get('go', [ClassroomPageController::class, 'go'])->name('classroom.go');
     Route::post('recording', [ClassroomPageController::class, 'startRecording'])->name('classroom.recording.start');
     Route::post('recording/stop', [ClassroomPageController::class, 'stopRecording'])->name('classroom.recording.stop');
-    // A Quran lesson's shared mushaf: its pages and marked words, and the lesson's own live channel.
-    Route::get('mushaf', [ClassroomPageController::class, 'mushaf'])->middleware('throttle:240,1')->name('classroom.mushaf');
-    Route::post('mushaf', [ClassroomPageController::class, 'changeMushaf'])->middleware('throttle:120,1')->name('classroom.mushaf.change');
+    // The lesson's own live channel (what a tool beside the room says), signed here for link visitors.
     Route::post('live/auth', [ClassroomPageController::class, 'liveAuth'])->middleware('throttle:30,1')->name('classroom.live.auth');
 });

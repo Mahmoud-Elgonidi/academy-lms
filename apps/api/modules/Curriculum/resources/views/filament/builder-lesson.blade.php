@@ -19,7 +19,7 @@
             </small>
             <span class="cb-badges">
                 <span class="cb-badge" data-tone="{{ $hasObjective ? 'ok' : 'miss' }}">{{ __($b.'badges.'.($hasObjective ? 'objective' : 'no_objective')) }}</span>
-                @if ($text)<span class="cb-badge" data-tone="text">{{ __($b.'badges.'.($text === 'quran' ? 'quran' : 'text')) }}</span>@endif
+                @if ($text)<span class="cb-badge" data-tone="text">{{ __($b.'badges.text') }}</span>@endif
             </span>
             @if (array_key_exists($lesson->id, $this->playsIn))
                 {{-- What the learner plays it in: the games its practice is enough for. --}}

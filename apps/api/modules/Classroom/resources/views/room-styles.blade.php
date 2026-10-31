@@ -14,7 +14,7 @@
     .ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
     .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-    /* Shared basics (also the mushaf's and the plan's buttons). */
+    /* Shared basics (also the buttons of the plan and of what is beside the room). */
     button { font: inherit; border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; background: var(--ctl); color: var(--text); }
     button:hover { background: var(--ctl-hover); }
     button:focus-visible, a:focus-visible, .tile:focus-visible { outline: 2px solid color-mix(in oklab, var(--brand) 70%, #fff); outline-offset: 2px; }
@@ -135,7 +135,7 @@
     .pop .note { font-size: 12px; color: var(--muted); margin: 2px 12px 6px; line-height: 1.6; }
     .pop .narrow { display: none !important; }
 
-    /* The side panel: the mushaf, today's plan and homework, or the materials. */
+    /* The side panel: what is beside the room, today's plan and homework, or the materials. */
     aside { background: var(--panel); border-radius: 16px; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
     aside h2 { margin: 0; font-size: 15px; }
     .panel-head { display: none; align-items: center; justify-content: space-between; gap: 8px; }
@@ -143,7 +143,6 @@
     .panel-head .round { width: 36px; height: 36px; background: none; }
     .panel-head .round:hover { background: var(--ctl); }
     body[data-state="live"] .panel-head { display: flex; }
-    aside .mushaf:not(:last-child) { padding-bottom: 12px; border-bottom: 1px solid var(--line); }
     aside .line { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
     aside .line small, aside .none { color: var(--muted); font-size: 12px; }
     aside .line p { margin: 4px 0 0; font-size: 13px; color: #d4d4d8; white-space: pre-line; }
@@ -158,7 +157,7 @@
     .materials span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .materials em { font-style: normal; font-size: 11px; color: var(--muted); white-space: nowrap; }
 
-    /* Notices: an outside meeting opened beside the mushaf, or the lesson left. */
+    /* Notices: an outside meeting opened beside the page, or the lesson left. */
     .notice { margin: auto; width: 100%; max-width: 480px; background: var(--panel); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; text-align: center; }
     .notice h1 { margin: 0; font-size: 20px; font-weight: 500; }
     .notice .row { justify-content: center; }
@@ -167,7 +166,7 @@
     /* Wide screens: the panel sits beside the stage (always before joining; in the call, while it is open). */
     @media (min-width: 1000px) {
         body:not([data-state="live"]) main.with-plan, body[data-state="live"][data-panel="open"] main.with-plan { grid-template-columns: minmax(0, 1fr) 340px; }
-        body:not([data-state="live"]) main.with-mushaf, body[data-state="live"][data-panel="open"] main.with-mushaf { grid-template-columns: minmax(0, 1fr) 440px; }
+        body:not([data-state="live"]) main.with-tool, body[data-state="live"][data-panel="open"] main.with-tool { grid-template-columns: minmax(0, 1fr) 440px; }
         body[data-state="live"]:not([data-panel="open"]) aside { display: none; }
     }
     /* Narrow screens: before joining the panel follows the card; in the call it slides over the stage. */

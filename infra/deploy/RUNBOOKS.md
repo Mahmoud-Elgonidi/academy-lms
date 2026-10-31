@@ -324,7 +324,7 @@ docker compose exec web php artisan queue:failed           # a helper's job that
 
   ```bash
   docker compose cp ./recitations web:/tmp/recitations
-  docker compose exec web php artisan learning:try-recitation /tmp/recitations
+  docker compose exec web php artisan quran:try-recitation /tmp/recitations
   docker compose exec web rm -r /tmp/recitations
   ```
 
@@ -362,11 +362,11 @@ docker compose exec web php artisan platform:services --group=ai   # one section
 The Quran's words (lesson passages, practice suggestions) come only from Tanzil's Simple text and its
 metadata, kept in the storage volume (`storage/app/platform/quran`, with `manifest.json`: their SHA-256 and
 when they came; in the daily backup with the rest of the files). The deploy fetches them the first time
-(`curriculum:quran --fetch --if-missing`); a deploy that could not reach Tanzil says so and goes on.
+(`quran:text --fetch --if-missing`; `curriculum:quran` is its older name); a deploy that could not reach Tanzil says so and goes on.
 
 ```bash
-docker compose exec web php artisan curriculum:quran            # which copy, its version and checksums
-docker compose exec web php artisan curriculum:quran --fetch    # fetch again (or the console: Platform settings › "Fetch again")
+docker compose exec web php artisan quran:text            # which copy, its version and checksums
+docker compose exec web php artisan quran:text --fetch    # fetch again (or the console: Platform settings › "Fetch again")
 ```
 
 A fetch is kept only once both files pass every check (114 surahs, 6,236 verses in order, Arabic lines,

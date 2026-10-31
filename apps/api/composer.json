@@ -79,6 +79,8 @@
             "Modules\\Games\\": "modules/Games/src/",
             "Modules\\Games\\Database\\Seeders\\": "modules/Games/database/seeders/",
             "Modules\\Announcements\\": "modules/Announcements/src/",
+            "Modules\\Quran\\": "modules/Quran/src/",
+            "Modules\\Quran\\Database\\Seeders\\": "modules/Quran/database/seeders/",
             "Modules\\Announcements\\Database\\Seeders\\": "modules/Announcements/database/seeders/",
             "Modules\\Site\\": "modules/Site/src/",
             "Modules\\Site\\Database\\Seeders\\": "modules/Site/database/seeders/",

@@ -29,6 +29,7 @@ use Modules\Payroll\Filament\Teacher\PayrollTeacherPlugin;
 use Modules\People\Filament\Teacher\PeopleTeacherPlugin;
 use Modules\Platform\Filament\PlatformPlugin;
 use Modules\Privacy\Filament\Teacher\PrivacyTeacherPlugin;
+use Modules\Quran\Filament\Teacher\QuranTeacherPlugin;
 use Modules\Safeguarding\Filament\Teacher\SafeguardingTeacherPlugin;
 use Modules\Scheduling\Filament\Teacher\SchedulingTeacherPlugin;
 use Modules\SharedKernel\Realtime\EnableBrowserEcho;
@@ -86,6 +87,7 @@ final class TeacherPanelProvider extends PanelProvider
                 SchedulingTeacherPlugin::make(),
                 CrmTeacherPlugin::make(),
                 LearningTeacherPlugin::make(),
+                QuranTeacherPlugin::make(),
                 EvaluationTeacherPlugin::make(),
                 PayrollTeacherPlugin::make(),
                 SupportTeacherPlugin::make(),

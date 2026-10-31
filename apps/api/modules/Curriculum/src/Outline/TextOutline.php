@@ -133,6 +133,6 @@ final class TextOutline
     /** @return array<string, mixed> */
     private static function row(string $kind, int $depth, string $title, ?string $objective = null): array
     {
-        return ['kind' => $kind, 'depth' => $depth, 'title_ar' => $title, 'title_en' => $title, 'objective' => $objective, 'quran' => null, 'on' => true];
+        return ['kind' => $kind, 'depth' => $depth, 'title_ar' => $title, 'title_en' => $title, 'objective' => $objective, 'on' => true];
     }
 }

@@ -11,8 +11,7 @@ use Modules\Curriculum\Models\NodeItem;
 
 /**
  * A version's readiness to publish (Domain\PublishReadiness) read from its
- * own tables each time: the tree, each lesson's practice count and the kind
- * of its text. The builder's bar and PublishVersion both read it here.
+ * own tables each time: the tree and each lesson's practice count. The builder's bar and PublishVersion both read it here.
  */
 final class VersionReadiness
 {
@@ -30,10 +29,8 @@ final class VersionReadiness
 
         $practice = NodeItem::query()->whereIn('node_id', $lessons->pluck('id'))
             ->selectRaw('node_id, count(*) as n')->groupBy('node_id')->pluck('n', 'node_id')->map(fn ($n) => (int) $n)->all();
-        $texts = $lessons->filter(fn (Node $n) => is_array($n->text_source) && isset($n->text_source['kind']))
-            ->mapWithKeys(fn (Node $n) => [$n->id => (string) $n->text_source['kind']])->all();
 
-        return [PublishReadiness::of($tree, $practice, $texts), $tree];
+        return [PublishReadiness::of($tree, $practice), $tree];
     }
 
     /** An item in the reader's words, naming its level, unit or lesson. */

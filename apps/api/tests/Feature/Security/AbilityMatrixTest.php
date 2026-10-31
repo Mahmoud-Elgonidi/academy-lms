@@ -73,6 +73,10 @@ function expectedAbilities(): array
         'site.manage' => [$o, $a],
         'security.manage' => [$o],
         'academy.manage-timezone' => [$o],
+        'quran.manage' => [$o, $a],
+        'quran.teach' => [$t],
+        'quran.examine' => [$o, $a, $su],
+        'quran.board' => [$o, $a, $su],
     ];
 }
 
@@ -82,6 +86,7 @@ const ABILITY_PLAN_AREAS = [
     'payroll.manage' => 'payroll', 'payroll.view-own' => 'payroll',
     'data.import' => 'import',
     'ai.manage' => 'ai',
+    'quran.manage' => 'quran', 'quran.teach' => 'quran', 'quran.examine' => 'quran', 'quran.board' => 'quran',
 ];
 
 beforeEach(function () {

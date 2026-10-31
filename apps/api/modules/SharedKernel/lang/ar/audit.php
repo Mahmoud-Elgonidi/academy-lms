@@ -156,7 +156,11 @@ return [
         ],
         'learning' => [
             'weekly_digest_saved' => 'الرسالة الأسبوعية لأولياء الأمور: :state',
+            // Kept for entries written before the Quran module (now quran.daily_pages_saved).
             'hifz_daily_saved' => 'أصبح ورد المراجعة :pages صفحة في اليوم على الأكثر',
+        ],
+        'quran' => [
+            'daily_pages_saved' => 'أصبح ورد المراجعة :pages صفحة في اليوم على الأكثر',
         ],
         'games' => [
             'settings_saved' => 'تعديل ألعاب الأكاديمية (:state، :minutes دقيقة في اليوم)',

@@ -9,6 +9,8 @@ use Illuminate\Validation\ValidationException;
 use Modules\Catalog\Models\Subject;
 use Modules\Catalog\Models\SubjectCategory;
 use Modules\Catalog\Models\SubjectLevel;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 
 /**
  * A subject with its levels in order and its categories (tracks or school
@@ -18,6 +20,10 @@ use Modules\Catalog\Models\SubjectLevel;
  */
 final class SaveSubject
 {
+    public const KINDS = ['general', 'quran'];
+
+    public const QURAN_TRACKS = ['hifz', 'tilawa', 'talqin', 'noorani'];
+
     public const MAX_LEVELS = 30;
 
     public const MAX_CATEGORIES = 20;
@@ -26,7 +32,9 @@ final class SaveSubject
      * @param  list<array{id?: ?string, name_ar: string, name_en?: ?string}>  $levels  in order
      * @param  list<array{id?: ?string, name_ar: string, name_en?: ?string}>  $categories  in order
      */
-    public function handle(?string $subjectId, string $nameAr, ?string $nameEn, array $levels = [], array $categories = []): Subject
+    public function __construct(private readonly AcademyPlan $plan) {}
+
+    public function handle(?string $subjectId, string $nameAr, ?string $nameEn, array $levels = [], array $categories = [], ?string $kind = null, ?string $track = null): Subject
     {
         $nameAr = trim($nameAr);
         $nameEn = trim((string) $nameEn) ?: $nameAr;
@@ -44,15 +52,44 @@ final class SaveSubject
         $levels = $this->items($levels, self::MAX_LEVELS, 'levels');
         $categories = $this->items($categories, self::MAX_CATEGORIES, 'categories');
 
-        return DB::transaction(function () use ($subjectId, $nameAr, $nameEn, $levels, $categories) {
+        return DB::transaction(function () use ($subjectId, $nameAr, $nameEn, $levels, $categories, $kind, $track) {
             $subject = $subjectId === null ? new Subject : Subject::query()->lockForUpdate()->findOrFail($subjectId);
-            $subject->fill(['name_ar' => $nameAr, 'name_en' => $nameEn])->save();
+            $subject->fill(['name_ar' => $nameAr, 'name_en' => $nameEn] + $this->kind($subject, $kind, $track))->save();
 
             $this->sync($subject, SubjectLevel::class, $levels, 'levels');
             $this->sync($subject, SubjectCategory::class, $categories, 'categories');
 
             return $subject->load(['levels', 'categories']);
         });
+    }
+
+    /**
+     * The subject's kind and track as kept: a Quran subject has a track (hifz when none is said), a general one none.
+     *
+     * @return array{kind?: string, quran_track?: ?string}
+     */
+    private function kind(Subject $subject, ?string $kind, ?string $track): array
+    {
+        $e = 'catalog::subjects.errors.';
+        if ($kind === null) {
+            return [];
+        }
+        if (! in_array($kind, self::KINDS, true)) {
+            throw ValidationException::withMessages(['kind' => __($e.'kind')]);
+        }
+        if ($kind === 'general') {
+            return ['kind' => 'general', 'quran_track' => null];
+        }
+        $track = $track ?: ($subject->quran_track ?? 'hifz');
+        if (! in_array($track, self::QURAN_TRACKS, true)) {
+            throw ValidationException::withMessages(['quran_track' => __($e.'quran_track')]);
+        }
+        $already = $subject->exists && $subject->kind === 'quran' && $subject->quran_track === $track;
+        if (! $already && ! $this->plan->has(Feature::Quran)) {
+            throw ValidationException::withMessages(['kind' => __($e.'quran_off')]);
+        }
+
+        return ['kind' => 'quran', 'quran_track' => $track];
     }
 
     /**

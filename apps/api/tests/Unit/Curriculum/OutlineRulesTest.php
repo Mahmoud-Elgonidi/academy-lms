@@ -14,11 +14,11 @@ function oRow(string $kind, int $depth, string $title, array $extra = []): array
     return ['kind' => $kind, 'depth' => $depth, 'title_ar' => $title, 'title_en' => ''] + $extra;
 }
 
-it('cleans titles and objectives, fills the other language and keeps a passage by its shape', function () {
+it('cleans titles and objectives, and fills the other language', function () {
     $clean = OutlineRules::clean([
         oRow('level', 0, '  Level  one  '),
-        oRow('lesson', 2, str_repeat('ا', 250), ['objective' => str_repeat('b', 1200), 'quran' => ['surah' => '112', 'from' => 1, 'to' => 4]]),
-        oRow('lesson', 1, 'Bad passage', ['quran' => ['surah' => 115, 'from' => 1, 'to' => 2]]),
+        oRow('lesson', 2, str_repeat('ا', 250), ['objective' => str_repeat('b', 1200)]),
+        oRow('lesson', 1, 'Another', ['objective' => '  ']),
         oRow('unit', 1, ''),
         ['kind' => 'objective', 'title_ar' => 'x'],
     ]);
@@ -28,8 +28,8 @@ it('cleans titles and objectives, fills the other language and keeps a passage b
         ->and(mb_strlen($long['title_ar']))->toBe(OutlineRules::TITLE_MAX)
         ->and(mb_strlen($long['objective']))->toBe(OutlineRules::OBJECTIVE_MAX)
         ->and($long['depth'])->toBe(1)                                   // no unit open: straight in the level
-        ->and($long['quran'])->toBe(['surah' => 112, 'from' => 1, 'to' => 4])
-        ->and($bad['quran'])->toBeNull()
+        ->and($bad['objective'])->toBeNull()
+        ->and($long)->not->toHaveKey('quran')
         ->and($clean['dropped'])->toBe(2);
 });
 

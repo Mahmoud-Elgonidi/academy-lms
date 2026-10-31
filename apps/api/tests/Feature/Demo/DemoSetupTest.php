@@ -17,7 +17,7 @@ use Modules\SharedKernel\Setup\SetupStep;
 
 it('comes out with every step of "Start here" done, so its owner opens on the live board', function () {
     SaasPlan::query()->create(['code' => 'pro', 'name_ar' => 'الاحتراف', 'name_en' => 'Pro', 'max_teachers' => 75, 'max_active_students' => 1000,
-        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll']]);
+        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll', 'quran']]);
     $this->seed(DatabaseSeeder::class);
     $this->clearTenant();
 

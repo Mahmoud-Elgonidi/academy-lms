@@ -28,7 +28,7 @@ final class PracticePrompt
             foreach ($passage->words as $i => $word) {
                 $numbered[] = ($i + 1).' '.$word;
             }
-            $user[] = ($passage->source->isQuran() ? 'Text (a passage of the Quran, '.$passage->title.')' : 'Text').", its words numbered:\n".implode("\n", $numbered);
+            $user[] = "Text, its words numbered:\n".implode("\n", $numbered);
         }
         if ($existing !== []) {
             $user[] = "Items already on the lesson (do not repeat them):\n- ".implode("\n- ", $existing);
@@ -55,7 +55,7 @@ final class PracticePrompt
         - order: parts to put in order. Give "parts_from" and "parts_to": the numbers of the first and last word of the text the learner puts back in order (2 to 8 words is best). An optional "prompt" (at most 160 characters) says what to do. Only for a lesson with a text.
         - pair: two things that go together, "left" and "right" (at most 60 characters each): a word and its meaning, a question and its answer.
 
-        Quoting the lesson's text: its words are given numbered. To use them, write {{a-b}} (the numbers of the first and last word; {{a}} for one word) in a prompt, an option, left or right; the platform puts in those exact words. For a passage of the Quran, never write its words yourself, not even one phrase: always quote them by number. Do not explain or translate the Quran; ask about its words, their order, and what comes next.
+        Quoting the lesson's text: its words are given numbered. To use them, write {{a-b}} (the numbers of the first and last word; {{a}} for one word) in a prompt, an option, left or right; the platform puts in those exact words.
 
         Write in the lesson's own language (the language of its text and title; Arabic lessons in clear Modern Standard Arabic). Keep items short and right for the lesson's level. Use only the lesson's own content. Never mention a person, a name or a place outside the lesson. Do not repeat the items already on the lesson. Mix the kinds when the lesson allows.
         TXT;

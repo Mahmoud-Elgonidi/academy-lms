@@ -16,7 +16,6 @@ use Modules\Curriculum\Contracts\DTOs\TextSource;
 use Modules\Curriculum\Filament\Programs\EditCurriculum;
 use Modules\Curriculum\Models\Node;
 use Modules\Curriculum\Models\NodeItem;
-use Modules\Curriculum\Texts\QuranText;
 use Modules\Identity\Enums\Role;
 use Modules\Identity\Models\User;
 use Modules\Platform\Actions\SaveAiSettings;
@@ -31,14 +30,10 @@ uses(QuranProgram::class);
 
 /*
  * A lesson's text and the practice helper (docs/architecture/02, section 22):
- * the academy types a lesson's words, or names a passage of the Quran whose
- * words come only from the platform's copy; the helper suggests practice from
+ * the academy types a lesson's words; the helper suggests practice from
  * them, quoting the text by number so every quoted word is the text as kept,
- * and saves nothing until a person does.
- *
- * The Quran here is a fixture in the shape of Tanzil's files (made-up words):
- * surah 1 has three verses (the first is the basmala), surah 2 two (the basmala
- * at the head of its first verse, which is kept apart).
+ * and saves nothing until a person does. (A passage of the Quran is the
+ * Quran module's, never a curriculum's text.)
  */
 
 beforeEach(function () {
@@ -46,7 +41,6 @@ beforeEach(function () {
     $this->admin = User::factory()->withRole(Role::Admin)->create(['name' => 'Huda Admin', 'email' => 'huda@noor.test']);
     $this->program = $this->publishQuranProgram(app(CatalogApi::class)->createSubject('قرآن', 'Quran'));
     $this->lesson = Node::query()->findOrFail($this->lessons[0]);
-    app()->instance(QuranText::class, new QuranText(base_path('tests/Fixtures/quran')));
     config(['platform.ai.driver' => 'claude', 'platform.ai.key' => 'a-key-for-the-test']);
     RateLimiter::clear('ai:practice:'.$this->academy->id.':'.$this->admin->id);
 });
@@ -88,69 +82,42 @@ function fakeModel(array $answer): object
     return $model;
 }
 
-it('keeps a lesson\'s own words, or a passage of the Quran from the platform\'s copy alone', function () {
+it('keeps a lesson\'s own words, and nothing else', function () {
     $typed = setText($this->lesson, ['kind' => 'text', 'text' => "  أ ب ت\nث  "]);
     $passage = app(CurriculumApi::class)->passage(TextSource::fromArray($typed->text_source));
     expect($passage->words)->toBe(['أ', 'ب', 'ت', 'ث'])
         ->and($passage->quote(2, 3))->toBe('ب ت')
         ->and($passage->quote(4, 5))->toBe('')
-        ->and($passage->attribution)->toBeNull();
+        ->and($passage->text())->toBe('أ ب ت ث');
 
-    $quran = setText($this->lesson, ['kind' => 'quran', 'surah' => '2', 'from' => 1, 'to' => '2', 'text' => 'ignored']);
-    expect($quran->fresh()->text_source)->toEqual(['kind' => 'quran', 'surah' => 2, 'from' => 1, 'to' => 2]);   // as kept (jsonb orders the keys its own way)
-    $passage = app(CurriculumApi::class)->passage(TextSource::fromArray($quran->text_source));
-    expect($passage->title)->toBe('الثانية ١–٢')
-        ->and($passage->words)->toBe(['حَرْفٌ', 'نَصٌّ', 'آخَرُ', 'لِلتَّجْرِبَةِ', 'فَقَطْ'])     // the basmala kept apart
-        ->and(array_column($passage->verses, 'verse'))->toBe([1, 2])
-        ->and($passage->verses[1])->toMatchArray(['first' => 2, 'last' => 5])
-        ->and($passage->text())->toBe('حَرْفٌ ﴿١﴾ نَصٌّ آخَرُ لِلتَّجْرِبَةِ فَقَطْ ﴿٢﴾')
-        ->and($passage->attribution)->toContain('Tanzil');
-
-    // Al-Fatiha's basmala is its first verse.
-    expect(app(CurriculumApi::class)->passage(TextSource::quran(1, 1, 1))->words)->toBe(['بِسْمِ', 'اللَّهِ', 'الرَّحْمَٰنِ', 'الرَّحِيمِ'])
-        ->and(app(CurriculumApi::class)->surahs())->toBe([
-            ['number' => 1, 'name_ar' => 'الأولى', 'name_en' => 'Al-Ula', 'verses' => 3],
-            ['number' => 2, 'name_ar' => 'الثانية', 'name_en' => 'Ath-Thaniya', 'verses' => 2],
-        ]);
+    // Any other kind of text is not a curriculum's (nor kept by the database).
+    expect(textRefusal(fn () => setText($this->lesson, ['kind' => 'quran', 'surah' => 2, 'from' => 1, 'to' => 2])))->toBe('text_source')
+        ->and(TextSource::fromArray(['kind' => 'quran', 'surah' => 2, 'from' => 1, 'to' => 2]))->toBeNull()
+        ->and(fn () => DB::table('curriculum_nodes')->where('id', $this->lesson->id)->update(['text_source' => json_encode(['kind' => 'quran', 'surah' => 2, 'from' => 1, 'to' => 2])]))
+        ->toThrow(QueryException::class);
 
     setText($this->lesson, null);
     expect($this->lesson->fresh()->text_source)->toBeNull();
 });
 
-it('refuses a text too long, a passage that is not there, and a text on anything but a lesson', function () {
+it('refuses a text too long or empty, and a text on anything but a lesson', function () {
     expect(textRefusal(fn () => setText($this->lesson, ['kind' => 'text', 'text' => str_repeat('ب', TextSource::TEXT_MAX + 1)])))->toBe('text_source')
-        ->and(textRefusal(fn () => setText($this->lesson, ['kind' => 'quran', 'surah' => 3, 'from' => 1, 'to' => 1])))->toBe('text_source')
-        ->and(textRefusal(fn () => setText($this->lesson, ['kind' => 'quran', 'surah' => 1, 'from' => 2, 'to' => 4])))->toBe('text_source')
-        ->and(textRefusal(fn () => setText($this->lesson, ['kind' => 'quran', 'surah' => 1, 'from' => 3, 'to' => 2])))->toBe('text_source')
+        ->and(textRefusal(fn () => setText($this->lesson, ['kind' => 'text', 'text' => '   '])))->toBe('text_source')
         ->and(textRefusal(fn () => setText($this->lesson, ['kind' => 'poem', 'text' => 'x'])))->toBe('text_source');
 
     $unit = Node::query()->findOrFail($this->lesson->parent_id);
     expect(textRefusal(fn () => setText($unit, ['kind' => 'text', 'text' => 'نص'])))->toBe('text_source')
         ->and(fn () => DB::table('curriculum_nodes')->where('id', $unit->id)->update(['text_source' => json_encode(['kind' => 'text', 'text' => 'نص'])]))
         ->toThrow(QueryException::class);
-
-    // Until the platform has the Quran's files, it is not offered.
-    app()->instance(QuranText::class, new QuranText(base_path('tests/Fixtures/nowhere')));
-    expect(textRefusal(fn () => setText($this->lesson, ['kind' => 'quran', 'surah' => 1, 'from' => 1, 'to' => 1])))->toBe('text_source')
-        ->and(app(CurriculumApi::class)->surahs())->toBe([]);
-});
-
-it('knows three words of the Quran in a row wherever they are written, marks and alef forms aside', function () {
-    $quran = app(QuranText::class);
-
-    expect($quran->quotes('سؤال: كلمه اولي وثانيه؟'))->toBeTrue()
-        ->and($quran->quotes('كَلِمَةٌ أُولَى'))->toBeFalse()
-        ->and($quran->quotes('كلمة ثالثة أولى'))->toBeFalse();
 });
 
 it('suggests practice that quotes the passage as kept, and drops what it may not offer', function () {
     app(SaveAiSettings::class)->handle(['practice_items' => true], $this->admin->id);
-    $lesson = setText($this->lesson, ['kind' => 'quran', 'surah' => 2, 'from' => 1, 'to' => 2]);
+    $lesson = setText($this->lesson, ['kind' => 'text', 'text' => 'حَرْفٌ نَصٌّ آخَرُ لِلتَّجْرِبَةِ فَقَطْ']);
     app(SaveNodeItems::class)->handle($lesson, [['kind' => 'pair', 'left' => 'حرف', 'right' => 'نص']], $this->admin->id);
     $model = fakeModel(['items' => [
         ['kind' => 'order', 'prompt' => 'رتّب', 'parts_from' => 2, 'parts_to' => 5],
         ['kind' => 'choice', 'prompt' => 'إيه اللي بعد {{2-3}}؟', 'options' => ['{{4}}', '{{5}}'], 'answer' => 0],
-        ['kind' => 'choice', 'prompt' => 'أكمل: نص آخر …', 'options' => ['للتجربة', 'فقط'], 'answer' => 0],     // writes the passage itself
         ['kind' => 'choice', 'prompt' => 'إيه اللي بعد {{9}}؟', 'options' => ['{{1}}', '{{2}}'], 'answer' => 0],     // outside the passage
         ['kind' => 'choice', 'prompt' => 'سؤال', 'options' => ['واحدة'], 'answer' => 0],                            // one answer
         ['kind' => 'pair', 'left' => 'حرف', 'right' => 'نص'],                                                      // already on the lesson
@@ -163,7 +130,7 @@ it('suggests practice that quotes the passage as kept, and drops what it may not
         ['kind' => 'order', 'prompt' => 'رتّب', 'parts' => ['نَصٌّ', 'آخَرُ', 'لِلتَّجْرِبَةِ', 'فَقَطْ']],
         ['kind' => 'choice', 'prompt' => 'إيه اللي بعد نَصٌّ آخَرُ؟', 'options' => ['لِلتَّجْرِبَةِ', 'فَقَطْ'], 'answer' => 0],
         ['kind' => 'pair', 'prompt' => null, 'left' => 'حَرْفٌ', 'right' => 'letter'],
-    ])->and($result['dropped'])->toBe(4)
+    ])->and($result['dropped'])->toBe(3)
         ->and(NodeItem::query()->where('node_id', $lesson->id)->count())->toBe(1);   // nothing saved
 
     // The lesson and its words numbered; nothing about a person.
@@ -201,7 +168,7 @@ it('runs on the demo\'s fixed answer, which quotes the passage too', function ()
     config(['platform.ai.driver' => 'demo', 'platform.ai.key' => '']);
     app()->forgetInstance(LanguageModel::class);
     app(SaveAiSettings::class)->handle(['practice_items' => true], $this->admin->id);
-    $lesson = setText($this->lesson, ['kind' => 'quran', 'surah' => 1, 'from' => 1, 'to' => 3]);
+    $lesson = setText($this->lesson, ['kind' => 'text', 'text' => 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ كَلِمَةٌ أُولَى كَلِمَةٌ ثَالِثَةٌ']);
 
     $items = app(SuggestNodeItems::class)->handle($lesson->fresh(), $this->admin->id)['items'];
 
@@ -218,9 +185,9 @@ it('sets the text in the builder, and puts suggestions in the practice form to l
 
     $builder = Livewire::test(EditCurriculum::class, ['record' => $this->program->id])
         ->callAction(TestAction::make('editNode')->arguments(['node' => $this->lesson->id]), [
-            'title_ar' => 'درس ١', 'title_en' => 'Lesson 1', 'text_kind' => 'quran', 'surah' => 2, 'from' => 1, 'to' => 2,
+            'title_ar' => 'درس ١', 'title_en' => 'Lesson 1', 'text_kind' => 'text', 'text' => 'حَرْفٌ نَصٌّ آخَرُ لِلتَّجْرِبَةِ فَقَطْ',
         ])->assertHasNoActionErrors();
-    expect($this->lesson->fresh()->text_source)->toEqual(['kind' => 'quran', 'surah' => 2, 'from' => 1, 'to' => 2]);   // as kept (jsonb orders the keys its own way)
+    expect($this->lesson->fresh()->text_source)->toEqual(['kind' => 'text', 'text' => 'حَرْفٌ نَصٌّ آخَرُ لِلتَّجْرِبَةِ فَقَطْ']);
 
     $builder->callAction(TestAction::make('suggest')->arguments(['node' => $this->lesson->id]))
         ->assertActionMounted('practice')

@@ -2,17 +2,11 @@
 
 namespace Modules\Curriculum\Outline;
 
-use Modules\Curriculum\Contracts\DTOs\TextSource;
 use Modules\Curriculum\Domain\Outline\OutlineRules;
-use Modules\Curriculum\Texts\QuranText;
 
 /**
- * Turns the model's outline into rows to review (OutlineRules). For the
- * Quran, a lesson is kept only as numbers the platform's copy has (the
- * surah, verses within it, at most TextSource::VERSES_MAX): its titles are
- * the surah's names from the copy and the verses, and its text the passage;
- * an objective, level or unit title that writes three of the Quran's words
- * itself is left out (a title falls back to its number). Nothing is saved.
+ * Turns the model's outline into rows to review (OutlineRules); a level or
+ * unit with no title falls back to its number. Nothing is saved.
  */
 final class OutlineAnswer
 {
@@ -20,11 +14,11 @@ final class OutlineAnswer
      * @param  array<string, mixed>  $data  the model's answer
      * @return array{rows: list<array<string, mixed>>, dropped: int}
      */
-    public static function read(array $data, QuranText $quran, bool $isQuran): array
+    public static function read(array $data): array
     {
         $rows = [];
         $dropped = 0;
-        $own = fn (mixed $text): string => ($t = trim(is_string($text) ? $text : '')) !== '' && $isQuran && $quran->quotes($t) ? '' : $t;
+        $own = fn (mixed $text): string => trim(is_string($text) ? $text : '');
         $titles = function (array $raw, string $fallback, int $n) use ($own): array {
             [$ar, $en] = [$own($raw['title_ar'] ?? ''), $own($raw['title_en'] ?? '')];
 
@@ -32,31 +26,15 @@ final class OutlineAnswer
                 ? ['title_ar' => __('curriculum::outline.fallback.'.$fallback, ['n' => $n], 'ar'), 'title_en' => __('curriculum::outline.fallback.'.$fallback, ['n' => $n], 'en')]
                 : ['title_ar' => $ar, 'title_en' => $en];
         };
-        $lesson = function (mixed $raw, int $depth) use (&$dropped, $own, $quran, $isQuran): ?array {
+        $lesson = function (mixed $raw, int $depth) use (&$dropped, $own): ?array {
             if (! is_array($raw)) {
                 $dropped++;
 
                 return null;
             }
-            $row = ['kind' => 'lesson', 'depth' => $depth, 'objective' => $own($raw['objective'] ?? '') ?: null];
-            if (! $isQuran) {
-                return $row + ['title_ar' => trim((string) ($raw['title_ar'] ?? '')), 'title_en' => trim((string) ($raw['title_en'] ?? ''))];
-            }
-            $surah = $quran->surah((int) ($raw['surah'] ?? 0));
-            [$from, $to] = [(int) ($raw['from'] ?? 0), (int) ($raw['to'] ?? 0)];
-            if ($surah === null || $from < 1 || $to < $from || $to > $surah['verses'] || $to - $from + 1 > TextSource::VERSES_MAX) {
-                $dropped++;
 
-                return null;
-            }
-            $whole = $from === 1 && $to === $surah['verses'];
-            $line = 'curriculum::outline.quran_lesson.'.($whole ? 'whole' : 'part');
-
-            return $row + [
-                'title_ar' => __($line, ['name' => $surah['name_ar'], 'from' => $from, 'to' => $to], 'ar'),
-                'title_en' => __($line, ['name' => $surah['name_en'], 'from' => $from, 'to' => $to], 'en'),
-                'quran' => ['surah' => $surah['number'], 'from' => $from, 'to' => $to],
-            ];
+            return ['kind' => 'lesson', 'depth' => $depth, 'objective' => $own($raw['objective'] ?? '') ?: null,
+                'title_ar' => trim((string) ($raw['title_ar'] ?? '')), 'title_en' => trim((string) ($raw['title_en'] ?? ''))];
         };
 
         $units = 0;

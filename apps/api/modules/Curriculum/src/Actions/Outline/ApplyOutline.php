@@ -13,8 +13,7 @@ use Modules\SharedKernel\Audit\AuditTrail;
 /**
  * Saves a reviewed outline (Domain\Outline\OutlineRules rows: what is ticked,
  * under ticked parents) at the end of a draft version, in one transaction:
- * every level, unit and lesson through SaveNode, so a lesson's passage of the
- * Quran is checked against the platform's copy like any other. Refused on a
+ * every level, unit and lesson through SaveNode. Refused on a
  * version that is not a draft, with nothing ticked, or past LEVELS_MAX levels
  * or LESSONS_MAX lessons with what the version has. Audited with the counts.
  */
@@ -56,7 +55,7 @@ final class ApplyOutline
                     'title_ar' => $row['title_ar'],
                     'title_en' => $row['title_en'],
                     'objectives' => $row['objective'],
-                ] + ($row['quran'] !== null ? ['text_source' => ['kind' => 'quran'] + $row['quran']] : []));
+                ]);
             }
 
             $counts = OutlineRules::counts($rows);

@@ -9,6 +9,7 @@ return [
         'custom_branding' => 'Your own colour templates',
         'payroll' => "Teachers' pay",
         'ai' => 'AI helpers',
+        'quran' => 'The Quran',
     ],
     'limits' => [
         'teachers' => 'Teachers',

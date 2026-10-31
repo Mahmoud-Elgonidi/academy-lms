@@ -29,7 +29,7 @@ function rItems(PublishReadiness $r): array
 }
 
 it('stops an empty version', function () {
-    $r = PublishReadiness::of(rTree([]), [], []);
+    $r = PublishReadiness::of(rTree([]), []);
 
     expect($r->canPublish())->toBeFalse()
         ->and(rItems($r))->toBe(['blocker:no_lessons:-'])
@@ -43,7 +43,7 @@ it('stops a version with an empty level or unit, and says which', function () {
         ['A', 'U1', 'lesson', 'Read the letters'],
         ['U2', 'L1', 'unit', null],
         ['L2', null, 'level', null],
-    ]), ['A' => 3], []);
+    ]), ['A' => 3]);
 
     expect($r->canPublish())->toBeFalse()
         ->and(rItems($r))->toBe(['blocker:empty_unit:U2', 'blocker:empty_level:L2'])
@@ -55,23 +55,11 @@ it('lets a version through with warnings: no objective, no practice', function (
         ['L1', null, 'level', null],
         ['A', 'L1', 'lesson', 'Read'],
         ['B', 'L1', 'lesson', '  '],
-    ]), ['A' => 4], []);
+    ]), ['A' => 4]);
 
     expect($r->canPublish())->toBeTrue()
         ->and($r->blockers())->toBe([])
         ->and(rItems($r))->toBe(['warning:no_objective:B', 'warning:no_practice:B'])
         // Five checks (the level holds lessons; two per lesson), three passed.
         ->and($r->percent)->toBe(60);
-});
-
-it('asks every lesson of a curriculum that reads the Quran for its text, and no other', function () {
-    $tree = rTree([
-        ['L1', null, 'level', null],
-        ['A', 'L1', 'lesson', 'x'],
-        ['B', 'L1', 'lesson', 'x'],
-    ]);
-
-    expect(rItems(PublishReadiness::of($tree, ['A' => 1, 'B' => 1], ['A' => 'quran'])))->toBe(['warning:no_text:B'])
-        ->and(rItems(PublishReadiness::of($tree, ['A' => 1, 'B' => 1], ['A' => 'text'])))->toBe([])
-        ->and(PublishReadiness::of($tree, ['A' => 1, 'B' => 1], ['A' => 'text'])->percent)->toBe(100);
 });

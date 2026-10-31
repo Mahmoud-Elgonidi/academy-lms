@@ -10,7 +10,6 @@ use Modules\Curriculum\Models\Node;
 use Modules\Curriculum\Models\NodeItem;
 use Modules\Curriculum\Practice\PracticePrompt;
 use Modules\Curriculum\Practice\Suggestions;
-use Modules\Curriculum\Texts\QuranText;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
@@ -35,7 +34,6 @@ final class SuggestNodeItems
         private readonly AcademyAi $ai,
         private readonly LanguageModel $model,
         private readonly CurriculumApi $curriculum,
-        private readonly QuranText $quran,
         private readonly TenantContext $tenants,
     ) {}
 
@@ -66,6 +64,6 @@ final class SuggestNodeItems
 
         $answer = $this->model->json(AiFeature::PracticeItems, PracticePrompt::for($lesson, $passage, $existing, $room));
 
-        return Suggestions::read($answer->data, $passage, $this->quran, $room, $existing);
+        return Suggestions::read($answer->data, $passage, $room, $existing);
     }
 }

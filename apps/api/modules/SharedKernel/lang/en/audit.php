@@ -156,7 +156,11 @@ return [
         ],
         'learning' => [
             'weekly_digest_saved' => 'Turned the weekly note to guardians :state',
+            // Kept for entries written before the Quran module (now quran.daily_pages_saved).
             'hifz_daily_saved' => 'The daily hifz review is now :pages pages at most',
+        ],
+        'quran' => [
+            'daily_pages_saved' => 'The daily hifz review is now :pages pages at most',
         ],
         'games' => [
             'settings_saved' => "Changed the academy's games (:state, :minutes minutes a day)",

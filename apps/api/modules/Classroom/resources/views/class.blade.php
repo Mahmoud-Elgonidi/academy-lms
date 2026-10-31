@@ -35,7 +35,7 @@
         'joining' => __($l.'check.joining'),
         'quality' => trans($l.'room.quality'),
         'providerError' => __($l.'errors.provider'),
-        'mushaf' => $mushaf !== null,
+        'side' => $side !== null,
         'icons' => $icons,
         'words' => [
             'you' => __($r.'you'),
@@ -50,7 +50,7 @@
         ],
     ];
     $materials = collect($plan)->flatMap(fn ($line) => $line->materials)->unique('id')->values();
-    $hasPanel = $mushaf || $seat->role !== 'student' || $materials->isNotEmpty();
+    $hasPanel = $side !== null || $seat->role !== 'student' || $materials->isNotEmpty();
     // Materials' own icons (the panel's list).
     $materialIcons = [
         'pdf' => 'M14 3H7.5A1.5 1.5 0 0 0 6 4.5v15A1.5 1.5 0 0 0 7.5 21h9a1.5 1.5 0 0 0 1.5-1.5V7l-4-4ZM14 3v4h4M9 13h6M9 17h4',
@@ -91,7 +91,7 @@
         <span class="chip">{{ __($l.'roles.'.$seat->role) }}</span>
     </header>
 
-    <main class="{{ $mushaf ? 'with-plan with-mushaf' : ($hasPanel ? 'with-plan' : '') }}">
+    <main class="{{ $side ? 'with-plan with-tool' : ($hasPanel ? 'with-plan' : '') }}">
         <div class="stage">
             <section class="prejoin {{ $publishes ? '' : 'observer' }}" id="prejoin">
                 @if ($publishes)
@@ -171,8 +171,8 @@
                 </nav>
             </div>
 
-            @if ($mushaf)
-                {{-- A lesson on Zoom or Meet opens in a tab of its own, so the mushaf stays open here beside it. --}}
+            @if ($side)
+                {{-- A lesson on Zoom or Meet opens in a tab of its own, so what is beside the room stays open here. --}}
                 <section class="notice" id="outside" hidden>
                     <h1>{{ __($l.'external.opened') }}</h1>
                     <div class="row"><a class="button primary" href="{{ $goUrl }}" target="_blank" rel="noopener">{{ __($l.'external.again') }}</a></div>
@@ -191,7 +191,8 @@
                     <strong>{{ __($r.'panel') }}</strong>
                     <button type="button" class="round" id="panel-close" title="{{ __($r.'panel_close') }}" aria-label="{{ __($r.'panel_close') }}">{!! $icon('close') !!}</button>
                 </div>
-                @if ($mushaf) @include('classroom::mushaf') @endif
+                {{-- What another module puts beside the room (SharedKernel's LessonQuran). --}}
+                @if ($side) {{ $side }} @endif
             @if ($seat->role !== 'student')
                 <h2>{{ __($l.'plan.title') }}</h2>
                 @forelse ($plan as $line)
@@ -547,7 +548,7 @@
             else if (s === 'prejoin') { e.preventDefault(); if (k === 'mic') preMic = !preMic; else preCam = !preCam; applyPre(); }
         });
 
-        // The side panel: open by default on a wide screen when it holds the mushaf.
+        // The side panel: open by default on a wide screen when it holds a tool beside the room.
         const wide = window.matchMedia('(min-width: 1000px)');
         function panel(open) {
             document.body.dataset.panel = open ? 'open' : 'closed';
@@ -555,7 +556,7 @@
             $('panel-toggle')?.setAttribute('aria-pressed', String(open));
             requestAnimationFrame(() => layout(false));
         }
-        panel(!!$('panel') && cfg.mushaf && wide.matches);
+        panel(!!$('panel') && cfg.side && wide.matches);
         $('panel-toggle')?.addEventListener('click', () => panel(document.body.dataset.panel !== 'open'));
         $('panel-close')?.addEventListener('click', () => { panel(false); $('panel-toggle')?.focus(); });
 
@@ -658,8 +659,8 @@
             } catch (e) { return fail(e.message); }
 
             if (ticket.provider === 'external') {
-                // Beside a Quran lesson's mushaf, Zoom or Meet opens in a tab of its own and this page stays.
-                if (!cfg.mushaf) { window.location.href = cfg.goUrl; return; }
+                // Beside a tool next to the room, Zoom or Meet opens in a tab of its own and this page stays.
+                if (!cfg.side) { window.location.href = cfg.goUrl; return; }
                 stopPreview(); setState('outside'); $('join').disabled = false; $('join').textContent = $('join').dataset.label;
                 window.open(cfg.goUrl, '_blank', 'noopener');
                 return;
@@ -700,7 +701,7 @@
             try {
                 await room.connect(ticket.url, ticket.token);
             } catch (e) { return fail(cfg.providerError); }
-            // The mushaf beside the room hears the teacher's turns through it (lms:room).
+            // What is beside the room hears the room through it (lms:room).
             document.dispatchEvent(new CustomEvent('lms:room', { detail: room }));
             setState('live');
             startClock();

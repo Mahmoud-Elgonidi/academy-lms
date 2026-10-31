@@ -10,8 +10,7 @@ use Modules\Curriculum\Contracts\DTOs\CurriculumTree;
  * builder's readiness bar and by PublishVersion (pure). Blockers stop the
  * publishing: no lesson at all, or a level or unit with nothing in it.
  * Warnings let it through, said once more in the confirmation: a lesson with
- * no objective, a lesson with no practice for the games, and, in a curriculum
- * that reads the Quran (a lesson of it names a passage), a lesson with no text.
+ * no objective, and a lesson with no practice for the games.
  */
 final readonly class PublishReadiness
 {
@@ -24,16 +23,14 @@ final readonly class PublishReadiness
 
     /**
      * @param  array<string, int>  $practice  lesson id => how many practice items it has
-     * @param  array<string, string>  $texts  lesson id => its text's kind (text, quran); a lesson with none is left out
      */
-    public static function of(CurriculumTree $tree, array $practice, array $texts): self
+    public static function of(CurriculumTree $tree, array $practice): self
     {
         $blockers = [];
         $warnings = [];
         $passed = 0;
         $checks = 0;
         $lessons = $tree->lessons();
-        $readsQuran = in_array('quran', $texts, true);
 
         if ($lessons === []) {
             $blockers[] = new ReadinessItem(self::BLOCKER, 'no_lessons', null);
@@ -41,7 +38,7 @@ final readonly class PublishReadiness
 
         foreach ($tree->inOrder() as $node) {
             if ($node->kind === 'lesson') {
-                foreach (self::lessonChecks($node, $practice, $texts, $readsQuran) as $key => $ok) {
+                foreach (self::lessonChecks($node, $practice) as $key => $ok) {
                     $checks++;
                     if ($ok) {
                         $passed++;
@@ -71,20 +68,14 @@ final readonly class PublishReadiness
 
     /**
      * @param  array<string, int>  $practice
-     * @param  array<string, string>  $texts
      * @return array<string, bool> the warning's key => whether the lesson passes it
      */
-    private static function lessonChecks(CurriculumNode $lesson, array $practice, array $texts, bool $readsQuran): array
+    private static function lessonChecks(CurriculumNode $lesson, array $practice): array
     {
-        $checks = [
+        return [
             'no_objective' => trim((string) $lesson->objectives) !== '',
             'no_practice' => ($practice[$lesson->id] ?? 0) > 0,
         ];
-        if ($readsQuran) {
-            $checks['no_text'] = isset($texts[$lesson->id]);
-        }
-
-        return $checks;
     }
 
     public function canPublish(): bool

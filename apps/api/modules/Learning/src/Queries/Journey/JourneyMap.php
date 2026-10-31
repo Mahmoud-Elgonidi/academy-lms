@@ -33,7 +33,7 @@ use Modules\SharedKernel\Time\Timezones;
  * do now (the next lesson, the teacher's homework, reviews due), the stars
  * (StarsQuery), the week's chest and, when the academy has games, the games
  * on each lesson the student may practise (JourneyGames). Nothing here knows
- * a subject: an academy teaching the Quran and one teaching English get the
+ * a subject: an academy teaching one subject and one teaching another get the
  * same journey over their own programs.
  */
 final class JourneyMap

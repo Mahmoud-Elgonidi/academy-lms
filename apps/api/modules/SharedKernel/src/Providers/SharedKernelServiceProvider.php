@@ -41,6 +41,8 @@ use Modules\SharedKernel\Plans\AcademyPlan;
 use Modules\SharedKernel\Plans\OpenPlan;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Privacy\PersonalData;
+use Modules\SharedKernel\Quran\LessonQuran;
+use Modules\SharedKernel\Quran\NoLessonQuran;
 use Modules\SharedKernel\Realtime\Console\LiveRelayCommand;
 use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Setup\SetupChecklist;
@@ -86,8 +88,10 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->singletonIf(SpeechToText::class, NoAi::class);
         // Made each time, so it hears through whatever speech to text is bound then.
         $this->app->bindIf(RecitationEngine::class, SpeechRecitation::class);
-        // The Quran's text: none until Curriculum binds its copy.
+        // The Quran's text: none until the Quran module binds its copy.
         $this->app->singletonIf(QuranSource::class, NoQuranSource::class);
+        // Nothing of the Quran beside a lesson until the Quran module binds its own.
+        $this->app->bindIf(LessonQuran::class, NoLessonQuran::class);
         // What each module holds about a person, for the Privacy module's copies and erasures.
         $this->app->singleton(PersonalData::class);
         // What a new academy gets ready before its first families come, each module's steps, for the "Start here" page.

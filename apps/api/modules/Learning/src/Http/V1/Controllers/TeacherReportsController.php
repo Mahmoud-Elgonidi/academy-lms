@@ -6,18 +6,16 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Modules\Curriculum\Contracts\CurriculumApi;
-use Modules\Curriculum\Contracts\DTOs\TextSource;
 use Modules\Learning\Actions\Assist\DraftReportFromVoice;
 use Modules\Learning\Actions\ReviewHomework;
 use Modules\Learning\Actions\SubmitGroupReport;
 use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Actions\SubmitSessionReport;
-use Modules\Learning\Assist\RecitationTarget;
 use Modules\Learning\Authorization\LearningAccess;
+use Modules\Learning\Contracts\LearningQuran;
 use Modules\Learning\Http\V1\Resources\LearningPresenter;
-use Modules\Learning\Http\V1\Resources\RecitationPresenter;
 use Modules\Learning\Models\Homework;
+use Modules\Learning\Models\HomeworkSubmission;
 use Modules\Learning\Models\ReportTemplate;
 use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\ReportFormQuery;
@@ -39,8 +37,7 @@ final class TeacherReportsController
         private readonly LearningAccess $access,
         private readonly LearningPresenter $present,
         private readonly ReportFormQuery $form,
-        private readonly RecitationTarget $recitation,
-        private readonly RecitationPresenter $recited,
+        private readonly LearningQuran $recitation,
     ) {}
 
     /**
@@ -86,18 +83,18 @@ final class TeacherReportsController
         return response()->json(['data' => $this->present->report($report, true, $items) + [
             'template' => $this->present->template(ReportTemplate::forReport($report)),
             'lesson_options' => collect($this->form->lessonOptions($report))->map(fn ($label, $id) => ['id' => $id, 'label' => $label])->values()->all(),
-            'homework' => $homework ? $this->recited->homework($homework, $this->present->homework($homework)) : null,
+            'homework' => $homework ? $this->recited($homework) : null,
             'roadmap' => $report->enrollment_id ? $roadmap->for($report->enrollment_id, RoadmapQuery::MATERIALS_TEACHERS) : null,
             // Helpers the academy turned on for this report: a draft from a voice note (POST teacher/reports/{report}/draft),
             // and a check of recited homework against what it asks to recite (homework.expected).
             'assist' => [
                 'voice_draft' => $report->status !== 'reviewed' && $ai->on(AiFeature::ReportDraft),
-                'recitation_check' => $report->status !== 'reviewed' && $this->recitation->offered(),
+                'recitation_check' => $report->status !== 'reviewed' && $this->recitation->recitationOffered(),
             ],
             // What the report's lessons ask to recite, to start homework.expected from (null: none).
-            'expected_suggestion' => $report->kind === 'lesson' ? $this->recitation->suggestion(array_column($items, 'node_id')) : null,
+            'expected_suggestion' => $report->kind === 'lesson' ? $this->recitation->targetFromLessons(array_column($items, 'node_id')) : null,
             // The verses with the words marked in the lesson's shared mushaf (the surah with the most marks; null: none).
-            'mistakes_suggestion' => $report->kind === 'lesson' ? $this->recitation->fromMistakes($report->session_id) : null,
+            'mistakes_suggestion' => $report->kind === 'lesson' ? $this->recitation->targetFromMistakes($report->session_id) : null,
             // A group lesson: every student's report in it (send them all as `students` to PUT); null for a one-to-one lesson.
             'group' => SubmitGroupReport::isGroup($report) ? ['students' => $groups->reportsOf($report)->map(fn (SessionReport $r) => [
                 'report_id' => $r->id,
@@ -112,22 +109,6 @@ final class TeacherReportsController
                 'absence_note' => $r->absence_note,
             ])->values()->all()] : null,
         ]]);
-    }
-
-    /**
-     * The Quran's surahs.
-     *
-     * To choose what homework asks to recite: each surah's number, names and verses, and the attribution its text
-     * asks to be shown with (empty until the platform has its copy).
-     */
-    public function surahs(CurriculumApi $curriculum): JsonResponse
-    {
-        $surahs = $curriculum->surahs();
-
-        return response()->json([
-            'data' => $surahs,
-            'attribution' => $surahs === [] ? null : $curriculum->passage(TextSource::quran(1, 1, 1))?->attribution,
-        ]);
     }
 
     /**
@@ -184,7 +165,7 @@ final class TeacherReportsController
         $homework = Homework::query()->with('submissions')->where('teacher_id', $request->user()->getAuthIdentifier())
             ->where('status', $status)->orderBy('due_at')->limit(100)->get();
 
-        return response()->json(['data' => $homework->map(fn (Homework $h) => $this->recited->homework($h, $this->present->homework($h)))->all()]);
+        return response()->json(['data' => $homework->map(fn (Homework $h) => $this->recited($h))->all()]);
     }
 
     public function mark(Request $request, string $homework, ReviewHomework $review): JsonResponse
@@ -195,7 +176,7 @@ final class TeacherReportsController
 
         $homework->load('submissions');
 
-        return response()->json(['data' => $this->recited->homework($homework, $this->present->homework($homework))]);
+        return response()->json(['data' => $this->recited($homework)]);
     }
 
     private function mine(Request $request, string $id): SessionReport
@@ -204,5 +185,25 @@ final class TeacherReportsController
         abort_unless($this->access->writesReport($request->user(), $report), 403);
 
         return $report;
+    }
+
+    /**
+     * The homework as LearningPresenter gives it, with what it asks to recite and each recording's check (the
+     * Quran module's, for the teacher alone; null: none).
+     *
+     * @return array<string, mixed>
+     */
+    private function recited(Homework $h): array
+    {
+        $presented = $this->present->homework($h);
+        $checks = $this->recitation->checks($h->id, $h->expected);
+        $presented['expected'] = $this->recitation->presentTarget($h->expected);
+        $presented['submissions'] = $h->submissions->map(fn (HomeworkSubmission $s) => [
+            ...$this->present->submission($s),
+            // The recording's check against what it asks to recite (null: none).
+            'check' => $checks[$s->id] ?? null,
+        ])->values()->all();
+
+        return $presented;
     }
 }

@@ -30,7 +30,7 @@ const OWN_FAMILY = ['api/v1/family/learners', 'api/v1/family/consents', 'api/v1/
 
 beforeEach(function () {
     SaasPlan::query()->create(['code' => 'pro', 'name_ar' => 'الاحتراف', 'name_en' => 'Pro', 'max_teachers' => 75, 'max_active_students' => 1000,
-        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll']]);
+        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll', 'quran']]);
     $this->seed(DatabaseSeeder::class);
     $this->clearTenant();
 
@@ -222,7 +222,7 @@ it('keeps every record of one academy out of reach of another academy\'s people'
             // The academy's hifz: its own courses only; the demo's student, asked for by course, is not found.
             'admin/hifz', 'admin/hifz/{enrollment}'],
         'accountant' => ['admin/invoices/{invoice}', 'admin/payroll/{teacher}', 'billing/proofs/{proof}/file'],
-        'teacher' => ['teach/reports/{report}', 'teach/reports/{report}/game', 'teach/students/{enrollment}', 'class/{session}', 'class/{session}/go', 'class/{session}/mushaf',
+        'teacher' => ['teach/reports/{report}', 'teach/reports/{report}/game', 'teach/students/{enrollment}', 'teach/students/{enrollment}/hifz', 'class/{session}', 'class/{session}/go', 'class/{session}/mushaf',
             'learning/files/{submission}', 'support/files/{message}', 'people/checks/{check}/file'],
         'guardian' => ['my', 'class/{session}', 'class/{session}/mushaf', 'learning/files/{submission}', 'support/files/{message}', 'billing/proofs/{proof}/file'],
         'student' => ['class/{session}', 'class/{session}/go', 'class/{session}/mushaf', 'learning/files/{submission}'],

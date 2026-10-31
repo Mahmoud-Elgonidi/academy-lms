@@ -17,7 +17,7 @@ use Modules\Platform\Models\SaasPlan;
 
 beforeEach(function () {
     SaasPlan::query()->create(['code' => 'pro', 'name_ar' => 'الاحتراف', 'name_en' => 'Pro', 'max_teachers' => 75, 'max_active_students' => 1000,
-        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll']]);
+        'features' => ['crm', 'online_payments', 'import', 'custom_branding', 'payroll', 'quran']]);
     $this->seed(DatabaseSeeder::class);
     $this->clearTenant();
 });

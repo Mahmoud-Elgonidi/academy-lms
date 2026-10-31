@@ -16,6 +16,7 @@ enum Feature: string
     case CustomBranding = 'custom_branding';
     case Payroll = 'payroll';
     case Ai = 'ai';
+    case Quran = 'quran';
 
     public function label(): string
     {

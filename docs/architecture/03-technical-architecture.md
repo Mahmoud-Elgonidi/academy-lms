@@ -500,11 +500,11 @@ interface PaymentGateway
 - **قاعدة البيانات**:
   - `attendance_segments` فيها فترة مفتوحة واحدة بس لكل شخص في الحصة (partial unique index).
   - الوقت المدرَّس = `range_agg(المدرس) * range_agg(الطالب) * tstzrange(الحصة)`، ولو مفيش فترات بنرجع لتقريب أول دخول.
-- **المصحف المشترك** (حصة القرآن، والمصحف والعلامات بتوع Learning عن طريق `LearningApi::lessonMushaf`/`changeMushaf`):
-  - صفحة الحصة بتعرضه في الجنب: `GET`/`POST class/{session}/mushaf`، بنفس الشخص (الدخول أو اللينك الموقّع)، وLearning بيتأكد تاني.
+- **اللي جنب الغرفة** (المصحف المشترك في حصة القرآن، بتاع موديول القرآن؛ 02، القسم 26): Classroom بيسأل `SharedKernel\Quran\LessonQuran::classPanel` (الافتراضي `NoLessonQuran` مابيرجّعش حاجة) ومايعرفش عنه حاجة غير إنه حاجة جنب الغرفة (`with-tool`).
+  - صفحة الحصة بتعرضه في الجنب، وطلباته `GET`/`POST class/{session}/mushaf` عند Quran، بنفس الشخص (الدخول أو اللينك الموقّع، عن طريق `Classroom\Contracts\ClassPage::viewer`)، والقرآن بيتأكد تاني.
   - **LiveKit**: بعد ما التغيير يتحفظ، المدرّس بيبعت `{v:1}` على topic ‏`mushaf` (reliable)، والباقيين بيعيدوا القراية. الرسالة بتتقبل بس من مشارك الـ metadata بتاعته `role=teacher`، والـ metadata دي السيرفر هو اللي بيكتبها في التوكن.
-  - **القناة** `private-lesson.{session}` (`LessonMushafChanged`، `mushaf.changed`، من غير بيانات) لأصحاب المقاعد بس، وده في كل حصة. وصفحة الحصة بتمضي الاشتراك بنفسها (`POST class/{session}/live/auth`، HMAC بسر Reverb) للي داخل باللينك الموقّع.
-  - **اللينك الخارجي**: لو الحصة ليها مصحف، Zoom أو Meet بيتفتح في تاب جديد، وصفحة الحصة بتفضل مفتوحة جنبه.
+  - **القناة** `private-lesson.{session}` (قناة الحصة بتاعة Classroom: `ClassPage::channel`؛ والقرآن بيبعت عليها `LessonMushafChanged`، `mushaf.changed`، من غير بيانات) لأصحاب المقاعد بس، وده في كل حصة. وصفحة الحصة بتمضي الاشتراك بنفسها (`POST class/{session}/live/auth`، HMAC بسر Reverb) للي داخل باللينك الموقّع.
+  - **اللينك الخارجي**: لو الحصة ليها حاجة جنب الغرفة، Zoom أو Meet بيتفتح في تاب جديد، وصفحة الحصة بتفضل مفتوحة جنبه.
 - **التشغيل على الجهاز**: `docker compose` فيه LiveKit (`livekit/livekit-server:v1.13.7`، بورتات 7880 و7881 و7882/udp)، والـ webhooks رايحة للـ API. اتجرّب بحصة حقيقية بين متصفحين ومشرف مخفي، والحضور اتسجل من الـ webhooks.
 
 ### تسجيل الحصة (المنفّذ)

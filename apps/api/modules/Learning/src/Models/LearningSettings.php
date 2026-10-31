@@ -13,7 +13,6 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property int $homework_days default time to hand homework in
  * @property string $journey_style playful | calm | plain (how students see their journey)
  * @property bool $weekly_digest the weekly note to guardians goes out (Actions\Digest\SendWeeklyDigest)
- * @property int $hifz_daily_pages pages a day at most in a learner's daily hifz review
  */
 final class LearningSettings extends Model
 {
@@ -25,13 +24,13 @@ final class LearningSettings extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['report_due_hours', 'homework_days', 'journey_style', 'weekly_digest', 'hifz_daily_pages'];
+    protected $fillable = ['report_due_hours', 'homework_days', 'journey_style', 'weekly_digest'];
 
-    protected $attributes = ['report_due_hours' => 12, 'homework_days' => 3, 'journey_style' => 'playful', 'weekly_digest' => false, 'hifz_daily_pages' => 3];
+    protected $attributes = ['report_due_hours' => 12, 'homework_days' => 3, 'journey_style' => 'playful', 'weekly_digest' => false];
 
     protected function casts(): array
     {
-        return ['report_due_hours' => 'integer', 'homework_days' => 'integer', 'weekly_digest' => 'boolean', 'hifz_daily_pages' => 'integer'];
+        return ['report_due_hours' => 'integer', 'homework_days' => 'integer', 'weekly_digest' => 'boolean'];
     }
 
     public static function current(): self

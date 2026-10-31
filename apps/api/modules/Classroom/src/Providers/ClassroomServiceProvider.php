@@ -12,10 +12,11 @@ use Illuminate\Support\ServiceProvider;
 use Modules\Classroom\Authorization\ClassroomAccess;
 use Modules\Classroom\Console\ReconcileClassroomsCommand;
 use Modules\Classroom\Console\RecordingsCommand;
+use Modules\Classroom\Contracts\ClassPage;
 use Modules\Classroom\Contracts\RecordingHolds;
+use Modules\Classroom\Http\ClassPageViewers;
 use Modules\Classroom\Http\Controllers\LiveKitWebhookController;
 use Modules\Classroom\Http\Controllers\RecordingMediaController;
-use Modules\Classroom\Live\LessonMushafChanged;
 use Modules\Classroom\Privacy\RecordingsData;
 use Modules\Classroom\Queries\VideoMinutes;
 use Modules\Classroom\Recordings\AllRecordingHolds;
@@ -26,7 +27,6 @@ use Modules\SharedKernel\Plans\Limit;
 use Modules\SharedKernel\Plans\UsageMeters;
 use Modules\SharedKernel\Plans\UsagePeriod;
 use Modules\SharedKernel\Privacy\PersonalData;
-use Modules\SharedKernel\Realtime\LiveSignals;
 use Modules\SharedKernel\Tenancy\TenantContext;
 
 /** The live classroom (docs/architecture/01-features.md, section 9; 03, section 6). */
@@ -37,6 +37,7 @@ final class ClassroomServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../../config/classroom.php', 'classroom');
         // Every module's reasons to keep a lesson's recordings (tagged RecordingHolds::SOURCES), asked together.
         $this->app->bind(RecordingHolds::class, AllRecordingHolds::class);
+        $this->app->singleton(ClassPage::class, ClassPageViewers::class);
     }
 
     public function boot(): void
@@ -69,10 +70,9 @@ final class ClassroomServiceProvider extends ServiceProvider
             return $this->app->make(TenantDirectory::class)->baseUrl($this->app->make(TenantContext::class)->require()).$path;
         });
 
-        // A Quran lesson's shared mushaf turned or marked: the class page follows on the lesson's own channel, which
-        // only those with a seat in the lesson may hear (the page signs it for link visitors itself).
-        $this->app->make(LiveSignals::class)->on('lesson-mushaf', fn (string $sessionId) => new LessonMushafChanged($sessionId));
-        Broadcast::channel(LessonMushafChanged::CHANNEL, function (Authenticatable $user, string $session): bool {
+        // The lesson's own channel, which only those with a seat in the lesson may hear (the page signs it for link
+        // visitors itself): what another module puts beside the room says "look again" on it.
+        Broadcast::channel(ClassPageViewers::CHANNEL, function (Authenticatable $user, string $session): bool {
             $lesson = $this->app->make(AttendanceApi::class)->lesson($session);
 
             return $lesson !== null && $this->app->make(ClassroomAccess::class)->seatFor((string) $user->getAuthIdentifier(), $lesson) !== null;

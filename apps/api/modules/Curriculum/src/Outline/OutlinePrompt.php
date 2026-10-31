@@ -8,9 +8,7 @@ use Modules\SharedKernel\Ai\AiPrompt;
 /**
  * What the language model is asked for a curriculum outline: the subject and
  * its levels as the academy names them, the age group, how many lessons, and
- * the goal the academy typed. Nothing about a person. For the Quran, each
- * lesson is a passage by numbers alone (surah, first and last verse): the
- * platform puts in the names and words from its own copy.
+ * the goal the academy typed. Nothing about a person.
  */
 final class OutlinePrompt
 {
@@ -26,9 +24,8 @@ final class OutlinePrompt
 
     /**
      * @param  list<string>  $levels  the subject's levels as the academy names them, in order
-     * @param  list<array{number: int, name_ar: string, name_en: string, verses: int}>  $surahs  the platform's surahs, for the demo's answer (Quran only)
      */
-    public static function for(string $subject, array $levels, string $age, int $lessons, string $goal, bool $quran, array $surahs = []): AiPrompt
+    public static function for(string $subject, array $levels, string $age, int $lessons, string $goal): AiPrompt
     {
         $user = [
             'Subject: '.$subject,
@@ -37,18 +34,15 @@ final class OutlinePrompt
             "Lessons in all: about {$lessons}.",
             "The academy's goal, in its own words:\n".$goal,
         ];
-        if ($quran) {
-            $user[] = 'This is a Quran curriculum: each lesson is a passage given only by numbers (surah, from verse, to verse).';
-        }
 
         return new AiPrompt(
-            system: $quran ? self::SYSTEM.self::QURAN : self::SYSTEM,
+            system: self::SYSTEM,
             user: implode("\n\n", $user),
-            schema: self::schema($quran),
+            schema: self::schema(),
             tier: 'best',
             effort: 'medium',
             maxTokens: 16000,
-            demo: self::demo($levels, $lessons, $quran, $surahs),
+            demo: self::demo($levels, $lessons),
         );
     }
 
@@ -62,19 +56,11 @@ final class OutlinePrompt
         Use only what a curriculum needs. Never mention a person, a name, a price or a place.
         TXT;
 
-    private const QURAN = <<<'TXT'
-
-
-        For the Quran: never write any of the Quran's words, not even a phrase; give each lesson only "surah" (1 to 114), "from" and "to" (verse numbers in that surah). The platform writes the surah's name and words itself. A lesson is a passage a learner can take in one or two lessons. Objectives may say what to do (memorise, revise, recite with a rule of tajweed) but never quote the Quran.
-        TXT;
-
     /** @return array<string, mixed> */
-    private static function schema(bool $quran): array
+    private static function schema(): array
     {
         $title = ['title_ar' => ['type' => 'string'], 'title_en' => ['type' => 'string']];
-        $lesson = $quran
-            ? ['type' => 'object', 'properties' => ['surah' => ['type' => 'integer'], 'from' => ['type' => 'integer'], 'to' => ['type' => 'integer'], 'objective' => ['type' => 'string']], 'required' => ['surah', 'from', 'to', 'objective'], 'additionalProperties' => false]
-            : ['type' => 'object', 'properties' => $title + ['objective' => ['type' => 'string']], 'required' => ['title_ar', 'title_en', 'objective'], 'additionalProperties' => false];
+        $lesson = ['type' => 'object', 'properties' => $title + ['objective' => ['type' => 'string']], 'required' => ['title_ar', 'title_en', 'objective'], 'additionalProperties' => false];
         $lessons = ['type' => 'array', 'items' => $lesson];
 
         return [
@@ -100,25 +86,15 @@ final class OutlinePrompt
 
     /**
      * The demo's answer (AI_DRIVER=demo): the academy's levels (or two of its own), the lessons shared
-     * between them; for the Quran, the last surahs a lesson each.
+     * between them.
      *
      * @param  list<string>  $levels
-     * @param  list<array{number: int, name_ar: string, name_en: string, verses: int}>  $surahs
      * @return array<string, mixed>
      */
-    private static function demo(array $levels, int $lessons, bool $quran, array $surahs): array
+    private static function demo(array $levels, int $lessons): array
     {
         $names = array_slice($levels !== [] ? $levels : ['المستوى الأول', 'المستوى الثاني'], 0, OutlineRules::LEVELS_MAX);
         $lessons = max(1, min($lessons, 24));
-        if ($quran) {
-            $passages = array_slice(array_reverse($surahs), 0, $lessons);
-            $per = (int) ceil(max(1, count($passages)) / count($names));
-
-            return ['levels' => array_values(array_filter(array_map(fn (string $name, int $i) => [
-                'title_ar' => $name, 'title_en' => $name, 'units' => [],
-                'lessons' => array_map(fn (array $s) => ['surah' => $s['number'], 'from' => 1, 'to' => $s['verses'], 'objective' => 'الحفظ والتلاوة الصحيحة.'], array_slice($passages, $i * $per, $per)),
-            ], $names, array_keys($names)), fn (array $l) => $l['lessons'] !== []))];
-        }
         $per = (int) ceil($lessons / count($names));
         $n = 0;
 

@@ -10,8 +10,7 @@ namespace Modules\Curriculum\Domain\Outline;
  *
  * A row is a level (depth 0), a unit in the level above it (depth 1), or a
  * lesson straight in the level (depth 1) or in the unit above it (depth 2):
- * {kind, depth, title_ar, title_en, objective, quran: ?{surah, from, to},
- * on, key}. The order of the rows is the teaching order, so the tree is
+ * {kind, depth, title_ar, title_en, objective, on, key}. The order of the rows is the teaching order, so the tree is
  * exactly what the rows say. A row left unticked (on false) is left out with
  * everything under it.
  */
@@ -246,21 +245,9 @@ final class OutlineRules
             'title_ar' => $ar !== '' ? $ar : $en,
             'title_en' => $en !== '' ? $en : $ar,
             'objective' => $kind === 'lesson' && $objective !== '' ? $objective : null,
-            'quran' => $kind === 'lesson' ? self::quran($raw['quran'] ?? null) : null,
             'on' => ($raw['on'] ?? true) !== false,
             'key' => is_string($raw['key'] ?? null) && $raw['key'] !== '' ? $raw['key'] : 'r'.$i,
         ];
-    }
-
-    /** @return ?array{surah: int, from: int, to: int} a passage by numbers, in its shape (the platform's copy checks the rest) */
-    private static function quran(mixed $given): ?array
-    {
-        if (! is_array($given)) {
-            return null;
-        }
-        [$surah, $from, $to] = [(int) ($given['surah'] ?? 0), (int) ($given['from'] ?? 0), (int) ($given['to'] ?? 0)];
-
-        return $surah >= 1 && $surah <= 114 && $from >= 1 && $to >= $from ? ['surah' => $surah, 'from' => $from, 'to' => $to] : null;
     }
 
     private static function cut(string $text, int $max): string

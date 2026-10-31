@@ -6,7 +6,6 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Modules\Curriculum\Contracts\DTOs\TextSource;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
 
 /**
@@ -32,7 +31,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property ?list<string> $practice_nodes the report's lessons whose practice it asks for
  * @property ?array{correct: int, total: int, stars: int, game: string, played_at: string} $practice_result the best round played for it
  * @property ?string $practice_game the catalog game the teacher chose for it
- * @property ?array<string, mixed> $expected what is to be recited (a Curriculum TextSource: a passage of the Quran), checked word by word for the teacher
+ * @property ?array<string, mixed> $expected what is to be recited, as the module that reads it keeps it (LearningQuran), checked word by word for the teacher
  */
 final class Homework extends Model
 {
@@ -40,6 +39,9 @@ final class Homework extends Model
     use HasUuids;
 
     public const ACCEPTS = ['any', 'text', 'audio', 'file', 'practice'];
+
+    /** Homework that may come with a recording. */
+    public const VOICE = ['audio', 'any'];
 
     public const STATUSES = ['assigned', 'submitted', 'reviewed', 'missed'];
 
@@ -61,12 +63,6 @@ final class Homework extends Model
     public function hasPractice(): bool
     {
         return $this->practice_nodes !== null && $this->practice_nodes !== [];
-    }
-
-    /** What is to be recited, when it says. */
-    public function expectedSource(): ?TextSource
-    {
-        return TextSource::fromArray($this->expected);
     }
 
     /** @return HasMany<HomeworkSubmission, $this> */

@@ -12,7 +12,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
@@ -20,7 +19,6 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -58,7 +56,6 @@ use Modules\Curriculum\Outline\OutlineSheet;
 use Modules\Curriculum\Outline\Templates;
 use Modules\Curriculum\Outline\TextOutline;
 use Modules\Curriculum\Queries\VersionReadiness;
-use Modules\Curriculum\Texts\QuranText;
 use Modules\SharedKernel\Ai\AcademyAi;
 use Modules\SharedKernel\Ai\AiFailed;
 use Modules\SharedKernel\Ai\AiFeature;
@@ -76,7 +73,7 @@ use Modules\SharedKernel\Games\ItemKind;
  * time (published or not), and its practice: the questions, orders and
  * pairs the learner's games play after the lesson (SaveNodeItems), with the
  * games those items are enough for, and how much of the program has practice.
- * A lesson's text (typed, or a passage of the Quran) is set with the lesson;
+ * A lesson's text (typed) is set with the lesson;
  * when the academy turned the helper on, "Suggest practice" puts suggested
  * items in the practice form, marked, to look over and save.
  *
@@ -153,7 +150,7 @@ final class EditCurriculum extends Page
         return VersionReadiness::say($item, $this->readiness[1]);
     }
 
-    /** @return array<string, string> lesson id => the kind of its text (text, quran) */
+    /** @return array<string, string> lesson id => the kind of its text (text) */
     #[Computed]
     public function texts(): array
     {
@@ -211,8 +208,6 @@ final class EditCurriculum extends Page
     public function startAiAction(): Action
     {
         $o = 'curriculum::outline.';
-        $surahs = app(QuranText::class)->available();
-        $subject = (string) (app(CatalogApi::class)->subjectNames()[$this->record->subject_id] ?? '');
 
         return $this->startWay('startAi', 'ai', Heroicon::OutlinedSparkles)
             ->modalDescription(fn () => $this->aiOff() ?? __($o.'ai.description'))
@@ -227,8 +222,6 @@ final class EditCurriculum extends Page
                     TextInput::make('lessons')->label(__($o.'ai.fields.lessons'))->numeric()->required()
                         ->minValue(1)->maxValue(OutlineRules::LESSONS_MAX)->default(24),
                 ]),
-                Toggle::make('quran')->label(__($o.'ai.fields.quran'))->helperText(__($o.'ai.fields.quran_hint'))
-                    ->visible($surahs)->default($surahs && preg_match('/قرآن|قران|quran|qur.an|حفظ|تحفيظ/iu', $subject) === 1),
             ])
             ->action(function (array $data, Action $action) use ($o) {
                 try {
@@ -834,33 +827,19 @@ final class EditCurriculum extends Page
         ];
     }
 
-    /** A lesson's text: none, typed, or a passage of the Quran by surah and verses (offered once the platform has its copy). */
+    /** A lesson's text: none, or words the academy types. */
     private function textSection(): Section
     {
         $t = 'curriculum::curriculum.text.';
-        $surahs = app(CurriculumApi::class)->surahs();
-        $kinds = collect(['none', 'text', 'quran'])->mapWithKeys(fn ($k) => [$k => __($t.'kinds.'.$k)])->all();
+        $kinds = collect(['none', 'text'])->mapWithKeys(fn ($k) => [$k => __($t.'kinds.'.$k)])->all();
 
         return Section::make(__($t.'section'))->description(__($t.'hint'))->compact()->schema([
             Radio::make('text_kind')->label(__($t.'kind'))->inline()->default('none')->live()
-                ->options($kinds)
-                ->disableOptionWhen(fn (string $value) => $value === 'quran' && $surahs === [])
-                ->helperText($surahs === [] ? __($t.'quran_missing') : null),
+                ->options($kinds),
             Textarea::make('text')->label(__($t.'text'))->rows(5)->maxLength(TextSource::TEXT_MAX)
                 ->helperText(__($t.'text_hint', ['max' => TextSource::TEXT_MAX]))
                 ->extraInputAttributes(['dir' => 'auto'])
                 ->visible(fn (Get $get) => $get('text_kind') === 'text')->required(fn (Get $get) => $get('text_kind') === 'text'),
-            Grid::make(3)->schema([
-                Select::make('surah')->label(__($t.'surah'))->native(false)->searchable()->live()
-                    ->options(collect($surahs)->mapWithKeys(fn (array $s) => [$s['number'] => $s['number'].'. '.$s['name_ar'].' · '.$s['name_en']])->all())
-                    ->required(fn (Get $get) => $get('text_kind') === 'quran'),
-                TextInput::make('from')->label(__($t.'from'))->numeric()->minValue(1)->default(1)
-                    ->required(fn (Get $get) => $get('text_kind') === 'quran'),
-                TextInput::make('to')->label(__($t.'to'))->numeric()->minValue(1)
-                    ->maxValue(fn (Get $get) => collect($surahs)->firstWhere('number', (int) $get('surah'))['verses'] ?? null)
-                    ->required(fn (Get $get) => $get('text_kind') === 'quran'),
-            ])->visible(fn (Get $get) => $get('text_kind') === 'quran'),
-            Text::make(__($t.'quran_hint'))->visible(fn (Get $get) => $get('text_kind') === 'quran'),
         ]);
     }
 
@@ -872,9 +851,6 @@ final class EditCurriculum extends Page
         return $node->only(['title_ar', 'title_en', 'objectives', 'weight', 'est_sessions', 'mastery_rule']) + [
             'text_kind' => $text?->kind ?? 'none',
             'text' => $text?->text,
-            'surah' => $text?->surah,
-            'from' => $text?->from,
-            'to' => $text?->to,
         ];
     }
 
@@ -883,11 +859,10 @@ final class EditCurriculum extends Page
         if (array_key_exists('text_kind', $data)) {
             $data['text_source'] = match ($data['text_kind']) {
                 'text' => ['kind' => 'text', 'text' => $data['text'] ?? ''],
-                'quran' => ['kind' => 'quran', 'surah' => $data['surah'] ?? null, 'from' => $data['from'] ?? null, 'to' => $data['to'] ?? null],
                 default => null,
             };
         }
-        unset($data['text_kind'], $data['text'], $data['surah'], $data['from'], $data['to']);
+        unset($data['text_kind'], $data['text']);
         app(SaveNode::class)->handle($this->version(), $node, $data);
         $this->forget();
     }

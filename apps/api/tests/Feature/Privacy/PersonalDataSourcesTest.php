@@ -64,6 +64,8 @@ const PRIVACY_COVERAGE = [
     'games' => ['copy' => ['student'], 'erases' => true],
     'imports' => ['copy' => [], 'erases' => true],
     'learning' => ['copy' => ['student', 'guardian'], 'erases' => true],
+    // The hifz map, the mistakes notebook and the checks of recited homework (the Quran module's).
+    'quran' => ['copy' => ['student'], 'erases' => true],
     'messaging' => ['copy' => ['student', 'guardian', 'teacher'], 'erases' => false],
     'earnings' => ['copy' => ['teacher'], 'erases' => false],
     'safeguarding' => ['copy' => ['student'], 'erases' => false],
@@ -303,7 +305,8 @@ it('holds an erasure back for each source\'s own reasons, and erases once they a
         ->and($after['ratings'])->toBe([null, '[]', 4])
         ->and($after['games'])->toBe([0, 0, 0])
         ->and($after['imports'])->toBe('{}')
-        ->and($after['learning'])->toBe([0, 0, 0, 1, 1, 0, 0])
+        ->and($after['learning'])->toBe([0, 0, 0, 1, 1, 0])
+        ->and($after['quran'])->toBe(0)
         ->and($after['lessons'])->toBe(['', null, 0])
         ->and(Storage::disk('local')->exists($this->handedIn))->toBeFalse()
         ->and(Storage::disk('local')->exists($this->checkScan))->toBeFalse();
@@ -351,9 +354,9 @@ function pdsSnapshot(array $people): array
         'imports' => (string) DB::table('import_rows')->value(DB::raw('cells::text')),
         'learning' => [DB::table('homework_submissions')->where('submitted_by', $s)->count(), DB::table('challenge_claims')->where('student_id', $s)->count(),
             DB::table('cheers')->where('student_id', $s)->orWhere('from_id', $g)->count(), DB::table('homework')->where('student_id', $s)->count(), DB::table('practice_rounds')->where('student_id', $s)->count(),
-            DB::table('weekly_digests')->where('student_id', $s)->count(),
-            DB::table('hifz_pages')->where('student_id', $s)->count() + DB::table('hifz_reviews')->where('student_id', $s)->count() + DB::table('hifz_recitations')->where('student_id', $s)->count()
-                + DB::table('recitation_mistakes')->where('student_id', $s)->count()],
+            DB::table('weekly_digests')->where('student_id', $s)->count()],
+        'quran' => DB::table('hifz_pages')->where('student_id', $s)->count() + DB::table('hifz_reviews')->where('student_id', $s)->count() + DB::table('hifz_recitations')->where('student_id', $s)->count()
+            + DB::table('recitation_mistakes')->where('student_id', $s)->count(),
         'messaging' => DB::table('conversation_messages')->count(),
         'earnings' => DB::table('teacher_earnings')->where('teacher_id', $t)->count(),
         'safeguarding' => DB::table('safeguarding_concerns')->where('reporter_id', $s)->count(),

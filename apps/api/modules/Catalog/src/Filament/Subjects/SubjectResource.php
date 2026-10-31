@@ -7,10 +7,13 @@ use Closure;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
@@ -26,6 +29,8 @@ use Modules\Catalog\Models\Subject;
 use Modules\Catalog\Models\SubjectCategory;
 use Modules\Catalog\Models\SubjectLevel;
 use Modules\SharedKernel\Authorization\Ability;
+use Modules\SharedKernel\Plans\AcademyPlan;
+use Modules\SharedKernel\Plans\Feature;
 use UnitEnum;
 
 /**
@@ -86,9 +91,23 @@ final class SubjectResource extends Resource
                 TextInput::make('name_ar')->label(__($l.'name_ar'))->required()->maxLength(120),
                 TextInput::make('name_en')->label(__($l.'name_en'))->helperText(__($l.'name_en_hint'))->maxLength(120),
             ]),
+            // The kind, as two cards: general, or the Quran (its courses are the Quran module's), offered while the plan has it.
+            ToggleButtons::make('kind')->label(__($l.'kind'))->helperText(__($l.'kind_hint'))->inline()->live()->default('general')
+                ->options(['general' => __('catalog::subjects.kinds.general'), 'quran' => __('catalog::subjects.kinds.quran')])
+                ->icons(['general' => Heroicon::OutlinedBookOpen, 'quran' => Heroicon::OutlinedSparkles])
+                ->visible(fn (Get $get) => self::quranOffered() || $get('kind') === 'quran'),
+            Select::make('quran_track')->label(__($l.'quran_track'))->native(false)->default('hifz')->required(fn (Get $get) => $get('kind') === 'quran')
+                ->options(collect(SaveSubject::QURAN_TRACKS)->mapWithKeys(fn (string $t) => [$t => __('catalog::subjects.tracks.'.$t)])->all())
+                ->visible(fn (Get $get) => $get('kind') === 'quran'),
             $items('levels', 'levels_hint', 'add_level')->maxItems(SaveSubject::MAX_LEVELS),
             $items('categories', 'categories_hint', 'add_category')->maxItems(SaveSubject::MAX_CATEGORIES),
         ]);
+    }
+
+    /** Whether a subject may become the Quran: the academy's plan has it. */
+    public static function quranOffered(): bool
+    {
+        return app(AcademyPlan::class)->has(Feature::Quran);
     }
 
     public static function table(Table $table): Table
@@ -103,6 +122,8 @@ final class SubjectResource extends Resource
             ->columns([
                 TextColumn::make($name())->label(__($c.'name'))->weight('semibold')->searchable(['name_ar', 'name_en'])->sortable()
                     ->description(fn (Subject $s) => app()->getLocale() === 'ar' ? ($s->name_en !== $s->name_ar ? $s->name_en : null) : ($s->name_ar !== $s->name_en ? $s->name_ar : null)),
+                TextColumn::make('kind')->label(__($c.'kind'))->badge()->color('success')
+                    ->state(fn (Subject $s) => $s->kind === 'quran' ? __('catalog::subjects.kinds.quran').' · '.__('catalog::subjects.tracks.'.$s->quran_track) : null),
                 TextColumn::make('levels')->label(__($c.'levels'))->wrap()
                     ->state(fn (Subject $s) => $s->levels->isEmpty() ? __('catalog::subjects.no_levels') : $s->levels->map(fn (SubjectLevel $l) => $l->name())->implode(__('catalog::subjects.level_separator'))),
                 TextColumn::make('categories')->label(__($c.'categories'))->badge()->color('gray')
@@ -130,6 +151,8 @@ final class SubjectResource extends Resource
         return [
             'name_ar' => $subject->name_ar,
             'name_en' => $subject->name_en === $subject->name_ar ? null : $subject->name_en,
+            'kind' => $subject->kind,
+            'quran_track' => $subject->quran_track,
             'levels' => $subject->levels->map($item)->values()->all(),
             'categories' => $subject->categories->map($item)->values()->all(),
         ];
@@ -144,6 +167,8 @@ final class SubjectResource extends Resource
             $data['name_en'] ?? null,
             array_values($data['levels'] ?? []),
             array_values($data['categories'] ?? []),
+            is_string($data['kind'] ?? null) ? $data['kind'] : null,
+            is_string($data['quran_track'] ?? null) ? $data['quran_track'] : null,
         );
     }
 

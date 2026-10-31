@@ -24,6 +24,7 @@ use Modules\Payroll\Providers\PayrollServiceProvider;
 use Modules\People\Providers\PeopleServiceProvider;
 use Modules\Platform\Providers\PlatformServiceProvider;
 use Modules\Privacy\Providers\PrivacyServiceProvider;
+use Modules\Quran\Providers\QuranServiceProvider;
 use Modules\Safeguarding\Providers\SafeguardingServiceProvider;
 use Modules\Scheduling\Providers\SchedulingServiceProvider;
 use Modules\SharedKernel\Providers\SharedKernelServiceProvider;
@@ -56,6 +57,7 @@ return [
     MessagingServiceProvider::class,
     GamesServiceProvider::class,
     AnnouncementsServiceProvider::class,
+    QuranServiceProvider::class,
     AppServiceProvider::class,
     AcademyPanelProvider::class,
     TeacherPanelProvider::class,

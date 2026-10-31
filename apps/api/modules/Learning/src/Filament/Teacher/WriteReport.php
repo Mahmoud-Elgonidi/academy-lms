@@ -2,7 +2,6 @@
 
 namespace Modules\Learning\Filament\Teacher;
 
-use Filament\Actions\Action;
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -16,7 +15,6 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +27,7 @@ use Modules\Learning\Actions\Assist\DraftReportFromVoice;
 use Modules\Learning\Actions\SubmitGroupReport;
 use Modules\Learning\Actions\SubmitHomework;
 use Modules\Learning\Actions\SubmitSessionReport;
-use Modules\Learning\Assist\RecitationTarget;
+use Modules\Learning\Contracts\LearningQuran;
 use Modules\Learning\Domain\MasteryRule;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\LearningSettings;
@@ -54,8 +52,9 @@ use Modules\SharedKernel\Time\ViewerTimezone;
  * template), and optional homework. Same Action as the API. When the
  * academy turned the helper on, a voice note drafts what is still empty
  * (DraftReportFromVoice): the teacher checks it, then sends as usual; and
- * homework handed in by voice may say what to recite, so each recording is
- * checked word by word for the teacher (RecitationTarget, CheckRecitation).
+ * homework handed in by voice may say what to recite where the Quran module
+ * adds it (LearningQuran), so each recording is checked word by word for the
+ * teacher.
  *
  * @property-read Schema $form
  */
@@ -83,10 +82,10 @@ final class WriteReport extends Page
 
     private bool $templateRead = false;
 
-    /** The passage of the report's lessons the form starts from, as it reads (null: none, or the homework has its own). */
+    /** What the report's lessons ask to recite, as it reads (null: none, or the homework has its own; LearningQuran). */
     public ?string $reciteSuggestion = null;
 
-    /** The passage most marked in this lesson's mushaf (surah, from, to, title), offered with one tap. */
+    /** What the words marked in this lesson suggest reciting (surah, from, to, title), offered with one tap (LearningQuran). */
     public ?array $mistakesSuggestion = null;
 
     public static function canAccess(): bool
@@ -108,15 +107,15 @@ final class WriteReport extends Page
         }
 
         $homework = $this->sessionReport->homework()->first();
-        $target = app(RecitationTarget::class);
-        // What to recite: the homework's own, else the passage of the report's lessons, ready for when the teacher turns it on.
-        $recite = $target->present($homework?->expectedSource());
+        $quran = app(LearningQuran::class);
+        // What to recite: the homework's own, else what the report's lessons ask, ready for when the teacher turns it on.
+        $recite = $quran->presentTarget($homework?->expected);
         if ($recite === null && $this->sessionReport->kind === 'lesson') {
-            $recite = $target->suggestion(array_column(app(ReportFormQuery::class)->items($this->sessionReport), 'node_id'));
+            $recite = $quran->targetFromLessons(array_column(app(ReportFormQuery::class)->items($this->sessionReport), 'node_id'));
             $this->reciteSuggestion = $recite['title'] ?? null;
         }
         if ($this->sessionReport->kind === 'lesson') {
-            $this->mistakesSuggestion = $target->fromMistakes($this->sessionReport->session_id);
+            $this->mistakesSuggestion = $quran->targetFromMistakes($this->sessionReport->session_id);
         }
         $this->form->fill([
             'items' => app(ReportFormQuery::class)->items($this->sessionReport),
@@ -269,49 +268,20 @@ final class WriteReport extends Page
             ]);
     }
 
-    /** Whether the form asks what the homework is to recite: the helper is on, or the homework already says. */
+    /** Whether the form asks what the homework is to recite: the Quran module offers it, or the homework already says. */
     public function reciteOffered(): bool
     {
-        return app(RecitationTarget::class)->offered() || $this->sessionReport->homework()->whereNotNull('expected')->exists();
+        return app(LearningQuran::class)->recitationOffered() || $this->sessionReport->homework()->whereNotNull('expected')->exists();
     }
 
     /**
-     * What a homework handed in by voice asks to recite, for the teacher's check: a passage of the Quran by surah and verses.
+     * What a homework handed in by voice asks to recite, for the teacher's check (the Quran module's fields).
      *
-     * @return list<Field|Grid>
+     * @return list<mixed>
      */
     private function recitation(): array
     {
-        if (! $this->reciteOffered()) {
-            return [];
-        }
-        $r = 'learning::recitation.';
-        $surahs = app(CurriculumApi::class)->surahs();
-        $voice = fn (Get $get) => in_array($get('homework.accepts'), RecitationTarget::ACCEPTS, true);
-        $on = fn (Get $get) => $voice($get) && (bool) $get('homework.recite');
-
-        return [
-            Toggle::make('homework.recite')->label(__($r.'toggle'))->helperText(__($r.'hint'))->live()->visible($voice)
-                ->hintAction(Action::make('fromMistakes')->link()
-                    ->label(fn () => __('learning::mushaf.from_mistakes', ['title' => $this->mistakesSuggestion['title'] ?? '']))
-                    ->visible(fn () => $this->mistakesSuggestion !== null)
-                    ->action(function (Set $set): void {
-                        $set('homework.recite', true);
-                        foreach (['surah', 'from', 'to'] as $key) {
-                            $set('homework.expected.'.$key, $this->mistakesSuggestion[$key] ?? null);
-                        }
-                    })),
-            Grid::make(3)->schema([
-                Select::make('homework.expected.surah')->label(__($r.'fields.surah'))->native(false)->searchable()->live()
-                    ->helperText($this->reciteSuggestion === null ? null : __($r.'suggestion', ['title' => $this->reciteSuggestion]))
-                    ->options(collect($surahs)->mapWithKeys(fn (array $s) => [$s['number'] => $s['number'].'. '.$s['name_ar'].' · '.$s['name_en']])->all())
-                    ->required($on),
-                TextInput::make('homework.expected.from')->label(__($r.'fields.from'))->numeric()->minValue(1)->required($on),
-                TextInput::make('homework.expected.to')->label(__($r.'fields.to'))->numeric()->minValue(1)
-                    ->maxValue(fn (Get $get) => collect($surahs)->firstWhere('number', (int) $get('homework.expected.surah'))['verses'] ?? null)
-                    ->required($on),
-            ])->visible($on),
-        ];
+        return $this->reciteOffered() ? app(LearningQuran::class)->reportFields($this->mistakesSuggestion, $this->reciteSuggestion) : [];
     }
 
     /** The subject's own questions (the version this report was handed in with, else the one now). */
@@ -439,7 +409,7 @@ final class WriteReport extends Page
         $data = $this->form->getState();
         $data['items'] = array_values(array_map(fn (array $i) => array_intersect_key($i, array_flip(['node_id', 'outcome', 'score', 'note'])), $data['items'] ?? []));
         // What to recite goes only when the form asks it: the passage while the switch is on, else none.
-        $recite = (bool) ($data['homework']['recite'] ?? false) && in_array($data['homework']['accepts'] ?? null, RecitationTarget::ACCEPTS, true);
+        $recite = (bool) ($data['homework']['recite'] ?? false) && in_array($data['homework']['accepts'] ?? null, Homework::VOICE, true);
         if ($this->reciteOffered()) {
             $data['homework']['expected'] = $recite ? array_map(fn ($v) => $v === null || $v === '' ? null : (int) $v, $data['homework']['expected'] ?? []) : null;
         } else {

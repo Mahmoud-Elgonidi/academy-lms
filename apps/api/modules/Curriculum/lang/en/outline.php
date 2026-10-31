@@ -19,8 +19,6 @@ return [
             'goal_placeholder' => 'For example: read and write short Arabic words, in three months.',
             'age' => 'Age group',
             'lessons' => 'Number of lessons',
-            'quran' => 'Lessons from the Quran',
-            'quran_hint' => 'Each lesson is a surah and verses by number, its text from the platform\'s copy.',
         ],
         'ages' => ['kids' => 'Children (6–9)', 'middle' => '10–13 years', 'teen' => 'Teenagers (14–17)', 'adults' => 'Adults', 'any' => 'All ages'],
         'dropped' => '{1} One line did not fit and was left out|[2,*] :count lines did not fit and were left out',
@@ -73,7 +71,6 @@ return [
         'include' => 'Include',
         'remove' => 'Remove',
         'objective' => 'Objective',
-        'quran' => 'Quran text',
         'empty' => 'Nothing is left in the outline.',
         'saved' => 'The outline was saved to the draft: :levels levels and :lessons lessons.',
     ],
@@ -86,10 +83,6 @@ return [
             ['', 'Second unit', 'Third lesson', ''],
             ['Second level', '', 'Fourth lesson', ''],
         ],
-    ],
-    'quran_lesson' => [
-        'whole' => 'Surah :name',
-        'part' => 'Surah :name (:from–:to)',
     ],
     'fallback' => [
         'level' => 'Level :n',
