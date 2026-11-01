@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Quran\Http\V1\Controllers\HifzController;
 use Modules\Quran\Http\V1\Controllers\MushafController;
+use Modules\Quran\Http\V1\Controllers\QuranLessonController;
+use Modules\Quran\Http\V1\Controllers\QuranPlanController;
 use Modules\Quran\Http\V1\Controllers\TeacherHifzController;
 
 /*
@@ -42,4 +44,17 @@ Route::middleware(['auth:sanctum', 'plan.feature:quran'])->prefix('learning')->g
     Route::post('hifz/pages/{page}/grade', [HifzController::class, 'grade'])->whereNumber('page')->middleware(['idempotent', 'throttle:30,1'])->name('learning.hifz.grade');
     // The words marked in the learner's lessons, by surah.
     Route::get('mistakes', [MushafController::class, 'book'])->middleware('throttle:60,1')->name('learning.mistakes');
+});
+
+// The Quran program (quran/…): a lesson's portion and its record for the teacher, a student's plan and pace.
+Route::middleware(['auth:sanctum', 'plan.feature:quran', 'can:quran.teach'])->prefix('quran')->group(function () {
+    Route::get('lessons/{session}/portion', [QuranLessonController::class, 'show'])->middleware('throttle:120,1')->name('quran.lessons.portion');
+    Route::post('lessons/{session}/result', [QuranLessonController::class, 'record'])->middleware(['idempotent', 'throttle:30,1'])->name('quran.lessons.record');
+    Route::get('students/{enrollment}/plan', [QuranPlanController::class, 'teacher'])->middleware('throttle:60,1')->name('quran.students.plan');
+    Route::patch('students/{enrollment}/plan', [QuranPlanController::class, 'pace'])->middleware('throttle:30,1')->name('quran.students.pace');
+});
+
+// Students and guardians: each Quran course's plan, where the learner is and the last lessons' grades.
+Route::middleware(['auth:sanctum', 'plan.feature:quran'])->prefix('quran')->group(function () {
+    Route::get('plan', [QuranPlanController::class, 'family'])->middleware('throttle:60,1')->name('quran.plan');
 });

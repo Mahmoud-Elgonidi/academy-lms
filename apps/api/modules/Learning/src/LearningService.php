@@ -3,11 +3,13 @@
 namespace Modules\Learning;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Str;
 use Modules\Curriculum\Contracts\CurriculumApi;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\Learning\Actions\RecordPractice;
 use Modules\Learning\Actions\SendCheer;
 use Modules\Learning\Contracts\DTOs\HomeworkLine;
+use Modules\Learning\Contracts\DTOs\LessonReport;
 use Modules\Learning\Contracts\DTOs\PlanLine;
 use Modules\Learning\Contracts\DTOs\PracticeFocus;
 use Modules\Learning\Contracts\DTOs\PracticeRecorded;
@@ -17,6 +19,8 @@ use Modules\Learning\Domain\PlannedItem;
 use Modules\Learning\Domain\TodaysPlan;
 use Modules\Learning\Materials\MaterialLinks;
 use Modules\Learning\Models\Homework;
+use Modules\Learning\Models\ReportItem;
+use Modules\Learning\Models\SessionReport;
 use Modules\Learning\Queries\Journey\JourneyMap;
 use Modules\Learning\Queries\Journey\StarsQuery;
 use Modules\Learning\Queries\PracticeFocusQuery;
@@ -89,5 +93,28 @@ final class LearningService implements LearningApi
     public function cheer(string $fromId, string $studentId, string $kind = 'heart'): void
     {
         app(SendCheer::class)->handle($fromId, $studentId, $kind);
+    }
+
+    public function lessonReport(string $reportId): ?LessonReport
+    {
+        $report = Str::isUuid($reportId) ? SessionReport::query()->find($reportId) : null;
+
+        return $report === null ? null : new LessonReport(
+            $report->id,
+            $report->session_id,
+            $report->kind,
+            CarbonImmutable::parse($report->session_starts_at),
+            ReportItem::query()->where('report_id', $report->id)->pluck('outcome', 'node_id')->map(fn ($o) => (string) $o)->all(),
+        );
+    }
+
+    public function reportIdsOf(string $sessionId): array
+    {
+        return SessionReport::query()->where('session_id', $sessionId)->pluck('id')->map(fn ($id) => (string) $id)->all();
+    }
+
+    public function reportHandedIn(string $sessionId): bool
+    {
+        return SessionReport::query()->where('session_id', $sessionId)->whereIn('status', ['submitted', 'reviewed'])->exists();
     }
 }

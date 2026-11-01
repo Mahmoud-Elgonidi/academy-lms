@@ -161,6 +161,12 @@ return [
         ],
         'quran' => [
             'daily_pages_saved' => 'The daily hifz review is now :pages pages at most',
+            'settings_saved' => 'Quran settings changed: :quran_fields',
+            'program_saved' => 'Quran program :name saved',
+            'program_archived' => 'Quran program :name archived',
+            'program_restored' => 'Quran program :name brought back',
+            'plan_started' => 'A Quran plan started on :program',
+            'plan_adjusted' => 'A Quran plan changed: :quran_fields',
         ],
         'games' => [
             'settings_saved' => "Changed the academy's games (:state, :minutes minutes a day)",
@@ -186,6 +192,17 @@ return [
         ],
     ],
     'values' => [
+        'quran_fields' => [
+            'hifz_daily_pages' => 'daily review', 'riwaya' => 'riwaya', 'mushaf' => 'mushaf', 'default_unit' => 'default unit',
+            'default_new_amount' => 'default new amount', 'default_near_portions' => 'default near review', 'default_far_pages' => 'default far review',
+            'mistake_types' => 'mistake types', 'grade_scale' => 'grade scale', 'memorization_threshold' => 'memorization threshold',
+            'auto_recitation_check' => 'automatic recitation check', 'exams_enabled' => 'exams', 'examiner' => 'examiner',
+            'certificates_enabled' => 'certificates', 'certificate_title' => 'certificate title', 'certificate_signature' => 'certificate signature',
+            'certificates_family' => 'certificates for families', 'track' => 'track', 'preset' => 'ready track', 'scope_from_surah' => 'scope',
+            'scope_from_verse' => 'scope', 'scope_to_surah' => 'scope', 'scope_to_verse' => 'scope', 'direction' => 'direction', 'unit' => 'unit',
+            'new_amount' => 'new amount', 'near_portions' => 'near review', 'far_pages' => 'far review', 'pass_grade' => 'pass grade',
+            'exam_stops' => 'exam stops', 'counts_for_certificate' => 'certificate', 'position' => 'position',
+        ],
         'signup' => ['contacted' => 'talked to', 'declined' => 'turned down', 'created' => 'academy made'],
         'sections' => ['ai' => 'AI helpers', 'mail' => 'email', 'whatsapp' => 'WhatsApp', 'sms' => 'texts', 'push' => 'phone notifications', 'classroom' => 'classroom', 'stripe' => 'Stripe Connect', 'social' => 'Google and Apple sign-in', 'platform' => 'the platform'],
         'helpers' => ['practice_items' => 'practice suggestions', 'report_draft' => 'reports from voice notes', 'recitation_check' => 'recitation check', 'digest_wording' => 'weekly note wording', 'curriculum_outline' => 'curriculum outline'],

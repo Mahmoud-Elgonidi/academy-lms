@@ -9,6 +9,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Modules\Quran\Contracts\DTOs\VerseRange;
 use Modules\Quran\Contracts\QuranApi;
+use Modules\Quran\Models\QuranSettings;
 use Modules\Quran\Models\RecitationMistake;
 use Modules\Quran\Mushaf\MushafLesson;
 use Modules\Quran\Mushaf\MushafLessons;
@@ -29,7 +30,7 @@ final class MarkMistake
     public function handle(MushafLesson $lesson, int $surah, int $verse, int $word, string $kind, ?CarbonImmutable $now = null): RecitationMistake
     {
         $this->open($lesson, $now);
-        Validator::make(['kind' => $kind], ['kind' => ['required', Rule::in(RecitationMistake::KINDS)]], [], ['kind' => __('quran::mushaf.attributes.kind')])->validate();
+        Validator::make(['kind' => $kind], ['kind' => ['required', Rule::in(QuranSettings::current()->mistakeKinds())]], [], ['kind' => __('quran::mushaf.attributes.kind')])->validate();
         self::wordThere($this->quran, $surah, $verse, $word);
 
         return RecitationMistake::query()->updateOrCreate(

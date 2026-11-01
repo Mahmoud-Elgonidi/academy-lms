@@ -11,10 +11,12 @@ use Modules\SharedKernel\Privacy\PersonalDataSource;
 /**
  * What the Quran module holds about a learner: the hifz map (each page, every
  * review and the pages recited), the mistakes notebook (the words their
- * teachers marked in their lessons' mushaf), and the checks of their recited
- * homework (what was heard and how it went). Erasing removes them all (a
- * recording still waiting to be heard too, after commit). Held whatever the
- * academy's plan says, as it is the learner's.
+ * teachers marked in their lessons' mushaf), the checks of their recited
+ * homework (what was heard and how it went), their plans on the academy's
+ * Quran programs and each lesson's grades (never the teacher's notes).
+ * Erasing removes them all (a recording still waiting to be heard too,
+ * after commit). Held whatever the academy's plan says, as it is the
+ * learner's. The programs are the academy's and name nobody.
  */
 final class QuranData implements PersonalDataSource
 {
@@ -34,6 +36,12 @@ final class QuranData implements PersonalDataSource
                 ->get(['page', 'status', 'grade', 'created_at'])->map(fn (object $r) => (array) $r)->all(),
             'mistakes' => DB::table('recitation_mistakes')->where('student_id', $userId)->orderBy('created_at')
                 ->get(['surah', 'verse', 'word', 'kind', 'created_at'])->map(fn (object $m) => (array) $m)->all(),
+            'quran_plans' => DB::table('quran_plans as p')->join('quran_programs as g', fn ($j) => $j->on('g.academy_id', '=', 'p.academy_id')->on('g.id', '=', 'p.program_id'))
+                ->where('p.student_id', $userId)->orderBy('p.created_at')
+                ->get(['g.name as program', 'g.track', 'p.position_surah', 'p.position_verse', 'p.status', 'p.finished_at', 'p.created_at'])->map(fn (object $p) => (array) $p)->all(),
+            'quran_lessons' => DB::table('quran_lesson_results')->where('student_id', $userId)->orderBy('recorded_at')->get(['parts', 'advanced', 'recorded_at'])
+                ->map(fn (object $r) => ['parts' => array_map(fn (array $part) => array_diff_key($part, ['note' => true]), json_decode((string) $r->parts, true) ?: []),
+                    'advanced' => (bool) $r->advanced, 'recorded_at' => $r->recorded_at])->all(),
             // A recited homework's check (for the teacher) is about the learner too: what was heard and how it went.
             'recitation_checks' => $this->checks($userId)->where('c.status', 'ready')
                 ->get(['h.title as homework', 'c.heard', 'c.result', 'c.checked_at'])
@@ -56,6 +64,8 @@ final class QuranData implements PersonalDataSource
 
         return [
             'recitation_checks' => DB::table('submission_checks')->whereIn('id', $this->checks($userId)->select('c.id'))->delete(),
+            'quran_lessons' => DB::table('quran_lesson_results')->where('student_id', $userId)->delete()
+                + DB::table('quran_plans')->where('student_id', $userId)->delete(),
             'hifz' => DB::table('recitation_mistakes')->where('student_id', $userId)->delete()
                 + DB::table('hifz_recitations')->where('student_id', $userId)->delete()
                 + DB::table('hifz_reviews')->where('student_id', $userId)->delete()

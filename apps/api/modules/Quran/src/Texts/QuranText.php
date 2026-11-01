@@ -39,7 +39,7 @@ final class QuranText
     /** @var ?array<string, true> each run of three words, as compared */
     private ?array $runs = null;
 
-    /** @var ?array{pages: list<int>, juzs: list<int>, offsets: array<int, int>, total: int} where pages and parts begin, as verses counted through the Quran from 1 */
+    /** @var ?array{pages: list<int>, juzs: list<int>, quarters: list<int>, offsets: array<int, int>, total: int} where pages, parts and quarters of a hizb begin, as verses counted through the Quran from 1 */
     private ?array $layout = null;
 
     /** @param  ?string  $fallback  read when $dir has no copy (the code's own, under resources) */
@@ -248,14 +248,15 @@ final class QuranText
     }
 
     /**
-     * Where pages and parts begin, as verses counted through the Quran from 1 (empty without the metadata).
+     * Where pages, parts and quarters of a hizb begin, as verses counted through the Quran from 1 (empty without
+     * the metadata; quarters empty when it has none), and where each surah's verses start (its offset).
      *
-     * @return array{pages: list<int>, juzs: list<int>, offsets: array<int, int>, total: int}
+     * @return array{pages: list<int>, juzs: list<int>, quarters: list<int>, offsets: array<int, int>, total: int}
      */
-    private function layout(): array
+    public function layout(): array
     {
         if ($this->layout !== null || ($dir = $this->dir()) === null) {
-            return $this->layout ?? ['pages' => [], 'juzs' => [], 'offsets' => [], 'total' => 0];
+            return $this->layout ?? ['pages' => [], 'juzs' => [], 'quarters' => [], 'offsets' => [], 'total' => 0];
         }
         $offsets = [];
         $total = 0;
@@ -274,7 +275,28 @@ final class QuranText
             return array_values($list);
         };
 
-        return $this->layout = ['pages' => $starts($xml->pages->page ?? null), 'juzs' => $starts($xml->juzs->juz ?? null), 'offsets' => $offsets, 'total' => $total];
+        return $this->layout = [
+            'pages' => $starts($xml->pages->page ?? null), 'juzs' => $starts($xml->juzs->juz ?? null),
+            'quarters' => $starts($xml->hizbs->quarter ?? null), 'offsets' => $offsets, 'total' => $total,
+        ];
+    }
+
+    /**
+     * How many words each verse has (a pause mark going with the word before it), in the Quran's order from its
+     * first verse; empty without the text. A lesson's portion measures pages, lines and quarters by them.
+     *
+     * @return list<int>
+     */
+    public function wordCounts(): array
+    {
+        $counts = [];
+        foreach ($this->load() as $verses) {
+            foreach ($verses as $text) {
+                $counts[] = count(self::words($text));
+            }
+        }
+
+        return $counts;
     }
 
     /** Which of the runs beginning at $starts (in order) the verse $at falls in, from 1. */

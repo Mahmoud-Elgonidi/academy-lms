@@ -25,6 +25,12 @@ final class QuranArea
         return $this->plan->has(Feature::Quran);
     }
 
+    /** Nothing new is written without the Quran's area: a 403 feature-not-in-plan in the API, a message on a screen. */
+    public function require(): void
+    {
+        $this->plan->requireFeature(Feature::Quran);
+    }
+
     /** Whether a subject is of the Quran kind (Catalog's subjects.kind). */
     public function isQuranSubject(string $subjectId): bool
     {

@@ -5,7 +5,7 @@ namespace Modules\Quran\Mushaf;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Modules\Enrollment\Contracts\EnrollmentApi;
-use Modules\Learning\Models\SessionReport;
+use Modules\Learning\Contracts\LearningApi;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Quran\Queries\Hifz\HifzMap;
 use Modules\Scheduling\Contracts\AttendanceApi;
@@ -32,6 +32,7 @@ final class MushafLessons
         private readonly EnrollmentApi $enrollments,
         private readonly PeopleApi $people,
         private readonly HifzMap $map,
+        private readonly LearningApi $learning,
     ) {}
 
     /** The lesson's mushaf for this person; null when the lesson has none, or it is not theirs. */
@@ -61,6 +62,6 @@ final class MushafLessons
         return $lesson->teaches()
             && $now->greaterThanOrEqualTo($lesson->card->startsAt->subMinutes(self::OPENS_BEFORE_MIN))
             && $now->lessThanOrEqualTo($lesson->card->endsAt->addHours(self::MARKS_AFTER_HOURS))
-            && ! SessionReport::query()->where('session_id', $lesson->card->id)->whereIn('status', ['submitted', 'reviewed'])->exists();
+            && ! $this->learning->reportHandedIn($lesson->card->id);
     }
 }

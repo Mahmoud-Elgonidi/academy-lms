@@ -2144,6 +2144,101 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/quran/lessons/{session}/portion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A Quran lesson's portion
+         * @description The plan the lesson follows (its course's, or its group's) with today's portion: the new part, the near and
+         *     far reviews (passages by surah and verses, and their pages), the exam stops it reaches, and whether the plan
+         *     is frozen (the course paused or over). plan is null for a course with no Quran plan: it has no portion. With
+         *     the academy's mistake types and grades, and what was already recorded for each student.
+         */
+        get: operations["quran.lessons.portion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/quran/lessons/{session}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record a Quran lesson
+         * @description For each student (students[].student_id; a one-to-one lesson may leave it out), each part of today's portion
+         *     they recited (parts.new, parts.near, parts.far) with its mistakes by kind (mistakes: [{kind, count}], else the
+         *     words marked in the lesson's mushaf), and the teacher's own grade with a note when it differs from the mistakes'. The
+         *     position moves past the new part only when it reaches the program's pass grade (a group's: most of its
+         *     students), and never while the course is paused or over. Once per lesson and student.
+         */
+        post: operations["quran.lessons.record"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/quran/students/{enrollment}/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A student's Quran plan
+         * @description For the course's teacher: the plan (null when the course has none yet), its next portion, and the last
+         *     lessons' results with the teacher's notes.
+         */
+        get: operations["quran.students.plan"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Change a student's pace
+         * @description The new amount a lesson (in the program's unit), the near review (portions) and the far review (pages); null
+         *     goes back to the program's. A group's plan is changed by the office.
+         */
+        patch: operations["quran.students.pace"];
+        trace?: never;
+    };
+    "/v1/quran/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A learner's Quran plans
+         * @description Each Quran course with a plan: the program, where the learner is and how much is behind them, the next
+         *     portion (new, near and far review), whether it is frozen (the course paused or over), and the last lessons'
+         *     grades (mistakes by kind, except in the kids' look).
+         */
+        get: operations["quran.plan"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/safeguarding/new": {
         parameters: {
             query?: never;
@@ -10608,6 +10703,706 @@ export interface operations {
                             kinds: {
                                 [key: string]: string;
                             };
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "quran.lessons.portion": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                session: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            session_id: string;
+                            group: boolean;
+                            students: unknown[];
+                            plan: {
+                                id: string;
+                                enrollment_id: string | null;
+                                group_id: string | null;
+                                program: {
+                                    id: string;
+                                    name: string;
+                                    /** @description hifz, tilawa, talqin, noorani, review or ijaza */
+                                    track: string;
+                                    track_label: string;
+                                    /** @description forward (from al-Fatiha) or backward (from an-Nas) */
+                                    direction: string;
+                                    /** @description verses, lines, page, quarter_hizb or lesson (the Noorani Qaida) */
+                                    unit: string;
+                                    unit_label: string;
+                                    pass_grade: string;
+                                    /** @description none, juz or surah */
+                                    exam_stops: string;
+                                };
+                                /** @description The learner's own pace (the program's where the plan sets none). */
+                                pace: {
+                                    new_amount: number;
+                                    near_portions: number;
+                                    far_pages: number;
+                                };
+                                /** @description Where the next new portion starts; null once the program is complete. */
+                                position: {
+                                    surah: number | null;
+                                    verse: number;
+                                    title: string;
+                                } | null;
+                                finished: boolean;
+                                /**
+                                 * @description paused or ended: the plan waits where it is; null when it moves on
+                                 * @enum {string|null}
+                                 */
+                                frozen: "ended" | "paused" | null;
+                                frozen_label: null | string | ("quran::programs.frozen.ended" | "quran::programs.frozen.paused");
+                                /** @description How much of the program's scope is behind the learner, 0 to 1. */
+                                progress: number;
+                                portion: {
+                                    new: {
+                                        /** @constant */
+                                        label: "New";
+                                        ranges: unknown[];
+                                        pages: number[];
+                                    } | null;
+                                    near: {
+                                        /** @constant */
+                                        label: "Near review";
+                                        ranges: unknown[];
+                                        pages: number[];
+                                    } | null;
+                                    far: {
+                                        /** @constant */
+                                        label: "Far review";
+                                        ranges: unknown[];
+                                        pages: number[];
+                                    } | null;
+                                    /** @description On the Noorani Qaida: the lesson's number and title. */
+                                    lesson: {
+                                        number: number | null;
+                                        title: string;
+                                    } | null;
+                                    /** @description The exam stops the new part completes (end of a surah or a part). */
+                                    stops: unknown[];
+                                    finished: boolean;
+                                } | null;
+                            } | null;
+                            mistake_types: unknown[];
+                            grades: unknown[];
+                            results: {
+                                id: string;
+                                session_id: string;
+                                student_id: string;
+                                parts: string;
+                                /** @description Whether the position moved past the new part. */
+                                advanced: boolean;
+                                /** @description The course was paused or over: nothing moved. */
+                                frozen: boolean;
+                                recorded_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+        };
+    };
+    "quran.lessons.record": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                session: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    students?: {
+                        student_id?: string | null;
+                        parts?: {
+                            new?: {
+                                mistakes?: {
+                                    kind: string;
+                                    count: number;
+                                }[] | null;
+                                /** @enum {string|null} */
+                                grade?: "excellent" | "very_good" | "good" | "acceptable" | "repeat" | null;
+                                note?: string | null;
+                            } | null;
+                            near?: {
+                                mistakes?: {
+                                    kind: string;
+                                    count: number;
+                                }[] | null;
+                                /** @enum {string|null} */
+                                grade?: "excellent" | "very_good" | "good" | "acceptable" | "repeat" | null;
+                                note?: string | null;
+                            } | null;
+                            far?: {
+                                mistakes?: {
+                                    kind: string;
+                                    count: number;
+                                }[] | null;
+                                /** @enum {string|null} */
+                                grade?: "excellent" | "very_good" | "good" | "acceptable" | "repeat" | null;
+                                note?: string | null;
+                            } | null;
+                        };
+                    }[] | null;
+                    student_id?: string | null;
+                    parts: {
+                        new?: {
+                            mistakes?: {
+                                kind: string;
+                                count: number;
+                            }[] | null;
+                            /** @enum {string|null} */
+                            grade?: "excellent" | "very_good" | "good" | "acceptable" | "repeat" | null;
+                            note?: string | null;
+                        } | null;
+                        near?: {
+                            mistakes?: {
+                                kind: string;
+                                count: number;
+                            }[] | null;
+                            /** @enum {string|null} */
+                            grade?: "excellent" | "very_good" | "good" | "acceptable" | "repeat" | null;
+                            note?: string | null;
+                        } | null;
+                        far?: {
+                            mistakes?: {
+                                kind: string;
+                                count: number;
+                            }[] | null;
+                            /** @enum {string|null} */
+                            grade?: "excellent" | "very_good" | "good" | "acceptable" | "repeat" | null;
+                            note?: string | null;
+                        } | null;
+                    };
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            results: unknown[];
+                            plan: {
+                                id: string;
+                                enrollment_id: string | null;
+                                group_id: string | null;
+                                program: {
+                                    id: string;
+                                    name: string;
+                                    /** @description hifz, tilawa, talqin, noorani, review or ijaza */
+                                    track: string;
+                                    track_label: string;
+                                    /** @description forward (from al-Fatiha) or backward (from an-Nas) */
+                                    direction: string;
+                                    /** @description verses, lines, page, quarter_hizb or lesson (the Noorani Qaida) */
+                                    unit: string;
+                                    unit_label: string;
+                                    pass_grade: string;
+                                    /** @description none, juz or surah */
+                                    exam_stops: string;
+                                };
+                                /** @description The learner's own pace (the program's where the plan sets none). */
+                                pace: {
+                                    new_amount: number;
+                                    near_portions: number;
+                                    far_pages: number;
+                                };
+                                /** @description Where the next new portion starts; null once the program is complete. */
+                                position: {
+                                    surah: number | null;
+                                    verse: number;
+                                    title: string;
+                                } | null;
+                                finished: boolean;
+                                /**
+                                 * @description paused or ended: the plan waits where it is; null when it moves on
+                                 * @enum {string|null}
+                                 */
+                                frozen: "ended" | "paused" | null;
+                                frozen_label: null | string | ("quran::programs.frozen.ended" | "quran::programs.frozen.paused");
+                                /** @description How much of the program's scope is behind the learner, 0 to 1. */
+                                progress: number;
+                                portion: {
+                                    new: {
+                                        /** @constant */
+                                        label: "New";
+                                        ranges: unknown[];
+                                        pages: number[];
+                                    } | null;
+                                    near: {
+                                        /** @constant */
+                                        label: "Near review";
+                                        ranges: unknown[];
+                                        pages: number[];
+                                    } | null;
+                                    far: {
+                                        /** @constant */
+                                        label: "Far review";
+                                        ranges: unknown[];
+                                        pages: number[];
+                                    } | null;
+                                    /** @description On the Noorani Qaida: the lesson's number and title. */
+                                    lesson: {
+                                        number: number | null;
+                                        title: string;
+                                    } | null;
+                                    /** @description The exam stops the new part completes (end of a surah or a part). */
+                                    stops: unknown[];
+                                    finished: boolean;
+                                } | null;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "quran.students.plan": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                enrollment: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            enrollment_id: string;
+                            plan: {
+                                id: string;
+                                enrollment_id: string | null;
+                                group_id: string | null;
+                                program: {
+                                    id: string;
+                                    name: string;
+                                    /** @description hifz, tilawa, talqin, noorani, review or ijaza */
+                                    track: string;
+                                    track_label: string;
+                                    /** @description forward (from al-Fatiha) or backward (from an-Nas) */
+                                    direction: string;
+                                    /** @description verses, lines, page, quarter_hizb or lesson (the Noorani Qaida) */
+                                    unit: string;
+                                    unit_label: string;
+                                    pass_grade: string;
+                                    /** @description none, juz or surah */
+                                    exam_stops: string;
+                                };
+                                /** @description The learner's own pace (the program's where the plan sets none). */
+                                pace: {
+                                    new_amount: number;
+                                    near_portions: number;
+                                    far_pages: number;
+                                };
+                                /** @description Where the next new portion starts; null once the program is complete. */
+                                position: {
+                                    surah: number | null;
+                                    verse: number;
+                                    title: string;
+                                } | null;
+                                finished: boolean;
+                                /**
+                                 * @description paused or ended: the plan waits where it is; null when it moves on
+                                 * @enum {string|null}
+                                 */
+                                frozen: "ended" | "paused" | null;
+                                frozen_label: null | string | ("quran::programs.frozen.ended" | "quran::programs.frozen.paused");
+                                /** @description How much of the program's scope is behind the learner, 0 to 1. */
+                                progress: number;
+                                portion: {
+                                    new: {
+                                        /** @constant */
+                                        label: "New";
+                                        ranges: unknown[];
+                                        pages: number[];
+                                    } | null;
+                                    near: {
+                                        /** @constant */
+                                        label: "Near review";
+                                        ranges: unknown[];
+                                        pages: number[];
+                                    } | null;
+                                    far: {
+                                        /** @constant */
+                                        label: "Far review";
+                                        ranges: unknown[];
+                                        pages: number[];
+                                    } | null;
+                                    /** @description On the Noorani Qaida: the lesson's number and title. */
+                                    lesson: {
+                                        number: number | null;
+                                        title: string;
+                                    } | null;
+                                    /** @description The exam stops the new part completes (end of a surah or a part). */
+                                    stops: unknown[];
+                                    finished: boolean;
+                                } | null;
+                            } | null;
+                            recent: {
+                                id: string;
+                                session_id: string;
+                                student_id: string;
+                                parts: string;
+                                /** @description Whether the position moved past the new part. */
+                                advanced: boolean;
+                                /** @description The course was paused or over: nothing moved. */
+                                frozen: boolean;
+                                recorded_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            }[];
+                            grades: unknown[];
+                            mistake_types: unknown[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+        };
+    };
+    "quran.students.pace": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                enrollment: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    new_amount?: number | null;
+                    near_portions?: number | null;
+                    far_pages?: number | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            enrollment_id: string;
+                            plan: {
+                                id: string;
+                                enrollment_id: string | null;
+                                group_id: string | null;
+                                program: {
+                                    id: string;
+                                    name: string;
+                                    /** @description hifz, tilawa, talqin, noorani, review or ijaza */
+                                    track: string;
+                                    track_label: string;
+                                    /** @description forward (from al-Fatiha) or backward (from an-Nas) */
+                                    direction: string;
+                                    /** @description verses, lines, page, quarter_hizb or lesson (the Noorani Qaida) */
+                                    unit: string;
+                                    unit_label: string;
+                                    pass_grade: string;
+                                    /** @description none, juz or surah */
+                                    exam_stops: string;
+                                };
+                                /** @description The learner's own pace (the program's where the plan sets none). */
+                                pace: {
+                                    new_amount: number;
+                                    near_portions: number;
+                                    far_pages: number;
+                                };
+                                /** @description Where the next new portion starts; null once the program is complete. */
+                                position: {
+                                    surah: number | null;
+                                    verse: number;
+                                    title: string;
+                                } | null;
+                                finished: boolean;
+                                /**
+                                 * @description paused or ended: the plan waits where it is; null when it moves on
+                                 * @enum {string|null}
+                                 */
+                                frozen: "ended" | "paused" | null;
+                                frozen_label: null | string | ("quran::programs.frozen.ended" | "quran::programs.frozen.paused");
+                                /** @description How much of the program's scope is behind the learner, 0 to 1. */
+                                progress: number;
+                                portion: {
+                                    new: {
+                                        /** @constant */
+                                        label: "New";
+                                        ranges: unknown[];
+                                        pages: number[];
+                                    } | null;
+                                    near: {
+                                        /** @constant */
+                                        label: "Near review";
+                                        ranges: unknown[];
+                                        pages: number[];
+                                    } | null;
+                                    far: {
+                                        /** @constant */
+                                        label: "Far review";
+                                        ranges: unknown[];
+                                        pages: number[];
+                                    } | null;
+                                    /** @description On the Noorani Qaida: the lesson's number and title. */
+                                    lesson: {
+                                        number: number | null;
+                                        title: string;
+                                    } | null;
+                                    /** @description The exam stops the new part completes (end of a surah or a part). */
+                                    stops: unknown[];
+                                    finished: boolean;
+                                } | null;
+                            };
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "quran.plan": {
+        parameters: {
+            query?: {
+                learner_id?: string | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            learner_id: string;
+                            courses: {
+                                enrollment_id: string;
+                                subject: string;
+                                plan: {
+                                    id: string;
+                                    enrollment_id: string | null;
+                                    group_id: string | null;
+                                    program: {
+                                        id: string;
+                                        name: string;
+                                        /** @description hifz, tilawa, talqin, noorani, review or ijaza */
+                                        track: string;
+                                        track_label: string;
+                                        /** @description forward (from al-Fatiha) or backward (from an-Nas) */
+                                        direction: string;
+                                        /** @description verses, lines, page, quarter_hizb or lesson (the Noorani Qaida) */
+                                        unit: string;
+                                        unit_label: string;
+                                        pass_grade: string;
+                                        /** @description none, juz or surah */
+                                        exam_stops: string;
+                                    };
+                                    /** @description The learner's own pace (the program's where the plan sets none). */
+                                    pace: {
+                                        new_amount: number;
+                                        near_portions: number;
+                                        far_pages: number;
+                                    };
+                                    /** @description Where the next new portion starts; null once the program is complete. */
+                                    position: {
+                                        surah: number | null;
+                                        verse: number;
+                                        title: string;
+                                    } | null;
+                                    finished: boolean;
+                                    /**
+                                     * @description paused or ended: the plan waits where it is; null when it moves on
+                                     * @enum {string|null}
+                                     */
+                                    frozen: "ended" | "paused" | null;
+                                    frozen_label: null | string | ("quran::programs.frozen.ended" | "quran::programs.frozen.paused");
+                                    /** @description How much of the program's scope is behind the learner, 0 to 1. */
+                                    progress: number;
+                                    portion: {
+                                        new: {
+                                            /** @constant */
+                                            label: "New";
+                                            ranges: unknown[];
+                                            pages: number[];
+                                        } | null;
+                                        near: {
+                                            /** @constant */
+                                            label: "Near review";
+                                            ranges: unknown[];
+                                            pages: number[];
+                                        } | null;
+                                        far: {
+                                            /** @constant */
+                                            label: "Far review";
+                                            ranges: unknown[];
+                                            pages: number[];
+                                        } | null;
+                                        /** @description On the Noorani Qaida: the lesson's number and title. */
+                                        lesson: {
+                                            number: number | null;
+                                            title: string;
+                                        } | null;
+                                        /** @description The exam stops the new part completes (end of a surah or a part). */
+                                        stops: unknown[];
+                                        finished: boolean;
+                                    } | null;
+                                };
+                                recent: {
+                                    id: string;
+                                    session_id: string;
+                                    student_id: string;
+                                    parts: string;
+                                    /** @description Whether the position moved past the new part. */
+                                    advanced: boolean;
+                                    /** @description The course was paused or over: nothing moved. */
+                                    frozen: boolean;
+                                    recorded_at: {
+                                        utc: string;
+                                        local: string;
+                                        timezone: null;
+                                        label: string;
+                                    } | null;
+                                }[];
+                            }[];
                         };
                     };
                 };

@@ -6,6 +6,7 @@ use Modules\Learning\Contracts\Events\HomeworkSubmitted;
 use Modules\Learning\Models\Homework;
 use Modules\Quran\Contracts\DTOs\VerseRange;
 use Modules\Quran\Jobs\CheckRecitationJob;
+use Modules\Quran\Models\QuranSettings;
 use Modules\Quran\Models\SubmissionCheck;
 use Modules\Quran\Support\QuranArea;
 use Modules\SharedKernel\Ai\AcademyAi;
@@ -13,8 +14,8 @@ use Modules\SharedKernel\Ai\AiFeature;
 
 /**
  * A recording handed in on homework that says what to recite gets its check,
- * once, in the background, while the academy has the helper on and its
- * plan has the Quran.
+ * once, in the background, while the academy has the helper on, its plan
+ * has the Quran and its Quran settings keep the automatic check on.
  */
 final class QueueRecitationCheck
 {
@@ -26,7 +27,8 @@ final class QueueRecitationCheck
     public function handle(HomeworkSubmitted $event): void
     {
         $homework = Homework::query()->find($event->homeworkId);
-        if (VerseRange::fromArray($homework?->expected) === null || ! $this->area->on() || ! $this->ai->on(AiFeature::RecitationCheck)) {
+        if (VerseRange::fromArray($homework?->expected) === null || ! $this->area->on() || ! $this->ai->on(AiFeature::RecitationCheck)
+            || ! QuranSettings::current()->auto_recitation_check) {
             return;
         }
         $submission = $homework->submissions()->reorder()->orderByDesc('submitted_at')->orderByDesc('id')->whereNotNull('file_path')->first();

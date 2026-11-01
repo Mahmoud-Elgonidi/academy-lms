@@ -5,8 +5,7 @@ namespace Modules\Quran\Hifz;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
-use Modules\Learning\Models\ReportItem;
-use Modules\Learning\Models\SessionReport;
+use Modules\Learning\Contracts\LearningApi;
 use Modules\Quran\Actions\Hifz\RecordHifzReview;
 use Modules\Quran\Contracts\QuranApi;
 use Modules\Quran\Domain\Hifz\Scheduler;
@@ -34,6 +33,7 @@ final class HifzFromLessons
         private readonly RecordHifzReview $review,
         private readonly HifzPages $pages,
         private readonly QuranArea $area,
+        private readonly LearningApi $learning,
     ) {}
 
     public function reportSubmitted(SessionReportSubmitted $event): void
@@ -41,22 +41,27 @@ final class HifzFromLessons
         if (! $this->area->on()) {
             return;
         }
-        $report = $event->kind === 'lesson' ? SessionReport::query()->find($event->reportId) : null;
+        $report = $event->kind === 'lesson' ? $this->learning->lessonReport($event->reportId) : null;
         if ($report === null) {
             return;
         }
-        $at = CarbonImmutable::parse($report->session_starts_at);
-        $seen = [];
+        $at = $report->sessionStartsAt;
+        // Pages the lesson's Quran result (RecordQuranLesson) already reviewed for the student are not counted again.
+        $results = DB::table('quran_lesson_results')->where('session_id', $report->sessionId)->where('student_id', $event->studentId)->pluck('id')->all();
+        $seen = $results === [] ? [] : DB::table('hifz_reviews')->where('student_id', $event->studentId)->where('source', 'lesson')->whereIn('source_id', $results)
+            ->pluck('page')->mapWithKeys(fn ($p) => [(int) $p => true])->all();
         // A group lesson's marks are each student's own; its reviews are kept by each student's report.
-        $group = DB::table('sessions')->where('id', $report->session_id)->whereNotNull('group_id')->exists();
-        foreach ($this->markedPages($report->session_id, $event->studentId) as $page => $grade) {
-            $this->review->handle($event->studentId, $page, $grade, 'mistakes', $group ? $report->id : $report->session_id, $at);
+        $group = DB::table('sessions')->where('id', $report->sessionId)->whereNotNull('group_id')->exists();
+        foreach ($this->markedPages($report->sessionId, $event->studentId) as $page => $grade) {
+            if (isset($seen[$page])) {
+                continue;
+            }
+            $this->review->handle($event->studentId, $page, $grade, 'mistakes', $group ? $report->id : $report->sessionId, $at);
             $seen[$page] = true;
         }
-        $items = ReportItem::query()->where('report_id', $report->id)->get(['node_id', 'outcome']);
-        $sources = $this->quran->textSources($items->pluck('node_id')->all());
-        foreach ($items as $item) {
-            $source = $sources[$item->node_id] ?? null;
+        $sources = $this->quran->textSources(array_map('strval', array_keys($report->outcomes)));
+        foreach ($report->outcomes as $nodeId => $outcome) {
+            $source = $sources[$nodeId] ?? null;
             if ($source === null) {
                 continue;
             }
@@ -66,7 +71,7 @@ final class HifzFromLessons
                 }
                 $seen[$page] = true;
                 $known = HifzPage::query()->where('student_id', $event->studentId)->where('page', $page)->exists();
-                [$grade, $memorized] = match ($item->outcome) {
+                [$grade, $memorized] = match ($outcome) {
                     'mastered' => [Scheduler::GOOD, true],
                     'practiced' => [$known ? Scheduler::GOOD : Scheduler::HARD, false],
                     'introduced' => [$known ? null : Scheduler::HARD, false],

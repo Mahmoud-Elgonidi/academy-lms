@@ -5,7 +5,7 @@ namespace Modules\Quran\Mushaf;
 use Illuminate\Validation\Rule;
 use Modules\Quran\Contracts\DTOs\VerseRange;
 use Modules\Quran\Contracts\QuranApi;
-use Modules\Quran\Models\RecitationMistake;
+use Modules\Quran\Models\QuranSettings;
 
 /** What a change to a lesson's shared mushaf takes, the same from the apps' API and the class page. */
 final class MushafInput
@@ -22,7 +22,7 @@ final class MushafInput
 
         return match ($change) {
             'turn' => ['page' => ['required', 'integer', 'between:1,604']],
-            'mark' => $word + ['kind' => ['required', Rule::in(RecitationMistake::KINDS)]],
+            'mark' => $word + ['kind' => ['required', Rule::in(QuranSettings::current()->mistakeKinds())]],
             'unmark' => $word,
         };
     }

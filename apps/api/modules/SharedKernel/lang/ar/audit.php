@@ -161,6 +161,12 @@ return [
         ],
         'quran' => [
             'daily_pages_saved' => 'أصبح ورد المراجعة :pages صفحة في اليوم على الأكثر',
+            'settings_saved' => 'تعديل إعدادات القرآن: :quran_fields',
+            'program_saved' => 'حفظ برنامج القرآن :name',
+            'program_archived' => 'أرشفة برنامج القرآن :name',
+            'program_restored' => 'إعادة برنامج القرآن :name من الأرشيف',
+            'plan_started' => 'بدء خطة قرآن على :program',
+            'plan_adjusted' => 'تعديل خطة قرآن: :quran_fields',
         ],
         'games' => [
             'settings_saved' => 'تعديل ألعاب الأكاديمية (:state، :minutes دقيقة في اليوم)',
@@ -186,6 +192,17 @@ return [
         ],
     ],
     'values' => [
+        'quran_fields' => [
+            'hifz_daily_pages' => 'الورد اليومي', 'riwaya' => 'الرواية', 'mushaf' => 'المصحف', 'default_unit' => 'الوحدة الافتراضية',
+            'default_new_amount' => 'المقدار الجديد الافتراضي', 'default_near_portions' => 'المراجعة القريبة الافتراضية', 'default_far_pages' => 'المراجعة البعيدة الافتراضية',
+            'mistake_types' => 'أنواع الأخطاء', 'grade_scale' => 'سلّم التقديرات', 'memorization_threshold' => 'حد الحفظ',
+            'auto_recitation_check' => 'التسميع الآلي', 'exams_enabled' => 'الاختبارات', 'examiner' => 'المختبِر',
+            'certificates_enabled' => 'الشهادات', 'certificate_title' => 'عنوان الشهادة', 'certificate_signature' => 'توقيع الشهادة',
+            'certificates_family' => 'الشهادات للأسرة', 'track' => 'المسار', 'preset' => 'المسار الجاهز', 'scope_from_surah' => 'النطاق',
+            'scope_from_verse' => 'النطاق', 'scope_to_surah' => 'النطاق', 'scope_to_verse' => 'النطاق', 'direction' => 'الاتجاه', 'unit' => 'الوحدة',
+            'new_amount' => 'المقدار الجديد', 'near_portions' => 'المراجعة القريبة', 'far_pages' => 'المراجعة البعيدة', 'pass_grade' => 'تقدير النجاح',
+            'exam_stops' => 'مواضع الاختبارات', 'counts_for_certificate' => 'الشهادة', 'position' => 'الموضع',
+        ],
         'signup' => ['contacted' => 'تواصلنا معهم', 'declined' => 'رُفض', 'created' => 'أُنشئت الأكاديمية'],
         'sections' => ['ai' => 'المساعد الآلي', 'mail' => 'البريد الإلكتروني', 'whatsapp' => 'واتساب', 'sms' => 'الرسائل النصية', 'push' => 'إشعارات الهاتف', 'classroom' => 'الفصل', 'stripe' => 'Stripe Connect', 'social' => 'الدخول بجوجل وأبل', 'platform' => 'المنصة'],
         'helpers' => ['practice_items' => 'اقتراح التدريبات', 'report_draft' => 'تقرير من رسالة صوتية', 'recitation_check' => 'تصحيح التسميع', 'digest_wording' => 'صياغة الرسالة الأسبوعية', 'curriculum_outline' => 'مخطط المنهج'],

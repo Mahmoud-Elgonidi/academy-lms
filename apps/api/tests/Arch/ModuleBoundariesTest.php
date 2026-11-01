@@ -289,9 +289,9 @@ arch('the Quran sits on top: learning, lessons, courses, people, the catalog and
     ->and(['Modules\SharedKernel', 'Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging', 'Modules\Games', 'Modules\Announcements', 'Modules\Site'])
     ->not->toUse('Modules\Quran');
 
-arch('the hifz map\'s spaced repetition is pure: dates and numbers only')
+arch('the Quran\'s rules are pure: the hifz map\'s spaced repetition, programs, portions and grades from dates, numbers and verse ranges only')
     ->expect('Modules\Quran\Domain')
-    ->toOnlyUse(['Carbon\CarbonImmutable', 'Modules\Quran\Domain', 'InvalidArgumentException']);
+    ->toOnlyUse(['Carbon\CarbonImmutable', 'Modules\Quran\Domain', 'Modules\Quran\Contracts\DTOs\VerseRange', 'InvalidArgumentException']);
 
 arch('an outside service\'s faults are read purely: its code in, our words out')
     ->expect('Modules\SharedKernel\Health\Faults')

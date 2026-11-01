@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Validation\ValidationException;
 use Modules\Learning\Contracts\DTOs\HomeworkLine;
 use Modules\Learning\Contracts\DTOs\JourneyStation;
+use Modules\Learning\Contracts\DTOs\LessonReport;
 use Modules\Learning\Contracts\DTOs\PlanLine;
 use Modules\Learning\Contracts\DTOs\PracticeFocus;
 use Modules\Learning\Contracts\DTOs\PracticeRecorded;
@@ -57,4 +58,13 @@ interface LearningApi
      * @throws ValidationException not their child, or too many today
      */
     public function cheer(string $fromId, string $studentId, string $kind = 'heart'): void;
+
+    /** A lesson report with its curriculum lessons' outcomes; null when there is none. */
+    public function lessonReport(string $reportId): ?LessonReport;
+
+    /** @return list<string> the ids of a lesson's reports (one a student) */
+    public function reportIdsOf(string $sessionId): array;
+
+    /** Whether a report of the lesson has been handed in (submitted or reviewed). */
+    public function reportHandedIn(string $sessionId): bool;
 }

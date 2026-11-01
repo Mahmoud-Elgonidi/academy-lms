@@ -2,7 +2,7 @@
 
 namespace Modules\Quran\Http\V1\Resources;
 
-use Modules\Quran\Models\RecitationMistake;
+use Modules\Quran\Models\QuranSettings;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 
 /** A lesson's shared mushaf page and a learner's mistakes notebook, as the apps, the portal and the class page read them. */
@@ -85,12 +85,13 @@ final class MushafPresenter
         ];
     }
 
-    /** @return array<string, string> each kind of mistake (wrong, hesitation, tajweed) in the reader's language */
+    /** @return array<string, string> each kind of mistake (wrong, hesitation, tajweed and the academy's own) in the reader's language */
     private function kinds(): array
     {
         $kinds = [];
-        foreach (RecitationMistake::KINDS as $kind) {
-            $kinds[$kind] = (string) __('quran::mushaf.kinds.'.$kind);
+        $settings = QuranSettings::current();
+        foreach ($settings->mistakeKinds() as $kind) {
+            $kinds[$kind] = $settings->mistakeName($kind);
         }
 
         return $kinds;

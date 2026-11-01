@@ -2,6 +2,15 @@
 
 // The ready tracks a Quran program will start from (the Quran program, docs/architecture/02 section 26): kept here for it.
 return [
+    // المسارات التي تتبعها مادة القرآن أو برنامجه.
+    'names' => [
+        'hifz' => 'الحفظ',
+        'tilawa' => 'التلاوة والتجويد',
+        'talqin' => 'التلقين للأطفال',
+        'noorani' => 'القاعدة النورانية',
+        'review' => 'المراجعة والتثبيت',
+        'ijaza' => 'الإجازة',
+    ],
     'juz_amma' => [
         'name' => 'جزء عمّ',
         'hint' => 'سور جزء عمّ من الناس إلى النبأ، درس لكل سورة ومعه نصها من نسخة المنصة.',

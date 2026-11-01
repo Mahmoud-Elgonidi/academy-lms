@@ -182,6 +182,16 @@ function pdsSeedEverySource(object $t): void
         'result' => json_encode(['summary' => ['words' => 10, 'ok' => 9, 'missing' => 1, 'wrong' => 0, 'extra' => 0]]), 'created_at' => $now]);
     DB::table('recitation_mistakes')->insert(['id' => $id(), 'student_id' => $s->id, 'session_id' => $lesson, 'teacher_id' => $tr->id, 'surah' => 78, 'verse' => 3, 'word' => 2,
         'kind' => 'hesitation', 'created_at' => $now, 'updated_at' => $now]);
+    // The Quran program: the student's plan and a lesson's result (its teacher's note is never in the copy).
+    $program = $id();
+    DB::table('quran_programs')->insert(['id' => $program, 'name' => 'Juz Amma', 'track' => 'talqin', 'scope_from_surah' => 78, 'scope_from_verse' => 1, 'scope_to_surah' => 114,
+        'scope_to_verse' => 6, 'direction' => 'backward', 'unit' => 'verses', 'new_amount' => 4, 'pass_grade' => 'good', 'created_at' => $now, 'updated_at' => $now]);
+    $quranPlan = $id();
+    DB::table('quran_plans')->insert(['id' => $quranPlan, 'program_id' => $program, 'enrollment_id' => $t->booked->enrollmentId, 'student_id' => $s->id,
+        'position_surah' => 113, 'position_verse' => 1, 'created_at' => $now, 'updated_at' => $now]);
+    DB::table('quran_lesson_results')->insert(['id' => $id(), 'session_id' => $lesson, 'student_id' => $s->id, 'plan_id' => $quranPlan, 'recorded_by' => $tr->id,
+        'parts' => json_encode(['new' => ['ranges' => [['surah' => 114, 'from' => 1, 'to' => 4]], 'pages' => [604], 'mistakes' => ['wrong' => 1], 'computed' => 'good',
+            'grade' => 'good', 'penalty' => 2.0, 'note' => 'Zubaida rushes the last verse']]), 'new_grade' => 'good', 'advanced' => true, 'recorded_at' => $now, 'created_at' => $now]);
 
     // messaging: the student, the guardian and the teacher talk; the student typed a number.
     test()->actingAs($s);
@@ -229,6 +239,11 @@ it('shows each source in the copy of whoever it is about, with the files they ga
 
     // The teacher's card on the academy's page is in her copy.
     expect(pdsSources()['profile']->export($this->teacher->id)->data['public_card']['display_name'])->toBe('Fadwa Lutfi');
+    // The Quran lessons' grades are in the student's copy; the teacher's note is not.
+    $quran = pdsSources()['quran']->export($this->student->id)->data;
+    expect($quran['quran_lessons'][0]['parts']['new']['grade'])->toBe('good')
+        ->and($quran['quran_plans'][0]['program'])->toBe('Juz Amma')
+        ->and(json_encode($quran))->not->toContain('rushes');
 
     // The ZIP: every part, and the files the person gave.
     foreach (['student' => [$this->handedIn], 'guardian' => [$this->receipt], 'teacher' => [$this->checkScan]] as $who => $files) {
@@ -356,7 +371,8 @@ function pdsSnapshot(array $people): array
             DB::table('cheers')->where('student_id', $s)->orWhere('from_id', $g)->count(), DB::table('homework')->where('student_id', $s)->count(), DB::table('practice_rounds')->where('student_id', $s)->count(),
             DB::table('weekly_digests')->where('student_id', $s)->count()],
         'quran' => DB::table('hifz_pages')->where('student_id', $s)->count() + DB::table('hifz_reviews')->where('student_id', $s)->count() + DB::table('hifz_recitations')->where('student_id', $s)->count()
-            + DB::table('recitation_mistakes')->where('student_id', $s)->count(),
+            + DB::table('recitation_mistakes')->where('student_id', $s)->count() + DB::table('quran_plans')->where('student_id', $s)->count()
+            + DB::table('quran_lesson_results')->where('student_id', $s)->count(),
         'messaging' => DB::table('conversation_messages')->count(),
         'earnings' => DB::table('teacher_earnings')->where('teacher_id', $t)->count(),
         'safeguarding' => DB::table('safeguarding_concerns')->where('reporter_id', $s)->count(),

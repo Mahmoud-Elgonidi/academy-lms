@@ -19598,6 +19598,2532 @@
                 }
             }
         },
+        "/v1/quran/lessons/{session}/portion": {
+            "get": {
+                "operationId": "quran.lessons.portion",
+                "description": "The plan the lesson follows (its course's, or its group's) with today's portion: the new part, the near and\nfar reviews (passages by surah and verses, and their pages), the exam stops it reaches, and whether the plan\nis frozen (the course paused or over). plan is null for a course with no Quran plan: it has no portion. With\nthe academy's mistake types and grades, and what was already recorded for each student.",
+                "summary": "A Quran lesson's portion",
+                "tags": [
+                    "Quran"
+                ],
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "session_id": {
+                                                    "type": "string"
+                                                },
+                                                "group": {
+                                                    "type": "boolean"
+                                                },
+                                                "students": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "plan": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "enrollment_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "group_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "program": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "track": {
+                                                                    "type": "string",
+                                                                    "description": "hifz, tilawa, talqin, noorani, review or ijaza"
+                                                                },
+                                                                "track_label": {
+                                                                    "type": "string"
+                                                                },
+                                                                "direction": {
+                                                                    "type": "string",
+                                                                    "description": "forward (from al-Fatiha) or backward (from an-Nas)"
+                                                                },
+                                                                "unit": {
+                                                                    "type": "string",
+                                                                    "description": "verses, lines, page, quarter_hizb or lesson (the Noorani Qaida)"
+                                                                },
+                                                                "unit_label": {
+                                                                    "type": "string"
+                                                                },
+                                                                "pass_grade": {
+                                                                    "type": "string"
+                                                                },
+                                                                "exam_stops": {
+                                                                    "type": "string",
+                                                                    "description": "none, juz or surah"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "name",
+                                                                "track",
+                                                                "track_label",
+                                                                "direction",
+                                                                "unit",
+                                                                "unit_label",
+                                                                "pass_grade",
+                                                                "exam_stops"
+                                                            ]
+                                                        },
+                                                        "pace": {
+                                                            "type": "object",
+                                                            "description": "The learner's own pace (the program's where the plan sets none).",
+                                                            "properties": {
+                                                                "new_amount": {
+                                                                    "type": "number"
+                                                                },
+                                                                "near_portions": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "far_pages": {
+                                                                    "type": "integer"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "new_amount",
+                                                                "near_portions",
+                                                                "far_pages"
+                                                            ]
+                                                        },
+                                                        "position": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "Where the next new portion starts; null once the program is complete.",
+                                                            "properties": {
+                                                                "surah": {
+                                                                    "type": [
+                                                                        "integer",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "verse": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "surah",
+                                                                "verse",
+                                                                "title"
+                                                            ]
+                                                        },
+                                                        "finished": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "frozen": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ],
+                                                            "description": "paused or ended: the plan waits where it is; null when it moves on",
+                                                            "enum": [
+                                                                "ended",
+                                                                "paused",
+                                                                null
+                                                            ]
+                                                        },
+                                                        "frozen_label": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "quran::programs.frozen.ended",
+                                                                        "quran::programs.frozen.paused"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        "progress": {
+                                                            "type": "number",
+                                                            "description": "How much of the program's scope is behind the learner, 0 to 1."
+                                                        },
+                                                        "portion": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "new": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "label": {
+                                                                            "type": "string",
+                                                                            "const": "New"
+                                                                        },
+                                                                        "ranges": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "pages": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "label",
+                                                                        "ranges",
+                                                                        "pages"
+                                                                    ]
+                                                                },
+                                                                "near": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "label": {
+                                                                            "type": "string",
+                                                                            "const": "Near review"
+                                                                        },
+                                                                        "ranges": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "pages": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "label",
+                                                                        "ranges",
+                                                                        "pages"
+                                                                    ]
+                                                                },
+                                                                "far": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "label": {
+                                                                            "type": "string",
+                                                                            "const": "Far review"
+                                                                        },
+                                                                        "ranges": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "pages": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "label",
+                                                                        "ranges",
+                                                                        "pages"
+                                                                    ]
+                                                                },
+                                                                "lesson": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "description": "On the Noorani Qaida: the lesson's number and title.",
+                                                                    "properties": {
+                                                                        "number": {
+                                                                            "type": [
+                                                                                "integer",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "title": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "number",
+                                                                        "title"
+                                                                    ]
+                                                                },
+                                                                "stops": {
+                                                                    "type": "array",
+                                                                    "description": "The exam stops the new part completes (end of a surah or a part).",
+                                                                    "items": {}
+                                                                },
+                                                                "finished": {
+                                                                    "type": "boolean"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "new",
+                                                                "near",
+                                                                "far",
+                                                                "lesson",
+                                                                "stops",
+                                                                "finished"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "enrollment_id",
+                                                        "group_id",
+                                                        "program",
+                                                        "pace",
+                                                        "position",
+                                                        "finished",
+                                                        "frozen",
+                                                        "frozen_label",
+                                                        "progress",
+                                                        "portion"
+                                                    ]
+                                                },
+                                                "mistake_types": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "grades": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "results": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "session_id": {
+                                                                "type": "string"
+                                                            },
+                                                            "student_id": {
+                                                                "type": "string"
+                                                            },
+                                                            "parts": {
+                                                                "type": "string"
+                                                            },
+                                                            "advanced": {
+                                                                "type": "boolean",
+                                                                "description": "Whether the position moved past the new part."
+                                                            },
+                                                            "frozen": {
+                                                                "type": "boolean",
+                                                                "description": "The course was paused or over: nothing moved."
+                                                            },
+                                                            "recorded_at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "session_id",
+                                                            "student_id",
+                                                            "parts",
+                                                            "advanced",
+                                                            "frozen",
+                                                            "recorded_at"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "session_id",
+                                                "group",
+                                                "students",
+                                                "plan",
+                                                "mistake_types",
+                                                "grades",
+                                                "results"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/quran/lessons/{session}/result": {
+            "post": {
+                "operationId": "quran.lessons.record",
+                "description": "For each student (students[].student_id; a one-to-one lesson may leave it out), each part of today's portion\nthey recited (parts.new, parts.near, parts.far) with its mistakes by kind (mistakes: [{kind, count}], else the\nwords marked in the lesson's mushaf), and the teacher's own grade with a note when it differs from the mistakes'. The\nposition moves past the new part only when it reaches the program's pass grade (a group's: most of its\nstudents), and never while the course is paused or over. Once per lesson and student.",
+                "summary": "Record a Quran lesson",
+                "tags": [
+                    "Quran"
+                ],
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "students": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "student_id": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "maxLength": 64
+                                                },
+                                                "parts": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "new": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "mistakes": {
+                                                                    "type": [
+                                                                        "array",
+                                                                        "null"
+                                                                    ],
+                                                                    "items": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "kind": {
+                                                                                "type": "string",
+                                                                                "maxLength": 30
+                                                                            },
+                                                                            "count": {
+                                                                                "type": "integer",
+                                                                                "minimum": 0,
+                                                                                "maximum": 200
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "kind",
+                                                                            "count"
+                                                                        ]
+                                                                    },
+                                                                    "maxItems": 20
+                                                                },
+                                                                "grade": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ],
+                                                                    "enum": [
+                                                                        "excellent",
+                                                                        "very_good",
+                                                                        "good",
+                                                                        "acceptable",
+                                                                        "repeat",
+                                                                        null
+                                                                    ]
+                                                                },
+                                                                "note": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ],
+                                                                    "maxLength": 500
+                                                                }
+                                                            }
+                                                        },
+                                                        "near": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "mistakes": {
+                                                                    "type": [
+                                                                        "array",
+                                                                        "null"
+                                                                    ],
+                                                                    "items": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "kind": {
+                                                                                "type": "string",
+                                                                                "maxLength": 30
+                                                                            },
+                                                                            "count": {
+                                                                                "type": "integer",
+                                                                                "minimum": 0,
+                                                                                "maximum": 200
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "kind",
+                                                                            "count"
+                                                                        ]
+                                                                    },
+                                                                    "maxItems": 20
+                                                                },
+                                                                "grade": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ],
+                                                                    "enum": [
+                                                                        "excellent",
+                                                                        "very_good",
+                                                                        "good",
+                                                                        "acceptable",
+                                                                        "repeat",
+                                                                        null
+                                                                    ]
+                                                                },
+                                                                "note": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ],
+                                                                    "maxLength": 500
+                                                                }
+                                                            }
+                                                        },
+                                                        "far": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "mistakes": {
+                                                                    "type": [
+                                                                        "array",
+                                                                        "null"
+                                                                    ],
+                                                                    "items": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "kind": {
+                                                                                "type": "string",
+                                                                                "maxLength": 30
+                                                                            },
+                                                                            "count": {
+                                                                                "type": "integer",
+                                                                                "minimum": 0,
+                                                                                "maximum": 200
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "kind",
+                                                                            "count"
+                                                                        ]
+                                                                    },
+                                                                    "maxItems": 20
+                                                                },
+                                                                "grade": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ],
+                                                                    "enum": [
+                                                                        "excellent",
+                                                                        "very_good",
+                                                                        "good",
+                                                                        "acceptable",
+                                                                        "repeat",
+                                                                        null
+                                                                    ]
+                                                                },
+                                                                "note": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ],
+                                                                    "maxLength": 500
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "minItems": 1,
+                                        "maxItems": 20
+                                    },
+                                    "student_id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 64
+                                    },
+                                    "parts": {
+                                        "type": "object",
+                                        "properties": {
+                                            "new": {
+                                                "type": [
+                                                    "object",
+                                                    "null"
+                                                ],
+                                                "properties": {
+                                                    "mistakes": {
+                                                        "type": [
+                                                            "array",
+                                                            "null"
+                                                        ],
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "kind": {
+                                                                    "type": "string",
+                                                                    "maxLength": 30
+                                                                },
+                                                                "count": {
+                                                                    "type": "integer",
+                                                                    "minimum": 0,
+                                                                    "maximum": 200
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "kind",
+                                                                "count"
+                                                            ]
+                                                        },
+                                                        "maxItems": 20
+                                                    },
+                                                    "grade": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "enum": [
+                                                            "excellent",
+                                                            "very_good",
+                                                            "good",
+                                                            "acceptable",
+                                                            "repeat",
+                                                            null
+                                                        ]
+                                                    },
+                                                    "note": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "maxLength": 500
+                                                    }
+                                                }
+                                            },
+                                            "near": {
+                                                "type": [
+                                                    "object",
+                                                    "null"
+                                                ],
+                                                "properties": {
+                                                    "mistakes": {
+                                                        "type": [
+                                                            "array",
+                                                            "null"
+                                                        ],
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "kind": {
+                                                                    "type": "string",
+                                                                    "maxLength": 30
+                                                                },
+                                                                "count": {
+                                                                    "type": "integer",
+                                                                    "minimum": 0,
+                                                                    "maximum": 200
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "kind",
+                                                                "count"
+                                                            ]
+                                                        },
+                                                        "maxItems": 20
+                                                    },
+                                                    "grade": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "enum": [
+                                                            "excellent",
+                                                            "very_good",
+                                                            "good",
+                                                            "acceptable",
+                                                            "repeat",
+                                                            null
+                                                        ]
+                                                    },
+                                                    "note": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "maxLength": 500
+                                                    }
+                                                }
+                                            },
+                                            "far": {
+                                                "type": [
+                                                    "object",
+                                                    "null"
+                                                ],
+                                                "properties": {
+                                                    "mistakes": {
+                                                        "type": [
+                                                            "array",
+                                                            "null"
+                                                        ],
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "kind": {
+                                                                    "type": "string",
+                                                                    "maxLength": 30
+                                                                },
+                                                                "count": {
+                                                                    "type": "integer",
+                                                                    "minimum": 0,
+                                                                    "maximum": 200
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "kind",
+                                                                "count"
+                                                            ]
+                                                        },
+                                                        "maxItems": 20
+                                                    },
+                                                    "grade": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "enum": [
+                                                            "excellent",
+                                                            "very_good",
+                                                            "good",
+                                                            "acceptable",
+                                                            "repeat",
+                                                            null
+                                                        ]
+                                                    },
+                                                    "note": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "maxLength": 500
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "parts"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "results": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "plan": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "enrollment_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "group_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "program": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "track": {
+                                                                    "type": "string",
+                                                                    "description": "hifz, tilawa, talqin, noorani, review or ijaza"
+                                                                },
+                                                                "track_label": {
+                                                                    "type": "string"
+                                                                },
+                                                                "direction": {
+                                                                    "type": "string",
+                                                                    "description": "forward (from al-Fatiha) or backward (from an-Nas)"
+                                                                },
+                                                                "unit": {
+                                                                    "type": "string",
+                                                                    "description": "verses, lines, page, quarter_hizb or lesson (the Noorani Qaida)"
+                                                                },
+                                                                "unit_label": {
+                                                                    "type": "string"
+                                                                },
+                                                                "pass_grade": {
+                                                                    "type": "string"
+                                                                },
+                                                                "exam_stops": {
+                                                                    "type": "string",
+                                                                    "description": "none, juz or surah"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "name",
+                                                                "track",
+                                                                "track_label",
+                                                                "direction",
+                                                                "unit",
+                                                                "unit_label",
+                                                                "pass_grade",
+                                                                "exam_stops"
+                                                            ]
+                                                        },
+                                                        "pace": {
+                                                            "type": "object",
+                                                            "description": "The learner's own pace (the program's where the plan sets none).",
+                                                            "properties": {
+                                                                "new_amount": {
+                                                                    "type": "number"
+                                                                },
+                                                                "near_portions": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "far_pages": {
+                                                                    "type": "integer"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "new_amount",
+                                                                "near_portions",
+                                                                "far_pages"
+                                                            ]
+                                                        },
+                                                        "position": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "Where the next new portion starts; null once the program is complete.",
+                                                            "properties": {
+                                                                "surah": {
+                                                                    "type": [
+                                                                        "integer",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "verse": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "surah",
+                                                                "verse",
+                                                                "title"
+                                                            ]
+                                                        },
+                                                        "finished": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "frozen": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ],
+                                                            "description": "paused or ended: the plan waits where it is; null when it moves on",
+                                                            "enum": [
+                                                                "ended",
+                                                                "paused",
+                                                                null
+                                                            ]
+                                                        },
+                                                        "frozen_label": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "quran::programs.frozen.ended",
+                                                                        "quran::programs.frozen.paused"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        "progress": {
+                                                            "type": "number",
+                                                            "description": "How much of the program's scope is behind the learner, 0 to 1."
+                                                        },
+                                                        "portion": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "new": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "label": {
+                                                                            "type": "string",
+                                                                            "const": "New"
+                                                                        },
+                                                                        "ranges": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "pages": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "label",
+                                                                        "ranges",
+                                                                        "pages"
+                                                                    ]
+                                                                },
+                                                                "near": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "label": {
+                                                                            "type": "string",
+                                                                            "const": "Near review"
+                                                                        },
+                                                                        "ranges": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "pages": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "label",
+                                                                        "ranges",
+                                                                        "pages"
+                                                                    ]
+                                                                },
+                                                                "far": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "label": {
+                                                                            "type": "string",
+                                                                            "const": "Far review"
+                                                                        },
+                                                                        "ranges": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "pages": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "label",
+                                                                        "ranges",
+                                                                        "pages"
+                                                                    ]
+                                                                },
+                                                                "lesson": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "description": "On the Noorani Qaida: the lesson's number and title.",
+                                                                    "properties": {
+                                                                        "number": {
+                                                                            "type": [
+                                                                                "integer",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "title": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "number",
+                                                                        "title"
+                                                                    ]
+                                                                },
+                                                                "stops": {
+                                                                    "type": "array",
+                                                                    "description": "The exam stops the new part completes (end of a surah or a part).",
+                                                                    "items": {}
+                                                                },
+                                                                "finished": {
+                                                                    "type": "boolean"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "new",
+                                                                "near",
+                                                                "far",
+                                                                "lesson",
+                                                                "stops",
+                                                                "finished"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "enrollment_id",
+                                                        "group_id",
+                                                        "program",
+                                                        "pace",
+                                                        "position",
+                                                        "finished",
+                                                        "frozen",
+                                                        "frozen_label",
+                                                        "progress",
+                                                        "portion"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "results",
+                                                "plan"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/quran/students/{enrollment}/plan": {
+            "get": {
+                "operationId": "quran.students.plan",
+                "description": "For the course's teacher: the plan (null when the course has none yet), its next portion, and the last\nlessons' results with the teacher's notes.",
+                "summary": "A student's Quran plan",
+                "tags": [
+                    "Quran"
+                ],
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "enrollment_id": {
+                                                    "type": "string"
+                                                },
+                                                "plan": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "enrollment_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "group_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "program": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "track": {
+                                                                    "type": "string",
+                                                                    "description": "hifz, tilawa, talqin, noorani, review or ijaza"
+                                                                },
+                                                                "track_label": {
+                                                                    "type": "string"
+                                                                },
+                                                                "direction": {
+                                                                    "type": "string",
+                                                                    "description": "forward (from al-Fatiha) or backward (from an-Nas)"
+                                                                },
+                                                                "unit": {
+                                                                    "type": "string",
+                                                                    "description": "verses, lines, page, quarter_hizb or lesson (the Noorani Qaida)"
+                                                                },
+                                                                "unit_label": {
+                                                                    "type": "string"
+                                                                },
+                                                                "pass_grade": {
+                                                                    "type": "string"
+                                                                },
+                                                                "exam_stops": {
+                                                                    "type": "string",
+                                                                    "description": "none, juz or surah"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "name",
+                                                                "track",
+                                                                "track_label",
+                                                                "direction",
+                                                                "unit",
+                                                                "unit_label",
+                                                                "pass_grade",
+                                                                "exam_stops"
+                                                            ]
+                                                        },
+                                                        "pace": {
+                                                            "type": "object",
+                                                            "description": "The learner's own pace (the program's where the plan sets none).",
+                                                            "properties": {
+                                                                "new_amount": {
+                                                                    "type": "number"
+                                                                },
+                                                                "near_portions": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "far_pages": {
+                                                                    "type": "integer"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "new_amount",
+                                                                "near_portions",
+                                                                "far_pages"
+                                                            ]
+                                                        },
+                                                        "position": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "Where the next new portion starts; null once the program is complete.",
+                                                            "properties": {
+                                                                "surah": {
+                                                                    "type": [
+                                                                        "integer",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "verse": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "surah",
+                                                                "verse",
+                                                                "title"
+                                                            ]
+                                                        },
+                                                        "finished": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "frozen": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ],
+                                                            "description": "paused or ended: the plan waits where it is; null when it moves on",
+                                                            "enum": [
+                                                                "ended",
+                                                                "paused",
+                                                                null
+                                                            ]
+                                                        },
+                                                        "frozen_label": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "quran::programs.frozen.ended",
+                                                                        "quran::programs.frozen.paused"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        "progress": {
+                                                            "type": "number",
+                                                            "description": "How much of the program's scope is behind the learner, 0 to 1."
+                                                        },
+                                                        "portion": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "new": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "label": {
+                                                                            "type": "string",
+                                                                            "const": "New"
+                                                                        },
+                                                                        "ranges": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "pages": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "label",
+                                                                        "ranges",
+                                                                        "pages"
+                                                                    ]
+                                                                },
+                                                                "near": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "label": {
+                                                                            "type": "string",
+                                                                            "const": "Near review"
+                                                                        },
+                                                                        "ranges": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "pages": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "label",
+                                                                        "ranges",
+                                                                        "pages"
+                                                                    ]
+                                                                },
+                                                                "far": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "label": {
+                                                                            "type": "string",
+                                                                            "const": "Far review"
+                                                                        },
+                                                                        "ranges": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "pages": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "label",
+                                                                        "ranges",
+                                                                        "pages"
+                                                                    ]
+                                                                },
+                                                                "lesson": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "description": "On the Noorani Qaida: the lesson's number and title.",
+                                                                    "properties": {
+                                                                        "number": {
+                                                                            "type": [
+                                                                                "integer",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "title": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "number",
+                                                                        "title"
+                                                                    ]
+                                                                },
+                                                                "stops": {
+                                                                    "type": "array",
+                                                                    "description": "The exam stops the new part completes (end of a surah or a part).",
+                                                                    "items": {}
+                                                                },
+                                                                "finished": {
+                                                                    "type": "boolean"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "new",
+                                                                "near",
+                                                                "far",
+                                                                "lesson",
+                                                                "stops",
+                                                                "finished"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "enrollment_id",
+                                                        "group_id",
+                                                        "program",
+                                                        "pace",
+                                                        "position",
+                                                        "finished",
+                                                        "frozen",
+                                                        "frozen_label",
+                                                        "progress",
+                                                        "portion"
+                                                    ]
+                                                },
+                                                "recent": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "session_id": {
+                                                                "type": "string"
+                                                            },
+                                                            "student_id": {
+                                                                "type": "string"
+                                                            },
+                                                            "parts": {
+                                                                "type": "string"
+                                                            },
+                                                            "advanced": {
+                                                                "type": "boolean",
+                                                                "description": "Whether the position moved past the new part."
+                                                            },
+                                                            "frozen": {
+                                                                "type": "boolean",
+                                                                "description": "The course was paused or over: nothing moved."
+                                                            },
+                                                            "recorded_at": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "utc": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "local": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "timezone": {
+                                                                        "type": "null"
+                                                                    },
+                                                                    "label": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "utc",
+                                                                    "local",
+                                                                    "timezone",
+                                                                    "label"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "session_id",
+                                                            "student_id",
+                                                            "parts",
+                                                            "advanced",
+                                                            "frozen",
+                                                            "recorded_at"
+                                                        ]
+                                                    }
+                                                },
+                                                "grades": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "mistake_types": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "required": [
+                                                "enrollment_id",
+                                                "plan",
+                                                "recent",
+                                                "grades",
+                                                "mistake_types"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "quran.students.pace",
+                "description": "The new amount a lesson (in the program's unit), the near review (portions) and the far review (pages); null\ngoes back to the program's. A group's plan is changed by the office.",
+                "summary": "Change a student's pace",
+                "tags": [
+                    "Quran"
+                ],
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "new_amount": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ]
+                                    },
+                                    "near_portions": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "far_pages": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "enrollment_id": {
+                                                    "type": "string"
+                                                },
+                                                "plan": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "enrollment_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "group_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "program": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "track": {
+                                                                    "type": "string",
+                                                                    "description": "hifz, tilawa, talqin, noorani, review or ijaza"
+                                                                },
+                                                                "track_label": {
+                                                                    "type": "string"
+                                                                },
+                                                                "direction": {
+                                                                    "type": "string",
+                                                                    "description": "forward (from al-Fatiha) or backward (from an-Nas)"
+                                                                },
+                                                                "unit": {
+                                                                    "type": "string",
+                                                                    "description": "verses, lines, page, quarter_hizb or lesson (the Noorani Qaida)"
+                                                                },
+                                                                "unit_label": {
+                                                                    "type": "string"
+                                                                },
+                                                                "pass_grade": {
+                                                                    "type": "string"
+                                                                },
+                                                                "exam_stops": {
+                                                                    "type": "string",
+                                                                    "description": "none, juz or surah"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "name",
+                                                                "track",
+                                                                "track_label",
+                                                                "direction",
+                                                                "unit",
+                                                                "unit_label",
+                                                                "pass_grade",
+                                                                "exam_stops"
+                                                            ]
+                                                        },
+                                                        "pace": {
+                                                            "type": "object",
+                                                            "description": "The learner's own pace (the program's where the plan sets none).",
+                                                            "properties": {
+                                                                "new_amount": {
+                                                                    "type": "number"
+                                                                },
+                                                                "near_portions": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "far_pages": {
+                                                                    "type": "integer"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "new_amount",
+                                                                "near_portions",
+                                                                "far_pages"
+                                                            ]
+                                                        },
+                                                        "position": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "Where the next new portion starts; null once the program is complete.",
+                                                            "properties": {
+                                                                "surah": {
+                                                                    "type": [
+                                                                        "integer",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "verse": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "surah",
+                                                                "verse",
+                                                                "title"
+                                                            ]
+                                                        },
+                                                        "finished": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "frozen": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ],
+                                                            "description": "paused or ended: the plan waits where it is; null when it moves on",
+                                                            "enum": [
+                                                                "ended",
+                                                                "paused",
+                                                                null
+                                                            ]
+                                                        },
+                                                        "frozen_label": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "quran::programs.frozen.ended",
+                                                                        "quran::programs.frozen.paused"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        "progress": {
+                                                            "type": "number",
+                                                            "description": "How much of the program's scope is behind the learner, 0 to 1."
+                                                        },
+                                                        "portion": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "new": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "label": {
+                                                                            "type": "string",
+                                                                            "const": "New"
+                                                                        },
+                                                                        "ranges": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "pages": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "label",
+                                                                        "ranges",
+                                                                        "pages"
+                                                                    ]
+                                                                },
+                                                                "near": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "label": {
+                                                                            "type": "string",
+                                                                            "const": "Near review"
+                                                                        },
+                                                                        "ranges": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "pages": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "label",
+                                                                        "ranges",
+                                                                        "pages"
+                                                                    ]
+                                                                },
+                                                                "far": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "properties": {
+                                                                        "label": {
+                                                                            "type": "string",
+                                                                            "const": "Far review"
+                                                                        },
+                                                                        "ranges": {
+                                                                            "type": "array",
+                                                                            "items": {}
+                                                                        },
+                                                                        "pages": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "label",
+                                                                        "ranges",
+                                                                        "pages"
+                                                                    ]
+                                                                },
+                                                                "lesson": {
+                                                                    "type": [
+                                                                        "object",
+                                                                        "null"
+                                                                    ],
+                                                                    "description": "On the Noorani Qaida: the lesson's number and title.",
+                                                                    "properties": {
+                                                                        "number": {
+                                                                            "type": [
+                                                                                "integer",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "title": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "number",
+                                                                        "title"
+                                                                    ]
+                                                                },
+                                                                "stops": {
+                                                                    "type": "array",
+                                                                    "description": "The exam stops the new part completes (end of a surah or a part).",
+                                                                    "items": {}
+                                                                },
+                                                                "finished": {
+                                                                    "type": "boolean"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "new",
+                                                                "near",
+                                                                "far",
+                                                                "lesson",
+                                                                "stops",
+                                                                "finished"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "enrollment_id",
+                                                        "group_id",
+                                                        "program",
+                                                        "pace",
+                                                        "position",
+                                                        "finished",
+                                                        "frozen",
+                                                        "frozen_label",
+                                                        "progress",
+                                                        "portion"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "enrollment_id",
+                                                "plan"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/quran/plan": {
+            "get": {
+                "operationId": "quran.plan",
+                "description": "Each Quran course with a plan: the program, where the learner is and how much is behind them, the next\nportion (new, near and far review), whether it is frozen (the course paused or over), and the last lessons'\ngrades (mistakes by kind, except in the kids' look).",
+                "summary": "A learner's Quran plans",
+                "tags": [
+                    "Quran"
+                ],
+                "parameters": [
+                    {
+                        "name": "learner_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 64
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "learner_id": {
+                                                    "type": "string"
+                                                },
+                                                "courses": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "enrollment_id": {
+                                                                "type": "string"
+                                                            },
+                                                            "subject": {
+                                                                "type": "string"
+                                                            },
+                                                            "plan": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "enrollment_id": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ]
+                                                                    },
+                                                                    "group_id": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ]
+                                                                    },
+                                                                    "program": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "id": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "name": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "track": {
+                                                                                "type": "string",
+                                                                                "description": "hifz, tilawa, talqin, noorani, review or ijaza"
+                                                                            },
+                                                                            "track_label": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "direction": {
+                                                                                "type": "string",
+                                                                                "description": "forward (from al-Fatiha) or backward (from an-Nas)"
+                                                                            },
+                                                                            "unit": {
+                                                                                "type": "string",
+                                                                                "description": "verses, lines, page, quarter_hizb or lesson (the Noorani Qaida)"
+                                                                            },
+                                                                            "unit_label": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "pass_grade": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "exam_stops": {
+                                                                                "type": "string",
+                                                                                "description": "none, juz or surah"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "id",
+                                                                            "name",
+                                                                            "track",
+                                                                            "track_label",
+                                                                            "direction",
+                                                                            "unit",
+                                                                            "unit_label",
+                                                                            "pass_grade",
+                                                                            "exam_stops"
+                                                                        ]
+                                                                    },
+                                                                    "pace": {
+                                                                        "type": "object",
+                                                                        "description": "The learner's own pace (the program's where the plan sets none).",
+                                                                        "properties": {
+                                                                            "new_amount": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "near_portions": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "far_pages": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "new_amount",
+                                                                            "near_portions",
+                                                                            "far_pages"
+                                                                        ]
+                                                                    },
+                                                                    "position": {
+                                                                        "type": [
+                                                                            "object",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "Where the next new portion starts; null once the program is complete.",
+                                                                        "properties": {
+                                                                            "surah": {
+                                                                                "type": [
+                                                                                    "integer",
+                                                                                    "null"
+                                                                                ]
+                                                                            },
+                                                                            "verse": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "title": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "surah",
+                                                                            "verse",
+                                                                            "title"
+                                                                        ]
+                                                                    },
+                                                                    "finished": {
+                                                                        "type": "boolean"
+                                                                    },
+                                                                    "frozen": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "paused or ended: the plan waits where it is; null when it moves on",
+                                                                        "enum": [
+                                                                            "ended",
+                                                                            "paused",
+                                                                            null
+                                                                        ]
+                                                                    },
+                                                                    "frozen_label": {
+                                                                        "anyOf": [
+                                                                            {
+                                                                                "type": "null"
+                                                                            },
+                                                                            {
+                                                                                "type": "string"
+                                                                            },
+                                                                            {
+                                                                                "type": "string",
+                                                                                "enum": [
+                                                                                    "quran::programs.frozen.ended",
+                                                                                    "quran::programs.frozen.paused"
+                                                                                ]
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    "progress": {
+                                                                        "type": "number",
+                                                                        "description": "How much of the program's scope is behind the learner, 0 to 1."
+                                                                    },
+                                                                    "portion": {
+                                                                        "type": [
+                                                                            "object",
+                                                                            "null"
+                                                                        ],
+                                                                        "properties": {
+                                                                            "new": {
+                                                                                "type": [
+                                                                                    "object",
+                                                                                    "null"
+                                                                                ],
+                                                                                "properties": {
+                                                                                    "label": {
+                                                                                        "type": "string",
+                                                                                        "const": "New"
+                                                                                    },
+                                                                                    "ranges": {
+                                                                                        "type": "array",
+                                                                                        "items": {}
+                                                                                    },
+                                                                                    "pages": {
+                                                                                        "type": "array",
+                                                                                        "items": {
+                                                                                            "type": "integer"
+                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "label",
+                                                                                    "ranges",
+                                                                                    "pages"
+                                                                                ]
+                                                                            },
+                                                                            "near": {
+                                                                                "type": [
+                                                                                    "object",
+                                                                                    "null"
+                                                                                ],
+                                                                                "properties": {
+                                                                                    "label": {
+                                                                                        "type": "string",
+                                                                                        "const": "Near review"
+                                                                                    },
+                                                                                    "ranges": {
+                                                                                        "type": "array",
+                                                                                        "items": {}
+                                                                                    },
+                                                                                    "pages": {
+                                                                                        "type": "array",
+                                                                                        "items": {
+                                                                                            "type": "integer"
+                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "label",
+                                                                                    "ranges",
+                                                                                    "pages"
+                                                                                ]
+                                                                            },
+                                                                            "far": {
+                                                                                "type": [
+                                                                                    "object",
+                                                                                    "null"
+                                                                                ],
+                                                                                "properties": {
+                                                                                    "label": {
+                                                                                        "type": "string",
+                                                                                        "const": "Far review"
+                                                                                    },
+                                                                                    "ranges": {
+                                                                                        "type": "array",
+                                                                                        "items": {}
+                                                                                    },
+                                                                                    "pages": {
+                                                                                        "type": "array",
+                                                                                        "items": {
+                                                                                            "type": "integer"
+                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "label",
+                                                                                    "ranges",
+                                                                                    "pages"
+                                                                                ]
+                                                                            },
+                                                                            "lesson": {
+                                                                                "type": [
+                                                                                    "object",
+                                                                                    "null"
+                                                                                ],
+                                                                                "description": "On the Noorani Qaida: the lesson's number and title.",
+                                                                                "properties": {
+                                                                                    "number": {
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "title": {
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "number",
+                                                                                    "title"
+                                                                                ]
+                                                                            },
+                                                                            "stops": {
+                                                                                "type": "array",
+                                                                                "description": "The exam stops the new part completes (end of a surah or a part).",
+                                                                                "items": {}
+                                                                            },
+                                                                            "finished": {
+                                                                                "type": "boolean"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "new",
+                                                                            "near",
+                                                                            "far",
+                                                                            "lesson",
+                                                                            "stops",
+                                                                            "finished"
+                                                                        ]
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "id",
+                                                                    "enrollment_id",
+                                                                    "group_id",
+                                                                    "program",
+                                                                    "pace",
+                                                                    "position",
+                                                                    "finished",
+                                                                    "frozen",
+                                                                    "frozen_label",
+                                                                    "progress",
+                                                                    "portion"
+                                                                ]
+                                                            },
+                                                            "recent": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "session_id": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "student_id": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "parts": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "advanced": {
+                                                                            "type": "boolean",
+                                                                            "description": "Whether the position moved past the new part."
+                                                                        },
+                                                                        "frozen": {
+                                                                            "type": "boolean",
+                                                                            "description": "The course was paused or over: nothing moved."
+                                                                        },
+                                                                        "recorded_at": {
+                                                                            "type": [
+                                                                                "object",
+                                                                                "null"
+                                                                            ],
+                                                                            "properties": {
+                                                                                "utc": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "local": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "timezone": {
+                                                                                    "type": "null"
+                                                                                },
+                                                                                "label": {
+                                                                                    "type": "string"
+                                                                                }
+                                                                            },
+                                                                            "required": [
+                                                                                "utc",
+                                                                                "local",
+                                                                                "timezone",
+                                                                                "label"
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "id",
+                                                                        "session_id",
+                                                                        "student_id",
+                                                                        "parts",
+                                                                        "advanced",
+                                                                        "frozen",
+                                                                        "recorded_at"
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "enrollment_id",
+                                                            "subject",
+                                                            "plan",
+                                                            "recent"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "learner_id",
+                                                "courses"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/v1/safeguarding/new": {
             "get": {
                 "operationId": "safeguarding.new",
