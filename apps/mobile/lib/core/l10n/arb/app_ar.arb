@@ -3931,5 +3931,319 @@
   },
   "trialRequestedNext3": "بعد الاتفاق يصلك الموعد ورابط دخول الحصة.",
   "trialTooMany": "طُلبت رموز كثيرة من هذا الجهاز أو لهذا الرقم، فأوقفنا الطلب قليلًا لحمايته. انتظر حتى ينتهي العدّاد، ثم حاول مرة أخرى.",
-  "trialDone": "تم"
+  "trialDone": "تم",
+  "trialsTitle": "الحصص التجريبية",
+  "trialsKidsTitle": "حصصي التجريبية",
+  "trialsRowHint": "تقارير المعلّمين وما يقترحونه",
+  "trialsLead": "حصص {name} التجريبية المجانية وتقارير المعلّمين عنها.",
+  "@trialsLead": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "trialsLeadSelf": "حصصك التجريبية المجانية وتقارير المعلّمين عنها.",
+  "trialsEmptyTitle": "لا توجد حصص تجريبية",
+  "trialsEmptyBody": "بعد كل حصة تجريبية يكتب المعلّم تقريرًا عمّا وجده وما يقترحه، وتجده هنا.",
+  "trialStateBooked": "قادمة",
+  "trialStateReady": "التقرير جاهز",
+  "trialStateWriting": "التقرير قيد الكتابة",
+  "trialStateStudentAbsent": "لم يحضرها الطالب",
+  "trialStateTeacherAbsent": "تغيّب المعلّم",
+  "trialStateCancelledFamily": "ألغيتموها",
+  "trialStateCancelledAcademy": "ألغتها الأكاديمية",
+  "trialStateMissed": "لم تتم",
+  "trialKindSecond": "الحصة الثانية مع معلّم آخر",
+  "trialKindRebook": "موعد جديد",
+  "trialNotCounted": "لا تُحسب من حصتكم التجريبية المجانية.",
+  "trialWritingNote": "يكتب المعلّم التقرير الآن، ويصلكم إشعار حين يجهز.",
+  "trialBookedNote": "تجدونها في «الحصص» وتدخلونها من هناك في موعدها.",
+  "trialReadReport": "اقرأ التقرير",
+  "trialBookAgain": "احجز موعدًا آخر",
+  "trialTryAnother": "جرّب معلّمًا آخر مجانًا",
+  "trialReportTitle": "تقرير الحصة التجريبية",
+  "trialReportKidsTitle": "ماذا قال معلّمك؟ ⭐",
+  "trialReportSecond": "الحصة التجريبية الثانية",
+  "trialReportFor": "{subject} · {name}",
+  "@trialReportFor": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "trialReportTeacher": "المعلّم",
+  "trialReportLevel": "المستوى الذي وجده المعلّم",
+  "trialReportLevelKids": "مستواك الآن 🌱",
+  "trialReportStrengths": "نقاط القوة",
+  "trialReportStrengthsKids": "ما تُحسنه 💪",
+  "trialReportToWorkOn": "ما نعمل عليه",
+  "trialReportToWorkOnKids": "ما سنتعلّمه معًا 🎯",
+  "trialReportNote": "كلمة المعلّم",
+  "trialReportNoteKids": "رسالة من معلّمك 💌",
+  "trialReportNotReadyTitle": "التقرير لم يجهز بعد",
+  "trialReportNotReadyBody": "يكتب المعلّم تقرير الحصة التجريبية، ويصلكم إشعار حين يجهز. تجدون حصصكم التجريبية كلها في «الحصص التجريبية».",
+  "trialReportAllTrials": "كل الحصص التجريبية",
+  "trialPlanTitle": "ما يقترحه المعلّم",
+  "trialPlanPerWeek": "{n, plural, =1{حصة واحدة} =2{حصتان} few{{n} حصص} other{{n} حصة}} في الأسبوع",
+  "@trialPlanPerWeek": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "trialPlanLength": "الحصة {minutes}",
+  "@trialPlanLength": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "trialPlanPrivate": "حصص فردية",
+  "trialPlanGroup": "حصص جماعية",
+  "trialPlanBlock": "{lessons} خلال {days}",
+  "@trialPlanBlock": {
+    "placeholders": {
+      "lessons": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "trialDaysCount": "{n, plural, =1{يوم واحد} =2{يومين} few{{n} أيام} other{{n} يومًا}}",
+  "@trialDaysCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "trialPlanOnlyPerWeek": "يقترح المعلّم {perWeek}.",
+  "@trialPlanOnlyPerWeek": {
+    "placeholders": {
+      "perWeek": {
+        "type": "String"
+      }
+    }
+  },
+  "trialPlanWithdrawn": "لم تعد الأكاديمية تقدّم الباقة التي اقترحها المعلّم، وسيساعدكم فريقها في اختيار باقة مناسبة.",
+  "trialPrice": "سعر الباقة",
+  "trialPriceFor": "لكل {lessons}",
+  "@trialPriceFor": {
+    "placeholders": {
+      "lessons": {
+        "type": "String"
+      }
+    }
+  },
+  "trialPriceRegion": "بأسعار {region}",
+  "@trialPriceRegion": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "trialNoPrice": "يخبركم فريق الأكاديمية بالسعر حين تتواصلون معه.",
+  "trialOfferTitle": "خصم {percent}٪ لكم",
+  "@trialOfferTitle": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "trialOfferLead": "على أول دفعة من أي باقة، حتى {label}.",
+  "@trialOfferLead": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "trialOfferLeft": "يبقى على انتهاء العرض",
+  "trialOfferDays": "أيام",
+  "trialOfferHours": "ساعات",
+  "trialOfferMinutes": "دقائق",
+  "trialOfferSeconds": "ثوانٍ",
+  "trialOfferLeftSpoken": "يبقى {days} و{hours} و{minutes}",
+  "@trialOfferLeftSpoken": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "trialOfferWith": "بعد الخصم",
+  "trialOfferInstead": "بدلًا من {price}",
+  "@trialOfferInstead": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "trialOfferSaving": "توفّرون {amount}",
+  "@trialOfferSaving": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "trialOfferNoPrice": "يُطبَّق الخصم على أول فاتورة من أي باقة تختارونها.",
+  "trialOfferFamilyBigger": "خصم الإخوة لديكم أكبر من هذا العرض، فيُطبَّق هو بدلًا منه، فالخصمان لا يجتمعان.",
+  "trialOfferEnded": "انتهى وقت العرض، وهذا سعر الباقة اليوم.",
+  "trialOfferEndedNoPrice": "انتهى وقت العرض.",
+  "trialOfferUsed": "استخدمتم العرض على أول فاتورة.",
+  "trialStarted": "بدأت الدراسة في {subject}. نتمنّى لكم التوفيق.",
+  "@trialStarted": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "trialStartedKids": "بدأت دروسك في {subject}! 🎉",
+  "@trialStartedKids": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "trialCourseWaiting": "الدورة بانتظار الدفع، وتجدون الفاتورة في «المدفوعات».",
+  "trialCourseActive": "الدورة جارية، وتجدون حصصها في «الحصص».",
+  "trialCoursePaused": "الدورة متوقفة مؤقتًا.",
+  "trialOpenMoney": "افتح المدفوعات",
+  "trialStartPlan": "ابدأ بهذه الباقة",
+  "trialStartAsk": "اطلب باقة مناسبة",
+  "trialStartFollow": "تابع طلبك",
+  "trialStartTitle": "نبدأ معكم",
+  "trialStartLead": "التسجيل والدفع من التطبيق قادمان قريبًا. أرسلوا طلبكم الآن إلى الأكاديمية، فيرتّب فريقها الدورة ويرسل إليكم الفاتورة، ويصلكم رده في «المساعدة».",
+  "trialStartOfferNote": "يطبّق الفريق خصم العرض على أول فاتورة إن سجّلكم قبل انتهائه، فأرسلوا مبكرًا.",
+  "trialStartWhat": "ما سنرسله",
+  "trialStartSubject": "البدء بباقة {plan} لـ{name}",
+  "@trialStartSubject": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "trialStartSubjectAny": "البدء في {subject} لـ{name}",
+  "@trialStartSubjectAny": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "trialStartBody": "نودّ أن نبدأ في {subject} بباقة {plan} كما اقترح المعلّم بعد الحصة التجريبية.",
+  "@trialStartBody": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      },
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "trialStartBodyAny": "نودّ أن نبدأ الدراسة في {subject} بعد الحصة التجريبية، ونرجو مساعدتنا في اختيار الباقة.",
+  "@trialStartBodyAny": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "trialStartNote": "هل تريدون إضافة شيء؟ الأيام والأوقات المناسبة مثلًا",
+  "trialStartSend": "أرسل إلى الأكاديمية",
+  "trialStartSent": "وصل طلبكم إلى الأكاديمية",
+  "trialStartNoHelp": "تواصلوا مع الأكاديمية بطرقها المعتادة لتبدؤوا بهذه الباقة.",
+  "trialSecondTitle": "لم يناسبكم المعلّم؟",
+  "trialSecondBody": "جرّبوا حصة تجريبية ثانية مجانية مع معلّم آخر، حتى {label}.",
+  "@trialSecondBody": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "trialSecondBodyNoDate": "جرّبوا حصة تجريبية ثانية مجانية مع معلّم آخر.",
+  "trialSecondPick": "اختر موعدًا مع معلّم آخر",
+  "trialRebookTitle": "لم تتم الحصة؟ احجزوا موعدًا آخر",
+  "trialRebookBody": "اختاروا موعدًا جديدًا للحصة التجريبية المجانية.",
+  "trialNextPickSecond": "اختر موعد الحصة الثانية",
+  "trialNextPickRebook": "اختر موعدًا جديدًا",
+  "trialNextLeadSecond": "مع معلّم آخر غير {teacher}. المواعيد بتوقيت {zone}، والأقرب أولًا.",
+  "@trialNextLeadSecond": {
+    "placeholders": {
+      "teacher": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "trialNextNoTimes": "لا توجد مواعيد متاحة خلال الأسبوعين القادمين. اكتبوا إلينا في «المساعدة» وسنرتّب لكم موعدًا.",
+  "trialNextOpenHelp": "اكتب إلى الأكاديمية",
+  "trialNextBookedTitle": "حُجزت الحصة",
+  "trialNextBookedSecond": "حُجزت الحصة الثانية مع معلّم آخر",
+  "trialNextBooked1": "يصلكم إشعار ورسالة فيهما الموعد ورابط دخول الحصة.",
+  "trialNextBooked2": "تجدون الحصة في «الحصص»، وتدخلونها من هناك في موعدها.",
+  "trialNextBooked3": "بعد الحصة يكتب المعلّم تقريرًا جديدًا، وتجدونه هنا.",
+  "trialNextTimeTaken": "حُجز هذا الموعد للتو. اختر موعدًا آخر من المواعيد المتاحة الآن.",
+  "trialOpenLessons": "افتح الحصص",
+  "trialHomeReady": "تقرير الحصة التجريبية جاهز",
+  "trialHomeReadyBody": "{subject} مع {teacher}: ما وجده المعلّم وما يقترحه.",
+  "@trialHomeReadyBody": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      },
+      "teacher": {
+        "type": "String"
+      }
+    }
+  },
+  "trialHomeRebook": "لم تتم الحصة التجريبية في {subject}",
+  "@trialHomeRebook": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "trialHomeRebookBody": "احجزوا موعدًا آخر متى شئتم.",
+  "trialHomeSecond": "جرّبوا معلّمًا آخر في {subject}",
+  "@trialHomeSecond": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -450,6 +450,11 @@ it('makes the demo\'s report with an open offer once, and leaves an owner\'s set
     $coupon = $trial->offer_coupon_id;
     app(DemoTrialReportSeeder::class)->run(app(IssueTrialOffer::class));
     expect(Coupon::query()->where('purpose', 'trial_offer')->count())->toBe(1)->and($trial->refresh()->offer_coupon_id)->toBe($coupon);
+
+    // An older demo's colloquial level reads in Modern Standard Arabic once the family sees it in the report.
+    $trial->forceFill(['level' => 'بتقرأ كويس، ومحتاجة تشتغل على أحكام النون الساكنة والمدود.'])->save();
+    app(DemoTrialReportSeeder::class)->run(app(IssueTrialOffer::class));
+    expect($trial->refresh()->level)->toBe('تقرأ جيدًا، وتحتاج إلى العمل على أحكام النون الساكنة والمدود.');
 });
 
 it('runs from the panels: the teacher writes the family\'s part apart from the academy\'s, sales see the report and the offer and send it again, settings save the offer', function () {

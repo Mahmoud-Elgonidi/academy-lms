@@ -57,6 +57,11 @@ String targetOf(String? screen, String? id, Area area) {
     (Area.family, 'report' || 'roadmap') => '/family/journey/courses',
     (Area.teen, 'report') => '/teen/reports',
     (Area.kids || Area.middle, 'homework') => '$base/more/homework',
+    // A free trial: its report (or, when it did not take place, the trial and one more from it).
+    (Area.family, 'family_trial') when id != null => '/family/me/trials/$id',
+    (Area.family, 'family_trial') => '/family/me/trials',
+    (Area.kids || Area.middle || Area.teen, 'family_trial') when id != null => '$base/more/trials/$id',
+    (Area.kids || Area.middle || Area.teen, 'family_trial') => '$base/more/trials',
     (Area.teen, 'homework') => '/teen/homework',
     _ => home,
   };

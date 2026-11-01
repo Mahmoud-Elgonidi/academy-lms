@@ -4,6 +4,7 @@ namespace Modules\Crm\Database\Seeders;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Modules\Crm\Actions\IssueTrialOffer;
 use Modules\Crm\Models\CrmSettings;
 use Modules\Crm\Models\Lead;
@@ -20,8 +21,23 @@ use Modules\Crm\Models\LeadTrial;
  */
 final class DemoTrialReportSeeder extends Seeder
 {
+    /**
+     * What an older demo wrote in colloquial words before its wording turned to
+     * Modern Standard Arabic, which the family now reads in the report.
+     */
+    private const OLD_WORDS = [
+        ['lead_trials', 'level', 'بتقرأ كويس، ومحتاجة تشتغل على أحكام النون الساكنة والمدود.', 'تقرأ جيدًا، وتحتاج إلى العمل على أحكام النون الساكنة والمدود.'],
+        ['lead_trials', 'level', 'حافظ جزء عمّ، ومخارج الحروف محتاجة ضبط.', 'يحفظ جزء عمّ، ومخارج الحروف تحتاج إلى ضبط.'],
+        ['teacher_public_cards', 'bio', 'محفّظة قرآن بإجازة في رواية حفص، بحب أشتغل مع الأطفال وأخلّي الحفظ لعبة يستنوها كل أسبوع.', 'محفّظة قرآن بإجازة في رواية حفص، أحب العمل مع الأطفال وأجعل الحفظ لعبة ينتظرونها كل أسبوع.'],
+        ['teacher_public_cards', 'bio', 'بدرّس التجويد والقرآن من 8 سنين، للكبار والصغيرين. الصبر والتشجيع هما سرّ كل حصة عندي.', 'أدرّس التجويد والقرآن منذ 8 سنوات، للكبار والصغار. الصبر والتشجيع هما سرّ كل حصة عندي.'],
+        ['teacher_public_cards', 'bio', 'مدرّس لغة عربية ونحو. بشرح القاعدة بأمثلة من حياة الطالب لحد ما تبقى سهلة وتتفهم.', 'معلّم لغة عربية ونحو. أشرح القاعدة بأمثلة من حياة الطالب حتى تصبح سهلة ومفهومة.'],
+    ];
+
     public function run(IssueTrialOffer $offer): void
     {
+        foreach (self::OLD_WORDS as [$table, $column, $old, $new]) {
+            DB::table($table)->where($column, $old)->update([$column => $new]);
+        }
         if (LeadTrial::query()->whereNotNull('offer_coupon_id')->exists()) {
             return;
         }

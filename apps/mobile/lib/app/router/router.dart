@@ -66,6 +66,9 @@ import '../../features/teaching/presentation/pages/performance_page.dart';
 import '../../features/teaching/presentation/pages/today_page.dart';
 import '../../features/teaching/presentation/pages/week_page.dart';
 import '../../features/teaching/domain/teaching.dart';
+import '../../features/trial/presentation/reports/next_trial_page.dart';
+import '../../features/trial/presentation/reports/report_page.dart';
+import '../../features/trial/presentation/reports/trials_page.dart';
 import '../../features/trial/presentation/trial_page.dart';
 import '../../features/teaching/presentation/widgets/waiting.dart';
 import 'areas.dart';
@@ -90,6 +93,29 @@ GoRouter buildRouter(SessionCubit session) {
     'help',
     (_) => HelpPage(scope: scope, at: at),
     routes: [page(':id', (s) => TicketPage(ticketId: s.pathParameters['id']!))],
+  );
+
+  // The free trials, a trial's report and one more trial from it, under the look's own place (Me, or a student's More).
+  GoRoute trials(String base) => page(
+    'trials',
+    (_) => TrialsPage(base: base),
+    routes: [
+      page(
+        ':id',
+        (s) => TrialReportPage(id: s.pathParameters['id']!, base: base),
+        routes: [
+          page(
+            'next',
+            (s) => NextTrialPage(
+              id: s.pathParameters['id']!,
+              base: base,
+              second: s.uri.queryParameters['kind'] != 'rebook',
+              teacher: s.uri.queryParameters['teacher'] ?? '',
+            ),
+          ),
+        ],
+      ),
+    ],
   );
 
   // Conversations with a teacher or a student, and each one, under the look's own place: Me, More, or a student's account.
@@ -282,6 +308,7 @@ GoRouter buildRouter(SessionCubit session) {
               page('my-data', (_) => const MyDataPage()),
               page('recordings', (_) => const RecordingsPage(teacher: false)),
               page('tell-us', (_) => const TellUsPage(scope: ConcernScope.family)),
+              trials('/family/me/trials'),
               help(HelpScope.family),
               messages(MessagesScope.family),
             ],
@@ -304,7 +331,7 @@ GoRouter buildRouter(SessionCubit session) {
           branch(
             '/kids/more',
             (_) => const StudentMorePage(),
-            routes: [page('homework', (_) => const HomeworkPage()), page('stickers', (_) => stickers())],
+            routes: [page('homework', (_) => const HomeworkPage()), page('stickers', (_) => stickers()), trials('/kids/more/trials')],
           ),
         ],
       ),
@@ -330,7 +357,11 @@ GoRouter buildRouter(SessionCubit session) {
           branch(
             '/middle/more',
             (_) => const StudentMorePage(),
-            routes: [page('homework', (_) => const HomeworkPage()), page('recordings', (_) => const RecordingsPage(teacher: false))],
+            routes: [
+              page('homework', (_) => const HomeworkPage()),
+              page('recordings', (_) => const RecordingsPage(teacher: false)),
+              trials('/middle/more/trials'),
+            ],
           ),
         ],
       ),
@@ -363,6 +394,7 @@ GoRouter buildRouter(SessionCubit session) {
             routes: [
               page('recordings', (_) => const RecordingsPage(teacher: false)),
               page('tell-us', (_) => const TellUsPage(scope: ConcernScope.self)),
+              trials('/teen/more/trials'),
               help(HelpScope.self, at: '/teen/more/help'),
               messages(MessagesScope.self, at: '/teen/more/messages'),
             ],

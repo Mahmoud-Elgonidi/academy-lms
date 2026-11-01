@@ -13,6 +13,7 @@ import '../../../../shared/widgets/lms.dart';
 import '../../../journey/data/journey_repository.dart';
 import '../../../journey/domain/journey.dart';
 import '../../../notifications/presentation/widgets/notification_bell.dart';
+import '../../../trial/presentation/reports/trials_page.dart';
 import '../widgets/more_rows.dart';
 
 /// "More" for a student: the kids' list as it was; middle school's card of
@@ -135,6 +136,7 @@ class StudentMorePage extends StatelessWidget {
           ),
         ],
       ),
+      TrialsEntry(base: trialsBase('/middle')),
     ];
   }
 
@@ -180,6 +182,7 @@ class StudentMorePage extends StatelessWidget {
           ),
         ],
       ),
+      TrialsEntry(base: trialsBase('/teen')),
     ];
   }
 }
@@ -360,6 +363,7 @@ class _KidsMore extends StatelessWidget {
               ],
             ),
           ).appear(context, 1),
+          TrialsEntry(base: trialsBase(base)),
         ],
       ),
     );

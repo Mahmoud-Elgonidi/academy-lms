@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -75,7 +74,7 @@ class _TimeStepState extends State<TimeStep> {
                   Note(l.trialNoneSuit),
                 const Gap(Space.m),
               ],
-              _DayStrip(days: days, open: open!, onDay: (d) => setState(() => _day = d)),
+              TrialDayStrip(days: days, open: open!, onDay: (d) => setState(() => _day = d)),
               const Gap(Space.l),
               AnimatedSwitcher(
                 duration: context.calm ? Duration.zero : const Duration(milliseconds: 220),
@@ -142,83 +141,6 @@ class _Bottom extends StatelessWidget {
           child: Text(l.trialNoTimeSuits),
         ),
       ],
-    );
-  }
-}
-
-/// The days with times: today, tomorrow, then the weekday and date, each with how many times it has.
-class _DayStrip extends StatelessWidget {
-  const _DayStrip({required this.days, required this.open, required this.onDay});
-
-  final List<SlotDay> days;
-  final SlotDay open;
-  final ValueChanged<String> onDay;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final l = context.l10n;
-    return SizedBox(
-      height: 92 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.6),
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: days.length,
-        separatorBuilder: (_, _) => const Gap(Space.s),
-        itemBuilder: (context, i) {
-          final day = days[i];
-          final at = day.first;
-          final selected = day.day == open.day;
-          final top = switch (at.relativeDay(context)) {
-            final r when r == l.today || r == l.tomorrow => r,
-            _ => DateFormat('EEEE', context.locale).format(at.wall),
-          };
-          return Semantics(
-            button: true,
-            selected: selected,
-            label: joinSpoken(context, [at.relativeDay(context), at.day(context.locale), l.trialTimesCount(day.slots.length)]),
-            excludeSemantics: true,
-            child: PressScale(
-              onTap: () => onDay(day.day),
-              child: AnimatedContainer(
-                key: Key('trial-day-${day.day}'),
-                duration: context.calm ? Duration.zero : const Duration(milliseconds: 200),
-                width: 84,
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-                decoration: BoxDecoration(
-                  color: selected ? c.brand : c.card,
-                  borderRadius: BorderRadius.circular(context.shape.card),
-                  border: Border.all(color: selected ? c.brand : c.line, width: 1.5),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      top,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: selected ? Colors.white : c.muted),
-                    ),
-                    Text(
-                      DateFormat('d', context.locale).format(at.wall),
-                      style: TextStyle(
-                        fontFamily: context.shape.headingFont,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: selected ? Colors.white : c.ink,
-                      ),
-                    ),
-                    Text(
-                      DateFormat('MMM', context.locale).format(at.wall),
-                      maxLines: 1,
-                      style: TextStyle(fontSize: 12, color: selected ? Colors.white.withValues(alpha: 0.9) : c.muted),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
     );
   }
 }

@@ -5200,4 +5200,394 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trialDone => 'Done';
+
+  @override
+  String get trialsTitle => 'Free trials';
+
+  @override
+  String get trialsKidsTitle => 'My trial lessons';
+
+  @override
+  String get trialsRowHint => 'The teachers\' reports and what they recommend';
+
+  @override
+  String trialsLead(String name) {
+    return '$name\'s free trial lessons and the teachers\' reports on them.';
+  }
+
+  @override
+  String get trialsLeadSelf => 'Your free trial lessons and the teachers\' reports on them.';
+
+  @override
+  String get trialsEmptyTitle => 'No free trials';
+
+  @override
+  String get trialsEmptyBody => 'After each free trial the teacher writes what they found and what they recommend, and you find it here.';
+
+  @override
+  String get trialStateBooked => 'Coming up';
+
+  @override
+  String get trialStateReady => 'Report ready';
+
+  @override
+  String get trialStateWriting => 'Report on its way';
+
+  @override
+  String get trialStateStudentAbsent => 'Missed';
+
+  @override
+  String get trialStateTeacherAbsent => 'The teacher was away';
+
+  @override
+  String get trialStateCancelledFamily => 'You cancelled it';
+
+  @override
+  String get trialStateCancelledAcademy => 'Cancelled by the academy';
+
+  @override
+  String get trialStateMissed => 'Didn\'t take place';
+
+  @override
+  String get trialKindSecond => 'Second trial, another teacher';
+
+  @override
+  String get trialKindRebook => 'New time';
+
+  @override
+  String get trialNotCounted => 'It doesn\'t count against your free trial.';
+
+  @override
+  String get trialWritingNote => 'The teacher is writing the report; you\'ll be told when it\'s ready.';
+
+  @override
+  String get trialBookedNote => 'It\'s under Lessons; join it from there when it\'s time.';
+
+  @override
+  String get trialReadReport => 'Read the report';
+
+  @override
+  String get trialBookAgain => 'Book another time';
+
+  @override
+  String get trialTryAnother => 'Try another teacher for free';
+
+  @override
+  String get trialReportTitle => 'Trial lesson report';
+
+  @override
+  String get trialReportKidsTitle => 'What your teacher said ⭐';
+
+  @override
+  String get trialReportSecond => 'Second free trial';
+
+  @override
+  String trialReportFor(String subject, String name) {
+    return '$subject · $name';
+  }
+
+  @override
+  String get trialReportTeacher => 'Teacher';
+
+  @override
+  String get trialReportLevel => 'The level the teacher found';
+
+  @override
+  String get trialReportLevelKids => 'Where you are now 🌱';
+
+  @override
+  String get trialReportStrengths => 'Strengths';
+
+  @override
+  String get trialReportStrengthsKids => 'What you\'re good at 💪';
+
+  @override
+  String get trialReportToWorkOn => 'What to work on';
+
+  @override
+  String get trialReportToWorkOnKids => 'What we\'ll learn together 🎯';
+
+  @override
+  String get trialReportNote => 'The teacher\'s words';
+
+  @override
+  String get trialReportNoteKids => 'A note from your teacher 💌';
+
+  @override
+  String get trialReportNotReadyTitle => 'The report isn\'t ready yet';
+
+  @override
+  String get trialReportNotReadyBody =>
+      'The teacher is writing the trial report; you\'ll be told when it\'s ready. All your trials are under Free trials.';
+
+  @override
+  String get trialReportAllTrials => 'All free trials';
+
+  @override
+  String get trialPlanTitle => 'What the teacher recommends';
+
+  @override
+  String trialPlanPerWeek(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n lessons', one: '1 lesson');
+    return '$_temp0 a week';
+  }
+
+  @override
+  String trialPlanLength(String minutes) {
+    return '$minutes a lesson';
+  }
+
+  @override
+  String get trialPlanPrivate => 'One-to-one lessons';
+
+  @override
+  String get trialPlanGroup => 'Group lessons';
+
+  @override
+  String trialPlanBlock(String lessons, String days) {
+    return '$lessons within $days';
+  }
+
+  @override
+  String trialDaysCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n days', one: '1 day');
+    return '$_temp0';
+  }
+
+  @override
+  String trialPlanOnlyPerWeek(String perWeek) {
+    return 'The teacher recommends $perWeek.';
+  }
+
+  @override
+  String get trialPlanWithdrawn => 'The academy no longer offers the plan the teacher chose; its team will help you pick one that suits.';
+
+  @override
+  String get trialPrice => 'Plan price';
+
+  @override
+  String trialPriceFor(String lessons) {
+    return 'for $lessons';
+  }
+
+  @override
+  String trialPriceRegion(String region) {
+    return '$region prices';
+  }
+
+  @override
+  String get trialNoPrice => 'The academy\'s team tells you the price when you get in touch.';
+
+  @override
+  String trialOfferTitle(String percent) {
+    return '$percent% off for you';
+  }
+
+  @override
+  String trialOfferLead(String label) {
+    return 'On your first payment for any plan, until $label.';
+  }
+
+  @override
+  String get trialOfferLeft => 'Time left on the offer';
+
+  @override
+  String get trialOfferDays => 'days';
+
+  @override
+  String get trialOfferHours => 'hours';
+
+  @override
+  String get trialOfferMinutes => 'minutes';
+
+  @override
+  String get trialOfferSeconds => 'seconds';
+
+  @override
+  String trialOfferLeftSpoken(String days, String hours, String minutes) {
+    return '$days, $hours and $minutes left';
+  }
+
+  @override
+  String get trialOfferWith => 'With the offer';
+
+  @override
+  String trialOfferInstead(String price) {
+    return 'instead of $price';
+  }
+
+  @override
+  String trialOfferSaving(String amount) {
+    return 'You save $amount';
+  }
+
+  @override
+  String get trialOfferNoPrice => 'The discount goes on the first invoice of any plan you choose.';
+
+  @override
+  String get trialOfferFamilyBigger => 'Your family discount is bigger than this offer, so it applies instead: the two never add up.';
+
+  @override
+  String get trialOfferEnded => 'The offer has ended; this is the plan\'s price today.';
+
+  @override
+  String get trialOfferEndedNoPrice => 'The offer has ended.';
+
+  @override
+  String get trialOfferUsed => 'You used the offer on your first invoice.';
+
+  @override
+  String trialStarted(String subject) {
+    return 'Studying $subject has begun. We wish you every success.';
+  }
+
+  @override
+  String trialStartedKids(String subject) {
+    return 'Your $subject lessons have started! 🎉';
+  }
+
+  @override
+  String get trialCourseWaiting => 'The course is waiting for payment; the invoice is under Payments.';
+
+  @override
+  String get trialCourseActive => 'The course is running; its lessons are under Lessons.';
+
+  @override
+  String get trialCoursePaused => 'The course is paused.';
+
+  @override
+  String get trialOpenMoney => 'Open Payments';
+
+  @override
+  String get trialStartPlan => 'Start with this plan';
+
+  @override
+  String get trialStartAsk => 'Ask for a plan that suits';
+
+  @override
+  String get trialStartFollow => 'Follow your request';
+
+  @override
+  String get trialStartTitle => 'Let\'s get started';
+
+  @override
+  String get trialStartLead =>
+      'Signing up and paying in the app are coming soon. Send your request to the academy now: its team sets up the course and sends you the invoice, and you\'ll find their answer under Help.';
+
+  @override
+  String get trialStartOfferNote => 'The team puts the offer on your first invoice if they sign you up before it ends, so send early.';
+
+  @override
+  String get trialStartWhat => 'What we send';
+
+  @override
+  String trialStartSubject(String plan, String name) {
+    return 'Starting $plan for $name';
+  }
+
+  @override
+  String trialStartSubjectAny(String subject, String name) {
+    return 'Starting $subject for $name';
+  }
+
+  @override
+  String trialStartBody(String subject, String plan) {
+    return 'We would like to start $subject with the $plan plan, as the teacher recommended after the trial.';
+  }
+
+  @override
+  String trialStartBodyAny(String subject) {
+    return 'We would like to start $subject after the trial; please help us choose the plan.';
+  }
+
+  @override
+  String get trialStartNote => 'Anything to add? The days and times that suit you, say';
+
+  @override
+  String get trialStartSend => 'Send to the academy';
+
+  @override
+  String get trialStartSent => 'Your request reached the academy';
+
+  @override
+  String get trialStartNoHelp => 'Get in touch with the academy the usual way to start with this plan.';
+
+  @override
+  String get trialSecondTitle => 'Not the right teacher?';
+
+  @override
+  String trialSecondBody(String label) {
+    return 'Try a second free trial with another teacher, until $label.';
+  }
+
+  @override
+  String get trialSecondBodyNoDate => 'Try a second free trial with another teacher.';
+
+  @override
+  String get trialSecondPick => 'Pick a time with another teacher';
+
+  @override
+  String get trialRebookTitle => 'Didn\'t happen? Book another time';
+
+  @override
+  String get trialRebookBody => 'Pick a new time for the free trial.';
+
+  @override
+  String get trialNextPickSecond => 'Pick the second trial';
+
+  @override
+  String get trialNextPickRebook => 'Pick a new time';
+
+  @override
+  String trialNextLeadSecond(String teacher, String zone) {
+    return 'With a teacher other than $teacher. Times are on $zone time, soonest first.';
+  }
+
+  @override
+  String get trialNextNoTimes => 'No free times in the next two weeks. Write to us under Help and we\'ll arrange one.';
+
+  @override
+  String get trialNextOpenHelp => 'Write to the academy';
+
+  @override
+  String get trialNextBookedTitle => 'It\'s booked';
+
+  @override
+  String get trialNextBookedSecond => 'Your second trial with another teacher is booked';
+
+  @override
+  String get trialNextBooked1 => 'A notification and a message bring the time and the link to join.';
+
+  @override
+  String get trialNextBooked2 => 'The lesson is under Lessons; join it from there when it\'s time.';
+
+  @override
+  String get trialNextBooked3 => 'After it, the teacher writes a new report, and you find it here.';
+
+  @override
+  String get trialNextTimeTaken => 'That time was just taken. Pick another from the times free now.';
+
+  @override
+  String get trialOpenLessons => 'Open Lessons';
+
+  @override
+  String get trialHomeReady => 'The trial report is ready';
+
+  @override
+  String trialHomeReadyBody(String subject, String teacher) {
+    return '$subject with $teacher: what they found and what they recommend.';
+  }
+
+  @override
+  String trialHomeRebook(String subject) {
+    return 'The $subject trial didn\'t take place';
+  }
+
+  @override
+  String get trialHomeRebookBody => 'Book another time whenever you like.';
+
+  @override
+  String trialHomeSecond(String subject) {
+    return 'Try another teacher for $subject';
+  }
 }

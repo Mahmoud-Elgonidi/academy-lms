@@ -29,6 +29,7 @@ import '../../features/mushaf/data/mushaf_repository.dart';
 import '../../features/safeguarding/data/safeguarding_repository.dart';
 import '../../features/support/data/support_repository.dart';
 import '../../features/teaching/data/teaching_repository.dart';
+import '../../features/trial/data/trial_reports_repository.dart';
 import '../../features/trial/data/trial_repository.dart';
 
 /// The repositories every screen reads from, over one API client.
@@ -59,8 +60,9 @@ class Services {
       safeguarding = SafeguardingRepository(api),
       messages = MessagesRepository(api),
       trial = TrialRepository(api),
+      trialReports = TrialReportsRepository(api),
       live = Live(source: LiveRepository(api), apiBaseUrl: api.dio.options.baseUrl) {
-    home = HomeLoader(lessons: lessons, billing: billing, learning: learning, homework: homework, journey: journey);
+    home = HomeLoader(lessons: lessons, billing: billing, learning: learning, homework: homework, journey: journey, trials: trialReports);
   }
 
   final ApiClient api;
@@ -100,6 +102,9 @@ class Services {
   /// A free trial asked for or booked before signing in.
   final TrialRepository trial;
 
+  /// A signed-in family's free trials: their reports, the offer and one more trial.
+  final TrialReportsRepository trialReports;
+
   /// The person's own signals while the app is open (screens reload on them).
   final Live live;
   late final HomeLoader home;
@@ -119,6 +124,7 @@ class Services {
       RepositoryProvider.value(value: safeguarding),
       RepositoryProvider.value(value: messages),
       RepositoryProvider.value(value: trial),
+      RepositoryProvider.value(value: trialReports),
       RepositoryProvider.value(value: learning),
       RepositoryProvider.value(value: homework),
       RepositoryProvider.value(value: classroom),

@@ -5523,4 +5523,394 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get trialDone => 'تم';
+
+  @override
+  String get trialsTitle => 'الحصص التجريبية';
+
+  @override
+  String get trialsKidsTitle => 'حصصي التجريبية';
+
+  @override
+  String get trialsRowHint => 'تقارير المعلّمين وما يقترحونه';
+
+  @override
+  String trialsLead(String name) {
+    return 'حصص $name التجريبية المجانية وتقارير المعلّمين عنها.';
+  }
+
+  @override
+  String get trialsLeadSelf => 'حصصك التجريبية المجانية وتقارير المعلّمين عنها.';
+
+  @override
+  String get trialsEmptyTitle => 'لا توجد حصص تجريبية';
+
+  @override
+  String get trialsEmptyBody => 'بعد كل حصة تجريبية يكتب المعلّم تقريرًا عمّا وجده وما يقترحه، وتجده هنا.';
+
+  @override
+  String get trialStateBooked => 'قادمة';
+
+  @override
+  String get trialStateReady => 'التقرير جاهز';
+
+  @override
+  String get trialStateWriting => 'التقرير قيد الكتابة';
+
+  @override
+  String get trialStateStudentAbsent => 'لم يحضرها الطالب';
+
+  @override
+  String get trialStateTeacherAbsent => 'تغيّب المعلّم';
+
+  @override
+  String get trialStateCancelledFamily => 'ألغيتموها';
+
+  @override
+  String get trialStateCancelledAcademy => 'ألغتها الأكاديمية';
+
+  @override
+  String get trialStateMissed => 'لم تتم';
+
+  @override
+  String get trialKindSecond => 'الحصة الثانية مع معلّم آخر';
+
+  @override
+  String get trialKindRebook => 'موعد جديد';
+
+  @override
+  String get trialNotCounted => 'لا تُحسب من حصتكم التجريبية المجانية.';
+
+  @override
+  String get trialWritingNote => 'يكتب المعلّم التقرير الآن، ويصلكم إشعار حين يجهز.';
+
+  @override
+  String get trialBookedNote => 'تجدونها في «الحصص» وتدخلونها من هناك في موعدها.';
+
+  @override
+  String get trialReadReport => 'اقرأ التقرير';
+
+  @override
+  String get trialBookAgain => 'احجز موعدًا آخر';
+
+  @override
+  String get trialTryAnother => 'جرّب معلّمًا آخر مجانًا';
+
+  @override
+  String get trialReportTitle => 'تقرير الحصة التجريبية';
+
+  @override
+  String get trialReportKidsTitle => 'ماذا قال معلّمك؟ ⭐';
+
+  @override
+  String get trialReportSecond => 'الحصة التجريبية الثانية';
+
+  @override
+  String trialReportFor(String subject, String name) {
+    return '$subject · $name';
+  }
+
+  @override
+  String get trialReportTeacher => 'المعلّم';
+
+  @override
+  String get trialReportLevel => 'المستوى الذي وجده المعلّم';
+
+  @override
+  String get trialReportLevelKids => 'مستواك الآن 🌱';
+
+  @override
+  String get trialReportStrengths => 'نقاط القوة';
+
+  @override
+  String get trialReportStrengthsKids => 'ما تُحسنه 💪';
+
+  @override
+  String get trialReportToWorkOn => 'ما نعمل عليه';
+
+  @override
+  String get trialReportToWorkOnKids => 'ما سنتعلّمه معًا 🎯';
+
+  @override
+  String get trialReportNote => 'كلمة المعلّم';
+
+  @override
+  String get trialReportNoteKids => 'رسالة من معلّمك 💌';
+
+  @override
+  String get trialReportNotReadyTitle => 'التقرير لم يجهز بعد';
+
+  @override
+  String get trialReportNotReadyBody =>
+      'يكتب المعلّم تقرير الحصة التجريبية، ويصلكم إشعار حين يجهز. تجدون حصصكم التجريبية كلها في «الحصص التجريبية».';
+
+  @override
+  String get trialReportAllTrials => 'كل الحصص التجريبية';
+
+  @override
+  String get trialPlanTitle => 'ما يقترحه المعلّم';
+
+  @override
+  String trialPlanPerWeek(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n حصة', few: '$n حصص', two: 'حصتان', one: 'حصة واحدة');
+    return '$_temp0 في الأسبوع';
+  }
+
+  @override
+  String trialPlanLength(String minutes) {
+    return 'الحصة $minutes';
+  }
+
+  @override
+  String get trialPlanPrivate => 'حصص فردية';
+
+  @override
+  String get trialPlanGroup => 'حصص جماعية';
+
+  @override
+  String trialPlanBlock(String lessons, String days) {
+    return '$lessons خلال $days';
+  }
+
+  @override
+  String trialDaysCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n يومًا', few: '$n أيام', two: 'يومين', one: 'يوم واحد');
+    return '$_temp0';
+  }
+
+  @override
+  String trialPlanOnlyPerWeek(String perWeek) {
+    return 'يقترح المعلّم $perWeek.';
+  }
+
+  @override
+  String get trialPlanWithdrawn => 'لم تعد الأكاديمية تقدّم الباقة التي اقترحها المعلّم، وسيساعدكم فريقها في اختيار باقة مناسبة.';
+
+  @override
+  String get trialPrice => 'سعر الباقة';
+
+  @override
+  String trialPriceFor(String lessons) {
+    return 'لكل $lessons';
+  }
+
+  @override
+  String trialPriceRegion(String region) {
+    return 'بأسعار $region';
+  }
+
+  @override
+  String get trialNoPrice => 'يخبركم فريق الأكاديمية بالسعر حين تتواصلون معه.';
+
+  @override
+  String trialOfferTitle(String percent) {
+    return 'خصم $percent٪ لكم';
+  }
+
+  @override
+  String trialOfferLead(String label) {
+    return 'على أول دفعة من أي باقة، حتى $label.';
+  }
+
+  @override
+  String get trialOfferLeft => 'يبقى على انتهاء العرض';
+
+  @override
+  String get trialOfferDays => 'أيام';
+
+  @override
+  String get trialOfferHours => 'ساعات';
+
+  @override
+  String get trialOfferMinutes => 'دقائق';
+
+  @override
+  String get trialOfferSeconds => 'ثوانٍ';
+
+  @override
+  String trialOfferLeftSpoken(String days, String hours, String minutes) {
+    return 'يبقى $days و$hours و$minutes';
+  }
+
+  @override
+  String get trialOfferWith => 'بعد الخصم';
+
+  @override
+  String trialOfferInstead(String price) {
+    return 'بدلًا من $price';
+  }
+
+  @override
+  String trialOfferSaving(String amount) {
+    return 'توفّرون $amount';
+  }
+
+  @override
+  String get trialOfferNoPrice => 'يُطبَّق الخصم على أول فاتورة من أي باقة تختارونها.';
+
+  @override
+  String get trialOfferFamilyBigger => 'خصم الإخوة لديكم أكبر من هذا العرض، فيُطبَّق هو بدلًا منه، فالخصمان لا يجتمعان.';
+
+  @override
+  String get trialOfferEnded => 'انتهى وقت العرض، وهذا سعر الباقة اليوم.';
+
+  @override
+  String get trialOfferEndedNoPrice => 'انتهى وقت العرض.';
+
+  @override
+  String get trialOfferUsed => 'استخدمتم العرض على أول فاتورة.';
+
+  @override
+  String trialStarted(String subject) {
+    return 'بدأت الدراسة في $subject. نتمنّى لكم التوفيق.';
+  }
+
+  @override
+  String trialStartedKids(String subject) {
+    return 'بدأت دروسك في $subject! 🎉';
+  }
+
+  @override
+  String get trialCourseWaiting => 'الدورة بانتظار الدفع، وتجدون الفاتورة في «المدفوعات».';
+
+  @override
+  String get trialCourseActive => 'الدورة جارية، وتجدون حصصها في «الحصص».';
+
+  @override
+  String get trialCoursePaused => 'الدورة متوقفة مؤقتًا.';
+
+  @override
+  String get trialOpenMoney => 'افتح المدفوعات';
+
+  @override
+  String get trialStartPlan => 'ابدأ بهذه الباقة';
+
+  @override
+  String get trialStartAsk => 'اطلب باقة مناسبة';
+
+  @override
+  String get trialStartFollow => 'تابع طلبك';
+
+  @override
+  String get trialStartTitle => 'نبدأ معكم';
+
+  @override
+  String get trialStartLead =>
+      'التسجيل والدفع من التطبيق قادمان قريبًا. أرسلوا طلبكم الآن إلى الأكاديمية، فيرتّب فريقها الدورة ويرسل إليكم الفاتورة، ويصلكم رده في «المساعدة».';
+
+  @override
+  String get trialStartOfferNote => 'يطبّق الفريق خصم العرض على أول فاتورة إن سجّلكم قبل انتهائه، فأرسلوا مبكرًا.';
+
+  @override
+  String get trialStartWhat => 'ما سنرسله';
+
+  @override
+  String trialStartSubject(String plan, String name) {
+    return 'البدء بباقة $plan لـ$name';
+  }
+
+  @override
+  String trialStartSubjectAny(String subject, String name) {
+    return 'البدء في $subject لـ$name';
+  }
+
+  @override
+  String trialStartBody(String subject, String plan) {
+    return 'نودّ أن نبدأ في $subject بباقة $plan كما اقترح المعلّم بعد الحصة التجريبية.';
+  }
+
+  @override
+  String trialStartBodyAny(String subject) {
+    return 'نودّ أن نبدأ الدراسة في $subject بعد الحصة التجريبية، ونرجو مساعدتنا في اختيار الباقة.';
+  }
+
+  @override
+  String get trialStartNote => 'هل تريدون إضافة شيء؟ الأيام والأوقات المناسبة مثلًا';
+
+  @override
+  String get trialStartSend => 'أرسل إلى الأكاديمية';
+
+  @override
+  String get trialStartSent => 'وصل طلبكم إلى الأكاديمية';
+
+  @override
+  String get trialStartNoHelp => 'تواصلوا مع الأكاديمية بطرقها المعتادة لتبدؤوا بهذه الباقة.';
+
+  @override
+  String get trialSecondTitle => 'لم يناسبكم المعلّم؟';
+
+  @override
+  String trialSecondBody(String label) {
+    return 'جرّبوا حصة تجريبية ثانية مجانية مع معلّم آخر، حتى $label.';
+  }
+
+  @override
+  String get trialSecondBodyNoDate => 'جرّبوا حصة تجريبية ثانية مجانية مع معلّم آخر.';
+
+  @override
+  String get trialSecondPick => 'اختر موعدًا مع معلّم آخر';
+
+  @override
+  String get trialRebookTitle => 'لم تتم الحصة؟ احجزوا موعدًا آخر';
+
+  @override
+  String get trialRebookBody => 'اختاروا موعدًا جديدًا للحصة التجريبية المجانية.';
+
+  @override
+  String get trialNextPickSecond => 'اختر موعد الحصة الثانية';
+
+  @override
+  String get trialNextPickRebook => 'اختر موعدًا جديدًا';
+
+  @override
+  String trialNextLeadSecond(String teacher, String zone) {
+    return 'مع معلّم آخر غير $teacher. المواعيد بتوقيت $zone، والأقرب أولًا.';
+  }
+
+  @override
+  String get trialNextNoTimes => 'لا توجد مواعيد متاحة خلال الأسبوعين القادمين. اكتبوا إلينا في «المساعدة» وسنرتّب لكم موعدًا.';
+
+  @override
+  String get trialNextOpenHelp => 'اكتب إلى الأكاديمية';
+
+  @override
+  String get trialNextBookedTitle => 'حُجزت الحصة';
+
+  @override
+  String get trialNextBookedSecond => 'حُجزت الحصة الثانية مع معلّم آخر';
+
+  @override
+  String get trialNextBooked1 => 'يصلكم إشعار ورسالة فيهما الموعد ورابط دخول الحصة.';
+
+  @override
+  String get trialNextBooked2 => 'تجدون الحصة في «الحصص»، وتدخلونها من هناك في موعدها.';
+
+  @override
+  String get trialNextBooked3 => 'بعد الحصة يكتب المعلّم تقريرًا جديدًا، وتجدونه هنا.';
+
+  @override
+  String get trialNextTimeTaken => 'حُجز هذا الموعد للتو. اختر موعدًا آخر من المواعيد المتاحة الآن.';
+
+  @override
+  String get trialOpenLessons => 'افتح الحصص';
+
+  @override
+  String get trialHomeReady => 'تقرير الحصة التجريبية جاهز';
+
+  @override
+  String trialHomeReadyBody(String subject, String teacher) {
+    return '$subject مع $teacher: ما وجده المعلّم وما يقترحه.';
+  }
+
+  @override
+  String trialHomeRebook(String subject) {
+    return 'لم تتم الحصة التجريبية في $subject';
+  }
+
+  @override
+  String get trialHomeRebookBody => 'احجزوا موعدًا آخر متى شئتم.';
+
+  @override
+  String trialHomeSecond(String subject) {
+    return 'جرّبوا معلّمًا آخر في $subject';
+  }
 }

@@ -15,6 +15,7 @@ import '../../../consent/presentation/privacy_page.dart';
 import '../../../homework/domain/homework.dart';
 import '../../../journey/presentation/widgets/home_card.dart';
 import '../../../roadmap/domain/learning.dart';
+import '../../../trial/presentation/reports/trials_page.dart';
 import '../../data/home_loader.dart';
 import '../bloc/learner_cubit.dart';
 import '../widgets/family_header.dart';
@@ -86,9 +87,12 @@ class _Home extends StatelessWidget {
       children: staggered(context, [
         // A guardian's child waiting for their consent to sign in.
         if (context.read<SessionCubit>().state.current?.isGuardian ?? false) const ConsentNudge(),
+        // Fresh from a free trial with no lesson ahead: its report (or one more trial) comes first.
+        if (home.trial != null && home.next == null) ...[TrialHomeCard(trial: home.trial!), const Gap(Space.m)],
         NextLessonCard(lesson: home.next),
         const Gap(Space.m),
         _Numbers(home: home, name: name, self: self),
+        if (home.trial != null && home.next != null) ...[const Gap(Space.m), TrialHomeCard(trial: home.trial!)],
         for (final n in home.lessons.notices) ...[const Gap(Space.m), Note(n, icon: Icons.event_note_rounded)],
         SectionHeader(self ? l.navJourney : l.journeyTitle(name), action: l.openJourney, onAction: () => context.go('/family/journey')),
         JourneyHomeCard(name: name, to: '/family/journey', map: home.journey, self: self),

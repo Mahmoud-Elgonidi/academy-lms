@@ -10,6 +10,7 @@ import '../../../auth/presentation/pages/accounts_page.dart';
 import '../../../consent/presentation/privacy_page.dart';
 import '../../../dashboard/presentation/bloc/learner_cubit.dart';
 import '../../../dashboard/presentation/widgets/family_header.dart';
+import '../../../trial/presentation/reports/trials_page.dart';
 import '../widgets/more_rows.dart';
 import 'account_page.dart';
 
@@ -46,6 +47,14 @@ class FamilyMorePage extends StatelessWidget {
                       title: l.moreChildren,
                       children: [
                         MenuRow(
+                          key: const Key('open-trials'),
+                          icon: Icons.school_outlined,
+                          tone: Tone.info,
+                          label: l.trialsTitle,
+                          subtitle: l.trialsRowHint,
+                          onTap: () => context.go(trialsBase('/family')),
+                        ),
+                        MenuRow(
                           key: const Key('open-privacy'),
                           icon: Icons.verified_user_outlined,
                           label: l.privacyTitle,
@@ -80,7 +89,17 @@ class FamilyMorePage extends StatelessWidget {
                   MenuGroup(
                     title: l.moreMine,
                     children: [
-                      // An adult student's own recordings are theirs to see too.
+                      // An adult student's own trials and recordings are theirs to see too.
+                      if (!guardian) ...[
+                        MenuRow(
+                          key: const Key('open-trials'),
+                          icon: Icons.school_outlined,
+                          tone: Tone.info,
+                          label: l.trialsTitle,
+                          subtitle: l.trialsRowHint,
+                          onTap: () => context.go(trialsBase('/family')),
+                        ),
+                      ],
                       if (!guardian)
                         MenuRow(
                           key: const Key('open-recordings'),
