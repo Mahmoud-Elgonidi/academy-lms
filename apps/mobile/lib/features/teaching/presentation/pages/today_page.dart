@@ -87,7 +87,7 @@ class _Day extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       children: staggered(context, [
         if (next != null)
-          NextLessonCard(lesson: next)
+          NextLessonCard(lesson: next, quran: true)
         else if (lessons.isEmpty)
           EmptyState(
             icon: Icons.wb_sunny_outlined,

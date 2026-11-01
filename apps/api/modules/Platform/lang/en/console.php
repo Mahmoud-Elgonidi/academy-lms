@@ -116,4 +116,18 @@ return [
         'owner_locked' => 'This console account is locked; let it back in first (--reactivate).',
         'last_owner' => 'This is the last owner who can sign in; make someone else an owner first (platform:admin email --owner).',
     ],
+    'quran' => [
+        'nav' => 'Quran',
+        'title' => 'The Quran',
+        'subtitle' => 'The platform\'s copy of the Quran\'s text, and the academies whose plan has the Quran.',
+        'tiles' => ['on' => 'Academies with the Quran', 'off' => 'Academies without it'],
+        'ready' => 'Ready',
+        'missing' => 'Not fetched',
+        'owners' => 'Only the platform\'s owners fetch it.',
+        'academies' => 'Academies with the Quran',
+        'academies_hint' => 'By their plan, set for them alone, or on no plan (which has everything). Changed from Plans or the academy\'s page.',
+        'plans' => 'Plans',
+        'none' => 'No academy has the Quran now.',
+        'how' => ['plan' => 'Plan :plan', 'academy' => 'Set for this academy', 'no_plan' => 'No plan'],
+    ],
 ];

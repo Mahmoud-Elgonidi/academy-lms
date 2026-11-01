@@ -5,6 +5,7 @@ namespace Modules\Quran\Providers;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Learning\Contracts\Events\HomeworkSubmitted;
@@ -22,7 +23,11 @@ use Modules\Quran\Events\CertificateIssued;
 use Modules\Quran\Events\ExamBooked;
 use Modules\Quran\Events\ExamDecided;
 use Modules\Quran\Events\ExamSuggested;
-use Modules\Quran\Filament\Pages\HifzOverview;
+use Modules\Quran\Filament\Family\FamilyHifz;
+use Modules\Quran\Filament\Pages\QuranCertificates;
+use Modules\Quran\Filament\Pages\QuranExamResult;
+use Modules\Quran\Filament\Pages\QuranExams;
+use Modules\Quran\Filament\Teacher\QuranLessons as TeacherQuranLessons;
 use Modules\Quran\Hifz\HifzFromLessons;
 use Modules\Quran\Listeners\QueueRecitationCheck;
 use Modules\Quran\Listeners\SendQuranNotifications;
@@ -30,13 +35,16 @@ use Modules\Quran\Live\HifzChanged;
 use Modules\Quran\Live\LessonMushafChanged;
 use Modules\Quran\Live\MushafChanged;
 use Modules\Quran\Models\QuranCertificate;
+use Modules\Quran\Models\QuranExam;
 use Modules\Quran\Privacy\QuranData;
 use Modules\Quran\QuranService;
+use Modules\Quran\Setup\QuranStep;
 use Modules\Quran\Texts\QuranFiles;
 use Modules\Quran\Texts\QuranText;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Quran\LessonQuran;
 use Modules\SharedKernel\Realtime\LiveSignals;
+use Modules\SharedKernel\Setup\SetupChecklist;
 use Modules\SharedKernel\Text\QuranSource;
 
 /**
@@ -78,6 +86,8 @@ final class QuranServiceProvider extends ServiceProvider
     {
         // The hifz map, the mistakes notebook and the checks of recited homework, for a learner's copy and erasure.
         $this->app->make(PersonalData::class)->add(QuranData::class);
+        // "Start here": a Quran subject and a program, while the plan has the Quran.
+        $this->app->make(SetupChecklist::class)->add(QuranStep::class);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../../lang', 'quran');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'quran');
@@ -99,8 +109,28 @@ final class QuranServiceProvider extends ServiceProvider
         Event::listen(ExamDecided::class, [SendQuranNotifications::class, 'decided']);
         Event::listen(CertificateIssued::class, [SendQuranNotifications::class, 'issued']);
         $links = $this->app->make(NotificationLinks::class);
-        $links->register('quran_exam', fn (array $a, string $panel) => $panel === 'academy' && HifzOverview::canAccess() ? HifzOverview::getUrl(panel: 'academy') : null);
-        $links->register('quran_certificate', fn (array $a, string $panel) => null);
+        // In the panels: the exam on Quran › Exams (its tab), the examiner's result page, the family's Quran page.
+        $links->register('quran_exam', function (array $a, string $panel): ?string {
+            $exam = isset($a['id']) && Str::isUuid((string) $a['id']) ? QuranExam::query()->find($a['id']) : null;
+
+            return match ($panel) {
+                'academy' => $exam !== null && $exam->examiner_id === auth()->id() && $exam->status === 'booked' && QuranExamResult::canAccess()
+                    ? QuranExamResult::getUrl(['exam' => $exam->id], panel: 'academy')
+                    : (QuranExams::canAccess() ? QuranExams::getUrl(['tab' => match ($exam?->status) {
+                        'booked' => 'booked', 'passed', 'failed' => 'results', default => 'suggested',
+                    }], panel: 'academy') : null),
+                'teach' => $exam !== null && $exam->examiner_id === auth()->id() && $exam->status === 'booked' && QuranExamResult::canAccess()
+                    ? QuranExamResult::getUrl(['exam' => $exam->id], panel: 'teach')
+                    : (TeacherQuranLessons::canAccess() ? TeacherQuranLessons::getUrl(panel: 'teach') : null),
+                'family' => FamilyHifz::canAccess() ? FamilyHifz::getUrl(panel: 'family') : null,
+                default => null,
+            };
+        });
+        $links->register('quran_certificate', fn (array $a, string $panel) => match ($panel) {
+            'academy' => QuranCertificates::canAccess() ? QuranCertificates::getUrl(panel: 'academy') : null,
+            'family' => FamilyHifz::canAccess() ? FamilyHifz::getUrl(panel: 'family') : null,
+            default => null,
+        });
         $links->registerPersonal('quran_certificate', function (array $action, string $userId): ?string {
             $certificate = isset($action['id']) ? QuranCertificate::query()->find($action['id']) : null;
 

@@ -74,6 +74,7 @@ Future<void> openTeacherLesson(BuildContext context, Lesson lesson, {required Fu
     lesson,
     zone: zone.me?.displayTimezone ?? zone.timezone,
     actions: LessonActions(
+      quran: true,
       dispute: teacherDispute(context, lesson, reload),
       report: reportId == null || lesson.ahead
           ? null

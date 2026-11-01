@@ -289,7 +289,7 @@ it('lets the academy choose how many pages the daily review holds', function () 
 
     Livewire::test(QuranSettingsPage::class)->assertSee(__('quran::hifz.settings.daily'))->assertSet('data.hifz_daily_pages', 3)
         ->set('data.hifz_daily_pages', 0)->call('save')->assertHasErrors('data.hifz_daily_pages')
-        ->set('data.hifz_daily_pages', 5)->call('save')->assertHasNoErrors()->assertNotified(__('quran::hifz.settings.saved'));
+        ->set('data.hifz_daily_pages', 5)->call('save')->assertHasNoErrors()->assertNotified(__('quran::screens.settings.saved'));
     expect(QuranSettings::current()->hifz_daily_pages)->toBe(5)
         ->and(DB::table('audit_logs')->where('action', 'quran.daily_pages_saved')->sole()->data)->toContain('"pages": 5');
 

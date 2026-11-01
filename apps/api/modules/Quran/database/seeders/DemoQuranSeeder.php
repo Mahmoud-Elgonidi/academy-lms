@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Catalog\Actions\SaveSubject;
 use Modules\Quran\Actions\Passages\SetLessonPassage;
+use Modules\Quran\Actions\Programs\SaveQuranProgram;
 use Modules\Quran\Contracts\DTOs\VerseRange;
 use Modules\Quran\Models\LessonPassage;
+use Modules\Quran\Models\QuranProgram;
 use Modules\Quran\Support\QuranArea;
 use Modules\Quran\Texts\QuranText;
 
@@ -37,7 +39,7 @@ final class DemoQuranSeeder extends Seeder
         'التكاثر والقارعة' => [102, 8],
     ];
 
-    public function run(SaveSubject $subjects, SetLessonPassage $passages, QuranText $quran, QuranArea $area): void
+    public function run(SaveSubject $subjects, SetLessonPassage $passages, QuranText $quran, QuranArea $area, SaveQuranProgram $programs): void
     {
         // A demo whose plan leaves the Quran out stays without it (DemoQuranAreaSeeder gives the demo's plan the area).
         if (! $area->on()) {
@@ -50,6 +52,19 @@ final class DemoQuranSeeder extends Seeder
                     DB::table('subject_levels')->where('subject_id', $subject->id)->orderBy('ordinal')->get(['id', 'name_ar', 'name_en'])->map(fn ($l) => (array) $l)->all(),
                     DB::table('subject_categories')->where('subject_id', $subject->id)->orderBy('ordinal')->get(['id', 'name_ar', 'name_en'])->map(fn ($c) => (array) $c)->all(),
                     'quran', $track);
+            }
+        }
+
+        // A program, so the academy's "Start here" has its Quran step done (Juz Amma once the platform has the text,
+        // else the Noorani Qaida, which needs none). The demo's programs and plans are DemoQuranPlansSeeder's.
+        if (! QuranProgram::query()->exists()) {
+            // Under its Arabic name, the demo's language.
+            $preset = fn (string $key) => $programs->fromPreset($key, trans('quran::programs.presets.'.$key.'.name', [], 'ar'));
+            try {
+                $preset($quran->available() ? 'juz_amma_talqin' : 'noorani');
+            } catch (ValidationException) {
+                // A copy without Juz Amma's surahs (a test's): the Noorani Qaida instead.
+                $preset('noorani');
             }
         }
 

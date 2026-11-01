@@ -13,14 +13,14 @@ function useActive() {
   return (item: NavItem) => isAt(item, path);
 }
 
-export function SideNav({ stage, money, guardian = false, unread, chats }: { stage: Stage; money: boolean; guardian?: boolean; unread: number; chats: number }) {
+export function SideNav({ stage, money, guardian = false, quran = false, unread, chats }: { stage: Stage; money: boolean; guardian?: boolean; quran?: boolean; unread: number; chats: number }) {
   const t = useTranslations(`nav.${stage}`);
   const common = useTranslations('common');
   const active = useActive();
   return (
     <nav aria-label={t('menu')}>
       <ul className="space-y-0.5">
-        {itemsOf(stage, money, guardian).all.map((item) => (
+        {itemsOf(stage, money, guardian, quran).all.map((item) => (
           <li key={item.href}>
             <Link
               href={item.href}

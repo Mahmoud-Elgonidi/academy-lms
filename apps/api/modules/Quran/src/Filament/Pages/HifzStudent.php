@@ -3,12 +3,16 @@
 namespace Modules\Quran\Filament\Pages;
 
 use Carbon\CarbonImmutable;
+use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\Quran\Filament\Concerns\PlanActions;
+use Modules\Quran\Filament\Concerns\QuranMenu;
+use Modules\Quran\Queries\Board\QuranCourses;
 use Modules\Quran\Queries\Hifz\HifzMap;
 use Modules\Quran\Queries\Hifz\StudentHifz;
 use Modules\SharedKernel\Authorization\Ability;
@@ -17,6 +21,9 @@ use Modules\SharedKernel\Time\ViewerTimezone;
 /** One student's hifz for the academy's supervisors: the map, the last two weeks' reviews and the mistakes notebook (read only). */
 final class HifzStudent extends Page
 {
+    use PlanActions;
+    use QuranMenu;
+
     protected string $view = 'quran::filament.hifz.student';
 
     protected static ?string $slug = 'hifz/{enrollment}';
@@ -53,6 +60,29 @@ final class HifzStudent extends Page
             ->where('e.id', $this->enrollment)->first(['t.name', 's.name_ar', 's.name_en']);
 
         return $row === null ? null : (app()->getLocale() === 'ar' ? $row->name_ar : $row->name_en).' · '.$row->name;
+    }
+
+    /** @return array<string, mixed> the course's Quran plan */
+    #[Computed]
+    public function quran(): array
+    {
+        return app(QuranCourses::class)->course($this->enrollment, $this->studentId, CarbonImmutable::now());
+    }
+
+    protected function refreshPlans(): void
+    {
+        unset($this->quran);
+    }
+
+    /** @return list<Action> the office starts the course's plan, or adjusts it */
+    protected function getHeaderActions(): array
+    {
+        $grouped = DB::table('group_members')->where('enrollment_id', $this->enrollment)->whereNull('left_on')->exists();
+
+        return [
+            $this->startPlan()->arguments(['enrollment' => $this->enrollment])->visible(fn () => $this->quran['plan'] === null && ! $grouped),
+            $this->adjustPlan(office: true)->arguments(['enrollment' => $this->enrollment])->visible(fn () => $this->quran['plan'] !== null),
+        ];
     }
 
     /** @return array<string, mixed> */

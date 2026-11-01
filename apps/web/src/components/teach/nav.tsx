@@ -15,6 +15,7 @@ export const TEACHING: Item[] = [
   { href: '/teach/reports', key: 'reports', icon: 'report' },
   { href: '/teach/marking', key: 'marking', icon: 'mark' },
   { href: '/teach/students', key: 'students', icon: 'people' },
+  { href: '/teach/exams', key: 'exams', icon: 'trophy' },
   { href: '/teach/messages', key: 'messages', icon: 'chat' },
   { href: '/teach/trials', key: 'trials', icon: 'spark' },
 ];

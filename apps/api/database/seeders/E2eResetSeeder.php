@@ -22,6 +22,12 @@ use Modules\Learning\Domain\Challenges\ChallengeCatalog;
 use Modules\Learning\Models\Homework;
 use Modules\Learning\Models\SessionReport;
 use Modules\Platform\Contracts\TenantDirectory;
+use Modules\Quran\Actions\Settings\SaveQuranSettings;
+use Modules\Quran\Domain\Certificates\CertificateNumber;
+use Modules\Quran\Models\QuranCertificate;
+use Modules\Quran\Models\QuranLessonResult;
+use Modules\Quran\Programs\Plans;
+use Modules\Quran\Support\QuranArea;
 use Modules\Scheduling\Actions\ApplyAttendanceDeadlines;
 use Modules\Scheduling\Actions\CancelUnpaidSessions;
 use Modules\Scheduling\Actions\FundSessions;
@@ -57,7 +63,8 @@ use RuntimeException;
  * opened, cheers, ratings, eggs hatched, rounds left open, their homework).
  * What the tests need (the homework's titles, the academy's own host) is
  * printed as one line, `E2E_FIXTURES {json}` (with `group`: the children's group, a lesson of it to excuse,
- * a report of it to write, and the family's sign-ins). What depends on the moment a
+ * a report of it to write, and the family's sign-ins; with `quran`: Yousef's Quran course, a lesson of it to record
+ * now, his family's sign-ins and his certificate, its code as printed). What depends on the moment a
  * test runs is done when it asks, through artisan tinker: a lesson to go
  * into now (`lessonNow`) and staff approving a receipt (`approveProof`).
  */
@@ -107,12 +114,13 @@ final class E2eResetSeeder extends Seeder
                 $this->lessonsAhead();
                 $this->practiceHomework();
                 $group = $this->group();
+                $quran = $this->quran();
             } finally {
                 CarbonImmutable::setTestNow();
                 AuditActor::forget();
             }
 
-            return ['homework' => ['hand_in' => self::HAND_IN, 'to_mark' => self::TO_MARK], 'group' => $group];
+            return ['homework' => ['hand_in' => self::HAND_IN, 'to_mark' => self::TO_MARK], 'group' => $group, 'quran' => $quran];
         });
         // Its own host ({slug}.{platform domain}), as a browser reaches it on a server (here perhaps without DNS).
         $port = parse_url((string) config('app.url'), PHP_URL_PORT);
@@ -476,6 +484,64 @@ final class E2eResetSeeder extends Seeder
             'guardian' => 'lina.guardian@demo.test',
             'student' => 'lina@demo.test',
             'teacher' => $email($group->teacher_id),
+        ];
+    }
+
+    /**
+     * Yousef's Quran course (DemoQuranPlansSeeder: Juz Amma with Nour, his certificate for the first surah he was
+     * examined on), as the Quran tests need it: the academy holds exams and shows certificates to families, and a
+     * lesson of the course to record now (from the room's opening, ten minutes before its start, as
+     * RecordQuranLesson allows; a lesson held may still be recorded): one of today's not yet recorded, else one booked
+     * now when Nour and Yousef are both free, else earlier today (the demo's live board has them together now). Null on a demo without the Quran (its area, its text or the plan).
+     *
+     * @return ?array{teacher: string, guardian: string, student: string, lesson_id: string, enrollment_id: string, certificate_code: ?string, certificate_number: ?string}
+     */
+    private function quran(): ?array
+    {
+        $yousef = $this->ids['yousef'];
+        $course = DB::table('enrollments as e')->join('subjects as s', fn ($j) => $j->on('s.academy_id', '=', 'e.academy_id')->on('s.id', '=', 'e.subject_id'))
+            ->where('e.student_id', $yousef)->where('s.kind', 'quran')->orderBy('e.created_at')->first(['e.id', 'e.teacher_id', 'e.subject_id']);
+        if (! app(QuranArea::class)->on() || $course === null || app(Plans::class)->forEnrollment((string) $course->id) === null) {
+            return null;
+        }
+        app(SaveQuranSettings::class)->handle(['exams_enabled' => true, 'certificates_enabled' => true, 'certificates_family' => true]);
+
+        $recorded = QuranLessonResult::query()->select('session_id');
+        $today = collect(['Africa/Cairo', $this->zone($yousef)])->map(fn (string $zone) => $this->now->setTimezone($zone)->startOfDay()->utc())->max();
+        $lesson = Session::query()->where('enrollment_id', $course->id)->where('type', 'regular')->whereIn('status', ['scheduled', 'in_progress', 'completed'])
+            ->where('starts_at', '>=', $today)->where('starts_at', '<=', $this->now->addMinutes(10))
+            ->whereNotIn('id', $recorded)->orderByDesc('starts_at')->first();
+        if ($lesson === null) {
+            // Now, or a few minutes on; else earlier today, when one of them is in another lesson now (held or not, it may be recorded).
+            $starts = collect([...range(0, 10), ...range(-1, -5), ...range(-10, -600, 5)])->map(fn (int $m) => $this->now->addMinutes($m)->startOfMinute())->filter(fn ($at) => $at >= $today);
+            foreach ([30, 20] as $minutes) {
+                foreach ($starts as $at) {
+                    try {
+                        $lesson = app(ScheduleSession::class)->handle(new NewSession(
+                            teacherId: (string) $course->teacher_id, studentId: $yousef, subjectId: (string) $course->subject_id, startsAt: $at,
+                            durationMin: $minutes, anchorTimezone: 'Africa/Cairo', funding: 'unfunded', enrollmentId: (string) $course->id,
+                        ));
+                        break 2;
+                    } catch (ValidationException) {
+                        // One of them has a lesson then.
+                    }
+                }
+            }
+            if ($lesson === null) {
+                throw new RuntimeException('No Quran lesson could be booked now for Yousef: he or his teacher is busy.');
+            }
+            app(FundSessions::class)->handle((string) $course->id);
+        }
+        $certificate = QuranCertificate::query()->where('student_id', $yousef)->whereNull('revoked_at')->orderByDesc('issued_at')->first();
+
+        return [
+            'teacher' => (string) DB::table('users')->where('id', $course->teacher_id)->value('email'),
+            'guardian' => 'yousef.guardian@demo.test',
+            'student' => 'yousef@demo.test',
+            'lesson_id' => (string) $lesson->id,
+            'enrollment_id' => (string) $course->id,
+            'certificate_code' => $certificate === null ? null : CertificateNumber::display($certificate->code),
+            'certificate_number' => $certificate?->number,
         ];
     }
 

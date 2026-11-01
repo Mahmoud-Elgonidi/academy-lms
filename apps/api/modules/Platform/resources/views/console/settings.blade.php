@@ -10,13 +10,6 @@
             background: color-mix(in oklab, var(--gray-50) 88%, transparent); backdrop-filter: blur(6px); }
         .dark .ps-save { border-block-start-color: var(--gray-800); background: color-mix(in oklab, var(--gray-950) 88%, transparent); }
         .ps-save small { font-size: .8rem; color: var(--gray-500); }
-        .ps-quran { display: flex; flex-direction: column; gap: .8rem; }
-        .ps-quran-bar { display: flex; justify-content: flex-end; }
-        .ps-quran dl { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); gap: .6rem 1rem; }
-        .ps-quran dt { font-size: .75rem; color: var(--gray-500); }
-        .ps-quran dd { font-size: .88rem; overflow-wrap: anywhere; }
-        .ps-hash { font-family: ui-monospace, monospace; font-size: .75rem !important; }
-        .ps-missing { color: var(--warning-700) !important; font-size: .88rem; }
         .ps-trouble { padding: .9rem 1.1rem; display: flex; flex-direction: column; gap: .6rem; border-inline-start: 4px solid var(--danger-600); }
         .ps-trouble.is-warn { border-inline-start-color: var(--warning-500); }
         .ps-trouble h2 { font-weight: 600; font-size: 1rem; display: flex; gap: .5rem; align-items: center; }

@@ -4572,4 +4572,270 @@ class AppLocalizationsEn extends AppLocalizations {
   String mistakesWordKids(String word) {
     return '$word: a word to practise';
   }
+
+  @override
+  String get quranTitle => 'Quran';
+
+  @override
+  String get quranTitleKids => 'My Quran';
+
+  @override
+  String quranTitleOf(String name) {
+    return '$name\'s Quran';
+  }
+
+  @override
+  String get quranCardLead => 'The plan, the review, exams and certificates';
+
+  @override
+  String get quranCardKids => 'My Quran journey ⭐';
+
+  @override
+  String get quranNone => 'No Quran plan yet.';
+
+  @override
+  String get quranParts => 'The thirty parts';
+
+  @override
+  String get quranPartsKids => 'Every part you learn lights up here ⭐';
+
+  @override
+  String quranJuzState(int n, String state) {
+    return 'Part $n: $state';
+  }
+
+  @override
+  String get quranJuzDone => 'memorized';
+
+  @override
+  String get quranJuzSome => 'started';
+
+  @override
+  String get quranJuzNone => 'not started';
+
+  @override
+  String get quranOpenHifz => 'Hifz map and mistakes notebook';
+
+  @override
+  String get quranOpenHifzKids => 'My hifz map and my words';
+
+  @override
+  String get quranWirdKids => 'Your review is waiting today 📖';
+
+  @override
+  String get quranPlanHeader => 'The plan';
+
+  @override
+  String get quranPlanHeaderKids => 'My way';
+
+  @override
+  String quranAt(String title) {
+    return 'Now at: $title';
+  }
+
+  @override
+  String quranAtKids(String title) {
+    return 'You reached $title ⭐';
+  }
+
+  @override
+  String quranProgress(int percent) {
+    return '$percent% of the plan done';
+  }
+
+  @override
+  String get quranFinished => 'The plan is complete';
+
+  @override
+  String get quranFinishedKids => 'You finished the plan! 🎉';
+
+  @override
+  String get quranWeek => 'This week\'s portion';
+
+  @override
+  String get quranWeekKids => 'What I\'ll read this week';
+
+  @override
+  String quranPages(String pages) {
+    return 'Pages $pages';
+  }
+
+  @override
+  String quranStops(String stops) {
+    return 'It reaches an exam: $stops';
+  }
+
+  @override
+  String get quranRecent => 'Recent lessons';
+
+  @override
+  String get quranRecentNone => 'No results yet.';
+
+  @override
+  String get quranAdvanced => 'Moved on';
+
+  @override
+  String get quranStays => 'Repeats the portion';
+
+  @override
+  String get quranExams => 'Exams';
+
+  @override
+  String get quranExamsKids => 'My exams';
+
+  @override
+  String get quranExamsNone => 'No exams yet.';
+
+  @override
+  String quranExamWith(String name) {
+    return 'With $name';
+  }
+
+  @override
+  String quranExamRetakeOn(String day) {
+    return 'Retake on $day';
+  }
+
+  @override
+  String quranExamNotBefore(String day) {
+    return 'Not booked before $day';
+  }
+
+  @override
+  String get quranCertificates => 'Certificates';
+
+  @override
+  String get quranCertificatesKids => 'My certificates';
+
+  @override
+  String quranCertificateCode(String code) {
+    return 'Verification code: $code';
+  }
+
+  @override
+  String get quranCertificateRevoked => 'Revoked';
+
+  @override
+  String get quranCertificateOpen => 'Open the certificate';
+
+  @override
+  String get quranLessonTitle => 'Quran lesson';
+
+  @override
+  String get quranLessonOpen => 'The lesson\'s portion';
+
+  @override
+  String get quranLessonNoPlan => 'This lesson has no Quran plan.';
+
+  @override
+  String get quranPartRecited => 'Recited';
+
+  @override
+  String get quranMistakes => 'Mistakes';
+
+  @override
+  String get quranMistakesHint => 'If you don\'t count mistakes here, the words marked in the mushaf are counted.';
+
+  @override
+  String quranMistakeLess(String kind) {
+    return 'One less $kind';
+  }
+
+  @override
+  String quranMistakeMore(String kind) {
+    return 'One more $kind';
+  }
+
+  @override
+  String get quranGrade => 'Grade';
+
+  @override
+  String get quranGradeAuto => 'From the mistakes';
+
+  @override
+  String get quranNote => 'Note';
+
+  @override
+  String get quranNoteHint => 'Why a grade other than the mistakes\' one?';
+
+  @override
+  String get quranNoteNeeded => 'Write a note on the grade you chose.';
+
+  @override
+  String get quranChooseParts => 'Choose what the student recited.';
+
+  @override
+  String get quranSubmit => 'Save the result';
+
+  @override
+  String get quranRecordedAdvanced => 'Saved; the student moves on to the next portion.';
+
+  @override
+  String get quranRecordedStays => 'Saved; the student repeats this portion.';
+
+  @override
+  String get quranAlreadyRecorded => 'This student\'s result for this lesson is saved.';
+
+  @override
+  String get quranStudent => 'Student';
+
+  @override
+  String get quranPace => 'Pace';
+
+  @override
+  String quranPaceLine(String amount, String unit, String near, String far) {
+    return 'New $amount $unit · near review $near · far $far';
+  }
+
+  @override
+  String quranPaceNew(String unit) {
+    return 'New each lesson ($unit)';
+  }
+
+  @override
+  String get quranPaceNear => 'Near review (portions)';
+
+  @override
+  String get quranPaceFar => 'Far review (pages)';
+
+  @override
+  String get quranPaceSave => 'Save the pace';
+
+  @override
+  String get quranPaceSaved => 'Pace saved.';
+
+  @override
+  String get quranPaceProgram => 'Back to the program\'s pace';
+
+  @override
+  String get quranExaminerTitle => 'Quran exams';
+
+  @override
+  String get quranExaminerBooked => 'Booked';
+
+  @override
+  String get quranExaminerNone => 'No exams booked with you.';
+
+  @override
+  String get quranExaminerRecent => 'Recent results';
+
+  @override
+  String get quranExamRecord => 'Record the exam\'s result';
+
+  @override
+  String get quranExamFailHint => 'If the student doesn\'t pass, write what to work on and choose the retake day.';
+
+  @override
+  String get quranExamNote => 'Words to the student';
+
+  @override
+  String get quranExamRetake => 'Retake day';
+
+  @override
+  String get quranExamRetakePick => 'Choose the day';
+
+  @override
+  String quranExamSaved(String status) {
+    return 'Result saved: $status';
+  }
 }

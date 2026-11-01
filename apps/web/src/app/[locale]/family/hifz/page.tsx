@@ -5,12 +5,14 @@ import { Icon } from '@/components/icons';
 import { RefreshOn } from '@/components/live-refresh';
 import { MistakesNotebook } from '@/components/mushaf/notebook';
 import { Badge, Card, Empty, Heading, SectionTitle, join } from '@/components/ui';
-import { get } from '@/lib/api/server';
+import { notFound } from 'next/navigation';
+import { QuranOff } from '@/components/quran/off';
 import { family } from '@/lib/family/context';
 import { firstName } from '@/lib/games/world';
 import { pageTitle, strengthTone, wirdStatus } from '@/lib/hifz/hifz';
 import type { Hifz } from '@/lib/hifz/types';
 import { familyNotebook } from '@/lib/mushaf/server';
+import { quranRead } from '@/lib/quran/server';
 
 /**
  * The hifz map of the learner on screen (GET learning/hifz): every page of
@@ -21,19 +23,24 @@ import { familyNotebook } from '@/lib/mushaf/server';
  * recited and then heard). Under it the mistakes notebook: the words
  * teachers marked in the lessons' shared mushaf ("كلمات نراجعها" in the
  * kids' look), following the words as they are marked. Nothing while the
- * platform has no Quran text.
+ * platform has no Quran text; a calm word while the academy's plan leaves
+ * the Quran out.
  */
 export default async function HifzMapPage() {
   const [t, m, fam, locale] = await Promise.all([getTranslations('hifz'), getTranslations('mushaf'), family(), getLocale()]);
   const learner = fam.current;
   if (!learner) return <Empty>{t('noLearner')}</Empty>;
-  const [nav, { data: hifz }, book] = await Promise.all([
+  const [nav, found, book] = await Promise.all([
     getTranslations(`nav.${fam.stage}`),
-    get<{ data: Hifz }>('/v1/learning/hifz', { query: { learner_id: learner.id } }),
+    quranRead<Hifz>('/v1/learning/hifz', { query: { learner_id: learner.id } }),
     familyNotebook(learner.id),
   ]);
   const kids = fam.stage === 'kids';
   const title = learner.is_self ? nav('hifz') : t('of', { name: `\u2068${firstName(learner.name)}\u2069` });
+  // The academy's plan leaves the Quran out: a calm word, never an error page.
+  if (found.state === 'off') return <QuranOff title={title} />;
+  if (found.state === 'missing') notFound();
+  const hifz = found.data;
   if (hifz.pages_total === 0) {
     return (
       <div>

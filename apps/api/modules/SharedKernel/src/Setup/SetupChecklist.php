@@ -25,10 +25,11 @@ final class SetupChecklist
         }
     }
 
-    /** @return list<SetupStep> by group (SetupGroup's order), then each one's order, then key */
+    /** @return list<SetupStep> those that apply now (ConditionalSetupStep), by group (SetupGroup's order), then each one's order, then key */
     public function steps(): array
     {
         $all = array_map(fn (string $class): SetupStep => $this->container->make($class), $this->steps);
+        $all = array_values(array_filter($all, fn (SetupStep $step) => ! $step instanceof ConditionalSetupStep || $step->applies()));
         usort($all, fn (SetupStep $a, SetupStep $b) => [$a->group()->rank(), $a->order(), $a->key()] <=> [$b->group()->rank(), $b->order(), $b->key()]);
 
         return $all;

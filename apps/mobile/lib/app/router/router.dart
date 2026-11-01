@@ -37,6 +37,9 @@ import '../../features/notifications/presentation/pages/choices_page.dart';
 import '../../features/notifications/presentation/pages/inbox_page.dart';
 import '../../features/notifications/presentation/pages/update_page.dart';
 import '../../features/onboarding/presentation/intro_page.dart';
+import '../../features/quran/presentation/examiner_page.dart';
+import '../../features/quran/presentation/lesson_page.dart';
+import '../../features/quran/presentation/quran_page.dart';
 import '../../features/onboarding/presentation/splash_page.dart';
 import '../../features/profile/presentation/pages/account_page.dart';
 import '../../features/profile/presentation/pages/family_more_page.dart';
@@ -95,13 +98,15 @@ GoRouter buildRouter(SessionCubit session) {
     routes: [page(':id', (s) => ConversationPage(conversationId: s.pathParameters['id']!))],
   );
 
-  // A look's journey with the creatures' album (an island's creatures, a creature just named) and the hifz map under it.
+  // A look's journey with the creatures' album (an island's creatures, a creature just named), the hifz map and the
+  // Quran (plans, exams, certificates) under it.
   GoRoute journey(String path, {List<RouteBase> routes = const []}) => page(
     path,
     (_) => const JourneyPage(),
     routes: [
       page('album', (s) => GamesAlbumPage(base: path, island: s.uri.queryParameters['island'], fresh: s.uri.queryParameters['new'])),
       page('hifz', (_) => const HifzPage()),
+      page('quran', (_) => QuranPage(base: path)),
       ...routes,
     ],
   );
@@ -200,6 +205,8 @@ GoRouter buildRouter(SessionCubit session) {
       // Reports tab lists them), marking homework, the hours.
       page('/teach/reports/:id', (s) => TeacherReportPage(reportId: s.pathParameters['id']!)),
       page('/teach/marking', (_) => const MarkingPage()),
+      // A Quran lesson's portion and record, from the lesson's sheet.
+      page('/teach/lessons/:id/quran', (s) => QuranLessonPage(lessonId: s.pathParameters['id']!)),
       page(
         '/teach/hours',
         (_) => const ShiftsPage(),
@@ -416,6 +423,7 @@ GoRouter buildRouter(SessionCubit session) {
               page('my-data', (_) => const MyDataPage(teacher: true)),
               page('concern', (_) => const TellUsPage(scope: ConcernScope.teacher)),
               page('documents', (_) => const DocumentsPage()),
+              page('quran-exams', (_) => const QuranExaminerPage()),
               help(HelpScope.teacher),
               messages(MessagesScope.teacher),
             ],

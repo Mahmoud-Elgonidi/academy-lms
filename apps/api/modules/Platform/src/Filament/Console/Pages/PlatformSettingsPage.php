@@ -19,7 +19,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -33,7 +32,6 @@ use Modules\Platform\Actions\SavePlatformSettings;
 use Modules\Platform\Ai\AiProvider;
 use Modules\Platform\Ai\ModelCatalog;
 use Modules\Platform\Ai\ModelList;
-use Modules\Platform\Console\PlatformAudit;
 use Modules\Platform\Health\OutsideServices;
 use Modules\Platform\Health\SystemHealth;
 use Modules\Platform\Models\PlatformAdmin;
@@ -45,8 +43,6 @@ use Modules\Platform\Settings\SettingCatalog;
 use Modules\Platform\Settings\SettingChecks;
 use Modules\Platform\Settings\SettingDefinition;
 use Modules\Platform\Settings\SettingValues;
-use Modules\SharedKernel\Text\QuranFetchFailed;
-use Modules\SharedKernel\Text\QuranSource;
 use Modules\SharedKernel\Time\Clock;
 use Modules\SharedKernel\Time\ViewerTimezone;
 
@@ -64,7 +60,6 @@ use Modules\SharedKernel\Time\ViewerTimezone;
  * "Try it" tries what is typed in its section before it is saved (else what
  * is in force) and its result stays under the section's title with how each
  * service answered lately; the services that need someone head the page.
- * Below, the Quran's text on the server, and fetching it from Tanzil.
  *
  * @property-read Schema $form
  */
@@ -94,7 +89,7 @@ final class PlatformSettingsPage extends Page
         'classroom' => ['icon' => 'heroicon-o-video-camera', 'cards' => ['classroom']],
         'payments' => ['icon' => 'heroicon-o-credit-card', 'cards' => ['stripe']],
         'signin' => ['icon' => 'heroicon-o-finger-print', 'cards' => ['social']],
-        'platform' => ['icon' => 'heroicon-o-building-office-2', 'cards' => ['platform', 'quran']],
+        'platform' => ['icon' => 'heroicon-o-building-office-2', 'cards' => ['platform']],
     ];
 
     /** The AI group, three ways: the academies' helpers, the games designer, and speech to text (Anthropic's key shows in one of the first two). */
@@ -166,9 +161,6 @@ final class PlatformSettingsPage extends Page
     {
         $words = self::words($card);
         $section = Section::make(__($words.'.title'))->id('ps-'.$card)->description(__($words.'.about'));
-        if ($card === 'quran') {
-            return $section->schema([View::make('platform::console.quran')]);
-        }
         $keys = self::CARD_SETTINGS[$card] ?? array_map(fn (SettingDefinition $s) => $s->key, SettingCatalog::inGroup($card));
 
         return $section
@@ -184,7 +176,6 @@ final class PlatformSettingsPage extends Page
     private static function words(string $card): string
     {
         return match (true) {
-            $card === 'quran' => 'platform::settings.quran',
             trans()->has("platform::settings.cards.{$card}") => "platform::settings.cards.{$card}",
             default => "platform::settings.groups.{$card}",
         };
@@ -455,40 +446,6 @@ final class PlatformSettingsPage extends Page
         unset($this->saved);
         $this->mount();
         Notification::make()->success()->title($changed === [] ? __('platform::settings.nothing_changed') : trans_choice('platform::settings.saved', count($changed), ['count' => count($changed)]))->send();
-    }
-
-    /** @return array{available: bool, where: ?string, notice: ?string, verses: ?int, text_sha256: ?string, data_sha256: ?string, fetched_at: ?string} */
-    #[Computed]
-    public function quran(): array
-    {
-        $status = app(QuranSource::class)->status();
-        if ($status['fetched_at'] !== null) {
-            $status['fetched_at'] = CarbonImmutable::parse($status['fetched_at'])->setTimezone(app(ViewerTimezone::class)->effective())
-                ->locale(app()->getLocale())->translatedFormat(Clock::pattern('j M Y، H:i'));
-        }
-
-        return $status;
-    }
-
-    /** Fetches Tanzil's files to the server again (checked whole before they replace the copy in use). */
-    public function fetchQuranAction(): Action
-    {
-        return Action::make('fetchQuran')->label(fn () => __($this->quran['available'] ? 'platform::settings.quran.fetch_again' : 'platform::settings.quran.fetch'))
-            ->icon('heroicon-m-arrow-down-tray')->color(fn () => $this->quran['available'] ? 'gray' : 'primary')
-            ->requiresConfirmation()->modalDescription(__('platform::settings.quran.confirm'))
-            ->action(function () {
-                abort_unless(self::canAccess(), 403);
-                try {
-                    $status = app(QuranSource::class)->fetch();
-                } catch (QuranFetchFailed $e) {
-                    Notification::make()->danger()->title(__('platform::settings.quran.failed'))->body($e->getMessage())->persistent()->send();
-
-                    return;
-                }
-                app(PlatformAudit::class)->record(null, 'platform.quran_fetched', 'platform_settings', null, ['verses' => $status['verses']]);
-                unset($this->quran);
-                Notification::make()->success()->title(__('platform::settings.quran.fetched'))->send();
-            });
     }
 
     public function check(string $group): void

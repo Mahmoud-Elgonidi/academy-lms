@@ -3,6 +3,7 @@
 import { refresh } from 'next/cache';
 import { send, type Outcome } from '@/lib/api/server';
 import type { MushafPage, MushafResult, WordRef } from '@/lib/mushaf/types';
+import type { PartKey, PartRecord } from '@/lib/quran/types';
 import type { StudentPayload } from '@/lib/teach/group-report';
 import type { ShiftBlock } from '@/lib/teach/types';
 import type { VoiceDraft } from '@/lib/teach/voice-draft';
@@ -35,6 +36,9 @@ export type ReportPayload = {
   /** A group lesson: a row per student in it (lib/teach/group-report), the rest above being the class's shared part. */
   students?: StudentPayload[];
 };
+
+/** One student's record of a Quran lesson: the parts they recited. */
+export type QuranStudentRecord = { student_id: string; parts: Partial<Record<PartKey, PartRecord>> };
 
 /** Sends (or corrects) a lesson report or absence note. */
 export async function submitReport(id: string, payload: ReportPayload): Promise<Result> {
@@ -191,4 +195,26 @@ export async function saveCard(form: FormData): Promise<Result> {
   const photo = form.get('photo');
   if (photo instanceof File && photo.size > 0) sent.set('photo', photo, photo.name || 'photo');
   return result(await send('post', '/v1/teacher/card', { form: sent }));
+}
+
+/*
+ * The Quran program (docs/architecture/02, section 26): recording what each
+ * student recited of a lesson's portion, a student's pace, and an exam's
+ * result. A record moves the plan (and an exam may earn a certificate), so
+ * each submit sends one idempotency key: a retry answers the first time.
+ */
+
+/** What each student recited of today's portion (POST quran/lessons/{session}/result); once per lesson and student. */
+export async function recordQuranLesson(session: string, students: QuranStudentRecord[], key: string): Promise<Result> {
+  return result(await send('post', '/v1/quran/lessons/{session}/result', { params: { session }, body: { students }, idempotencyKey: key }));
+}
+
+/** A student's own pace: the new amount a lesson, the near review (portions) and the far review (pages); null is the program's. */
+export async function saveQuranPace(enrollment: string, pace: { new_amount: number | null; near_portions: number | null; far_pages: number | null }): Promise<Result> {
+  return result(await send('patch', '/v1/quran/students/{enrollment}/plan', { params: { enrollment }, body: pace }));
+}
+
+/** An exam's result from its examiner: the mistakes by kind (else the lesson's mushaf marks), their own grade with a note, and a fail's retake day. */
+export async function recordQuranExam(exam: string, record: PartRecord & { retake_on: string | null }, key: string): Promise<Result> {
+  return result(await send('post', '/v1/quran/exams/{exam}/result', { params: { exam }, body: record, idempotencyKey: key }));
 }

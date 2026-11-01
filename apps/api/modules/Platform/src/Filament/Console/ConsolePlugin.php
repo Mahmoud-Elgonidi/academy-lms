@@ -20,12 +20,13 @@ use Modules\Platform\Filament\Console\Pages\GameStudio;
 use Modules\Platform\Filament\Console\Pages\Health;
 use Modules\Platform\Filament\Console\Pages\Plans;
 use Modules\Platform\Filament\Console\Pages\PlatformSettingsPage;
+use Modules\Platform\Filament\Console\Pages\QuranConsole;
 use Modules\Platform\Filament\Console\Pages\SignupRequests;
 use Modules\Platform\Filament\Console\Pages\SitePage;
 use Modules\Platform\Http\Controllers\GameDraftPageController;
 use Modules\SharedKernel\Filament\ZoneChip;
 
-/** The platform team's console: the academies, their use, plans and status, the plans on sale, the games studio, the audit log across them, the stack's health, and (owners) the platform's settings. */
+/** The platform team's console: the academies, their use, plans and status, the plans on sale, the games studio, the audit log across them, the stack's health, the Quran's text and who has it, and (owners) the platform's settings. */
 final class ConsolePlugin implements Plugin
 {
     public static function make(): self
@@ -40,7 +41,7 @@ final class ConsolePlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([Academies::class, AcademyOverview::class, Plans::class, GameStudio::class, GameDraftPage::class, GameEditor::class, AuditLog::class, Health::class, PlatformSettingsPage::class, SitePage::class, SignupRequests::class]);
+        $panel->pages([Academies::class, AcademyOverview::class, Plans::class, GameStudio::class, GameDraftPage::class, GameEditor::class, AuditLog::class, Health::class, PlatformSettingsPage::class, SitePage::class, SignupRequests::class, QuranConsole::class]);
         // A draft game's page for the studio's preview (sandboxed, never cached).
         $panel->authenticatedRoutes(fn () => Route::get('games/drafts/{draft}/page', GameDraftPageController::class)->name('games.draft-page'));
         // The console has no settings page: a zone chip hidden from its card comes back from the account menu.

@@ -81,6 +81,17 @@ describe('the journey', () => {
     expect(isAt(classic.find((i) => i.key === 'home')!, '/family/journey')).toBe(false);
   });
 
+  it('has the Quran’s page only while the academy’s plan has it, after messages and never as a tab', () => {
+    for (const stage of STAGES) {
+      expect(itemsOf(stage, seesMoney(stage)).all.some((i) => i.key === 'quran')).toBe(false);
+      const { all, tabs } = itemsOf(stage, seesMoney(stage), stage === 'classic', true);
+      const at = all.findIndex((i) => i.key === 'quran');
+      expect(at).toBe(all.findIndex((i) => i.key === 'messages') + 1);
+      expect(tabs.some((i) => i.key === 'quran')).toBe(false);
+      expect(isAt(all[at]!, '/family/hifz/12')).toBe(true);
+    }
+  });
+
   it('has no games, challenges or badges places any more', () => {
     for (const stage of STAGES) {
       const { all, tabs } = itemsOf(stage, seesMoney(stage), stage === 'classic');

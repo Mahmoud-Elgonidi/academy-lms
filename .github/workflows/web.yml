@@ -99,6 +99,8 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           php artisan migrate --database=pgsql_owner --force
+          # The Quran's text (Tanzil's files, checked), so the demo comes with its Quran program (quran.spec.ts).
+          php artisan quran:text --fetch
           php artisan db:seed --force
           # A few workers: a portal page asks the API for several things at once.
           PHP_CLI_SERVER_WORKERS=4 nohup php artisan serve --host=127.0.0.1 --port=8000 > ../../api-serve.log 2>&1 &

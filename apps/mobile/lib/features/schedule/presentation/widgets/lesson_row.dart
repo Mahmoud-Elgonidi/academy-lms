@@ -7,12 +7,13 @@ import '../../../../shared/motion/motion.dart';
 import '../../../../shared/widgets/lms.dart';
 import '../../../classroom/presentation/join.dart';
 import '../../../mushaf/presentation/widgets/mushaf_entry.dart';
+import '../../../quran/presentation/widgets/quran_entry.dart';
 import '../../domain/lesson.dart';
 import 'group_lesson.dart';
 
 /// What a lesson's own sheet can do now; each is null when it may not.
 class LessonActions {
-  const LessonActions({this.cancel, this.refuse, this.rate, this.dispute, this.report});
+  const LessonActions({this.cancel, this.refuse, this.rate, this.dispute, this.report, this.quran = false});
 
   final VoidCallback? cancel;
   final VoidCallback? refuse;
@@ -21,6 +22,9 @@ class LessonActions {
 
   /// The teacher's report on it, still to write.
   final VoidCallback? report;
+
+  /// The teacher's way to its Quran portion and record, shown once the lesson follows a Quran plan.
+  final bool quran;
 }
 
 /// One lesson in a list: the time in its own column, whom it is with, its
@@ -323,6 +327,15 @@ class _LessonSheet extends StatelessWidget {
               builder: (context, label, open) => Padding(
                 padding: const EdgeInsets.only(top: Space.s),
                 child: SecondaryAction(label, icon: Icons.menu_book_rounded, onPressed: open),
+              ),
+            ),
+          if (actions.quran && !x.cancelled)
+            QuranLessonEntry(
+              lessonId: x.id,
+              onOpen: _after(context, () => openQuranLesson(host, x.id)),
+              builder: (context, label, open) => Padding(
+                padding: const EdgeInsets.only(top: Space.s),
+                child: SecondaryAction(label, icon: Icons.fact_check_outlined, onPressed: open),
               ),
             ),
           if (actions.report != null) ...[

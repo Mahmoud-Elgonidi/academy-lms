@@ -18,6 +18,7 @@ import '../../features/journey/data/journey_repository.dart';
 import '../../features/live/data/live_repository.dart';
 import '../../features/notifications/data/notifications_repository.dart';
 import '../../features/profile/data/profile_repository.dart';
+import '../../features/quran/data/quran_repository.dart';
 import '../../features/roadmap/data/learning_repository.dart';
 import '../../features/schedule/data/lessons_repository.dart';
 import '../../features/consent/data/consent_repository.dart';
@@ -48,6 +49,7 @@ class Services {
       journey = JourneyRepository(api),
       hifz = HifzRepository(api),
       mushaf = MushafRepository(api),
+      quran = QuranRepository(api),
       notifications = NotificationsRepository(api),
       consent = ConsentRepository(api),
       privacy = PrivacyRepository(api),
@@ -82,6 +84,9 @@ class Services {
 
   /// A Quran lesson's shared mushaf and the mistakes notebook.
   final MushafRepository mushaf;
+
+  /// The Quran program: plans and portions, lessons' results, exams and certificates.
+  final QuranRepository quran;
   final NotificationsRepository notifications;
   final ConsentRepository consent;
   final PrivacyRepository privacy;
@@ -119,6 +124,7 @@ class Services {
       RepositoryProvider.value(value: journey),
       RepositoryProvider.value(value: hifz),
       RepositoryProvider.value(value: mushaf),
+      RepositoryProvider.value(value: quran),
       RepositoryProvider.value(value: notifications),
       RepositoryProvider.value(value: home),
       RepositoryProvider.value(value: live),

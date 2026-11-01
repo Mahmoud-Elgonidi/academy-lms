@@ -1,0 +1,34 @@
+/*
+ * The public verification of a Quran certificate: the academy's colours
+ * (an academy's page look, .ls.ls-academy), one calm card. It shows whole
+ * without script or motion; with motion allowed the card rises and its seal
+ * pops in (transform and opacity only).
+ */
+.ls-cert-page { min-block-size: 100dvh; display: grid; place-items: center; padding: 2.5rem 1rem 3rem; background:
+  radial-gradient(60rem 30rem at 50% -10%, color-mix(in oklab, var(--ls-main) 16%, transparent), transparent 70%), var(--ls-paper); }
+.ls-cert { inline-size: min(40rem, 100%); background: var(--ls-card); border: 1px solid var(--ls-line); border-radius: var(--ls-radius); box-shadow: 0 30px 60px -40px color-mix(in oklab, var(--ls-deep) 60%, transparent); overflow: hidden; }
+.ls-cert-head { display: flex; align-items: center; gap: 0.9rem; padding: 1.25rem 1.5rem; background: var(--ls-deep); color: white; }
+.ls-cert-head p { margin: 0; }
+.ls-cert-academy { font-weight: 700; font-size: 1.05rem; }
+.ls-cert-kicker { font-size: 0.85rem; opacity: 0.8; }
+.ls-cert-seal { flex: none; inline-size: 3rem; block-size: 3rem; display: grid; place-items: center; border-radius: 999px; background: var(--ls-gold); color: #1d1300; }
+.ls-cert-body { padding: 1.5rem; }
+.ls-cert-state { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 700; font-size: 0.9rem; padding: 0.35rem 0.85rem; border-radius: 999px; background: color-mix(in oklab, var(--ls-main) 12%, white); color: var(--ls-deep); }
+.ls-cert-state[data-revoked] { background: color-mix(in oklab, var(--danger) 12%, white); color: var(--danger); }
+.ls-cert-title { margin: 0.9rem 0 0.25rem; font-size: clamp(1.4rem, 4vw, 1.9rem); font-weight: 800; line-height: 1.3; }
+.ls-cert-student { margin: 0; color: var(--ls-muted); font-size: 1.05rem; }
+.ls-cert-facts { margin: 1.25rem 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.75rem; }
+.ls-cert-facts div { border: 1px solid var(--ls-line); border-radius: calc(var(--ls-radius) * 0.6); padding: 0.75rem 0.9rem; }
+.ls-cert-facts dt { font-size: 0.8rem; color: var(--ls-muted); }
+.ls-cert-facts dd { margin: 0.15rem 0 0; font-weight: 700; overflow-wrap: anywhere; }
+.ls-cert-note { margin: 1.25rem 0 0; font-size: 0.85rem; color: var(--ls-muted); }
+.ls-cert-missing { text-align: center; padding: 2rem 1.5rem; }
+.ls-cert-missing h1 { margin: 0.75rem 0 0.4rem; font-size: 1.5rem; }
+.ls-cert-missing p { margin: 0; color: var(--ls-muted); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ls-cert { animation: ls-cert-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+  .ls-cert-seal { animation: ls-cert-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s backwards; }
+}
+@keyframes ls-cert-rise { from { opacity: 0; transform: translateY(24px); } }
+@keyframes ls-cert-pop { from { opacity: 0; transform: scale(0.5) rotate(-20deg); } }

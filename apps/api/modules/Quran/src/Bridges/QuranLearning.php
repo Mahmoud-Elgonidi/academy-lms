@@ -124,7 +124,7 @@ final class QuranLearning implements LearningQuran
         }
 
         return [
-            Action::make('quranHifz')->label(__('quran::hifz.title'))->icon(Heroicon::OutlinedBookOpen)
+            Action::make('quranHifz')->label(__('quran::screens.plan_card.open'))->icon(Heroicon::OutlinedBookOpen)
                 ->url(StudentHifz::getUrl(['enrollment' => $enrollmentId], panel: 'teach')),
         ];
     }

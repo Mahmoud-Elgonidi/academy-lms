@@ -21,7 +21,9 @@ use Modules\Learning\Authorization\LearningAccess;
 use Modules\Quran\Actions\Hifz\ClearHifzPages;
 use Modules\Quran\Actions\Hifz\MarkMemorized;
 use Modules\Quran\Contracts\QuranApi;
+use Modules\Quran\Filament\Concerns\PlanActions;
 use Modules\Quran\Hifz\HifzPages;
+use Modules\Quran\Queries\Board\QuranCourses;
 use Modules\Quran\Queries\Hifz\HifzMap;
 use Modules\Quran\Queries\Hifz\StudentHifz as StudentHifzQuery;
 use Modules\SharedKernel\Authorization\Ability;
@@ -35,6 +37,8 @@ use Modules\SharedKernel\Time\ViewerTimezone;
  */
 final class StudentHifz extends Page
 {
+    use PlanActions;
+
     protected string $view = 'quran::filament.hifz.student';
 
     protected static ?string $slug = 'students/{enrollment}/hifz';
@@ -71,6 +75,18 @@ final class StudentHifz extends Page
         return app(StudentHifzQuery::class)->for($this->studentId, CarbonImmutable::now(), app(ViewerTimezone::class)->effective());
     }
 
+    /** @return array<string, mixed> the course's Quran plan */
+    #[Computed]
+    public function quran(): array
+    {
+        return app(QuranCourses::class)->course($this->enrollment, $this->studentId, CarbonImmutable::now());
+    }
+
+    protected function refreshPlans(): void
+    {
+        unset($this->quran);
+    }
+
     /** @return list<Action> */
     protected function getHeaderActions(): array
     {
@@ -87,6 +103,8 @@ final class StudentHifz extends Page
         );
 
         return [
+            $this->adjustPlan(office: false)->label(__('quran::screens.plan.pace'))->arguments(['enrollment' => $this->enrollment])
+                ->visible(fn () => $this->quran['plan'] !== null && ! $this->quran['plan']['group']),
             Action::make('hifzMark')->label(__($h.'mark.action'))->icon(Heroicon::OutlinedBookOpen)
                 ->modalHeading(__($h.'mark.heading'))->modalDescription(__($h.'mark.hint'))
                 ->schema([...$choice(), Radio::make('strength')->label(__($h.'attributes.strength'))->options(trans($h.'marks'))->default('good')->required()])

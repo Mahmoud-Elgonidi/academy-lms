@@ -4,8 +4,9 @@ namespace Modules\Quran\Filament\Teacher;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Modules\Quran\Filament\Pages\QuranExamResult;
 
-/** The Quran in the teachers' area: a student's hifz map, from the student's page. */
+/** The Quran in the teachers' area: their Quran lessons and «حصة قرآن», a student's plan and hifz map, the result of an exam they examine. */
 final class QuranTeacherPlugin implements Plugin
 {
     public static function make(): self
@@ -20,7 +21,7 @@ final class QuranTeacherPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->pages([StudentHifz::class]);
+        $panel->pages([QuranLessons::class, QuranLesson::class, StudentHifz::class, QuranExamResult::class]);
     }
 
     public function boot(Panel $panel): void {}

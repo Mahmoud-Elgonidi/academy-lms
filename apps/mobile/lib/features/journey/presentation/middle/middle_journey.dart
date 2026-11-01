@@ -12,6 +12,7 @@ import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../domain/journey.dart';
 import '../journey_ui.dart';
 import '../widgets/course_chips.dart';
+import '../../../quran/presentation/widgets/quran_entry.dart';
 import '../widgets/hifz_card.dart';
 import '../widgets/missions.dart';
 import '../widgets/rewards.dart';
@@ -83,6 +84,7 @@ class _MiddleJourneyState extends State<MiddleJourney> {
           openStation: _openMission,
         ),
       if (_m.hifz case final hifz?) HifzJourneyCard(hifz: hifz, place: widget.place),
+      QuranJourneyCard(base: widget.place.base),
       if (_m.lastLesson != null)
         LmsCard(
           child: LastLessonCard(lesson: _m.lastLesson!, rewards: _m.rewards),

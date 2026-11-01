@@ -9,6 +9,11 @@ describe('the teacher pages a plan may leave out', () => {
     expect(inPlan('/teach/earnings', [])).toBe(false);
   });
 
+  it('shows the Quran’s exams only when the plan includes the Quran', () => {
+    expect(inPlan('/teach/exams', ['quran'])).toBe(true);
+    expect(inPlan('/teach/exams', ['crm'])).toBe(false);
+  });
+
   it('keeps every other page', () => {
     expect(inPlan('/teach', [])).toBe(true);
     expect(inPlan('/teach/time-off', [])).toBe(true);

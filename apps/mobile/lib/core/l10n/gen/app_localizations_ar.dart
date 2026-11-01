@@ -4887,4 +4887,270 @@ class AppLocalizationsAr extends AppLocalizations {
   String mistakesWordKids(String word) {
     return '$word: كلمة نراجعها';
   }
+
+  @override
+  String get quranTitle => 'القرآن';
+
+  @override
+  String get quranTitleKids => 'قرآني';
+
+  @override
+  String quranTitleOf(String name) {
+    return 'القرآن مع $name';
+  }
+
+  @override
+  String get quranCardLead => 'الخطة والورد والاختبارات والشهادات';
+
+  @override
+  String get quranCardKids => 'رحلتي مع القرآن ⭐';
+
+  @override
+  String get quranNone => 'لا توجد خطة قرآن بعد.';
+
+  @override
+  String get quranParts => 'الأجزاء الثلاثون';
+
+  @override
+  String get quranPartsKids => 'كل جزء تحفظه يضيء هنا ⭐';
+
+  @override
+  String quranJuzState(int n, String state) {
+    return 'الجزء $n: $state';
+  }
+
+  @override
+  String get quranJuzDone => 'محفوظ';
+
+  @override
+  String get quranJuzSome => 'بدأ حفظه';
+
+  @override
+  String get quranJuzNone => 'لم يبدأ';
+
+  @override
+  String get quranOpenHifz => 'خريطة الحفظ ودفتر الأخطاء';
+
+  @override
+  String get quranOpenHifzKids => 'خريطة حفظي وكلماتي';
+
+  @override
+  String get quranWirdKids => 'وردك ينتظرك اليوم 📖';
+
+  @override
+  String get quranPlanHeader => 'الخطة';
+
+  @override
+  String get quranPlanHeaderKids => 'طريقي';
+
+  @override
+  String quranAt(String title) {
+    return 'الموضع الآن: $title';
+  }
+
+  @override
+  String quranAtKids(String title) {
+    return 'وصلت إلى $title ⭐';
+  }
+
+  @override
+  String quranProgress(int percent) {
+    return 'أُنجز $percent% من الخطة';
+  }
+
+  @override
+  String get quranFinished => 'اكتملت الخطة';
+
+  @override
+  String get quranFinishedKids => 'أكملت الخطة! 🎉';
+
+  @override
+  String get quranWeek => 'ورد هذا الأسبوع';
+
+  @override
+  String get quranWeekKids => 'ما سأقرؤه هذا الأسبوع';
+
+  @override
+  String quranPages(String pages) {
+    return 'الصفحات $pages';
+  }
+
+  @override
+  String quranStops(String stops) {
+    return 'يصل به إلى اختبار: $stops';
+  }
+
+  @override
+  String get quranRecent => 'آخر الحصص';
+
+  @override
+  String get quranRecentNone => 'لم تُسجَّل نتائج بعد.';
+
+  @override
+  String get quranAdvanced => 'انتقل إلى الورد التالي';
+
+  @override
+  String get quranStays => 'يعيد الورد';
+
+  @override
+  String get quranExams => 'الاختبارات';
+
+  @override
+  String get quranExamsKids => 'اختباراتي';
+
+  @override
+  String get quranExamsNone => 'لا توجد اختبارات بعد.';
+
+  @override
+  String quranExamWith(String name) {
+    return 'مع $name';
+  }
+
+  @override
+  String quranExamRetakeOn(String day) {
+    return 'الإعادة يوم $day';
+  }
+
+  @override
+  String quranExamNotBefore(String day) {
+    return 'لا يُحجز قبل $day';
+  }
+
+  @override
+  String get quranCertificates => 'الشهادات';
+
+  @override
+  String get quranCertificatesKids => 'شهاداتي';
+
+  @override
+  String quranCertificateCode(String code) {
+    return 'رمز التحقق: $code';
+  }
+
+  @override
+  String get quranCertificateRevoked => 'أُلغيت';
+
+  @override
+  String get quranCertificateOpen => 'افتح الشهادة';
+
+  @override
+  String get quranLessonTitle => 'حصة القرآن';
+
+  @override
+  String get quranLessonOpen => 'ورد الحصة';
+
+  @override
+  String get quranLessonNoPlan => 'لا توجد خطة قرآن لهذه الحصة.';
+
+  @override
+  String get quranPartRecited => 'سمّعه الطالب';
+
+  @override
+  String get quranMistakes => 'الأخطاء';
+
+  @override
+  String get quranMistakesHint => 'إن لم تعدّ الأخطاء هنا، فتُحسب الكلمات المعلَّمة في المصحف.';
+
+  @override
+  String quranMistakeLess(String kind) {
+    return 'أنقص $kind';
+  }
+
+  @override
+  String quranMistakeMore(String kind) {
+    return 'زد $kind';
+  }
+
+  @override
+  String get quranGrade => 'التقدير';
+
+  @override
+  String get quranGradeAuto => 'من الأخطاء';
+
+  @override
+  String get quranNote => 'ملاحظة';
+
+  @override
+  String get quranNoteHint => 'لماذا اخترت تقديرًا غير تقدير الأخطاء؟';
+
+  @override
+  String get quranNoteNeeded => 'اكتب ملاحظة تشرح التقدير الذي اخترته.';
+
+  @override
+  String get quranChooseParts => 'اختر ما سمّعه الطالب.';
+
+  @override
+  String get quranSubmit => 'سجّل النتيجة';
+
+  @override
+  String get quranRecordedAdvanced => 'سُجّلت النتيجة، وينتقل الطالب إلى الورد التالي.';
+
+  @override
+  String get quranRecordedStays => 'سُجّلت النتيجة، ويعيد الطالب الورد نفسه.';
+
+  @override
+  String get quranAlreadyRecorded => 'سُجّلت نتيجة هذا الطالب في هذه الحصة.';
+
+  @override
+  String get quranStudent => 'الطالب';
+
+  @override
+  String get quranPace => 'الوتيرة';
+
+  @override
+  String quranPaceLine(String amount, String unit, String near, String far) {
+    return 'الجديد $amount $unit · المراجعة القريبة $near · البعيدة $far';
+  }
+
+  @override
+  String quranPaceNew(String unit) {
+    return 'الجديد في كل حصة ($unit)';
+  }
+
+  @override
+  String get quranPaceNear => 'المراجعة القريبة (عدد الأوراد)';
+
+  @override
+  String get quranPaceFar => 'المراجعة البعيدة (عدد الصفحات)';
+
+  @override
+  String get quranPaceSave => 'احفظ الوتيرة';
+
+  @override
+  String get quranPaceSaved => 'حُفظت الوتيرة.';
+
+  @override
+  String get quranPaceProgram => 'عُد إلى وتيرة البرنامج';
+
+  @override
+  String get quranExaminerTitle => 'اختبارات القرآن';
+
+  @override
+  String get quranExaminerBooked => 'المحجوزة';
+
+  @override
+  String get quranExaminerNone => 'لا توجد اختبارات محجوزة معك.';
+
+  @override
+  String get quranExaminerRecent => 'آخر النتائج';
+
+  @override
+  String get quranExamRecord => 'سجّل نتيجة الاختبار';
+
+  @override
+  String get quranExamFailHint => 'إن لم ينجح الطالب، فاكتب ما يراجعه واختر يوم الإعادة.';
+
+  @override
+  String get quranExamNote => 'كلمة للطالب';
+
+  @override
+  String get quranExamRetake => 'يوم الإعادة';
+
+  @override
+  String get quranExamRetakePick => 'اختر اليوم';
+
+  @override
+  String quranExamSaved(String status) {
+    return 'سُجّلت النتيجة: $status';
+  }
 }

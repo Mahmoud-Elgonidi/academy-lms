@@ -11,6 +11,7 @@ use Modules\Platform\Database\Seeders\DemoAiAreaSeeder;
 use Modules\Platform\Database\Seeders\DemoQuranAreaSeeder;
 use Modules\Quran\Database\Seeders\DemoHifzSeeder;
 use Modules\Quran\Database\Seeders\DemoMistakesSeeder;
+use Modules\Quran\Database\Seeders\DemoQuranPlansSeeder;
 use Modules\Quran\Database\Seeders\DemoQuranSeeder;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\Site\Database\Seeders\DemoSiteSeeder;
@@ -24,7 +25,10 @@ use Modules\Site\Database\Seeders\DemoSiteSeeder;
  * demo's plan takes the AI helpers' and the Quran's areas; and its public page is on, with
  * three teachers' cards and its price regions naming their countries; and
  * group lessons (DemoGroupsSeeder: teachers who take groups, group plans and
- * pay, a running group of adults, a children's group and one forming).
+ * pay, a running group of adults, a children's group and one forming); and, once
+ * the Quran's text is there, its Quran program (DemoQuranPlansSeeder: exams and
+ * certificates on, two ready tracks, its Quran learners on plans, Yousef's last
+ * lessons recorded, a certificate and an exam waiting to be booked).
  * Nothing without the demo academy (an academy's own server), and each step
  * only once.
  */
@@ -41,16 +45,18 @@ final class DemoCatchUpSeeder extends Seeder
         // The Quran's area first: what follows writes the demo's Quran (its subject, its lessons' passages).
         $this->call(DemoQuranAreaSeeder::class);
         $counts = $tenants->run($demo, function (): array {
-            $this->call([DemoQuranSeeder::class, DemoMistakesSeeder::class, DemoHifzSeeder::class, DemoRegionCountriesSeeder::class, DemoTeacherCardsSeeder::class, DemoSiteSeeder::class, DemoGroupsSeeder::class]);
+            $this->call([DemoQuranSeeder::class, DemoMistakesSeeder::class, DemoHifzSeeder::class, DemoRegionCountriesSeeder::class, DemoTeacherCardsSeeder::class, DemoSiteSeeder::class, DemoGroupsSeeder::class, DemoQuranPlansSeeder::class]);
 
             return [
                 DB::table('quran_lesson_passages')->count(),
                 DB::table('hifz_pages')->distinct()->count('student_id'),
                 DB::table('recitation_mistakes')->count(),
                 DB::table('lesson_groups')->where('status', '!=', 'ended')->count(),
+                DB::table('quran_plans')->where('status', 'active')->count(),
+                DB::table('quran_certificates')->count(),
             ];
         });
         $this->call(DemoAiAreaSeeder::class);
-        $this->command?->info(vsprintf('Demo: %d lessons with their passage of the Quran, %d learners with a hifz map, %d marked words, %d groups.', $counts));
+        $this->command?->info(vsprintf('Demo: %d lessons with their passage of the Quran, %d learners with a hifz map, %d marked words, %d groups, %d Quran plans, %d Quran certificates.', $counts));
     }
 }

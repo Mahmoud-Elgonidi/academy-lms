@@ -3509,5 +3509,207 @@
         "type": "String"
       }
     }
+  },
+  "quranTitle": "القرآن",
+  "quranTitleKids": "قرآني",
+  "quranTitleOf": "القرآن مع {name}",
+  "@quranTitleOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "quranCardLead": "الخطة والورد والاختبارات والشهادات",
+  "quranCardKids": "رحلتي مع القرآن ⭐",
+  "quranNone": "لا توجد خطة قرآن بعد.",
+  "quranParts": "الأجزاء الثلاثون",
+  "quranPartsKids": "كل جزء تحفظه يضيء هنا ⭐",
+  "quranJuzState": "الجزء {n}: {state}",
+  "@quranJuzState": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "quranJuzDone": "محفوظ",
+  "quranJuzSome": "بدأ حفظه",
+  "quranJuzNone": "لم يبدأ",
+  "quranOpenHifz": "خريطة الحفظ ودفتر الأخطاء",
+  "quranOpenHifzKids": "خريطة حفظي وكلماتي",
+  "quranWirdKids": "وردك ينتظرك اليوم 📖",
+  "quranPlanHeader": "الخطة",
+  "quranPlanHeaderKids": "طريقي",
+  "quranAt": "الموضع الآن: {title}",
+  "@quranAt": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "quranAtKids": "وصلت إلى {title} ⭐",
+  "@quranAtKids": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "quranProgress": "أُنجز {percent}% من الخطة",
+  "@quranProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "quranFinished": "اكتملت الخطة",
+  "quranFinishedKids": "أكملت الخطة! 🎉",
+  "quranWeek": "ورد هذا الأسبوع",
+  "quranWeekKids": "ما سأقرؤه هذا الأسبوع",
+  "quranPages": "الصفحات {pages}",
+  "@quranPages": {
+    "placeholders": {
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
+  "quranStops": "يصل به إلى اختبار: {stops}",
+  "@quranStops": {
+    "placeholders": {
+      "stops": {
+        "type": "String"
+      }
+    }
+  },
+  "quranRecent": "آخر الحصص",
+  "quranRecentNone": "لم تُسجَّل نتائج بعد.",
+  "quranAdvanced": "انتقل إلى الورد التالي",
+  "quranStays": "يعيد الورد",
+  "quranExams": "الاختبارات",
+  "quranExamsKids": "اختباراتي",
+  "quranExamsNone": "لا توجد اختبارات بعد.",
+  "quranExamWith": "مع {name}",
+  "@quranExamWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "quranExamRetakeOn": "الإعادة يوم {day}",
+  "@quranExamRetakeOn": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "quranExamNotBefore": "لا يُحجز قبل {day}",
+  "@quranExamNotBefore": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "quranCertificates": "الشهادات",
+  "quranCertificatesKids": "شهاداتي",
+  "quranCertificateCode": "رمز التحقق: {code}",
+  "@quranCertificateCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "quranCertificateRevoked": "أُلغيت",
+  "quranCertificateOpen": "افتح الشهادة",
+  "quranLessonTitle": "حصة القرآن",
+  "quranLessonOpen": "ورد الحصة",
+  "quranLessonNoPlan": "لا توجد خطة قرآن لهذه الحصة.",
+  "quranPartRecited": "سمّعه الطالب",
+  "quranMistakes": "الأخطاء",
+  "quranMistakesHint": "إن لم تعدّ الأخطاء هنا، فتُحسب الكلمات المعلَّمة في المصحف.",
+  "quranMistakeLess": "أنقص {kind}",
+  "@quranMistakeLess": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "quranMistakeMore": "زد {kind}",
+  "@quranMistakeMore": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "quranGrade": "التقدير",
+  "quranGradeAuto": "من الأخطاء",
+  "quranNote": "ملاحظة",
+  "quranNoteHint": "لماذا اخترت تقديرًا غير تقدير الأخطاء؟",
+  "quranNoteNeeded": "اكتب ملاحظة تشرح التقدير الذي اخترته.",
+  "quranChooseParts": "اختر ما سمّعه الطالب.",
+  "quranSubmit": "سجّل النتيجة",
+  "quranRecordedAdvanced": "سُجّلت النتيجة، وينتقل الطالب إلى الورد التالي.",
+  "quranRecordedStays": "سُجّلت النتيجة، ويعيد الطالب الورد نفسه.",
+  "quranAlreadyRecorded": "سُجّلت نتيجة هذا الطالب في هذه الحصة.",
+  "quranStudent": "الطالب",
+  "quranPace": "الوتيرة",
+  "quranPaceLine": "الجديد {amount} {unit} · المراجعة القريبة {near} · البعيدة {far}",
+  "@quranPaceLine": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "near": {
+        "type": "String"
+      },
+      "far": {
+        "type": "String"
+      }
+    }
+  },
+  "quranPaceNew": "الجديد في كل حصة ({unit})",
+  "@quranPaceNew": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "quranPaceNear": "المراجعة القريبة (عدد الأوراد)",
+  "quranPaceFar": "المراجعة البعيدة (عدد الصفحات)",
+  "quranPaceSave": "احفظ الوتيرة",
+  "quranPaceSaved": "حُفظت الوتيرة.",
+  "quranPaceProgram": "عُد إلى وتيرة البرنامج",
+  "quranExaminerTitle": "اختبارات القرآن",
+  "quranExaminerBooked": "المحجوزة",
+  "quranExaminerNone": "لا توجد اختبارات محجوزة معك.",
+  "quranExaminerRecent": "آخر النتائج",
+  "quranExamRecord": "سجّل نتيجة الاختبار",
+  "quranExamFailHint": "إن لم ينجح الطالب، فاكتب ما يراجعه واختر يوم الإعادة.",
+  "quranExamNote": "كلمة للطالب",
+  "quranExamRetake": "يوم الإعادة",
+  "quranExamRetakePick": "اختر اليوم",
+  "quranExamSaved": "سُجّلت النتيجة: {status}",
+  "@quranExamSaved": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
   }
 }

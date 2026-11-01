@@ -1,7 +1,9 @@
 @php $d = $this->hifz; @endphp
 <x-filament-panels::page>
     @include('learning::filament.family.styles')
+    @include('quran::filament.parts.styles')
     <div class="lf-stack lms-stagger">
+        @include('quran::filament.parts.plan-card', ['q' => $this->quran])
         <section class="lf-card">
             <div class="lf-head"><h3>{{ __('quran::hifz.title') }}</h3></div>
             @include('quran::filament.hifz.map', ['map' => $d['map']])

@@ -19,9 +19,11 @@ export type NavItem = { href: string; key: string; icon: IconName; also?: string
  * academy's safeguarding leads that something is wrong (tell us), and talk
  * with the learner's teachers (messages; the guardians are in every
  * conversation). The roadmap and the teacher's reports stay a place of
- * their own for students, and open from the journey for everyone.
+ * their own for students, and open from the journey for everyone. While
+ * the academy's plan has the Quran (`quran`), everyone has its page (the
+ * plan, the hifz map, exams, certificates) after messages, so the tabs stay.
  */
-export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: NavItem[]; tabs: NavItem[] } {
+export function itemsOf(stage: Stage, money: boolean, guardian = false, quran = false): { all: NavItem[]; tabs: NavItem[] } {
   const lessons: NavItem = { href: '/family/lessons', key: 'lessons', icon: 'calendar' };
   const homework: NavItem = { href: '/family/homework', key: 'homework', icon: 'book' };
   const progress: NavItem = { href: '/family/progress', key: 'progress', icon: 'chart' };
@@ -29,6 +31,8 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: 
   const inbox: NavItem = { href: '/family/notifications', key: 'notifications', icon: 'bell' };
   const messages: NavItem = { href: '/family/messages', key: 'messages', icon: 'chat' };
   const more: NavItem = { href: '/family/more', key: 'more', icon: 'menu' };
+  // The Quran (its page, and the hifz map under it): only while the academy's plan has it.
+  const quranItems: NavItem[] = quran ? [{ href: '/family/quran', key: 'quran', icon: 'book', also: ['/family/hifz'] }] : [];
   const home: NavItem = stage === 'classic' ? { href: '/family', key: 'home', icon: 'home' } : { href: '/family', key: 'home', icon: 'map', also: ['/family/journey'] };
   const pay: NavItem[] = money ? [{ href: '/family/money', key: 'money', icon: 'coins' }] : [];
   const privacy: NavItem[] = guardian ? [{ href: '/family/privacy', key: 'privacy', icon: 'shield' }] : [];
@@ -45,15 +49,15 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false): { all: 
 
   if (stage === 'classic') {
     return {
-      all: [home, lessons, journey, messages, homework, ...pay, inbox, ...recordings, ...privacy, ...help, tellUs, ...account, myData],
+      all: [home, lessons, journey, messages, ...quranItems, homework, ...pay, inbox, ...recordings, ...privacy, ...help, tellUs, ...account, myData],
       tabs: [home, lessons, journey, ...(money ? pay : [homework]), more],
     };
   }
   if (stage === 'teen') {
-    return { all: [home, lessons, homework, progress, messages, inbox, ...recordings, ...help, tellUs, ...account], tabs: [home, lessons, homework, progress, more] };
+    return { all: [home, lessons, homework, progress, messages, ...quranItems, inbox, ...recordings, ...help, tellUs, ...account], tabs: [home, lessons, homework, progress, more] };
   }
   // Kids and middle school: their journey, lessons and teachers on the bar; homework (also the journey's missions) under more.
-  return { all: [home, lessons, messages, homework, progress, inbox, ...recordings, ...help, tellUs, ...account], tabs: [home, lessons, messages, more] };
+  return { all: [home, lessons, messages, ...quranItems, homework, progress, inbox, ...recordings, ...help, tellUs, ...account], tabs: [home, lessons, messages, more] };
 }
 
 /** Whether a place is the page at this path (a student's home also on /family/journey). */

@@ -50,6 +50,26 @@ export type Fixtures = {
     student: string;
     teacher: string;
   };
+  /**
+   * The demo's Quran (docs/architecture/02, section 26; DemoQuranSeeder and
+   * E2eResetSeeder): a Quran course with a plan, its teacher's lesson whose
+   * room is open or held today and not yet recorded, the course's family
+   * (a guardian in the classic look and the student in the kids' look), and
+   * a standing certificate's verification code (the academy shows
+   * certificates to families).
+   */
+  quran: {
+    /** Sign-ins (the demo password): the course's teacher, a guardian of its student, and the student. */
+    teacher: string;
+    guardian: string;
+    student: string;
+    /** A lesson of the course with today's portion, not yet recorded. */
+    lesson_id: string;
+    enrollment_id: string;
+    /** A standing certificate of the student (XXXX-XXXX-XXXX-XXXX) and its number. */
+    certificate_code: string;
+    certificate_number: string;
+  };
 };
 
 export function fixtures(): Fixtures {

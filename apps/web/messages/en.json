@@ -105,7 +105,8 @@
       "tellUs": "Report a concern",
       "journey": "Journey",
       "hifz": "Hifz map",
-      "mistakes": "Mistakes notebook"
+      "mistakes": "Mistakes notebook",
+      "quran": "Quran"
     },
     "kids": {
       "menu": "Menu",
@@ -120,7 +121,8 @@
       "help": "Help",
       "tellUs": "Tell a grown-up",
       "hifz": "My hifz map",
-      "mistakes": "Words to practise"
+      "mistakes": "Words to practise",
+      "quran": "My Quran"
     },
     "middle": {
       "menu": "Menu",
@@ -137,7 +139,8 @@
       "account": "My account",
       "tellUs": "Tell us",
       "hifz": "My hifz map",
-      "mistakes": "My mistakes notebook"
+      "mistakes": "My mistakes notebook",
+      "quran": "Quran"
     },
     "teen": {
       "menu": "Menu",
@@ -154,7 +157,8 @@
       "account": "My account",
       "tellUs": "Report a concern",
       "hifz": "Hifz",
-      "mistakes": "My mistakes notebook"
+      "mistakes": "My mistakes notebook",
+      "quran": "Quran"
     },
     "help": "Help",
     "recordings": "My lesson recordings",
@@ -162,7 +166,8 @@
     "myData": "My data",
     "concern": "Raise a concern",
     "documents": "My documents",
-    "card": "My card on the academy's page"
+    "card": "My card on the academy's page",
+    "exams": "Quran exams"
   },
   "family": {
     "switchLearner": "Choose whose",
@@ -621,7 +626,8 @@
     "rowRatingsMissing": "Pick focus and overall.",
     "rowAbsenceMissing": "Write the absence note.",
     "rowsMissing": "{n, plural, =1 {One student's row is missing something} other {# students' rows are missing something}}: see the ones marked in red.",
-    "roster": "Students in the lesson"
+    "roster": "Students in the lesson",
+    "backToLesson": "Back to the lesson"
   },
   "errors": {
     "title": "Something went wrong",
@@ -1896,5 +1902,153 @@
     "seatNumber": "Your seat: {seat} of {capacity}",
     "groupPlan": "Group plan",
     "listJoin": ", "
+  },
+  "quran": {
+    "noLearner": "There is no student to show the Quran for.",
+    "of": "Quran · {name}",
+    "lead": "The plan and where you are in it, the next lesson's portion, and the results of lessons and exams.",
+    "none": "No Quran plan yet. It shows here once your teacher starts the plan.",
+    "off": {
+      "title": "The Quran isn't available right now",
+      "lead": "The academy's plan doesn't include the Quran at the moment. Everything recorded is kept and shows again when it comes back."
+    },
+    "progress": "Plan completed",
+    "percent": "{n}%",
+    "position": "Current position:",
+    "frozen": {
+      "paused": "Course paused",
+      "ended": "Course ended"
+    },
+    "finishedBadge": "Plan complete",
+    "finished": "The plan is complete. Well done!",
+    "portion": "Next lesson's portion",
+    "recent": "Last lessons' results",
+    "noResults": "No results recorded yet.",
+    "frozenResult": "Position held (course paused)",
+    "advanced": "Moved forward",
+    "parts": {
+      "new": "New memorization",
+      "near": "Near review",
+      "far": "Far review"
+    },
+    "pages": "Pages: {list}",
+    "mistakeCount": "{label}: {n}",
+    "noteSaid": "Your note: {note}",
+    "juzTitle": "The thirty parts",
+    "juzDone": "{n, plural, =0 {No part complete yet} one {# of 30 parts complete} other {# of 30 parts complete}}",
+    "juzCell": "Part {juz}: {memorized} of {total} pages memorized",
+    "legendMemorized": "Memorized",
+    "legendLearning": "Learning",
+    "hifz": "Memorization and review",
+    "mapLine": "{n, plural, =0 {No pages memorized yet} one {# page memorized} other {# pages memorized}}",
+    "bookLine": "{n, plural, =0 {No words to review} one {# word to review} other {# words to review}}",
+    "exams": "Exams",
+    "certificates": "Certificates",
+    "retake": "Retake",
+    "examiner": {
+      "lead": "The exams booked with you, soonest first.",
+      "none": "No exams are booked with you right now.",
+      "recent": "Results you recorded lately",
+      "enter": "Enter the exam lesson",
+      "formLead": "Record the result after the recitation: mistakes by kind, or leave them and the words marked in the mushaf count."
+    },
+    "notBefore": "Not booked before {day}",
+    "retakeOn": "Suggested retake: {day}",
+    "revoked": "Revoked",
+    "openCertificate": "View certificate",
+    "verify": "Verification page",
+    "listJoin": ", ",
+    "kids": {
+      "lead": "Your journey with the Quran, step by step.",
+      "none": "Your journey with the Quran starts soon.",
+      "stars": "Your memorization stars",
+      "position": "You reached:",
+      "portion": "Your next lesson",
+      "recent": "Your last lessons",
+      "advanced": "One step forward",
+      "parts": {
+        "new": "New",
+        "near": "Near review",
+        "far": "Far review"
+      },
+      "juzTitle": "Parts of the Quran",
+      "hifz": "My memorization",
+      "mapLine": "See the pages you know",
+      "bookLine": "Words we practise",
+      "exams": "My exams",
+      "passed": "Passed!"
+    },
+    "lesson": {
+      "title": "Quran lesson",
+      "panel": "Quran lesson: portion and record",
+      "panelLead": "Today's portion and recording what the student recited",
+      "openMushaf": "Open the shared mushaf",
+      "noPlan": "This course has no Quran plan yet, so the lesson has no portion.",
+      "frozen": "{why}: the position stays where it is.",
+      "groupPlan": "Group plan",
+      "portion": "Today's portion",
+      "recorded": "Recorded in this lesson",
+      "record": "Record the recitation",
+      "recordLead": "Count the mistakes for each part, or leave them and the words marked in the mushaf count. The position moves on when the new part reaches the pass grade.",
+      "allRecorded": "This lesson is recorded."
+    },
+    "student": {
+      "title": "Quran plan",
+      "back": "Student",
+      "noPlan": "This course has no Quran plan yet. The academy starts it."
+    },
+    "pace": {
+      "title": "Student's pace",
+      "newAmount": "New per lesson ({unit})",
+      "nearPortions": "Near review (portions)",
+      "farPages": "Far review (pages)",
+      "hint": "Leave a field empty to go back to the program's.",
+      "bad": "Type positive numbers, and whole numbers for the reviews.",
+      "save": "Save pace",
+      "group": "The academy sets a group plan's pace."
+    },
+    "form": {
+      "mistakes": "Mistakes",
+      "less": "One less {label} in {part}",
+      "more": "One more {label} in {part}",
+      "counted": "{n, plural, =0 {No mistakes} one {# mistake} other {# mistakes}}",
+      "fromMushaf": "Mistakes come from the words marked in the mushaf unless you count them here.",
+      "grade": "Grade",
+      "byMistakes": "By mistakes",
+      "note": "Why this grade",
+      "noteHint": "Needed when you choose a grade other than the mistakes give.",
+      "nothing": "Choose at least one part the student recited.",
+      "noteNeeded": "Write why you chose this grade.",
+      "recordThem": "Record",
+      "recited": "Recited",
+      "notRecited": "This part was not recited.",
+      "skipped": "Not recorded for this student now.",
+      "save": "Record the lesson",
+      "exam": "Exam",
+      "examNote": "Your words to the student",
+      "examNoteHint": "Needed on a fail: what to work on before the retake.",
+      "retakeOn": "Retake day",
+      "retakeHint": "Only on a fail: a day after today, within 180 days.",
+      "saveExam": "Record the result",
+      "examSaved": "The exam's result is recorded."
+    }
+  },
+  "certificate": {
+    "pageTitle": "Certificate check",
+    "kicker": "Quran certificate check",
+    "valid": "Valid certificate",
+    "revoked": "This certificate was revoked",
+    "revokedOn": "This certificate was revoked on {when}",
+    "awardedTo": "Awarded to {name}",
+    "portion": "Portion",
+    "riwaya": "Riwaya",
+    "grade": "Grade",
+    "issued": "Issued",
+    "number": "Certificate number",
+    "code": "Verification code",
+    "validNote": "The academy issued this certificate, and it still stands.",
+    "revokedNote": "The academy revoked this certificate; it no longer counts.",
+    "missingTitle": "We couldn't find this certificate",
+    "missingLead": "Check the verification code printed on the certificate, then try again."
   }
 }

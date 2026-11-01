@@ -5,6 +5,8 @@ import { HifzReview } from '@/components/hifz/review';
 import { Icon } from '@/components/icons';
 import { Badge, Empty } from '@/components/ui';
 import { get } from '@/lib/api/server';
+import { QuranOff } from '@/components/quran/off';
+import { quranRead } from '@/lib/quran/server';
 import { family } from '@/lib/family/context';
 import { nextPage, pageParam, pageTitle, strengthTone } from '@/lib/hifz/hifz';
 import type { Hifz, HifzPage, Recitation } from '@/lib/hifz/types';
@@ -23,8 +25,12 @@ export default async function HifzPageScreen({ params, searchParams }: { params:
   const learner = fam.current;
   if (!learner) return <Empty>{t('noLearner')}</Empty>;
   const who = { learner_id: learner.id };
-  const [{ data: hifz }, { data: shown }, check] = await Promise.all([
-    get<{ data: Hifz }>('/v1/learning/hifz', { query: who }),
+  // The academy's plan leaves the Quran out: a calm word, never an error page.
+  const found = await quranRead<Hifz>('/v1/learning/hifz', { query: who });
+  if (found.state === 'off') return <QuranOff title={t('back')} />;
+  if (found.state === 'missing') notFound();
+  const hifz = found.data;
+  const [{ data: shown }, check] = await Promise.all([
     get<{ data: HifzPage }>('/v1/learning/hifz/pages/{page}', { params: { page: String(page) }, query: who }),
     recited ? get<{ data: Recitation }>('/v1/learning/hifz/recitations/{recitation}', { params: { recitation: recited }, query: who }) : Promise.resolve(null),
   ]);

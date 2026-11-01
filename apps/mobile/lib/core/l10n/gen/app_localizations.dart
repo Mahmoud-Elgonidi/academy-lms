@@ -7723,6 +7723,474 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{word}: كلمة نراجعها'**
   String mistakesWordKids(String word);
+
+  /// No description provided for @quranTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'القرآن'**
+  String get quranTitle;
+
+  /// No description provided for @quranTitleKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'قرآني'**
+  String get quranTitleKids;
+
+  /// No description provided for @quranTitleOf.
+  ///
+  /// In ar, this message translates to:
+  /// **'القرآن مع {name}'**
+  String quranTitleOf(String name);
+
+  /// No description provided for @quranCardLead.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخطة والورد والاختبارات والشهادات'**
+  String get quranCardLead;
+
+  /// No description provided for @quranCardKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'رحلتي مع القرآن ⭐'**
+  String get quranCardKids;
+
+  /// No description provided for @quranNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد خطة قرآن بعد.'**
+  String get quranNone;
+
+  /// No description provided for @quranParts.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأجزاء الثلاثون'**
+  String get quranParts;
+
+  /// No description provided for @quranPartsKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل جزء تحفظه يضيء هنا ⭐'**
+  String get quranPartsKids;
+
+  /// No description provided for @quranJuzState.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجزء {n}: {state}'**
+  String quranJuzState(int n, String state);
+
+  /// No description provided for @quranJuzDone.
+  ///
+  /// In ar, this message translates to:
+  /// **'محفوظ'**
+  String get quranJuzDone;
+
+  /// No description provided for @quranJuzSome.
+  ///
+  /// In ar, this message translates to:
+  /// **'بدأ حفظه'**
+  String get quranJuzSome;
+
+  /// No description provided for @quranJuzNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يبدأ'**
+  String get quranJuzNone;
+
+  /// No description provided for @quranOpenHifz.
+  ///
+  /// In ar, this message translates to:
+  /// **'خريطة الحفظ ودفتر الأخطاء'**
+  String get quranOpenHifz;
+
+  /// No description provided for @quranOpenHifzKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'خريطة حفظي وكلماتي'**
+  String get quranOpenHifzKids;
+
+  /// No description provided for @quranWirdKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'وردك ينتظرك اليوم 📖'**
+  String get quranWirdKids;
+
+  /// No description provided for @quranPlanHeader.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخطة'**
+  String get quranPlanHeader;
+
+  /// No description provided for @quranPlanHeaderKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'طريقي'**
+  String get quranPlanHeaderKids;
+
+  /// No description provided for @quranAt.
+  ///
+  /// In ar, this message translates to:
+  /// **'الموضع الآن: {title}'**
+  String quranAt(String title);
+
+  /// No description provided for @quranAtKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'وصلت إلى {title} ⭐'**
+  String quranAtKids(String title);
+
+  /// No description provided for @quranProgress.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُنجز {percent}% من الخطة'**
+  String quranProgress(int percent);
+
+  /// No description provided for @quranFinished.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتملت الخطة'**
+  String get quranFinished;
+
+  /// No description provided for @quranFinishedKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'أكملت الخطة! 🎉'**
+  String get quranFinishedKids;
+
+  /// No description provided for @quranWeek.
+  ///
+  /// In ar, this message translates to:
+  /// **'ورد هذا الأسبوع'**
+  String get quranWeek;
+
+  /// No description provided for @quranWeekKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'ما سأقرؤه هذا الأسبوع'**
+  String get quranWeekKids;
+
+  /// No description provided for @quranPages.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصفحات {pages}'**
+  String quranPages(String pages);
+
+  /// No description provided for @quranStops.
+  ///
+  /// In ar, this message translates to:
+  /// **'يصل به إلى اختبار: {stops}'**
+  String quranStops(String stops);
+
+  /// No description provided for @quranRecent.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر الحصص'**
+  String get quranRecent;
+
+  /// No description provided for @quranRecentNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم تُسجَّل نتائج بعد.'**
+  String get quranRecentNone;
+
+  /// No description provided for @quranAdvanced.
+  ///
+  /// In ar, this message translates to:
+  /// **'انتقل إلى الورد التالي'**
+  String get quranAdvanced;
+
+  /// No description provided for @quranStays.
+  ///
+  /// In ar, this message translates to:
+  /// **'يعيد الورد'**
+  String get quranStays;
+
+  /// No description provided for @quranExams.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاختبارات'**
+  String get quranExams;
+
+  /// No description provided for @quranExamsKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختباراتي'**
+  String get quranExamsKids;
+
+  /// No description provided for @quranExamsNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد اختبارات بعد.'**
+  String get quranExamsNone;
+
+  /// No description provided for @quranExamWith.
+  ///
+  /// In ar, this message translates to:
+  /// **'مع {name}'**
+  String quranExamWith(String name);
+
+  /// No description provided for @quranExamRetakeOn.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإعادة يوم {day}'**
+  String quranExamRetakeOn(String day);
+
+  /// No description provided for @quranExamNotBefore.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يُحجز قبل {day}'**
+  String quranExamNotBefore(String day);
+
+  /// No description provided for @quranCertificates.
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهادات'**
+  String get quranCertificates;
+
+  /// No description provided for @quranCertificatesKids.
+  ///
+  /// In ar, this message translates to:
+  /// **'شهاداتي'**
+  String get quranCertificatesKids;
+
+  /// No description provided for @quranCertificateCode.
+  ///
+  /// In ar, this message translates to:
+  /// **'رمز التحقق: {code}'**
+  String quranCertificateCode(String code);
+
+  /// No description provided for @quranCertificateRevoked.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُلغيت'**
+  String get quranCertificateRevoked;
+
+  /// No description provided for @quranCertificateOpen.
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح الشهادة'**
+  String get quranCertificateOpen;
+
+  /// No description provided for @quranLessonTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حصة القرآن'**
+  String get quranLessonTitle;
+
+  /// No description provided for @quranLessonOpen.
+  ///
+  /// In ar, this message translates to:
+  /// **'ورد الحصة'**
+  String get quranLessonOpen;
+
+  /// No description provided for @quranLessonNoPlan.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد خطة قرآن لهذه الحصة.'**
+  String get quranLessonNoPlan;
+
+  /// No description provided for @quranPartRecited.
+  ///
+  /// In ar, this message translates to:
+  /// **'سمّعه الطالب'**
+  String get quranPartRecited;
+
+  /// No description provided for @quranMistakes.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأخطاء'**
+  String get quranMistakes;
+
+  /// No description provided for @quranMistakesHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'إن لم تعدّ الأخطاء هنا، فتُحسب الكلمات المعلَّمة في المصحف.'**
+  String get quranMistakesHint;
+
+  /// No description provided for @quranMistakeLess.
+  ///
+  /// In ar, this message translates to:
+  /// **'أنقص {kind}'**
+  String quranMistakeLess(String kind);
+
+  /// No description provided for @quranMistakeMore.
+  ///
+  /// In ar, this message translates to:
+  /// **'زد {kind}'**
+  String quranMistakeMore(String kind);
+
+  /// No description provided for @quranGrade.
+  ///
+  /// In ar, this message translates to:
+  /// **'التقدير'**
+  String get quranGrade;
+
+  /// No description provided for @quranGradeAuto.
+  ///
+  /// In ar, this message translates to:
+  /// **'من الأخطاء'**
+  String get quranGradeAuto;
+
+  /// No description provided for @quranNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظة'**
+  String get quranNote;
+
+  /// No description provided for @quranNoteHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'لماذا اخترت تقديرًا غير تقدير الأخطاء؟'**
+  String get quranNoteHint;
+
+  /// No description provided for @quranNoteNeeded.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب ملاحظة تشرح التقدير الذي اخترته.'**
+  String get quranNoteNeeded;
+
+  /// No description provided for @quranChooseParts.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر ما سمّعه الطالب.'**
+  String get quranChooseParts;
+
+  /// No description provided for @quranSubmit.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل النتيجة'**
+  String get quranSubmit;
+
+  /// No description provided for @quranRecordedAdvanced.
+  ///
+  /// In ar, this message translates to:
+  /// **'سُجّلت النتيجة، وينتقل الطالب إلى الورد التالي.'**
+  String get quranRecordedAdvanced;
+
+  /// No description provided for @quranRecordedStays.
+  ///
+  /// In ar, this message translates to:
+  /// **'سُجّلت النتيجة، ويعيد الطالب الورد نفسه.'**
+  String get quranRecordedStays;
+
+  /// No description provided for @quranAlreadyRecorded.
+  ///
+  /// In ar, this message translates to:
+  /// **'سُجّلت نتيجة هذا الطالب في هذه الحصة.'**
+  String get quranAlreadyRecorded;
+
+  /// No description provided for @quranStudent.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطالب'**
+  String get quranStudent;
+
+  /// No description provided for @quranPace.
+  ///
+  /// In ar, this message translates to:
+  /// **'الوتيرة'**
+  String get quranPace;
+
+  /// No description provided for @quranPaceLine.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجديد {amount} {unit} · المراجعة القريبة {near} · البعيدة {far}'**
+  String quranPaceLine(String amount, String unit, String near, String far);
+
+  /// No description provided for @quranPaceNew.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجديد في كل حصة ({unit})'**
+  String quranPaceNew(String unit);
+
+  /// No description provided for @quranPaceNear.
+  ///
+  /// In ar, this message translates to:
+  /// **'المراجعة القريبة (عدد الأوراد)'**
+  String get quranPaceNear;
+
+  /// No description provided for @quranPaceFar.
+  ///
+  /// In ar, this message translates to:
+  /// **'المراجعة البعيدة (عدد الصفحات)'**
+  String get quranPaceFar;
+
+  /// No description provided for @quranPaceSave.
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ الوتيرة'**
+  String get quranPaceSave;
+
+  /// No description provided for @quranPaceSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'حُفظت الوتيرة.'**
+  String get quranPaceSaved;
+
+  /// No description provided for @quranPaceProgram.
+  ///
+  /// In ar, this message translates to:
+  /// **'عُد إلى وتيرة البرنامج'**
+  String get quranPaceProgram;
+
+  /// No description provided for @quranExaminerTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختبارات القرآن'**
+  String get quranExaminerTitle;
+
+  /// No description provided for @quranExaminerBooked.
+  ///
+  /// In ar, this message translates to:
+  /// **'المحجوزة'**
+  String get quranExaminerBooked;
+
+  /// No description provided for @quranExaminerNone.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد اختبارات محجوزة معك.'**
+  String get quranExaminerNone;
+
+  /// No description provided for @quranExaminerRecent.
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر النتائج'**
+  String get quranExaminerRecent;
+
+  /// No description provided for @quranExamRecord.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل نتيجة الاختبار'**
+  String get quranExamRecord;
+
+  /// No description provided for @quranExamFailHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'إن لم ينجح الطالب، فاكتب ما يراجعه واختر يوم الإعادة.'**
+  String get quranExamFailHint;
+
+  /// No description provided for @quranExamNote.
+  ///
+  /// In ar, this message translates to:
+  /// **'كلمة للطالب'**
+  String get quranExamNote;
+
+  /// No description provided for @quranExamRetake.
+  ///
+  /// In ar, this message translates to:
+  /// **'يوم الإعادة'**
+  String get quranExamRetake;
+
+  /// No description provided for @quranExamRetakePick.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر اليوم'**
+  String get quranExamRetakePick;
+
+  /// No description provided for @quranExamSaved.
+  ///
+  /// In ar, this message translates to:
+  /// **'سُجّلت النتيجة: {status}'**
+  String quranExamSaved(String status);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

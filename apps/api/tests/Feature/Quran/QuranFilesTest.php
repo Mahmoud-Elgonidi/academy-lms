@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Modules\Platform\Filament\Console\Pages\PlatformSettingsPage;
+use Modules\Platform\Filament\Console\Pages\QuranConsole;
 use Modules\Platform\Models\PlatformAdmin;
 use Modules\Quran\Contracts\DTOs\VerseRange;
 use Modules\Quran\Providers\QuranServiceProvider;
@@ -182,7 +183,9 @@ it('shows the copy in the console and fetches it there, audited', function () {
     Filament::setCurrentPanel('console');
     $this->actingAs($owner, 'platform');
 
-    Livewire::test(PlatformSettingsPage::class)
+    // Its own page in the console (the Quran), no longer a card of the settings.
+    Livewire::test(PlatformSettingsPage::class)->assertDontSee('Not on the server yet');
+    Livewire::test(QuranConsole::class)
         ->assertSee('Not on the server yet')
         ->callAction('fetchQuran')
         ->assertNotified("The Quran's text is on the server, checked: 114 surahs, 6,236 verses.")

@@ -12,6 +12,7 @@ import { me } from '@/lib/viewer';
 const ITEMS: { href: string; key: string; icon: IconName }[] = [
   { href: '/teach/marking', key: 'marking', icon: 'mark' },
   { href: '/teach/trials', key: 'trials', icon: 'spark' },
+  { href: '/teach/exams', key: 'exams', icon: 'trophy' },
   { href: '/teach/hours', key: 'hours', icon: 'clock' },
   { href: '/teach/time-off', key: 'timeOff', icon: 'leave' },
   { href: '/teach/earnings', key: 'earnings', icon: 'wallet' },
