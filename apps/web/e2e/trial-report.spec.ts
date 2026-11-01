@@ -60,7 +60,7 @@ test('the report from the family\'s link: the report card, the plan and its pric
 
   const plan = page.locator('.lr-plan');
   await expect(plan.getByRole('heading', { name: 'الباقة التي يقترحها المعلّم' })).toBeVisible();
-  await expect(plan.getByText('حصتان في الأسبوع')).toBeVisible();
+  await expect(plan.getByText('حصتان في الأسبوع', { exact: true })).toBeVisible();
   await expect(plan.getByText('30 دقيقة للحصة')).toBeVisible();
   await expect(plan.getByText('حصص فردية')).toBeVisible();
   // The offer: its percent, the price after it, the usual one struck through, the saving, and one lesson's share.
