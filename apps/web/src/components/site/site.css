@@ -447,6 +447,10 @@ fieldset.ls-field legend { padding: 0; margin-block-end: 0.45rem; }
 .ls-whatsapp { position: fixed; inset-block-end: 1.2rem; inset-inline-end: 1.2rem; z-index: 50; inline-size: 3.5rem; block-size: 3.5rem; border-radius: 50%; display: grid; place-items: center; background: #25d366; color: white; box-shadow: 0 15px 30px -10px rgb(0 0 0 / 0.5); transition: transform 0.25s var(--ls-spring); }
 .ls-whatsapp:hover { transform: scale(1.08); }
 .ls-whatsapp svg { inline-size: 1.8rem; block-size: 1.8rem; }
+/* While someone fills the trial form on a phone, the floating button would sit on its buttons: it steps aside. */
+@media (max-width: 47.99rem) {
+  body:has(.ls-form-wrap:focus-within) .ls-whatsapp { opacity: 0; pointer-events: none; transform: scale(0.6); }
+}
 
 @property --ls-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 

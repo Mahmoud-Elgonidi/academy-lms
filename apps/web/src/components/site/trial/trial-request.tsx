@@ -614,7 +614,10 @@ function SubmitButton({ at, booking, code, chosen, busy, times, now }: { at: Ste
 function StepHeading({ children, focus }: { children: ReactNode; focus: boolean }) {
   const ref = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
-    if (focus) ref.current?.focus();
+    if (!focus || !ref.current) return;
+    // The form's top (progress and any refusal above the heading) comes into view under the site's bar, then the heading takes the focus.
+    ref.current.closest('.lt-form')?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    ref.current.focus({ preventScroll: true });
   }, [focus]);
   return <h3 id="lt-step-title" ref={ref} tabIndex={-1}>{children}</h3>;
 }

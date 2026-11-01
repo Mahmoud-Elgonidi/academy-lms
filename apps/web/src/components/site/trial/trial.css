@@ -245,7 +245,7 @@
 /* Icons in buttons, and headings that take the focus clear of the page's fixed header. */
 .lt-form .ls-btn svg, .lt-card .ls-btn svg, .lt-calm .ls-btn svg { inline-size: 1.1rem; block-size: 1.1rem; flex: none; }
 .lt-form h3[tabindex], .lt-card h1, .lt-card h2[tabindex], .lt-booked h3 { scroll-margin-block-start: 6rem; }
-.lt-form { scroll-margin-block-start: 5rem; }
+.lt-form { scroll-margin-block-start: 7rem; }
 /* Links that look like buttons keep their own colours over the page's `.ls a`. */
 .ls a.ls-btn-dark, .ls a.lt-btn-danger { color: white; }
 .ls a.lt-btn-soft { color: var(--ls-deep); }
