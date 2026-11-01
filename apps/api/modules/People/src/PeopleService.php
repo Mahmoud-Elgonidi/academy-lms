@@ -15,6 +15,7 @@ use Modules\People\Actions\SendWelcome;
 use Modules\People\Checks\Clearances;
 use Modules\People\Consent\ConsentRules;
 use Modules\People\Contracts\DTOs\ConsentState;
+use Modules\People\Contracts\DTOs\PublicTeacher;
 use Modules\People\Contracts\DTOs\StudentDetails;
 use Modules\People\Contracts\DTOs\StudentProfileData;
 use Modules\People\Contracts\DTOs\TeacherProfileData;
@@ -193,6 +194,11 @@ final class PeopleService implements PeopleApi
     public function publicTeachers(): array
     {
         return app(PublicTeachers::class)->onPage();
+    }
+
+    public function publicTeacherOf(string $teacherId): ?PublicTeacher
+    {
+        return app(PublicTeachers::class)->onPage($teacherId)[0] ?? null;
     }
 
     public function teacherCards(): array

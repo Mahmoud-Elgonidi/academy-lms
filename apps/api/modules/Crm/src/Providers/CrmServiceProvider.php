@@ -12,6 +12,7 @@ use Modules\Crm\Console\FollowUpLeadsCommand;
 use Modules\Crm\Contracts\Events\LeadAssigned;
 use Modules\Crm\Contracts\Events\LeadStageChanged;
 use Modules\Crm\Contracts\Events\TrialAssessed;
+use Modules\Crm\Contracts\Events\TrialCancelledByAcademy;
 use Modules\Crm\Contracts\Events\TrialCancelledByFamily;
 use Modules\Crm\Contracts\Events\TrialCompleted;
 use Modules\Crm\Contracts\Events\TrialMissed;
@@ -20,6 +21,7 @@ use Modules\Crm\Filament\Teacher\MyTrials;
 use Modules\Crm\Listeners\FollowLeads;
 use Modules\Crm\Listeners\FollowSiteRequests;
 use Modules\Crm\Listeners\SendCrmNotifications;
+use Modules\Crm\Listeners\TellFamilyAfterTrial;
 use Modules\Crm\Models\LeadTrial;
 use Modules\Crm\Privacy\LeadsData;
 use Modules\Crm\Queries\TrialConversion;
@@ -58,6 +60,7 @@ final class CrmServiceProvider extends ServiceProvider
             ->group(__DIR__.'/../../routes/api.php');
 
         SendCrmNotifications::templates($this->app->make(NotificationsApi::class));
+        TellFamilyAfterTrial::templates($this->app->make(NotificationsApi::class));
         $links = $this->app->make(NotificationLinks::class);
         $links->register('lead', fn (array $a, string $panel) => $panel === 'academy' && isset($a['id']) ? LeadPage::getUrl(['lead' => $a['id']], panel: 'academy') : null);
         $links->register('trial', fn (array $a, string $panel) => match ($panel) {
@@ -78,6 +81,10 @@ final class CrmServiceProvider extends ServiceProvider
         Event::listen(TrialMissed::class, [SendCrmNotifications::class, 'trialMissed']);
         Event::listen(TrialAssessed::class, [SendCrmNotifications::class, 'trialAssessed']);
         Event::listen(TrialCancelledByFamily::class, [SendCrmNotifications::class, 'trialCancelled']);
+        // After the trial (J2): the family's report (and the offer made with it), a missed trial, an apology with a new time.
+        Event::listen(TrialAssessed::class, [TellFamilyAfterTrial::class, 'assessed']);
+        Event::listen(TrialMissed::class, [TellFamilyAfterTrial::class, 'missed']);
+        Event::listen(TrialCancelledByAcademy::class, [TellFamilyAfterTrial::class, 'cancelled']);
         // The page's request follows its lead (one status).
         Event::listen(LeadStageChanged::class, [FollowSiteRequests::class, 'stageChanged']);
 
@@ -85,7 +92,7 @@ final class CrmServiceProvider extends ServiceProvider
             $this->commands([FollowUpLeadsCommand::class]);
         }
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
-            // Leads nobody answered within the academy's hours, and trials still waiting for their assessment.
+            // Leads nobody answered within the academy's hours, trials still waiting for their assessment, offers ending within a day.
             $schedule->command('crm:follow-up')->hourlyAt(17)->withoutOverlapping()->onOneServer();
         });
     }

@@ -4,11 +4,15 @@ namespace Modules\Billing\Actions\Discounts;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Modules\Billing\Contracts\CouponPurpose;
+use Modules\Billing\Contracts\DTOs\PersonalCoupon;
 use Modules\Billing\Models\Coupon;
 use Modules\Billing\Models\Plan;
 use Modules\SharedKernel\Audit\AuditTrail;
 use Modules\SharedKernel\Money\Money;
+use Modules\SharedKernel\Tenancy\TenantContext;
 use Throwable;
 
 /**
@@ -27,6 +31,10 @@ final class SaveCoupon
     {
         return DB::transaction(function () use ($couponId, $data, $actorId) {
             $coupon = $couponId === null ? new Coupon(['created_by' => $actorId]) : Coupon::query()->lockForUpdate()->findOrFail($couponId);
+            if ($coupon->isPersonal()) {
+                // A family's own offer keeps what it was promised: the academy's rules made it, staff do not edit it.
+                throw ValidationException::withMessages(['code' => __('billing::discounts.errors.personal')]);
+            }
             $values = $this->values($data);
 
             if ($coupon->exists && $coupon->uses() > 0) {
@@ -48,6 +56,52 @@ final class SaveCoupon
                 'max_uses' => $coupon->max_uses,
                 'active' => $coupon->is_active,
             ], fn ($v) => $v !== null));
+
+            return $coupon;
+        });
+    }
+
+    /**
+     * A personal coupon (a trial offer): a percentage off the first invoice
+     * of one course, for one payer, once, until a moment (its day on the
+     * academy's calendar is its ends_on). Any plan; never on top of the
+     * family discount (the bigger of the two applies). Its code is random
+     * and never needs typing. Audited like any coupon.
+     */
+    public function personal(PersonalCoupon $new): Coupon
+    {
+        if ($new->percentBp < 1 || $new->percentBp > 10_000 || ! $new->expiresAt->isFuture() || $new->purpose === CouponPurpose::General) {
+            throw ValidationException::withMessages(['percent' => __('billing::discounts.errors.percent')]);
+        }
+
+        return DB::transaction(function () use ($new) {
+            do {
+                $code = 'TRIAL-'.strtoupper(Str::random(10));
+            } while (Coupon::query()->where('code', $code)->exists());
+            $coupon = Coupon::query()->create([
+                'code' => $code,
+                'name' => mb_substr($new->name, 0, 80),
+                'kind' => 'percent',
+                'percent_bp' => $new->percentBp,
+                'blocks' => 1,
+                'starts_on' => null,
+                'ends_on' => $new->expiresAt->setTimezone(app(TenantContext::class)->require()->defaultTimezone)->toDateString(),
+                'max_uses' => 1,
+                'plan_ids' => [],
+                'with_sibling' => false,
+                'is_active' => true,
+                'created_by' => $new->actorId,
+                'purpose' => $new->purpose,
+                'payer_id' => $new->payerId,
+                'expires_at' => $new->expiresAt->utc(),
+            ]);
+            app(AuditTrail::class)->record('billing.coupon_saved', 'coupon', $coupon->id, [
+                'code' => $coupon->code,
+                'value' => $coupon->valueLabel(),
+                'blocks' => 1,
+                'max_uses' => 1,
+                'active' => true,
+            ]);
 
             return $coupon;
         });

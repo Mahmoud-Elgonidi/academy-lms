@@ -9,6 +9,7 @@ use Modules\Billing\Actions\BuyExtraLessons;
 use Modules\Billing\Actions\CloseEndedCourse;
 use Modules\Billing\Actions\Discounts\ApplyCoupon;
 use Modules\Billing\Actions\Discounts\RemoveCoupon;
+use Modules\Billing\Actions\Discounts\SaveCoupon;
 use Modules\Billing\Actions\RecordPayment;
 use Modules\Billing\Actions\SavePlan;
 use Modules\Billing\Actions\SubscribeEnrollment;
@@ -18,10 +19,14 @@ use Modules\Billing\Contracts\DTOs\EndedCourseBilling;
 use Modules\Billing\Contracts\DTOs\IssuedInvoice;
 use Modules\Billing\Contracts\DTOs\NewPlan;
 use Modules\Billing\Contracts\DTOs\NewSubscription;
+use Modules\Billing\Contracts\DTOs\PersonalCoupon;
+use Modules\Billing\Contracts\DTOs\PersonalCouponState;
 use Modules\Billing\Contracts\DTOs\PlanOption;
 use Modules\Billing\Contracts\DTOs\PriceQuote;
 use Modules\Billing\Contracts\DTOs\RegionOption;
 use Modules\Billing\Contracts\DTOs\SharedPackage;
+use Modules\Billing\Models\BillingAccount;
+use Modules\Billing\Models\Coupon;
 use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PlanPrice;
 use Modules\Billing\Models\PriceRegion;
@@ -119,6 +124,43 @@ final class BillingService implements BillingApi
         return PriceRegion::query()->orderByDesc('is_default')->orderBy('sort')->get()
             ->map(fn (PriceRegion $r) => new RegionOption($r->id, $r->name(), $r->currency, $r->is_default, array_values($r->countries ?? [])))
             ->all();
+    }
+
+    public function priceRegionFor(?string $payerId, ?string $country): ?RegionOption
+    {
+        $regions = collect($this->regions());
+        $paying = $payerId === null ? null : BillingAccount::query()->where('payer_id', $payerId)->orderBy('created_at')->value('price_region_id');
+        $country = $country === null ? null : strtoupper($country);
+
+        return $regions->first(fn (RegionOption $r) => $r->id === $paying)
+            ?? ($country !== null ? $regions->first(fn (RegionOption $r) => in_array($country, $r->countries, true)) : null)
+            ?? $regions->first(fn (RegionOption $r) => $r->isDefault)
+            ?? $regions->first();
+    }
+
+    public function issuePersonalCoupon(PersonalCoupon $coupon): PersonalCouponState
+    {
+        return self::couponState(app(SaveCoupon::class)->personal($coupon));
+    }
+
+    public function personalCoupon(string $couponId): ?PersonalCouponState
+    {
+        $coupon = Coupon::query()->whereKey($couponId)->whereNotNull('payer_id')->first();
+
+        return $coupon === null ? null : self::couponState($coupon);
+    }
+
+    private static function couponState(Coupon $coupon): PersonalCouponState
+    {
+        return new PersonalCouponState(
+            id: $coupon->id,
+            code: $coupon->code,
+            payerId: (string) $coupon->payer_id,
+            percentBp: (int) $coupon->percent_bp,
+            expiresAt: $coupon->expires_at ?? CarbonImmutable::now(),
+            used: $coupon->uses() > 0,
+            active: $coupon->is_active,
+        );
     }
 
     public function quote(string $planId, string $priceRegionId, string $payerId, string $studentId, ?string $couponCode = null, int $lateJoinLessons = 0): ?PriceQuote

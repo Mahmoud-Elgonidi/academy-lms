@@ -9,7 +9,10 @@ use Modules\Crm\Models\LeadTrial;
 /**
  * A teacher's trial lessons: to assess (attended, no assessment yet), coming
  * up, and assessed in the last 30 days (latest first). No contact details:
- * the learner's name, age and what the family asked for.
+ * the learner's name, age and what the family asked for; the assessment
+ * with what the family reads of it (level, strengths, what to work on, the
+ * teacher's words, the plan and lessons a week) and the notes for the
+ * academy alone.
  */
 final class TeacherTrials
 {
@@ -51,6 +54,10 @@ final class TeacherTrials
                 'plan' => $t->recommended_plan_id ? ($plans[$t->recommended_plan_id]->name ?? null) : null,
                 'per_week' => $t->recommended_per_week,
                 'assessment' => $t->assessment,
+                'strengths' => $t->strengths,
+                'to_work_on' => $t->to_work_on,
+                'family_note' => $t->family_note,
+                'kind' => $t->kind,
             ];
         }
         $groups['done'] = array_reverse($groups['done']);

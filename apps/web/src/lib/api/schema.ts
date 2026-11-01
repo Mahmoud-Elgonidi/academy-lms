@@ -398,7 +398,8 @@ export interface paths {
         };
         /**
          * My trial lessons
-         * @description to_assess, upcoming, and done (assessed in the last 30 days); plans are what an assessment may recommend.
+         * @description to_assess, upcoming, and done (assessed in the last 30 days); plans are what an assessment may recommend;
+         *     family_reads names the assessment's fields the family reads in the trial's report (notes are the academy's alone).
          */
         get: operations["teacher.trials"];
         put?: never;
@@ -419,7 +420,9 @@ export interface paths {
         get?: never;
         /**
          * Assess a trial
-         * @description After the trial took place: the level, what to recommend, and notes for the sales team. Again to correct it.
+         * @description After the trial took place. For the family's report: the level, strengths, to_work_on, family_note (the teacher's words to
+         *     the family), the plan and lessons a week to recommend; notes are for the academy alone. Again to correct it: a family field
+         *     left out keeps what it said, and the family gets no second message (their report reads what it says now).
          */
         put: operations["teacher.trials.assess"];
         post?: never;
@@ -511,6 +514,213 @@ export interface paths {
          * @description starts_at: one of the times `slots` offered for the request. No code: the link went to the number they gave.
          */
         post: operations["site.trials.pick.book"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/site/trials/report/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A free trial's report, from the family's link
+         * @description The level, strengths, what to work on and the teacher's words; the recommended plan with its price in the family's region;
+         *     the academy's offer while it is open (its end and the price after it); a course already started; and the free second trial
+         *     with another teacher while the academy gives one. 404 for a link that is not this academy's or names no report; 410 once it ended.
+         */
+        get: operations["site.trials.report"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/site/trials/report/{token}/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Times for the free second trial, from the report's link
+         * @description With any teacher but the first one, who teaches the subject and the learner's age, on the family's clock, over 14 days from `from`.
+         *     422 with why it cannot be booked (the family's words: what to do instead).
+         */
+        get: operations["site.trials.report.slots"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/site/trials/report/{token}/book": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Book the free second trial, from the report's link
+         * @description starts_at: one of the times offered. No code: the link went to the family's number. The family hears the time and its links.
+         */
+        post: operations["site.trials.report.book"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/site/trials/rebook/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A trial that did not take place, from the family's "book again" link
+         * @description Who, what and when it was, why (the learner missed it, or the teacher or the academy could not hold it: then it does not
+         *     count as the family's free trial), and whether a new time may be booked. 410 once a new time is booked or the link ended.
+         */
+        get: operations["site.trials.rebook"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/site/trials/rebook/{token}/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Times for a new trial, from the "book again" link
+         * @description The subject's teachers for the learner, on the family's clock, over 14 days from `from`. 422 with why it cannot be booked.
+         */
+        get: operations["site.trials.rebook.slots"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/site/trials/rebook/{token}/book": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Book a new trial, from the "book again" link
+         * @description starts_at: one of the times offered. No code: the link went to the family's number. The family hears the time and its links.
+         */
+        post: operations["site.trials.rebook.book"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/trials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A learner's free trials
+         * @description Latest first: the subject, when, the teacher's first name, how it went, whether its report is ready, and (classic look)
+         *     one more trial it allows with why not.
+         */
+        get: operations["family.trials"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/trials/{session}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A free trial's report
+         * @description As the family's link shows it (GET site/trials/report/{token}); in a look other than classic, without prices, the offer or the
+         *     second trial. Not found until the trial took place and was assessed.
+         */
+        get: operations["family.trials.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/trials/{session}/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Times for one more free trial from this one
+         * @description The second trial (any teacher but the first) after a report, or a new time after a trial that did not take place; on the
+         *     viewer's clock over 14 days from `from`. 422 with why it cannot be booked; 403 outside the classic look.
+         */
+        get: operations["family.trials.slots"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/trials/{session}/book": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Book one more free trial from this one
+         * @description starts_at: one of the times offered. Send an Idempotency-Key. The family hears the time and its links; 422 with why not.
+         */
+        post: operations["family.trials.book"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4743,6 +4953,9 @@ export interface operations {
                     plan_id?: string | null;
                     per_week?: number | null;
                     notes: string;
+                    strengths?: string | null;
+                    to_work_on?: string | null;
+                    family_note?: string | null;
                 };
             };
         };
@@ -5060,6 +5273,777 @@ export interface operations {
                     };
                 };
             };
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "site.trials.report": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The trial lesson's id (the family's trials are named by their lesson). */
+                            id: string;
+                            /** @description The learner's first name. */
+                            learner: string;
+                            subject: {
+                                id: string;
+                                name: string;
+                            };
+                            held_at: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            /** @description This was the free second trial, with another teacher. */
+                            second: boolean;
+                            teacher: {
+                                /** @description The teacher's first name, with a title before it ("أ. منى"). */
+                                name: string;
+                                /** @description Their card on the academy's page, when it shows one: the name they chose, a few words, a photo. */
+                                card: {
+                                    name: string;
+                                    bio: string | null;
+                                    photo_url: string | null;
+                                } | null;
+                            };
+                            /** @description What the teacher found, in their words for the family. */
+                            level: string;
+                            strengths: string | null;
+                            to_work_on: string | null;
+                            /** @description The teacher's words to the family. */
+                            note: string | null;
+                            recommendation: {
+                                /** @description The plan the teacher recommends; null when none, or the academy no longer offers it (plan_withdrawn). */
+                                plan: {
+                                    id: string;
+                                    name: string;
+                                    /**
+                                     * @description private (one student a lesson) or group.
+                                     * @enum {string}
+                                     */
+                                    format: "group" | "private";
+                                    session_minutes: number;
+                                    sessions_per_week: number;
+                                    sessions_per_block: number;
+                                    validity_days: number;
+                                } | null;
+                                plan_withdrawn: boolean;
+                                per_week: number | null;
+                                /** @description The plan's block price in the family's region, today (classic look only; null when unknown). */
+                                price: {
+                                    price: string;
+                                    amount_minor: number;
+                                    currency: string;
+                                } | null;
+                                region: {
+                                    id: string;
+                                    name: string;
+                                    currency: string;
+                                } | null;
+                            };
+                            /** @description The learner's course in this subject that has not ended (pending_payment, active, paused): they have started, so no offer. */
+                            course: {
+                                status: string;
+                            } | null;
+                            /**
+                             * @description The academy's offer: open, ended (its time passed), used, started (a course began) or none (classic look only).
+                             * @enum {string}
+                             */
+                            offer_state: "ended" | "used" | "open" | "started" | "none";
+                            offer: {
+                                /** @description What the offer takes off, as promised when it was made. */
+                                percent: number;
+                                /** @description When it ends: the report shows the time left. */
+                                ends_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: string;
+                                    label: string;
+                                } | null;
+                                /** @description The recommended plan's first block with the offer (and the family discount, whichever is bigger); null without a plan or a price. */
+                                price: {
+                                    price: string;
+                                    amount_minor: number;
+                                    currency: string;
+                                } | null;
+                                /** @description How much less than without the offer. */
+                                saving: {
+                                    price: string;
+                                    amount_minor: number;
+                                    currency: string;
+                                } | null;
+                                /** @description The family discount is bigger than the offer, so it applies instead (they never add up). */
+                                family_discount_bigger: string;
+                            } | null;
+                            /** @description The free second trial with another teacher, when the academy gives one (classic look only). */
+                            next_trial: {
+                                /** @constant */
+                                kind: "second";
+                                /** @description Whether it may be booked now. */
+                                available: boolean;
+                                /** @description Why not, in the family's words (what to do instead); null when it may be booked. */
+                                why_not: string | null;
+                                /** @description The last moment to book it (SECOND_WITHIN_DAYS after the first trial). */
+                                until: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: string;
+                                    label: string;
+                                } | null;
+                            } | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    "site.trials.report.slots": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            starts_at: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                        }[];
+                    };
+                };
+            };
+        };
+    };
+    "site.trials.report.book": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The new trial lesson's id. */
+                            id: string;
+                            starts_at: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            subject: string;
+                            /** @description The teacher's first name only (with a title before it, as "أ. منى"). */
+                            teacher: string;
+                            /** @description How long the lesson is, in minutes. */
+                            minutes: number;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    "site.trials.rebook": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The learner's first name. */
+                            learner: string;
+                            subject: {
+                                id: string;
+                                name: string;
+                            };
+                            was_at: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            /** @description student_absent (the learner missed it), teacher_absent or academy (not the family's doing: it does not count as their free trial). */
+                            outcome: string;
+                            /** @description Whether a new time may be booked now. */
+                            available: boolean;
+                            /** @description Why not, in the family's words (what to do instead); null when it may be booked. */
+                            why_not: string | null;
+                            /** @description Their clock (IANA), for the times. */
+                            timezone: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    "site.trials.rebook.slots": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            starts_at: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                        }[];
+                    };
+                };
+            };
+        };
+    };
+    "site.trials.rebook.book": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The new trial lesson's id. */
+                            id: string;
+                            starts_at: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            subject: string;
+                            /** @description The teacher's first name only (with a title before it, as "أ. منى"). */
+                            teacher: string;
+                            /** @description How long the lesson is, in minutes. */
+                            minutes: number;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    "family.trials": {
+        parameters: {
+            query?: {
+                learner_id?: string | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        learner: {
+                            id: string;
+                            name: string;
+                        };
+                        /** @description The viewer's look: kids, middle, teen or classic (prices, the offer and booking only in classic). */
+                        viewer_stage: string;
+                        data: {
+                            /** @description The trial lesson's id: its report is family/trials/{id}. */
+                            id: string;
+                            subject: {
+                                id: string;
+                                name: string;
+                            };
+                            starts_at: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            /** @description The teacher's first name, with a title before it. */
+                            teacher: string;
+                            /** @description first, rebook (booked again after one that did not take place) or second (the free second trial). */
+                            kind: string;
+                            /** @description booked (to come), attended, missed or cancelled. */
+                            status: string;
+                            /** @description Why it did not take place: student_absent, teacher_absent (missed); family, academy (cancelled); else null. */
+                            outcome: string | null;
+                            /** @description Its report is ready to read. */
+                            report_ready: boolean;
+                            /** @description One more trial it allows (classic look only), or null. */
+                            next: {
+                                /**
+                                 * @description second (with another teacher) or rebook (after one that did not take place).
+                                 * @enum {string|null}
+                                 */
+                                kind: "second" | "rebook" | null;
+                                available: boolean;
+                                /** @description Why not, in the family's words (what to do instead); null when it may be booked. */
+                                why_not: string | null;
+                            } | null;
+                        }[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.trials.show": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                session: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        viewer_stage: string;
+                        data: {
+                            /** @description The trial lesson's id (the family's trials are named by their lesson). */
+                            id: string;
+                            /** @description The learner's first name. */
+                            learner: string;
+                            subject: {
+                                id: string;
+                                name: string;
+                            };
+                            held_at: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            /** @description This was the free second trial, with another teacher. */
+                            second: boolean;
+                            teacher: {
+                                /** @description The teacher's first name, with a title before it ("أ. منى"). */
+                                name: string;
+                                /** @description Their card on the academy's page, when it shows one: the name they chose, a few words, a photo. */
+                                card: {
+                                    name: string;
+                                    bio: string | null;
+                                    photo_url: string | null;
+                                } | null;
+                            };
+                            /** @description What the teacher found, in their words for the family. */
+                            level: string;
+                            strengths: string | null;
+                            to_work_on: string | null;
+                            /** @description The teacher's words to the family. */
+                            note: string | null;
+                            recommendation: {
+                                /** @description The plan the teacher recommends; null when none, or the academy no longer offers it (plan_withdrawn). */
+                                plan: {
+                                    id: string;
+                                    name: string;
+                                    /**
+                                     * @description private (one student a lesson) or group.
+                                     * @enum {string}
+                                     */
+                                    format: "group" | "private";
+                                    session_minutes: number;
+                                    sessions_per_week: number;
+                                    sessions_per_block: number;
+                                    validity_days: number;
+                                } | null;
+                                plan_withdrawn: boolean;
+                                per_week: number | null;
+                                /** @description The plan's block price in the family's region, today (classic look only; null when unknown). */
+                                price: {
+                                    price: string;
+                                    amount_minor: number;
+                                    currency: string;
+                                } | null;
+                                region: {
+                                    id: string;
+                                    name: string;
+                                    currency: string;
+                                } | null;
+                            };
+                            /** @description The learner's course in this subject that has not ended (pending_payment, active, paused): they have started, so no offer. */
+                            course: {
+                                status: string;
+                            } | null;
+                            /**
+                             * @description The academy's offer: open, ended (its time passed), used, started (a course began) or none (classic look only).
+                             * @enum {string}
+                             */
+                            offer_state: "ended" | "used" | "open" | "started" | "none";
+                            offer: {
+                                /** @description What the offer takes off, as promised when it was made. */
+                                percent: number;
+                                /** @description When it ends: the report shows the time left. */
+                                ends_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: string;
+                                    label: string;
+                                } | null;
+                                /** @description The recommended plan's first block with the offer (and the family discount, whichever is bigger); null without a plan or a price. */
+                                price: {
+                                    price: string;
+                                    amount_minor: number;
+                                    currency: string;
+                                } | null;
+                                /** @description How much less than without the offer. */
+                                saving: {
+                                    price: string;
+                                    amount_minor: number;
+                                    currency: string;
+                                } | null;
+                                /** @description The family discount is bigger than the offer, so it applies instead (they never add up). */
+                                family_discount_bigger: string;
+                            } | null;
+                            /** @description The free second trial with another teacher, when the academy gives one (classic look only). */
+                            next_trial: {
+                                /** @constant */
+                                kind: "second";
+                                /** @description Whether it may be booked now. */
+                                available: boolean;
+                                /** @description Why not, in the family's words (what to do instead); null when it may be booked. */
+                                why_not: string | null;
+                                /** @description The last moment to book it (SECOND_WITHIN_DAYS after the first trial). */
+                                until: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: string;
+                                    label: string;
+                                } | null;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "family.trials.slots": {
+        parameters: {
+            query?: {
+                from?: string | null;
+                timezone?: "Africa/Abidjan" | "Africa/Accra" | "Africa/Addis_Ababa" | "Africa/Algiers" | "Africa/Asmara" | "Africa/Bamako" | "Africa/Bangui" | "Africa/Banjul" | "Africa/Bissau" | "Africa/Blantyre" | "Africa/Brazzaville" | "Africa/Bujumbura" | "Africa/Cairo" | "Africa/Casablanca" | "Africa/Ceuta" | "Africa/Conakry" | "Africa/Dakar" | "Africa/Dar_es_Salaam" | "Africa/Djibouti" | "Africa/Douala" | "Africa/El_Aaiun" | "Africa/Freetown" | "Africa/Gaborone" | "Africa/Harare" | "Africa/Johannesburg" | "Africa/Juba" | "Africa/Kampala" | "Africa/Khartoum" | "Africa/Kigali" | "Africa/Kinshasa" | "Africa/Lagos" | "Africa/Libreville" | "Africa/Lome" | "Africa/Luanda" | "Africa/Lubumbashi" | "Africa/Lusaka" | "Africa/Malabo" | "Africa/Maputo" | "Africa/Maseru" | "Africa/Mbabane" | "Africa/Mogadishu" | "Africa/Monrovia" | "Africa/Nairobi" | "Africa/Ndjamena" | "Africa/Niamey" | "Africa/Nouakchott" | "Africa/Ouagadougou" | "Africa/Porto-Novo" | "Africa/Sao_Tome" | "Africa/Tripoli" | "Africa/Tunis" | "Africa/Windhoek" | "America/Adak" | "America/Anchorage" | "America/Anguilla" | "America/Antigua" | "America/Araguaina" | "America/Argentina/Buenos_Aires" | "America/Argentina/Catamarca" | "America/Argentina/Cordoba" | "America/Argentina/Jujuy" | "America/Argentina/La_Rioja" | "America/Argentina/Mendoza" | "America/Argentina/Rio_Gallegos" | "America/Argentina/Salta" | "America/Argentina/San_Juan" | "America/Argentina/San_Luis" | "America/Argentina/Tucuman" | "America/Argentina/Ushuaia" | "America/Aruba" | "America/Asuncion" | "America/Atikokan" | "America/Bahia" | "America/Bahia_Banderas" | "America/Barbados" | "America/Belem" | "America/Belize" | "America/Blanc-Sablon" | "America/Boa_Vista" | "America/Bogota" | "America/Boise" | "America/Cambridge_Bay" | "America/Campo_Grande" | "America/Cancun" | "America/Caracas" | "America/Cayenne" | "America/Cayman" | "America/Chicago" | "America/Chihuahua" | "America/Ciudad_Juarez" | "America/Costa_Rica" | "America/Coyhaique" | "America/Creston" | "America/Cuiaba" | "America/Curacao" | "America/Danmarkshavn" | "America/Dawson" | "America/Dawson_Creek" | "America/Denver" | "America/Detroit" | "America/Dominica" | "America/Edmonton" | "America/Eirunepe" | "America/El_Salvador" | "America/Fort_Nelson" | "America/Fortaleza" | "America/Glace_Bay" | "America/Goose_Bay" | "America/Grand_Turk" | "America/Grenada" | "America/Guadeloupe" | "America/Guatemala" | "America/Guayaquil" | "America/Guyana" | "America/Halifax" | "America/Havana" | "America/Hermosillo" | "America/Indiana/Indianapolis" | "America/Indiana/Knox" | "America/Indiana/Marengo" | "America/Indiana/Petersburg" | "America/Indiana/Tell_City" | "America/Indiana/Vevay" | "America/Indiana/Vincennes" | "America/Indiana/Winamac" | "America/Inuvik" | "America/Iqaluit" | "America/Jamaica" | "America/Juneau" | "America/Kentucky/Louisville" | "America/Kentucky/Monticello" | "America/Kralendijk" | "America/La_Paz" | "America/Lima" | "America/Los_Angeles" | "America/Lower_Princes" | "America/Maceio" | "America/Managua" | "America/Manaus" | "America/Marigot" | "America/Martinique" | "America/Matamoros" | "America/Mazatlan" | "America/Menominee" | "America/Merida" | "America/Metlakatla" | "America/Mexico_City" | "America/Miquelon" | "America/Moncton" | "America/Monterrey" | "America/Montevideo" | "America/Montserrat" | "America/Nassau" | "America/New_York" | "America/Nome" | "America/Noronha" | "America/North_Dakota/Beulah" | "America/North_Dakota/Center" | "America/North_Dakota/New_Salem" | "America/Nuuk" | "America/Ojinaga" | "America/Panama" | "America/Paramaribo" | "America/Phoenix" | "America/Port-au-Prince" | "America/Port_of_Spain" | "America/Porto_Velho" | "America/Puerto_Rico" | "America/Punta_Arenas" | "America/Rankin_Inlet" | "America/Recife" | "America/Regina" | "America/Resolute" | "America/Rio_Branco" | "America/Santarem" | "America/Santiago" | "America/Santo_Domingo" | "America/Sao_Paulo" | "America/Scoresbysund" | "America/Sitka" | "America/St_Barthelemy" | "America/St_Johns" | "America/St_Kitts" | "America/St_Lucia" | "America/St_Thomas" | "America/St_Vincent" | "America/Swift_Current" | "America/Tegucigalpa" | "America/Thule" | "America/Tijuana" | "America/Toronto" | "America/Tortola" | "America/Vancouver" | "America/Whitehorse" | "America/Winnipeg" | "America/Yakutat" | "Antarctica/Casey" | "Antarctica/Davis" | "Antarctica/DumontDUrville" | "Antarctica/Macquarie" | "Antarctica/Mawson" | "Antarctica/McMurdo" | "Antarctica/Palmer" | "Antarctica/Rothera" | "Antarctica/Syowa" | "Antarctica/Troll" | "Antarctica/Vostok" | "Arctic/Longyearbyen" | "Asia/Aden" | "Asia/Almaty" | "Asia/Amman" | "Asia/Anadyr" | "Asia/Aqtau" | "Asia/Aqtobe" | "Asia/Ashgabat" | "Asia/Atyrau" | "Asia/Baghdad" | "Asia/Bahrain" | "Asia/Baku" | "Asia/Bangkok" | "Asia/Barnaul" | "Asia/Beirut" | "Asia/Bishkek" | "Asia/Brunei" | "Asia/Chita" | "Asia/Colombo" | "Asia/Damascus" | "Asia/Dhaka" | "Asia/Dili" | "Asia/Dubai" | "Asia/Dushanbe" | "Asia/Famagusta" | "Asia/Gaza" | "Asia/Hebron" | "Asia/Ho_Chi_Minh" | "Asia/Hong_Kong" | "Asia/Hovd" | "Asia/Irkutsk" | "Asia/Jakarta" | "Asia/Jayapura" | "Asia/Jerusalem" | "Asia/Kabul" | "Asia/Kamchatka" | "Asia/Karachi" | "Asia/Kathmandu" | "Asia/Khandyga" | "Asia/Kolkata" | "Asia/Krasnoyarsk" | "Asia/Kuala_Lumpur" | "Asia/Kuching" | "Asia/Kuwait" | "Asia/Macau" | "Asia/Magadan" | "Asia/Makassar" | "Asia/Manila" | "Asia/Muscat" | "Asia/Nicosia" | "Asia/Novokuznetsk" | "Asia/Novosibirsk" | "Asia/Omsk" | "Asia/Oral" | "Asia/Phnom_Penh" | "Asia/Pontianak" | "Asia/Pyongyang" | "Asia/Qatar" | "Asia/Qostanay" | "Asia/Qyzylorda" | "Asia/Riyadh" | "Asia/Sakhalin" | "Asia/Samarkand" | "Asia/Seoul" | "Asia/Shanghai" | "Asia/Singapore" | "Asia/Srednekolymsk" | "Asia/Taipei" | "Asia/Tashkent" | "Asia/Tbilisi" | "Asia/Tehran" | "Asia/Thimphu" | "Asia/Tokyo" | "Asia/Tomsk" | "Asia/Ulaanbaatar" | "Asia/Urumqi" | "Asia/Ust-Nera" | "Asia/Vientiane" | "Asia/Vladivostok" | "Asia/Yakutsk" | "Asia/Yangon" | "Asia/Yekaterinburg" | "Asia/Yerevan" | "Atlantic/Azores" | "Atlantic/Bermuda" | "Atlantic/Canary" | "Atlantic/Cape_Verde" | "Atlantic/Faroe" | "Atlantic/Madeira" | "Atlantic/Reykjavik" | "Atlantic/South_Georgia" | "Atlantic/St_Helena" | "Atlantic/Stanley" | "Australia/Adelaide" | "Australia/Brisbane" | "Australia/Broken_Hill" | "Australia/Darwin" | "Australia/Eucla" | "Australia/Hobart" | "Australia/Lindeman" | "Australia/Lord_Howe" | "Australia/Melbourne" | "Australia/Perth" | "Australia/Sydney" | "Europe/Amsterdam" | "Europe/Andorra" | "Europe/Astrakhan" | "Europe/Athens" | "Europe/Belgrade" | "Europe/Berlin" | "Europe/Bratislava" | "Europe/Brussels" | "Europe/Bucharest" | "Europe/Budapest" | "Europe/Busingen" | "Europe/Chisinau" | "Europe/Copenhagen" | "Europe/Dublin" | "Europe/Gibraltar" | "Europe/Guernsey" | "Europe/Helsinki" | "Europe/Isle_of_Man" | "Europe/Istanbul" | "Europe/Jersey" | "Europe/Kaliningrad" | "Europe/Kirov" | "Europe/Kyiv" | "Europe/Lisbon" | "Europe/Ljubljana" | "Europe/London" | "Europe/Luxembourg" | "Europe/Madrid" | "Europe/Malta" | "Europe/Mariehamn" | "Europe/Minsk" | "Europe/Monaco" | "Europe/Moscow" | "Europe/Oslo" | "Europe/Paris" | "Europe/Podgorica" | "Europe/Prague" | "Europe/Riga" | "Europe/Rome" | "Europe/Samara" | "Europe/San_Marino" | "Europe/Sarajevo" | "Europe/Saratov" | "Europe/Simferopol" | "Europe/Skopje" | "Europe/Sofia" | "Europe/Stockholm" | "Europe/Tallinn" | "Europe/Tirane" | "Europe/Ulyanovsk" | "Europe/Vaduz" | "Europe/Vatican" | "Europe/Vienna" | "Europe/Vilnius" | "Europe/Volgograd" | "Europe/Warsaw" | "Europe/Zagreb" | "Europe/Zurich" | "Indian/Antananarivo" | "Indian/Chagos" | "Indian/Christmas" | "Indian/Cocos" | "Indian/Comoro" | "Indian/Kerguelen" | "Indian/Mahe" | "Indian/Maldives" | "Indian/Mauritius" | "Indian/Mayotte" | "Indian/Reunion" | "Pacific/Apia" | "Pacific/Auckland" | "Pacific/Bougainville" | "Pacific/Chatham" | "Pacific/Chuuk" | "Pacific/Easter" | "Pacific/Efate" | "Pacific/Fakaofo" | "Pacific/Fiji" | "Pacific/Funafuti" | "Pacific/Galapagos" | "Pacific/Gambier" | "Pacific/Guadalcanal" | "Pacific/Guam" | "Pacific/Honolulu" | "Pacific/Kanton" | "Pacific/Kiritimati" | "Pacific/Kosrae" | "Pacific/Kwajalein" | "Pacific/Majuro" | "Pacific/Marquesas" | "Pacific/Midway" | "Pacific/Nauru" | "Pacific/Niue" | "Pacific/Norfolk" | "Pacific/Noumea" | "Pacific/Pago_Pago" | "Pacific/Palau" | "Pacific/Pitcairn" | "Pacific/Pohnpei" | "Pacific/Port_Moresby" | "Pacific/Rarotonga" | "Pacific/Saipan" | "Pacific/Tahiti" | "Pacific/Tarawa" | "Pacific/Tongatapu" | "Pacific/Wake" | "Pacific/Wallis" | "UTC" | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                session: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            starts_at: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                        }[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.trials.book": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                session: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: date-time */
+                    starts_at: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description The new trial lesson's id. */
+                            id: string;
+                            starts_at: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            subject: string;
+                            /** @description The teacher's first name only (with a title before it, as "أ. منى"). */
+                            teacher: string;
+                            /** @description How long the lesson is, in minutes. */
+                            minutes: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
         };
     };

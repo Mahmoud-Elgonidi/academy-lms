@@ -143,6 +143,9 @@ interface PeopleApi
      */
     public function publicTeachers(): array;
 
+    /** One teacher's card, when it is on the academy's page (the same rules as publicTeachers); null otherwise. */
+    public function publicTeacherOf(string $teacherId): ?PublicTeacher;
+
     /** @return list<TeacherCardSummary> every card the academy's teachers made, for its page settings */
     public function teacherCards(): array;
 

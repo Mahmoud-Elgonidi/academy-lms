@@ -12,7 +12,9 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * Whether a code can go on a subscription now: it exists and is on, today
  * (on the academy's calendar) is within its dates, it has uses left, it is
  * for this plan and, an amount, in this currency, and this payer has not
- * used it before. Says why not, in words for the person typing it.
+ * used it before. A personal coupon (a trial offer) is this payer's alone
+ * and ends at its moment, not only its day. Says why not, in words for the
+ * person typing it.
  */
 final class CouponCheck
 {
@@ -25,8 +27,10 @@ final class CouponCheck
         $today = CarbonImmutable::now($this->tenant->require()->defaultTimezone)->toDateString();
 
         $why = match (true) {
-            $coupon === null => 'not_found',
+            // Someone else's personal offer reads as no such code: it never says it exists, nor whose it is.
+            $coupon === null, $coupon->payer_id !== null && $coupon->payer_id !== $payerId => 'not_found',
             ! $coupon->is_active => 'inactive',
+            $coupon->expires_at !== null && ! $coupon->expires_at->isFuture() => 'expired',
             $coupon->starts_on !== null && $coupon->starts_on->toDateString() > $today => 'not_yet',
             $coupon->ends_on !== null && $coupon->ends_on->toDateString() < $today => 'expired',
             $coupon->max_uses !== null && $coupon->uses() >= $coupon->max_uses => 'used_up',

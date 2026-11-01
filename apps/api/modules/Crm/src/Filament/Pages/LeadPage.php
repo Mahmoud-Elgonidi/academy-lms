@@ -20,6 +20,7 @@ use Modules\Crm\Actions\LogLeadContact;
 use Modules\Crm\Actions\MarkLeadLost;
 use Modules\Crm\Actions\PrepareLearner;
 use Modules\Crm\Actions\ReopenLead;
+use Modules\Crm\Actions\SendTrialReport;
 use Modules\Crm\Actions\UpdateLead;
 use Modules\Crm\Enums\LeadStage;
 use Modules\Crm\Filament\Concerns\Attempts;
@@ -27,6 +28,7 @@ use Modules\Crm\Filament\LeadForm;
 use Modules\Crm\Models\Lead;
 use Modules\Crm\Models\LeadActivity;
 use Modules\Crm\Models\LeadTrial;
+use Modules\Crm\Queries\TrialReport;
 use Modules\Crm\Support\LeadFields;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\SharedKernel\Authorization\Ability;
@@ -129,13 +131,36 @@ final class LeadPage extends Page
         $locale = app()->getLocale();
         $plans = collect(app(BillingApi::class)->planOptions(null))->keyBy('id');
 
-        return LeadTrial::query()->where('lead_id', $lead->id)->orderByDesc('starts_at')->get()->map(function (LeadTrial $t) use ($lead, $locale, $plans) {
+        $viewer = app(ViewerTimezone::class)->effective();
+        $at = fn (?CarbonImmutable $when) => $when?->setTimezone($viewer)->locale($locale)->translatedFormat(Clock::pattern('j F · H:i'));
+        $trials = LeadTrial::query()->where('lead_id', $lead->id)->orderByDesc('starts_at')->get();
+        $billing = app(BillingApi::class);
+
+        return $trials->map(function (LeadTrial $t) use ($lead, $locale, $plans, $at, $trials, $billing) {
             $teacher = DB::table('users')->where('id', $t->teacher_id)->first(['name', 'timezone']);
+            $percent = $t->offer_percent_bp !== null ? $t->offer_percent_bp / 100 : null;
+            $coupon = $t->offer_coupon_id !== null ? $billing->personalCoupon($t->offer_coupon_id) : null;
+            $offer = match (true) {
+                $coupon === null => null,
+                $coupon->used => __('crm::leads.page.offer.used', ['percent' => $percent]),
+                $coupon->open() => __('crm::leads.page.offer.open', ['percent' => $percent, 'until' => $at($t->offer_ends_at)])
+                    .($t->offer_reminded_at !== null ? ' · '.__('crm::leads.page.offer.reminded') : ''),
+                default => __('crm::leads.page.offer.ended', ['percent' => $percent, 'until' => $at($t->offer_ends_at)]),
+            };
+            $follows = $t->follows_trial_id !== null ? $trials->firstWhere('id', $t->follows_trial_id) : null;
 
             return [
                 'id' => $t->id,
                 'status' => $t->status,
-                'statusLabel' => __('crm::trials.statuses.'.$t->status),
+                'statusLabel' => __('crm::trials.statuses.'.$t->status).($t->outcome !== null ? ' · '.__('crm::trials.outcomes.'.$t->outcome) : ''),
+                'kindLabel' => $t->kind !== 'first' ? __('crm::trials.kinds.'.$t->kind) : null,
+                'follows' => $follows !== null ? $follows->starts_at->setTimezone($lead->timezone)->locale($locale)->translatedFormat('j F') : null,
+                'strengths' => $t->strengths,
+                'to_work_on' => $t->to_work_on,
+                'family_note' => $t->family_note,
+                'report' => $t->report_sent_at !== null ? __('crm::leads.page.report_sent', ['when' => $at($t->report_sent_at)]) : __('crm::leads.page.report_not_sent'),
+                'offer' => $offer,
+                'canResend' => TrialReport::ready($t),
                 'teacher' => $teacher->name ?? '',
                 'their' => $t->starts_at->setTimezone($lead->timezone)->locale($locale)->translatedFormat(Clock::pattern('l j F · H:i')),
                 'teacherAt' => $t->starts_at->setTimezone($teacher->timezone ?? 'UTC')->locale($locale)->translatedFormat(Clock::pattern('H:i')).' '.Timezones::city($teacher->timezone ?? 'UTC'),
@@ -171,6 +196,7 @@ final class LeadPage extends Page
                 'trial_moved' => __($l.'activity.trial_moved', ['when' => $at($a->data['at'] ?? null)]),
                 'trial_missed' => __($l.'activity.trial_missed', ['outcome' => __('crm::trials.outcomes.'.($a->data['outcome'] ?? 'cancelled'))]),
                 'assessed' => __($l.'activity.assessed', ['level' => $a->data['level'] ?? '']),
+                'offer_made' => __($l.'activity.offer_made', ['percent' => $a->data['percent'] ?? '', 'until' => $at($a->data['until'] ?? null)]),
                 'lost' => __($l.'activity.lost', ['reason' => __($l.'lost_reasons.'.($a->data['reason'] ?? 'other'))]),
                 default => __($l.'activity.'.$a->kind),
             },
@@ -194,6 +220,22 @@ final class LeadPage extends Page
         $this->body = '';
         $this->refreshLead();
         Notification::make()->success()->title(__('crm::leads.page.logged'))->send();
+    }
+
+    /** The trial's report to the family again (a new link), from its card. */
+    public function resendReportAction(): Action
+    {
+        $l = 'crm::leads.page.';
+
+        return Action::make('resendReport')->label(__($l.'resend'))->icon(Heroicon::OutlinedPaperAirplane)
+            ->link()->size('sm')
+            ->requiresConfirmation()->modalHeading(__($l.'resend_heading'))->modalDescription(__($l.'resend_body'))
+            ->action(function (array $arguments, Action $action) use ($l) {
+                $trial = LeadTrial::query()->with('lead')->where('lead_id', $this->leadId)->findOrFail($arguments['trial'] ?? null);
+                $this->attempt($action, fn () => app(SendTrialReport::class)->handle($trial, (string) auth()->id(), again: true));
+                $this->refreshLead();
+                Notification::make()->success()->title(__($l.'resent'))->send();
+            });
     }
 
     protected function getHeaderActions(): array

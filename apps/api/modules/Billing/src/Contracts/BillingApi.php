@@ -8,6 +8,8 @@ use Modules\Billing\Contracts\DTOs\EndedCourseBilling;
 use Modules\Billing\Contracts\DTOs\IssuedInvoice;
 use Modules\Billing\Contracts\DTOs\NewPlan;
 use Modules\Billing\Contracts\DTOs\NewSubscription;
+use Modules\Billing\Contracts\DTOs\PersonalCoupon;
+use Modules\Billing\Contracts\DTOs\PersonalCouponState;
 use Modules\Billing\Contracts\DTOs\PlanOption;
 use Modules\Billing\Contracts\DTOs\PriceQuote;
 use Modules\Billing\Contracts\DTOs\RegionOption;
@@ -42,6 +44,24 @@ interface BillingApi
 
     /** @return list<RegionOption> */
     public function regions(): array;
+
+    /**
+     * The price region a family's prices are in: the one the payer already
+     * pays in (their billing account), else the one naming their country,
+     * else the default one. Null when the academy has no region.
+     */
+    public function priceRegionFor(?string $payerId, ?string $country): ?RegionOption;
+
+    /**
+     * Makes a personal coupon (a trial offer) through SaveCoupon: a
+     * percentage off the first invoice of one course, for this payer alone,
+     * once, until its moment, never on top of the family discount (the bigger
+     * applies). Its code is random and never needs typing.
+     */
+    public function issuePersonalCoupon(PersonalCoupon $coupon): PersonalCouponState;
+
+    /** A personal coupon as it stands now; null when there is none (another academy's, or a staff code). */
+    public function personalCoupon(string $couponId): ?PersonalCouponState;
 
     /** Makes an active plan through SavePlan (its checks and audit) and answers its id. */
     public function createPlan(NewPlan $plan): string;

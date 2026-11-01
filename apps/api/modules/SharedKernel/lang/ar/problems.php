@@ -12,6 +12,7 @@ return [
     'academy-suspended' => 'هذه الأكاديمية موقوفة.',
     'academy-not-found' => 'الأكاديمية غير موجودة.',
     'not-found' => 'غير موجود.',
+    'link-expired' => 'انتهت مدة هذا الرابط.',
     'bad-request' => 'طلب غير صحيح.',
     'method-not-allowed' => 'الطريقة غير مسموحة.',
     'conflict' => 'هذا يتعارض مع الحالة الحالية.',

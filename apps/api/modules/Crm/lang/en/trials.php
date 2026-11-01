@@ -3,7 +3,7 @@
 return [
     'nav' => 'Trial lessons',
     'title' => 'Trial lessons',
-    'subtitle' => 'After each trial lesson, write the level you found and the plan you suggest. Sales talk to the family with it.',
+    'subtitle' => 'After each trial lesson, write your report: what the family reads in the trial\'s report, and your notes for the academy alone.',
     'groups' => [
         'to_assess' => 'Waiting for your assessment',
         'upcoming' => 'Coming up',
@@ -19,16 +19,27 @@ return [
     'assess' => 'Assess',
     'reassess' => 'Edit the assessment',
     'assess_heading' => 'Assessing :name',
-    'assess_hint' => 'The family does not see this. Sales will talk to them.',
+    'assess_hint' => 'The first part reaches the family in the trial\'s report, so write it to them clearly and kindly. Your notes in the last part are for the academy alone: the family never sees them.',
+    'sections' => [
+        'family' => 'For the family: shown in the trial\'s report',
+        'academy' => 'For the academy only: the family does not see it',
+    ],
+    'family_reads' => 'The family reads this',
     'assessed' => 'Assessment sent. Thank you!',
     'fields' => [
         'level' => 'The level you found',
         'plan_id' => 'The plan you suggest',
         'per_week' => 'Lessons a week',
         'notes' => 'Your notes for the academy',
+        'strengths' => 'Strengths',
+        'to_work_on' => 'What to work on',
+        'family_note' => 'Your words to the family',
     ],
+    'strengths_hint' => 'For example: pronounces the letters clearly, likes to ask questions.',
+    'to_work_on_hint' => 'For example: the long vowels, focus at the end of the lesson.',
+    'family_note_hint' => 'A short word that encourages the student and reassures the family.',
     'level_hint' => 'For example: beginner, reads letters without vowels',
-    'notes_hint' => 'Strengths, what needs work, and anything sales should know.',
+    'notes_hint' => 'What sales should know that is not for the family.',
     'statuses' => [
         'booked' => 'Booked',
         'attended' => 'Attended',
@@ -41,9 +52,17 @@ return [
         'teacher_absent' => 'the teacher did not come',
         'needs_review' => 'under review',
         'cancelled' => 'cancelled',
+        'family' => 'cancelled by the family',
+        'academy' => 'cancelled by the academy',
+    ],
+    'kinds' => [
+        'first' => 'The free trial',
+        'rebook' => 'A new time after one that did not take place',
+        'second' => 'The free second trial with another teacher',
     ],
     'errors' => [
         'not_yours' => 'This is not your lesson.',
         'not_attended' => 'This lesson has not taken place.',
+        'no_report' => 'This lesson has no report yet: it is written once the lesson took place and the teacher assessed it.',
     ],
 ];

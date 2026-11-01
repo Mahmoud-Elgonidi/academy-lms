@@ -24,6 +24,26 @@ final class LinkToken
     /** The record's id, when the token is this purpose's, this academy's and still good; else null. */
     public static function read(string $purpose, ?string $token): ?string
     {
+        $signed = self::signed($purpose, $token);
+
+        return $signed !== null && $signed[1] > now()->getTimestamp() ? $signed[0] : null;
+    }
+
+    /**
+     * Whether the token is this purpose's and this academy's but its time has
+     * passed: a page may then say the link ended (410) rather than "not
+     * found". A forged token, or another academy's or purpose's, is not expired.
+     */
+    public static function expired(string $purpose, ?string $token): bool
+    {
+        $signed = self::signed($purpose, $token);
+
+        return $signed !== null && $signed[1] <= now()->getTimestamp();
+    }
+
+    /** @return array{0: string, 1: int}|null the record's id and the moment it is good until, when signed for this purpose here */
+    private static function signed(string $purpose, ?string $token): ?array
+    {
         if ($token === null || strlen($token) > 300 || substr_count($token, '.') !== 1) {
             return null;
         }
@@ -37,9 +57,8 @@ final class LinkToken
         if ($dot === false) {
             return null;
         }
-        $until = (int) substr($payload, $dot + 1);
 
-        return $until > now()->getTimestamp() ? substr($payload, 0, $dot) : null;
+        return [substr($payload, 0, $dot), (int) substr($payload, $dot + 1)];
     }
 
     private static function signature(string $purpose, string $payload): string

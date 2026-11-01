@@ -4,6 +4,7 @@ namespace Modules\Crm\Actions;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\Crm\Contracts\Events\TrialCancelledByAcademy;
 use Modules\Crm\Contracts\Events\TrialCancelledByFamily;
 use Modules\Crm\Contracts\Events\TrialCompleted;
 use Modules\Crm\Contracts\Events\TrialMissed;
@@ -62,13 +63,14 @@ final class TrackTrial
         }
         $byFamily = in_array($askedBy, ['student', 'family'], true);
         DB::transaction(function () use ($trial, $reason, $actorId, $byFamily) {
-            $trial->forceFill(['status' => 'cancelled'])->save();
+            $trial->forceFill(['status' => 'cancelled', 'outcome' => $byFamily ? 'family' : 'academy'])->save();
             LeadActivity::record($trial->lead, 'trial_cancelled', null, ['reason' => $reason] + ($byFamily ? ['by' => 'family'] : []), $actorId);
             $this->backToContacted($trial->lead, $actorId);
-            if ($byFamily) {
-                $academyId = $trial->lead->academy_id;
-                DB::afterCommit(fn () => event(new TrialCancelledByFamily($academyId, $trial->id, $trial->lead_id)));
-            }
+            $academyId = $trial->lead->academy_id;
+            // The family's own cancellation tells sales; the academy's tells the family how to book again (J2).
+            DB::afterCommit(fn () => event($byFamily
+                ? new TrialCancelledByFamily($academyId, $trial->id, $trial->lead_id)
+                : new TrialCancelledByAcademy($academyId, $trial->id, $trial->lead_id, $reason)));
         });
     }
 
@@ -92,7 +94,7 @@ final class TrackTrial
 
                 return;
             }
-            $trial->forceFill(['status' => 'missed'])->save();
+            $trial->forceFill(['status' => 'missed', 'outcome' => in_array($outcome, ['student_absent', 'teacher_absent'], true) ? $outcome : null])->save();
             LeadActivity::record($lead, 'trial_missed', null, ['outcome' => $outcome], null);
             $this->backToContacted($lead, null);
             DB::afterCommit(fn () => event(new TrialMissed($academyId, $trial->id, $lead->id, $outcome)));

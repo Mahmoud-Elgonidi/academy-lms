@@ -9,6 +9,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -26,9 +27,10 @@ use Modules\SharedKernel\Time\ViewerTimezone;
 /**
  * A teacher's trial lessons (docs/architecture/01, section 14, "تقييم
  * التجربة"): those waiting for their assessment first, then those coming
- * up, then the ones assessed. Assessing asks the level found, the plan and
- * lessons a week they suggest, and notes for the academy; the family does
- * not see it.
+ * up, then the ones assessed. Assessing asks, for the family's report (the
+ * form says so), the level found, strengths, what to work on, a word to the
+ * family, the plan and lessons a week they suggest; and notes for the
+ * academy alone, which the family never sees.
  */
 final class MyTrials extends Page
 {
@@ -99,16 +101,26 @@ final class MyTrials extends Page
             ->fillForm(function (array $arguments) {
                 $t = $this->ownTrial($arguments);
 
-                return ['level' => $t->level, 'plan_id' => $t->recommended_plan_id, 'per_week' => $t->recommended_per_week, 'notes' => $t->assessment];
+                return ['level' => $t->level, 'plan_id' => $t->recommended_plan_id, 'per_week' => $t->recommended_per_week, 'notes' => $t->assessment,
+                    'strengths' => $t->strengths, 'to_work_on' => $t->to_work_on, 'family_note' => $t->family_note];
             })
             ->schema([
                 Text::make(__($l.'assess_hint'))->color('gray'),
-                TextInput::make('level')->label(__($l.'fields.level'))->placeholder(__($l.'level_hint'))->required()->maxLength(120),
-                Select::make('plan_id')->label(__($l.'fields.plan_id'))->native(false)
-                    ->options(fn () => collect(app(BillingApi::class)->planOptions(null))->mapWithKeys(fn ($p) => [$p->id => $p->name])->all()),
-                Select::make('per_week')->label(__($l.'fields.per_week'))->native(false)
-                    ->options(array_combine(range(1, 5), range(1, 5))),
-                Textarea::make('notes')->label(__($l.'fields.notes'))->placeholder(__($l.'notes_hint'))->required()->rows(4)->maxLength(2000),
+                // What the family reads in the trial's report (LeadTrial::FAMILY_READS).
+                Section::make(__($l.'sections.family'))->icon(Heroicon::OutlinedEye)->compact()->schema([
+                    TextInput::make('level')->label(__($l.'fields.level'))->placeholder(__($l.'level_hint'))->required()->maxLength(120),
+                    Textarea::make('strengths')->label(__($l.'fields.strengths'))->placeholder(__($l.'strengths_hint'))->rows(2)->maxLength(AssessTrial::FAMILY_TEXT_MAX),
+                    Textarea::make('to_work_on')->label(__($l.'fields.to_work_on'))->placeholder(__($l.'to_work_on_hint'))->rows(2)->maxLength(AssessTrial::FAMILY_TEXT_MAX),
+                    Select::make('plan_id')->label(__($l.'fields.plan_id'))->native(false)
+                        ->options(fn () => collect(app(BillingApi::class)->planOptions(null))->mapWithKeys(fn ($p) => [$p->id => $p->name])->all()),
+                    Select::make('per_week')->label(__($l.'fields.per_week'))->native(false)
+                        ->options(array_combine(range(1, 5), range(1, 5))),
+                    Textarea::make('family_note')->label(__($l.'fields.family_note'))->placeholder(__($l.'family_note_hint'))->rows(2)->maxLength(AssessTrial::FAMILY_TEXT_MAX),
+                ]),
+                // The academy's alone.
+                Section::make(__($l.'sections.academy'))->icon(Heroicon::OutlinedLockClosed)->compact()->schema([
+                    Textarea::make('notes')->label(__($l.'fields.notes'))->placeholder(__($l.'notes_hint'))->required()->rows(3)->maxLength(2000),
+                ]),
             ])
             ->action(function (array $data, array $arguments, Action $action) use ($l) {
                 $this->attempt($action, fn () => app(AssessTrial::class)->handle($this->ownTrial($arguments), $data, (string) auth()->id()));

@@ -7,10 +7,11 @@ use Modules\SharedKernel\Privacy\PersonalDataPart;
 use Modules\SharedKernel\Privacy\PersonalDataSource;
 
 /**
- * What a payer was invoiced and paid, and the receipts they sent (with the
- * files). Money still due holds an erasure back. Nothing is erased here:
- * issued invoices and payments are kept as tax law asks (they never change
- * anyway), and so are the receipts that back a payment.
+ * What a payer was invoiced and paid, the receipts they sent (with the
+ * files) and the personal offers made for them (a trial offer). Money still
+ * due holds an erasure back. Issued invoices and payments are kept as tax
+ * law asks (they never change anyway), and so are the receipts that back a
+ * payment; an erased payer's personal offers are turned off.
  */
 final class BillingData implements PersonalDataSource
 {
@@ -37,6 +38,8 @@ final class BillingData implements PersonalDataSource
                 ->map(fn (object $r) => (array) $r)->all(),
             'payments' => DB::table('payments as p')->joinSub((clone $invoices)->select(['i.id', 'i.number']), 'iv', 'iv.id', '=', 'p.invoice_id')
                 ->orderBy('p.received_at')->get(['iv.number as invoice', 'p.method', 'p.amount_minor', 'p.currency', 'p.reference', 'p.received_at'])->map(fn (object $r) => (array) $r)->all(),
+            'offers' => DB::table('coupons')->where('payer_id', $userId)->orderBy('created_at')
+                ->get(['purpose', 'percent_bp', 'expires_at', 'is_active', 'created_at'])->map(fn (object $r) => (array) $r)->all(),
             'receipts_sent' => $proofs->map(fn (object $p) => array_diff_key((array) $p, ['file_path' => 1, 'file_name' => 1])
                 + ['file' => $p->file_path === null ? null : $files[$p->file_path]])->all(),
         ], $files);
@@ -52,6 +55,8 @@ final class BillingData implements PersonalDataSource
 
     public function erase(string $userId): array
     {
-        return [];
+        $offers = DB::table('coupons')->where('payer_id', $userId)->where('is_active', true)->update(['is_active' => false, 'updated_at' => now()]);
+
+        return $offers > 0 ? ['offers' => $offers] : [];
     }
 }

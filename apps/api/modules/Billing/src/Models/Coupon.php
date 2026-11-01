@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Modules\Billing\Contracts\CouponPurpose;
 use Modules\Billing\Domain\CouponTerms;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
@@ -32,15 +33,19 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property bool $with_sibling
  * @property bool $is_active
  * @property ?string $created_by
+ * @property CouponPurpose $purpose general, or a personal trial offer
+ * @property ?string $payer_id a personal coupon's one payer
+ * @property ?CarbonImmutable $expires_at a personal coupon's last moment
  */
 final class Coupon extends Model
 {
     use BelongsToTenant;
     use HasUuids;
 
-    protected $fillable = ['code', 'name', 'kind', 'percent_bp', 'amount_minor', 'currency', 'blocks', 'starts_on', 'ends_on', 'max_uses', 'plan_ids', 'with_sibling', 'is_active', 'created_by'];
+    protected $fillable = ['code', 'name', 'kind', 'percent_bp', 'amount_minor', 'currency', 'blocks', 'starts_on', 'ends_on', 'max_uses', 'plan_ids', 'with_sibling', 'is_active', 'created_by',
+        'purpose', 'payer_id', 'expires_at'];
 
-    protected $attributes = ['plan_ids' => '[]', 'with_sibling' => false, 'is_active' => true];
+    protected $attributes = ['plan_ids' => '[]', 'with_sibling' => false, 'is_active' => true, 'purpose' => 'general'];
 
     protected function casts(): array
     {
@@ -54,6 +59,8 @@ final class Coupon extends Model
             'plan_ids' => 'array',
             'with_sibling' => 'boolean',
             'is_active' => 'boolean',
+            'purpose' => CouponPurpose::class,
+            'expires_at' => 'immutable_datetime',
         ];
     }
 
@@ -114,6 +121,12 @@ final class Coupon extends Model
                 ->where('l.kind', 'discount')
                 ->whereRaw("l.meta->>'redemption_id' = coupon_redemptions.id::text")
                 ->whereIn('i.status', ['issued', 'paid'])));
+    }
+
+    /** Made for one payer by the academy's own rules (a trial offer), not a code staff give out. */
+    public function isPersonal(): bool
+    {
+        return $this->purpose !== CouponPurpose::General;
     }
 
     public function forPlan(string $planId): bool

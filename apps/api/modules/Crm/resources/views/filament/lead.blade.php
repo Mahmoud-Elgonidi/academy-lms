@@ -5,7 +5,8 @@
     $steps = ['new', 'contacted', 'trial_booked', 'attended', 'assessed', 'won'];
     $icons = ['call' => 'heroicon-m-phone', 'whatsapp' => 'heroicon-m-chat-bubble-left-ellipsis', 'note' => 'heroicon-m-pencil', 'created' => 'heroicon-m-plus',
         'assigned' => 'heroicon-m-user', 'stage' => 'heroicon-m-arrow-long-left', 'won' => 'heroicon-m-check', 'lost' => 'heroicon-m-x-mark',
-        'reopened' => 'heroicon-m-arrow-uturn-left', 'edited' => 'heroicon-m-pencil-square', 'website_again' => 'heroicon-m-globe-alt', 'assessed' => 'heroicon-m-clipboard-document-check'];
+        'reopened' => 'heroicon-m-arrow-uturn-left', 'edited' => 'heroicon-m-pencil-square', 'website_again' => 'heroicon-m-globe-alt', 'assessed' => 'heroicon-m-clipboard-document-check',
+        'offer_made' => 'heroicon-m-gift', 'report_sent' => 'heroicon-m-paper-airplane', 'report_resent' => 'heroicon-m-paper-airplane', 'second_trial' => 'heroicon-m-arrow-path', 'rebooked' => 'heroicon-m-calendar'];
 @endphp
 <x-filament-panels::page>
     @include('crm::filament.styles')
@@ -68,13 +69,19 @@
                             <span class="crm-pill" data-s="{{ $t['status'] }}">{{ $t['statusLabel'] }}</span>
                         </header>
                         <small>{{ __($l.'page.with', ['teacher' => $t['teacher']]) }} · {{ __($l.'page.teacher_time', ['time' => $t['teacherAt']]) }}</small>
+                        @if ($t['kindLabel'])<small><strong>{{ $t['kindLabel'] }}</strong>@if ($t['follows']) · {{ __($l.'page.follows', ['when' => $t['follows']]) }}@endif</small>@endif
                         @if ($t['assessed'])
                             <div class="crm-assess">
                                 <div><small>{{ __($l.'page.level') }}</small><strong>{{ $t['level'] }}</strong></div>
                                 @if ($t['plan'])<div><small>{{ __($l.'page.plan') }}</small><strong>{{ $t['plan'] }}</strong></div>@endif
                                 @if ($t['perWeek'])<div><small>&nbsp;</small><strong>{{ trans_choice($l.'page.per_week', $t['perWeek'], ['count' => $t['perWeek']]) }}</strong></div>@endif
-                                @if ($t['assessment'])<p>{{ $t['assessment'] }}</p>@endif
+                                @foreach (['strengths', 'to_work_on', 'family_note'] as $field)
+                                    @if ($t[$field])<p><small>{{ __('crm::trials.fields.'.$field) }} · {{ __($l.'page.family_reads') }}</small><br>{{ $t[$field] }}</p>@endif
+                                @endforeach
+                                @if ($t['assessment'])<p><small>{{ __($l.'page.academy_notes') }}</small><br>{{ $t['assessment'] }}</p>@endif
                             </div>
+                            <small>{{ $t['report'] }}@if ($t['offer']) · {{ $t['offer'] }}@endif</small>
+                            @if ($t['canResend']){{ ($this->resendReportAction)(['trial' => $t['id']]) }}@endif
                         @elseif ($t['status'] === 'attended')
                             <small>{{ __($l.'page.waiting') }}</small>
                         @endif

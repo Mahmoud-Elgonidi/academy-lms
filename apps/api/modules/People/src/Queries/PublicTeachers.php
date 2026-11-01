@@ -21,9 +21,10 @@ use Modules\People\Models\TeacherPublicCard;
 final class PublicTeachers
 {
     /** @return list<PublicTeacher> */
-    public function onPage(): array
+    public function onPage(?string $teacherId = null): array
     {
         $rows = $this->cards()->where('c.shown', true)->where('c.hidden_by_academy', false)
+            ->when($teacherId !== null, fn ($q) => $q->where('c.teacher_id', $teacherId))
             ->where('u.status', 'active')->where('p.status', 'active')
             ->whereExists(fn ($q) => $q->from('user_roles as r')->whereColumn('r.user_id', 'c.teacher_id')->where('r.role', 'teacher'))
             ->orderBy('c.display_name')->orderBy('c.id')

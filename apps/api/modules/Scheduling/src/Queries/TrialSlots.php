@@ -98,6 +98,9 @@ final class TrialSlots
         $busy = [];
         foreach ($availability as $teacherId => $teacher) {
             /** @var TeacherAvailability $teacher */
+            if ($search->excludeTeacherId !== null && (string) $teacherId === $search->excludeTeacherId) {
+                continue;       // a second trial is with another teacher
+            }
             $busy[$teacherId] = $teacher->utilisation();
             $starts = [];
             foreach ($teacher->free->intervals as [$start, $end]) {

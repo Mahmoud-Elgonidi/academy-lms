@@ -3121,7 +3121,7 @@
         "/v1/teacher/trials": {
             "get": {
                 "operationId": "teacher.trials",
-                "description": "to_assess, upcoming, and done (assessed in the last 30 days); plans are what an assessment may recommend.",
+                "description": "to_assess, upcoming, and done (assessed in the last 30 days); plans are what an assessment may recommend;\nfamily_reads names the assessment's fields the family reads in the trial's report (notes are the academy's alone).",
                 "summary": "My trial lessons",
                 "tags": [
                     "Crm"
@@ -3179,7 +3179,7 @@
         "/v1/teacher/trials/{trial}/assessment": {
             "put": {
                 "operationId": "teacher.trials.assess",
-                "description": "After the trial took place: the level, what to recommend, and notes for the sales team. Again to correct it.",
+                "description": "After the trial took place. For the family's report: the level, strengths, to_work_on, family_note (the teacher's words to\nthe family), the plan and lessons a week to recommend; notes are for the academy alone. Again to correct it: a family field\nleft out keeps what it said, and the family gets no second message (their report reads what it says now).",
                 "summary": "Assess a trial",
                 "tags": [
                     "Crm"
@@ -3250,6 +3250,27 @@
                                     "notes": {
                                         "type": "string",
                                         "maxLength": 2000
+                                    },
+                                    "strengths": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 1000
+                                    },
+                                    "to_work_on": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 1000
+                                    },
+                                    "family_note": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 1000
                                     }
                                 },
                                 "required": [
@@ -4915,6 +4936,2519 @@
                     }
                 },
                 "security": []
+            }
+        },
+        "/v1/site/trials/report/{token}": {
+            "get": {
+                "operationId": "site.trials.report",
+                "description": "The level, strengths, what to work on and the teacher's words; the recommended plan with its price in the family's region;\nthe academy's offer while it is open (its end and the price after it); a course already started; and the free second trial\nwith another teacher while the academy gives one. 404 for a link that is not this academy's or names no report; 410 once it ended.",
+                "summary": "A free trial's report, from the family's link",
+                "tags": [
+                    "Crm"
+                ],
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "description": "The trial lesson's id (the family's trials are named by their lesson)."
+                                                },
+                                                "learner": {
+                                                    "type": "string",
+                                                    "description": "The learner's first name."
+                                                },
+                                                "subject": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "held_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "second": {
+                                                    "type": "boolean",
+                                                    "description": "This was the free second trial, with another teacher."
+                                                },
+                                                "teacher": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "description": "The teacher's first name, with a title before it (\"\u0623. \u0645\u0646\u0649\")."
+                                                        },
+                                                        "card": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "Their card on the academy's page, when it shows one: the name they chose, a few words, a photo.",
+                                                            "properties": {
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "bio": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "photo_url": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "name",
+                                                                "bio",
+                                                                "photo_url"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "name",
+                                                        "card"
+                                                    ]
+                                                },
+                                                "level": {
+                                                    "type": "string",
+                                                    "description": "What the teacher found, in their words for the family."
+                                                },
+                                                "strengths": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "to_work_on": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "note": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "The teacher's words to the family."
+                                                },
+                                                "recommendation": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "plan": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The plan the teacher recommends; null when none, or the academy no longer offers it (plan_withdrawn).",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "format": {
+                                                                    "type": "string",
+                                                                    "description": "private (one student a lesson) or group.",
+                                                                    "enum": [
+                                                                        "group",
+                                                                        "private"
+                                                                    ]
+                                                                },
+                                                                "session_minutes": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "sessions_per_week": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "sessions_per_block": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "validity_days": {
+                                                                    "type": "integer"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "name",
+                                                                "format",
+                                                                "session_minutes",
+                                                                "sessions_per_week",
+                                                                "sessions_per_block",
+                                                                "validity_days"
+                                                            ]
+                                                        },
+                                                        "plan_withdrawn": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "per_week": {
+                                                            "type": [
+                                                                "integer",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "price": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The plan's block price in the family's region, today (classic look only; null when unknown).",
+                                                            "properties": {
+                                                                "price": {
+                                                                    "type": "string"
+                                                                },
+                                                                "amount_minor": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "currency": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "price",
+                                                                "amount_minor",
+                                                                "currency"
+                                                            ]
+                                                        },
+                                                        "region": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "currency": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "name",
+                                                                "currency"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "plan",
+                                                        "plan_withdrawn",
+                                                        "per_week",
+                                                        "price",
+                                                        "region"
+                                                    ]
+                                                },
+                                                "course": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The learner's course in this subject that has not ended (pending_payment, active, paused): they have started, so no offer.",
+                                                    "properties": {
+                                                        "status": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "status"
+                                                    ]
+                                                },
+                                                "offer_state": {
+                                                    "type": "string",
+                                                    "description": "The academy's offer: open, ended (its time passed), used, started (a course began) or none (classic look only).",
+                                                    "enum": [
+                                                        "ended",
+                                                        "used",
+                                                        "open",
+                                                        "started",
+                                                        "none"
+                                                    ]
+                                                },
+                                                "offer": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "percent": {
+                                                            "description": "What the offer takes off, as promised when it was made.",
+                                                            "type": "number"
+                                                        },
+                                                        "ends_at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "When it ends: the report shows the time left.",
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "string"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "price": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The recommended plan's first block with the offer (and the family discount, whichever is bigger); null without a plan or a price.",
+                                                            "properties": {
+                                                                "price": {
+                                                                    "type": "string"
+                                                                },
+                                                                "amount_minor": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "currency": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "price",
+                                                                "amount_minor",
+                                                                "currency"
+                                                            ]
+                                                        },
+                                                        "saving": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "How much less than without the offer.",
+                                                            "properties": {
+                                                                "price": {
+                                                                    "type": "string"
+                                                                },
+                                                                "amount_minor": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "currency": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "price",
+                                                                "amount_minor",
+                                                                "currency"
+                                                            ]
+                                                        },
+                                                        "family_discount_bigger": {
+                                                            "type": "string",
+                                                            "description": "The family discount is bigger than the offer, so it applies instead (they never add up)."
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "percent",
+                                                        "ends_at",
+                                                        "price",
+                                                        "saving",
+                                                        "family_discount_bigger"
+                                                    ]
+                                                },
+                                                "next_trial": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The free second trial with another teacher, when the academy gives one (classic look only).",
+                                                    "properties": {
+                                                        "kind": {
+                                                            "type": "string",
+                                                            "const": "second"
+                                                        },
+                                                        "available": {
+                                                            "type": "boolean",
+                                                            "description": "Whether it may be booked now."
+                                                        },
+                                                        "why_not": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ],
+                                                            "description": "Why not, in the family's words (what to do instead); null when it may be booked."
+                                                        },
+                                                        "until": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The last moment to book it (SECOND_WITHIN_DAYS after the first trial).",
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "string"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "kind",
+                                                        "available",
+                                                        "why_not",
+                                                        "until"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "learner",
+                                                "subject",
+                                                "held_at",
+                                                "second",
+                                                "teacher",
+                                                "level",
+                                                "strengths",
+                                                "to_work_on",
+                                                "note",
+                                                "recommendation",
+                                                "course",
+                                                "offer_state",
+                                                "offer",
+                                                "next_trial"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/site/trials/report/{token}/slots": {
+            "get": {
+                "operationId": "site.trials.report.slots",
+                "description": "With any teacher but the first one, who teaches the subject and the learner's age, on the family's clock, over 14 days from `from`.\n422 with why it cannot be booked (the family's words: what to do instead).",
+                "summary": "Times for the free second trial, from the report's link",
+                "tags": [
+                    "Crm"
+                ],
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "starts_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "string"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "starts_at"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/site/trials/report/{token}/book": {
+            "post": {
+                "operationId": "site.trials.report.book",
+                "description": "starts_at: one of the times offered. No code: the link went to the family's number. The family hears the time and its links.",
+                "summary": "Book the free second trial, from the report's link",
+                "tags": [
+                    "Crm"
+                ],
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "description": "The new trial lesson's id."
+                                                },
+                                                "starts_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "subject": {
+                                                    "type": "string"
+                                                },
+                                                "teacher": {
+                                                    "type": "string",
+                                                    "description": "The teacher's first name only (with a title before it, as \"\u0623. \u0645\u0646\u0649\")."
+                                                },
+                                                "minutes": {
+                                                    "type": "integer",
+                                                    "description": "How long the lesson is, in minutes."
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "starts_at",
+                                                "subject",
+                                                "teacher",
+                                                "minutes"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/site/trials/rebook/{token}": {
+            "get": {
+                "operationId": "site.trials.rebook",
+                "description": "Who, what and when it was, why (the learner missed it, or the teacher or the academy could not hold it: then it does not\ncount as the family's free trial), and whether a new time may be booked. 410 once a new time is booked or the link ended.",
+                "summary": "A trial that did not take place, from the family's \"book again\" link",
+                "tags": [
+                    "Crm"
+                ],
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "learner": {
+                                                    "type": "string",
+                                                    "description": "The learner's first name."
+                                                },
+                                                "subject": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "was_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "outcome": {
+                                                    "type": "string",
+                                                    "description": "student_absent (the learner missed it), teacher_absent or academy (not the family's doing: it does not count as their free trial)."
+                                                },
+                                                "available": {
+                                                    "type": "boolean",
+                                                    "description": "Whether a new time may be booked now."
+                                                },
+                                                "why_not": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Why not, in the family's words (what to do instead); null when it may be booked."
+                                                },
+                                                "timezone": {
+                                                    "type": "string",
+                                                    "description": "Their clock (IANA), for the times."
+                                                }
+                                            },
+                                            "required": [
+                                                "learner",
+                                                "subject",
+                                                "was_at",
+                                                "outcome",
+                                                "available",
+                                                "why_not",
+                                                "timezone"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/site/trials/rebook/{token}/slots": {
+            "get": {
+                "operationId": "site.trials.rebook.slots",
+                "description": "The subject's teachers for the learner, on the family's clock, over 14 days from `from`. 422 with why it cannot be booked.",
+                "summary": "Times for a new trial, from the \"book again\" link",
+                "tags": [
+                    "Crm"
+                ],
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "starts_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "string"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "starts_at"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/site/trials/rebook/{token}/book": {
+            "post": {
+                "operationId": "site.trials.rebook.book",
+                "description": "starts_at: one of the times offered. No code: the link went to the family's number. The family hears the time and its links.",
+                "summary": "Book a new trial, from the \"book again\" link",
+                "tags": [
+                    "Crm"
+                ],
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "description": "The new trial lesson's id."
+                                                },
+                                                "starts_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "subject": {
+                                                    "type": "string"
+                                                },
+                                                "teacher": {
+                                                    "type": "string",
+                                                    "description": "The teacher's first name only (with a title before it, as \"\u0623. \u0645\u0646\u0649\")."
+                                                },
+                                                "minutes": {
+                                                    "type": "integer",
+                                                    "description": "How long the lesson is, in minutes."
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "starts_at",
+                                                "subject",
+                                                "teacher",
+                                                "minutes"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/v1/family/trials": {
+            "get": {
+                "operationId": "family.trials",
+                "description": "Latest first: the subject, when, the teacher's first name, how it went, whether its report is ready, and (classic look)\none more trial it allows with why not.",
+                "summary": "A learner's free trials",
+                "tags": [
+                    "Crm"
+                ],
+                "parameters": [
+                    {
+                        "name": "learner_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 64
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "learner": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name"
+                                            ]
+                                        },
+                                        "viewer_stage": {
+                                            "type": "string",
+                                            "description": "The viewer's look: kids, middle, teen or classic (prices, the offer and booking only in classic)."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "description": "The trial lesson's id: its report is family/trials/{id}."
+                                                    },
+                                                    "subject": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name"
+                                                        ]
+                                                    },
+                                                    "starts_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "string"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    },
+                                                    "teacher": {
+                                                        "type": "string",
+                                                        "description": "The teacher's first name, with a title before it."
+                                                    },
+                                                    "kind": {
+                                                        "type": "string",
+                                                        "description": "first, rebook (booked again after one that did not take place) or second (the free second trial)."
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "description": "booked (to come), attended, missed or cancelled."
+                                                    },
+                                                    "outcome": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "description": "Why it did not take place: student_absent, teacher_absent (missed); family, academy (cancelled); else null."
+                                                    },
+                                                    "report_ready": {
+                                                        "type": "boolean",
+                                                        "description": "Its report is ready to read."
+                                                    },
+                                                    "next": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "description": "One more trial it allows (classic look only), or null.",
+                                                        "properties": {
+                                                            "kind": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "second (with another teacher) or rebook (after one that did not take place).",
+                                                                "enum": [
+                                                                    "second",
+                                                                    "rebook",
+                                                                    null
+                                                                ]
+                                                            },
+                                                            "available": {
+                                                                "type": "boolean"
+                                                            },
+                                                            "why_not": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "description": "Why not, in the family's words (what to do instead); null when it may be booked."
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "kind",
+                                                            "available",
+                                                            "why_not"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "subject",
+                                                    "starts_at",
+                                                    "teacher",
+                                                    "kind",
+                                                    "status",
+                                                    "outcome",
+                                                    "report_ready",
+                                                    "next"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "learner",
+                                        "viewer_stage",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/family/trials/{session}": {
+            "get": {
+                "operationId": "family.trials.show",
+                "description": "As the family's link shows it (GET site/trials/report/{token}); in a look other than classic, without prices, the offer or the\nsecond trial. Not found until the trial took place and was assessed.",
+                "summary": "A free trial's report",
+                "tags": [
+                    "Crm"
+                ],
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "viewer_stage": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "description": "The trial lesson's id (the family's trials are named by their lesson)."
+                                                },
+                                                "learner": {
+                                                    "type": "string",
+                                                    "description": "The learner's first name."
+                                                },
+                                                "subject": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "held_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "second": {
+                                                    "type": "boolean",
+                                                    "description": "This was the free second trial, with another teacher."
+                                                },
+                                                "teacher": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "description": "The teacher's first name, with a title before it (\"\u0623. \u0645\u0646\u0649\")."
+                                                        },
+                                                        "card": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "Their card on the academy's page, when it shows one: the name they chose, a few words, a photo.",
+                                                            "properties": {
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "bio": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "photo_url": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "name",
+                                                                "bio",
+                                                                "photo_url"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "name",
+                                                        "card"
+                                                    ]
+                                                },
+                                                "level": {
+                                                    "type": "string",
+                                                    "description": "What the teacher found, in their words for the family."
+                                                },
+                                                "strengths": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "to_work_on": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "note": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "The teacher's words to the family."
+                                                },
+                                                "recommendation": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "plan": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The plan the teacher recommends; null when none, or the academy no longer offers it (plan_withdrawn).",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "format": {
+                                                                    "type": "string",
+                                                                    "description": "private (one student a lesson) or group.",
+                                                                    "enum": [
+                                                                        "group",
+                                                                        "private"
+                                                                    ]
+                                                                },
+                                                                "session_minutes": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "sessions_per_week": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "sessions_per_block": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "validity_days": {
+                                                                    "type": "integer"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "name",
+                                                                "format",
+                                                                "session_minutes",
+                                                                "sessions_per_week",
+                                                                "sessions_per_block",
+                                                                "validity_days"
+                                                            ]
+                                                        },
+                                                        "plan_withdrawn": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "per_week": {
+                                                            "type": [
+                                                                "integer",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "price": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The plan's block price in the family's region, today (classic look only; null when unknown).",
+                                                            "properties": {
+                                                                "price": {
+                                                                    "type": "string"
+                                                                },
+                                                                "amount_minor": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "currency": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "price",
+                                                                "amount_minor",
+                                                                "currency"
+                                                            ]
+                                                        },
+                                                        "region": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "currency": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "name",
+                                                                "currency"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "plan",
+                                                        "plan_withdrawn",
+                                                        "per_week",
+                                                        "price",
+                                                        "region"
+                                                    ]
+                                                },
+                                                "course": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The learner's course in this subject that has not ended (pending_payment, active, paused): they have started, so no offer.",
+                                                    "properties": {
+                                                        "status": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "status"
+                                                    ]
+                                                },
+                                                "offer_state": {
+                                                    "type": "string",
+                                                    "description": "The academy's offer: open, ended (its time passed), used, started (a course began) or none (classic look only).",
+                                                    "enum": [
+                                                        "ended",
+                                                        "used",
+                                                        "open",
+                                                        "started",
+                                                        "none"
+                                                    ]
+                                                },
+                                                "offer": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "percent": {
+                                                            "description": "What the offer takes off, as promised when it was made.",
+                                                            "type": "number"
+                                                        },
+                                                        "ends_at": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "When it ends: the report shows the time left.",
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "string"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        },
+                                                        "price": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The recommended plan's first block with the offer (and the family discount, whichever is bigger); null without a plan or a price.",
+                                                            "properties": {
+                                                                "price": {
+                                                                    "type": "string"
+                                                                },
+                                                                "amount_minor": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "currency": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "price",
+                                                                "amount_minor",
+                                                                "currency"
+                                                            ]
+                                                        },
+                                                        "saving": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "How much less than without the offer.",
+                                                            "properties": {
+                                                                "price": {
+                                                                    "type": "string"
+                                                                },
+                                                                "amount_minor": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "currency": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "price",
+                                                                "amount_minor",
+                                                                "currency"
+                                                            ]
+                                                        },
+                                                        "family_discount_bigger": {
+                                                            "type": "string",
+                                                            "description": "The family discount is bigger than the offer, so it applies instead (they never add up)."
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "percent",
+                                                        "ends_at",
+                                                        "price",
+                                                        "saving",
+                                                        "family_discount_bigger"
+                                                    ]
+                                                },
+                                                "next_trial": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "description": "The free second trial with another teacher, when the academy gives one (classic look only).",
+                                                    "properties": {
+                                                        "kind": {
+                                                            "type": "string",
+                                                            "const": "second"
+                                                        },
+                                                        "available": {
+                                                            "type": "boolean",
+                                                            "description": "Whether it may be booked now."
+                                                        },
+                                                        "why_not": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ],
+                                                            "description": "Why not, in the family's words (what to do instead); null when it may be booked."
+                                                        },
+                                                        "until": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "description": "The last moment to book it (SECOND_WITHIN_DAYS after the first trial).",
+                                                            "properties": {
+                                                                "utc": {
+                                                                    "type": "string"
+                                                                },
+                                                                "local": {
+                                                                    "type": "string"
+                                                                },
+                                                                "timezone": {
+                                                                    "type": "string"
+                                                                },
+                                                                "label": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "utc",
+                                                                "local",
+                                                                "timezone",
+                                                                "label"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "kind",
+                                                        "available",
+                                                        "why_not",
+                                                        "until"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "learner",
+                                                "subject",
+                                                "held_at",
+                                                "second",
+                                                "teacher",
+                                                "level",
+                                                "strengths",
+                                                "to_work_on",
+                                                "note",
+                                                "recommendation",
+                                                "course",
+                                                "offer_state",
+                                                "offer",
+                                                "next_trial"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "viewer_stage",
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/family/trials/{session}/slots": {
+            "get": {
+                "operationId": "family.trials.slots",
+                "description": "The second trial (any teacher but the first) after a report, or a new time after a trial that did not take place; on the\nviewer's clock over 14 days from `from`. 422 with why it cannot be booked; 403 outside the classic look.",
+                "summary": "Times for one more free trial from this one",
+                "tags": [
+                    "Crm"
+                ],
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "timezone",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                "Africa/Abidjan",
+                                "Africa/Accra",
+                                "Africa/Addis_Ababa",
+                                "Africa/Algiers",
+                                "Africa/Asmara",
+                                "Africa/Bamako",
+                                "Africa/Bangui",
+                                "Africa/Banjul",
+                                "Africa/Bissau",
+                                "Africa/Blantyre",
+                                "Africa/Brazzaville",
+                                "Africa/Bujumbura",
+                                "Africa/Cairo",
+                                "Africa/Casablanca",
+                                "Africa/Ceuta",
+                                "Africa/Conakry",
+                                "Africa/Dakar",
+                                "Africa/Dar_es_Salaam",
+                                "Africa/Djibouti",
+                                "Africa/Douala",
+                                "Africa/El_Aaiun",
+                                "Africa/Freetown",
+                                "Africa/Gaborone",
+                                "Africa/Harare",
+                                "Africa/Johannesburg",
+                                "Africa/Juba",
+                                "Africa/Kampala",
+                                "Africa/Khartoum",
+                                "Africa/Kigali",
+                                "Africa/Kinshasa",
+                                "Africa/Lagos",
+                                "Africa/Libreville",
+                                "Africa/Lome",
+                                "Africa/Luanda",
+                                "Africa/Lubumbashi",
+                                "Africa/Lusaka",
+                                "Africa/Malabo",
+                                "Africa/Maputo",
+                                "Africa/Maseru",
+                                "Africa/Mbabane",
+                                "Africa/Mogadishu",
+                                "Africa/Monrovia",
+                                "Africa/Nairobi",
+                                "Africa/Ndjamena",
+                                "Africa/Niamey",
+                                "Africa/Nouakchott",
+                                "Africa/Ouagadougou",
+                                "Africa/Porto-Novo",
+                                "Africa/Sao_Tome",
+                                "Africa/Tripoli",
+                                "Africa/Tunis",
+                                "Africa/Windhoek",
+                                "America/Adak",
+                                "America/Anchorage",
+                                "America/Anguilla",
+                                "America/Antigua",
+                                "America/Araguaina",
+                                "America/Argentina/Buenos_Aires",
+                                "America/Argentina/Catamarca",
+                                "America/Argentina/Cordoba",
+                                "America/Argentina/Jujuy",
+                                "America/Argentina/La_Rioja",
+                                "America/Argentina/Mendoza",
+                                "America/Argentina/Rio_Gallegos",
+                                "America/Argentina/Salta",
+                                "America/Argentina/San_Juan",
+                                "America/Argentina/San_Luis",
+                                "America/Argentina/Tucuman",
+                                "America/Argentina/Ushuaia",
+                                "America/Aruba",
+                                "America/Asuncion",
+                                "America/Atikokan",
+                                "America/Bahia",
+                                "America/Bahia_Banderas",
+                                "America/Barbados",
+                                "America/Belem",
+                                "America/Belize",
+                                "America/Blanc-Sablon",
+                                "America/Boa_Vista",
+                                "America/Bogota",
+                                "America/Boise",
+                                "America/Cambridge_Bay",
+                                "America/Campo_Grande",
+                                "America/Cancun",
+                                "America/Caracas",
+                                "America/Cayenne",
+                                "America/Cayman",
+                                "America/Chicago",
+                                "America/Chihuahua",
+                                "America/Ciudad_Juarez",
+                                "America/Costa_Rica",
+                                "America/Coyhaique",
+                                "America/Creston",
+                                "America/Cuiaba",
+                                "America/Curacao",
+                                "America/Danmarkshavn",
+                                "America/Dawson",
+                                "America/Dawson_Creek",
+                                "America/Denver",
+                                "America/Detroit",
+                                "America/Dominica",
+                                "America/Edmonton",
+                                "America/Eirunepe",
+                                "America/El_Salvador",
+                                "America/Fort_Nelson",
+                                "America/Fortaleza",
+                                "America/Glace_Bay",
+                                "America/Goose_Bay",
+                                "America/Grand_Turk",
+                                "America/Grenada",
+                                "America/Guadeloupe",
+                                "America/Guatemala",
+                                "America/Guayaquil",
+                                "America/Guyana",
+                                "America/Halifax",
+                                "America/Havana",
+                                "America/Hermosillo",
+                                "America/Indiana/Indianapolis",
+                                "America/Indiana/Knox",
+                                "America/Indiana/Marengo",
+                                "America/Indiana/Petersburg",
+                                "America/Indiana/Tell_City",
+                                "America/Indiana/Vevay",
+                                "America/Indiana/Vincennes",
+                                "America/Indiana/Winamac",
+                                "America/Inuvik",
+                                "America/Iqaluit",
+                                "America/Jamaica",
+                                "America/Juneau",
+                                "America/Kentucky/Louisville",
+                                "America/Kentucky/Monticello",
+                                "America/Kralendijk",
+                                "America/La_Paz",
+                                "America/Lima",
+                                "America/Los_Angeles",
+                                "America/Lower_Princes",
+                                "America/Maceio",
+                                "America/Managua",
+                                "America/Manaus",
+                                "America/Marigot",
+                                "America/Martinique",
+                                "America/Matamoros",
+                                "America/Mazatlan",
+                                "America/Menominee",
+                                "America/Merida",
+                                "America/Metlakatla",
+                                "America/Mexico_City",
+                                "America/Miquelon",
+                                "America/Moncton",
+                                "America/Monterrey",
+                                "America/Montevideo",
+                                "America/Montserrat",
+                                "America/Nassau",
+                                "America/New_York",
+                                "America/Nome",
+                                "America/Noronha",
+                                "America/North_Dakota/Beulah",
+                                "America/North_Dakota/Center",
+                                "America/North_Dakota/New_Salem",
+                                "America/Nuuk",
+                                "America/Ojinaga",
+                                "America/Panama",
+                                "America/Paramaribo",
+                                "America/Phoenix",
+                                "America/Port-au-Prince",
+                                "America/Port_of_Spain",
+                                "America/Porto_Velho",
+                                "America/Puerto_Rico",
+                                "America/Punta_Arenas",
+                                "America/Rankin_Inlet",
+                                "America/Recife",
+                                "America/Regina",
+                                "America/Resolute",
+                                "America/Rio_Branco",
+                                "America/Santarem",
+                                "America/Santiago",
+                                "America/Santo_Domingo",
+                                "America/Sao_Paulo",
+                                "America/Scoresbysund",
+                                "America/Sitka",
+                                "America/St_Barthelemy",
+                                "America/St_Johns",
+                                "America/St_Kitts",
+                                "America/St_Lucia",
+                                "America/St_Thomas",
+                                "America/St_Vincent",
+                                "America/Swift_Current",
+                                "America/Tegucigalpa",
+                                "America/Thule",
+                                "America/Tijuana",
+                                "America/Toronto",
+                                "America/Tortola",
+                                "America/Vancouver",
+                                "America/Whitehorse",
+                                "America/Winnipeg",
+                                "America/Yakutat",
+                                "Antarctica/Casey",
+                                "Antarctica/Davis",
+                                "Antarctica/DumontDUrville",
+                                "Antarctica/Macquarie",
+                                "Antarctica/Mawson",
+                                "Antarctica/McMurdo",
+                                "Antarctica/Palmer",
+                                "Antarctica/Rothera",
+                                "Antarctica/Syowa",
+                                "Antarctica/Troll",
+                                "Antarctica/Vostok",
+                                "Arctic/Longyearbyen",
+                                "Asia/Aden",
+                                "Asia/Almaty",
+                                "Asia/Amman",
+                                "Asia/Anadyr",
+                                "Asia/Aqtau",
+                                "Asia/Aqtobe",
+                                "Asia/Ashgabat",
+                                "Asia/Atyrau",
+                                "Asia/Baghdad",
+                                "Asia/Bahrain",
+                                "Asia/Baku",
+                                "Asia/Bangkok",
+                                "Asia/Barnaul",
+                                "Asia/Beirut",
+                                "Asia/Bishkek",
+                                "Asia/Brunei",
+                                "Asia/Chita",
+                                "Asia/Colombo",
+                                "Asia/Damascus",
+                                "Asia/Dhaka",
+                                "Asia/Dili",
+                                "Asia/Dubai",
+                                "Asia/Dushanbe",
+                                "Asia/Famagusta",
+                                "Asia/Gaza",
+                                "Asia/Hebron",
+                                "Asia/Ho_Chi_Minh",
+                                "Asia/Hong_Kong",
+                                "Asia/Hovd",
+                                "Asia/Irkutsk",
+                                "Asia/Jakarta",
+                                "Asia/Jayapura",
+                                "Asia/Jerusalem",
+                                "Asia/Kabul",
+                                "Asia/Kamchatka",
+                                "Asia/Karachi",
+                                "Asia/Kathmandu",
+                                "Asia/Khandyga",
+                                "Asia/Kolkata",
+                                "Asia/Krasnoyarsk",
+                                "Asia/Kuala_Lumpur",
+                                "Asia/Kuching",
+                                "Asia/Kuwait",
+                                "Asia/Macau",
+                                "Asia/Magadan",
+                                "Asia/Makassar",
+                                "Asia/Manila",
+                                "Asia/Muscat",
+                                "Asia/Nicosia",
+                                "Asia/Novokuznetsk",
+                                "Asia/Novosibirsk",
+                                "Asia/Omsk",
+                                "Asia/Oral",
+                                "Asia/Phnom_Penh",
+                                "Asia/Pontianak",
+                                "Asia/Pyongyang",
+                                "Asia/Qatar",
+                                "Asia/Qostanay",
+                                "Asia/Qyzylorda",
+                                "Asia/Riyadh",
+                                "Asia/Sakhalin",
+                                "Asia/Samarkand",
+                                "Asia/Seoul",
+                                "Asia/Shanghai",
+                                "Asia/Singapore",
+                                "Asia/Srednekolymsk",
+                                "Asia/Taipei",
+                                "Asia/Tashkent",
+                                "Asia/Tbilisi",
+                                "Asia/Tehran",
+                                "Asia/Thimphu",
+                                "Asia/Tokyo",
+                                "Asia/Tomsk",
+                                "Asia/Ulaanbaatar",
+                                "Asia/Urumqi",
+                                "Asia/Ust-Nera",
+                                "Asia/Vientiane",
+                                "Asia/Vladivostok",
+                                "Asia/Yakutsk",
+                                "Asia/Yangon",
+                                "Asia/Yekaterinburg",
+                                "Asia/Yerevan",
+                                "Atlantic/Azores",
+                                "Atlantic/Bermuda",
+                                "Atlantic/Canary",
+                                "Atlantic/Cape_Verde",
+                                "Atlantic/Faroe",
+                                "Atlantic/Madeira",
+                                "Atlantic/Reykjavik",
+                                "Atlantic/South_Georgia",
+                                "Atlantic/St_Helena",
+                                "Atlantic/Stanley",
+                                "Australia/Adelaide",
+                                "Australia/Brisbane",
+                                "Australia/Broken_Hill",
+                                "Australia/Darwin",
+                                "Australia/Eucla",
+                                "Australia/Hobart",
+                                "Australia/Lindeman",
+                                "Australia/Lord_Howe",
+                                "Australia/Melbourne",
+                                "Australia/Perth",
+                                "Australia/Sydney",
+                                "Europe/Amsterdam",
+                                "Europe/Andorra",
+                                "Europe/Astrakhan",
+                                "Europe/Athens",
+                                "Europe/Belgrade",
+                                "Europe/Berlin",
+                                "Europe/Bratislava",
+                                "Europe/Brussels",
+                                "Europe/Bucharest",
+                                "Europe/Budapest",
+                                "Europe/Busingen",
+                                "Europe/Chisinau",
+                                "Europe/Copenhagen",
+                                "Europe/Dublin",
+                                "Europe/Gibraltar",
+                                "Europe/Guernsey",
+                                "Europe/Helsinki",
+                                "Europe/Isle_of_Man",
+                                "Europe/Istanbul",
+                                "Europe/Jersey",
+                                "Europe/Kaliningrad",
+                                "Europe/Kirov",
+                                "Europe/Kyiv",
+                                "Europe/Lisbon",
+                                "Europe/Ljubljana",
+                                "Europe/London",
+                                "Europe/Luxembourg",
+                                "Europe/Madrid",
+                                "Europe/Malta",
+                                "Europe/Mariehamn",
+                                "Europe/Minsk",
+                                "Europe/Monaco",
+                                "Europe/Moscow",
+                                "Europe/Oslo",
+                                "Europe/Paris",
+                                "Europe/Podgorica",
+                                "Europe/Prague",
+                                "Europe/Riga",
+                                "Europe/Rome",
+                                "Europe/Samara",
+                                "Europe/San_Marino",
+                                "Europe/Sarajevo",
+                                "Europe/Saratov",
+                                "Europe/Simferopol",
+                                "Europe/Skopje",
+                                "Europe/Sofia",
+                                "Europe/Stockholm",
+                                "Europe/Tallinn",
+                                "Europe/Tirane",
+                                "Europe/Ulyanovsk",
+                                "Europe/Vaduz",
+                                "Europe/Vatican",
+                                "Europe/Vienna",
+                                "Europe/Vilnius",
+                                "Europe/Volgograd",
+                                "Europe/Warsaw",
+                                "Europe/Zagreb",
+                                "Europe/Zurich",
+                                "Indian/Antananarivo",
+                                "Indian/Chagos",
+                                "Indian/Christmas",
+                                "Indian/Cocos",
+                                "Indian/Comoro",
+                                "Indian/Kerguelen",
+                                "Indian/Mahe",
+                                "Indian/Maldives",
+                                "Indian/Mauritius",
+                                "Indian/Mayotte",
+                                "Indian/Reunion",
+                                "Pacific/Apia",
+                                "Pacific/Auckland",
+                                "Pacific/Bougainville",
+                                "Pacific/Chatham",
+                                "Pacific/Chuuk",
+                                "Pacific/Easter",
+                                "Pacific/Efate",
+                                "Pacific/Fakaofo",
+                                "Pacific/Fiji",
+                                "Pacific/Funafuti",
+                                "Pacific/Galapagos",
+                                "Pacific/Gambier",
+                                "Pacific/Guadalcanal",
+                                "Pacific/Guam",
+                                "Pacific/Honolulu",
+                                "Pacific/Kanton",
+                                "Pacific/Kiritimati",
+                                "Pacific/Kosrae",
+                                "Pacific/Kwajalein",
+                                "Pacific/Majuro",
+                                "Pacific/Marquesas",
+                                "Pacific/Midway",
+                                "Pacific/Nauru",
+                                "Pacific/Niue",
+                                "Pacific/Norfolk",
+                                "Pacific/Noumea",
+                                "Pacific/Pago_Pago",
+                                "Pacific/Palau",
+                                "Pacific/Pitcairn",
+                                "Pacific/Pohnpei",
+                                "Pacific/Port_Moresby",
+                                "Pacific/Rarotonga",
+                                "Pacific/Saipan",
+                                "Pacific/Tahiti",
+                                "Pacific/Tarawa",
+                                "Pacific/Tongatapu",
+                                "Pacific/Wake",
+                                "Pacific/Wallis",
+                                "UTC",
+                                null
+                            ]
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "starts_at": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "utc": {
+                                                                "type": "string"
+                                                            },
+                                                            "local": {
+                                                                "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                                "type": "string"
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "utc",
+                                                            "local",
+                                                            "timezone",
+                                                            "label"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "starts_at"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/family/trials/{session}/book": {
+            "post": {
+                "operationId": "family.trials.book",
+                "description": "starts_at: one of the times offered. Send an Idempotency-Key. The family hears the time and its links; 422 with why not.",
+                "summary": "Book one more free trial from this one",
+                "tags": [
+                    "Crm"
+                ],
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "starts_at": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    }
+                                },
+                                "required": [
+                                    "starts_at"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "description": "The new trial lesson's id."
+                                                },
+                                                "starts_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "string"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "subject": {
+                                                    "type": "string"
+                                                },
+                                                "teacher": {
+                                                    "type": "string",
+                                                    "description": "The teacher's first name only (with a title before it, as \"\u0623. \u0645\u0646\u0649\")."
+                                                },
+                                                "minutes": {
+                                                    "type": "integer",
+                                                    "description": "How long the lesson is, in minutes."
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "starts_at",
+                                                "subject",
+                                                "teacher",
+                                                "minutes"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
             }
         },
         "/v1/lessons/{session}/rating": {

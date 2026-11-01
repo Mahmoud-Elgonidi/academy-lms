@@ -21,7 +21,10 @@
                                 <div><small>{{ __($l.'fields.level') }}</small><strong>{{ $t['level'] }}</strong></div>
                                 @if ($t['plan'])<div><small>{{ __($l.'fields.plan_id') }}</small><strong>{{ $t['plan'] }}</strong></div>@endif
                                 @if ($t['perWeek'])<div><small>{{ __($l.'fields.per_week') }}</small><strong>{{ $t['perWeek'] }}</strong></div>@endif
-                                @if ($t['assessment'])<p>{{ $t['assessment'] }}</p>@endif
+                                @foreach (['strengths', 'to_work_on', 'family_note'] as $field)
+                                    @if ($t[$field])<p><small>{{ __($l.'fields.'.$field) }} · {{ __($l.'family_reads') }}</small><br>{{ $t[$field] }}</p>@endif
+                                @endforeach
+                                @if ($t['assessment'])<p><small>{{ __($l.'fields.notes') }}</small><br>{{ $t['assessment'] }}</p>@endif
                             </div>
                         @endif
                     </article>

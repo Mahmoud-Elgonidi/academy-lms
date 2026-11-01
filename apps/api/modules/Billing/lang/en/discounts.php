@@ -9,6 +9,7 @@ return [
         'sibling_bigger' => 'The sibling discount is bigger, so it applies now; the coupon waits for a later invoice.',
     ],
     'errors' => [
+        'personal' => 'This is a family\'s own offer after its free trial, made by the academy\'s rules, so it cannot be edited. Change the offer after a trial in the lead settings.',
         'not_found' => 'There is no coupon :code.',
         'inactive' => 'Coupon :code is turned off.',
         'not_yet' => 'Coupon :code can be used from :date.',

@@ -89,6 +89,8 @@ return [
         ],
         'crm' => [
             'settings_saved' => 'Lead settings changed (website leads shared out: :assign_website_leads)',
+            'trial_offer_saved' => 'Changed the offer after a free trial (:state, :percent% off, for :hours hours)',
+            'second_trial_saved' => 'The free second trial with another teacher: :state',
         ],
         'announcements' => [
             'sent' => 'Sent an announcement to :audience (recipients: :count)',

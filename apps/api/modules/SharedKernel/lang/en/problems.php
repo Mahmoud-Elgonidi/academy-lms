@@ -12,6 +12,7 @@ return [
     'academy-suspended' => 'This academy is suspended.',
     'academy-not-found' => 'Academy not found.',
     'not-found' => 'Not found.',
+    'link-expired' => 'This link has ended.',
     'bad-request' => 'Bad request.',
     'method-not-allowed' => 'Method not allowed.',
     'conflict' => 'This conflicts with the current state.',

@@ -5,9 +5,13 @@ namespace Modules\Crm\Filament\Pages;
 use BackedEnum;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +20,8 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\Crm\Actions\CreateLead;
 use Modules\Crm\Actions\SaveCrmSettings;
+use Modules\Crm\Actions\SaveTrialOffer;
+use Modules\Crm\Domain\TrialOfferRules;
 use Modules\Crm\Enums\LeadSource;
 use Modules\Crm\Enums\LeadStage;
 use Modules\Crm\Filament\Concerns\Attempts;
@@ -187,13 +193,48 @@ final class Leads extends Page
                 }),
             Action::make('settings')->label(__('crm::leads.settings.open'))->icon(Heroicon::OutlinedCog6Tooth)->color('gray')
                 ->modalHeading(__('crm::leads.settings.open'))->modalWidth('lg')
-                ->fillForm(fn (): array => ['assign_website_leads' => CrmSettings::current()->assign_website_leads])
+                ->fillForm(function (): array {
+                    $settings = CrmSettings::current();
+
+                    return [
+                        'assign_website_leads' => $settings->assign_website_leads,
+                        'trial_offer' => $settings->trial_offer,
+                        'trial_offer_percent' => $settings->trial_offer_percent,
+                        'trial_offer_hours' => $settings->trial_offer_hours,
+                        'second_trial' => $settings->second_trial,
+                    ];
+                })
                 ->schema([
                     Toggle::make('assign_website_leads')->label(__('crm::leads.settings.assign_website_leads'))
                         ->helperText(__('crm::leads.settings.assign_website_leads_hint')),
+                    // After the free trial (J2): the offer with the report, and the free second trial.
+                    Section::make(__('crm::leads.settings.after_trial'))->description(__('crm::leads.settings.after_trial_hint'))->compact()->schema([
+                        Toggle::make('trial_offer')->label(__('crm::leads.settings.trial_offer'))->live()
+                            ->helperText(__('crm::leads.settings.trial_offer_hint')),
+                        Grid::make(2)->visible(fn (Get $get) => (bool) $get('trial_offer'))->schema([
+                            TextInput::make('trial_offer_percent')->label(__('crm::leads.settings.trial_offer_percent'))->integer()->required()
+                                ->minValue(TrialOfferRules::MIN_PERCENT)->maxValue(TrialOfferRules::MAX_PERCENT)->suffix('%'),
+                            TextInput::make('trial_offer_hours')->label(__('crm::leads.settings.trial_offer_hours'))->integer()->required()
+                                ->minValue(TrialOfferRules::MIN_HOURS)->maxValue(TrialOfferRules::MAX_HOURS)
+                                ->helperText(__('crm::leads.settings.trial_offer_hours_hint')),
+                        ]),
+                        Toggle::make('second_trial')->label(__('crm::leads.settings.second_trial'))
+                            ->helperText(__('crm::leads.settings.second_trial_hint')),
+                    ]),
                 ])
-                ->action(function (array $data): void {
-                    app(SaveCrmSettings::class)->handle((bool) ($data['assign_website_leads'] ?? false));
+                ->action(function (array $data, Action $action): void {
+                    $this->attempt($action, function () use ($data) {
+                        $settings = CrmSettings::current();
+                        DB::transaction(function () use ($data, $settings) {
+                            app(SaveCrmSettings::class)->handle((bool) ($data['assign_website_leads'] ?? false), (bool) ($data['second_trial'] ?? false));
+                            $on = (bool) ($data['trial_offer'] ?? false);
+                            $percent = (int) ($data['trial_offer_percent'] ?? $settings->trial_offer_percent);
+                            $hours = (int) ($data['trial_offer_hours'] ?? $settings->trial_offer_hours);
+                            if ($on !== $settings->trial_offer || $percent !== $settings->trial_offer_percent || $hours !== $settings->trial_offer_hours) {
+                                app(SaveTrialOffer::class)->handle($on, $percent, $hours);
+                            }
+                        });
+                    });
                     Notification::make()->success()->title(__('crm::leads.settings.saved'))->send();
                 }),
         ];

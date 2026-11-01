@@ -89,6 +89,8 @@ return [
         ],
         'crm' => [
             'settings_saved' => 'تعديل إعدادات العملاء (التوزيع التلقائي لعملاء الموقع: :assign_website_leads)',
+            'trial_offer_saved' => 'تعديل عرض ما بعد الحصة التجريبية (:state، خصم :percent%، لمدة :hours ساعة)',
+            'second_trial_saved' => 'الحصة التجريبية الثانية مع معلّم آخر: :state',
         ],
         'announcements' => [
             'sent' => 'أرسل إعلانًا إلى :audience (عدد المستلمين: :count)',

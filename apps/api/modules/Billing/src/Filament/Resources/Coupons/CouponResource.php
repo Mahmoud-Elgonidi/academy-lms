@@ -20,10 +20,12 @@ use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Actions\Discounts\SaveCoupon;
+use Modules\Billing\Contracts\CouponPurpose;
 use Modules\Billing\Filament\Resources\Plans\ManagePlans;
 use Modules\Billing\Models\Coupon;
 use Modules\Billing\Models\Plan;
@@ -46,6 +48,12 @@ final class CouponResource extends Resource
     protected static ?int $navigationSort = 81;
 
     protected static ?string $slug = 'settings/coupons';
+
+    /** The academy's own codes; a family's personal trial offer is the CRM's to show, on its lead. */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('purpose', CouponPurpose::General->value);
+    }
 
     public static function canAccess(): bool
     {

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Crm\Models\Lead;
 use Modules\Crm\Models\LeadActivity;
+use Modules\Crm\Support\TrialFacts;
 use Modules\Crm\Support\WebsiteLeads;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\People\Contracts\AgeGroup;
@@ -47,6 +48,7 @@ final class BookOwnTrial
         private readonly PrepareLearner $prepare,
         private readonly TrialBooking $trials,
         private readonly TenantContext $tenants,
+        private readonly TrialFacts $facts,
     ) {}
 
     /**
@@ -108,12 +110,8 @@ final class BookOwnTrial
         $refuse = fn (string $why, array $replace = []) => throw ValidationException::withMessages(['starts_at' => __('crm::leads.errors.'.$why, $replace)]);
 
         return DB::transaction(function () use ($request, $startsAt, $refuse) {
-            DB::select('select pg_advisory_xact_lock(hashtext(?))', ['own-trial:'.$this->tenants->id().':'.$request->phone]);
-            $open = DB::table('lead_trials as t')
-                ->join('leads as l', fn ($j) => $j->on('l.academy_id', '=', 't.academy_id')->on('l.id', '=', 't.lead_id'))
-                ->join('sessions as s', fn ($j) => $j->on('s.academy_id', '=', 't.academy_id')->on('s.id', '=', 't.session_id'))
-                ->where('l.phone_e164', $request->phone)->where('t.status', 'booked')
-                ->get(['s.subject_id', 'l.for_child', 'l.learner_name']);
+            $this->facts->lockNumber($request->phone);
+            $open = $this->facts->openOnNumber($request->phone);
             // One open trial per learner and subject; a few at most per number (two children, two subjects; never a flood).
             foreach ($open as $trial) {
                 $sameLearner = (bool) $trial->for_child === $request->forChild
@@ -135,16 +133,10 @@ final class BookOwnTrial
                 $refuse('number_in_use');
             }
             // A learner who already studies the subject, or had their free trial in it, is the academy's to talk to.
-            $studying = DB::table('enrollments')->where('student_id', $learnerId)->where('subject_id', $request->subjectId)
-                ->where('status', '!=', 'ended')->exists();
-            if ($studying) {
+            if ($this->facts->studying($learnerId, $request->subjectId)) {
                 $refuse('already_student');
             }
-            $hadTrial = DB::table('sessions as s')
-                ->join('session_participants as p', fn ($j) => $j->on('p.academy_id', '=', 's.academy_id')->on('p.session_id', '=', 's.id'))
-                ->where('p.user_id', $learnerId)->where('p.role', 'student')->where('s.type', 'trial')->where('s.subject_id', $request->subjectId)
-                ->where('s.status', 'completed')->exists();
-            if ($hadTrial) {
+            if ($this->facts->hadTrial($learnerId, $request->subjectId)) {
                 $refuse('had_trial');
             }
 
