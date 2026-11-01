@@ -84,8 +84,11 @@ return [
             'concern_reopened' => 'Safeguarding concern :concern opened again',
         ],
         'site' => [
-            'settings_saved' => "The academy's page saved (:state; sections: :shown)",
+            'settings_saved' => "The academy's page saved (:state; sections: :shown; free trials booked by: :trial_booking; answered within :response_hours hours; booked at least :trial_notice_hours hours ahead)",
             'request_handled' => 'A request from the academy\'s page answered (:request_status)',
+        ],
+        'crm' => [
+            'settings_saved' => 'Lead settings changed (website leads shared out: :assign_website_leads)',
         ],
         'announcements' => [
             'sent' => 'Sent an announcement to :audience (recipients: :count)',
@@ -198,6 +201,8 @@ return [
         ],
     ],
     'values' => [
+        'trial_booking' => ['family' => 'the family', 'staff' => 'the academy\'s staff'],
+        'assign_website_leads' => ['on' => 'on', 'off' => 'off'],
         'stop_kind' => ['juz' => 'part', 'surah' => 'surah', 'program' => 'the program', 'khatma' => 'the whole Quran'],
         'outcome' => ['passed' => 'passed', 'failed' => 'to try again'],
         'quran_fields' => [

@@ -23,7 +23,8 @@ final class JoinRequestsData implements PersonalDataSource
     public function export(string $userId): PersonalDataPart
     {
         $rows = $this->theirs($userId)?->orderBy('created_at')
-            ->get(['kind', 'name', 'phone', 'email', 'country', 'timezone', 'locale', 'for_child', 'child_name', 'child_birth_year', 'years_teaching', 'message', 'status', 'created_at']);
+            ->get(['kind', 'name', 'phone', 'email', 'country', 'timezone', 'locale', 'for_child', 'child_name', 'child_birth_year', 'preferred_days', 'preferred_from', 'preferred_to',
+                'teacher_gender', 'help_choose', 'years_teaching', 'message', 'status', 'created_at']);
 
         return new PersonalDataPart(['requests' => $rows === null ? [] : $rows->map(fn (object $r) => (array) $r)->all()]);
     }

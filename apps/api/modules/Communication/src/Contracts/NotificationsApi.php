@@ -2,6 +2,7 @@
 
 namespace Modules\Communication\Contracts;
 
+use Modules\Communication\Contracts\DTOs\ContactMessage;
 use Modules\Communication\Contracts\DTOs\Message;
 use Modules\Communication\Contracts\DTOs\TemplateDefinition;
 
@@ -26,4 +27,14 @@ interface NotificationsApi
      * @return int how many people it was sent to (repeats of a dedupe key do not count)
      */
     public function send(Message $message): int;
+
+    /**
+     * A message to someone with no account (ContactMessage): written in their
+     * language and on their clock, sent after the commit by the template's
+     * WhatsApp and email that the academy has on. Nothing goes to an inbox
+     * and nothing is kept. Never throws.
+     *
+     * @return int how many channels it went out by
+     */
+    public function sendToContact(ContactMessage $message): int;
 }

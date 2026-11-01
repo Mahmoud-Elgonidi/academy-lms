@@ -169,7 +169,8 @@ final class FindTeacher extends Page
             'student_id' => $query['student'] ?? null,
             'timezone' => in_array($query['tz'] ?? null, Timezones::all(), true) ? $query['tz'] : app(TenantContext::class)->require()->defaultTimezone,
             'subject_id' => $focus?->subject_id ?? $query['subject'] ?? null,
-            'gender' => 'any',
+            // A teacher's gender the family asked for (a lead's preference sent along), else anyone.
+            'gender' => in_array($query['gender'] ?? null, TeacherSearch::GENDERS, true) ? $query['gender'] : 'any',
             'language' => null,
             'level_id' => null,
             'category_id' => null,

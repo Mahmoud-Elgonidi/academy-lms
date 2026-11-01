@@ -3,6 +3,8 @@
 namespace Modules\Communication;
 
 use Modules\Communication\Actions\SendMessage;
+use Modules\Communication\Actions\SendToContact;
+use Modules\Communication\Contracts\DTOs\ContactMessage;
 use Modules\Communication\Contracts\DTOs\Message;
 use Modules\Communication\Contracts\DTOs\TemplateDefinition;
 use Modules\Communication\Contracts\NotificationsApi;
@@ -31,6 +33,17 @@ final class CommunicationService implements NotificationsApi
     {
         try {
             return app(SendMessage::class)->handle($message);
+        } catch (Throwable $e) {
+            report($e);
+
+            return 0;
+        }
+    }
+
+    public function sendToContact(ContactMessage $message): int
+    {
+        try {
+            return app(SendToContact::class)->handle($message);
         } catch (Throwable $e) {
             report($e);
 

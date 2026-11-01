@@ -14,6 +14,10 @@ use Modules\Site\Domain\SiteContent;
  *
  * @property bool $enabled
  * @property array<string, mixed> $content
+ * @property string $trial_booking family | staff: who books a free trial asked for on the page
+ * @property int $response_hours how soon the academy promises to answer a request
+ * @property int $trial_notice_hours a family books its own trial at least this long ahead
+ * @property ?string $default_trial_subject_id the subject of a trial whose family asked for help choosing
  * @property ?string $updated_by
  * @property ?CarbonImmutable $updated_at
  */
@@ -29,13 +33,21 @@ final class SiteSettings extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['enabled', 'content', 'updated_by'];
+    public const TRIAL_BOOKING = ['family', 'staff'];
 
-    protected $attributes = ['enabled' => false];
+    protected $fillable = ['enabled', 'content', 'trial_booking', 'response_hours', 'trial_notice_hours', 'default_trial_subject_id', 'updated_by'];
+
+    protected $attributes = ['enabled' => false, 'trial_booking' => 'family', 'response_hours' => 4, 'trial_notice_hours' => 3];
 
     protected function casts(): array
     {
-        return ['enabled' => 'boolean', 'content' => 'array', 'updated_at' => 'immutable_datetime', 'created_at' => 'immutable_datetime'];
+        return ['enabled' => 'boolean', 'content' => 'array', 'response_hours' => 'integer', 'trial_notice_hours' => 'integer', 'updated_at' => 'immutable_datetime', 'created_at' => 'immutable_datetime'];
+    }
+
+    /** Whether families book their own free trial from the page (the page on, and the academy lets them). */
+    public function familyBooks(): bool
+    {
+        return $this->exists && $this->enabled && $this->trial_booking === 'family';
     }
 
     public static function current(): self

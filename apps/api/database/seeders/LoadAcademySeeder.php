@@ -14,6 +14,7 @@ use Modules\Billing\Contracts\DTOs\RegionOption;
 use Modules\Billing\Database\Seeders\DemoBillingSeeder;
 use Modules\Billing\Models\Invoice;
 use Modules\Catalog\Contracts\CatalogApi;
+use Modules\Communication\Contracts\DTOs\ContactMessage;
 use Modules\Communication\Contracts\DTOs\Message;
 use Modules\Communication\Contracts\DTOs\TemplateDefinition;
 use Modules\Communication\Contracts\NotificationsApi;
@@ -168,6 +169,11 @@ final class LoadAcademySeeder extends Seeder
             }
 
             public function send(Message $message): int
+            {
+                return 0;
+            }
+
+            public function sendToContact(ContactMessage $message): int
             {
                 return 0;
             }

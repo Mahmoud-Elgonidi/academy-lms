@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Scheduling\Http\V1\Controllers\FamilyLessonsController;
 use Modules\Scheduling\Http\V1\Controllers\TeacherLessonsController;
 use Modules\Scheduling\Http\V1\Controllers\TeacherShiftsController;
+use Modules\Scheduling\Http\V1\Controllers\TrialLessonController;
 
 // The teacher's own shifts (mobile app): see the schedule, propose changes, talk to the admins.
 Route::middleware(['auth:sanctum', 'can:shifts.propose-own'])->prefix('teacher/shifts')->group(function () {
@@ -33,4 +34,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('lessons/{session}/cancel', [FamilyLessonsController::class, 'cancel'])->middleware('idempotent')->name('lessons.cancel');
     Route::post('lessons/{session}/refuse-substitute', [FamilyLessonsController::class, 'refuseSubstitute'])->middleware('idempotent')->name('lessons.refuse-substitute');
     Route::post('lessons/{session}/dispute', [FamilyLessonsController::class, 'dispute'])->middleware('idempotent')->name('lessons.dispute');
+});
+
+// A family's own link to its coming free trial (no sign-in: the token is the proof): see it, the teacher's other times, move it, or say they cannot come.
+Route::prefix('site/trials/lesson/{token}')->where(['token' => '[A-Za-z0-9_\-.]{20,300}'])->group(function () {
+    Route::get('/', [TrialLessonController::class, 'show'])->middleware('throttle:60,1')->name('site.trials.lesson');
+    Route::get('slots', [TrialLessonController::class, 'slots'])->middleware('throttle:60,1')->name('site.trials.lesson.slots');
+    Route::post('move', [TrialLessonController::class, 'move'])->middleware(['throttle:10,60', 'idempotent'])->name('site.trials.lesson.move');
+    Route::post('cancel', [TrialLessonController::class, 'cancel'])->middleware(['throttle:10,60', 'idempotent'])->name('site.trials.lesson.cancel');
 });

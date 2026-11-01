@@ -54,6 +54,8 @@ final class SiteServiceProvider extends ServiceProvider
             ? route('filament.academy.pages.site.requests')
             : null);
         Event::listen(JoinRequested::class, [SendSiteNotifications::class, 'requested']);
+        // Whoever asked for a free trial hears back at once (WhatsApp and email: they have no account yet).
+        Event::listen(JoinRequested::class, [SendSiteNotifications::class, 'reply']);
 
         if ($this->app->runningInConsole()) {
             $this->commands([SweepJoinRequests::class]);

@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Modules\People\Actions\Cards\HideTeacherCard;
 use Modules\People\Actions\Checks\PauseTeacherForMinors;
 use Modules\People\Actions\Checks\ResumeTeacherForMinors;
+use Modules\People\Actions\Consent\RequestConsent;
 use Modules\People\Actions\LinkGuardian;
 use Modules\People\Actions\SaveStudentDetails;
 use Modules\People\Actions\SaveStudentProfile;
@@ -129,9 +130,14 @@ final class PeopleService implements PeopleApi
         ));
     }
 
-    public function linkGuardian(string $guardianId, string $studentId, string $relationship = 'parent', bool $isPrimary = true): void
+    public function linkGuardian(string $guardianId, string $studentId, string $relationship = 'parent', bool $isPrimary = true, bool $askConsent = true): void
     {
-        $this->linkGuardian->handle($guardianId, $studentId, $relationship, $isPrimary);
+        $this->linkGuardian->handle($guardianId, $studentId, $relationship, $isPrimary, $askConsent);
+    }
+
+    public function requestConsent(string $studentId): int
+    {
+        return app(RequestConsent::class)->handle($studentId);
     }
 
     public function saveTeacherProfile(TeacherProfileData $profile): void

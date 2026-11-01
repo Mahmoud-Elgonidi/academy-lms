@@ -19,7 +19,7 @@ return [
     'teacher_late' => ['title' => 'لم يدخل :teacher حصة :student', 'body' => 'بدأت الحصة :when. تابعها من لوحة العمليات.'],
     'session_cancelled' => ['title' => 'أُلغيت حصة :subject', 'body' => 'أُلغيت حصة :student يوم :when. :outcome'],
     'session_cancelled_teacher' => ['title' => 'أُلغيت حصة :student', 'body' => 'أُلغيت حصة :subject يوم :when.'],
-    'trial_booked' => ['title' => 'حُجزت الحصة التجريبية لـ :student', 'body' => 'حصة :subject التجريبية مع :teacher يوم :when. لا تحتاجون إلى حساب ولا تطبيق: ادخلوا من هنا قبل الموعد بدقائق: :link'],
+    'trial_booked' => ['title' => 'حُجزت الحصة التجريبية لـ :student', 'body' => 'حصة :subject التجريبية مع :teacher يوم :when. لا تحتاجون إلى حساب ولا تطبيق: ادخلوا من هنا قبل الموعد بدقائق: :link — لتغيير الموعد: :change — وإن لم تستطيعوا الحضور: :cancel'],
     'trial_booked_teacher' => ['title' => 'حصة تجريبية جديدة', 'body' => ':student · :subject · :when. بعد الحصة سيُطلب منك تقييم مستواه.'],
     'session_moved' => ['title' => 'نُقلت حصة :subject', 'body' => 'نُقلت حصة :student من :from إلى :when.'],
     'session_moved_teacher' => ['title' => 'نُقلت حصة :student', 'body' => 'نُقلت حصة :subject من :from إلى :when.'],

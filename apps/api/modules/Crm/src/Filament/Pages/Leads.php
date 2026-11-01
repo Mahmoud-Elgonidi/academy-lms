@@ -5,6 +5,7 @@ namespace Modules\Crm\Filament\Pages;
 use BackedEnum;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -14,10 +15,12 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Modules\Crm\Actions\CreateLead;
+use Modules\Crm\Actions\SaveCrmSettings;
 use Modules\Crm\Enums\LeadSource;
 use Modules\Crm\Enums\LeadStage;
 use Modules\Crm\Filament\Concerns\Attempts;
 use Modules\Crm\Filament\LeadForm;
+use Modules\Crm\Models\CrmSettings;
 use Modules\Crm\Models\Lead;
 use Modules\Crm\Queries\LeadFunnel;
 use Modules\SharedKernel\Authorization\Ability;
@@ -181,6 +184,17 @@ final class Leads extends Page
                     $lead = $this->attempt($action, fn () => app(CreateLead::class)->handle($data, (string) auth()->id()));
                     Notification::make()->success()->title(__('crm::leads.created'))->send();
                     $this->redirect(LeadPage::getUrl(['lead' => $lead->id]), navigate: true);
+                }),
+            Action::make('settings')->label(__('crm::leads.settings.open'))->icon(Heroicon::OutlinedCog6Tooth)->color('gray')
+                ->modalHeading(__('crm::leads.settings.open'))->modalWidth('lg')
+                ->fillForm(fn (): array => ['assign_website_leads' => CrmSettings::current()->assign_website_leads])
+                ->schema([
+                    Toggle::make('assign_website_leads')->label(__('crm::leads.settings.assign_website_leads'))
+                        ->helperText(__('crm::leads.settings.assign_website_leads_hint')),
+                ])
+                ->action(function (array $data): void {
+                    app(SaveCrmSettings::class)->handle((bool) ($data['assign_website_leads'] ?? false));
+                    Notification::make()->success()->title(__('crm::leads.settings.saved'))->send();
                 }),
         ];
     }

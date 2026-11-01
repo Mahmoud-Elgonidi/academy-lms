@@ -11,5 +11,6 @@ final readonly class SessionCancelled
         public string $reason,
         public bool $makeup,
         public ?string $actorId,
+        public ?string $askedBy = null,     // student | teacher | academy | family | system (CancelSession), null otherwise
     ) {}
 }

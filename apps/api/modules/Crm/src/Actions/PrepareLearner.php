@@ -18,7 +18,12 @@ use Modules\People\Contracts\PeopleApi;
  * trial from their own signed link, without signing in (docs/architecture/
  * 01, section 8). An adult is the learner; a child gets an account under
  * the parent, who keeps the phone. A number already in the academy is
- * reused when it fits (a parent with another child here), refused when not.
+ * reused when it fits (a parent with another child here, and that child
+ * when the name is the same: no second account for one child), refused
+ * when not.
+ * The parent is not asked for the child's consent yet: they bring the child
+ * to the trial by their own link, and the consent is asked when the child
+ * first needs a way in of their own (their sign-in, their seat, a course).
  */
 final class PrepareLearner
 {
@@ -35,14 +40,17 @@ final class PrepareLearner
             throw ValidationException::withMessages(['phone_e164' => __('crm::leads.errors.no_phone')]);
         }
 
-        return DB::transaction(function () use ($lead) {
+        // An email already another account's here is left off the new one (the number is the way in).
+        $email = $lead->email !== null && ! DB::table('users')->where('email', $lead->email)->exists() ? $lead->email : null;
+
+        return DB::transaction(function () use ($lead, $email) {
             $existing = DB::table('users')->where('phone_e164', $lead->phone_e164)->first(['id', 'name']);
             $roles = $existing ? DB::table('user_roles')->where('user_id', $existing->id)->pluck('role')->all() : [];
             $taken = fn () => throw ValidationException::withMessages(['phone_e164' => __('crm::leads.errors.phone_taken', ['name' => $existing->name])]);
             $new = fn (string $name, Role $role, bool $phone, ?string $username = null) => $this->identity->createUser(new NewUser(
                 name: $name,
                 roles: [$role],
-                email: $phone ? $lead->email : null,
+                email: $phone ? $email : null,
                 phoneE164: $phone ? $lead->phone_e164 : null,
                 username: $username,
                 locale: $lead->locale,
@@ -56,9 +64,11 @@ final class PrepareLearner
                     in_array(Role::Guardian->value, $roles, true) => $existing->id,
                     default => $taken(),
                 };
-                $learnerId = $new((string) $lead->learner_name, Role::Student, false, 'learner.'.substr(str_replace('-', '', $lead->id), -12));
-                $this->people->linkGuardian($contactId, $learnerId);
-                if ($lead->learner_birth_year !== null) {
+                $known = DB::table('guardian_student as g')->join('users as u', fn ($j) => $j->on('u.academy_id', '=', 'g.academy_id')->on('u.id', '=', 'g.student_id'))
+                    ->where('g.guardian_id', $contactId)->whereRaw('lower(trim(u.name)) = lower(trim(?))', [(string) $lead->learner_name])->value('u.id');
+                $learnerId = $known ?? $new((string) $lead->learner_name, Role::Student, false, 'learner.'.substr(str_replace('-', '', $lead->id), -12));
+                $this->people->linkGuardian($contactId, $learnerId, askConsent: false);
+                if ($known === null && $lead->learner_birth_year !== null) {
                     $this->people->saveStudentProfile($learnerId, CarbonImmutable::create($lead->learner_birth_year, 7, 1), null);
                 }
             } else {

@@ -22,6 +22,8 @@
         .sq-tag[data-status="accepted"] { background: var(--success-100); color: var(--success-800); }
         .sq-tag[data-kind] { background: var(--primary-50); color: var(--primary-700); }
         .sq-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+        .sq-failed { font-size: .85rem; padding: .5rem .75rem; border-radius: .6rem; background: var(--danger-50); color: var(--danger-700); }
+        .dark .sq-failed { background: var(--gray-950); color: var(--danger-400); }
         .sq-empty { padding: 2rem; text-align: center; color: var(--gray-500); border: 1px dashed var(--gray-300); border-radius: var(--radius-xl, .75rem); }
     </style>
     <nav class="sq-filters" aria-label="{{ __($l.'filter') }}">
@@ -55,8 +57,13 @@
                     @if ($r['child'])<span>{{ __($l.'for_child', ['name' => $r['child']]) }}@if ($r['born']) · {{ __($l.'born', ['year' => $r['born']]) }}@endif</span>@endif
                     @if ($r['subjects'] !== [])<span>{{ __($l.'subjects') }}: <bdi>{{ implode('، ', $r['subjects']) }}</bdi></span>@endif
                     @if ($r['years'] !== null)<span>{{ __($l.'years', ['years' => $r['years']]) }}</span>@endif
+                    @if ($r['help_choose'])<span>{{ __($l.'help_choose') }}</span>@endif
+                    @if ($r['days'])<span>{{ __($l.'free', ['days' => $r['days']]) }}@if ($r['hours']) · {{ $r['hours'] }}@endif</span>@endif
+                    @if ($r['teacher_gender'])<span>{{ __($l.'teacher_gender.'.$r['teacher_gender']) }}</span>@endif
                     @if ($r['utm'])<span dir="ltr">utm: {{ $r['utm'] }}</span>@endif
                 </div>
+                @if ($r['booked'])<p class="sq-note">{{ __($l.'booked') }}</p>@endif
+                @if ($r['failed'])<p class="sq-failed" role="alert">{{ __($l.'lead_failed', ['why' => $r['failed']]) }}</p>@endif
                 @if ($r['message'])<p class="sq-message">{{ $r['message'] }}</p>@endif
                 @if ($r['note'])<p class="sq-note">{{ __($l.'note') }}: {{ $r['note'] }}</p>@endif
                 <div class="sq-actions">

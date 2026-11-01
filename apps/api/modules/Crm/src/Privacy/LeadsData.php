@@ -23,7 +23,7 @@ final class LeadsData implements PersonalDataSource
     {
         return new PersonalDataPart([
             'enquiries' => $this->leads($userId)->orderBy('created_at')
-                ->get(['contact_name', 'phone_e164', 'email', 'country', 'learner_name', 'learner_birth_year', 'preferred_days', 'source', 'stage', 'created_at'])
+                ->get(['contact_name', 'phone_e164', 'email', 'country', 'learner_name', 'learner_birth_year', 'preferred_days', 'preferred_from', 'preferred_to', 'teacher_gender', 'source', 'stage', 'created_at'])
                 ->map(fn (object $l) => ['preferred_days' => json_decode((string) $l->preferred_days, true)] + (array) $l)->all(),
         ]);
     }

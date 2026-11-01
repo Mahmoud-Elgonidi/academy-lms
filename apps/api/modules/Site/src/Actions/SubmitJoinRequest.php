@@ -12,6 +12,7 @@ use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Time\Timezones;
 use Modules\Site\Contracts\Events\JoinRequested;
 use Modules\Site\Models\JoinRequest;
+use Modules\Site\Models\SiteSettings;
 
 /**
  * Someone asks from the academy's page: a free trial lesson (for themself or
@@ -20,7 +21,11 @@ use Modules\Site\Models\JoinRequest;
  * makes a lead of a trial (JoinRequested, after commit). A form a machine
  * sent (the hidden field filled, or no fresh token: FormToken) is answered
  * the same and kept nowhere; the same number asking the same again within a
- * week is the same request.
+ * week is the same request. A trial says its subject, or asks the academy to
+ * help choose (the academy's default trial subject, else its staff choose),
+ * and may say when the family is free (days and hours on their clock) and
+ * the teacher they would rather have. A family that books its own trial
+ * with a code to its number comes through record() (the code proved them).
  *
  * Plain loops and no collection closures: the public controller calls it,
  * and Scramble's inference of those breaks other endpoints.
@@ -31,13 +36,15 @@ final class SubmitJoinRequest
 
     private const SAME_FOR_DAYS = 7;
 
-    private const FIELDS = ['kind', 'name', 'phone', 'email', 'country', 'timezone', 'subject_id', 'for_child', 'child_name', 'child_birth_year', 'subject_ids', 'years_teaching', 'message'];
+    private const FIELDS = ['kind', 'name', 'phone', 'email', 'country', 'timezone', 'subject_id', 'for_child', 'child_name', 'child_birth_year', 'subject_ids', 'years_teaching', 'message',
+        'preferred_days', 'preferred_from', 'preferred_to', 'teacher_gender', 'help_choose'];
 
     public function __construct(private readonly TenantContext $tenants) {}
 
     /**
-     * @param  array<string, mixed>  $data  kind, name, phone, email, country, timezone, subject_id, for_child, child_name, child_birth_year,
-     *                                      subject_ids, years_teaching, message, utm_source, utm_medium, utm_campaign, form_token, website (left empty by people)
+     * @param  array<string, mixed>  $data  kind, name, phone, email, country, timezone, subject_id, help_choose, for_child, child_name, child_birth_year,
+     *                                      preferred_days, preferred_from, preferred_to, teacher_gender, subject_ids, years_teaching, message,
+     *                                      utm_source, utm_medium, utm_campaign, form_token, website (left empty by people)
      * @return ?JoinRequest the request kept (or the same one already waiting); null for a machine's form
      *
      * @throws ValidationException
@@ -49,6 +56,19 @@ final class SubmitJoinRequest
             return null;
         }
 
+        return $this->record($data, $locale);
+    }
+
+    /**
+     * Keeps a request a person sent (handle() checked the form; a family booking
+     * its own trial proved its number with a code).
+     *
+     * @param  array<string, mixed>  $data  as handle()
+     *
+     * @throws ValidationException
+     */
+    public function record(array $data, string $locale): JoinRequest
+    {
         $kind = is_string($data['kind'] ?? null) ? $data['kind'] : '';
         $trial = $kind === 'trial';
         $forChild = $trial && filter_var($data['for_child'] ?? false, FILTER_VALIDATE_BOOL);
@@ -60,6 +80,16 @@ final class SubmitJoinRequest
                 }
             }
         }
+        $helpChoose = $trial && filter_var($data['help_choose'] ?? false, FILTER_VALIDATE_BOOL);
+        $days = [];
+        if ($trial && is_array($data['preferred_days'] ?? null)) {
+            foreach ($data['preferred_days'] as $day) {
+                if (is_numeric($day) && ! in_array((int) $day, $days, true)) {
+                    $days[] = (int) $day;
+                }
+            }
+            sort($days);
+        }
         $input = [
             'kind' => $kind,
             'name' => $this->text($data['name'] ?? null),
@@ -67,7 +97,12 @@ final class SubmitJoinRequest
             'email' => ($email = $this->text($data['email'] ?? null)) !== null ? strtolower($email) : null,
             'country' => ($country = $this->text($data['country'] ?? null)) !== null ? strtoupper($country) : null,
             'timezone' => $this->text($data['timezone'] ?? null),
-            'subject_id' => $trial ? $this->text($data['subject_id'] ?? null) : null,
+            'subject_id' => $trial && ! $helpChoose ? $this->text($data['subject_id'] ?? null) : null,
+            'help_choose' => $helpChoose,
+            'preferred_days' => $days,
+            'preferred_from' => $trial && is_numeric($data['preferred_from'] ?? null) ? (int) $data['preferred_from'] : null,
+            'preferred_to' => $trial && is_numeric($data['preferred_to'] ?? null) ? (int) $data['preferred_to'] : null,
+            'teacher_gender' => $trial ? $this->text($data['teacher_gender'] ?? null) : null,
             'for_child' => $forChild,
             'child_name' => $forChild ? $this->text($data['child_name'] ?? null) : null,
             'child_birth_year' => $forChild && filled($data['child_birth_year'] ?? null) ? $data['child_birth_year'] : null,
@@ -81,6 +116,7 @@ final class SubmitJoinRequest
             $attributes[$field] = (string) __('site::site.request.fields.'.$field);
         }
         $attributes['subject_ids.*'] = (string) __('site::site.request.fields.subject_ids.*');
+        $attributes['preferred_days.*'] = (string) __('site::site.request.fields.preferred_days');
         $valid = Validator::make($input, [
             'kind' => ['required', Rule::in(JoinRequest::KINDS)],
             'name' => ['required', 'string', 'min:2', 'max:120'],
@@ -88,7 +124,13 @@ final class SubmitJoinRequest
             'email' => ['nullable', 'email:rfc', 'max:190'],
             'country' => ['nullable', 'regex:/^[A-Z]{2}$/'],
             'timezone' => ['nullable', Rule::in(Timezones::all())],
-            'subject_id' => ['bail', 'nullable', 'uuid', Rule::exists('subjects', 'id')],
+            'subject_id' => ['bail', Rule::requiredIf($trial && ! $helpChoose), 'nullable', 'uuid', Rule::exists('subjects', 'id')],
+            'help_choose' => ['boolean'],
+            'preferred_days' => ['array', 'max:7'],
+            'preferred_days.*' => ['integer', 'between:1,7'],
+            'preferred_from' => ['nullable', 'integer', 'between:0,23'],
+            'preferred_to' => ['nullable', 'integer', 'between:1,24', $input['preferred_from'] !== null ? 'gt:preferred_from' : 'nullable'],
+            'teacher_gender' => ['nullable', Rule::in(['female', 'male'])],
             'for_child' => ['boolean'],
             'child_name' => ['nullable', Rule::requiredIf($forChild), 'string', 'max:60'],
             'child_birth_year' => ['nullable', 'integer', 'between:'.($year - 18).','.($year - 3)],
@@ -105,8 +147,13 @@ final class SubmitJoinRequest
         }
 
         $academyId = $this->tenants->require()->id;
+        // "Help me choose": the academy's subject for such trials, else its staff choose one with the family.
+        $subjectId = $valid['subject_id'] ?? null;
+        if ($helpChoose) {
+            $subjectId = SiteSettings::current()->default_trial_subject_id;
+        }
 
-        return DB::transaction(function () use ($valid, $data, $locale, $academyId) {
+        return DB::transaction(function () use ($valid, $data, $locale, $academyId, $subjectId) {
             $request = JoinRequest::query()->create([
                 'kind' => $valid['kind'],
                 'name' => $valid['name'],
@@ -115,7 +162,12 @@ final class SubmitJoinRequest
                 'country' => $valid['country'] ?? null,
                 'timezone' => $valid['timezone'] ?? null,
                 'locale' => $locale === 'en' ? 'en' : 'ar',
-                'subject_id' => $valid['subject_id'] ?? null,
+                'subject_id' => $subjectId,
+                'help_choose' => (bool) ($valid['help_choose'] ?? false),
+                'preferred_days' => array_values($valid['preferred_days'] ?? []),
+                'preferred_from' => isset($valid['preferred_from']) ? (int) $valid['preferred_from'] : null,
+                'preferred_to' => isset($valid['preferred_to']) ? (int) $valid['preferred_to'] : null,
+                'teacher_gender' => $valid['teacher_gender'] ?? null,
                 'for_child' => (bool) ($valid['for_child'] ?? false),
                 'child_name' => $valid['child_name'] ?? null,
                 'child_birth_year' => isset($valid['child_birth_year']) ? (int) $valid['child_birth_year'] : null,

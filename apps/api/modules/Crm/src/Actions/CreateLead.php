@@ -15,18 +15,21 @@ use Modules\SharedKernel\Tenancy\TenantContext;
  * A new lead (docs/architecture/01, section 14): who, how to reach them,
  * what and when they want, where they came from, and who follows them (the
  * one who adds it, unless someone else is named). The same number twice
- * while the first is still open is refused, with the name it is under.
+ * while the first is still open is refused, with the name it is under;
+ * from the academy's page ($sibling) only for the same learner, so a parent
+ * may ask for a second child.
  */
 final class CreateLead
 {
     public function __construct(private readonly AssignLead $assign, private readonly TenantContext $tenants) {}
 
     /** @param  array<string, mixed>  $data */
-    public function handle(array $data, ?string $actorId, ?string $ownerId = null): Lead
+    public function handle(array $data, ?string $actorId, ?string $ownerId = null, bool $sibling = false): Lead
     {
         $fields = LeadFields::validate($data);
         $open = Lead::query()->where('phone_e164', $fields['phone_e164'])
-            ->whereIn('stage', array_map(fn (LeadStage $s) => $s->value, LeadStage::OPEN))->first();
+            ->whereIn('stage', array_map(fn (LeadStage $s) => $s->value, LeadStage::OPEN))->get()
+            ->first(fn (Lead $l) => ! $sibling || $l->takesAsk((bool) $fields['for_child'], $fields['learner_name'] ?? null));
         if ($open !== null) {
             throw ValidationException::withMessages(['phone_e164' => __('crm::leads.errors.duplicate', ['name' => $open->contact_name])]);
         }

@@ -99,18 +99,20 @@ final class Challenges
      * signing in). Otherwise a ValidationException on "code"; a wrong code
      * counts, and the fifth closes the challenge.
      */
-    public function verify(string $challengeId, string $code, OtpPurpose $purpose, ?string $academyId): OtpChallenge
+    public function verify(string $challengeId, string $code, OtpPurpose $purpose, ?string $academyId, ?Contact $for = null): OtpChallenge
     {
         $code = (string) preg_replace('/\D/', '', strtr($code, ['٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9']));
         $max = (int) config('identity.otp.max_attempts');
 
         // Decided in the transaction, thrown after it: a wrong code must stay counted.
-        [$outcome, $challenge] = ! Str::isUuid($challengeId) ? ['expired', null] : DB::transaction(function () use ($challengeId, $code, $purpose, $academyId, $max): array {
+        [$outcome, $challenge] = ! Str::isUuid($challengeId) ? ['expired', null] : DB::transaction(function () use ($challengeId, $code, $purpose, $academyId, $max, $for): array {
             $challenge = OtpChallenge::query()
                 ->whereKey($challengeId)->where('purpose', $purpose->value)->where('academy_id', $academyId)
                 ->lockForUpdate()->first();
 
-            if ($challenge === null || $challenge->verified_at !== null || $challenge->consumed_at !== null || $challenge->expires_at->isPast()) {
+            // A code proves only the contact it went to.
+            if ($challenge === null || $challenge->verified_at !== null || $challenge->consumed_at !== null || $challenge->expires_at->isPast()
+                || ($for !== null && ! hash_equals($challenge->destination_hash, $for->hash()))) {
                 return ['expired', null];
             }
             if ($challenge->attempts >= $max) {
@@ -118,7 +120,7 @@ final class Challenges
             }
             // A challenge with no account behind it was never sent: no code is right.
             $right = hash_equals($challenge->code_hash, self::codeHash($challenge->id, $code))
-                && ($purpose === OtpPurpose::Discover || $challenge->user_id !== null);
+                && ($purpose->needsNoAccount() || $challenge->user_id !== null);
             if (! $right) {
                 $challenge->increment('attempts');
 

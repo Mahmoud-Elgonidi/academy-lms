@@ -10,6 +10,7 @@ use Modules\Communication\Contracts\DTOs\Translatable;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Crm\Contracts\Events\LeadAssigned;
 use Modules\Crm\Contracts\Events\TrialAssessed;
+use Modules\Crm\Contracts\Events\TrialCancelledByFamily;
 use Modules\Crm\Contracts\Events\TrialCompleted;
 use Modules\Crm\Contracts\Events\TrialMissed;
 use Modules\Crm\Models\Lead;
@@ -36,6 +37,10 @@ final class SendCrmNotifications
             ['assess_trial', $a.'teacher', ['push', 'whatsapp'], ['student' => 'يوسف', 'subject' => 'القرآن', 'when' => 'الثلاثاء 13 أكتوبر · 6:00 م']],
             ['trial_missed', $a.'sales', ['push'], ['name' => 'أم يوسف', 'outcome' => 'لم يحضر الطالب']],
             ['trial_assessed', $a.'sales', ['push', 'email'], ['name' => 'أم يوسف', 'teacher' => 'أ. نور', 'level' => 'مبتدئ: الحروف والحركات']],
+            // The family's journey: a lead nobody answered in time, a trial still waiting for its assessment, a trial the family cancelled.
+            ['lead_waiting', $a.'sales', ['push', 'email'], ['name' => 'أم يوسف', 'hours' => '4']],
+            ['trial_unassessed', $a.'sales', ['push'], ['name' => 'يوسف', 'teacher' => 'أ. نور']],
+            ['trial_cancelled', $a.'sales', ['push', 'email'], ['name' => 'يوسف', 'when' => 'الثلاثاء 13 أكتوبر · 6:00 م']],
         ] as [$name, $audience, $channels, $sample]) {
             $notifications->define(new TemplateDefinition(
                 key: "crm.{$name}", category: 'staff',
@@ -93,6 +98,19 @@ final class SendCrmNotifications
             'teacher' => (string) DB::table('users')->where('id', $trial->teacher_id)->value('name'),
             'level' => (string) $trial->level,
         ], ['screen' => 'lead', 'id' => $trial->lead_id], "trial-assessed:{$trial->id}"));
+    }
+
+    /** The family cancelled its free trial: whoever follows the lead calls them to book another time. */
+    public function trialCancelled(TrialCancelledByFamily $event): void
+    {
+        $trial = LeadTrial::query()->with('lead')->find($event->trialId);
+        if ($trial === null) {
+            return;
+        }
+        $this->notifications->send(new Message('crm.trial_cancelled', $this->sales($trial->lead), [
+            'name' => $trial->lead->learnerName(),
+            'when' => $trial->starts_at,
+        ], ['screen' => 'lead', 'id' => $trial->lead_id], "trial-cancelled:{$trial->id}"));
     }
 
     /** @return list<string> */

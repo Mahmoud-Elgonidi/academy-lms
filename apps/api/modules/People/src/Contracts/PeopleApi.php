@@ -14,7 +14,22 @@ use Modules\People\Contracts\DTOs\TeacherProfileData;
 /** What other modules may ask of People. */
 interface PeopleApi
 {
-    public function linkGuardian(string $guardianId, string $studentId, string $relationship = 'parent', bool $isPrimary = true): void;
+    /**
+     * Links a guardian to a student. A child waiting for consent has the new
+     * guardian asked for it, unless $askConsent is false (a free trial, which
+     * the guardian brings the child to by their own link: the consent is
+     * asked when it is first needed, requestConsent()).
+     */
+    public function linkGuardian(string $guardianId, string $studentId, string $relationship = 'parent', bool $isPrimary = true, bool $askConsent = true): void;
+
+    /**
+     * Asks a child's guardians for their consent now, when the child's account
+     * waits for it (the child's own sign-in or seat, an enrolment); nothing
+     * when it does not. Each guardian hears it at most once a day.
+     *
+     * @return int how many guardians are asked
+     */
+    public function requestConsent(string $studentId): int;
 
     public function saveTeacherProfile(TeacherProfileData $profile): void;
 

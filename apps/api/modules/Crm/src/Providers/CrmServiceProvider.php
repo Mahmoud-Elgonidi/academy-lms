@@ -2,13 +2,17 @@
 
 namespace Modules\Crm\Providers;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
+use Modules\Crm\Console\FollowUpLeadsCommand;
 use Modules\Crm\Contracts\Events\LeadAssigned;
+use Modules\Crm\Contracts\Events\LeadStageChanged;
 use Modules\Crm\Contracts\Events\TrialAssessed;
+use Modules\Crm\Contracts\Events\TrialCancelledByFamily;
 use Modules\Crm\Contracts\Events\TrialCompleted;
 use Modules\Crm\Contracts\Events\TrialMissed;
 use Modules\Crm\Filament\Pages\LeadPage;
@@ -73,5 +77,16 @@ final class CrmServiceProvider extends ServiceProvider
         Event::listen(TrialCompleted::class, [SendCrmNotifications::class, 'trialCompleted']);
         Event::listen(TrialMissed::class, [SendCrmNotifications::class, 'trialMissed']);
         Event::listen(TrialAssessed::class, [SendCrmNotifications::class, 'trialAssessed']);
+        Event::listen(TrialCancelledByFamily::class, [SendCrmNotifications::class, 'trialCancelled']);
+        // The page's request follows its lead (one status).
+        Event::listen(LeadStageChanged::class, [FollowSiteRequests::class, 'stageChanged']);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([FollowUpLeadsCommand::class]);
+        }
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            // Leads nobody answered within the academy's hours, and trials still waiting for their assessment.
+            $schedule->command('crm:follow-up')->hourlyAt(17)->withoutOverlapping()->onOneServer();
+        });
     }
 }

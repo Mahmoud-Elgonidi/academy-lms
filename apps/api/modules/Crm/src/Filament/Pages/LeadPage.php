@@ -110,6 +110,7 @@ final class LeadPage extends Page
             'wants' => $lead->preferred_from !== null && $lead->preferred_to !== null && $days !== ''
                 ? __($l.'page.wants', ['subject' => $subject ?? __($l.'page.no_subject'), 'days' => $days, 'from' => Clock::hour($lead->preferred_from), 'to' => Clock::hour($lead->preferred_to)])
                 : ($subject ?? __($l.'page.no_subject')).' · '.__($l.'page.wants_any'),
+            'teacherGender' => $lead->teacher_gender !== null ? __($l.'teacher_genders.'.$lead->teacher_gender) : null,
             'source' => __($l.'sources.'.$lead->source->value),
             'utm' => collect([$lead->getAttribute('utm_source'), $lead->getAttribute('utm_medium'), $lead->getAttribute('utm_campaign')])->filter()->implode(' / '),
             'notes' => $lead->notes,
@@ -275,6 +276,7 @@ final class LeadPage extends Page
             'days' => $lead->preferred_days !== [] ? implode(',', $lead->preferred_days) : null,
             'from' => $lead->preferred_from,
             'to' => $lead->preferred_to,
+            'gender' => $lead->teacher_gender !== null ? 'prefer_'.$lead->teacher_gender : null,
             'per_week' => $mode === 'series' ? $perWeek : null,
             'return' => parse_url(self::getUrl(['lead' => $lead->id]), PHP_URL_PATH),
         ], fn ($v) => $v !== null && $v !== '')), navigate: true);

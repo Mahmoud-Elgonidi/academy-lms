@@ -135,6 +135,15 @@ final class SiteRequests extends Page
                 'when' => $r->created_at->setTimezone($tz)->locale($locale)->translatedFormat(Clock::pattern('j M Y، H:i')),
                 'ago' => $r->created_at->locale($locale)->diffForHumans(),
                 'lead' => $leads && $r->lead_id !== null ? route('filament.academy.pages.leads.{lead}', ['lead' => $r->lead_id]) : null,
+                'help_choose' => $r->help_choose,
+                'days' => $r->preferred_days === [] ? null : implode('، ', array_map(fn ($d) => (string) __('scheduling::shifts.days.'.(int) $d), $r->preferred_days)),
+                'hours' => $r->preferred_from !== null && $r->preferred_to !== null
+                    ? __('site::site.requests.free_hours', ['from' => Clock::hour($r->preferred_from), 'to' => Clock::hour($r->preferred_to % 24)])
+                    : null,
+                'teacher_gender' => $r->teacher_gender,
+                'booked' => $r->session_id !== null,
+                // The CRM could not make a lead of it: someone adds it by hand.
+                'failed' => $r->lead_id === null && $r->lead_failure !== null ? __('site::site.requests.lead_failures.'.$r->lead_failure) : null,
             ];
         }
 

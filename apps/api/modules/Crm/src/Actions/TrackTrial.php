@@ -4,6 +4,7 @@ namespace Modules\Crm\Actions;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\Crm\Contracts\Events\TrialCancelledByFamily;
 use Modules\Crm\Contracts\Events\TrialCompleted;
 use Modules\Crm\Contracts\Events\TrialMissed;
 use Modules\Crm\Enums\LeadStage;
@@ -52,16 +53,22 @@ final class TrackTrial
         });
     }
 
-    public function cancelled(string $sessionId, string $reason, ?string $actorId): void
+    /** Cancelled; when the family cancelled it ($askedBy student or family), whoever follows the lead hears of it. */
+    public function cancelled(string $sessionId, string $reason, ?string $actorId, ?string $askedBy = null): void
     {
         $trial = $this->open($sessionId);
         if ($trial === null) {
             return;
         }
-        DB::transaction(function () use ($trial, $reason, $actorId) {
+        $byFamily = in_array($askedBy, ['student', 'family'], true);
+        DB::transaction(function () use ($trial, $reason, $actorId, $byFamily) {
             $trial->forceFill(['status' => 'cancelled'])->save();
-            LeadActivity::record($trial->lead, 'trial_cancelled', null, ['reason' => $reason], $actorId);
+            LeadActivity::record($trial->lead, 'trial_cancelled', null, ['reason' => $reason] + ($byFamily ? ['by' => 'family'] : []), $actorId);
             $this->backToContacted($trial->lead, $actorId);
+            if ($byFamily) {
+                $academyId = $trial->lead->academy_id;
+                DB::afterCommit(fn () => event(new TrialCancelledByFamily($academyId, $trial->id, $trial->lead_id)));
+            }
         });
     }
 

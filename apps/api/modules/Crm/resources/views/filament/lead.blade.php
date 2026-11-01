@@ -51,6 +51,7 @@
                     <div><small>{{ __($l.'fields.learner_name') }}</small><span>{{ $d['learner'] }}@if ($d['age']) · {{ __($l.'card.age', ['years' => $d['age']]) }}@endif</span></div>
                 @endif
                 <div><small>{{ __($l.'sections.wants') }}</small><span>{{ $d['wants'] }}</span></div>
+                @if ($d['teacherGender'])<div><small>{{ __($l.'fields.teacher_gender') }}</small><span>{{ $d['teacherGender'] }}</span></div>@endif
                 <div><small>{{ __($l.'fields.source') }}</small><span>{{ $d['source'] }}@if ($d['utm']) · <span dir="ltr">{{ $d['utm'] }}</span>@endif</span></div>
                 <div><small>{{ __($l.'fields.owner_id') }}</small><span>{{ $d['owner'] ?? __($l.'page.no_owner') }}</span></div>
                 @if ($d['notes'])<div><small>{{ __($l.'page.notes') }}</small><span style="white-space: pre-line">{{ $d['notes'] }}</span></div>@endif

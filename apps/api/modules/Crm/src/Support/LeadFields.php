@@ -13,7 +13,7 @@ final class LeadFields
 {
     public const FIELDS = [
         'contact_name', 'phone_e164', 'email', 'country', 'timezone', 'locale', 'for_child', 'learner_name', 'learner_birth_year',
-        'subject_id', 'preferred_days', 'preferred_from', 'preferred_to', 'source', 'utm_source', 'utm_medium', 'utm_campaign', 'notes',
+        'subject_id', 'preferred_days', 'preferred_from', 'preferred_to', 'teacher_gender', 'source', 'utm_source', 'utm_medium', 'utm_campaign', 'notes',
     ];
 
     /** "00966 50-123 4567" → "+966501234567"; anything else is left for the check to refuse. */
@@ -38,7 +38,7 @@ final class LeadFields
         $data['for_child'] = (bool) ($data['for_child'] ?? false);
         $data['locale'] ??= 'ar';
         $data['preferred_days'] = array_values(array_map('intval', $data['preferred_days'] ?? []));
-        foreach (['email', 'country', 'learner_name', 'learner_birth_year', 'subject_id', 'preferred_from', 'preferred_to', 'utm_source', 'utm_medium', 'utm_campaign', 'notes'] as $optional) {
+        foreach (['email', 'country', 'learner_name', 'learner_birth_year', 'subject_id', 'preferred_from', 'preferred_to', 'teacher_gender', 'utm_source', 'utm_medium', 'utm_campaign', 'notes'] as $optional) {
             $data[$optional] = blank($data[$optional] ?? null) ? null : $data[$optional];
         }
         if (! $data['for_child']) {
@@ -61,6 +61,7 @@ final class LeadFields
             'preferred_days.*' => ['integer', 'between:1,7'],
             'preferred_from' => ['nullable', 'integer', 'between:0,23'],
             'preferred_to' => ['nullable', 'integer', 'between:1,24', 'gt:preferred_from'],
+            'teacher_gender' => ['nullable', Rule::in(['female', 'male'])],
             'source' => ['required', Rule::enum(LeadSource::class)],
             'utm_source' => ['nullable', 'string', 'max:120'],
             'utm_medium' => ['nullable', 'string', 'max:120'],

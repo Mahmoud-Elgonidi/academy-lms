@@ -6,10 +6,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\ValidationException;
 use Modules\Identity\Actions\CreateUser;
+use Modules\Identity\Actions\Otp\SendPhoneCode;
 use Modules\Identity\Actions\SetUserActive;
 use Modules\Identity\Actions\UpdateUserDetails;
 use Modules\Identity\Authorization\AbilityMatrix;
 use Modules\Identity\Contracts\DTOs\NewUser;
+use Modules\Identity\Contracts\DTOs\PhoneCodeSent;
 use Modules\Identity\Contracts\DTOs\UserDetails;
 use Modules\Identity\Contracts\IdentityApi;
 use Modules\Identity\Enums\Role;
@@ -91,5 +93,15 @@ final class IdentityService implements IdentityApi
         if (config('session.driver') === 'database') {
             DB::table((string) config('session.table'))->where('user_id', $userId)->delete();
         }
+    }
+
+    public function sendPhoneCode(string $phone, string $locale, ?string $channel = null, ?string $ip = null): PhoneCodeSent
+    {
+        return app(SendPhoneCode::class)->handle($phone, $locale, $channel, $ip);
+    }
+
+    public function verifyPhoneCode(string $challengeId, string $code, string $phone): void
+    {
+        app(SendPhoneCode::class)->verify($challengeId, $code, $phone);
     }
 }

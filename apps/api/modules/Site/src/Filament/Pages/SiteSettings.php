@@ -5,7 +5,9 @@ namespace Modules\Site\Filament\Pages;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -20,6 +22,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Modules\Catalog\Contracts\CatalogApi;
 use Modules\People\Contracts\PeopleApi;
 use Modules\Platform\Contracts\TenantDirectory;
 use Modules\SharedKernel\Authorization\Ability;
@@ -33,8 +36,9 @@ use UnitEnum;
  * Settings › The academy's page (site.manage: the owner and admins): on or
  * off, its opening words, why families choose the academy, what families
  * said, questions and answers, which sections show, the teachers' cards
- * (each teacher writes theirs; the academy may take any off), and its
- * WhatsApp and search words. Subjects come from Catalog, prices from the
+ * (each teacher writes theirs; the academy may take any off), its
+ * WhatsApp and search words, and its free trials (who books them, how soon
+ * the academy answers, the subject for "help me choose"). Subjects come from Catalog, prices from the
  * plans; the requests it brings are under "Page requests".
  *
  * @property-read Schema $form
@@ -84,8 +88,14 @@ final class SiteSettings extends Page
 
     public function mount(): void
     {
-        $settings = Settings::current();
-        $this->form->fill(['enabled' => $settings->enabled] + $settings->said());
+        $this->form->fill(self::state(Settings::current()));
+    }
+
+    /** @return array<string, mixed> the form's state from what is saved */
+    private static function state(Settings $settings): array
+    {
+        return ['enabled' => $settings->enabled, 'trial_booking' => $settings->trial_booking, 'response_hours' => $settings->response_hours, 'trial_notice_hours' => $settings->trial_notice_hours,
+            'default_trial_subject_id' => $settings->default_trial_subject_id] + $settings->said();
     }
 
     protected function getHeaderActions(): array
@@ -146,6 +156,19 @@ final class SiteSettings extends Page
                         'off' => ! in_array('teachers', (array) ($this->data['sections'] ?? []), true),
                     ]),
                 ]),
+                Tab::make(__($s.'tabs.trials'))->id('trials')->icon(Heroicon::OutlinedCalendarDays)->schema([
+                    Section::make(__($s.'trials.title'))->description(__($s.'trials.hint'))->schema([
+                        Radio::make('trial_booking')->label(__($s.'trials.booking'))->required()
+                            ->options(['family' => __($s.'trials.booking_family'), 'staff' => __($s.'trials.booking_staff')])
+                            ->descriptions(['family' => __($s.'trials.booking_family_hint'), 'staff' => __($s.'trials.booking_staff_hint')]),
+                        TextInput::make('response_hours')->label(__($s.'trials.response_hours'))->helperText(__($s.'trials.response_hours_hint'))
+                            ->numeric()->integer()->minValue(1)->maxValue(72)->required(),
+                        TextInput::make('trial_notice_hours')->label(__($s.'trials.notice_hours'))->helperText(__($s.'trials.notice_hours_hint'))
+                            ->numeric()->integer()->minValue(1)->maxValue(72)->required(),
+                        Select::make('default_trial_subject_id')->label(__($s.'trials.default_subject'))->helperText(__($s.'trials.default_subject_hint'))
+                            ->options(fn (): array => app(CatalogApi::class)->subjectNames())->placeholder('—'),
+                    ]),
+                ]),
                 Tab::make(__($s.'tabs.contact'))->id('contact')->icon(Heroicon::OutlinedChatBubbleLeftRight)->schema([
                     Section::make(__($s.'contact'))->schema([
                         TextInput::make('whatsapp')->label(__($l.'whatsapp'))->helperText(__($l.'whatsapp_hint'))->tel()->maxLength(20)->extraInputAttributes(['dir' => 'ltr']),
@@ -184,7 +207,7 @@ final class SiteSettings extends Page
 
             return;
         }
-        $this->form->fill(['enabled' => $kept->enabled] + $kept->said());
+        $this->form->fill(self::state($kept));
         Notification::make()->success()->title(__('site::site.settings.saved'))->send();
     }
 }

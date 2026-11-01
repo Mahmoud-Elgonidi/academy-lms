@@ -55,6 +55,8 @@ final class LeadForm
                     ->options(collect($days)->mapWithKeys(fn (int $d) => [$d => self::dayName($d)])->all()),
                 Select::make('preferred_from')->label(__($l.'fields.preferred_from'))->options($hours)->helperText(__($l.'hints.times')),
                 Select::make('preferred_to')->label(__($l.'fields.preferred_to'))->options($hours),
+                Select::make('teacher_gender')->label(__($l.'fields.teacher_gender'))
+                    ->options(['female' => __($l.'teacher_genders.female'), 'male' => __($l.'teacher_genders.male')])->placeholder(__($l.'teacher_genders.any')),
             ]),
             Fieldset::make(__($l.'sections.source'))->columns(2)->schema([
                 Select::make('source')->label(__($l.'fields.source'))->options(LeadSource::options())->required()->default(LeadSource::WhatsApp->value),

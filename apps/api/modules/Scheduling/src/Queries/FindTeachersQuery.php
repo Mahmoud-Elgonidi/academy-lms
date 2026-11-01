@@ -119,12 +119,12 @@ final class FindTeachersQuery
 
     /**
      * The teachers the hard filters leave, and their free time over the
-     * search's weeks.
+     * search's weeks (a family's own trial search reads them too: TrialSlots).
      *
      * @param  list<string>|null  $only
      * @return array{0: Collection<string, object>, 1: array<string, TeacherAvailability>}
      */
-    private function eligible(TeacherSearch $search, ?array $only = null): array
+    public function eligible(TeacherSearch $search, ?array $only = null): array
     {
         $pref = $search->preference;
 

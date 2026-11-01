@@ -10,6 +10,7 @@ use Modules\Billing\Contracts\DTOs\PlanOption;
 use Modules\Credits\Contracts\CreditsApi;
 use Modules\Enrollment\Contracts\DTOs\NewEnrollment;
 use Modules\Enrollment\Contracts\EnrollmentApi;
+use Modules\People\Contracts\PeopleApi;
 use Modules\Scheduling\Contracts\DTOs\EnrollmentBooked;
 use Modules\Scheduling\Contracts\DTOs\EnrollmentTerms;
 use Modules\Scheduling\Domain\Models\BookingHold;
@@ -26,7 +27,9 @@ use Modules\Scheduling\Support\MinorsGuard;
  * has with this payer, the course joins it instead: its lessons draw on the
  * package's balance, with no invoice of its own, and it starts at once when
  * the package is paid. A shared plan's weekly lessons are across courses,
- * so a course on one only has to match its lesson length.
+ * so a course on one only has to match its lesson length. A child whose
+ * account still waits for a guardian's consent has the guardians asked now
+ * (a free trial did not ask them).
  */
 final class EnrollStudent
 {
@@ -39,6 +42,7 @@ final class EnrollStudent
         private readonly MaterializeSessions $materialize,
         private readonly FundSessions $fund,
         private readonly MinorsGuard $minors,
+        private readonly PeopleApi $people,
     ) {}
 
     public function handle(string $batchId, string $studentId, string $subjectId, EnrollmentTerms $terms, string $coordinatorId): EnrollmentBooked
@@ -109,6 +113,8 @@ final class EnrollStudent
             $this->fund->handle($enrollmentId);
 
             $starts = array_map(fn ($s) => $s->starts_at, $result['created']);
+            // The course needs the child's own way in from now on: their guardians are asked (after the commit).
+            $this->people->requestConsent($studentId);
 
             return new EnrollmentBooked(
                 enrollmentId: $enrollmentId,

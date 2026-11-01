@@ -68,8 +68,8 @@ it('keeps what the owner saves, cleaned and held to its limits, and audits wheth
         ->and($kept->content['whatsapp'])->toBe('+966501234567')
         ->and(SiteSettings::isOn())->toBeTrue();
     $audit = DB::table('audit_logs')->where('action', 'site.settings_saved')->sole();
-    expect(json_decode($audit->data, true))->toEqual(['state' => 'on', 'shown' => ['teachers', 'faq']])
-        ->and(AuditEntries::describe($audit, 'UTC')['title'])->toBe(__('shared::audit.actions.site.settings_saved', ['state' => 'on', 'shown' => 'teachers, questions']))
+    expect(json_decode($audit->data, true))->toEqual(['state' => 'on', 'shown' => ['teachers', 'faq'], 'trial_booking' => 'family', 'response_hours' => 4, 'trial_notice_hours' => 3, 'default_trial_subject' => false])
+        ->and(AuditEntries::describe($audit, 'UTC')['title'])->toBe(__('shared::audit.actions.site.settings_saved', ['state' => 'on', 'shown' => 'teachers, questions', 'trial_booking' => 'the family', 'response_hours' => 4, 'trial_notice_hours' => 3]))
         ->and(AuditEntries::group($audit->action))->toBe('site');
 
     $bad = fn (array $change) => fn () => app(SaveSiteSettings::class)->handle(array_replace_recursive($content, $change));

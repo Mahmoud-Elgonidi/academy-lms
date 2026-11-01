@@ -91,7 +91,7 @@ final class CancelSession
             if ($waive) {
                 app(AuditTrail::class)->record('session.cancel_waived', 'session', $session->id, ['asked_by' => $askedBy, 'reason' => $reason, 'note' => $note, 'rule' => $decision->rule]);
             }
-            DB::afterCommit(fn () => event(new SessionCancelled($session->academy_id, $session->id, $reason, $decision->credit === 'makeup', $actorId)));
+            DB::afterCommit(fn () => event(new SessionCancelled($session->academy_id, $session->id, $reason, $decision->credit === 'makeup', $actorId, $askedBy)));
         });
 
         return $session;

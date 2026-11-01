@@ -36,6 +36,7 @@ use Modules\Scheduling\Contracts\Events\TeacherLessonsShifted;
 use Modules\Scheduling\Contracts\Events\TimeOffDecided;
 use Modules\Scheduling\Contracts\Events\TimeOffRequested;
 use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
+use Modules\Scheduling\Contracts\TrialBooking;
 use Modules\Scheduling\Domain\Models\AcademyHoliday;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionDispute;
@@ -66,7 +67,8 @@ final class SendSchedulingNotifications
         // Each person's own signed link to the class page, filled in by Communication (Classroom registers it).
         $link = ['link' => 'https://demo.lms.test/class/…'];
         foreach ([
-            ['reminder_day', 'lessons', $a.'family', ['push', 'email'], $lesson],
+            // A trial's reminder also goes by WhatsApp (a family new to the academy may have neither the app nor the email at hand).
+            ['reminder_day', 'lessons', $a.'family', ['push', 'email', 'whatsapp'], $lesson],
             ['reminder_hour', 'lessons', $a.'family', ['push', 'whatsapp'], $lesson + $link],
             ['reminder_hour_teacher', 'staff', $a.'teacher', ['push'], $lesson + $link],
             ['reminder_soon', 'lessons', $a.'family', ['push'], $lesson + $link],
@@ -76,7 +78,7 @@ final class SendSchedulingNotifications
             ['teacher_late', 'staff', $a.'supervisors', ['push'], $lesson],
             ['session_cancelled', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson + ['outcome' => 'ولكم حصة تعويضية.']],
             ['session_cancelled_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson],
-            ['trial_booked', 'lessons', $a.'family', ['whatsapp', 'email', 'push'], $lesson + $link],
+            ['trial_booked', 'lessons', $a.'family', ['whatsapp', 'email', 'push'], $lesson + $link + ['change' => 'https://demo.lms.test/ar/trial/lesson/…/change', 'cancel' => 'https://demo.lms.test/ar/trial/lesson/…/cancel']],
             ['trial_booked_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson],
             ['session_moved', 'lessons', $a.'family', ['whatsapp', 'push'], $lesson + ['from' => 'السبت 10 أكتوبر · 6:00 م']],
             ['session_moved_teacher', 'staff', $a.'teacher', ['push', 'whatsapp'], $lesson + ['from' => 'السبت 10 أكتوبر · 6:00 م']],
@@ -204,8 +206,11 @@ final class SendSchedulingNotifications
         }
         $action = ['screen' => 'session', 'id' => $s['session_id']];
         $key = "trial:{$s['session_id']}";
+        // Their own links to change the time or say they cannot come (signed, no sign-in), in the family's language.
+        $locale = (string) (DB::table('users')->whereIn('id', $s['family'])->orderByRaw('id = ? desc', [$s['student_id']])->value('locale') ?? app()->getLocale());
+        $links = app(TrialBooking::class)->familyLinks($s['session_id'], $locale) ?? ['change' => '', 'cancel' => ''];
 
-        $this->notifications->send(new Message('scheduling.trial_booked', $s['family'], self::lessonData($s), $action, $key));
+        $this->notifications->send(new Message('scheduling.trial_booked', $s['family'], self::lessonData($s) + $links, $action, $key));
         $this->notifications->send(new Message('scheduling.trial_booked_teacher', $this->without([$s['teacher_id']], $event->actorId), self::lessonData($s), $action, $key));
     }
 

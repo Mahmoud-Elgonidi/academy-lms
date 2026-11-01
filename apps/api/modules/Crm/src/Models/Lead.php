@@ -6,6 +6,8 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
+use Modules\Crm\Contracts\Events\LeadStageChanged;
 use Modules\Crm\Enums\LeadSource;
 use Modules\Crm\Enums\LeadStage;
 use Modules\SharedKernel\Tenancy\BelongsToTenant;
@@ -29,6 +31,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property list<int> $preferred_days
  * @property ?int $preferred_from
  * @property ?int $preferred_to
+ * @property ?string $teacher_gender female | male: the teacher they would rather have
  * @property LeadSource $source
  * @property ?string $notes
  * @property ?string $owner_id
@@ -50,7 +53,7 @@ final class Lead extends Model
 
     protected $fillable = [
         'contact_name', 'phone_e164', 'email', 'country', 'timezone', 'locale', 'for_child', 'learner_name', 'learner_birth_year',
-        'subject_id', 'preferred_days', 'preferred_from', 'preferred_to', 'source', 'utm_source', 'utm_medium', 'utm_campaign',
+        'subject_id', 'preferred_days', 'preferred_from', 'preferred_to', 'teacher_gender', 'source', 'utm_source', 'utm_medium', 'utm_campaign',
         'notes', 'owner_id', 'stage', 'stage_changed_at', 'lost_reason', 'last_contact_at', 'learner_id', 'contact_id', 'enrollment_id', 'created_by',
     ];
 
@@ -83,6 +86,23 @@ final class Lead extends Model
         return $this->hasMany(LeadTrial::class)->orderByDesc('starts_at');
     }
 
+    /** Whether the lessons are for this learner: the contact themself, or the child of this name. */
+    public function isFor(bool $forChild, ?string $childName): bool
+    {
+        return $this->for_child === $forChild
+            && (! $forChild || mb_strtolower(trim((string) $this->learner_name)) === mb_strtolower(trim((string) $childName)));
+    }
+
+    /**
+     * Whether a new ask from the same number is this lead asking again: the
+     * same learner, or a lead whose learner has no account yet and is not
+     * another child (a second child of a parent is a lead of its own).
+     */
+    public function takesAsk(bool $forChild, ?string $childName): bool
+    {
+        return $this->isFor($forChild, $childName) || ($this->learner_id === null && ! ($this->for_child && $forChild));
+    }
+
     /** Who the lessons are for. */
     public function learnerName(): string
     {
@@ -103,5 +123,9 @@ final class Lead extends Model
         if ($log) {
             LeadActivity::record($this, 'stage', null, ['from' => $from->value, 'to' => $stage->value], $actorId);
         }
+        // The page's request it came from follows (one status), after the commit.
+        $academyId = $this->academy_id;
+        $leadId = $this->id;
+        DB::afterCommit(fn () => event(new LeadStageChanged($academyId, $leadId, $from->value, $stage->value)));
     }
 }

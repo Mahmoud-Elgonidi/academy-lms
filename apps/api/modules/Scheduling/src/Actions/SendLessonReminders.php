@@ -101,10 +101,12 @@ final class SendLessonReminders
     private function toFamily(string $sessionId, string $template, string $key, bool $urgent = false, ?string $studentId = null): int
     {
         $seats = $studentId === null ? $this->sessions->seats($sessionId) : array_filter([$this->sessions->of($sessionId, $studentId)]);
+        // The day before goes by WhatsApp only for a free trial (a family new to the academy); other lessons by push and email.
+        $channels = $template === 'scheduling.reminder_day' && DB::table('sessions')->where('id', $sessionId)->value('type') !== 'trial' ? ['push', 'email'] : null;
         $sent = 0;
         foreach ($seats as $s) {
             $sent += $this->notifications->send(new Message($template, $s['family'], SendSchedulingNotifications::lessonData($s),
-                ['screen' => 'session', 'id' => $sessionId], $key, $urgent));
+                ['screen' => 'session', 'id' => $sessionId], $key, $urgent, $channels));
         }
 
         return $sent;

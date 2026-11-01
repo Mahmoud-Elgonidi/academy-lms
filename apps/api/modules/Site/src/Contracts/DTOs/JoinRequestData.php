@@ -12,6 +12,11 @@ final readonly class JoinRequestData
      * @param  ?string  $timezone  IANA, as the visitor's browser said it
      * @param  string  $locale  ar | en: the page's language when they asked
      * @param  list<string>  $subjectIds  for a teacher: the subjects they teach
+     * @param  list<int>  $preferredDays  ISO weekdays the family is free, on their clock
+     * @param  ?int  $preferredFrom  hour of day (0–23), their clock
+     * @param  ?int  $preferredTo  hour of day (1–24)
+     * @param  ?string  $teacherGender  female | male: the teacher they would rather have
+     * @param  ?string  $sessionId  the trial the family booked from it
      */
     public function __construct(
         public string $id,
@@ -34,5 +39,11 @@ final readonly class JoinRequestData
         public ?string $utmCampaign,
         public string $status,
         public ?string $leadId,
+        public array $preferredDays = [],
+        public ?int $preferredFrom = null,
+        public ?int $preferredTo = null,
+        public ?string $teacherGender = null,
+        public bool $helpChoose = false,
+        public ?string $sessionId = null,
     ) {}
 }

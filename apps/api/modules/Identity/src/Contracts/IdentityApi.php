@@ -2,7 +2,9 @@
 
 namespace Modules\Identity\Contracts;
 
+use Illuminate\Validation\ValidationException;
 use Modules\Identity\Contracts\DTOs\NewUser;
+use Modules\Identity\Contracts\DTOs\PhoneCodeSent;
 use Modules\Identity\Contracts\DTOs\UserDetails;
 use Modules\SharedKernel\Authorization\Ability;
 
@@ -41,4 +43,19 @@ interface IdentityApi
      * (a child whose guardian took their consent back).
      */
     public function endSessions(string $userId): void;
+
+    /**
+     * Sends a one-time code to a mobile number, to prove it is the visitor's
+     * before a free trial is booked for it from the academy's page. The same
+     * answer whether or not the number has an account; limits as for any code
+     * (a ThrottleRequestsException when asked too often).
+     */
+    public function sendPhoneCode(string $phone, string $locale, ?string $channel = null, ?string $ip = null): PhoneCodeSent;
+
+    /**
+     * Checks a code sent by sendPhoneCode() to this number (used once).
+     *
+     * @throws ValidationException on "code" when it is wrong, used, expired or for another number
+     */
+    public function verifyPhoneCode(string $challengeId, string $code, string $phone): void;
 }

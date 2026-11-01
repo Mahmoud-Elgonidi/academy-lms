@@ -47,11 +47,13 @@ it('makes a lead of a free trial asked for on the page, and the request points a
     $this->postJson('http://noor.lms.test/api/v1/site/requests', trialForm(), ['Accept-Language' => 'en'])->assertCreated();
 
     [$lead, $request] = $this->inNoor(fn () => [Lead::query()->sole(), JoinRequest::query()->sole()]);
-    expect($lead->only(['contact_name', 'phone_e164', 'country', 'timezone', 'locale', 'for_child', 'learner_name', 'learner_birth_year', 'subject_id', 'utm_source', 'utm_medium', 'utm_campaign', 'notes', 'owner_id']))->toBe([
+    expect($lead->only(['contact_name', 'phone_e164', 'country', 'timezone', 'locale', 'for_child', 'learner_name', 'learner_birth_year', 'subject_id', 'utm_source', 'utm_medium', 'utm_campaign', 'notes']))->toBe([
         'contact_name' => 'Marwa Salem', 'phone_e164' => '+966501234567', 'country' => 'KW', 'timezone' => 'Asia/Kuwait', 'locale' => 'en', 'for_child' => true,
         'learner_name' => 'Yara', 'learner_birth_year' => now()->year - 9, 'subject_id' => $this->quran, 'utm_source' => 'instagram', 'utm_medium' => 'paid',
-        'utm_campaign' => 'ramadan', 'notes' => 'Evenings please.', 'owner_id' => null,
+        'utm_campaign' => 'ramadan', 'notes' => 'Evenings please.',
     ])->and($lead->source)->toBe(LeadSource::Website)
+        // Handed out in turn to whoever works leads (SiteTrialsTest follows the turns).
+        ->and($lead->owner_id)->toBeIn(collect([$this->owner, $this->admin, $this->sales])->pluck('id')->all())
         ->and($request->lead_id)->toBe($lead->id)
         ->and($this->inNoor(fn () => app(SiteApi::class)->joinRequest($request->id)?->leadId))->toBe($lead->id);
 });

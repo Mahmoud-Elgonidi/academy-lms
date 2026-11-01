@@ -118,6 +118,17 @@ final class SiteController
                 ],
                 /** The academy's WhatsApp number (E.164), or null. */
                 'whatsapp' => $content['whatsapp'],
+                /** How the academy takes a free trial asked for on the page. */
+                'trials' => [
+                    /** family: the family picks its own time (site/trial-slots, then a code to its number: site/trials); staff: the academy books it after the request. */
+                    'booking' => $settings->trial_booking,
+                    /** How many hours the academy promises to answer a request within. */
+                    'response_hours' => (int) $settings->response_hours,
+                    /** A family books its own trial at least this many hours ahead. */
+                    'notice_hours' => (int) $settings->trial_notice_hours,
+                    /** Whether a family that asks for help choosing starts with the academy's own trial subject (else sales choose with them). */
+                    'help_choose_subject' => $settings->default_trial_subject_id !== null,
+                ],
                 /** Sent back with the request form, unchanged. */
                 'form_token' => FormToken::issue(SubmitJoinRequest::FORM),
             ],
@@ -127,15 +138,18 @@ final class SiteController
     /**
      * Ask for a free trial lesson, or to teach at the academy.
      *
-     * kind is trial (subject_id, for_child with child_name and child_birth_year) or teach (subject_ids, years_teaching).
-     * The academy answers each request. A form sent too soon or with the hidden field filled is answered the same and kept nowhere.
+     * kind is trial (subject_id, or help_choose; for_child with child_name and child_birth_year; preferred_days as ISO weekdays with
+     * preferred_from and preferred_to as hours on the family's clock; teacher_gender female or male) or teach (subject_ids, years_teaching).
+     * The academy answers each request; whoever asked for a trial hears back at once by WhatsApp and email.
+     * A form sent too soon or with the hidden field filled is answered the same and kept nowhere.
      * Not found while the academy keeps its page off.
      */
     public function store(Request $request, SubmitJoinRequest $submit): JsonResponse
     {
         abort_unless(SiteSettings::isOn(), 404);
         $submit->handle($request->only([
-            'kind', 'name', 'phone', 'email', 'country', 'timezone', 'subject_id', 'for_child', 'child_name', 'child_birth_year',
+            'kind', 'name', 'phone', 'email', 'country', 'timezone', 'subject_id', 'help_choose', 'for_child', 'child_name', 'child_birth_year',
+            'preferred_days', 'preferred_from', 'preferred_to', 'teacher_gender',
             'subject_ids', 'years_teaching', 'message', 'utm_source', 'utm_medium', 'utm_campaign', 'form_token', 'website',
         ]), app()->getLocale());
 

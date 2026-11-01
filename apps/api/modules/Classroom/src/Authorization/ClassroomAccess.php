@@ -44,10 +44,19 @@ final class ClassroomAccess
         return $this->isSupervisor($userId) ? new Seat("observer:{$userId}", $user->name, 'observer', $userId) : null;
     }
 
-    /** One of the lesson's own students, whose account still waits for a guardian's consent. */
+    /**
+     * One of the lesson's own students, whose account still waits for a
+     * guardian's consent: their guardians are asked now (once a day at most;
+     * a child brought to a free trial by a guardian was not asked yet).
+     */
     public function waitsForConsent(string $userId, LessonCard $lesson): bool
     {
-        return $lesson->hasStudent($userId) && $this->people->consentState($userId)->waiting();
+        if (! $lesson->hasStudent($userId) || ! $this->people->consentState($userId)->waiting()) {
+            return false;
+        }
+        $this->people->requestConsent($userId);
+
+        return true;
     }
 
     private function nameOf(LessonCard $lesson, string $studentId): string

@@ -7,19 +7,20 @@ use Modules\People\Models\GuardianStudent;
 
 /**
  * Links a guardian account to a student account in the current academy. A
- * new guardian of a child waiting for consent is asked for it (after commit).
+ * new guardian of a child waiting for consent is asked for it (after commit),
+ * unless the link is for a free trial: then it is asked when first needed.
  */
 final class LinkGuardian
 {
     public function __construct(private readonly RequestConsent $requestConsent) {}
 
-    public function handle(string $guardianId, string $studentId, string $relationship = 'parent', bool $isPrimary = true): void
+    public function handle(string $guardianId, string $studentId, string $relationship = 'parent', bool $isPrimary = true, bool $askConsent = true): void
     {
         $link = GuardianStudent::query()->firstOrCreate(
             ['guardian_id' => $guardianId, 'student_id' => $studentId],
             ['relationship' => $relationship, 'is_primary' => $isPrimary],
         );
-        if ($link->wasRecentlyCreated) {
+        if ($link->wasRecentlyCreated && $askConsent) {
             $this->requestConsent->handle($studentId, [$guardianId]);
         }
     }

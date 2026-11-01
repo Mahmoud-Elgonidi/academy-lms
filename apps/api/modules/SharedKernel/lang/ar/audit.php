@@ -84,8 +84,11 @@ return [
             'concern_reopened' => 'أُعيد فتح بلاغ الحماية :concern',
         ],
         'site' => [
-            'settings_saved' => 'حُفظت صفحة الأكاديمية (:state؛ الأقسام: :shown)',
+            'settings_saved' => 'حُفظت صفحة الأكاديمية (:state؛ الأقسام: :shown؛ حجز الحصة التجريبية: :trial_booking؛ الرد خلال :response_hours ساعات؛ أقرب حجز بعد :trial_notice_hours ساعات)',
             'request_handled' => 'رُدّ على طلب من صفحة الأكاديمية (:request_status)',
+        ],
+        'crm' => [
+            'settings_saved' => 'تعديل إعدادات العملاء (التوزيع التلقائي لعملاء الموقع: :assign_website_leads)',
         ],
         'announcements' => [
             'sent' => 'أرسل إعلانًا إلى :audience (عدد المستلمين: :count)',
@@ -198,6 +201,8 @@ return [
         ],
     ],
     'values' => [
+        'trial_booking' => ['family' => 'تحجزها الأسرة', 'staff' => 'يحجزها فريق الأكاديمية'],
+        'assign_website_leads' => ['on' => 'مفعّل', 'off' => 'متوقف'],
         'stop_kind' => ['juz' => 'الجزء', 'surah' => 'السورة', 'program' => 'البرنامج', 'khatma' => 'القرآن كاملًا'],
         'outcome' => ['passed' => 'ناجح', 'failed' => 'يُعاد'],
         'quran_fields' => [

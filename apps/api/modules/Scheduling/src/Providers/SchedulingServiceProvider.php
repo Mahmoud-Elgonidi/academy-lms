@@ -47,6 +47,7 @@ use Modules\Scheduling\Contracts\Events\TimeOffDecided;
 use Modules\Scheduling\Contracts\Events\TimeOffRequested;
 use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
 use Modules\Scheduling\Contracts\ScheduleImport;
+use Modules\Scheduling\Contracts\TrialBooking;
 use Modules\Scheduling\Contracts\TrialConversionRates;
 use Modules\Scheduling\Domain\AttendancePolicy;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
@@ -67,6 +68,7 @@ use Modules\Scheduling\Privacy\LessonsData;
 use Modules\Scheduling\Queries\Groups\CourseGroupsQuery;
 use Modules\Scheduling\Setup\PolicyStep;
 use Modules\Scheduling\Setup\TeacherHoursStep;
+use Modules\Scheduling\TrialBookingService;
 use Modules\SharedKernel\Authorization\Ability;
 use Modules\SharedKernel\Privacy\PersonalData;
 use Modules\SharedKernel\Realtime\LiveSignals;
@@ -81,6 +83,8 @@ final class SchedulingServiceProvider extends ServiceProvider
         $this->app->bind(AttendancePolicy::class, fn () => PolicyVersion::settingsInForce()->attendance());
         $this->app->singleton(AttendanceApi::class, AttendanceService::class);
         $this->app->bind(AssessmentLessons::class, AssessmentService::class);
+        // A family's own free trial, for the CRM (the academy's page and the family's journey).
+        $this->app->bind(TrialBooking::class, TrialBookingService::class);
         $this->app->bind(ScheduleImport::class, BringExistingSchedule::class);
         $this->app->bind(CourseGroups::class, CourseGroupsQuery::class);
         // Trial conversion is the CRM's to know; without it no teacher gets ahead in a trial search.

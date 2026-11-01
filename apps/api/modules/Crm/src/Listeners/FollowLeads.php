@@ -28,7 +28,7 @@ final class FollowLeads
 
     public function cancelled(SessionCancelled $event): void
     {
-        $this->trials->cancelled($event->sessionId, $event->reason, $event->actorId);
+        $this->trials->cancelled($event->sessionId, $event->reason, $event->actorId, $event->askedBy);
     }
 
     public function finalized(SessionFinalized $event): void
