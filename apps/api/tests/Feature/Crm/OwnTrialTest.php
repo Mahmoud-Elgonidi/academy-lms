@@ -87,6 +87,12 @@ function noor(string $method, string $path, array $data = []): TestResponse
 }
 
 /** The free-trial request a mother sends for her nine-year-old. */
+/** A teacher's first name as families read it: with a title before it ("Dr. Emiliano", "أ. منى"). */
+function teacherFirstName(string $name): string
+{
+    return preg_match('/^(?:\S+\.\s+)?\S+/u', trim($name), $first) === 1 ? $first[0] : '';
+}
+
 function ownTrialRequest(array $change = []): array
 {
     return array_merge([
@@ -170,6 +176,8 @@ it('books only with the right code to the number, and the family gets the time w
     $request = JoinRequest::query()->sole();
     $body = Notification::query()->where('user_id', $lead->contact_id)->where('template_key', 'scheduling.trial_booked')->value('body');
     expect($booked->json('data.starts_at.local'))->toStartWith('2026-10-06T19:00')
+        ->and($booked->json('data.teacher'))->toBe(teacherFirstName($this->teacher->name))
+        ->and($booked->json('data.minutes'))->toBe(30)
         ->and([$session->teacher_id, $session->funding_status->value])->toBe([$this->teacher->id, 'free'])
         ->and($lead->stage)->toBe(LeadStage::TrialBooked)
         ->and($lead->teacher_gender)->toBe('female')
@@ -295,7 +303,7 @@ it('lets the family move its trial from its own link until six hours before, and
     preg_match('#/trial/lesson/([A-Za-z0-9_\-.]+)/change#', $body, $m);
     $lesson = NOOR.'site/trials/lesson/'.$m[1];
 
-    noor('GET', $lesson.'?timezone=Asia/Riyadh')->assertOk()->assertJsonPath('data.can_move', true)->assertJsonPath('data.teacher', explode(' ', $this->teacher->name)[0]);
+    noor('GET', $lesson.'?timezone=Asia/Riyadh')->assertOk()->assertJsonPath('data.can_move', true)->assertJsonPath('data.moves_left', 2)->assertJsonPath('data.teacher', teacherFirstName($this->teacher->name));
     $times = array_map(fn (array $s) => $s['starts_at']['utc'], noor('GET', $lesson.'/slots?timezone=Asia/Riyadh')->assertOk()->json('data'));
     expect($times)->toContain('2026-10-06T17:00:00Z')->not->toContain('2026-10-06T15:00:00Z');
 
@@ -305,9 +313,11 @@ it('lets the family move its trial from its own link until six hours before, and
     // Less than six hours before: not moved, but "we cannot come" still works, and whoever follows the lead hears of it.
     $this->travelTo(CarbonImmutable::parse('2026-10-06 12:00', 'UTC'));
     noor('POST', $lesson.'/move', ['starts_at' => '2026-10-10T16:00:00Z'])->assertStatus(422)->assertJsonValidationErrors('starts_at');
-    noor('POST', $lesson.'/cancel')->assertOk();
+    noor('POST', $lesson.'/cancel', ['note' => str_repeat('x', 501)])->assertStatus(422)->assertJsonValidationErrors('note');
+    noor('POST', $lesson.'/cancel', ['note' => '  Travelling that day  '])->assertOk();
 
     expect(Session::query()->where('type', 'trial')->sole()->status->value)->toBe('cancelled')
+        ->and(Session::query()->where('type', 'trial')->sole()->decision['note'] ?? null)->toBe('Travelling that day')
         ->and($lead->refresh()->stage)->toBe(LeadStage::Contacted)
         ->and(Notification::query()->where('template_key', 'crm.trial_cancelled')->pluck('user_id')->all())->toBe([$lead->owner_id])
         ->and(JoinRequest::query()->sole()->status)->toBe('contacted');
@@ -363,7 +373,7 @@ it('needs a subject unless the family asks for help choosing, which starts with 
     noor('POST', 'site/requests', trialForm2(['subject_id' => null, 'help_choose' => true, 'phone' => '+966500000008']))->assertCreated();
     expect(JoinRequest::query()->where('phone', '+966500000008')->value('subject_id'))->toBe($this->quran)
         ->and(Lead::query()->where('phone_e164', '+966500000008')->value('subject_id'))->toBe($this->quran);
-    noor('GET', 'site')->assertOk()->assertJsonPath('data.trials', ['booking' => 'family', 'response_hours' => 4, 'notice_hours' => 3, 'help_choose_subject' => true]);
+    noor('GET', 'site')->assertOk()->assertJsonPath('data.trials', ['booking' => 'family', 'response_hours' => 4, 'notice_hours' => 3, 'help_choose_subject' => true, 'help_choose_subject_id' => $this->quran]);
 });
 
 it('refuses a time someone took between seeing it and confirming it, kindly, and stops offering it', function () {

@@ -193,16 +193,22 @@ final class OwnTrialController
         return $out;
     }
 
-    /** @return array{starts_at: array<string, string>|null, subject: string} */
+    /** @return array{starts_at: array<string, string>|null, subject: string, teacher: string, minutes: int} */
     private function booked(string $sessionId, mixed $timezone): array
     {
         $lesson = DB::table('sessions as s')
             ->join('subjects as su', fn ($j) => $j->on('su.academy_id', '=', 's.academy_id')->on('su.id', '=', 's.subject_id'))
-            ->where('s.id', $sessionId)->first(['s.starts_at', 'su.name_ar', 'su.name_en']);
+            ->leftJoin('users as u', 'u.id', '=', 's.teacher_id')
+            ->where('s.id', $sessionId)->first(['s.starts_at', 's.ends_at', 'su.name_ar', 'su.name_en', 'u.name as teacher']);
+        $starts = $lesson !== null ? CarbonImmutable::parse($lesson->starts_at) : null;
 
         return [
-            'starts_at' => $this->time->present($lesson !== null ? CarbonImmutable::parse($lesson->starts_at) : null, $this->zone($timezone)),
+            'starts_at' => $this->time->present($starts, $this->zone($timezone)),
             'subject' => (string) (app()->getLocale() === 'en' ? ($lesson->name_en ?? '') : ($lesson->name_ar ?? '')),
+            /** The teacher's first name only (with a title before it, as "أ. منى"). */
+            'teacher' => preg_match('/^(?:\S+\.\s+)?\S+/u', trim((string) ($lesson->teacher ?? '')), $first) === 1 ? $first[0] : '',
+            /** How long the lesson is, in minutes. */
+            'minutes' => $starts !== null ? (int) $starts->diffInMinutes(CarbonImmutable::parse($lesson->ends_at), true) : 0,
         ];
     }
 }

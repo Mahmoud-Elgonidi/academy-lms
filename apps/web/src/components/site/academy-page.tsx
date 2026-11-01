@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { countriesIn } from '@/lib/site/countries';
+import { timeFormatOf } from '@/lib/time';
 import { initialOf } from '@/lib/site/initial';
 import type { AcademySite } from '@/lib/site/server';
 import type { Branding } from '@/lib/viewer';
@@ -401,7 +402,7 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
               <div data-reveal="start">
                 <span className="ls-eyebrow">{t('join.eyebrow')}</span>
                 <h2>{t('join.title')}</h2>
-                <p className="ls-lead" style={{ marginBlockStart: '1rem' }}>{t('join.lead')}</p>
+                <p className="ls-lead" style={{ marginBlockStart: '1rem' }}>{t(site.trials?.booking === 'family' ? 'join.leadBook' : 'join.lead')}</p>
                 <ul className="ls-join-points">
                   {(t.raw('join.points') as string[]).map((p) => <li key={p}><Icon name="star" />{p}</li>)}
                 </ul>
@@ -419,6 +420,10 @@ export async function AcademyPage({ site, look, utm, chosenSubject }: {
                   utm={{ source: utm.utm_source, medium: utm.utm_medium, campaign: utm.utm_campaign }}
                   teach={shown('teach')}
                   chosenSubject={subjects.some((s) => s.id === chosenSubject) ? chosenSubject : undefined}
+                  trials={site.trials ?? { booking: 'staff', response_hours: 24, notice_hours: 3, help_choose_subject: false, help_choose_subject_id: null }}
+                  whatsapp={site.whatsapp}
+                  academy={site.academy.name}
+                  timeFormat={timeFormatOf(look.time_format)}
                 />
               </div>
             </div>

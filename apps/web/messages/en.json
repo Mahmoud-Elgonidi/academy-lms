@@ -1777,12 +1777,244 @@
       "privacy": "We use your details only to get in touch with you.",
       "fix": "Look at the fields below.",
       "failed": "The request did not go through. Try again in a little while.",
-      "tooMany": "We have had many requests from this device. Try again in an hour."
+      "tooMany": "We have had many requests from this device. Try again in an hour.",
+      "leadBook": "Choose your free lesson's time now on your own clock, or leave your number and we will agree it with you on WhatsApp."
     },
     "footer": {
       "rights": "All rights reserved",
       "privacy": "Privacy policy",
       "terms": "Terms"
+    },
+    "trial": {
+      "language": "العربية",
+      "privacy": "We use your details only to arrange the lesson.",
+      "whatsapp": "Message us on WhatsApp",
+      "whatsappWords": "Hello, I asked for a free trial lesson on your page.",
+      "progress": "Step {at} of {count}",
+      "back": "Back",
+      "next": "Next",
+      "steps": {
+        "who": "Who",
+        "when": "When",
+        "time": "Time",
+        "contact": "Your number"
+      },
+      "who": {
+        "title": "Who is the lesson for?",
+        "lead": "Tell us a little about the learner, and we will match the right teacher.",
+        "child": "My child",
+        "childHint": "A son or a daughter",
+        "me": "Me",
+        "meHint": "I am the learner",
+        "name": "Your name",
+        "parentName": "Your name (parent)",
+        "childName": "Child's name",
+        "childAge": "Child's age",
+        "agePick": "Choose the age",
+        "years": "{count, plural, one {# year} other {# years}}",
+        "subject": "What would you like to learn?",
+        "helpChoose": "Help me choose",
+        "helpChooseStart": "We will start with a {subject} lesson; the teacher will then advise you on what suits the learner best.",
+        "helpChooseTeam": "Our team will choose the right subject with you and agree the time, within {hours, plural, one {an hour} other {# hours}}."
+      },
+      "when": {
+        "title": "When suits you?",
+        "lead": "We show the times that fit first. You can skip this.",
+        "days": "Days that suit you",
+        "anyDay": "Any day suits us",
+        "daysChosen": "{count, plural, one {# day chosen} other {# days chosen}}",
+        "hours": "Hours that suit you",
+        "presets": {
+          "morning": "Morning",
+          "afternoon": "Afternoon",
+          "evening": "Evening"
+        },
+        "from": "From",
+        "to": "To",
+        "anyTime": "Any time",
+        "onYourClock": "On your own clock.",
+        "gender": "The teacher",
+        "genders": {
+          "any": "No preference",
+          "female": "A woman teacher",
+          "male": "A man teacher"
+        }
+      },
+      "time": {
+        "title": "Pick a time for the free lesson",
+        "lead": "The soonest times come first. Times marked with a dot fit what you chose.",
+        "loading": "Looking for free times…",
+        "zone": "Times are on your clock: {zone}",
+        "days": "Days with free times",
+        "count": "{count, plural, one {# free time} other {# free times}}",
+        "suitsYou": "fits what you chose",
+        "suitsLegend": "Fits the days and hours you chose",
+        "later": "Later times",
+        "soonest": "Back to the soonest times",
+        "emptyTitle": "No free times in these two weeks",
+        "emptyText": "Send your request without a time, and we will reply within {hours, plural, one {an hour} other {# hours}} to agree one with you.",
+        "emptyLater": "Look at the two weeks after",
+        "sendInstead": "Send the request without a time",
+        "skip": "I would rather you contact me to agree the time (within {hours, plural, one {an hour} other {# hours}})",
+        "failed": "We could not load the times. Check your connection and try again.",
+        "retry": "Try again",
+        "taken": "Someone booked this time a moment ago. We updated the list: choose another time.",
+        "pickFirst": "Choose a time first",
+        "continue": "Continue with this time"
+      },
+      "contact": {
+        "title": "Confirm with your number",
+        "lead": "We send a 6-digit code to your WhatsApp to confirm the booking. The lesson's details reach you on the same number.",
+        "titleRequest": "How do we reach you?",
+        "leadRequest": "We will reply on WhatsApp within {hours, plural, one {an hour} other {# hours}}.",
+        "phone": "Mobile (WhatsApp)",
+        "phoneHint": "With the country code, like +966 50 123 4567",
+        "more": "Email and country (optional)",
+        "moreRequest": "More details (optional)",
+        "email": "Email",
+        "country": "Country",
+        "pickCountry": "Choose the country",
+        "message": "Anything you would like to tell us?",
+        "changeTime": "Change the time",
+        "sendCode": "Send me the code",
+        "sendRequest": "Send the request",
+        "sending": "Sending…",
+        "codeSent": "We sent a code to {to} by {channel}.",
+        "channels": {
+          "whatsapp": "WhatsApp",
+          "sms": "text message",
+          "email": "email"
+        },
+        "codeLabel": "The 6-digit code",
+        "confirm": "Confirm the booking",
+        "confirming": "Booking…",
+        "resendIn": "You can ask for a new code in {wait}",
+        "resend": "Send a new code",
+        "bySms": "Send it as a text message",
+        "changeNumber": "Change the number",
+        "codeEnded": "This code has ended. Ask for a new one.",
+        "codeLocked": "The code was typed wrong too many times. Ask for a new one.",
+        "codeKept": "Your code still works: confirm with the new time.",
+        "codeNew": "The earlier code was used on the time that was taken. We will send a new one to confirm this time."
+      },
+      "booked": {
+        "title": "Your free lesson is booked",
+        "titleChild": "{name}'s free lesson is booked",
+        "with": "with <name>{teacher}</name>",
+        "minutes": "{minutes} minutes",
+        "ics": "Add to my calendar",
+        "google": "Google Calendar",
+        "eventTitle": "Free trial lesson: {subject} · {academy}",
+        "eventDetails": "With {teacher}. The link to join is in our WhatsApp message.",
+        "nextTitle": "What happens next",
+        "next": {
+          "message": "Our WhatsApp message is on its way now, with the lesson's time and your link to join.",
+          "reminder": "We remind you on WhatsApp the day before the lesson.",
+          "change": "Need another time? The message has a link to change it (up to 6 hours before) and one to cancel.",
+          "after": "After the lesson, the teacher sends you a short report on the learner's level."
+        },
+        "another": "Book for another child",
+        "anotherSubject": "Book another subject"
+      },
+      "sent": {
+        "title": "We have your request",
+        "promise": "We will reply within {hours, plural, one {an hour} other {# hours}}.",
+        "nextTitle": "What happens next",
+        "next": {
+          "message": "A WhatsApp message confirming your request reaches you now.",
+          "pick": "It has a link to pick the time yourself, if you would like to.",
+          "call": "Within {hours, plural, one {an hour} other {# hours}} someone from the academy contacts you to agree the time with the right teacher.",
+          "lesson": "You get the lesson's time and the link to join on WhatsApp, with a reminder the day before."
+        },
+        "again": "Send another request"
+      },
+      "refused": {
+        "title": "This one cannot be booked from here",
+        "text": "This lesson cannot be booked from here. Message us and we will arrange it with you.",
+        "whatsapp": "Message us on WhatsApp",
+        "request": "Send it as a request without a time",
+        "edit": "Change the details"
+      },
+      "errors": {
+        "name": "Write your name (two letters at least).",
+        "childName": "Write the child's name.",
+        "childAge": "Choose the child's age.",
+        "subject": "Choose a subject, or «Help me choose».",
+        "hours": "The end hour must come after the start hour.",
+        "phone": "Write the number with its country code, like +966 50 123 4567.",
+        "phoneNeeded": "Write your mobile number so we can reach you.",
+        "email": "This email does not look right.",
+        "code": "Write the 6 digits of the code.",
+        "fix": "Look at the fields marked below.",
+        "failed": "It did not go through. Try again in a moment.",
+        "limited": "Many tries from this device. Try again in an hour."
+      },
+      "pick": {
+        "title": "Choose your free lesson's time",
+        "hello": "Hello {name}",
+        "for": "For {learner} · {subject}",
+        "empty": "There are no free times in these two weeks. Look at the weeks after, or message us and we will find a time with you.",
+        "noCode": "No code needed: this link came to your number.",
+        "confirm": "Book this time",
+        "booking": "Booking…",
+        "gone": {
+          "title": "This link no longer works",
+          "text": "A time may already have been booked with it (the time is in our WhatsApp message), or two weeks have passed since you asked. You can ask again from our page, or message us.",
+          "again": "Ask for a free lesson"
+        },
+        "noSubject": {
+          "title": "We will choose the subject with you",
+          "text": "Our team will contact you within {hours, plural, one {an hour} other {# hours}} to choose the right subject and agree the time."
+        }
+      },
+      "lesson": {
+        "kicker": "Your free trial lesson",
+        "change": {
+          "title": "Change the time of your free lesson",
+          "until": "You can change it until {when}",
+          "movesLeft": "{count, plural, =0 {No changes left} one {One change left} other {# changes left}}",
+          "pickNew": "Pick the new time (the same teacher)",
+          "confirm": "Move it to this time",
+          "moving": "Moving…",
+          "noTimes": "The teacher has no other free time in these two weeks. Look at the weeks after, or message us.",
+          "toCancel": "We cannot come",
+          "cantTitle": "The time cannot be changed",
+          "moved": {
+            "title": "Done: your lesson has its new time",
+            "text": "We sent the new time to your WhatsApp, and the teacher knows.",
+            "next": {
+              "reminder": "We remind you on WhatsApp the day before the lesson.",
+              "again": "{count, plural, one {You can change it one more time} other {You can change it # more times}} from the same link.",
+              "last": "This was the last change. If the time stops suiting you, cancel it and ask for a new lesson."
+            }
+          }
+        },
+        "cancel": {
+          "title": "Cancel the free lesson?",
+          "lead": "The lesson is cancelled and the teacher is told. You can ask for a new free lesson whenever you like.",
+          "reason": "Why? (optional)",
+          "reasonHint": "It helps us offer you a better time.",
+          "tryChange": "Is it only the time?",
+          "changeLink": "Change the time instead",
+          "confirm": "Yes, cancel the lesson",
+          "cancelling": "Cancelling…",
+          "keep": "Keep the lesson",
+          "kept": {
+            "title": "Your lesson stays as it is",
+            "text": "Nothing has changed. See you at the lesson."
+          },
+          "done": {
+            "title": "The lesson is cancelled",
+            "text": "We have told the teacher. When you are ready, ask for a new free lesson from our page, or message us.",
+            "again": "Ask for a new free lesson"
+          }
+        },
+        "gone": {
+          "title": "This link no longer works",
+          "text": "The lesson may have started or ended, been cancelled, or the link is old. For anything about your lesson, message us on WhatsApp.",
+          "again": "Ask for a free lesson"
+        }
+      }
     }
   },
   "teachCard": {

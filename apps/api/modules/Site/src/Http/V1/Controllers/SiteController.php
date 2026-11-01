@@ -128,6 +128,8 @@ final class SiteController
                     'notice_hours' => (int) $settings->trial_notice_hours,
                     /** Whether a family that asks for help choosing starts with the academy's own trial subject (else sales choose with them). */
                     'help_choose_subject' => $settings->default_trial_subject_id !== null,
+                    /** That subject (one of `subjects`), whose times a family that asks for help choosing books from; null when sales choose with them. */
+                    'help_choose_subject_id' => $settings->default_trial_subject_id !== null ? (string) $settings->default_trial_subject_id : null,
                 ],
                 /** Sent back with the request form, unchanged. */
                 'form_token' => FormToken::issue(SubmitJoinRequest::FORM),

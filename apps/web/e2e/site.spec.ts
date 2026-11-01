@@ -30,16 +30,21 @@ test('the academy page shows what it offers and takes a free trial request', asy
   await fitsTheScreen(page);
   await noRawKeys(page);
 
-  // Sent empty, the form says what is missing; filled, it goes to the academy.
-  const form = page.locator('#ls-panel-trial form');
+  // Sent empty, the first step says what is missing; filled, the request goes to the academy (trial-booking.spec.ts takes every step).
+  const form = page.locator('#ls-panel-trial');
   await page.waitForTimeout(FORM_READY_MS);
-  await form.getByRole('button', { name: 'أرسل' }).click();
+  await form.getByRole('button', { name: 'التالي' }).click();
   await expect(form.getByRole('alert')).toBeVisible();
-  await form.getByLabel('اسمك').fill('ولي أمر من الموقع');
-  await form.getByLabel('الجوال (واتساب)').fill(freshPhone());
+  await form.getByLabel('اسمك (ولي الأمر)').fill('ولي أمر من الموقع');
   await form.getByLabel('اسم الطفل').fill('سلمى');
-  await form.getByRole('button', { name: 'أرسل' }).click();
-  await expect(page.getByRole('status').getByText('وصلنا طلبك')).toBeVisible();
+  await form.getByLabel('عمر الطفل').selectOption('8');
+  await form.getByLabel('ساعدوني في الاختيار').check();
+  await form.getByRole('button', { name: 'التالي' }).click();
+  await form.getByRole('button', { name: 'التالي' }).click();
+  await form.getByRole('button', { name: /أفضّل أن تتواصلوا معي/ }).click();
+  await form.getByLabel('الجوال (واتساب)').fill(freshPhone());
+  await form.getByRole('button', { name: 'أرسل الطلب' }).click();
+  await expect(form.getByRole('heading', { name: 'وصلنا طلبك' })).toBeVisible();
 });
 
 test('a teacher asks to teach at the academy from its page', async ({ page }) => {

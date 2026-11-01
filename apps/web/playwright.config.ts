@@ -51,6 +51,8 @@ export default defineConfig({
     { name: 'quran', testMatch: /quran\.spec\.ts/, dependencies: ['setup'], use: { ...devices['Pixel 7'] } },
     // The pages before signing in (the academy's, the platform's), on a phone.
     { name: 'site', testMatch: /site\.spec\.ts/, dependencies: ['setup'], use: { ...devices['Pixel 7'] } },
+    // A family asks for and books its own free trial on the academy's page, and uses the trial's own links (no sign-in).
+    { name: 'trial', testMatch: /trial-booking\.spec\.ts/, use: { ...devices['Pixel 7'] } },
   ],
   webServer: process.env.E2E_SERVE
     ? { command: 'npm run start', url: `${base}/ar/sign-in`, reuseExistingServer: true, timeout: 120_000 }

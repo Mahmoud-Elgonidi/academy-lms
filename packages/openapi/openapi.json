@@ -4142,11 +4142,31 @@
                                                 },
                                                 "subject": {
                                                     "type": "string"
+                                                },
+                                                "teacher": {
+                                                    "description": "The teacher's first name only (with a title before it, as \"\u0623. \u0645\u0646\u0649\").",
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "enum": [
+                                                                ""
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                "minutes": {
+                                                    "type": "integer",
+                                                    "description": "How long the lesson is, in minutes."
                                                 }
                                             },
                                             "required": [
                                                 "starts_at",
-                                                "subject"
+                                                "subject",
+                                                "teacher",
+                                                "minutes"
                                             ]
                                         }
                                     },
@@ -4855,11 +4875,31 @@
                                                 },
                                                 "subject": {
                                                     "type": "string"
+                                                },
+                                                "teacher": {
+                                                    "description": "The teacher's first name only (with a title before it, as \"\u0623. \u0645\u0646\u0649\").",
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "enum": [
+                                                                ""
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                "minutes": {
+                                                    "type": "integer",
+                                                    "description": "How long the lesson is, in minutes."
                                                 }
                                             },
                                             "required": [
                                                 "starts_at",
-                                                "subject"
+                                                "subject",
+                                                "teacher",
+                                                "minutes"
                                             ]
                                         }
                                     },
@@ -28688,8 +28728,18 @@
                                                     "type": "string"
                                                 },
                                                 "teacher": {
-                                                    "type": "string",
-                                                    "description": "The teacher's first name only."
+                                                    "description": "The teacher's first name only (with a title before it, as \"\u0623. \u0645\u0646\u0649\").",
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "enum": [
+                                                                ""
+                                                            ]
+                                                        }
+                                                    ]
                                                 },
                                                 "starts_at": {
                                                     "type": [
@@ -28735,6 +28785,9 @@
                                                     "type": "integer",
                                                     "description": "Times it has been moved."
                                                 },
+                                                "moves_left": {
+                                                    "description": "Times it may still be moved (at most twice in all)."
+                                                },
                                                 "move_until": {
                                                     "type": [
                                                         "object",
@@ -28770,6 +28823,7 @@
                                                 "can_move",
                                                 "cannot_move",
                                                 "moves",
+                                                "moves_left",
                                                 "move_until"
                                             ]
                                         }
@@ -29421,8 +29475,18 @@
                                                     "type": "string"
                                                 },
                                                 "teacher": {
-                                                    "type": "string",
-                                                    "description": "The teacher's first name only."
+                                                    "description": "The teacher's first name only (with a title before it, as \"\u0623. \u0645\u0646\u0649\").",
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "type": "string",
+                                                            "enum": [
+                                                                ""
+                                                            ]
+                                                        }
+                                                    ]
                                                 },
                                                 "starts_at": {
                                                     "type": [
@@ -29468,6 +29532,9 @@
                                                     "type": "integer",
                                                     "description": "Times it has been moved."
                                                 },
+                                                "moves_left": {
+                                                    "description": "Times it may still be moved (at most twice in all)."
+                                                },
                                                 "move_until": {
                                                     "type": [
                                                         "object",
@@ -29503,6 +29570,7 @@
                                                 "can_move",
                                                 "cannot_move",
                                                 "moves",
+                                                "moves_left",
                                                 "move_until"
                                             ]
                                         }
@@ -29524,6 +29592,7 @@
         "/v1/site/trials/lesson/{token}/cancel": {
             "post": {
                 "operationId": "site.trials.lesson.cancel",
+                "description": "note: why, in the family's words (optional, up to 500 characters), for whoever follows them up.",
                 "summary": "We cannot come: cancel the free trial",
                 "tags": [
                     "Scheduling"
@@ -29574,6 +29643,24 @@
                         "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "note": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 500
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "",
@@ -29600,6 +29687,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 },
                 "security": []
@@ -30110,13 +30200,21 @@
                                                         "help_choose_subject": {
                                                             "type": "boolean",
                                                             "description": "Whether a family that asks for help choosing starts with the academy's own trial subject (else sales choose with them)."
+                                                        },
+                                                        "help_choose_subject_id": {
+                                                            "type": [
+                                                                "string",
+                                                                "null"
+                                                            ],
+                                                            "description": "That subject (one of `subjects`), whose times a family that asks for help choosing books from; null when sales choose with them."
                                                         }
                                                     },
                                                     "required": [
                                                         "booking",
                                                         "response_hours",
                                                         "notice_hours",
-                                                        "help_choose_subject"
+                                                        "help_choose_subject",
+                                                        "help_choose_subject_id"
                                                     ]
                                                 },
                                                 "form_token": {

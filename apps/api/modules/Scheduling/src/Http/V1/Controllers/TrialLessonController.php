@@ -94,11 +94,15 @@ final class TrialLessonController
     /**
      * We cannot come: cancel the free trial.
      *
+     * note: why, in the family's words (optional, up to 500 characters), for whoever follows them up.
+     *
      * @throws NotFoundHttpException the link names no coming trial
      */
-    public function cancel(string $token, CancelOwnTrial $cancel): JsonResponse
+    public function cancel(Request $request, string $token, CancelOwnTrial $cancel): JsonResponse
     {
-        $cancel->handle($this->lesson($token));
+        $valid = $request->validate(['note' => ['nullable', 'string', 'max:500']]);
+        $note = trim((string) ($valid['note'] ?? ''));
+        $cancel->handle($this->lesson($token), $note === '' ? null : $note);
 
         return response()->json(['data' => ['cancelled' => true]]);
     }
@@ -127,7 +131,7 @@ final class TrialLessonController
             ?? $this->viewer->effective();
     }
 
-    /** @return array{subject: string, teacher: string, starts_at: array<string, string>|null, minutes: int, can_move: bool, cannot_move: ?string, moves: int, move_until: array<string, string>|null} */
+    /** @return array{subject: string, teacher: string, starts_at: array<string, string>|null, minutes: int, can_move: bool, cannot_move: ?string, moves: int, moves_left: int, move_until: array<string, string>|null} */
     private function present(Session $session, string $zone): array
     {
         $locale = app()->getLocale() === 'en' ? 'en' : 'ar';
@@ -136,8 +140,8 @@ final class TrialLessonController
 
         return [
             'subject' => (string) ($locale === 'en' ? ($subject->name_en ?? '') : ($subject->name_ar ?? '')),
-            /** The teacher's first name only. */
-            'teacher' => (string) strtok($teacher, ' '),
+            /** The teacher's first name only (with a title before it, as "أ. منى"). */
+            'teacher' => preg_match('/^(?:\S+\.\s+)?\S+/u', trim($teacher), $first) === 1 ? $first[0] : '',
             'starts_at' => $this->time->present($session->starts_at, $zone),
             'minutes' => $session->durationMinutes(),
             /** Whether it may still be moved (until six hours before, twice at most, while its teacher takes trials). */
@@ -146,6 +150,8 @@ final class TrialLessonController
             'cannot_move' => RescheduleOwnTrial::whyNotMovable($session),
             /** Times it has been moved. */
             'moves' => (int) $session->reschedule_count,
+            /** Times it may still be moved (at most twice in all). */
+            'moves_left' => max(0, TrialBooking::MAX_MOVES - (int) $session->reschedule_count),
             'move_until' => $this->time->present($session->starts_at->subHours(TrialBooking::MOVE_UNTIL_HOURS), $zone),
         ];
     }

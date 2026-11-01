@@ -3,7 +3,10 @@
 import { useActionState, useState, useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 import { askTheAcademy, type SiteFormState } from '@/lib/site/actions';
+import type { TrialSettings } from '@/lib/site/trial';
+import type { TimeFormat } from '@/lib/time';
 import { Done } from './join-platform';
+import { TrialRequest } from './trial/trial-request';
 
 type Kind = 'trial' | 'teach';
 type Option = { id: string; name: string };
@@ -33,7 +36,7 @@ const browserZone = () => {
  * #teach opens the second. The visitor's time zone rides along, read in the
  * browser after the page shows (the form reads the same without it).
  */
-export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosenSubject }: {
+export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosenSubject, trials, whatsapp, academy, timeFormat }: {
   token: string;
   subjects: Option[];
   countries: { code: string; name: string }[];
@@ -41,6 +44,11 @@ export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosen
   /** Whether the academy shows "teach with us". */
   teach: boolean;
   chosenSubject?: string;
+  /** How the academy takes a free trial (families pick their own time, or its staff book it). */
+  trials: TrialSettings;
+  whatsapp: string | null;
+  academy: string;
+  timeFormat: TimeFormat;
 }) {
   const t = useTranslations('site.join');
   const hash = useSyncExternalStore(onHash, () => window.location.hash, () => '');
@@ -71,7 +79,21 @@ export function JoinAcademyForm({ token, subjects, countries, utm, teach, chosen
       ) : null}
       {(['trial', 'teach'] as const).filter((tab) => tab === 'trial' || teach).map((tab) => (
         <div key={tab} role={teach ? 'tabpanel' : undefined} id={`ls-panel-${tab}`} aria-labelledby={teach ? `ls-tab-${tab}` : undefined} hidden={kind !== tab}>
-          <OneForm kind={tab} token={token} subjects={subjects} countries={countries} utm={utm} chosenSubject={chosenSubject} />
+          {tab === 'trial' ? (
+            <TrialRequest
+              token={token}
+              subjects={subjects}
+              countries={countries}
+              utm={utm}
+              chosenSubject={chosenSubject}
+              settings={trials}
+              whatsapp={whatsapp}
+              academy={academy}
+              timeFormat={timeFormat}
+            />
+          ) : (
+            <OneForm kind={tab} token={token} subjects={subjects} countries={countries} utm={utm} chosenSubject={chosenSubject} />
+          )}
         </div>
       ))}
     </div>

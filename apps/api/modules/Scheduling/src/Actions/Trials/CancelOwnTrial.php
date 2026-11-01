@@ -15,8 +15,9 @@ final class CancelOwnTrial
 {
     public function __construct(private readonly CancelSession $cancel) {}
 
-    public function handle(Session $session): Session
+    /** @param  ?string  $note  why, in the family's words (kept on the cancellation like any lesson's note) */
+    public function handle(Session $session, ?string $note = null): Session
     {
-        return $this->cancel->handle($session, 'student', 'other', null, null);
+        return $this->cancel->handle($session, 'student', 'other', $note, null);
     }
 }

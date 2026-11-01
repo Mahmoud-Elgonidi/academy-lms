@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Actions\Proofs\ApprovePaymentProof;
 use Modules\Billing\Actions\Proofs\RejectPaymentProof;
@@ -34,6 +35,7 @@ use Modules\Scheduling\Actions\FundSessions;
 use Modules\Scheduling\Actions\Groups\GroupOutcomes;
 use Modules\Scheduling\Actions\Groups\GroupSeats;
 use Modules\Scheduling\Actions\MaterializeSessions;
+use Modules\Scheduling\Actions\PlaceBookingHold;
 use Modules\Scheduling\Actions\RecordParticipantJoin;
 use Modules\Scheduling\Actions\ResolveReview;
 use Modules\Scheduling\Actions\ScheduleSession;
@@ -44,10 +46,14 @@ use Modules\Scheduling\Domain\Models\PolicyVersion;
 use Modules\Scheduling\Domain\Models\Session;
 use Modules\Scheduling\Domain\Models\SessionEvent;
 use Modules\Scheduling\Domain\Models\SessionParticipant;
+use Modules\Scheduling\Support\TrialLinks;
 use Modules\SharedKernel\Audit\AuditActor;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Tenancy\TenantContext;
 use Modules\SharedKernel\Tenancy\TenantRef;
+use Modules\Site\Models\JoinRequest;
+use Modules\Site\Models\SiteSettings;
+use Modules\Site\Support\PickLinks;
 use RuntimeException;
 
 /**
@@ -66,7 +72,9 @@ use RuntimeException;
  * a report of it to write, and the family's sign-ins; with `quran`: Yousef's Quran course, a lesson of it to record
  * now, his family's sign-ins and his certificate, its code as printed). What depends on the moment a
  * test runs is done when it asks, through artisan tinker: a lesson to go
- * into now (`lessonNow`) and staff approving a receipt (`approveProof`).
+ * into now (`lessonNow`), staff approving a receipt (`approveProof`), the academy
+ * booking free trials itself for a while (`trialBooking`) and a free trial's time
+ * taken by someone else between seeing it and confirming it (`takeTrialSlot`).
  */
 final class E2eResetSeeder extends Seeder
 {
@@ -115,6 +123,8 @@ final class E2eResetSeeder extends Seeder
                 $this->practiceHomework();
                 $group = $this->group();
                 $quran = $this->quran();
+                // Families book their own free trials, as the demo has it (a test may have switched the academy to booking them).
+                SiteSettings::query()->where('trial_booking', '!=', 'family')->update(['trial_booking' => 'family']);
             } finally {
                 CarbonImmutable::setTestNow();
                 AuditActor::forget();
@@ -150,6 +160,74 @@ final class E2eResetSeeder extends Seeder
             }
 
             return (string) $invoice->number;
+        });
+    }
+
+    /**
+     * Who books the demo's free trials from its page: `staff` (the family sends a request) or `family` (it picks
+     * its own time), as the owner would set it in Settings › The academy's page; the reset puts back `family`.
+     */
+    public static function trialBooking(string $mode): string
+    {
+        if (! in_array($mode, ['family', 'staff'], true)) {
+            throw new RuntimeException("Not family or staff: {$mode}.");
+        }
+        $academy = self::demo(app(TenantDirectory::class));
+
+        return app(TenantContext::class)->run($academy, function () use ($mode): string {
+            SiteSettings::query()->update(['trial_booking' => $mode]);
+
+            return $mode;
+        });
+    }
+
+    /**
+     * Someone else takes a free trial's time (UTC) while a family looks at it: every teacher free then is held for
+     * ten minutes, as a coordinator's booking hold does, so the time leaves the list and booking it is refused as
+     * taken; the holds lapse by themselves. Returns how many teachers were held.
+     */
+    public static function takeTrialSlot(string $utc, int $minutes = 30): int
+    {
+        $academy = self::demo(app(TenantDirectory::class));
+
+        return app(TenantContext::class)->run($academy, function () use ($utc, $minutes): int {
+            $at = CarbonImmutable::parse($utc)->utc()->getTimestamp();
+            $held = 0;
+            foreach (DB::table('user_roles')->where('role', 'teacher')->distinct()->pluck('user_id') as $teacher) {
+                try {
+                    app(PlaceBookingHold::class)->handle((string) $teacher, null, [$at], $minutes, (string) Str::uuid());
+                    $held++;
+                } catch (ValidationException) {
+                    // Busy then already.
+                }
+            }
+
+            return $held;
+        });
+    }
+
+    /**
+     * The links a family's messages carry for the free trial asked for with this number (the latest request):
+     * `pick` (the instant reply's "pick a time", while it waits for one), and `change`/`cancel` (the booked
+     * trial's own), as the tests' stand-in for reading WhatsApp. Returns them as JSON, paths on the academy's host.
+     */
+    public static function trialLinks(string $phone, string $locale = 'ar'): string
+    {
+        $academy = self::demo(app(TenantDirectory::class));
+
+        return app(TenantContext::class)->run($academy, function () use ($phone, $locale): string {
+            $request = JoinRequest::query()->where('phone', $phone)->where('kind', 'trial')->latest('created_at')->first()
+                ?? throw new RuntimeException("No free trial request from {$phone}.");
+            $path = fn (string $url) => (string) parse_url($url, PHP_URL_PATH);
+            $links = ['pick' => $path(app(PickLinks::class)->url($request->forceFill(['locale' => $locale])))];
+            $session = $request->session_id !== null ? Session::query()->find($request->session_id) : null;
+            if ($session !== null) {
+                foreach (app(TrialLinks::class)->links($session, $locale) as $kind => $url) {
+                    $links[$kind] = $path($url);
+                }
+            }
+
+            return (string) json_encode($links);
         });
     }
 

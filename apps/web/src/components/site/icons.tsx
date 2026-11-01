@@ -21,6 +21,14 @@ const PATHS = {
   heart: 'M4.32 6.32a4.5 4.5 0 0 0 0 6.36L12 20.36l7.68-7.68a4.5 4.5 0 0 0-6.36-6.36L12 7.64l-1.32-1.32a4.5 4.5 0 0 0-6.36 0z',
   clock: 'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
   academic: 'M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.42a12.08 12.08 0 0 1 .66 6.48A11.95 11.95 0 0 0 12 20.06a11.95 11.95 0 0 0-6.82-2.94 12.08 12.08 0 0 1 .66-6.48L12 14zm-4 6v-7.5l4-2.22',
+  // Forward in the reading direction (flipped right to left by .ls-flip in site.css).
+  chevron: 'M9 5l7 7-7 7',
+  refresh: 'M4 4v5h.58m15.36 2A8 8 0 0 0 4.58 9M4.58 9H9m11 11v-5h-.58m0 0a8 8 0 0 1-15.36-2m15.36 2H15',
+  close: 'M6 18L18 6M6 6l12 12',
+  user: 'M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z',
+  child: 'M12 4a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM8 21v-6l-2-2 2.5-3h7L18 13l-2 2v6M10 21v-4h4v4',
+  pencil: 'M15.23 5.23l3.54 3.54M4 20h4L18.5 9.5a2.5 2.5 0 0 0-3.54-3.54L4.5 16.5 4 20z',
+  sparkle: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z',
 } as const;
 
 export type IconName = keyof typeof PATHS;

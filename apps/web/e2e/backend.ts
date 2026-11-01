@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { closeSync, fstatSync, openSync, readFileSync, readSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 /**
@@ -96,4 +96,49 @@ export function approveProof(reference: string): string {
   if (!/^[\w-]+$/.test(reference)) throw new Error(`Not a reference: ${reference}`);
   const out = artisan(['tinker', `--execute=echo Database\\Seeders\\E2eResetSeeder::approveProof('${reference}');`]);
   return out.trim().split('\n').pop() ?? '';
+}
+
+/* ── A family's own free trial (the academy's page, its links) ── */
+
+/** Who books the demo's free trials: `staff` (a request), or `family` (its own time; the global setup puts it back). */
+export function trialBooking(mode: 'family' | 'staff'): void {
+  const out = artisan(['tinker', `--execute=echo Database\\Seeders\\E2eResetSeeder::trialBooking('${mode}');`]).trim().split('\n').pop();
+  if (out !== mode) throw new Error(`Free trials not set to ${mode}: ${out}`);
+}
+
+/** Someone else takes a free trial's time (UTC) meanwhile: every teacher free then is held for ten minutes. */
+export function takeTrialSlot(utc: string): number {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(utc)) throw new Error(`Not a UTC instant: ${utc}`);
+  return Number(artisan(['tinker', `--execute=echo Database\\Seeders\\E2eResetSeeder::takeTrialSlot('${utc}');`]).trim().split('\n').pop());
+}
+
+/** The paths the family's messages carry for the trial asked for with this number: pick (a time), and change and cancel once booked. */
+export function trialLinks(phone: string, locale: 'ar' | 'en' = 'ar'): { pick: string; change?: string; cancel?: string } {
+  if (!/^\+\d{8,15}$/.test(phone)) throw new Error(`Not a number: ${phone}`);
+  const out = artisan(['tinker', `--execute=echo Database\\Seeders\\E2eResetSeeder::trialLinks('${phone}', '${locale}');`]);
+  return JSON.parse(out.trim().split('\n').pop() ?? '{}');
+}
+
+/**
+ * The code just sent to a number, as WhatsApp's log driver wrote it to the
+ * API's log (WHATSAPP_DRIVER=log, a laptop or CI only; the log masks the
+ * number to its last two digits, so each test uses a number of its own).
+ * The code leaves after the API answers, so this waits a little for it.
+ */
+export async function phoneCode(phone: string): Promise<string> {
+  const log = resolve(process.env.E2E_API_DIR ?? '../api', 'storage/logs/laravel.log');
+  const ends = [`code to ${phone} `, `code to ***${phone.slice(-2)} `];
+  for (let tries = 0; tries < 40; tries++) {
+    const fd = openSync(log, 'r');
+    const size = fstatSync(fd).size;
+    const length = Math.min(size, 200_000);
+    const tail = Buffer.alloc(length);
+    readSync(fd, tail, 0, length, size - length);
+    closeSync(fd);
+    const lines = tail.toString('utf8').split('\n').filter((line) => ends.some((end) => line.includes(end)));
+    const found = lines.map((line) => /: (\d{6})\b/.exec(line)?.[1]).filter(Boolean);
+    if (found.length > 0) return found.at(-1)!;
+    await new Promise((done) => setTimeout(done, 250));
+  }
+  throw new Error(`No code in the API's log for ${phone} (WHATSAPP_DRIVER=log?)`);
 }

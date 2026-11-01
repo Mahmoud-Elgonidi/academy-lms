@@ -1,6 +1,7 @@
 import 'server-only';
 import { cache } from 'react';
 import { call } from '@/lib/api/server';
+import type { TrialSettings } from './trial';
 
 /** What the platform's page says, as GET /v1/site/platform answers it (in the visitor's language). */
 export type PlatformSite = {
@@ -82,6 +83,8 @@ export type AcademySite = {
   regions: { id: string; name: string; currency: string; default: boolean; countries: string[] }[];
   app: { android_url: string | null; ios_url: string | null };
   whatsapp: string | null;
+  /** How the academy takes a free trial asked for on its page (families pick their own time, or its staff book it). */
+  trials?: TrialSettings;
   form_token: string;
 };
 

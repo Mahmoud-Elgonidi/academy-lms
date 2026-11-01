@@ -2839,7 +2839,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** We cannot come: cancel the free trial */
+        /**
+         * We cannot come: cancel the free trial
+         * @description note: why, in the family's words (optional, up to 500 characters), for whoever follows them up.
+         */
         post: operations["site.trials.lesson.cancel"];
         delete?: never;
         options?: never;
@@ -4925,6 +4928,10 @@ export interface operations {
                                 label: string;
                             } | null;
                             subject: string;
+                            /** @description The teacher's first name only (with a title before it, as "أ. منى"). */
+                            teacher: string | "";
+                            /** @description How long the lesson is, in minutes. */
+                            minutes: number;
                         };
                     };
                 };
@@ -5045,6 +5052,10 @@ export interface operations {
                                 label: string;
                             } | null;
                             subject: string;
+                            /** @description The teacher's first name only (with a title before it, as "أ. منى"). */
+                            teacher: string | "";
+                            /** @description How long the lesson is, in minutes. */
+                            minutes: number;
                         };
                     };
                 };
@@ -13783,8 +13794,8 @@ export interface operations {
                     "application/json": {
                         data: {
                             subject: string;
-                            /** @description The teacher's first name only. */
-                            teacher: string;
+                            /** @description The teacher's first name only (with a title before it, as "أ. منى"). */
+                            teacher: string | "";
                             starts_at: {
                                 utc: string;
                                 local: string;
@@ -13798,6 +13809,8 @@ export interface operations {
                             cannot_move: string | null;
                             /** @description Times it has been moved. */
                             moves: number;
+                            /** @description Times it may still be moved (at most twice in all). */
+                            moves_left: unknown;
                             move_until: {
                                 utc: string;
                                 local: string;
@@ -13907,8 +13920,8 @@ export interface operations {
                     "application/json": {
                         data: {
                             subject: string;
-                            /** @description The teacher's first name only. */
-                            teacher: string;
+                            /** @description The teacher's first name only (with a title before it, as "أ. منى"). */
+                            teacher: string | "";
                             starts_at: {
                                 utc: string;
                                 local: string;
@@ -13922,6 +13935,8 @@ export interface operations {
                             cannot_move: string | null;
                             /** @description Times it has been moved. */
                             moves: number;
+                            /** @description Times it may still be moved (at most twice in all). */
+                            moves_left: unknown;
                             move_until: {
                                 utc: string;
                                 local: string;
@@ -13965,7 +13980,13 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    note?: string | null;
+                };
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -13979,6 +14000,7 @@ export interface operations {
                     };
                 };
             };
+            422: components["responses"]["ValidationException"];
         };
     };
     "site.show": {
@@ -14141,6 +14163,8 @@ export interface operations {
                                 notice_hours: number;
                                 /** @description Whether a family that asks for help choosing starts with the academy's own trial subject (else sales choose with them). */
                                 help_choose_subject: boolean;
+                                /** @description That subject (one of `subjects`), whose times a family that asks for help choosing books from; null when sales choose with them. */
+                                help_choose_subject_id: string | null;
                             };
                             /** @description Sent back with the request form, unchanged. */
                             form_token: string;
