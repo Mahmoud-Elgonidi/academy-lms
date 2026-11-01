@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Quran\Http\V1\Controllers\HifzController;
 use Modules\Quran\Http\V1\Controllers\MushafController;
+use Modules\Quran\Http\V1\Controllers\QuranCertificateController;
+use Modules\Quran\Http\V1\Controllers\QuranExamController;
 use Modules\Quran\Http\V1\Controllers\QuranLessonController;
 use Modules\Quran\Http\V1\Controllers\QuranPlanController;
 use Modules\Quran\Http\V1\Controllers\TeacherHifzController;
@@ -57,4 +59,18 @@ Route::middleware(['auth:sanctum', 'plan.feature:quran', 'can:quran.teach'])->pr
 // Students and guardians: each Quran course's plan, where the learner is and the last lessons' grades.
 Route::middleware(['auth:sanctum', 'plan.feature:quran'])->prefix('quran')->group(function () {
     Route::get('plan', [QuranPlanController::class, 'family'])->middleware('throttle:60,1')->name('quran.plan');
+});
+
+// Exams (quran/…): the examiner's own queue and recording a result (whoever the exam names; the action checks it).
+Route::middleware(['auth:sanctum', 'plan.feature:quran'])->prefix('quran')->group(function () {
+    Route::get('examiner/exams', [QuranExamController::class, 'examiner'])->middleware('throttle:60,1')->name('quran.examiner.exams');
+    Route::post('exams/{exam}/result', [QuranExamController::class, 'record'])->middleware(['idempotent', 'throttle:30,1'])->name('quran.exams.record');
+    // Students and guardians: the learner's exams, and their certificates while the academy shows them to families.
+    Route::get('exams', [QuranExamController::class, 'family'])->middleware('throttle:60,1')->name('quran.exams');
+    Route::get('certificates', [QuranCertificateController::class, 'family'])->middleware('throttle:60,1')->name('quran.certificates');
+});
+
+// Anyone verifies a certificate by its code, on the academy's address (the portal's page shows it); a tight door.
+Route::middleware(['plan.feature:quran'])->prefix('quran')->group(function () {
+    Route::get('certificates/{code}', [QuranCertificateController::class, 'verify'])->middleware('throttle:10,1')->name('quran.certificates.verify');
 });

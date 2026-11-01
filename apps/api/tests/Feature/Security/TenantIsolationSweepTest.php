@@ -72,6 +72,10 @@ beforeEach(function () {
         'check' => $one('teacher_checks', fn ($q) => $q->whereNotNull('file_path')),
         'node' => $one('curriculum_nodes', fn ($q) => $q->where('kind', 'lesson')),
         'announcement' => $one('announcements'),
+        // The Quran's exams and certificates (the certificate by its public code).
+        'exam' => $one('quran_exams'),
+        'code' => (string) $platform->table('quran_certificates')->where('academy_id', $this->demo)->orderBy('id')->value('code'),
+        'certificate' => $one('quran_certificates'),
     ]);
     $this->game = (string) $platform->table('games')->orderBy('key')->value('key');
     // A message and its own ticket.
@@ -265,6 +269,7 @@ it('keeps every record of one academy out of reach of another academy\'s people'
         ['learning.material', ['resource' => $this->ids['resource'] ?? $this->ids['session']]],
         ['billing.pay.return', ['checkout' => $this->ids['checkout'] ?? $this->ids['invoice']]],
         ['privacy.copy', ['request' => $this->ids['request'] ?? $this->ids['invoice']]],
+        ['quran.certificate', ['certificate' => $this->ids['certificate'] ?? $this->ids['invoice']]],
     ];
     foreach ($signed as [$name, $params]) {
         $url = URL::temporarySignedRoute($name, now()->addHour(), $params, absolute: false);

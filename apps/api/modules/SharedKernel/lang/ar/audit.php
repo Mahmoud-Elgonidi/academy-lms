@@ -167,6 +167,12 @@ return [
             'program_restored' => 'إعادة برنامج القرآن :name من الأرشيف',
             'plan_started' => 'بدء خطة قرآن على :program',
             'plan_adjusted' => 'تعديل خطة قرآن: :quran_fields',
+            'exam_suggested' => 'اقتراح اختبار قرآن (:stop_kind :stop_number)',
+            'exam_booked' => 'حجز اختبار قرآن (:stop_kind :stop_number)',
+            'exam_recorded' => 'تسجيل نتيجة اختبار قرآن (:stop_kind :stop_number): :outcome',
+            'exam_cancelled' => 'إلغاء اختبار قرآن (:stop_kind :stop_number)',
+            'certificate_issued' => 'إصدار شهادة القرآن :number',
+            'certificate_revoked' => 'سحب شهادة القرآن :number',
         ],
         'games' => [
             'settings_saved' => 'تعديل ألعاب الأكاديمية (:state، :minutes دقيقة في اليوم)',
@@ -192,6 +198,8 @@ return [
         ],
     ],
     'values' => [
+        'stop_kind' => ['juz' => 'الجزء', 'surah' => 'السورة', 'program' => 'البرنامج', 'khatma' => 'القرآن كاملًا'],
+        'outcome' => ['passed' => 'ناجح', 'failed' => 'يُعاد'],
         'quran_fields' => [
             'hifz_daily_pages' => 'الورد اليومي', 'riwaya' => 'الرواية', 'mushaf' => 'المصحف', 'default_unit' => 'الوحدة الافتراضية',
             'default_new_amount' => 'المقدار الجديد الافتراضي', 'default_near_portions' => 'المراجعة القريبة الافتراضية', 'default_far_pages' => 'المراجعة البعيدة الافتراضية',

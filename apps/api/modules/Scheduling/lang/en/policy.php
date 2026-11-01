@@ -137,6 +137,8 @@ return [
         'someone_busy' => 'The teacher or the student has another session then.',
         'no_makeup_credit' => 'Not enough makeup credit valid on that day.',
         'no_extra_credit' => 'The course has not enough paid minutes valid on that day (makeup credit is for makeups).',
+        'course_not_running' => 'This course has no lessons now (not started, paused or ended).',
+        'assessment_length' => 'An assessment lasts 10 to 120 minutes.',
         'no_enrollment' => 'Enrollment not found.',
         'same_teacher' => 'That is the current teacher.',
         'new_teacher_busy' => 'The new teacher is not free on: :dates',

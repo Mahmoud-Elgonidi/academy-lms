@@ -13,13 +13,19 @@ use Modules\SharedKernel\Privacy\PersonalDataSource;
  * review and the pages recited), the mistakes notebook (the words their
  * teachers marked in their lessons' mushaf), the checks of their recited
  * homework (what was heard and how it went), their plans on the academy's
- * Quran programs and each lesson's grades (never the teacher's notes).
- * Erasing removes them all (a recording still waiting to be heard too,
- * after commit). Held whatever the academy's plan says, as it is the
+ * Quran programs and each lesson's grades (never the teacher's notes), their
+ * exams (never why one was cancelled) and certificates. Erasing removes them
+ * all (a recording still waiting to be heard too, after commit), but for a
+ * certificate the academy issued: it keeps its number and is revoked, so
+ * verifying it says so, and the exam behind it loses the examiner's words
+ * and the mistakes. Held whatever the academy's plan says, as it is the
  * learner's. The programs are the academy's and name nobody.
  */
 final class QuranData implements PersonalDataSource
 {
+    /** A certificate revoked because its holder's account was erased (never shown: verifying says only "revoked"). */
+    public const ERASED = 'erased';
+
     public function key(): string
     {
         return 'quran';
@@ -42,6 +48,13 @@ final class QuranData implements PersonalDataSource
             'quran_lessons' => DB::table('quran_lesson_results')->where('student_id', $userId)->orderBy('recorded_at')->get(['parts', 'advanced', 'recorded_at'])
                 ->map(fn (object $r) => ['parts' => array_map(fn (array $part) => array_diff_key($part, ['note' => true]), json_decode((string) $r->parts, true) ?: []),
                     'advanced' => (bool) $r->advanced, 'recorded_at' => $r->recorded_at])->all(),
+            'quran_exams' => DB::table('quran_exams as e')->join('quran_programs as g', fn ($j) => $j->on('g.academy_id', '=', 'e.academy_id')->on('g.id', '=', 'e.program_id'))
+                ->where('e.student_id', $userId)->orderBy('e.created_at')
+                ->get(['g.name as program', 'e.stop_kind', 'e.stop_number', 'e.status', 'e.grade', 'e.mistakes', 'e.result_note', 'e.retake_on', 'e.recorded_at', 'e.created_at'])
+                ->map(fn (object $e) => ['mistakes' => json_decode((string) $e->mistakes, true)] + (array) $e)->all(),
+            'quran_certificates' => DB::table('quran_certificates')->where('student_id', $userId)->orderBy('issued_at')
+                ->get(['number', 'code', 'portion', 'riwaya', 'grade', 'issued_at', 'revoked_at'])
+                ->map(fn (object $c) => ['portion' => json_decode((string) $c->portion, true)] + (array) $c)->all(),
             // A recited homework's check (for the teacher) is about the learner too: what was heard and how it went.
             'recitation_checks' => $this->checks($userId)->where('c.status', 'ready')
                 ->get(['h.title as homework', 'c.heard', 'c.result', 'c.checked_at'])
@@ -62,7 +75,16 @@ final class QuranData implements PersonalDataSource
             DB::afterCommit(fn () => Storage::disk(Recordings::DISK)->delete($waiting));
         }
 
+        // A certificate the academy issued keeps its number (revoked, so verifying it says so); the rest of the exams go.
+        $certified = DB::table('quran_certificates')->where('student_id', $userId)->pluck('exam_id')->all();
+        $revoked = DB::table('quran_certificates')->where('student_id', $userId)->whereNull('revoked_at')
+            ->update(['revoked_at' => now(), 'revoke_reason' => self::ERASED, 'updated_at' => now()]);
+        DB::table('quran_exams')->where('student_id', $userId)->update(['retake_of' => null]);
+        $exams = DB::table('quran_exams')->where('student_id', $userId)->whereNotIn('id', $certified)->delete();
+        DB::table('quran_exams')->whereIn('id', $certified)->update(['plan_id' => null, 'result_note' => null, 'mistakes' => null, 'cancel_reason' => null, 'updated_at' => now()]);
+
         return [
+            'quran_exams' => $exams + $revoked,
             'recitation_checks' => DB::table('submission_checks')->whereIn('id', $this->checks($userId)->select('c.id'))->delete(),
             'quran_lessons' => DB::table('quran_lesson_results')->where('student_id', $userId)->delete()
                 + DB::table('quran_plans')->where('student_id', $userId)->delete(),

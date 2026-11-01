@@ -22124,6 +22124,848 @@
                 }
             }
         },
+        "/v1/quran/examiner/exams": {
+            "get": {
+                "operationId": "quran.examiner.exams",
+                "description": "The exams booked with the person signed in as examiner (soonest first), with the academy's mistake types and\ngrades, and the last results they recorded.",
+                "summary": "The examiner's exams",
+                "tags": [
+                    "Quran"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "booked": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "array",
+                                                        "items": {}
+                                                    }
+                                                },
+                                                "recent": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "array",
+                                                        "items": {}
+                                                    }
+                                                },
+                                                "mistake_types": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "grades": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "required": [
+                                                "booked",
+                                                "recent",
+                                                "mistake_types",
+                                                "grades"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/quran/exams/{exam}/result": {
+            "post": {
+                "operationId": "quran.exams.record",
+                "description": "The examiner alone, from the assessment lesson's opening on, once: the mistakes by kind (mistakes: [{kind,\ncount}], else the words marked in the lesson's mushaf) and their own grade with a note when it differs. Passed\nat the program's pass grade; a fail needs note (what to work on) and retake_on (a day after today, at most 180\ndays ahead), and the retake is suggested for that day. A pass earns a certificate when the academy gives them.",
+                "summary": "Record an exam's result",
+                "tags": [
+                    "Quran"
+                ],
+                "parameters": [
+                    {
+                        "name": "exam",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Any unique string per action: a retry with it answers the first response instead of acting twice.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "mistakes": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "kind": {
+                                                    "type": "string",
+                                                    "maxLength": 30
+                                                },
+                                                "count": {
+                                                    "type": "integer",
+                                                    "minimum": 0,
+                                                    "maximum": 500
+                                                }
+                                            },
+                                            "required": [
+                                                "kind",
+                                                "count"
+                                            ]
+                                        },
+                                        "maxItems": 20
+                                    },
+                                    "grade": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "enum": [
+                                            "excellent",
+                                            "very_good",
+                                            "good",
+                                            "acceptable",
+                                            "repeat",
+                                            null
+                                        ]
+                                    },
+                                    "note": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 1000
+                                    },
+                                    "retake_on": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "An error",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/quran/exams": {
+            "get": {
+                "operationId": "quran.exams",
+                "description": "Every exam of the learner but the cancelled ones, newest first: the stop, whether it is waiting to be booked,\nbooked (with the lesson's time and the examiner), passed or failed (the grade, the mistakes by kind except in\nthe kids' look, the examiner's words and the day to try again).",
+                "summary": "A learner's Quran exams",
+                "tags": [
+                    "Quran"
+                ],
+                "parameters": [
+                    {
+                        "name": "learner_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 64
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "learner_id": {
+                                                    "type": "string"
+                                                },
+                                                "exams": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "array",
+                                                        "items": {}
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "learner_id",
+                                                "exams"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/quran/certificates": {
+            "get": {
+                "operationId": "quran.certificates",
+                "description": "shown is false (and certificates empty) while the academy keeps certificates from families. Each certificate:\nits number, title, portion, riwaya, grade, examiner and day, whether it was revoked, and while it stands its\npage (signed for this reader) and its verification code.",
+                "summary": "A learner's Quran certificates",
+                "tags": [
+                    "Quran"
+                ],
+                "parameters": [
+                    {
+                        "name": "learner_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 64
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "learner_id": {
+                                                    "type": "string"
+                                                },
+                                                "shown": {
+                                                    "type": "boolean"
+                                                },
+                                                "certificates": {
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "number": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "title": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "portion": {
+                                                                        "type": "object",
+                                                                        "description": "juz, surah, program or khatma, and the part's or surah's number",
+                                                                        "properties": {
+                                                                            "kind": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "number": {
+                                                                                "type": [
+                                                                                    "integer",
+                                                                                    "null"
+                                                                                ]
+                                                                            },
+                                                                            "label": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "kind",
+                                                                            "number",
+                                                                            "label"
+                                                                        ]
+                                                                    },
+                                                                    "riwaya": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "grade": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "grade_label": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "examiner": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ]
+                                                                    },
+                                                                    "issued_at": {
+                                                                        "type": [
+                                                                            "object",
+                                                                            "null"
+                                                                        ],
+                                                                        "properties": {
+                                                                            "utc": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "local": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "timezone": {
+                                                                                "type": "null"
+                                                                            },
+                                                                            "label": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "utc",
+                                                                            "local",
+                                                                            "timezone",
+                                                                            "label"
+                                                                        ]
+                                                                    },
+                                                                    "revoked": {
+                                                                        "type": "boolean"
+                                                                    },
+                                                                    "url": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "The certificate's page to read and print, signed for this reader (for 30 days); null once revoked."
+                                                                    },
+                                                                    "code": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "Its public verification code (XXXX-XXXX-XXXX-XXXX)."
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "id",
+                                                                    "number",
+                                                                    "title",
+                                                                    "portion",
+                                                                    "riwaya",
+                                                                    "grade",
+                                                                    "grade_label",
+                                                                    "examiner",
+                                                                    "issued_at",
+                                                                    "revoked",
+                                                                    "url",
+                                                                    "code"
+                                                                ]
+                                                            }
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "additionalProperties": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "number": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "title": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "portion": {
+                                                                        "type": "object",
+                                                                        "description": "juz, surah, program or khatma, and the part's or surah's number",
+                                                                        "properties": {
+                                                                            "kind": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "number": {
+                                                                                "type": [
+                                                                                    "integer",
+                                                                                    "null"
+                                                                                ]
+                                                                            },
+                                                                            "label": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "kind",
+                                                                            "number",
+                                                                            "label"
+                                                                        ]
+                                                                    },
+                                                                    "riwaya": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "grade": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "grade_label": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "examiner": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ]
+                                                                    },
+                                                                    "issued_at": {
+                                                                        "type": [
+                                                                            "object",
+                                                                            "null"
+                                                                        ],
+                                                                        "properties": {
+                                                                            "utc": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "local": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "timezone": {
+                                                                                "type": "null"
+                                                                            },
+                                                                            "label": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "utc",
+                                                                            "local",
+                                                                            "timezone",
+                                                                            "label"
+                                                                        ]
+                                                                    },
+                                                                    "revoked": {
+                                                                        "type": "boolean"
+                                                                    },
+                                                                    "url": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "The certificate's page to read and print, signed for this reader (for 30 days); null once revoked."
+                                                                    },
+                                                                    "code": {
+                                                                        "type": [
+                                                                            "string",
+                                                                            "null"
+                                                                        ],
+                                                                        "description": "Its public verification code (XXXX-XXXX-XXXX-XXXX)."
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "id",
+                                                                    "number",
+                                                                    "title",
+                                                                    "portion",
+                                                                    "riwaya",
+                                                                    "grade",
+                                                                    "grade_label",
+                                                                    "examiner",
+                                                                    "issued_at",
+                                                                    "revoked",
+                                                                    "url",
+                                                                    "code"
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "learner_id",
+                                                "shown",
+                                                "certificates"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/v1/quran/certificates/{code}": {
+            "get": {
+                "operationId": "quran.certificates.verify",
+                "description": "Anyone, by the code printed on it (any case, with or without dashes), on the academy's address: the\ncertificate's number, title, portion, riwaya, grade and day, the academy's name, the student's first name and\nlast initial, and whether it was revoked. 404 for a code this academy never issued.",
+                "summary": "Verify a Quran certificate",
+                "tags": [
+                    "Quran"
+                ],
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Academy",
+                        "in": "header",
+                        "description": "The academy's slug, until a token names it (a token for another academy is refused).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "noor"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "description": "ar or en: the language of labels and errors.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ar"
+                    },
+                    {
+                        "name": "X-Timezone",
+                        "in": "header",
+                        "description": "The device's IANA zone: times come back on its clock.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Asia/Riyadh"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "number": {
+                                                    "type": "string"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "portion": {
+                                                    "type": "object",
+                                                    "description": "juz, surah, program or khatma, and the part's or surah's number",
+                                                    "properties": {
+                                                        "kind": {
+                                                            "type": "string"
+                                                        },
+                                                        "number": {
+                                                            "type": [
+                                                                "integer",
+                                                                "null"
+                                                            ]
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "kind",
+                                                        "number",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "riwaya": {
+                                                    "type": "string"
+                                                },
+                                                "grade": {
+                                                    "type": "string",
+                                                    "description": "excellent, very_good, good or acceptable"
+                                                },
+                                                "grade_label": {
+                                                    "type": "string"
+                                                },
+                                                "issued_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                },
+                                                "academy": {
+                                                    "type": "string"
+                                                },
+                                                "student": {
+                                                    "type": "string",
+                                                    "description": "The student's first name and the initial of their last."
+                                                },
+                                                "revoked": {
+                                                    "type": "boolean"
+                                                },
+                                                "revoked_at": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "utc": {
+                                                            "type": "string"
+                                                        },
+                                                        "local": {
+                                                            "type": "string"
+                                                        },
+                                                        "timezone": {
+                                                            "type": "null"
+                                                        },
+                                                        "label": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "utc",
+                                                        "local",
+                                                        "timezone",
+                                                        "label"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "number",
+                                                "title",
+                                                "portion",
+                                                "riwaya",
+                                                "grade",
+                                                "grade_label",
+                                                "issued_at",
+                                                "academy",
+                                                "student",
+                                                "revoked",
+                                                "revoked_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
         "/v1/safeguarding/new": {
             "get": {
                 "operationId": "safeguarding.new",

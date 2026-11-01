@@ -80,7 +80,7 @@ arch('communication knows only identity\'s and platform\'s contracts: modules ca
     ]);
 
 arch('modules send messages only through communication\'s contracts')
-    ->expect(['Modules\People', 'Modules\Learning', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Messaging', 'Modules\Announcements', 'Modules\Site'])
+    ->expect(['Modules\People', 'Modules\Learning', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Messaging', 'Modules\Announcements', 'Modules\Site', 'Modules\Quran'])
     ->not->toUse([
         'Modules\Communication\Models', 'Modules\Communication\Actions', 'Modules\Communication\Channels',
         'Modules\Communication\Templates', 'Modules\Communication\Jobs', 'Modules\Communication\Domain',
@@ -272,17 +272,19 @@ arch('games sit on top: practice from curriculum and learning, the look from peo
     ->and(['Modules\Platform', 'Modules\Identity', 'Modules\Communication', 'Modules\Catalog', 'Modules\People', 'Modules\Curriculum', 'Modules\Credits', 'Modules\Enrollment', 'Modules\Billing', 'Modules\Scheduling', 'Modules\Learning', 'Modules\Classroom', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import', 'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging'])
     ->not->toUse('Modules\Games');
 
-arch('the Quran sits on top: learning, lessons, courses, people, the catalog and the classroom through their contracts and the tables it reads, and nothing depends on it')
+arch('the Quran sits on top: learning, lessons, courses, people, the catalog, the classroom, messages and branding through their contracts and the tables it reads, and nothing depends on it')
     ->expect('Modules\Quran')
     ->not->toUse([
-        'Modules\Platform', 'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\Identity\Preferences', 'Modules\Identity\Authorization',
+        'Modules\Platform\Models', 'Modules\Platform\Actions', 'Modules\Platform\Directory', 'Modules\Platform\Branding', 'Modules\Platform\Filament', 'Modules\Platform\Settings', 'Modules\Identity\Models', 'Modules\Identity\Actions', 'Modules\Identity\Preferences', 'Modules\Identity\Authorization',
         'Modules\People\Models', 'Modules\People\Actions', 'Modules\People\Filament', 'Modules\People\Checks',
         'Modules\Catalog\Models', 'Modules\Catalog\Actions', 'Modules\Catalog\Filament', 'Modules\Curriculum',
         'Modules\Learning\Actions', 'Modules\Learning\Queries', 'Modules\Learning\Domain', 'Modules\Learning\Filament', 'Modules\Learning\Http',
         'Modules\Enrollment\Models', 'Modules\Enrollment\Actions',
         'Modules\Scheduling\Domain', 'Modules\Scheduling\Actions', 'Modules\Scheduling\Queries', 'Modules\Scheduling\Filament',
         'Modules\Classroom\Models', 'Modules\Classroom\Actions', 'Modules\Classroom\Http', 'Modules\Classroom\Filament',
-        'Modules\Credits', 'Modules\Billing', 'Modules\Communication', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import',
+        'Modules\Communication\Models', 'Modules\Communication\Actions', 'Modules\Communication\Channels', 'Modules\Communication\Templates',
+        'Modules\Communication\Jobs', 'Modules\Communication\Domain', 'Modules\Communication\Filament',
+        'Modules\Credits', 'Modules\Billing', 'Modules\Crm', 'Modules\Evaluation', 'Modules\Payroll', 'Modules\Import',
         'Modules\Support', 'Modules\Privacy', 'Modules\Safeguarding', 'Modules\Messaging', 'Modules\Games', 'Modules\Announcements', 'Modules\Site', 'App',
     ])
     ->ignoring('Modules\Quran\Database')

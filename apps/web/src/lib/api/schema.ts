@@ -2239,6 +2239,116 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/quran/examiner/exams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The examiner's exams
+         * @description The exams booked with the person signed in as examiner (soonest first), with the academy's mistake types and
+         *     grades, and the last results they recorded.
+         */
+        get: operations["quran.examiner.exams"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/quran/exams/{exam}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record an exam's result
+         * @description The examiner alone, from the assessment lesson's opening on, once: the mistakes by kind (mistakes: [{kind,
+         *     count}], else the words marked in the lesson's mushaf) and their own grade with a note when it differs. Passed
+         *     at the program's pass grade; a fail needs note (what to work on) and retake_on (a day after today, at most 180
+         *     days ahead), and the retake is suggested for that day. A pass earns a certificate when the academy gives them.
+         */
+        post: operations["quran.exams.record"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/quran/exams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A learner's Quran exams
+         * @description Every exam of the learner but the cancelled ones, newest first: the stop, whether it is waiting to be booked,
+         *     booked (with the lesson's time and the examiner), passed or failed (the grade, the mistakes by kind except in
+         *     the kids' look, the examiner's words and the day to try again).
+         */
+        get: operations["quran.exams"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/quran/certificates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A learner's Quran certificates
+         * @description shown is false (and certificates empty) while the academy keeps certificates from families. Each certificate:
+         *     its number, title, portion, riwaya, grade, examiner and day, whether it was revoked, and while it stands its
+         *     page (signed for this reader) and its verification code.
+         */
+        get: operations["quran.certificates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/quran/certificates/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Verify a Quran certificate
+         * @description Anyone, by the code printed on it (any case, with or without dashes), on the academy's address: the
+         *     certificate's number, title, portion, riwaya, grade and day, the academy's name, the student's first name and
+         *     last initial, and whether it was revoked. 404 for a code this academy never issued.
+         */
+        get: operations["quran.certificates.verify"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/safeguarding/new": {
         parameters: {
             query?: never;
@@ -11409,6 +11519,327 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "quran.examiner.exams": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            booked: unknown[][];
+                            recent: unknown[][];
+                            mistake_types: unknown[];
+                            grades: unknown[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "quran.exams.record": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                exam: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    mistakes?: {
+                        kind: string;
+                        count: number;
+                    }[] | null;
+                    /** @enum {string|null} */
+                    grade?: "excellent" | "very_good" | "good" | "acceptable" | "repeat" | null;
+                    note?: string | null;
+                    /** Format: date */
+                    retake_on?: string | null;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: unknown[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            /** @description An error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "quran.exams": {
+        parameters: {
+            query?: {
+                learner_id?: string | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            learner_id: string;
+                            exams: unknown[][];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "quran.certificates": {
+        parameters: {
+            query?: {
+                learner_id?: string | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            learner_id: string;
+                            shown: boolean;
+                            certificates: {
+                                id: string;
+                                number: string;
+                                title: string;
+                                /** @description juz, surah, program or khatma, and the part's or surah's number */
+                                portion: {
+                                    kind: string;
+                                    number: number | null;
+                                    label: string;
+                                };
+                                riwaya: string;
+                                grade: string;
+                                grade_label: string;
+                                examiner: string | null;
+                                issued_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                revoked: boolean;
+                                /** @description The certificate's page to read and print, signed for this reader (for 30 days); null once revoked. */
+                                url: string | null;
+                                /** @description Its public verification code (XXXX-XXXX-XXXX-XXXX). */
+                                code: string | null;
+                            }[] | {
+                                [key: string]: {
+                                    id: string;
+                                    number: string;
+                                    title: string;
+                                    /** @description juz, surah, program or khatma, and the part's or surah's number */
+                                    portion: {
+                                        kind: string;
+                                        number: number | null;
+                                        label: string;
+                                    };
+                                    riwaya: string;
+                                    grade: string;
+                                    grade_label: string;
+                                    examiner: string | null;
+                                    issued_at: {
+                                        utc: string;
+                                        local: string;
+                                        timezone: null;
+                                        label: string;
+                                    } | null;
+                                    revoked: boolean;
+                                    /** @description The certificate's page to read and print, signed for this reader (for 30 days); null once revoked. */
+                                    url: string | null;
+                                    /** @description Its public verification code (XXXX-XXXX-XXXX-XXXX). */
+                                    code: string | null;
+                                };
+                            };
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "quran.certificates.verify": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            number: string;
+                            title: string;
+                            /** @description juz, surah, program or khatma, and the part's or surah's number */
+                            portion: {
+                                kind: string;
+                                number: number | null;
+                                label: string;
+                            };
+                            riwaya: string;
+                            /** @description excellent, very_good, good or acceptable */
+                            grade: string;
+                            grade_label: string;
+                            issued_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            academy: string;
+                            /** @description The student's first name and the initial of their last. */
+                            student: string;
+                            revoked: boolean;
+                            revoked_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                        };
+                    };
+                };
+            };
         };
     };
     "safeguarding.new": {

@@ -5,6 +5,8 @@ namespace Modules\Quran\Providers;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Modules\Communication\Contracts\NotificationLinks;
+use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Learning\Contracts\Events\HomeworkSubmitted;
 use Modules\Learning\Contracts\Events\SessionReportSubmitted;
 use Modules\Learning\Contracts\JourneyQuran;
@@ -12,14 +14,22 @@ use Modules\Learning\Contracts\LearningQuran;
 use Modules\Quran\Bridges\QuranJourney;
 use Modules\Quran\Bridges\QuranLearning;
 use Modules\Quran\Bridges\QuranLessons;
+use Modules\Quran\Certificates\CertificateLinks;
 use Modules\Quran\Console\QuranCommand;
 use Modules\Quran\Console\TryRecitationCommand;
 use Modules\Quran\Contracts\QuranApi;
+use Modules\Quran\Events\CertificateIssued;
+use Modules\Quran\Events\ExamBooked;
+use Modules\Quran\Events\ExamDecided;
+use Modules\Quran\Events\ExamSuggested;
+use Modules\Quran\Filament\Pages\HifzOverview;
 use Modules\Quran\Hifz\HifzFromLessons;
 use Modules\Quran\Listeners\QueueRecitationCheck;
+use Modules\Quran\Listeners\SendQuranNotifications;
 use Modules\Quran\Live\HifzChanged;
 use Modules\Quran\Live\LessonMushafChanged;
 use Modules\Quran\Live\MushafChanged;
+use Modules\Quran\Models\QuranCertificate;
 use Modules\Quran\Privacy\QuranData;
 use Modules\Quran\QuranService;
 use Modules\Quran\Texts\QuranFiles;
@@ -32,7 +42,8 @@ use Modules\SharedKernel\Text\QuranSource;
 /**
  * The Quran (docs/architecture/02, section 26): the platform's copy of its
  * text, the hifz map and its daily review, the shared mushaf and the mistakes
- * notebook, and the check of recited homework. It sits on top: nothing below
+ * notebook, the check of recited homework, programs and plans, exams and
+ * certificates. It sits on top: nothing below
  * depends on it, and it reaches Learning, Classroom and the journey only
  * through the contracts they own (LearningQuran, JourneyQuran, LessonQuran),
  * whose defaults do nothing. Switched on per academy by its SaaS plan
@@ -79,6 +90,22 @@ final class QuranServiceProvider extends ServiceProvider
         // A report on a lesson of the Quran reviews its pages on the learner's hifz map; recited homework gets its check.
         Event::listen(SessionReportSubmitted::class, [HifzFromLessons::class, 'reportSubmitted']);
         Event::listen(HomeworkSubmitted::class, QueueRecitationCheck::class);
+
+        // Exams and certificates: who examines hears of an exam due, the family and the examiner of a booking, the family of
+        // a result and of a certificate (with its page, signed for each reader).
+        SendQuranNotifications::templates($this->app->make(NotificationsApi::class));
+        Event::listen(ExamSuggested::class, [SendQuranNotifications::class, 'suggested']);
+        Event::listen(ExamBooked::class, [SendQuranNotifications::class, 'booked']);
+        Event::listen(ExamDecided::class, [SendQuranNotifications::class, 'decided']);
+        Event::listen(CertificateIssued::class, [SendQuranNotifications::class, 'issued']);
+        $links = $this->app->make(NotificationLinks::class);
+        $links->register('quran_exam', fn (array $a, string $panel) => $panel === 'academy' && HifzOverview::canAccess() ? HifzOverview::getUrl(panel: 'academy') : null);
+        $links->register('quran_certificate', fn (array $a, string $panel) => null);
+        $links->registerPersonal('quran_certificate', function (array $action, string $userId): ?string {
+            $certificate = isset($action['id']) ? QuranCertificate::query()->find($action['id']) : null;
+
+            return $certificate === null || $certificate->isRevoked() ? null : $this->app->make(CertificateLinks::class)->page($certificate, $userId);
+        });
 
         $signals = $this->app->make(LiveSignals::class);
         // The hifz map refreshes when a page is reviewed, marked or recited (the hifz triggers raise "hifz:{person}").

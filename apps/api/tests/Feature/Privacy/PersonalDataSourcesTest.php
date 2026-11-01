@@ -192,6 +192,18 @@ function pdsSeedEverySource(object $t): void
     DB::table('quran_lesson_results')->insert(['id' => $id(), 'session_id' => $lesson, 'student_id' => $s->id, 'plan_id' => $quranPlan, 'recorded_by' => $tr->id,
         'parts' => json_encode(['new' => ['ranges' => [['surah' => 114, 'from' => 1, 'to' => 4]], 'pages' => [604], 'mistakes' => ['wrong' => 1], 'computed' => 'good',
             'grade' => 'good', 'penalty' => 2.0, 'note' => 'Zubaida rushes the last verse']]), 'new_grade' => 'good', 'advanced' => true, 'recorded_at' => $now, 'created_at' => $now]);
+    // Exams: a fail (the examiner's words are the student's) and its retake, passed with a certificate that keeps its number.
+    $failed = $id();
+    DB::table('quran_exams')->insert(['id' => $failed, 'plan_id' => $quranPlan, 'program_id' => $program, 'student_id' => $s->id, 'enrollment_id' => $t->booked->enrollmentId,
+        'stop_kind' => 'surah', 'stop_number' => 114, 'status' => 'failed', 'examiner_id' => $tr->id, 'session_id' => $lesson, 'grade' => 'repeat', 'mistakes' => json_encode(['wrong' => 9]),
+        'result_note' => 'Zubaida skips verse 4', 'retake_on' => '2026-10-20', 'recorded_at' => $now, 'created_at' => $now, 'updated_at' => $now]);
+    $passed = $id();
+    DB::table('quran_exams')->insert(['id' => $passed, 'plan_id' => $quranPlan, 'program_id' => $program, 'student_id' => $s->id, 'enrollment_id' => $t->booked->enrollmentId,
+        'stop_kind' => 'surah', 'stop_number' => 114, 'status' => 'passed', 'retake_of' => $failed, 'examiner_id' => $tr->id, 'session_id' => $lesson, 'grade' => 'very_good',
+        'mistakes' => json_encode(['hesitation' => 2]), 'result_note' => 'Zubaida did well', 'recorded_at' => $now, 'created_at' => $now, 'updated_at' => $now]);
+    DB::table('quran_certificates')->insert(['id' => $id(), 'exam_id' => $passed, 'student_id' => $s->id, 'program_id' => $program, 'seq' => 1, 'number' => 'Q-2026-000001',
+        'code' => 'PDSCERTCODE23456', 'portion' => json_encode(['kind' => 'surah', 'number' => 114, 'program' => 'Juz Amma', 'track' => 'talqin', 'scope' => []]),
+        'riwaya' => 'hafs', 'grade' => 'very_good', 'examiner_id' => $tr->id, 'issued_at' => $now, 'created_at' => $now, 'updated_at' => $now]);
 
     // messaging: the student, the guardian and the teacher talk; the student typed a number.
     test()->actingAs($s);
@@ -243,7 +255,11 @@ it('shows each source in the copy of whoever it is about, with the files they ga
     $quran = pdsSources()['quran']->export($this->student->id)->data;
     expect($quran['quran_lessons'][0]['parts']['new']['grade'])->toBe('good')
         ->and($quran['quran_plans'][0]['program'])->toBe('Juz Amma')
-        ->and(json_encode($quran))->not->toContain('rushes');
+        ->and(json_encode($quran))->not->toContain('rushes')
+        // Their exams (the examiner's words included) and certificates.
+        ->and(array_column($quran['quran_exams'], 'status'))->toBe(['failed', 'passed'])
+        ->and($quran['quran_exams'][0]['result_note'])->toBe('Zubaida skips verse 4')
+        ->and($quran['quran_certificates'][0]['number'])->toBe('Q-2026-000001');
 
     // The ZIP: every part, and the files the person gave.
     foreach (['student' => [$this->handedIn], 'guardian' => [$this->receipt], 'teacher' => [$this->checkScan]] as $who => $files) {
@@ -372,7 +388,10 @@ function pdsSnapshot(array $people): array
             DB::table('weekly_digests')->where('student_id', $s)->count()],
         'quran' => DB::table('hifz_pages')->where('student_id', $s)->count() + DB::table('hifz_reviews')->where('student_id', $s)->count() + DB::table('hifz_recitations')->where('student_id', $s)->count()
             + DB::table('recitation_mistakes')->where('student_id', $s)->count() + DB::table('quran_plans')->where('student_id', $s)->count()
-            + DB::table('quran_lesson_results')->where('student_id', $s)->count(),
+            + DB::table('quran_lesson_results')->where('student_id', $s)->count()
+            // An exam's words and mistakes, and a certificate still standing (one issued keeps its number, revoked).
+            + DB::table('quran_exams')->where('student_id', $s)->where(fn ($q) => $q->whereNotNull('result_note')->orWhereNotNull('mistakes'))->count()
+            + DB::table('quran_certificates')->where('student_id', $s)->whereNull('revoked_at')->count(),
         'messaging' => DB::table('conversation_messages')->count(),
         'earnings' => DB::table('teacher_earnings')->where('teacher_id', $t)->count(),
         'safeguarding' => DB::table('safeguarding_concerns')->where('reporter_id', $s)->count(),

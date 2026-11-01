@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Modules\Learning\Contracts\LearningApi;
+use Modules\Quran\Actions\Exams\SuggestQuranExam;
 use Modules\Quran\Actions\Hifz\RecordHifzReview;
 use Modules\Quran\Contracts\DTOs\VerseRange;
 use Modules\Quran\Domain\Grading\Grades;
@@ -45,6 +46,10 @@ use Modules\Scheduling\Contracts\DTOs\LessonCard;
  *   it comes back; the reviews' by their grade. A page this lesson's report
  *   or marks already reviewed is left.
  *
+ * - Past a stop of the program (the end of a part or a surah, or the
+ *   program's end), each student whose new part passed has an exam
+ *   suggested while the academy holds exams (SuggestQuranExam).
+ *
  * One result per lesson and student, never changed. The lesson's teacher
  * (a substitute too) records it, from the room's opening on, unless it was
  * cancelled. A course of a Quran subject without a plan has nothing to record.
@@ -62,6 +67,7 @@ final class RecordQuranLesson
         private readonly RecordHifzReview $review,
         private readonly QuranArea $area,
         private readonly LearningApi $learning,
+        private readonly SuggestQuranExam $exams,
     ) {}
 
     /**
@@ -127,6 +133,8 @@ final class RecordQuranLesson
                 $this->hifz($result, $parts, $portion, $shape->memorizes(), $shape->passGrade, $card);
                 $results[] = $result;
             }
+            // Past a stop of the program (or its end), each student whose new part passed has an exam suggested.
+            $this->exams->afterLesson($plan, $portion, $results, $actorId);
 
             return $results;
         });

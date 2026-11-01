@@ -18,11 +18,13 @@ use Modules\Enrollment\Contracts\Events\EnrollmentResumed;
 use Modules\Identity\Contracts\Preferences\PreferenceDefinition;
 use Modules\Identity\Contracts\Preferences\UserPreferences;
 use Modules\Scheduling\Actions\BringExistingSchedule;
+use Modules\Scheduling\AssessmentService;
 use Modules\Scheduling\AttendanceService;
 use Modules\Scheduling\Console\FollowCourseDaysCommand;
 use Modules\Scheduling\Console\MaterializeSessionsCommand;
 use Modules\Scheduling\Console\PlanDstCommand;
 use Modules\Scheduling\Console\SweepSessionsCommand;
+use Modules\Scheduling\Contracts\AssessmentLessons;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\CourseGroups;
 use Modules\Scheduling\Contracts\Events\DstShiftDecided;
@@ -78,6 +80,7 @@ final class SchedulingServiceProvider extends ServiceProvider
         // The current academy's numbers, read each time (one process serves many academies).
         $this->app->bind(AttendancePolicy::class, fn () => PolicyVersion::settingsInForce()->attendance());
         $this->app->singleton(AttendanceApi::class, AttendanceService::class);
+        $this->app->bind(AssessmentLessons::class, AssessmentService::class);
         $this->app->bind(ScheduleImport::class, BringExistingSchedule::class);
         $this->app->bind(CourseGroups::class, CourseGroupsQuery::class);
         // Trial conversion is the CRM's to know; without it no teacher gets ahead in a trial search.

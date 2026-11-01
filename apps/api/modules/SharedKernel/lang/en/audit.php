@@ -167,6 +167,12 @@ return [
             'program_restored' => 'Quran program :name brought back',
             'plan_started' => 'A Quran plan started on :program',
             'plan_adjusted' => 'A Quran plan changed: :quran_fields',
+            'exam_suggested' => 'A Quran exam suggested (:stop_kind :stop_number)',
+            'exam_booked' => 'A Quran exam booked (:stop_kind :stop_number)',
+            'exam_recorded' => 'A Quran exam recorded (:stop_kind :stop_number): :outcome',
+            'exam_cancelled' => 'A Quran exam cancelled (:stop_kind :stop_number)',
+            'certificate_issued' => 'Quran certificate :number issued',
+            'certificate_revoked' => 'Quran certificate :number revoked',
         ],
         'games' => [
             'settings_saved' => "Changed the academy's games (:state, :minutes minutes a day)",
@@ -192,6 +198,8 @@ return [
         ],
     ],
     'values' => [
+        'stop_kind' => ['juz' => 'part', 'surah' => 'surah', 'program' => 'the program', 'khatma' => 'the whole Quran'],
+        'outcome' => ['passed' => 'passed', 'failed' => 'to try again'],
         'quran_fields' => [
             'hifz_daily_pages' => 'daily review', 'riwaya' => 'riwaya', 'mushaf' => 'mushaf', 'default_unit' => 'default unit',
             'default_new_amount' => 'default new amount', 'default_near_portions' => 'default near review', 'default_far_pages' => 'default far review',
