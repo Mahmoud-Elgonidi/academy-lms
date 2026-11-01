@@ -15,6 +15,12 @@ use Modules\Billing\Models\PaymentProof;
 use Modules\Classroom\Actions\SaveClassroomSettings;
 use Modules\Classroom\Actions\SaveMeetingLink;
 use Modules\Classroom\Models\Room;
+use Modules\Crm\Actions\AssessTrial;
+use Modules\Crm\Actions\CreateLead;
+use Modules\Crm\Actions\PrepareLearner;
+use Modules\Crm\Models\CrmSettings;
+use Modules\Crm\Models\LeadTrial;
+use Modules\Crm\Support\ReportLinks;
 use Modules\Games\Actions\SaveGameLimit;
 use Modules\Learning\Actions\AssignHomework;
 use Modules\Learning\Actions\SubmitHomework;
@@ -40,6 +46,7 @@ use Modules\Scheduling\Actions\RecordParticipantJoin;
 use Modules\Scheduling\Actions\ResolveReview;
 use Modules\Scheduling\Actions\ScheduleSession;
 use Modules\Scheduling\Contracts\DTOs\NewSession;
+use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
 use Modules\Scheduling\Domain\Enums\SessionEventKind;
 use Modules\Scheduling\Domain\Enums\SessionStatus;
 use Modules\Scheduling\Domain\Models\PolicyVersion;
@@ -228,6 +235,105 @@ final class E2eResetSeeder extends Seeder
             }
 
             return (string) json_encode($links);
+        });
+    }
+
+    /**
+     * After a free trial (docs/architecture/02, section 27, J2), for the portal's trial-report tests: a family new
+     * to this run (its own number) whose child (9, the kids' look) took a Tajweed trial with Sara two days ago, as
+     * the screens would have it (booked, both came, the attendance sweep closed it, Sara assessed it with what
+     * the family reads), so its report is ready with an open offer and a second free trial to book; and another
+     * family whose child missed a Quran trial yesterday, for the "book again" link. The academy gives both the
+     * offer (10%, 72 hours) and the second trial, as the demo does. Returns JSON: the links' paths (`report`,
+     * `report_en`, `rebook`), the report's trial (its lesson's id, `session`) and a token each for the first
+     * family's guardian and child (the portal's session cookie; neither has a password).
+     */
+    public static function trialAfter(): string
+    {
+        $academy = self::demo(app(TenantDirectory::class));
+
+        return app(TenantContext::class)->run($academy, function (): string {
+            $id = fn (string $email) => (string) DB::table('users')->where('email', $email)->value('id');
+            [$sara, $sales] = [$id('sara@demo.test'), $id('sales@demo.test') ?: $id('owner@demo.test')];
+            $subject = fn (string $en) => (string) DB::table('subjects')->where('name_en', $en)->value('id');
+            $settings = CrmSettings::query()->first() ?? new CrmSettings;
+            $settings->fill(['trial_offer' => true, 'trial_offer_percent' => 10, 'trial_offer_hours' => 72, 'second_trial' => true])->save();
+            SiteSettings::query()->where('trial_booking', '!=', 'family')->update(['trial_booking' => 'family']);
+            $number = substr((string) hrtime(true), -8);
+
+            $family = function (string $phone, string $parent, string $child, string $subjectId, int $daysAgo, bool $came) use ($sara, $sales): LeadTrial {
+                $lead = app(CreateLead::class)->handle(['contact_name' => $parent, 'phone_e164' => $phone, 'country' => 'EG', 'timezone' => 'Africa/Cairo',
+                    'for_child' => true, 'learner_name' => $child, 'learner_birth_year' => (int) CarbonImmutable::now()->year - 9, 'subject_id' => $subjectId,
+                    'source' => 'website', 'locale' => 'ar'], $sales);
+                $learner = app(PrepareLearner::class)->handle($lead, $sales);
+                // That day, else the days before it (a day fills up after many runs): any half hour Sara is free.
+                foreach (range($daysAgo, $daysAgo + 4) as $back) {
+                    $day = CarbonImmutable::now()->subDays($back)->setTimezone('Africa/Cairo')->toDateString();
+                    foreach (range(16, 45) as $half) {
+                        $at = CarbonImmutable::parse($day, 'Africa/Cairo')->addMinutes($half * 30)->utc();
+                        try {
+                            $session = app(ScheduleSession::class)->handle(new NewSession($sara, $learner, $subjectId, $at, 30, 'Africa/Cairo', 'trial', 'free'), $sales);
+                        } catch (ValidationException) {
+                            continue;
+                        }
+                        event(new TrialLessonBooked($session->academy_id, $session->id, $learner, $sara, $subjectId, $at->toIso8601ZuluString(), $sales));
+                        app(RecordParticipantJoin::class)->handle($session->refresh(), $sara, $at->subMinute());
+                        if ($came) {
+                            app(RecordParticipantJoin::class)->handle($session->refresh(), $learner, $at->addMinute());
+                        }
+                        app(ApplyAttendanceDeadlines::class)->handle($at->addMinutes(45));
+
+                        return LeadTrial::query()->with('lead')->where('session_id', $session->id)->firstOrFail();
+                    }
+                }
+                throw new RuntimeException('Sara has no free half hour in the days before for a trial.');
+            };
+
+            $trial = $family("+2010{$number}", 'أم ليان', 'ليان', $subject('Tajweed'), 2, true);
+            $plan = collect(app(BillingApi::class)->planOptions(30))->first(fn ($p) => $p->sessionsPerWeek === 2);
+            app(AssessTrial::class)->handle($trial, [
+                'level' => 'المستوى الأول: تقرأ قراءة صحيحة',
+                'plan_id' => $plan?->id,
+                'per_week' => 2,
+                'notes' => 'للأكاديمية: تحتاج معلّمة صبورة.',
+                'strengths' => "تقرأ بصوت واضح وثقة.\nتحفظ بسرعة، وتسأل حين لا تفهم.",
+                'to_work_on' => "أحكام النون الساكنة والتنوين.\nالمدود، وأن تتمهّل في آخر الآية.",
+                'family_note' => 'سعدت بالتعرف إلى ليان. أساسها جيد، وبحصتين في الأسبوع ستتقن أحكام المستوى الأول خلال شهرين.',
+            ], $sara);
+            $trial->refresh();
+            $missed = $family("+2011{$number}", 'أبو آدم', 'آدم', $subject('Quran memorisation'), 1, false);
+            if ($missed->refresh()->status !== 'missed' || $trial->status !== 'attended') {
+                throw new RuntimeException("The trials did not close as expected: {$trial->status}, {$missed->status}.");
+            }
+
+            $links = app(ReportLinks::class);
+            $path = fn (string $url) => (string) parse_url($url, PHP_URL_PATH);
+            // A personal access token as signing in would give one (the accounts have no password; the guard's own model, never Identity's internals).
+            $accounts = (string) config('auth.providers.users.model');
+            $token = fn (?string $user) => $accounts::query()->findOrFail($user)->createToken('e2e')->plainTextToken;
+
+            return (string) json_encode([
+                'report' => $path($links->report($trial, 'ar')),
+                'report_en' => $path($links->report($trial, 'en')),
+                'rebook' => $path($links->rebook($missed, 'ar')),
+                'session' => $trial->session_id,
+                'guardian_token' => $token($trial->lead->contact_id),
+                'learner_token' => $token($trial->lead->learner_id),
+            ]);
+        });
+    }
+
+    /** The offer of the trial with this lesson ends now (its moment just passed), as it would on its own after its hours. */
+    public static function endTrialOffer(string $sessionId): string
+    {
+        $academy = self::demo(app(TenantDirectory::class));
+
+        return app(TenantContext::class)->run($academy, function () use ($sessionId): string {
+            $coupon = (string) LeadTrial::query()->where('session_id', $sessionId)->value('offer_coupon_id');
+            $past = CarbonImmutable::now()->subMinute();
+            DB::table('coupons')->where('id', $coupon)->update(['expires_at' => $past]);
+
+            return $coupon;
         });
     }
 

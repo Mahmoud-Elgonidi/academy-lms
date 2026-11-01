@@ -181,3 +181,15 @@ describe('the academy\'s announcements', () => {
     expect(familyTargetOf('announcement', true, 'a1')).toBe('/family/notifications');
   });
 });
+
+describe('the free trials', () => {
+  it('are in every look’s menu, never a tab, and their messages open the trial', () => {
+    for (const stage of STAGES) {
+      const { all, tabs } = itemsOf(stage, seesMoney(stage), stage === 'classic');
+      expect(all.find((i) => i.key === 'trials')?.href).toBe('/family/trials');
+      expect(tabs.some((i) => i.key === 'trials')).toBe(false);
+    }
+    expect(familyTargetOf('family_trial', true, 'abc')).toBe('/family/trials/abc');
+    expect(familyTargetOf('family_trial', false)).toBe('/family/trials');
+  });
+});

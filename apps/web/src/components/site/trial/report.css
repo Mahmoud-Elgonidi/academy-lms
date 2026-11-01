@@ -1,0 +1,203 @@
+/*
+ * The family's report after a free trial: a report card (the level, the
+ * teacher's lists, their words), the recommended plan with the offer and its
+ * countdown, and the second trial. On the family's own link it sits in the
+ * academy page's look (.ls.ls-academy); in their account it takes the same
+ * brand tokens (--brand, --attention, --neutral) through .lr, so one set of
+ * parts reads the same in both. Whole without script or motion; with motion
+ * allowed, the parts come in one by one, the level's steps rise and a
+ * countdown number drops in when it changes (transform and opacity only).
+ */
+
+.lr {
+  --lr-main: var(--brand);
+  --lr-gold: var(--attention);
+  --lr-ink: color-mix(in oklab, var(--neutral) 30%, #1c1917);
+  --lr-muted: var(--neutral);
+  --lr-line: color-mix(in oklab, var(--neutral) 18%, white);
+  --lr-paper: color-mix(in oklab, var(--neutral) 4%, white);
+  --lr-deep: color-mix(in oklab, var(--brand) 55%, black);
+  display: grid;
+  gap: 1.1rem;
+  color: var(--lr-ink);
+  min-inline-size: 0;
+}
+.lr .lt-card { gap: 1.2rem; }
+.lr h2 { margin: 0; }
+.lr .lr-label, .lr-label {
+  display: flex; align-items: center; gap: 0.45rem; margin: 0; font-size: 0.82rem; font-weight: 800; letter-spacing: 0.01em;
+  color: var(--lr-muted); text-transform: none; line-height: 1.4;
+}
+.lr-label svg { inline-size: 1.05rem; block-size: 1.05rem; flex: none; }
+.lr-hint { margin: 0; font-size: 0.85rem; color: var(--lr-muted); line-height: 1.6; }
+.lr-chip {
+  justify-self: start; display: inline-flex; align-items: center; gap: 0.4rem; margin: 0; padding: 0.35rem 0.85rem; border-radius: 999px;
+  background: color-mix(in oklab, var(--lr-main) 9%, white); color: var(--lr-deep); font-weight: 700; font-size: 0.85rem;
+}
+.lr-chip svg { inline-size: 1rem; block-size: 1rem; }
+.lr-note {
+  display: flex; gap: 0.5rem; align-items: flex-start; margin: 0; padding: 0.75rem 0.95rem; border-radius: 0.95rem; line-height: 1.7; font-size: 0.92rem;
+  background: color-mix(in oklab, var(--lr-gold) 10%, white); border: 1px solid color-mix(in oklab, var(--lr-gold) 28%, white);
+}
+.lr-note[data-tone='done'] { background: color-mix(in oklab, var(--lr-main) 8%, white); border-color: color-mix(in oklab, var(--lr-main) 22%, white); }
+.lr-note svg { inline-size: 1.1rem; block-size: 1.1rem; flex: none; margin-block-start: 0.3rem; color: var(--lr-main); }
+
+/* ── The report card ────────────────────────────────────── */
+.lr-sheet { overflow: hidden; padding-block-start: 0; }
+.lr-hero {
+  margin-inline: calc(-1 * clamp(1.2rem, 4vw, 2rem)); padding: clamp(1.3rem, 4vw, 2rem) clamp(1.2rem, 4vw, 2rem) 1.2rem;
+  background:
+    radial-gradient(30rem 12rem at 100% 0, color-mix(in oklab, var(--lr-gold) 22%, transparent), transparent 70%),
+    linear-gradient(160deg, color-mix(in oklab, var(--lr-main) 14%, white), color-mix(in oklab, var(--lr-main) 4%, white));
+  border-block-end: 1px solid var(--lr-line);
+}
+.lr-hero h1 { margin: 0 0 0.8rem; font-size: clamp(1.45rem, 5vw, 2rem); font-weight: 800; line-height: 1.3; }
+.lr-facts { justify-content: flex-start; }
+.lr-facts li { background: white; }
+
+.lr-teacher { display: flex; gap: 0.9rem; align-items: flex-start; }
+.lr-avatar { flex: none; inline-size: 3.6rem; block-size: 3.6rem; border-radius: 1.1rem; object-fit: cover; border: 2px solid white; box-shadow: 0 10px 24px -16px var(--lr-deep); }
+.lr-avatar-initial { display: grid; place-items: center; background: var(--lr-main); color: white; font-weight: 800; font-size: 1.5rem; }
+.lr-teacher p { margin: 0; }
+.lr-teacher-name { font-weight: 800; font-size: 1.05rem; }
+.lr-teacher-role { font-size: 0.8rem; color: var(--lr-muted); font-weight: 600; }
+.lr-teacher-bio { margin-block-start: 0.35rem !important; font-size: 0.9rem; line-height: 1.7; color: var(--lr-ink); }
+
+/* The level: a badge with three rising steps, the teacher's words big beside it. */
+.lr-level {
+  display: flex; gap: 1rem; align-items: center; padding: 1rem 1.1rem; border-radius: 1.2rem;
+  background: linear-gradient(135deg, color-mix(in oklab, var(--lr-main) 10%, white), white);
+  border: 1.5px solid color-mix(in oklab, var(--lr-main) 26%, white);
+}
+.lr-level p { margin: 0; }
+.lr-level-steps {
+  flex: none; display: flex; align-items: flex-end; gap: 0.22rem; inline-size: 3.6rem; block-size: 3.6rem; padding: 0.6rem; border-radius: 50%;
+  background: var(--lr-main); box-shadow: 0 0 0 5px color-mix(in oklab, var(--lr-main) 16%, transparent);
+}
+.lr-level-steps i { flex: 1; border-radius: 0.2rem; background: white; transform-origin: bottom; }
+.lr-level-steps i:nth-child(1) { block-size: 35%; opacity: 0.65; }
+.lr-level-steps i:nth-child(2) { block-size: 65%; opacity: 0.8; }
+.lr-level-steps i:nth-child(3) { block-size: 100%; background: var(--lr-gold); }
+.lr-level-text { font-size: clamp(1.1rem, 3.6vw, 1.3rem); font-weight: 800; line-height: 1.45; margin-block: 0.15rem !important; }
+
+.lr-lists { display: grid; gap: 0.9rem; }
+@media (min-width: 640px) { .lr-lists { grid-template-columns: 1fr 1fr; } }
+.lr-list { padding: 1rem 1.05rem; border-radius: 1.2rem; border: 1px solid var(--lr-line); background: var(--lr-paper); display: grid; gap: 0.7rem; align-content: start; }
+.lr-list[data-tone='good'] .lr-label { color: var(--lr-deep); }
+.lr-list[data-tone='good'] .lr-label svg { color: var(--lr-main); }
+.lr-list[data-tone='grow'] .lr-label { color: color-mix(in oklab, var(--lr-gold) 45%, black); }
+.lr-list[data-tone='grow'] .lr-label svg { color: var(--lr-gold); }
+.lr-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
+.lr-list li { display: grid; grid-template-columns: 1.6rem 1fr; gap: 0.55rem; align-items: start; line-height: 1.7; font-size: 0.95rem; }
+.lr-list li svg { inline-size: 1.6rem; block-size: 1.6rem; padding: 0.3rem; border-radius: 50%; stroke-width: 2.6; }
+.lr-list[data-tone='good'] li svg { background: color-mix(in oklab, var(--lr-main) 14%, white); color: var(--lr-main); }
+.lr-list[data-tone='grow'] li svg { background: color-mix(in oklab, var(--lr-gold) 18%, white); color: color-mix(in oklab, var(--lr-gold) 50%, black); }
+[dir='rtl'] .lr-list li svg.ls-flip { transform: scaleX(-1); }
+
+.lr-quote { margin: 0; position: relative; padding: 1.1rem 1.2rem 1rem; border-radius: 1.2rem; background: white; border: 1px solid var(--lr-line); display: grid; gap: 0.5rem; }
+.lr-quote::before {
+  content: '”'; position: absolute; inset-block-start: -0.35rem; inset-inline-end: 0.9rem; font-size: 4.5rem; line-height: 1; font-weight: 800;
+  color: color-mix(in oklab, var(--lr-main) 22%, white); pointer-events: none;
+}
+[dir='rtl'] .lr-quote::before { content: '“'; }
+.lr-quote blockquote { margin: 0; }
+.lr-quote blockquote p { margin: 0; font-size: 1.04rem; line-height: 1.9; font-weight: 500; }
+.lr-quote-by { margin: 0; font-weight: 700; color: var(--lr-deep); font-size: 0.9rem; }
+
+/* A student's own report: bigger, rounder, no money. */
+.lr[data-look='student'] .lr-level-text { font-size: clamp(1.2rem, 4vw, 1.45rem); }
+.lr[data-look='student'] .lr-list li { font-size: 1rem; }
+
+/* ── The plan and the offer ─────────────────────────────── */
+.lr-plan { gap: 1rem; }
+.lr-plan-title { display: flex; align-items: center; gap: 0.5rem; font-size: clamp(1.15rem, 3.6vw, 1.35rem) !important; font-weight: 800; }
+.lr-plan-title svg { inline-size: 1.5rem; block-size: 1.5rem; color: var(--lr-main); flex: none; }
+.lr-plan-icon { inline-size: 3.2rem; block-size: 3.2rem; border-radius: 1rem; display: grid; place-items: center; background: var(--lr-main); color: white; }
+.lr-plan-icon svg { inline-size: 1.7rem; block-size: 1.7rem; stroke-width: 2.6; }
+.lr-plan[data-state='started'] h2 { font-size: clamp(1.2rem, 3.8vw, 1.45rem); font-weight: 800; }
+.lr-plan-name { margin: 0; font-weight: 800; font-size: 1.05rem; }
+.lr-shape { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 0.5rem; }
+.lr-shape li { display: flex; align-items: center; gap: 0.55rem; padding: 0.6rem 0.8rem; border-radius: 0.9rem; background: var(--lr-paper); border: 1px solid var(--lr-line); font-weight: 600; font-size: 0.92rem; }
+.lr-shape svg { inline-size: 1.15rem; block-size: 1.15rem; color: var(--lr-main); flex: none; }
+
+.lr-price { display: grid; gap: 0.1rem; }
+.lr-price b { font-size: clamp(1.7rem, 6vw, 2.3rem); font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.lr-price small { color: var(--lr-muted); font-weight: 600; font-size: 0.88rem; }
+
+.lr-offer {
+  position: relative; display: grid; gap: 0.55rem; padding: 1.1rem 1.15rem; border-radius: 1.3rem; overflow: hidden;
+  background:
+    radial-gradient(18rem 9rem at 0 0, color-mix(in oklab, var(--lr-gold) 30%, transparent), transparent 70%),
+    linear-gradient(150deg, color-mix(in oklab, var(--lr-gold) 14%, white), white 70%);
+  border: 1.5px solid color-mix(in oklab, var(--lr-gold) 45%, white);
+}
+.lr-offer p { margin: 0; line-height: 1.7; }
+.lr-offer[data-state='ended'] { background: var(--lr-paper); border-color: var(--lr-line); }
+.lr-offer-title { display: flex; align-items: center; gap: 0.45rem; font-weight: 800; }
+.lr-offer-title svg { inline-size: 1.2rem; block-size: 1.2rem; color: color-mix(in oklab, var(--lr-gold) 55%, black); flex: none; }
+.lr-offer[data-state='ended'] .lr-offer-title svg { color: var(--lr-muted); }
+.lr-offer-ribbon {
+  justify-self: start; padding: 0.3rem 0.85rem; border-radius: 999px; font-weight: 800; font-size: 0.95rem;
+  background: var(--lr-gold); color: color-mix(in oklab, var(--lr-gold) 18%, black); box-shadow: 0 8px 20px -12px var(--lr-gold);
+}
+.lr-price-offer b { color: var(--lr-deep); }
+.lr-was { color: var(--lr-muted); font-size: 0.92rem; }
+.lr-was s { text-decoration-thickness: 2px; text-decoration-color: color-mix(in oklab, var(--danger) 55%, transparent); }
+.lr-saving { justify-self: start; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.75rem; border-radius: 999px; background: color-mix(in oklab, var(--lr-main) 12%, white); color: var(--lr-deep); font-weight: 800; font-size: 0.9rem; }
+.lr-saving svg { inline-size: 1rem; block-size: 1rem; stroke-width: 3; }
+
+/* The offer beside its countdown on a wide screen; one under the other on a phone. */
+.lr-deal { display: grid; gap: 0.9rem; }
+@media (min-width: 760px) {
+  .lr-deal { grid-template-columns: 1.15fr 1fr; align-items: stretch; }
+  .lr-deal > .lr-hint { grid-column: 1 / -1; grid-row: 2; }
+  .lr-deal > .lr-count { align-content: center; }
+}
+
+/* The countdown: three numbers on cards, the end as the API wrote it beneath. */
+.lr-count { display: grid; gap: 0.55rem; padding: 0.9rem 1rem; border-radius: 1.1rem; background: var(--lr-deep); color: white; }
+.lr-count p { margin: 0; }
+.lr-count-head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; font-weight: 700; font-size: 0.9rem; }
+.lr-count-flag { padding: 0.15rem 0.6rem; border-radius: 999px; background: var(--lr-gold); color: color-mix(in oklab, var(--lr-gold) 18%, black); font-size: 0.78rem; }
+.lr-count-units { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.lr-count-units li { display: grid; justify-items: center; gap: 0.05rem; padding: 0.5rem 0.3rem; border-radius: 0.85rem; background: rgb(255 255 255 / 0.1); border: 1px solid rgb(255 255 255 / 0.14); overflow: hidden; }
+.lr-count-units b { display: block; font-size: clamp(1.6rem, 6.5vw, 2.1rem); font-weight: 800; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.lr-count-units small { font-size: 0.76rem; opacity: 0.85; font-weight: 600; }
+.lr-count-until { font-size: 0.82rem; opacity: 0.85; }
+.lr-count[data-urgency='last'] { background: color-mix(in oklab, var(--danger) 72%, black); }
+
+/* The way to start. */
+.lr-start { display: grid; gap: 0.6rem; padding-block-start: 1rem; border-block-start: 1px solid var(--lr-line); }
+.lr-start .ls-btn { justify-self: stretch; font-size: 1.05rem; padding-block: 0.95rem; }
+@media (min-width: 640px) { .lr-start .ls-btn { justify-self: start; } }
+.lr-start p { margin: 0; font-size: 0.88rem; color: var(--lr-muted); line-height: 1.7; }
+.lr-start .lt-link { justify-self: start; }
+.lr .ls-btn svg { inline-size: 1.15rem; block-size: 1.15rem; flex: none; }
+
+/* The second trial. */
+.lr-next-head { display: flex; gap: 0.9rem; align-items: flex-start; }
+.lr-next-head h2 { font-size: clamp(1.15rem, 3.6vw, 1.35rem) !important; font-weight: 800; margin: 0 0 0.2rem !important; }
+.lr-next-icon { flex: none; inline-size: 3rem; block-size: 3rem; border-radius: 1rem; display: grid; place-items: center; background: color-mix(in oklab, var(--lr-main) 12%, white); color: var(--lr-main); }
+.lr-next-icon svg { inline-size: 1.5rem; block-size: 1.5rem; }
+
+/* In the family's account: the same parts on the portal's paper, its own fonts. */
+.lr-embed { background: transparent; font-size: inherit; overflow: visible; }
+.lr-embed .lt-card { box-shadow: 0 18px 40px -36px var(--lr-deep); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lr > * { animation: lt-in 0.5s var(--ls-ease, ease-out) backwards; }
+  .lr > :nth-child(2) { animation-delay: 0.12s; }
+  .lr > :nth-child(3) { animation-delay: 0.24s; }
+  .lr-sheet > * { animation: lt-in 0.5s var(--ls-ease, ease-out) backwards; }
+  .lr-sheet > :nth-child(2) { animation-delay: 0.08s; }
+  .lr-sheet > :nth-child(3) { animation-delay: 0.16s; }
+  .lr-sheet > :nth-child(4) { animation-delay: 0.24s; }
+  .lr-sheet > :nth-child(5) { animation-delay: 0.32s; }
+  .lr-level-steps i { animation: lr-rise 0.6s var(--ls-spring, ease-out) backwards; }
+  .lr-level-steps i:nth-child(2) { animation-delay: 0.12s; }
+  .lr-level-steps i:nth-child(3) { animation-delay: 0.24s; }
+  .lr-count-units b { animation: lr-drop 0.35s var(--ls-ease, ease-out) backwards; }
+  .lr-offer-ribbon { animation: lt-pop 0.6s var(--ls-spring, ease-out) 0.3s backwards; }
+}
+@keyframes lr-rise { from { transform: scaleY(0.1); opacity: 0; } }
+@keyframes lr-drop { from { transform: translateY(-40%); opacity: 0; } }

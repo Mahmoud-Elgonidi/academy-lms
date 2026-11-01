@@ -142,3 +142,30 @@ export async function phoneCode(phone: string): Promise<string> {
   }
   throw new Error(`No code in the API's log for ${phone} (WHATSAPP_DRIVER=log?)`);
 }
+
+/* ── After the free trial (the report, the offer, the next trial) ── */
+
+/** A family new to this run after its free trial (E2eResetSeeder::trialAfter): its links' paths, the report's lesson, and its sign-ins. */
+export type TrialAfter = {
+  /** The report's link (Arabic, English): an assessed Tajweed trial two days ago, an open offer, a second trial to book. */
+  report: string;
+  report_en: string;
+  /** Another family's "book again" link after a Quran trial its child missed yesterday. */
+  rebook: string;
+  /** The report's trial (its lesson's id): /family/trials/{session}. */
+  session: string;
+  /** Session tokens (the portal's cookie) for the first family's guardian (classic) and child (the kids' look). */
+  guardian_token: string;
+  learner_token: string;
+};
+
+export function trialAfter(): TrialAfter {
+  const out = artisan(['tinker', '--execute=echo Database\\Seeders\\E2eResetSeeder::trialAfter();']);
+  return JSON.parse(out.trim().split('\n').pop() ?? '{}') as TrialAfter;
+}
+
+/** The offer of the trial with this lesson ends now, as it would on its own after its hours. */
+export function endTrialOffer(session: string): void {
+  if (!/^[0-9a-f-]{36}$/.test(session)) throw new Error(`Not a lesson: ${session}`);
+  artisan(['tinker', `--execute=echo Database\\Seeders\\E2eResetSeeder::endTrialOffer('${session}');`]);
+}

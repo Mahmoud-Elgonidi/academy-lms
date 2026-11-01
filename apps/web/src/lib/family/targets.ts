@@ -28,6 +28,9 @@ export function familyTargetOf(screen: string | null | undefined, money: boolean
       return '/family/tell-us';
     case 'conversation':
       return id ? `/family/messages/${id}` : '/family/messages';
+    case 'family_trial':
+      // A free trial's report, or booking one more after it.
+      return id ? `/family/trials/${id}` : '/family/trials';
     case 'announcement':
       // The academy's announcement is read in full where it is: the notifications.
       return '/family/notifications';

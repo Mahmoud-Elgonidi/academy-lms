@@ -106,7 +106,8 @@
       "journey": "Journey",
       "hifz": "Hifz map",
       "mistakes": "Mistakes notebook",
-      "quran": "Quran"
+      "quran": "Quran",
+      "trials": "Free trials"
     },
     "kids": {
       "menu": "Menu",
@@ -122,7 +123,8 @@
       "tellUs": "Tell a grown-up",
       "hifz": "My hifz map",
       "mistakes": "Words to practise",
-      "quran": "My Quran"
+      "quran": "My Quran",
+      "trials": "My free trial"
     },
     "middle": {
       "menu": "Menu",
@@ -140,7 +142,8 @@
       "tellUs": "Tell us",
       "hifz": "My hifz map",
       "mistakes": "My mistakes notebook",
-      "quran": "Quran"
+      "quran": "Quran",
+      "trials": "My free trials"
     },
     "teen": {
       "menu": "Menu",
@@ -158,7 +161,8 @@
       "tellUs": "Report a concern",
       "hifz": "Hifz",
       "mistakes": "My mistakes notebook",
-      "quran": "Quran"
+      "quran": "Quran",
+      "trials": "My free trials"
     },
     "help": "Help",
     "recordings": "My lesson recordings",
@@ -2014,6 +2018,166 @@
           "text": "The lesson may have started or ended, been cancelled, or the link is old. For anything about your lesson, message us on WhatsApp.",
           "again": "Ask for a free lesson"
         }
+      }
+    },
+    "report": {
+      "metaTitle": "Free trial report",
+      "kicker": "Free trial report",
+      "kickerSecond": "Second free trial report",
+      "title": "{learner} in {subject}",
+      "with": "with {teacher}",
+      "teacherRole": "The lesson's teacher",
+      "level": {
+        "title": "Level",
+        "hint": "As the teacher found it in the lesson"
+      },
+      "strengths": "Strengths",
+      "toWorkOn": "What we will work on",
+      "note": "The teacher's words",
+      "noteBy": "— {teacher}",
+      "nothingWritten": "The teacher wrote nothing more.",
+      "student": {
+        "title": "Your free trial report",
+        "level": "Your level now",
+        "strengths": "What you do well",
+        "toWorkOn": "What we will learn together",
+        "note": "A message from your teacher"
+      },
+      "plan": {
+        "title": "The plan the teacher recommends",
+        "perWeek": "{count, plural, one {# lesson} other {# lessons}} a week",
+        "minutes": "{minutes} minutes a lesson",
+        "block": "{count, plural, one {# lesson} other {# lessons}} in the plan",
+        "validity": "valid for {days, plural, one {# day} other {# days}}",
+        "private": "One-to-one lessons",
+        "group": "Group lessons",
+        "teacherPerWeek": "The teacher suggests {count, plural, one {# lesson} other {# lessons}} a week.",
+        "noPlan": "The teacher did not name a plan, and suggests {count, plural, one {# lesson} other {# lessons}} a week. Message us and we will suggest the right plan.",
+        "noPlanAtAll": "The teacher did not name a plan. Message us and we will suggest the right one.",
+        "withdrawn": "The plan the teacher recommended is no longer offered. Message us and we will suggest one that suits you.",
+        "noPrice": "The academy's team will tell you the plan's price in your region when you get in touch.",
+        "price": "Plan price",
+        "perLesson": "That is {price} a lesson",
+        "region": "Prices for {region}, in {currency}."
+      },
+      "offer": {
+        "badge": "{percent}% off",
+        "title": "A special offer after the free trial",
+        "lead": "{percent}% off the first payment if you start before the offer ends.",
+        "anyPlan": "The offer is good for any plan you choose: {percent}% off the first payment.",
+        "was": "instead of <s>{price}</s>",
+        "saving": "You save {price}",
+        "endsIn": "The offer ends in",
+        "until": "until {when}",
+        "units": {
+          "days": "{count, plural, one {day} other {days}}",
+          "hours": "{count, plural, one {hour} other {hours}}",
+          "minutes": "{count, plural, one {minute} other {minutes}}",
+          "seconds": "{count, plural, one {second} other {seconds}}"
+        },
+        "soon": "Last day",
+        "last": "Last hour",
+        "familyBigger": "Your family discount is bigger than this offer, so the bigger one applies (the two are never added together).",
+        "ended": {
+          "title": "The offer has ended",
+          "text": "The offer after the free trial has ended. The price below is the plan's usual price, and you are welcome to start any time."
+        },
+        "used": "The offer was used on your first payment. Thank you for your trust."
+      },
+      "started": {
+        "title": "{learner} has started with us",
+        "text": "{learner} is enrolled in {subject}, so there is no new offer. Lessons and payments are in your account.",
+        "status": {
+          "pending_payment": "Waiting for the first payment",
+          "active": "Lessons under way",
+          "paused": "Paused for now"
+        },
+        "open": "Sign in to your account",
+        "openFamily": "{learner}'s lessons"
+      },
+      "start": {
+        "cta": "Start with this plan",
+        "ctaAny": "Start now",
+        "how": "A WhatsApp chat with the academy opens with the plan's name, and the team completes the enrolment with you and counts the offer while it is open.",
+        "howNoOffer": "A WhatsApp chat with the academy opens with the plan's name, and the team completes the enrolment with you.",
+        "howSignIn": "Sign in with your mobile number, then write to the academy from Help to complete the enrolment.",
+        "howHelp": "Write to the academy from Help, and the team completes the enrolment with you and counts the offer while it is open.",
+        "words": "Hello, I would like {learner} to start {subject} with the plan \"{plan}\".",
+        "wordsAny": "Hello, I would like {learner} to start {subject}.",
+        "wordsOffer": " I received the offer after the free trial ({percent}% off).",
+        "signIn": "or sign in to your account",
+        "help": "Write to the academy"
+      },
+      "next": {
+        "title": "Not the right teacher?",
+        "text": "Book a free second trial with another teacher in {subject}.",
+        "until": "Open until {when}",
+        "cta": "Pick a time with another teacher",
+        "pickTitle": "Pick the second lesson's time",
+        "pickLead": "Other teachers' times in {subject} for {learner}.",
+        "close": "Not now",
+        "confirm": "Book this time",
+        "booking": "Booking…",
+        "empty": "No times with another teacher in these two weeks. Show the next weeks, or message us and we will find one.",
+        "notNow": "The second trial is not open now",
+        "booked": {
+          "title": "{name}'s second trial is booked",
+          "lead": "With another teacher, and free.",
+          "after": "After the lesson the new teacher writes a report you can read here."
+        },
+        "refusedTitle": "This time cannot be booked here",
+        "goneTitle": "This link no longer works"
+      },
+      "rebook": {
+        "metaTitle": "Book another time for the free trial",
+        "kicker": "A lesson that did not take place",
+        "title": "Book another time for {learner}",
+        "student_absent": "We missed {learner} in the {subject} lesson on {when}. No problem: pick another time that suits you.",
+        "teacher_absent": "We are sorry: {learner}'s {subject} lesson on {when} did not take place because the teacher could not attend.",
+        "academy": "We are sorry: the academy cancelled {learner}'s {subject} lesson on {when}.",
+        "noCount": "This lesson does not count as your free trial",
+        "pickLead": "Free times of {subject} teachers, on your clock.",
+        "empty": "No free times in these two weeks. Show the next weeks, or message us and we will find one.",
+        "cantTitle": "This link cannot book a time now",
+        "booked": {
+          "title": "{name}'s new time is booked"
+        }
+      },
+      "gone": {
+        "title": "We could not find this report",
+        "text": "The link may have arrived cut short. Open it again from our message, or sign in to your account to find the report there."
+      },
+      "rebookGone": {
+        "title": "This link no longer works",
+        "text": "The link may have arrived cut short, or a time was booked with it already. Open it again from our message, or message us."
+      },
+      "expired": {
+        "title": "This link has ended"
+      },
+      "signIn": "Sign in to your account",
+      "family": {
+        "lead": "{name}'s free trials and their reports.",
+        "leadStudent": "Your free trials and what the teacher wrote about them.",
+        "empty": "{name} has no free trials.",
+        "emptyStudent": "No free trials yet.",
+        "read": "Read the report",
+        "kind": {
+          "second": "Second trial",
+          "rebook": "New time"
+        },
+        "badge": {
+          "report": "Report ready",
+          "booked": "Coming up",
+          "waiting": "Report being written",
+          "missed": "The student did not come",
+          "teacherMissed": "The teacher did not come",
+          "cancelled": "Cancelled",
+          "academyCancelled": "Cancelled by the academy"
+        },
+        "nextSecond": "Book a second trial with another teacher",
+        "nextRebook": "Book another time",
+        "back": "All free trials",
+        "missedTitle": "The {subject} lesson did not take place"
       }
     }
   },

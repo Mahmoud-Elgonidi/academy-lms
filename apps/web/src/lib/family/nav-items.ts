@@ -22,6 +22,8 @@ export type NavItem = { href: string; key: string; icon: IconName; also?: string
  * their own for students, and open from the journey for everyone. While
  * the academy's plan has the Quran (`quran`), everyone has its page (the
  * plan, the hifz map, exams, certificates) after messages, so the tabs stay.
+ * Everyone has their free trials (the teacher's reports after them) after
+ * the notifications, never as a tab.
  */
 export function itemsOf(stage: Stage, money: boolean, guardian = false, quran = false): { all: NavItem[]; tabs: NavItem[] } {
   const lessons: NavItem = { href: '/family/lessons', key: 'lessons', icon: 'calendar' };
@@ -44,20 +46,22 @@ export function itemsOf(stage: Stage, money: boolean, guardian = false, quran = 
   const account: NavItem[] = stage === 'kids' ? [] : [{ href: '/family/account', key: 'account', icon: 'lock' }];
   // Telling the academy's safeguarding leads that something is wrong: everyone, in their own words.
   const tellUs: NavItem = { href: '/family/tell-us', key: 'tellUs', icon: 'hand' };
+  // The learner's free trials and their reports (docs/architecture/02, section 27, J2): everyone; prices, the offer and booking in the classic look alone.
+  const trials: NavItem = { href: '/family/trials', key: 'trials', icon: 'spark' };
   // My data (a copy, erasure): adults in the classic look.
   const myData: NavItem = { href: '/family/my-data', key: 'myData', icon: 'file' };
 
   if (stage === 'classic') {
     return {
-      all: [home, lessons, journey, messages, ...quranItems, homework, ...pay, inbox, ...recordings, ...privacy, ...help, tellUs, ...account, myData],
+      all: [home, lessons, journey, messages, ...quranItems, homework, ...pay, inbox, trials, ...recordings, ...privacy, ...help, tellUs, ...account, myData],
       tabs: [home, lessons, journey, ...(money ? pay : [homework]), more],
     };
   }
   if (stage === 'teen') {
-    return { all: [home, lessons, homework, progress, messages, ...quranItems, inbox, ...recordings, ...help, tellUs, ...account], tabs: [home, lessons, homework, progress, more] };
+    return { all: [home, lessons, homework, progress, messages, ...quranItems, inbox, trials, ...recordings, ...help, tellUs, ...account], tabs: [home, lessons, homework, progress, more] };
   }
   // Kids and middle school: their journey, lessons and teachers on the bar; homework (also the journey's missions) under more.
-  return { all: [home, lessons, messages, ...quranItems, homework, progress, inbox, ...recordings, ...help, tellUs, ...account], tabs: [home, lessons, messages, more] };
+  return { all: [home, lessons, messages, ...quranItems, homework, progress, inbox, trials, ...recordings, ...help, tellUs, ...account], tabs: [home, lessons, messages, more] };
 }
 
 /** Whether a place is the page at this path (a student's home also on /family/journey). */

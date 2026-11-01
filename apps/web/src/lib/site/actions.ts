@@ -1,5 +1,6 @@
 'use server';
 
+import { refresh } from 'next/cache';
 import { read, send } from '@/lib/api/server';
 import type { LocalTime } from '@/lib/time';
 import { birthYearFor, normalizePhone, stillOffered, type TrialDraft } from './trial';
@@ -259,4 +260,38 @@ export async function cancelTrial(token: string, note: string, key: string): Pro
     body: note.trim() ? { note: note.trim().slice(0, 500) } : {},
     idempotencyKey: key,
   }));
+}
+
+/* ── After the free trial (docs/architecture/02, section 27, J2) ─────────── */
+
+/**
+ * Where one more free trial is booked from: the report's link (the second
+ * trial with another teacher), the "book again" link (after a trial that did
+ * not take place), or a signed-in family's own trial (either, by its lesson).
+ */
+export type NextTrialSource = { from: 'report' | 'rebook'; token: string } | { from: 'family'; session: string };
+
+/** The times one more free trial may be booked at, on the family's clock, soonest first. */
+export async function nextTrialTimes(source: NextTrialSource, from: string | null, timezone: string): Promise<Answer<LocalTime[]>> {
+  const query = { from: from ?? undefined, timezone: timezone || undefined };
+  const done = source.from === 'family'
+    ? await read<{ data: { starts_at: LocalTime }[] }>('/v1/family/trials/{session}/slots', { params: { session: source.session }, query })
+    : source.from === 'report'
+      ? await read<{ data: { starts_at: LocalTime }[] }>('/v1/site/trials/report/{token}/slots', { params: { token: source.token }, query })
+      : await read<{ data: { starts_at: LocalTime }[] }>('/v1/site/trials/rebook/{token}/slots', { params: { token: source.token }, query });
+  if (!done.ok) return { ok: false, refusal: refusalOf(done.problem) };
+  return { ok: true, data: done.data.data.map((s) => s.starts_at).filter((t): t is LocalTime => Boolean(t)) };
+}
+
+/** Books one more free trial at a time from the list (no code: the link went to the family's number, or they are signed in). */
+export async function bookNextTrial(source: NextTrialSource, utc: string, timezone: string, key: string): Promise<Answer<BookedTrial>> {
+  const body = { starts_at: utc, ...(timezone ? { timezone } : {}) };
+  if (source.from === 'family') {
+    const done = answered<BookedTrial>(await send('post', '/v1/family/trials/{session}/book', { params: { session: source.session }, body: { starts_at: utc }, idempotencyKey: key }));
+    if (done.ok) refresh();
+    return done;
+  }
+  return answered<BookedTrial>(source.from === 'report'
+    ? await send('post', '/v1/site/trials/report/{token}/book', { params: { token: source.token }, body, idempotencyKey: key })
+    : await send('post', '/v1/site/trials/rebook/{token}/book', { params: { token: source.token }, body, idempotencyKey: key }));
 }
