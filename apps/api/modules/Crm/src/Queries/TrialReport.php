@@ -12,6 +12,7 @@ use Modules\Crm\Models\LeadTrial;
 use Modules\Crm\Support\NextTrials;
 use Modules\Crm\Support\TrialFacts;
 use Modules\People\Contracts\PeopleApi;
+use Modules\Scheduling\Contracts\OwnCourseStart;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Time\LocalTimePresenter;
 
@@ -42,6 +43,7 @@ final class TrialReport
         private readonly TrialFacts $facts,
         private readonly NextTrials $next,
         private readonly LocalTimePresenter $time,
+        private readonly OwnCourseStart $start,
     ) {}
 
     public static function ready(LeadTrial $trial): bool
@@ -53,9 +55,10 @@ final class TrialReport
 
     /**
      * @param  bool  $classic  the classic look: prices, the offer and the second trial
+     * @param  ?string  $viewerId  who reads it (signed in); the family's contact through its link
      * @return array<string, mixed>
      */
-    public function present(LeadTrial $trial, bool $classic, ?string $timezone = null, ?CarbonImmutable $now = null): array
+    public function present(LeadTrial $trial, bool $classic, ?string $timezone = null, ?CarbonImmutable $now = null, ?string $viewerId = null): array
     {
         $now ??= CarbonImmutable::now();
         $lead = $trial->lead;
@@ -114,6 +117,12 @@ final class TrialReport
             'offer' => $offer,
             /** The free second trial with another teacher, when the academy gives one (classic look only). */
             'next_trial' => $classic ? $this->secondTrial($trial, $timezone, $now) : null,
+            /**
+             * «ابدأ بهذه الباقة» (J3, classic look only): whether the family may start the course on its own now, and what to open
+             * the start flow with (GET family/start/options, then slots and POST family/courses): the recommended plan while it is
+             * offered, the trial's teacher while they still take the learner, the subject and the learner.
+             */
+            'start' => $classic && $lead->learner_id !== null && $subjectId !== '' ? $this->start($trial, $lead->learner_id, $subjectId, $plan, $viewerId ?? $lead->contact_id ?? $lead->learner_id) : null,
         ];
     }
 
@@ -165,6 +174,29 @@ final class TrialReport
             'saving' => $saving === null || $with === null ? null : self::money(Money::of($saving, $with->total->currency), $locale),
             /** The family discount is bigger than the offer, so it applies instead (they never add up). */
             'family_discount_bigger' => $saving === 0 && $without !== null && self::discounted($without),
+        ];
+    }
+
+    /** @return array{available: bool, why_not: ?string, reason: ?string, learner_id: string, subject_id: string, plan_id: ?string, teacher_id: ?string, enrollment_id: ?string} */
+    private function start(LeadTrial $trial, string $learnerId, string $subjectId, ?PlanOption $plan, string $viewerId): array
+    {
+        $check = $this->start->check($viewerId, $learnerId, $subjectId, $trial->teacher_id);
+
+        return [
+            /** Whether the family may start the course on its own now. */
+            'available' => $check->available,
+            /** Why not, in the family's words (what to do instead): the academy enrols itself, a course already began, ... */
+            'why_not' => $check->whyNot,
+            /** self_serve_off, has_course, course_pending_own, course_pending, course_paused, course_ending (null when available). */
+            'reason' => $check->reason,
+            'learner_id' => $learnerId,
+            'subject_id' => $subjectId,
+            /** The recommended plan, while the academy offers it. */
+            'plan_id' => $plan?->id,
+            /** The trial's teacher, while they still take the learner (else the family chooses another). */
+            'teacher_id' => $check->teacherId,
+            /** The learner's course in the subject, when that is why not. */
+            'enrollment_id' => $check->enrollmentId,
         ];
     }
 

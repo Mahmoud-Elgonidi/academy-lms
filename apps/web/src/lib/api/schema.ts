@@ -70,6 +70,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/family/invoices/{invoice}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One of my invoices, before or after paying
+         * @description What it is for and what came off it, line by line, the VAT, what is left, the coupon on it and whether one can be typed
+         *     now (why not in my words), its signed pages, and the latest online payment on it (for the portal's page after the
+         *     gateway: paid, open while the gateway confirms, failed or expired). A child who does not pay sees no money.
+         */
+        get: operations["family.invoices.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/invoices/{invoice}/coupon": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Put a coupon on my invoice before paying
+         * @description Only a course's own block invoice, issued, with nothing paid, no proof waiting and no online payment open (coupon_entry
+         *     says so). The invoice is issued again with the discount: the answer is the new invoice (a new id and number; the old one
+         *     is void). 422 with why not, in my words. Send an Idempotency-Key.
+         */
+        post: operations["family.invoices.coupon"];
+        /**
+         * Take a coupon off my invoice before paying
+         * @description The trial's offer stays (422). The invoice is issued again without it: the answer is the new invoice. Send an Idempotency-Key.
+         */
+        delete: operations["family.invoices.coupon.remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/family/invoices/{invoice}/checkout": {
         parameters: {
             query?: never;
@@ -3060,6 +3108,105 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/family/start/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What a family may start
+         * @description The viewer's learners (with a child still waiting for a guardian's consent marked), the subjects the academy teaches
+         *     (each with the learner's course in it, if any, and why a new one cannot start), the plans priced in the payer's region
+         *     (private and group, their shape, the block's and a lesson's price, and what the first invoice would come to for this
+         *     learner: the sibling discount or the trial's offer, the bigger), and, for a subject, the teachers who take the learner
+         *     (the trial's teacher first) and the trial's offer. self_serve false: the academy enrols itself (why_off says how to
+         *     reach it). 403 start-refused (family_only) outside the classic look.
+         */
+        get: operations["family.start.options"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/start/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A teacher's weekly times, or the open groups, for a plan
+         * @description A private plan (teacher_id required): the teacher's weekly times on the viewer's clock, each free in all of the first
+         *     four weeks, on whole and half hours, never when the learner already has a lesson, from the first day the family may
+         *     start (time to pay before an unpaid lesson would be cancelled), with each time's first lesson and a suggested pattern
+         *     of per_week days. Choose per_week of them (one a day) and send their keys. A group plan: the open groups of its shape
+         *     with a seat for the learner (teacher_id narrows them). 422 start-refused (teacher_unavailable, no_plan, ...).
+         */
+        get: operations["family.start.slots"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start a course
+         * @description The plan at the block price the family saw (price_minor and currency, from the options: a different price today
+         *     refuses with price_changed and the new price), and either teacher_id with times (the keys of per_week weekly times,
+         *     one a day) or group_id. Makes the course, its lessons (waiting unpaid until the invoice is paid) and the first invoice
+         *     (the trial's offer on it by itself when open and bigger than the sibling discount), or joins the learner's shared
+         *     package (no invoice). Answers the course, the invoice with its lines, discounts and VAT, the pay link, and until when
+         *     to pay. One start at a time per learner. Refusals: 409 start-refused (time_taken with the fresh times,
+         *     price_changed, has_course and the course's pending ones with its enrollment_id), 409 guardian-consent-needed
+         *     (student_id: agree through POST family/consents/{student} and send again), 422 start-refused (anything else), 403
+         *     outside the classic look or while the academy enrols itself. Send an Idempotency-Key.
+         */
+        post: operations["family.courses.start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/family/courses/{enrollment}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Call off a course I started, before paying
+         * @description Only its payer, while it waits for its first payment and no money may be on its way (nothing paid, no proof waiting,
+         *     no payment page open). Its lessons are cancelled with nothing charged, its invoice is voided and the teacher's times
+         *     are free again; the learner may start again. 409 start-refused with why not. Send an Idempotency-Key.
+         */
+        post: operations["family.courses.cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/site": {
         parameters: {
             query?: never;
@@ -3855,6 +4002,330 @@ export interface operations {
             403: components["responses"]["AccessDeniedHttpException"];
         };
     };
+    "family.invoices.show": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path: {
+                invoice: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            number: string;
+                            /** @description issued, partly_paid, overdue, paid or void */
+                            status: string;
+                            currency: string;
+                            lines: {
+                                /** @description block (the plan's lessons), extra (extra lessons) or discount (the sibling discount, a coupon, the trial's offer: a negative amount) */
+                                kind: string;
+                                description: string;
+                                quantity: string;
+                                amount_minor: string;
+                                amount: string;
+                            }[];
+                            /** @description What the lines come to before VAT is added (with prices_include_tax, the VAT is inside it). */
+                            subtotal: {
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            vat: {
+                                /** @description The VAT rate in percent (15 = 15%); 0 when the academy adds none. */
+                                rate: number;
+                                /** @description The prices already hold the VAT (the Gulf's way); else it is added. */
+                                included: boolean;
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            total: {
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            paid: {
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            outstanding: {
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            due_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description The coupon on it (personal: the trial's offer, which stays on). */
+                            coupon: {
+                                code: string;
+                                personal: string;
+                            } | null;
+                            /** @description Whether a coupon can be typed or taken off now; why not in the payer's words when not. */
+                            coupon_entry: {
+                                open: boolean;
+                                why_not: string | null;
+                            };
+                            /** @description The academy's signed pay page for it (no sign-in needed). */
+                            pay_url: string;
+                            /** @description The invoice to read and print. */
+                            document_url: string;
+                        };
+                        /** @description The latest online payment I began on it: paid, open (the gateway is confirming), failed, expired or refund_due; null when none. */
+                        checkout: {
+                            id: string;
+                            status: string;
+                            /** @description Where it stands, in a sentence. */
+                            text: string;
+                            hint: string;
+                        } | null;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "family.invoices.coupon": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                invoice: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    code: string;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            number: string;
+                            /** @description issued, partly_paid, overdue, paid or void */
+                            status: string;
+                            currency: string;
+                            lines: {
+                                /** @description block (the plan's lessons), extra (extra lessons) or discount (the sibling discount, a coupon, the trial's offer: a negative amount) */
+                                kind: string;
+                                description: string;
+                                quantity: string;
+                                amount_minor: string;
+                                amount: string;
+                            }[];
+                            /** @description What the lines come to before VAT is added (with prices_include_tax, the VAT is inside it). */
+                            subtotal: {
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            vat: {
+                                /** @description The VAT rate in percent (15 = 15%); 0 when the academy adds none. */
+                                rate: number;
+                                /** @description The prices already hold the VAT (the Gulf's way); else it is added. */
+                                included: boolean;
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            total: {
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            paid: {
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            outstanding: {
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            due_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description The coupon on it (personal: the trial's offer, which stays on). */
+                            coupon: {
+                                code: string;
+                                personal: string;
+                            } | null;
+                            /** @description Whether a coupon can be typed or taken off now; why not in the payer's words when not. */
+                            coupon_entry: {
+                                open: boolean;
+                                why_not: string | null;
+                            };
+                            /** @description The academy's signed pay page for it (no sign-in needed). */
+                            pay_url: string;
+                            /** @description The invoice to read and print. */
+                            document_url: string;
+                        };
+                        message: string;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.invoices.coupon.remove": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                invoice: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            number: string;
+                            /** @description issued, partly_paid, overdue, paid or void */
+                            status: string;
+                            currency: string;
+                            lines: {
+                                /** @description block (the plan's lessons), extra (extra lessons) or discount (the sibling discount, a coupon, the trial's offer: a negative amount) */
+                                kind: string;
+                                description: string;
+                                quantity: string;
+                                amount_minor: string;
+                                amount: string;
+                            }[];
+                            /** @description What the lines come to before VAT is added (with prices_include_tax, the VAT is inside it). */
+                            subtotal: {
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            vat: {
+                                /** @description The VAT rate in percent (15 = 15%); 0 when the academy adds none. */
+                                rate: number;
+                                /** @description The prices already hold the VAT (the Gulf's way); else it is added. */
+                                included: boolean;
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            total: {
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            paid: {
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            outstanding: {
+                                amount_minor: number;
+                                amount: string;
+                            };
+                            due_at: {
+                                utc: string;
+                                local: string;
+                                timezone: null;
+                                label: string;
+                            } | null;
+                            /** @description The coupon on it (personal: the trial's offer, which stays on). */
+                            coupon: {
+                                code: string;
+                                personal: string;
+                            } | null;
+                            /** @description Whether a coupon can be typed or taken off now; why not in the payer's words when not. */
+                            coupon_entry: {
+                                open: boolean;
+                                why_not: string | null;
+                            };
+                            /** @description The academy's signed pay page for it (no sign-in needed). */
+                            pay_url: string;
+                            /** @description The invoice to read and print. */
+                            document_url: string;
+                        };
+                        message: string;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
     "family.invoices.checkout": {
         parameters: {
             query?: never;
@@ -3889,6 +4360,11 @@ export interface operations {
             content: {
                 "application/json": {
                     account_id?: string | null;
+                    /**
+                     * @description Where the payer comes back after the gateway: portal or app (the portal's /{locale}/pay/return, which opens the app); none: the academy's pay page.
+                     * @enum {string|null}
+                     */
+                    return?: "portal" | "app" | null;
                 };
             };
         };
@@ -5421,6 +5897,27 @@ export interface operations {
                                     label: string;
                                 } | null;
                             } | null;
+                            /**
+                             * @description «ابدأ بهذه الباقة» (J3, classic look only): whether the family may start the course on its own now, and what to open
+                             *     the start flow with (GET family/start/options, then slots and POST family/courses): the recommended plan while it is
+                             *     offered, the trial's teacher while they still take the learner, the subject and the learner.
+                             */
+                            start: {
+                                /** @description Whether the family may start the course on its own now. */
+                                available: boolean;
+                                /** @description Why not, in the family's words (what to do instead): the academy enrols itself, a course already began, ... */
+                                why_not: string | null;
+                                /** @description self_serve_off, has_course, course_pending_own, course_pending, course_paused, course_ending (null when available). */
+                                reason: string | null;
+                                learner_id: string | null;
+                                subject_id: string;
+                                /** @description The recommended plan, while the academy offers it. */
+                                plan_id: string;
+                                /** @description The trial's teacher, while they still take the learner (else the family chooses another). */
+                                teacher_id: string | null;
+                                /** @description The learner's course in the subject, when that is why not. */
+                                enrollment_id: string | null;
+                            } | null;
                         };
                     };
                 };
@@ -5921,6 +6418,27 @@ export interface operations {
                                     timezone: string;
                                     label: string;
                                 } | null;
+                            } | null;
+                            /**
+                             * @description «ابدأ بهذه الباقة» (J3, classic look only): whether the family may start the course on its own now, and what to open
+                             *     the start flow with (GET family/start/options, then slots and POST family/courses): the recommended plan while it is
+                             *     offered, the trial's teacher while they still take the learner, the subject and the learner.
+                             */
+                            start: {
+                                /** @description Whether the family may start the course on its own now. */
+                                available: boolean;
+                                /** @description Why not, in the family's words (what to do instead): the academy enrols itself, a course already began, ... */
+                                why_not: string | null;
+                                /** @description self_serve_off, has_course, course_pending_own, course_pending, course_paused, course_ending (null when available). */
+                                reason: string | null;
+                                learner_id: string | null;
+                                subject_id: string;
+                                /** @description The recommended plan, while the academy offers it. */
+                                plan_id: string;
+                                /** @description The trial's teacher, while they still take the learner (else the family chooses another). */
+                                teacher_id: string | null;
+                                /** @description The learner's course in the subject, when that is why not. */
+                                enrollment_id: string | null;
                             } | null;
                         };
                     };
@@ -14985,6 +15503,531 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.start.options": {
+        parameters: {
+            query?: {
+                learner_id?: string | null;
+                subject_id?: string | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @description Whether families start courses on their own here. */
+                            self_serve: boolean;
+                            /** @description Why not and how to reach the academy, when the academy enrols itself (then the lists are empty). */
+                            why_off: string;
+                            learner: {
+                                id: string;
+                                name: string;
+                            };
+                            learners: {
+                                id: string;
+                                name: string;
+                                /** @description The viewer themselves (an adult studying for themselves). */
+                                is_self: boolean;
+                                /** @description A child whose account waits for a guardian's consent: agree first (GET/POST family/consents), then start. */
+                                consent_waiting: boolean;
+                            }[];
+                            subjects: {
+                                id: string;
+                                name: string;
+                                /** @description The learner's course in it that has not ended: pending_payment, active or paused. */
+                                course: {
+                                    enrollment_id: string;
+                                    status: string;
+                                } | null;
+                                can_start: boolean;
+                                /** @description Why not, in the family's words (what to do instead). */
+                                why_not: string | null;
+                            }[];
+                            /** @description Prices are in this region's currency (the region the payer pays in, else their learner's country's, else the default). */
+                            region: {
+                                id: string;
+                                name: string;
+                                currency: string;
+                            } | null;
+                            plans: {
+                                id: string;
+                                name: string;
+                                /**
+                                 * @description private (one student a lesson) or group (a seat in a group).
+                                 * @enum {string}
+                                 */
+                                format: "group" | "private";
+                                /** @description A shared package: one balance for the learner's courses on it (a later course joins it, with no invoice). */
+                                shared: boolean;
+                                session_minutes: number;
+                                sessions_per_week: number;
+                                sessions_per_block: number;
+                                validity_days: number;
+                                /** @description The next block's invoice comes when this many lessons are left. */
+                                renews_at_lessons_left: number;
+                                /** @description The block's price: send price.amount_minor and price.currency back to start. */
+                                price: {
+                                    amount_minor: number;
+                                    currency: string;
+                                    amount: string;
+                                };
+                                per_lesson: {
+                                    amount_minor: number;
+                                    currency: string;
+                                    amount: string;
+                                };
+                                /** @description What the first invoice would come to for this learner before VAT is added: the sibling discount or the trial's offer (the bigger). */
+                                first_invoice: {
+                                    discounts: {
+                                        label: string;
+                                        amount_minor: string;
+                                        amount: string;
+                                    }[];
+                                    total: {
+                                        amount_minor: number;
+                                        currency: string;
+                                        amount: string;
+                                    } | null;
+                                    /** @description The trial's offer is the discount here (open, for this plan, and bigger than the sibling discount). */
+                                    offer_applied: string;
+                                };
+                            }[];
+                            teachers: {
+                                id: string;
+                                /** @description The name families read: the one on their card on the academy's page, else their first name with its title. */
+                                name: string;
+                                bio: string | null;
+                                photo_url: string | null;
+                                /** @description female | male | null */
+                                gender: string | null;
+                                /** @description The teacher of the learner's free trial in this subject. */
+                                trial_teacher: boolean;
+                                /** @description Takes new students for private lessons (GET family/start/slots for their weekly times). */
+                                private: string;
+                                /** @description Open groups of theirs with a seat for the learner. */
+                                groups: number;
+                            }[];
+                            /** @description The learner's offer after a free trial in this subject (made to this payer), while it is not used. */
+                            offer: {
+                                /**
+                                 * @description open (applied by itself to the first invoice when it is bigger than the sibling discount) or ended.
+                                 * @enum {string}
+                                 */
+                                state: "open" | "ended";
+                                percent: number;
+                                ends_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                            };
+                            /** @description The learner's free trial in this subject, if they had one. */
+                            trial: {
+                                session_id: string;
+                                /** @description Whether the trial's teacher still takes the learner (else choose another). */
+                                teacher_available: boolean;
+                            } | null;
+                            payment: {
+                                /** @description Rule 16: a lesson still unpaid this many hours before it starts is cancelled (0: never). */
+                                unpaid_cancel_hours: number;
+                                /** @description The first lesson is at least this many hours away, so there is time to pay. */
+                                notice_hours: number;
+                            } | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.start.slots": {
+        parameters: {
+            query: {
+                learner_id?: string | null;
+                subject_id: string;
+                plan_id: string;
+                teacher_id?: string | null;
+                timezone?: "Africa/Abidjan" | "Africa/Accra" | "Africa/Addis_Ababa" | "Africa/Algiers" | "Africa/Asmara" | "Africa/Bamako" | "Africa/Bangui" | "Africa/Banjul" | "Africa/Bissau" | "Africa/Blantyre" | "Africa/Brazzaville" | "Africa/Bujumbura" | "Africa/Cairo" | "Africa/Casablanca" | "Africa/Ceuta" | "Africa/Conakry" | "Africa/Dakar" | "Africa/Dar_es_Salaam" | "Africa/Djibouti" | "Africa/Douala" | "Africa/El_Aaiun" | "Africa/Freetown" | "Africa/Gaborone" | "Africa/Harare" | "Africa/Johannesburg" | "Africa/Juba" | "Africa/Kampala" | "Africa/Khartoum" | "Africa/Kigali" | "Africa/Kinshasa" | "Africa/Lagos" | "Africa/Libreville" | "Africa/Lome" | "Africa/Luanda" | "Africa/Lubumbashi" | "Africa/Lusaka" | "Africa/Malabo" | "Africa/Maputo" | "Africa/Maseru" | "Africa/Mbabane" | "Africa/Mogadishu" | "Africa/Monrovia" | "Africa/Nairobi" | "Africa/Ndjamena" | "Africa/Niamey" | "Africa/Nouakchott" | "Africa/Ouagadougou" | "Africa/Porto-Novo" | "Africa/Sao_Tome" | "Africa/Tripoli" | "Africa/Tunis" | "Africa/Windhoek" | "America/Adak" | "America/Anchorage" | "America/Anguilla" | "America/Antigua" | "America/Araguaina" | "America/Argentina/Buenos_Aires" | "America/Argentina/Catamarca" | "America/Argentina/Cordoba" | "America/Argentina/Jujuy" | "America/Argentina/La_Rioja" | "America/Argentina/Mendoza" | "America/Argentina/Rio_Gallegos" | "America/Argentina/Salta" | "America/Argentina/San_Juan" | "America/Argentina/San_Luis" | "America/Argentina/Tucuman" | "America/Argentina/Ushuaia" | "America/Aruba" | "America/Asuncion" | "America/Atikokan" | "America/Bahia" | "America/Bahia_Banderas" | "America/Barbados" | "America/Belem" | "America/Belize" | "America/Blanc-Sablon" | "America/Boa_Vista" | "America/Bogota" | "America/Boise" | "America/Cambridge_Bay" | "America/Campo_Grande" | "America/Cancun" | "America/Caracas" | "America/Cayenne" | "America/Cayman" | "America/Chicago" | "America/Chihuahua" | "America/Ciudad_Juarez" | "America/Costa_Rica" | "America/Coyhaique" | "America/Creston" | "America/Cuiaba" | "America/Curacao" | "America/Danmarkshavn" | "America/Dawson" | "America/Dawson_Creek" | "America/Denver" | "America/Detroit" | "America/Dominica" | "America/Edmonton" | "America/Eirunepe" | "America/El_Salvador" | "America/Fort_Nelson" | "America/Fortaleza" | "America/Glace_Bay" | "America/Goose_Bay" | "America/Grand_Turk" | "America/Grenada" | "America/Guadeloupe" | "America/Guatemala" | "America/Guayaquil" | "America/Guyana" | "America/Halifax" | "America/Havana" | "America/Hermosillo" | "America/Indiana/Indianapolis" | "America/Indiana/Knox" | "America/Indiana/Marengo" | "America/Indiana/Petersburg" | "America/Indiana/Tell_City" | "America/Indiana/Vevay" | "America/Indiana/Vincennes" | "America/Indiana/Winamac" | "America/Inuvik" | "America/Iqaluit" | "America/Jamaica" | "America/Juneau" | "America/Kentucky/Louisville" | "America/Kentucky/Monticello" | "America/Kralendijk" | "America/La_Paz" | "America/Lima" | "America/Los_Angeles" | "America/Lower_Princes" | "America/Maceio" | "America/Managua" | "America/Manaus" | "America/Marigot" | "America/Martinique" | "America/Matamoros" | "America/Mazatlan" | "America/Menominee" | "America/Merida" | "America/Metlakatla" | "America/Mexico_City" | "America/Miquelon" | "America/Moncton" | "America/Monterrey" | "America/Montevideo" | "America/Montserrat" | "America/Nassau" | "America/New_York" | "America/Nome" | "America/Noronha" | "America/North_Dakota/Beulah" | "America/North_Dakota/Center" | "America/North_Dakota/New_Salem" | "America/Nuuk" | "America/Ojinaga" | "America/Panama" | "America/Paramaribo" | "America/Phoenix" | "America/Port-au-Prince" | "America/Port_of_Spain" | "America/Porto_Velho" | "America/Puerto_Rico" | "America/Punta_Arenas" | "America/Rankin_Inlet" | "America/Recife" | "America/Regina" | "America/Resolute" | "America/Rio_Branco" | "America/Santarem" | "America/Santiago" | "America/Santo_Domingo" | "America/Sao_Paulo" | "America/Scoresbysund" | "America/Sitka" | "America/St_Barthelemy" | "America/St_Johns" | "America/St_Kitts" | "America/St_Lucia" | "America/St_Thomas" | "America/St_Vincent" | "America/Swift_Current" | "America/Tegucigalpa" | "America/Thule" | "America/Tijuana" | "America/Toronto" | "America/Tortola" | "America/Vancouver" | "America/Whitehorse" | "America/Winnipeg" | "America/Yakutat" | "Antarctica/Casey" | "Antarctica/Davis" | "Antarctica/DumontDUrville" | "Antarctica/Macquarie" | "Antarctica/Mawson" | "Antarctica/McMurdo" | "Antarctica/Palmer" | "Antarctica/Rothera" | "Antarctica/Syowa" | "Antarctica/Troll" | "Antarctica/Vostok" | "Arctic/Longyearbyen" | "Asia/Aden" | "Asia/Almaty" | "Asia/Amman" | "Asia/Anadyr" | "Asia/Aqtau" | "Asia/Aqtobe" | "Asia/Ashgabat" | "Asia/Atyrau" | "Asia/Baghdad" | "Asia/Bahrain" | "Asia/Baku" | "Asia/Bangkok" | "Asia/Barnaul" | "Asia/Beirut" | "Asia/Bishkek" | "Asia/Brunei" | "Asia/Chita" | "Asia/Colombo" | "Asia/Damascus" | "Asia/Dhaka" | "Asia/Dili" | "Asia/Dubai" | "Asia/Dushanbe" | "Asia/Famagusta" | "Asia/Gaza" | "Asia/Hebron" | "Asia/Ho_Chi_Minh" | "Asia/Hong_Kong" | "Asia/Hovd" | "Asia/Irkutsk" | "Asia/Jakarta" | "Asia/Jayapura" | "Asia/Jerusalem" | "Asia/Kabul" | "Asia/Kamchatka" | "Asia/Karachi" | "Asia/Kathmandu" | "Asia/Khandyga" | "Asia/Kolkata" | "Asia/Krasnoyarsk" | "Asia/Kuala_Lumpur" | "Asia/Kuching" | "Asia/Kuwait" | "Asia/Macau" | "Asia/Magadan" | "Asia/Makassar" | "Asia/Manila" | "Asia/Muscat" | "Asia/Nicosia" | "Asia/Novokuznetsk" | "Asia/Novosibirsk" | "Asia/Omsk" | "Asia/Oral" | "Asia/Phnom_Penh" | "Asia/Pontianak" | "Asia/Pyongyang" | "Asia/Qatar" | "Asia/Qostanay" | "Asia/Qyzylorda" | "Asia/Riyadh" | "Asia/Sakhalin" | "Asia/Samarkand" | "Asia/Seoul" | "Asia/Shanghai" | "Asia/Singapore" | "Asia/Srednekolymsk" | "Asia/Taipei" | "Asia/Tashkent" | "Asia/Tbilisi" | "Asia/Tehran" | "Asia/Thimphu" | "Asia/Tokyo" | "Asia/Tomsk" | "Asia/Ulaanbaatar" | "Asia/Urumqi" | "Asia/Ust-Nera" | "Asia/Vientiane" | "Asia/Vladivostok" | "Asia/Yakutsk" | "Asia/Yangon" | "Asia/Yekaterinburg" | "Asia/Yerevan" | "Atlantic/Azores" | "Atlantic/Bermuda" | "Atlantic/Canary" | "Atlantic/Cape_Verde" | "Atlantic/Faroe" | "Atlantic/Madeira" | "Atlantic/Reykjavik" | "Atlantic/South_Georgia" | "Atlantic/St_Helena" | "Atlantic/Stanley" | "Australia/Adelaide" | "Australia/Brisbane" | "Australia/Broken_Hill" | "Australia/Darwin" | "Australia/Eucla" | "Australia/Hobart" | "Australia/Lindeman" | "Australia/Lord_Howe" | "Australia/Melbourne" | "Australia/Perth" | "Australia/Sydney" | "Europe/Amsterdam" | "Europe/Andorra" | "Europe/Astrakhan" | "Europe/Athens" | "Europe/Belgrade" | "Europe/Berlin" | "Europe/Bratislava" | "Europe/Brussels" | "Europe/Bucharest" | "Europe/Budapest" | "Europe/Busingen" | "Europe/Chisinau" | "Europe/Copenhagen" | "Europe/Dublin" | "Europe/Gibraltar" | "Europe/Guernsey" | "Europe/Helsinki" | "Europe/Isle_of_Man" | "Europe/Istanbul" | "Europe/Jersey" | "Europe/Kaliningrad" | "Europe/Kirov" | "Europe/Kyiv" | "Europe/Lisbon" | "Europe/Ljubljana" | "Europe/London" | "Europe/Luxembourg" | "Europe/Madrid" | "Europe/Malta" | "Europe/Mariehamn" | "Europe/Minsk" | "Europe/Monaco" | "Europe/Moscow" | "Europe/Oslo" | "Europe/Paris" | "Europe/Podgorica" | "Europe/Prague" | "Europe/Riga" | "Europe/Rome" | "Europe/Samara" | "Europe/San_Marino" | "Europe/Sarajevo" | "Europe/Saratov" | "Europe/Simferopol" | "Europe/Skopje" | "Europe/Sofia" | "Europe/Stockholm" | "Europe/Tallinn" | "Europe/Tirane" | "Europe/Ulyanovsk" | "Europe/Vaduz" | "Europe/Vatican" | "Europe/Vienna" | "Europe/Vilnius" | "Europe/Volgograd" | "Europe/Warsaw" | "Europe/Zagreb" | "Europe/Zurich" | "Indian/Antananarivo" | "Indian/Chagos" | "Indian/Christmas" | "Indian/Cocos" | "Indian/Comoro" | "Indian/Kerguelen" | "Indian/Mahe" | "Indian/Maldives" | "Indian/Mauritius" | "Indian/Mayotte" | "Indian/Reunion" | "Pacific/Apia" | "Pacific/Auckland" | "Pacific/Bougainville" | "Pacific/Chatham" | "Pacific/Chuuk" | "Pacific/Easter" | "Pacific/Efate" | "Pacific/Fakaofo" | "Pacific/Fiji" | "Pacific/Funafuti" | "Pacific/Galapagos" | "Pacific/Gambier" | "Pacific/Guadalcanal" | "Pacific/Guam" | "Pacific/Honolulu" | "Pacific/Kanton" | "Pacific/Kiritimati" | "Pacific/Kosrae" | "Pacific/Kwajalein" | "Pacific/Majuro" | "Pacific/Marquesas" | "Pacific/Midway" | "Pacific/Nauru" | "Pacific/Niue" | "Pacific/Norfolk" | "Pacific/Noumea" | "Pacific/Pago_Pago" | "Pacific/Palau" | "Pacific/Pitcairn" | "Pacific/Pohnpei" | "Pacific/Port_Moresby" | "Pacific/Rarotonga" | "Pacific/Saipan" | "Pacific/Tahiti" | "Pacific/Tarawa" | "Pacific/Tongatapu" | "Pacific/Wake" | "Pacific/Wallis" | "UTC" | null;
+            };
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @constant */
+                            format: "private";
+                            timezone: string;
+                            /** @description How many weekly times to choose (a shared package: up to this many). */
+                            per_week: number;
+                            days: {
+                                weekday: number;
+                                name: string;
+                                times: {
+                                    weekday: number;
+                                    start: string;
+                                    label: string;
+                                }[];
+                            }[];
+                            /** @description A pattern of per_week days worth suggesting (keys); null when the teacher has too few days free. */
+                            suggested: unknown[] | null;
+                            /** @description The first day a course may start on (time to pay first). */
+                            first_day: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            groups: string[];
+                        };
+                    } | {
+                        data: {
+                            /** @constant */
+                            format: "group";
+                            timezone: string;
+                            per_week: number;
+                            days: string[];
+                            suggested: null;
+                            first_day: null;
+                            groups: {
+                                id: string;
+                                name: string;
+                                teacher: {
+                                    id: string;
+                                    name: string;
+                                };
+                                /** @description forming (starts when it has min_to_start students) or running. */
+                                status: string;
+                                seats: {
+                                    capacity: number;
+                                    taken: number;
+                                    free: number;
+                                };
+                                min_to_start: string | null;
+                                times: {
+                                    weekday: number;
+                                    start: string;
+                                    label: string;
+                                }[];
+                                /** @description Its next lesson, when it is running. */
+                                next: string;
+                                /** @description Lessons it held so far (a late join's are made up as the academy chose). */
+                                held: number;
+                            }[];
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.courses.start": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    learner_id?: string | null;
+                    /** Format: uuid */
+                    subject_id: string;
+                    /** Format: uuid */
+                    plan_id: string;
+                    /** @description The block price the family saw, in minor units (plans[].price.amount_minor). */
+                    price_minor: number;
+                    currency: string;
+                    /** Format: uuid */
+                    teacher_id?: string | null;
+                    /** @description The weekly times' keys from GET family/start/slots. */
+                    times?: string[] | null;
+                    /** Format: uuid */
+                    group_id?: string | null;
+                    /** @enum {string|null} */
+                    timezone?: "Africa/Abidjan" | "Africa/Accra" | "Africa/Addis_Ababa" | "Africa/Algiers" | "Africa/Asmara" | "Africa/Bamako" | "Africa/Bangui" | "Africa/Banjul" | "Africa/Bissau" | "Africa/Blantyre" | "Africa/Brazzaville" | "Africa/Bujumbura" | "Africa/Cairo" | "Africa/Casablanca" | "Africa/Ceuta" | "Africa/Conakry" | "Africa/Dakar" | "Africa/Dar_es_Salaam" | "Africa/Djibouti" | "Africa/Douala" | "Africa/El_Aaiun" | "Africa/Freetown" | "Africa/Gaborone" | "Africa/Harare" | "Africa/Johannesburg" | "Africa/Juba" | "Africa/Kampala" | "Africa/Khartoum" | "Africa/Kigali" | "Africa/Kinshasa" | "Africa/Lagos" | "Africa/Libreville" | "Africa/Lome" | "Africa/Luanda" | "Africa/Lubumbashi" | "Africa/Lusaka" | "Africa/Malabo" | "Africa/Maputo" | "Africa/Maseru" | "Africa/Mbabane" | "Africa/Mogadishu" | "Africa/Monrovia" | "Africa/Nairobi" | "Africa/Ndjamena" | "Africa/Niamey" | "Africa/Nouakchott" | "Africa/Ouagadougou" | "Africa/Porto-Novo" | "Africa/Sao_Tome" | "Africa/Tripoli" | "Africa/Tunis" | "Africa/Windhoek" | "America/Adak" | "America/Anchorage" | "America/Anguilla" | "America/Antigua" | "America/Araguaina" | "America/Argentina/Buenos_Aires" | "America/Argentina/Catamarca" | "America/Argentina/Cordoba" | "America/Argentina/Jujuy" | "America/Argentina/La_Rioja" | "America/Argentina/Mendoza" | "America/Argentina/Rio_Gallegos" | "America/Argentina/Salta" | "America/Argentina/San_Juan" | "America/Argentina/San_Luis" | "America/Argentina/Tucuman" | "America/Argentina/Ushuaia" | "America/Aruba" | "America/Asuncion" | "America/Atikokan" | "America/Bahia" | "America/Bahia_Banderas" | "America/Barbados" | "America/Belem" | "America/Belize" | "America/Blanc-Sablon" | "America/Boa_Vista" | "America/Bogota" | "America/Boise" | "America/Cambridge_Bay" | "America/Campo_Grande" | "America/Cancun" | "America/Caracas" | "America/Cayenne" | "America/Cayman" | "America/Chicago" | "America/Chihuahua" | "America/Ciudad_Juarez" | "America/Costa_Rica" | "America/Coyhaique" | "America/Creston" | "America/Cuiaba" | "America/Curacao" | "America/Danmarkshavn" | "America/Dawson" | "America/Dawson_Creek" | "America/Denver" | "America/Detroit" | "America/Dominica" | "America/Edmonton" | "America/Eirunepe" | "America/El_Salvador" | "America/Fort_Nelson" | "America/Fortaleza" | "America/Glace_Bay" | "America/Goose_Bay" | "America/Grand_Turk" | "America/Grenada" | "America/Guadeloupe" | "America/Guatemala" | "America/Guayaquil" | "America/Guyana" | "America/Halifax" | "America/Havana" | "America/Hermosillo" | "America/Indiana/Indianapolis" | "America/Indiana/Knox" | "America/Indiana/Marengo" | "America/Indiana/Petersburg" | "America/Indiana/Tell_City" | "America/Indiana/Vevay" | "America/Indiana/Vincennes" | "America/Indiana/Winamac" | "America/Inuvik" | "America/Iqaluit" | "America/Jamaica" | "America/Juneau" | "America/Kentucky/Louisville" | "America/Kentucky/Monticello" | "America/Kralendijk" | "America/La_Paz" | "America/Lima" | "America/Los_Angeles" | "America/Lower_Princes" | "America/Maceio" | "America/Managua" | "America/Manaus" | "America/Marigot" | "America/Martinique" | "America/Matamoros" | "America/Mazatlan" | "America/Menominee" | "America/Merida" | "America/Metlakatla" | "America/Mexico_City" | "America/Miquelon" | "America/Moncton" | "America/Monterrey" | "America/Montevideo" | "America/Montserrat" | "America/Nassau" | "America/New_York" | "America/Nome" | "America/Noronha" | "America/North_Dakota/Beulah" | "America/North_Dakota/Center" | "America/North_Dakota/New_Salem" | "America/Nuuk" | "America/Ojinaga" | "America/Panama" | "America/Paramaribo" | "America/Phoenix" | "America/Port-au-Prince" | "America/Port_of_Spain" | "America/Porto_Velho" | "America/Puerto_Rico" | "America/Punta_Arenas" | "America/Rankin_Inlet" | "America/Recife" | "America/Regina" | "America/Resolute" | "America/Rio_Branco" | "America/Santarem" | "America/Santiago" | "America/Santo_Domingo" | "America/Sao_Paulo" | "America/Scoresbysund" | "America/Sitka" | "America/St_Barthelemy" | "America/St_Johns" | "America/St_Kitts" | "America/St_Lucia" | "America/St_Thomas" | "America/St_Vincent" | "America/Swift_Current" | "America/Tegucigalpa" | "America/Thule" | "America/Tijuana" | "America/Toronto" | "America/Tortola" | "America/Vancouver" | "America/Whitehorse" | "America/Winnipeg" | "America/Yakutat" | "Antarctica/Casey" | "Antarctica/Davis" | "Antarctica/DumontDUrville" | "Antarctica/Macquarie" | "Antarctica/Mawson" | "Antarctica/McMurdo" | "Antarctica/Palmer" | "Antarctica/Rothera" | "Antarctica/Syowa" | "Antarctica/Troll" | "Antarctica/Vostok" | "Arctic/Longyearbyen" | "Asia/Aden" | "Asia/Almaty" | "Asia/Amman" | "Asia/Anadyr" | "Asia/Aqtau" | "Asia/Aqtobe" | "Asia/Ashgabat" | "Asia/Atyrau" | "Asia/Baghdad" | "Asia/Bahrain" | "Asia/Baku" | "Asia/Bangkok" | "Asia/Barnaul" | "Asia/Beirut" | "Asia/Bishkek" | "Asia/Brunei" | "Asia/Chita" | "Asia/Colombo" | "Asia/Damascus" | "Asia/Dhaka" | "Asia/Dili" | "Asia/Dubai" | "Asia/Dushanbe" | "Asia/Famagusta" | "Asia/Gaza" | "Asia/Hebron" | "Asia/Ho_Chi_Minh" | "Asia/Hong_Kong" | "Asia/Hovd" | "Asia/Irkutsk" | "Asia/Jakarta" | "Asia/Jayapura" | "Asia/Jerusalem" | "Asia/Kabul" | "Asia/Kamchatka" | "Asia/Karachi" | "Asia/Kathmandu" | "Asia/Khandyga" | "Asia/Kolkata" | "Asia/Krasnoyarsk" | "Asia/Kuala_Lumpur" | "Asia/Kuching" | "Asia/Kuwait" | "Asia/Macau" | "Asia/Magadan" | "Asia/Makassar" | "Asia/Manila" | "Asia/Muscat" | "Asia/Nicosia" | "Asia/Novokuznetsk" | "Asia/Novosibirsk" | "Asia/Omsk" | "Asia/Oral" | "Asia/Phnom_Penh" | "Asia/Pontianak" | "Asia/Pyongyang" | "Asia/Qatar" | "Asia/Qostanay" | "Asia/Qyzylorda" | "Asia/Riyadh" | "Asia/Sakhalin" | "Asia/Samarkand" | "Asia/Seoul" | "Asia/Shanghai" | "Asia/Singapore" | "Asia/Srednekolymsk" | "Asia/Taipei" | "Asia/Tashkent" | "Asia/Tbilisi" | "Asia/Tehran" | "Asia/Thimphu" | "Asia/Tokyo" | "Asia/Tomsk" | "Asia/Ulaanbaatar" | "Asia/Urumqi" | "Asia/Ust-Nera" | "Asia/Vientiane" | "Asia/Vladivostok" | "Asia/Yakutsk" | "Asia/Yangon" | "Asia/Yekaterinburg" | "Asia/Yerevan" | "Atlantic/Azores" | "Atlantic/Bermuda" | "Atlantic/Canary" | "Atlantic/Cape_Verde" | "Atlantic/Faroe" | "Atlantic/Madeira" | "Atlantic/Reykjavik" | "Atlantic/South_Georgia" | "Atlantic/St_Helena" | "Atlantic/Stanley" | "Australia/Adelaide" | "Australia/Brisbane" | "Australia/Broken_Hill" | "Australia/Darwin" | "Australia/Eucla" | "Australia/Hobart" | "Australia/Lindeman" | "Australia/Lord_Howe" | "Australia/Melbourne" | "Australia/Perth" | "Australia/Sydney" | "Europe/Amsterdam" | "Europe/Andorra" | "Europe/Astrakhan" | "Europe/Athens" | "Europe/Belgrade" | "Europe/Berlin" | "Europe/Bratislava" | "Europe/Brussels" | "Europe/Bucharest" | "Europe/Budapest" | "Europe/Busingen" | "Europe/Chisinau" | "Europe/Copenhagen" | "Europe/Dublin" | "Europe/Gibraltar" | "Europe/Guernsey" | "Europe/Helsinki" | "Europe/Isle_of_Man" | "Europe/Istanbul" | "Europe/Jersey" | "Europe/Kaliningrad" | "Europe/Kirov" | "Europe/Kyiv" | "Europe/Lisbon" | "Europe/Ljubljana" | "Europe/London" | "Europe/Luxembourg" | "Europe/Madrid" | "Europe/Malta" | "Europe/Mariehamn" | "Europe/Minsk" | "Europe/Monaco" | "Europe/Moscow" | "Europe/Oslo" | "Europe/Paris" | "Europe/Podgorica" | "Europe/Prague" | "Europe/Riga" | "Europe/Rome" | "Europe/Samara" | "Europe/San_Marino" | "Europe/Sarajevo" | "Europe/Saratov" | "Europe/Simferopol" | "Europe/Skopje" | "Europe/Sofia" | "Europe/Stockholm" | "Europe/Tallinn" | "Europe/Tirane" | "Europe/Ulyanovsk" | "Europe/Vaduz" | "Europe/Vatican" | "Europe/Vienna" | "Europe/Vilnius" | "Europe/Volgograd" | "Europe/Warsaw" | "Europe/Zagreb" | "Europe/Zurich" | "Indian/Antananarivo" | "Indian/Chagos" | "Indian/Christmas" | "Indian/Cocos" | "Indian/Comoro" | "Indian/Kerguelen" | "Indian/Mahe" | "Indian/Maldives" | "Indian/Mauritius" | "Indian/Mayotte" | "Indian/Reunion" | "Pacific/Apia" | "Pacific/Auckland" | "Pacific/Bougainville" | "Pacific/Chatham" | "Pacific/Chuuk" | "Pacific/Easter" | "Pacific/Efate" | "Pacific/Fakaofo" | "Pacific/Fiji" | "Pacific/Funafuti" | "Pacific/Galapagos" | "Pacific/Gambier" | "Pacific/Guadalcanal" | "Pacific/Guam" | "Pacific/Honolulu" | "Pacific/Kanton" | "Pacific/Kiritimati" | "Pacific/Kosrae" | "Pacific/Kwajalein" | "Pacific/Majuro" | "Pacific/Marquesas" | "Pacific/Midway" | "Pacific/Nauru" | "Pacific/Niue" | "Pacific/Norfolk" | "Pacific/Noumea" | "Pacific/Pago_Pago" | "Pacific/Palau" | "Pacific/Pitcairn" | "Pacific/Pohnpei" | "Pacific/Port_Moresby" | "Pacific/Rarotonga" | "Pacific/Saipan" | "Pacific/Tahiti" | "Pacific/Tarawa" | "Pacific/Tongatapu" | "Pacific/Wake" | "Pacific/Wallis" | "UTC" | null;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            enrollment_id: string;
+                            /** @description pending_payment until the first invoice is paid; active at once when it joined a paid shared package. */
+                            status: string;
+                            learner: {
+                                id: string;
+                                name: string;
+                            };
+                            subject: {
+                                id: string;
+                                name: string;
+                            };
+                            teacher: {
+                                id: string;
+                                name: string;
+                            };
+                            plan: {
+                                id: string;
+                                name: string;
+                                /** @enum {string} */
+                                format: "group" | "private";
+                                session_minutes: number;
+                                sessions_per_week: number;
+                                sessions_per_block: number;
+                            } | null;
+                            /** @description The weekly times on the viewer's clock. */
+                            weekly_times: {
+                                weekday: number;
+                                start: string;
+                                label: string;
+                            }[];
+                            first_lesson: {
+                                utc: string;
+                                local: string;
+                                timezone: string;
+                                label: string;
+                            } | null;
+                            /** @description Lessons booked so far (more are made week by week). */
+                            lessons: number;
+                            /** @description Days skipped because the teacher or the learner was already booked (Y-m-d on the teacher's clock). */
+                            skipped_dates: unknown[];
+                            /** @description It joined the learner's shared package: its lessons draw on that balance, with no invoice of its own. */
+                            joined_package: boolean;
+                            group: {
+                                id: string;
+                                status: string;
+                                seat: number | null;
+                                capacity: number | null;
+                                /** @description It started with this learner. */
+                                started: boolean;
+                                min_to_start: number | null;
+                            } | null;
+                            /** @description The first invoice as the payer reads it (lines, discounts, VAT, total; coupon entry); null when it joined a shared package. */
+                            invoice: {
+                                id: string;
+                                number: string;
+                                /** @description issued, partly_paid, overdue, paid or void */
+                                status: string;
+                                currency: string;
+                                lines: {
+                                    /** @description block (the plan's lessons), extra (extra lessons) or discount (the sibling discount, a coupon, the trial's offer: a negative amount) */
+                                    kind: string;
+                                    description: string;
+                                    quantity: string;
+                                    amount_minor: string;
+                                    amount: string;
+                                }[];
+                                /** @description What the lines come to before VAT is added (with prices_include_tax, the VAT is inside it). */
+                                subtotal: {
+                                    amount_minor: number;
+                                    amount: string;
+                                };
+                                vat: {
+                                    /** @description The VAT rate in percent (15 = 15%); 0 when the academy adds none. */
+                                    rate: string;
+                                    /** @description The prices already hold the VAT (the Gulf's way); else it is added. */
+                                    included: boolean;
+                                    amount_minor: number;
+                                    amount: string;
+                                };
+                                total: {
+                                    amount_minor: number;
+                                    amount: string;
+                                };
+                                paid: {
+                                    amount_minor: number;
+                                    amount: string;
+                                };
+                                outstanding: {
+                                    amount_minor: number;
+                                    amount: string;
+                                };
+                                due_at: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: null;
+                                    label: string;
+                                } | null;
+                                /** @description The coupon on it (personal: the trial's offer, which stays on). */
+                                coupon: {
+                                    code: string;
+                                    personal: string;
+                                } | null;
+                                /** @description Whether a coupon can be typed or taken off now; why not in the payer's words when not. */
+                                coupon_entry: {
+                                    open: boolean;
+                                    why_not: string | null;
+                                };
+                                /** @description The academy's signed pay page for it (no sign-in needed). */
+                                pay_url: string;
+                                /** @description The invoice to read and print. */
+                                document_url: string;
+                            } | null;
+                            /** @description The academy's signed pay page for it (the apps pay through POST family/invoices/{id}/checkout as well). */
+                            pay_url: string | null;
+                            offer: {
+                                /**
+                                 * @description applied, ended (its time passed: the plain price), family_discount_bigger, not_for_plan, package or none.
+                                 * @enum {string}
+                                 */
+                                state: "none" | "package";
+                                percent: null | number;
+                                /** @description What became of it, in a sentence (null: no offer). */
+                                message: string | null;
+                            };
+                            payment: {
+                                /** @description Pay before this to keep the first lesson (rule 16); null when nothing is due or no lesson is booked yet. */
+                                pay_by: {
+                                    utc: string;
+                                    local: string;
+                                    timezone: string;
+                                    label: string;
+                                } | null;
+                                unpaid_cancel_hours: number;
+                                text: string;
+                                /** @description When the next block's invoice comes, and that the family can stop any time. */
+                                renews: string | null;
+                            };
+                            /** @description The family may call it off before paying (POST family/courses/{enrollment}/cancel). */
+                            can_cancel: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "family.courses.cancel": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description The academy's slug, until a token names it (a token for another academy is refused).
+                 * @example noor
+                 */
+                "X-Academy"?: string;
+                /**
+                 * @description ar or en: the language of labels and errors.
+                 * @example ar
+                 */
+                "Accept-Language"?: string;
+                /**
+                 * @description The device's IANA zone: times come back on its clock.
+                 * @example Asia/Riyadh
+                 */
+                "X-Timezone"?: string;
+                /**
+                 * @description Any unique string per action: a retry with it answers the first response instead of acting twice.
+                 * @example 7f0c1d0e-2b8e-4c1f-9a51-3a1d5e2f8b10
+                 */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                enrollment: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            enrollment_id: string;
+                            /** @constant */
+                            status: "ended";
+                            lessons_cancelled: number;
+                            /** @description The invoice voided with it. */
+                            invoice_number: string | null;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
         };
     };
     "site.show": {

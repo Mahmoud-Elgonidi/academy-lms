@@ -51,6 +51,19 @@ final class PayLinks
         return $host.URL::temporarySignedRoute('billing.pay.return', $checkout->expires_at->addDays(2), ['checkout' => $checkout->id], absolute: false);
     }
 
+    /**
+     * The portal's page after a gateway (/{locale}/pay/return), for a payment begun in the portal or the app: the
+     * portal reads the invoice signed in (GET family/invoices/{id}) and, begun in the app, opens the app from there.
+     */
+    public function portalReturn(PaymentCheckout $checkout, string $locale): string
+    {
+        return $this->base().'/'.($locale === 'en' ? 'en' : 'ar').'/pay/return?'.http_build_query(array_filter([
+            'invoice' => $checkout->invoice_id,
+            'checkout' => $checkout->id,
+            'from' => $checkout->return_to === 'app' ? 'app' : null,
+        ]));
+    }
+
     public function webhook(GatewayAccount $account): string
     {
         return $this->base().route('billing.webhooks', ['academy' => $account->academy_id, 'account' => $account->id], absolute: false);

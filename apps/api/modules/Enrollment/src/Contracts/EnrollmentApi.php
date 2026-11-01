@@ -14,8 +14,12 @@ interface EnrollmentApi
 
     public function attachCreditAccount(string $enrollmentId, string $creditAccountId): void;
 
-    /** First payment in: pending_payment becomes active. Idempotent. */
-    public function activate(string $enrollmentId, ?string $actorId = null): void;
+    /**
+     * First payment in: pending_payment becomes active. Idempotent. $reason says why (paid: its first payment; package:
+     * it joined a paid shared package; imported: a course brought over that was paid before), so whoever follows
+     * EnrollmentActivated knows whether a course is starting for the family.
+     */
+    public function activate(string $enrollmentId, ?string $actorId = null, string $reason = 'paid'): void;
 
     /** The teacher from $from on; the current assignment ends the day before. */
     public function reassignTeacher(string $enrollmentId, string $teacherId, CarbonImmutable $from, ?string $actorId = null): void;

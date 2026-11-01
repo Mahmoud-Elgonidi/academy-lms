@@ -12,6 +12,8 @@ return [
     'academy-suspended' => 'This academy is suspended.',
     'academy-not-found' => 'Academy not found.',
     'not-found' => 'Not found.',
+    'start-refused' => 'The course cannot start with these choices.',
+    'guardian-consent-needed' => 'The child\'s account needs a guardian\'s consent first.',
     'link-expired' => 'This link has ended.',
     'bad-request' => 'Bad request.',
     'method-not-allowed' => 'Method not allowed.',

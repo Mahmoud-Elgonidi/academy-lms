@@ -87,7 +87,7 @@ final class EnrollStudent
             if ($package !== null) {
                 $this->enrollments->attachCreditAccount($enrollmentId, $package->creditAccountId);
                 if ($package->paid) {
-                    $this->enrollments->activate($enrollmentId, $coordinatorId);
+                    $this->enrollments->activate($enrollmentId, $coordinatorId, 'package');
                 }
             } else {
                 $accountId = $this->credits->openAccount($studentId, $plan->shared ? 'student_pool' : 'enrollment', $enrollmentId);

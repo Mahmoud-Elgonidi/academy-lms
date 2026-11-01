@@ -30,8 +30,11 @@ final class StartCheckout
         private readonly AcademyPlan $plan,
     ) {}
 
-    /** @param  string  $channel  family (signed in) | link (the invoice's pay link) */
-    public function handle(Invoice $invoice, GatewayAccount $account, ?string $payerId, string $channel): PaymentCheckout
+    /**
+     * @param  string  $channel  family (signed in) | link (the invoice's pay link)
+     * @param  ?string  $returnTo  portal | app: back from the gateway to the portal's /{locale}/pay/return (the app opens from there); null: the pay page
+     */
+    public function handle(Invoice $invoice, GatewayAccount $account, ?string $payerId, string $channel, ?string $returnTo = null): PaymentCheckout
     {
         $this->plan->requireFeature(Feature::OnlinePayments);
         $amount = $invoice->outstanding();
@@ -50,13 +53,14 @@ final class StartCheckout
 
         $open = PaymentCheckout::query()->where('invoice_id', $invoice->id)->where('gateway_account_id', $account->id)
             ->where('status', 'open')->where('amount_minor', $amount->minor)->whereNotNull('url')
+            ->when($returnTo === null, fn ($q) => $q->whereNull('return_to'), fn ($q) => $q->where('return_to', $returnTo))
             ->where('expires_at', '>', CarbonImmutable::now()->addMinutes(5))->latest()->first();
         if ($open !== null) {
             return $open;
         }
 
         $checkout = PaymentCheckout::query()->create([
-            'invoice_id' => $invoice->id, 'gateway_account_id' => $account->id, 'payer_id' => $payerId, 'channel' => $channel,
+            'invoice_id' => $invoice->id, 'gateway_account_id' => $account->id, 'payer_id' => $payerId, 'channel' => $channel, 'return_to' => $returnTo,
             'amount_minor' => $amount->minor, 'currency' => $amount->currency,
             'expires_at' => CarbonImmutable::now()->addMinutes((int) config('billing.payments.checkout_minutes')),
         ]);

@@ -68,6 +68,13 @@ return [
         'hint' => 'Each region has one currency, and each plan a price per region. A payer is billed in one region and keeps its currency.',
         'add' => 'Add a region',
     ],
+    'self_serve' => [
+        'action' => 'Families start on their own',
+        'title' => 'Families start a course and pay on their own',
+        'hint' => 'From their account in the portal or the app: they choose the plan, the teacher and the times, get the invoice and its pay link, and the trial offer is applied for them. Off, families read that the office enrols them; what they started stays as it is.',
+        'label' => 'The academy lets families start a course on their own',
+        'saved' => 'Saved.',
+    ],
     'tax' => [
         'action' => 'Tax and invoices',
         'title' => 'Tax and invoices',

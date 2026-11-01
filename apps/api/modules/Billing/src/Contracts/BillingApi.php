@@ -5,6 +5,7 @@ namespace Modules\Billing\Contracts;
 use Carbon\CarbonImmutable;
 use Modules\Billing\Contracts\DTOs\CourseBilling;
 use Modules\Billing\Contracts\DTOs\EndedCourseBilling;
+use Modules\Billing\Contracts\DTOs\InvoiceSummary;
 use Modules\Billing\Contracts\DTOs\IssuedInvoice;
 use Modules\Billing\Contracts\DTOs\NewPlan;
 use Modules\Billing\Contracts\DTOs\NewSubscription;
@@ -109,4 +110,19 @@ interface BillingApi
      * with the other courses' blocks. A shared package's stays for its other courses. The balance left stays.
      */
     public function closeEndedCourse(string $enrollmentId, ?string $actorId): EndedCourseBilling;
+
+    /** Whether families may start a course and pay on their own (billing_settings.self_serve_enrol; J3). */
+    public function selfServeEnrol(): bool;
+
+    /** An invoice as its payer reads it before paying (lines, discounts, VAT, its signed pages); null when there is none. */
+    public function invoiceSummary(string $invoiceId, ?string $payerId): ?InvoiceSummary;
+
+    /** The course's first block invoice (the one its start issued), as its payer reads it; null without one (a shared package it joined). */
+    public function firstInvoice(string $enrollmentId, ?string $payerId): ?InvoiceSummary;
+
+    /**
+     * Whether money may be on its way for this invoice: paid_some (something paid on it), proof_waiting (a transfer
+     * receipt the academy has not decided) or checkout_open (an online payment page still open); null when none.
+     */
+    public function paymentUnderway(string $invoiceId): ?string;
 }

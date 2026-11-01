@@ -19,6 +19,8 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property int $sibling_second_bp the family discount for a payer's second child (1000 = 10%)
  * @property int $sibling_more_bp for the third child and after
  * @property int $family_invoice_days a payer's renewals due within this many days go on one invoice (0: each on its own)
+ * @property bool $self_serve_enrol families may start a course and pay on their own (J3; SaveSelfServeEnrol)
+ * @property ?string $self_serve_saved_by who last chose it (null: the default, never chosen)
  */
 final class BillingSettings extends Model
 {
@@ -32,13 +34,13 @@ final class BillingSettings extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['tax_rate_bp', 'prices_include_tax', 'tax_number', 'invoice_prefix', 'due_days', 'manual_payment_note', 'seller_name', 'zatca', 'sibling_second_bp', 'sibling_more_bp', 'family_invoice_days'];
+    protected $fillable = ['tax_rate_bp', 'prices_include_tax', 'tax_number', 'invoice_prefix', 'due_days', 'manual_payment_note', 'seller_name', 'zatca', 'sibling_second_bp', 'sibling_more_bp', 'family_invoice_days', 'self_serve_enrol', 'self_serve_saved_by'];
 
-    protected $attributes = ['tax_rate_bp' => 0, 'prices_include_tax' => true, 'invoice_prefix' => 'INV-', 'due_days' => 3, 'zatca' => false, 'sibling_second_bp' => 0, 'sibling_more_bp' => 0, 'family_invoice_days' => 7];
+    protected $attributes = ['tax_rate_bp' => 0, 'prices_include_tax' => true, 'invoice_prefix' => 'INV-', 'due_days' => 3, 'zatca' => false, 'sibling_second_bp' => 0, 'sibling_more_bp' => 0, 'family_invoice_days' => 7, 'self_serve_enrol' => true];
 
     protected function casts(): array
     {
-        return ['tax_rate_bp' => 'integer', 'prices_include_tax' => 'boolean', 'due_days' => 'integer', 'zatca' => 'boolean', 'sibling_second_bp' => 'integer', 'sibling_more_bp' => 'integer', 'family_invoice_days' => 'integer'];
+        return ['tax_rate_bp' => 'integer', 'prices_include_tax' => 'boolean', 'due_days' => 'integer', 'zatca' => 'boolean', 'sibling_second_bp' => 'integer', 'sibling_more_bp' => 'integer', 'family_invoice_days' => 'integer', 'self_serve_enrol' => 'boolean'];
     }
 
     /** This academy's settings; the defaults when it has no row yet. */

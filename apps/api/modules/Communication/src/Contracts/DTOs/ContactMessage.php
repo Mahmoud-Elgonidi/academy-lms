@@ -18,7 +18,7 @@ final readonly class ContactMessage
      * @param  ?string  $phone  E.164
      * @param  string  $locale  ar | en
      * @param  string  $timezone  IANA
-     * @param  array<string, string|int|float|CarbonImmutable|Day|WeekdayTime|Money|Localized|Translatable|null>  $data
+     * @param  array<string, string|int|float|CarbonImmutable|Day|WeekdayTime|WeeklyTimes|Money|Localized|Translatable|null>  $data
      */
     public function __construct(
         public string $template,

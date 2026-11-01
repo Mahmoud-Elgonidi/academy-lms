@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Scheduling\Http\V1\Controllers\FamilyLessonsController;
+use Modules\Scheduling\Http\V1\Controllers\FamilyStartController;
 use Modules\Scheduling\Http\V1\Controllers\TeacherLessonsController;
 use Modules\Scheduling\Http\V1\Controllers\TeacherShiftsController;
 use Modules\Scheduling\Http\V1\Controllers\TrialLessonController;
@@ -42,4 +43,13 @@ Route::prefix('site/trials/lesson/{token}')->where(['token' => '[A-Za-z0-9_\-.]{
     Route::get('slots', [TrialLessonController::class, 'slots'])->middleware('throttle:60,1')->name('site.trials.lesson.slots');
     Route::post('move', [TrialLessonController::class, 'move'])->middleware(['throttle:10,60', 'idempotent'])->name('site.trials.lesson.move');
     Route::post('cancel', [TrialLessonController::class, 'cancel'])->middleware(['throttle:10,60', 'idempotent'])->name('site.trials.lesson.cancel');
+});
+
+// The family starts a course and pays on its own (J3): what it may start, a teacher's weekly times or the open groups,
+// starting it (the course, its lessons and its invoice), and calling it off before paying.
+Route::middleware('auth:sanctum')->prefix('family')->group(function () {
+    Route::get('start/options', [FamilyStartController::class, 'options'])->middleware('throttle:60,1')->name('family.start.options');
+    Route::get('start/slots', [FamilyStartController::class, 'slots'])->middleware('throttle:60,1')->name('family.start.slots');
+    Route::post('courses', [FamilyStartController::class, 'start'])->middleware(['throttle:20,60', 'idempotent'])->name('family.courses.start');
+    Route::post('courses/{enrollment}/cancel', [FamilyStartController::class, 'cancel'])->whereUuid('enrollment')->middleware(['throttle:10,60', 'idempotent'])->name('family.courses.cancel');
 });

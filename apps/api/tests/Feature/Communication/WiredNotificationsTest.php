@@ -51,8 +51,9 @@ it('sends the payer the invoice on enrolment and a receipt when it is paid', fun
         ->and($issued->deliveries()->pluck('status', 'channel')->sortKeys()->all())->toBe(['email' => 'sent', 'push' => 'skipped']);
 
     app(BillingApi::class)->recordPayment($this->booked->invoice->id, 'cash', $this->booked->invoice->total, null, CarbonImmutable::now(), $this->admin->id);
-    expect(inbox($this->guardian))->toBe(['billing.invoice_issued', 'billing.invoice_paid'])
-        ->and(inbox($this->student))->toBe([]);
+    // The receipt, and the welcome to the course now that it is paid (J3): the guardian and the adult learner.
+    expect(inbox($this->guardian))->toEqualCanonicalizing(['billing.invoice_issued', 'billing.invoice_paid', 'enrollment.course_started'])
+        ->and(inbox($this->student))->toBe(['enrollment.course_started']);
 });
 
 it('tells the family about the report and the homework, and the teacher about the hand-in', function () {

@@ -43,7 +43,7 @@
         .pill[data-tone="bad"] { background: var(--bad-soft); color: var(--bad); }
         .amount { margin: .6rem 0 .2rem; font-size: 2.1rem; font-weight: 700; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
         dl { margin: .5rem 0 0; display: grid; grid-template-columns: auto 1fr; gap: .3rem .9rem; font-size: .92rem; }
-        dt { color: var(--muted); } dd { margin: 0; text-align: end; font-variant-numeric: tabular-nums; }
+        dt { color: var(--muted); } dd { margin: 0; text-align: end; font-variant-numeric: tabular-nums; } dd.good { color: var(--good); }
         form { margin: 0; }
         .pay-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: .6rem; padding: .85rem 1rem; border: 0; border-radius: .85rem; background: var(--brand); color: #fff; font: inherit; font-weight: 700; cursor: pointer; text-align: start; transition: transform .15s, box-shadow .2s, filter .2s; }
         .pay-btn small { display: block; font-weight: 400; opacity: .9; font-size: .8rem; }

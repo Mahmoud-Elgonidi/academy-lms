@@ -10,6 +10,9 @@ Route::middleware(['web', 'tenant'])->prefix('pay')->group(function () {
     Route::get('invoice/{invoice}', [PayController::class, 'show'])->middleware(['signed:relative', 'throttle:links'])->name('billing.pay');
     Route::get('invoice/{invoice}/document', [PayController::class, 'document'])->middleware(['signed:relative', 'throttle:links'])->name('billing.pay.document');
     Route::post('invoice/{invoice}/proof', [PayController::class, 'proof'])->middleware(['signed:relative', 'throttle:6,1'])->name('billing.pay.proof');
+    // The payer types a coupon (or takes one off) before paying: the invoice is issued again (PayerCoupon).
+    Route::post('invoice/{invoice}/coupon', [PayController::class, 'coupon'])->middleware(['signed:relative', 'throttle:10,1'])->name('billing.pay.coupon');
+    Route::post('invoice/{invoice}/coupon/remove', [PayController::class, 'removeCoupon'])->middleware(['signed:relative', 'throttle:10,1'])->name('billing.pay.coupon.remove');
     Route::post('invoice/{invoice}/{account}', [PayController::class, 'start'])->middleware(['signed:relative', 'throttle:12,1'])->name('billing.pay.start');
     Route::get('back/{checkout}', [PayController::class, 'back'])->middleware(['signed:relative', 'throttle:links'])->name('billing.pay.return');
     Route::get('demo/{ref}', [DemoGatewayController::class, 'show'])->middleware(['signed:relative', 'throttle:links'])->name('billing.demo-gateway');

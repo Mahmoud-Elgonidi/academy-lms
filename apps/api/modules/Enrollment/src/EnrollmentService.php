@@ -40,9 +40,9 @@ final class EnrollmentService implements EnrollmentApi
         Enrollment::query()->whereKey($enrollmentId)->update(['credit_account_id' => $creditAccountId]);
     }
 
-    public function activate(string $enrollmentId, ?string $actorId = null): void
+    public function activate(string $enrollmentId, ?string $actorId = null, string $reason = 'paid'): void
     {
-        $this->activate->handle($enrollmentId, $actorId);
+        $this->activate->handle($enrollmentId, $actorId, $reason);
     }
 
     public function reassignTeacher(string $enrollmentId, string $teacherId, CarbonImmutable $from, ?string $actorId = null): void

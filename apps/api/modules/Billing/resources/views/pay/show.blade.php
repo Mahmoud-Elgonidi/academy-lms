@@ -41,8 +41,52 @@
                 <dt>{{ __($p.'due') }}</dt><dd>{{ $invoice->due_at->setTimezone($tz)->locale(app()->getLocale())->translatedFormat('l j F Y') }}</dd>
             @endif
         </dl>
+        @if ($summary->lines !== [])
+            <h2 style="font-size: .95rem; margin: 1rem 0 .4rem">{{ __($p.'lines') }}</h2>
+            <dl class="lines">
+                @foreach ($summary->lines as $line)
+                    <dt>{{ $line['description'] }}</dt>
+                    <dd @if ($line['amount_minor'] < 0) class="good" @endif dir="ltr">{{ \Modules\SharedKernel\Money\Money::of($line['amount_minor'], $invoice->currency)->format() }}</dd>
+                @endforeach
+                @if ($summary->taxMinor > 0 || $summary->taxRateBp > 0)
+                    @unless ($summary->pricesIncludeTax)
+                        <dt>{{ __($p.'subtotal') }}</dt><dd dir="ltr">{{ \Modules\SharedKernel\Money\Money::of($summary->subtotalMinor, $invoice->currency)->format() }}</dd>
+                    @endunless
+                    <dt>{{ __($p.($summary->pricesIncludeTax ? 'vat_included' : 'vat'), ['rate' => rtrim(rtrim(number_format($summary->taxRateBp / 100, 2, '.', ''), '0'), '.')]) }}</dt>
+                    <dd dir="ltr">{{ \Modules\SharedKernel\Money\Money::of($summary->taxMinor, $invoice->currency)->format() }}</dd>
+                @endif
+            </dl>
+        @endif
         <a class="doc-link" href="{{ $document }}">{{ __('billing::invoices.doc.view') }}</a>
     </section>
+
+    @if (session('coupon_done'))
+        <div class="banner" data-tone="good" role="status"><b>✓</b><div>{{ session('coupon_done') }}</div></div>
+    @endif
+    @if ($summary->coupon !== null && $invoice->status === 'issued')
+        <section class="card">
+            <p class="note" style="margin: 0">{{ __($p.'coupon.'.($summary->coupon['personal'] ? 'offer' : 'on'), ['code' => $summary->coupon['code']]) }}</p>
+            @if ($couponRemoveUrl)
+                <form method="post" action="{{ $couponRemoveUrl }}" style="margin-top: .6rem">
+                    @csrf
+                    <button type="submit" class="pay-btn secondary"><span>{{ __($p.'coupon.remove') }}</span></button>
+                </form>
+            @endif
+        </section>
+    @elseif ($couponUrl)
+        <section class="card">
+            <details @if ($errors->has('coupon') || $errors->has('code')) open @endif>
+                <summary class="pay-btn secondary"><span>{{ __($p.'coupon.title') }}<small>{{ __($p.'coupon.hint') }}</small></span></summary>
+                <form method="post" action="{{ $couponUrl }}">
+                    @csrf
+                    <label class="field"><span>{{ __($p.'coupon.label') }}</span>
+                        <input type="text" name="code" maxlength="32" dir="ltr" autocomplete="off" autocapitalize="characters" required value="{{ old('code') }}">
+                    </label>
+                    <button type="submit" class="pay-btn"><span>{{ __($p.'coupon.apply') }}</span></button>
+                </form>
+            </details>
+        </section>
+    @endif
 
     @if ($errors->any())
         <p class="errors" role="alert">{{ $errors->first() }}</p>

@@ -12,6 +12,7 @@ use Illuminate\Support\ServiceProvider;
 use Modules\Communication\Contracts\NotificationLinks;
 use Modules\Communication\Contracts\NotificationsApi;
 use Modules\Credits\Contracts\Events\CreditsGranted;
+use Modules\Enrollment\Contracts\Events\EnrollmentActivated;
 use Modules\Enrollment\Contracts\Events\EnrollmentEnded;
 use Modules\Enrollment\Contracts\Events\EnrollmentPaused;
 use Modules\Enrollment\Contracts\Events\EnrollmentResumed;
@@ -27,6 +28,7 @@ use Modules\Scheduling\Console\SweepSessionsCommand;
 use Modules\Scheduling\Contracts\AssessmentLessons;
 use Modules\Scheduling\Contracts\AttendanceApi;
 use Modules\Scheduling\Contracts\CourseGroups;
+use Modules\Scheduling\Contracts\DTOs\StartOffer;
 use Modules\Scheduling\Contracts\Events\DstShiftDecided;
 use Modules\Scheduling\Contracts\Events\DstShiftUpcoming;
 use Modules\Scheduling\Contracts\Events\GroupStarted;
@@ -46,7 +48,9 @@ use Modules\Scheduling\Contracts\Events\TeacherLessonsShifted;
 use Modules\Scheduling\Contracts\Events\TimeOffDecided;
 use Modules\Scheduling\Contracts\Events\TimeOffRequested;
 use Modules\Scheduling\Contracts\Events\TrialLessonBooked;
+use Modules\Scheduling\Contracts\OwnCourseStart;
 use Modules\Scheduling\Contracts\ScheduleImport;
+use Modules\Scheduling\Contracts\StartOffers;
 use Modules\Scheduling\Contracts\TrialBooking;
 use Modules\Scheduling\Contracts\TrialConversionRates;
 use Modules\Scheduling\Domain\AttendancePolicy;
@@ -62,10 +66,12 @@ use Modules\Scheduling\Filament\Teacher\MyWeek;
 use Modules\Scheduling\Listeners\FundSessionsFromNewCredit;
 use Modules\Scheduling\Listeners\SendSchedulingNotifications;
 use Modules\Scheduling\Listeners\TellGroupStarted;
+use Modules\Scheduling\Listeners\WelcomeToCourse;
 use Modules\Scheduling\Live\BoardChanged;
 use Modules\Scheduling\Live\LessonsChanged;
 use Modules\Scheduling\Privacy\LessonsData;
 use Modules\Scheduling\Queries\Groups\CourseGroupsQuery;
+use Modules\Scheduling\Queries\Start\StartRules;
 use Modules\Scheduling\Setup\PolicyStep;
 use Modules\Scheduling\Setup\TeacherHoursStep;
 use Modules\Scheduling\TrialBookingService;
@@ -88,6 +94,15 @@ final class SchedulingServiceProvider extends ServiceProvider
         $this->app->bind(ScheduleImport::class, BringExistingSchedule::class);
         $this->app->bind(CourseGroups::class, CourseGroupsQuery::class);
         // Trial conversion is the CRM's to know; without it no teacher gets ahead in a trial search.
+        // The family's own start (J3): its rules for the trial's report, and the trial's offer (the CRM's; none without it).
+        $this->app->bind(OwnCourseStart::class, StartRules::class);
+        $this->app->bindIf(StartOffers::class, fn () => new class implements StartOffers
+        {
+            public function forLearner(string $learnerId, string $subjectId, string $payerId): ?StartOffer
+            {
+                return null;
+            }
+        });
         $this->app->bindIf(TrialConversionRates::class, fn () => new class implements TrialConversionRates
         {
             public function forTeachers(array $teacherIds): array
@@ -133,6 +148,7 @@ final class SchedulingServiceProvider extends ServiceProvider
 
         SendSchedulingNotifications::templates($this->app->make(NotificationsApi::class));
         TellGroupStarted::templates($this->app->make(NotificationsApi::class));
+        WelcomeToCourse::templates($this->app->make(NotificationsApi::class));
         $links = $this->app->make(NotificationLinks::class);
         $links->register('shift_proposal', fn (array $a, string $panel) => $panel === 'academy' ? ReviewShiftProposal::getUrl(['proposal' => $a['id']], panel: 'academy') : null);
         $links->register('dispute', fn (array $a, string $panel) => $panel === 'academy' ? LessonDisputes::getUrl(['dispute' => $a['id']], panel: 'academy') : null);
@@ -173,6 +189,7 @@ final class SchedulingServiceProvider extends ServiceProvider
         Event::listen(EnrollmentPaused::class, [SendSchedulingNotifications::class, 'coursePaused']);
         Event::listen(EnrollmentResumed::class, [SendSchedulingNotifications::class, 'courseResumed']);
         Event::listen(EnrollmentEnded::class, [SendSchedulingNotifications::class, 'courseEnded']);
+        Event::listen(EnrollmentActivated::class, WelcomeToCourse::class);
         foreach ([ShiftProposalApproved::class, ShiftProposalRejected::class, ShiftProposalChangesRequested::class, ShiftProposalCountered::class] as $answer) {
             Event::listen($answer, [SendSchedulingNotifications::class, 'proposalAnswered']);
         }

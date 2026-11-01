@@ -9,18 +9,21 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Modules\Billing\Actions\BuyExtraLessons;
+use Modules\Billing\Actions\Discounts\PayerCoupon;
 use Modules\Billing\Actions\Payments\StartCheckout;
 use Modules\Billing\Actions\Proofs\SubmitPaymentProof;
 use Modules\Billing\Filament\Family\FamilyAccount;
 use Modules\Billing\Filament\Resources\Invoices\InvoiceResource;
 use Modules\Billing\Models\GatewayAccount;
 use Modules\Billing\Models\Invoice;
+use Modules\Billing\Models\PaymentCheckout;
 use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Payments\GatewayManager;
 use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Queries\CourseBillingQuery;
 use Modules\Billing\Queries\InvoiceCourses;
+use Modules\Billing\Queries\InvoiceSummaries;
 use Modules\Billing\Queries\TransferDetails;
 use Modules\People\Contracts\FamilyView;
 use Modules\SharedKernel\Money\Money;
@@ -308,7 +311,11 @@ final class FamilyBillingController
      */
     public function checkout(Request $request, string $invoice, OnlinePayments $online, StartCheckout $start): JsonResponse
     {
-        $request->validate(['account_id' => ['nullable', 'string', 'max:64']]);
+        $request->validate([
+            'account_id' => ['nullable', 'string', 'max:64'],
+            /** Where the payer comes back after the gateway: portal or app (the portal's /{locale}/pay/return, which opens the app); none: the academy's pay page. */
+            'return' => ['nullable', 'string', 'in:portal,app'],
+        ]);
         $me = (string) $request->user()?->getAuthIdentifier();
         $own = Str::isUuid($invoice) ? Invoice::query()->find($invoice) : null;
         if ($own === null || DB::table('billing_accounts')->where('id', $own->billing_account_id)->value('payer_id') !== $me) {
@@ -320,12 +327,96 @@ final class FamilyBillingController
         if ($account === null) {
             throw ValidationException::withMessages(['account_id' => __('billing::payments.family.unavailable')]);
         }
-        $checkout = $start->handle($own, $account, $me, 'link');
+        $checkout = $start->handle($own, $account, $me, 'link', $request->input('return'));
 
         return response()->json([
             'checkout_id' => $checkout->id,
             'url' => $checkout->url,
             'expires_at' => $this->time->present($checkout->expires_at),
         ], 201);
+    }
+
+    /**
+     * One of my invoices, before or after paying.
+     *
+     * What it is for and what came off it, line by line, the VAT, what is left, the coupon on it and whether one can be typed
+     * now (why not in my words), its signed pages, and the latest online payment on it (for the portal's page after the
+     * gateway: paid, open while the gateway confirms, failed or expired). A child who does not pay sees no money.
+     *
+     * @throws NotFoundHttpException not an invoice I pay
+     */
+    public function show(Request $request, string $invoice, InvoiceSummaries $summaries): JsonResponse
+    {
+        $me = (string) $request->user()?->getAuthIdentifier();
+        $own = $this->mine($me, $invoice);
+        $checkout = PaymentCheckout::query()->where('invoice_id', $own->id)->where('payer_id', $me)
+            ->when(Str::isUuid((string) $request->query('checkout')), fn ($q) => $q->whereKey((string) $request->query('checkout')))->latest()->first();
+
+        return response()->json([
+            'data' => $summaries->of($own, $me)->present($this->time),
+            /** The latest online payment I began on it: paid, open (the gateway is confirming), failed, expired or refund_due; null when none. */
+            'checkout' => $checkout === null ? null : [
+                'id' => $checkout->id,
+                'status' => $checkout->status,
+                /** Where it stands, in a sentence. */
+                'text' => __('billing::payments.page.result.'.$checkout->status),
+                'hint' => __('billing::payments.page.result_hint.'.$checkout->status),
+            ],
+        ]);
+    }
+
+    /**
+     * Put a coupon on my invoice before paying.
+     *
+     * Only a course's own block invoice, issued, with nothing paid, no proof waiting and no online payment open (coupon_entry
+     * says so). The invoice is issued again with the discount: the answer is the new invoice (a new id and number; the old one
+     * is void). 422 with why not, in my words. Send an Idempotency-Key.
+     *
+     * @throws NotFoundHttpException not an invoice I pay
+     */
+    public function applyCoupon(Request $request, string $invoice, PayerCoupon $coupons, InvoiceSummaries $summaries): JsonResponse
+    {
+        $data = $request->validate(['code' => ['required', 'string', 'max:40']]);
+        $me = (string) $request->user()?->getAuthIdentifier();
+        $again = $coupons->apply($this->mine($me, $invoice), $me, (string) $data['code']);
+
+        return response()->json([
+            'data' => $summaries->of($again->refresh(), $me)->present($this->time),
+            'message' => __('billing::discounts.payer.applied', ['code' => PayerCoupon::onInvoice($again)['code'] ?? '']),
+        ]);
+    }
+
+    /**
+     * Take a coupon off my invoice before paying.
+     *
+     * The trial's offer stays (422). The invoice is issued again without it: the answer is the new invoice. Send an Idempotency-Key.
+     *
+     * @throws NotFoundHttpException not an invoice I pay
+     */
+    public function removeCoupon(Request $request, string $invoice, PayerCoupon $coupons, InvoiceSummaries $summaries): JsonResponse
+    {
+        $me = (string) $request->user()?->getAuthIdentifier();
+        $own = $this->mine($me, $invoice);
+        $code = PayerCoupon::onInvoice($own)['code'] ?? '';
+        $again = $coupons->remove($own, $me);
+
+        return response()->json([
+            'data' => $summaries->of($again->refresh(), $me)->present($this->time),
+            'message' => __('billing::discounts.payer.removed', ['code' => $code]),
+        ]);
+    }
+
+    /** An invoice this person pays; anyone else's reads as not found. */
+    private function mine(string $me, string $invoice): Invoice
+    {
+        if (! FamilyAccount::shown()) {
+            throw new AccessDeniedHttpException;
+        }
+        $own = Str::isUuid($invoice) ? Invoice::query()->with('lines')->find($invoice) : null;
+        if ($own === null || DB::table('billing_accounts')->where('id', $own->billing_account_id)->value('payer_id') !== $me) {
+            throw new NotFoundHttpException;
+        }
+
+        return $own;
     }
 }

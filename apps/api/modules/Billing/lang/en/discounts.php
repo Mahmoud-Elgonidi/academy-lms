@@ -2,6 +2,34 @@
 
 return [
     'reissue_reason' => 'Issued again with coupon :code',
+    'reissue_removed' => 'Issued again without coupon :code',
+    // The payer typing a code on the pay page or in the app, before paying (J3): what to do next.
+    'payer' => [
+        'applied' => 'Coupon :code applied: here is your new invoice with the discount.',
+        'removed' => 'Coupon :code removed: here is your new invoice.',
+        'not_payer' => 'This invoice is not in your name. Open the link you received, or sign in to your account.',
+        'not_open' => 'This invoice is no longer waiting to be paid, so a coupon cannot be added.',
+        'paid_some' => 'Part of this invoice is paid, so a coupon cannot be added now. Pay the rest, or message the academy.',
+        'proof_waiting' => 'You sent a proof of payment for this invoice and it is being checked, so a coupon cannot be added now. Wait for the academy\'s answer.',
+        'checkout_open' => 'You started paying this invoice online. Finish it, or wait a few minutes for the payment page to close, then add the coupon.',
+        'family_invoice' => 'This invoice is for more than one course, so a coupon cannot be added here. Message the academy to put it on the right course.',
+        'not_block' => 'A coupon does not go on an invoice for extra lessons; only the sibling discount does.',
+        'has_coupon' => 'This invoice already has :code off. Remove it first if you want another coupon.',
+        'offer_stays' => 'This is your offer after the free trial; it stays so you do not lose it. If you have another coupon, message the academy.',
+        'no_coupon' => 'There is no coupon on this invoice.',
+        'code' => 'Type the coupon code as you received it (3 to 32 characters).',
+    ],
+    'payer_errors' => [
+        'not_found' => 'There is no coupon :code. Check it is typed as you received it.',
+        'inactive' => 'Coupon :code is not available now. Message the academy if they sent it to you.',
+        'expired' => 'Coupon :code has ended; the invoice stays at its price.',
+        'not_yet' => 'Coupon :code starts on :date. You can pay now at the current price, or wait until then.',
+        'used_up' => 'Coupon :code has been used as many times as it can.',
+        'plan' => 'Coupon :code does not cover this plan.',
+        'currency' => 'Coupon :code is in :currency, and this invoice is in another currency.',
+        'used_before' => 'You have used coupon :code before; it is once per family.',
+        'cancelled' => 'This course is no longer on, so a coupon cannot be added.',
+    ],
     'quote' => [
         'sibling' => 'Sibling discount (:rate)',
         'coupon' => 'Coupon :code (:value)',

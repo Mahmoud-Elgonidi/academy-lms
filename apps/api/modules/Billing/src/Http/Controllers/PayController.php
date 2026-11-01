@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Modules\Billing\Actions\Discounts\PayerCoupon;
 use Modules\Billing\Actions\Payments\SettleCheckout;
 use Modules\Billing\Actions\Payments\StartCheckout;
 use Modules\Billing\Actions\Proofs\SubmitPaymentProof;
@@ -22,6 +23,7 @@ use Modules\Billing\Payments\OnlinePayments;
 use Modules\Billing\Payments\PayLinks;
 use Modules\Billing\Queries\InvoiceCourses;
 use Modules\Billing\Queries\InvoiceDocument;
+use Modules\Billing\Queries\InvoiceSummaries;
 use Modules\Billing\Queries\TransferDetails;
 use Modules\Platform\Contracts\BrandingApi;
 use Modules\SharedKernel\Tenancy\TenantContext;
@@ -48,8 +50,16 @@ final class PayController
         // Where to send the money by hand (the payer's region's words, else the academy's), while something is left to pay.
         $manual = $transfer->forInvoice($invoice);
 
+        $summary = app(InvoiceSummaries::class)->of($invoice, $payerId);
+        $couponParams = array_filter(['invoice' => $invoice->id, 'u' => $payerId]);
+
         return view('billing::pay.show', [
             'invoice' => $invoice,
+            // What it is for and what came off it, the VAT, and typing a coupon before paying (J3).
+            'summary' => $summary,
+            'couponUrl' => $summary->couponOpen ? URL::temporarySignedRoute('billing.pay.coupon', now()->addHours(6), $couponParams, absolute: false) : null,
+            'couponRemoveUrl' => $summary->couponOpen && $summary->coupon !== null && ! $summary->coupon['personal']
+                ? URL::temporarySignedRoute('billing.pay.coupon.remove', now()->addHours(6), $couponParams, absolute: false) : null,
             'student' => $student,
             'branding' => $branding->current(),
             'checkout' => $checkout,
@@ -86,6 +96,35 @@ final class PayController
         return redirect()->to($back)->with('proof_sent', true);
     }
 
+    /** The payer types a coupon before paying: the invoice comes out again with it, at its own new link. */
+    public function coupon(Request $request, Invoice $invoice, PayerCoupon $coupons, PayLinks $links, TenantContext $tenants): RedirectResponse
+    {
+        $payerId = (string) ($request->query('u') ?: DB::table('billing_accounts')->where('id', $invoice->billing_account_id)->value('payer_id'));
+        $this->speak($payerId, $tenants);
+        try {
+            $again = $coupons->apply($invoice, $payerId, (string) $request->input('code', ''));
+        } catch (ValidationException $e) {
+            return redirect()->to($links->invoice($invoice, $request->query('u')))->withErrors($e->errors())->withInput();
+        }
+
+        return redirect()->to($links->invoice($again, $request->query('u')))->with('coupon_done', __('billing::discounts.payer.applied', ['code' => strtoupper(trim((string) $request->input('code')))]));
+    }
+
+    /** The payer takes a coupon off before paying (never the trial's offer): the invoice comes out again without it. */
+    public function removeCoupon(Request $request, Invoice $invoice, PayerCoupon $coupons, PayLinks $links, TenantContext $tenants): RedirectResponse
+    {
+        $payerId = (string) ($request->query('u') ?: DB::table('billing_accounts')->where('id', $invoice->billing_account_id)->value('payer_id'));
+        $this->speak($payerId, $tenants);
+        $code = PayerCoupon::onInvoice($invoice)['code'] ?? '';
+        try {
+            $again = $coupons->remove($invoice, $payerId);
+        } catch (ValidationException $e) {
+            return redirect()->to($links->invoice($invoice, $request->query('u')))->withErrors($e->errors());
+        }
+
+        return redirect()->to($links->invoice($again, $request->query('u')))->with('coupon_done', __('billing::discounts.payer.removed', ['code' => $code]));
+    }
+
     /** The invoice as a document to read and print (a Saudi tax invoice with its QR code, and the credit note that cancelled it). */
     public function document(Request $request, Invoice $invoice, InvoiceDocument $documents, BrandingApi $branding, TenantContext $tenants, PayLinks $links): View
     {
@@ -118,6 +157,12 @@ final class PayController
             report($e);     // the webhook or the sweeper settles it later; the payer sees "confirming"
         }
 
+        // Begun in the portal or the app: back to the portal's own page, which reads the invoice signed in.
+        if ($checkout->return_to !== null) {
+            $locale = $checkout->payer_id ? DB::table('users')->where('id', $checkout->payer_id)->value('locale') : null;
+
+            return redirect()->away($links->portalReturn($checkout, (string) ($locale ?: app()->getLocale())));
+        }
         if ($checkout->channel === 'family' && auth()->check()) {
             return redirect()->to(FamilyBilling::getUrl(['checkout' => $checkout->id], panel: 'family'));
         }

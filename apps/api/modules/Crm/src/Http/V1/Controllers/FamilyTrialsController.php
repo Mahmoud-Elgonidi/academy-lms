@@ -72,7 +72,7 @@ final class FamilyTrialsController
 
         return response()->json([
             'viewer_stage' => $stage->value,
-            'data' => $reports->present($trial, $stage === LearnerStage::Classic, $this->viewer->effective()),
+            'data' => $reports->present($trial, $stage === LearnerStage::Classic, $this->viewer->effective(), viewerId: $me),
         ]);
     }
 

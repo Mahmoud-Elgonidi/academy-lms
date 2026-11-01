@@ -16,6 +16,7 @@ use Modules\Billing\Actions\SubscribeEnrollment;
 use Modules\Billing\Contracts\BillingApi;
 use Modules\Billing\Contracts\DTOs\CourseBilling;
 use Modules\Billing\Contracts\DTOs\EndedCourseBilling;
+use Modules\Billing\Contracts\DTOs\InvoiceSummary;
 use Modules\Billing\Contracts\DTOs\IssuedInvoice;
 use Modules\Billing\Contracts\DTOs\NewPlan;
 use Modules\Billing\Contracts\DTOs\NewSubscription;
@@ -26,12 +27,17 @@ use Modules\Billing\Contracts\DTOs\PriceQuote;
 use Modules\Billing\Contracts\DTOs\RegionOption;
 use Modules\Billing\Contracts\DTOs\SharedPackage;
 use Modules\Billing\Models\BillingAccount;
+use Modules\Billing\Models\BillingSettings;
 use Modules\Billing\Models\Coupon;
+use Modules\Billing\Models\Invoice;
+use Modules\Billing\Models\PaymentCheckout;
+use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Models\Plan;
 use Modules\Billing\Models\PlanPrice;
 use Modules\Billing\Models\PriceRegion;
 use Modules\Billing\Models\Subscription;
 use Modules\Billing\Queries\CourseBillingQuery;
+use Modules\Billing\Queries\InvoiceSummaries;
 use Modules\Enrollment\Contracts\EnrollmentApi;
 use Modules\SharedKernel\Money\Money;
 
@@ -79,6 +85,7 @@ final class BillingService implements BillingApi
                 names: [$plan->name_ar, $plan->name_en],
                 shared: $plan->isShared(),
                 group: $plan->isGroup(),
+                renewAtSessions: (int) $plan->renew_at_sessions,
             ))
             ->all();
     }
@@ -198,6 +205,44 @@ final class BillingService implements BillingApi
     public function closeEndedCourse(string $enrollmentId, ?string $actorId): EndedCourseBilling
     {
         return app(CloseEndedCourse::class)->handle($enrollmentId, $actorId);
+    }
+
+    public function selfServeEnrol(): bool
+    {
+        return BillingSettings::current()->self_serve_enrol;
+    }
+
+    public function invoiceSummary(string $invoiceId, ?string $payerId): ?InvoiceSummary
+    {
+        $invoice = Invoice::query()->with('lines')->find($invoiceId);
+
+        return $invoice === null ? null : app(InvoiceSummaries::class)->of($invoice, $payerId);
+    }
+
+    public function firstInvoice(string $enrollmentId, ?string $payerId): ?InvoiceSummary
+    {
+        $subscription = Subscription::query()->where('enrollment_id', $enrollmentId)->first();
+        if ($subscription === null) {
+            return null;
+        }
+        $invoice = Invoice::query()->with('lines')->whereIn('status', ['issued', 'paid', 'void'])
+            ->whereHas('lines', fn ($q) => $q->where('subscription_id', $subscription->id)->where('kind', 'block')->whereRaw("(meta->>'block_no')::int = 1"))
+            ->orderByRaw("case status when 'paid' then 0 when 'issued' then 1 else 2 end")->latest('issued_at')->first();
+
+        return $invoice === null ? null : app(InvoiceSummaries::class)->of($invoice, $payerId);
+    }
+
+    public function paymentUnderway(string $invoiceId): ?string
+    {
+        $invoice = Invoice::query()->find($invoiceId);
+
+        return match (true) {
+            $invoice === null => null,
+            $invoice->paid_minor > 0 || $invoice->status === 'paid' => 'paid_some',
+            PaymentProof::query()->where('invoice_id', $invoiceId)->where('status', 'pending')->exists() => 'proof_waiting',
+            PaymentCheckout::query()->where('invoice_id', $invoiceId)->where('status', 'open')->where('expires_at', '>', CarbonImmutable::now())->exists() => 'checkout_open',
+            default => null,
+        };
     }
 
     private function subscriptionId(string $enrollmentId): string

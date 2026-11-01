@@ -10,7 +10,8 @@ use Modules\SharedKernel\Privacy\PersonalDataSource;
  * A person's lessons (as a student: when, what, with whom, how long they
  * were in; as a teacher: when and what, without the students' names), the
  * groups they learned in (subject, teacher, from and to, never classmates),
- * the disputes they raised and a teacher's time off. Lessons still to come hold
+ * the disputes they raised, a teacher's time off, and the courses a family
+ * started on its own (J3). Lessons still to come hold
  * an erasure back. Erasing blanks their words in a dispute and in time-off
  * notes and drops held times; the lessons stay, for credit, pay and the
  * academy's numbers.
@@ -49,6 +50,12 @@ final class LessonsData implements PersonalDataSource
                 ->map(fn (object $r) => (array) $r)->all(),
             'time_off' => DB::table('teacher_time_off')->where('teacher_id', $userId)->orderBy('starts_at')
                 ->get(['starts_at', 'ends_at', 'all_day', 'reason', 'note', 'status', 'decision_note'])->map(fn (object $r) => (array) $r)->all(),
+            // Courses the family started on its own (J3): by whom (this person) or for whom, the price it began at, and whether called off.
+            'started_courses' => DB::table('course_starts as c')
+                ->join('enrollments as e', fn ($j) => $j->on('e.academy_id', '=', 'c.academy_id')->on('e.id', '=', 'c.enrollment_id'))
+                ->leftJoin('subjects as sub', fn ($j) => $j->on('sub.academy_id', '=', 'e.academy_id')->on('sub.id', '=', 'e.subject_id'))
+                ->where(fn ($q) => $q->where('c.started_by', $userId)->orWhere('c.learner_id', $userId))->orderBy('c.created_at')
+                ->get(['c.created_at as started_at', $subject, 'c.price_minor', 'c.currency', 'c.offer_applied', 'c.cancelled_at'])->map(fn (object $r) => (array) $r)->all(),
         ]);
     }
 

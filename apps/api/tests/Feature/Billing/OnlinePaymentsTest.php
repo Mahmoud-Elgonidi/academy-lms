@@ -228,7 +228,8 @@ it('opens the invoice from its signed link, pays, and comes back to say so; nobo
 
     $this->get(preg_replace('/signature=[^&]+/', 'signature=forged', $link()))->assertForbidden();
     $page = $this->get($link())->assertOk()->assertSee($this->invoice->number)->assertSee('class="pay-btn', false);
-    preg_match('#action="([^"]*/pay/invoice/[^"]+)"#', $page->getContent(), $form);
+    // The first way to pay (the coupon's form, J3, comes before it).
+    preg_match('#action="([^"]*/pay/invoice/(?![^"]*/coupon)[^"]+)"#', $page->getContent(), $form);
     $go = $this->post(html_entity_decode($form[1]))->assertRedirect();
     expect($go->headers->get('Location'))->toContain('/pay/demo/');
 

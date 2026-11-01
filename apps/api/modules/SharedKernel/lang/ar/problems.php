@@ -12,6 +12,8 @@ return [
     'academy-suspended' => 'هذه الأكاديمية موقوفة.',
     'academy-not-found' => 'الأكاديمية غير موجودة.',
     'not-found' => 'غير موجود.',
+    'start-refused' => 'تعذّر بدء الكورس بهذه الاختيارات.',
+    'guardian-consent-needed' => 'يحتاج حساب الطفل إلى موافقة وليّ الأمر أولًا.',
     'link-expired' => 'انتهت مدة هذا الرابط.',
     'bad-request' => 'طلب غير صحيح.',
     'method-not-allowed' => 'الطريقة غير مسموحة.',

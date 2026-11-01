@@ -111,7 +111,7 @@ final class BringExistingSchedule implements ScheduleImport
                 $expires = $s->creditExpiresOn?->endOfDay() ?? ($plan ? $s->startDate->addDays($plan->validityDays)->endOfDay() : null);
                 $this->credits->grant($accountId, LotSource::Purchase, null, $s->remainingLessons * $s->durationMin, $expires, 'import:'.$enrollmentId, $s->actorId, 'imported');
             }
-            $this->enrollments->activate($enrollmentId, $s->actorId);
+            $this->enrollments->activate($enrollmentId, $s->actorId, 'imported');
 
             $this->slots->handle($enrollmentId, $s->teacherId, $s->studentId, $teacherTz, $times, $s->actorId);
             $result = $this->materialize->handle([$enrollmentId], actorId: $s->actorId);

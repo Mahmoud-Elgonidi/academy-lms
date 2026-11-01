@@ -20,8 +20,8 @@ final class CouponCheck
 {
     public function __construct(private readonly TenantContext $tenant) {}
 
-    /** @throws ValidationException under "coupon" */
-    public function usable(string $code, string $payerId, string $currency, string $planId): Coupon
+    /** @throws ValidationException under "coupon"; $forPayer words it for the payer typing it (what to do next) */
+    public function usable(string $code, string $payerId, string $currency, string $planId, bool $forPayer = false): Coupon
     {
         $coupon = Coupon::byCode($code);
         $today = CarbonImmutable::now($this->tenant->require()->defaultTimezone)->toDateString();
@@ -40,7 +40,7 @@ final class CouponCheck
             default => null,
         };
         if ($why !== null) {
-            throw ValidationException::withMessages(['coupon' => __('billing::discounts.errors.'.$why, [
+            throw ValidationException::withMessages(['coupon' => __('billing::discounts.'.($forPayer ? 'payer_errors.' : 'errors.').$why, [
                 'code' => Coupon::normalize($code),
                 'date' => $coupon?->starts_on?->locale(app()->getLocale())->translatedFormat('j F'),
                 'currency' => $coupon?->currency,

@@ -20,6 +20,7 @@ use Modules\Billing\Actions\Discounts\SaveSiblingDiscount;
 use Modules\Billing\Actions\SaveBillingSettings;
 use Modules\Billing\Actions\SavePlan;
 use Modules\Billing\Actions\SavePriceRegions;
+use Modules\Billing\Actions\SaveSelfServeEnrol;
 use Modules\Billing\Models\BillingSettings;
 use Modules\Billing\Models\PriceRegion;
 use Modules\SharedKernel\Geo\Countries;
@@ -119,6 +120,19 @@ final class ManagePlans extends ManageRecords
                 ->action(function (array $data) {
                     app(SaveSiblingDiscount::class)->handle($data['second'], $data['more'], $data['family_days']);
                     Notification::make()->success()->title(__('billing::discounts.sibling.saved'))->send();
+                }),
+            Action::make('selfServe')
+                ->label(__('billing::plans.self_serve.action'))
+                ->icon(Heroicon::OutlinedShoppingCart)
+                ->color('gray')
+                ->modalHeading(__('billing::plans.self_serve.title'))
+                ->modalDescription(__('billing::plans.self_serve.hint'))
+                ->modalWidth('md')
+                ->fillForm(fn () => ['on' => BillingSettings::current()->self_serve_enrol])
+                ->schema([Toggle::make('on')->label(__('billing::plans.self_serve.label'))])
+                ->action(function (array $data) {
+                    app(SaveSelfServeEnrol::class)->handle((bool) ($data['on'] ?? false));
+                    Notification::make()->success()->title(__('billing::plans.self_serve.saved'))->send();
                 }),
             CreateAction::make()
                 ->label(__('billing::plans.create'))

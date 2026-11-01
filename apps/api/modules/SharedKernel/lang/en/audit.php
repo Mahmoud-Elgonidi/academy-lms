@@ -18,6 +18,8 @@ return [
             'plan_saved' => 'Plan ":name" saved (:prices)',
             'proof_rejected' => 'Proof of :amount on invoice :number turned down: :reason',
             'transfer_details_saved' => 'Transfer details changed',
+            'self_serve_on' => 'Families may start a course and pay on their own',
+            'self_serve_off' => 'Families no longer start courses on their own (the office enrols)',
         ],
         'policy' => [
             'saved' => 'Cancellation policy version :version',
@@ -40,6 +42,8 @@ return [
             'settings' => 'Group lesson settings (default makeup: :late_join, mixed ages: :mixed, starts at: :min)',
         ],
         'enrollment' => [
+            'started_own' => 'The family started a course on its own (:plan, :price, offer: :offer)',
+            'own_start_cancelled' => 'The family called off a course it started before paying (:lessons lessons cancelled, invoice :invoice)',
             'teacher_changed' => 'A student\'s teacher changed from :starting',
             'paused' => 'A course paused from :from until :until (:lessons lessons cancelled): :reason',
             'resumed' => 'A paused course resumed (:early, :lessons lessons made)',
@@ -203,6 +207,7 @@ return [
         ],
     ],
     'values' => [
+        'offer' => ['applied' => 'applied', 'ended' => 'ended', 'family_discount_bigger' => 'sibling discount bigger', 'not_for_plan' => 'not for this plan', 'package' => 'shared package', 'none' => 'none'],
         'trial_booking' => ['family' => 'the family', 'staff' => 'the academy\'s staff'],
         'assign_website_leads' => ['on' => 'on', 'off' => 'off'],
         'stop_kind' => ['juz' => 'part', 'surah' => 'surah', 'program' => 'the program', 'khatma' => 'the whole Quran'],

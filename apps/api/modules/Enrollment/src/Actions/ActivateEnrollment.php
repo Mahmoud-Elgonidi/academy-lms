@@ -10,16 +10,16 @@ use Modules\Enrollment\Models\Enrollment;
 /** The first payment arrived. Anything but "awaiting payment" is left as it is. */
 final class ActivateEnrollment
 {
-    public function handle(string $enrollmentId, ?string $actorId = null): void
+    public function handle(string $enrollmentId, ?string $actorId = null, string $reason = 'paid'): void
     {
-        DB::transaction(function () use ($enrollmentId, $actorId) {
+        DB::transaction(function () use ($enrollmentId, $actorId, $reason) {
             $enrollment = Enrollment::query()->whereKey($enrollmentId)->lockForUpdate()->firstOrFail();
             if ($enrollment->status !== EnrollmentStatus::PendingPayment) {
                 return;
             }
 
-            $enrollment->moveTo(EnrollmentStatus::Active, 'paid', $actorId);
-            DB::afterCommit(fn () => event(new EnrollmentActivated($enrollment->academy_id, $enrollment->id)));
+            $enrollment->moveTo(EnrollmentStatus::Active, $reason, $actorId);
+            DB::afterCommit(fn () => event(new EnrollmentActivated($enrollment->academy_id, $enrollment->id, $reason)));
         });
     }
 }

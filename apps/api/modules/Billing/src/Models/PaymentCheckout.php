@@ -20,6 +20,7 @@ use Modules\SharedKernel\Tenancy\BelongsToTenant;
  * @property string $gateway_account_id
  * @property ?string $payer_id
  * @property string $channel family | link
+ * @property ?string $return_to portal | app: back from the gateway to the portal's /{locale}/pay/return; null: the pay page
  * @property int $amount_minor
  * @property string $currency
  * @property string $status open | paid | failed | expired | refund_due
@@ -40,7 +41,7 @@ final class PaymentCheckout extends Model
 
     protected $fillable = [
         'invoice_id', 'gateway_account_id', 'payer_id', 'channel', 'amount_minor', 'currency', 'status',
-        'provider_ref', 'provider_payment_ref', 'url', 'failure', 'expires_at', 'paid_at',
+        'provider_ref', 'provider_payment_ref', 'url', 'failure', 'expires_at', 'paid_at', 'return_to',
     ];
 
     protected $attributes = ['status' => 'open'];

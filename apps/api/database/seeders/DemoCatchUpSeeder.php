@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Modules\Billing\Database\Seeders\DemoRegionCountriesSeeder;
+use Modules\Crm\Database\Seeders\DemoSelfStartSeeder;
 use Modules\Crm\Database\Seeders\DemoTrialReportSeeder;
 use Modules\People\Database\Seeders\DemoTeacherCardsSeeder;
 use Modules\Platform\Contracts\TenantDirectory;
@@ -31,7 +32,9 @@ use Modules\Site\Database\Seeders\DemoSiteSeeder;
  * certificates on, two ready tracks, its Quran learners on plans, Yousef's last
  * lessons recorded, a certificate and an exam waiting to be booked); and
  * after the free trial (DemoTrialReportSeeder: the offer and the second
- * trial on, Jana's trial a report her mother can read, with an open offer).
+ * trial on, Jana's trial a report her mother can read, with an open offer);
+ * and the family starting a course on its own (DemoSelfStartSeeder: self-serve
+ * on, Jana's mother signs in as jana.mother@demo.test to start from the report).
  * Nothing without the demo academy (an academy's own server), and each step
  * only once.
  */
@@ -48,7 +51,7 @@ final class DemoCatchUpSeeder extends Seeder
         // The Quran's area first: what follows writes the demo's Quran (its subject, its lessons' passages).
         $this->call(DemoQuranAreaSeeder::class);
         $counts = $tenants->run($demo, function (): array {
-            $this->call([DemoQuranSeeder::class, DemoMistakesSeeder::class, DemoHifzSeeder::class, DemoRegionCountriesSeeder::class, DemoTeacherCardsSeeder::class, DemoSiteSeeder::class, DemoGroupsSeeder::class, DemoQuranPlansSeeder::class, DemoTrialReportSeeder::class]);
+            $this->call([DemoQuranSeeder::class, DemoMistakesSeeder::class, DemoHifzSeeder::class, DemoRegionCountriesSeeder::class, DemoTeacherCardsSeeder::class, DemoSiteSeeder::class, DemoGroupsSeeder::class, DemoQuranPlansSeeder::class, DemoTrialReportSeeder::class, DemoSelfStartSeeder::class]);
 
             return [
                 DB::table('quran_lesson_passages')->count(),

@@ -8,6 +8,7 @@ use Modules\Communication\Contracts\DTOs\Localized;
 use Modules\Communication\Contracts\DTOs\TemplateDefinition;
 use Modules\Communication\Contracts\DTOs\Translatable;
 use Modules\Communication\Contracts\DTOs\WeekdayTime;
+use Modules\Communication\Contracts\DTOs\WeeklyTimes;
 use Modules\Communication\Models\TemplateWording;
 use Modules\SharedKernel\Money\Money;
 use Modules\SharedKernel\Time\Clock;
@@ -61,6 +62,7 @@ final class Renderer
         return match (true) {
             $value instanceof CarbonImmutable => $value->setTimezone($timezone)->locale($locale)->translatedFormat(Clock::pattern((string) trans()->get('shared::time.label', [], $locale), $clock)),
             $value instanceof WeekdayTime => $value->local->locale($locale)->translatedFormat(Clock::pattern('l H:i', $clock)),
+            $value instanceof WeeklyTimes => $this->weekly($value, $locale, $timezone, $clock),
             $value instanceof Day => CarbonImmutable::parse($value->date, $timezone)->locale($locale)->translatedFormat('l j F'),
             $value instanceof Money => $value->format($locale),
             $value instanceof Localized => $value->in($locale),
@@ -68,5 +70,20 @@ final class Renderer
             $value === null => '',
             default => (string) $value,
         };
+    }
+
+    /** Each weekly time on the recipient's clock, from Saturday in Arabic (Monday otherwise), joined as a list. */
+    private function weekly(WeeklyTimes $times, string $locale, string $timezone, TimeFormat $clock): string
+    {
+        $local = array_map(fn (CarbonImmutable $at) => $at->setTimezone($timezone), $times->starts);
+        $first = $locale === 'ar' ? 6 : 1;
+        usort($local, fn (CarbonImmutable $a, CarbonImmutable $b) => [($a->dayOfWeekIso - $first + 7) % 7, $a->format('H:i')] <=> [($b->dayOfWeekIso - $first + 7) % 7, $b->format('H:i')]);
+        $words = array_map(fn (CarbonImmutable $at) => $at->locale($locale)->translatedFormat(Clock::pattern('l H:i', $clock)), $local);
+        if (count($words) < 2) {
+            return (string) ($words[0] ?? '');
+        }
+        $last = array_pop($words);
+
+        return implode($locale === 'ar' ? '، ' : ', ', $words).($locale === 'ar' ? ' و' : ' and ').$last;
     }
 }

@@ -18,6 +18,8 @@ return [
             'extra_lessons' => 'فاتورة :number بحصص إضافية عددها :lessons (:total)',
             'plan_saved' => 'حفظ الباقة ":name" (:prices)',
             'transfer_details_saved' => 'تعديل بيانات التحويل',
+            'self_serve_on' => 'السماح للأسر ببدء كورس والدفع بنفسها',
+            'self_serve_off' => 'إيقاف بدء الأسر للكورسات بنفسها (التسجيل من المكتب فقط)',
         ],
         'policy' => [
             'saved' => 'إصدار :version من سياسة الإلغاء والتعويض',
@@ -40,6 +42,8 @@ return [
             'settings' => 'إعدادات الحصص الجماعية (التعويض الافتراضي: :late_join، الأعمار المختلطة: :mixed، البدء عند: :min)',
         ],
         'enrollment' => [
+            'started_own' => 'بدأت الأسرة كورسًا بنفسها (:plan، :price، العرض: :offer)',
+            'own_start_cancelled' => 'ألغت الأسرة كورسًا بدأته قبل الدفع (الحصص الملغاة: :lessons، الفاتورة: :invoice)',
             'teacher_changed' => 'تغيير معلّم طالب بدءًا من :starting',
             'paused' => 'إيقاف كورس من :from حتى :until (الحصص الملغاة: :lessons): :reason',
             'resumed' => 'استئناف كورس موقوف (:early، الحصص المُنشأة: :lessons)',
@@ -203,6 +207,7 @@ return [
         ],
     ],
     'values' => [
+        'offer' => ['applied' => 'طُبّق', 'ended' => 'انتهى', 'family_discount_bigger' => 'خصم الإخوة أكبر', 'not_for_plan' => 'لا يشمل الباقة', 'package' => 'باقة مشتركة', 'none' => 'لا يوجد'],
         'trial_booking' => ['family' => 'تحجزها الأسرة', 'staff' => 'يحجزها فريق الأكاديمية'],
         'assign_website_leads' => ['on' => 'مفعّل', 'off' => 'متوقف'],
         'stop_kind' => ['juz' => 'الجزء', 'surah' => 'السورة', 'program' => 'البرنامج', 'khatma' => 'القرآن كاملًا'],

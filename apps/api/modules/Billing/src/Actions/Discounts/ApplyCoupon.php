@@ -5,15 +5,12 @@ namespace Modules\Billing\Actions\Discounts;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Modules\Billing\Actions\IssueBlockInvoice;
-use Modules\Billing\Actions\VoidInvoice;
 use Modules\Billing\Discounts\CouponCheck;
+use Modules\Billing\Discounts\ReissueBlock;
 use Modules\Billing\Models\BillingAccount;
 use Modules\Billing\Models\Coupon;
 use Modules\Billing\Models\CouponRedemption;
 use Modules\Billing\Models\Invoice;
-use Modules\Billing\Models\PaymentCheckout;
-use Modules\Billing\Models\PaymentProof;
 use Modules\Billing\Models\Subscription;
 use Modules\SharedKernel\Audit\AuditTrail;
 
@@ -29,8 +26,7 @@ final class ApplyCoupon
 {
     public function __construct(
         private readonly CouponCheck $check,
-        private readonly VoidInvoice $void,
-        private readonly IssueBlockInvoice $issue,
+        private readonly ReissueBlock $reissue,
     ) {}
 
     /** @return array{redemption: CouponRedemption, reissued: ?Invoice} */
@@ -49,7 +45,7 @@ final class ApplyCoupon
             Coupon::query()->where('code', Coupon::normalize($code))->lockForUpdate()->first();
             $coupon = $this->check->usable($code, $payerId, $subscription->currency, $subscription->plan_id);
 
-            $waiting = $reissue ? $this->waitingBlock($subscription) : null;
+            $waiting = $reissue ? $this->reissue->waiting($subscription) : null;
 
             $redemption = CouponRedemption::query()->create([
                 'coupon_id' => $coupon->id,
@@ -62,16 +58,7 @@ final class ApplyCoupon
             $reissued = null;
             if ($waiting !== null) {
                 // The same blocks again: this course's first, and the family's others when it was a family invoice.
-                $blocks = $waiting->lines->where('kind', 'block')
-                    ->sortBy(fn ($line) => $line->subscription_id === $subscription->id ? 0 : 1)
-                    ->map(function ($line) {
-                        $course = Subscription::query()->with('plan')->findOrFail($line->subscription_id);
-                        [$ar, $en] = $course->subjectNames();
-
-                        return [$course, (int) $line->meta['block_no'], $ar, $en];
-                    })->values()->all();
-                $this->void->handle($waiting->id, __('billing::discounts.reissue_reason', ['code' => $coupon->code]), $actorId);
-                $reissued = $this->issue->together($blocks, $actorId);
+                $reissued = $this->reissue->again($subscription, $waiting, __('billing::discounts.reissue_reason', ['code' => $coupon->code]), $actorId);
             }
 
             app(AuditTrail::class)->record('billing.coupon_applied', 'subscription', $subscription->id, array_filter([
@@ -83,21 +70,5 @@ final class ApplyCoupon
 
             return ['redemption' => $redemption->load('coupon'), 'reissued' => $reissued];
         });
-    }
-
-    /** The block invoice waiting to be paid, if it can be issued again; refuses when money may be on its way. */
-    private function waitingBlock(Subscription $subscription): ?Invoice
-    {
-        $invoice = Invoice::query()->with('lines')->forSubscription($subscription->id, 'block')->where('status', 'issued')->latest('issued_at')->first();
-        if ($invoice === null) {
-            return null;
-        }
-        if ($invoice->paid_minor > 0
-            || PaymentProof::query()->where('invoice_id', $invoice->id)->where('status', 'pending')->exists()
-            || PaymentCheckout::query()->where('invoice_id', $invoice->id)->where('status', 'open')->exists()) {
-            throw ValidationException::withMessages(['coupon' => __('billing::discounts.errors.invoice_busy', ['number' => $invoice->number])]);
-        }
-
-        return $invoice;
     }
 }

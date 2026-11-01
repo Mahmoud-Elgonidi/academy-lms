@@ -1,0 +1,36 @@
+<?php
+
+namespace Modules\Scheduling\Contracts\DTOs;
+
+use Carbon\CarbonImmutable;
+
+/**
+ * A course the family started: its enrollment, the first invoice (none when it
+ * joined a shared package), the teacher, its weekly times (each as its first
+ * lesson's instant), the first lesson, and what became of the trial's offer:
+ * applied, ended (its time passed: the plain price), family_discount_bigger,
+ * not_for_plan, package (a shared package has no invoice of its own) or none.
+ */
+final readonly class OwnStarted
+{
+    /**
+     * @param  list<CarbonImmutable>  $weeklyTimes
+     * @param  list<string>  $skippedDates
+     */
+    public function __construct(
+        public string $enrollmentId,
+        public ?string $invoiceId,
+        public string $teacherId,
+        public array $weeklyTimes,
+        public ?CarbonImmutable $firstLesson,
+        public int $lessons,
+        public array $skippedDates,
+        public bool $joinedPackage,
+        public string $offer,
+        public ?int $offerPercentBp,
+        public ?string $groupId = null,
+        public ?int $seat = null,
+        public ?int $capacity = null,
+        public bool $groupStarted = false,
+    ) {}
+}

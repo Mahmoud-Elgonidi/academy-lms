@@ -2,6 +2,7 @@
 
 return [
     'audience' => [
+        'family_accounts' => 'The guardians, and an adult student for themselves',
         'family' => 'The student and their guardians',
         'teacher' => 'The teacher',
         'supervisors' => 'Supervisors and schedulers',
@@ -38,6 +39,7 @@ return [
     'substitute_teacher' => ['title' => 'A lesson with :student was added for you', 'body' => 'The :subject lesson on :when.'],
     'holiday_family' => ['title' => 'Academy holiday: :name', 'body' => 'The academy is closed from :from to :to. :student\'s :count lessons on those days are cancelled; the minutes are back in the balance and its validity is extended by the days off.'],
     'holiday_teacher' => ['title' => 'Academy holiday: :name', 'body' => 'The academy is closed from :from to :to, and :count of your lessons on those days are cancelled.'],
+    'course_started' => ['title' => 'Welcome to :subject, :student', 'body' => ':student\'s :subject course with :teacher has started. Weekly times: :times. First lesson: :first. :join :link :app'],
     'course_paused_family' => ['title' => ':student\'s :subject lessons are paused', 'body' => 'The :subject course is paused from :from to :until. The lessons on those days are cancelled, their minutes are back in the balance, and its validity is extended by the paused days. Lessons start again the day after.'],
     'course_paused_teacher' => ['title' => 'A course paused: :student', 'body' => ':student\'s :subject course is paused from :from to :until, and their lessons with you on those days are cancelled. Their weekly times stay theirs.'],
     'course_resumed_family' => ['title' => ':student\'s :subject lessons are back', 'body' => 'The :subject course is on again: the weekly lessons go on at their usual times.'],
