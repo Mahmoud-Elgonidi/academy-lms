@@ -2,6 +2,7 @@ import 'server-only';
 import { cookies, headers } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
+import { fetchWithRetry } from './retry';
 import type { paths } from './schema';
 import { CHOSEN_ZONE_COOKIE, SESSION_COOKIE, TIMEZONE_COOKIE } from '../session';
 
@@ -76,7 +77,8 @@ export async function call<M extends Method>(method: M, path: PathFor<M>, option
   const sent = { ...(options.headers ?? {}), ...(await outgoing(options.token)) };
   if (options.body !== undefined) sent['Content-Type'] = 'application/json';
   if (options.idempotencyKey) sent['Idempotency-Key'] = options.idempotencyKey;
-  return fetch(urlOf(path, options.params, options.query), {
+  // A read that meets the rate limit waits a moment and asks once more (lib/api/retry.ts); writes are sent once.
+  return fetchWithRetry(urlOf(path, options.params, options.query), {
     method: method.toUpperCase(),
     headers: sent,
     body: options.form ?? (options.body === undefined ? undefined : JSON.stringify(options.body)),

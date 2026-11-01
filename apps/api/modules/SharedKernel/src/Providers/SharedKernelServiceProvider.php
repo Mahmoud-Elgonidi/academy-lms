@@ -74,6 +74,7 @@ final class SharedKernelServiceProvider extends ServiceProvider
         $this->app->singleton(OwnTimezones::class);
         // Uploads are checked for malware by clamd when the server runs one (UPLOAD_SCANNER=clamav), else not at all.
         $this->mergeConfigFrom(__DIR__.'/../../config/uploads.php', 'uploads');
+        $this->mergeConfigFrom(__DIR__.'/../../config/limits.php', 'limits');
         $this->app->singleton(UploadScanner::class, fn () => config('uploads.scanner') === 'clamav'
             ? new ClamAvScanner((string) config('uploads.clamav.host'), (int) config('uploads.clamav.port'), (int) config('uploads.clamav.timeout'))
             : new NullUploadScanner);
@@ -139,8 +140,8 @@ final class SharedKernelServiceProvider extends ServiceProvider
     {
         $this->callAfterResolving(RateLimiter::class, function (RateLimiter $limiter): void {
             $limiter->for('api', fn (Request $request) => $request->user()
-                ? Limit::perMinute(600)->by('user:'.$request->user()->getAuthIdentifier())
-                : Limit::perMinute(240)->by('ip:'.$request->ip()));
+                ? Limit::perMinute((int) config('limits.api_per_minute', 600))->by('user:'.$request->user()->getAuthIdentifier())
+                : Limit::perMinute((int) config('limits.api_guest_per_minute', 240))->by('ip:'.$request->ip()));
             $limiter->for('links', fn (Request $request) => $request->user()
                 ? Limit::perMinute(120)->by('user:'.$request->user()->getAuthIdentifier())
                 : Limit::perMinute(120)->by('ip:'.$request->ip()));

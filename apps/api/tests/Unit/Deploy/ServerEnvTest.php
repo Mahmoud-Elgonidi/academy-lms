@@ -13,6 +13,8 @@ const SERVER_DEFAULTS = [
     'STRIPE_CONNECT_REDIRECT', 'TAP_API_BASE', 'WHATSAPP_META_API_VERSION', 'QURAN_TEXT_URL', 'QURAN_DATA_URL',
     // A laptop's own academy; and the push key's path, which compose.yml sets inside the worker.
     'PLATFORM_DEV_ACADEMY', 'FCM_CREDENTIALS',
+    // The API's limits per minute: their defaults are the servers'; only the end-to-end run raises them.
+    'API_PER_MINUTE', 'API_GUEST_PER_MINUTE',
 ];
 
 /** @return array<string, string> the settings deploy.sh writes, KEY => value as written (secrets as their shell) */

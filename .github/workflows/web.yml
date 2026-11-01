@@ -97,6 +97,9 @@ jobs:
             -v db=lms -v owner_password=owner -v app_password=app -v platform_password=platform \
             -f database/setup/roles.sql
           cp .env.example .env
+          # One account per role drives every page twice at machine speed: more than the API's per-person limit
+          # a minute (a person opening pages never comes near it), so this run alone raises it.
+          printf 'API_PER_MINUTE=6000\nAPI_GUEST_PER_MINUTE=2400\n' >> .env
           php artisan key:generate
           php artisan migrate --database=pgsql_owner --force
           # The Quran's text (Tanzil's files, checked), so the demo comes with its Quran program (quran.spec.ts).
